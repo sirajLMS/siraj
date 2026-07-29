@@ -31,6 +31,8 @@ import {
   RateSource,
   StudentStatus,
   SuggestionStatus,
+  SystemSettingCategory,
+  SystemSettingDataType,
   TeacherDueStatus,
   VacationRequestStatus,
 } from "@/backend/enum";
@@ -103,6 +105,10 @@ export const appPermissionEnum = pgEnum(
 export const fxProviderEnum = createPgEnumFromEnum("fx_provider", FxProvider);
 
 export const fxSyncStatusEnum = createPgEnumFromEnum("fx_sync_status", FxSyncStatus);
+
+export const systemSettingDataTypeEnum = createPgEnumFromEnum("system_setting_data_type", SystemSettingDataType);
+
+export const systemSettingCategoryEnum = createPgEnumFromEnum("system_setting_category", SystemSettingCategory);
 
 export const teacherDueStatusEnum = createPgEnumFromEnum("teacher_due_status", TeacherDueStatus);
 

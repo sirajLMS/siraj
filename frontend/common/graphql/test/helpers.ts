@@ -1,4 +1,5 @@
 import { expect } from "bun:test";
+import { randomUUID } from "node:crypto";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   ClassType,
@@ -492,12 +493,18 @@ export async function provisionTestManager(
   prefix: string,
   accountType: ManagerAccountType
 ): Promise<{ userId: string; staffProfileId: string; name: string; assignedGroupSlug: string }> {
+  // Email must be unique per call: deterministic `${prefix}-manager@test.com`
+  // collided with prior runs whose `cleanupTestEntities` left the row behind
+  // (e.g. the teacher-denied test does not clean up its provision batch),
+  // which made `createManager`'s email-uniqueness check fail and cascade into
+  // the whole `managerDirectory` suite failing.
+  const emailUnique = `${prefix}-manager-${randomUUID().slice(0, 8)}@test.com`;
   const result = await testClient.mutate({
     mutation: createManagerMutationDocument,
     variables: {
       input: {
         name: `${prefix}-manager`,
-        email: `${prefix}-manager@test.com`,
+        email: emailUnique,
         avatarUrl: null,
         password: TEST_USER_PASSWORD,
         accountType,

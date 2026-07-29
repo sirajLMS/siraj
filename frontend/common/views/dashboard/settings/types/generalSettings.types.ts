@@ -1,13 +1,16 @@
-import type { SystemSettingDataType } from "@/frontend/common/views/dashboard/settings/schemas/systemSettingForm.schema";
+import type {
+  SystemSettingCategory,
+  SystemSettingDataType,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SettingsGeneralTabLabels } from "@/shared/locale/types/dashboard/settings/general";
 
 export type SystemSettingRow = {
   readonly id: string;
   readonly key: string;
   readonly value: string;
-  readonly dataType: SystemSettingDataType | string;
+  readonly dataType: SystemSettingDataType;
   readonly description: string;
-  readonly category: string;
+  readonly category: SystemSettingCategory;
   readonly updatedByUserId: string | null;
   readonly updatedAt: string | null;
 };

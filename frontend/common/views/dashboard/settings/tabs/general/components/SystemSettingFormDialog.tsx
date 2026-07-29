@@ -8,19 +8,23 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
   Stack,
+  Switch,
   TextField,
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { SystemSettingCategory, SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { upsertSystemSettingMutationDocument } from "@/frontend/common/graphql/sharedDocuments/settings/general-settings.documents";
 import { logger } from "@/frontend/common/utils/logger";
 import {
   createSystemSettingFormSchema,
+  SYSTEM_SETTING_CATEGORIES,
   SYSTEM_SETTING_DATA_TYPES,
   type SystemSettingFormValues,
 } from "@/frontend/common/views/dashboard/settings/schemas/systemSettingForm.schema";
@@ -39,13 +43,16 @@ export interface SystemSettingFormDialogProps {
 }
 
 function defaultValues(row: SystemSettingRow | null): SystemSettingFormValues {
+  const dataType = row?.dataType ?? SystemSettingDataType.String;
+  const category = row?.category ?? SystemSettingCategory.System;
+  const value = row?.value ?? "";
   return {
     key: row?.key ?? "",
-    value: row?.value ?? "",
-    dataType: row?.dataType === "integer" ? "integer" : "string",
+    value: dataType === SystemSettingDataType.Boolean ? (value === "true" ? "true" : "false") : value,
+    dataType,
     description: row?.description ?? "",
-    category: row?.category ?? "",
-  };
+    category,
+  } as SystemSettingFormValues;
 }
 
 export function SystemSettingFormDialog({
@@ -65,14 +72,16 @@ export function SystemSettingFormDialog({
     formState: { errors },
   } = useForm<SystemSettingFormValues>({
     resolver: zodResolver(createSystemSettingFormSchema(labels)),
-    defaultValues: defaultValues(row),
+    defaultValues: defaultValues(row) as SystemSettingFormValues,
   });
 
   const [upsertSetting, { loading }] = useMutation(upsertSystemSettingMutationDocument);
 
+  const watchedDataType = useWatch({ control, name: "dataType" });
+
   useEffect(() => {
     if (open) {
-      reset(defaultValues(row));
+      reset(defaultValues(row) as SystemSettingFormValues);
     }
   }, [open, row, reset]);
 
@@ -82,10 +91,10 @@ export function SystemSettingFormDialog({
         variables: {
           input: {
             key: values.key.trim(),
-            value: values.value.trim(),
+            value: values.value,
             dataType: values.dataType,
             description: values.description?.trim() || null,
-            category: values.category?.trim() || null,
+            category: values.category,
           },
         },
       });
@@ -119,23 +128,6 @@ export function SystemSettingFormDialog({
             />
 
             <Controller
-              name="value"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label={labels.valueField}
-                  fullWidth
-                  required
-                  multiline
-                  minRows={2}
-                  error={Boolean(errors.value)}
-                  helperText={errors.value?.message}
-                />
-              )}
-            />
-
-            <Controller
               name="dataType"
               control={control}
               render={({ field }) => (
@@ -145,17 +137,19 @@ export function SystemSettingFormDialog({
                     {...field}
                     labelId="system-setting-data-type-label"
                     label={labels.dataTypeField}
-                    value={field.value}
+                    value={field.value ?? SystemSettingDataType.String}
                   >
                     {SYSTEM_SETTING_DATA_TYPES.map(dataType => (
                       <MenuItem key={dataType} value={dataType}>
-                        {dataType === "integer" ? labels.dataTypeInteger : labels.dataTypeString}
+                        {labels.dataTypeLabels[dataType]}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               )}
             />
+
+            {renderValueField({ control, errors, watchedDataType, labels })}
 
             <Controller
               name="description"
@@ -168,7 +162,23 @@ export function SystemSettingFormDialog({
             <Controller
               name="category"
               control={control}
-              render={({ field }) => <TextField {...field} label={labels.categoryField} fullWidth />}
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel id="system-setting-category-label">{labels.categoryField}</InputLabel>
+                  <Select
+                    {...field}
+                    labelId="system-setting-category-label"
+                    label={labels.categoryField}
+                    value={field.value ?? SystemSettingCategory.System}
+                  >
+                    {SYSTEM_SETTING_CATEGORIES.map(category => (
+                      <MenuItem key={category} value={category}>
+                        {labels.categories[category]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
             />
           </Stack>
         </Box>
@@ -181,5 +191,100 @@ export function SystemSettingFormDialog({
         isLoading={loading}
       />
     </Dialog>
+  );
+}
+
+type RenderValueFieldArgs = {
+  readonly control: ReturnType<typeof useForm<SystemSettingFormValues>>["control"];
+  readonly errors: ReturnType<typeof useForm<SystemSettingFormValues>>["formState"]["errors"];
+  readonly watchedDataType: SystemSettingDataType | undefined;
+  readonly labels: SettingsGeneralTabLabels;
+};
+
+function renderValueField({ control, errors, watchedDataType, labels }: RenderValueFieldArgs) {
+  const dataType = watchedDataType ?? SystemSettingDataType.String;
+
+  if (dataType === SystemSettingDataType.Integer) {
+    return (
+      <Controller
+        name="value"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label={labels.valueField}
+            fullWidth
+            required
+            type="number"
+            slotProps={{ htmlInput: { min: 0 } }}
+            error={Boolean(errors.value)}
+            helperText={errors.value?.message}
+          />
+        )}
+      />
+    );
+  }
+
+  if (dataType === SystemSettingDataType.Boolean) {
+    return (
+      <Controller
+        name="value"
+        control={control}
+        render={({ field }) => (
+          <FormControl fullWidth>
+            <FormControlLabel
+              label={labels.valueField}
+              control={
+                <Switch
+                  checked={field.value === "true"}
+                  onChange={event => field.onChange(event.target.checked ? "true" : "false")}
+                />
+              }
+            />
+          </FormControl>
+        )}
+      />
+    );
+  }
+
+  if (dataType === SystemSettingDataType.Json) {
+    return (
+      <Controller
+        name="value"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label={labels.valueField}
+            fullWidth
+            required
+            multiline
+            minRows={6}
+            slotProps={{ input: { sx: { fontFamily: "monospace" } } }}
+            error={Boolean(errors.value)}
+            helperText={errors.value?.message}
+          />
+        )}
+      />
+    );
+  }
+
+  return (
+    <Controller
+      name="value"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label={labels.valueField}
+          fullWidth
+          required
+          multiline
+          minRows={2}
+          error={Boolean(errors.value)}
+          helperText={errors.value?.message}
+        />
+      )}
+    />
   );
 }

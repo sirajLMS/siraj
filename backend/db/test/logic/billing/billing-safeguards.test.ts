@@ -6,7 +6,7 @@ import { BillingRepository } from "@/backend/db/repo";
 import { currencyExchangeAuditLogs, currencyExchangeRates, systemSettings } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode, SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
@@ -38,9 +38,9 @@ async function setupBillingTestEntities(tx: DBTransaction) {
     .values({
       key: "billing_rounding_decimals",
       value: "2",
-      dataType: "number",
+      dataType: SystemSettingDataType.Integer,
       description: "Decimals for billing rounding",
-      category: "FINANCE",
+      category: SystemSettingCategory.Billing,
       updatedByUserId: adminUser.id,
       updatedAt: now,
     })

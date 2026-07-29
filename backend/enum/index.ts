@@ -28,6 +28,7 @@ export * from "./scheduling/scheduling.enum";
 export * from "./shared/country.enum";
 export * from "./shared/currency.enum";
 export * from "./shared/pagination.enum";
+export * from "./shared/system-setting.enum";
 export * from "./shared/timezone.enum";
 export * from "./students/student-lifecycle.enum";
 export * from "./teachers/teacher-availability.enum";

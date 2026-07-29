@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { SystemSettingCategory, SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   deleteSystemSettingMutationDocument,
   systemSettingQueryDocument,
@@ -43,9 +44,9 @@ describe("GraphQL General Settings Integration Tests", () => {
       input: {
         key: testSettingKey,
         value: "42",
-        dataType: "integer",
+        dataType: SystemSettingDataType.Integer,
         description: "GraphQL integration test setting",
-        category: "system",
+        category: SystemSettingCategory.System,
       },
     });
 

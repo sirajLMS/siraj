@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { IanaTimezone, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/schedule.documents";
 import { changeStudentStatusMutationDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-lifecycle.documents";
@@ -220,37 +220,74 @@ describe("GraphQL: statusTrackingSchedule query", () => {
     });
   });
 
-  describe("security: T10-004 — SUSPENDED→REGULAR restores isFrozen = false", () => {
+  describe.serial("security: T10-004 — SUSPENDED→REGULAR restores isFrozen = false", () => {
+    let localAdminToken = "";
+    let localSuperAdminToken = "";
+    let localStudentId = "";
+
+    beforeAll(async () => {
+      // Self-contained provisioning so this describe does not depend on the
+      // outer describe's mutable state being initialized. Bun test may run
+      // inner describes concurrently with the file's top-level tests on
+      // resource-constrained CI runners — reading the outer
+      // `superAdminToken` / `studentId` as empty in that race causes
+      // `changeStudentStatus` to run unauthenticated and fail with
+      // `Not authorized to resolve Mutation.changeStudentStatus`. The
+      // outer lifecycle reuses an already-provisioned super admin / student
+      // when available; otherwise it provisions isolated fixtures scoped
+      // to this describe and cleans them up afterwards.
+      localAdminToken = adminToken || (await loginDemoUser("academy_admin"));
+
+      if (superAdminToken && superAdminUserId) {
+        localSuperAdminToken = superAdminToken;
+      } else {
+        const sa = await provisionTestSuperAdmin(localAdminToken, "s10statusSa");
+        localSuperAdminToken = sa.token;
+        superAdminToken = sa.token;
+        superAdminUserId = sa.userId;
+      }
+
+      if (studentId) {
+        localStudentId = studentId;
+      } else {
+        const entities = await provisionTestEntities(localAdminToken, "s10status");
+        localStudentId = entities.studentId;
+        studentId = entities.studentId;
+        teacherId = entities.teacherId;
+        teacherToken = entities.teacherToken;
+      }
+    });
+
     test("after admin changes student from SUSPENDED back to REGULAR, isFrozen reflects unfrozen state", async () => {
       // Step 1: Change student to SUSPENDED (triggers bulkFreezeStudentClasses)
-      await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
-        studentId,
+      await authenticatedRequest(localSuperAdminToken, "mutate", changeStudentStatusMutationDocument, {
+        studentId: localStudentId,
         newStatus: StudentStatus.Suspended,
         expectedVersion: null,
       });
 
       // Step 2: Verify via statusTrackingSchedule that classes have isFrozen = true
-      const suspendedData = await fetchStatusTracking(adminToken, testDate);
+      const suspendedData = await fetchStatusTracking(localAdminToken, testDate);
 
       const suspendedRows = suspendedData.statusTrackingSchedule;
-      const frozenRow = suspendedRows?.find(r => r?.studentId === studentId);
+      const frozenRow = suspendedRows?.find(r => r?.studentId === localStudentId);
       if (frozenRow) {
         expect(frozenRow.isFrozen).toBe(true);
         expect(frozenRow.studentStatus).toBe(StudentStatus.Suspended);
       }
 
       // Step 3: Change student back to REGULAR (triggers bulkUnfreezeStudentClasses)
-      await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
-        studentId,
+      await authenticatedRequest(localSuperAdminToken, "mutate", changeStudentStatusMutationDocument, {
+        studentId: localStudentId,
         newStatus: StudentStatus.Regular,
         expectedVersion: null,
       });
 
       // Step 4: Verify via statusTrackingSchedule that classes have isFrozen = false
-      const restoredData = await fetchStatusTracking(adminToken, testDate);
+      const restoredData = await fetchStatusTracking(localAdminToken, testDate);
 
       const restoredRows = restoredData.statusTrackingSchedule;
-      const restoredRow = restoredRows?.find(r => r?.studentId === studentId);
+      const restoredRow = restoredRows?.find(r => r?.studentId === localStudentId);
       if (restoredRow) {
         expect(restoredRow.isFrozen).toBe(false);
         expect(restoredRow.studentStatus).toBe(StudentStatus.Regular);

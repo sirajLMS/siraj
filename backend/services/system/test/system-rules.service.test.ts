@@ -4,6 +4,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
 import { setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -13,8 +14,8 @@ async function setTeacherMaxLeaves(tx: DBTransaction, value: string) {
     .values({
       key: "teacher_max_leaves",
       value,
-      dataType: "number",
-      category: "leave",
+      dataType: SystemSettingDataType.Integer,
+      category: SystemSettingCategory.Scheduling,
       description: "Teacher maximum leaves per month",
       updatedAt: new Date(),
     })

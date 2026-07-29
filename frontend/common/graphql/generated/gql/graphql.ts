@@ -1796,9 +1796,33 @@ export type SupportedPaymentLinkUpdateInput = {
   urlExample: string | null | undefined;
 };
 
+export type SystemSettingCategory =
+  | 'app'
+  | 'auth'
+  | 'billing'
+  | 'cache'
+  | 'communication'
+  | 'email'
+  | 'fx'
+  | 'general'
+  | 'meeting'
+  | 'push'
+  | 'redis'
+  | 'scheduling'
+  | 'security'
+  | 'sms'
+  | 'storage'
+  | 'system';
+
+export type SystemSettingDataType =
+  | 'boolean'
+  | 'integer'
+  | 'json'
+  | 'string';
+
 export type SystemSettingUpsertInput = {
-  category: string | null | undefined;
-  dataType: string | null | undefined;
+  category: SystemSettingCategory | null | undefined;
+  dataType: SystemSettingDataType | null | undefined;
   description: string | null | undefined;
   key: string;
   value: string;
@@ -3425,26 +3449,26 @@ export type DeleteEnvConfigEntryMutationVariables = Exact<{
 
 export type DeleteEnvConfigEntryMutation = { deleteEnvConfigEntry: { id: string | null, key: string | null, deleted: boolean | null, source: string | null } | null };
 
-export type SystemSettingFieldsFragment = { id: string | null, key: string | null, value: string | null, dataType: string | null, description: string | null, category: string | null, updatedByUserId: string | null, updatedAt: string | null };
+export type SystemSettingFieldsFragment = { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
 
 export type SystemSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SystemSettingsQuery = { systemSettings: Array<{ id: string | null, key: string | null, value: string | null, dataType: string | null, description: string | null, category: string | null, updatedByUserId: string | null, updatedAt: string | null }> | null };
+export type SystemSettingsQuery = { systemSettings: Array<{ id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null }> | null };
 
 export type SystemSettingQueryVariables = Exact<{
   key: string;
 }>;
 
 
-export type SystemSettingQuery = { systemSetting: { id: string | null, key: string | null, value: string | null, dataType: string | null, description: string | null, category: string | null, updatedByUserId: string | null, updatedAt: string | null } | null };
+export type SystemSettingQuery = { systemSetting: { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null } | null };
 
 export type UpsertSystemSettingMutationVariables = Exact<{
   input: SystemSettingUpsertInput;
 }>;
 
 
-export type UpsertSystemSettingMutation = { upsertSystemSetting: { id: string | null, key: string | null, value: string | null, dataType: string | null, description: string | null, category: string | null, updatedByUserId: string | null, updatedAt: string | null } | null };
+export type UpsertSystemSettingMutation = { upsertSystemSetting: { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null } | null };
 
 export type DeleteSystemSettingMutationVariables = Exact<{
   key: string;

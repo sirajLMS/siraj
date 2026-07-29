@@ -29,7 +29,7 @@ function GeneralSettingCard({
   readonly onEdit: (row: SystemSettingRow) => void;
   readonly onDelete: (row: SystemSettingRow) => void;
 }>) {
-  const dataTypeLabel = row.dataType === "integer" ? labels.dataTypeInteger : labels.dataTypeString;
+  const dataTypeLabel = labels.dataTypeLabels[row.dataType];
 
   return (
     <MobileCardListItem variant="edge-to-edge">
@@ -60,13 +60,11 @@ function GeneralSettingCard({
         </Typography>
 
         <Box>
-          {row.category ? (
-            <SystemSettingMetadataRow
-              icon={<LockOutlined fontSize="small" />}
-              label={labels.categoryColumn}
-              value={row.category}
-            />
-          ) : null}
+          <SystemSettingMetadataRow
+            icon={<LockOutlined fontSize="small" />}
+            label={labels.categoryColumn}
+            value={labels.categories[row.category]}
+          />
           <SystemSettingMetadataRow
             icon={<TagOutlined fontSize="small" />}
             label={labels.dataTypeColumn}

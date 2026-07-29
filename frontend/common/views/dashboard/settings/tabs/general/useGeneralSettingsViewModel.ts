@@ -3,7 +3,11 @@
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  SystemSettingCategory,
+  SystemSettingDataType,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { deleteSystemSettingMutationDocument } from "@/frontend/common/graphql/sharedDocuments/settings/general-settings.documents";
 import { useSystemSettingsQuery } from "@/frontend/common/hooks/settings";
 import { useGeneralSettingsStore } from "@/frontend/common/stores/generalSettingsStore";
@@ -21,9 +25,9 @@ function toSystemSettingRow(
     readonly id: string | null;
     readonly key: string | null;
     readonly value: string | null;
-    readonly dataType: string | null;
+    readonly dataType: SystemSettingDataType | null;
     readonly description: string | null;
-    readonly category: string | null;
+    readonly category: SystemSettingCategory | null;
     readonly updatedByUserId: string | null;
     readonly updatedAt: string | null;
   },
@@ -37,9 +41,9 @@ function toSystemSettingRow(
     id: setting.id ?? `${setting.key}-${index}`,
     key: setting.key,
     value: setting.value ?? "",
-    dataType: setting.dataType ?? "string",
+    dataType: setting.dataType ?? SystemSettingDataType.String,
     description: setting.description ?? "",
-    category: setting.category ?? "",
+    category: setting.category ?? SystemSettingCategory.System,
     updatedByUserId: setting.updatedByUserId,
     updatedAt: setting.updatedAt,
   };

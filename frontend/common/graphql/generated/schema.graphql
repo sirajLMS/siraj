@@ -4380,8 +4380,8 @@ type SystemAlert {
 }
 
 type SystemSetting {
-  category: String
-  dataType: String
+  category: SystemSettingCategory
+  dataType: SystemSettingDataType
   description: String
   id: String
   key: String
@@ -4390,9 +4390,35 @@ type SystemSetting {
   value: String
 }
 
+enum SystemSettingCategory {
+  app
+  auth
+  billing
+  cache
+  communication
+  email
+  fx
+  general
+  meeting
+  push
+  redis
+  scheduling
+  security
+  sms
+  storage
+  system
+}
+
+enum SystemSettingDataType {
+  boolean
+  integer
+  json
+  string
+}
+
 input SystemSettingUpsertInput {
-  category: String
-  dataType: String
+  category: SystemSettingCategory
+  dataType: SystemSettingDataType
   description: String
   key: String!
   value: String!

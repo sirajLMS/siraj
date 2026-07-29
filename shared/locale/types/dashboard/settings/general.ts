@@ -1,3 +1,23 @@
+export type SystemSettingDataTypeKey = "string" | "integer" | "boolean" | "json";
+
+export type SystemSettingCategoryKey =
+  | "security"
+  | "system"
+  | "scheduling"
+  | "communication"
+  | "email"
+  | "sms"
+  | "push"
+  | "fx"
+  | "cache"
+  | "redis"
+  | "storage"
+  | "auth"
+  | "app"
+  | "meeting"
+  | "billing"
+  | "general";
+
 export interface SettingsGeneralTabLabels {
   readonly title: string;
   readonly subtitle: string;
@@ -21,8 +41,13 @@ export interface SettingsGeneralTabLabels {
   readonly categoryField: string;
   readonly dataTypeString: string;
   readonly dataTypeInteger: string;
+  readonly dataTypeBoolean: string;
+  readonly dataTypeJson: string;
   readonly keyRequired: string;
   readonly valueRequired: string;
+  readonly valueInteger: string;
+  readonly valueBoolean: string;
+  readonly valueJson: string;
   readonly saveLabel: string;
   readonly cancelLabel: string;
   readonly saveSuccess: string;
@@ -33,4 +58,6 @@ export interface SettingsGeneralTabLabels {
   readonly deleteConfirmConfirm: string;
   readonly deleteSuccess: string;
   readonly deleteError: string;
+  readonly categories: Record<SystemSettingCategoryKey, string>;
+  readonly dataTypeLabels: Record<SystemSettingDataTypeKey, string>;
 }

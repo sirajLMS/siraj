@@ -51,6 +51,28 @@ function transformAlterTypeAddValue(trimmed: string): string | null {
   return null;
 }
 
+function transformAlterColumnType(trimmed: string): string | null {
+  if (
+    /\bALTER\s+COLUMN\b/i.test(trimmed) &&
+    /\bTYPE\b/i.test(trimmed) &&
+    !/DROP\s+DEFAULT/i.test(trimmed) &&
+    !/DO\s+\$\$/i.test(trimmed)
+  ) {
+    const match = /ALTER\s+TABLE\s+(\S+)\s+ALTER\s+COLUMN\s+(\S+)\s+TYPE\s+(\S+)(?:\s+USING\s+([^;]+))?/i.exec(trimmed);
+    if (match) {
+      const fullTable = match[1];
+      const tableName = fullTable.replace(/"/g, "");
+      const fullCol = match[2];
+      const colName = fullCol.replace(/"/g, "");
+      const fullType = match[3];
+      const usingClause = match[4] ? ` USING ${match[4]}` : "";
+      const body = `ALTER TABLE ${fullTable} ALTER COLUMN ${fullCol} DROP DEFAULT;\n    ALTER TABLE ${fullTable} ALTER COLUMN ${fullCol} TYPE ${fullType}${usingClause};`;
+      return `DO $$ BEGIN\n    IF EXISTS (\n        SELECT 1 FROM information_schema.columns WHERE table_name = '${tableName}' AND column_name = '${colName}' AND data_type = 'character varying'\n    ) THEN\n        ${body}\n    END IF;\nEXCEPTION WHEN OTHERS THEN NULL;\nEND $$;`;
+    }
+  }
+  return null;
+}
+
 function transformInsertGroupPermissions(trimmed: string): string | null {
   if (
     /\bINSERT\s+INTO\s+(group_permissions|user_permission_groups)\b/i.test(trimmed) &&
@@ -64,7 +86,7 @@ function transformInsertGroupPermissions(trimmed: string): string | null {
 
 /**
  * Transforms a single SQL statement to be idempotent for PostgreSQL.
- * Handles `CREATE TYPE`, `ADD COLUMN`, `ADD CONSTRAINT`, `ALTER TYPE ... ADD VALUE`, and join-table `INSERT`s.
+ * Handles `CREATE TYPE`, `ADD COLUMN`, `ADD CONSTRAINT`, `ALTER TYPE ... ADD VALUE`, `ALTER COLUMN ... TYPE`, and join-table `INSERT`s.
  *
  * @param stmt The SQL statement string to transform.
  * @returns The transformed, idempotent SQL statement.
@@ -72,6 +94,9 @@ function transformInsertGroupPermissions(trimmed: string): string | null {
 export function transformStatementIdempotent(stmt: string): string {
   const trimmed = stmt.trim();
   if (!trimmed) return stmt;
+
+  const alterColumnType = transformAlterColumnType(trimmed);
+  if (alterColumnType) return alterColumnType;
 
   const alterTypeAddValue = transformAlterTypeAddValue(trimmed);
   if (alterTypeAddValue) return alterTypeAddValue;

@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises";
 import { resolveAssetPath } from "@/backend/db/seeds/lib/file-seed-helper";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
+import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { ENV_CONFIG_KEYS } from "@/backend/lib/env-config-keys";
 import logger from "@/backend/lib/logger";
@@ -16,8 +17,8 @@ const createSetting = (
   key: string,
   value: string,
   description: string,
-  category: "security" | "system" | "scheduling" | "communication",
-  dataType: "integer" | "string" = "integer"
+  category: SystemSettingCategory,
+  dataType: SystemSettingDataType = SystemSettingDataType.Integer
 ) => ({
   key,
   value,
@@ -27,61 +28,100 @@ const createSetting = (
 });
 
 const SYSTEM_SETTINGS_DATA = [
-  createSetting("auth_max_attempts", "5", "Maximum failed login attempts before lockout", "security"),
-  createSetting("auth_lockout_minutes", "15", "Duration of account lockout in minutes", "security"),
-  createSetting("password_reset_expiry_hours", "24", "Expiration time for password reset tokens in hours", "security"),
-  createSetting("cache_default_ttl_seconds", "3600", "Default TTL for cache entries in seconds", "system"),
+  createSetting(
+    "auth_max_attempts",
+    "5",
+    "Maximum failed login attempts before lockout",
+    SystemSettingCategory.Security
+  ),
+  createSetting("auth_lockout_minutes", "15", "Duration of account lockout in minutes", SystemSettingCategory.Security),
+  createSetting(
+    "password_reset_expiry_hours",
+    "24",
+    "Expiration time for password reset tokens in hours",
+    SystemSettingCategory.Security
+  ),
+  createSetting(
+    "cache_default_ttl_seconds",
+    "3600",
+    "Default TTL for cache entries in seconds",
+    SystemSettingCategory.System
+  ),
   createSetting(
     "session_activation_window_before_minutes",
     "5",
     "Minutes before scheduled start time that a session can be activated",
-    "scheduling"
+    SystemSettingCategory.Scheduling
   ),
   createSetting(
     "default_timezone",
     IanaTimezone.UTC,
     "Default fallback timezone for the system",
-    "scheduling",
-    "string"
+    SystemSettingCategory.Scheduling,
+    SystemSettingDataType.String
   ),
   createSetting(
     "session_absent_waiting_minutes",
     "30",
     "Minutes to wait before student can be marked absent",
-    "scheduling"
+    SystemSettingCategory.Scheduling
   ),
   createSetting(
     "session_missed_grace_minutes",
     "15",
     "Minutes after scheduled end time before an unactivated class is auto-marked as missed",
-    "scheduling"
+    SystemSettingCategory.Scheduling
   ),
   createSetting(
     "session_leave_reschedule_offset_days",
     "7",
     "Days offset to reschedule when leave is processed",
-    "scheduling"
+    SystemSettingCategory.Scheduling
   ),
   createSetting(
     "teacher_max_leaves",
     "2",
     "Maximum number of leave requests a teacher can make per calendar month",
-    "scheduling"
+    SystemSettingCategory.Scheduling
   ),
   createSetting(
     "student_max_leaves",
     "2",
     "Maximum number of leave requests a student can make per calendar month",
-    "scheduling"
+    SystemSettingCategory.Scheduling
   ),
   createSetting(
     "complaint_max_file_size_mb",
     "25",
     "Maximum file size for complaint attachments in MB",
-    "communication"
+    SystemSettingCategory.Communication
   ),
-  createSetting("complaint_max_files_per_complaint", "5", "Maximum number of files per complaint", "communication"),
-  createSetting("sms_rate_limit_per_hour", "3", "Maximum SMS messages per parent per hour", "communication"),
+  createSetting(
+    "complaint_max_files_per_complaint",
+    "5",
+    "Maximum number of files per complaint",
+    SystemSettingCategory.Communication
+  ),
+  createSetting(
+    "sms_rate_limit_per_hour",
+    "3",
+    "Maximum SMS messages per parent per hour",
+    SystemSettingCategory.Communication
+  ),
+  createSetting(
+    "maintenance_mode",
+    "false",
+    "Maintenance mode flag",
+    SystemSettingCategory.System,
+    SystemSettingDataType.Boolean
+  ),
+  createSetting(
+    "feature_flags",
+    `{"new_dashboard":false}`,
+    "Feature flags JSON",
+    SystemSettingCategory.System,
+    SystemSettingDataType.Json
+  ),
 ] as const;
 
 type EnvConfigPlaceholderSetting = SystemSettingsService.SystemSettingUpsertInput;
@@ -95,9 +135,9 @@ const ENV_CONFIG_PLACEHOLDER_SETTINGS: EnvConfigPlaceholderSetting[] = ENV_CONFI
 ).map(descriptor => ({
   key: `${ENV_SETTING_KEY_PREFIX}${descriptor.key}`,
   value: "",
-  dataType: "string" as const,
+  dataType: SystemSettingDataType.String,
   description: descriptor.description.en,
-  category: "system" as const,
+  category: SystemSettingCategory.System,
 }));
 
 async function findSettingsByKeys(keys: string[]): Promise<Map<string, SystemSettingSelectType>> {

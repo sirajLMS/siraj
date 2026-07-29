@@ -2,6 +2,7 @@ import { GraphQLError } from "graphql";
 import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { SystemSettingCategoryPothos, SystemSettingDataTypePothos } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { SystemSettingSelectType, SystemSettingUpsertInput } from "@/backend/types";
@@ -48,9 +49,9 @@ export const SystemSettingPothosObject = SystemSettingRef.implement({
     }),
     key: t.exposeString("key"),
     value: t.exposeString("value"),
-    dataType: t.exposeString("dataType"),
+    dataType: t.expose("dataType", { type: SystemSettingDataTypePothos }),
     description: t.exposeString("description"),
-    category: t.exposeString("category"),
+    category: t.expose("category", { type: SystemSettingCategoryPothos }),
     updatedByUserId: t.exposeString("updatedByUserId", { nullable: true }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),
@@ -62,9 +63,9 @@ export const SystemSettingUpsertInputPothos = gqlSchemaBuilder
     fields: t => ({
       key: t.string({ required: true }),
       value: t.string({ required: true }),
-      dataType: t.string({ required: false }),
+      dataType: t.field({ type: SystemSettingDataTypePothos, required: false }),
       description: t.string({ required: false }),
-      category: t.string({ required: false }),
+      category: t.field({ type: SystemSettingCategoryPothos, required: false }),
     }),
   });
 
@@ -123,8 +124,7 @@ gqlSchemaBuilder.mutationField("upsertSystemSetting", t =>
         {
           key: args.input.key,
           value: args.input.value,
-          dataType:
-            args.input.dataType === "integer" || args.input.dataType === "string" ? args.input.dataType : undefined,
+          dataType: args.input.dataType ?? undefined,
           description: args.input.description ?? undefined,
           category: args.input.category ?? undefined,
         },
