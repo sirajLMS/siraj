@@ -151,7 +151,7 @@ function collectCoreGroups(core: Record<string, unknown>, groups: Set<string>): 
   if (["name", "email", "avatarUrl", "displayCurrency"].some(key => key in core)) {
     groups.add("core_identity");
   }
-  if ("phone" in core) {
+  if (["phone", "timezone"].some(key => key in core)) {
     groups.add("core_contact");
   }
 }

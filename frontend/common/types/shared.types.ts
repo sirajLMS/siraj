@@ -191,11 +191,14 @@ type CleanInput<T> = {
   [K in keyof T as undefined extends CleanField<T[K]> ? never : K]: CleanField<T[K]>;
 };
 
-export type ManagerOnboardingFormData = CleanInput<ManagerOnboardingInput>;
+export type ManagerOnboardingFormData = Omit<CleanInput<ManagerOnboardingInput>, "timezone" | "displayCurrency"> & {
+  timezone: string;
+  displayCurrency?: CurrencyCode | null;
+};
 
 export type ParentOnboardingFormData = Omit<
   CleanInput<ParentOnboardingInput>,
-  "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "initialPayinMethod" | "timezone"
+  "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "initialPayinMethod" | "timezone" | "displayCurrency"
 > & {
   phone?: string;
   address?: string;
@@ -204,6 +207,7 @@ export type ParentOnboardingFormData = Omit<
   invoiceType?: InvoiceType | null;
   payinMethod?: OnboardingPaymentMethodFormValues | null;
   timezone: string;
+  displayCurrency?: CurrencyCode | null;
   meetingProvider?: MeetingProviderFieldsFragment | null;
   meetingUrl?: string;
   meetingLabel?: string;

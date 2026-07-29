@@ -9,6 +9,7 @@ export const dashboardStudentProfileAr: StudentProfileLabels = {
   notFoundTitle: "الطالب غير موجود",
   notFoundDescription: "تعذّر العثور على هذا الطالب. ربما تمت إزالته أو لا تملك صلاحية الوصول إليه.",
   tabs: {
+    profile: "الملف الشخصي",
     status: "الحالة",
     classes: "الحصص القادمة",
     quota: "الحصص",

@@ -80,6 +80,7 @@ export type UserCreateCoreInput = {
 export type UserCreateProfileFieldsInput = {
   readonly phone?: string | null;
   readonly timezone?: string | null;
+  readonly displayCurrency?: string | null;
 };
 
 export type PaginatedUsersResponseSelectType = {

@@ -2397,10 +2397,12 @@ export type ManagerOnboarding = {
 export type ManagerOnboardingInput = {
   accountType: ManagerAccountType;
   avatarUrl: InputMaybe<Scalars['String']['input']>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
   phone: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<IanaTimezone>;
 };
 
 /** Result of manager onboarding operation */
@@ -3841,6 +3843,7 @@ export type ParentOnboardingInput = {
   address: InputMaybe<Scalars['String']['input']>;
   avatarUrl: InputMaybe<Scalars['String']['input']>;
   currency: InputMaybe<CurrencyCode>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   email: Scalars['Email']['input'];
   facebook: InputMaybe<Scalars['String']['input']>;
   feeAmount: InputMaybe<Scalars['String']['input']>;
@@ -5329,6 +5332,8 @@ export type StudentOnboardingInput = {
   classesRemaining: InputMaybe<Scalars['Int']['input']>;
   classesTotal: InputMaybe<Scalars['Int']['input']>;
   dateOfBirth: InputMaybe<Scalars['DateTime']['input']>;
+  /** User display currency */
+  displayCurrency: InputMaybe<CurrencyCode>;
   /** Student login email (creates a users row when provided) */
   email: InputMaybe<Scalars['String']['input']>;
   gender: InputMaybe<Gender>;
@@ -5337,6 +5342,8 @@ export type StudentOnboardingInput = {
   parentId: InputMaybe<Scalars['String']['input']>;
   /** Student login password (required when email is provided) */
   password: InputMaybe<Scalars['String']['input']>;
+  /** Student phone (stored on users row) */
+  phone: InputMaybe<Scalars['String']['input']>;
   primaryTeacherId: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<StudentStatus>;
   /** Student timezone (applied to the created user record) */
@@ -5361,6 +5368,7 @@ export type StudentProfile = {
   classesTotal: Maybe<Scalars['Int']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   dateOfBirth: Maybe<Scalars['DateTime']['output']>;
+  displayCurrency: Maybe<CurrencyCode>;
   email: Maybe<Scalars['String']['output']>;
   gender: Maybe<Gender>;
   hoursPerWeek: Maybe<Scalars['Float']['output']>;
@@ -5378,6 +5386,7 @@ export type StudentProfile = {
   status: Maybe<StudentStatus>;
   teacherName: Maybe<Scalars['String']['output']>;
   teacherUserId: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<IanaTimezone>;
   timezoneOverride: Maybe<Scalars['String']['output']>;
   upcomingClasses: Maybe<StudentUpcomingClassesResult>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
@@ -5387,10 +5396,12 @@ export type StudentProfile = {
 export type StudentProfileEditInput = {
   avatarUrl: InputMaybe<Scalars['String']['input']>;
   dateOfBirth: InputMaybe<Scalars['DateTime']['input']>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   gender: InputMaybe<Gender>;
   language: InputMaybe<AppLanguage>;
   parentPhone: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<Scalars['String']['input']>;
   timezoneOverride: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -6034,6 +6045,7 @@ export type TeacherOnboardingInput = {
   countryCode: InputMaybe<CountryCode>;
   /** Teacher date of birth (ISO date string) */
   dateOfBirth: InputMaybe<Scalars['String']['input']>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   /** Teacher email address */
   email: Scalars['Email']['input'];
   /** Teacher gender */
@@ -6223,6 +6235,7 @@ export type UnifiedProfile = {
   parentOwnProfile: Maybe<ParentOwnProfile>;
   paymentMethodDefaults: Maybe<PaymentMethodDefaults>;
   paymentMethods: Maybe<Array<UserPaymentMethod>>;
+  phone: Maybe<Scalars['String']['output']>;
   scope: Maybe<ProfileScope>;
   staffPermissionGroups: Maybe<Array<StaffPermissionGroup>>;
   staffPermissionOverrides: Maybe<Array<StaffPermissionOverride>>;
@@ -6231,6 +6244,7 @@ export type UnifiedProfile = {
   teacherAdminProfile: Maybe<TeacherProfileResult>;
   teacherId: Maybe<Scalars['String']['output']>;
   teacherOwnProfile: Maybe<TeacherOwnProfile>;
+  timezone: Maybe<IanaTimezone>;
   userId: Maybe<Scalars['String']['output']>;
 };
 

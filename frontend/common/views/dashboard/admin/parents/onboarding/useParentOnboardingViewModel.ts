@@ -14,7 +14,7 @@ import {
   type ParentOnboardingFormData,
   parentOnboardingSchema,
 } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
-import { InvoiceType, PaymentMethodType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+import { InvoiceType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import type { ParentOnboardingLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types/parentOnboardingViewModel.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -31,13 +31,10 @@ const defaultValues: ParentOnboardingFormData = {
   twitter: "",
   invoiceType: InvoiceType.Monthly,
   feeAmount: "",
-  payinMethod: {
-    type: PaymentMethodType.BankTransfer,
-    label: "",
-    details: {},
-  },
+  payinMethod: null,
   currency: CurrencyCode.Usd,
   timezone: "Africa/Cairo",
+  displayCurrency: CurrencyCode.Usd,
   meetingProvider: null,
   meetingUrl: "",
   meetingLabel: "",

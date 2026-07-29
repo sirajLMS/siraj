@@ -3,6 +3,7 @@
 import { useMutation } from "@apollo/client/react";
 import type { StudentOnboardingInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createStudentMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
@@ -23,7 +24,9 @@ export function useCreateStudentOnboarding() {
       classesRemaining: null,
       email: formData.email,
       password: formData.password,
-      timezone: null,
+      phone: formData.phone || null,
+      timezone: toGraphqlIanaTimezone(formData.timezone),
+      displayCurrency: formData.displayCurrency ?? null,
     };
 
     const result = await mutate({ variables: { input } });

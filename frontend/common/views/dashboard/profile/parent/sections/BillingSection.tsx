@@ -5,12 +5,9 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
-import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
-import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
@@ -89,23 +86,6 @@ function BillingEditSection({
         <TextField label={t.fields.invoiceType} fullWidth size="small" {...register("invoiceType")} />
         <TextField label={t.fields.feeAmount} fullWidth size="small" {...register("feeAmount")} />
         <CurrencyControllerField control={control} name="currency" label={t.fields.currency} />
-        <Controller
-          name="timezone"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TimezoneSelect
-              value={field.value ? toGraphqlIanaTimezone(field.value) : null}
-              onChangeAction={value => {
-                field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
-              }}
-              onBlurAction={field.onBlur}
-              label={t.fields.timezone}
-              error={Boolean(fieldState.error)}
-              helperText={fieldState.error?.message}
-              fullWidth
-            />
-          )}
-        />
       </Stack>
     </SectionPanel>
   );
@@ -152,10 +132,6 @@ function BillingViewSection({
         <InfoField
           label={t.fields.currency}
           value={<CurrencyDisplay code={adminData.currency} fallback={tc.notSet} />}
-        />
-        <InfoField
-          label={t.fields.timezone}
-          value={<TimezoneDisplay timezone={adminData.timezone} fallback={tc.notSet} />}
         />
         <Stack spacing={0.5}>
           <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>

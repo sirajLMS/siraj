@@ -34,6 +34,7 @@ export interface ParentsDirectoryLabels {
     readonly addParent: string;
     readonly filter: string;
     readonly clearFilters: string;
+    readonly export: string;
     readonly manageLifecycle: string;
   };
   readonly noEntries: string;

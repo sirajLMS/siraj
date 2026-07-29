@@ -34,6 +34,7 @@ export function useCreateTeacherOnboarding() {
       qualifications: formData.qualifications || null,
       countryCode: formData.countryCode,
       timezone: toGraphqlIanaTimezone(formData.timezone),
+      displayCurrency: formData.displayCurrency ?? null,
       hourlyRate: formData.hourlyRate,
       rateCurrency: formData.rateCurrency,
       initialPayoutMethod: formData.payoutMethod?.type

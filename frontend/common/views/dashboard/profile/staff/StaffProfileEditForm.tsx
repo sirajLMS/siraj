@@ -26,6 +26,7 @@ export function StaffProfileEditForm({
   staffData,
   avatarUrl,
   displayCurrency,
+  profileTimezone,
   targetUserId,
   isAdminScope,
   isSaving,
@@ -34,6 +35,7 @@ export function StaffProfileEditForm({
   readonly staffData: StaffProfileData;
   readonly avatarUrl?: string | null;
   readonly displayCurrency: StaffAdminEditFormData["displayCurrency"];
+  readonly profileTimezone?: string | null;
   readonly targetUserId: string;
   readonly isAdminScope: boolean;
   readonly isSaving: boolean;
@@ -65,6 +67,7 @@ export function StaffProfileEditForm({
       email: "",
       avatarUrl: null,
       phone: "",
+      timezone: "",
       status: AccountStatus.Activated,
       displayCurrency: null,
       hourlyRate: "",
@@ -78,12 +81,13 @@ export function StaffProfileEditForm({
       email: staffData.email ?? "",
       avatarUrl: avatarUrl ?? staffData.avatarUrl ?? null,
       phone: staffData.phone ?? "",
+      timezone: profileTimezone ?? "",
       status: staffData.status ?? AccountStatus.Activated,
       displayCurrency: displayCurrency ?? null,
       hourlyRate: staffData.hourlyRate ?? "",
       rateCurrency: staffData.rateCurrency ?? null,
     });
-  }, [avatarUrl, displayCurrency, form, staffData]);
+  }, [avatarUrl, displayCurrency, form, profileTimezone, staffData]);
 
   const onValidSubmit = async (values: StaffAdminEditFormData) => {
     try {

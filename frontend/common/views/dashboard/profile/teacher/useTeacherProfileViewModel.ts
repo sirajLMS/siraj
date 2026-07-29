@@ -39,6 +39,7 @@ export type TeacherOwnSubmitData = {
   nationality: string;
   avatarUrl?: string | null;
   displayCurrency: CurrencyCode | null;
+  timezone?: string;
 };
 
 export type TeacherAdminSubmitData = {
@@ -64,6 +65,8 @@ export interface TeacherProfileViewModel {
   readonly teacherData: TeacherViewData;
   readonly avatarUrl: string | null | undefined;
   readonly displayCurrency: CurrencyCode | null | undefined;
+  readonly profilePhone: string | null | undefined;
+  readonly profileTimezone: string | null | undefined;
   readonly isAdminScope: boolean;
   readonly targetUserId: string;
   readonly meetingTabHref: string;
@@ -110,6 +113,8 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const teacherData = buildEditSource(scope, profile ?? ({} as ProfileData));
   const avatarUrl = profile?.avatarUrl;
   const displayCurrency = profile?.displayCurrency;
+  const profilePhone = profile?.phone;
+  const profileTimezone = profile?.timezone;
 
   const onSubmitOwn = async (formData: TeacherOwnSubmitData) => {
     setIsSaving(true);
@@ -127,6 +132,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
               phone: formData.phone || null,
               nationalId: formData.nationalId || null,
               nationality: formData.nationality || null,
+              timezone: (formData.timezone || null) as IanaTimezone | null,
             },
           },
         },
@@ -187,6 +193,8 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
     teacherData: teacherData as TeacherViewData,
     avatarUrl,
     displayCurrency,
+    profilePhone,
+    profileTimezone,
     isAdminScope,
     targetUserId,
     meetingTabHref: "?tab=meeting",

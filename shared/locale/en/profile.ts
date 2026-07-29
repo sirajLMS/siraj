@@ -230,6 +230,7 @@ export const profileEn: ProfileLabels = {
       fullName: "Full Name",
       primaryEmail: "Email",
       phone: "Phone",
+      timezone: "Timezone",
       roleName: "Role",
       roleSlug: "Role ID",
       department: "Department",

@@ -4,7 +4,7 @@ import { Box, Stack, TextField } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ProfilePersonalSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection";
+import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import type { ProfilePersonalFieldLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
@@ -76,7 +76,7 @@ export function TeacherProfileOwnEditFormBody({
             control={control}
           />
         ) : null}
-        {canEdit("core_contact") || canEdit("teacher_identity") ? (
+        {canEdit("core_contact") ? (
           <ContactSection
             labels={sectionLabels}
             scope={scope}
@@ -85,28 +85,31 @@ export function TeacherProfileOwnEditFormBody({
             control={control}
           />
         ) : null}
-        {canEdit("teacher_professional") ? (
-          <ProfilePersonalSection
+        {canEdit("teacher_identity") || canEdit("teacher_professional") ? (
+          <TeacherExtensionProfileSection
             mode="edit"
             scope={scope}
-            fieldGroupKey="teacher_professional"
+            labels={{
+              teacher: sectionLabels.teacher,
+              personalFieldLabels,
+              baseLabels: sectionLabels.baseLabels,
+            }}
             sectionTitle={identitySectionTitle}
-            fieldLabels={personalFieldLabels}
-            baseLabels={sectionLabels.baseLabels}
-            fields={{ nationality: true }}
             register={register}
             control={control}
           />
         ) : null}
-        <TextField
-          {...register("nationalId")}
-          label={nationalIdLabel}
-          required
-          error={Boolean(nationalIdError)}
-          helperText={nationalIdError}
-          fullWidth
-          size="small"
-        />
+        {canEdit("teacher_professional") ? (
+          <TextField
+            {...register("nationalId")}
+            label={nationalIdLabel}
+            required
+            error={Boolean(nationalIdError)}
+            helperText={nationalIdError}
+            fullWidth
+            size="small"
+          />
+        ) : null}
       </Box>
     </Stack>
   );

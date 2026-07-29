@@ -80,6 +80,7 @@ export function TeacherProfileEditBody({
             nationality: values.nationality ?? "",
             avatarUrl: values.avatarUrl,
             displayCurrency: values.displayCurrency ?? null,
+            timezone: values.timezone ?? "",
           });
         }}
       />

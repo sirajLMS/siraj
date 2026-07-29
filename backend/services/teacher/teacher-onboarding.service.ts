@@ -29,6 +29,7 @@ export interface TeacherOnboardingInput {
   readonly timezone: string;
   readonly hourlyRate?: string | null;
   readonly rateCurrency?: CurrencyCode | null;
+  readonly displayCurrency?: CurrencyCode | null;
   readonly initialPayoutMethod?: Omit<UserPaymentMethodSubmitInput, "userId"> | null;
 }
 
@@ -59,9 +60,8 @@ export namespace TeacherOnboardingService {
           ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         } satisfies UserCreateCoreInput,
         profileFields: {
-          // Teacher phone lives on the `teachers` row, NOT on `users`. Only timezone
-          // is written to the user row here.
           timezone: input.timezone,
+          displayCurrency: input.displayCurrency ?? undefined,
         } satisfies UserCreateProfileFieldsInput,
         validatePassword: true,
         groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,

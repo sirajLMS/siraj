@@ -53,6 +53,7 @@ const createMinimalTeacherInput = (
       swiftBic: "BOFAUS3N",
     } as import("@/frontend/common/graphql/generated/gql/graphql-types").PaymentMethodDetailsInput,
   },
+  displayCurrency: null,
 });
 
 const attemptCreateTeacherAs = async (demoUser: string) => {

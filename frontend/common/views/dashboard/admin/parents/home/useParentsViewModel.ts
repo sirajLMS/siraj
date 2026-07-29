@@ -136,7 +136,6 @@ function buildLabelsBySection(t: ParentsDirectoryLabels): ParentsDirectoryLabels
       unpaidInvoices: t.table.unpaidInvoices,
       options: t.table.options,
       noEntries: t.noEntries,
-      guardianOf: t.card.guardianOf,
       statusLabels,
       accountStatusLabels,
       manageLifecycle: t.actions.manageLifecycle,
@@ -150,6 +149,7 @@ function buildLabelsBySection(t: ParentsDirectoryLabels): ParentsDirectoryLabels
     },
     actions: {
       addParent: t.actions.addParent,
+      export: t.actions.export,
       manageLifecycle: t.actions.manageLifecycle,
       accountStatusLabels,
     },

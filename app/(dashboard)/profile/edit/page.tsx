@@ -39,6 +39,7 @@ export default async function ProfileEditPage() {
       mode={toGqlProfileMode(resolution.mode) satisfies GqlProfileMode}
       audience={toGqlProfileAudience(resolution.audience) satisfies ProfileAudience}
       targetUserId={resolution.targetUserId}
+      studentId={resolution.studentId}
     />
   );
 }

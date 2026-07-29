@@ -42,8 +42,9 @@ export namespace StudentOnboardingService {
           ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         } satisfies UserCreateCoreInput,
         profileFields: {
-          // Student phone is NOT collected at onboarding; only timezone is written to `users`.
+          phone: input.phone ?? undefined,
           timezone: input.timezone ?? undefined,
+          displayCurrency: input.displayCurrency ?? undefined,
         } satisfies UserCreateProfileFieldsInput,
         groupSlug: SystemPermissionGroupSlug.STUDENT_DEFAULT,
         preChecks: async () => {

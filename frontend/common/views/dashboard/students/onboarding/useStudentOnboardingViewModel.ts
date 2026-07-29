@@ -12,7 +12,7 @@ import {
 } from "react-hook-form";
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus, CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCreateStudentOnboarding } from "@/frontend/common/hooks/useCreateStudentOnboarding";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import {
@@ -98,6 +98,9 @@ function useStudentOnboardingForm(initialParentId: string): StudentOnboardingFor
       email: "",
       password: "",
       avatarUrl: undefined,
+      phone: "",
+      timezone: IanaTimezone.AfricaCairo,
+      displayCurrency: CurrencyCode.Usd,
       dateOfBirth: "",
       gender: null,
       language: null,
@@ -114,6 +117,9 @@ function buildResetPayload(initialParentId: string, formData: StudentOnboardingF
     email: "",
     password: "",
     avatarUrl: undefined,
+    phone: "",
+    timezone: IanaTimezone.AfricaCairo,
+    displayCurrency: CurrencyCode.Usd,
     dateOfBirth: "",
     gender: null,
     language: null,

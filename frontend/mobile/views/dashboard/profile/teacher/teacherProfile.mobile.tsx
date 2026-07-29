@@ -2,10 +2,10 @@
 
 import { Box } from "@mui/material";
 import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ProfilePersonalSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection";
+import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
+import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/CompensationSection";
-import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
 import { StatsSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/StatsSection";
 import {
   toTeacherPersonalFieldLabels,
@@ -28,6 +28,8 @@ export function TeacherProfileMobileView({
   teacherData,
   avatarUrl,
   displayCurrency,
+  profilePhone,
+  profileTimezone,
   isAdminScope,
   mode,
   scope,
@@ -66,38 +68,42 @@ export function TeacherProfileMobileView({
 
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
   const showCompensation = hasTeacherCompensationData(teacherData);
-  const showPersonal = isAdminScope && adminData != null && hasTeacherPersonalData(teacherData);
+  const showExtension = hasTeacherPersonalData(teacherData);
   const showAdminOnly = isAdminScope && adminData != null && hasTeacherAdminOnlyData(adminData);
   const showStats = hasTeacherStatsData(teacherData);
 
   return (
     <Box data-testid="teacher-profile-view">
       <MobileContentStack>
-        <ContactSection labels={sectionLabels} scope={scope} teacherData={teacherData} isAdminScope={isAdminScope} />
+        <UserDetailsProfileSection
+          scope={scope}
+          sectionTitle={labels.teacher.sections.contact}
+          phoneLabel={labels.teacher.fields.phone}
+          timezoneLabel={labels.teacher.fields.timezone}
+          currencyLabel={labels.teacher.fields.displayCurrency}
+          phone={profilePhone ?? teacherData.phone}
+          timezone={profileTimezone ?? teacherData.timezone}
+          displayCurrency={displayCurrency}
+          baseLabels={sectionLabels.baseLabels}
+        />
         {showCompensation ? (
           <CompensationSection labels={labels} mode="view" teacherData={teacherData} subjectUserId={targetUserId} />
         ) : null}
-        {showPersonal && adminData ? (
-          <ProfilePersonalSection
+        {showExtension ? (
+          <TeacherExtensionProfileSection
             mode="view"
             scope={scope}
-            fieldGroupKey="teacher_identity"
-            qualificationsFieldGroupKey="teacher_professional"
-            sectionTitle={labels.teacher.sections.identity}
-            fieldLabels={personalFieldLabels}
-            baseLabels={sectionLabels.baseLabels}
-            fields={{
-              nationality: true,
-              address: true,
-              dateOfBirth: true,
-              gender: true,
-              qualifications: true,
+            labels={{
+              teacher: labels.teacher,
+              personalFieldLabels,
+              baseLabels: sectionLabels.baseLabels,
             }}
+            sectionTitle={labels.teacher.sections.identity}
             nationality={teacherData.nationality}
-            address={adminData.address}
-            dateOfBirth={adminData.dateOfBirth}
-            gender={adminData.gender}
-            qualifications={adminData.qualifications}
+            address={adminData?.address ?? teacherData.address}
+            dateOfBirth={adminData?.dateOfBirth ?? teacherData.dateOfBirth}
+            gender={adminData?.gender ?? teacherData.gender}
+            qualifications={adminData?.qualifications ?? teacherData.qualifications}
           />
         ) : null}
         {showAdminOnly && adminData ? (

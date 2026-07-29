@@ -85,6 +85,8 @@ export const studentProfileQueryDocument: TypedDocumentNode<
       timezoneOverride
       email
       phone
+      timezone
+      displayCurrency
       parentId
       parentUserId
       parentName
@@ -144,6 +146,8 @@ interface RecordStudentProfileEditMutationShape {
 interface RecordStudentProfileEditMutationArgs {
   input: {
     phone?: string | null;
+    timezone?: string | null;
+    displayCurrency?: string | null;
     dateOfBirth?: string | null;
     gender?: string | null;
     language?: string | null;

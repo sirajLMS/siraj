@@ -1,16 +1,17 @@
 "use client";
 
-import { Alert, Box, Button, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
+import { StaffExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/StaffExtensionProfileSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
-import { ContactSection } from "@/frontend/common/views/dashboard/profile/staff/sections/ContactSection";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
 import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
-import { MobileContentStack, MobileSectionPanel } from "@/frontend/mobile/components/ui";
+import { MobileContentStack } from "@/frontend/mobile/components/ui";
 
 type StaffProfileTranslations = StaffProfileViewLabels;
 
@@ -101,6 +102,8 @@ export function StaffProfileMobileView({
   staffData,
   avatarUrl,
   displayCurrency,
+  profileTimezone,
+  profilePhone,
   targetUserId,
   permissionGroups,
   permissionOverrides,
@@ -127,48 +130,23 @@ export function StaffProfileMobileView({
     return guard;
   }
 
-  const renderCompensationSection = () => {
-    if (!canView("staff_role")) {
-      return null;
-    }
-    if (isAdminScope) {
-      return (
-        <MobileSectionPanel title={st.sections.compensation}>
-          <Stack spacing={2}>
-            <Typography variant="bodyMd">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {st.fields.hourlyRate}
-              </Typography>
-              {staffData?.hourlyRate} {staffData?.rateCurrency}
-            </Typography>
-          </Stack>
-        </MobileSectionPanel>
-      );
-    }
-    if (staffData?.hourlyRate || staffData?.rateCurrency) {
-      return (
-        <MobileSectionPanel title={st.sections.compensation}>
-          <Stack spacing={2}>
-            <Typography variant="bodyMd">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {st.fields.hourlyRate}
-              </Typography>
-              {staffData.hourlyRate} {staffData.rateCurrency}
-            </Typography>
-          </Stack>
-        </MobileSectionPanel>
-      );
-    }
-    return null;
-  };
-
   const sectionLabels = {
     staff: st,
     baseLabels: toStaffSharedBaseLabels(translations.base),
   };
 
   const renderContactSection = () => (
-    <ContactSection mode="view" labels={sectionLabels} scope={scope} staffData={staffData} />
+    <UserDetailsProfileSection
+      scope={scope}
+      sectionTitle={st.sections.contact}
+      phoneLabel={st.fields.phone}
+      timezoneLabel={st.fields.timezone}
+      currencyLabel={st.fields.displayCurrency}
+      phone={profilePhone ?? staffData?.phone}
+      timezone={profileTimezone}
+      displayCurrency={displayCurrency}
+      baseLabels={sectionLabels.baseLabels}
+    />
   );
 
   if (mode === ProfileMode.View) {
@@ -180,7 +158,12 @@ export function StaffProfileMobileView({
           </Typography>
         ) : null}
         {renderContactSection()}
-        {renderCompensationSection()}
+        <StaffExtensionProfileSection
+          scope={scope}
+          labels={sectionLabels}
+          hourlyRate={staffData?.hourlyRate}
+          rateCurrency={staffData?.rateCurrency}
+        />
       </MobileContentStack>
     );
   }
@@ -191,6 +174,7 @@ export function StaffProfileMobileView({
         staffData={staffData}
         avatarUrl={avatarUrl}
         displayCurrency={displayCurrency}
+        profileTimezone={profileTimezone}
         targetUserId={targetUserId}
         isAdminScope={isAdminScope}
         isSaving={isSaving}
@@ -204,6 +188,7 @@ export function StaffProfileMobileView({
       staffData={staffData}
       avatarUrl={avatarUrl}
       displayCurrency={displayCurrency}
+      profileTimezone={profileTimezone}
       targetUserId={targetUserId}
       isAdminScope={isAdminScope}
       isSaving={isSaving}

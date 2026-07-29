@@ -80,6 +80,8 @@ export const UnifiedProfilePothosObject = UnifiedProfileRef.implement({
     parentId: t.exposeString("parentId", { nullable: true }),
     staffProfileId: t.exposeString("staffProfileId", { nullable: true }),
     displayCurrency: t.expose("displayCurrency", { type: CurrencyCodePothosObject, nullable: true }),
+    timezone: t.expose("timezone", { type: IanaTimezonePothosObject, nullable: true }),
+    phone: t.exposeString("phone", { nullable: true }),
     teacherOwnProfile: t.expose("teacherOwnProfile", { type: TeacherOwnProfilePothosObject, nullable: true }),
     teacherAdminProfile: t.expose("teacherAdminProfile", { type: TeacherProfileResultPothosObject, nullable: true }),
     parentOwnProfile: t.expose("parentOwnProfile", { type: ParentOwnProfilePothosObject, nullable: true }),

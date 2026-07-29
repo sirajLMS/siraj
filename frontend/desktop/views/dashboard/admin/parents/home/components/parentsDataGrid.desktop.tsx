@@ -6,7 +6,7 @@ import {
   TuneOutlined as LifecycleIcon,
   SettingsOutlined as SettingsIcon,
 } from "@mui/icons-material";
-import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
@@ -74,19 +74,14 @@ export function ParentsDataGridDesktop({
         flex: 1.5,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <Stack sx={{ justifyContent: "center", height: "100%" }}>
-            <DesktopPersonProfileLinkCell
-              href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
-              name={row.name}
-              avatarUrl={row.avatarUrl}
-              avatarSize={40}
-              typographyVariant="bodyLg"
-              fontWeight={600}
-            />
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {labels.guardianOf(row.guardianOf)}
-            </Typography>
-          </Stack>
+          <DesktopPersonProfileLinkCell
+            href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
+            name={row.name}
+            avatarUrl={row.avatarUrl}
+            avatarSize={40}
+            typographyVariant="bodyLg"
+            fontWeight={600}
+          />
         ),
       },
       {

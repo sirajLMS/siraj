@@ -44,7 +44,6 @@ export interface ParentsDataGridLabels {
   readonly unpaidInvoices: string;
   readonly options: string;
   readonly noEntries: string;
-  readonly guardianOf: (name: string) => string;
   readonly statusLabels: Record<ParentLifecycleStatus, string>;
   readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
   readonly manageLifecycle: string;

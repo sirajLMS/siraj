@@ -1,5 +1,6 @@
 import { ParentRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
-import { type AppLanguage, AppPermission, type Gender, StudentStatus } from "@/backend/enum";
+import { type AppLanguage, AppPermission, type CurrencyCode, type Gender, StudentStatus } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
@@ -72,6 +73,8 @@ function mapProfileRow(
   | "timezoneOverride"
   | "email"
   | "phone"
+  | "timezone"
+  | "displayCurrency"
   | "parentId"
   | "parentUserId"
   | "parentName"
@@ -98,6 +101,8 @@ function mapProfileRow(
     timezoneOverride: row.timezoneOverride,
     email: row.email,
     phone: row.phone,
+    timezone: row.timezone as IanaTimezone,
+    displayCurrency: row.displayCurrency as CurrencyCode | null,
     parentId: row.parentId,
     parentUserId: row.parentUserId,
     parentName: row.parentName,
@@ -290,6 +295,14 @@ async function applyStudentProfileEdit(
     await UserRepository.updateProfileFields(actorUserId, { phone: input.phone }, locale);
   }
 
+  if (input.timezone !== undefined && input.timezone) {
+    await UserRepository.updateTimezone(actorUserId, input.timezone, undefined, locale);
+  }
+
+  if (input.displayCurrency !== undefined) {
+    await UserRepository.updateProfileFields(actorUserId, { displayCurrency: input.displayCurrency }, locale);
+  }
+
   if (input.parentPhone !== undefined) {
     if (!profile.parentUserId) {
       throw new Error(tErrors.invalidInput);
@@ -301,8 +314,20 @@ async function applyStudentProfileEdit(
 function collectStudentProfileEditGroups(input: StudentProfileEditInput): string[] {
   const groups: string[] = [];
 
-  // Phone lives on users but is gated with identity edit_own (no separate student contact group).
-  if ("phone" in input || "dateOfBirth" in input || "gender" in input || "language" in input || "avatarUrl" in input) {
+  // Phone, timezone, and displayCurrency live on users but are gated with identity edit_own.
+  if (
+    "phone" in input ||
+    "timezone" in input ||
+    "displayCurrency" in input ||
+    "dateOfBirth" in input ||
+    "gender" in input ||
+    "language" in input ||
+    "avatarUrl" in input
+  ) {
+    groups.push("student_identity");
+  }
+
+  if ("timezoneOverride" in input) {
     groups.push("student_identity");
   }
 

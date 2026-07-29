@@ -21,7 +21,10 @@ export type ParentsDirectoryColumnLabels = ParentsDataGridLabels;
 
 export type ParentsDirectoryCardLabels = ParentCardListLabels;
 
-export type ParentsDirectoryActionLabels = Pick<ParentsDirectoryLabels["actions"], "addParent" | "manageLifecycle"> & {
+export type ParentsDirectoryActionLabels = Pick<
+  ParentsDirectoryLabels["actions"],
+  "addParent" | "export" | "manageLifecycle"
+> & {
   readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
 };
 

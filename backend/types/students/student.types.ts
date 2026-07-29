@@ -74,6 +74,8 @@ export interface StudentOnboardingInput {
   readonly timezone?: string | null;
   readonly timezoneOverride?: string | null;
   readonly avatarUrl?: string | null;
+  readonly phone?: string | null;
+  readonly displayCurrency?: string | null;
 }
 
 export interface StudentOnboardingResult {

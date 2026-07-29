@@ -28,6 +28,7 @@ const createMinimalParentInput = (
   avatarUrl: null,
   password: `Pwd_${randomUUID()}`,
   phone: null,
+  displayCurrency: null,
   invoiceType: null,
   feeAmount: null,
   initialPayinMethod: null,
@@ -93,6 +94,7 @@ const createFullParentInput = (
   whatsapp: overrides?.whatsapp ?? "+1234567890",
   twitter: overrides?.twitter ?? "@testparent",
   nationality: overrides?.nationality ?? "US",
+  displayCurrency: null,
 });
 
 describe("Parent Onboarding GraphQL API", () => {

@@ -1,13 +1,17 @@
 "use client";
 
-import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
+import {
+  UserEntityFieldsSection,
+} from "@/frontend/common/components/onboarding/sections";
+import { StudentExtensionSection } from "@/frontend/common/views/dashboard/students/onboarding/components/StudentExtensionSection";
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
 import { DesktopFormSuccessSnackbar, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ParentAssignmentSection } from "@/frontend/desktop/views/dashboard/students/onboarding/components/parentAssignmentSection.desktop";
-import { StudentInfoSection } from "@/frontend/desktop/views/dashboard/students/onboarding/components/studentInfoSection.desktop";
 import { TeacherAssignmentSection } from "@/frontend/desktop/views/dashboard/students/onboarding/components/teacherAssignmentSection.desktop";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function StudentOnboardingDesktopView({
   register,
@@ -23,6 +27,8 @@ export function StudentOnboardingDesktopView({
   onCloseSuccess,
   successMessage,
 }: Readonly<StudentOnboardingViewModel>) {
+  const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
@@ -42,7 +48,6 @@ export function StudentOnboardingDesktopView({
               borderRadius: 2,
             })}
           >
-            <InfoOutlined />
             <Typography variant="labelMd">{labels.statusBanner}</Typography>
           </Stack>
         }
@@ -55,6 +60,16 @@ export function StudentOnboardingDesktopView({
         }}
         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
       >
+        <DesktopSectionPanel title={userEntityLabels.sectionTitle}>
+          <UserEntityFieldsSection
+            register={register}
+            control={control}
+            errors={errors}
+            labels={userEntityLabels}
+            onUploadAvatar={onUploadAvatar}
+          />
+        </DesktopSectionPanel>
+
         <ParentAssignmentSection
           control={control}
           errors={errors}
@@ -67,29 +82,25 @@ export function StudentOnboardingDesktopView({
           }}
         />
 
-        <StudentInfoSection
-          register={register}
-          errors={errors}
-          control={control}
-          onUploadAvatar={onUploadAvatar}
-          labels={{
-            sectionTitle: labels.sections.studentInfo,
-            name: labels.fields.name,
-            namePlaceholder: labels.placeholders.name,
-            nameMinLength: labels.validation.nameMinLength,
-            dateOfBirth: labels.fields.dateOfBirth,
-            dateOfBirthPlaceholder: labels.placeholders.dateOfBirth,
-            gender: labels.fields.gender,
-            male: labels.fields.male,
-            female: labels.fields.female,
-            language: labels.fields.language,
-            languagePlaceholder: labels.placeholders.language,
-            status: labels.fields.status,
-            statusOnTrial: labels.options.status.onTrial,
-            statusRegular: labels.options.status.regular,
-            avatar: labels.fields.avatar,
-          }}
-        />
+        <DesktopSectionPanel title={labels.sections.studentInfo}>
+          <StudentExtensionSection
+            register={register}
+            errors={errors}
+            control={control}
+            labels={{
+              dateOfBirth: labels.fields.dateOfBirth,
+              dateOfBirthPlaceholder: labels.placeholders.dateOfBirth,
+              gender: labels.fields.gender,
+              male: labels.fields.male,
+              female: labels.fields.female,
+              language: labels.fields.language,
+              languagePlaceholder: labels.placeholders.language,
+              status: labels.fields.status,
+              statusOnTrial: labels.options.status.onTrial,
+              statusRegular: labels.options.status.regular,
+            }}
+          />
+        </DesktopSectionPanel>
 
         <TeacherAssignmentSection
           control={control}

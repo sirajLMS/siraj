@@ -120,6 +120,8 @@ describe("ParentProfileView admin sections", () => {
         editData={baseEditData}
         avatarUrl={null}
         displayCurrency={null}
+        profileTimezone={null}
+        profilePhone={null}
         parentId="parent-own-1"
         meetingTabHref="?tab=meeting"
         associatedStudents={associatedStudents}
@@ -151,6 +153,8 @@ describe("ParentProfileView admin sections", () => {
         editData={baseEditData}
         avatarUrl={null}
         displayCurrency={CurrencyCode.Sar}
+        profileTimezone={IanaTimezone.AsiaRiyadh}
+        profilePhone="+966500000000"
         parentId="parent-admin-1"
         meetingTabHref="?tab=meeting"
         associatedStudents={associatedStudents}

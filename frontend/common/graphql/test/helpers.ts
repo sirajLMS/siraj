@@ -509,6 +509,8 @@ export async function provisionTestManager(
         password: TEST_USER_PASSWORD,
         accountType,
         phone: null,
+        displayCurrency: null,
+        timezone: IanaTimezone.Utc,
       },
     },
     context: { headers: { Authorization: `Bearer ${superAdminToken}` } },

@@ -102,7 +102,7 @@ export function ParentsViewDesktop({
             <DesktopFilterButton startIcon={<FilterListOutlined />} onClick={onFilter}>
               {filters.filterLabel}
             </DesktopFilterButton>
-            <DesktopExportButton onClick={onExport} />
+            <DesktopExportButton onClick={onExport}>{actions.export}</DesktopExportButton>
           </Box>
         }
       >

@@ -4,14 +4,14 @@ import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
-import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent/sections/ContactSection";
-import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
+import { ParentExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/ParentExtensionProfileSection";
 import type { ParentAdminData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { toParentSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
 import { hasParentBillingData, hasParentSocialData } from "@/frontend/common/views/dashboard/profile/parent/utils";
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { MobileContentStack, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 
@@ -29,6 +29,9 @@ export function ParentProfileMobileView({
   onRetry,
   parentData,
   editData,
+  displayCurrency,
+  profileTimezone,
+  profilePhone,
   parentId: _parentId,
   meetingTabHref: _meetingTabHref,
   associatedStudents: _associatedStudents,
@@ -92,28 +95,28 @@ export function ParentProfileMobileView({
       <MobileSectionPanel title={pt.sections.social}>
         <Stack spacing={2}>
           {parentData?.facebook && (
-            <Typography variant="bodyMd">
+            <Stack sx={{ gap: 0.25 }}>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {pt.fields.facebook}
               </Typography>
-              {parentData.facebook}
-            </Typography>
+              <Typography variant="bodyMd">{parentData.facebook}</Typography>
+            </Stack>
           )}
           {parentData?.whatsapp && (
-            <Typography variant="bodyMd">
+            <Stack sx={{ gap: 0.25 }}>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {pt.fields.whatsapp}
               </Typography>
-              {parentData.whatsapp}
-            </Typography>
+              <Typography variant="bodyMd">{parentData.whatsapp}</Typography>
+            </Stack>
           )}
           {parentData?.twitter && (
-            <Typography variant="bodyMd">
+            <Stack sx={{ gap: 0.25 }}>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {pt.fields.twitter}
               </Typography>
-              {parentData.twitter}
-            </Typography>
+              <Typography variant="bodyMd">{parentData.twitter}</Typography>
+            </Stack>
           )}
         </Stack>
       </MobileSectionPanel>
@@ -124,7 +127,7 @@ export function ParentProfileMobileView({
     if (!isAdminScope || !adminData || !canView("parent_identity")) {
       return null;
     }
-    return <IdentitySection mode="view" labels={pt} scope={scope} adminData={adminData} />;
+    return <ParentExtensionProfileSection mode="view" labels={pt} scope={scope} adminData={adminData} />;
   };
 
   const renderBillingSection = () => {
@@ -138,36 +141,30 @@ export function ParentProfileMobileView({
       <MobileSectionPanel title={pt.sections.billing}>
         <Stack spacing={2}>
           {adminData.invoiceType && (
-            <Typography variant="bodyMd">
+            <Stack sx={{ gap: 0.25 }}>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {pt.fields.invoiceType}
               </Typography>
-              {adminData.invoiceType}
-            </Typography>
+              <Typography variant="bodyMd">{adminData.invoiceType}</Typography>
+            </Stack>
           )}
           {adminData.feeAmount && adminData.currency && (
-            <Typography variant="bodyMd">
+            <Stack sx={{ gap: 0.25 }}>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {pt.fields.feeAmount}
               </Typography>
-              {adminData.feeAmount} {adminData.currency}
-            </Typography>
-          )}
-          {adminData.timezone && (
-            <Typography variant="bodyMd">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.timezone}
+              <Typography variant="bodyMd">
+                {adminData.feeAmount} {adminData.currency}
               </Typography>
-              {adminData.timezone}
-            </Typography>
+            </Stack>
           )}
           {adminData.lifecycleStatus && (
-            <Typography variant="bodyMd">
+            <Stack sx={{ gap: 0.25 }}>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                 {pt.fields.lifecycleStatus}
               </Typography>
-              {adminData.lifecycleStatus}
-            </Typography>
+              <Typography variant="bodyMd">{adminData.lifecycleStatus}</Typography>
+            </Stack>
           )}
         </Stack>
       </MobileSectionPanel>
@@ -180,7 +177,17 @@ export function ParentProfileMobileView({
   };
 
   const renderContactSection = () => (
-    <ContactSection mode="view" labels={sectionLabels} scope={scope} parentData={parentData} />
+    <UserDetailsProfileSection
+      scope={scope}
+      sectionTitle={pt.sections.contact}
+      phoneLabel={pt.fields.phone}
+      timezoneLabel={pt.fields.timezone}
+      currencyLabel={pt.fields.displayCurrency}
+      phone={profilePhone ?? parentData.phone}
+      timezone={profileTimezone ?? adminData?.timezone}
+      displayCurrency={displayCurrency}
+      baseLabels={sectionLabels.baseLabels}
+    />
   );
 
   const renderStudentsSection = () => {

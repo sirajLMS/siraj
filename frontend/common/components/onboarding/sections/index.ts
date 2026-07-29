@@ -1,13 +1,7 @@
 export type {
   OnboardingSectionTranslations,
-  UserContactFieldsProps,
-  UserContactFieldsShape,
-  UserIdentityFieldsProps,
-  UserIdentityFieldsShape,
+  UserEntityOnboardingFieldsShape,
   UserOnboardingCoreFieldsShape,
-  UserPersonalFieldsProps,
-  UserPersonalFieldsShape,
 } from "@/frontend/common/components/onboarding/sections/types";
-export { UserContactFields } from "@/frontend/common/components/onboarding/sections/UserContactFields";
-export { UserIdentityFields } from "@/frontend/common/components/onboarding/sections/UserIdentityFields";
-export { UserPersonalFields } from "@/frontend/common/components/onboarding/sections/UserPersonalFields";
+export { OnboardingPaymentMethodSection } from "@/frontend/common/components/onboarding/sections/OnboardingPaymentMethodSection";
+export { UserEntityFieldsSection } from "@/frontend/common/components/onboarding/sections/UserEntityFieldsSection";

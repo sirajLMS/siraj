@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AccountStatus, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 
 const coreSchema = z.object({
   name: z.string().min(1),
@@ -7,6 +8,10 @@ const coreSchema = z.object({
   avatarUrl: z.string().nullable().optional(),
   displayCurrency: z.enum(CurrencyCode).nullable().optional(),
   phone: z.string().optional(),
+  timezone: z
+    .string()
+    .optional()
+    .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
 });
 
 const adminStaffSchema = z.object({

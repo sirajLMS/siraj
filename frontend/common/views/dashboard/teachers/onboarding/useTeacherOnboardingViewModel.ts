@@ -90,6 +90,7 @@ function useOnboardingForm(labels: TeacherOnboardingLabels): OnboardingForm {
       gender: Gender.Male,
       countryCode: CountryCode.Eg,
       timezone: IanaTimezone.AfricaCairo,
+      displayCurrency: CurrencyCode.Usd,
       rateCurrency: CurrencyCode.Usd,
       avatarUrl: undefined,
       payoutMethod: null,

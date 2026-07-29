@@ -1,7 +1,7 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
-import type { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
+import type { AppPermission, CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { validatePasswordStrength } from "@/backend/lib/auth";
 import { logger } from "@/backend/lib/logger";
@@ -148,6 +148,14 @@ export namespace UserOnboardingService {
         }
         if (profileFields.phone != null) {
           await UserRepository.updateProfileFields(user.id, { phone: profileFields.phone }, locale, txObj);
+        }
+        if (profileFields.displayCurrency != null) {
+          await UserRepository.updateProfileFields(
+            user.id,
+            { displayCurrency: profileFields.displayCurrency as CurrencyCode },
+            locale,
+            txObj
+          );
         }
       } else if (opts.writeDefaultTimezone) {
         await UserRepository.updateTimezone(user.id, IanaTimezone.UTC, txObj, locale);

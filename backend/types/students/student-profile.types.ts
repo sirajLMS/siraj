@@ -1,4 +1,5 @@
-import type { AppLanguage, Gender, StudentStatus } from "@/backend/enum";
+import type { AppLanguage, CurrencyCode, Gender, StudentStatus } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { StudentClassHistory } from "@/backend/types/students/student.types";
 import type { StudentUpcomingClassesResult } from "@/backend/types/students/student-status.types";
 
@@ -13,6 +14,8 @@ export type StudentProfileReturnType = {
   readonly timezoneOverride: string | null;
   readonly email: string | null;
   readonly phone: string | null;
+  readonly timezone: IanaTimezone | null;
+  readonly displayCurrency: CurrencyCode | null;
   readonly parentId: string | null;
   readonly parentUserId: string | null;
   readonly parentName: string | null;
@@ -38,6 +41,8 @@ export type StudentProfileReturnType = {
  */
 export type StudentProfileEditInput = {
   readonly phone?: string | null;
+  readonly timezone?: string | null;
+  readonly displayCurrency?: CurrencyCode | null;
   readonly dateOfBirth?: Date | null;
   readonly gender?: Gender | null;
   readonly language?: AppLanguage | null;

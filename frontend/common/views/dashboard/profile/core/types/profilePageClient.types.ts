@@ -6,6 +6,7 @@ export type ProfilePageClientProps = {
   readonly mode: ProfileMode;
   readonly audience: ProfileAudience;
   readonly targetUserId: string;
+  readonly studentId?: string;
 };
 
 export type ProfilePageClientLabels = {

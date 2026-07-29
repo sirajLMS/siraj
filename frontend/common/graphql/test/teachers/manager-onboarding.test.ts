@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { IanaTimezone, ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
   authenticatedRequest,
@@ -23,6 +23,8 @@ const createMinimalManagerInput = (
   password: `Pwd_${randomUUID()}`,
   accountType: overrides?.accountType ?? ManagerAccountType.Manager,
   phone: null,
+  displayCurrency: null,
+  timezone: IanaTimezone.Utc,
 });
 
 describe("Manager Onboarding GraphQL API", () => {

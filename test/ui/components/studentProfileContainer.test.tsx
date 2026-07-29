@@ -11,8 +11,8 @@ mock.module("next/navigation", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/profile",
-  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/profile",
+  useSearchParams: () => new URLSearchParams("tab=profile"),
   redirect: () => {},
 }));
 
@@ -27,7 +27,7 @@ mock.module("@/shared/i18n/routing", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/profile",
+  usePathname: () => "/profile",
   Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
     <a href={href} {...rest}>
       {children}
@@ -45,7 +45,7 @@ mock.module("@/shared/i18n/navigation", () => ({
     replace: mock(() => {}),
     prefetch: mock(() => {}),
   }),
-  usePathname: () => "/students/me/profile",
+  usePathname: () => "/profile",
 }));
 
 mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
@@ -56,7 +56,6 @@ import { afterEach, describe, expect, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 expect.extend(matchers);
 
@@ -69,10 +68,6 @@ import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const studentId = "student-profile-1";
 
-/**
- * Production-shaped desktop container for tests.
- * Bypasses ResponsiveViewSwitch / next/dynamic (not preloaded for this view).
- */
 function StudentProfileContainerImpl() {
   const viewModel = useStudentProfileViewModel({
     scope: ProfileScope.Own,
@@ -133,9 +128,12 @@ afterEach(() => {
     isEditing: false,
     draft: {
       phone: "",
+      timezone: "",
+      displayCurrency: "",
       dateOfBirth: "",
       gender: "",
       language: "",
+      timezoneOverride: "",
       parentPhone: "",
       avatarUrl: null,
     },
@@ -144,7 +142,7 @@ afterEach(() => {
 });
 
 describe("StudentProfileContainer", () => {
-  test("renders profile header, edit button, and personal information", async () => {
+  test("renders profile tab sections inside profile shell layout", async () => {
     renderWithWrapper(<StudentProfileContainerImpl />, {
       locale: "en",
       themeMode: "dark",
@@ -153,32 +151,12 @@ describe("StudentProfileContainer", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("My Profile")).toBeInTheDocument();
+      expect(screen.getByText("Personal Information")).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("button", { name: "Edit Profile" })).toBeInTheDocument();
-    expect(screen.getByText("Personal Information")).toBeInTheDocument();
-    expect(screen.getByText("Ahmed Student")).toBeInTheDocument();
-    expect(screen.getByText("ahmed@example.com")).toBeInTheDocument();
-  });
-
-  test("enters edit mode and shows Save Changes", async () => {
-    const user = userEvent.setup();
-
-    renderWithWrapper(<StudentProfileContainerImpl />, {
-      locale: "en",
-      themeMode: "dark",
-      mocks: createMocks(),
-      viewport: "desktop",
-    });
-
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Edit Profile" })).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByRole("button", { name: "Edit Profile" }));
-
-    expect(await screen.findByRole("button", { name: "Save Changes" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    expect(screen.getByText("Parent Information")).toBeInTheDocument();
+    expect(screen.getByText("Academic Information")).toBeInTheDocument();
+    expect(screen.getByText("Parent One")).toBeInTheDocument();
+    expect(screen.getByText("Ustadh Yusuf")).toBeInTheDocument();
   });
 });

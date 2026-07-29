@@ -2,22 +2,23 @@
 
 import { Grid, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import type { OnboardingSectionTranslations } from "@/frontend/common/components/onboarding/sections";
 import {
-  UserContactFields,
-  UserIdentityFields,
-  UserPersonalFields,
-} from "@/frontend/common/components/onboarding/sections";
+  UserPersonalAddressField,
+  UserPersonalDateOfBirthField,
+  UserPersonalGenderField,
+  UserPersonalNationalityField,
+  UserPersonalQualificationsField,
+} from "@/frontend/common/components/onboarding/sections/userPersonalFieldComponents";
+import type { OnboardingSectionTranslations } from "@/frontend/common/components/onboarding/sections/types";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers/onboarding";
 
-interface TeacherInfoSectionProps {
+interface TeacherExtensionSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
   readonly control: Control<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
   readonly labels: TeacherOnboardingLabels;
-  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
 function toSectionTranslations(labels: TeacherOnboardingLabels): OnboardingSectionTranslations {
@@ -28,25 +29,16 @@ function toSectionTranslations(labels: TeacherOnboardingLabels): OnboardingSecti
   };
 }
 
-export function TeacherInfoSection({
+export function TeacherExtensionSection({
   register,
   control,
   errors,
   labels,
-  onUploadAvatar,
-}: Readonly<TeacherInfoSectionProps>) {
+}: Readonly<TeacherExtensionSectionProps>) {
   const translate = toSectionTranslations(labels);
 
   return (
     <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-      <UserIdentityFields
-        register={register}
-        control={control}
-        errors={errors}
-        translate={translate}
-        hidePhone
-        onUploadAvatar={onUploadAvatar}
-      />
       <Grid size={{ xs: 12, md: 6 }}>
         <TextField
           {...register("nationalId")}
@@ -58,8 +50,11 @@ export function TeacherInfoSection({
           sx={outlinedInputSx}
         />
       </Grid>
-      <UserContactFields control={control} errors={errors} translate={translate} phoneRequired />
-      <UserPersonalFields register={register} control={control} errors={errors} translate={translate} />
+      <UserPersonalNationalityField register={register} control={control} errors={errors} translate={translate} />
+      <UserPersonalAddressField register={register} translate={translate} />
+      <UserPersonalDateOfBirthField control={control} errors={errors} translate={translate} />
+      <UserPersonalGenderField control={control} errors={errors} translate={translate} />
+      <UserPersonalQualificationsField register={register} translate={translate} />
     </Grid>
   );
 }

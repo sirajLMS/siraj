@@ -230,6 +230,7 @@ export const profileAr: ProfileLabels = {
       fullName: "الاسم الكامل",
       primaryEmail: "البريد الإلكتروني",
       phone: "رقم الهاتف",
+      timezone: "المنطقة الزمنية",
       roleName: "الدور",
       roleSlug: "معرّف الدور",
       department: "القسم",

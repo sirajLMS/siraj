@@ -1,6 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AppLanguagePothosObject,
+  CurrencyCodePothosObject,
   GenderPothosObject,
   IanaTimezonePothosObject,
   StudentStatusPothosObject,
@@ -34,6 +35,16 @@ export const StudentOnboardingInputPothosObject = gqlSchemaBuilder
       timezone: t.field({
         type: IanaTimezonePothosObject,
         description: "Student timezone (applied to the created user record)",
+      }),
+      phone: t.string({
+        required: false,
+        description: "Student phone (stored on users row)",
+        directives: { constraint: { maxLength: 512 } },
+      }),
+      displayCurrency: t.field({
+        type: CurrencyCodePothosObject,
+        required: false,
+        description: "User display currency",
       }),
       avatarUrl: t.string({
         required: false,

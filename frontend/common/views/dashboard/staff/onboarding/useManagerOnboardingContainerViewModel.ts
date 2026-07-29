@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
-import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone, ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { managerOnboardingSchema } from "@/frontend/common/views/dashboard/staff/onboarding/schemas/managerOnboardingSchema";
@@ -19,6 +19,8 @@ const defaultValues: ManagerOnboardingFormData = {
   email: "",
   avatarUrl: undefined,
   phone: "",
+  timezone: IanaTimezone.AfricaCairo,
+  displayCurrency: CurrencyCode.Usd,
   accountType: ManagerAccountType.Manager,
   password: "",
 };

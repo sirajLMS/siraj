@@ -18,6 +18,8 @@ export interface ManagerOnboardingInput {
   readonly avatarUrl?: string | null;
   readonly phone?: string | null;
   readonly accountType: ManagerAccountType;
+  readonly timezone?: string | null;
+  readonly displayCurrency?: string | null;
 }
 
 export interface ManagerOnboardingResult {
@@ -64,8 +66,9 @@ export namespace ManagerOnboardingService {
           ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         } satisfies UserCreateCoreInput,
         profileFields: {
-          // Manager phone lives on the `users` row.
           phone: input.phone,
+          timezone: input.timezone ?? undefined,
+          displayCurrency: input.displayCurrency ?? undefined,
         } satisfies UserCreateProfileFieldsInput,
         groupSlug: targetGroupSlug,
         preChecks: async () => {

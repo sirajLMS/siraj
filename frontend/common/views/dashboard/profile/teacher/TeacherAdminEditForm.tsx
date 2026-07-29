@@ -9,7 +9,7 @@ import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarIm
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
-import { ProfilePersonalSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection";
+import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
@@ -25,14 +25,6 @@ import {
   type TeacherEditData,
   teacherAdminEditSchema,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-
-const TEACHER_ADMIN_PERSONAL_FIELDS = {
-  nationality: true,
-  address: true,
-  dateOfBirth: true,
-  gender: true,
-  qualifications: true,
-} as const;
 
 type FieldScope = ReturnType<typeof useProfileFieldAccess>["canEdit"];
 
@@ -125,15 +117,15 @@ function TeacherFormSectionsGrid({ labels, teacherData, targetUserId, scope, can
         <CompensationSection labels={labels} mode="edit" register={form.register} control={form.control} />
       ) : null}
       {canEdit("teacher_identity") || canEdit("teacher_professional") ? (
-        <ProfilePersonalSection
+        <TeacherExtensionProfileSection
           mode="edit"
           scope={scope}
-          fieldGroupKey="teacher_identity"
-          qualificationsFieldGroupKey="teacher_professional"
+          labels={{
+            teacher: labels.teacher,
+            personalFieldLabels,
+            baseLabels: sectionLabels.baseLabels,
+          }}
           sectionTitle={labels.teacher.sections.identity}
-          fieldLabels={personalFieldLabels}
-          baseLabels={sectionLabels.baseLabels}
-          fields={TEACHER_ADMIN_PERSONAL_FIELDS}
           register={form.register}
           control={form.control}
         />

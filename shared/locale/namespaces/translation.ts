@@ -84,6 +84,7 @@ import { DashboardTeacherStudents } from "@/shared/locale/namespaces/dashboard/t
 import { DashboardTeacherWeeklySchedule } from "@/shared/locale/namespaces/dashboard/teachers/weeklySchedule.namespace";
 import { Emails } from "@/shared/locale/namespaces/emails/emails.namespace";
 import { Errors } from "@/shared/locale/namespaces/errors/errors.namespace";
+import { OnboardingUserEntity } from "@/shared/locale/namespaces/onboarding/userEntity.namespace";
 import { Notifications } from "@/shared/locale/namespaces/notifications/notifications.namespace";
 import { ProfileBase } from "@/shared/locale/namespaces/profile/base.namespace";
 import { ProfileNotifications } from "@/shared/locale/namespaces/profile/notifications.namespace";
@@ -117,6 +118,9 @@ export const Translation = {
   Session,
   Sms,
   Notifications,
+  Onboarding: {
+    UserEntity: OnboardingUserEntity,
+  },
   Profile: {
     Base: ProfileBase,
     Teacher: ProfileTeacher,

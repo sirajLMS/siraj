@@ -2321,10 +2321,12 @@ type ManagerOnboarding {
 input ManagerOnboardingInput {
   accountType: ManagerAccountType!
   avatarUrl: String
+  displayCurrency: CurrencyCode
   email: String!
   name: String!
   password: String!
   phone: String
+  timezone: IanaTimezone
 }
 
 """Result of manager onboarding operation"""
@@ -2955,6 +2957,7 @@ input ParentOnboardingInput {
   address: String
   avatarUrl: String
   currency: CurrencyCode
+  displayCurrency: CurrencyCode
   email: Email!
   facebook: String
   feeAmount: String
@@ -3968,6 +3971,9 @@ input StudentOnboardingInput {
   classesTotal: Int
   dateOfBirth: DateTime
 
+  """User display currency"""
+  displayCurrency: CurrencyCode
+
   """Student login email (creates a users row when provided)"""
   email: String
   gender: Gender
@@ -3977,6 +3983,9 @@ input StudentOnboardingInput {
 
   """Student login password (required when email is provided)"""
   password: String
+
+  """Student phone (stored on users row)"""
+  phone: String
   primaryTeacherId: String
   status: StudentStatus
 
@@ -4000,6 +4009,7 @@ type StudentProfile {
   classesTotal: Int
   createdAt: DateTime
   dateOfBirth: DateTime
+  displayCurrency: CurrencyCode
   email: String
   gender: Gender
   hoursPerWeek: Float
@@ -4017,6 +4027,7 @@ type StudentProfile {
   status: StudentStatus
   teacherName: String
   teacherUserId: String
+  timezone: IanaTimezone
   timezoneOverride: String
   upcomingClasses: StudentUpcomingClassesResult
   updatedAt: DateTime
@@ -4026,10 +4037,12 @@ type StudentProfile {
 input StudentProfileEditInput {
   avatarUrl: String
   dateOfBirth: DateTime
+  displayCurrency: CurrencyCode
   gender: Gender
   language: AppLanguage
   parentPhone: String
   phone: String
+  timezone: String
   timezoneOverride: String
 }
 
@@ -4647,6 +4660,7 @@ input TeacherOnboardingInput {
 
   """Teacher date of birth (ISO date string)"""
   dateOfBirth: String
+  displayCurrency: CurrencyCode
 
   """Teacher email address"""
   email: Email!
@@ -4837,6 +4851,7 @@ type UnifiedProfile {
   parentOwnProfile: ParentOwnProfile
   paymentMethodDefaults: PaymentMethodDefaults
   paymentMethods: [UserPaymentMethod!]
+  phone: String
   scope: ProfileScope
   staffPermissionGroups: [StaffPermissionGroup!]
   staffPermissionOverrides: [StaffPermissionOverride!]
@@ -4845,6 +4860,7 @@ type UnifiedProfile {
   teacherAdminProfile: TeacherProfileResult
   teacherId: String
   teacherOwnProfile: TeacherOwnProfile
+  timezone: IanaTimezone
   userId: String
 }
 

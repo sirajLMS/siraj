@@ -28,6 +28,7 @@ export interface ParentOnboardingInput {
   readonly initialPayinMethod?: Omit<UserPaymentMethodSubmitInput, "userId"> | null;
   readonly currency?: CurrencyCode | null;
   readonly timezone?: string | null;
+  readonly displayCurrency?: CurrencyCode | null;
   readonly status?: string | null;
 }
 
@@ -59,9 +60,9 @@ export namespace ParentOnboardingService {
           ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
         } satisfies UserCreateCoreInput,
         profileFields: {
-          // Parent phone lives on the `users` row.
           phone: input.phone,
           timezone: input.timezone,
+          displayCurrency: input.displayCurrency ?? undefined,
         } satisfies UserCreateProfileFieldsInput,
         // Parent flow writes UTC when no timezone was provided.
         writeDefaultTimezone: true,

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import {
   type CurrencyCode,
   type ProfileMode,
+  type IanaTimezone,
   ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
@@ -35,6 +36,8 @@ export interface StaffProfileViewModel {
   readonly staffData: StaffProfileData;
   readonly avatarUrl: string | null | undefined;
   readonly displayCurrency: CurrencyCode | null | undefined;
+  readonly profileTimezone: string | null | undefined;
+  readonly profilePhone: string | null | undefined;
   readonly isAdminScope: boolean;
   readonly targetUserId: string;
   readonly meetingTabHref: string;
@@ -82,6 +85,8 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
   const staffData = buildEditSource(scope, profile ?? ({} as ProfileData));
   const avatarUrl = profile?.avatarUrl ?? staffData?.avatarUrl;
   const displayCurrency = profile?.displayCurrency;
+  const profileTimezone = profile?.timezone ?? null;
+  const profilePhone = profile?.phone ?? null;
 
   const onSubmitOwn = async (formData: StaffOwnEditFormData) => {
     setIsSaving(true);
@@ -94,6 +99,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
               email: formData.email,
               avatarUrl: formData.avatarUrl,
               displayCurrency: formData.displayCurrency,
+              timezone: (formData.timezone || null) as IanaTimezone | null,
             },
             staff: {
               phone: formData.phone || null,
@@ -122,8 +128,10 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
               email: formData.email,
               avatarUrl: formData.avatarUrl,
               displayCurrency: formData.displayCurrency,
+              timezone: (formData.timezone || null) as IanaTimezone | null,
             },
             staff: {
+              phone: formData.phone || null,
               status: formData.status ?? null,
               hourlyRate: formData.hourlyRate || null,
               rateCurrency: formData.rateCurrency ?? null,
@@ -151,6 +159,8 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
     staffData: staffData as StaffProfileData,
     avatarUrl,
     displayCurrency,
+    profileTimezone,
+    profilePhone,
     isAdminScope,
     targetUserId,
     meetingTabHref: "?tab=meeting",

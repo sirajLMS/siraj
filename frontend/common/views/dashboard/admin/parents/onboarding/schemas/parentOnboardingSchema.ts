@@ -32,6 +32,7 @@ export const parentOnboardingSchema = z
       .string()
       .min(1, "timezoneRequired")
       .refine(value => isValidIanaTimezoneId(value), { message: "timezoneRequired" }),
+    displayCurrency: z.enum(CurrencyCode).optional().nullable(),
     meetingProvider: z.custom<MeetingProviderFieldsFragment | null>().nullable().optional(),
     meetingUrl: z.string().optional(),
     meetingLabel: z.string().optional(),

@@ -44,6 +44,7 @@ export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
       initialPayinMethod: t.field({ type: UserPaymentMethodInitialInputPothos, required: false }),
       currency: t.field({ type: CurrencyCodePothosObject }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
+      displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
     }),
   });
 

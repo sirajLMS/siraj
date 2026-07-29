@@ -6,6 +6,7 @@ import {
   UserRepository,
 } from "@/backend/db";
 import { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import {
   ManagerProfileService,
   ParentPortalService,
@@ -517,6 +518,8 @@ export namespace ProfileService {
         paymentMethodDefaults,
         assignedStudents,
         displayCurrency: user.displayCurrency,
+        timezone: user.timezone as IanaTimezone,
+        phone: user.phone,
       },
       filterCtx
     );

@@ -109,7 +109,15 @@ export function ProfilePageClient(props: Readonly<ProfilePageClientProps>) {
       return <ParentProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
     }
     if (audience === PROFILE_AUDIENCE_STUDENT) {
-      return <StudentProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
+      return (
+        <StudentProfileContainer
+          scope={scope}
+          mode={mode}
+          targetUserId={targetUserId}
+          studentId={props.studentId}
+          activeTab={activeTab}
+        />
+      );
     }
     return <StaffProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
   }

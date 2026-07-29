@@ -617,6 +617,8 @@ export namespace StudentRepository {
     readonly name: string;
     readonly email: string | null;
     readonly phone: string | null;
+    readonly timezone: string | null;
+    readonly displayCurrency: string | null;
     readonly status: StudentStatus;
     readonly avatarUrl: string | null;
     readonly dateOfBirth: Date | null;
@@ -650,6 +652,8 @@ export namespace StudentRepository {
         name: students.name,
         email: studentUser.email,
         phone: studentUser.phone,
+        timezone: studentUser.timezone,
+        displayCurrency: studentUser.displayCurrency,
         status: students.status,
         avatarUrl: students.avatarUrl,
         dateOfBirth: students.dateOfBirth,
@@ -686,6 +690,8 @@ export namespace StudentRepository {
       name: row.name,
       email: row.email,
       phone: row.phone,
+      timezone: row.timezone,
+      displayCurrency: row.displayCurrency,
       status: parseStudentStatus(row.status) ?? StudentStatus.REGULAR,
       avatarUrl: row.avatarUrl,
       dateOfBirth: row.dateOfBirth,

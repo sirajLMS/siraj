@@ -56,6 +56,7 @@ export function TeacherProfileEditForm({
       phone: "",
       nationalId: "",
       nationality: "",
+      timezone: "",
       displayCurrency: null,
     },
   });
@@ -68,6 +69,7 @@ export function TeacherProfileEditForm({
       phone: teacherData.phone ?? "",
       nationalId: teacherData.nationalId ?? "",
       nationality: teacherData.nationality ?? "",
+      timezone: teacherData.timezone ?? "",
       displayCurrency: teacherData.displayCurrency ?? null,
     });
   }, [form, teacherData]);

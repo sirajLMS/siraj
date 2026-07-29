@@ -1,8 +1,10 @@
 import { create } from "zustand";
-import type { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface StudentPortalProfileEditDraft {
   readonly phone: string;
+  readonly timezone: string;
+  readonly displayCurrency: CurrencyCode | "";
   readonly dateOfBirth: string;
   readonly gender: Gender | "";
   readonly language: AppLanguage | "";
@@ -31,6 +33,8 @@ export interface StudentPortalProfileState {
 
 const EMPTY_DRAFT: StudentPortalProfileEditDraft = {
   phone: "",
+  timezone: "",
+  displayCurrency: "",
   dateOfBirth: "",
   gender: "",
   language: "",
