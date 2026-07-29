@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowBackOutlined,
   CalendarToday,
   ChevronLeft,
   ChevronRight,
@@ -13,10 +12,12 @@ import {
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, type Theme, Typography } from "@mui/material";
 import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { scheduleOverviewCardShellSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import {
   MobileCardList,
+  MobileCardListItem,
   MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
@@ -183,33 +184,15 @@ function HistorySessionList({
       rows={listRows}
       emptyMessage={labels.noHistory}
       getKey={row => row.id}
+      gap={0}
+      layout="edge-to-edge"
       paginationOptions={{ mode: "client" }}
       renderItem={row => (
-        <HistorySessionCardMobile row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
+        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
+          <HistorySessionCardMobile row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
+        </MobileCardListItem>
       )}
     />
-  );
-}
-
-function BackToDashboardButton({
-  labels,
-  onBackToDashboard,
-}: Readonly<{
-  labels: StudentHistoryViewModel["labels"];
-  onBackToDashboard: () => void;
-}>): React.ReactNode {
-  return (
-    <MobileContentInset>
-      <Button
-        variant="outlined"
-        fullWidth
-        startIcon={<ArrowBackOutlined />}
-        sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
-        onClick={onBackToDashboard}
-      >
-        {labels.backToDashboard}
-      </Button>
-    </MobileContentInset>
   );
 }
 
@@ -229,7 +212,6 @@ export function StudentHistoryMobileView({
   labels,
   locale,
   loading,
-  onBackToDashboard,
   onOpenMeetingUrl,
   onPrevMonth,
   onNextMonth,
@@ -296,8 +278,6 @@ export function StudentHistoryMobileView({
           />
           <HistorySessionList listRows={listRows} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
         </MobileSectionPanel>
-
-        <BackToDashboardButton labels={labels} onBackToDashboard={onBackToDashboard} />
       </MobileContentStack>
     </MobilePageContainer>
   );

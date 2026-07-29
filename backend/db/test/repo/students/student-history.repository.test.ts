@@ -57,7 +57,7 @@ describe("StudentHistoryRepository", () => {
       const entry = calendar[0];
       expect(entry.id).toBe(juneClass.id);
       expect(entry.dayOfMonth).toBe(15);
-      expect(entry.time).toBe("14:30");
+      expect(entry.time).toBe(juneClass.scheduledStartAt.toISOString());
       expect(entry.duration).toBe(60);
       expect(entry.instructor).toBe(teacherUser.name);
       expect(entry.room).toBe("https://zoom.us/j/123");

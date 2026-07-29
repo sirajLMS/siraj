@@ -13,7 +13,7 @@ import {
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { formatDate, formatTime } from "@/frontend/common/components/intl/dateFormat";
+import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { classHref } from "@/frontend/common/utils/profileHref";
@@ -65,23 +65,8 @@ function buildColumns(
       headerName: labels.sessionDate,
       flex: 1,
       minWidth: 140,
-      renderCell: ({ row }) => {
-        if (!row.time) {
-          return "—";
-        }
-        try {
-          return (
-            <Stack spacing={0.25}>
-              <Typography variant="bodyMd">{formatDate(row.time, locale)}</Typography>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {formatTime(row.time, locale)}
-              </Typography>
-            </Stack>
-          );
-        } catch {
-          return row.time;
-        }
-      },
+      valueGetter: (_, row) => row.time,
+      renderCell: ({ row }) => <DateTimeTooltipDisplay value={row.time} locale={locale} />,
     },
     {
       field: "instructor",

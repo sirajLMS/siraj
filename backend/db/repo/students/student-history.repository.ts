@@ -48,7 +48,7 @@ export namespace StudentHistoryRepository {
       return {
         id: r.instance.id,
         title: "Class Session", // Fallback, would normally resolve course name if courses table existed
-        time: `${hh}:${mm}`,
+        time: date.toISOString(),
         duration: r.instance.durationMinutes,
         status: r.instance.executionState,
         outcome: r.instance.outcome,

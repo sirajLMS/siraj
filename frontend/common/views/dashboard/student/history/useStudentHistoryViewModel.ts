@@ -22,7 +22,6 @@ import {
   mapStudentHistoryMetrics,
   mapStudentHistorySessions,
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryMappers";
-import { useRouter } from "@/shared/i18n/navigation";
 import {
   type StudentPortalHistoryLabels as StudentHistoryLabels,
   Translation,
@@ -90,7 +89,6 @@ export interface StudentHistoryViewModel {
   readonly labels: StudentHistoryLabels;
   readonly locale: string;
   readonly loading: boolean;
-  readonly onBackToDashboard: () => void;
   readonly onOpenMeetingUrl: (url: string | null | undefined) => void;
   readonly onPrevMonth: () => void;
   readonly onNextMonth: () => void;
@@ -103,18 +101,15 @@ export interface StudentHistoryViewModel {
 export type UseStudentHistoryViewModelProps = Record<string, never>;
 
 interface StudentHistoryNavigation {
-  readonly onBackToDashboard: () => void;
   readonly onOpenMeetingUrl: (url: string | null | undefined) => void;
 }
 
 function useStudentHistoryNavigation(): StudentHistoryNavigation {
-  const router = useRouter();
   return useMemo(
     () => ({
-      onBackToDashboard: () => router.push("/dashboard"),
       onOpenMeetingUrl: (url: string | null | undefined) => safeOpenWindow(url),
     }),
-    [router]
+    []
   );
 }
 
@@ -180,8 +175,8 @@ function useStudentClassHistory(studentId: string | null, year: number, month: n
   );
 
   const sessions: readonly StudentHistorySessionRow[] = useMemo(
-    () => mapStudentHistorySessions(historyData?.studentClassHistory?.sessions ?? null),
-    [historyData]
+    () => mapStudentHistorySessions(historyData?.studentClassHistory?.sessions ?? null, year, month),
+    [historyData, year, month]
   );
 
   return { historyLoading, metrics, sessions };
@@ -235,7 +230,6 @@ export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelPro
     labels,
     locale,
     loading,
-    onBackToDashboard: navigation.onBackToDashboard,
     onOpenMeetingUrl: navigation.onOpenMeetingUrl,
     onPrevMonth: dates.goPrevMonth,
     onNextMonth: dates.goNextMonth,

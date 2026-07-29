@@ -2,9 +2,9 @@
 
 import { Box, Tooltip, Typography, type TypographyProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { formatDate, formatTime } from "@/frontend/common/components/intl/dateFormat";
+import { formatDate, formatTime, parseDateInput } from "@/frontend/common/components/intl/dateFormat";
 
-type DateTimeTooltipTone = "default" | "highlight" | "meta";
+type DateTimeTooltipTone = "default" | "highlight" | "meta" | "muted";
 
 interface DateTimeTooltipDisplayProps {
   readonly value: string | null | undefined;
@@ -37,6 +37,8 @@ function getDisplaySx(tone: DateTimeTooltipTone): SxProps<Theme> {
         display: "block",
         textAlign: "center",
       });
+    case "muted":
+      return theme => ({ color: theme.palette.onSurfaceVariant, cursor: "default" });
     default:
       return theme => ({ color: theme.palette.onSurface, cursor: "default" });
   }
@@ -70,8 +72,17 @@ export function DateTimeTooltipDisplay({
     );
   }
 
-  const dateLabel = formatDate(value, locale);
-  const timeLabel = formatTime(value, locale);
+  const parsed = parseDateInput(value);
+  if (!parsed) {
+    return (
+      <Typography variant={variant} sx={displaySx}>
+        {value.trim() || emptyFallback}
+      </Typography>
+    );
+  }
+
+  const dateLabel = formatDate(parsed, locale);
+  const timeLabel = formatTime(parsed, locale);
 
   return (
     <Tooltip
