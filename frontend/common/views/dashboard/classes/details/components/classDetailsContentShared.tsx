@@ -7,7 +7,11 @@ import type { ClassDetailsContentSharedProps } from "@/frontend/common/views/das
 import { useLocalizedClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useLocalizedClassInstance";
 import { ClassDetailsStudentView } from "@/frontend/common/views/dashboard/classes/details/student/ClassDetailsStudentView";
 import { ClassDetailsTeacherView } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
-import type { AdminViewProps, StudentViewProps, TeacherViewProps } from "@/frontend/common/views/dashboard/classes/details/types";
+import type {
+  AdminViewProps,
+  StudentViewProps,
+  TeacherViewProps,
+} from "@/frontend/common/views/dashboard/classes/details/types";
 import {
   useAdminViewLabels,
   useStudentViewLabels,
@@ -113,12 +117,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
 
   return (
     <>
-      <Header
-        instance={instance}
-        canOverride={canOverride}
-        isStudentView={isStudentView}
-        labels={headerLabels}
-      />
+      <Header instance={instance} canOverride={canOverride} isStudentView={isStudentView} labels={headerLabels} />
       <ActionFeedbackAlert feedbackState={feedbackState} />
       {viewContent}
       <DeleteConfirmationDialog

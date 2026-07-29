@@ -94,10 +94,7 @@ interface ClassInstanceDetailsHeaderProps {
 function ClassInstanceDetailsHeader({ title }: ClassInstanceDetailsHeaderProps) {
   return (
     <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}>
-      <StyledCardHeading
-        variant="headlineMd"
-        sx={theme => ({ color: theme.palette.onSurface, gap: theme.spacing(1) })}
-      >
+      <StyledCardHeading variant="headlineMd" sx={theme => ({ color: theme.palette.onSurface, gap: theme.spacing(1) })}>
         <StyledHeadingInfoIcon sx={theme => ({ color: theme.palette.onSurfaceVariant })} />
         {title}
       </StyledCardHeading>

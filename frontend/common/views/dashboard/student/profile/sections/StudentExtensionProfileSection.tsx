@@ -10,7 +10,7 @@ import { AppDatePicker } from "@/frontend/common/components/ui/form";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLanguageByCode } from "@/frontend/common/lib/locale";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";

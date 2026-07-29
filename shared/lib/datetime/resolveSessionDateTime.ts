@@ -2,12 +2,7 @@
  * Normalizes student-history session `time` values into ISO datetimes.
  * The API historically returned `HH:mm`; newer responses may already be ISO.
  */
-export function resolveSessionDateTime(
-  time: string,
-  year: number,
-  month: number,
-  dayOfMonth: number
-): string {
+export function resolveSessionDateTime(time: string, year: number, month: number, dayOfMonth: number): string {
   const trimmed = time.trim();
   if (!trimmed) {
     return time;

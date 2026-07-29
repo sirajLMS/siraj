@@ -1,7 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
-import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import {
   type ClassInstanceAffectedUsers,
   classLifecycleAffectedUserIds,
@@ -9,6 +8,7 @@ import {
 } from "@/backend/db/repo/scheduling";
 import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
+import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, type CurrencyCode, NotificationEventType } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { logger } from "@/backend/lib/logger";
@@ -92,10 +92,7 @@ export namespace ClassSessionService {
     instance: ClassInstanceForViewAccess,
     tErrors: ErrorsLabels
   ): Promise<void> {
-    const hasSessionViewDetails = await PermissionsService.hasPermission(
-      userId,
-      AppPermission.SESSION_VIEW_DETAILS
-    );
+    const hasSessionViewDetails = await PermissionsService.hasPermission(userId, AppPermission.SESSION_VIEW_DETAILS);
     if (hasSessionViewDetails) {
       await assertClassInstanceViewAccess(userId, instance, tErrors);
       return;

@@ -74,7 +74,7 @@ function DateTabNavMobile({
 
   useEffect(() => {
     activeTabRef.current?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  }, [activeTab]);
+  }, []);
 
   return (
     <Box

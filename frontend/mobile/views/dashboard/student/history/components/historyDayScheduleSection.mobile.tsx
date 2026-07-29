@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
 import { Typography } from "@mui/material";
+import { useMemo } from "react";
 import { scheduleOverviewCardShellSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";

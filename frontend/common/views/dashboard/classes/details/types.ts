@@ -100,7 +100,7 @@ export interface TeacherViewProps extends CommonViewProps {
   readonly onInfoEdit: () => void;
 }
 
-export interface StudentViewProps extends CommonViewProps {}
+export type StudentViewProps = CommonViewProps;
 
 // NEW FOR PLAN v5: lifted from classDetailsContent.{mobile,desktop}.tsx inline declaration
 // specs.md §4.1 Class-B unified shape (mobile/desktop content bodies were identical).

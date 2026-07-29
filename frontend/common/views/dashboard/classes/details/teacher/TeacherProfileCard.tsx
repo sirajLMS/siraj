@@ -3,9 +3,9 @@
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/common/components/ui";
-import { TeacherEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
-import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { ClassInstanceTeacherInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
+import { TeacherEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import { Link } from "@/shared/i18n";
 
 interface TeacherProfileCardProps {

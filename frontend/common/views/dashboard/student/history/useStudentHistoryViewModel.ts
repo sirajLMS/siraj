@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import {
   useStudentPortalClassHistory,
   useStudentPortalDerivedSessionData,
@@ -11,7 +10,10 @@ import {
   useStudentPortalHistoryNavigation,
   useStudentPortalProfile,
 } from "@/frontend/common/views/dashboard/student/history/hooks/useStudentPortalHistoryData";
-import type { StudentHistoryMetrics } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
+import type {
+  StudentHistoryMetrics,
+  StudentHistorySessionRow,
+} from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import { collectDaysWithSessions } from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryFilters";
 import {
   type StudentPortalHistoryLabels as StudentHistoryLabels,
@@ -62,17 +64,13 @@ function useStudentHistoryLabels(t: StudentHistoryLabels): StudentHistoryLabels 
   );
 }
 
-function resolveEffectiveSelectedDay(
-  selectedDay: number | null,
-  currentMonth: Date
-): number {
+function resolveEffectiveSelectedDay(selectedDay: number | null, currentMonth: Date): number {
   if (selectedDay != null) {
     return selectedDay;
   }
 
   const now = new Date();
-  const isCurrentMonth =
-    now.getFullYear() === currentMonth.getFullYear() && now.getMonth() === currentMonth.getMonth();
+  const isCurrentMonth = now.getFullYear() === currentMonth.getFullYear() && now.getMonth() === currentMonth.getMonth();
 
   if (isCurrentMonth) {
     return now.getDate();
@@ -111,6 +109,7 @@ export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelPro
 
   const dates = useStudentPortalHistoryDates(locale);
   const filters = useStudentPortalHistoryFilters();
+  const { setSelectedDay } = filters;
   const navigation = useStudentPortalHistoryNavigation();
   const { studentId, profileLoading } = useStudentPortalProfile();
   const { historyLoading, metrics, sessions } = useStudentPortalClassHistory(studentId, dates.year, dates.month);
@@ -134,10 +133,10 @@ export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelPro
     (dayId: string) => {
       const day = Number.parseInt(dayId, 10);
       if (!Number.isNaN(day)) {
-        filters.setSelectedDay(day);
+        setSelectedDay(day);
       }
     },
-    [filters.setSelectedDay]
+    [setSelectedDay]
   );
 
   return {

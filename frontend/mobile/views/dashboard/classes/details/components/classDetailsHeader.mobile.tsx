@@ -6,7 +6,12 @@ import type { ClassDetailsHeaderProps } from "@/frontend/common/views/dashboard/
 import { getLocalizedClassTypeName } from "@/frontend/common/views/dashboard/classes/details/utils/localizedClassTypeName";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 
-export function ClassDetailsHeaderMobile({ instance, canOverride, isStudentView, labels }: Readonly<ClassDetailsHeaderProps>) {
+export function ClassDetailsHeaderMobile({
+  instance,
+  canOverride,
+  isStudentView,
+  labels,
+}: Readonly<ClassDetailsHeaderProps>) {
   const title = getLocalizedClassTypeName(instance.classType, labels.classTypes, instance.courseName);
   const subtitle = canOverride
     ? labels.pageSubtitleAdmin
@@ -16,12 +21,7 @@ export function ClassDetailsHeaderMobile({ instance, canOverride, isStudentView,
 
   return (
     <Box sx={classDetailsContentPaddingSx}>
-      <MobilePageHeader
-        title={title}
-        subtitle={subtitle}
-        titleVariant="headlineMd"
-        breadcrumbs={undefined}
-      />
+      <MobilePageHeader title={title} subtitle={subtitle} titleVariant="headlineMd" breadcrumbs={undefined} />
     </Box>
   );
 }

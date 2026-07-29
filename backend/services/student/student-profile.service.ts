@@ -186,8 +186,9 @@ export namespace StudentProfileService {
     tErrors: ErrorsLabels,
     locale?: string
   ): Promise<StudentProfileReturnType> {
-    const targetStudentId =
-      input.studentId?.trim() ? input.studentId.trim() : await resolveOwnStudentId(actorUserId, tErrors);
+    const targetStudentId = input.studentId?.trim()
+      ? input.studentId.trim()
+      : await resolveOwnStudentId(actorUserId, tErrors);
 
     const profile = await StudentRepository.findProfileById(targetStudentId);
     if (!profile) {
@@ -206,13 +207,7 @@ export namespace StudentProfileService {
 
     const isAssociatedViewer = isOwnProfile || (await resolveIsAssociatedViewer(actorUserId, targetStudentId));
 
-    await assertCanEditSubmittedGroups(
-      actorUserId,
-      targetStudentId,
-      isAssociatedViewer,
-      submittedGroups,
-      tErrors
-    );
+    await assertCanEditSubmittedGroups(actorUserId, targetStudentId, isAssociatedViewer, submittedGroups, tErrors);
     await applyStudentProfileEdit(profile.userId, targetStudentId, profile, input, tErrors, locale);
 
     return getProfile(actorUserId, targetStudentId, tErrors, {});

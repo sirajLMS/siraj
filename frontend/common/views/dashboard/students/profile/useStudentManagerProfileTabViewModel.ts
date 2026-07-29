@@ -5,9 +5,9 @@ import { useCallback, useState } from "react";
 import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { recordStudentProfileEditMutationDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
-import {
-  type StudentPortalProfileEditDraft,
-  type StudentPortalProfileSnackbar,
+import type {
+  StudentPortalProfileEditDraft,
+  StudentPortalProfileSnackbar,
 } from "@/frontend/common/stores/studentPortalProfileStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";

@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import {
   useStudentPortalClassHistory,
   useStudentPortalDerivedSessionData,
@@ -11,11 +10,8 @@ import {
   useStudentPortalHistoryNavigation,
   useStudentPortalProfile,
 } from "@/frontend/common/views/dashboard/student/history/hooks/useStudentPortalHistoryData";
-import {
-  type StudentPortalSessionsLabels,
-  Translation,
-  useAppTranslation,
-} from "@/shared/locale";
+import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
+import { type StudentPortalSessionsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function useStudentSessionsLabels(t: StudentPortalSessionsLabels): StudentPortalSessionsLabels {
   return useMemo(

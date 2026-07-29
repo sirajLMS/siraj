@@ -55,8 +55,8 @@ import { DashboardStaffOnboarding } from "@/shared/locale/namespaces/dashboard/s
 import { DashboardStudentPortalCredits } from "@/shared/locale/namespaces/dashboard/studentPortal/credits.namespace";
 import { DashboardStudentPortalDashboard } from "@/shared/locale/namespaces/dashboard/studentPortal/dashboard.namespace";
 import { DashboardStudentPortalHistory } from "@/shared/locale/namespaces/dashboard/studentPortal/history.namespace";
-import { DashboardStudentPortalSessions } from "@/shared/locale/namespaces/dashboard/studentPortal/sessions.namespace";
 import { DashboardStudentPortalProfile } from "@/shared/locale/namespaces/dashboard/studentPortal/profile.namespace";
+import { DashboardStudentPortalSessions } from "@/shared/locale/namespaces/dashboard/studentPortal/sessions.namespace";
 import { DashboardStudentDirectory } from "@/shared/locale/namespaces/dashboard/students/directory.namespace";
 import { DashboardStudentHistory } from "@/shared/locale/namespaces/dashboard/students/history.namespace";
 import { DashboardStudentOnboarding } from "@/shared/locale/namespaces/dashboard/students/onboarding.namespace";

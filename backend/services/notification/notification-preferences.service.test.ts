@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
-import { AppPermission, NotificationChannel, NotificationEventType, UserRole } from "@/backend/enum";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
+import { AppPermission, NotificationChannel, NotificationEventType, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
 import {
