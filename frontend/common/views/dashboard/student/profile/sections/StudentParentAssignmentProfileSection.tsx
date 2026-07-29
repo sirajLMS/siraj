@@ -7,7 +7,6 @@ import { Stack, TextField } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDisplay/PhoneDisplay";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
-import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type {
   StudentProfileEditableSectionProps,
   StudentProfileSectionBaseProps,
@@ -27,20 +26,16 @@ export function StudentParentAssignmentProfileSection({
   draft,
   onDraftChange,
 }: Readonly<StudentParentAssignmentProfileSectionProps>) {
-  const { canView, showField } = useStudentFieldAccess();
+  const { canView, canViewField } = useStudentFieldAccess();
   const canViewParent = enforceFieldAccess ? canView("student_parent") : true;
 
   if (!canViewParent) {
     return null;
   }
 
-  if (!profile.parentName && !isEditing) {
-    return null;
-  }
-
-  const showParentName = enforceFieldAccess ? showField(profile.parentName, "student_parent") : true;
-  const showParentEmail = enforceFieldAccess ? showField(profile.parentEmail, "student_parent") : true;
-  const showParentPhone = enforceFieldAccess ? showField(profile.parentPhone, "student_parent") : true;
+  const showParentName = enforceFieldAccess ? canViewField("student_parent") : true;
+  const showParentEmail = enforceFieldAccess ? canViewField("student_parent") : true;
+  const showParentPhone = enforceFieldAccess ? canViewField("student_parent") : true;
 
   if (isEditing && draft && onDraftChange) {
     return (
@@ -58,10 +53,6 @@ export function StudentParentAssignmentProfileSection({
         </Stack>
       </SectionPanel>
     );
-  }
-
-  if (enforceFieldAccess && !showParentName && !showParentEmail && !showParentPhone) {
-    return <ProfileRestrictedSection title={sectionTitle} />;
   }
 
   return (

@@ -11,7 +11,6 @@ import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSe
 import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
-import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type {
   StudentProfileEditableSectionProps,
   StudentProfileSectionBaseProps,
@@ -36,7 +35,7 @@ export function StudentExtensionProfileSection({
   formattedDateOfBirth,
   timezoneOverrideLabel,
 }: Readonly<StudentExtensionProfileSectionProps>) {
-  const { canView, showField } = useStudentFieldAccess();
+  const { canView, canViewField } = useStudentFieldAccess();
   const canViewIdentity = enforceFieldAccess ? canView("student_identity") : true;
 
   if (!canViewIdentity) {
@@ -44,11 +43,11 @@ export function StudentExtensionProfileSection({
   }
 
   const dateOfBirthDisplay = formattedDateOfBirth ?? profile.dateOfBirth ?? notSetLabel;
-  const showDateOfBirth = enforceFieldAccess ? showField(profile.dateOfBirth, "student_identity") : true;
-  const showGender = enforceFieldAccess ? showField(profile.gender, "student_identity") : true;
-  const showLanguage = enforceFieldAccess ? showField(profile.language, "student_identity") : true;
+  const showDateOfBirth = enforceFieldAccess ? canViewField("student_identity") : true;
+  const showGender = enforceFieldAccess ? canViewField("student_identity") : true;
+  const showLanguage = enforceFieldAccess ? canViewField("student_identity") : true;
   const showTimezoneOverride = enforceFieldAccess
-    ? showField(profile.timezoneOverride, "student_identity")
+    ? canViewField("student_identity")
     : Boolean(timezoneOverrideLabel);
 
   if (isEditing && draft && onDraftChange) {
@@ -108,10 +107,6 @@ export function StudentExtensionProfileSection({
         </Stack>
       </SectionPanel>
     );
-  }
-
-  if (enforceFieldAccess && !showDateOfBirth && !showGender && !showLanguage && !showTimezoneOverride) {
-    return <ProfileRestrictedSection title={sectionTitle} />;
   }
 
   return (

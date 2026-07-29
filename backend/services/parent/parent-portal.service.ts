@@ -46,7 +46,7 @@ export namespace ParentPortalService {
   }
 
   export async function getOwnProfile(userId: string, locale?: string): Promise<ParentOwnProfileReturnType> {
-    await assertPermission(userId, AppPermission.PARENT_VIEW_OWN_PROFILE, locale);
+    await assertPermission(userId, AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN, locale);
     const parent = await resolveParentForUser(userId, locale);
     const profile = await ParentRepository.getParentProfile(parent.id);
     if (!profile) {

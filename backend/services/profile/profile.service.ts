@@ -89,126 +89,22 @@ export function toParentRepoInput(
   };
 }
 
-type OwnScopePermissionSet = {
-  readonly authPermission: AppPermission;
-  readonly audiencePermissions: Partial<Record<ProfileAudience, AppPermission>>;
-  readonly audienceBypass: ProfileAudience[];
-};
-
-type OtherScopePermissionSet = {
-  readonly genericPermission: AppPermission;
-  readonly audiencePermissions: Partial<Record<ProfileAudience, AppPermission>>;
-};
-
-const VIEW_OWN_PERMISSIONS: OwnScopePermissionSet = {
-  authPermission: AppPermission.AUTH_VIEW_OWN_PROFILE,
-  audiencePermissions: {
-    [ProfileAudience.TEACHER]: AppPermission.TEACHER_VIEW_OWN_PROFILE,
-    [ProfileAudience.PARENT]: AppPermission.PARENT_VIEW_OWN_PROFILE,
-  },
-  audienceBypass: [ProfileAudience.STAFF, ProfileAudience.STUDENT],
-};
-
-const VIEW_OTHER_PERMISSIONS: OtherScopePermissionSet = {
-  genericPermission: AppPermission.USER_VIEW_PROFILE,
-  audiencePermissions: {
-    [ProfileAudience.PARENT]: AppPermission.PARENT_VIEW_PROFILE,
-    [ProfileAudience.TEACHER]: AppPermission.TEACHER_VIEW_PROFILE,
-  },
-};
-
-const EDIT_OWN_PERMISSIONS: OwnScopePermissionSet = {
-  authPermission: AppPermission.AUTH_EDIT_OWN_PROFILE,
-  audiencePermissions: {
-    [ProfileAudience.TEACHER]: AppPermission.TEACHER_EDIT_OWN_PROFILE,
-    [ProfileAudience.PARENT]: AppPermission.PARENT_EDIT_OWN_PROFILE,
-  },
-  audienceBypass: [ProfileAudience.STAFF, ProfileAudience.STUDENT],
-};
-
-const EDIT_OTHER_PERMISSIONS: OtherScopePermissionSet = {
-  genericPermission: AppPermission.USER_EDIT_PROFILE,
-  audiencePermissions: {
-    [ProfileAudience.PARENT]: AppPermission.PARENTS_EDIT,
-    [ProfileAudience.TEACHER]: AppPermission.STAFF_EDIT_PROFILE,
-    [ProfileAudience.STAFF]: AppPermission.STAFF_EDIT_PROFILE,
-  },
-};
-
-async function hasAudiencePermission(
-  actorUserId: string,
+function getProfilePermissionsForAudience(
   audience: ProfileAudience,
-  audiencePermissions: Partial<Record<ProfileAudience, AppPermission>>
-): Promise<boolean> {
-  const audiencePerm = audiencePermissions[audience];
-  if (audiencePerm === undefined) {
-    return false;
-  }
-  return PermissionsService.hasPermission(actorUserId, audiencePerm);
-}
-
-async function checkOwnScopePermission(
-  actorUserId: string,
-  audience: ProfileAudience,
-  permissionSet: OwnScopePermissionSet
-): Promise<boolean> {
-  const hasAuth = await PermissionsService.hasPermission(actorUserId, permissionSet.authPermission);
-  if (!hasAuth) {
-    return false;
-  }
-  if (permissionSet.audienceBypass.includes(audience)) {
-    return true;
-  }
-  return hasAudiencePermission(actorUserId, audience, permissionSet.audiencePermissions);
-}
-
-async function checkOtherScopePermission(
-  actorUserId: string,
-  audience: ProfileAudience,
-  permissionSet: OtherScopePermissionSet
-): Promise<boolean> {
-  const hasGeneric = await PermissionsService.hasPermission(actorUserId, permissionSet.genericPermission);
-  if (hasGeneric) {
-    return true;
-  }
-  return hasAudiencePermission(actorUserId, audience, permissionSet.audiencePermissions);
+  scope: ProfileScope,
+  action: "view" | "edit"
+): AppPermission[] {
+  return PROFILE_FIELD_GROUPS.filter(group => group.audiences.includes(audience)).map(group => {
+    if (action === "view") {
+      return scope === ProfileScope.OWN ? group.viewOwn : group.viewOther;
+    }
+    return scope === ProfileScope.OWN ? group.editOwn : group.editOther;
+  });
 }
 
 async function throwInsufficientPermissions(locale?: string): Promise<never> {
   const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
   throw new Error(errorsTranslations.insufficientPermissions);
-}
-
-async function assertOwnScopeOrThrow(
-  actorUserId: string,
-  audience: ProfileAudience,
-  permissionSet: OwnScopePermissionSet,
-  locale?: string
-): Promise<boolean> {
-  const hasOwnPermission = await checkOwnScopePermission(actorUserId, audience, permissionSet);
-  if (!hasOwnPermission) {
-    await throwInsufficientPermissions(locale);
-  }
-  return true;
-}
-
-async function assertProfilePermission(
-  actorUserId: string,
-  scope: ProfileScope,
-  audience: ProfileAudience,
-  ownPermissionSet: OwnScopePermissionSet,
-  otherPermissionSet: OtherScopePermissionSet,
-  locale?: string
-): Promise<void> {
-  if (scope === ProfileScope.OWN) {
-    await assertOwnScopeOrThrow(actorUserId, audience, ownPermissionSet, locale);
-    return;
-  }
-
-  const canAccessOther = await checkOtherScopePermission(actorUserId, audience, otherPermissionSet);
-  if (!canAccessOther) {
-    await throwInsufficientPermissions(locale);
-  }
 }
 
 async function hasAnyProfileViewOtherPermission(actorUserId: string): Promise<boolean> {
@@ -224,8 +120,8 @@ async function assertCanViewProfile(
   locale?: string
 ): Promise<void> {
   if (scope === ProfileScope.OTHER) {
-    const canViewOther = await checkOtherScopePermission(actorUserId, audience, VIEW_OTHER_PERMISSIONS);
-    if (canViewOther) {
+    const audienceViewOther = getProfilePermissionsForAudience(audience, ProfileScope.OTHER, "view");
+    if (await PermissionsService.hasAnyPermission(actorUserId, audienceViewOther)) {
       return;
     }
     if (await hasAnyProfileViewOtherPermission(actorUserId)) {
@@ -238,7 +134,10 @@ async function assertCanViewProfile(
     return;
   }
 
-  await assertProfilePermission(actorUserId, scope, audience, VIEW_OWN_PERMISSIONS, VIEW_OTHER_PERMISSIONS, locale);
+  const viewOwnPermissions = getProfilePermissionsForAudience(audience, ProfileScope.OWN, "view");
+  if (!(await PermissionsService.hasAnyPermission(actorUserId, viewOwnPermissions))) {
+    await throwInsufficientPermissions(locale);
+  }
 }
 
 async function assertCanEditProfile(
@@ -248,7 +147,10 @@ async function assertCanEditProfile(
   audience: ProfileAudience,
   locale?: string
 ): Promise<void> {
-  await assertProfilePermission(actorUserId, scope, audience, EDIT_OWN_PERMISSIONS, EDIT_OTHER_PERMISSIONS, locale);
+  const editPermissions = getProfilePermissionsForAudience(audience, scope, "edit");
+  if (!(await PermissionsService.hasAnyPermission(actorUserId, editPermissions))) {
+    await throwInsufficientPermissions(locale);
+  }
 }
 
 export namespace ProfileService {
@@ -536,12 +438,31 @@ export namespace ProfileService {
       return;
     }
 
-    const requiredPermission =
-      scope === ProfileScope.OWN ? AppPermission.AUTH_EDIT_OWN_PROFILE : AppPermission.USER_EDIT_PROFILE;
-    const canEdit = await PermissionsService.hasPermission(actorUserId, requiredPermission);
-    if (!canEdit) {
-      const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(errorsTranslations.insufficientPermissions);
+    const identityKeys = ["name", "email", "avatarUrl", "displayCurrency"] as const;
+    const contactKeys = ["phone", "timezone"] as const;
+    const touchesIdentity = identityKeys.some(key => core[key] !== undefined);
+    const touchesContact = contactKeys.some(key => core[key] !== undefined);
+
+    if (touchesIdentity) {
+      const identityPermission =
+        scope === ProfileScope.OWN
+          ? AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN
+          : AppPermission.PROFILE_CORE_IDENTITY_EDIT_OTHER;
+      if (!(await PermissionsService.hasPermission(actorUserId, identityPermission))) {
+        const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+        throw new Error(errorsTranslations.insufficientPermissions);
+      }
+    }
+
+    if (touchesContact) {
+      const contactPermission =
+        scope === ProfileScope.OWN
+          ? AppPermission.PROFILE_CORE_CONTACT_EDIT_OWN
+          : AppPermission.PROFILE_CORE_CONTACT_EDIT_OTHER;
+      if (!(await PermissionsService.hasPermission(actorUserId, contactPermission))) {
+        const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+        throw new Error(errorsTranslations.insufficientPermissions);
+      }
     }
 
     await UserRepository.updateProfileFields(targetUserId, core, locale);

@@ -51,8 +51,8 @@ function isPermissionsTabVisible(
     audience === "STAFF" && scope === ProfileScope.Other
       ? hasPermission(AppPermission.ProfileStaffPermissionsViewOther)
       : false;
-  const legacyEdit = hasPermission(AppPermission.UserEditProfile);
-  return staffPermissions || legacyEdit;
+  const canEditOther = hasPermission(AppPermission.ProfileStaffPermissionsEditOther);
+  return staffPermissions || canEditOther;
 }
 
 function isStudentsTabVisible(hasPermission: (permission: AppPermission) => boolean): boolean {

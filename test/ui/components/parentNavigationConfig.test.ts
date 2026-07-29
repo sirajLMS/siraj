@@ -15,7 +15,7 @@ const PARENT_PERMISSIONS: AppPermission[] = [
   AppPermission.CommunicationSubmitSuggestion,
   AppPermission.BillingViewHistory,
   AppPermission.ParentViewStudents,
-  AppPermission.ParentViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
 ];
 
 describe("parent sidebar navigation", () => {

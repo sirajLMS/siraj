@@ -10,7 +10,6 @@ import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDispl
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
-import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
@@ -40,20 +39,16 @@ export function UserDetailsProfileSection({
 }: Readonly<UserDetailsProfileSectionProps>) {
   const fallbackBaseLabels = useProfileSharedBaseLabels();
   const t = baseLabels ?? fallbackBaseLabels;
-  const { canView, showField } = useProfileFieldAccess({ scope });
+  const { canView, canViewField } = useProfileFieldAccess({ scope });
 
   const canViewContact = canView("core_contact");
   const canViewIdentity = canView("core_identity");
-  const showPhone = canViewContact && showField(phone, "core_contact");
-  const showTimezone = canViewContact && showField(timezone, "core_contact");
-  const showCurrency = canViewIdentity && showField(displayCurrency, "core_identity");
+  const showPhone = canViewContact && canViewField("core_contact");
+  const showTimezone = canViewContact && canViewField("core_contact");
+  const showCurrency = canViewIdentity && canViewField("core_identity");
 
   if (!canViewContact && !canViewIdentity) {
     return null;
-  }
-
-  if (!showPhone && !showTimezone && !showCurrency) {
-    return <ProfileRestrictedSection title={sectionTitle} labels={t.fieldAccess} />;
   }
 
   return (

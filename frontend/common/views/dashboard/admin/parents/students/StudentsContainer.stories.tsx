@@ -86,7 +86,7 @@ const meta: Meta<typeof StudentsContainer> = {
         AppPermission.StaffViewDirectory,
         AppPermission.ResourcesList,
         AppPermission.ResourcesUpload,
-        AppPermission.StaffEditProfile,
+        AppPermission.ProfileStaffRoleEditOther,
       ];
       useUserStore.setState({ permissions: perms });
       return (

@@ -83,7 +83,7 @@ describe("StaffProfileService Permission Gating", () => {
     expect(getErrorMessage(error)).toContain("الصلاحيات");
 
     // Case 2: Has permission
-    mockPermissions.set(`${actorUserId}:${AppPermission.STAFF_EDIT_PROFILE}`, true);
+    mockPermissions.set(`${actorUserId}:${AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER}`, true);
     const result = await StaffProfileService.getTeacherProfileForEdit(actorUserId, teacherId);
     expect(result.id).toBe(teacherId);
   });
@@ -101,7 +101,7 @@ describe("StaffProfileService Permission Gating", () => {
     expect(getErrorMessage(error)).toContain("الصلاحيات");
 
     // Case 2: Has permission
-    mockPermissions.set(`${actorUserId}:${AppPermission.STAFF_EDIT_PROFILE}`, true);
+    mockPermissions.set(`${actorUserId}:${AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER}`, true);
     const result = await StaffProfileService.updateTeacherProfile(actorUserId, teacherId, {
       address: newAddress,
     });

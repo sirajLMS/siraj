@@ -19,7 +19,7 @@ const TEACHER_PERMISSIONS: AppPermission[] = [
   AppPermission.SessionUpdateStatusLeave,
   AppPermission.ResourcesList,
   AppPermission.TeacherViewStudents,
-  AppPermission.TeacherViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
 ];
 
 const ADMIN_PERMISSIONS: AppPermission[] = [

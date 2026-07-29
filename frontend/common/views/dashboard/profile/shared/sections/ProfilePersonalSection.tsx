@@ -16,7 +16,6 @@ import { GenderSelector } from "@/frontend/common/components/ui/input/genderSele
 import { Gender, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
-import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type {
   ProfilePersonalFieldLabels,
   ProfilePersonalFieldVisibility,
@@ -108,7 +107,7 @@ function resolveFieldGroupKey(field: PersonalFieldKey, props: ProfilePersonalSec
 }
 
 function usePersonalFieldAccess(props: ProfilePersonalSectionBaseProps) {
-  const { canView, canEdit, showField } = useProfileFieldAccess({ scope: props.scope });
+  const { canView, canEdit } = useProfileFieldAccess({ scope: props.scope });
 
   const isFieldEnabled = (field: PersonalFieldKey): boolean => props.fields[field] === true;
 
@@ -128,7 +127,7 @@ function usePersonalFieldAccess(props: ProfilePersonalSectionBaseProps) {
 
   const hasAccessibleField = (): boolean => PERSONAL_FIELD_KEYS.some(field => canViewField(field));
 
-  return { canViewField, canEditField, showField, hasAccessibleField };
+  return { canViewField, canEditField, hasAccessibleField };
 }
 
 function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields>({
@@ -260,22 +259,15 @@ function ProfilePersonalSectionView({
   readonly access: ReturnType<typeof usePersonalFieldAccess>;
   readonly baseLabels: ProfileSharedBaseLabels;
 }) {
-  const { canViewField, showField } = access;
+  const { canViewField } = access;
   const labels = props.fieldLabels;
-  const hasVisibleData = PERSONAL_FIELD_KEYS.some(
-    field => canViewField(field) && showField(props[field], resolveFieldGroupKey(field, props))
-  );
-
-  if (!hasVisibleData) {
-    return <ProfileRestrictedSection title={props.sectionTitle} labels={baseLabels.fieldAccess} />;
-  }
 
   const genderDisplay = formatGender(props.gender, labels);
 
   return (
     <SectionPanel title={props.sectionTitle}>
       <Stack spacing={1}>
-        {canViewField("nationality") && showField(props.nationality, resolveFieldGroupKey("nationality", props)) ? (
+        {canViewField("nationality") ? (
           <ProfileFieldRow
             icon={PersonOutlined}
             label={labels.nationality}
@@ -288,21 +280,20 @@ function ProfilePersonalSectionView({
             }
           />
         ) : null}
-        {canViewField("address") && showField(props.address, resolveFieldGroupKey("address", props)) ? (
+        {canViewField("address") ? (
           <ProfileFieldRow icon={HomeOutlined} label={labels.address} value={props.address ?? baseLabels.notSet} />
         ) : null}
-        {canViewField("dateOfBirth") && showField(props.dateOfBirth, resolveFieldGroupKey("dateOfBirth", props)) ? (
+        {canViewField("dateOfBirth") ? (
           <ProfileFieldRow
             icon={CakeOutlined}
             label={labels.dateOfBirth}
             value={props.dateOfBirth ?? baseLabels.notSet}
           />
         ) : null}
-        {canViewField("gender") && showField(props.gender, resolveFieldGroupKey("gender", props)) ? (
+        {canViewField("gender") ? (
           <ProfileFieldRow icon={WcOutlined} label={labels.gender} value={genderDisplay || baseLabels.notSet} />
         ) : null}
-        {canViewField("qualifications") &&
-        showField(props.qualifications, resolveFieldGroupKey("qualifications", props)) ? (
+        {canViewField("qualifications") ? (
           <ProfileFieldRow
             icon={SchoolOutlined}
             label={labels.qualifications}

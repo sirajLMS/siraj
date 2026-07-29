@@ -1,5 +1,5 @@
 {
-  "manifestHash": "579dde074cb76d333c00756c72e9717a629e3aadd8dfaa3dba9d23a2e80e2ecb",
+  "manifestHash": "ba4b78ed44fd4c46d9bfe452142548995ef24120550eaa7e8b6e2940ed7cb7c4",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -72,6 +72,10 @@
     {
       "file": "6c-payment-method-permissions.sql",
       "sha256": "1f6cee0c26f97440b46c21978ad34bb3237c5db0f80f559e7d80d7f00c9024ee"
+    },
+    {
+      "file": "6d-profile-fine-grained-only.sql",
+      "sha256": "f632c6356f6dc33e82915c9db79b8be65a3ed63d0ba47f1b472b636488a9fa3a"
     },
     {
       "file": "7a-settings-permissions-enum.sql",
@@ -192,6 +196,7 @@
     "20260729030011_custom_student_progress_rls",
     "20260729030012_custom_student_status_transition_trigger",
     "20260729030013_custom_timezone_dst_logic",
-    "20260729030014_custom_user_notification_preferences"
+    "20260729030014_custom_user_notification_preferences",
+    "20260729073854_custom_6d-profile-fine-grained-only"
   ]
 }

@@ -7,7 +7,7 @@ import {
 
 const STUDENT_PERMISSIONS: AppPermission[] = [
   AppPermission.StudentViewOwnDashboard,
-  AppPermission.AuthViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
   AppPermission.ScheduleViewAssigned,
   AppPermission.SessionViewDetails,
   AppPermission.HistoryViewCalendar,

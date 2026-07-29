@@ -18,7 +18,7 @@ const TEACHER_PERMISSIONS: AppPermission[] = [
   AppPermission.SessionUpdateStatusLeave,
   AppPermission.ResourcesList,
   AppPermission.TeacherViewStudents,
-  AppPermission.TeacherViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
 ];
 
 describe("teacher sidebar navigation", () => {

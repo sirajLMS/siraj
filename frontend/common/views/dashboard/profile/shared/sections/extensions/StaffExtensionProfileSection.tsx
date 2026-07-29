@@ -3,7 +3,6 @@
 import { Stack, Typography } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { StaffSectionLabelsBundle } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 
@@ -20,19 +19,10 @@ export function StaffExtensionProfileSection({
   hourlyRate,
   rateCurrency,
 }: Readonly<StaffExtensionProfileSectionProps>) {
-  const { canView, showField } = useProfileFieldAccess({ scope });
+  const { canViewField } = useProfileFieldAccess({ scope });
   const st = labels.staff;
 
-  if (!canView("staff_role")) {
-    return null;
-  }
-
-  const showCompensation = showField(hourlyRate, "staff_role") || showField(rateCurrency, "staff_role");
-  if (!showCompensation) {
-    return <ProfileRestrictedSection title={st.sections.compensation} labels={labels.baseLabels.fieldAccess} />;
-  }
-
-  if (!hourlyRate && !rateCurrency) {
+  if (!canViewField("staff_role")) {
     return null;
   }
 

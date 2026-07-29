@@ -14,7 +14,7 @@ const SUPERVISOR_PERMISSIONS: AppPermission[] = [
   AppPermission.LessonReportsReject,
   AppPermission.TeacherDuesView,
   AppPermission.MonthlyReportsView,
-  AppPermission.AuthViewOwnProfile,
+  AppPermission.ProfileCoreIdentityViewOwn,
   AppPermission.ScheduleViewList,
   AppPermission.ScheduleViewAssigned,
   AppPermission.SessionViewDetails,
@@ -85,7 +85,7 @@ describe("supervisor sidebar navigation", () => {
       AppPermission.LessonReportsApprove,
       AppPermission.TeacherDuesView,
       AppPermission.MonthlyReportsView,
-      AppPermission.AuthViewOwnProfile,
+      AppPermission.ProfileCoreIdentityViewOwn,
     ];
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, SUPERADMIN_PERMISSIONS);
     const keys = items.map(item => item.key);

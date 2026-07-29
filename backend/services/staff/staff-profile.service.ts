@@ -30,7 +30,10 @@ export namespace StaffProfileService {
     input: TeacherProfileUpdateInputType,
     locale?: string
   ): Promise<TeacherProfileReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_EDIT_PROFILE);
+    const hasPermission = await PermissionsService.hasPermission(
+      actorUserId,
+      AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER
+    );
     if (!hasPermission) {
       const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(tFunc.insufficientPermissions);
@@ -77,7 +80,10 @@ export namespace StaffProfileService {
     teacherId: string,
     locale?: string
   ): Promise<TeacherProfileReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_EDIT_PROFILE);
+    const hasPermission = await PermissionsService.hasPermission(
+      actorUserId,
+      AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER
+    );
     if (!hasPermission) {
       const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(tFunc.insufficientPermissions);

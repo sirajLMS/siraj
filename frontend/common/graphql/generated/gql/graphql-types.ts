@@ -85,9 +85,7 @@ export enum AppLanguage {
 }
 
 export enum AppPermission {
-  AuthEditOwnProfile = 'AUTH_EDIT_OWN_PROFILE',
   AuthLogin = 'AUTH_LOGIN',
-  AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
   BillingCreateInvoice = 'BILLING_CREATE_INVOICE',
   BillingDeleteInvoice = 'BILLING_DELETE_INVOICE',
   BillingManageCurrencies = 'BILLING_MANAGE_CURRENCIES',
@@ -139,11 +137,8 @@ export enum AppPermission {
   ParentsCreate = 'PARENTS_CREATE',
   ParentsEdit = 'PARENTS_EDIT',
   ParentsList = 'PARENTS_LIST',
-  ParentEditOwnProfile = 'PARENT_EDIT_OWN_PROFILE',
   ParentManageStatus = 'PARENT_MANAGE_STATUS',
   ParentViewDirectory = 'PARENT_VIEW_DIRECTORY',
-  ParentViewOwnProfile = 'PARENT_VIEW_OWN_PROFILE',
-  ParentViewProfile = 'PARENT_VIEW_PROFILE',
   ParentViewStudents = 'PARENT_VIEW_STUDENTS',
   PaymentMethodsManageCatalogs = 'PAYMENT_METHODS_MANAGE_CATALOGS',
   PaymentMethodsVerifyBankTransfer = 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER',
@@ -243,7 +238,6 @@ export enum AppPermission {
   SettingsView = 'SETTINGS_VIEW',
   StaffCreate = 'STAFF_CREATE',
   StaffEdit = 'STAFF_EDIT',
-  StaffEditProfile = 'STAFF_EDIT_PROFILE',
   StaffList = 'STAFF_LIST',
   StaffViewDirectory = 'STAFF_VIEW_DIRECTORY',
   StorageManage = 'STORAGE_MANAGE',
@@ -312,16 +306,11 @@ export enum AppPermission {
   TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
   TeacherDuesMarkPaid = 'TEACHER_DUES_MARK_PAID',
   TeacherDuesView = 'TEACHER_DUES_VIEW',
-  TeacherEditOwnProfile = 'TEACHER_EDIT_OWN_PROFILE',
   TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
-  TeacherViewOwnProfile = 'TEACHER_VIEW_OWN_PROFILE',
-  TeacherViewProfile = 'TEACHER_VIEW_PROFILE',
   TeacherViewStudents = 'TEACHER_VIEW_STUDENTS',
   TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
-  TestSystemOnly = 'TEST_SYSTEM_ONLY',
-  UserEditProfile = 'USER_EDIT_PROFILE',
-  UserViewProfile = 'USER_VIEW_PROFILE'
+  TestSystemOnly = 'TEST_SYSTEM_ONLY'
 }
 
 export type AssignPermissionGroupToUserInput = {

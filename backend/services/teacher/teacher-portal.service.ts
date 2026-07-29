@@ -37,7 +37,7 @@ export namespace TeacherPortalService {
   }
 
   export async function getOwnProfile(userId: string, tErrors: ErrorsLabels): Promise<TeacherOwnProfileReturnType> {
-    await assertPermission(userId, AppPermission.TEACHER_VIEW_OWN_PROFILE, tErrors);
+    await assertPermission(userId, AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN, tErrors);
     const teacher = await resolveTeacherForUser(userId, tErrors);
     const profile = await TeacherRepository.getTeacherProfileForEdit(teacher.id);
     if (!profile) {
@@ -108,7 +108,14 @@ export namespace TeacherPortalService {
     input: TeacherOwnProfileUpdateInput,
     tErrors: ErrorsLabels
   ): Promise<TeacherOwnProfileReturnType> {
-    await assertPermission(userId, AppPermission.TEACHER_EDIT_OWN_PROFILE, tErrors);
+    const canEditOwn = await PermissionsService.hasAnyPermission(userId, [
+      AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN,
+      AppPermission.PROFILE_CORE_CONTACT_EDIT_OWN,
+      AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OWN,
+    ]);
+    if (!canEditOwn) {
+      throw new Error(tErrors.unauthorizedAction);
+    }
     const teacher = await resolveTeacherForUser(userId, tErrors);
 
     if (teacher.id !== teacherId) {

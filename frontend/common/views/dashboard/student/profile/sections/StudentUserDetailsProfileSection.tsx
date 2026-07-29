@@ -13,7 +13,6 @@ import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graph
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
-import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type {
   StudentProfileEditableSectionProps,
   StudentProfileSectionBaseProps,
@@ -37,16 +36,16 @@ export function StudentUserDetailsProfileSection({
   draft,
   onDraftChange,
 }: Readonly<StudentUserDetailsProfileSectionProps>) {
-  const { canView, showField } = useStudentFieldAccess();
+  const { canView, canViewField } = useStudentFieldAccess();
   const canViewIdentity = enforceFieldAccess ? canView("student_identity") : true;
 
   if (!canViewIdentity) {
     return null;
   }
 
-  const showPhone = enforceFieldAccess ? showField(profile.phone, "student_identity") : true;
-  const showTimezone = enforceFieldAccess ? showField(profile.timezone, "student_identity") : true;
-  const showCurrency = enforceFieldAccess ? showField(profile.displayCurrency, "student_identity") : true;
+  const showPhone = enforceFieldAccess ? canViewField("student_identity") : true;
+  const showTimezone = enforceFieldAccess ? canViewField("student_identity") : true;
+  const showCurrency = enforceFieldAccess ? canViewField("student_identity") : true;
 
   if (isEditing && draft && onDraftChange) {
     return (
@@ -76,10 +75,6 @@ export function StudentUserDetailsProfileSection({
         </Stack>
       </SectionPanel>
     );
-  }
-
-  if (enforceFieldAccess && !showPhone && !showTimezone && !showCurrency) {
-    return <ProfileRestrictedSection title={sectionTitle} />;
   }
 
   return (

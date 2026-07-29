@@ -1,7 +1,5 @@
 export enum AppPermission {
   AUTH_LOGIN = "auth.login",
-  AUTH_VIEW_OWN_PROFILE = "auth.view_own_profile",
-  AUTH_EDIT_OWN_PROFILE = "auth.edit_own_profile",
   DASHBOARD_VIEW = "dashboard.view",
   DASHBOARD_VIEW_METRICS = "dashboard.view_metrics",
   DASHBOARD_FILTER_METRICS = "dashboard.filter_metrics",
@@ -29,8 +27,6 @@ export enum AppPermission {
   HISTORY_VIEW_DETAILS = "history.view_details",
   TEACHER_VIEW_DASHBOARD = "teacher.view_dashboard",
   TEACHER_VIEW_STUDENTS = "teacher.view_students",
-  TEACHER_VIEW_OWN_PROFILE = "teacher.view_own_profile",
-  TEACHER_EDIT_OWN_PROFILE = "teacher.edit_own_profile",
   SYSTEM_ENFORCE_TIME_WINDOW = "system.enforce_time_window",
   SYSTEM_ENFORCE_LEAVE_LIMIT = "system.enforce_leave_limit",
   TEACHERS_LIST = "teachers.list",
@@ -78,18 +74,12 @@ export enum AppPermission {
   PERMISSION_GROUPS_ASSIGN = "permission_groups.assign",
   NOTIFICATION_VIEW_ALERTS = "notification.view_alerts",
   BILLING_VIEW_UNPAID_INVOICES = "billing.view_unpaid_invoices",
-  USER_VIEW_PROFILE = "user.view_profile",
-  USER_EDIT_PROFILE = "user.edit_profile",
   SCHEDULE_DELETE_CLASS = "schedule.delete_class",
   SCHEDULE_CLEAR_WEEKLY = "schedule.clear_weekly",
-  STAFF_EDIT_PROFILE = "staff.edit_profile",
   SYSTEM_BULK_UPDATE_DST = "system.bulk_update_dst",
   PARENT_VIEW_DIRECTORY = "parent.view_directory",
   // Parent Profile & Account Lifecycle Management
-  PARENT_VIEW_PROFILE = "parent.view_profile",
   PARENT_VIEW_STUDENTS = "parent.view_students",
-  PARENT_VIEW_OWN_PROFILE = "parent.view_own_profile",
-  PARENT_EDIT_OWN_PROFILE = "parent.edit_own_profile",
   PARENT_MANAGE_STATUS = "parent.manage_status",
   STUDENT_VIEW_ASSOCIATED = "student.view_associated",
   STUDENT_EDIT_QUOTA = "student.edit_quota",
@@ -146,7 +136,6 @@ export enum AppPermission {
   MEETING_CONFIGS_MANAGE_OWN = "meeting_configs.manage_own",
   MEETING_CONFIGS_MANAGE_OTHER = "meeting_configs.manage_other",
   MEETING_CONFIGS_MANAGE_CLASS = "meeting_configs.manage_class",
-  TEACHER_VIEW_PROFILE = "teacher.view_profile",
   // Profile field-group ACL (view_own / view_other / edit_own / edit_other per group)
   PROFILE_CORE_IDENTITY_VIEW_OWN = "profile.core_identity.view_own",
   PROFILE_CORE_IDENTITY_VIEW_OTHER = "profile.core_identity.view_other",
@@ -257,4 +246,27 @@ export enum AppPermission {
   SETTINGS_AUDIT_VIEW = "settings.audit_view",
   SETTINGS_SITE_CONTENT_MANAGE = "settings.site_content_manage",
   SETTINGS_TIMEZONES_VIEW = "settings.timezones_view",
+}
+
+let knownAppPermissionsCache: Set<string> | undefined;
+
+function getKnownAppPermissions(): Set<string> {
+  if (knownAppPermissionsCache === undefined) {
+    knownAppPermissionsCache = new Set(Object.values(AppPermission));
+  }
+  return knownAppPermissionsCache;
+}
+
+/** Drops DB rows whose keys were removed from the TypeScript/GraphQL enum (e.g. legacy profile ACL). */
+export function filterKnownAppPermissions(keys: Iterable<string>): AppPermission[] {
+  const known = getKnownAppPermissions();
+  const result: AppPermission[] = [];
+  const seen = new Set<string>();
+  for (const key of keys) {
+    if (known.has(key) && !seen.has(key)) {
+      seen.add(key);
+      result.push(key as AppPermission);
+    }
+  }
+  return result;
 }

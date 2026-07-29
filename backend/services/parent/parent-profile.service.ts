@@ -92,14 +92,26 @@ function toStudentResult(student: {
 export namespace ParentProfileService {
   /**
    * Retrieves the full profile for a specific parent.
-   * Requires: parent.view_profile permission.
+   * Requires any fine-grained profile.parent_* / profile.core_* view_other permission.
    */
   export async function getProfile(
     actorUserId: string,
     parentId: string,
     locale?: string
   ): Promise<ParentProfileResult> {
-    await requirePermission(actorUserId, AppPermission.PARENT_VIEW_PROFILE, locale);
+    const canView = await PermissionsService.hasAnyPermission(actorUserId, [
+      AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER,
+      AppPermission.PROFILE_CORE_CONTACT_VIEW_OTHER,
+      AppPermission.PROFILE_PARENT_SOCIAL_VIEW_OTHER,
+      AppPermission.PROFILE_PARENT_IDENTITY_VIEW_OTHER,
+      AppPermission.PROFILE_PARENT_BILLING_VIEW_OTHER,
+      AppPermission.PROFILE_PARENT_ACCOUNT_VIEW_OTHER,
+      AppPermission.PROFILE_PARENT_STUDENTS_VIEW_OTHER,
+    ]);
+    if (!canView) {
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
+    }
 
     const profile = await requireParentProfile(parentId, locale);
 
@@ -193,7 +205,7 @@ export namespace ParentProfileService {
 
   /**
    * Updates own parent profile fields (contact/social only).
-   * Requires: parent.edit_own_profile permission.
+   * Requires any fine-grained profile.core_* / profile.parent_social edit_own permission.
    */
   export async function updateOwnProfile(
     actorUserId: string,
@@ -201,7 +213,15 @@ export namespace ParentProfileService {
     input: ParentOwnProfileUpdateInput,
     locale?: string
   ): Promise<ParentProfileResult> {
-    await requirePermission(actorUserId, AppPermission.PARENT_EDIT_OWN_PROFILE, locale);
+    const canEdit = await PermissionsService.hasAnyPermission(actorUserId, [
+      AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN,
+      AppPermission.PROFILE_CORE_CONTACT_EDIT_OWN,
+      AppPermission.PROFILE_PARENT_SOCIAL_EDIT_OWN,
+    ]);
+    if (!canEdit) {
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
+    }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (parent?.id !== parentId) {

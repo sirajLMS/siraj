@@ -12,7 +12,6 @@ import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSe
 import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
-import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
@@ -125,7 +124,7 @@ export function CoreContactSection<T extends CoreContactFormFields = CoreContact
 ) {
   const fallbackBaseLabels = useProfileSharedBaseLabels();
   const t = props.baseLabels ?? fallbackBaseLabels;
-  const { canView, canEdit, showField } = useProfileFieldAccess({ scope: props.scope });
+  const { canView, canEdit, canViewField } = useProfileFieldAccess({ scope: props.scope });
   const showTimezone = Boolean(props.timezoneLabel);
 
   if (!canView("core_contact")) {
@@ -138,12 +137,8 @@ export function CoreContactSection<T extends CoreContactFormFields = CoreContact
     );
   }
 
-  const showPhone = showField(props.phone, "core_contact");
-  const showTimezoneValue = showTimezone && showField(props.timezone, "core_contact");
-
-  if (!showPhone && !showTimezoneValue) {
-    return <ProfileRestrictedSection title={props.sectionTitle} labels={t.fieldAccess} />;
-  }
+  const showPhone = canViewField("core_contact");
+  const showTimezoneValue = showTimezone && canViewField("core_contact");
 
   return (
     <SectionPanel title={props.sectionTitle}>

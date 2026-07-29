@@ -32,12 +32,9 @@ export function useProfileFieldAccess(options: UseProfileFieldAccessOptions = {}
     return hasPermission(permission);
   };
 
-  const showField = (value: unknown, groupKey: ProfileFieldGroupKey): boolean => {
-    if (!canView(groupKey)) {
-      return false;
-    }
-    return value != null;
-  };
+  const canViewField = (groupKey: ProfileFieldGroupKey): boolean => canView(groupKey);
 
-  return { canView, canEdit, showField, scope };
+  const showField = (_value: unknown, groupKey: ProfileFieldGroupKey): boolean => canViewField(groupKey);
+
+  return { canView, canEdit, canViewField, showField, scope };
 }

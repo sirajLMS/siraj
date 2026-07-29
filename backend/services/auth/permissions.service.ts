@@ -2,7 +2,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions/permission-management.repository";
 import { groupPermissions, permissionGroups, permissions, userPermissionGroups, users } from "@/backend/db/schema";
-import { type AppPermission, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
+import { type AppPermission, filterKnownAppPermissions, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 
 export type UserPermissionContext = {
@@ -36,7 +36,7 @@ export namespace PermissionsService {
       if (user.isSuperAdmin) {
         const allPermissions = await db.select({ key: permissions.key }).from(permissions);
         return {
-          permissions: allPermissions.map(p => p.key),
+          permissions: filterKnownAppPermissions(allPermissions.map(p => p.key)),
           permissionGroups: groupSlugs,
           isSuperAdmin: true,
           role: UserRole.SUPER_ADMIN,
@@ -50,13 +50,8 @@ export namespace PermissionsService {
         .innerJoin(permissions, eq(groupPermissions.permissionId, permissions.id))
         .where(eq(userPermissionGroups.userId, userId));
 
-      const permissionSet = new Set<AppPermission>();
-      for (const permission of permissionRows) {
-        permissionSet.add(permission.key);
-      }
-
       return {
-        permissions: [...permissionSet],
+        permissions: filterKnownAppPermissions(permissionRows.map(row => row.key)),
         permissionGroups: groupSlugs,
         isSuperAdmin: false,
         role: resolveRoleFromGroupSlugs(groupSlugs),
@@ -118,13 +113,8 @@ export namespace PermissionsService {
           ? []
           : await db.select({ key: permissions.key }).from(permissions).where(inArray(permissions.id, permissionIds));
 
-      const permissionSet = new Set<AppPermission>();
-      for (const permission of permissionRows) {
-        permissionSet.add(permission.key);
-      }
-
       return {
-        permissions: [...permissionSet],
+        permissions: filterKnownAppPermissions(permissionRows.map(row => row.key)),
         permissionGroups: [group.slug],
         isSuperAdmin: false,
         role: resolveRoleFromGroupSlugs([group.slug]),
