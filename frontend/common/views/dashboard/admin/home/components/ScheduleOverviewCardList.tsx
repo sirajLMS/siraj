@@ -24,6 +24,8 @@ import {
   ScheduleSessionCardMetaBar,
   ScheduleSessionCardPersonCell,
   type ScheduleSessionMetaStatItem,
+} from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout";
+import {
   StyledScheduleSessionCardActions,
   StyledScheduleSessionCardHeader,
   StyledScheduleSessionCardHeaderMain,
@@ -33,7 +35,7 @@ import {
   StyledScheduleSessionTimeHighlightLabel,
   StyledScheduleSessionTimeHighlightText,
   scheduleSessionCardContentSx,
-} from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout";
+} from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout.styles";
 import type {
   ScheduleOverviewDataHeaders,
   ScheduleOverviewDataStatusLabels,

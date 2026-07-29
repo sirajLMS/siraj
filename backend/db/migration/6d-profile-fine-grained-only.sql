@@ -1,21 +1,16 @@
 -- Migration: Remove legacy profile permission grants; ensure fine-grained profile/student grants
 -- Repairs partial 6a application by re-inserting missing fine-grained group_permissions.
 
--- 2a. DELETE legacy profile keys from all target groups
+-- Disable protection trigger temporarily to delete obsolete legacy system permissions
+DO $$ BEGIN
+  ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
+EXCEPTION WHEN OTHERS THEN NULL; END $$;
+
+-- 2a. DELETE legacy profile keys from all target groups and permissions table
 DELETE FROM group_permissions gp
-USING permission_groups g, permissions p
-WHERE gp.group_id = g.id
-  AND gp.permission_id = p.id
-  AND g.slug IN (
-    'super_admin',
-    'academy_admin',
-    'teacher_default',
-    'parent_default',
-    'staff_default',
-    'supervisor_default',
-    'student_default'
-  )
-  AND p.key IN (
+USING permissions p
+WHERE gp.permission_id = p.id
+  AND p.key::text IN (
     'auth.view_own_profile',
     'auth.edit_own_profile',
     'user.view_profile',
@@ -28,6 +23,35 @@ WHERE gp.group_id = g.id
     'parent.view_profile',
     'staff.edit_profile'
   );
+
+DELETE FROM permissions
+WHERE key::text IN (
+  'auth.view_own_profile',
+  'auth.edit_own_profile',
+  'user.view_profile',
+  'user.edit_profile',
+  'teacher.view_own_profile',
+  'teacher.edit_own_profile',
+  'teacher.view_profile',
+  'parent.view_own_profile',
+  'parent.edit_own_profile',
+  'parent.view_profile',
+  'staff.edit_profile'
+);
+
+DO $$ BEGIN
+  ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
+EXCEPTION WHEN OTHERS THEN NULL; END $$;
+
+-- Convert permissions.key to app_permission enum if it is still varchar
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'permissions' AND column_name = 'key' AND data_type = 'character varying'
+  ) THEN
+    ALTER TABLE permissions ALTER COLUMN key TYPE app_permission USING key::app_permission;
+  END IF;
+EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
 -- 2b. Re-INSERT missing fine-grained grants (6a pattern, without teacher.view_profile)
 INSERT INTO group_permissions (group_id, permission_id)

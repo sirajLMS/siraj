@@ -24,6 +24,8 @@ import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/
 import {
   ScheduleSessionCardMetaBar,
   ScheduleSessionCardPersonCell,
+} from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout";
+import {
   StyledScheduleSessionCardActions,
   StyledScheduleSessionCardHeader,
   StyledScheduleSessionCardHeaderMain,
@@ -33,7 +35,7 @@ import {
   StyledScheduleSessionTimeHighlightLabel,
   StyledScheduleSessionTimeHighlightText,
   scheduleSessionCardContentSx,
-} from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout";
+} from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout.styles";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
