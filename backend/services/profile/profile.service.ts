@@ -36,6 +36,7 @@ import type {
 import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
+import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -137,6 +138,15 @@ function getProfilePermissionsForAudience(
   });
 }
 
+function getStudentProfilePermissions(scope: ProfileScope, action: "view" | "edit"): AppPermission[] {
+  return STUDENT_FIELD_GROUPS.map(group => {
+    if (action === "view") {
+      return scope === ProfileScope.OWN ? group.viewOwn : group.viewOther;
+    }
+    return scope === ProfileScope.OWN ? group.editOwn : group.editOther;
+  });
+}
+
 export type ProfilePermissionContext = Pick<UserPermissionContext, "permissions" | "isSuperAdmin">;
 
 export type ProfileAccessOptions = {
@@ -184,6 +194,18 @@ async function resolveEffectiveProfileScope(
     return scope;
   }
 
+  if (audience === ProfileAudience.STUDENT) {
+    const viewOwn = getStudentProfilePermissions(ProfileScope.OWN, "view");
+    if (await hasAnyPermissionForProfile(actorUserId, viewOwn, permissionContext)) {
+      return ProfileScope.OWN;
+    }
+    const viewOther = getStudentProfilePermissions(ProfileScope.OTHER, "view");
+    if (await hasAnyPermissionForProfile(actorUserId, viewOther, permissionContext)) {
+      return ProfileScope.OTHER;
+    }
+    return scope;
+  }
+
   const viewOwn = getProfilePermissionsForAudience(audience, ProfileScope.OWN, "view");
   if (await hasAnyPermissionForProfile(actorUserId, viewOwn, permissionContext)) {
     return ProfileScope.OWN;
@@ -209,6 +231,15 @@ async function assertCanViewProfile(
   locale?: string,
   permissionContext?: ProfilePermissionContext
 ): Promise<void> {
+  if (audience === ProfileAudience.STUDENT) {
+    const viewPermissions = getStudentProfilePermissions(scope, "view");
+    if (await hasAnyPermissionForProfile(actorUserId, viewPermissions, permissionContext)) {
+      return;
+    }
+    await throwInsufficientPermissions(locale);
+    return;
+  }
+
   if (scope === ProfileScope.OTHER) {
     const audienceViewOther = getProfilePermissionsForAudience(audience, ProfileScope.OTHER, "view");
     if (await hasAnyPermissionForProfile(actorUserId, audienceViewOther, permissionContext)) {
@@ -242,7 +273,10 @@ async function assertCanEditProfile(
   locale?: string,
   permissionContext?: ProfilePermissionContext
 ): Promise<void> {
-  const editPermissions = getProfilePermissionsForAudience(audience, scope, "edit");
+  const editPermissions =
+    audience === ProfileAudience.STUDENT
+      ? getStudentProfilePermissions(scope, "edit")
+      : getProfilePermissionsForAudience(audience, scope, "edit");
   if (!(await hasAnyPermissionForProfile(actorUserId, editPermissions, permissionContext))) {
     await throwInsufficientPermissions(locale);
   }
