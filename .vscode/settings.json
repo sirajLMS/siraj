@@ -12,5 +12,5 @@
       "allowedModels": []
     }
   },
-  "chat.utilitySmallModel": "customendpoint/nvidia/z-ai/glm-5.2"
+  "chat.utilitySmallModel": "customendpoint/nvidia/nvidia/nemotron-3-ultra-550b-a55b"
 }
