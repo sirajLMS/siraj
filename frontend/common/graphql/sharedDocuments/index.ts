@@ -16,3 +16,4 @@ export * from "./students";
 export * from "./suggestions";
 export * from "./supervisor";
 export * from "./teachers";
+export * from "./users";

@@ -47,6 +47,7 @@ export type TeacherAdminSubmitData = {
   phone: string;
   avatarUrl?: string | null;
   nationalId: string;
+  nationality: string;
   dateOfBirth: string;
   gender: string | null;
   address: string;
@@ -155,6 +156,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
             teacher: {
               phone: formData.phone || null,
               nationalId: formData.nationalId || null,
+              nationality: formData.nationality || null,
               dateOfBirth: formData.dateOfBirth || null,
               gender: (formData.gender as Gender | null) ?? null,
               address: formData.address || null,

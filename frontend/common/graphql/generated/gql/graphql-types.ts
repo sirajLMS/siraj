@@ -2341,7 +2341,6 @@ export type LoginResponse = {
   user: Maybe<User>;
 };
 
-/** Account type for new manager */
 export enum ManagerAccountType {
   Admin = 'admin',
   Manager = 'manager',

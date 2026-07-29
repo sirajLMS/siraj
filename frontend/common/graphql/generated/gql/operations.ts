@@ -1315,7 +1315,6 @@ export type LoginInput = {
   password: string;
 };
 
-/** Account type for new manager */
 export type ManagerAccountType =
   | 'admin'
   | 'manager'
@@ -2003,7 +2002,7 @@ export type UserPaymentMethodUpdateInput = {
   label: string | null | undefined;
 };
 
-export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null, displayCurrency: Types.CurrencyCode | null };
+export type MeQuery_me_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type MeQuery_Query = { me: MeQuery_me_User | null };
 
@@ -2013,7 +2012,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = MeQuery_Query;
 
-export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null, displayCurrency: Types.CurrencyCode | null };
+export type UserQuery_user_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type UserQuery_Query = { user: UserQuery_user_User | null };
 
@@ -2025,7 +2024,7 @@ export type UserQueryVariables = Exact<{
 
 export type UserQuery = UserQuery_Query;
 
-export type UsersQuery_users_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null };
+export type UsersQuery_users_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type UsersQuery_Query = { users: Array<UsersQuery_users_User> | null };
 
@@ -2039,7 +2038,7 @@ export type UsersQueryVariables = Exact<{
 
 export type UsersQuery = UsersQuery_Query;
 
-export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null };
+export type LoginMutation_login_LoginResponse_user_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type LoginMutation_login_LoginResponse = { token: string | null, user: LoginMutation_login_LoginResponse_user_User | null };
 
@@ -2053,7 +2052,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = LoginMutation_Mutation;
 
-export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null };
+export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type DemoLoginMutation_demoLogin_LoginResponse = { token: string | null, user: DemoLoginMutation_demoLogin_LoginResponse_user_User | null };
 
@@ -2075,7 +2074,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type LogoutMutation = LogoutMutation_Mutation;
 
-export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null };
+export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type RefreshTokenMutation_refreshToken_RefreshTokenResponse = { token: string | null, user: RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User | null };
 
@@ -5602,3 +5601,5 @@ export type TeachersQueryVariables = Exact<{
 
 
 export type TeachersQuery = TeachersQuery_Query;
+
+export type UserFieldsFragmentFragment = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };

@@ -1,6 +1,6 @@
 "use client";
 
-import { Stack, TextField } from "@mui/material";
+import { Stack } from "@mui/material";
 import type { ReactElement } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
@@ -52,12 +52,10 @@ type ContactSectionProps = ContactSectionViewProps | ContactSectionOwnEditProps 
 function TeacherIdentityFieldsView({
   labels,
   timezone,
-  address,
   scope,
 }: {
   readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
   readonly timezone: string | null | undefined;
-  readonly address: string | null | undefined;
   readonly scope: ProfileScope;
 }) {
   const t = labels.teacher;
@@ -69,30 +67,20 @@ function TeacherIdentityFieldsView({
   }
 
   const showTimezone = showField(timezone, "teacher_identity");
-  const showAddress = showField(address, "teacher_identity");
 
-  if (!showTimezone && !showAddress) {
-    return <ProfileRestrictedSection title={t.sections.contact} labels={tc.fieldAccess} />;
+  if (!showTimezone) {
+    return null;
   }
 
-  return (
-    <>
-      {showTimezone ? (
-        <InfoField label={t.fields.timezone} value={<TimezoneDisplay timezone={timezone} fallback={tc.notSet} />} />
-      ) : null}
-      {showAddress ? <InfoField label={t.fields.address} value={address || tc.notSet} /> : null}
-    </>
-  );
+  return <InfoField label={t.fields.timezone} value={<TimezoneDisplay timezone={timezone} fallback={tc.notSet} />} />;
 }
 
 function TeacherIdentityFieldsEdit({
   labels,
-  register,
   control,
   scope,
 }: {
   readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
-  readonly register: UseFormRegister<TeacherAdminEditFormData>;
   readonly control: Control<TeacherAdminEditFormData>;
   readonly scope?: ProfileScope;
 }) {
@@ -106,35 +94,24 @@ function TeacherIdentityFieldsEdit({
   const identityEditable = canEdit("teacher_identity");
 
   return (
-    <>
-      <TextField
-        label={t.fields.address}
-        fullWidth
-        size="small"
-        multiline
-        rows={2}
-        disabled={!identityEditable}
-        {...register("address")}
-      />
-      <Controller
-        name="timezone"
-        control={control}
-        render={({ field, fieldState }) => (
-          <TimezoneSelect
-            value={field.value ? toGraphqlIanaTimezone(field.value) : null}
-            onChangeAction={value => {
-              field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
-            }}
-            onBlurAction={field.onBlur}
-            label={t.fields.timezone}
-            error={Boolean(fieldState.error)}
-            helperText={fieldState.error?.message}
-            fullWidth
-            disabled={!identityEditable}
-          />
-        )}
-      />
-    </>
+    <Controller
+      name="timezone"
+      control={control}
+      render={({ field, fieldState }) => (
+        <TimezoneSelect
+          value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+          onChangeAction={value => {
+            field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+          }}
+          onBlurAction={field.onBlur}
+          label={t.fields.timezone}
+          error={Boolean(fieldState.error)}
+          helperText={fieldState.error?.message}
+          fullWidth
+          disabled={!identityEditable}
+        />
+      )}
+    />
   );
 }
 
@@ -154,12 +131,7 @@ function ContactSectionEdit(props: ContactSectionOwnEditProps | ContactSectionAd
           <PhoneFormField name="phone" control={props.control} label={t.fields.phone} />
         ) : null}
         {props.isAdminScope ? (
-          <TeacherIdentityFieldsEdit
-            labels={props.labels}
-            register={props.register}
-            control={props.control}
-            scope={scope}
-          />
+          <TeacherIdentityFieldsEdit labels={props.labels} control={props.control} scope={scope} />
         ) : null}
       </Stack>
     </SectionPanel>
@@ -200,12 +172,7 @@ function ContactSectionView(props: ContactSectionViewProps): ReactElement {
           />
         ) : null}
         {showIdentity && adminData ? (
-          <TeacherIdentityFieldsView
-            labels={props.labels}
-            timezone={adminData.timezone}
-            address={adminData.address}
-            scope={scope}
-          />
+          <TeacherIdentityFieldsView labels={props.labels} timezone={adminData.timezone} scope={scope} />
         ) : null}
       </Stack>
     </SectionPanel>

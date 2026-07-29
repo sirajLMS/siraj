@@ -22,6 +22,7 @@ import {
   InvoiceType,
   LeaveRequestStatus,
   LessonReportStatus,
+  ManagerAccountType,
   NotificationChannel,
   NotificationEventType,
   OrderSortDirection,
@@ -44,6 +45,10 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
   name: "AppPermission",
+});
+
+export const ManagerAccountTypePothosEnum = gqlSchemaBuilder.enumType(ManagerAccountType, {
+  name: "ManagerAccountType",
 });
 
 export const OrderSortDirectionPothosObject = gqlSchemaBuilder.enumType(OrderSortDirection, {

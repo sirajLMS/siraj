@@ -1,3 +1,4 @@
+import { ManagerAccountType } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ManagerOnboardingInputPothosObject,
@@ -161,7 +162,7 @@ gqlSchemaBuilder.mutationFields(t => ({
           email: args.input.email,
           password: args.input.password,
           phone: args.input.phone ?? null,
-          accountType: "supervisor",
+          accountType: ManagerAccountType.supervisor,
         },
         ctx.locale
       );

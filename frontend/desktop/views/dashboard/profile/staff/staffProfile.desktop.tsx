@@ -5,8 +5,10 @@ import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/g
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
+import { ContactSection } from "@/frontend/common/views/dashboard/profile/staff/sections/ContactSection";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
 import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 
@@ -160,25 +162,14 @@ export function StaffProfileDesktopView({
     return null;
   };
 
-  const renderContactSection = () => {
-    if (!canView("core_contact")) {
-      return null;
-    }
-    return (
-      <DesktopSectionPanel title={st.sections.contact}>
-        <Stack spacing={1}>
-          {staffData?.phone && (
-            <Typography variant="bodyLg">
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {st.fields.phone}
-              </Typography>
-              {staffData.phone}
-            </Typography>
-          )}
-        </Stack>
-      </DesktopSectionPanel>
-    );
+  const sectionLabels = {
+    staff: st,
+    baseLabels: toStaffSharedBaseLabels(translations.base),
   };
+
+  const renderContactSection = () => (
+    <ContactSection mode="view" labels={sectionLabels} scope={scope} staffData={staffData} />
+  );
 
   if (mode === ProfileMode.View) {
     return (

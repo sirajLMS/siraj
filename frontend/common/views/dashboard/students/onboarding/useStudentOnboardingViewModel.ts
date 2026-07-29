@@ -1,9 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNotifications } from "@toolpad/core/useNotifications";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   type Control,
   type FieldErrors,
@@ -11,16 +10,15 @@ import {
   type UseFormRegister,
   useForm,
 } from "react-hook-form";
+import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
+import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateStudentOnboarding } from "@/frontend/common/hooks/useCreateStudentOnboarding";
-import { logger } from "@/frontend/common/utils/logger";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import {
   type StudentOnboardingFormData,
   studentOnboardingSchema,
 } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
-import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { StudentOnboardingLabels as StudentOnboardingLocaleLabels } from "@/shared/locale/types/dashboard/students/onboarding";
 
@@ -170,19 +168,20 @@ function buildLabels(t: StudentOnboardingLocaleLabels): StudentOnboardingLabels 
 
 function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
   const t = useAppTranslation(Translation.Dashboard.StudentOnboarding);
-  const tc = useAppTranslation(Translation.Common);
-  const router = useRouter();
-  const notifications = useNotifications();
   const searchParams = useSearchParams();
   const initialParentId = searchParams.get("parentId") ?? "";
 
   const { execute, loading } = useCreateStudentOnboarding();
-  const [showSuccess, setShowSuccess] = useState(false);
-  // Lazy initializer: Generate the pending-avatar storage key once per hook
-  // instance. Using useState with a lazy initializer (instead of useRef) avoids
-  // reading ref.current during render (which trips `react-hooks/refs`).
-  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
+  const { onUploadAvatar } = useOnboardingAvatar();
+  const { showSuccess, onSubmit, onDismissSuccess, isSubmitting } = useOnboardingSubmit<
+    StudentOnboardingFormData,
+    { studentId: string | null }
+  >({
+    execute,
+    onSuccess: result => (result?.studentId ? studentHref(result.studentId) : undefined),
+    onError: error => (error instanceof Error ? error.message : "operationFailed"),
+    successAutoDismissMs: 3000,
+  });
 
   const {
     register,
@@ -199,39 +198,27 @@ function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
     }
   }, [initialParentId, setValue]);
 
-  const onSubmit = useCallback(
+  const wrappedOnSubmit = useCallback(
     async (formData: StudentOnboardingFormData) => {
-      try {
-        logger.info("Submitting student onboarding form", { formData });
-        const result = await execute(formData);
-        setShowSuccess(true);
-        reset(buildResetPayload(initialParentId, formData));
-        if (result.studentId) {
-          router.push(studentHref(result.studentId));
-        }
-      } catch (error) {
-        logger.error("Failed to submit student onboarding form", { error });
-        notifications.show(tc.operationFailed, { severity: "error", autoHideDuration: 5000 });
-      }
+      await onSubmit(formData);
+      reset(buildResetPayload(initialParentId, formData));
     },
-    [execute, initialParentId, notifications, reset, router, tc.operationFailed]
+    [onSubmit, reset, initialParentId]
   );
 
   const labels = useMemo(() => buildLabels(t), [t]);
-
-  const onCloseSuccess = useCallback(() => setShowSuccess(false), []);
 
   return {
     register,
     control,
     errors,
     handleSubmit,
-    isSubmitting: loading,
+    isSubmitting: loading || isSubmitting,
     parentLocked: Boolean(initialParentId),
     labels,
-    onSubmit,
+    onSubmit: wrappedOnSubmit,
     successOpen: showSuccess,
-    onCloseSuccess,
+    onCloseSuccess: onDismissSuccess,
     successMessage: t.actions.successMessage,
     onUploadAvatar,
   };

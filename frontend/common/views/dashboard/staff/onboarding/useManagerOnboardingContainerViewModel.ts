@@ -3,11 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
+import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
 import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
-import { logger } from "@/frontend/common/utils/logger";
 import { managerOnboardingSchema } from "@/frontend/common/views/dashboard/staff/onboarding/schemas/managerOnboardingSchema";
 import type { OnboardingMetricsViewModel } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
 import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
@@ -47,13 +47,10 @@ export function useManagerOnboardingContainerViewModel(
   const labels = useAppTranslation(Translation.Dashboard.StaffOnboarding);
   const router = useRouter();
   const { execute, loading } = useCreateManagerOnboarding();
-  const [showSuccess, setShowSuccess] = useState(false);
   const metricsModel = useOnboardingMetrics();
-  // Lazy initializer: generate the pending-avatar storage key once per hook
-  // instance. Using useState with a lazy initializer (instead of useRef) avoids
-  // reading ref.current during render (which trips `react-hooks/refs`).
-  const [pendingAvatarKey] = useState(() => `pending-${crypto.randomUUID()}`);
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: pendingAvatarKey });
+  const { onUploadAvatar } = useOnboardingAvatar();
+
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const {
     register,
@@ -76,18 +73,20 @@ export function useManagerOnboardingContainerViewModel(
     };
   }, [showSuccess]);
 
-  const onSubmit = async (formData: ManagerOnboardingFormData) => {
-    try {
-      logger.info("Submitting manager onboarding form", { formData });
-      await execute(formData);
-      logger.info("Manager onboarding form submitted successfully");
-      setShowSuccess(true);
-      resetForm();
-      router.push("/staff");
-    } catch (error) {
-      logger.error("Failed to submit manager onboarding form", { error });
-    }
-  };
+  const {
+    isSubmitting,
+    showSuccess: showSuccessState,
+    onSubmit,
+    onDismissSuccess,
+  } = useOnboardingSubmit<ManagerOnboardingFormData, { userId: string }>({
+    execute: async data => {
+      await execute(data);
+      return { userId: "" }; // execute doesn't return userId, but we need to satisfy the return type
+    },
+    onSuccess: () => "/staff",
+    successAutoDismissMs: 3000,
+    resetForm,
+  });
 
   const onCancel = () => {
     router.push("/staff");
@@ -99,11 +98,11 @@ export function useManagerOnboardingContainerViewModel(
     control,
     errors,
     handleSubmit,
-    isSubmitting: loading,
-    showSuccess,
+    isSubmitting: loading || isSubmitting,
+    showSuccess: showSuccessState,
     onSubmit,
     onCancel,
-    onDismissSuccess: () => setShowSuccess(false),
+    onDismissSuccess,
     metricsModel,
     onUploadAvatar,
   };
