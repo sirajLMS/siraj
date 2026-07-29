@@ -42,4 +42,6 @@ export interface DashboardLayoutProps {
   readonly sidebarWidth?: string;
   readonly navbarHeight?: string;
   readonly initialSidebarOpen?: boolean;
+  /** When true, hide sidebar, drawer, and bottom nav (teacher profile completion gate). */
+  readonly hideSidebarNavigation?: boolean;
 }

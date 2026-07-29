@@ -269,7 +269,7 @@ export function useStudentCreditsViewModel(): StudentCreditsViewModel {
     onReasonFilterChange: setReasonFilter,
     onPageChange: setPage,
     onPageSizeChange: setPageSize,
-    onBackToDashboard: () => router.push("/students/me"),
+    onBackToDashboard: () => router.push("/dashboard"),
     reasonLabel,
   };
 }

@@ -13,7 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
+import { PrimaryPageAction } from "@/frontend/common/components/ui/container";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
@@ -71,7 +71,7 @@ function ScheduleWorkloadMetrics({ labels, schedule }: Readonly<{ labels: Schedu
             key: "weekly-hours-worked",
             count: schedule.weeklyHoursWorked,
             labelKey: "weekly-hours-worked",
-            label: labels.metrics.weeklyHoursWorked(schedule.weeklyHoursWorked),
+            label: labels.metrics.weeklyHoursWorkedTitle,
             icon: TimerOutlined,
           },
         ] satisfies MetricItem[]
@@ -201,15 +201,13 @@ export function TeacherWeeklyScheduleViewDesktop({
 
       {hasScheduleViewWorkload ? <ScheduleWorkloadMetrics labels={t} schedule={schedule} /> : null}
 
-      <SectionPanel>
-        <WeeklyScheduleGrid
-          classes={schedule.classes}
-          onRemoveClass={onRemoveClass}
-          hasScheduleDeleteClass={hasScheduleDeleteClass}
-          labels={labels}
-          meetingJoinLabels={meetingJoinLabels}
-        />
-      </SectionPanel>
+      <WeeklyScheduleGrid
+        classes={schedule.classes}
+        onRemoveClass={onRemoveClass}
+        hasScheduleDeleteClass={hasScheduleDeleteClass}
+        labels={labels}
+        meetingJoinLabels={meetingJoinLabels}
+      />
 
       <ScheduleLegend labels={t} schedule={schedule} />
 

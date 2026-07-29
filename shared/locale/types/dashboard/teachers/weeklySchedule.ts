@@ -5,7 +5,8 @@ export interface TeacherWeeklyScheduleLabels {
     readonly schedule: string;
   };
   readonly metrics: {
-    readonly weeklyHoursWorked: (hours: number) => string;
+    readonly weeklyHoursWorkedTitle: string;
+    readonly weeklyHoursWorked: (hours: string) => string;
   };
   readonly actions: {
     readonly addSlot: string;
@@ -20,7 +21,16 @@ export interface TeacherWeeklyScheduleLabels {
     readonly bookedClass: string;
     readonly availableSlot: string;
     readonly lastUpdated: (date: string) => string;
-    readonly sessionEnded: string;
+    readonly unknownSubject: string;
+    readonly status: {
+      readonly ended: string;
+      readonly absent: string;
+      readonly leave: string;
+      readonly pending: string;
+      readonly activated: string;
+      readonly running: string;
+      readonly frozen: string;
+    };
   };
   readonly days: {
     readonly monday: string;

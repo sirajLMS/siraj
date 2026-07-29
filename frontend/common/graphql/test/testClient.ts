@@ -11,6 +11,13 @@ export const clearCookies = () => {
   cookieJar = [];
 };
 
+/** Returns a named auth cookie from the in-memory test jar (for integration tests). */
+export const getTestCookie = (name: string): string | undefined => {
+  const prefix = `${name}=`;
+  const entry = cookieJar.find(c => c.startsWith(prefix));
+  return entry?.slice(prefix.length);
+};
+
 function parseCookie(cookieStr: string): { name: string; value: string } | null {
   const part = cookieStr.split(";")[0]?.trim();
   if (!part) return null;

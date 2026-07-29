@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
+import { isTeacherNationalIdComplete } from "@/frontend/common/lib/profileCompletion";
+import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import {
   type AccountStatus,
   type CurrencyCode,
@@ -24,6 +26,7 @@ import type {
   TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import { useRouter } from "@/shared/i18n/navigation";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 
@@ -87,6 +90,7 @@ export interface UseTeacherProfileViewModelProps {
   readonly mode: ProfileMode;
   readonly targetUserId: string;
   readonly activeTab?: string;
+  readonly forceComplete?: boolean;
 }
 
 export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileViewModelProps>): TeacherProfileViewModel {
@@ -96,10 +100,11 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const errors = useAppTranslation(Translation.Errors);
   const labels: TeacherProfileViewLabels = { base, teacher, dashboard, errors };
 
-  const { scope, mode, targetUserId, activeTab: _activeTab = "profile" } = props;
+  const { scope, mode, targetUserId, activeTab: _activeTab = "profile", forceComplete = false } = props;
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
@@ -137,6 +142,13 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
           },
         },
       });
+
+      if (forceComplete && isTeacherNationalIdComplete(formData.nationalId)) {
+        router.replace(ownProfileHref());
+        router.refresh();
+        return;
+      }
+
       await refetch();
     } catch (submitError) {
       logger.error("Failed to update own teacher profile", { error: submitError });

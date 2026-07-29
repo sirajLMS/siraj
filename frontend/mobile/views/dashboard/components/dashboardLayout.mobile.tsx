@@ -26,7 +26,13 @@ import { usePathname } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
 
-function MobileMainScrollArea({ children }: { readonly children: ReactNode }) {
+function MobileMainScrollArea({
+  children,
+  hideBottomNav,
+}: {
+  readonly children: ReactNode;
+  readonly hideBottomNav: boolean;
+}) {
   const mainRef = useRef<HTMLElement>(null);
   useFxLiveRefresh();
 
@@ -45,7 +51,9 @@ function MobileMainScrollArea({ children }: { readonly children: ReactNode }) {
         overflowY: "auto",
         overscrollBehavior: "contain",
         backgroundColor: theme.palette.background.default,
-        pb: `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
+        pb: hideBottomNav
+          ? theme.spacing(2)
+          : `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
       })}
     >
       <Box
@@ -88,6 +96,7 @@ export function DashboardLayoutMobile({
   avatarUrl,
   notificationCount,
   sidebarWidth = "260px",
+  hideSidebarNavigation = false,
 }: Readonly<DashboardLayoutProps>) {
   const pathname = usePathname();
   const t = useNavLabels();
@@ -100,7 +109,7 @@ export function DashboardLayoutMobile({
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
       <NavbarChrome
         roleLabel={roleLabel}
-        leftSlot={<MobileMenuButton />}
+        leftSlot={hideSidebarNavigation ? null : <MobileMenuButton />}
         rightSlot={
           <>
             <ThemeSwitcher />
@@ -111,15 +120,17 @@ export function DashboardLayoutMobile({
         }
       />
 
-      <SidebarShell
-        navGroups={translatedNavGroups}
-        navItems={translatedNavItems}
-        activeKey={activeNavKey}
-        sidebarWidth={sidebarWidth}
-        userName={userName}
-        avatarUrl={avatarUrl}
-        logoutLabel={navLabels.nav.logout}
-      />
+      {hideSidebarNavigation ? null : (
+        <SidebarShell
+          navGroups={translatedNavGroups}
+          navItems={translatedNavItems}
+          activeKey={activeNavKey}
+          sidebarWidth={sidebarWidth}
+          userName={userName}
+          avatarUrl={avatarUrl}
+          logoutLabel={navLabels.nav.logout}
+        />
+      )}
 
       {/* NavbarChrome is position:fixed — offset content like desktop (pt: navbarHeight) */}
       <Box
@@ -133,10 +144,12 @@ export function DashboardLayoutMobile({
           boxSizing: "border-box",
         })}
       >
-        <MobileMainScrollArea>{children}</MobileMainScrollArea>
+        <MobileMainScrollArea hideBottomNav={hideSidebarNavigation}>{children}</MobileMainScrollArea>
       </Box>
 
-      <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />
+      {hideSidebarNavigation ? null : (
+        <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />
+      )}
     </Box>
   );
 }

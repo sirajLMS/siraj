@@ -11,6 +11,7 @@ interface DashboardLayoutContainerProps {
   readonly userProfile: User;
   readonly isSuperAdmin: boolean;
   readonly initialSidebarOpen?: boolean;
+  readonly hideSidebarNavigation?: boolean;
 }
 
 export async function DashboardLayoutContainer({
@@ -18,6 +19,7 @@ export async function DashboardLayoutContainer({
   userProfile,
   isSuperAdmin,
   initialSidebarOpen,
+  hideSidebarNavigation = false,
 }: DashboardLayoutContainerProps) {
   const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations;
@@ -35,6 +37,7 @@ export async function DashboardLayoutContainer({
         logoAriaLabel={coreLayoutT.appTitle}
         initialSidebarOpen={initialSidebarOpen}
         enableUsersDirectory={enableUsersDirectory}
+        hideSidebarNavigation={hideSidebarNavigation}
       >
         {children}
       </DashboardClientBridge>

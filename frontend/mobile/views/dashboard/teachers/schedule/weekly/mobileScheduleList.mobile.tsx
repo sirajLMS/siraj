@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import {
   isTerminalClassInstance,
+  resolveWeeklyScheduleSlotStatus,
   useDeleteConfirmDialog,
   useSelectedDayFilter,
   WEEKLY_SCHEDULE_DAYS,
@@ -22,10 +23,20 @@ import type {
   MobileScheduleListProps,
   ScheduledClass,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { Link } from "@/shared/i18n";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
+
+const linkTypographySx = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  display: "block",
+} as const;
 
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;
@@ -44,10 +55,19 @@ function MobileSlotItem({
 }: Readonly<MobileSlotItemProps>) {
   const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
   const t = labels;
+  const classInstanceId = classItem.id ?? "";
+  const subjectLabel = classItem.subjectName?.trim() || t.grid.unknownSubject;
+  const statusLabel = resolveWeeklyScheduleSlotStatus(classItem, t.grid.status);
 
   const handleConfirm = () => {
     closeDialog();
-    onRemove(classItem.id ?? "");
+    onRemove(classInstanceId);
+  };
+
+  const handleDeleteClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openDialog();
   };
 
   const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
@@ -56,64 +76,91 @@ function MobileSlotItem({
   const isTerminal = isTerminalClassInstance(classItem.executionState, classItem.outcome);
   const showDelete = !classItem.isFrozen && !isTerminal;
 
-  let slotContent: React.ReactNode = null;
-  if (canJoin) {
-    slotContent = (
-      <MobileMeetingJoinAction
-        variant="icon"
-        joinUrl={classItem.meetingJoinUrl}
-        meeting={classItem.effectiveMeeting}
-        emptyRole="teacher"
-        label={meetingJoinLabels.joinMeeting}
-        setupHref="/profile?tab=meeting"
-      />
-    );
-  } else if (isTerminal) {
-    slotContent = (
-      <Typography variant="labelMd" sx={{ opacity: 0.7, color: "inherit", fontSize: 10 }}>
-        {t.grid.sessionEnded}
-      </Typography>
-    );
-  }
-
   return (
     <>
       <Box
         sx={theme => ({
-          backgroundColor: theme.palette.primary.dark,
-          color: theme.palette.onPrimary,
-          borderRadius: 2,
-          px: 2,
-          py: 1.5,
+          flex: 1,
           width: "100%",
+          minHeight: 0,
+          backgroundColor: isTerminal ? theme.palette.surfaceContainerHigh : theme.palette.primaryContainer,
+          color: isTerminal ? theme.palette.onSurface : theme.palette.onPrimaryContainer,
+          borderRadius: 1.5,
+          px: 1.5,
+          py: 1.25,
           display: "flex",
+          flexDirection: "column",
           justifyContent: "space-between",
-          alignItems: "center",
-          borderLeft: `4px solid ${theme.palette.status.confirmed}`,
+          gap: 0.75,
+          border: `1px solid ${isTerminal ? theme.palette.outlineVariant : theme.palette.primary.main}`,
+          borderInlineStart: `3px solid ${theme.palette.primary.main}`,
+          opacity: isTerminal ? 0.9 : 1,
         })}
       >
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="bodyLg" sx={{ color: "inherit" }}>
-            {classItem.studentName} ({classItem.duration}m)
+        <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
+          {classInstanceId ? (
+            <Link href={classHref(classInstanceId)} style={{ textDecoration: "none", minWidth: 0 }}>
+              <Typography
+                variant="bodyMd"
+                sx={theme => ({
+                  ...linkTypographySx,
+                  fontWeight: 700,
+                  color: theme.palette.primary.main,
+                  lineHeight: 1.25,
+                  "&:hover": { textDecoration: "underline" },
+                })}
+              >
+                {subjectLabel}
+              </Typography>
+            </Link>
+          ) : (
+            <Typography variant="bodyMd" sx={{ ...linkTypographySx, fontWeight: 700, lineHeight: 1.25 }}>
+              {subjectLabel}
+            </Typography>
+          )}
+
+          <MobilePersonProfileLink
+            href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
+            name={classItem.studentName || "—"}
+            showAvatar={false}
+            typographyVariant="bodySm"
+            fontWeight={500}
+          />
+
+          <Typography variant="caption" sx={{ color: "inherit", opacity: 0.85, lineHeight: 1.2 }}>
+            {classItem.duration}m · {statusLabel}
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          {slotContent}
-          {showDelete && hasScheduleDeleteClass ? (
-            <Box
-              component="span"
-              className="material-symbols-outlined"
-              sx={theme => ({
-                fontSize: 20,
-                cursor: "pointer",
-                "&:hover": { color: theme.palette.error.light },
-              })}
-              onClick={openDialog}
-            >
-              delete
-            </Box>
-          ) : null}
-        </Box>
+
+        {(canJoin || (showDelete && hasScheduleDeleteClass)) ? (
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.75, minHeight: 24 }}>
+            {canJoin ? (
+              <MobileMeetingJoinAction
+                variant="icon"
+                joinUrl={classItem.meetingJoinUrl}
+                meeting={classItem.effectiveMeeting}
+                emptyRole="teacher"
+                label={meetingJoinLabels.joinMeeting}
+                setupHref="/profile?tab=meeting"
+              />
+            ) : null}
+            {showDelete && hasScheduleDeleteClass ? (
+              <Box
+                component="span"
+                className="material-symbols-outlined"
+                sx={theme => ({
+                  fontSize: 20,
+                  cursor: "pointer",
+                  opacity: 0.7,
+                  "&:hover": { color: theme.palette.error.main, opacity: 1 },
+                })}
+                onClick={handleDeleteClick}
+              >
+                delete
+              </Box>
+            ) : null}
+          </Box>
+        ) : null}
       </Box>
 
       <Dialog open={open} onClose={closeDialog}>
@@ -230,7 +277,7 @@ function TimeSlotRow({
     );
   } else if (slotClasses.length > 0) {
     content = (
-      <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
+      <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 0.75, py: 0.5 }}>
         {slotClasses.map(c => (
           <MobileSlotItem
             key={c.id}
@@ -249,7 +296,7 @@ function TimeSlotRow({
     <Box
       sx={theme => ({
         display: "flex",
-        minHeight: isLunch ? 48 : 80,
+        minHeight: isLunch ? 48 : slotClasses.length > 0 ? 96 : 64,
         backgroundColor: theme.palette.background.paper,
       })}
     >
@@ -270,7 +317,7 @@ function TimeSlotRow({
           {time}
         </Typography>
       </Box>
-      <Box sx={{ flex: 1, p: 1, display: "flex", alignItems: "center" }}>{content}</Box>
+      <Box sx={{ flex: 1, px: 1, py: 0.5, display: "flex", alignItems: "stretch" }}>{content}</Box>
     </Box>
   );
 }

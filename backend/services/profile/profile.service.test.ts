@@ -1,7 +1,49 @@
-import { describe, expect, test } from "bun:test";
-import { CurrencyCode, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import { afterEach, describe, expect, spyOn, test } from "bun:test";
+import { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope, UserRole } from "@/backend/enum";
+import type { ProfilePageContext } from "@/backend/types";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { isRedirect, toParentRepoInput } from "@/backend/services";
+import { ParentRepository, StaffProfileRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { isRedirect, ProfileService, toParentRepoInput } from "@/backend/services";
+
+afterEach(() => {
+  spyOn(TeacherRepository, "findByUserId").mockRestore();
+  spyOn(ParentRepository, "findByUserId").mockRestore();
+  spyOn(StaffProfileRepository, "findByUserId").mockRestore();
+  spyOn(StudentRepository, "getStudentIdByUserId").mockRestore();
+  spyOn(PermissionsService, "hasAnyPermission").mockRestore();
+  spyOn(PermissionsService, "getUserContext").mockRestore();
+});
+
+describe("ProfileService.resolvePageContext", () => {
+  test("allows pure admin own profile when granted profile view_other only", async () => {
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(ParentRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(StudentRepository, "getStudentIdByUserId").mockResolvedValue(null);
+    spyOn(PermissionsService, "hasAnyPermission").mockImplementation(async (_userId, keys) => {
+      const list = keys as AppPermission[];
+      return list.includes(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER);
+    });
+    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
+      permissions: [AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER],
+      permissionGroups: [],
+      isSuperAdmin: false,
+      role: UserRole.ACADEMY_ADMIN,
+    });
+
+    const result = await ProfileService.resolvePageContext("admin-user", { mode: ProfileMode.VIEW });
+
+    expect(isRedirect(result)).toBe(false);
+    if (isRedirect(result)) {
+      throw new Error("expected profile page context, got redirect");
+    }
+    const context = result as ProfilePageContext;
+    expect(context.audience).toBe(ProfileAudience.STAFF);
+    expect(context.scope).toBe(ProfileScope.OTHER);
+    expect(context.targetUserId).toBe("admin-user");
+  });
+});
 
 describe("ProfileService helpers", () => {
   test("isRedirect identifies redirect resolutions", () => {

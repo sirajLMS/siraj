@@ -2,7 +2,6 @@
 
 import { Alert, Box } from "@mui/material";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
 import { ParentSupportFab } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentSupportFab";
 import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
@@ -11,6 +10,7 @@ import {
   teacherDashboardPageContainerSx,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/activationPolicyPanel.desktop";
 import { ManualClassEntryStudentSelectDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.desktop";
 import { MissedClassAlertBannerDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.desktop";
@@ -58,14 +58,11 @@ export function TeacherDashboardDesktopView({
           </Alert>
         )}
 
-        <DesktopPageHeader title={labels.activeWelcome.title(userName)} />
+        <DesktopPageHeader title={labels.activeWelcome.title(userName)} subtitle={lastUpdated} />
 
-        <DashboardMetricsSection
-          title={labels.pageTitle}
-          lastUpdated={lastUpdated}
-          metrics={metricItems}
-          gridSize={{ xs: 6, sm: 6, md: 3 }}
-        />
+        <Box sx={{ mb: 3 }}>
+          <DesktopMetricCardGrid metrics={metricItems} size={{ xs: 6, sm: 6, md: 3 }} />
+        </Box>
 
         <TeacherDailyScheduleSectionDesktop
           title={labels.schedule.title}

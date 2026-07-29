@@ -420,7 +420,7 @@ function buildScheduleViewModel(schedule: ScheduleGrid, workload: Workload, teac
   return {
     teacherId: schedule?.teacherId || "",
     teacherName,
-    weeklyHoursWorked: workload?.weeklyHoursWorked ? Number(workload.weeklyHoursWorked) : 0,
+    weeklyHoursWorked: workload?.weeklyHoursWorked ?? "0:00",
     classes: (schedule?.classes || []).map(c => ({
       id: c.id || "",
       studentName: c.studentName || "",

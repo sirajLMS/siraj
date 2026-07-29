@@ -188,10 +188,10 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
         }
       },
       handleViewHistory: () => {
-        router.push("/students/me/history");
+        router.push("/students/history");
       },
       handleViewCredits: () => {
-        router.push("/students/me/credits");
+        router.push("/students/credits");
       },
       handleAddReflection: (classInstanceId: string) => {
         setSelectedReportId(classInstanceId);

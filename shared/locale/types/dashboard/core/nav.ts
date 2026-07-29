@@ -56,6 +56,7 @@ export interface DashboardNavigationLabels {
   readonly todayClasses: string;
   readonly regularSchedule: string;
   readonly yourStudents: string;
+  readonly teacherClassList: string;
   readonly yourProfile: string;
   readonly salaryDetails: string;
   readonly teacherRules: string;

@@ -4,7 +4,10 @@ import {
   getNavItemsForPermissions,
   SIDEBAR_NAV_ITEMS,
 } from "@/frontend/common/views/dashboard/config/navigationConfig";
-import { getActiveNavKey } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
+import {
+  getActiveNavKey,
+  isProfileRouteActive,
+} from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
 
 const TEACHER_PERMISSIONS: AppPermission[] = [
   AppPermission.DashboardView,
@@ -40,14 +43,14 @@ describe("getActiveNavKey", () => {
     expect(getActiveNavKey("/students", items)).toBe("your-students");
   });
 
-  test("highlights regular-schedule on /teachers/me/schedule/weekly", () => {
+  test("highlights regular-schedule on /schedule/weekly", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
-    expect(getActiveNavKey("/teachers/me/schedule/weekly", items)).toBe("regular-schedule");
+    expect(getActiveNavKey("/schedule/weekly", items)).toBe("regular-schedule");
   });
 
-  test("highlights regular-schedule on /teachers/me/schedule/weekly/extra", () => {
+  test("highlights regular-schedule on /schedule/weekly/extra", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
-    expect(getActiveNavKey("/teachers/me/schedule/weekly/extra", items)).toBe("regular-schedule");
+    expect(getActiveNavKey("/schedule/weekly/extra", items)).toBe("regular-schedule");
   });
 
   test("prefers longest matching href when multiple items match", () => {
@@ -73,5 +76,24 @@ describe("getActiveNavKey", () => {
   test("returns null when no items match a deep dynamic segment without a parent nav item", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, ADMIN_PERMISSIONS);
     expect(getActiveNavKey("/some/orphan/route", items)).toBeNull();
+  });
+});
+
+describe("isProfileRouteActive", () => {
+  test("is active on /profile", () => {
+    expect(isProfileRouteActive("/profile")).toBe(true);
+  });
+
+  test("is active on /profile/edit", () => {
+    expect(isProfileRouteActive("/profile/edit")).toBe(true);
+  });
+
+  test("strips locale prefix before matching", () => {
+    expect(isProfileRouteActive("/ar/profile")).toBe(true);
+  });
+
+  test("is not active on unrelated routes", () => {
+    expect(isProfileRouteActive("/dashboard")).toBe(false);
+    expect(isProfileRouteActive("/users/user-1/profile")).toBe(false);
   });
 });

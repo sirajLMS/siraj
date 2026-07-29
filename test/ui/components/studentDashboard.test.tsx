@@ -21,7 +21,7 @@ mock.module("next/navigation", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/dashboard",
+  usePathname: () => "/dashboard",
   useSearchParams: () => new URLSearchParams(),
   redirect: () => {},
 }));
@@ -37,7 +37,7 @@ mock.module("@/shared/i18n/routing", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/dashboard",
+  usePathname: () => "/dashboard",
   Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
     <a href={href} {...rest}>
       {children}
@@ -55,7 +55,7 @@ mock.module("@/shared/i18n/navigation", () => ({
     replace: mock(() => {}),
     prefetch: mock(() => {}),
   }),
-  usePathname: () => "/students/me/dashboard",
+  usePathname: () => "/dashboard",
 }));
 
 // Eliminates dependency on the router-backed language switch hook so this file is

@@ -5,7 +5,13 @@ import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { DateNavigator } from "@/frontend/common/components/ui";
 
-const StyledFiltersContainer = styled(Box)(({ theme }) => ({
+interface StyledFiltersContainerProps {
+  readonly centerOnDesktop?: boolean;
+}
+
+const StyledFiltersContainer = styled(Box, {
+  shouldForwardProp: prop => prop !== "centerOnDesktop",
+})<StyledFiltersContainerProps>(({ theme, centerOnDesktop }) => ({
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(2),
@@ -14,7 +20,14 @@ const StyledFiltersContainer = styled(Box)(({ theme }) => ({
   [theme.breakpoints.up("md")]: {
     flexDirection: "row",
     alignItems: "flex-end",
-    flexWrap: "wrap",
+    flexWrap: centerOnDesktop ? "nowrap" : "wrap",
+    ...(centerOnDesktop
+      ? {
+          width: "100%",
+          justifyContent: "space-between",
+          gap: theme.spacing(2),
+        }
+      : {}),
   },
 }));
 
@@ -27,14 +40,27 @@ const StyledDateNavigatorSlot = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledTeacherSelectSlot = styled(Box)(({ theme }) => ({
+interface StyledTeacherSelectSlotProps {
+  readonly centerOnDesktop?: boolean;
+}
+
+const StyledTeacherSelectSlot = styled(Box, {
+  shouldForwardProp: prop => prop !== "centerOnDesktop",
+})<StyledTeacherSelectSlotProps>(({ theme, centerOnDesktop }) => ({
   width: "100%",
   minWidth: 0,
-  [theme.breakpoints.up("md")]: {
-    flex: "1 1 200px",
-    minWidth: 200,
-    maxWidth: 360,
-  },
+  [theme.breakpoints.up("md")]: centerOnDesktop
+    ? {
+        flex: "0 0 auto",
+        width: 280,
+        minWidth: 200,
+        maxWidth: 360,
+      }
+    : {
+        flex: "1 1 200px",
+        minWidth: 200,
+        maxWidth: 360,
+      },
 }));
 
 interface ScheduleFiltersProps {
@@ -45,6 +71,8 @@ interface ScheduleFiltersProps {
   readonly nextDayLabel: string;
   readonly teacherSelect: ReactNode;
   readonly onDateChange: (date: string) => void;
+  /** When true, the filter row spans full width with space-between on desktop. */
+  readonly centerOnDesktop?: boolean;
 }
 
 export function ScheduleFilters({
@@ -55,9 +83,10 @@ export function ScheduleFilters({
   nextDayLabel,
   teacherSelect,
   onDateChange,
+  centerOnDesktop = false,
 }: Readonly<ScheduleFiltersProps>) {
   return (
-    <StyledFiltersContainer>
+    <StyledFiltersContainer centerOnDesktop={centerOnDesktop}>
       <StyledDateNavigatorSlot>
         <DateNavigator
           dateValue={dateValue}
@@ -69,7 +98,7 @@ export function ScheduleFilters({
         />
       </StyledDateNavigatorSlot>
 
-      <StyledTeacherSelectSlot>{teacherSelect}</StyledTeacherSelectSlot>
+      <StyledTeacherSelectSlot centerOnDesktop={centerOnDesktop}>{teacherSelect}</StyledTeacherSelectSlot>
     </StyledFiltersContainer>
   );
 }

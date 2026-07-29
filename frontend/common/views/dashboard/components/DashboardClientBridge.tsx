@@ -9,6 +9,7 @@ import { UserStoreInitializer } from "@/frontend/common/views/dashboard/componen
 import { DashboardLayout } from "@/frontend/common/views/dashboard/components/DashboardLayout";
 import { NotificationDrawer } from "@/frontend/common/views/dashboard/components/navbar/notifications/NotificationDrawer";
 import { useNotificationsDrawerViewModel } from "@/frontend/common/views/dashboard/components/navbar/notifications/useNotificationsDrawerViewModel";
+import { TeacherProfileCompletionRedirect } from "@/frontend/common/views/dashboard/components/TeacherProfileCompletionRedirect";
 import { getDashboardLayoutData } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
 
 interface DashboardClientBridgeProps {
@@ -20,6 +21,7 @@ interface DashboardClientBridgeProps {
   readonly logoAriaLabel: string;
   readonly initialSidebarOpen?: boolean;
   readonly enableUsersDirectory: boolean;
+  readonly hideSidebarNavigation?: boolean;
 }
 
 /**
@@ -56,17 +58,20 @@ export function DashboardClientBridge({
   logoAriaLabel,
   initialSidebarOpen,
   enableUsersDirectory,
+  hideSidebarNavigation = false,
 }: Readonly<DashboardClientBridgeProps>) {
   const notificationCount = useLiveNotificationCount(userProfile.notificationCount || 0);
   const notificationsDrawerVm = useNotificationsDrawerViewModel();
 
   const permissions = (userProfile.permissions || []).filter(isValidPermission);
-  const { sidebarGroups, sidebarItems, bottomNavItems } = getDashboardLayoutData(permissions, {
-    enableUsersDirectory,
-  });
+  const layoutData = hideSidebarNavigation
+    ? { sidebarGroups: [], sidebarItems: [], bottomNavItems: [] }
+    : getDashboardLayoutData(permissions, { enableUsersDirectory });
+  const { sidebarGroups, sidebarItems, bottomNavItems } = layoutData;
 
   return (
     <NotificationsProvider>
+      <TeacherProfileCompletionRedirect active={hideSidebarNavigation} />
       <UserStoreInitializer userProfile={userProfile} isSuperAdmin={isSuperAdmin} />
       <DashboardLayout
         sidebarGroups={sidebarGroups}
@@ -81,6 +86,7 @@ export function DashboardClientBridge({
         avatarUrl={userProfile.avatarUrl || ""}
         notificationCount={notificationCount}
         initialSidebarOpen={initialSidebarOpen}
+        hideSidebarNavigation={hideSidebarNavigation}
       >
         {children}
       </DashboardLayout>

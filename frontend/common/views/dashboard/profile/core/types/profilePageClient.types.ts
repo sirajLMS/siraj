@@ -7,6 +7,8 @@ export type ProfilePageClientProps = {
   readonly audience: ProfileAudience;
   readonly targetUserId: string;
   readonly studentId?: string;
+  /** Server-provided gate for teacher own-profile edit force-complete redirects. */
+  readonly nationalIdComplete?: boolean;
 };
 
 export type ProfilePageClientLabels = {

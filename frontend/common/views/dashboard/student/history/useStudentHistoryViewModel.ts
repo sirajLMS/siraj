@@ -105,7 +105,7 @@ function useStudentHistoryNavigation(): StudentHistoryNavigation {
   const router = useRouter();
   return useMemo(
     () => ({
-      onBackToDashboard: () => router.push("/students/me"),
+      onBackToDashboard: () => router.push("/dashboard"),
       onOpenMeetingUrl: (url: string | null | undefined) => safeOpenWindow(url),
     }),
     [router]

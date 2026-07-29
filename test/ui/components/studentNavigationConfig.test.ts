@@ -22,11 +22,8 @@ describe("student sidebar navigation", () => {
     expect(keys).toContain("student-today-classes");
     expect(keys).toContain("student-schedule");
     expect(keys).toContain("student-credits");
-    expect(keys).toContain("student-profile");
-    expect(keys).toContain("logout");
-
-    const profile = items.find(item => item.key === "student-profile");
-    expect(profile?.href).toBe("/profile");
+    expect(keys).not.toContain("student-profile");
+    expect(keys).not.toContain("logout");
 
     expect(keys).not.toContain("home");
     expect(keys).not.toContain("search-schedule");

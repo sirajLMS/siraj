@@ -53,6 +53,7 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   todayClasses: "Today's Classes",
   regularSchedule: "Regular Schedule",
   yourStudents: "Your Students",
+  teacherClassList: "Class List",
   yourProfile: "Your Profile",
   salaryDetails: "Salary Details",
   teacherRules: "Rules",

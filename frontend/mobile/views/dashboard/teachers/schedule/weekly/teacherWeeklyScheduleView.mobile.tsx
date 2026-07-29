@@ -52,7 +52,7 @@ export function TeacherWeeklyScheduleViewMobile({
   const workloadMetrics: readonly MetricItem[] = [
     {
       key: "weeklyHoursWorked",
-      label: t.metrics.weeklyHoursWorked(Number(schedule.weeklyHoursWorked)),
+      label: t.metrics.weeklyHoursWorkedTitle,
       count: schedule.weeklyHoursWorked,
       icon: TimerOutlined,
       labelKey: "weeklyHoursWorked",

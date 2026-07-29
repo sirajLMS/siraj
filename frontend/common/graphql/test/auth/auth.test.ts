@@ -10,7 +10,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { authenticatedRequest, loginDemoUser } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
+import { clearCookies, getTestCookie, testClient } from "@/frontend/common/graphql/test/testClient";
 
 async function expectDemoLoginSucceeds(groupSlug: string): Promise<void> {
   const result = await testClient.mutate({
@@ -102,6 +102,41 @@ describe("GraphQL Auth Integration Tests", () => {
     const data = await authenticatedRequest(token, "mutate", refreshTokenMutationDocument);
     expect(data.refreshToken?.token).toBeDefined();
     expect(data.refreshToken?.user).toBeDefined();
+  });
+
+  test("refreshToken succeeds with valid session_id and stale refresh_token JTI", async () => {
+    clearCookies();
+
+    await testClient.mutate({
+      mutation: demoLoginMutationDocument,
+      variables: { input: { groupSlug: "academy_admin" } },
+    });
+
+    const staleRefreshToken = getTestCookie("refresh_token");
+    const sessionId = getTestCookie("session_id");
+    if (!staleRefreshToken || !sessionId) {
+      throw new Error("Expected session_id and refresh_token cookies after demoLogin");
+    }
+
+    // First refresh rotates the session JTI and issues a new refresh_token cookie.
+    const firstRefresh = await testClient.mutate({
+      mutation: refreshTokenMutationDocument,
+    });
+    expect(firstRefresh.data?.refreshToken?.token).toBeDefined();
+
+    // Simulate a browser that still sends the pre-rotation refresh_token cookie.
+    const staleCookieRefresh = await testClient.mutate({
+      mutation: refreshTokenMutationDocument,
+      context: {
+        headers: {
+          Cookie: `session_id=${sessionId}; refresh_token=${staleRefreshToken}`,
+        },
+      },
+    });
+
+    expect(staleCookieRefresh.error).toBeUndefined();
+    expect(staleCookieRefresh.data?.refreshToken?.token).toBeDefined();
+    expect(staleCookieRefresh.data?.refreshToken?.user).toBeDefined();
   });
 
   test("executes logout", async () => {

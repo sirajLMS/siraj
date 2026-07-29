@@ -2,7 +2,7 @@
 
 import { AccessTimeOutlined, CalendarTodayOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Avatar, Box, Skeleton, type Theme, Tooltip, Typography } from "@mui/material";
-import { alpha, styled } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import type * as React from "react";
 import { ActionIconLink } from "@/frontend/common/components/ui";
 import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
@@ -53,9 +53,9 @@ type PersonAccentTone = "teacher" | "student" | "default";
 function getPersonAccentColor(tone: PersonAccentTone, theme: Theme): string {
   switch (tone) {
     case "teacher":
-      return theme.palette.text.secondary;
+      return theme.palette.onSurfaceVariant;
     case "student":
-      return theme.palette.onSurface;
+      return theme.palette.primary.main;
     case "default":
       return theme.palette.onSurface;
   }
@@ -85,7 +85,8 @@ const StyledCardActions = styled(Box)(({ theme }) => ({
   flexShrink: 0,
   padding: theme.spacing(0.25),
   borderRadius: theme.layout.radius.card,
-  backgroundColor: alpha(theme.palette.onSurface, 0.04),
+  backgroundColor: theme.palette.surfaceContainerHigh,
+  border: `1px solid ${theme.palette.outlineVariant}`,
 }));
 
 const StyledTimeHighlight = styled(Box)(({ theme }) => ({
@@ -95,8 +96,8 @@ const StyledTimeHighlight = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(1.5),
   padding: theme.spacing(1.25, 1.5),
   borderRadius: theme.layout.radius.card,
-  backgroundColor: alpha(theme.palette.primary.main, 0.08),
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.16)}`,
+  backgroundColor: theme.palette.primaryContainer,
+  border: `1px solid ${theme.palette.outlineVariant}`,
   minWidth: 0,
   overflow: "hidden",
 }));
@@ -111,13 +112,14 @@ const StyledTimeHighlightContent = styled(Box)({
 });
 
 const StyledTimeHighlightLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
+  color: theme.palette.onPrimaryContainer,
   flexShrink: 0,
   whiteSpace: "nowrap",
+  opacity: 0.8,
 }));
 
 const StyledTimeHighlightText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
+  color: theme.palette.onPrimaryContainer,
   fontWeight: 700,
   minWidth: 0,
   overflow: "hidden",
@@ -130,8 +132,8 @@ const StyledMetaPanel = styled(Box)(({ theme }) => ({
   alignItems: "stretch",
   marginBottom: theme.spacing(1.5),
   borderRadius: theme.layout.radius.card,
-  backgroundColor: alpha(theme.palette.onSurface, 0.03),
-  border: `1px solid ${theme.palette.border.light}`,
+  backgroundColor: theme.palette.surfaceContainerHigh,
+  border: `1px solid ${theme.palette.outlineVariant}`,
   overflow: "hidden",
 }));
 
@@ -146,12 +148,12 @@ const StyledMetaTile = styled(Box)(({ theme }) => ({
   textAlign: "center",
   gap: theme.spacing(0.375),
   "&:not(:last-child)": {
-    borderInlineEnd: `1px solid ${theme.palette.border.light}`,
+    borderInlineEnd: `1px solid ${theme.palette.outlineVariant}`,
   },
 }));
 
 const StyledMetaLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
+  color: theme.palette.onSurfaceVariant,
   display: "block",
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -176,7 +178,7 @@ const StyledPeopleRow = styled(Box)(({ theme }) => ({
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: theme.spacing(1.5),
   paddingTop: theme.spacing(1.25),
-  borderTop: `1px solid ${theme.palette.border.light}`,
+  borderTop: `1px solid ${theme.palette.outlineVariant}`,
 }));
 
 const StyledPersonCell = styled(Box)(({ theme }) => ({
@@ -188,7 +190,7 @@ const StyledPersonCell = styled(Box)(({ theme }) => ({
   overflow: "hidden",
   "&:first-of-type": {
     paddingInlineEnd: theme.spacing(0.75),
-    borderInlineEnd: `1px solid ${theme.palette.border.light}`,
+    borderInlineEnd: `1px solid ${theme.palette.outlineVariant}`,
   },
 }));
 
@@ -206,7 +208,7 @@ const StyledPersonAvatar = styled(Avatar)(({ theme }) => ({
   flexShrink: 0,
   fontSize: theme.typography.labelSm.fontSize,
   fontWeight: theme.typography.labelSm.fontWeight,
-  backgroundColor: theme.palette.surfaceContainerHigh,
+  backgroundColor: theme.palette.surfaceContainerHighest,
   color: theme.palette.onSurfaceVariant,
 }));
 
@@ -217,7 +219,7 @@ const StyledPersonText = styled(Box)({
 });
 
 const StyledPersonLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
+  color: theme.palette.onSurfaceVariant,
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
@@ -440,7 +442,7 @@ export function ScheduleOverviewCard({
       </StyledCardHeader>
 
       <StyledTimeHighlight>
-        <AccessTimeOutlined sx={theme => ({ fontSize: 18, color: theme.palette.primary.main, flexShrink: 0 })} />
+        <AccessTimeOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onPrimaryContainer, flexShrink: 0 })} />
         <StyledTimeHighlightContent>
           <StyledTimeHighlightLabel variant="labelMd">{headers.yourTime}</StyledTimeHighlightLabel>
           <StyledTimeHighlightText variant="bodyLg" title={yourTime}>
@@ -535,8 +537,8 @@ export function ScheduleOverviewEmptyState({ message }: { readonly message: stri
           width: 48,
           height: 48,
           borderRadius: "50%",
-          backgroundColor: alpha(theme.palette.primary.main, 0.08),
-          color: theme.palette.primary.main,
+          backgroundColor: theme.palette.primaryContainer,
+          color: theme.palette.onPrimaryContainer,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

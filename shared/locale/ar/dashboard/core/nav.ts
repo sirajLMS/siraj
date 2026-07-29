@@ -53,6 +53,7 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   todayClasses: "حصص اليوم",
   regularSchedule: "الجدول الدائم",
   yourStudents: "طلابك",
+  teacherClassList: "قائمة الحصص",
   yourProfile: "الملف",
   salaryDetails: "تفاصيل الراتب",
   teacherRules: "القواعد",

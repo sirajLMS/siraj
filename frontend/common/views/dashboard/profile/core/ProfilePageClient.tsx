@@ -3,6 +3,7 @@
 import { Alert, Stack } from "@mui/material";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
+import { TeacherProfileEditForceCompleteGuard } from "@/frontend/common/views/dashboard/components/TeacherProfileEditForceCompleteGuard";
 import { ProfileActionBar } from "@/frontend/common/views/dashboard/profile/core/components/ProfileActionBar";
 import { ProfileShell } from "@/frontend/common/views/dashboard/profile/core/ProfileShell";
 import type { ProfilePageClientProps } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
@@ -101,9 +102,23 @@ export function ProfilePageClient(props: Readonly<ProfilePageClientProps>) {
     );
   }
 
+  const showTeacherForceCompleteGuard =
+    props.nationalIdComplete !== undefined &&
+    scope === ProfileScope.Own &&
+    mode === ProfileMode.Edit &&
+    audience === ProfileAudience.Teacher;
+
   function renderProfileContainer() {
     if (audience === ProfileAudience.Teacher) {
-      return <TeacherProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
+      return (
+        <TeacherProfileContainer
+          scope={scope}
+          mode={mode}
+          targetUserId={targetUserId}
+          activeTab={activeTab}
+          forceComplete={forceComplete}
+        />
+      );
     }
     if (audience === ProfileAudience.Parent) {
       return <ParentProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
@@ -124,6 +139,12 @@ export function ProfilePageClient(props: Readonly<ProfilePageClientProps>) {
 
   return (
     <ProfileShell {...shellProps}>
+      {showTeacherForceCompleteGuard ? (
+        <TeacherProfileEditForceCompleteGuard
+          active
+          nationalIdComplete={props.nationalIdComplete ?? true}
+        />
+      ) : null}
       {scope === ProfileScope.Own && mode === ProfileMode.View ? <DisplayCurrencyHint /> : null}
       {forceComplete && audience === ProfileAudience.Teacher ? (
         <Alert severity="warning">

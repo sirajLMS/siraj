@@ -29,11 +29,17 @@ describe("teacher sidebar navigation", () => {
     expect(keys).toContain("today-classes");
     expect(keys).toContain("regular-schedule");
     expect(keys).toContain("your-students");
-    expect(keys).toContain("teacher-profile");
+    expect(keys).toContain("teacher-class-details");
     expect(keys).toContain("teacher-rules");
     expect(keys).toContain("resources");
-    expect(keys).toContain("logout");
+    expect(keys).not.toContain("classes");
+    expect(keys).not.toContain("teacher-profile");
+    expect(keys).not.toContain("logout");
     expect(keys).not.toContain("home");
     expect(keys).not.toContain("books-and-bags");
+
+    const classListItem = items.find(item => item.key === "teacher-class-details");
+    expect(classListItem?.href).toBe("/classes");
+    expect(classListItem?.labelKey).toBe("teacherClassList");
   });
 });

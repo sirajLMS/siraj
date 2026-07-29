@@ -14,6 +14,42 @@
 
 import { useCallback as _useCallback, useState } from "react";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
+
+export type WeeklyScheduleSlotStatusLabels = TeacherWeeklyScheduleLabels["grid"]["status"];
+
+export function resolveWeeklyScheduleSlotStatus(
+  classItem: {
+    readonly executionState?: ClassExecutionState | null;
+    readonly outcome?: ClassOutcome | null;
+    readonly isFrozen?: boolean | null;
+  },
+  labels: WeeklyScheduleSlotStatusLabels
+): string {
+  if (classItem.isFrozen) {
+    return labels.frozen;
+  }
+
+  const { executionState, outcome } = classItem;
+
+  if (outcome === ClassOutcome.Absent) {
+    return labels.absent;
+  }
+  if (outcome === ClassOutcome.Leave) {
+    return labels.leave;
+  }
+  if (executionState === ClassExecutionState.Completed || outcome === ClassOutcome.Taken) {
+    return labels.ended;
+  }
+  if (executionState === ClassExecutionState.Running) {
+    return labels.running;
+  }
+  if (executionState === ClassExecutionState.Activated) {
+    return labels.activated;
+  }
+
+  return labels.pending;
+}
 
 // NEW FOR PLAN v5: isTerminalClassInstance — lifts the previously inline
 // pure-data helper out of the tier files. Per specs.md §3 N9.

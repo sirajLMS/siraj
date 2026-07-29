@@ -25,7 +25,7 @@ export type ScheduledClass = Omit<
 export interface TeacherWeeklySchedule {
   readonly teacherId: string;
   readonly teacherName: string;
-  readonly weeklyHoursWorked: number;
+  readonly weeklyHoursWorked: string;
   readonly classes: readonly ScheduledClass[];
   readonly lastUpdated: string;
 }

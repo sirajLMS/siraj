@@ -262,7 +262,7 @@ export function useStudentProfileViewModel({
     targetUserId: _targetUserId,
     activeTab,
     onUploadAvatar,
-    onBackToDashboard: () => router.push("/students/me"),
+    onBackToDashboard: () => router.push("/dashboard"),
     onStartEdit,
     onCancelEdit,
     onDraftChange: patchDraft,

@@ -35,7 +35,7 @@ describe("supervisor sidebar navigation", () => {
     expect(keys).toContain("pending-reviews");
     expect(keys).toContain("teacher-dues");
     expect(keys).toContain("monthly-reports");
-    expect(keys).toContain("supervisor-profile");
+    expect(keys).not.toContain("supervisor-profile");
     expect(keys).not.toContain("logout");
 
     expect(keys).not.toContain("home");

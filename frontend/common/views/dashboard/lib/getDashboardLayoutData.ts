@@ -18,6 +18,12 @@ import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/
  * every orphan page. Callers should pass `null` straight to the renderer
  * (no item highlighted) rather than substituting a default.
  */
+/** True when the pathname is the account footer profile route (`/profile` or a sub-route). */
+export function isProfileRouteActive(pathname: string): boolean {
+  const stripped = stripLocaleFromPath(pathname);
+  return stripped === "/profile" || stripped.startsWith("/profile/");
+}
+
 export function getActiveNavKey(pathname: string, sidebarItems: readonly NavItem[]): string | null {
   const stripped = stripLocaleFromPath(pathname);
   if (stripped === "/dashboard") {

@@ -14,10 +14,12 @@ import {
   type User,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/components/DashboardLayoutContainer";
+import {
+  isTeacherProfileCompletionPath,
+  TEACHER_PROFILE_COMPLETION_EDIT_HREF,
+} from "@/frontend/common/lib/profileCompletion";
+import { stripLocaleFromPath } from "@/frontend/common/views/dashboard/lib/stripLocaleFromPath";
 import { redirect } from "@/shared/i18n/routing";
-
-/** Paths a teacher with an incomplete profile may still reach (to complete it). */
-const PROFILE_COMPLETION_ALLOWED_PATHS = new Set(["/profile", "/profile/edit"]);
 
 interface DashboardProfileShellProps {
   readonly userId: string;
@@ -34,19 +36,23 @@ export async function DashboardProfileShell({
 }: Readonly<DashboardProfileShellProps>) {
   const userProfile = await getCurrentUser(userId, context);
 
-  if (userProfile.role === UserRole.TEACHER && !userProfile.nationalIdComplete) {
+  const teacherProfileCompletionRequired =
+    userProfile.role === UserRole.TEACHER && !userProfile.nationalIdComplete;
+
+  if (teacherProfileCompletionRequired) {
     const headersList = await headers();
     const rawPathname = headersList.get("x-pathname");
-    if (rawPathname && !PROFILE_COMPLETION_ALLOWED_PATHS.has(rawPathname)) {
+    const pathname = rawPathname ? stripLocaleFromPath(rawPathname) : null;
+    if (pathname && !isTeacherProfileCompletionPath(pathname)) {
       if (await isPrefetchRequest()) {
         forbidden();
         return;
       }
       logger.info("[ProfileCompletion] Redirecting teacher to complete national ID", {
         userId,
-        rawPathname,
+        pathname,
       });
-      redirect("/profile/edit?forceComplete=1");
+      redirect(TEACHER_PROFILE_COMPLETION_EDIT_HREF);
       return;
     }
   }
@@ -74,6 +80,7 @@ export async function DashboardProfileShell({
       userProfile={mappedUser}
       isSuperAdmin={userProfile.isSuperAdmin}
       initialSidebarOpen={initialSidebarOpen}
+      hideSidebarNavigation={teacherProfileCompletionRequired}
     >
       {children}
     </DashboardLayoutContainer>

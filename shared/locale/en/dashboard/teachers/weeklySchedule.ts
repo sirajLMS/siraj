@@ -7,6 +7,7 @@ export const dashboardTeacherWeeklyScheduleEn: TeacherWeeklyScheduleLabels = {
     schedule: "Schedule",
   },
   metrics: {
+    weeklyHoursWorkedTitle: "Weekly Hours Worked",
     weeklyHoursWorked: hours => `Weekly Hours Worked: ${hours}`,
   },
   actions: {
@@ -22,7 +23,16 @@ export const dashboardTeacherWeeklyScheduleEn: TeacherWeeklyScheduleLabels = {
     bookedClass: "Booked",
     availableSlot: "Available Slot",
     lastUpdated: date => `Last Updated: ${date}`,
-    sessionEnded: "Session ended",
+    unknownSubject: "Class",
+    status: {
+      ended: "Ended",
+      absent: "Absent",
+      leave: "Leave",
+      pending: "Pending",
+      activated: "Active",
+      running: "Live",
+      frozen: "Frozen",
+    },
   },
   days: {
     monday: "Monday",

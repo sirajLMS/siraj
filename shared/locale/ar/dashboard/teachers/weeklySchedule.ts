@@ -7,6 +7,7 @@ export const dashboardTeacherWeeklyScheduleAr: TeacherWeeklyScheduleLabels = {
     schedule: "الجدول",
   },
   metrics: {
+    weeklyHoursWorkedTitle: "ساعات العمل الأسبوعية",
     weeklyHoursWorked: hours => `ساعات العمل الأسبوعية: ${hours}`,
   },
   actions: {
@@ -22,7 +23,16 @@ export const dashboardTeacherWeeklyScheduleAr: TeacherWeeklyScheduleLabels = {
     bookedClass: "حصة محجوزة",
     availableSlot: "فترة متاحة",
     lastUpdated: time => `آخر تحديث: ${time}`,
-    sessionEnded: "انتهت الحصة",
+    unknownSubject: "حصة",
+    status: {
+      ended: "انتهت",
+      absent: "غائب",
+      leave: "إجازة",
+      pending: "معلّقة",
+      activated: "نشطة",
+      running: "مباشرة",
+      frozen: "مجمّدة",
+    },
   },
   days: {
     monday: "الاثنين",

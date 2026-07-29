@@ -1,7 +1,7 @@
 "use client";
 
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import { ParentsView } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
 
 interface ParentsContainerProps {
@@ -10,7 +10,7 @@ interface ParentsContainerProps {
 
 export function ParentsContainer(_props: ParentsContainerProps) {
   return (
-    <RequirePermission permissions={[AppPermission.ParentsList]} fallback={null}>
+    <RequirePermission permissions={PAGE_PERMISSIONS.parents} fallback={null}>
       <ParentsView />
     </RequirePermission>
   );

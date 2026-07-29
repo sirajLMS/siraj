@@ -9,6 +9,9 @@ export const DEFAULT_NAV_FEATURE_FLAGS: NavFeatureFlags = {
   enableUsersDirectory: false,
 };
 
+/** Nav items pinned to the bottom of the sidebar (above the account footer). */
+export const SIDEBAR_END_NAV_ITEM_KEYS = new Set(["teacher-rules", "parent-rules"]);
+
 /**
  * Sidebar navigation GROUPS — labelled, optionally-collapsible clusters of
  * nav items. Each item in {@link SIDEBAR_NAV_ITEMS} can reference a group
@@ -146,7 +149,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "regular-schedule",
     labelKey: "regularSchedule",
     iconKey: "eventRepeat",
-    href: "/teachers/me/schedule/weekly",
+    href: "/schedule/weekly",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
     audience: "teacher",
@@ -161,23 +164,13 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     audience: "teacher",
   },
   {
-    key: "teacher-profile",
-    labelKey: "yourProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherOwnProfile,
-    audience: "teacher",
-  },
-  {
     key: "teacher-class-details",
-    labelKey: "classDetails",
+    labelKey: "teacherClassList",
     iconKey: "class",
     href: "/classes",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherClassDetails,
     audience: "teacher",
-    groupId: "grp_content",
   },
   {
     key: "teacher-rules",
@@ -225,19 +218,10 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     audience: "parent",
   },
   {
-    key: "parent-profile",
-    labelKey: "yourProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.parentProfile,
-    audience: "parent",
-  },
-  {
     key: "parent-social",
     labelKey: "socialMedia",
     iconKey: "share",
-    href: "/parents/me/social",
+    href: "/parents/social",
     section: "footer",
     permission: PAGE_PERMISSIONS.parentOwnProfile,
     audience: "parent",
@@ -255,7 +239,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "student-schedule",
     labelKey: "studentSchedule",
     iconKey: "eventRepeat",
-    href: "/students/me/history",
+    href: "/students/history",
     section: "main",
     permission: PAGE_PERMISSIONS.studentOwnHistory,
     audience: "student",
@@ -264,18 +248,9 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "student-credits",
     labelKey: "studentCredits",
     iconKey: "accountBalanceWallet",
-    href: "/students/me/credits",
+    href: "/students/credits",
     section: "main",
     permission: PAGE_PERMISSIONS.studentCredits,
-    audience: "student",
-  },
-  {
-    key: "student-profile",
-    labelKey: "studentProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentSelfProfile,
     audience: "student",
   },
   {
@@ -316,15 +291,6 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.monthlyReportsView,
     audience: "supervisor",
     groupId: "grp_reports",
-  },
-  {
-    key: "supervisor-profile",
-    labelKey: "supervisorProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.profile,
-    audience: "supervisor",
   },
   {
     key: "search-schedule",
@@ -538,7 +504,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     key: "regular-schedule",
     labelKey: "regularSchedule",
     iconKey: "eventRepeat",
-    href: "/teachers/me/schedule/weekly",
+    href: "/schedule/weekly",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
     audience: "teacher",
@@ -575,15 +541,6 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/resources",
     section: "main",
     permission: PAGE_PERMISSIONS.resources,
-  },
-  {
-    key: "teacher-profile",
-    labelKey: "yourProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherOwnProfile,
-    audience: "teacher",
   },
   {
     key: "teachers",
@@ -678,15 +635,6 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     audience: "parent",
   },
   {
-    key: "parent-profile",
-    labelKey: "yourProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.parentProfile,
-    audience: "parent",
-  },
-  {
     key: "student-today-classes",
     labelKey: "studentTodayClasses",
     iconKey: "calendarToday",
@@ -699,7 +647,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     key: "student-schedule",
     labelKey: "studentSchedule",
     iconKey: "eventRepeat",
-    href: "/students/me/history",
+    href: "/students/history",
     section: "main",
     permission: PAGE_PERMISSIONS.studentOwnHistory,
     audience: "student",
@@ -708,18 +656,9 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     key: "student-credits",
     labelKey: "studentCredits",
     iconKey: "accountBalanceWallet",
-    href: "/students/me/credits",
+    href: "/students/credits",
     section: "main",
     permission: PAGE_PERMISSIONS.studentCredits,
-    audience: "student",
-  },
-  {
-    key: "student-profile",
-    labelKey: "studentProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentSelfProfile,
     audience: "student",
   },
   {
@@ -748,15 +687,6 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/teacher-dues",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDuesView,
-    audience: "supervisor",
-  },
-  {
-    key: "supervisor-profile",
-    labelKey: "supervisorProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.profile,
     audience: "supervisor",
   },
   {
@@ -794,7 +724,7 @@ function hasItemPermission(item: NavItem, permissions: readonly AppPermission[])
  * to that group by the seed migration, so this is a stable discriminator.
  * Used to relax the supervisor audience gate so SUPERADMIN inherits every
  * supervisor-only nav item (`pending-reviews`, `teacher-dues`,
- * `monthly-reports`, `supervisor-profile`) — `supervisor-home` is excluded
+ * `monthly-reports`) — `supervisor-home` is excluded
  * by [`skipSuperAdminKeysForSupervisorItems`] below because the admin `home`
  * item already serves `/dashboard` for them (user decision: consolidate).
  */
@@ -942,21 +872,9 @@ function applyUsersDirectoryNavOverrides(items: readonly NavItem[], featureFlags
   return items.filter(item => item.key !== "users-directory");
 }
 
-const PORTAL_PROFILE_NAV_KEYS = new Set(["teacher-profile", "parent-profile", "student-profile", "supervisor-profile"]);
-
-function applyProfileNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
-  const isPortalUser =
-    isTeacherPortalUser(permissions) ||
-    isParentPortalUser(permissions) ||
-    isStudentPortalUser(permissions) ||
-    isSupervisorPortalUser(permissions);
-
-  if (isPortalUser) {
-    return items.filter(item => item.key !== "own-profile");
-  }
-
-  // Admin/staff: profile is only in SidebarAccountFooter, not the main nav list.
-  return items.filter(item => !PORTAL_PROFILE_NAV_KEYS.has(item.key));
+function applyProfileNavOverrides(items: readonly NavItem[], _permissions: readonly AppPermission[]): NavItem[] {
+  // Profile is only reachable via SidebarAccountFooter for every audience.
+  return items.filter(item => item.href !== "/profile" && item.key !== "own-profile");
 }
 
 function isParentPortalUser(permissions: readonly AppPermission[]): boolean {
@@ -986,7 +904,7 @@ export function applyTeacherNavOverrides(items: readonly NavItem[], permissions:
     return [...items];
   }
 
-  const hiddenKeys = new Set(["home", "books-and-bags"]);
+  const hiddenKeys = new Set(["home", "books-and-bags", "classes"]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
 

@@ -10,6 +10,9 @@ import {
   ScheduleOverviewEmptyState,
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
+import {
+  scheduleOverviewListCanvasSx,
+} from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
 import { DesktopSectionPanel, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
@@ -18,15 +21,17 @@ import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/
 
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 2,
-  border: `1px solid ${theme.palette.border.light}`,
+  border: `1px solid ${theme.palette.outlineVariant}`,
+  backgroundColor: theme.palette.surfaceContainerLow,
   overflow: "hidden",
 }));
 
 const StyledFilterContainer = styled(Box)(({ theme }) => ({
-  paddingInline: theme.spacing(3),
   paddingBlock: theme.spacing(2.5),
-  backgroundColor: theme.palette.background.default,
-  borderBottom: `1px solid ${theme.palette.border.light}`,
+  paddingInline: theme.spacing(3),
+  width: "100%",
+  backgroundColor: theme.palette.surfaceContainerLow,
+  borderBottom: `1px solid ${theme.palette.outlineVariant}`,
 }));
 
 const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
@@ -108,6 +113,7 @@ function ScheduleOverviewFilterSection({
   return (
     <StyledFilterContainer>
       <ScheduleFilters
+        centerOnDesktop
         dateLabel={filters.dateLabel}
         dateValue={dateValue}
         todayLabel={filters.todayLabel}
@@ -143,42 +149,44 @@ function ScheduleOverviewListSection({
   const { shell, columns, status, actions } = labelsBySection;
 
   return (
-    <ScheduleOverviewListShell
-      rows={rows}
-      getKey={row => row.id ?? ""}
-      loading={loading}
-      emptyMessage={shell.emptyMessage}
-      renderItem={row => (
-        <ScheduleOverviewDesktopCard
-          row={row}
-          headers={columns}
-          statusLabels={status}
-          detailsLabel={actions.detailsLabel}
-          showTimezones={showTimezones}
-          locale={locale}
-        />
-      )}
-      renderEmptyState={() => (
-        <Box sx={{ p: 2 }}>
-          <ScheduleOverviewEmptyState message={shell.emptyMessage} />
-        </Box>
-      )}
-      renderSkeleton={() => (
-        <Stack spacing={2} sx={{ p: 2 }}>
-          <Paper
-            elevation={0}
-            sx={theme => ({
-              borderRadius: 2,
-              border: `1px solid ${theme.palette.border.light}`,
-              backgroundColor: theme.palette.surfaceContainerLowest,
-            })}
-          >
-            <ScheduleOverviewCardSkeleton />
-          </Paper>
-        </Stack>
-      )}
-      sx={{ p: 2 }}
-    />
+    <Box sx={scheduleOverviewListCanvasSx}>
+      <ScheduleOverviewListShell
+        rows={rows}
+        getKey={row => row.id ?? ""}
+        loading={loading}
+        emptyMessage={shell.emptyMessage}
+        renderItem={row => (
+          <ScheduleOverviewDesktopCard
+            row={row}
+            headers={columns}
+            statusLabels={status}
+            detailsLabel={actions.detailsLabel}
+            showTimezones={showTimezones}
+            locale={locale}
+          />
+        )}
+        renderEmptyState={() => (
+          <Box sx={{ py: 2 }}>
+            <ScheduleOverviewEmptyState message={shell.emptyMessage} />
+          </Box>
+        )}
+        renderSkeleton={() => (
+          <Stack spacing={0}>
+            <Paper
+              elevation={0}
+              sx={theme => ({
+                borderRadius: 0,
+                border: "none",
+                borderBottom: `1px solid ${theme.palette.outlineVariant}`,
+                backgroundColor: theme.palette.surfaceContainer,
+              })}
+            >
+              <ScheduleOverviewCardSkeleton />
+            </Paper>
+          </Stack>
+        )}
+      />
+    </Box>
   );
 }
 
@@ -200,15 +208,13 @@ function ScheduleOverviewPaginationSection({
   const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
-    <Box sx={{ p: 2, pt: 1, display: "flex", justifyContent: "flex-end" }}>
-      <PaginationControls
-        page={page}
-        pageCount={pageCount}
-        rowCount={totalCount}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
-      />
-    </Box>
+    <PaginationControls
+      page={page}
+      pageCount={pageCount}
+      rowCount={totalCount}
+      pageSize={pageSize}
+      onPageChange={onPageChange}
+    />
   );
 }
 
@@ -237,6 +243,10 @@ export function ScheduleOverviewDesktopView({
   return (
     <StyledDesktopPanel elevation={0}>
       <DesktopSectionPanel
+        contentPadding={false}
+        sx={theme => ({
+          backgroundColor: theme.palette.surfaceContainerLow,
+        })}
         title={<ScheduleOverviewTitle title={shell.title} selectedMetricLabel={selectedMetricLabel} />}
         actions={
           canDashboardSearch ? (

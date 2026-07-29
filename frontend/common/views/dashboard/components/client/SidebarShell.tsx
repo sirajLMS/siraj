@@ -24,9 +24,12 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
+import { SIDEBAR_END_NAV_ITEM_KEYS } from "@/frontend/common/views/dashboard/config/navigationConfig";
 import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistry";
+import { isProfileRouteActive } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
 import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n";
+import { usePathname } from "@/shared/i18n/navigation";
 
 export interface TranslatedNavItem extends NavItem {
   readonly label: string;
@@ -57,8 +60,8 @@ interface SidebarNavItemProps {
 function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter = false): SxProps<Theme> {
   return {
     borderRadius: 2,
-    py: 1.25,
-    px: 2,
+    py: isCollapsed ? 1 : 1.25,
+    px: isCollapsed ? 0 : 2,
     justifyContent: isCollapsed ? "center" : "flex-start",
     backgroundColor: isActive ? "var(--mui-palette-primaryContainer)" : "transparent",
     color: isActive ? "var(--mui-palette-primary-main)" : "var(--mui-palette-onSurfaceVariant)",
@@ -148,6 +151,15 @@ function getGroupTitleStyles(): SxProps<Theme> {
   };
 }
 
+/** Full-width divider in collapsed icon mode. */
+function getCollapsedSidebarDividerSx(extra?: SxProps<Theme>): SxProps<Theme> {
+  return {
+    borderColor: "var(--mui-palette-outlineVariant)",
+    width: "100%",
+    ...extra,
+  };
+}
+
 interface SidebarGroupHeaderProps {
   readonly group: TranslatedNavGroup;
   readonly isCollapsed: boolean;
@@ -163,7 +175,7 @@ function SidebarGroupStaticTitle({
   readonly isCollapsed: boolean;
 }) {
   if (isCollapsed) {
-    return <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", my: 1, mx: 1.5 }} />;
+    return <Divider sx={getCollapsedSidebarDividerSx({ my: 1 })} />;
   }
 
   return (
@@ -179,7 +191,7 @@ function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: Sidebar
   if (isCollapsed) {
     // Icon-only mode (desktop sidebar collapsed to 80px): no group headers,
     // just a thin separator so users see the grouping visually.
-    return <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", my: 1, mx: 1.5 }} />;
+    return <Divider sx={getCollapsedSidebarDividerSx({ my: 1 })} />;
   }
 
   return (
@@ -232,10 +244,19 @@ interface RenderedGroup {
 function bucketItemsByGroup(
   groups: readonly TranslatedNavGroup[],
   items: readonly TranslatedNavItem[]
-): { readonly grouped: readonly RenderedGroup[]; readonly noGroup: readonly TranslatedNavItem[] } {
+): {
+  readonly grouped: readonly RenderedGroup[];
+  readonly noGroup: readonly TranslatedNavItem[];
+  readonly endItems: readonly TranslatedNavItem[];
+} {
   const itemsByGroupId = new Map<string, TranslatedNavItem[]>();
   const noGroup: TranslatedNavItem[] = [];
+  const endItems: TranslatedNavItem[] = [];
   for (const item of items) {
+    if (SIDEBAR_END_NAV_ITEM_KEYS.has(item.key)) {
+      endItems.push(item);
+      continue;
+    }
     if (item.groupId) {
       const arr = itemsByGroupId.get(item.groupId);
       if (arr) {
@@ -254,7 +275,7 @@ function bucketItemsByGroup(
       grouped.push({ group, items: groupItems });
     }
   }
-  return { grouped, noGroup };
+  return { grouped, noGroup, endItems };
 }
 
 function useCollapsedGroupState(groups: readonly TranslatedNavGroup[]): void {
@@ -282,10 +303,11 @@ function GroupedNavList({
   readonly isCollapsed: boolean;
   readonly navListRef?: RefObject<HTMLElement | null>;
 }) {
-  const { grouped, noGroup } = bucketItemsByGroup(groups, items);
+  const { grouped, noGroup, endItems } = bucketItemsByGroup(groups, items);
   useCollapsedGroupState(groups);
   const toggleGroupCollapsed = useLayoutStore(state => state.toggleGroupCollapsed);
   const collapsedGroups = useLayoutStore(state => state.collapsedGroups);
+  const hasLeadingNav = noGroup.length > 0 || grouped.length > 0;
 
   return (
     <Box
@@ -296,8 +318,8 @@ function GroupedNavList({
         flexBasis: 0,
         overflow: "auto",
         overscrollBehavior: "contain",
-        py: 2,
-        px: 1.5,
+        py: isCollapsed ? 1.5 : 2,
+        px: isCollapsed ? 0 : 1.5,
         "&::-webkit-scrollbar": { width: 4 },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: "var(--mui-palette-outlineVariant)",
@@ -342,7 +364,11 @@ function GroupedNavList({
                     onToggle={() => toggleGroupCollapsed(group.id)}
                   />
                   <Collapse in={!collapsed} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding sx={{ px: 0, pb: 0.5, paddingInlineStart: 2 }}>
+                    <List
+                      component="div"
+                      disablePadding
+                      sx={{ px: 0, pb: 0.5, paddingInlineStart: isCollapsed ? 0 : 2 }}
+                    >
                       {groupItems.map(item => (
                         <SidebarNavItem
                           key={item.key}
@@ -358,6 +384,20 @@ function GroupedNavList({
             </Box>
           );
         })}
+
+        {endItems.length > 0 && hasLeadingNav ? (
+          <Divider
+            sx={{
+              borderColor: "var(--mui-palette-outlineVariant)",
+              my: 1,
+              mx: isCollapsed ? 0 : 0.5,
+              width: isCollapsed ? "100%" : undefined,
+            }}
+          />
+        ) : null}
+        {endItems.map(item => (
+          <SidebarNavItem key={item.key} item={item} isActive={item.key === activeKey} isCollapsed={isCollapsed} />
+        ))}
       </List>
     </Box>
   );
@@ -374,22 +414,19 @@ function SidebarAccountFooter({
   readonly logoutLabel: string;
   readonly isCollapsed: boolean;
 }) {
+  const pathname = usePathname();
+  const isProfileActive = isProfileRouteActive(pathname);
+
   const profileButton = (
     <ListItemButton
       component={Link}
       href="/profile"
+      selected={isProfileActive}
       sx={{
-        borderRadius: 2,
+        ...getSidebarItemStyles(isCollapsed, isProfileActive),
         py: 1,
-        px: isCollapsed ? 1 : 2,
         flex: 1,
         minWidth: 0,
-        justifyContent: isCollapsed ? "center" : "flex-start",
-        color: "var(--mui-palette-onSurfaceVariant)",
-        "&:hover": {
-          backgroundColor: "color-mix(in srgb, var(--mui-palette-primary-main) 8%, transparent)",
-          color: "var(--mui-palette-primary-main)",
-        },
       }}
     >
       <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40, color: "inherit" }}>
@@ -402,7 +439,7 @@ function SidebarAccountFooter({
             primary: {
               sx: {
                 typography: "labelMd",
-                fontWeight: 600,
+                fontWeight: isProfileActive ? 700 : 600,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -433,8 +470,14 @@ function SidebarAccountFooter({
   );
 
   return (
-    <Box sx={{ px: 1.5, py: 1.5, flexShrink: 0 }}>
-      <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", mb: 1 }} />
+    <Box sx={{ px: isCollapsed ? 0 : 1.5, py: isCollapsed ? 1 : 1.5, flexShrink: 0 }}>
+      <Divider
+        sx={
+          isCollapsed
+            ? getCollapsedSidebarDividerSx({ mb: 1 })
+            : { borderColor: "var(--mui-palette-outlineVariant)", mb: 1 }
+        }
+      />
       <Box
         sx={{
           display: "flex",

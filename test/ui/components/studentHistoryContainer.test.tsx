@@ -11,7 +11,7 @@ mock.module("next/navigation", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/history",
+  usePathname: () => "/students/history",
   useSearchParams: () => new URLSearchParams(),
   redirect: () => {},
 }));
@@ -27,7 +27,7 @@ mock.module("@/shared/i18n/routing", () => ({
     replace: () => {},
     prefetch: () => {},
   }),
-  usePathname: () => "/students/me/history",
+  usePathname: () => "/students/history",
   Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
     <a href={href} {...rest}>
       {children}
@@ -45,7 +45,7 @@ mock.module("@/shared/i18n/navigation", () => ({
     replace: mock(() => {}),
     prefetch: mock(() => {}),
   }),
-  usePathname: () => "/students/me/history",
+  usePathname: () => "/students/history",
 }));
 
 mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
