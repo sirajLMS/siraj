@@ -496,6 +496,17 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
     excludeFromDb: false,
   },
   {
+    key: "NEXT_PUBLIC_ENABLE_PEOPLE_DIRECTORY",
+    category: "app",
+    displayStrategy: "plain",
+    description: {
+      en: 'Enables the consolidated People directory at `/people` (set to "true" or "false"). DB override applies at runtime for navigation and page redirects.',
+      ar: 'يفعّل دليل الأشخاص الموحّد على `/people` (اضبطه على "true" أو "false"). تطبيق قاعدة البيانات يعمل وقت التشغيل للتنقل وإعادة التوجيه.',
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
     key: "IS_DEMO",
     category: "app",
     displayStrategy: "plain",

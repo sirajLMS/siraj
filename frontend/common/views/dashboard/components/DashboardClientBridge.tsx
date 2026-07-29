@@ -19,6 +19,7 @@ interface DashboardClientBridgeProps {
   readonly appTitle: string;
   readonly logoAriaLabel: string;
   readonly initialSidebarOpen?: boolean;
+  readonly enablePeopleDirectory: boolean;
 }
 
 /**
@@ -54,12 +55,15 @@ export function DashboardClientBridge({
   appTitle,
   logoAriaLabel,
   initialSidebarOpen,
+  enablePeopleDirectory,
 }: Readonly<DashboardClientBridgeProps>) {
   const notificationCount = useLiveNotificationCount(userProfile.notificationCount || 0);
   const notificationsDrawerVm = useNotificationsDrawerViewModel();
 
   const permissions = (userProfile.permissions || []).filter(isValidPermission);
-  const { sidebarGroups, sidebarItems, bottomNavItems } = getDashboardLayoutData(permissions);
+  const { sidebarGroups, sidebarItems, bottomNavItems } = getDashboardLayoutData(permissions, {
+    enablePeopleDirectory,
+  });
 
   return (
     <NotificationsProvider>

@@ -1,7 +1,9 @@
 import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   BOTTOM_NAV_ITEMS,
+  DEFAULT_NAV_FEATURE_FLAGS,
   getNavItemsForPermissions,
+  type NavFeatureFlags,
   SIDEBAR_NAV_GROUPS,
   SIDEBAR_NAV_ITEMS,
 } from "@/frontend/common/views/dashboard/config/navigationConfig";
@@ -29,14 +31,17 @@ export function getActiveNavKey(pathname: string, sidebarItems: readonly NavItem
   return match?.key ?? null;
 }
 
-export function getDashboardLayoutData(permissions: readonly AppPermission[]): {
+export function getDashboardLayoutData(
+  permissions: readonly AppPermission[],
+  featureFlags: NavFeatureFlags = DEFAULT_NAV_FEATURE_FLAGS
+): {
   readonly sidebarGroups: readonly NavGroup[];
   readonly sidebarItems: NavItem[];
   readonly bottomNavItems: NavItem[];
 } {
-  const sidebarGroups = getNavItemsForPermissions(SIDEBAR_NAV_GROUPS, SIDEBAR_NAV_ITEMS, permissions);
-  const sidebarItems = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, permissions);
-  const bottomNavItems = getNavItemsForPermissions(BOTTOM_NAV_ITEMS, permissions);
+  const sidebarGroups = getNavItemsForPermissions(SIDEBAR_NAV_GROUPS, SIDEBAR_NAV_ITEMS, permissions, featureFlags);
+  const sidebarItems = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, permissions, featureFlags);
+  const bottomNavItems = getNavItemsForPermissions(BOTTOM_NAV_ITEMS, permissions, featureFlags);
 
   return { sidebarGroups, sidebarItems, bottomNavItems };
 }

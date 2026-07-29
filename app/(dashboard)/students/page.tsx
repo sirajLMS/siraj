@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import { AppPermission } from "@/backend/enum";
 import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { isPeopleDirectoryEnabled } from "@/backend/lib/features/is-people-directory-enabled";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { StudentsContainer } from "@/frontend/common/views/dashboard/admin/parents/students/StudentsContainer";
-import { ENABLE_PEOPLE_DIRECTORY } from "@/shared/constants/features/sidebarFeatures.constants";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StudentsPage() {
-  if (ENABLE_PEOPLE_DIRECTORY) {
+  if (await isPeopleDirectoryEnabled()) {
     redirect("/people?tab=students");
   }
 

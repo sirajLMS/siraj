@@ -29,7 +29,13 @@ import {
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
-import { ENABLE_PEOPLE_DIRECTORY } from "@/shared/constants/features/sidebarFeatures.constants";
+export interface NavFeatureFlags {
+  readonly enablePeopleDirectory: boolean;
+}
+
+export const DEFAULT_NAV_FEATURE_FLAGS: NavFeatureFlags = {
+  enablePeopleDirectory: false,
+};
 
 /**
  * Sidebar navigation GROUPS — labelled, optionally-collapsible clusters of
@@ -881,6 +887,20 @@ export function isSuperAdminNavUser(permissions: readonly AppPermission[]): bool
 /** Supervisor-audience keys that should remain hidden for SUPERADMIN. */
 const SUPERADMIN_HIDDEN_SUPERVISOR_KEYS = new Set<string>(["supervisor-home"]);
 
+function isNavFeatureFlags(value: readonly AppPermission[] | NavFeatureFlags | undefined): value is NavFeatureFlags {
+  return value !== undefined && !Array.isArray(value);
+}
+
+function resolveNavFeatureFlags(
+  maybeFlags: readonly AppPermission[] | NavFeatureFlags | undefined,
+  fallbackFlags?: NavFeatureFlags
+): NavFeatureFlags {
+  if (isNavFeatureFlags(maybeFlags)) {
+    return maybeFlags;
+  }
+  return fallbackFlags ?? DEFAULT_NAV_FEATURE_FLAGS;
+}
+
 /**
  * Returns the subset of NAV ITEMS that survive the user's permission + audience
  * gate + per-portal overrides. The same predicate is reused for both the
@@ -891,21 +911,28 @@ const SUPERADMIN_HIDDEN_SUPERVISOR_KEYS = new Set<string>(["supervisor-home"]);
  * gated against the user. Empty groups never surface — portals don't see
  * empty headers in the sidebar.
  */
-export function getNavItemsForPermissions(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[];
+export function getNavItemsForPermissions(
+  items: readonly NavItem[],
+  permissions: readonly AppPermission[],
+  featureFlags?: NavFeatureFlags
+): NavItem[];
 export function getNavItemsForPermissions(
   groups: readonly NavGroup[],
   items: readonly NavItem[],
-  permissions: readonly AppPermission[]
+  permissions: readonly AppPermission[],
+  featureFlags?: NavFeatureFlags
 ): NavGroup[];
 export function getNavItemsForPermissions(
   groupsOrItems: readonly NavGroup[] | readonly NavItem[],
   itemsOrPermissions: readonly NavItem[] | readonly AppPermission[],
-  maybePermissions?: readonly AppPermission[]
+  maybePermissionsOrFlags?: readonly AppPermission[] | NavFeatureFlags,
+  maybeFeatureFlags?: NavFeatureFlags
 ): NavItem[] | NavGroup[] {
-  // Overload 1: (items, permissions) => NavItem[]
-  if (maybePermissions === undefined) {
+  // Overload 1: (items, permissions[, featureFlags]) => NavItem[]
+  if (maybePermissionsOrFlags === undefined || !Array.isArray(maybePermissionsOrFlags)) {
     const items = groupsOrItems as readonly NavItem[];
     const permissions = itemsOrPermissions as readonly AppPermission[];
+    const featureFlags = resolveNavFeatureFlags(maybePermissionsOrFlags);
     const filtered = items.filter(item => {
       if (item.audience === "teacher" && !isTeacherPortalUser(permissions)) return false;
       if (item.audience === "parent" && !isParentPortalUser(permissions)) return false;
@@ -932,7 +959,7 @@ export function getNavItemsForPermissions(
       applySupervisorNavOverrides(
         applyStudentNavOverrides(
           applyParentNavOverrides(
-            applyTeacherNavOverrides(applyPeopleDirectoryNavOverrides(filtered), permissions),
+            applyTeacherNavOverrides(applyPeopleDirectoryNavOverrides(filtered, featureFlags), permissions),
             permissions
           ),
           permissions
@@ -943,13 +970,14 @@ export function getNavItemsForPermissions(
     );
   }
 
-  // Overload 2: (groups, items, permissions) => NavGroup[]
+  // Overload 2: (groups, items, permissions[, featureFlags]) => NavGroup[]
   const groups = groupsOrItems as readonly NavGroup[];
   const items = itemsOrPermissions as readonly NavItem[];
-  const permissions = maybePermissions;
+  const permissions = maybePermissionsOrFlags as readonly AppPermission[];
+  const featureFlags = resolveNavFeatureFlags(undefined, maybeFeatureFlags);
 
   // 1) Filter items (single pass, exactly the same logic as overload 1).
-  const filteredItems = getNavItemsForPermissions(items, permissions);
+  const filteredItems = getNavItemsForPermissions(items, permissions, featureFlags);
 
   // 2) Keep a group when (a) it passes its own audience+permission gate AND
   //    (b) it has at least one surviving child item.
@@ -988,9 +1016,9 @@ export function getNavItemsForPermissions(
   return survivingGroups;
 }
 
-function applyPeopleDirectoryNavOverrides(items: readonly NavItem[]): NavItem[] {
+function applyPeopleDirectoryNavOverrides(items: readonly NavItem[], featureFlags: NavFeatureFlags): NavItem[] {
   const peopleKeys = new Set(["teachers", "parents", "students", "staff"]);
-  if (ENABLE_PEOPLE_DIRECTORY) {
+  if (featureFlags.enablePeopleDirectory) {
     return items.filter(item => !peopleKeys.has(item.key));
   }
   return items.filter(item => item.key !== "people-directory");
