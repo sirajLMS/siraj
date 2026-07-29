@@ -5,7 +5,7 @@ import type * as React from "react";
 import { buildPaymentMethodTypeLabelByType } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/constants";
 import type { PaymentMethodTypeSelectorProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
 import { PAYMENT_METHOD_TYPES } from "@/frontend/common/lib/payment-method";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodTypeSelectorProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
 
@@ -19,7 +19,7 @@ export const PaymentMethodTypeSelector: React.FC<PaymentMethodTypeSelectorProps>
   allowEmpty = false,
   allowedTypes,
 }): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.paymentMethod.typeSelector;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod).typeSelector;
   const title = labels?.title ?? t.title;
   const ariaLabel = labels?.ariaLabel ?? t.ariaLabel;
 

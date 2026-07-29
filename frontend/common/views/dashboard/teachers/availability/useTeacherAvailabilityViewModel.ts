@@ -9,9 +9,14 @@ import type {
   WeeklyAvailability,
   WeeklyAvailabilityGridLabels,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
-import { useAppTranslation } from "@/shared/locale";
+import type {
+  TeacherAvailabilityLabelsBySection,
+  TeacherAvailabilityShellLabels,
+} from "@/frontend/common/views/dashboard/teachers/availability/types/teacherAvailabilityViewModel.types";
+import { type CommonLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface TeacherAvailabilityViewModel {
+  readonly labelsBySection: TeacherAvailabilityLabelsBySection;
   readonly availability: WeeklyAvailability;
   readonly insights: TeacherAvailabilityInsights;
   readonly defaultFilters: AvailabilitySearchFormData;
@@ -19,17 +24,29 @@ export interface TeacherAvailabilityViewModel {
   readonly onExportPdf?: () => void;
   readonly onSearch?: (formData: AvailabilitySearchFormData) => void;
   readonly onBlockClick?: (entry: AvailabilityEntry) => void;
-  readonly tableLabels: WeeklyAvailabilityGridLabels;
 }
 
-export type UseTeacherAvailabilityViewModelProps = Omit<TeacherAvailabilityViewModel, "tableLabels">;
+export type UseTeacherAvailabilityViewModelProps = Omit<TeacherAvailabilityViewModel, "labelsBySection">;
+
+export interface TeacherAvailabilityCoordinatorLabels {
+  readonly shell: TeacherAvailabilityShellLabels;
+  readonly common: Pick<CommonLabels, "loadFailed">;
+}
+
+/** Coordinator-only labels for `TeacherAvailabilityContainer` notifications and error UI. */
+export function useTeacherAvailabilityCoordinatorLabels(): TeacherAvailabilityCoordinatorLabels {
+  return {
+    shell: useAppTranslation(Translation.Dashboard.TeacherAvailability),
+    common: useAppTranslation(Translation.Common),
+  };
+}
 
 export function useTeacherAvailabilityViewModel(
   props: UseTeacherAvailabilityViewModelProps
 ): TeacherAvailabilityViewModel {
   const { availability, insights, defaultFilters, loading, onExportPdf, onSearch, onBlockClick } = props;
 
-  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
+  const t = useAppTranslation(Translation.Dashboard.TeacherAvailability);
 
   const tableLabels = useMemo<WeeklyAvailabilityGridLabels>(
     () => ({
@@ -52,7 +69,13 @@ export function useTeacherAvailabilityViewModel(
     [t]
   );
 
+  const { table: _table, ...shell } = t;
+
   return {
+    labelsBySection: {
+      shell,
+      table: tableLabels,
+    },
     availability,
     insights,
     defaultFilters,
@@ -60,6 +83,5 @@ export function useTeacherAvailabilityViewModel(
     onExportPdf,
     onSearch,
     onBlockClick,
-    tableLabels,
   };
 }

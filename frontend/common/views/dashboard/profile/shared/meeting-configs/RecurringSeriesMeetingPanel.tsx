@@ -3,8 +3,8 @@
 import { Button, Stack } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
+import { useMeetingConfigProfileLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigProfileLabels";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 export type RecurringSeriesMeetingPanelProps = {
   readonly recurringScheduleId: string;
@@ -17,7 +17,8 @@ export function RecurringSeriesMeetingPanel({
   recurringScheduleId,
   effectiveMeeting,
 }: RecurringSeriesMeetingPanelProps) {
-  const t = useAppTranslation().uiTranslations.meetingConfigClassScope;
+  const labels = useMeetingConfigProfileLabels();
+  const t = labels.classScope;
 
   return (
     <SectionPanel title={t.seriesSectionTitle} subTitle={t.seriesSectionSubtitle}>

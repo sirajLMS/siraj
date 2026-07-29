@@ -6,11 +6,11 @@ import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container"
 import { PermissionCatalogSectionDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogSection.desktop";
 import { PermissionGroupsDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionGroupsDataGrid.desktop";
 import { UserOverridesDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/userOverridesDataGrid.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 export type TabKey = "groups" | "catalog" | "overrides";
 
 export function PermissionTabContentDesktop({
+  labels,
   activeTab,
   isLoading,
   permissions,
@@ -25,7 +25,7 @@ export function PermissionTabContentDesktop({
   catalogFilter,
   groupRowMenuAnchor,
 }: Readonly<PermissionTabContentProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   if (isLoading && !groups) {
     return (
@@ -40,6 +40,7 @@ export function PermissionTabContentDesktop({
       {activeTab === "groups" && (
         <DesktopSectionPanel title={t.groupsTab}>
           <PermissionGroupsDataGridDesktop
+            labels={labels}
             groups={groups}
             onViewGroup={setSelectedGroupId}
             onEditGroup={openEditDialog}
@@ -53,6 +54,7 @@ export function PermissionTabContentDesktop({
 
       {activeTab === "catalog" && (
         <PermissionCatalogSectionDesktop
+          labels={labels}
           permissions={permissions}
           groups={groups}
           searchQuery={catalogFilter.searchQuery}
@@ -68,6 +70,7 @@ export function PermissionTabContentDesktop({
       {activeTab === "overrides" && (
         <DesktopSectionPanel title={t.overridesTab}>
           <UserOverridesDataGridDesktop
+            labels={labels}
             users={users}
             groups={groups}
             loading={isLoading}

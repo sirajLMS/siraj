@@ -9,6 +9,7 @@ import { UserOverridesDataGridMobile } from "@/frontend/mobile/views/dashboard/p
 export type TabKey = "groups" | "catalog" | "overrides";
 
 export function PermissionTabContentMobile({
+  labels,
   activeTab,
   isLoading,
   permissions,
@@ -35,6 +36,7 @@ export function PermissionTabContentMobile({
     <Box>
       {activeTab === "groups" && (
         <PermissionGroupCardListMobile
+          labels={labels}
           groups={groups}
           onViewGroup={setSelectedGroupId}
           onEditGroup={openEditDialog}
@@ -46,6 +48,7 @@ export function PermissionTabContentMobile({
 
       {activeTab === "catalog" && (
         <PermissionCatalogSectionMobile
+          labels={labels}
           permissions={permissions}
           groups={groups}
           searchQuery={catalogFilter.searchQuery}
@@ -60,6 +63,7 @@ export function PermissionTabContentMobile({
 
       {activeTab === "overrides" && (
         <UserOverridesDataGridMobile
+          labels={labels}
           users={users}
           groups={groups}
           loading={isLoading}

@@ -24,12 +24,13 @@ import type { ManualInvoiceLabels } from "@/frontend/common/views/dashboard/bill
 import { buildManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import { formatDraftTotal } from "@/frontend/common/views/dashboard/billing/manual/utils/manualInvoiceFormatters";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { type ProfileParentLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export type UseManualInvoiceViewModelProps = Record<string, never>;
 
 export interface ManualInvoiceViewModel {
   readonly labels: ManualInvoiceLabels;
+  readonly profileLabels: ProfileParentLabels;
   readonly selectedParentId: string | null;
   readonly control: Control<ManualInvoiceFormData>;
   readonly errors: FieldErrors<ManualInvoiceFormData>;
@@ -199,7 +200,8 @@ function useInvoiceForm(labels: ManualInvoiceLabels): InvoiceForm {
 }
 
 export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewModelProps>): ManualInvoiceViewModel {
-  const t = useAppTranslation().dashboardTranslations.billingManual;
+  const t = useAppTranslation(Translation.Dashboard.BillingManual);
+  const profileLabels = useAppTranslation(Translation.Profile.Parent);
   const labels = buildManualInvoiceLabels(t);
   const router = useRouter();
 
@@ -238,6 +240,7 @@ export function useManualInvoiceViewModel(_props: Readonly<UseManualInvoiceViewM
 
   return {
     labels,
+    profileLabels,
     selectedParentId,
     control,
     errors,

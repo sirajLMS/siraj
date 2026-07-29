@@ -12,7 +12,7 @@ import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graph
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodRow };
 
@@ -35,7 +35,7 @@ export function DesktopPaymentMethodList({
   onDeleteAction,
   onSetDefaultAction,
 }: DesktopPaymentMethodListProps) {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tList = t.list;
 
   const columns = useMemo<GridColDef<PaymentMethodRow>[]>(() => {

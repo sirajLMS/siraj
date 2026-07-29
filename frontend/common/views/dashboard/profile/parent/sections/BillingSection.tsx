@@ -16,20 +16,23 @@ import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/
 import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
 import {
   type ParentAdminData,
+  type ParentBillingViewLabels,
+  type ParentSectionLabels,
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 type BillingSectionProps =
   | {
       readonly mode: "view";
+      readonly labels: ParentBillingViewLabels;
       readonly adminData: ParentAdminData;
       readonly parentId?: string | null;
     }
   | {
       readonly mode: "edit";
+      readonly labels: ParentSectionLabels;
       readonly register: UseFormRegister<ParentAdminEditFormData>;
       readonly control: Control<ParentAdminEditFormData>;
     };
@@ -47,13 +50,15 @@ function resolveLifecycleStatus(adminData: ParentAdminData): string {
 }
 
 function BillingEditSection({
+  labels,
   register,
   control,
 }: {
+  readonly labels: ParentSectionLabels;
   readonly register: UseFormRegister<ParentAdminEditFormData>;
   readonly control: Control<ParentAdminEditFormData>;
 }) {
-  const t = useAppTranslation().profileTranslations.parent;
+  const t = labels;
 
   return (
     <SectionPanel title={t.sections.billing}>
@@ -107,15 +112,15 @@ function BillingEditSection({
 }
 
 function BillingViewSection({
+  labels,
   adminData,
   parentId,
 }: {
+  readonly labels: ParentBillingViewLabels;
   readonly adminData: ParentAdminData;
   readonly parentId?: string | null;
 }) {
-  const t = useAppTranslation().profileTranslations.parent;
-  const tc = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
+  const { parent: t, base: tc, errors: tErrors } = labels;
   const locale = useAppLocale();
 
   const lockedAmount = adminData.feeAmount ?? "0";
@@ -181,8 +186,8 @@ function BillingViewSection({
 
 export function BillingSection(props: BillingSectionProps) {
   if (props.mode === "edit") {
-    return <BillingEditSection register={props.register} control={props.control} />;
+    return <BillingEditSection labels={props.labels} register={props.register} control={props.control} />;
   }
 
-  return <BillingViewSection adminData={props.adminData} parentId={props.parentId} />;
+  return <BillingViewSection labels={props.labels} adminData={props.adminData} parentId={props.parentId} />;
 }

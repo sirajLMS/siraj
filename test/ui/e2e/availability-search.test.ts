@@ -1,68 +1,107 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
-import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
-import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
+import {
+  authenticateDemoUser,
+  closeE2eSession,
+  DEMO_USERS,
+  gotoAppRoute,
+  loginAsDemoUser,
+} from "@/test/ui/e2e/helpers";
+import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
 
-let context: BrowserContext;
-let page: Page;
+const SCHEDULE_SEARCH_NAV = /schedule search|بحث الجدول/i;
+const SCHEDULE_SEARCH_TITLE = /search schedule availability|البحث عن توفر الجدول/i;
+const DATE_RANGE_LABEL = /date range|نطاق التاريخ/i;
+const TIME_RANGE_LABEL = /time range|نطاق الوقت/i;
+const FILTERS_BUTTON = /filters|الفلاتر/i;
+const SEARCH_BUTTON = /^search$|^بحث$/i;
+const SEARCH_OUTCOME =
+  /teachers with \d+ available slots|معلمين مع \d+ فترات متاحة|no available time slots found|لم يتم العثور على فترات زمنية متاحة/i;
 
-afterEach(async () => {
-  if (page) {
-    await page.close();
-  }
-  if (context) {
-    await context.close();
-  }
-});
+let adminContext: BrowserContext;
+let adminPage: Page;
+let isolatedContext: BrowserContext;
+let isolatedPage: Page;
 
-function setupPageTimeouts(p: Page): void {
-  p.setDefaultNavigationTimeout(90000);
-  p.setDefaultTimeout(60000);
+function scheduleSearchNavLink(page: Page) {
+  return page.getByRole("link", { name: SCHEDULE_SEARCH_NAV }).first();
 }
 
-describe("Availability Search E2E", () => {
-  test("Admin sees Schedule Search nav item in sidebar", async () => {
-    context = await createContext();
-    page = await context.newPage();
-    setupPageTimeouts(page);
-    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
+async function waitForScheduleSearchNav(page: Page): Promise<void> {
+  await scheduleSearchNavLink(page).waitFor({ state: "visible", timeout: 30_000 });
+}
 
-    const navItem = page.getByText("بحث الجدول");
-    expect(await navItem.isVisible()).toBe(true);
+async function waitForSearchScheduleReady(page: Page): Promise<void> {
+  if (page.url().includes("/login")) {
+    throw new Error(`Login failed: redirected to ${page.url()}`);
+  }
+
+  if (!page.url().includes("/search-schedule")) {
+    await page.waitForURL("**/search-schedule**", { waitUntil: "commit", timeout: 30_000 });
+  }
+
+  await page.getByLabel(DATE_RANGE_LABEL).first().waitFor({ state: "visible", timeout: 45_000 });
+}
+
+async function navigateToSearchSchedule(page: Page): Promise<void> {
+  try {
+    const link = scheduleSearchNavLink(page);
+    await link.waitFor({ state: "visible", timeout: 10_000 });
+    await link.click({ timeout: 15_000 });
+  } catch {
+    await gotoAppRoute(page, "/search-schedule");
+  }
+
+  await waitForSearchScheduleReady(page);
+}
+
+describe.serial("Availability Search E2E", () => {
+  beforeAll(async () => {
+    await new Promise(resolve => setTimeout(resolve, 5_000));
+
+    adminContext = await createContext();
+    adminPage = await adminContext.newPage();
+    await loginAsDemoUser(adminPage, adminContext, DEMO_USERS.academyAdmin.groupSlug);
+    await waitForScheduleSearchNav(adminPage);
+  });
+
+  afterAll(async () => {
+    await closeE2eSession(adminPage, adminContext);
+  });
+
+  afterEach(async () => {
+    await closeE2eSession(isolatedPage, isolatedContext);
+    isolatedPage = undefined as unknown as Page;
+    isolatedContext = undefined as unknown as BrowserContext;
+  });
+
+  test("Admin sees Schedule Search nav item in sidebar", async () => {
+    await waitForScheduleSearchNav(adminPage);
+    expect(await scheduleSearchNavLink(adminPage).isVisible()).toBe(true);
   });
 
   test("Clicking nav item navigates to search-schedule page", async () => {
-    context = await createContext();
-    page = await context.newPage();
-    setupPageTimeouts(page);
-    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
+    await navigateToSearchSchedule(adminPage);
+    expect(adminPage.url()).toContain("/search-schedule");
 
-    const navItem = page.getByText("بحث الجدول");
-    await navItem.click();
-
-    await page.waitForURL("**/search-schedule**");
-    expect(page.url()).toContain("/search-schedule");
-
-    const heading = page.getByText("البحث عن توفر الجدول");
+    const heading = adminPage.getByText(SCHEDULE_SEARCH_TITLE).first();
+    await heading.waitFor({ state: "visible" });
     expect(await heading.isVisible()).toBe(true);
   });
 
   test("Search form renders with date/time range pickers, filter and search buttons", async () => {
-    context = await createContext();
-    page = await context.newPage();
-    setupPageTimeouts(page);
-    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
+    if (!adminPage.url().includes("/search-schedule")) {
+      await navigateToSearchSchedule(adminPage);
+    }
 
-    await page.goto("/search-schedule");
-    await page.waitForURL("**/search-schedule**");
+    const dateRange = adminPage.getByLabel(DATE_RANGE_LABEL).first();
+    const timeRange = adminPage.getByLabel(TIME_RANGE_LABEL).first();
+    const filtersButton = adminPage.getByRole("button", { name: FILTERS_BUTTON }).first();
+    const searchButton = adminPage.getByRole("button", { name: SEARCH_BUTTON }).first();
 
-    const dateRange = page.getByLabel("نطاق التاريخ");
-    const timeRange = page.getByLabel("نطاق الوقت");
-    const filtersButton = page.getByRole("button", { name: "الفلاتر" });
-    const searchButton = page.getByRole("button", { name: "بحث" });
-
+    await dateRange.waitFor({ state: "visible" });
     expect(await dateRange.isVisible()).toBe(true);
     expect(await timeRange.isVisible()).toBe(true);
     expect(await filtersButton.isVisible()).toBe(true);
@@ -70,57 +109,28 @@ describe("Availability Search E2E", () => {
   });
 
   test("Submitting form shows results or no-results message", async () => {
-    context = await createContext();
-    page = await context.newPage();
-    setupPageTimeouts(page);
-    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
+    if (!adminPage.url().includes("/search-schedule")) {
+      await navigateToSearchSchedule(adminPage);
+    }
 
-    await page.goto("/search-schedule");
-    await page.waitForURL("**/search-schedule**");
-
-    const searchButton = page.getByRole("button", { name: "بحث" });
+    const searchButton = adminPage.getByRole("button", { name: SEARCH_BUTTON }).first();
     await searchButton.click();
 
-    const hasResults = page.getByText(/معلمين مع \d+ فترات متاحة/);
-    const noResults = page.getByText("لم يتم العثور على فقرات زمنية متاحة للمعايير المحددة.");
-
-    const maxAttempts = 20;
-    let found = false;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const resultsVisible = await hasResults.isVisible().catch(() => false);
-      const noResultsVisible = await noResults.isVisible().catch(() => false);
-      if (resultsVisible || noResultsVisible) {
-        found = true;
-        break;
-      }
-      await page.waitForTimeout(500);
-    }
-    expect(found).toBe(true);
+    const outcome = adminPage.getByText(SEARCH_OUTCOME).first();
+    await outcome.waitFor({ state: "visible" });
+    expect(await outcome.isVisible()).toBe(true);
   });
 
   test("Teacher does NOT see Schedule Search nav item", async () => {
-    context = await createContext();
-    page = await context.newPage();
-    setupPageTimeouts(page);
-    await loginAsDemoUser(page, context, DEMO_USERS.teacher.groupSlug);
+    isolatedContext = await createContext();
+    isolatedPage = await isolatedContext.newPage();
+    await authenticateDemoUser(isolatedContext, DEMO_USERS.teacher.groupSlug);
+    await gotoAppRoute(isolatedPage, "/dashboard");
+    await isolatedPage
+      .getByText(/today's classes|حصص اليوم/i)
+      .first()
+      .waitFor({ state: "visible", timeout: 45_000 });
 
-    const navItem = page.getByText("بحث الجدول");
-    expect(await navItem.isVisible()).toBe(false);
-  });
-
-  test("Mobile: form renders on search-schedule page", async () => {
-    context = await createMobileContext();
-    page = await context.newPage();
-    setupPageTimeouts(page);
-    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
-
-    await page.goto("/search-schedule");
-    await page.waitForURL("**/search-schedule**");
-
-    const heading = page.getByText("البحث عن توفر الجدول");
-    const searchButton = page.getByRole("button", { name: "بحث" });
-
-    expect(await heading.isVisible()).toBe(true);
-    expect(await searchButton.isVisible()).toBe(true);
+    expect(await isolatedPage.getByRole("link", { name: SCHEDULE_SEARCH_NAV }).count()).toBe(0);
   });
 });

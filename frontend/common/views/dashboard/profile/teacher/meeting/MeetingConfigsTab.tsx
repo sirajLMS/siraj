@@ -2,10 +2,9 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingConfigsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/meeting/meetingConfigsTabTypes";
-import { useAppTranslation } from "@/shared/locale";
+import { useMeetingConfigsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/meeting/useMeetingConfigsTabViewModel";
 
 type MeetingConfigsTabProps = {
   readonly targetUserId: string;
@@ -24,19 +23,6 @@ const lazyViews = createLazyView<MeetingConfigsTabViewModel>(
 );
 
 export function MeetingConfigsTab({ targetUserId, scope }: Readonly<MeetingConfigsTabProps>) {
-  const t = useAppTranslation().uiTranslations.meetingConfig;
-  const { hasPermission } = useUserStore();
-
-  const canManage =
-    scope === ProfileScope.Own
-      ? hasPermission(AppPermission.MeetingConfigsManageOwn)
-      : hasPermission(AppPermission.MeetingConfigsManageOther);
-
-  const viewModel: MeetingConfigsTabViewModel = {
-    targetUserId,
-    canManage,
-    sectionTitle: t.sectionTitle,
-  };
-
+  const viewModel = useMeetingConfigsTabViewModel({ targetUserId, scope });
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

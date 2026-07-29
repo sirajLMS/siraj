@@ -1,9 +1,13 @@
+# DATABASE_URL policy: this (and deploy.yml) are the ONLY GitHub Actions workflow that may use
+# secrets.DATABASE_URL (production Neon). All other workflows — especially ci.yml —
+# must use the local Postgres service or other non-production URLs.
+
 name: Production Database Migration
 
 on:
   push:
     branches:
-      - master
+      - prod
 
 # Avoid overlapping migration runs on rapid pushes.
 concurrency:

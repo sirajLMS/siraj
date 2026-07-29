@@ -8,10 +8,10 @@ import { ConflictErrorsPanelDesktop } from "@/frontend/desktop/views/dashboard/t
 import { DstMigrationMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/dstMigrationMetricsRow.desktop";
 import { UpdatedSessionsSectionDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/updatedSessionsSection.desktop";
 import { UpdateSchedulesButtonDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/components/updateSchedulesButton.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 type Props = Pick<
   DstMigrationViewModel,
+  | "labels"
   | "metrics"
   | "updatedSessions"
   | "conflictGroups"
@@ -22,6 +22,7 @@ type Props = Pick<
 >;
 
 export function DstMigrationViewDesktop({
+  labels,
   metrics,
   updatedSessions,
   conflictGroups,
@@ -30,29 +31,36 @@ export function DstMigrationViewDesktop({
   onUpdate,
   dstOffsetDetected,
 }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
   const headerActions = (
-    <UpdateSchedulesButtonDesktop status={migrationStatus} onUpdate={onUpdate} dstOffsetDetected={dstOffsetDetected} />
+    <UpdateSchedulesButtonDesktop
+      labels={labels}
+      status={migrationStatus}
+      onUpdate={onUpdate}
+      dstOffsetDetected={dstOffsetDetected}
+    />
   );
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={t.pageTitle} subtitle={t.pageSubtitle} actions={headerActions} />
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} actions={headerActions} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
-          <UpdatedSessionsSectionDesktop sessions={updatedSessions} successfulCount={metrics.successful} />
+          <UpdatedSessionsSectionDesktop
+            labels={labels}
+            sessions={updatedSessions}
+            successfulCount={metrics.successful}
+          />
         </Grid>
         <Grid size={{ xs: 12, lg: 4 }}>
           <Stack spacing={3} sx={{ alignItems: "stretch" }}>
-            <ConflictErrorsPanelDesktop conflictGroups={conflictGroups} />
-            <CheckedEmptyPanelDesktop items={checkedEmptyItems} />
+            <ConflictErrorsPanelDesktop labels={labels} conflictGroups={conflictGroups} />
+            <CheckedEmptyPanelDesktop labels={labels} items={checkedEmptyItems} />
           </Stack>
         </Grid>
       </Grid>
 
-      <DstMigrationMetricsRowDesktop metrics={metrics} />
+      <DstMigrationMetricsRowDesktop labels={labels} metrics={metrics} />
     </DesktopPageContainer>
   );
 }

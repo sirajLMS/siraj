@@ -6,6 +6,7 @@ import { PermissionCatalogCardListMobile } from "@/frontend/mobile/views/dashboa
 import { PermissionCatalogToolbarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCatalogToolbar.mobile";
 
 export function PermissionCatalogSectionMobile({
+  labels,
   groups,
   searchQuery,
   setSearchQuery,
@@ -17,13 +18,14 @@ export function PermissionCatalogSectionMobile({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <PermissionCatalogToolbarMobile
+        labels={labels}
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
         categories={categories}
         onSearchChange={setSearchQuery}
         onCategoryChange={setSelectedCategory}
       />
-      <PermissionCatalogCardListMobile permissions={filteredPermissions} groups={groups} />
+      <PermissionCatalogCardListMobile labels={labels} permissions={filteredPermissions} groups={groups} />
     </Box>
   );
 }

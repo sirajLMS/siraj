@@ -33,6 +33,8 @@ import {
   RateSource,
   RescheduleDateLabel,
   StudentStatus,
+  SystemSettingCategory,
+  SystemSettingDataType,
   TeacherDueStatus,
   UserRole,
 } from "@/backend/enum";
@@ -198,4 +200,34 @@ export const TeacherDueStatusPothosEnum = gqlSchemaBuilder.enumType(TeacherDueSt
 
 export const RateSourcePothosEnum = gqlSchemaBuilder.enumType(RateSource, {
   name: "RateSource",
+});
+
+export const SystemSettingCategoryPothos = gqlSchemaBuilder.enumType("SystemSettingCategory", {
+  values: {
+    app: { value: SystemSettingCategory.App },
+    auth: { value: SystemSettingCategory.Auth },
+    billing: { value: SystemSettingCategory.Billing },
+    cache: { value: SystemSettingCategory.Cache },
+    communication: { value: SystemSettingCategory.Communication },
+    email: { value: SystemSettingCategory.Email },
+    fx: { value: SystemSettingCategory.Fx },
+    general: { value: SystemSettingCategory.General },
+    meeting: { value: SystemSettingCategory.Meeting },
+    push: { value: SystemSettingCategory.Push },
+    redis: { value: SystemSettingCategory.Redis },
+    scheduling: { value: SystemSettingCategory.Scheduling },
+    security: { value: SystemSettingCategory.Security },
+    sms: { value: SystemSettingCategory.Sms },
+    storage: { value: SystemSettingCategory.Storage },
+    system: { value: SystemSettingCategory.System },
+  },
+});
+
+export const SystemSettingDataTypePothos = gqlSchemaBuilder.enumType("SystemSettingDataType", {
+  values: {
+    boolean: { value: SystemSettingDataType.Boolean },
+    integer: { value: SystemSettingDataType.Integer },
+    json: { value: SystemSettingDataType.Json },
+    string: { value: SystemSettingDataType.String },
+  },
 });

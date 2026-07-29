@@ -5,10 +5,14 @@ import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashb
 import type { AssignedStudentsTabSlotProps } from "@/frontend/common/views/dashboard/profile/teacher/students/types/assignedStudentsTabShared.types";
 import { AssignedStudentsDataGrid } from "@/frontend/desktop/views/dashboard/profile/teacher/students/assignedStudentsDataGrid.desktop";
 
-const ListView: AssignedStudentsTabSlotProps["ListView"] = ({ rows, loading, pagination }) => (
+const ListView: AssignedStudentsTabSlotProps["ListView"] = ({ rows, loading, pagination, labelsBySection }) => (
   <AssignedStudentsDataGrid
     rows={rows}
     loading={loading}
+    labels={{
+      columns: labelsBySection.columns,
+      emptyMessage: labelsBySection.list.desktopEmptyMessage,
+    }}
     page={pagination.page}
     pageSize={pagination.pageSize}
     onPaginationModelChange={model => {

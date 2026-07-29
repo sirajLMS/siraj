@@ -64,33 +64,172 @@ const buildLivePerformanceMetrics = (
   return { metrics, hasData };
 };
 
-export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps>) {
-  const {
-    instance,
-    labels,
-    handlers,
-    isWarningDismissed,
-    onDismissWarning,
-    onForceActivate,
-    onStop,
-    onGenerateLog,
-    onReschedule,
-    onDelete,
-    formattedScheduledDate,
-  } = props;
+interface ClassDetailsTimezoneWarningProps {
+  readonly instance: AdminViewProps["instance"];
+  readonly isWarningDismissed: boolean;
+  readonly onDismissWarning: () => void;
+  readonly labels: AdminViewLabels;
+}
 
-  const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
-  const [overrideRateAmount, setOverrideRateAmount] = useState(instance.rateAmount ?? "");
-  const [overrideRateCurrency, setOverrideRateCurrency] = useState<CurrencyCode | null>(instance.rateCurrency ?? null);
+function ClassDetailsTimezoneWarning(props: Readonly<ClassDetailsTimezoneWarningProps>) {
+  const { instance, isWarningDismissed, onDismissWarning, labels } = props;
+  if (isWarningDismissed || !instance.hasTimezoneMismatch || !instance.studentTimezone || !instance.teacherTimezone) {
+    return null;
+  }
+  return (
+    <TimezoneWarningBanner
+      studentTimezone={instance.studentTimezone}
+      teacherTimezone={instance.teacherTimezone}
+      onDismiss={onDismissWarning}
+      labels={labels.timezone}
+    />
+  );
+}
 
-  const executionState = instance.executionState ?? "";
+interface ClassDetailsInfoGridProps {
+  readonly instance: AdminViewProps["instance"];
+  readonly executionState: string;
+  readonly showLiveMetadata: boolean;
+  readonly formattedScheduledDate: string;
+  readonly labels: AdminViewLabels;
+}
+
+function ClassDetailsInfoGrid(props: Readonly<ClassDetailsInfoGridProps>) {
+  const { instance, executionState, showLiveMetadata, formattedScheduledDate, labels } = props;
   const student = instance.student;
   const teacher = instance.teacher;
   const performance = instance.performance;
-  const showLiveMetadata = executionState === "ACTIVATED" || executionState === "RUNNING";
-  const { metrics, hasData } = buildLivePerformanceMetrics(instance);
-  const heatmapData = coerceHeatmapData(performance?.heatmapData);
+
+  return (
+    <Grid container spacing={{ xs: 2, lg: 3 }}>
+      <Grid size={{ xs: 12, lg: 7 }}>
+        <ClassInfoCard
+          courseName={instance.courseName ?? ""}
+          subjectId={instance.subjectId ?? ""}
+          subjectName={instance.subjectName ?? ""}
+          subjectAvatarUrl={instance.subjectAvatarUrl}
+          student={
+            student ?? {
+              id: null,
+              name: null,
+              avatarUrl: null,
+              grade: null,
+              level: null,
+            }
+          }
+          teacher={teacher ?? { id: null, name: null, avatarUrl: null, title: null }}
+          isActive={executionState === "ACTIVATED" || executionState === "RUNNING"}
+          rateAmount={instance.rateAmount ?? null}
+          rateCurrency={instance.rateCurrency ?? null}
+          rateSource={instance.rateSource ?? null}
+          isRateOverridden={instance.isRateOverridden ?? false}
+          labels={labels}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, lg: 5 }}>
+        <MetadataCard
+          scheduledDate={formattedScheduledDate}
+          durationMinutes={instance.durationMinutes ?? 0}
+          latencyMs={performance?.latencyMs ?? null}
+          authorizationLabel={performance?.authorizationLabel ?? null}
+          showLiveMetadata={showLiveMetadata}
+          labels={labels.metadata}
+        />
+      </Grid>
+    </Grid>
+  );
+}
+
+interface ClassDetailsPerformanceGridProps {
+  readonly heatmapData: readonly number[];
+  readonly metrics: readonly LivePerformanceMetricRow[];
+  readonly hasData: boolean;
+  readonly labels: AdminViewLabels;
+}
+
+function ClassDetailsPerformanceGrid(props: Readonly<ClassDetailsPerformanceGridProps>) {
+  const { heatmapData, metrics, hasData, labels } = props;
+
+  return (
+    <Grid container spacing={{ xs: 2, lg: 3 }}>
+      <Grid size={{ xs: 12, lg: 7 }}>
+        <ActivityHeatmap data={heatmapData} labels={labels.heatmap} />
+      </Grid>
+      <Grid size={{ xs: 12, lg: 5 }}>
+        <LivePerformanceGrid metrics={metrics} hasData={hasData} labels={labels.performance} />
+      </Grid>
+    </Grid>
+  );
+}
+
+interface OverrideRateDialogProps {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly labels: AdminViewLabels;
+  readonly overrideRateAmount: string;
+  readonly onOverrideRateAmountChange: (value: string) => void;
+  readonly overrideRateCurrency: CurrencyCode | null;
+  readonly onOverrideRateCurrencyChange: (value: CurrencyCode | null) => void;
+  readonly onSubmitOverride: (clearOverride: boolean) => void;
+}
+
+function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
+  const {
+    open,
+    onClose,
+    labels,
+    overrideRateAmount,
+    onOverrideRateAmountChange,
+    overrideRateCurrency,
+    onOverrideRateCurrencyChange,
+    onSubmitOverride,
+  } = props;
   const currencyOptions = Object.values(CurrencyCode);
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{labels.rate.overrideRateDialogTitle}</DialogTitle>
+      <DialogContent sx={{ display: "grid", gap: 2, pt: 1 }}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+          {labels.rate.overrideRateDialogDescription}
+        </Typography>
+        <TextField
+          label={labels.rate.hourlyRateLabel}
+          value={overrideRateAmount}
+          onChange={event => onOverrideRateAmountChange(event.target.value)}
+          type="text"
+          fullWidth
+        />
+        <TextField
+          select
+          label={labels.rate.currencyLabel}
+          value={overrideRateCurrency ?? ""}
+          onChange={event => onOverrideRateCurrencyChange((event.target.value as CurrencyCode) || null)}
+          fullWidth
+        >
+          <MenuItem value="">{labels.rate.currencyLabel}</MenuItem>
+          {currencyOptions.map(currency => (
+            <MenuItem key={currency} value={currency}>
+              {currency}
+            </MenuItem>
+          ))}
+        </TextField>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{labels.rate.cancelButton}</Button>
+        <Button onClick={() => void onSubmitOverride(true)}>{labels.rate.clearOverrideButton}</Button>
+        <Button variant="contained" onClick={() => void onSubmitOverride(false)}>
+          {labels.rate.saveButton}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function useOverrideRateDialog(instance: AdminViewProps["instance"], handlers: AdminViewProps["handlers"]) {
+  const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
+  const [overrideRateAmount, setOverrideRateAmount] = useState(instance.rateAmount ?? "");
+  const [overrideRateCurrency, setOverrideRateCurrency] = useState<CurrencyCode | null>(instance.rateCurrency ?? null);
 
   const handleOpenOverrideDialog = () => {
     setOverrideRateAmount(instance.rateAmount ?? "");
@@ -110,16 +249,49 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
     setIsOverrideDialogOpen(false);
   };
 
+  return {
+    isOverrideDialogOpen,
+    overrideRateAmount,
+    setOverrideRateAmount,
+    overrideRateCurrency,
+    setOverrideRateCurrency,
+    handleOpenOverrideDialog,
+    handleCloseOverrideDialog,
+    handleSubmitOverride,
+  };
+}
+
+export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps>) {
+  const {
+    instance,
+    labels,
+    handlers,
+    isWarningDismissed,
+    onDismissWarning,
+    onForceActivate,
+    onStop,
+    onGenerateLog,
+    onReschedule,
+    onDelete,
+    formattedScheduledDate,
+  } = props;
+
+  const overrideRateDialog = useOverrideRateDialog(instance, handlers);
+
+  const executionState = instance.executionState ?? "";
+  const performance = instance.performance;
+  const showLiveMetadata = executionState === "ACTIVATED" || executionState === "RUNNING";
+  const { metrics, hasData } = buildLivePerformanceMetrics(instance);
+  const heatmapData = coerceHeatmapData(performance?.heatmapData);
+
   return (
     <Stack sx={{ gap: { xs: 2, lg: 3 } }}>
-      {!isWarningDismissed && instance.hasTimezoneMismatch && instance.studentTimezone && instance.teacherTimezone ? (
-        <TimezoneWarningBanner
-          studentTimezone={instance.studentTimezone}
-          teacherTimezone={instance.teacherTimezone}
-          onDismiss={onDismissWarning}
-          labels={labels.timezone}
-        />
-      ) : null}
+      <ClassDetailsTimezoneWarning
+        instance={instance}
+        isWarningDismissed={isWarningDismissed}
+        onDismissWarning={onDismissWarning}
+        labels={labels}
+      />
 
       <AdminActionsBar
         executionState={executionState}
@@ -128,92 +300,30 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
         onGenerateLog={onGenerateLog}
         onReschedule={onReschedule}
         onDelete={onDelete}
-        onOverrideRate={handleOpenOverrideDialog}
+        onOverrideRate={overrideRateDialog.handleOpenOverrideDialog}
         labels={labels.adminActions}
       />
 
-      <Grid container spacing={{ xs: 2, lg: 3 }}>
-        <Grid size={{ xs: 12, lg: 7 }}>
-          <ClassInfoCard
-            courseName={instance.courseName ?? ""}
-            subjectId={instance.subjectId ?? ""}
-            subjectName={instance.subjectName ?? ""}
-            subjectAvatarUrl={instance.subjectAvatarUrl}
-            student={
-              student ?? {
-                id: null,
-                name: null,
-                avatarUrl: null,
-                grade: null,
-                level: null,
-              }
-            }
-            teacher={teacher ?? { id: null, name: null, avatarUrl: null, title: null }}
-            isActive={executionState === "ACTIVATED" || executionState === "RUNNING"}
-            rateAmount={instance.rateAmount ?? null}
-            rateCurrency={instance.rateCurrency ?? null}
-            rateSource={instance.rateSource ?? null}
-            isRateOverridden={instance.isRateOverridden ?? false}
-            labels={labels}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, lg: 5 }}>
-          <MetadataCard
-            scheduledDate={formattedScheduledDate}
-            durationMinutes={instance.durationMinutes ?? 0}
-            latencyMs={performance?.latencyMs ?? null}
-            authorizationLabel={performance?.authorizationLabel ?? null}
-            showLiveMetadata={showLiveMetadata}
-            labels={labels.metadata}
-          />
-        </Grid>
-      </Grid>
+      <ClassDetailsInfoGrid
+        instance={instance}
+        executionState={executionState}
+        showLiveMetadata={showLiveMetadata}
+        formattedScheduledDate={formattedScheduledDate}
+        labels={labels}
+      />
 
-      <Grid container spacing={{ xs: 2, lg: 3 }}>
-        <Grid size={{ xs: 12, lg: 7 }}>
-          <ActivityHeatmap data={heatmapData} labels={labels.heatmap} />
-        </Grid>
-        <Grid size={{ xs: 12, lg: 5 }}>
-          <LivePerformanceGrid metrics={metrics} hasData={hasData} labels={labels.performance} />
-        </Grid>
-      </Grid>
+      <ClassDetailsPerformanceGrid heatmapData={heatmapData} metrics={metrics} hasData={hasData} labels={labels} />
 
-      <Dialog open={isOverrideDialogOpen} onClose={handleCloseOverrideDialog} fullWidth maxWidth="sm">
-        <DialogTitle>{labels.rate.overrideRateDialogTitle}</DialogTitle>
-        <DialogContent sx={{ display: "grid", gap: 2, pt: 1 }}>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {labels.rate.overrideRateDialogDescription}
-          </Typography>
-          <TextField
-            label={labels.rate.hourlyRateLabel}
-            value={overrideRateAmount}
-            onChange={event => setOverrideRateAmount(event.target.value)}
-            type="text"
-            fullWidth
-          />
-          <TextField
-            select
-            label={labels.rate.currencyLabel}
-            value={overrideRateCurrency ?? ""}
-            onChange={event => setOverrideRateCurrency((event.target.value as CurrencyCode) || null)}
-            fullWidth
-          >
-            <MenuItem value="">{labels.rate.currencyLabel}</MenuItem>
-            {currencyOptions.map(currency => (
-              <MenuItem key={currency} value={currency}>
-                {currency}
-              </MenuItem>
-            ))}
-          </TextField>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseOverrideDialog}>{labels.rate.cancelButton}</Button>
-          <Button onClick={() => void handleSubmitOverride(true)}>{labels.rate.clearOverrideButton}</Button>
-          <Button variant="contained" onClick={() => void handleSubmitOverride(false)}>
-            {labels.rate.saveButton}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <OverrideRateDialog
+        open={overrideRateDialog.isOverrideDialogOpen}
+        onClose={overrideRateDialog.handleCloseOverrideDialog}
+        labels={labels}
+        overrideRateAmount={overrideRateDialog.overrideRateAmount}
+        onOverrideRateAmountChange={overrideRateDialog.setOverrideRateAmount}
+        overrideRateCurrency={overrideRateDialog.overrideRateCurrency}
+        onOverrideRateCurrencyChange={overrideRateDialog.setOverrideRateCurrency}
+        onSubmitOverride={overrideRateDialog.handleSubmitOverride}
+      />
     </Stack>
   );
 }

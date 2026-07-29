@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludePattern pattern=".next*" />
+      <excludePattern pattern=".playwright-*" />
+      <excludePattern pattern=".stakpak*" />
+      <excludePattern pattern=".agent-sandbox" />
+      <excludePattern pattern=".agents" />
+      <excludePattern pattern=".ai" />
+      <excludePattern pattern=".claude" />
+      <excludePattern pattern=".codescene" />
+      <excludePattern pattern=".container" />
+      <excludePattern pattern=".continue" />
+      <excludePattern pattern=".cursor" />
+      <excludePattern pattern=".gemini" />
+      <excludePattern pattern=".graphql-test-ports" />
+      <excludePattern pattern=".kilo" />
+      <excludePattern pattern=".opencode" />
+      <excludePattern pattern=".openhands" />
+      <excludePattern pattern=".scannerwork" />
+      <excludePattern pattern=".vercel" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

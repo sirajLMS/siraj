@@ -39,6 +39,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
     onCloseDeleteDialog,
     onConfirmDelete,
     t,
+    headerLabels,
     formattedScheduledDate,
     formattedStartTime,
     formattedEndTime,
@@ -88,7 +89,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
 
   return (
     <>
-      <Header instance={instance} canOverride={canOverride} />
+      <Header instance={instance} canOverride={canOverride} labels={headerLabels} />
       <ActionFeedbackAlert feedbackState={feedbackState} />
       {viewContent}
       <DeleteConfirmationDialog

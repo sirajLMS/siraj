@@ -17,7 +17,6 @@ import { QuickAdjustSectionMobile } from "@/frontend/mobile/views/dashboard/resc
 import { RescheduleDateTimeSectionMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/rescheduleDateTimeSection.mobile";
 import { TimezoneWarningBannerMobile } from "@/frontend/mobile/views/dashboard/reschedule/home/components/timezoneWarningBanner.mobile";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({
   display: "flex",
@@ -31,6 +30,8 @@ const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({
 }));
 
 export function RescheduleViewMobile({
+  labels,
+  meetingConfigLabels,
   session,
   control,
   errors,
@@ -43,16 +44,13 @@ export function RescheduleViewMobile({
   onCancel,
   onDismissSuccess,
 }: Readonly<RescheduleViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm;
-  const tMeeting = useAppTranslation().uiTranslations.meetingConfig;
-
   return (
     <MobilePageContainer sx={{ maxWidth: 900, mx: "auto" }}>
-      <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} edgeToEdge={false} />
+      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
-      <TimezoneWarningBannerMobile timezone={session.teacherTimezone} />
+      <TimezoneWarningBannerMobile labels={labels} timezone={session.teacherTimezone} />
 
-      <MobileSectionPanel title={t.sections.classDetails}>
+      <MobileSectionPanel title={labels.sections.classDetails}>
         <Box
           component="form"
           onSubmit={e => {
@@ -60,7 +58,7 @@ export function RescheduleViewMobile({
           }}
           sx={theme => ({ p: theme.layout.cardPadding, display: "flex", flexDirection: "column", gap: 4 })}
         >
-          <ClassParticipantsSectionMobile session={session} />
+          <ClassParticipantsSectionMobile labels={labels} session={session} />
 
           {session.effectiveMeeting ? (
             <>
@@ -76,7 +74,7 @@ export function RescheduleViewMobile({
                   underline="hover"
                   sx={{ typography: "labelMd" }}
                 >
-                  {tMeeting.summary.manageLink}
+                  {meetingConfigLabels.summary.manageLink}
                 </MuiLink>
               </Stack>
             </>
@@ -84,13 +82,13 @@ export function RescheduleViewMobile({
 
           <Divider />
 
-          <RescheduleDateTimeSectionMobile control={control} errors={errors} />
+          <RescheduleDateTimeSectionMobile labels={labels} control={control} errors={errors} />
 
-          <QuickAdjustSectionMobile setValue={setValue} getValues={getValues} />
+          <QuickAdjustSectionMobile labels={labels} setValue={setValue} getValues={getValues} />
 
           <ActionContainer>
             <MobilePrimaryPageAction type="submit" disabled={isSubmitting}>
-              {isSubmitting ? t.actions.processing : t.actions.submitMobile}
+              {isSubmitting ? labels.actions.processing : labels.actions.submitMobile}
             </MobilePrimaryPageAction>
             <MobilePrimaryPageAction
               type="button"
@@ -101,15 +99,19 @@ export function RescheduleViewMobile({
                 "&:hover": { color: theme.palette.error.dark },
               })}
             >
-              {t.actions.cancel}
+              {labels.actions.cancel}
             </MobilePrimaryPageAction>
           </ActionContainer>
         </Box>
       </MobileSectionPanel>
 
-      <NotificationPolicyCardMobile />
+      <NotificationPolicyCardMobile labels={labels} />
 
-      <MobileFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <MobileFormSuccessSnackbar
+        open={showSuccess}
+        message={labels.actions.successMessage}
+        onClose={onDismissSuccess}
+      />
     </MobilePageContainer>
   );
 }

@@ -5,11 +5,8 @@ import { AssignmentIndOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import type { CurrentTeacherCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
-import { useAppTranslation } from "@/shared/locale";
 
-export function CurrentTeacherCardMobile({ currentTeacherName, teacherId }: Readonly<CurrentTeacherCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment.currentTeacher;
-
+export function CurrentTeacherCardMobile({ currentTeacherName, teacherId, labels }: Readonly<CurrentTeacherCardProps>) {
   return (
     <MobileBaseCard
       sx={theme => ({
@@ -37,7 +34,7 @@ export function CurrentTeacherCardMobile({ currentTeacherName, teacherId }: Read
             color: theme.palette.onPrimary,
           })}
         >
-          {t.title}
+          {labels.title}
         </Typography>
         <Typography
           variant="titleLg"
@@ -47,7 +44,7 @@ export function CurrentTeacherCardMobile({ currentTeacherName, teacherId }: Read
             color: theme.palette.onPrimary,
           })}
         >
-          {currentTeacherName || t.unset}
+          {currentTeacherName || labels.unset}
         </Typography>
         <Typography
           variant="labelSm"
@@ -57,7 +54,7 @@ export function CurrentTeacherCardMobile({ currentTeacherName, teacherId }: Read
             color: theme.palette.onPrimary,
           })}
         >
-          {t.notice}
+          {labels.notice}
         </Typography>
       </Box>
       <AssignmentIndOutlined

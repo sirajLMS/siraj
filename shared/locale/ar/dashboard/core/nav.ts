@@ -58,6 +58,7 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   parentRules: "القواعد",
   socialMedia: "وسائل التواصل",
   permissions: "الصلاحيات",
+  settings: "الإعدادات",
   booksAndBags: "الكتب والحقائب",
   studentTodayClasses: "حصص اليوم",
   studentSchedule: "جدولي",

@@ -2,10 +2,11 @@
 
 import { InfoOutlined, PublicOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale";
+import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 
 export function ContextualHelperCardsMobile() {
-  const t = useAppTranslation().dashboardTranslations.studentQuota.info;
+  const { labels } = useQuotaFormAccess();
+  const t = labels.info;
 
   return (
     <Box

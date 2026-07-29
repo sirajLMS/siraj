@@ -7,7 +7,7 @@ import { SectionPanel } from "@/frontend/common/components/ui/container/SectionP
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function SocialCommsSection({ register, control }: Props) {
-  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
+  const t = useAppTranslation(Translation.Dashboard.ParentOnboarding);
 
   return (
     <SectionPanel title={t.sections.socialComms}>

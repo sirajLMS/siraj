@@ -71,11 +71,12 @@ export async function dispatchAction(key: string): Promise<number> {
 }
 
 /**
- * Handles the execution of an action by its key (1-7).
+ * Handles the execution of an action by its key (1-8).
+ * Returns process exit code (0 = success, 1 = failure or blocked).
  */
-export async function executeAction(key: string, rl?: Interface): Promise<void> {
+export async function executeAction(key: string, rl?: Interface): Promise<number> {
   const action = ACTIONS[key];
-  if (!action) return;
+  if (!action) return 1;
 
   // Check for permanently disabled actions first
   if (isPermanentlyDisabled(key)) {
@@ -86,7 +87,7 @@ export async function executeAction(key: string, rl?: Interface): Promise<void> 
     if (rl) {
       await askQuestion(rl, "\nPress Enter to continue...");
     }
-    return;
+    return 1;
   }
 
   if (isDestructiveActionBlocked(key)) {
@@ -97,7 +98,7 @@ export async function executeAction(key: string, rl?: Interface): Promise<void> 
     if (rl) {
       await askQuestion(rl, "\nPress Enter to continue...");
     }
-    return;
+    return 1;
   }
 
   globalThis.console.log(`\nRunning: ${action.label}...\n`);
@@ -107,6 +108,8 @@ export async function executeAction(key: string, rl?: Interface): Promise<void> 
   if (rl) {
     await askQuestion(rl, "\nPress Enter to continue...");
   }
+
+  return code;
 }
 
 /**

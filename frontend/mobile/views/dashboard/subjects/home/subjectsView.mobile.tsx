@@ -13,9 +13,9 @@ import { DeleteSubjectDialogMobile } from "@/frontend/mobile/views/dashboard/sub
 import { EditCategoryDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/editCategoryDialog.mobile";
 import { EditSubjectDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/editSubjectDialog.mobile";
 import { SubjectCardMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/subjectCard.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 export function SubjectsViewMobile({
+  labels,
   categories,
   filteredSubjects,
   isLoading,
@@ -39,10 +39,11 @@ export function SubjectsViewMobile({
   editCategoryDialog,
   deleteCategoryDialog,
 }: Readonly<SubjectsViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+  const t = labels;
 
   const categoriesSection = (
     <CategoriesSectionMobile
+      labels={labels}
       categories={categories}
       activeCategoryId={activeCategoryId}
       onCategoryChange={onCategoryChange}
@@ -101,6 +102,7 @@ export function SubjectsViewMobile({
         layout="edge-to-edge"
         renderItem={subject => (
           <SubjectCardMobile
+            labels={labels}
             subject={subject}
             onEdit={() => onEditSubject(subject.id ?? "")}
             onDelete={() => onDeleteSubject(subject.id ?? "")}

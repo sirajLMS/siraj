@@ -9,13 +9,13 @@ import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-ty
 import { useParentLifecycleForm } from "@/frontend/common/views/dashboard/parents/lifecycle/components/useParentLifecycleForm";
 import type { LifecycleUpdateFormData } from "@/frontend/common/views/dashboard/parents/lifecycle/schemas/lifecycleUpdateSchema";
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
-import { useAppTranslation } from "@/shared/locale";
+import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/parents";
 
 export function LifecycleParentSummaryCard({
   parent,
+  labels,
   size = "lg",
-}: Readonly<{ parent: ParentLifecycleViewProps["parent"]; size?: "lg" | "sm" }>) {
-  const tp = useAppTranslation().profileTranslations.base;
+}: Readonly<{ parent: ParentLifecycleViewProps["parent"]; labels: ParentLifecycleLabels; size?: "lg" | "sm" }>) {
   const lifecycleKey = parent.lifecycleStatus.toLowerCase();
   const accountKey = parent.accountStatus.toLowerCase();
 
@@ -48,14 +48,12 @@ export function LifecycleParentSummaryCard({
             <StatusBadge
               category="studentAccount"
               status={lifecycleKey}
-              label={
-                tp.parent.status[lifecycleKey as "regular" | "on_trial" | "on_leave" | "suspended" | "deactivated"]
-              }
+              label={labels.status[lifecycleKey as "regular" | "on_trial" | "on_leave" | "suspended" | "deactivated"]}
             />
             <StatusBadge
               category="staffAccount"
               status={accountKey}
-              label={tp.parent.accountStatus[accountKey as "activated" | "deactivated"]}
+              label={labels.accountStatus[accountKey as "activated" | "deactivated"]}
             />
           </Stack>
         </Box>
@@ -64,9 +62,7 @@ export function LifecycleParentSummaryCard({
   );
 }
 
-export function PolicyOverviewCard() {
-  const t = useAppTranslation().dashboardTranslations.parentLifecycle;
-
+export function PolicyOverviewCard({ labels }: Readonly<{ labels: ParentLifecycleLabels }>) {
   return (
     <Box
       sx={theme => ({
@@ -78,23 +74,23 @@ export function PolicyOverviewCard() {
       })}
     >
       <Typography variant="titleLg" sx={{ fontWeight: 700, mb: 2 }}>
-        {t.sections.policyOverview}
+        {labels.sections.policyOverview}
       </Typography>
       <Stack spacing={2}>
         <Box>
           <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
-            {t.policies.lifecycleTitle}
+            {labels.policies.lifecycleTitle}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.policies.lifecycleDesc}
+            {labels.policies.lifecycleDesc}
           </Typography>
         </Box>
         <Box>
           <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
-            {t.policies.accountTitle}
+            {labels.policies.accountTitle}
           </Typography>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.policies.accountDesc}
+            {labels.policies.accountDesc}
           </Typography>
         </Box>
       </Stack>
@@ -102,29 +98,31 @@ export function PolicyOverviewCard() {
   );
 }
 
-export function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
-  const t = useAppTranslation().dashboardTranslations.parentLifecycle;
+export function LifecycleControls({
+  labels,
+  isUpdating,
+}: Readonly<{ labels: ParentLifecycleLabels; isUpdating: boolean }>) {
   const { control, register } = useFormContext<LifecycleUpdateFormData>();
 
   return (
-    <AdminControlPanel title={t.sections.adminControls}>
+    <AdminControlPanel title={labels.sections.adminControls}>
       <Stack spacing={3}>
         <Box>
           <Typography
             variant="labelMd"
             sx={theme => ({ color: theme.palette.text.secondary, mb: 1, display: "block" })}
           >
-            {t.fields.lifecycleStatus}
+            {labels.fields.lifecycleStatus}
           </Typography>
           <Controller
             name="lifecycleStatus"
             control={control}
             render={({ field }) => (
               <Select {...field} fullWidth size="small">
-                <MenuItem value={ParentStatus.Regular}>{t.statusOptions.REGULAR}</MenuItem>
-                <MenuItem value={ParentStatus.OnTrial}>{t.statusOptions.ON_TRIAL}</MenuItem>
-                <MenuItem value={ParentStatus.OnLeave}>{t.statusOptions.ON_LEAVE}</MenuItem>
-                <MenuItem value={ParentStatus.Suspended}>{t.statusOptions.SUSPENDED}</MenuItem>
+                <MenuItem value={ParentStatus.Regular}>{labels.statusOptions.REGULAR}</MenuItem>
+                <MenuItem value={ParentStatus.OnTrial}>{labels.statusOptions.ON_TRIAL}</MenuItem>
+                <MenuItem value={ParentStatus.OnLeave}>{labels.statusOptions.ON_LEAVE}</MenuItem>
+                <MenuItem value={ParentStatus.Suspended}>{labels.statusOptions.SUSPENDED}</MenuItem>
               </Select>
             )}
           />
@@ -132,8 +130,8 @@ export function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean
 
         <TextField
           {...register("reason")}
-          label={t.fields.reason}
-          placeholder={t.fields.reasonPlaceholder}
+          label={labels.fields.reason}
+          placeholder={labels.fields.reasonPlaceholder}
           multiline
           rows={3}
           fullWidth
@@ -141,7 +139,7 @@ export function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean
         />
 
         <PrimaryPageAction type="submit" disabled={isUpdating}>
-          {t.actions.applyChange}
+          {labels.actions.applyChange}
         </PrimaryPageAction>
       </Stack>
     </AdminControlPanel>
@@ -150,10 +148,11 @@ export function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean
 
 export function LifecycleFormBody({
   parent,
+  labels,
   isUpdating,
   onUpdateLifecycle,
   children,
-}: Readonly<ParentLifecycleViewProps & { readonly children?: ReactNode }>) {
+}: Readonly<ParentLifecycleViewProps & { readonly labels: ParentLifecycleLabels; readonly children?: ReactNode }>) {
   const methods = useParentLifecycleForm(parent);
 
   const handleSubmit = async (data: LifecycleUpdateFormData) => {
@@ -170,9 +169,9 @@ export function LifecycleFormBody({
       sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}
     >
       <FormProvider {...methods}>
-        <LifecycleControls isUpdating={isUpdating} />
+        <LifecycleControls labels={labels} isUpdating={isUpdating} />
       </FormProvider>
-      <PolicyOverviewCard />
+      <PolicyOverviewCard labels={labels} />
       {children}
     </Box>
   );

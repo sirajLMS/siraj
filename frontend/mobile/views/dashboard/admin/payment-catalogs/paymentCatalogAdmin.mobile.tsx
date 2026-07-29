@@ -10,9 +10,9 @@ import {
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
 import { PaymentCatalogCardMobile } from "@/frontend/mobile/views/dashboard/admin/payment-catalogs/components/paymentCatalogCard.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 export function PaymentCatalogAdminMobileView({
+  labels,
   activeTab,
   onTabChange,
   mobileWallets,
@@ -23,23 +23,21 @@ export function PaymentCatalogAdminMobileView({
   onEdit,
   onDelete,
 }: Readonly<PaymentCatalogAdminViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
-
   const catalogRows =
     activeTab === "mobileWallet" ? mobileWallets : activeTab === "paymentLink" ? paymentLinks : onlineAccounts;
   const rows = catalogRows.filter((row): row is NonNullable<typeof row> & { id: string } => Boolean(row?.id));
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} edgeToEdge={false} actions={null} />
+      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} actions={null} />
       <MobileContentStack gap={3} paddingBottom={4}>
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <MobileAddButton label={t.addEntry} onClick={onAdd} />
+          <MobileAddButton label={labels.addEntry} onClick={onAdd} />
         </Box>
         <Tabs value={activeTab} onChange={(_event, value) => onTabChange(value)} variant="fullWidth">
-          <Tab value="mobileWallet" label={t.tabs.mobileWallets} />
-          <Tab value="paymentLink" label={t.tabs.paymentLinks} />
-          <Tab value="onlineAccount" label={t.tabs.onlineAccounts} />
+          <Tab value="mobileWallet" label={labels.tabs.mobileWallets} />
+          <Tab value="paymentLink" label={labels.tabs.paymentLinks} />
+          <Tab value="onlineAccount" label={labels.tabs.onlineAccounts} />
         </Tabs>
 
         <MobileCardList
@@ -48,7 +46,7 @@ export function PaymentCatalogAdminMobileView({
           getKey={row => row.id}
           paginationOptions={{ mode: "client" }}
           layout="edge-to-edge"
-          renderItem={row => <PaymentCatalogCardMobile row={row} onEdit={onEdit} onDelete={onDelete} />}
+          renderItem={row => <PaymentCatalogCardMobile labels={labels} row={row} onEdit={onEdit} onDelete={onDelete} />}
         />
       </MobileContentStack>
     </MobilePageContainer>

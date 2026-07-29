@@ -23,7 +23,9 @@ import {
 import { useRouter } from "@/shared/i18n/navigation";
 import {
   type AppLocale,
+  type CommonLabels,
   type StudentPortalDashboardLabels as StudentDashboardLabels,
+  Translation,
   useAppLocale,
   useAppTranslation,
 } from "@/shared/locale";
@@ -76,6 +78,7 @@ export interface StudentDashboardViewModel {
   readonly recentLessonReports: readonly RecentLessonReportRow[];
   readonly reportsPagination: ReportsPagination;
   readonly labels: StudentDashboardLabels;
+  readonly commonLabels: CommonLabels;
   readonly loading: boolean;
   readonly onJoinLesson: (id: string) => void;
   readonly onViewHistory: () => void;
@@ -88,7 +91,8 @@ export interface StudentDashboardViewModel {
 export type UseStudentDashboardViewModelProps = Record<string, never>;
 
 export function useStudentDashboardViewModel(_props: UseStudentDashboardViewModelProps): StudentDashboardViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentPortalDashboard;
+  const t = useAppTranslation(Translation.Dashboard.StudentPortalDashboard);
+  const commonLabels = useAppTranslation(Translation.Common);
   const locale = useAppLocale();
   const router = useRouter();
   const userName = useUserStore(state => state.name);
@@ -222,6 +226,7 @@ export function useStudentDashboardViewModel(_props: UseStudentDashboardViewMode
     recentLessonReports,
     reportsPagination,
     labels,
+    commonLabels,
     loading,
     onJoinLesson: handlers.handleJoinLesson,
     onViewHistory: handlers.handleViewHistory,

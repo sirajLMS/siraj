@@ -1,10 +1,9 @@
 import type { NeonDatabase } from "drizzle-orm/neon-serverless";
-import { migrate as migrateNeon } from "drizzle-orm/neon-serverless/migrator";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { migrate as migratePostgres } from "drizzle-orm/node-postgres/migrator";
 import { db, getDrizzleDbPool } from "@/backend/db/drizzleDb";
 import { applyCustomMigrations } from "@/backend/db/scripts/applyCustomMigrations";
 import { ensureIdempotentMigrations } from "@/backend/db/scripts/ensureIdempotentMigrations";
+import { runDrizzleMigrations } from "@/backend/db/scripts/runDrizzleMigrations";
 import { getEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 
@@ -36,16 +35,13 @@ export async function runMigrations(closePool: boolean) {
   // when type/column/constraint already exists.
   ensureIdempotentMigrations();
 
+  // Per-folder transactions + enum pre-commit (avoids PG 55P04 on fresh and cloud DBs).
   if (provider === "postgres") {
     logger.warn("⚠️  Pool will be closed after migrations complete");
-    await migratePostgres(db as NodePgDatabase, {
-      migrationsFolder: "./backend/drizzle",
-    });
-  } else {
-    await migrateNeon(db as NeonDatabase, {
-      migrationsFolder: "./backend/drizzle",
-    });
   }
+  await runDrizzleMigrations(db as NodePgDatabase | NeonDatabase, {
+    migrationsFolder: "./backend/drizzle",
+  });
 
   logger.log("Migrations completed successfully!");
 

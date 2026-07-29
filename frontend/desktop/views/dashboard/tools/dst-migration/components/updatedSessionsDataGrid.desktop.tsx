@@ -7,21 +7,20 @@ import { useMemo } from "react";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly sessions: readonly UpdatedSession[];
   readonly loading?: boolean;
 }
 
-export function UpdatedSessionsDataGridDesktop({ sessions, loading = false }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
+export function UpdatedSessionsDataGridDesktop({ labels, sessions, loading = false }: Readonly<Props>) {
   const columns = useMemo<GridColDef<UpdatedSession>[]>(
     () => [
       {
         field: "studentName",
-        headerName: t.table.studentName,
+        headerName: labels.table.studentName,
         flex: 1.5,
         minWidth: 220,
         renderCell: params => (
@@ -45,7 +44,7 @@ export function UpdatedSessionsDataGridDesktop({ sessions, loading = false }: Re
       },
       {
         field: "fromTime",
-        headerName: t.table.from,
+        headerName: labels.table.from,
         width: 130,
         align: "center",
         headerAlign: "center",
@@ -65,14 +64,14 @@ export function UpdatedSessionsDataGridDesktop({ sessions, loading = false }: Re
       },
       {
         field: "toTime",
-        headerName: t.table.to,
+        headerName: labels.table.to,
         width: 130,
         align: "center",
         headerAlign: "center",
         renderCell: params => <DesktopStatusBadge category="session" status="completed" label={params.row.toTime} />,
       },
     ],
-    [t]
+    [labels]
   );
 
   return (
@@ -82,7 +81,7 @@ export function UpdatedSessionsDataGridDesktop({ sessions, loading = false }: Re
       getRowId={row => row.id}
       paginationOptions={false}
       ariaLabel="dst-updated-sessions-table"
-      emptyMessage={t.sections.updated}
+      emptyMessage={labels.sections.updated}
       loading={loading}
       sx={{ border: "none" }}
     />

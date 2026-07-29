@@ -1,4 +1,8 @@
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
+import type {
+  AssignedStudentsColumnLabels,
+  AssignedStudentsListShellLabels,
+} from "@/frontend/common/views/dashboard/profile/teacher/students/types/assignedStudentsList.types";
 
 /**
  * Shared ViewModel contract for AssignedStudentsTab tier variants.
@@ -8,6 +12,10 @@ import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/prof
  * receive computed values and remain pure-presentational.
  */
 export interface AssignedStudentsTabViewModel {
+  readonly labelsBySection: {
+    readonly columns: AssignedStudentsColumnLabels;
+    readonly list: AssignedStudentsListShellLabels;
+  };
   readonly title: string;
   readonly description: string;
   readonly rows: readonly AssignedStudentsRow[];

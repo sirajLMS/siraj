@@ -10,11 +10,12 @@ import {
 import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
 import type {
   ParentAdminData,
+  ParentSectionLabelsBundle,
   ParentViewData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import { type ProfileParentLabels, useAppTranslation } from "@/shared/locale";
+import type { ProfileParentLabels } from "@/shared/locale/types/profile";
 
 type ParentAccountFormFields = {
   name: string;
@@ -33,6 +34,7 @@ function resolveAccountStatusLabel(accountStatus: string | null | undefined, t: 
 type AccountSectionProps =
   | {
       readonly mode: "view";
+      readonly labels: ParentSectionLabelsBundle;
       readonly scope?: ProfileScope;
       readonly parentData: AccountParentData;
       readonly avatarUrl?: string | null;
@@ -41,6 +43,7 @@ type AccountSectionProps =
     }
   | {
       readonly mode: "edit";
+      readonly labels: ParentSectionLabelsBundle;
       readonly scope?: ProfileScope;
       readonly parentData: AccountParentData;
       readonly register: UseFormRegister<ParentAccountFormFields>;
@@ -48,7 +51,8 @@ type AccountSectionProps =
     };
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useAppTranslation().profileTranslations.parent;
+  const t = props.labels.parent;
+  const { baseLabels } = props.labels;
   const { canView } = useProfileFieldAccess({ scope: props.scope });
 
   if (props.mode === "edit") {
@@ -61,6 +65,7 @@ export function AccountSection(props: AccountSectionProps) {
         nameLabel={t.fields.fullName}
         emailLabel={t.fields.primaryEmail}
         currencyLabel={t.fields.displayCurrency}
+        baseLabels={baseLabels}
         register={props.register}
         control={props.control}
       />
@@ -96,6 +101,7 @@ export function AccountSection(props: AccountSectionProps) {
       nameLabel={t.fields.fullName}
       emailLabel={t.fields.primaryEmail}
       currencyLabel={t.fields.displayCurrency}
+      baseLabels={baseLabels}
       additionalViewContent={accountStatusContent}
     />
   );

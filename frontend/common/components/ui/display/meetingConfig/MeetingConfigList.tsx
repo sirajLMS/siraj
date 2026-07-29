@@ -7,7 +7,7 @@ import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { MeetingConfigListProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type {
   MeetingConfigListItem,
@@ -23,7 +23,7 @@ export function MeetingConfigList({
   onDeleteAction,
   emptyMessage,
 }: MeetingConfigListProps) {
-  const t = useAppTranslation().uiTranslations.meetingConfig;
+  const t = useAppTranslation(Translation.Ui.MeetingConfig);
   const tDisplay = t.display;
   const tManager = t.manager;
   const locale = useAppLocale();

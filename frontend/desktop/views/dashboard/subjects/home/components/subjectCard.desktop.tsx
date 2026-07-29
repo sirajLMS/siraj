@@ -14,7 +14,6 @@ import {
 } from "@mui/material";
 import { ClassAvatar } from "@/frontend/common/components/ui/avatar/ClassAvatar";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
-import { useAppTranslation } from "@/shared/locale";
 
 /**
  * SubjectCardDesktop — fixed-aspect desktop card suited to a multi-column grid.
@@ -23,8 +22,15 @@ import { useAppTranslation } from "@/shared/locale";
  * regardless of description length (mobile cards inside a 1-col list don't
  * need this equalization).
  */
-export function SubjectCardDesktop({ subject, onEdit, onDelete, onClick, canManage }: Readonly<SubjectCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+export function SubjectCardDesktop({
+  labels,
+  subject,
+  onEdit,
+  onDelete,
+  onClick,
+  canManage,
+}: Readonly<SubjectCardProps>) {
+  const t = labels;
 
   return (
     <Card

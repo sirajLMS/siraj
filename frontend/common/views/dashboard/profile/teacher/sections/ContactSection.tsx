@@ -11,25 +11,28 @@ import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSe
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
 import {
   isTeacherAdminData,
+  type TeacherProfileViewLabels,
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type {
   TeacherAdminEditFormData,
   TeacherOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import { useAppTranslation } from "@/shared/locale";
 
 type ContactSectionViewProps = {
+  readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
   readonly scope?: ProfileScope;
   readonly teacherData: TeacherViewData;
   readonly isAdminScope: boolean;
 };
 
 type ContactSectionOwnEditProps = {
+  readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
   readonly scope?: ProfileScope;
   readonly isAdminScope: false;
   readonly register: UseFormRegister<TeacherOwnEditFormData>;
@@ -37,6 +40,7 @@ type ContactSectionOwnEditProps = {
 };
 
 type ContactSectionAdminEditProps = {
+  readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
   readonly scope?: ProfileScope;
   readonly isAdminScope: true;
   readonly register: UseFormRegister<TeacherAdminEditFormData>;
@@ -46,16 +50,18 @@ type ContactSectionAdminEditProps = {
 type ContactSectionProps = ContactSectionViewProps | ContactSectionOwnEditProps | ContactSectionAdminEditProps;
 
 function TeacherIdentityFieldsView({
+  labels,
   timezone,
   address,
   scope,
 }: {
+  readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
   readonly timezone: string | null | undefined;
   readonly address: string | null | undefined;
   readonly scope: ProfileScope;
 }) {
-  const t = useAppTranslation().profileTranslations.teacher;
-  const tc = useAppTranslation().profileTranslations.base;
+  const t = labels.teacher;
+  const tc = labels.baseLabels;
   const { canView, showField } = useProfileFieldAccess({ scope });
 
   if (!canView("teacher_identity")) {
@@ -66,7 +72,7 @@ function TeacherIdentityFieldsView({
   const showAddress = showField(address, "teacher_identity");
 
   if (!showTimezone && !showAddress) {
-    return <ProfileRestrictedSection title={t.sections.contact} />;
+    return <ProfileRestrictedSection title={t.sections.contact} labels={tc.fieldAccess} />;
   }
 
   return (
@@ -80,15 +86,17 @@ function TeacherIdentityFieldsView({
 }
 
 function TeacherIdentityFieldsEdit({
+  labels,
   register,
   control,
   scope,
 }: {
+  readonly labels: Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
   readonly register: UseFormRegister<TeacherAdminEditFormData>;
   readonly control: Control<TeacherAdminEditFormData>;
   readonly scope?: ProfileScope;
 }) {
-  const t = useAppTranslation().profileTranslations.teacher;
+  const t = labels.teacher;
   const { canView, canEdit } = useProfileFieldAccess({ scope });
 
   if (!canView("teacher_identity")) {
@@ -131,7 +139,7 @@ function TeacherIdentityFieldsEdit({
 }
 
 function ContactSectionEdit(props: ContactSectionOwnEditProps | ContactSectionAdminEditProps): ReactElement | null {
-  const t = useAppTranslation().profileTranslations.teacher;
+  const t = props.labels.teacher;
   const scope = props.scope ?? ProfileScope.Own;
   const { canView } = useProfileFieldAccess({ scope });
 
@@ -146,7 +154,12 @@ function ContactSectionEdit(props: ContactSectionOwnEditProps | ContactSectionAd
           <PhoneFormField name="phone" control={props.control} label={t.fields.phone} />
         ) : null}
         {props.isAdminScope ? (
-          <TeacherIdentityFieldsEdit register={props.register} control={props.control} scope={scope} />
+          <TeacherIdentityFieldsEdit
+            labels={props.labels}
+            register={props.register}
+            control={props.control}
+            scope={scope}
+          />
         ) : null}
       </Stack>
     </SectionPanel>
@@ -154,8 +167,8 @@ function ContactSectionEdit(props: ContactSectionOwnEditProps | ContactSectionAd
 }
 
 function ContactSectionView(props: ContactSectionViewProps): ReactElement {
-  const t = useAppTranslation().profileTranslations.teacher;
-  const tc = useAppTranslation().profileTranslations.base;
+  const t = props.labels.teacher;
+  const tc = props.labels.baseLabels;
   const scope = props.scope ?? (props.isAdminScope ? ProfileScope.Other : ProfileScope.Own);
   const { canView, showField } = useProfileFieldAccess({ scope });
 
@@ -168,7 +181,7 @@ function ContactSectionView(props: ContactSectionViewProps): ReactElement {
   const showIdentity = props.isAdminScope && adminData != null && canView("teacher_identity");
 
   if (!showPhone && !showOwnTimezone && !showIdentity) {
-    return <ProfileRestrictedSection title={t.sections.contact} />;
+    return <ProfileRestrictedSection title={t.sections.contact} labels={tc.fieldAccess} />;
   }
 
   return (
@@ -187,7 +200,12 @@ function ContactSectionView(props: ContactSectionViewProps): ReactElement {
           />
         ) : null}
         {showIdentity && adminData ? (
-          <TeacherIdentityFieldsView timezone={adminData.timezone} address={adminData.address} scope={scope} />
+          <TeacherIdentityFieldsView
+            labels={props.labels}
+            timezone={adminData.timezone}
+            address={adminData.address}
+            scope={scope}
+          />
         ) : null}
       </Stack>
     </SectionPanel>

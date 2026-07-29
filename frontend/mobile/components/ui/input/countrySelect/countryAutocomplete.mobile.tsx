@@ -16,7 +16,7 @@ import {
   getCountryAutocompletePopperSlotProps,
 } from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocompletePopper";
 import { CountryOptionRowMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryOptionRow.mobile";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const buildSxProp = (
   style: React.CSSProperties | undefined,
@@ -131,7 +131,7 @@ export const CountryAutocompleteMobile: React.FC<CountryAutocompleteProps> = ({
   disablePortal = false,
   listAttached = false,
 }: CountryAutocompleteProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.countrySelect;
+  const t = useAppTranslation(Translation.Ui.CountrySelect);
   const locale = useAppLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;

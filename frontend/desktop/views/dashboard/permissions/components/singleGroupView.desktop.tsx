@@ -7,9 +7,9 @@ import { AddPermissionsTabDesktop } from "@/frontend/desktop/views/dashboard/per
 import { AssignedUsersTabDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/assignedUsersTab.desktop";
 import { CurrentPermissionsTabDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/currentPermissionsTab.desktop";
 import { SingleGroupHeaderDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/singleGroupHeader.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 export function SingleGroupViewDesktop({
+  labels,
   group,
   permissions,
   isLoading,
@@ -18,7 +18,7 @@ export function SingleGroupViewDesktop({
   onAssignGroup,
   singleGroupState,
 }: Readonly<SingleGroupViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
   const {
     activeSubTab,
     setActiveSubTab,
@@ -45,7 +45,7 @@ export function SingleGroupViewDesktop({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <SingleGroupHeaderDesktop group={group} onBack={onBack} onEditGroup={onEditGroup} />
+      <SingleGroupHeaderDesktop labels={labels} group={group} onBack={onBack} onEditGroup={onEditGroup} />
 
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
@@ -80,6 +80,7 @@ export function SingleGroupViewDesktop({
         <Box sx={{ mt: 1 }}>
           {activeSubTab === "current" && (
             <CurrentPermissionsTabDesktop
+              labels={labels}
               group={group}
               groupPermissions={groupPermissions}
               permissionsCount={permissionsCount}
@@ -91,6 +92,7 @@ export function SingleGroupViewDesktop({
 
           {activeSubTab === "add" && !group.isSystem && (
             <AddPermissionsTabDesktop
+              labels={labels}
               filteredAvailablePermissions={filteredAvailablePermissions}
               selectedAddPermissionIds={selectedAddPermissionIds}
               searchQuery={searchQuery}
@@ -106,6 +108,7 @@ export function SingleGroupViewDesktop({
 
           {activeSubTab === "users" && (
             <AssignedUsersTabDesktop
+              labels={labels}
               group={group}
               filteredAssignedUsers={filteredAssignedUsers}
               selectedAssignedUserIds={selectedAssignedUserIds}

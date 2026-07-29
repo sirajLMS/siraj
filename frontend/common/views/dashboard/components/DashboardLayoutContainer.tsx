@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DashboardClientProviders } from "@/frontend/common/providers/DashboardClientProviders";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
@@ -23,15 +24,17 @@ export async function DashboardLayoutContainer({
   const coreLayoutT = t.coreLayout;
 
   return (
-    <DashboardClientBridge
-      userProfile={userProfile}
-      isSuperAdmin={isSuperAdmin}
-      roleLabel={adminT.roleLabel}
-      appTitle={coreLayoutT.appTitle}
-      logoAriaLabel={coreLayoutT.appTitle}
-      initialSidebarOpen={initialSidebarOpen}
-    >
-      {children}
-    </DashboardClientBridge>
+    <DashboardClientProviders>
+      <DashboardClientBridge
+        userProfile={userProfile}
+        isSuperAdmin={isSuperAdmin}
+        roleLabel={adminT.roleLabel}
+        appTitle={coreLayoutT.appTitle}
+        logoAriaLabel={coreLayoutT.appTitle}
+        initialSidebarOpen={initialSidebarOpen}
+      >
+        {children}
+      </DashboardClientBridge>
+    </DashboardClientProviders>
   );
 }

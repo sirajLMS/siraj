@@ -11,14 +11,14 @@ import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
 import logger from "@/frontend/common/lib/logger";
 import { isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface AuthProviderProps {
   readonly children: React.ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const t = useAppTranslation().authTranslations.login;
+  const t = useAppTranslation(Translation.Auth.Login);
   const { updateAuthToken, clearAuthData } = useAuthToken();
   const client = useApolloClient();
   const [loginMutation] = useMutation(Document.loginMutationDocument);

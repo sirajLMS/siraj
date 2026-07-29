@@ -2,7 +2,7 @@
 
 import { Alert, Button } from "@mui/material";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface DesktopErrorStateProps {
   readonly message?: string;
@@ -17,7 +17,7 @@ export interface DesktopErrorStateProps {
  * fixed-position LinearProgress while the theme/language is changing).
  */
 export function DesktopErrorState({ message, onRetry, retryLabel, embedded = false }: DesktopErrorStateProps) {
-  const tDefault = useAppTranslation().commonTranslations;
+  const tDefault = useAppTranslation(Translation.Common);
   const displayMessage = message ?? tDefault.loadFailed ?? "";
 
   const alert = (

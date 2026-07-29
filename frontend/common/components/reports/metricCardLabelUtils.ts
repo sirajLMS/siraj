@@ -1,18 +1,31 @@
-import type { useAppTranslation } from "@/shared/locale";
+import type { CommonLabels } from "@/shared/locale/types/common";
+import type { RescheduleTrackingLabels } from "@/shared/locale/types/dashboard/classes/rescheduleTracking";
+import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core";
+import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents/directory";
 
-export function resolveDashboardTranslation(
-  path: string,
-  translations: ReturnType<typeof useAppTranslation>
-): string | undefined {
+export interface MetricLabelSources {
+  readonly statusTracking: StatusTrackingLabels;
+  readonly common: CommonLabels;
+  readonly dashboardSections: {
+    readonly parentsDirectory: ParentsDirectoryLabels;
+    readonly rescheduleTracking: RescheduleTrackingLabels;
+    readonly statusTracking: StatusTrackingLabels;
+    readonly coreStatusTracking: StatusTrackingLabels;
+  };
+}
+
+function resolveDashboardTranslation(path: string, sources: MetricLabelSources): string | undefined {
   const parts = path.split(".");
-  let ns = parts[1];
-  if (ns === "statusTracking") {
-    ns = "coreStatusTracking";
+  const sectionKey = parts[1];
+  if (!sectionKey) {
+    return undefined;
   }
-  const section = translations.dashboardTranslations[ns as keyof typeof translations.dashboardTranslations];
+
+  const section = sources.dashboardSections[sectionKey as keyof typeof sources.dashboardSections];
   if (!section) {
     return undefined;
   }
+
   let curr: unknown = section;
   for (let i = 2; i < parts.length; i++) {
     if (curr && typeof curr === "object") {
@@ -21,28 +34,25 @@ export function resolveDashboardTranslation(
       return undefined;
     }
   }
+
   return typeof curr === "string" ? curr : undefined;
 }
 
-export function resolveMetricLabel(path: string, translations: ReturnType<typeof useAppTranslation>): string {
+export function resolveMetricLabel(path: string, sources: MetricLabelSources): string {
   if (path.startsWith("dashboard.")) {
-    const val = resolveDashboardTranslation(path, translations);
+    const val = resolveDashboardTranslation(path, sources);
     if (val !== undefined) {
       return val;
     }
   } else if (path.startsWith("metrics.")) {
     const parts = path.split(".");
-    const resolved =
-      translations.dashboardTranslations.coreStatusTracking.metrics[
-        parts[1] as keyof typeof translations.dashboardTranslations.coreStatusTracking.metrics
-      ];
+    const resolved = sources.statusTracking.metrics[parts[1] as keyof StatusTrackingLabels["metrics"]];
     if (typeof resolved === "string") {
       return resolved;
     }
   }
 
-  const commonT = translations.commonTranslations as unknown as Record<string, unknown>;
-  const commonValue = commonT[path];
+  const commonValue = sources.common[path as keyof CommonLabels];
   if (typeof commonValue === "string") {
     return commonValue;
   }

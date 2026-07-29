@@ -1,7 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { assertTestHelperAllowed, isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
 import { TestHelperService } from "@/backend/services/system/test-helper.service";
 
-if (process.env.NODE_ENV !== "production") {
+if (isTestHelperEnabled()) {
   const TestEntitiesType = gqlSchemaBuilder.objectRef<{
     studentUserEmail: string;
     studentUserId: string;
@@ -44,6 +45,16 @@ if (process.env.NODE_ENV !== "production") {
     }),
   });
 
+  gqlSchemaBuilder.mutationField("ensureDemoUsers", t =>
+    t.field({
+      type: "Boolean",
+      resolve: async () => {
+        assertTestHelperAllowed();
+        return await TestHelperService.ensureDemoUsers();
+      },
+    })
+  );
+
   gqlSchemaBuilder.mutationField("createTestEntities", t =>
     t.field({
       type: TestEntitiesType,
@@ -53,9 +64,7 @@ if (process.env.NODE_ENV !== "production") {
         classesRemaining: t.arg.int({ required: false }),
       },
       resolve: async (_query, args) => {
-        if (process.env.NODE_ENV === "production") {
-          throw new Error("Test mutations are not available in production");
-        }
+        assertTestHelperAllowed();
         return await TestHelperService.createTestEntities(args.prefix, args.classesRemaining ?? undefined);
       },
     })
@@ -74,9 +83,7 @@ if (process.env.NODE_ENV !== "production") {
         parentId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
-        if (process.env.NODE_ENV === "production") {
-          throw new Error("Test mutations are not available in production");
-        }
+        assertTestHelperAllowed();
         return await TestHelperService.cleanupTestEntities(args);
       },
     })
@@ -91,9 +98,7 @@ if (process.env.NODE_ENV !== "production") {
         teacherName: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
-        if (process.env.NODE_ENV === "production") {
-          throw new Error("Test mutations are not available in production");
-        }
+        assertTestHelperAllowed();
         return await TestHelperService.createTestGroupClass(args.classInstanceId, args.teacherName);
       },
     })
@@ -107,9 +112,7 @@ if (process.env.NODE_ENV !== "production") {
         groupClassId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
-        if (process.env.NODE_ENV === "production") {
-          throw new Error("Test mutations are not available in production");
-        }
+        assertTestHelperAllowed();
         return await TestHelperService.cleanupTestGroupClass(args.groupClassId);
       },
     })
@@ -135,9 +138,7 @@ if (process.env.NODE_ENV !== "production") {
         prefix: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
-        if (process.env.NODE_ENV === "production") {
-          throw new Error("Test mutations are not available in production");
-        }
+        assertTestHelperAllowed();
         return await TestHelperService.createTestSuperAdmin(args.prefix);
       },
     })
@@ -151,9 +152,7 @@ if (process.env.NODE_ENV !== "production") {
         userId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
-        if (process.env.NODE_ENV === "production") {
-          throw new Error("Test mutations are not available in production");
-        }
+        assertTestHelperAllowed();
         return await TestHelperService.cleanupTestSuperAdmin(args.userId);
       },
     })
@@ -167,9 +166,7 @@ if (process.env.NODE_ENV !== "production") {
         userId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
-        if (process.env.NODE_ENV === "production") {
-          throw new Error("Test mutations are not available in production");
-        }
+        assertTestHelperAllowed();
         return await TestHelperService.cleanupTestManager(args.userId);
       },
     })

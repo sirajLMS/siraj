@@ -4,7 +4,6 @@ import { CalendarTodayOutlined, ChevronLeftOutlined, ChevronRightOutlined } from
 import { alpha, Box, IconButton, Stack, type SxProps, type Theme, Typography, useTheme } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { JumpToDateHeaderProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale";
 
 function shiftDate(selectedDate: string, delta: number): string {
   const d = new Date(selectedDate + "T00:00:00");
@@ -67,8 +66,8 @@ function DateNavigator({
 function LeaveQuotaStat({
   leaveQuotaUsed,
   leaveQuotaTotal,
-}: Readonly<Pick<JumpToDateHeaderProps, "leaveQuotaUsed" | "leaveQuotaTotal">>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
+  labels,
+}: Readonly<Pick<JumpToDateHeaderProps, "leaveQuotaUsed" | "leaveQuotaTotal" | "labels">>) {
   return (
     <Box
       sx={theme => ({
@@ -84,17 +83,16 @@ function LeaveQuotaStat({
         variant="labelUppercase"
         sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700, fontSize: 10 })}
       >
-        {t.leaveQuotaDesc(leaveQuotaTotal)}
+        {labels.leaveQuotaDesc(leaveQuotaTotal)}
       </Typography>
       <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-        {t.remaining(leaveQuotaTotal - leaveQuotaUsed, leaveQuotaTotal)}
+        {labels.remaining(leaveQuotaTotal - leaveQuotaUsed, leaveQuotaTotal)}
       </Typography>
     </Box>
   );
 }
 
-function TotalClassesStat({ totalClasses }: Readonly<Pick<JumpToDateHeaderProps, "totalClasses">>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
+function TotalClassesStat({ totalClasses, labels }: Readonly<Pick<JumpToDateHeaderProps, "totalClasses" | "labels">>) {
   return (
     <Box
       sx={theme => ({
@@ -110,10 +108,10 @@ function TotalClassesStat({ totalClasses }: Readonly<Pick<JumpToDateHeaderProps,
         variant="labelUppercase"
         sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700, fontSize: 10 })}
       >
-        {t.totalClassesDesc(totalClasses)}
+        {labels.totalClassesDesc(totalClasses)}
       </Typography>
       <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.header, fontWeight: 700 })}>
-        {totalClasses} {t.totalClasses}
+        {totalClasses} {labels.totalClasses}
       </Typography>
     </Box>
   );
@@ -125,21 +123,20 @@ export function JumpToDateHeaderDesktop({
   totalClasses,
   selectedDate,
   onDateChange,
+  labels,
 }: Readonly<JumpToDateHeaderProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
-
   return (
-    <BaseCard sx={{ p: 3 }}>
-      <Stack direction="row" spacing={3} sx={{ justifyContent: "space-between" }}>
+    <BaseCard sx={{ p: 2 }}>
+      <Stack direction="column" spacing={3} sx={{ justifyContent: "space-between" }}>
         <Stack spacing={2}>
           <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-            {t.jumpToDate}
+            {labels.jumpToDate}
           </Typography>
           <DateNavigator selectedDate={selectedDate} onDateChange={onDateChange} />
         </Stack>
-        <Stack direction="row" spacing={2} sx={{ width: "auto" }}>
-          <LeaveQuotaStat leaveQuotaUsed={leaveQuotaUsed} leaveQuotaTotal={leaveQuotaTotal} />
-          <TotalClassesStat totalClasses={totalClasses} />
+        <Stack direction="row" spacing={2} sx={{ width: "100%" }}>
+          <LeaveQuotaStat leaveQuotaUsed={leaveQuotaUsed} leaveQuotaTotal={leaveQuotaTotal} labels={labels} />
+          <TotalClassesStat totalClasses={totalClasses} labels={labels} />
         </Stack>
       </Stack>
     </BaseCard>

@@ -17,13 +17,10 @@ export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurr
     isSubmitting,
     showSuccess,
     meetingConfigWarning,
-    meetingConfigWarningMessage,
-    goToClassLabel,
+    labelsBySection,
     onGoToCreatedClass,
-    labels,
     onClose,
     onSubmit,
-    formLabels,
     register,
     handleSubmit,
     watch,
@@ -34,21 +31,23 @@ export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurr
     onMeetingConfigChange,
   } = viewModel;
 
+  const { shell, form, notifications } = labelsBySection;
+
   const breadcrumbs = [
-    { label: labels.breadcrumbs.dashboard, href: "/dashboard" },
-    { label: labels.breadcrumbs.classes, href: "/dashboard" },
-    { label: labels.title, current: true },
+    { label: shell.breadcrumbs.dashboard, href: "/dashboard" },
+    { label: shell.breadcrumbs.classes, href: "/dashboard" },
+    { label: shell.title, current: true },
   ];
 
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={labels.title}
-        subtitle={labels.subtitle}
+        title={shell.title}
+        subtitle={shell.subtitle}
         titleVariant="headlineLg"
         breadcrumbs={breadcrumbs}
         actions={
-          <StyledHeaderCloseButton onClick={onClose} aria-label={labels.close}>
+          <StyledHeaderCloseButton onClick={onClose} aria-label={shell.close}>
             <CloseOutlined />
           </StyledHeaderCloseButton>
         }
@@ -70,10 +69,10 @@ export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurr
             isSubmitting={isSubmitting}
             showSuccess={showSuccess}
             meetingConfigWarning={meetingConfigWarning}
-            meetingConfigWarningMessage={meetingConfigWarningMessage}
-            goToClassLabel={goToClassLabel}
+            meetingConfigWarningMessage={notifications.meetingConfigWarningMessage}
+            goToClassLabel={notifications.goToClassLabel}
             onGoToCreatedClass={onGoToCreatedClass}
-            formLabels={formLabels}
+            formLabels={form}
             meetingConfig={meetingConfig}
             onMeetingConfigChangeAction={onMeetingConfigChange}
             onSubmit={data => onSubmit(data, meetingConfig)}

@@ -1,4 +1,34 @@
 /**
+ * Env vars read by {@link assessDestructiveDbCommandSafety}.
+ * Cleared before applying a selected db CLI env file so stale values cannot leak across files.
+ */
+export const DESTRUCTIVE_GUARD_ENV_KEYS = [
+  "NODE_ENV",
+  "DB_PROVIDER",
+  "STORAGE_PROVIDER",
+  "REDIS_PROVIDER",
+  "DATABASE_URL",
+  "UPSTASH_REDIS_REST_URL",
+  "GCP_PROJECT_ID",
+  "GCP_BUCKET_NAME",
+  "BLOB_READ_WRITE_TOKEN",
+] as const;
+
+/**
+ * Removes destructive-guard env vars from `process.env`.
+ *
+ * Used when switching db CLI env files so stale cloud/production signals
+ * from a previously loaded file cannot leak into safety checks.
+ *
+ * This does **not** reset the database or change repo policy blocks.
+ */
+export function clearDestructiveGuardEnvVars(): void {
+  for (const key of DESTRUCTIVE_GUARD_ENV_KEYS) {
+    delete process.env[key];
+  }
+}
+
+/**
  * Assessment of whether destructive DB commands are safe to run in the current environment.
  */
 export interface DestructiveDbSafetyAssessment {

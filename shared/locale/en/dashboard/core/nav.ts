@@ -58,6 +58,7 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   parentRules: "Rules",
   socialMedia: "Social Media",
   permissions: "Permissions",
+  settings: "Settings",
   booksAndBags: "Books & Bags",
   studentTodayClasses: "Today's Classes",
   studentSchedule: "My Schedule",

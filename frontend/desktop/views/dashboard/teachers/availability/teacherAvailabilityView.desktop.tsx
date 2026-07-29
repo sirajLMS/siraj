@@ -11,9 +11,9 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { AvailabilityInsightsDesktop } from "@/frontend/desktop/views/dashboard/teachers/availability/components/availabilityInsights.desktop";
 import { AvailabilitySearchFormDesktop } from "@/frontend/desktop/views/dashboard/teachers/availability/components/availabilitySearchForm.desktop";
 import { WeeklyAvailabilityGridDesktop } from "@/frontend/desktop/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherAvailabilityDesktopView({
+  labelsBySection,
   availability,
   insights,
   defaultFilters,
@@ -21,9 +21,8 @@ export function TeacherAvailabilityDesktopView({
   onExportPdf,
   onSearch,
   onBlockClick,
-  tableLabels,
 }: Readonly<TeacherAvailabilityViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
+  const { shell: labels, table: tableLabels } = labelsBySection;
   const storeFilters = useTeacherAvailabilityStore(
     (state: { readonly filters: AvailabilitySearchFormData }) => state.filters
   );
@@ -38,19 +37,31 @@ export function TeacherAvailabilityDesktopView({
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={t.pageTitle}
-        subtitle={t.pageSubtitle}
+        title={labels.pageTitle}
+        subtitle={labels.pageSubtitle}
         breadcrumbs={[
-          { label: t.breadcrumbs.teachers, href: "/teachers" },
-          { label: t.breadcrumbs.availability, current: true },
+          { label: labels.breadcrumbs.teachers, href: "/teachers" },
+          { label: labels.breadcrumbs.availability, current: true },
         ]}
-        actions={<DesktopExportButton onClick={onExportPdf}>{t.exportPdf}</DesktopExportButton>}
+        actions={<DesktopExportButton onClick={onExportPdf}>{labels.exportPdf}</DesktopExportButton>}
       />
 
       <Box sx={{ mb: 4 }}>
-        <DesktopSectionPanel title={t.searchTitle}>
+        <DesktopSectionPanel title={labels.searchTitle}>
           <FormProvider {...methods}>
-            <AvailabilitySearchFormDesktop onSearch={onSearch} />
+            <AvailabilitySearchFormDesktop
+              onSearch={onSearch}
+              labels={{
+                searchTitle: labels.searchTitle,
+                from: labels.from,
+                to: labels.to,
+                gender: labels.gender,
+                any: labels.any,
+                male: labels.male,
+                female: labels.female,
+                submit: labels.submit,
+              }}
+            />
           </FormProvider>
         </DesktopSectionPanel>
       </Box>
@@ -65,7 +76,7 @@ export function TeacherAvailabilityDesktopView({
         <WeeklyAvailabilityGridDesktop availability={availability} labels={tableLabels} onBlockClick={onBlockClick} />
       )}
 
-      <AvailabilityInsightsDesktop insights={insights} />
+      <AvailabilityInsightsDesktop insights={insights} labels={labels.insights} />
     </DesktopPageContainer>
   );
 }

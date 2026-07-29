@@ -1,7 +1,10 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
+
 import type { ManageOverridesState } from "@/frontend/common/views/dashboard/permissions/components/useManageOverridesState";
+import type { PermissionsLabels } from "@/shared/locale";
 
 export interface ManageOverridesDialogProps {
+  readonly labels: PermissionsLabels;
   readonly open: boolean;
   readonly onClose: () => void;
   // NEW FOR PLAN v5: pre-computed manage-overrides dialog state composed by

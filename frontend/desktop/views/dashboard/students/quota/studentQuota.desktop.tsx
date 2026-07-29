@@ -12,8 +12,7 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { ContextualHelperCardsDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/contextualHelperCards.desktop";
 import { CourseDetailsSectionDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/courseDetailsSection.desktop";
 import { StudentInformationSectionDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/studentInformationSection.desktop";
-import type { StudentQuotaLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 function DesktopBreadcrumbs(t: StudentQuotaLabels) {
   return [
@@ -23,22 +22,21 @@ function DesktopBreadcrumbs(t: StudentQuotaLabels) {
 }
 
 function FormActionsDesktop({
+  labels,
   isSaving,
   isSaved,
   studentData,
   onCancel,
   readOnly = false,
   showCancel = true,
-}: Readonly<FormActionsProps>) {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
-
+}: Readonly<FormActionsProps & { readonly labels: StudentQuotaLabels }>) {
   let saveIcon = <Save />;
   if (isSaving) saveIcon = <SyncOutlined sx={{ animation: "spin 1s linear infinite" }} />;
   else if (isSaved) saveIcon = <CheckCircleOutlined />;
 
-  let saveText = t.actions.save;
-  if (isSaving) saveText = t.actions.saving;
-  else if (isSaved) saveText = t.actions.saved;
+  let saveText = labels.actions.save;
+  if (isSaving) saveText = labels.actions.saving;
+  else if (isSaved) saveText = labels.actions.saved;
 
   return (
     <Box
@@ -98,7 +96,7 @@ function FormActionsDesktop({
               width: "auto",
             })}
           >
-            {t.actions.cancel}
+            {labels.actions.cancel}
           </DesktopPrimaryPageAction>
         ) : null}
       </Box>
@@ -113,7 +111,7 @@ function FormActionsDesktop({
           })}
         >
           <ScheduleOutlined sx={{ fontSize: 14 }} />
-          <Typography variant="labelMd">{t.actions.lastEditedAt(studentData.lastEditedTime)}</Typography>
+          <Typography variant="labelMd">{labels.actions.lastEditedAt(studentData.lastEditedTime)}</Typography>
         </Box>
       ) : null}
     </Box>
@@ -122,6 +120,7 @@ function FormActionsDesktop({
 
 function QuotaFormCardDesktop({
   t,
+  tc,
   methods,
   onSubmit,
   studentData,
@@ -138,6 +137,7 @@ function QuotaFormCardDesktop({
   Pick<
     StudentQuotaViewModel,
     | "t"
+    | "tc"
     | "methods"
     | "onSubmit"
     | "isSaving"
@@ -184,6 +184,8 @@ function QuotaFormCardDesktop({
               canEditQuota,
               canViewQuota,
               canViewTeacher,
+              labels: t,
+              commonLabels: tc,
             }}
           >
             <Box
@@ -204,6 +206,7 @@ function QuotaFormCardDesktop({
               <StudentInformationSectionDesktop />
               <CourseDetailsSectionDesktop />
               <FormActionsDesktop
+                labels={t}
                 isSaving={isSaving}
                 isSaved={isSaved}
                 studentData={studentData}
@@ -227,6 +230,7 @@ function QuotaFormCardDesktop({
 
 export function StudentQuotaDesktopView({
   t,
+  tc,
   studentData,
   embedded,
   readOnly,
@@ -252,6 +256,7 @@ export function StudentQuotaDesktopView({
   const formContent = (
     <QuotaFormCardDesktop
       t={t}
+      tc={tc}
       methods={methods}
       onSubmit={onSubmit}
       studentData={studentData}

@@ -9,16 +9,14 @@ import {
   MobilePersonProfileLink,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale";
 
 function formatStatusLabel(status: string): string {
   const normalized = status.replaceAll("_", " ").toLowerCase();
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
-export function AssociatedStudentsCardListMobile({ rows }: Readonly<BaseAssociatedStudentsListProps>) {
-  const t = useAppTranslation().profileTranslations.parent;
-  const tProfile = useAppTranslation().profileTranslations.base;
+export function AssociatedStudentsCardListMobile({ rows, labels }: Readonly<BaseAssociatedStudentsListProps>) {
+  const { parent: t, base: tProfile } = labels;
 
   return (
     <MobileCardList

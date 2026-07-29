@@ -104,7 +104,7 @@ function StudentDashboardContainerImpl() {
   return (
     <Fragment>
       <StudentDashboardDesktopView {...viewModel} />
-      <ReflectionDialog />
+      <ReflectionDialog labels={viewModel.labels} commonLabels={viewModel.commonLabels} />
     </Fragment>
   );
 }

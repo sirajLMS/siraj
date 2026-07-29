@@ -9,7 +9,6 @@ import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permission
 import type { BasePermissionGroupListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
-import { useAppTranslation } from "@/shared/locale";
 
 export interface PermissionGroupsDataGridDesktopProps extends BasePermissionGroupListProps {
   // VARIANT JUSTIFICATION: extra field loading — desktop data-grid supports async row-loading state; mobile card list renders synchronously
@@ -17,6 +16,7 @@ export interface PermissionGroupsDataGridDesktopProps extends BasePermissionGrou
 }
 
 interface RowActionsProps {
+  readonly labels: BasePermissionGroupListProps["labels"];
   readonly group: PermissionGroup;
   readonly onEditGroup: (id: string) => void;
   readonly onDeleteGroup: (id: string) => void;
@@ -25,13 +25,14 @@ interface RowActionsProps {
 }
 
 function RowActionsDesktop({
+  labels,
   group,
   onEditGroup,
   onDeleteGroup,
   onAssignGroup,
   rowMenuAnchor,
 }: Readonly<RowActionsProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
   const { anchorEl, openMenu, closeMenu } = rowMenuAnchor;
   const open = Boolean(anchorEl);
 
@@ -77,6 +78,7 @@ function RowActionsDesktop({
 }
 
 export function PermissionGroupsDataGridDesktop({
+  labels,
   groups,
   onViewGroup,
   onEditGroup,
@@ -85,7 +87,7 @@ export function PermissionGroupsDataGridDesktop({
   groupRowMenuAnchor,
   loading = false,
 }: Readonly<PermissionGroupsDataGridDesktopProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing `columns` keeps
   // the MUI DataGrid column-identity stable across re-renders so the grid does
@@ -122,7 +124,7 @@ export function PermissionGroupsDataGridDesktop({
           <Typography
             variant="labelMd"
             sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
               color: theme.palette.text.secondary,
             })}
           >
@@ -159,6 +161,7 @@ export function PermissionGroupsDataGridDesktop({
         filterable: false,
         renderCell: params => (
           <RowActionsDesktop
+            labels={labels}
             group={params.row}
             onEditGroup={onEditGroup}
             onDeleteGroup={onDeleteGroup}
@@ -168,7 +171,7 @@ export function PermissionGroupsDataGridDesktop({
         ),
       },
     ];
-  }, [t, onEditGroup, onDeleteGroup, onAssignGroup, onViewGroup, groupRowMenuAnchor]);
+  }, [t, onEditGroup, onDeleteGroup, onAssignGroup, onViewGroup, groupRowMenuAnchor, labels]);
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>

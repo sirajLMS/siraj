@@ -17,32 +17,32 @@ import { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graph
 import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import type { SearchScheduleFilterDrawerProps } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterDrawer.types";
 import { getClearDrawerFiltersPatch } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
-import { useAppTranslation } from "@/shared/locale";
+import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 
 function DaysOfWeekSelect({
+  labels,
   value,
   onChange,
 }: {
+  readonly labels: SearchScheduleLabels;
   readonly value: DayOfWeek[];
   readonly onChange: (event: SelectChangeEvent<string[]>) => void;
 }) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
-
   return (
     <FormControl size="small" fullWidth>
       <InputLabel id="search-schedule-days-label" shrink>
-        {t.daysOfWeek}
+        {labels.daysOfWeek}
       </InputLabel>
       <Select
         labelId="search-schedule-days-label"
-        label={t.daysOfWeek}
+        label={labels.daysOfWeek}
         multiple
         value={value}
         onChange={onChange}
         renderValue={selected => (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
             {selected.slice(0, 2).map(day => (
-              <Chip key={day} label={t.day[day.toLowerCase() as keyof typeof t.day]} size="small" />
+              <Chip key={day} label={labels.day[day.toLowerCase() as keyof typeof labels.day]} size="small" />
             ))}
             {selected.length > 2 ? <Chip label={`+${selected.length - 2}`} size="small" /> : null}
           </Box>
@@ -50,7 +50,7 @@ function DaysOfWeekSelect({
       >
         {Object.values(DayOfWeek).map(day => (
           <MenuItem key={day} value={day}>
-            {t.day[day.toLowerCase() as keyof typeof t.day]}
+            {labels.day[day.toLowerCase() as keyof typeof labels.day]}
           </MenuItem>
         ))}
       </Select>
@@ -59,13 +59,12 @@ function DaysOfWeekSelect({
 }
 
 interface FilterFieldsProps {
+  readonly labels: SearchScheduleLabels;
   readonly draft: SearchScheduleDraftFilters;
   readonly onDraftChange: (draft: Partial<SearchScheduleDraftFilters>) => void;
 }
 
-function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
-
+function FilterFields({ labels, draft, onDraftChange }: Readonly<FilterFieldsProps>) {
   const handleDaysOfWeekChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value;
     const selectedDays = typeof value === "string" ? value.split(",") : value;
@@ -78,7 +77,7 @@ function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, px: 2, py: 2, flex: 1, overflowY: "auto" }}>
       <TextField
         select
-        label={t.teacherGender}
+        label={labels.teacherGender}
         value={draft.gender ?? ""}
         size="small"
         fullWidth
@@ -96,13 +95,13 @@ function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
           onDraftChange({ gender });
         }}
       >
-        <MenuItem value="">{t.allGenders}</MenuItem>
-        <MenuItem value={Gender.Male}>{t.male}</MenuItem>
-        <MenuItem value={Gender.Female}>{t.female}</MenuItem>
+        <MenuItem value="">{labels.allGenders}</MenuItem>
+        <MenuItem value={Gender.Male}>{labels.male}</MenuItem>
+        <MenuItem value={Gender.Female}>{labels.female}</MenuItem>
       </TextField>
 
       <TextField
-        label={t.minAvailableDays}
+        label={labels.minAvailableDays}
         type="number"
         size="small"
         fullWidth
@@ -116,7 +115,7 @@ function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
       />
 
       <TextField
-        label={t.minTotalGaps}
+        label={labels.minTotalGaps}
         type="number"
         size="small"
         fullWidth
@@ -129,19 +128,18 @@ function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
         slotProps={{ htmlInput: { min: 1 } }}
       />
 
-      <DaysOfWeekSelect value={draft.daysOfWeek ?? []} onChange={handleDaysOfWeekChange} />
+      <DaysOfWeekSelect labels={labels} value={draft.daysOfWeek ?? []} onChange={handleDaysOfWeekChange} />
     </Box>
   );
 }
 
 interface DrawerActionsProps {
+  readonly labels: SearchScheduleLabels;
   readonly onClear: () => void;
   readonly onApply: () => void;
 }
 
-function DrawerActions({ onClear, onApply }: Readonly<DrawerActionsProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
-
+function DrawerActions({ labels, onClear, onApply }: Readonly<DrawerActionsProps>) {
   return (
     <Box
       sx={{
@@ -153,24 +151,23 @@ function DrawerActions({ onClear, onApply }: Readonly<DrawerActionsProps>) {
       }}
     >
       <Button variant="outlined" fullWidth onClick={onClear}>
-        {t.clearFilters}
+        {labels.clearFilters}
       </Button>
       <Button variant="contained" fullWidth onClick={onApply}>
-        {t.applyFilters}
+        {labels.applyFilters}
       </Button>
     </Box>
   );
 }
 
 export function SearchScheduleFilterDrawerMobile({
+  labels,
   open,
   draft,
   onClose,
   onDraftChange,
   onApply,
 }: Readonly<SearchScheduleFilterDrawerProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
-
   const handleClear = () => {
     onDraftChange(getClearDrawerFiltersPatch());
   };
@@ -198,12 +195,12 @@ export function SearchScheduleFilterDrawerMobile({
     >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-          <Typography variant="titleLg">{t.filters}</Typography>
+          <Typography variant="titleLg">{labels.filters}</Typography>
         </Box>
 
-        <FilterFields draft={draft} onDraftChange={onDraftChange} />
+        <FilterFields labels={labels} draft={draft} onDraftChange={onDraftChange} />
 
-        <DrawerActions onClear={handleClear} onApply={handleApply} />
+        <DrawerActions labels={labels} onClear={handleClear} onApply={handleApply} />
       </Box>
     </Drawer>
   );

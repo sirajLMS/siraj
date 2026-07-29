@@ -16,7 +16,7 @@ import type {
   TeacherDuesViewModel,
   UseTeacherDuesViewModelProps,
 } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { TeacherDuesViewModel, UseTeacherDuesViewModelProps };
 
@@ -40,7 +40,7 @@ function groupDueIdsByPaymentId(dueIds: readonly string[], rows: readonly Teache
 }
 
 export function useTeacherDuesViewModel(_props: Readonly<UseTeacherDuesViewModelProps> = {}): TeacherDuesViewModel {
-  const t = useAppTranslation().dashboardTranslations.supervisorPortalTeacherDues;
+  const t = useAppTranslation(Translation.Dashboard.SupervisorPortalTeacherDues);
   const { hasPermission } = useUserStore();
   const canMarkPaid = hasPermission(AppPermission.TeacherDuesMarkPaid);
 

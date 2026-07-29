@@ -8,28 +8,28 @@ import type { TeacherLessonReportsViewModel } from "@/frontend/common/views/dash
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 export function TeacherLessonReportsDesktopView({
-  title,
   rows,
   loading,
   error,
-  noReportsMessage,
   statusFilter,
   statusOptions,
-  labels,
+  labelsBySection,
   locale,
   onStatusFilterChange,
   resolveStatusLabel,
 }: Readonly<TeacherLessonReportsViewModel>) {
+  const { shell, filters, cards: labels } = labelsBySection;
+
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={title} />
+      <DesktopPageHeader title={shell.title} />
       <Stack spacing={2}>
         <FormControl size="small" sx={{ minWidth: 220, maxWidth: { sm: 280 } }}>
-          <InputLabel id="lesson-report-status-filter-label">{labels.filterAll}</InputLabel>
+          <InputLabel id="lesson-report-status-filter-label">{filters.filterAll}</InputLabel>
           <Select
             labelId="lesson-report-status-filter-label"
             value={statusFilter}
-            label={labels.filterAll}
+            label={filters.filterAll}
             onChange={e => onStatusFilterChange(e.target.value)}
           >
             {statusOptions.map(option => (
@@ -46,10 +46,10 @@ export function TeacherLessonReportsDesktopView({
           </Box>
         ) : null}
 
-        {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{noReportsMessage}</Typography> : null}
+        {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{shell.emptyMessage}</Typography> : null}
 
         {!loading && !error && rows.length === 0 ? (
-          <Typography sx={{ color: theme => theme.palette.text.secondary }}>{noReportsMessage}</Typography>
+          <Typography sx={{ color: theme => theme.palette.text.secondary }}>{shell.emptyMessage}</Typography>
         ) : null}
 
         {!loading && !error && rows.length > 0 ? (

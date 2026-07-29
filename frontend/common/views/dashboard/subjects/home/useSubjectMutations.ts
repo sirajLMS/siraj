@@ -19,7 +19,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 interface UseSubjectMutationsOptions {
@@ -29,7 +29,7 @@ interface UseSubjectMutationsOptions {
 }
 
 export function useSubjectMutations(opts: UseSubjectMutationsOptions) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+  const t = useAppTranslation(Translation.Dashboard.Subjects);
   const notifications = useNotifications();
   const closeCreateDialog = useSubjectManagementStore(state => state.closeCreateDialog);
   const closeEditDialog = useSubjectManagementStore(state => state.closeEditDialog);

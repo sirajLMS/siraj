@@ -40,15 +40,17 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import { USER_SELECT_LIMIT } from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";
 import { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   approveLessonReportMutationDocument,
   pendingLessonReportsQueryDocument,
   rejectLessonReportMutationDocument,
   studentsDirectoryQueryDocument,
-  teacherDirectoryQueryDocument,
+  teachersQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { usePendingLessonReviewsStore } from "@/frontend/common/stores/pendingLessonReviewsStore";
+import { useUserAutocompleteStore } from "@/frontend/common/stores/userAutocompleteStore";
 import { PendingReviewsContainer as PendingReviewsEntry } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer";
 import { usePendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
 import { PendingReviewsDesktopView } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/pendingReviews.desktop";
@@ -58,16 +60,6 @@ function PendingReviewsContainerImpl() {
   const viewModel = usePendingReviewsViewModel({});
   return <PendingReviewsDesktopView {...viewModel} />;
 }
-
-const DIRECTORY_PAGINATION = {
-  first: 100,
-  page: 1,
-  after: null,
-  before: null,
-  last: null,
-  maxCount: null,
-  skip: null,
-};
 
 const MOCK_REPORTS = [
   {
@@ -132,39 +124,22 @@ function pendingLessonReportsMock(): MockLink.MockedResponse {
   };
 }
 
-function makeTeacherRow(id: string, userId: string, index: number, name: string) {
-  return { id, userId, index, name, status: "ACTIVE", email: null, avatarUrl: null };
+function makeTeacherRow(id: string, name: string) {
+  return { id, name, avatarUrl: null };
 }
 
-function makeTeacherDirectoryMock(): MockLink.MockedResponse {
+function makeTeachersMock(): MockLink.MockedResponse {
   return {
     request: {
-      query: teacherDirectoryQueryDocument,
-      variables: { search: null, paginationArgs: DIRECTORY_PAGINATION },
+      query: teachersQueryDocument,
+      variables: { search: "", limit: USER_SELECT_LIMIT },
     },
     result: {
       data: {
-        teacherDirectory: {
-          id: "dir",
-          metrics: { id: "m", activated: 0, deactivated: 0 },
-          rows: [
-            makeTeacherRow("teacher-1", "user-t1", 1, "Teacher One"),
-            makeTeacherRow("teacher-2", "user-t2", 2, "Teacher Two"),
-          ],
-          totalTeachers: 2,
-          pageInfo: {
-            count: 2,
-            currentPage: 1,
-            firstItem: null,
-            hasMorePages: false,
-            lastItem: null,
-            lastPage: 1,
-            perPage: 100,
-            total: 2,
-          },
-        },
+        teachers: [makeTeacherRow("teacher-1", "Teacher One"), makeTeacherRow("teacher-2", "Teacher Two")],
       },
     },
+    maxUsageCount: Number.POSITIVE_INFINITY,
   };
 }
 
@@ -188,13 +163,14 @@ function makeStudentsDirectoryMock(): MockLink.MockedResponse {
   return {
     request: {
       query: studentsDirectoryQueryDocument,
-      variables: { search: null, limit: 100 },
+      variables: { search: null, limit: USER_SELECT_LIMIT },
     },
     result: {
       data: {
         studentsDirectory: [makeStudentRow("student-1", "Student One"), makeStudentRow("student-2", "Student Two")],
       },
     },
+    maxUsageCount: Number.POSITIVE_INFINITY,
   };
 }
 
@@ -229,7 +205,10 @@ function rejectLessonReportMock(): MockLink.MockedResponse {
 function createMocks(): MockLink.MockedResponse[] {
   return [
     pendingLessonReportsMock(),
-    makeTeacherDirectoryMock(),
+    makeTeachersMock(),
+    makeStudentsDirectoryMock(),
+    // cache-and-network in autocomplete hooks can issue multiple requests per render
+    makeTeachersMock(),
     makeStudentsDirectoryMock(),
     approveLessonReportMock(),
     rejectLessonReportMock(),
@@ -238,6 +217,15 @@ function createMocks(): MockLink.MockedResponse[] {
 
 afterEach(() => {
   cleanup();
+  useUserAutocompleteStore.setState({
+    byAudience: {
+      teacher: {},
+      student: {},
+      parent: {},
+      user: {},
+      staff: {},
+    },
+  });
   usePendingLessonReviewsStore.setState({
     selectedTeacher: null,
     studentFilter: null,

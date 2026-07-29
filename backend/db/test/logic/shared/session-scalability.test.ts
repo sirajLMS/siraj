@@ -73,7 +73,7 @@ describe("Session Scalability and Redis Integration", () => {
 
   afterAll(async () => {
     if (redisAvailable) {
-      const redisService = getRedisService();
+      const redisService = await getRedisService();
       await redisService.disconnect();
     }
     resetRedisService();

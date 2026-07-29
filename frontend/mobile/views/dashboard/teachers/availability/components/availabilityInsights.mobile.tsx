@@ -11,7 +11,6 @@ import type {
 import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileTimezoneDisplay } from "@/frontend/mobile/components/ui/display/timezoneDisplay";
-import { useAppTranslation } from "@/shared/locale";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (
@@ -116,8 +115,8 @@ function TimezoneInsight({
   );
 }
 
-export function AvailabilityInsightsMobile({ insights }: Readonly<AvailabilityInsightsProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherAvailability.insights;
+export function AvailabilityInsightsMobile({ insights, labels }: Readonly<AvailabilityInsightsProps>) {
+  const t = labels;
 
   return (
     <AvailabilityInsightsLayout

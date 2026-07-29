@@ -11,7 +11,7 @@ import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display";
 import { MobilePaymentMethodDisplay } from "@/frontend/mobile/components/ui/display/paymentMethod/paymentMethodDisplay.mobile";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { PaymentMethodRow };
 
@@ -34,7 +34,7 @@ export function MobilePaymentMethodList({
   onDeleteAction,
   onSetDefaultAction,
 }: MobilePaymentMethodListProps) {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tList = t.list;
 
   if (loading) {

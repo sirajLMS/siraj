@@ -1,4 +1,5 @@
 import { expect } from "bun:test";
+import { randomUUID } from "node:crypto";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   ClassType,
@@ -23,6 +24,7 @@ import {
   cleanupTestSuperAdminMutationDocument,
   createTestEntitiesMutationDocument,
   createTestSuperAdminMutationDocument,
+  ensureDemoUsersMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
@@ -31,6 +33,30 @@ import { testClient } from "@/frontend/common/graphql/test/testClient";
 /** Shared test password — all provisioned test users use this value. */
 // eslint-disable-next-line sonarjs/no-hardcoded-passwords
 const TEST_USER_PASSWORD = "Test_Pass1!";
+
+let demoUsersReadyPromise: Promise<void> | null = null;
+
+/**
+ * Idempotently provisions canonical demo login users via the test-helper mutation.
+ * Safe to call from every suite's beforeAll — concurrent callers share one in-flight request.
+ */
+export async function ensureDemoUsersForTests(): Promise<void> {
+  if (!demoUsersReadyPromise) {
+    demoUsersReadyPromise = (async () => {
+      const result = await testClient.mutate({
+        mutation: ensureDemoUsersMutationDocument,
+      });
+      if (result.error) {
+        const messages = result.error.message ?? "unknown GraphQL error";
+        throw new Error(`ensureDemoUsers failed: ${messages}`);
+      }
+      if (!result.data?.ensureDemoUsers) {
+        throw new Error("ensureDemoUsers returned false");
+      }
+    })();
+  }
+  await demoUsersReadyPromise;
+}
 
 /**
  * Returns an existing class subject id, or creates a category + subject when the catalog is empty.
@@ -467,12 +493,18 @@ export async function provisionTestManager(
   prefix: string,
   accountType: ManagerAccountType
 ): Promise<{ userId: string; staffProfileId: string; name: string; assignedGroupSlug: string }> {
+  // Email must be unique per call: deterministic `${prefix}-manager@test.com`
+  // collided with prior runs whose `cleanupTestEntities` left the row behind
+  // (e.g. the teacher-denied test does not clean up its provision batch),
+  // which made `createManager`'s email-uniqueness check fail and cascade into
+  // the whole `managerDirectory` suite failing.
+  const emailUnique = `${prefix}-manager-${randomUUID().slice(0, 8)}@test.com`;
   const result = await testClient.mutate({
     mutation: createManagerMutationDocument,
     variables: {
       input: {
         name: `${prefix}-manager`,
-        email: `${prefix}-manager@test.com`,
+        email: emailUnique,
         avatarUrl: null,
         password: TEST_USER_PASSWORD,
         accountType,

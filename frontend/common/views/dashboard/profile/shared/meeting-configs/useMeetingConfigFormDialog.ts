@@ -6,7 +6,7 @@ import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { MeetingConfigDetailsForm } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
-import { useAppTranslation } from "@/shared/locale";
+import type { MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
 export type MeetingConfigFormEditInfo = {
   readonly id?: string | null;
@@ -44,10 +44,16 @@ export type UseMeetingConfigFormStateOptions = {
   readonly open: boolean;
   readonly editConfig: MeetingConfigFormEditInfo | null;
   readonly existingCount: number;
+  readonly labels: MeetingConfigManagerLabels;
 };
 
-export function useMeetingConfigFormState({ open, editConfig, existingCount }: UseMeetingConfigFormStateOptions) {
-  const t = useAppTranslation().uiTranslations.meetingConfigManager;
+export function useMeetingConfigFormState({
+  open,
+  editConfig,
+  existingCount,
+  labels,
+}: UseMeetingConfigFormStateOptions) {
+  const t = labels;
   const locale = useAppLocale();
   const isEdit = editConfig?.id != null;
 

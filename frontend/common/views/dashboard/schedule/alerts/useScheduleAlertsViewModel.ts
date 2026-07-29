@@ -16,7 +16,8 @@ import type {
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import { useRouter } from "@/shared/i18n/navigation";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts";
 
 function getTodayString() {
   const today = new Date();
@@ -95,7 +96,7 @@ function mapScheduleRowsToClasses(rows: ScheduleRow[] | null | undefined): Acade
   });
 }
 
-function buildScheduleLabels(t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreScheduleAlerts"]) {
+function buildScheduleLabels(t: ScheduleAlertsLabels) {
   return {
     pageTitle: t.pageTitle,
     pageSubtitle: t.pageSubtitle,
@@ -132,10 +133,7 @@ function buildScheduleLabels(t: ReturnType<typeof useAppTranslation>["dashboardT
   };
 }
 
-function buildMetricLabels(
-  metrics: readonly AlertsMetric[],
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["coreScheduleAlerts"]
-) {
+function buildMetricLabels(metrics: readonly AlertsMetric[], t: ScheduleAlertsLabels) {
   return Object.fromEntries(
     metrics.map(metric => [
       metric.key,
@@ -145,6 +143,98 @@ function buildMetricLabels(
       },
     ])
   );
+}
+
+type ScheduleResultMetrics = {
+  total?: number | null;
+  regular?: number | null;
+};
+
+function buildScheduleAlertMetrics(m: ScheduleResultMetrics | null | undefined): AlertsMetric[] {
+  if (!m) return [];
+  return [
+    {
+      key: "totalStudents",
+      value: m.total ?? 0,
+      labelKey: "totalStudents",
+      subLabelKey: "totalStudentsTrend",
+      icon: PeopleOutlined,
+      trend: undefined,
+    },
+    {
+      key: "activeCourses",
+      value: m.regular ?? 0,
+      labelKey: "activeCourses",
+      subLabelKey: "activeCoursesSub",
+      icon: SchoolOutlined,
+      trend: undefined,
+    },
+  ];
+}
+
+function resolveScheduleTotalCount(
+  scheduleResult: { pageInfo?: { total?: number | null } | null; totalCount?: number | null } | null | undefined
+): number | undefined {
+  return scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
+}
+
+function useScheduleAlertsHandlers(setPage: (page: number) => void, router: ReturnType<typeof useRouter>) {
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+    },
+    [setPage]
+  );
+
+  const handleLeave = useCallback(
+    (id: string) => {
+      router.push(`/reschedule?classInstanceId=${id}`);
+    },
+    [router]
+  );
+
+  const handleViewClassAudit = useCallback(
+    (id: string) => {
+      router.push(`/classes/${id}/audit`);
+    },
+    [router]
+  );
+
+  return { handlePageChange, handleLeave, handleViewClassAudit };
+}
+
+interface ScheduleAlertsViewModelParams {
+  readonly alerts: ScheduleAlert[];
+  readonly metrics: AlertsMetric[];
+  readonly metricLabels: Record<string, { label: string; subLabel: string }>;
+  readonly classes: AcademicClassRow[];
+  readonly totalCount: number | undefined;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly labels: ReturnType<typeof buildScheduleLabels>;
+  readonly loading: boolean;
+  readonly handlers: ReturnType<typeof useScheduleAlertsHandlers>;
+}
+
+function buildScheduleAlertsViewModelResult(params: ScheduleAlertsViewModelParams): ScheduleAlertsViewModel {
+  const { handlers, alerts, metrics, metricLabels, classes, totalCount, page, pageSize, labels, loading } = params;
+  return {
+    alerts,
+    metrics,
+    metricLabels,
+    classes,
+    totalClasses: totalCount,
+    currentPage: page,
+    pageSize,
+    labels,
+    loading,
+    onLeave: handlers.handleLeave,
+    onViewClassAudit: handlers.handleViewClassAudit,
+    onPageChange: handlers.handlePageChange,
+    onDownloadReport: () => {},
+    onFilter: () => {},
+    onExport: () => {},
+  };
 }
 
 export interface ScheduleAlertsViewModel {
@@ -171,7 +261,7 @@ export interface UseScheduleAlertsViewModelProps {
 }
 
 export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
-  const t = useAppTranslation().dashboardTranslations.coreScheduleAlerts;
+  const t = useAppTranslation(Translation.Dashboard.CoreScheduleAlerts);
   const router = useRouter();
 
   const page = useScheduleAlertsStore(state => state.page);
@@ -185,72 +275,27 @@ export function useScheduleAlertsViewModel(): ScheduleAlertsViewModel {
 
   const scheduleResult = data?.adminDashboardSchedule;
   const classes = mapScheduleRowsToClasses(scheduleResult?.rows);
-  const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
+  const totalCount = resolveScheduleTotalCount(scheduleResult);
 
   const alerts: ScheduleAlert[] = [];
 
-  const metrics = useMemo(() => {
-    const m = scheduleResult?.metrics;
-    if (!m) return [];
-    return [
-      {
-        key: "totalStudents",
-        value: m.total ?? 0,
-        labelKey: "totalStudents",
-        subLabelKey: "totalStudentsTrend",
-        icon: PeopleOutlined,
-        trend: undefined, // trend not available in metrics yet
-      },
-      {
-        key: "activeCourses",
-        value: m.regular ?? 0,
-        labelKey: "activeCourses",
-        subLabelKey: "activeCoursesSub",
-        icon: SchoolOutlined,
-        trend: undefined,
-      },
-    ];
-  }, [scheduleResult?.metrics]);
+  const metrics = useMemo(() => buildScheduleAlertMetrics(scheduleResult?.metrics), [scheduleResult?.metrics]);
 
   const labels = buildScheduleLabels(t);
   const metricLabels = buildMetricLabels(metrics, t);
 
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      setPage(newPage);
-    },
-    [setPage]
-  );
+  const handlers = useScheduleAlertsHandlers(setPage, router);
 
-  const handleLeave = useCallback(
-    (id: string) => {
-      router.push(`/reschedule?classInstanceId=${id}`);
-    },
-    [router]
-  );
-
-  const handleViewClassAudit = useCallback(
-    (id: string) => {
-      router.push(`/classes/${id}/audit`);
-    },
-    [router]
-  );
-
-  return {
+  return buildScheduleAlertsViewModelResult({
     alerts,
     metrics,
     metricLabels,
     classes,
-    totalClasses: totalCount,
-    currentPage: page,
+    totalCount,
+    page,
     pageSize,
     labels,
     loading,
-    onLeave: handleLeave,
-    onViewClassAudit: handleViewClassAudit,
-    onPageChange: handlePageChange,
-    onDownloadReport: () => {},
-    onFilter: () => {},
-    onExport: () => {},
-  };
+    handlers,
+  });
 }

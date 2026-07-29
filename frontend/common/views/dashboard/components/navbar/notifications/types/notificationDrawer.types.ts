@@ -1,4 +1,5 @@
 import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { NotificationsLabels } from "@/shared/locale/types/notifications";
 
 export type NotificationEntityKind =
   | "invoice"
@@ -87,6 +88,9 @@ export interface NotificationDrawerAlert {
 }
 
 export interface NotificationsDrawerViewModel {
+  readonly labels: NotificationsLabels;
+  /** Dashboard core-notifications copy — migrated in Phase 2. */
+  readonly errorLoadingMessage: string;
   readonly alerts: readonly NotificationDrawerAlert[];
   readonly unreadCount: number;
   readonly totalCount: number;

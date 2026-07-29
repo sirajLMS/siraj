@@ -108,6 +108,46 @@ async function insertStaffProfile(tx: DBTransaction, userId: string, status: str
   });
 }
 
+async function createActiveAndDeactivatedStaff(tx: DBTransaction, prefix: string) {
+  const activeUser = await createTestUser(tx, {
+    name: `${prefix}Active`,
+    email: `${prefix.toLowerCase()}-active-${randomUUID()}@t.com`,
+  });
+  await insertStaffProfile(tx, activeUser.id, AccountStatus.ACTIVATED);
+  const deactivatedUser = await createTestUser(tx, {
+    name: `${prefix}Deactivated`,
+    email: `${prefix.toLowerCase()}-deact-${randomUUID()}@t.com`,
+  });
+  await insertStaffProfile(tx, deactivatedUser.id, AccountStatus.DEACTIVATED);
+  return { activeUser, deactivatedUser };
+}
+
+async function expectDirectoryRoleFilter(
+  tx: DBTransaction,
+  roleFilter: string,
+  includedUserIds: string[],
+  excludedUserIds: string[]
+) {
+  const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter }, tx);
+  for (const userId of includedUserIds) {
+    expect(result.rows.find(r => r.id === userId)).toBeDefined();
+  }
+  for (const userId of excludedUserIds) {
+    expect(result.rows.find(r => r.id === userId)).toBeUndefined();
+  }
+}
+
+async function expectDirectoryStatusFilter(
+  tx: DBTransaction,
+  statusFilter: "active" | "offline",
+  visibleUserId: string,
+  hiddenUserId: string
+) {
+  const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter }, tx);
+  expect(result.rows.find(r => r.id === visibleUserId)).toBeDefined();
+  expect(result.rows.find(r => r.id === hiddenUserId)).toBeUndefined();
+}
+
 describe("StaffProfileRepository — getManagerDirectory", () => {
   staffTest("returns all staff members with their role", async tx => {
     const { user } = await createStaffUser(tx, "DirMgr");
@@ -156,9 +196,7 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
       `staff-${randomUUID()}`
     );
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter: "admin" }, tx);
-    expect(result.rows.find(r => r.id === adminUser.id)).toBeDefined();
-    expect(result.rows.find(r => r.id === staffUser.id)).toBeUndefined();
+    await expectDirectoryRoleFilter(tx, "admin", [adminUser.id], [staffUser.id]);
   });
 
   staffTest("filters by staff role (non-admin slugs)", async tx => {
@@ -166,10 +204,7 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
     const { user: staffUser } = await createStaffAndGroup(tx, "StaffMatch", "Staff Y", `staff-y-${randomUUID()}`);
     const { user: noGroupUser } = await createStaffUser(tx, "NoGroupMatch");
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter: "staff" }, tx);
-    expect(result.rows.find(r => r.id === adminUser.id)).toBeUndefined();
-    expect(result.rows.find(r => r.id === staffUser.id)).toBeDefined();
-    expect(result.rows.find(r => r.id === noGroupUser.id)).toBeDefined();
+    await expectDirectoryRoleFilter(tx, "staff", [staffUser.id, noGroupUser.id], [adminUser.id]);
   });
 
   staffTest("filters by supervisor role", async tx => {
@@ -181,34 +216,19 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
       `supervisor-${randomUUID()}`
     );
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter: "supervisor" }, tx);
-    expect(result.rows.find(r => r.id === adminUser.id)).toBeUndefined();
-    expect(result.rows.find(r => r.id === supervisorUser.id)).toBeDefined();
+    await expectDirectoryRoleFilter(tx, "supervisor", [supervisorUser.id], [adminUser.id]);
   });
 
   staffTest("filters by active status", async tx => {
-    const activeUser = await createTestUser(tx, { name: "ActiveS", email: `active-s-${randomUUID()}@t.com` });
-    await insertStaffProfile(tx, activeUser.id, AccountStatus.ACTIVATED);
-    const deactivatedUser = await createTestUser(tx, { name: "DeactivatedS", email: `deact-s-${randomUUID()}@t.com` });
-    await insertStaffProfile(tx, deactivatedUser.id, AccountStatus.DEACTIVATED);
+    const { activeUser, deactivatedUser } = await createActiveAndDeactivatedStaff(tx, "Status");
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter: "active" }, tx);
-    expect(result.rows.find(r => r.id === activeUser.id)).toBeDefined();
-    expect(result.rows.find(r => r.id === deactivatedUser.id)).toBeUndefined();
+    await expectDirectoryStatusFilter(tx, "active", activeUser.id, deactivatedUser.id);
   });
 
   staffTest("filters by offline status", async tx => {
-    const activeUser = await createTestUser(tx, { name: "ActiveOff", email: `active-off-${randomUUID()}@t.com` });
-    await insertStaffProfile(tx, activeUser.id, AccountStatus.ACTIVATED);
-    const deactivatedUser = await createTestUser(tx, {
-      name: "DeactivatedOff",
-      email: `deact-off-${randomUUID()}@t.com`,
-    });
-    await insertStaffProfile(tx, deactivatedUser.id, AccountStatus.DEACTIVATED);
+    const { activeUser, deactivatedUser } = await createActiveAndDeactivatedStaff(tx, "Offline");
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter: "offline" }, tx);
-    expect(result.rows.find(r => r.id === activeUser.id)).toBeUndefined();
-    expect(result.rows.find(r => r.id === deactivatedUser.id)).toBeDefined();
+    await expectDirectoryStatusFilter(tx, "offline", deactivatedUser.id, activeUser.id);
   });
 
   staffTest("returns paginated results with pageInfo", async tx => {
@@ -399,13 +419,7 @@ describe("StaffProfileRepository — getOnboardingMetrics", () => {
   });
 
   staffTest("counts active and deactivated staff correctly", async tx => {
-    const activeUser = await createTestUser(tx, { name: "ActiveOM", email: `active-om-${randomUUID()}@t.com` });
-    await insertStaffProfile(tx, activeUser.id, AccountStatus.ACTIVATED);
-    const deactivatedUser = await createTestUser(tx, {
-      name: "DeactivatedOM",
-      email: `deact-om-${randomUUID()}@t.com`,
-    });
-    await insertStaffProfile(tx, deactivatedUser.id, AccountStatus.DEACTIVATED);
+    await createActiveAndDeactivatedStaff(tx, "Onboarding");
 
     const result = await StaffProfileRepository.getOnboardingMetrics(tx);
     expect(result.activeStaff).toBeGreaterThanOrEqual(1);

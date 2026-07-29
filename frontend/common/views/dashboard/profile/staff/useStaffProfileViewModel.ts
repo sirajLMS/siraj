@@ -14,11 +14,15 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
-import type { StaffProfileData } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import type {
+  StaffProfileData,
+  StaffProfileViewLabels,
+} from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type {
   StaffAdminEditFormData,
   StaffOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 
@@ -27,6 +31,7 @@ function buildEditSource(_scope: ProfileScope, profile: ProfileData): StaffProfi
 }
 
 export interface StaffProfileViewModel {
+  readonly labels: StaffProfileViewLabels;
   readonly staffData: StaffProfileData;
   readonly avatarUrl: string | null | undefined;
   readonly displayCurrency: CurrencyCode | null | undefined;
@@ -56,6 +61,10 @@ export interface UseStaffProfileViewModelProps {
 }
 
 export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewModelProps>): StaffProfileViewModel {
+  const base = useAppTranslation(Translation.Profile.Base);
+  const staff = useAppTranslation(Translation.Profile.Staff);
+  const labels: StaffProfileViewLabels = { base, staff };
+
   const { scope, mode, targetUserId, activeTab: _activeTab = "profile" } = props;
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
@@ -138,6 +147,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
   const canView = useMemo(() => (_field: string) => true, []);
 
   return {
+    labels,
     staffData: staffData as StaffProfileData,
     avatarUrl,
     displayCurrency,

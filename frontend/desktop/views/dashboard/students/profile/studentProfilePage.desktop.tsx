@@ -17,13 +17,11 @@ export function StudentProfilePageDesktopView({
   statusBadge,
   visibleTabs,
   activeTab,
-  fallbackTitle,
-  loadingLabel,
-  notFoundTitle,
-  notFoundDescription,
-  tabLabels,
+  labelsBySection,
   onTabChange,
 }: Readonly<StudentProfilePageViewModel>) {
+  const { shell, tabs } = labelsBySection;
+
   if (loadingState === "loading") {
     return (
       <DesktopPageContainer>
@@ -38,7 +36,7 @@ export function StudentProfilePageDesktopView({
         >
           <CircularProgress />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {loadingLabel}
+            {shell.loading}
           </Typography>
         </Box>
       </DesktopPageContainer>
@@ -48,7 +46,7 @@ export function StudentProfilePageDesktopView({
   if (loadingState === "notFound") {
     return (
       <DesktopPageContainer>
-        <ProfileRestrictedSection title={notFoundTitle} description={notFoundDescription} />
+        <ProfileRestrictedSection title={shell.notFoundTitle} description={shell.notFoundDescription} />
       </DesktopPageContainer>
     );
   }
@@ -57,7 +55,7 @@ export function StudentProfilePageDesktopView({
     return (
       <DesktopPageContainer>
         <DesktopPageHeader title={header.title} subtitle={header.subtitle} />
-        <ProfileRestrictedSection title={fallbackTitle} />
+        <ProfileRestrictedSection title={shell.title} />
       </DesktopPageContainer>
     );
   }
@@ -77,10 +75,10 @@ export function StudentProfilePageDesktopView({
       />
 
       <Tabs value={currentTab} onChange={onTabChange} sx={{ mb: 3 }}>
-        {visibleTabs.includes("status") ? <Tab value="status" label={tabLabels.status} /> : null}
-        {visibleTabs.includes("classes") ? <Tab value="classes" label={tabLabels.classes} /> : null}
-        {visibleTabs.includes("quota") ? <Tab value="quota" label={tabLabels.quota} /> : null}
-        {visibleTabs.includes("history") ? <Tab value="history" label={tabLabels.history} /> : null}
+        {visibleTabs.includes("status") ? <Tab value="status" label={tabs.status} /> : null}
+        {visibleTabs.includes("classes") ? <Tab value="classes" label={tabs.classes} /> : null}
+        {visibleTabs.includes("quota") ? <Tab value="quota" label={tabs.quota} /> : null}
+        {visibleTabs.includes("history") ? <Tab value="history" label={tabs.history} /> : null}
       </Tabs>
 
       <Box>

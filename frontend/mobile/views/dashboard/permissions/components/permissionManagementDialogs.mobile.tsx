@@ -8,6 +8,7 @@ import { ManageOverridesDialogMobile } from "@/frontend/mobile/views/dashboard/p
 import { PermissionGroupFormMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionGroupForm.mobile";
 
 export function PermissionManagementDialogsMobile({
+  labels,
   isLoading,
   activeGroup,
   selectedGroupId,
@@ -32,6 +33,7 @@ export function PermissionManagementDialogsMobile({
   return (
     <>
       <PermissionGroupFormMobile
+        labels={labels}
         open={isCreateDialogOpen}
         group={null}
         permissions={[]}
@@ -55,6 +57,7 @@ export function PermissionManagementDialogsMobile({
       />
 
       <PermissionGroupFormMobile
+        labels={labels}
         open={isEditDialogOpen}
         group={activeGroup}
         permissions={[]}
@@ -78,6 +81,7 @@ export function PermissionManagementDialogsMobile({
       />
 
       <DeleteGroupDialogMobile
+        labels={labels}
         open={isDeleteDialogOpen}
         groupName={activeGroup?.name ? resolveLocalizedString(activeGroup.name) : ""}
         isLoading={isLoading}
@@ -90,6 +94,7 @@ export function PermissionManagementDialogsMobile({
       />
 
       <AssignGroupDialogMobile
+        labels={labels}
         open={isAssignDialogOpen}
         group={activeGroup}
         isLoading={isLoading}
@@ -105,6 +110,7 @@ export function PermissionManagementDialogsMobile({
       />
 
       <ManageOverridesDialogMobile
+        labels={labels}
         open={isManageOverridesOpen}
         onClose={() => {
           setSelectedUserIdForOverrides(null);

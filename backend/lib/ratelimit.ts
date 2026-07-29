@@ -1,5 +1,6 @@
 import { getBooleanEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
+import { isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
 import { cacheService } from "@/backend/services/cache";
 
 /**
@@ -200,10 +201,12 @@ export async function checkRateLimit(
 }> {
   const isDev = process.env.NODE_ENV === "development";
   const isProduction = process.env.NODE_ENV === "production";
-  // DISABLE_RATE_LIMITING=true intentionally only bypasses rate limiting in non-production
-  // environments. In production, rate limits are always enforced even if the flag is set,
-  // because disabling rate limiting in production would expose the system to abuse.
-  // This fail-closed design ensures security is never accidentally relaxed in production.
+  const isTestHarness = isTestHelperEnabled();
+  // DISABLE_RATE_LIMITING=true intentionally only bypasses rate limiting in
+  // non-production environments, or in production when an explicit test harness
+  // is active (`TEST_SERVER=1`, `TEST_CI=true`, never on Vercel production).
+  // This fail-closed design ensures security is never accidentally relaxed in
+  // real production deployments.
   const disableRateLimiting = getBooleanEnv("DISABLE_RATE_LIMITING");
   try {
     const { success, limit, remaining, reset } = await limiter.limitSimple(identifier);
@@ -212,7 +215,7 @@ export async function checkRateLimit(
       return { success, limit, remaining, reset };
     }
 
-    if (disableRateLimiting && !isProduction) {
+    if (disableRateLimiting && (!isProduction || isTestHarness)) {
       logger.warn(`Rate limiting explicitly disabled (DISABLE_RATE_LIMITING=true) for identifier: ${identifier}`);
       return { success: true, limit, remaining, reset };
     }

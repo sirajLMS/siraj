@@ -1,4 +1,5 @@
 import type { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherAvailabilityLabels } from "@/shared/locale/types/dashboard/teachers/availability";
 
 export interface AvailabilityEntry {
   readonly id: string;
@@ -59,6 +60,7 @@ export interface InsightCardProps {
 
 export interface AvailabilityInsightsProps {
   readonly insights: TeacherAvailabilityInsights;
+  readonly labels: TeacherAvailabilityLabels["insights"];
 }
 
 export interface TimeFieldProps {
@@ -74,4 +76,8 @@ export interface AvailabilitySearchFormData {
 
 export interface AvailabilitySearchFormProps {
   readonly onSearch?: (formData: AvailabilitySearchFormData) => void;
+  readonly labels: Pick<
+    TeacherAvailabilityLabels,
+    "searchTitle" | "from" | "to" | "gender" | "any" | "male" | "female" | "submit"
+  >;
 }

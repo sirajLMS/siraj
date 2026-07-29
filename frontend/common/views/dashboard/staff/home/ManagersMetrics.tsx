@@ -2,15 +2,14 @@ import { AdminPanelSettingsOutlined, BoltOutlined, GroupOutlined, WarningAmberOu
 import { Grid } from "@mui/material";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { NonNullableManagerDirectoryMetrics } from "@/frontend/common/views/dashboard/staff/home/types";
-import { useAppTranslation } from "@/shared/locale";
+import type { StaffDirectoryLabels } from "@/shared/locale";
 
 interface ManagersMetricsProps {
+  readonly labels: StaffDirectoryLabels["metrics"];
   metrics: NonNullableManagerDirectoryMetrics;
 }
 
-export function ManagersMetrics({ metrics }: Readonly<ManagersMetricsProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory.metrics;
-
+export function ManagersMetrics({ labels: t, metrics }: Readonly<ManagersMetricsProps>) {
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 6, md: 3 }}>

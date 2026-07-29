@@ -3,18 +3,19 @@
 import { CheckCircleOutlined, SyncOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { MigrationStatus } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { type DstMigrationLabels, useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly status: MigrationStatus;
   readonly onUpdate: () => void;
   readonly dstOffsetDetected: boolean;
 }
 
-function getButtonLabel(status: MigrationStatus, t: DstMigrationLabels): string {
-  if (status === MigrationStatus.RUNNING) return t.actions.migrating;
-  if (status === MigrationStatus.COMPLETE) return t.actions.migrationComplete;
-  return t.actions.updateSchedules;
+function getButtonLabel(status: MigrationStatus, labels: DstMigrationLabels): string {
+  if (status === MigrationStatus.RUNNING) return labels.actions.migrating;
+  if (status === MigrationStatus.COMPLETE) return labels.actions.migrationComplete;
+  return labels.actions.updateSchedules;
 }
 
 function getStartIcon(status: MigrationStatus) {
@@ -22,8 +23,7 @@ function getStartIcon(status: MigrationStatus) {
   return <SyncOutlined />;
 }
 
-export function UpdateSchedulesButtonDesktop({ status, onUpdate, dstOffsetDetected }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
+export function UpdateSchedulesButtonDesktop({ labels, status, onUpdate, dstOffsetDetected }: Readonly<Props>) {
   const isRunning = status === MigrationStatus.RUNNING;
   const isComplete = status === MigrationStatus.COMPLETE;
 
@@ -57,7 +57,7 @@ export function UpdateSchedulesButtonDesktop({ status, onUpdate, dstOffsetDetect
           : undefined,
       })}
     >
-      {getButtonLabel(status, t)}
+      {getButtonLabel(status, labels)}
     </Button>
   );
 }

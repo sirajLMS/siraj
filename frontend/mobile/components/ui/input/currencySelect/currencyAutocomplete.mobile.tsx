@@ -19,7 +19,7 @@ import {
   getCurrencyAutocompletePopperSlotProps,
 } from "@/frontend/mobile/components/ui/input/currencySelect/currencyAutocompletePopper";
 import { CurrencyOptionRowMobile } from "@/frontend/mobile/components/ui/input/currencySelect/currencyOptionRow.mobile";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const filterOptions = createFilterOptions<CurrencyOption>({
   matchFrom: "any",
@@ -167,7 +167,7 @@ export const CurrencyAutocompleteMobile: React.FC<CurrencyAutocompleteProps> = (
   listAttached = false,
   showSymbol = true,
 }: CurrencyAutocompleteProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.currencySelect;
+  const t = useAppTranslation(Translation.Ui.CurrencySelect);
   const locale = useAppLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;

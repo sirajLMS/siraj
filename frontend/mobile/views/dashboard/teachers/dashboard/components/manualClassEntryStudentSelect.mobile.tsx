@@ -3,13 +3,12 @@
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { useManualClassEntryStudentField } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
 import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
-import { useAppTranslation } from "@/shared/locale";
 
 export function ManualClassEntryStudentSelectMobile({
   teacherId,
   open,
-}: Readonly<{ readonly teacherId: string; readonly open: boolean }>) {
-  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
+  studentLabel,
+}: Readonly<{ readonly teacherId: string; readonly open: boolean; readonly studentLabel: string }>) {
   const { studentId, setStudentId, disabled } = useManualClassEntryStudentField();
 
   return (
@@ -21,7 +20,7 @@ export function ManualClassEntryStudentSelectMobile({
       scope={{ primaryTeacherId: teacherId }}
       skip={!open || !teacherId}
       disabled={disabled}
-      label={t.manualClassEntry.studentLabel}
+      label={studentLabel}
       required
     />
   );

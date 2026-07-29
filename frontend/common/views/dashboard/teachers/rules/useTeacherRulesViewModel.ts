@@ -4,7 +4,8 @@ import { useQuery } from "@apollo/client/react";
 import { useEffect, useState } from "react";
 import { teacherHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherRulesLabelsBySection } from "@/frontend/common/views/dashboard/teachers/rules/types/teacherRules.types";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * TeacherRules ViewModel.
@@ -17,12 +18,7 @@ import { useAppTranslation } from "@/shared/locale";
 
 export interface TeacherRulesViewModel {
   readonly handbookLoading: boolean;
-  readonly labels: {
-    readonly pageTitle: string;
-    readonly pageSubtitle: string;
-  };
-  readonly policyLabels: ReturnType<typeof buildTeacherDashboardLabels>["policy"];
-  readonly actionLabels: ReturnType<typeof buildTeacherDashboardLabels>["actions"];
+  readonly labelsBySection: TeacherRulesLabelsBySection;
   readonly onDownloadHandbook: () => void;
   readonly onContactCoordinator: () => void;
 }
@@ -30,9 +26,9 @@ export interface TeacherRulesViewModel {
 export type UseTeacherRulesViewModelProps = Record<string, never>;
 
 export function useTeacherRulesViewModel(_props: Readonly<UseTeacherRulesViewModelProps> = {}): TeacherRulesViewModel {
-  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
-  const dashboardT = useAppTranslation().dashboardTranslations.admin;
-  const tJoin = useAppTranslation().uiTranslations.meetingConfig.join;
+  const t = useAppTranslation(Translation.Dashboard.TeacherDashboard);
+  const dashboardT = useAppTranslation(Translation.Dashboard.Admin);
+  const tJoin = useAppTranslation(Translation.Ui.MeetingConfig).join;
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
 
   const [handbookRequested, setHandbookRequested] = useState(false);
@@ -51,12 +47,14 @@ export function useTeacherRulesViewModel(_props: Readonly<UseTeacherRulesViewMod
 
   return {
     handbookLoading,
-    labels: {
-      pageTitle: t.rules.pageTitle,
-      pageSubtitle: t.rules.pageSubtitle,
+    labelsBySection: {
+      shell: {
+        pageTitle: t.rules.pageTitle,
+        pageSubtitle: t.rules.pageSubtitle,
+      },
+      policy: labels.policy,
+      actions: labels.actions,
     },
-    policyLabels: labels.policy,
-    actionLabels: labels.actions,
     onDownloadHandbook: () => {
       setHandbookRequested(true);
     },

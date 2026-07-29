@@ -1,5 +1,6 @@
 import { AccountStatus, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import type { ParentsDirectoryLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/home/types/parentsDirectory.types";
 import type { ParentLifecycleStatus as BaseParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";
 
@@ -75,7 +76,7 @@ export interface ParentsViewLabels {
 export interface ParentsViewModel {
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly ParentDirectoryRow[];
-  readonly labels: ParentsViewLabels;
+  readonly labelsBySection: ParentsDirectoryLabelsBySection;
   readonly loading?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
@@ -104,7 +105,7 @@ export interface ParentsViewModel {
 export interface BaseParentsViewProps {
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly ParentDirectoryRow[];
-  readonly labels: ParentsViewLabels;
+  readonly labelsBySection: ParentsDirectoryLabelsBySection;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;

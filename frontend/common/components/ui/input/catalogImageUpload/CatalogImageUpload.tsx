@@ -6,7 +6,7 @@ import Image from "next/image";
 import type * as React from "react";
 import { useCallback, useRef } from "react";
 import { ACCEPTED_TYPES, DEFAULT_MAX_SIZE_MB, useImageUpload } from "@/frontend/common/hooks/useImageUpload";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type CatalogImageUploadProps = {
   readonly imageUrl?: string | null;
@@ -223,7 +223,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
   errorMessage,
   previewShape = "square",
 }): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.catalogImageUpload;
+  const t = useAppTranslation(Translation.Ui.CatalogImageUpload);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const upload = useImageUpload({
     onImageUrlChangeAction,

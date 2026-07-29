@@ -17,7 +17,7 @@ import {
   getRecurringMeetingConfigErrorKey,
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export type RecurringMeetingConfigSectionProps = {
   readonly teacherId: string;
@@ -137,8 +137,8 @@ export function RecurringMeetingConfigSection({
   onChangeAction,
   disabled,
 }: RecurringMeetingConfigSectionProps) {
-  const t = useAppTranslation().uiTranslations.meetingConfigClassScope;
-  const tManager = useAppTranslation().uiTranslations.meetingConfigManager;
+  const t = useAppTranslation(Translation.Ui.MeetingConfig).classScope;
+  const tManager = useAppTranslation(Translation.Ui.MeetingConfig).manager;
   const locale = useAppLocale();
   const [urlError, setUrlError] = useState<string | null>(null);
   const [fieldsError, setFieldsError] = useState<string | null>(null);

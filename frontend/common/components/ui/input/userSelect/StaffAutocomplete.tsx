@@ -3,7 +3,7 @@
 import { AudienceAutocomplete } from "@/frontend/common/components/ui/input/userSelect/AudienceAutocomplete";
 import type { StaffAutocompleteProps } from "@/frontend/common/components/ui/input/userSelect/types";
 import { useStaffAutocomplete } from "@/frontend/common/hooks/userAutocomplete";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function StaffAutocomplete({
   value,
@@ -21,7 +21,7 @@ export function StaffAutocomplete({
   scope,
   skip,
 }: StaffAutocompleteProps) {
-  const t = useAppTranslation().uiTranslations.userSelect;
+  const t = useAppTranslation(Translation.Ui.UserSelect);
   const { options, loading, inputValue, onInputChange } = useStaffAutocomplete({ value, scope, skip });
 
   return (

@@ -17,7 +17,7 @@ import {
   MeetingConfigService,
   MeetingProviderCatalogService,
 } from "@/backend/services/meeting";
-import type { MeetingConfigDetails, MeetingProviderFieldSchema } from "@/backend/types";
+import type { MeetingConfigDetails, MeetingProviderFieldSchema, MeetingProviderSubmitInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types";
 
@@ -92,6 +92,48 @@ function normalizeRequiredLocalizedString(
   };
 }
 
+function normalizeProviderCreateInput(input: {
+  readonly slug?: string | null;
+  readonly name?: { readonly ar?: string | null; readonly en?: string | null } | null;
+  readonly description?: { readonly ar?: string | null; readonly en?: string | null } | null;
+  readonly instructions?: { readonly ar?: string | null; readonly en?: string | null } | null;
+  readonly urlAllowlist?: readonly string[] | null;
+  readonly urlExample?: string | null;
+  readonly logoUrl?: string | null;
+  readonly fieldSchema?: {
+    readonly requiresMeetingUrl: boolean;
+    readonly supportsUsername?: boolean | null;
+    readonly supportsPassword?: boolean | null;
+    readonly supportsTenantId?: boolean | null;
+  } | null;
+  readonly isActive?: boolean | null;
+}): MeetingProviderSubmitInput {
+  const slug = input.slug;
+  if (slug == null) {
+    throw new Error("slug is required");
+  }
+  const urlAllowlist = input.urlAllowlist;
+  if (urlAllowlist == null) {
+    throw new Error("urlAllowlist is required");
+  }
+  const fieldSchema = input.fieldSchema;
+  if (fieldSchema == null) {
+    throw new Error("fieldSchema is required");
+  }
+
+  return {
+    slug,
+    name: normalizeRequiredLocalizedString(input.name),
+    description: normalizeLocalizedString(input.description),
+    instructions: normalizeLocalizedString(input.instructions),
+    urlAllowlist,
+    urlExample: input.urlExample ?? null,
+    logoUrl: input.logoUrl ?? null,
+    fieldSchema: normalizeFieldSchema(fieldSchema),
+    isActive: input.isActive ?? undefined,
+  };
+}
+
 function normalizeProviderUpdateInput(input: {
   readonly slug?: string | null;
   readonly name?: { readonly ar?: string | null; readonly en?: string | null } | null;
@@ -142,22 +184,35 @@ function normalizeConfigUpdateInput(input: {
 }
 
 function extractCommonMeetingConfigFields(input: {
-  readonly providerId: string;
+  readonly providerId?: string | null;
   readonly label?: string | null;
-  readonly isDefault: boolean;
+  readonly isDefault?: boolean | null;
   readonly password?: string | null;
-  readonly details: {
+  readonly details?: {
     readonly meetingUrl: string;
     readonly username?: string | null;
     readonly tenantId?: string | null;
-  };
+  } | null;
 }) {
+  const providerId = input.providerId;
+  if (providerId == null) {
+    throw new Error("providerId is required");
+  }
+  const isDefault = input.isDefault;
+  if (isDefault == null) {
+    throw new Error("isDefault is required");
+  }
+  const details = input.details;
+  if (details == null) {
+    throw new Error("details is required");
+  }
+
   return {
-    providerId: input.providerId,
+    providerId,
     label: input.label ?? null,
-    isDefault: input.isDefault,
+    isDefault,
     password: input.password ?? null,
-    details: normalizeMeetingConfigDetails(input.details),
+    details: normalizeMeetingConfigDetails(details),
   };
 }
 
@@ -169,21 +224,7 @@ gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
     },
     authScopes: { loggedIn: true },
     resolve: withAuthResult((userId, args, tErrors) =>
-      MeetingProviderCatalogService.createProvider(
-        userId,
-        {
-          slug: args.input.slug,
-          name: normalizeRequiredLocalizedString(args.input.name),
-          description: normalizeLocalizedString(args.input.description),
-          instructions: normalizeLocalizedString(args.input.instructions),
-          urlAllowlist: args.input.urlAllowlist,
-          urlExample: args.input.urlExample,
-          logoUrl: args.input.logoUrl,
-          fieldSchema: normalizeFieldSchema(args.input.fieldSchema),
-          isActive: args.input.isActive ?? undefined,
-        },
-        tErrors
-      )
+      MeetingProviderCatalogService.createProvider(userId, normalizeProviderCreateInput(args.input), tErrors)
     ),
   })
 );

@@ -1,4 +1,5 @@
 "use client";
+import { useMemo } from "react";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -9,22 +10,56 @@ import {
   useAdminScheduleQuery,
   useLastUpdatedLabel,
 } from "@/frontend/common/views/dashboard/admin/__shared__/useAdminDashboard";
+import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
-import { useAdminDashboardLabels } from "@/frontend/common/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
-import type {
-  ScheduleOverviewDataHeaders,
-  ScheduleOverviewDataStatusLabels,
-} from "@/frontend/common/views/dashboard/types/dashboard";
+import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
 import type { AdminDashboardLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface UseAdminDashboardViewModelProps {
   readonly onRetry?: () => void;
 }
 
+function buildLabelsBySection(labels: AdminDashboardLabels): AdminDashboardLabelsBySection {
+  return {
+    shell: {
+      todayClasses: labels.todayClasses,
+      scheduleOverview: labels.scheduleOverview,
+      searchPlaceholder: labels.searchPlaceholder,
+      noClasses: labels.noClasses,
+      details: labels.details,
+      loading: labels.loading,
+    },
+    filters: {
+      listOfClassesOn: labels.listOfClassesOn,
+      today: labels.today,
+      previousDay: labels.previousDay,
+      nextDay: labels.nextDay,
+      selectTeacher: labels.selectTeacher,
+      submit: labels.submit,
+    },
+    columns: {
+      className: labels.className,
+      student: labels.student,
+      teacher: labels.teacher,
+      time: labels.time,
+      yourTime: labels.yourTime,
+      teacherTime: labels.teacherTime,
+      studentTime: labels.studentTime,
+      duration: labels.duration,
+      status: labels.status,
+      actions: labels.actions,
+      history: labels.history,
+      joinVideo: labels.joinVideo,
+    },
+    status: buildClassInstanceStatusLabels(labels.statusLabels),
+    metrics: labels.metrics,
+  };
+}
+
 export interface AdminDashboardViewModel {
-  readonly t: AdminDashboardLabels;
+  readonly labelsBySection: AdminDashboardLabelsBySection;
   readonly loading: boolean;
   readonly lastUpdated: string;
   readonly metrics: readonly MetricItem[];
@@ -35,8 +70,6 @@ export interface AdminDashboardViewModel {
   readonly dateValue: string;
   readonly selectedTeacher: PersonOption | null;
   readonly rows: readonly DailyScheduleRow[];
-  readonly headers: ScheduleOverviewDataHeaders;
-  readonly statusLabels: ScheduleOverviewDataStatusLabels;
   readonly page: number;
   readonly totalCount?: number;
   readonly onPageChange: (page: number) => void;
@@ -45,33 +78,23 @@ export interface AdminDashboardViewModel {
   readonly onTeacherChange: (teacher: PersonOption | null) => void;
   readonly onSubmit: () => void;
   readonly pageSize: number;
-  readonly loadingLabel?: string;
-  readonly emptyLabel?: string;
   readonly pageCount: number;
-  // NEW FOR PLAN v5: lifted permission booleans per specs.md §3 N3 + §6.1.
-  // Tier admin-dashboard views no longer import `RequirePermission` or call
-  // `useUserStore()` — the ViewModel computes the gates ONCE and the tier
-  // view reads them as plain props.
   readonly canDashboardSearch: boolean;
   readonly canScheduleFilterAdvanced: boolean;
   readonly canScheduleViewTimezones: boolean;
 }
 
 export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardViewModelProps>): AdminDashboardViewModel {
-  const t = useAppTranslation().dashboardTranslations.admin;
-  const { headers, statusLabels } = useAdminDashboardLabels();
+  const labels = useAppTranslation(Translation.Dashboard.Admin);
+  const labelsBySection = useMemo(() => buildLabelsBySection(labels), [labels]);
 
-  // NEW FOR PLAN v5: read the user's permissions ONCE in the ViewModel and
-  // expose boolean gates. Tier admin-dashboard files no longer call
-  // `useUserStore()` directly (specs.md §3 N3); they read the booleans and
-  // conditionally render the gated sections.
   const { hasPermission } = useUserStore();
   const canDashboardSearch = hasPermission(AppPermission.DashboardSearch);
   const canScheduleFilterAdvanced = hasPermission(AppPermission.ScheduleFilterAdvanced);
   const canScheduleViewTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
 
   const { dashboardData, loading, refetch, page, setPage } = useAdminScheduleQuery();
-  const lastUpdated = useLastUpdatedLabel(dashboardData);
+  const lastUpdated = useLastUpdatedLabel(dashboardData, labels);
 
   const { filters, handleDateChange, handleTeacherChange, handleSearchChange, handleMetricClick } =
     useAdminDashboardHandlers(setPage);
@@ -83,12 +106,14 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
   const scheduleResult = dashboardData?.adminDashboardSchedule;
   const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null).map(metric => ({
     ...metric,
-    label: t.metrics[metric.key as keyof AdminDashboardLabels["metrics"]] ?? metric.labelKey,
+    label: labelsBySection.metrics[metric.key as keyof AdminDashboardLabels["metrics"]] ?? metric.labelKey,
   }));
   const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
-  const selectedMetricLabel = filters.selectedStatus ? t.metrics[filters.selectedStatus] : null;
+  const selectedMetricLabel = filters.selectedStatus
+    ? labelsBySection.metrics[filters.selectedStatus as keyof AdminDashboardLabels["metrics"]]
+    : null;
 
   const pageCount =
     totalCount !== undefined && ADMIN_DASHBOARD_PAGE_SIZE > 0
@@ -96,7 +121,7 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
       : 0;
 
   return {
-    t,
+    labelsBySection,
     loading,
     lastUpdated,
     metrics: metricsList,
@@ -107,8 +132,6 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
     dateValue: filters.date,
     selectedTeacher: filters.selectedTeacher,
     rows,
-    headers,
-    statusLabels,
     page,
     totalCount,
     onPageChange: setPage,
@@ -118,7 +141,6 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
     onSubmit: handleSubmit,
     pageSize: ADMIN_DASHBOARD_PAGE_SIZE,
     pageCount,
-    // NEW FOR PLAN v5: lifted permission booleans consumed by the tier views.
     canDashboardSearch,
     canScheduleFilterAdvanced,
     canScheduleViewTimezones,

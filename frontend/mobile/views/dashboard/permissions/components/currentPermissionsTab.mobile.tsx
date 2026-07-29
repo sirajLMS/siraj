@@ -5,7 +5,6 @@ import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { CurrentPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledRevokeButton = styled(Button)(({ theme }) => ({
   color: theme.palette.error.main,
@@ -56,7 +55,6 @@ const StyledAssignFirstButton = styled(Button)(({ theme }) => ({
 }));
 
 const StyledPermissionKeyChip = styled(Box)(({ theme }) => ({
-  fontFamily: "JetBrains Mono, monospace",
   typography: "labelMd",
   backgroundColor: theme.palette.surfaceVariant,
   color: theme.palette.onSurfaceVariant,
@@ -66,6 +64,7 @@ const StyledPermissionKeyChip = styled(Box)(({ theme }) => ({
 }));
 
 export function CurrentPermissionsTabMobile({
+  labels,
   group,
   groupPermissions,
   permissionsCount,
@@ -73,7 +72,7 @@ export function CurrentPermissionsTabMobile({
   onSwitchToAddTab,
   loading = false,
 }: Readonly<CurrentPermissionsTabProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   if (permissionsCount === 0 && !loading) {
     return (

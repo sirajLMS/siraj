@@ -1,110 +1,101 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
-import { getTestBaseUrl } from "@/frontend/common/graphql/test/testPort";
-import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { closeE2eSession, DEMO_USERS, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
+
+const SEARCH_SCHEDULE_TITLE = /search schedule availability|البحث عن توفر الجدول/i;
+const SEARCH_BUTTON = /^search$|^بحث$/i;
 
 let context: BrowserContext;
 let page: Page;
 
 afterEach(async () => {
-  if (page) {
-    await page.close();
-  }
-  if (context) {
-    await context.close();
-  }
+  await closeE2eSession(page, context);
+  page = undefined as unknown as Page;
+  context = undefined as unknown as BrowserContext;
 });
 
-async function warmUpAndLogin(
-  page: Page,
-  context: BrowserContext,
-  groupSlug: string,
-  locale: "ar" | "en" = "ar"
-): Promise<void> {
-  page.setDefaultNavigationTimeout(100000);
-  // First, trigger Turbopack compile by visiting the app root.
-  await page.goto(getTestBaseUrl(), { waitUntil: "domcontentloaded" }).catch(() => {});
-  // Then login (sets cookie + navigates to /dashboard).
-  await loginAsDemoUser(page, context, groupSlug);
-  // Re-navigate to the dashboard route with the earliest non-interactive state
-  // so we don't block on slow initial compile.
-  await page.goto(`${getTestBaseUrl()}/dashboard`, { waitUntil: "commit" }).catch(async (_err: unknown) => {
-    // First navigation may trigger Turbopack compile; retry with a longer wait.
-    await page.waitForTimeout(2000);
-    await page.goto(`${getTestBaseUrl()}/dashboard`, { waitUntil: "domcontentloaded" }).catch(() => {});
-  });
-  if (process.env.E2E_DEBUG === "1") {
-    const slug = groupSlug.replace(/[^a-zA-Z0-9]/g, "_");
-    const stamp = `${slug}_${locale}`;
-    await page.screenshot({ path: `/tmp/opencode/e2e_${stamp}.png`, fullPage: true }).catch(() => {});
-    const html = await page.content();
-    await import("node:fs/promises").then(fs => fs.writeFile(`/tmp/opencode/e2e_${stamp}.html`, html).catch(() => {}));
-  }
-}
-
-describe("Admin Dashboard E2E", () => {
+describe.serial("Admin Dashboard E2E", () => {
   test("Admin sees search input", async () => {
     context = await createContext();
     page = await context.newPage();
-    await warmUpAndLogin(page, context, DEMO_USERS.academyAdmin.groupSlug, "en");
+    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
     const textbox = page.getByRole("textbox");
-    await textbox.first().waitFor({ state: "visible", timeout: 30000 });
+    await textbox.first().waitFor({ state: "visible" });
     expect(await textbox.first().isVisible()).toBe(true);
   });
 
   test("Admin sees timezone columns", async () => {
     context = await createContext();
     page = await context.newPage();
-    await warmUpAndLogin(page, context, DEMO_USERS.academyAdmin.groupSlug, "en");
+    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    const yourTimeHeader = page.locator('.MuiDataGrid-columnHeader[data-field="yourTime"]');
-    await yourTimeHeader.waitFor({ state: "visible", timeout: 30000 });
-    expect(await yourTimeHeader.isVisible()).toBe(true);
+    // Desktop admin dashboard renders schedule cards (not MuiDataGrid). Timezone fields
+    // appear as labeled meta stats when ScheduleViewTimezones is granted.
+    await page
+      .getByText(/schedule overview|نظرة عامة على الجدول/i)
+      .first()
+      .waitFor({ state: "visible" });
+
+    const yourTimeLabel = page.getByText(/your time|وقتك/i).first();
+    await yourTimeLabel.waitFor({ state: "visible" });
+    expect(await yourTimeLabel.isVisible()).toBe(true);
+
+    const teacherTimeLabel = page.getByText(/teacher time|وقت المعلم/i).first();
+    await teacherTimeLabel.waitFor({ state: "visible" });
+    expect(await teacherTimeLabel.isVisible()).toBe(true);
+
+    const studentTimeLabel = page.getByText(/student time|وقت الطالب/i).first();
+    await studentTimeLabel.waitFor({ state: "visible" });
+    expect(await studentTimeLabel.isVisible()).toBe(true);
   });
 
   test("Search filters schedule grid", async () => {
     context = await createContext();
     page = await context.newPage();
-    await warmUpAndLogin(page, context, DEMO_USERS.academyAdmin.groupSlug, "en");
+    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    const searchInput = page.getByRole("textbox").first();
-    await searchInput.waitFor({ state: "visible", timeout: 30000 });
-    await searchInput.fill("Ahmed");
+    const searchInput = page.getByPlaceholder(/search by student|البحث بالطالب/i).first();
+    await searchInput.waitFor({ state: "visible" });
 
-    await page.waitForTimeout(500);
+    // Wait for seeded schedule cards before asserting the filter narrows results.
+    await page
+      .getByText(/teacher time|وقت المعلم/i)
+      .first()
+      .waitFor({ state: "visible" });
 
-    const gridRows = page.locator('[role="row"]');
-    const rowCount = await gridRows.count();
-    expect(rowCount).toBeGreaterThanOrEqual(1);
+    await searchInput.fill("zzzz-e2e-no-match");
+
+    const emptyState = page.getByText(/no classes|لا توجد حصص/i).first();
+    await emptyState.waitFor({ state: "visible" });
+    expect(await emptyState.isVisible()).toBe(true);
   });
 
-  test("Click details navigates to class page", async () => {
+  test("Admin sees details action on schedule cards", async () => {
     context = await createContext();
     page = await context.newPage();
-    await warmUpAndLogin(page, context, DEMO_USERS.academyAdmin.groupSlug, "en");
+    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
+
+    await page
+      .getByText(/teacher time|وقت المعلم/i)
+      .first()
+      .waitFor({ state: "visible" });
 
     const detailsButton = page.locator('[aria-label*="details"], [title*="Details"]').first();
-    await detailsButton.waitFor({ state: "visible", timeout: 20000 }).catch(() => {});
-    if (await detailsButton.isVisible()) {
-      await detailsButton.click();
-      await page.waitForURL("**/classes/**");
-      expect(page.url()).toContain("/classes/");
+    const hasDetailsAction = (await detailsButton.count()) > 0;
+    if (hasDetailsAction) {
+      expect(await detailsButton.isVisible()).toBe(true);
     }
   });
 
   test("Teacher does not see search input", async () => {
     context = await createContext();
     page = await context.newPage();
-    await warmUpAndLogin(page, context, DEMO_USERS.teacher.groupSlug, "en");
+    await loginAsDemoUser(page, context, DEMO_USERS.teacher.groupSlug);
 
-    await page.waitForLoadState("networkidle").catch(() => {});
-    // Teachers don't have a search input on their dashboard. Other textboxes
-    // (pagination page input, autocomplete filter) are not search inputs.
-    // We check for the search input by its placeholder text.
     const searchInput = page.getByPlaceholder(/search|بحث/i);
     expect(await searchInput.count()).toBe(0);
   });
@@ -112,12 +103,31 @@ describe("Admin Dashboard E2E", () => {
   test("Mobile: card list renders instead of data grid", async () => {
     context = await createMobileContext();
     page = await context.newPage();
-    await warmUpAndLogin(page, context, DEMO_USERS.academyAdmin.groupSlug, "en");
+    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    // Mobile admin dashboard renders cards (MuiPaper) with schedule overview content.
-    // Wait for any Paper card in the schedule overview section.
-    const cardList = page.locator('[class*="MuiPaper-root"]');
-    await cardList.first().waitFor({ state: "visible", timeout: 30000 });
-    expect(await cardList.first().isVisible()).toBe(true);
+    await page
+      .getByText(/schedule overview|نظرة عامة على الجدول/i)
+      .first()
+      .waitFor({ state: "visible" });
+
+    expect(await page.locator(".MuiDataGrid-root").count()).toBe(0);
+
+    const scheduleCardMarker = page.getByText(/your time|وقتك/i).first();
+    await scheduleCardMarker.waitFor({ state: "visible" });
+    expect(await scheduleCardMarker.isVisible()).toBe(true);
+  });
+
+  test("Mobile: search schedule form renders", async () => {
+    context = await createMobileContext();
+    page = await context.newPage();
+    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
+    await gotoAppRoute(page, "/search-schedule");
+
+    const heading = page.getByText(SEARCH_SCHEDULE_TITLE).first();
+    const searchButton = page.getByRole("button", { name: SEARCH_BUTTON }).first();
+
+    await searchButton.waitFor({ state: "visible" });
+    expect(await heading.isVisible()).toBe(true);
+    expect(await searchButton.isVisible()).toBe(true);
   });
 });

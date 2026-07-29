@@ -1,5 +1,11 @@
-import { describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, mock, test } from "bun:test";
 import { NextRequest } from "next/server";
+import {
+  allocateTestPort,
+  getTestApiUrl,
+  releaseAllocatedTestPort,
+  setTestPort,
+} from "@/frontend/common/graphql/test/testPort";
 
 // Mock dependencies
 mock.module("@/backend/lib", () => ({
@@ -45,14 +51,56 @@ mock.module("@vercel/blob/client", () => ({
   handleUpload: async () => new Response(JSON.stringify({ type: "blob.generate-client-token" }), { status: 200 }),
 }));
 
+beforeAll(async () => {
+  const port = await allocateTestPort();
+  setTestPort(port);
+});
+
+afterAll(async () => {
+  await releaseAllocatedTestPort();
+});
+
+function getUploadUrl(): string {
+  return getTestApiUrl("/api/storage/vercel-upload");
+}
+
+const AUTHENTICATED_UPLOAD_BODY = {
+  type: "blob.generate-client-token",
+  payload: {
+    pathname: "test/file.png",
+    clientPayload: JSON.stringify({
+      sessionId: "valid-session-id",
+      fileSize: 100,
+      contentType: "image/png",
+    }),
+  },
+};
+
 async function importRoute() {
   return import("./route");
+}
+
+function createAuthenticatedUploadRequest(headers: Record<string, string>) {
+  return new NextRequest(getUploadUrl(), {
+    method: "POST",
+    headers: {
+      ...headers,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(AUTHENTICATED_UPLOAD_BODY),
+  });
+}
+
+async function expectAuthenticatedPost(headers: Record<string, string>) {
+  const { POST } = await importRoute();
+  const res = await POST(createAuthenticatedUploadRequest(headers));
+  expect(res.status).not.toBe(401);
 }
 
 describe("POST /api/storage/vercel-upload Authentication", () => {
   test("returns 401 when no auth header or cookies are provided", async () => {
     const { POST } = await importRoute();
-    const req = new NextRequest("http://localhost:3000/api/storage/vercel-upload", {
+    const req = new NextRequest(getUploadUrl(), {
       method: "POST",
     });
 
@@ -63,77 +111,14 @@ describe("POST /api/storage/vercel-upload Authentication", () => {
   });
 
   test("authenticates via access_token cookie when Authorization header is absent", async () => {
-    const { POST } = await importRoute();
-    const req = new NextRequest("http://localhost:3000/api/storage/vercel-upload", {
-      method: "POST",
-      headers: {
-        cookie: "access_token=valid-access-token",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "blob.generate-client-token",
-        payload: {
-          pathname: "test/file.png",
-          clientPayload: JSON.stringify({
-            sessionId: "valid-session-id",
-            fileSize: 100,
-            contentType: "image/png",
-          }),
-        },
-      }),
-    });
-
-    const res = await POST(req);
-    expect(res.status).not.toBe(401);
+    await expectAuthenticatedPost({ cookie: "access_token=valid-access-token" });
   });
 
   test("authenticates via session_id cookie fallback when access_token is absent/expired", async () => {
-    const { POST } = await importRoute();
-    const req = new NextRequest("http://localhost:3000/api/storage/vercel-upload", {
-      method: "POST",
-      headers: {
-        cookie: "session_id=valid-session-id",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "blob.generate-client-token",
-        payload: {
-          pathname: "test/file.png",
-          clientPayload: JSON.stringify({
-            sessionId: "valid-session-id",
-            fileSize: 100,
-            contentType: "image/png",
-          }),
-        },
-      }),
-    });
-
-    const res = await POST(req);
-    expect(res.status).not.toBe(401);
+    await expectAuthenticatedPost({ cookie: "session_id=valid-session-id" });
   });
 
   test("authenticates via Authorization header when present", async () => {
-    const { POST } = await importRoute();
-    const req = new NextRequest("http://localhost:3000/api/storage/vercel-upload", {
-      method: "POST",
-      headers: {
-        authorization: "Bearer valid-access-token",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "blob.generate-client-token",
-        payload: {
-          pathname: "test/file.png",
-          clientPayload: JSON.stringify({
-            sessionId: "valid-session-id",
-            fileSize: 100,
-            contentType: "image/png",
-          }),
-        },
-      }),
-    });
-
-    const res = await POST(req);
-    expect(res.status).not.toBe(401);
+    await expectAuthenticatedPost({ authorization: "Bearer valid-access-token" });
   });
 });

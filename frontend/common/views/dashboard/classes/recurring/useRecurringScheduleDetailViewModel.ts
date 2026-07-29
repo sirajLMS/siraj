@@ -9,15 +9,13 @@ import {
   updateRecurringClassRateMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
-import { useAppTranslation } from "@/shared/locale";
+import type { RecurringScheduleDetailLabelsBySection } from "@/frontend/common/views/dashboard/classes/recurring/types/recurringScheduleDetail.types";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface RecurringScheduleDetailViewModel {
-  readonly pageTitle: string;
-  readonly subtitle: string;
-  readonly breadcrumbs: readonly { readonly label: string; readonly href?: string }[];
+  readonly labelsBySection: RecurringScheduleDetailLabelsBySection;
   readonly loading: boolean;
   readonly error: string | null;
-  readonly invalidId: string;
   readonly recurringScheduleId: string;
   readonly hourlyRate: string | null;
   readonly rateCurrency: CurrencyCode | null;
@@ -32,11 +30,122 @@ export interface UseRecurringScheduleDetailViewModelProps {
   readonly onRetry?: () => void;
 }
 
+type RecurringScheduleSummarySource = {
+  readonly studentName?: string | null;
+  readonly teacherName?: string | null;
+  readonly durationMinutes?: number | null;
+  readonly timezone?: string | null;
+};
+
+type RecurringScheduleTranslations = {
+  readonly scheduleSummary: (
+    studentName: string,
+    teacherName: string,
+    durationMinutes: string,
+    timezone: string
+  ) => string;
+  readonly breadcrumbDashboard: string;
+  readonly breadcrumbClasses: string;
+  readonly pageTitle: string;
+  readonly invalidId: string;
+  readonly rateSectionTitle: string;
+  readonly hourlyRateLabel: string;
+  readonly currencyLabel: string;
+  readonly rateSaveLabel: string;
+  readonly rateClearLabel: string;
+  readonly rateSuccessMessage: string;
+  readonly rateErrorMessage: string;
+};
+
+type ManagerTranslations = {
+  readonly loadError: string;
+};
+
+function buildScheduleSummary(schedule: RecurringScheduleSummarySource, t: RecurringScheduleTranslations): string {
+  return t.scheduleSummary(
+    schedule.studentName ?? "",
+    schedule.teacherName ?? "",
+    String(schedule.durationMinutes ?? 0),
+    schedule.timezone ?? ""
+  );
+}
+
+function buildBreadcrumbs(t: RecurringScheduleTranslations) {
+  return [
+    { label: t.breadcrumbDashboard, href: "/dashboard" },
+    { label: t.breadcrumbClasses, href: "/classes" },
+    { label: t.pageTitle },
+  ];
+}
+
+function buildLabelsBySection(
+  t: RecurringScheduleTranslations,
+  tManager: ManagerTranslations,
+  summary: string,
+  breadcrumbs: ReturnType<typeof buildBreadcrumbs>
+): RecurringScheduleDetailLabelsBySection {
+  return {
+    shell: {
+      pageTitle: t.pageTitle,
+      subtitle: summary,
+      breadcrumbs,
+      invalidId: t.invalidId,
+      loadError: tManager.loadError,
+    },
+    form: {
+      rate: {
+        title: t.rateSectionTitle,
+        hourlyRateLabel: t.hourlyRateLabel,
+        currencyLabel: t.currencyLabel,
+        saveLabel: t.rateSaveLabel,
+        clearLabel: t.rateClearLabel,
+        successMessage: t.rateSuccessMessage,
+        errorMessage: t.rateErrorMessage,
+      },
+    },
+  };
+}
+
+async function updateRecurringScheduleRate(
+  updateRateMut: ReturnType<typeof useMutation>[0],
+  recurringScheduleId: string,
+  hourlyRate: string | null,
+  rateCurrency: CurrencyCode | null
+): Promise<void> {
+  await updateRateMut({
+    variables: {
+      input: {
+        recurringScheduleId,
+        hourlyRate: hourlyRate || null,
+        rateCurrency: rateCurrency ?? null,
+      },
+    },
+  });
+}
+
+async function handleRateUpdate(
+  updateRateMut: ReturnType<typeof useMutation>[0],
+  recurringScheduleId: string,
+  hourlyRate: string | null,
+  rateCurrency: CurrencyCode | null,
+  setRateError: (error: string | null) => void,
+  setRateSuccess: (success: boolean) => void
+): Promise<void> {
+  setRateError(null);
+  setRateSuccess(false);
+  try {
+    await updateRecurringScheduleRate(updateRateMut, recurringScheduleId, hourlyRate, rateCurrency);
+    setRateSuccess(true);
+  } catch (err) {
+    setRateError(err instanceof Error ? err.message : "Failed to update rate");
+  }
+}
+
 export function useRecurringScheduleDetailViewModel(
   props: Readonly<UseRecurringScheduleDetailViewModelProps>
 ): RecurringScheduleDetailViewModel {
-  const t = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;
-  const tManager = useAppTranslation().uiTranslations.meetingConfigManager;
+  const t = useAppTranslation(Translation.Ui.MeetingConfigRecurringSchedule);
+  const tManager = useAppTranslation(Translation.Ui.MeetingConfig).manager;
   const { onRetry } = props;
 
   const params = useParams();
@@ -54,53 +163,20 @@ export function useRecurringScheduleDetailViewModel(
   const [rateError, setRateError] = useState<string | null>(null);
   const [rateSuccess, setRateSuccess] = useState(false);
 
-  useDocumentTitle(data?.recurringSchedule?.studentName, "common", "title");
+  useDocumentTitle(data?.recurringSchedule?.studentName, Translation.Common, "title");
 
   const schedule = data?.recurringSchedule;
 
   const handleUpdateRate = useCallback(
     async (hourlyRate: string | null, rateCurrency: CurrencyCode | null) => {
-      setRateError(null);
-      setRateSuccess(false);
-      try {
-        await updateRateMut({
-          variables: {
-            input: {
-              recurringScheduleId: id,
-              hourlyRate: hourlyRate || null,
-              rateCurrency: rateCurrency ?? null,
-            },
-          },
-        });
-        setRateSuccess(true);
-      } catch (err) {
-        setRateError(err instanceof Error ? err.message : "Failed to update rate");
-      }
+      await handleRateUpdate(updateRateMut, id, hourlyRate, rateCurrency, setRateError, setRateSuccess);
     },
     [id, updateRateMut]
   );
 
-  const summary = useMemo(
-    () =>
-      schedule
-        ? t.scheduleSummary(
-            schedule.studentName ?? "",
-            schedule.teacherName ?? "",
-            String(schedule.durationMinutes ?? 0),
-            schedule.timezone ?? ""
-          )
-        : "",
-    [schedule, t]
-  );
+  const summary = useMemo(() => (schedule ? buildScheduleSummary(schedule, t) : ""), [schedule, t]);
 
-  const breadcrumbs = useMemo(
-    () => [
-      { label: t.breadcrumbDashboard, href: "/dashboard" },
-      { label: t.breadcrumbClasses, href: "/classes" },
-      { label: t.pageTitle },
-    ],
-    [t]
-  );
+  const breadcrumbs = useMemo(() => buildBreadcrumbs(t), [t]);
 
   const handleRetry = useCallback(() => {
     if (onRetry) {
@@ -110,13 +186,15 @@ export function useRecurringScheduleDetailViewModel(
     }
   }, [onRetry, refetch]);
 
+  const labelsBySection = useMemo(
+    () => buildLabelsBySection(t, tManager, summary, breadcrumbs),
+    [t, tManager, summary, breadcrumbs]
+  );
+
   return {
-    pageTitle: t.pageTitle,
-    subtitle: summary,
-    breadcrumbs,
+    labelsBySection,
     loading,
     error: error ? tManager.loadError : null,
-    invalidId: t.invalidId,
     recurringScheduleId: schedule?.id ?? id,
     hourlyRate: schedule?.hourlyRate ?? null,
     rateCurrency: schedule?.rateCurrency ?? null,

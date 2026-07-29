@@ -14,7 +14,7 @@ import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { CountryOptionRowDesktop } from "@/frontend/desktop/components/ui/input/countrySelect/countryOptionRow.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type CountryAutocompleteSlotProps = NonNullable<AutocompleteProps<CountryType, false, false, false>["slotProps"]>;
 
@@ -201,7 +201,7 @@ export const CountryAutocompleteDesktop: React.FC<CountryAutocompleteProps> = ({
   disablePortal = false,
   listAttached = false,
 }: CountryAutocompleteProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.countrySelect;
+  const t = useAppTranslation(Translation.Ui.CountrySelect);
   const locale = useAppLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;

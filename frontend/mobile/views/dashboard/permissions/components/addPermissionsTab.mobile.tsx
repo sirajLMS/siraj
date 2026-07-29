@@ -8,7 +8,6 @@ import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { AddPermissionBulkBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionBulkBar.mobile";
 import { AddPermissionFilterBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionFilterBar.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledTabContainer = styled(Box)({
   display: "flex",
@@ -37,7 +36,7 @@ function AddPermissionCardMobile({ permission, checked, onToggle }: Readonly<Per
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1, minWidth: 0 }}>
           <Box
             sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
               typography: "labelMd",
               backgroundColor: theme.palette.surfaceVariant,
               color: theme.palette.onSurfaceVariant,
@@ -67,6 +66,7 @@ function AddPermissionCardMobile({ permission, checked, onToggle }: Readonly<Per
 }
 
 export function AddPermissionsTabMobile({
+  labels,
   filteredAvailablePermissions,
   selectedAddPermissionIds,
   searchQuery,
@@ -78,7 +78,7 @@ export function AddPermissionsTabMobile({
   onCategoryChange,
   loading = false,
 }: Readonly<AddPermissionsTabProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <StyledTabContainer>

@@ -16,6 +16,7 @@ import {
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { useRouter } from "@/shared/i18n/navigation";
+import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents/onboarding";
 
 type ParentOnboardingFormSectionsProps = Pick<
   ParentOnboardingViewModel,
@@ -37,7 +38,9 @@ function ParentOnboardingFormSections({
   );
 }
 
-type MeetingConfigSectionProps = Pick<ParentOnboardingViewModel, "register" | "control" | "errors" | "t">;
+type MeetingConfigSectionProps = Pick<ParentOnboardingViewModel, "register" | "control" | "errors"> & {
+  readonly t: ParentOnboardingLabels;
+};
 
 function MeetingConfigSection({ register, control, errors, t }: MeetingConfigSectionProps) {
   return (
@@ -64,7 +67,10 @@ function MeetingConfigSection({ register, control, errors, t }: MeetingConfigSec
   );
 }
 
-type SubmitActionsProps = Pick<ParentOnboardingViewModel, "isSubmitting" | "t">;
+type SubmitActionsProps = {
+  readonly isSubmitting: boolean;
+  readonly t: ParentOnboardingLabels;
+};
 
 function SubmitActions({ isSubmitting, t }: SubmitActionsProps) {
   return (
@@ -102,12 +108,14 @@ function SubmitActions({ isSubmitting, t }: SubmitActionsProps) {
 
 type MeetingConfigAlertProps = Pick<
   ParentOnboardingViewModel,
-  "meetingConfigWarning" | "clearMeetingConfigWarning" | "meetingSetupHref" | "tMeeting" | "tJoin"
+  "meetingConfigWarning" | "clearMeetingConfigWarning" | "meetingSetupHref" | "labelsBySection"
 >;
 
 function useMeetingConfigAlert(props: MeetingConfigAlertProps) {
   const router = useRouter();
-  const { meetingConfigWarning, clearMeetingConfigWarning, meetingSetupHref, tMeeting, tJoin } = props;
+  const { meetingConfigWarning, clearMeetingConfigWarning, meetingSetupHref, labelsBySection } = props;
+  const tMeeting = labelsBySection.meeting.manager;
+  const tJoin = labelsBySection.meeting.join;
   if (!meetingConfigWarning) {
     return null;
   }
@@ -129,7 +137,9 @@ function useMeetingConfigAlert(props: MeetingConfigAlertProps) {
   );
 }
 
-type StatusBannerActionProps = Pick<ParentOnboardingViewModel, "t">;
+type StatusBannerActionProps = {
+  readonly t: ParentOnboardingLabels;
+};
 
 function useStatusBannerAction({ t }: StatusBannerActionProps) {
   return (
@@ -154,8 +164,10 @@ function useStatusBannerAction({ t }: StatusBannerActionProps) {
 
 type ParentOnboardingFormProps = Pick<
   ParentOnboardingViewModel,
-  "form" | "register" | "control" | "errors" | "onUploadAvatar" | "handleSubmit" | "onSubmit" | "isSubmitting" | "t"
->;
+  "form" | "register" | "control" | "errors" | "onUploadAvatar" | "handleSubmit" | "onSubmit" | "isSubmitting"
+> & {
+  readonly t: ParentOnboardingLabels;
+};
 
 function useParentOnboardingForm(props: ParentOnboardingFormProps) {
   const { form, register, control, errors, onUploadAvatar, handleSubmit, onSubmit, isSubmitting, t } = props;
@@ -195,16 +207,14 @@ export function ParentOnboardingDesktopView({
   meetingSetupHref,
   showSuccess,
   onDismissSuccess,
-  t,
-  tMeeting,
-  tJoin,
+  labelsBySection,
 }: Readonly<ParentOnboardingViewModel>) {
+  const t = labelsBySection.form;
   const meetingConfigAlert = useMeetingConfigAlert({
     meetingConfigWarning,
     clearMeetingConfigWarning,
     meetingSetupHref,
-    tMeeting,
-    tJoin,
+    labelsBySection,
   });
   const statusBannerAction = useStatusBannerAction({ t });
   const parentOnboardingForm = useParentOnboardingForm({

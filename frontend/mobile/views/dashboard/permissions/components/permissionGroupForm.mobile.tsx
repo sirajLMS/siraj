@@ -20,7 +20,7 @@ import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { LocalizedStringFormFieldMobile } from "@/frontend/mobile/components/ui/input/localizedString";
 import { PermissionCategoryListMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCategoryList.mobile";
 import { PermissionFilterBarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionFilterBar.mobile";
-import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
+import type { PermissionsLabels } from "@/shared/locale";
 
 function PermissionGroupFormActionsMobile({
   isLoading,
@@ -118,6 +118,7 @@ function PermissionGroupFormContentMobile({
         <MobileSectionPanel title={t.addPermissions}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <PermissionFilterBarMobile
+              labels={t}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
               selectedCategory={selectedCategory}
@@ -144,6 +145,7 @@ function PermissionGroupFormContentMobile({
 }
 
 export function PermissionGroupFormMobile({
+  labels,
   open,
   group,
   isLoading,
@@ -163,7 +165,7 @@ export function PermissionGroupFormMobile({
   isGroupSelected,
   isGroupIndeterminate,
 }: Readonly<PermissionGroupFormProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <Dialog

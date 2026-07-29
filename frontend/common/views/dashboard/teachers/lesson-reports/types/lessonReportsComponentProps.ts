@@ -18,7 +18,7 @@ import type { useAppLocale } from "@/shared/locale";
 // `LessonReportCardDesktopProps` with byte-identical bodies.
 export interface LessonReportCardProps {
   readonly row: TeacherLessonReportRow;
-  readonly labels: TeacherLessonReportsViewModel["labels"];
+  readonly labels: TeacherLessonReportsViewModel["labelsBySection"]["cards"];
   readonly locale: ReturnType<typeof useAppLocale>;
   readonly resolveStatusLabel: (status: LessonReportStatus) => string;
 }

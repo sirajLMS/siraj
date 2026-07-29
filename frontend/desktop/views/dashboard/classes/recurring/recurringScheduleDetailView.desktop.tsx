@@ -4,15 +4,11 @@ import { RecurringRateSection } from "@/frontend/common/views/dashboard/classes/
 import type { RecurringScheduleDetailViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringScheduleDetailViewModel";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-import { useAppTranslation } from "@/shared/locale";
 
 export function RecurringScheduleDetailDesktopView({
-  pageTitle,
-  subtitle,
-  breadcrumbs,
+  labelsBySection,
   loading,
   error,
-  invalidId,
   recurringScheduleId,
   hourlyRate,
   rateCurrency,
@@ -22,12 +18,12 @@ export function RecurringScheduleDetailDesktopView({
   onUpdateRate,
   onRetry,
 }: Readonly<RecurringScheduleDetailViewModel>) {
-  const t = useAppTranslation().uiTranslations.meetingConfigRecurringSchedule;
+  const { shell, form } = labelsBySection;
 
   if (!recurringScheduleId) {
     return (
       <DesktopPageContainer>
-        <ErrorState embedded message={invalidId} retryLabel="" onRetry={onRetry} />
+        <ErrorState embedded message={shell.invalidId} retryLabel="" onRetry={onRetry} />
       </DesktopPageContainer>
     );
   }
@@ -46,22 +42,14 @@ export function RecurringScheduleDetailDesktopView({
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={pageTitle} subtitle={subtitle} breadcrumbs={breadcrumbs} />
+      <DesktopPageHeader title={shell.pageTitle} subtitle={shell.subtitle} breadcrumbs={shell.breadcrumbs} />
       <RecurringRateSection
         hourlyRate={hourlyRate}
         rateCurrency={rateCurrency}
         saving={rateSaving}
         error={rateError}
         success={rateSuccess}
-        labels={{
-          title: t.rateSectionTitle,
-          hourlyRateLabel: t.hourlyRateLabel,
-          currencyLabel: t.currencyLabel,
-          saveLabel: t.rateSaveLabel,
-          clearLabel: t.rateClearLabel,
-          successMessage: t.rateSuccessMessage,
-          errorMessage: t.rateErrorMessage,
-        }}
+        labels={form.rate}
         onSave={onUpdateRate}
       />
       <ClassMeetingConfigsSection recurringScheduleId={recurringScheduleId} />

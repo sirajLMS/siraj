@@ -2,11 +2,44 @@ import { sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions/permission-management.repository";
 import { TimezoneRepository } from "@/backend/db/repo/shared/timezone.repository";
-import type { GroupWithPermissionIds, TimezoneEntity, TimezoneUpsertInput } from "@/backend/types";
+import type {
+  GroupWithPermissionIds,
+  PaginationArgs,
+  SettingsTimezonesPaginatedResult,
+  TimezoneEntity,
+  TimezoneUpsertInput,
+} from "@/backend/types";
+import { PaginationUtils } from "@/backend/utils/pagination.utils";
 
 export namespace ReferenceDataService {
   export async function listTimezones(): Promise<TimezoneEntity[]> {
     return TimezoneRepository.listAll();
+  }
+
+  export async function listTimezonesPaginated(
+    pagination: PaginationArgs | null
+  ): Promise<SettingsTimezonesPaginatedResult> {
+    const sorted = [...(await TimezoneRepository.listAll())].sort((left, right) =>
+      left.ianaId.localeCompare(right.ianaId)
+    );
+    const totalCount = sorted.length;
+
+    if (!pagination) {
+      return {
+        id: "settings-timezones",
+        rows: sorted,
+        totalCount,
+        pageInfo: null,
+      };
+    }
+
+    const rows = sorted.slice(pagination.offset, pagination.offset + pagination.perPage);
+    return {
+      id: "settings-timezones",
+      rows,
+      totalCount,
+      pageInfo: PaginationUtils.buildPageInfoFromArgs(pagination, rows.length, totalCount),
+    };
   }
 
   export async function findTimezonesByIanaIds(ianaIds: string[]): Promise<TimezoneEntity[]> {

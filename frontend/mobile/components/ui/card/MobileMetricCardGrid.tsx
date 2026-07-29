@@ -1,11 +1,11 @@
 "use client";
 
 import { Box, type SxProps, type Theme } from "@mui/material";
+import { useMetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelSources";
 import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMetricCard";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container/MobileHorizontalScrollRow";
-import { useAppTranslation } from "@/shared/locale";
 
 export interface MobileMetricCardGridProps {
   readonly metrics: readonly MetricItem[];
@@ -15,12 +15,12 @@ export interface MobileMetricCardGridProps {
 }
 
 export function MobileMetricCardGrid({ metrics, onMetricClick, selectedKey, sx }: MobileMetricCardGridProps) {
-  const translations = useAppTranslation();
+  const labelSources = useMetricLabelSources();
 
   return (
     <MobileHorizontalScrollRow sx={sx}>
       {metrics.map((metric, index) => {
-        const label = metric.label || resolveMetricLabel(metric.labelKey, translations);
+        const label = metric.label || resolveMetricLabel(metric.labelKey, labelSources);
         return (
           <Box
             key={metric.key}

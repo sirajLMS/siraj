@@ -3,7 +3,7 @@
 import { AudienceAutocomplete } from "@/frontend/common/components/ui/input/userSelect/AudienceAutocomplete";
 import type { ParentAutocompleteProps } from "@/frontend/common/components/ui/input/userSelect/types";
 import { useParentAutocomplete } from "@/frontend/common/hooks/userAutocomplete";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function ParentAutocomplete({
   value,
@@ -21,7 +21,7 @@ export function ParentAutocomplete({
   skip,
   excludeIds,
 }: ParentAutocompleteProps & { readonly skip?: boolean }) {
-  const t = useAppTranslation().uiTranslations.userSelect;
+  const t = useAppTranslation(Translation.Ui.UserSelect);
   const { options, loading, inputValue, onInputChange } = useParentAutocomplete({ value, skip });
 
   return (

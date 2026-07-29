@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { parentAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
 import type { ParentStudentsLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ParentStudentRow {
   readonly id: string;
@@ -25,7 +25,7 @@ export interface ParentStudentsViewModel {
 export type UseParentStudentsViewModelProps = Record<string, never>;
 
 export function useParentStudentsViewModel(_props: Readonly<UseParentStudentsViewModelProps>): ParentStudentsViewModel {
-  const labels = useAppTranslation().dashboardTranslations.parentStudents;
+  const labels = useAppTranslation(Translation.Dashboard.ParentStudents);
   const { data, loading, error } = useQuery(parentAssignedStudentsQueryDocument, {
     fetchPolicy: "cache-and-network",
   });

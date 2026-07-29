@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TeacherAdminEditForm } from "@/frontend/common/views/dashboard/profile/teacher/TeacherAdminEditForm";
 import { TeacherProfileEditForm } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileEditForm";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const ownTeacherData = {
   name: "Ahmed Hassan",
@@ -25,6 +26,14 @@ const adminTeacherData = {
   status: null,
 };
 
+function useTeacherProfileStoryLabels() {
+  const base = useAppTranslation(Translation.Profile.Base);
+  const teacher = useAppTranslation(Translation.Profile.Teacher);
+  const dashboard = useAppTranslation(Translation.Dashboard.TeacherProfile);
+  const errors = useAppTranslation(Translation.Errors);
+  return { base, teacher, dashboard, errors };
+}
+
 const meta: Meta<typeof TeacherProfileEditForm> = {
   title: "Profile/Teacher/TeacherProfileEditForms",
   decorators: [
@@ -40,9 +49,11 @@ export default meta;
 
 type Story = StoryObj<typeof TeacherProfileEditForm>;
 
-export const OwnEdit: Story = {
-  render: () => (
+function OwnEditStory() {
+  const labels = useTeacherProfileStoryLabels();
+  return (
     <TeacherProfileEditForm
+      labels={labels}
       teacherData={ownTeacherData}
       targetUserId="user-teacher-1"
       isSaving={false}
@@ -50,12 +61,14 @@ export const OwnEdit: Story = {
         await Promise.resolve();
       }}
     />
-  ),
-};
+  );
+}
 
-export const AdminEdit: Story = {
-  render: () => (
+function AdminEditStory() {
+  const labels = useTeacherProfileStoryLabels();
+  return (
     <TeacherAdminEditForm
+      labels={labels}
       teacherData={adminTeacherData}
       targetUserId="user-teacher-1"
       isSaving={false}
@@ -63,5 +76,13 @@ export const AdminEdit: Story = {
         await Promise.resolve();
       }}
     />
-  ),
+  );
+}
+
+export const OwnEdit: Story = {
+  render: () => <OwnEditStory />,
+};
+
+export const AdminEdit: Story = {
+  render: () => <AdminEditStory />,
 };

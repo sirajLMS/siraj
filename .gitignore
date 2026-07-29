@@ -76,7 +76,9 @@ storybook-static
 .next-test-*
 .graphql-test-ports
 
-.idea
+.idea/*
+!.idea/siraj.iml
+!.idea/modules.xml
 
 # Stakpak session files
 .stakpak/session*
@@ -96,3 +98,5 @@ skills-lock.json
 .agent-canvas
 
 scripts/run-test/feedback/feedback*.md
+
+.graphql-test-heartbeats/

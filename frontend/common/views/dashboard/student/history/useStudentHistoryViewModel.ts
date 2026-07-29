@@ -23,7 +23,11 @@ import {
   mapStudentHistorySessions,
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryMappers";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type StudentPortalHistoryLabels as StudentHistoryLabels, useAppTranslation } from "@/shared/locale";
+import {
+  type StudentPortalHistoryLabels as StudentHistoryLabels,
+  Translation,
+  useAppTranslation,
+} from "@/shared/locale";
 
 function useStudentHistoryLabels(t: StudentHistoryLabels): StudentHistoryLabels {
   return useMemo(
@@ -193,7 +197,7 @@ function useDerivedSessionData(
 }
 
 export function useStudentHistoryViewModel(_props: UseStudentHistoryViewModelProps): StudentHistoryViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentPortalHistory;
+  const t = useAppTranslation(Translation.Dashboard.StudentPortalHistory);
   const locale = useAppLocale();
   const labels = useStudentHistoryLabels(t);
 

@@ -69,7 +69,7 @@ async function insertClassInstances(
   const results: ClassInstanceEntity[] = [];
   for (let i = 0; i < allInstances.length; i += CHUNK_SIZE) {
     const chunk = allInstances.slice(i, i + CHUNK_SIZE);
-    const inserted = await ClassSessionService.upsertManyClassInstances(chunk, {
+    const inserted = await ClassSessionService.upsertManyClassInstancesForSeed(chunk, {
       chunkSize: CHUNK_SIZE,
       updatedAt: now,
     });

@@ -4,7 +4,6 @@ import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { OverridesUserSidebarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledSidebarContainer = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -62,8 +61,8 @@ const StyledGroupName = styled(Typography)({
   fontWeight: 500,
 });
 
-export function OverridesUserSidebarMobile({ user, userGroups }: Readonly<OverridesUserSidebarProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+export function OverridesUserSidebarMobile({ labels, user, userGroups }: Readonly<OverridesUserSidebarProps>) {
+  const t = labels;
 
   return (
     <StyledSidebarContainer>

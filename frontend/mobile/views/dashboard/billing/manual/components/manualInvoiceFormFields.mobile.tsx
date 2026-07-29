@@ -14,7 +14,6 @@ import { ManualInvoiceFeeFieldMobile } from "@/frontend/mobile/views/dashboard/b
 import { MobileFieldCard } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceFormLayout.mobile";
 import { ManualInvoiceParentFieldMobile } from "@/frontend/mobile/views/dashboard/billing/manual/components/manualInvoiceParentField.mobile";
 import type { BillingManualLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
 
 function CurrencyField({
   control,
@@ -82,11 +81,11 @@ export function ManualInvoiceFormFieldsMobile({
   control,
   errors,
   labels,
+  profileLabels,
   selectedParentId,
   draftCurrency,
 }: Readonly<ManualInvoiceFormFieldsMobileProps>) {
-  const tProfile = useAppTranslation().profileTranslations.parent;
-  const currencyLabel = tProfile.fields.currency;
+  const currencyLabel = profileLabels.fields.currency;
   const watchedParentId = useWatch({ control, name: "parentId" });
   const parentIdForStudents = watchedParentId || selectedParentId;
 

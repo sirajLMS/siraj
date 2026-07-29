@@ -6,21 +6,20 @@ import type { Theme } from "@mui/material/styles";
 import { NotificationDrawerEmptyState } from "@/frontend/common/views/dashboard/components/navbar/notifications/emptyState";
 import { NotificationDrawerRow } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows";
 import type { NotificationDrawerProps } from "@/frontend/common/views/dashboard/components/navbar/notifications/types";
-import { useAppTranslation } from "@/shared/locale/client";
 
 function DrawerHeader({
   title,
   subtitle,
+  managePreferencesLabel,
   onClose,
   onManagePreferences,
 }: {
   readonly title: string;
   readonly subtitle: string;
+  readonly managePreferencesLabel: string;
   readonly onClose: () => void;
   readonly onManagePreferences: () => void;
 }) {
-  const t = useAppTranslation().notificationsTranslations;
-
   return (
     <Box
       sx={{
@@ -42,7 +41,7 @@ function DrawerHeader({
           {subtitle}
         </Typography>
       </Box>
-      <IconButton aria-label={t.managePreferences} onClick={onManagePreferences} size="small">
+      <IconButton aria-label={managePreferencesLabel} onClick={onManagePreferences} size="small">
         <SettingsOutlined />
       </IconButton>
       <IconButton aria-label={title} onClick={onClose} size="small">
@@ -53,9 +52,18 @@ function DrawerHeader({
 }
 
 export function NotificationDrawerMobile({ vm }: Readonly<NotificationDrawerProps>) {
-  const t = useAppTranslation().notificationsTranslations;
-  const tCore = useAppTranslation().dashboardTranslations.coreNotifications;
-  const { drawerOpen, closeDrawer, alerts, unreadCount, loading, error, markAllRead, handleManagePreferences } = vm;
+  const {
+    labels,
+    errorLoadingMessage,
+    drawerOpen,
+    closeDrawer,
+    alerts,
+    unreadCount,
+    loading,
+    error,
+    markAllRead,
+    handleManagePreferences,
+  } = vm;
 
   return (
     <Drawer
@@ -76,8 +84,9 @@ export function NotificationDrawerMobile({ vm }: Readonly<NotificationDrawerProp
     >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <DrawerHeader
-          title={t.drawerTitle}
-          subtitle={t.unreadCount(unreadCount)}
+          title={labels.drawerTitle}
+          subtitle={labels.unreadCount(unreadCount)}
+          managePreferencesLabel={labels.managePreferences}
           onClose={closeDrawer}
           onManagePreferences={handleManagePreferences}
         />
@@ -94,11 +103,13 @@ export function NotificationDrawerMobile({ vm }: Readonly<NotificationDrawerProp
               variant="body2"
               sx={{ color: (theme: Theme) => theme.palette.error.main, textAlign: "center", py: 4, px: 2 }}
             >
-              {tCore.errorLoading}
+              {errorLoadingMessage}
             </Typography>
           ) : null}
 
-          {!loading && !error && alerts.length === 0 ? <NotificationDrawerEmptyState /> : null}
+          {!loading && !error && alerts.length === 0 ? (
+            <NotificationDrawerEmptyState emptyMessage={labels.noNotifications} />
+          ) : null}
 
           {!loading && !error && alerts.length > 0 ? (
             <List disablePadding>
@@ -110,7 +121,7 @@ export function NotificationDrawerMobile({ vm }: Readonly<NotificationDrawerProp
         </Box>
 
         <Divider />
-        <Box sx={{ p: 2, pb: 3 }}>
+        <Box sx={{ p: 2 }}>
           <Button
             fullWidth
             variant="outlined"
@@ -120,7 +131,7 @@ export function NotificationDrawerMobile({ vm }: Readonly<NotificationDrawerProp
               void markAllRead();
             }}
           >
-            {t.markAllRead}
+            {labels.markAllRead}
           </Button>
         </Box>
       </Box>

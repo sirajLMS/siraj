@@ -1,8 +1,11 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
+
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
+import type { PermissionsLabels } from "@/shared/locale";
 
 export interface BasePermissionGroupListProps {
+  readonly labels: PermissionsLabels;
   readonly groups: readonly PermissionGroup[];
   readonly onViewGroup: (id: string) => void;
   readonly onEditGroup: (id: string) => void;

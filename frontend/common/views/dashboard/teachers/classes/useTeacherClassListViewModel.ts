@@ -6,7 +6,7 @@ import { teacherAssignedClassesQueryDocument } from "@/frontend/common/graphql/s
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useRouter } from "@/shared/i18n/navigation";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * TeacherClassList ViewModel.
@@ -92,7 +92,7 @@ export function isRowJoinable(row: TeacherClassRow): boolean {
 export function useTeacherClassListViewModel(
   _props: Readonly<UseTeacherClassListViewModelProps> = {}
 ): TeacherClassListViewModel {
-  const t = useAppTranslation().dashboardTranslations.teacherClassList;
+  const t = useAppTranslation(Translation.Dashboard.TeacherClassList);
   const locale = useAppLocale();
   const router = useRouter();
   const { data, loading, error } = useQuery(teacherAssignedClassesQueryDocument);

@@ -3,15 +3,18 @@
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import { Box, Typography } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { useAppTranslation } from "@/shared/locale";
+import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
+import type { ProfileFieldAccessLabels } from "@/shared/locale/types/profile";
 
 type ProfileRestrictedSectionProps = {
   readonly title?: string;
   readonly description?: string;
+  readonly labels?: ProfileFieldAccessLabels;
 };
 
-export function ProfileRestrictedSection({ title, description }: Readonly<ProfileRestrictedSectionProps>) {
-  const t = useAppTranslation().profileTranslations.base.fieldAccess;
+export function ProfileRestrictedSection({ title, description, labels }: Readonly<ProfileRestrictedSectionProps>) {
+  const fallbackLabels = useProfileSharedBaseLabels();
+  const t = labels ?? fallbackLabels.fieldAccess;
 
   return (
     <SectionPanel title={title ?? t.restrictedTitle}>

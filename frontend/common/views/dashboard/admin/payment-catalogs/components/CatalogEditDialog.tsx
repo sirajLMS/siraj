@@ -41,7 +41,6 @@ import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { logger } from "@/frontend/common/utils/logger";
 import type { CatalogEditDialogProps } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { EntityFormDialogActions } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
-import { useAppTranslation } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types";
 
 const FORM_ID = "payment-catalog-edit-form";
@@ -92,8 +91,8 @@ function resolveCurrency(code: string | null | undefined): CurrencyOption | null
   return getCurrencyOptions().find(option => option.code === code) ?? null;
 }
 
-export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonly<CatalogEditDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
+export function CatalogEditDialog({ labels, open, kind, row, onClose, onSaved }: Readonly<CatalogEditDialogProps>) {
+  const t = labels;
   const notifications = useNotifications();
   const isEdit = Boolean(row?.id);
 

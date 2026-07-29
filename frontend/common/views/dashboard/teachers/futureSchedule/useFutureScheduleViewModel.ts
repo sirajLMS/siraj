@@ -15,7 +15,8 @@ import type {
   ImportantNoteItem,
   SupportContactData,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale";
+import type { FutureScheduleLabelsBySection } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types/futureScheduleViewModel.types";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 /**
@@ -46,12 +47,7 @@ export interface FutureScheduleViewModel {
   // `useMutation(logTeacherSupportRequestMutationDocument)` +
   // `useNotifications()` per specs.md §3 N1 + N17 + §6.2).
   readonly onSupportContact: () => Promise<void>;
-  // NEW FOR PLAN v5: lifted labels consumed by the support-contact card so
-  // the tier view no longer calls `useAppTranslation` directly.
-  readonly supportContactLabels: {
-    readonly supportContact: string;
-    readonly contactAdmin: string;
-  };
+  readonly labelsBySection: FutureScheduleLabelsBySection;
 }
 
 export type UseFutureScheduleViewModelProps = {
@@ -60,9 +56,9 @@ export type UseFutureScheduleViewModelProps = {
 
 export function useFutureScheduleViewModel(props: Readonly<UseFutureScheduleViewModelProps>): FutureScheduleViewModel {
   const { teacherId } = props;
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
+  const t = useAppTranslation(Translation.Dashboard.TeacherFutureSchedule);
   const notifications = useNotifications();
-  useDocumentTitle(null, "dashboard.teacherFutureSchedule", "pageTitle");
+  useDocumentTitle(null, Translation.Dashboard.TeacherFutureSchedule, "pageTitle");
 
   const { data, loading, error, refetch } = useQuery(teacherFutureScheduleQueryDocument, {
     variables: { teacherId },
@@ -154,9 +150,12 @@ export function useFutureScheduleViewModel(props: Readonly<UseFutureScheduleView
     loading,
     error,
     onSupportContact: handleSupportContact,
-    supportContactLabels: {
-      supportContact: t.supportContact,
-      contactAdmin: t.contactAdmin,
+    labelsBySection: {
+      schedule: t,
+      supportContact: {
+        supportContact: t.supportContact,
+        contactAdmin: t.contactAdmin,
+      },
     },
   };
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { useAppTranslation } from "@/shared/locale/client";
-import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
+import { type DashboardNavigationLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * Resolves a nav `labelKey` (a `keyof DashboardNavigationLabels`) to its
@@ -12,7 +11,7 @@ import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/
  * directly via a typed `labels.nav.logout` etc. rather than via this helper.
  */
 export function useNavLabels(): (labelKey: keyof DashboardNavigationLabels) => string {
-  const labels = useAppTranslation().dashboardTranslations.coreNav;
+  const labels = useAppTranslation(Translation.Dashboard.CoreNav);
 
   return (labelKey: keyof DashboardNavigationLabels): string => {
     if (labelKey === "nav") {

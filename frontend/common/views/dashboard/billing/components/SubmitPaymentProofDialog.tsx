@@ -29,7 +29,7 @@ import {
   MAX_PAYMENT_PROOF_FILE_SIZE_BYTES,
   PAYMENT_PROOF_ACCEPT,
 } from "@/shared/constants/billing/payment-proof";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 import { extToMime } from "@/shared/utils/storage.utils";
 
@@ -278,8 +278,8 @@ export function SubmitPaymentProofDialog({
   onSuccess,
   onError,
 }: SubmitPaymentProofDialogProps): React.ReactNode {
-  const t = useAppTranslation().dashboardTranslations.billing.submitProofDialog;
-  const tErrors = useAppTranslation().errorsTranslations;
+  const t = useAppTranslation(Translation.Dashboard.Billing).submitProofDialog;
+  const tErrors = useAppTranslation(Translation.Errors);
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);

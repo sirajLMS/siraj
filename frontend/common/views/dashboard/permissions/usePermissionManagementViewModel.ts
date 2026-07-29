@@ -34,9 +34,11 @@ import {
   useSingleGroupState,
 } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
 import { usePermissionManagementData } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementData";
+import { type PermissionsLabels, Translation, useAppTranslation } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types";
 
 export interface PermissionManagementViewModel {
+  readonly labels: PermissionsLabels;
   readonly permissions: readonly Permission[];
   readonly groups: readonly PermissionGroup[];
   readonly overrides: readonly UserOverride[];
@@ -157,6 +159,7 @@ function resolveActiveGroup(
  * call `useState`/`useQuery`/`useForm`/`use*State` directly.
  */
 export function usePermissionManagementViewModel(): PermissionManagementViewModel {
+  const labels = useAppTranslation(Translation.Dashboard.Permissions);
   // Store-backed state (reads) — single selector-per-field subscriptions.
   const error = usePermissionManagementStore(s => s.error);
   const isLoading = usePermissionManagementStore(s => s.isLoading);
@@ -281,6 +284,7 @@ export function usePermissionManagementViewModel(): PermissionManagementViewMode
   const groupRowMenuAnchor = useRowMenuAnchor();
 
   return {
+    labels,
     permissions,
     groups,
     overrides,

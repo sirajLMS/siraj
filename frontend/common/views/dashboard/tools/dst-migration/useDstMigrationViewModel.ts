@@ -13,7 +13,8 @@ import {
   MigrationStatus,
   type UpdatedSession,
 } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 function detectDstOffsetMinutes(): number | null {
   const now = new Date();
@@ -27,6 +28,7 @@ function detectDstOffsetMinutes(): number | null {
 }
 
 export interface DstMigrationViewModel {
+  readonly labels: DstMigrationLabels;
   readonly metrics: DstMigrationMetrics;
   readonly updatedSessions: readonly UpdatedSession[];
   readonly conflictGroups: readonly ConflictGroup[];
@@ -41,7 +43,7 @@ export type UseDstMigrationViewModelProps = Record<string, never>;
 
 export function useDstMigrationViewModel(): DstMigrationViewModel {
   const notifications = useNotifications();
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
+  const labels = useAppTranslation(Translation.Dashboard.AdminDstMigration);
   const [executeDstUpdate, { loading, data }] = useMutation(executeDstBulkUpdateMutationDocument);
 
   const report = data?.executeDstBulkUpdate;
@@ -105,7 +107,7 @@ export function useDstMigrationViewModel(): DstMigrationViewModel {
     try {
       const offsetMinutes = detectDstOffsetMinutes();
       if (offsetMinutes === null) {
-        notifications.show(t.errors.noDstTransitionDetected, {
+        notifications.show(labels.errors.noDstTransitionDetected, {
           severity: "warning",
           autoHideDuration: 5000,
         });
@@ -117,13 +119,13 @@ export function useDstMigrationViewModel(): DstMigrationViewModel {
           description: `DST adjustment of ${offsetMinutes} minutes executed by admin`,
         },
       });
-      notifications.show(t.actions.successMessage, {
+      notifications.show(labels.actions.successMessage, {
         severity: "success",
         autoHideDuration: 5000,
       });
     } catch (error) {
       logger.error("DST bulk update failed", { error });
-      notifications.show(t.errors.mutationFailed, {
+      notifications.show(labels.errors.mutationFailed, {
         severity: "error",
         autoHideDuration: 5000,
       });
@@ -131,6 +133,7 @@ export function useDstMigrationViewModel(): DstMigrationViewModel {
   };
 
   return {
+    labels,
     metrics,
     updatedSessions,
     conflictGroups,

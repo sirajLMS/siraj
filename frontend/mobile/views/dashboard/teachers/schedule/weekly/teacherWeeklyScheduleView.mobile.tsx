@@ -19,7 +19,6 @@ import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import MobileScheduleList from "@/frontend/mobile/views/dashboard/teachers/schedule/weekly/mobileScheduleList.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 export function TeacherWeeklyScheduleViewMobile({
   schedule,
@@ -30,8 +29,10 @@ export function TeacherWeeklyScheduleViewMobile({
   hasScheduleClearWeekly,
   hasScheduleViewWorkload,
   hasScheduleDeleteClass,
+  labels,
+  meetingJoinLabels,
 }: Readonly<TeacherWeeklyScheduleViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
+  const t = labels;
   const clearDialogOpen = useWeeklyScheduleStore(state => state.clearDialogOpen);
   const setClearDialogOpen = useWeeklyScheduleStore(state => state.setClearDialogOpen);
 
@@ -103,6 +104,8 @@ export function TeacherWeeklyScheduleViewMobile({
           classes={schedule.classes}
           onRemoveClass={onRemoveClass}
           hasScheduleDeleteClass={hasScheduleDeleteClass}
+          labels={labels}
+          meetingJoinLabels={meetingJoinLabels}
         />
       </MobileSectionPanel>
 

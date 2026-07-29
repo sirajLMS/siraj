@@ -6,11 +6,15 @@ import { SearchScheduleView } from "@/frontend/common/views/dashboard/search-sch
 import type { UseSearchScheduleViewModelProps } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
 import { useSearchScheduleViewModel } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
 
-export function SearchScheduleContainer(props: Readonly<UseSearchScheduleViewModelProps>) {
+function SearchScheduleAuthorizedContent(props: Readonly<UseSearchScheduleViewModelProps>) {
   const viewModel = useSearchScheduleViewModel(props);
+  return <SearchScheduleView {...viewModel} />;
+}
+
+export function SearchScheduleContainer(props: Readonly<UseSearchScheduleViewModelProps>) {
   return (
     <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
-      <SearchScheduleView {...viewModel} />
+      <SearchScheduleAuthorizedContent {...props} />
     </RequirePermission>
   );
 }

@@ -12,10 +12,11 @@
       ".storybook/**",
       "!frontend/common/graphql/generated",
       "!**/.ai",
-      "!.next",
-      "!.next-test",
-      "!public",
-      "!.agents"
+      "!**/.agents",
+      "!!**/.next",
+      "!!**/.next-dev",
+      "!!**/.next-test*",
+      "!public"
     ]
   },
   "formatter": {

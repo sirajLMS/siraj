@@ -9,19 +9,17 @@ import { ConflictErrorsPanelMobile } from "@/frontend/mobile/views/dashboard/too
 import { DstMigrationMetricsRowMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/dstMigrationMetricsRow.mobile";
 import { UpdatedSessionsSectionMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsSection.mobile";
 import { UpdateSchedulesButtonMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updateSchedulesButton.mobile";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 type Props = Pick<
   DstMigrationViewModel,
-  "metrics" | "updatedSessions" | "conflictGroups" | "migrationStatus" | "onUpdate" | "dstOffsetDetected"
+  "labels" | "metrics" | "updatedSessions" | "conflictGroups" | "migrationStatus" | "onUpdate" | "dstOffsetDetected"
 >;
 
-function MobileInactiveNote() {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
+function MobileInactiveNote({ labels }: { readonly labels: DstMigrationLabels }) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <MobileSectionPanel title={t.sections.inactiveVerified} />
+      <MobileSectionPanel title={labels.sections.inactiveVerified} />
       <Box
         sx={theme => ({
           p: 2,
@@ -34,26 +32,23 @@ function MobileInactiveNote() {
       >
         <ReportProblemOutlined sx={theme => ({ color: theme.palette.warning.main })} />
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t.checkedEmpty.inactiveNote}
+          {labels.checkedEmpty.inactiveNote}
         </Typography>
       </Box>
     </Box>
   );
 }
 
-function MobileConflictsHeader() {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
-  return <MobileSectionPanel title={t.sections.conflictsDetected} />;
+function MobileConflictsHeader({ labels }: { readonly labels: DstMigrationLabels }) {
+  return <MobileSectionPanel title={labels.sections.conflictsDetected} />;
 }
 
-function MobileUpdatedHeader() {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
-  return <MobileSectionPanel title={t.sections.successfullyUpdated} />;
+function MobileUpdatedHeader({ labels }: { readonly labels: DstMigrationLabels }) {
+  return <MobileSectionPanel title={labels.sections.successfullyUpdated} />;
 }
 
 export function DstMigrationViewMobile({
+  labels,
   metrics,
   updatedSessions,
   conflictGroups,
@@ -61,14 +56,13 @@ export function DstMigrationViewMobile({
   onUpdate,
   dstOffsetDetected,
 }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
+      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <Box sx={{ mb: 3 }}>
         <UpdateSchedulesButtonMobile
+          labels={labels}
           status={migrationStatus}
           onUpdate={onUpdate}
           dstOffsetDetected={dstOffsetDetected}
@@ -76,19 +70,23 @@ export function DstMigrationViewMobile({
       </Box>
 
       <Box sx={{ mb: 4 }}>
-        <DstMigrationMetricsRowMobile metrics={metrics} />
+        <DstMigrationMetricsRowMobile labels={labels} metrics={metrics} />
       </Box>
 
       <MobileContentStack>
         <Box>
-          <MobileConflictsHeader />
-          <ConflictErrorsPanelMobile conflictGroups={conflictGroups} />
+          <MobileConflictsHeader labels={labels} />
+          <ConflictErrorsPanelMobile labels={labels} conflictGroups={conflictGroups} />
         </Box>
         <Box>
-          <MobileUpdatedHeader />
-          <UpdatedSessionsSectionMobile sessions={updatedSessions} successfulCount={metrics.successful} />
+          <MobileUpdatedHeader labels={labels} />
+          <UpdatedSessionsSectionMobile
+            labels={labels}
+            sessions={updatedSessions}
+            successfulCount={metrics.successful}
+          />
         </Box>
-        <MobileInactiveNote />
+        <MobileInactiveNote labels={labels} />
       </MobileContentStack>
     </MobilePageContainer>
   );

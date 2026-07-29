@@ -21,7 +21,7 @@ import {
   type MeetingProviderFormData,
   meetingProviderFormSchema,
 } from "@/frontend/common/views/dashboard/admin/meeting-providers/schemas/meetingProviderFormSchema";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const defaultFormValues: MeetingProviderFormData = {
   slug: "",
@@ -42,7 +42,7 @@ export function useMeetingProviderFormViewModel({
   providerId,
 }: Readonly<UseMeetingProviderFormViewModelProps>): MeetingProviderFormViewProps {
   const router = useRouter();
-  const t = useAppTranslation().dashboardTranslations.meetingProviders;
+  const t = useAppTranslation(Translation.Dashboard.MeetingProviders);
   const notifications = useNotifications();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 

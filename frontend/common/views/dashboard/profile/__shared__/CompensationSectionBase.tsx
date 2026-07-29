@@ -12,7 +12,9 @@ import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
-import { type ProfileStaffLabels, type ProfileTeacherLabels, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ProfileLabels, ProfileStaffLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
 
 export interface CompensationViewData {
   readonly hourlyRate?: string | null;
@@ -84,14 +86,20 @@ export function CompensationViewSection({
   profileData,
   subjectUserId,
   translations,
+  baseLabels,
+  errorLabels,
 }: {
   readonly profileData: CompensationViewData;
   readonly subjectUserId?: string;
   readonly translations: CompensationTranslations;
+  readonly baseLabels?: Pick<ProfileLabels, "convertedAmount" | "convertedTotalApprox">;
+  readonly errorLabels?: ErrorsLabels;
 }) {
   const t = translations;
-  const tProfile = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
+  const fallbackBase = useAppTranslation(Translation.Profile.Base);
+  const fallbackErrors = useAppTranslation(Translation.Errors);
+  const resolvedBaseLabels = baseLabels ?? fallbackBase;
+  const resolvedErrorLabels = errorLabels ?? fallbackErrors;
   const locale = useAppLocale();
 
   const lockedAmount = profileData.hourlyRate ?? "0";
@@ -110,11 +118,11 @@ export function CompensationViewSection({
     locale,
     buildFxDisplayMessages(
       {
-        convertedAmount: tProfile.convertedAmount,
+        convertedAmount: resolvedBaseLabels.convertedAmount,
       },
-      tErrors,
+      resolvedErrorLabels,
       {
-        convertedTotalApprox: tProfile.convertedTotalApprox,
+        convertedTotalApprox: resolvedBaseLabels.convertedTotalApprox,
       }
     )
   );

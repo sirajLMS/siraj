@@ -7,7 +7,7 @@ import type { LocaleAdornmentSwitchProps } from "@/frontend/common/components/ui
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/common/lib/locale";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import type { AppLocale } from "@/shared/i18n/routing";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 type DesktopLocaleListProps = {
   readonly activeLocale: AppLocale;
@@ -32,7 +32,7 @@ const DesktopLanguageOption = styled(Box, {
 }));
 
 function DesktopLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<DesktopLocaleListProps>) {
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const uiLocale = useAppLocale();
 
   return (
@@ -80,7 +80,7 @@ export function LocaleAdornmentSwitchDesktop({
   successSwitch = false,
   ariaLabel,
 }: LocaleAdornmentSwitchProps) {
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const uiLocale = useAppLocale();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 

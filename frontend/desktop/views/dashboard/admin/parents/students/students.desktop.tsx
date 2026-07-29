@@ -13,7 +13,7 @@ import {
 import { StudentDirectoryDataGrid } from "@/frontend/desktop/views/dashboard/admin/parents/students/components/studentDirectoryDataGrid.desktop";
 
 export function StudentsDesktopView({
-  labels,
+  labelsBySection,
   metrics,
   rows,
   totalStudents,
@@ -29,47 +29,32 @@ export function StudentsDesktopView({
   // instead of a `RequirePermission` wrapper.
   canStudentsCreate,
 }: Readonly<StudentsViewModel>) {
-  const tableLabels = {
-    index: labels.index,
-    student: labels.student,
-    email: labels.email,
-    status: labels.status,
-    hoursPerWeek: labels.hoursPerWeek,
-    classesLeft: labels.classesLeft,
-    actions: labels.actions,
-    showingOf: labels.showingOf,
-    previous: labels.previous,
-    next: labels.next,
-    viewProfile: labels.viewProfile,
-    viewHistory: labels.viewHistory,
-    noEntries: labels.noEntries,
-    statusLabels: labels.statusLabels,
-  };
+  const { shell, actions, columns } = labelsBySection;
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+      <DesktopPageHeader title={shell.pageTitle} subtitle={shell.pageSubtitle} />
 
       <DesktopMetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
 
       <DesktopSectionPanel
-        title={labels.globalRecord}
+        title={shell.globalRecord}
         actions={
           <>
             {canStudentsCreate ? (
               <DesktopPrimaryPageAction id="students-add-btn" startIcon={<AddOutlined />} onClick={onAddStudent}>
-                {labels.addStudent}
+                {actions.addStudent}
               </DesktopPrimaryPageAction>
             ) : null}
             <DesktopFilterButton id="students-filters-btn" startIcon={<FilterListOutlined />} onClick={onFilterClick}>
-              {labels.filters}
+              {labelsBySection.filters.filters}
             </DesktopFilterButton>
           </>
         }
       >
         <StudentDirectoryDataGrid
           rows={rows}
-          labels={tableLabels}
+          labels={columns}
           page={page}
           pageSize={pageSize}
           totalCount={totalStudents}

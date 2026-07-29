@@ -19,7 +19,8 @@ import type {
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { mapAdminComplaintRows } from "@/frontend/common/views/dashboard/complaints/utils/mapAdminComplaintRows";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale/client";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { ComplaintsLabels } from "@/shared/locale/types/dashboard/complaints";
 
 export interface AdminComplaintsViewModel {
   readonly labels: ComplaintsAdminLabels;
@@ -51,16 +52,14 @@ export interface AdminComplaintsViewModel {
 
 export type UseAdminComplaintsViewModelProps = Record<string, never>;
 
-function buildLabels(
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["complaints"]
-): ComplaintsAdminLabels {
+function buildLabels(t: ComplaintsLabels): ComplaintsAdminLabels {
   return buildComplaintsLabels(t).admin;
 }
 
 export function useAdminComplaintsViewModel(
   _props: Readonly<UseAdminComplaintsViewModelProps>
 ): AdminComplaintsViewModel {
-  const complaintsT = useAppTranslation().dashboardTranslations.complaints;
+  const complaintsT = useAppTranslation(Translation.Dashboard.Complaints);
   const labels = useMemo(() => buildLabels(complaintsT), [complaintsT]);
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManage = hasPermission(AppPermission.ComplaintsRespond);

@@ -23,8 +23,7 @@ import type {
   WorkshopPromo,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { useRouter } from "@/shared/i18n/navigation";
-import type { ParentDashboardLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { type ParentDashboardLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface SchedulePagination {
   readonly page: number;
@@ -268,7 +267,7 @@ function usePaginationArgs(page: number, pageSize: number) {
 }
 
 export function useParentDashboardViewModel(_props: UseParentDashboardViewModelProps): ParentDashboardViewModel {
-  const t = useAppTranslation().dashboardTranslations.coreParentDashboard;
+  const t = useAppTranslation(Translation.Dashboard.CoreParentDashboard);
   const router = useRouter();
   const userName = useUserStore(state => state.name);
   const page = useParentDashboardStore(state => state.page);

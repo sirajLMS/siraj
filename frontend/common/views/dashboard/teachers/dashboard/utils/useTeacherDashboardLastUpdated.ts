@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherDashboardLastUpdatedLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
-export function useTeacherDashboardLastUpdated(dataArrivedAt: number | null): string {
-  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
-  const updatedJustNow = t.updatedJustNow as string;
-  const updatedMinutesAgo = t.updatedMinutesAgo as (minutes: number) => string;
+export function useTeacherDashboardLastUpdated(
+  dataArrivedAt: number | null,
+  labels: TeacherDashboardLastUpdatedLabels
+): string {
+  const { updatedJustNow, updatedMinutesAgo } = labels;
   const [lastUpdated, setLastUpdated] = useState(updatedJustNow);
 
   useEffect(() => {

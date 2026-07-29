@@ -10,7 +10,6 @@ import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/p
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { OverrideEditControlsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEditControls.desktop";
 import { OverrideEffectiveDisplayDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEffectiveDisplay.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 export type { OverrideState };
 
@@ -20,7 +19,6 @@ const StyledPermissionKeyContainer = styled(Box)({
 });
 
 const StyledPermissionKeyText = styled(Typography)(({ theme }) => ({
-  fontFamily: "JetBrains Mono, monospace",
   fontSize: theme.typography.labelMd.fontSize,
   fontWeight: 600,
   color: theme.palette.primary.main,
@@ -38,6 +36,7 @@ const StyledBaselineText = styled(Typography, {
 }));
 
 export function OverridesDataGridDesktop({
+  labels,
   filteredPermissions,
   userGroups,
   localOverrides,
@@ -45,7 +44,7 @@ export function OverridesDataGridDesktop({
   isDialogLoading,
   handleOverrideChange,
 }: Readonly<OverridesDataGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const columns = useMemo<GridColDef<Permission>[]>(() => {
@@ -119,11 +118,18 @@ export function OverridesDataGridDesktop({
           }
 
           if (mode === "effective") {
-            return <OverrideEffectiveDisplayDesktop effectiveState={effectiveState} overrideState={overrideState} />;
+            return (
+              <OverrideEffectiveDisplayDesktop
+                labels={labels}
+                effectiveState={effectiveState}
+                overrideState={overrideState}
+              />
+            );
           }
 
           return (
             <OverrideEditControlsDesktop
+              labels={labels}
               permissionId={permission.id}
               overrideState={overrideState}
               isDialogLoading={isDialogLoading}
@@ -133,7 +139,7 @@ export function OverridesDataGridDesktop({
         },
       },
     ];
-  }, [t, userGroups, localOverrides, mode, isDialogLoading, handleOverrideChange]);
+  }, [t, userGroups, localOverrides, mode, isDialogLoading, handleOverrideChange, labels]);
 
   return (
     <DesktopAppDataGrid<Permission>

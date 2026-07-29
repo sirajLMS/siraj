@@ -2,15 +2,13 @@
 
 import { AdminPanelSettings, Badge, FamilyRestroom, Group as GroupIcon, School } from "@mui/icons-material";
 import { Box, Button, type ButtonProps, Divider, styled, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale";
+import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
-// Main container for the demo fast login section
 const StyledContainer = styled(Box)({
   display: "flex",
   flexDirection: "column",
 });
 
-// Fast login button with hover effects and transitions
 const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   paddingTop: theme.spacing(1),
   paddingBottom: theme.spacing(1),
@@ -37,22 +35,21 @@ const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   },
 }));
 
-// Divider label text with secondary color and spacing
 const StyledDividerLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontWeight: 500,
   letterSpacing: "0.5px",
 }));
 
-// Grid container for fast login buttons
 const StyledButtonGrid = styled(Box)({
   display: "grid",
   gridTemplateColumns: "repeat(2, 1fr)",
 });
 
 export interface DemoFastLoginProps {
-  groups: { slug: string; name: string; description: string | null }[];
-  onFastLogin: (groupSlug: string) => void;
+  readonly labels: AuthLoginLabels;
+  readonly groups: { slug: string; name: string; description: string | null }[];
+  readonly onFastLogin: (groupSlug: string) => void;
 }
 
 const getGroupIcon = (slug: string) => {
@@ -63,16 +60,14 @@ const getGroupIcon = (slug: string) => {
   return <GroupIcon />;
 };
 
-export function DemoFastLogin({ groups, onFastLogin }: Readonly<DemoFastLoginProps>) {
-  const t = useAppTranslation().authTranslations.login;
-
+export function DemoFastLogin({ labels, groups, onFastLogin }: Readonly<DemoFastLoginProps>) {
   if (!groups || groups.length === 0) return null;
 
   return (
     <StyledContainer sx={{ mt: 3, mb: 1 }}>
       <Divider sx={{ mb: 2 }}>
         <StyledDividerLabel variant="bodyMd" sx={{ px: 1 }}>
-          {t.orQuickLogin}
+          {labels.orQuickLogin}
         </StyledDividerLabel>
       </Divider>
 

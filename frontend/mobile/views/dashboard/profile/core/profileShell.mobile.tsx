@@ -8,10 +8,11 @@ import { ProfileHeader } from "@/frontend/common/views/dashboard/profile/core/Pr
 import { ProfileSkeleton } from "@/frontend/common/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
 import type { ProfileShellProps } from "@/frontend/common/views/dashboard/profile/core/profileShellTypes";
+import type { ProfileShellViewModel } from "@/frontend/common/views/dashboard/profile/core/types/profileShell.types";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale";
+import type { ProfileLabels } from "@/shared/locale/types/profile";
 
-export type ProfileShellMobileViewProps = ProfileShellProps;
+export type ProfileShellMobileViewProps = ProfileShellViewModel;
 
 function renderBody(
   {
@@ -30,7 +31,7 @@ function renderBody(
     roleLabel,
     avatarUrl,
   }: Readonly<ProfileShellProps>,
-  t: ReturnType<typeof useAppTranslation>["profileTranslations"]["base"]
+  t: ProfileLabels
 ): ReactNode {
   const showTabs = mode === ProfileMode.View && currentTab && onTabChange;
   const isEditMode = mode === ProfileMode.Edit;
@@ -112,9 +113,8 @@ function renderBody(
   );
 }
 
-export function ProfileShellMobileView(props: Readonly<ProfileShellMobileViewProps>) {
-  const t = useAppTranslation().profileTranslations.base;
-
+export function ProfileShellMobileView({ labels, ...shellProps }: Readonly<ProfileShellMobileViewProps>) {
+  const props: ProfileShellProps = shellProps;
   return (
     <MobilePageContainer sx={{ px: { xs: 2 } }}>
       <Box
@@ -125,7 +125,7 @@ export function ProfileShellMobileView(props: Readonly<ProfileShellMobileViewPro
           width: "100%",
         })}
       >
-        {renderBody(props, t)}
+        {renderBody(props, labels)}
       </Box>
     </MobilePageContainer>
   );

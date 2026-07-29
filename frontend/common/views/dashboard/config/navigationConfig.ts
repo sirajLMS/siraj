@@ -1,35 +1,3 @@
-import {
-  AccountBalanceWalletOutlined,
-  AssessmentOutlined,
-  BadgeOutlined,
-  CalendarTodayOutlined,
-  CategoryOutlined,
-  CurrencyExchangeOutlined,
-  DashboardOutlined,
-  DescriptionOutlined,
-  Diversity1Outlined,
-  EventRepeatOutlined,
-  FolderOpenOutlined,
-  GroupOutlined,
-  LightbulbOutlined,
-  LogoutOutlined,
-  MenuBookOutlined,
-  NoteAddOutlined,
-  NotificationsActiveOutlined,
-  PaymentsOutlined,
-  PersonOutlineOutlined,
-  RateReviewOutlined,
-  ReceiptLongOutlined,
-  ReportProblemOutlined,
-  SchoolOutlined,
-  SearchOutlined,
-  SecurityOutlined,
-  ShareOutlined,
-  ShieldOutlined,
-  TimelineOutlined,
-  UpdateOutlined,
-  VideocamOutlined,
-} from "@mui/icons-material";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
@@ -42,7 +10,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "home",
     labelKey: "home",
-    icon: DashboardOutlined,
+    iconKey: "dashboard",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.dashboard,
@@ -50,7 +18,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "today-classes",
     labelKey: "todayClasses",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDashboard,
@@ -59,7 +27,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "regular-schedule",
     labelKey: "regularSchedule",
-    icon: EventRepeatOutlined,
+    iconKey: "eventRepeat",
     href: "/schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
@@ -68,7 +36,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "your-students",
     labelKey: "yourStudents",
-    icon: GroupOutlined,
+    iconKey: "group",
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherStudents,
@@ -77,7 +45,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "teacher-profile",
     labelKey: "yourProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
@@ -94,7 +62,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "teacher-rules",
     labelKey: "teacherRules",
-    icon: DescriptionOutlined,
+    iconKey: "description",
     href: "/teachers/rules",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherRules,
@@ -103,7 +71,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-today-classes",
     labelKey: "todayClasses",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.parentDashboard,
@@ -112,7 +80,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-your-students",
     labelKey: "yourStudents",
-    icon: GroupOutlined,
+    iconKey: "group",
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.parentStudents,
@@ -121,7 +89,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-suggest",
     labelKey: "suggest",
-    icon: LightbulbOutlined,
+    iconKey: "lightbulb",
     href: "/suggestions",
     section: "main",
     permission: PAGE_PERMISSIONS.parentSuggest,
@@ -130,7 +98,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-rules",
     labelKey: "parentRules",
-    icon: DescriptionOutlined,
+    iconKey: "description",
     href: "/parents/rules",
     section: "main",
     permission: PAGE_PERMISSIONS.parentRules,
@@ -139,7 +107,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-profile",
     labelKey: "yourProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.parentProfile,
@@ -148,7 +116,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-social",
     labelKey: "socialMedia",
-    icon: ShareOutlined,
+    iconKey: "share",
     href: "/social",
     section: "footer",
     permission: PAGE_PERMISSIONS.parentOwnProfile,
@@ -157,7 +125,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-today-classes",
     labelKey: "studentTodayClasses",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.studentSelfDashboard,
@@ -166,7 +134,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-schedule",
     labelKey: "studentSchedule",
-    icon: EventRepeatOutlined,
+    iconKey: "eventRepeat",
     href: "/students/me/history",
     section: "main",
     permission: PAGE_PERMISSIONS.studentOwnHistory,
@@ -175,7 +143,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-credits",
     labelKey: "studentCredits",
-    icon: AccountBalanceWalletOutlined,
+    iconKey: "accountBalanceWallet",
     href: "/students/me/credits",
     section: "main",
     permission: PAGE_PERMISSIONS.studentCredits,
@@ -184,7 +152,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-profile",
     labelKey: "studentProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.studentSelfProfile,
@@ -193,7 +161,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "supervisor-home",
     labelKey: "supervisorHome",
-    icon: DashboardOutlined,
+    iconKey: "dashboard",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.supervisorDashboard,
@@ -202,7 +170,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "pending-reviews",
     labelKey: "pendingReviews",
-    icon: RateReviewOutlined,
+    iconKey: "rateReview",
     href: "/lesson-reports",
     section: "main",
     permission: PAGE_PERMISSIONS.lessonReportsReview,
@@ -211,7 +179,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "teacher-dues",
     labelKey: "teacherDues",
-    icon: PaymentsOutlined,
+    iconKey: "payments",
     href: "/teacher-dues",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDuesView,
@@ -220,7 +188,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "monthly-reports",
     labelKey: "monthlyReports",
-    icon: AssessmentOutlined,
+    iconKey: "assessment",
     href: "/monthly-reports",
     section: "main",
     permission: PAGE_PERMISSIONS.monthlyReportsView,
@@ -229,7 +197,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "supervisor-profile",
     labelKey: "supervisorProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.profile,
@@ -238,7 +206,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "search-schedule",
     labelKey: "scheduleSearch",
-    icon: SearchOutlined,
+    iconKey: "search",
     href: "/search-schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.searchSchedule,
@@ -246,7 +214,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "schedule-tracking",
     labelKey: "scheduleTracking",
-    icon: EventRepeatOutlined,
+    iconKey: "eventRepeat",
     href: "/schedule/tracking/reschedule",
     section: "main",
     permission: PAGE_PERMISSIONS.scheduleTracking,
@@ -254,7 +222,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "status-tracking",
     labelKey: "statusTracking",
-    icon: TimelineOutlined,
+    iconKey: "timeline",
     href: "/schedule/tracking/status",
     section: "main",
     permission: PAGE_PERMISSIONS.statusTracking,
@@ -262,7 +230,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "schedule-alerts",
     labelKey: "scheduleAlerts",
-    icon: NotificationsActiveOutlined,
+    iconKey: "notificationsActive",
     href: "/schedule/alerts",
     section: "main",
     permission: PAGE_PERMISSIONS.scheduleAlerts,
@@ -270,7 +238,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "teachers",
     labelKey: "teachers",
-    icon: SchoolOutlined,
+    iconKey: "school",
     href: "/teachers",
     section: "main",
     permission: PAGE_PERMISSIONS.teachers,
@@ -278,7 +246,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parents",
     labelKey: "parents",
-    icon: Diversity1Outlined,
+    iconKey: "diversity1",
     href: "/parents",
     section: "main",
     permission: PAGE_PERMISSIONS.parents,
@@ -286,7 +254,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "students",
     labelKey: "students",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.students,
@@ -294,7 +262,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "staff",
     labelKey: "staff",
-    icon: BadgeOutlined,
+    iconKey: "badge",
     href: "/staff",
     section: "main",
     permission: PAGE_PERMISSIONS.staff,
@@ -302,7 +270,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "resources",
     labelKey: "resources",
-    icon: FolderOpenOutlined,
+    iconKey: "folderOpen",
     href: "/resources",
     section: "main",
     permission: PAGE_PERMISSIONS.resources,
@@ -310,7 +278,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "subjects",
     labelKey: "subjects",
-    icon: CategoryOutlined,
+    iconKey: "category",
     href: "/subjects",
     section: "main",
     permission: PAGE_PERMISSIONS.subjects,
@@ -318,7 +286,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "books-and-bags",
     labelKey: "booksAndBags",
-    icon: MenuBookOutlined,
+    iconKey: "menuBook",
     href: "/resources/books-and-bags",
     section: "main",
     permission: PAGE_PERMISSIONS.booksAndBags,
@@ -326,7 +294,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "reports",
     labelKey: "reports",
-    icon: AssessmentOutlined,
+    iconKey: "assessment",
     href: "/reports",
     section: "main",
     permission: PAGE_PERMISSIONS.reports,
@@ -334,7 +302,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "billing-admin",
     labelKey: "billingAdmin",
-    icon: PaymentsOutlined,
+    iconKey: "payments",
     href: "/billing",
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
@@ -342,7 +310,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "exchange-rates",
     labelKey: "exchangeRates",
-    icon: TimelineOutlined,
+    iconKey: "timeline",
     href: "/billing/exchange-rates",
     section: "main",
     permission: PAGE_PERMISSIONS.exchangeRates,
@@ -350,7 +318,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "supported-currencies",
     labelKey: "supportedCurrencies",
-    icon: CurrencyExchangeOutlined,
+    iconKey: "currencyExchange",
     href: "/billing/currencies",
     section: "main",
     permission: PAGE_PERMISSIONS.supportedCurrencies,
@@ -358,7 +326,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "currency-hedges",
     labelKey: "currencyHedges",
-    icon: ShieldOutlined,
+    iconKey: "shield",
     href: "/billing/currency-hedges",
     section: "main",
     permission: PAGE_PERMISSIONS.currencyHedges,
@@ -366,7 +334,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "billing-manual",
     labelKey: "billingManual",
-    icon: NoteAddOutlined,
+    iconKey: "noteAdd",
     href: "/billing/manual",
     section: "main",
     permission: PAGE_PERMISSIONS.billingManual,
@@ -374,7 +342,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",
-    icon: AccountBalanceWalletOutlined,
+    iconKey: "accountBalanceWallet",
     href: "/payment-catalogs",
     section: "main",
     permission: PAGE_PERMISSIONS.paymentCatalogs,
@@ -382,7 +350,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "meeting-providers",
     labelKey: "meetingProviders",
-    icon: VideocamOutlined,
+    iconKey: "videocam",
     href: "/meeting-providers",
     section: "main",
     permission: PAGE_PERMISSIONS.meetingProviders,
@@ -390,7 +358,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "billing-parent",
     labelKey: "invoices",
-    icon: ReceiptLongOutlined,
+    iconKey: "receiptLong",
     href: "/billing/invoices",
     section: "main",
     permission: PAGE_PERMISSIONS.billingParent,
@@ -399,7 +367,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "suggestions-manage",
     labelKey: "suggestionsManage",
-    icon: LightbulbOutlined,
+    iconKey: "lightbulb",
     href: "/suggestions/manage",
     section: "main",
     permission: PAGE_PERMISSIONS.suggestionsManage,
@@ -407,7 +375,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "suggestions-submit",
     labelKey: "suggestionsSubmit",
-    icon: LightbulbOutlined,
+    iconKey: "lightbulb",
     href: "/suggestions",
     section: "main",
     permission: PAGE_PERMISSIONS.suggestionsSubmit,
@@ -416,7 +384,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "complaints-manage",
     labelKey: "complaintsManage",
-    icon: ReportProblemOutlined,
+    iconKey: "reportProblem",
     href: "/complaints/manage",
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsManage,
@@ -424,7 +392,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "complaints-submit",
     labelKey: "complaintsSubmit",
-    icon: ReportProblemOutlined,
+    iconKey: "reportProblem",
     href: "/complaints",
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsSubmit,
@@ -433,7 +401,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "dst-migration",
     labelKey: "dstMigration",
-    icon: UpdateOutlined,
+    iconKey: "update",
     href: "/tools/dst-migration",
     section: "main",
     permission: PAGE_PERMISSIONS.dstMigration,
@@ -441,15 +409,23 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "permissions",
     labelKey: "permissions",
-    icon: SecurityOutlined,
+    iconKey: "security",
     href: "/permissions",
     section: "main",
     permission: PAGE_PERMISSIONS.permissions,
   },
   {
+    key: "settings",
+    labelKey: "settings",
+    iconKey: "settings",
+    href: "/settings",
+    section: "main",
+    permission: PAGE_PERMISSIONS.settings,
+  },
+  {
     key: "own-profile",
     labelKey: "yourProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "footer",
     permission: PAGE_PERMISSIONS.profile,
@@ -457,7 +433,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "logout",
     labelKey: "logout",
-    icon: LogoutOutlined,
+    iconKey: "logout",
     href: "/logout",
     section: "footer",
   },
@@ -470,7 +446,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "today-classes",
     labelKey: "todayClasses",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDashboard,
@@ -479,7 +455,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "regular-schedule",
     labelKey: "regularSchedule",
-    icon: EventRepeatOutlined,
+    iconKey: "eventRepeat",
     href: "/schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
@@ -488,7 +464,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "your-students",
     labelKey: "yourStudents",
-    icon: GroupOutlined,
+    iconKey: "group",
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherStudents,
@@ -497,7 +473,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "home",
     labelKey: "home",
-    icon: DashboardOutlined,
+    iconKey: "dashboard",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.dashboard,
@@ -505,7 +481,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "schedule",
     labelKey: "schedule",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/dashboard",
     section: "main",
     permission: AppPermission.DashboardView,
@@ -513,7 +489,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "resources",
     labelKey: "resources",
-    icon: FolderOpenOutlined,
+    iconKey: "folderOpen",
     href: "/resources",
     section: "main",
     permission: PAGE_PERMISSIONS.resources,
@@ -521,7 +497,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "teacher-profile",
     labelKey: "yourProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
@@ -530,7 +506,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "teachers",
     labelKey: "teachers",
-    icon: SchoolOutlined,
+    iconKey: "school",
     href: "/teachers",
     section: "main",
     permission: PAGE_PERMISSIONS.teachers,
@@ -538,7 +514,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "students",
     labelKey: "students",
-    icon: GroupOutlined,
+    iconKey: "group",
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.students,
@@ -546,7 +522,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parents",
     labelKey: "parents",
-    icon: Diversity1Outlined,
+    iconKey: "diversity1",
     href: "/parents",
     section: "main",
     permission: PAGE_PERMISSIONS.parents,
@@ -554,7 +530,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "subjects",
     labelKey: "subjects",
-    icon: CategoryOutlined,
+    iconKey: "category",
     href: "/subjects",
     section: "main",
     permission: PAGE_PERMISSIONS.subjects,
@@ -562,7 +538,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "reports",
     labelKey: "reports",
-    icon: AssessmentOutlined,
+    iconKey: "assessment",
     href: "/reports",
     section: "main",
     permission: PAGE_PERMISSIONS.reports,
@@ -570,7 +546,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "billing-admin",
     labelKey: "billingAdmin",
-    icon: PaymentsOutlined,
+    iconKey: "payments",
     href: "/billing",
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
@@ -578,7 +554,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "exchange-rates",
     labelKey: "exchangeRates",
-    icon: TimelineOutlined,
+    iconKey: "timeline",
     href: "/billing/exchange-rates",
     section: "main",
     permission: PAGE_PERMISSIONS.exchangeRates,
@@ -586,7 +562,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "supported-currencies",
     labelKey: "supportedCurrencies",
-    icon: CurrencyExchangeOutlined,
+    iconKey: "currencyExchange",
     href: "/billing/currencies",
     section: "main",
     permission: PAGE_PERMISSIONS.supportedCurrencies,
@@ -594,7 +570,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "currency-hedges",
     labelKey: "currencyHedges",
-    icon: ShieldOutlined,
+    iconKey: "shield",
     href: "/billing/currency-hedges",
     section: "main",
     permission: PAGE_PERMISSIONS.currencyHedges,
@@ -602,7 +578,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "billing-manual",
     labelKey: "billingManual",
-    icon: NoteAddOutlined,
+    iconKey: "noteAdd",
     href: "/billing/manual",
     section: "main",
     permission: PAGE_PERMISSIONS.billingManual,
@@ -610,7 +586,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",
-    icon: AccountBalanceWalletOutlined,
+    iconKey: "accountBalanceWallet",
     href: "/payment-catalogs",
     section: "main",
     permission: PAGE_PERMISSIONS.paymentCatalogs,
@@ -618,7 +594,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "meeting-providers",
     labelKey: "meetingProviders",
-    icon: VideocamOutlined,
+    iconKey: "videocam",
     href: "/meeting-providers",
     section: "main",
     permission: PAGE_PERMISSIONS.meetingProviders,
@@ -626,7 +602,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "billing-parent",
     labelKey: "invoices",
-    icon: ReceiptLongOutlined,
+    iconKey: "receiptLong",
     href: "/billing/invoices",
     section: "main",
     permission: PAGE_PERMISSIONS.billingParent,
@@ -635,7 +611,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-today-classes",
     labelKey: "todayClasses",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.parentDashboard,
@@ -644,7 +620,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-your-students",
     labelKey: "yourStudents",
-    icon: GroupOutlined,
+    iconKey: "group",
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.parentStudents,
@@ -653,7 +629,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-suggest",
     labelKey: "suggest",
-    icon: LightbulbOutlined,
+    iconKey: "lightbulb",
     href: "/suggestions",
     section: "main",
     permission: PAGE_PERMISSIONS.parentSuggest,
@@ -662,7 +638,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "parent-profile",
     labelKey: "yourProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.parentProfile,
@@ -671,7 +647,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-today-classes",
     labelKey: "studentTodayClasses",
-    icon: CalendarTodayOutlined,
+    iconKey: "calendarToday",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.studentSelfDashboard,
@@ -680,7 +656,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-schedule",
     labelKey: "studentSchedule",
-    icon: EventRepeatOutlined,
+    iconKey: "eventRepeat",
     href: "/students/me/history",
     section: "main",
     permission: PAGE_PERMISSIONS.studentOwnHistory,
@@ -689,7 +665,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-credits",
     labelKey: "studentCredits",
-    icon: AccountBalanceWalletOutlined,
+    iconKey: "accountBalanceWallet",
     href: "/students/me/credits",
     section: "main",
     permission: PAGE_PERMISSIONS.studentCredits,
@@ -698,7 +674,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "student-profile",
     labelKey: "studentProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.studentSelfProfile,
@@ -707,7 +683,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "supervisor-home",
     labelKey: "supervisorHome",
-    icon: DashboardOutlined,
+    iconKey: "dashboard",
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.supervisorDashboard,
@@ -716,7 +692,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "pending-reviews",
     labelKey: "pendingReviews",
-    icon: RateReviewOutlined,
+    iconKey: "rateReview",
     href: "/lesson-reports",
     section: "main",
     permission: PAGE_PERMISSIONS.lessonReportsReview,
@@ -725,7 +701,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "teacher-dues",
     labelKey: "teacherDues",
-    icon: PaymentsOutlined,
+    iconKey: "payments",
     href: "/teacher-dues",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDuesView,
@@ -734,7 +710,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "supervisor-profile",
     labelKey: "supervisorProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.profile,
@@ -743,7 +719,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "complaints-submit",
     labelKey: "complaintsSubmit",
-    icon: ReportProblemOutlined,
+    iconKey: "reportProblem",
     href: "/complaints",
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsSubmit,
@@ -752,7 +728,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "own-profile",
     labelKey: "yourProfile",
-    icon: PersonOutlineOutlined,
+    iconKey: "personOutline",
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.profile,
@@ -760,7 +736,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "suggestions-manage",
     labelKey: "suggestionsManage",
-    icon: LightbulbOutlined,
+    iconKey: "lightbulb",
     href: "/suggestions/manage",
     section: "main",
     permission: PAGE_PERMISSIONS.suggestionsManage,
@@ -768,7 +744,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
     key: "complaints-manage",
     labelKey: "complaintsManage",
-    icon: ReportProblemOutlined,
+    iconKey: "reportProblem",
     href: "/complaints/manage",
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsManage,
@@ -913,6 +889,7 @@ export function applySupervisorNavOverrides(
     "complaints-manage",
     "dst-migration",
     "permissions",
+    "settings",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }

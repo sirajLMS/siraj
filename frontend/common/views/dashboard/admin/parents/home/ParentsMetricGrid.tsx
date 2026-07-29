@@ -3,14 +3,14 @@
 import { Grid } from "@mui/material";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface ParentsMetricGridProps {
   readonly metrics: readonly MetricItem[];
 }
 
 export function ParentsMetricGrid({ metrics }: Readonly<ParentsMetricGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.parentsDirectory;
+  const t = useAppTranslation(Translation.Dashboard.ParentsDirectory);
   const parents = t;
 
   return (

@@ -1,5 +1,6 @@
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentAccountStatus } from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers/reassignment";
 
 export interface TeacherReassignmentViewProps {
   readonly student: ReassignmentStudentData;
@@ -57,15 +58,18 @@ export interface ManagementControlsCardProps {
   readonly onSelectedTeacherIdChange: (id: string) => void;
   readonly onSelectedNewStatusChange: (status: StudentStatus | "") => void;
   readonly onSubmitForm: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
+  readonly labels: Pick<TeacherReassignmentLabels, "controls" | "actions">;
 }
 
 export interface StudentContextCardProps {
   readonly student: ReassignmentStudentData;
+  readonly labels: TeacherReassignmentLabels["studentContext"];
 }
 
 export interface CurrentTeacherCardProps {
   readonly currentTeacherName: string;
   readonly teacherId?: string;
+  readonly labels: TeacherReassignmentLabels["currentTeacher"];
 }
 
 export interface BentoCardProps {
@@ -83,4 +87,5 @@ export interface ReassignmentBentoGridProps {
   // useRouter/useNotifications (specs.md §3 N8, N17). Lifted into the ViewModel.
   readonly onOpenChangeHistory: () => void;
   readonly onOpenParentContact: () => void;
+  readonly labels: TeacherReassignmentLabels["historyAndContact"];
 }

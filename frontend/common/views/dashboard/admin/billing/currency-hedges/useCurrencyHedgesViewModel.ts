@@ -5,7 +5,9 @@ import { useCallback, useMemo, useState } from "react";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { currencyHedgesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useAppTranslation } from "@/shared/locale";
+import type { CurrencyHedgesLabelsBySection } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/types/currencyHedges.types";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { CurrencyHedgesLabels } from "@/shared/locale/types/dashboard/billing/currencyHedges";
 
 export type HedgeRow = {
   readonly id: string;
@@ -81,60 +83,36 @@ function toHedgeRows(data: Operations.CurrencyHedgesQuery_Query | undefined): re
     }));
 }
 
-function buildCurrencyHedgesViewModel(args: {
-  readonly rows: readonly HedgeRow[];
-  readonly loading: boolean;
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["billingCurrencyHedges"];
-  readonly onEdit: (row: HedgeRow) => void;
-  readonly onDelete: (row: HedgeRow) => void;
-  readonly onAdd: () => void;
-}): CurrencyHedgesViewModel {
-  const { rows, loading, t, onEdit, onDelete, onAdd } = args;
+function buildLabelsBySection(labels: CurrencyHedgesLabels): CurrencyHedgesLabelsBySection {
   return {
-    rows,
-    loading,
-    pageTitle: t.pageTitle,
-    pageSubtitle: t.pageSubtitle,
-    emptyMessage: t.empty,
-    addHedgeLabel: t.addHedge,
-    currencyColumnLabel: t.columns.currency,
-    amountColumnLabel: t.columns.amount,
-    hedgeTypeColumnLabel: t.columns.hedgeType,
-    notesColumnLabel: t.columns.notes,
-    updatedAtColumnLabel: t.columns.updatedAt,
-    actionsColumnLabel: t.columns.actions,
-    editHedgeLabel: t.editHedge,
-    deleteHedgeLabel: t.deleteHedge,
-    onEdit,
-    onDelete,
-    onAdd,
+    shell: {
+      pageTitle: labels.pageTitle,
+      pageSubtitle: labels.pageSubtitle,
+      empty: labels.empty,
+    },
+    columns: labels.columns,
+    actions: {
+      addHedge: labels.addHedge,
+      editHedge: labels.editHedge,
+      deleteHedge: labels.deleteHedge,
+    },
   };
 }
 
 export type UseCurrencyHedgesViewModelProps = Record<string, never>;
 
 export interface CurrencyHedgesViewModel {
+  readonly labelsBySection: CurrencyHedgesLabelsBySection;
   readonly rows: readonly HedgeRow[];
   readonly loading: boolean;
-  readonly pageTitle: string;
-  readonly pageSubtitle: string;
-  readonly emptyMessage: string;
-  readonly addHedgeLabel: string;
-  readonly currencyColumnLabel: string;
-  readonly amountColumnLabel: string;
-  readonly hedgeTypeColumnLabel: string;
-  readonly notesColumnLabel: string;
-  readonly updatedAtColumnLabel: string;
-  readonly actionsColumnLabel: string;
-  readonly editHedgeLabel: string;
-  readonly deleteHedgeLabel: string;
   readonly onEdit: (row: HedgeRow) => void;
   readonly onDelete: (row: HedgeRow) => void;
   readonly onAdd: () => void;
 }
 
 export function useCurrencyHedgesViewModel(_props: Readonly<UseCurrencyHedgesViewModelProps>): CurrencyHedgesViewModel {
-  const t = useAppTranslation().dashboardTranslations.billingCurrencyHedges;
+  const labels = useAppTranslation(Translation.Dashboard.BillingCurrencyHedges);
+  const labelsBySection = useMemo(() => buildLabelsBySection(labels), [labels]);
   const [_dialogOpen, setDialogOpen] = useState(false);
   const [_deleteOpen, setDeleteOpen] = useState(false);
   const [_editingRow, setEditingRow] = useState<HedgeRow | null>(null);
@@ -181,5 +159,5 @@ export function useCurrencyHedgesViewModel(_props: Readonly<UseCurrencyHedgesVie
     [deleteSetters]
   );
 
-  return buildCurrencyHedgesViewModel({ rows, loading, t, onEdit, onDelete, onAdd });
+  return { labelsBySection, rows, loading, onEdit, onDelete, onAdd };
 }

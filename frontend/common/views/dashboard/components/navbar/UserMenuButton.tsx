@@ -15,9 +15,7 @@ import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermiss
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { AuthImpersonationLabels } from "@/shared/locale/types/auth";
-import type { CommonLabels } from "@/shared/locale/types/common";
+import { type AuthImpersonationLabels, type CommonLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface UserInfoSlotProps {
   readonly name: string;
@@ -88,7 +86,7 @@ function DefaultUserInfo({ name, mail, secondaryLine }: Readonly<UserInfoSlotPro
 }
 
 function DefaultLogoutButton({ onClick }: Readonly<LogoutButtonSlotProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreNav;
+  const t = useAppTranslation(Translation.Dashboard.CoreNav);
   return (
     <MenuItem
       onClick={onClick}
@@ -324,9 +322,10 @@ export function UserMenuButton({
 }: Readonly<UserMenuButtonProps>) {
   const { logout } = useAuth();
   const router = useRouter();
-  const tCommon = useAppTranslation().commonTranslations;
-  const tProfile = useAppTranslation().profileTranslations.base;
-  const tAuth = useAppTranslation().authTranslations;
+  const tCommon = useAppTranslation(Translation.Common);
+  const tProfile = useAppTranslation(Translation.Profile.Base);
+  const tImpersonation = useAppTranslation(Translation.Auth.Impersonation);
+  const tGroupSimulation = useAppTranslation(Translation.Auth.GroupSimulation);
   const actorIsSuperAdmin = useUserStore(state => state.actorIsSuperAdmin);
   const canViewOwnProfile = useUserStore(state => state.hasPermission(AppPermission.AuthViewOwnProfile));
   const {
@@ -397,7 +396,7 @@ export function UserMenuButton({
 
   const actorSecondaryLine = computeSecondaryLine(
     { isImpersonating, isSimulatingGroup, impersonationStatus, simulationStatus },
-    tAuth.impersonation
+    tImpersonation
   );
 
   const triggerProps: Readonly<{
@@ -474,7 +473,7 @@ export function UserMenuButton({
           >
             <LoginOutlined fontSize="small" />
             <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-              {tAuth.impersonation.returnToNormalLogin}
+              {tImpersonation.returnToNormalLogin}
             </Typography>
           </MenuItem>
         ) : null}
@@ -490,7 +489,7 @@ export function UserMenuButton({
           >
             <LoginOutlined fontSize="small" />
             <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-              {tAuth.groupSimulation.returnToNormalRole}
+              {tGroupSimulation.returnToNormalRole}
             </Typography>
           </MenuItem>
         ) : null}
@@ -503,7 +502,7 @@ export function UserMenuButton({
           >
             <GroupsOutlined fontSize="small" />
             <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
-              {tAuth.groupSimulation.switchRoleTo}
+              {tGroupSimulation.switchRoleTo}
             </Typography>
           </MenuItem>
         ) : null}

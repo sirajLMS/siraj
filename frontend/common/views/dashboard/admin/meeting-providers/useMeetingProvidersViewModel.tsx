@@ -21,7 +21,7 @@ import type {
   MeetingProvidersViewLabels,
   MeetingProvidersViewProps,
 } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 function buildMeetingProviderColumns(
   labels: MeetingProvidersViewLabels,
@@ -160,7 +160,7 @@ export function useMeetingProvidersViewModel(
   _props: Readonly<UseMeetingProvidersViewModelProps>
 ): MeetingProvidersViewModel {
   const router = useRouter();
-  const t = useAppTranslation().dashboardTranslations.meetingProviders;
+  const t = useAppTranslation(Translation.Dashboard.MeetingProviders);
   const locale = useAppLocale();
 
   const [deleteProvider, setDeleteProvider] = useState<MeetingProviderFieldsFragment | null>(null);

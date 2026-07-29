@@ -200,6 +200,15 @@ export interface PermissionGroupErrors {
 }
 
 /**
+ * SessionConfigErrors — session configuration validation errors.
+ */
+export interface SessionConfigErrors {
+  readonly roleNameRequired: string;
+  readonly ttlOutOfRange: string;
+  readonly maxConcurrentOutOfRange: string;
+}
+
+/**
  * ErrorsLabels — the top-level errors namespace.
  * Only the subset needed by the login GraphQL mutation is defined here.
  * Grow this interface as more errors are migrated.
@@ -217,6 +226,7 @@ export interface ErrorsLabels {
   readonly user: UserErrors;
   readonly scheduling: SchedulingErrors;
   readonly permissionGroup: PermissionGroupErrors;
+  readonly sessionConfig: SessionConfigErrors;
   readonly parent: ParentErrors;
   readonly staff: StaffErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────

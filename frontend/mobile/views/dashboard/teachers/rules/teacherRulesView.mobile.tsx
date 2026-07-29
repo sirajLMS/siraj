@@ -11,23 +11,23 @@ import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/t
  */
 export function TeacherRulesMobileView({
   handbookLoading,
-  labels,
-  policyLabels,
-  actionLabels,
+  labelsBySection,
   onDownloadHandbook,
   onContactCoordinator,
 }: Readonly<TeacherRulesViewModel>) {
+  const { shell, policy, actions } = labelsBySection;
+
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+      <MobilePageHeader title={shell.pageTitle} subtitle={shell.pageSubtitle} />
       {handbookLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress size={24} />
         </Box>
       ) : null}
       <ActivationPolicyPanelMobile
-        labels={policyLabels}
-        actionLabels={actionLabels}
+        labels={policy}
+        actionLabels={actions}
         onDownloadHandbook={onDownloadHandbook}
         onContactCoordinator={onContactCoordinator}
       />

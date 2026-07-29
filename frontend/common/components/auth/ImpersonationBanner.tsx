@@ -1,11 +1,14 @@
 "use client";
 
 import { Box, Link, Typography } from "@mui/material";
+
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
-import { useAppTranslation } from "@/shared/locale";
+
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function ImpersonationBanner() {
-  const t = useAppTranslation().authTranslations.impersonation;
+  const t = useAppTranslation(Translation.Auth.Impersonation);
+
   const { isImpersonating, status, endImpersonation, loading } = useImpersonation();
 
   if (!isImpersonating || !status?.targetUser) {
@@ -18,24 +21,38 @@ export function ImpersonationBanner() {
     <Box
       sx={theme => ({
         position: "sticky",
+
         top: 0,
+
         zIndex: theme.zIndex.appBar + 1,
+
         display: "flex",
+
         alignItems: "center",
+
         justifyContent: "center",
+
         flexWrap: "wrap",
+
         gap: theme.spacing(0.5),
+
         px: theme.spacing(2),
+
         py: theme.spacing(1.25),
+
         backgroundColor: theme.palette.warningContainer ?? theme.palette.warning.main,
+
         color: theme.palette.onWarningContainer ?? theme.palette.onWarning,
+
         borderBottom: `1px solid ${theme.palette.divider}`,
+
         typography: "bodyMd",
       })}
     >
       <Typography component="span" sx={{ fontWeight: 600, textAlign: "center" }}>
         {t.bannerLoggedInAs(targetName)}
       </Typography>
+
       <Link
         component="button"
         type="button"
@@ -44,10 +61,15 @@ export function ImpersonationBanner() {
         onClick={() => void endImpersonation()}
         sx={theme => ({
           fontWeight: 700,
+
           color: theme.palette.onWarningContainer ?? theme.palette.onWarning,
+
           cursor: loading ? "wait" : "pointer",
+
           border: "none",
+
           background: "none",
+
           typography: "bodyMd",
         })}
       >

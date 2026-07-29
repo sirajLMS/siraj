@@ -1,12 +1,13 @@
 "use client";
 
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
-import { useAppTranslation } from "@/shared/locale";
+import type { PaymentMethodManagerLabels } from "@/shared/locale/types/ui";
 
 export type PaymentMethodDeleteDialogProps = {
   readonly open: boolean;
   readonly methodLabel: string;
   readonly isLoading: boolean;
+  readonly labels: PaymentMethodManagerLabels;
   readonly onClose: () => void;
   readonly onConfirm: () => void;
 };
@@ -15,10 +16,11 @@ export function PaymentMethodDeleteDialog({
   open,
   methodLabel,
   isLoading,
+  labels,
   onClose,
   onConfirm,
 }: PaymentMethodDeleteDialogProps) {
-  const t = useAppTranslation().uiTranslations.paymentMethodManager;
+  const t = labels;
 
   return (
     <BaseDeleteDialog

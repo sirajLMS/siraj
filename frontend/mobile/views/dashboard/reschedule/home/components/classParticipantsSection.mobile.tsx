@@ -3,9 +3,10 @@
 import { PersonOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
 import type { RescheduleSession } from "@/frontend/common/types/shared.types";
-import { useAppTranslation } from "@/shared/locale";
+import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
 interface Props {
+  readonly labels: RescheduleFormLabels;
   readonly session: RescheduleSession;
 }
 
@@ -41,16 +42,16 @@ function ParticipantField({
   );
 }
 
-export function ClassParticipantsSectionMobile({ session }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm.fields;
+export function ClassParticipantsSectionMobile({ labels, session }: Readonly<Props>) {
+  const fieldLabels = labels.fields;
 
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 6 }}>
-        <ParticipantField label={t.teacherName} value={session.teacherName} icon={SchoolOutlined} />
+        <ParticipantField label={fieldLabels.teacherName} value={session.teacherName} icon={SchoolOutlined} />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <ParticipantField label={t.studentName} value={session.studentName} icon={PersonOutlined} />
+        <ParticipantField label={fieldLabels.studentName} value={session.studentName} icon={PersonOutlined} />
       </Grid>
     </Grid>
   );

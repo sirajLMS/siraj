@@ -17,7 +17,7 @@ export function setAuthCookies(
   // copied .env.example (which defaults to http://localhost:3000) into a
   // production deployment without overriding ALLOWED_ORIGIN.
   const isProduction = process.env.NODE_ENV === "production";
-  const isSecure = isProduction;
+  const isSecure = isProduction && process.env.AUTH_COOKIE_SECURE !== "false";
   if (isProduction) {
     const allowedOrigin = getStringEnv("ALLOWED_ORIGIN");
     if (allowedOrigin?.startsWith("http://")) {

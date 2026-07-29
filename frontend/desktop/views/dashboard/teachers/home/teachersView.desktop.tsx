@@ -11,9 +11,10 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { TeacherDataGrid } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherDataGrid.desktop";
 import { TeacherMetricsRow } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherMetricsRow.desktop";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
 export interface TeachersDesktopViewProps {
+  readonly labels: TeachersDirectoryLabels;
   readonly metrics: TeacherDirectoryMetrics | null | undefined;
   readonly rows: readonly TeacherDirectoryRow[];
   readonly totalTeachers: number;
@@ -34,6 +35,7 @@ export interface TeachersDesktopViewProps {
  * is decided by the parent switcher `TeachersView.tsx`).
  */
 export function TeachersDesktopView({
+  labels,
   metrics,
   rows,
   totalTeachers,
@@ -45,7 +47,7 @@ export function TeachersDesktopView({
   onNavigateToSchedule,
   onNavigateToProfile,
 }: Readonly<TeachersDesktopViewProps>) {
-  const t = useAppTranslation().dashboardTranslations.teachersDirectory;
+  const t = labels;
 
   return (
     <DesktopPageContainer>
@@ -69,12 +71,13 @@ export function TeachersDesktopView({
       />
 
       <Box sx={{ mb: 4 }}>
-        <TeacherMetricsRow metrics={metrics} />
+        <TeacherMetricsRow metrics={metrics} labels={labels.metrics} />
       </Box>
 
       <DesktopSectionPanel title={t.table.showingOf(rows.length, totalTeachers)}>
         <TeacherDataGrid
           rows={rows}
+          labels={labels}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}

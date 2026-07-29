@@ -2,9 +2,8 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/common/stores/userStore";
-import { useAppTranslation } from "@/shared/locale";
+import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { usePaymentMethodsTabViewModel } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodsTabViewModel";
 
 export type PaymentMethodsTabProps = {
   readonly targetUserId: string;
@@ -31,18 +30,6 @@ const lazyViews = createLazyView<PaymentMethodsTabVariantProps>(
 );
 
 export function PaymentMethodsTab({ targetUserId, scope, slot }: Readonly<PaymentMethodsTabProps>) {
-  const t = useAppTranslation().profileTranslations.base;
-  const { user, hasPermission } = useUserStore();
-
-  const canManage =
-    scope === ProfileScope.Own ? user?.id === targetUserId : hasPermission(AppPermission.UserEditProfile);
-
-  const variantProps: PaymentMethodsTabVariantProps = {
-    targetUserId,
-    slot,
-    canManage,
-    title: t.shell.tabs.paymentMethods,
-  };
-
+  const variantProps = usePaymentMethodsTabViewModel({ targetUserId, scope, slot });
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={variantProps} />;
 }

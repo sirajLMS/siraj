@@ -3,9 +3,9 @@
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { PreferencesMatrixDesktopView } from "@/frontend/desktop/views/dashboard/profile/core/notifications/preferencesMatrix.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 export function NotificationPreferencesTabDesktop({
+  labels,
   matrixRows,
   onToggle,
   disabled,
@@ -16,24 +16,25 @@ export function NotificationPreferencesTabDesktop({
   onSnackbarClose,
   errorLoading,
 }: Readonly<NotificationPreferencesTabVariantProps>) {
-  const t = useAppTranslation().profileTranslations.notifications;
-
   if (errorLoading) {
     return (
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>{t.errorLoading}</Typography>
+      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
+        {labels.errorLoading}
+      </Typography>
     );
   }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box>
-        <Typography sx={{ typography: "titleLg", mb: 1 }}>{t.title}</Typography>
+        <Typography sx={{ typography: "titleLg", mb: 1 }}>{labels.title}</Typography>
         <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {t.description}
+          {labels.description}
         </Typography>
       </Box>
 
       <PreferencesMatrixDesktopView
+        labels={labels}
         matrixRows={matrixRows ?? []}
         onToggle={onToggle}
         disabled={disabled}

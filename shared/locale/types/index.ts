@@ -11,8 +11,6 @@
 // ─── Top-level directories (alphabetical) ──────────────────────────
 export * from "./auth";
 export * from "./common";
-// ─── Top-level files ───────────────────────────────────────────────
-export * from "./dashboard";
 // ─── dashboard/<group> ─────────────────────────────────────────────
 export * from "./dashboard/admin";
 export * from "./dashboard/billing";
@@ -26,6 +24,7 @@ export * from "./dashboard/payment-catalogs/main";
 export * from "./dashboard/permissions";
 export * from "./dashboard/reports";
 export * from "./dashboard/resources";
+export * from "./dashboard/settings";
 export * from "./dashboard/staff";
 export * from "./dashboard/studentPortal";
 export * from "./dashboard/students";
@@ -35,11 +34,10 @@ export * from "./dashboard/supervisorPortal";
 export * from "./dashboard/teachers";
 export * from "./emails";
 export * from "./errors";
+// ─── Top-level files ───────────────────────────────────────────────
 export * from "./message";
 export * from "./notifications";
 export * from "./profile";
-export * from "./profile-translations";
 export * from "./session";
 export * from "./sms";
 export * from "./ui";
-export * from "./ui-translations";

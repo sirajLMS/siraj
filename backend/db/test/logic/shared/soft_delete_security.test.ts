@@ -5,23 +5,15 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository, SoftDeleteRepository } from "@/backend/db/repo";
 import { auditLogs, users } from "@/backend/db/schema";
-import { setupRlsPolicies } from "@/backend/db/test/test-utils";
+import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+
+const SOFT_DELETE_RLS_ROLE = "test_rls_user_soft_delete";
 
 describe("Soft Delete Security (Issue #2)", () => {
   beforeAll(async () => {
     testLogger.info("Setting up soft delete security test role...");
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'test_rls_user_soft_delete') THEN
-          CREATE ROLE test_rls_user_soft_delete WITH LOGIN PASSWORD 'test_rls_pass';
-        END IF;
-      END
-      $$;
-      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_rls_user_soft_delete;
-      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_rls_user_soft_delete;
-    `);
+    await setupRlsRole(SOFT_DELETE_RLS_ROLE);
     await setupRlsPolicies([
       { table: "users", name: "users_select_policy", definition: "FOR SELECT USING (deleted_at IS NULL)" },
       { table: "users", name: "users_insert_policy", definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)" },
@@ -36,15 +28,7 @@ describe("Soft Delete Security (Issue #2)", () => {
   });
 
   afterAll(async () => {
-    try {
-      await db.execute(sql`
-        REASSIGN OWNED BY test_rls_user_soft_delete TO postgres;
-        DROP OWNED BY test_rls_user_soft_delete;
-        DROP ROLE IF EXISTS test_rls_user_soft_delete;
-      `);
-    } catch {
-      testLogger.warn("Failed to drop soft delete security test role");
-    }
+    await teardownRlsRole(SOFT_DELETE_RLS_ROLE);
   });
 
   test("Removes the SECURITY DEFINER soft_delete_row_trigger_fn function", async () => {
@@ -126,7 +110,8 @@ describe("Soft Delete Security (Issue #2)", () => {
 
     try {
       await db.transaction(async tx => {
-        await tx.execute(sql`SET LOCAL ROLE test_rls_user_soft_delete`);
+        const quotedRole = `"${SOFT_DELETE_RLS_ROLE}"`;
+        await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
 
         const hardDeleteResult = await tx.delete(users).where(eq(users.id, user.id)).returning();
         expect(hardDeleteResult).toHaveLength(0);

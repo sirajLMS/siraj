@@ -3,11 +3,15 @@
 import { Alert, Chip, Stack } from "@mui/material";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
-import { useAppTranslation } from "@/shared/locale";
+import type { MeetingConfigClassScopeLabels, MeetingConfigDisplayLabels } from "@/shared/locale/types/ui";
 
 export type ClassMeetingContextBannerProps = {
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
   readonly hasScopeConfigs: boolean;
+  readonly labels: {
+    readonly classScope: MeetingConfigClassScopeLabels;
+    readonly display: MeetingConfigDisplayLabels;
+  };
 };
 
 function resolveSourceKey(source: EffectiveMeetingSource | string | null | undefined): string {
@@ -18,9 +22,13 @@ function resolveSourceKey(source: EffectiveMeetingSource | string | null | undef
   return "sourceNone";
 }
 
-export function ClassMeetingContextBanner({ effectiveMeeting, hasScopeConfigs }: ClassMeetingContextBannerProps) {
-  const t = useAppTranslation().uiTranslations.meetingConfigClassScope;
-  const tDisplay = useAppTranslation().uiTranslations.meetingConfigDisplay;
+export function ClassMeetingContextBanner({
+  effectiveMeeting,
+  hasScopeConfigs,
+  labels,
+}: ClassMeetingContextBannerProps) {
+  const t = labels.classScope;
+  const tDisplay = labels.display;
 
   if (!effectiveMeeting && !hasScopeConfigs) return null;
 

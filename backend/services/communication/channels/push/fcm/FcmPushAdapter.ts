@@ -22,12 +22,24 @@ import type { UserDeviceTokenSelectType } from "@/backend/types/users/userDevice
 export class FcmPushAdapter implements IPushChannel {
   private readonly context: FcmPushContext;
 
-  constructor() {
-    const {
-      firebaseProjectId: projectId,
-      firebasePrivateKey: privateKey,
-      firebaseClientEmail: clientEmail,
-    } = getEnvironmentConfig();
+  /**
+   * Optional dependency-injection constructor.
+   *
+   * - With no arguments (`new FcmPushAdapter()`), falls back to `getEnvironmentConfig()`
+   *   for the Firebase service-account credentials — this preserves backwards compatibility
+   *   for existing tests that construct the adapter no-arg.
+   * - With `opts` provided (factory path), uses the resolved values directly, bypassing
+   *   `getEnvironmentConfig()` so the env-config DB override layer is the single source of
+   *   truth for the factory.
+   *
+   * The same `FIREBASE_* environment variable is required for FcmPushAdapter` errors are
+   * thrown regardless of which path supplied the credentials, so the factory can propagate
+   * them unchanged to callers.
+   */
+  constructor(opts?: { projectId?: string; privateKey?: string; clientEmail?: string }) {
+    const projectId = opts?.projectId ?? getEnvironmentConfig().firebaseProjectId;
+    const privateKey = opts?.privateKey ?? getEnvironmentConfig().firebasePrivateKey;
+    const clientEmail = opts?.clientEmail ?? getEnvironmentConfig().firebaseClientEmail;
 
     if (!projectId) {
       throw new Error("FIREBASE_PROJECT_ID environment variable is required for FcmPushAdapter");

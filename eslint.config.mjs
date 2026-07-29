@@ -18,6 +18,10 @@ const eslintConfig = defineConfig([
     // Ignore ALL dot-directories anywhere in the tree (e.g. .next, .git, .cursor,
     // .vscode, .scannerwork, .husky, .ai, .agents, .playwright-mcp, .kiro, ...).
     // One pattern replaces the previous hand-maintained list that missed new dot dirs.
+    // Next.js build output (dev, default, and per-port test dist dirs).
+    "**/.next/**",
+    "**/.next-dev/**",
+    "**/.next-test*/**",
     // Dot-directories (except `.storybook`, which is linted explicitly).
     "**/.*/**",
     "!.storybook/**",
@@ -454,6 +458,79 @@ const eslintConfig = defineConfig([
               ],
               message:
                 "Import TeacherAutocompleteDesktop/Mobile (or peer) from the tier UI kit — never common Autocomplete facades in views. Types/utils (PersonOption, resolvePersonOption) are allowed.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Lazy translations Phase 4: tier views pass labels from ViewModel — not useAppTranslation in views.
+  {
+    files: ["**/*.mobile.tsx", "**/*.desktop.tsx"],
+    ignores: ["frontend/desktop/components/ui/**", "frontend/mobile/components/ui/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/shared/locale",
+              importNames: ["useAppTranslation"],
+              message:
+                "Tier views must receive labels via props from the ViewModel — useAppTranslation is allowed only in shared tier UI (frontend/*/components/ui/). See frontend/common/views/AGENTS.md",
+            },
+            {
+              name: "@/shared/locale/client",
+              importNames: ["useAppTranslation"],
+              message:
+                "Tier views must receive labels via props from the ViewModel — useAppTranslation is allowed only in shared tier UI. See frontend/common/views/AGENTS.md",
+            },
+            {
+              name: "@/shared/locale/client/use-app-translation",
+              importNames: ["useAppTranslation"],
+              message:
+                "Tier views must receive labels via props from the ViewModel. See frontend/common/views/AGENTS.md",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Lazy translations Phase 4: client product code must not import eager messagesByLocale.
+  {
+    files: ["frontend/**/*.{ts,tsx}", "app/**/*.{ts,tsx}"],
+    ignores: ["frontend/common/graphql/test/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/shared/locale",
+              importNames: ["messagesByLocale"],
+              message:
+                "Client code must not import messagesByLocale — use useAppTranslation(handle) or labels from ViewModel props",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Lazy translations Phase 4: product code imports @/shared/locale barrel only — no deep old/beta paths.
+  {
+    files: ["app/**/*.{ts,tsx}", "frontend/**/*.{ts,tsx}", "backend/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/shared/locale/old/**", "@/shared/locale/beta/**"],
+              message:
+                "Import translation APIs from @/shared/locale or @/shared/locale/types only — never deep old/ or beta/ paths. See shared/AGENTS.md",
             },
           ],
         },

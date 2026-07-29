@@ -5,17 +5,16 @@ import { alpha, Box, Typography } from "@mui/material";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { UpdatedSessionsCardListMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsCardList.mobile";
-import { useAppTranslation } from "@/shared/locale";
+import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
+  readonly labels: DstMigrationLabels;
   readonly sessions: readonly UpdatedSession[];
   readonly successfulCount: number;
   readonly loading?: boolean;
 }
 
-export function UpdatedSessionsSectionMobile({ sessions, successfulCount }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.dstMigration;
-
+export function UpdatedSessionsSectionMobile({ labels, sessions, successfulCount }: Readonly<Props>) {
   return (
     <Box
       sx={theme => ({
@@ -53,10 +52,10 @@ export function UpdatedSessionsSectionMobile({ sessions, successfulCount }: Read
             <CheckCircleOutlined sx={{ fontSize: 18 }} />
           </Box>
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-            {t.sections.updated}
+            {labels.sections.updated}
           </Typography>
         </Box>
-        <MobileStatusBadge category="session" status="completed" label={t.table.sessionsCount(successfulCount)} />
+        <MobileStatusBadge category="session" status="completed" label={labels.table.sessionsCount(successfulCount)} />
       </Box>
       <Box sx={{ p: 2 }}>
         <UpdatedSessionsCardListMobile sessions={sessions} successfulCount={successfulCount} />

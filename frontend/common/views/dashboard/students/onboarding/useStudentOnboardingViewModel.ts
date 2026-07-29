@@ -21,7 +21,8 @@ import {
   studentOnboardingSchema,
 } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { StudentOnboardingLabels as StudentOnboardingLocaleLabels } from "@/shared/locale/types/dashboard/students/onboarding";
 
 export interface StudentOnboardingLabels {
   readonly pageTitle: string;
@@ -123,9 +124,7 @@ function buildResetPayload(initialParentId: string, formData: StudentOnboardingF
   } as StudentOnboardingFormData;
 }
 
-function buildLabels(
-  t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentOnboarding"]
-): StudentOnboardingLabels {
+function buildLabels(t: StudentOnboardingLocaleLabels): StudentOnboardingLabels {
   return {
     pageTitle: t.pageTitle,
     pageSubtitle: t.pageSubtitle,
@@ -170,9 +169,8 @@ function buildLabels(
 }
 
 function useStudentOnboardingViewModelImpl(): StudentOnboardingViewModel {
-  const translations = useAppTranslation();
-  const t = translations.dashboardTranslations.studentOnboarding;
-  const tc = translations.commonTranslations;
+  const t = useAppTranslation(Translation.Dashboard.StudentOnboarding);
+  const tc = useAppTranslation(Translation.Common);
   const router = useRouter();
   const notifications = useNotifications();
   const searchParams = useSearchParams();

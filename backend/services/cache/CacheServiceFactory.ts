@@ -1,4 +1,5 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
+import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
@@ -19,9 +20,28 @@ function getCacheState(): CacheState {
 }
 
 /**
- * Get cache provider from the centralized env validator
+ * Resolve the active cache provider using the DB-first / env-fallback strategy.
+ *
+ * Resolution order:
+ *  1. `resolveEnvConfig("CACHE_PROVIDER")` — consults the DB override in
+ *     `system_settings` under `env::CACHE_PROVIDER`, then falls back to the
+ *     env var. If the resolved value is `"redis"` or `"postgres"`, use it.
+ *  2. Any other non-empty string → logger.warn and fall back to the env-validated
+ *     default from `getEnvironmentConfig().cacheProvider`.
+ *  3. `undefined` (no DB override, no env override) → fall back to the env-validated
+ *     default from `getEnvironmentConfig().cacheProvider` (typically `"redis"`).
  */
-function getCacheProvider(): "redis" | "postgres" {
+async function getCacheProvider(): Promise<"redis" | "postgres"> {
+  const resolved = await resolveEnvConfig("CACHE_PROVIDER");
+
+  if (resolved === "redis" || resolved === "postgres") {
+    return resolved;
+  }
+
+  if (resolved !== undefined) {
+    logger.warn(`Unknown cache provider from env-config override: ${resolved}. Falling back to env-validated default.`);
+  }
+
   return getEnvironmentConfig().cacheProvider;
 }
 
@@ -47,7 +67,7 @@ async function createRedisCache(): Promise<ICacheService> {
  * Create cache service based on provider type
  */
 async function createCacheService(): Promise<ICacheService> {
-  const provider = getCacheProvider();
+  const provider = await getCacheProvider();
 
   logger.log(`🔧 Initializing Cache with provider: ${provider}`);
 
@@ -100,6 +120,9 @@ export const resetCacheService = (): void => {
   }
   state.initializationPromise = null;
   clearGlobalSingleton(CACHE_STATE_KEY);
+  // Invalidate the env-config cache entry for CACHE_PROVIDER so that an
+  // override update forces a fresh provider resolution on the next init.
+  invalidateEnvConfigCache("CACHE_PROVIDER");
 };
 
 /**

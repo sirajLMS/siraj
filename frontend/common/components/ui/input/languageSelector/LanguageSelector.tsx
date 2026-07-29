@@ -9,7 +9,7 @@ import { useCallback } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { getLanguageDisplayName, type LanguageType, languages } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type LanguageSelectorProps = {
   readonly language?: LanguageType;
@@ -39,7 +39,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onBlurAction: onBlur,
   style,
 }: LanguageSelectorProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.languageSelector;
+  const t = useAppTranslation(Translation.Ui.LanguageSelector);
   const locale = useAppLocale();
 
   const getLanguageName = useCallback((code: string) => getLanguageDisplayName(code, locale), [locale]);

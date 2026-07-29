@@ -249,4 +249,12 @@ export enum AppPermission {
   TEACHER_DUES_MARK_PAID = "teacher_dues.mark_paid",
   // LMS — Monthly reports
   MONTHLY_REPORTS_VIEW = "monthly_reports.view",
+  // Settings (system / environment config / session / audit / site content / timezones)
+  SETTINGS_VIEW = "settings.view",
+  SETTINGS_EDIT_GENERAL = "settings.edit_general",
+  SETTINGS_EDIT_ENV = "settings.edit_env",
+  SETTINGS_EDIT_SESSION = "settings.edit_session",
+  SETTINGS_AUDIT_VIEW = "settings.audit_view",
+  SETTINGS_SITE_CONTENT_MANAGE = "settings.site_content_manage",
+  SETTINGS_TIMEZONES_VIEW = "settings.timezones_view",
 }

@@ -8,7 +8,7 @@ import type {
 } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { AdminSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/adminSuggestions.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
   {
@@ -99,8 +99,7 @@ function AdminSuggestionsDesktopStoryRenderer({
   canManage,
   canDelete,
 }: Readonly<AdminSuggestionsDesktopStoryProps>) {
-  const t = useAppTranslation();
-  const labels = buildSuggestionsLabels(t.dashboardTranslations.suggestions).admin;
+  const labels = buildSuggestionsLabels(useAppTranslation(Translation.Dashboard.Suggestions)).admin;
 
   return (
     <AdminSuggestionsDesktopView

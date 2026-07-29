@@ -29,7 +29,6 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { MobileFormErrorSnackbar, MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
-import { useAppTranslation } from "@/shared/locale";
 
 function ProfileField({ label, value }: Readonly<{ label: string; value: string }>): React.ReactNode {
   return (
@@ -276,7 +275,7 @@ export function StudentProfileMobileView({
   onSnackbarClose,
   onUploadAvatar,
 }: Readonly<StudentProfileViewModel>) {
-  const editAvatarTitle = useAppTranslation().profileTranslations.base.editAvatarTitle;
+  const editAvatarTitle = labels.editAvatarTitle;
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;

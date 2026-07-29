@@ -16,7 +16,7 @@ import {
   toGraphqlIanaTimezone,
 } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type TimezoneSelectProps = {
   readonly value: IanaTimezone | null;
@@ -45,7 +45,7 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
   error,
   helperText,
 }: TimezoneSelectProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.timezoneSelect;
+  const t = useAppTranslation(Translation.Ui.TimezoneSelect);
   const locale = useAppLocale();
 
   const options = useMemo(() => getTimezoneOptions(locale), [locale]);

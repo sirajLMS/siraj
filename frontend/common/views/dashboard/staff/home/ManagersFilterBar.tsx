@@ -1,11 +1,7 @@
 import { Box, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/views/dashboard/staff/home/types";
-import { useAppTranslation } from "@/shared/locale";
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Styled Components — Extracted inline sx styles for reusability & consistency
- * ──────────────────────────────────────────────────────────────────────────── */
+import type { StaffDirectoryLabels } from "@/shared/locale";
 
 const StyledFilterContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -22,11 +18,8 @@ const StyledInputGroup = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
 }));
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Component Interface
- * ──────────────────────────────────────────────────────────────────────────── */
-
 interface ManagersFilterBarProps {
+  readonly labels: StaffDirectoryLabels["filters"];
   roleFilter: ManagerRoleFilter;
   statusFilter: ManagerStatusFilter;
   onRoleFilterChange: (role: ManagerRoleFilter) => void;
@@ -38,13 +31,12 @@ interface ManagersFilterBarProps {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export function ManagersFilterBar({
+  labels: t,
   roleFilter,
   statusFilter,
   onRoleFilterChange,
   onStatusFilterChange,
 }: Readonly<ManagersFilterBarProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory.filters;
-
   return (
     <StyledFilterContainer>
       {/* Filter dropdowns grouped together */}

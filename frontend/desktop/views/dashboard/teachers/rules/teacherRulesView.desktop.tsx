@@ -12,23 +12,23 @@ import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard
  */
 export function TeacherRulesDesktopView({
   handbookLoading,
-  labels,
-  policyLabels,
-  actionLabels,
+  labelsBySection,
   onDownloadHandbook,
   onContactCoordinator,
 }: Readonly<TeacherRulesViewModel>) {
+  const { shell, policy, actions } = labelsBySection;
+
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+      <DesktopPageHeader title={shell.pageTitle} subtitle={shell.pageSubtitle} />
       {handbookLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress size={24} />
         </Box>
       ) : null}
       <ActivationPolicyPanelDesktop
-        labels={policyLabels}
-        actionLabels={actionLabels}
+        labels={policy}
+        actionLabels={actions}
         onDownloadHandbook={onDownloadHandbook}
         onContactCoordinator={onContactCoordinator}
       />

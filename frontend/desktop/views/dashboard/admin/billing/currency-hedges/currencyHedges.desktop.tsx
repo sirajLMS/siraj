@@ -17,71 +17,40 @@ import {
 import { useAppLocale } from "@/shared/locale";
 
 export function CurrencyHedgesDesktopView({
+  labelsBySection,
   rows,
   loading,
-  pageTitle,
-  pageSubtitle,
-  emptyMessage,
-  addHedgeLabel,
-  currencyColumnLabel,
-  amountColumnLabel,
-  hedgeTypeColumnLabel,
-  notesColumnLabel,
-  updatedAtColumnLabel,
-  actionsColumnLabel,
-  editHedgeLabel,
-  deleteHedgeLabel,
   onEdit,
   onDelete,
   onAdd,
 }: Readonly<CurrencyHedgesViewModel>) {
   const locale = useAppLocale();
+  const { shell, columns, actions } = labelsBySection;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid
-  const columns = useMemo<readonly GridColDef<HedgeRow>[]>(
+  const gridColumns = useMemo<readonly GridColDef<HedgeRow>[]>(
     () =>
       buildCurrencyHedgeColumns(
-        {
-          currencyColumnLabel,
-          amountColumnLabel,
-          hedgeTypeColumnLabel,
-          notesColumnLabel,
-          updatedAtColumnLabel,
-          actionsColumnLabel,
-          editHedgeLabel,
-          deleteHedgeLabel,
-        },
+        { ...columns, editHedge: actions.editHedge, deleteHedge: actions.deleteHedge },
         { onEdit, onDelete },
         locale
       ),
-    [
-      currencyColumnLabel,
-      amountColumnLabel,
-      hedgeTypeColumnLabel,
-      notesColumnLabel,
-      updatedAtColumnLabel,
-      actionsColumnLabel,
-      editHedgeLabel,
-      deleteHedgeLabel,
-      locale,
-      onEdit,
-      onDelete,
-    ]
+    [actions.deleteHedge, actions.editHedge, columns, locale, onEdit, onDelete]
   );
 
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={pageTitle}
-        subtitle={pageSubtitle}
-        actions={<DesktopPrimaryPageAction onClick={onAdd}>{addHedgeLabel}</DesktopPrimaryPageAction>}
+        title={shell.pageTitle}
+        subtitle={shell.pageSubtitle}
+        actions={<DesktopPrimaryPageAction onClick={onAdd}>{actions.addHedge}</DesktopPrimaryPageAction>}
       />
       <Box sx={{ height: 560 }}>
         <DesktopAppDataGrid
           rows={rows}
-          columns={columns}
+          columns={gridColumns}
           loading={loading}
-          emptyMessage={emptyMessage}
+          emptyMessage={shell.empty}
           getRowId={row => row.id}
           paginationOptions={{ mode: "client" }}
         />

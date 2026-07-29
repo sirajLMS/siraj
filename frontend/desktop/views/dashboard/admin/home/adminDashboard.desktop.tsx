@@ -6,6 +6,7 @@ import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewEmptyState } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
+import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
@@ -13,8 +14,154 @@ import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/inp
 import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.desktop";
 import { useAppLocale } from "@/shared/locale";
 
+type AdminDashboardHeaderActionsProps = Pick<
+  AdminDashboardViewModel,
+  "metrics" | "onMetricClick" | "selectedMetricKey" | "canDashboardSearch" | "searchValue" | "onSearchChange"
+> & {
+  readonly searchPlaceholder: string;
+};
+
+function AdminDashboardHeaderActions({
+  metrics,
+  onMetricClick,
+  selectedMetricKey,
+  canDashboardSearch,
+  searchValue,
+  onSearchChange,
+  searchPlaceholder,
+}: Readonly<AdminDashboardHeaderActionsProps>) {
+  return (
+    <>
+      <DesktopMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
+      {canDashboardSearch ? (
+        <TextField
+          placeholder={searchPlaceholder}
+          value={searchValue}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            onSearchChange(event.target.value);
+          }}
+          size="small"
+          sx={{ maxWidth: 280 }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchOutlined fontSize="small" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+      ) : null}
+    </>
+  );
+}
+
+type AdminDashboardScheduleFiltersProps = Pick<
+  AdminDashboardViewModel,
+  "dateValue" | "onDateChange" | "selectedTeacher" | "onTeacherChange"
+> & {
+  readonly filters: AdminDashboardLabelsBySection["filters"];
+};
+
+function AdminDashboardScheduleFilters({
+  filters,
+  dateValue,
+  onDateChange,
+  selectedTeacher,
+  onTeacherChange,
+}: Readonly<AdminDashboardScheduleFiltersProps>) {
+  return (
+    <Box sx={{ mb: 2.5 }}>
+      <ScheduleFilters
+        dateLabel={filters.listOfClassesOn}
+        dateValue={dateValue}
+        todayLabel={filters.today}
+        previousDayLabel={filters.previousDay}
+        nextDayLabel={filters.nextDay}
+        onDateChange={onDateChange}
+        teacherSelect={
+          <TeacherAutocompleteDesktop
+            value={selectedTeacher}
+            onChange={onTeacherChange}
+            label={filters.selectTeacher}
+          />
+        }
+      />
+    </Box>
+  );
+}
+
+type AdminDashboardScheduleOverviewProps = Pick<
+  AdminDashboardViewModel,
+  "rows" | "loading" | "page" | "totalCount" | "pageSize" | "onPageChange"
+> & {
+  readonly labelsBySection: AdminDashboardLabelsBySection;
+  readonly showTimezones: boolean;
+  readonly locale: ReturnType<typeof useAppLocale>;
+  readonly pageCount: number;
+};
+
+function AdminDashboardScheduleOverview({
+  rows,
+  labelsBySection,
+  loading,
+  showTimezones,
+  locale,
+  page,
+  totalCount,
+  pageSize,
+  pageCount,
+  onPageChange,
+}: Readonly<AdminDashboardScheduleOverviewProps>) {
+  const { shell, columns, status, actions } = {
+    shell: labelsBySection.shell,
+    columns: labelsBySection.columns,
+    status: labelsBySection.status,
+    actions: { detailsLabel: labelsBySection.shell.details },
+  };
+
+  return (
+    <>
+      <ScheduleOverviewListShell
+        rows={rows}
+        getKey={row => row.id ?? ""}
+        loading={loading}
+        emptyMessage={shell.noClasses}
+        renderItem={row => (
+          <ScheduleOverviewDesktopCard
+            row={row}
+            headers={columns}
+            statusLabels={status}
+            detailsLabel={actions.detailsLabel}
+            showTimezones={showTimezones}
+            locale={locale}
+          />
+        )}
+        renderEmptyState={() => (
+          <Box sx={{ py: 2 }}>
+            <ScheduleOverviewEmptyState message={shell.noClasses} />
+          </Box>
+        )}
+      />
+
+      {totalCount !== undefined ? (
+        <Box sx={{ pt: 2, display: "flex", justifyContent: "flex-end" }}>
+          <PaginationControls
+            page={page}
+            pageCount={pageCount}
+            rowCount={totalCount}
+            pageSize={pageSize}
+            onPageChange={onPageChange}
+          />
+        </Box>
+      ) : null}
+    </>
+  );
+}
+
 export function AdminDashboardDesktopView({
-  t,
+  labelsBySection,
   loading,
   lastUpdated,
   metrics,
@@ -25,8 +172,6 @@ export function AdminDashboardDesktopView({
   dateValue,
   selectedTeacher,
   rows,
-  headers,
-  statusLabels,
   page,
   totalCount,
   onPageChange,
@@ -34,65 +179,42 @@ export function AdminDashboardDesktopView({
   onDateChange,
   onTeacherChange,
   pageSize,
+  pageCount,
   canDashboardSearch,
   canScheduleFilterAdvanced,
   canScheduleViewTimezones,
 }: Readonly<AdminDashboardViewModel>) {
   const locale = useAppLocale();
   const showTimezones = canScheduleViewTimezones;
-  const pageCount = Math.max(1, Math.ceil((totalCount ?? 0) / pageSize));
+  const { shell, filters } = labelsBySection;
 
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={t.todayClasses}
+        title={shell.todayClasses}
         subtitle={lastUpdated}
         actions={
-          <>
-            <DesktopMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
-            {canDashboardSearch ? (
-              <TextField
-                placeholder={t.searchPlaceholder}
-                value={searchValue}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  onSearchChange(event.target.value);
-                }}
-                size="small"
-                sx={{ maxWidth: 280 }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchOutlined fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-            ) : null}
-          </>
+          <AdminDashboardHeaderActions
+            metrics={metrics}
+            onMetricClick={onMetricClick}
+            selectedMetricKey={selectedMetricKey}
+            canDashboardSearch={canDashboardSearch}
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            searchPlaceholder={shell.searchPlaceholder}
+          />
         }
       />
 
-      <DesktopSectionPanel title={t.scheduleOverview}>
+      <DesktopSectionPanel title={shell.scheduleOverview}>
         {canScheduleFilterAdvanced ? (
-          <Box sx={{ mb: 2.5 }}>
-            <ScheduleFilters
-              dateLabel={t.listOfClassesOn}
-              dateValue={dateValue}
-              todayLabel={t.today}
-              previousDayLabel={t.previousDay}
-              nextDayLabel={t.nextDay}
-              onDateChange={onDateChange}
-              teacherSelect={
-                <TeacherAutocompleteDesktop
-                  value={selectedTeacher}
-                  onChange={onTeacherChange}
-                  label={t.selectTeacher}
-                />
-              }
-            />
-          </Box>
+          <AdminDashboardScheduleFilters
+            filters={filters}
+            dateValue={dateValue}
+            onDateChange={onDateChange}
+            selectedTeacher={selectedTeacher}
+            onTeacherChange={onTeacherChange}
+          />
         ) : null}
         {selectedMetricLabel ? (
           <Box sx={{ mb: 1 }}>
@@ -100,39 +222,18 @@ export function AdminDashboardDesktopView({
           </Box>
         ) : null}
 
-        <ScheduleOverviewListShell
+        <AdminDashboardScheduleOverview
           rows={rows}
-          getKey={row => row.id ?? ""}
+          labelsBySection={labelsBySection}
           loading={loading}
-          emptyMessage={t.noClasses}
-          renderItem={row => (
-            <ScheduleOverviewDesktopCard
-              row={row}
-              headers={headers}
-              statusLabels={statusLabels}
-              detailsLabel={t.details}
-              showTimezones={showTimezones}
-              locale={locale}
-            />
-          )}
-          renderEmptyState={() => (
-            <Box sx={{ py: 2 }}>
-              <ScheduleOverviewEmptyState message={t.noClasses} />
-            </Box>
-          )}
+          showTimezones={showTimezones}
+          locale={locale}
+          page={page}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          pageCount={pageCount}
+          onPageChange={onPageChange}
         />
-
-        {totalCount !== undefined ? (
-          <Box sx={{ pt: 2, display: "flex", justifyContent: "flex-end" }}>
-            <PaginationControls
-              page={page}
-              pageCount={pageCount}
-              rowCount={totalCount}
-              pageSize={pageSize}
-              onPageChange={onPageChange}
-            />
-          </Box>
-        ) : null}
       </DesktopSectionPanel>
     </DesktopPageContainer>
   );

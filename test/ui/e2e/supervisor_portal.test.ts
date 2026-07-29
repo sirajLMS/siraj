@@ -22,8 +22,6 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     // Dashboard page title
     expect(await page.getByRole("heading", { name: /لوحة المشرف/i }).isVisible()).toBe(true);
 
@@ -38,8 +36,6 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     expect(await page.getByText(/الموافقات الأخيرة|Recent Approvals/i).isVisible()).toBe(true);
 
     const emptyState = page.getByText(/لا توجد موافقات حديثة|No recent approvals/i);
@@ -61,8 +57,6 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     // Teacher dues summary section
     expect(await page.getByRole("heading", { name: /ملخص مستحقات المعلمين/i }).isVisible()).toBe(true);
     expect(await page.getByText(/إجمالي المستحقات المعلقة/i).isVisible()).toBe(true);
@@ -73,8 +67,6 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     // Monthly reports shortcut section
     expect(await page.getByRole("heading", { name: /التقارير الشهرية/i }).isVisible()).toBe(true);
     expect(await page.getByRole("button", { name: /عرض التقارير الشهرية/i }).isVisible()).toBe(true);
@@ -84,13 +76,9 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     // Click go to reviews button
     await page.getByRole("button", { name: /انتقل إلى المراجعات/i }).click();
     await page.waitForURL("**/lesson-reports**");
-    await page.waitForLoadState("networkidle");
-
     // Pending reviews page title
     expect(await page.getByRole("heading", { name: /مراجعات الحصص المعلقة/i }).isVisible()).toBe(true);
 
@@ -103,11 +91,7 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     await page.goto("/lesson-reports");
-    await page.waitForLoadState("networkidle");
-
     // Check for either approve/reject buttons OR empty state message
     const approveButton = page.getByRole("button", { name: /قبول|Approve/i });
     const rejectButton = page.getByRole("button", { name: /رفض|Reject/i });
@@ -125,13 +109,9 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     // Click go to dues button
     await page.getByRole("button", { name: /عرض مستحقات المعلمين/i }).click();
     await page.waitForURL("**/teacher-dues**");
-    await page.waitForLoadState("networkidle");
-
     // Teacher dues page title
     expect(await page.getByRole("heading", { name: /مستحقات المعلمين/i }).isVisible()).toBe(true);
 
@@ -157,13 +137,9 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     // Click go to monthly reports button
     await page.getByRole("button", { name: /عرض التقارير الشهرية/i }).click();
     await page.waitForURL("**/monthly-reports**");
-    await page.waitForLoadState("networkidle");
-
     // Monthly reports page title
     expect(await page.getByRole("heading", { name: /التقارير الشهرية/i }).isVisible()).toBe(true);
 
@@ -185,11 +161,7 @@ describe("Supervisor Portal E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     await page.goto("/profile");
-    await page.waitForLoadState("networkidle");
-
     // Canonical own-profile route (same as teachers/students)
     expect(await page.getByRole("heading", { name: /الملف الشخصي|الملف|Profile/i }).isVisible()).toBe(true);
   });
@@ -198,8 +170,6 @@ describe("Supervisor Portal E2E", () => {
     context = await createMobileContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
-
     // Dashboard page title visible
     expect(await page.getByRole("heading", { name: /لوحة المشرف/i }).isVisible()).toBe(true);
 

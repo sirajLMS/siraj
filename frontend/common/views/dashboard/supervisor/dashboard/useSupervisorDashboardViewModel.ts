@@ -13,14 +13,14 @@ import type {
   UseSupervisorDashboardViewModelProps,
 } from "@/frontend/common/views/dashboard/supervisor/dashboard/types/supervisorDashboardTypes";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { SupervisorDashboardViewModel, UseSupervisorDashboardViewModelProps };
 
 export function useSupervisorDashboardViewModel(
   _props: Readonly<UseSupervisorDashboardViewModelProps> = {}
 ): SupervisorDashboardViewModel {
-  const t = useAppTranslation().dashboardTranslations.supervisorPortalDashboard;
+  const t = useAppTranslation(Translation.Dashboard.SupervisorPortalDashboard);
   const locale = useAppLocale();
   const router = useRouter();
   const userName = useUserStore(state => state.name);

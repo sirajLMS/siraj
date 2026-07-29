@@ -9,7 +9,7 @@ import { useLocalizedStringInputState } from "@/frontend/common/hooks/useLocaliz
 import { LocaleAdornmentSwitchMobile } from "@/frontend/mobile/components/ui/input/localizedString/localeAdornmentSwitch.mobile";
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString/localizedStringDrawer.mobile";
 import type { LocalizedStringLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type EditDrawerControlProps = {
   readonly t: LocalizedStringLabels;
@@ -67,7 +67,7 @@ export const LocalizedStringInputMobile: React.FC<LocalizedStringInputProps> = (
   drawerDismissAction = "save",
   sx,
 }) => {
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     isCompact,

@@ -35,7 +35,15 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { buildCreateRecurringClassInput } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/utils";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { TeacherCreateRecurringClassLabels } from "@/shared/locale/types/dashboard/teachers/createRecurringClass";
+import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
+import type {
+  MeetingConfigClassScopeLabels,
+  MeetingConfigJoinLabels,
+  MeetingConfigManagerLabels,
+  MeetingConfigRecurringScheduleLabels,
+} from "@/shared/locale/types/ui";
 
 export interface TeacherWeeklyScheduleViewModel extends TeacherWeeklyScheduleViewProps {
   readonly createRecurringClassDialog: CreateRecurringClassDialogViewModel;
@@ -70,6 +78,8 @@ type BaseViewModelFields = Pick<
   | "hasScheduleClearWeekly"
   | "hasScheduleViewWorkload"
   | "hasScheduleDeleteClass"
+  | "labels"
+  | "meetingJoinLabels"
   | "createRecurringClassDialog"
   | "handleRefetch"
 >;
@@ -80,8 +90,6 @@ type CreateClassFn = (opts: { variables: { input: CreateRecurringClassInput } })
   data?: { createRecurringClass?: CreateRecurringClassResult | null };
 }>;
 
-type Translations = ReturnType<typeof useScheduleTranslations>;
-
 type ScheduleClass =
   TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass;
 
@@ -90,21 +98,23 @@ type ScheduleGrid = { teacherId: string | null; weekEnd: string | null; classes:
 type Workload = TeacherWorkloadMetricsQuery_teacherWorkloadMetrics_WeeklyWorkloadMetrics | null | undefined;
 
 function useScheduleTranslations(): {
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["teacherWeeklySchedule"];
-  readonly dialogLabels: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["teacherCreateRecurringClass"];
-  readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigManager"];
-  readonly tRecurringSchedule: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigRecurringSchedule"];
-  readonly tClassScope: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfigClassScope"];
+  readonly t: TeacherWeeklyScheduleLabels;
+  readonly dialogLabels: TeacherCreateRecurringClassLabels;
+  readonly tMeeting: MeetingConfigManagerLabels;
+  readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
+  readonly tClassScope: MeetingConfigClassScopeLabels;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
 } {
   return {
-    t: useAppTranslation().dashboardTranslations.teacherWeeklySchedule,
+    t: useAppTranslation(Translation.Dashboard.TeacherWeeklySchedule),
     // NEW FOR PLAN v5: dialog labels lifted out of the tier views (specs §6.3 —
     // labels travel with the ViewModel, the tier views no longer call
     // `useAppTranslation` themselves for THIS dialog).
-    dialogLabels: useAppTranslation().dashboardTranslations.teacherCreateRecurringClass,
-    tMeeting: useAppTranslation().uiTranslations.meetingConfigManager,
-    tRecurringSchedule: useAppTranslation().uiTranslations.meetingConfigRecurringSchedule,
-    tClassScope: useAppTranslation().uiTranslations.meetingConfigClassScope,
+    dialogLabels: useAppTranslation(Translation.Dashboard.TeacherCreateRecurringClass),
+    tMeeting: useAppTranslation(Translation.Ui.MeetingConfig).manager,
+    tRecurringSchedule: useAppTranslation(Translation.Ui.MeetingConfigRecurringSchedule),
+    tClassScope: useAppTranslation(Translation.Ui.MeetingConfig).classScope,
+    meetingJoinLabels: useAppTranslation(Translation.Ui.MeetingConfig).join,
   };
 }
 
@@ -231,7 +241,7 @@ function useCompleteSuccessfulCreate(args: {
   readonly client: ReturnType<typeof useApolloClient>;
   readonly formState: CreateRecurringClassDialogFormState;
   readonly notifications: ReturnType<typeof useNotifications>;
-  readonly dialogLabels: Translations["dialogLabels"];
+  readonly dialogLabels: TeacherCreateRecurringClassLabels;
   readonly handleRefetch: () => Promise<void>;
   readonly closeDialog: () => void;
 }) {
@@ -286,7 +296,7 @@ function useHandleSubmit(args: {
   readonly createClassMutation: CreateClassFn;
   readonly completeSuccessfulCreate: (result: CreateRecurringClassResult) => Promise<void>;
   readonly notifications: ReturnType<typeof useNotifications>;
-  readonly creationFailedLabel: Translations["dialogLabels"]["errors"]["creationFailed"];
+  readonly creationFailedLabel: TeacherCreateRecurringClassLabels["errors"]["creationFailed"];
 }) {
   const {
     teacherId,
@@ -363,9 +373,9 @@ function buildCreateRecurringClassDialog(args: {
   readonly validateBeforeSubmit: () => boolean;
   readonly handleSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
   readonly hasSessionCreateClass: boolean;
-  readonly dialogLabels: Translations["dialogLabels"];
-  readonly tMeeting: Translations["tMeeting"];
-  readonly tRecurringSchedule: Translations["tRecurringSchedule"];
+  readonly dialogLabels: TeacherCreateRecurringClassLabels;
+  readonly tMeeting: MeetingConfigManagerLabels;
+  readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
   readonly onGoToCreatedClass: () => void;
 }): CreateRecurringClassDialogViewModel {
   const {
@@ -435,7 +445,7 @@ export function useTeacherWeeklyScheduleViewModel(
 ): TeacherWeeklyScheduleViewModel {
   const { teacherId } = props;
 
-  const { t, dialogLabels, tMeeting, tRecurringSchedule, tClassScope } = useScheduleTranslations();
+  const { t, dialogLabels, tMeeting, tRecurringSchedule, tClassScope, meetingJoinLabels } = useScheduleTranslations();
   const notifications = useNotifications();
   const client = useApolloClient();
   const router = useRouter();
@@ -456,7 +466,7 @@ export function useTeacherWeeklyScheduleViewModel(
   const teacherName =
     directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name || loggedInUserName || "";
 
-  useDocumentTitle(teacherName, "dashboard.teacherWeeklySchedule", "pageTitle");
+  useDocumentTitle(teacherName, Translation.Dashboard.TeacherWeeklySchedule, "pageTitle");
 
   // NEW FOR PLAN v5: `useDialogFormState` (8 `useState` + 1 `useEffect`) is
   // now called by the ViewModel instead of by the tier views (specs §6.2 + N7
@@ -546,6 +556,8 @@ export function useTeacherWeeklyScheduleViewModel(
     hasScheduleClearWeekly: permissions.hasScheduleClearWeekly,
     hasScheduleViewWorkload: permissions.hasScheduleViewWorkload,
     hasScheduleDeleteClass: permissions.hasScheduleDeleteClass,
+    labels: t,
+    meetingJoinLabels,
     createRecurringClassDialog,
     handleRefetch,
   };

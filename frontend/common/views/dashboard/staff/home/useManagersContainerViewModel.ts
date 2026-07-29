@@ -14,6 +14,7 @@ import type {
   ManagerStatusFilter,
   NonNullableManagerDirectoryMetrics,
 } from "@/frontend/common/views/dashboard/staff/home/types";
+import { type StaffDirectoryLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function mapManagerRole(roleSlug: string | null | undefined): ManagerRole {
   if (!roleSlug) return "staff";
@@ -87,6 +88,7 @@ function resolveFilter<T extends string>(filter: T): T | null {
 }
 
 export interface ManagersContainerViewModel {
+  readonly labels: StaffDirectoryLabels;
   readonly managers: readonly Manager[];
   readonly metrics: NonNullableManagerDirectoryMetrics;
   readonly totalManagers: number | undefined;
@@ -109,6 +111,7 @@ export interface UseManagersContainerViewModelProps {
 export function useManagersContainerViewModel(
   _props: Readonly<UseManagersContainerViewModelProps>
 ): ManagersContainerViewModel {
+  const labels = useAppTranslation(Translation.Dashboard.StaffDirectory);
   const roleFilter = useStaffDirectoryStore(state => state.roleFilter);
   const statusFilter = useStaffDirectoryStore(state => state.statusFilter);
   const setRoleFilter = useStaffDirectoryStore(state => state.setRoleFilter);
@@ -145,6 +148,7 @@ export function useManagersContainerViewModel(
   const totalCount = data ? (data.managerDirectory?.totalCount ?? 0) : undefined;
 
   return {
+    labels,
     managers: rows,
     metrics,
     totalManagers: totalCount,

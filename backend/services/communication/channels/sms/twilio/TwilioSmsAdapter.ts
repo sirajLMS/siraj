@@ -12,16 +12,27 @@ import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 
 const DEFAULT_SMS_RATE_LIMIT_PER_HOUR = 3;
 
+/**
+ * Optional Twilio credentials for the factory-provided construction path.
+ *
+ * When omitted, the adapter falls back to {@link getEnvironmentConfig} so
+ * that existing no-arg `new TwilioSmsAdapter()` callers (integration tests,
+ * ad-hoc scripts) keep working unchanged.
+ */
+export interface TwilioSmsAdapterOptions {
+  accountSid?: string;
+  authToken?: string;
+  fromNumber?: string;
+}
+
 export class TwilioSmsAdapter implements ISmsChannel {
   private readonly context: TwilioSmsContext;
   private readonly rateLimitConfig: TwilioRateLimitConfig;
 
-  constructor() {
-    const {
-      twilioAccountSid: accountSid,
-      twilioAuthToken: authToken,
-      twilioFromNumber: fromNumber,
-    } = getEnvironmentConfig();
+  constructor(opts?: TwilioSmsAdapterOptions) {
+    const accountSid = opts?.accountSid ?? getEnvironmentConfig().twilioAccountSid;
+    const authToken = opts?.authToken ?? getEnvironmentConfig().twilioAuthToken;
+    const fromNumber = opts?.fromNumber ?? getEnvironmentConfig().twilioFromNumber;
 
     if (!accountSid) {
       throw new Error("TWILIO_ACCOUNT_SID environment variable is required for TwilioSmsAdapter");

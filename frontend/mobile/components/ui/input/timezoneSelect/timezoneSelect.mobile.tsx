@@ -16,7 +16,7 @@ import {
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
 import type { TimezoneSelectProps } from "@/frontend/mobile/components/ui/input/timezoneSelect/TimezoneSelect";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export const TimezoneSelectMobile: React.FC<TimezoneSelectProps> = ({
   value,
@@ -31,7 +31,7 @@ export const TimezoneSelectMobile: React.FC<TimezoneSelectProps> = ({
   error,
   helperText,
 }: TimezoneSelectProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.timezoneSelect;
+  const t = useAppTranslation(Translation.Ui.TimezoneSelect);
   const locale = useAppLocale();
 
   const options = useMemo(() => getTimezoneOptions(locale), [locale]);

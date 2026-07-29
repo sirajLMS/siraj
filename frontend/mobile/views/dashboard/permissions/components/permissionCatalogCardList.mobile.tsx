@@ -5,10 +5,13 @@ import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql
 import type { BasePermissionCatalogListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
-import { useAppTranslation } from "@/shared/locale";
 
-export function PermissionCatalogCardListMobile({ permissions, groups }: Readonly<BasePermissionCatalogListProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+export function PermissionCatalogCardListMobile({
+  labels,
+  permissions,
+  groups,
+}: Readonly<BasePermissionCatalogListProps>) {
+  const t = labels;
 
   return (
     <MobileCardList<Permission>
@@ -28,7 +31,7 @@ export function PermissionCatalogCardListMobile({ permissions, groups }: Readonl
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box
                   sx={theme => ({
-                    fontFamily: "JetBrains Mono, monospace",
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
                     typography: "bodyMd",
                     fontWeight: 500,
                     backgroundColor: theme.palette.primaryContainer,

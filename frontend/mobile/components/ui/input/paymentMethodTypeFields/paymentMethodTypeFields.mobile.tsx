@@ -13,7 +13,7 @@ import { LocalizedStringFormFieldMobile } from "@/frontend/mobile/components/ui/
 import { PaymentMethodSelectMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect";
 import { PhoneFormFieldMobile } from "@/frontend/mobile/components/ui/input/phoneInput";
 import { TagInputMobile } from "@/frontend/mobile/components/ui/input/tagInput";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function PaymentMethodTypeFieldsMobile<T extends FieldValues>({
   type,
@@ -33,7 +33,7 @@ export function PaymentMethodTypeFieldsMobile<T extends FieldValues>({
   detailsPrefix,
   catalogPrefix,
 }: Readonly<PaymentMethodTypeFieldsProps<T>>): React.ReactNode {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tTypeFields = t.typeFields;
 
   const renderCatalogMetadata = () => {

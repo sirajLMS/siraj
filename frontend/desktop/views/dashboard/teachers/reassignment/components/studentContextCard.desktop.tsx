@@ -4,20 +4,17 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui";
 import type { StudentContextCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
-import { DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
-import { useAppTranslation } from "@/shared/locale";
+import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 
-export function StudentContextCardDesktop({ student }: Readonly<StudentContextCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment.studentContext;
-
+export function StudentContextCardDesktop({ student, labels }: Readonly<StudentContextCardProps>) {
   return (
     <BaseCard>
-      <Stack spacing={3} sx={{ alignItems: "center", textAlign: "center" }}>
+      <Stack spacing={2} sx={{ alignItems: "center", textAlign: "center" }}>
         <DesktopUserAvatar
           src={student.avatarUrl}
           label={student.name}
-          size={96}
+          size={80}
           variant="rounded"
           sx={theme => ({
             border: `2px solid ${theme.palette.primary.main}`,
@@ -25,7 +22,7 @@ export function StudentContextCardDesktop({ student }: Readonly<StudentContextCa
           })}
         />
         <Box>
-          <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
             {student.name}
           </Typography>
         </Box>
@@ -33,21 +30,21 @@ export function StudentContextCardDesktop({ student }: Readonly<StudentContextCa
         <Box
           sx={theme => ({
             width: "100%",
-            p: 1.5,
+            p: 1,
             backgroundColor: theme.palette.surfaceContainerLow,
             borderRadius: 2,
             textAlign: "left",
           })}
         >
           <Typography
-            variant="labelUppercase"
+            variant="labelSm"
             sx={theme => ({
               color: theme.palette.onSurfaceVariant,
               display: "block",
               mb: 0.5,
             })}
           >
-            {t.enrollment}
+            {labels.enrollment}
           </Typography>
           <DesktopStatusBadge category="studentAccount" status={student.accountStatus} label={student.accountStatus} />
         </Box>

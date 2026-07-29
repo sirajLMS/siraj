@@ -11,6 +11,7 @@ import {
   type NotificationPreferenceRole,
   resolveNotificationEventAllowlist,
 } from "@/shared/constants/notification-event-allowlists";
+import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 export type NotificationPrefRow = NonNullable<
   Operations.NotificationPreferencesQuery["notificationPreferences"]
@@ -26,6 +27,7 @@ export interface PreferenceMatrixRow {
 }
 
 export interface NotificationPreferencesTabVariantProps {
+  readonly labels: ProfileNotificationsLabels;
   readonly preferences: readonly NotificationPrefRow[];
   readonly onToggle: (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => void;
   readonly disabled: boolean;

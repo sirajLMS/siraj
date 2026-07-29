@@ -2,16 +2,14 @@
 
 import { Button } from "@mui/material";
 import type { NotificationMetadata } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
-import { useAppTranslation } from "@/shared/locale/client";
 
 export interface RowViewEntityActionProps {
+  readonly viewLabel: string;
   readonly metadata: NotificationMetadata;
   readonly onViewEntity: (metadata: NotificationMetadata) => void;
 }
 
-export function RowViewEntityAction({ metadata, onViewEntity }: Readonly<RowViewEntityActionProps>) {
-  const viewLabel = useAppTranslation().notificationsTranslations.viewEntity;
-
+export function RowViewEntityAction({ viewLabel, metadata, onViewEntity }: Readonly<RowViewEntityActionProps>) {
   return (
     <Button
       size="small"
@@ -20,7 +18,7 @@ export function RowViewEntityAction({ metadata, onViewEntity }: Readonly<RowView
         event.stopPropagation();
         onViewEntity(metadata);
       }}
-      sx={{ alignSelf: "flex-start", minWidth: 0, px: 0.5 }}
+      sx={{ minWidth: 0, px: 0.5, alignSelf: "flex-start" }}
     >
       {viewLabel}
     </Button>

@@ -1,6 +1,7 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { StatusTrackingScheduleRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ClassExecutionState, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { StatusTrackingLabelsBySection } from "@/frontend/common/views/dashboard/classes/status/tracking/types/statusTrackingViewModel.types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export enum SessionStatus {
@@ -144,7 +145,7 @@ export interface StatusTrackingViewProps {
   readonly rows: readonly StatusTrackingRow[];
   readonly totalSessions: number;
   readonly suspendedCount: number;
-  readonly labels: StatusTrackingLabels;
+  readonly labelsBySection: StatusTrackingLabelsBySection;
   readonly dateValue: string;
   readonly onDateChange: (date: string) => void;
   readonly onActivate: (id: string) => void;
@@ -186,14 +187,9 @@ export interface StatusActionProps {
   readonly onVerify: (id: string) => void;
 }
 
-export interface MobileLayoutProps extends StatusTrackingViewProps {
-  readonly cardListLabels: CardListLabels;
-  readonly analyticsLabels: SuspensionAnalyticsLabels;
-}
+export type MobileLayoutProps = StatusTrackingViewProps;
 
-export interface DesktopLayoutProps extends StatusTrackingViewProps {
-  readonly analyticsLabels: SuspensionAnalyticsLabels;
-}
+export type DesktopLayoutProps = StatusTrackingViewProps;
 
 export function computeSessionStatus(
   studentStatus: string | null,

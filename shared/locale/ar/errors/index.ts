@@ -170,6 +170,11 @@ export const errorsAr: ErrorsLabels = {
   permissionGroup: {
     permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
   },
+  sessionConfig: {
+    roleNameRequired: "اسم الدور مطلوب.",
+    ttlOutOfRange: "يجب أن تكون مدة الجلسة بين 60 و 2,419,200 ثانية.",
+    maxConcurrentOutOfRange: "يجب أن يكون الحد الأقصى للجلسات المتزامنة بين 1 و 50.",
+  },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
   duplicateRequest: "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",

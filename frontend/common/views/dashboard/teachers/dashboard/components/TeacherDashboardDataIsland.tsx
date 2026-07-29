@@ -10,7 +10,10 @@ import type {
   TeacherProgressFeedEventKind,
   TeacherScheduleRow,
 } from "@/frontend/common/types/shared.types";
-import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import type {
+  TeacherDashboardLastUpdatedLabels,
+  TeacherDashboardViewLabels,
+} from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
 import { useTeacherDashboardLastUpdated } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/useTeacherDashboardLastUpdated";
 
@@ -35,6 +38,7 @@ interface RawFeedItem {
 interface DataIslandProps {
   /** Current label bag, built once per locale change by the coordinator. */
   readonly labels: TeacherDashboardViewLabels;
+  readonly lastUpdatedLabels: TeacherDashboardLastUpdatedLabels;
 }
 
 /**
@@ -45,7 +49,7 @@ interface DataIslandProps {
  * composing the ViewModel — mutation islands can request a refetch through
  * the registered `refetch` handler.
  */
-export function TeacherDashboardDataIsland({ labels }: Readonly<DataIslandProps>) {
+export function TeacherDashboardDataIsland({ labels, lastUpdatedLabels }: Readonly<DataIslandProps>) {
   const filterDate = useTeacherDashboardStore(state => state.filterDate);
   const page = useTeacherDashboardStore(state => state.page);
   const pageSize = useTeacherDashboardStore(state => state.pageSize);
@@ -78,7 +82,7 @@ export function TeacherDashboardDataIsland({ labels }: Readonly<DataIslandProps>
     }
   }, [dashboardData]);
 
-  const lastUpdated = useTeacherDashboardLastUpdated(dataArrivedAt);
+  const lastUpdated = useTeacherDashboardLastUpdated(dataArrivedAt, lastUpdatedLabels);
 
   const refetchHandler = useCallback(() => {
     void refetch();

@@ -9,7 +9,7 @@ import {
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
 import type { ValidPermission } from "@/frontend/common/views/dashboard/permissions/types/validPermission.types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type { ValidPermission };
 
@@ -62,7 +62,7 @@ function usePermissionFormFilters(
   searchTerm: string,
   selectedCategory: string
 ): GroupedPermissions {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = useAppTranslation(Translation.Dashboard.Permissions);
 
   const validPermissions = useMemo(
     () => permissions.filter((p): p is ValidPermission => !!p.id && !!p.key && !!p.category),

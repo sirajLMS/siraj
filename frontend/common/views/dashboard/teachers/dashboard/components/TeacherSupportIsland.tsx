@@ -6,7 +6,11 @@ import { logTeacherSupportRequestMutationDocument } from "@/frontend/common/grap
 import type { SupportRequestType } from "@/frontend/common/stores/teacherDashboardStore";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+
+interface TeacherSupportIslandProps {
+  readonly labels: TeacherDashboardViewLabels;
+}
 
 /**
  * Owns the `logTeacherSupportRequest` mutation and registers
@@ -14,8 +18,7 @@ import { useAppTranslation } from "@/shared/locale";
  * success snackbar via the store; the request target is encoded in the
  * mutation `reason` string.
  */
-export function TeacherSupportIsland() {
-  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
+export function TeacherSupportIsland({ labels }: Readonly<TeacherSupportIslandProps>) {
   const setHandlers = useTeacherDashboardStore(state => state.setHandlers);
   const showSnackbar = useTeacherDashboardStore(state => state.showSnackbar);
 
@@ -31,12 +34,12 @@ export function TeacherSupportIsland() {
             },
           },
         });
-        showSnackbar(t.supportRequestSubmitted(type.toLowerCase()), "success");
+        showSnackbar(labels.supportRequestSubmitted(type.toLowerCase()), "success");
       } catch (err) {
         logger.error("Error logging support request:", err);
       }
     },
-    [logSupportRequest, showSnackbar, t]
+    [logSupportRequest, showSnackbar, labels]
   );
 
   const handleContactCoordinator = useCallback(() => {

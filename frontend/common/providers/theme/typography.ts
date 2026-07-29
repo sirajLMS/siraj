@@ -142,4 +142,11 @@ export const typography = {
     letterSpacing: "0.1em",
     textTransform: "uppercase",
   },
+  mono: {
+    fontFamily: "var(--font-jetbrains-mono), monospace",
+    fontSize: "0.875rem",
+    fontWeight: 400,
+    lineHeight: 1.43,
+    ...blockText,
+  },
 };

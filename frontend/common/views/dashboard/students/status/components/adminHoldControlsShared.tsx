@@ -6,10 +6,10 @@ import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-t
 import type { StatusUpdateFormData } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/common/views/dashboard/students/status/types";
 import type { AdminHoldControlsSlotProps } from "@/frontend/common/views/dashboard/students/status/types/adminHoldControlsShared.types";
-import { useAppTranslation } from "@/shared/locale";
+import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 
 function StatusSelectionField() {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   const { control } = useFormContext<StatusUpdateFormData>();
 
   return (
@@ -54,7 +54,7 @@ function StatusSelectionField() {
 }
 
 function ReasonEntryField({ slots }: Readonly<{ slots: AdminHoldControlsSlotProps }>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   const {
     control,
     formState: { errors },
@@ -135,7 +135,7 @@ function SubmitStatusButton({
   isUpdating,
   slots,
 }: Readonly<{ isUpdating: boolean; slots: AdminHoldControlsSlotProps }>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   const { watch } = useFormContext<StatusUpdateFormData>();
   const currentStatus = watch("status");
   const { PrimaryPageAction } = slots;
@@ -167,7 +167,7 @@ export interface AdminHoldControlsSharedProps {
 }
 
 export function AdminHoldControlsShared({ props, slots, containerGap = 3 }: Readonly<AdminHoldControlsSharedProps>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   const { AdminControlPanel } = slots;
 
   return (

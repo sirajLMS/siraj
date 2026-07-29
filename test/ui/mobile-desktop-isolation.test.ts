@@ -12,11 +12,13 @@ import { join, relative, resolve } from "node:path";
  *
  * They act as a safety net so a broken ESLint config, a misconfigured glob, or an
  * editor that bypassed linting cannot silently let a violating import slip through.
- * Scanning is restricted to `frontend/views/` per the plan (Phase 6, lines 634-636).
+ * Scanning covers `frontend/mobile/views/` and `frontend/desktop/views/` (tier-isolated
+ * view trees). Legacy `frontend/views/` is included when versioned files remain there.
  */
 
 const VIEWS_ROOT = resolve(import.meta.dirname, "../../frontend/views");
 const MOBILE_VIEWS_ROOT = resolve(import.meta.dirname, "../../frontend/mobile/views");
+const DESKTOP_VIEWS_ROOT = resolve(import.meta.dirname, "../../frontend/desktop/views");
 
 const FORBIDDEN_USE_MEDIA_QUERY = /\buseMediaQuery\b/;
 const FROM_DESKTOP = /\.desktop\b/;
@@ -59,6 +61,7 @@ function collectVersionedFiles(): VersionedFile[] {
   const rawPaths: string[] = [];
   walkDir(VIEWS_ROOT, rawPaths);
   walkDir(MOBILE_VIEWS_ROOT, rawPaths);
+  walkDir(DESKTOP_VIEWS_ROOT, rawPaths);
   for (const path of rawPaths) {
     const tier = isVersioned(path);
     if (tier === null) continue;
@@ -129,11 +132,11 @@ describe("mobile/desktop isolation: useMediaQuery", () => {
 });
 
 describe("mobile/desktop isolation: smoke checks (sanity)", () => {
-  test("discovers at least one mobile versioned file under frontend/views", () => {
+  test("discovers at least one mobile versioned file under frontend/mobile/views", () => {
     expect(mobileFiles.length).toBeGreaterThan(0);
   });
 
-  test("discovers at least one desktop versioned file under frontend/views", () => {
+  test("discovers at least one desktop versioned file under frontend/desktop/views", () => {
     expect(desktopFiles.length).toBeGreaterThan(0);
   });
 

@@ -8,7 +8,7 @@ import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/
 import type { ClassMeetingConfigFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type DesktopMeetingConfigListItem = UserMeetingConfigFieldsFragment | ClassMeetingConfigFieldsFragment;
 
@@ -31,7 +31,7 @@ export function DesktopMeetingConfigList({
   onDeleteAction,
   emptyMessage,
 }: DesktopMeetingConfigListProps) {
-  const t = useAppTranslation().uiTranslations.meetingConfig;
+  const t = useAppTranslation(Translation.Ui.MeetingConfig);
   const tDisplay = t.display;
   const tManager = t.manager;
   const locale = useAppLocale();

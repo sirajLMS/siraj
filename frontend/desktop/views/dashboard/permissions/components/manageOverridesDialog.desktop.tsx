@@ -8,7 +8,6 @@ import { OverridesDataGridDesktop } from "@/frontend/desktop/views/dashboard/per
 import { OverridesDialogFooterDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overridesDialogFooter.desktop";
 import { OverridesToolbarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overridesToolbar.desktop";
 import { OverridesUserSidebarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overridesUserSidebar.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
@@ -39,11 +38,12 @@ const StyledRightContentArea = styled(Box)({
 });
 
 export function ManageOverridesDialogDesktop({
+  labels,
   open,
   onClose,
   manageOverridesState,
 }: Readonly<ManageOverridesDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   const {
     user,
@@ -95,10 +95,11 @@ export function ManageOverridesDialogDesktop({
       </StyledDialogTitle>
 
       <StyledDialogContent>
-        <OverridesUserSidebarDesktop user={user} userGroups={userGroups} />
+        <OverridesUserSidebarDesktop labels={labels} user={user} userGroups={userGroups} />
 
         <StyledRightContentArea>
           <OverridesToolbarDesktop
+            labels={labels}
             mode={mode}
             onModeChange={setMode}
             searchQuery={searchQuery}
@@ -106,6 +107,7 @@ export function ManageOverridesDialogDesktop({
           />
 
           <OverridesDataGridDesktop
+            labels={labels}
             filteredPermissions={filteredPermissions}
             userGroups={userGroups}
             localOverrides={localOverrides}

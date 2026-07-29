@@ -4,9 +4,10 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { fromGraphqlIanaTimezone, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useAppTranslation } from "@/shared/locale";
+import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
 interface Props {
+  readonly labels: RescheduleFormLabels;
   readonly timezone: string;
 }
 
@@ -15,8 +16,7 @@ function formatTimezoneLabel(timezone: string, locale: string): string {
   return getTimezoneSelectLabel(normalized, locale);
 }
 
-export function TimezoneWarningBannerDesktop({ timezone }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm;
+export function TimezoneWarningBannerDesktop({ labels, timezone }: Readonly<Props>) {
   const locale = useAppLocale();
   const timezoneLabel = formatTimezoneLabel(timezone, locale);
 
@@ -35,7 +35,7 @@ export function TimezoneWarningBannerDesktop({ timezone }: Readonly<Props>) {
     >
       <InfoOutlined sx={theme => ({ color: theme.palette.onWarningContainer })} />
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onWarningContainer })}>
-        {t.warning.message(timezoneLabel)}
+        {labels.warning.message(timezoneLabel)}
       </Typography>
     </Box>
   );

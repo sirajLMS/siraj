@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { useCallback, useState } from "react";
 import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
 import type { ParentRulesLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ParentRulesViewModel {
   readonly labels: ParentRulesLabels;
@@ -15,7 +15,7 @@ export interface ParentRulesViewModel {
 export type UseParentRulesViewModelProps = Record<string, never>;
 
 export function useParentRulesViewModel(_props: Readonly<UseParentRulesViewModelProps>): ParentRulesViewModel {
-  const labels = useAppTranslation().dashboardTranslations.parentRules;
+  const labels = useAppTranslation(Translation.Dashboard.ParentRules);
   const [handbookLoading, setHandbookLoading] = useState(false);
 
   const { data, loading, refetch } = useQuery(parentHandbookUrlQueryDocument, {

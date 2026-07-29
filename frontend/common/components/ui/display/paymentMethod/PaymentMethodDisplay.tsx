@@ -21,6 +21,7 @@ import {
   type PaymentMethodListLabels,
   type PaymentMethodTypeFieldsLabels,
   type PaymentMethodTypeLabels,
+  Translation,
   useAppTranslation,
 } from "@/shared/locale";
 
@@ -150,7 +151,7 @@ export function PaymentMethodDisplay({
   showDirection = true,
   compact = false,
 }: PaymentMethodDisplayProps): React.ReactNode {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tDisplay = t.display;
 
   const typeLabel = method.type

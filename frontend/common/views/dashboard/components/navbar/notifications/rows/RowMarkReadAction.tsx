@@ -2,17 +2,15 @@
 
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { IconButton, Tooltip } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
 
 export interface RowMarkReadActionProps {
+  readonly markReadLabel: string;
   readonly deliveryId: string | null | undefined;
   readonly readAt: string | null | undefined;
   readonly onMarkRead?: (deliveryId: string) => void;
 }
 
-export function RowMarkReadAction({ deliveryId, readAt, onMarkRead }: Readonly<RowMarkReadActionProps>) {
-  const markReadLabel = useAppTranslation().notificationsTranslations.markAsRead;
-
+export function RowMarkReadAction({ markReadLabel, deliveryId, readAt, onMarkRead }: Readonly<RowMarkReadActionProps>) {
   if (readAt != null || !deliveryId || !onMarkRead) {
     return null;
   }

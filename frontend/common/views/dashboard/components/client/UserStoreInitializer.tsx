@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { AppPermission, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 
@@ -17,7 +17,7 @@ export function UserStoreInitializer({ userProfile, isSuperAdmin }: UserStoreIni
   const setUser = useUserStore(state => state.setUser);
   const setActorIsSuperAdmin = useUserStore(state => state.setActorIsSuperAdmin);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Filter inside the effect — a new `.filter()` array each render in the
     // dependency list re-fires this effect after setUser notifies subscribers
     // (e.g. DashboardClientBridge → useNotificationsDrawerViewModel).

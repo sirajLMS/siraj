@@ -8,7 +8,7 @@ import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button"
 import { PermissionManagementDialogsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionManagementDialogs.mobile";
 import { PermissionTabContentMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionTabContent.mobile";
 import { SingleGroupViewMobile } from "@/frontend/mobile/views/dashboard/permissions/components/singleGroupView.mobile";
-import { type PermissionsLabels, useAppTranslation } from "@/shared/locale";
+import type { PermissionsLabels } from "@/shared/locale";
 
 function PermissionErrorAlert({ error, t }: { readonly error: string | null; readonly t: PermissionsLabels }) {
   if (!error) return null;
@@ -20,6 +20,7 @@ function PermissionErrorAlert({ error, t }: { readonly error: string | null; rea
 }
 
 export function PermissionManagementMobileView({
+  labels,
   permissions,
   groups,
   users,
@@ -56,7 +57,7 @@ export function PermissionManagementMobileView({
   manageOverridesState,
   groupRowMenuAnchor,
 }: Readonly<PermissionManagementViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   const tabs = [
     { key: "groups" as const, label: t.groupsTab },
@@ -75,6 +76,7 @@ export function PermissionManagementMobileView({
     <MobilePageContainer>
       {activeGroup ? (
         <SingleGroupViewMobile
+          labels={labels}
           group={activeGroup}
           permissions={permissions}
           isLoading={isLoading}
@@ -93,6 +95,7 @@ export function PermissionManagementMobileView({
             <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={setActiveTab} />
 
             <PermissionTabContentMobile
+              labels={labels}
               activeTab={activeTab}
               isLoading={isLoading}
               permissions={permissions}
@@ -112,6 +115,7 @@ export function PermissionManagementMobileView({
       )}
 
       <PermissionManagementDialogsMobile
+        labels={labels}
         isLoading={isLoading}
         activeGroup={activeGroup}
         selectedGroupId={selectedGroupId}

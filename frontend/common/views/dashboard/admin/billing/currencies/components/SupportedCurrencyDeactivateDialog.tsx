@@ -2,7 +2,7 @@
 
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { SupportedCurrencyRow } from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface SupportedCurrencyDeactivateDialogProps {
   readonly open: boolean;
@@ -19,7 +19,7 @@ export function SupportedCurrencyDeactivateDialog({
   onClose,
   onConfirm,
 }: Readonly<SupportedCurrencyDeactivateDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.billing.supportedCurrencies;
+  const t = useAppTranslation(Translation.Dashboard.BillingSupportedCurrencies);
 
   return (
     <BaseDeleteDialog

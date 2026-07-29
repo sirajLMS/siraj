@@ -1,6 +1,7 @@
 "use client";
 
 import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import {
   isTeacherAdminData,
   type TeacherViewData,
@@ -8,7 +9,10 @@ import {
 import { TeacherAdminEditForm } from "@/frontend/common/views/dashboard/profile/teacher/TeacherAdminEditForm";
 import { TeacherProfileEditForm } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileEditForm";
 import type { TeacherEditData } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import type { TeacherProfileViewModel } from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
+import type {
+  TeacherAdminSubmitData,
+  TeacherOwnSubmitData,
+} from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
 
 function toTeacherEditData(
   teacherData: TeacherViewData,
@@ -38,6 +42,7 @@ function toTeacherEditData(
 }
 
 export function TeacherProfileEditBody({
+  labels,
   teacherData,
   avatarUrl,
   displayCurrency,
@@ -47,20 +52,22 @@ export function TeacherProfileEditBody({
   onSubmitOwn,
   onSubmitAdmin,
 }: Readonly<{
+  labels: TeacherProfileViewLabels;
   teacherData: TeacherViewData;
   avatarUrl: string | null | undefined;
   displayCurrency: CurrencyCode | null | undefined;
   scope: ProfileScope;
   targetUserId: string;
   isSaving: boolean;
-  onSubmitOwn: TeacherProfileViewModel["onSubmitOwn"];
-  onSubmitAdmin: TeacherProfileViewModel["onSubmitAdmin"];
+  onSubmitOwn: (formData: TeacherOwnSubmitData) => Promise<void>;
+  onSubmitAdmin: (formData: TeacherAdminSubmitData) => Promise<void>;
 }>) {
   const editData = toTeacherEditData(teacherData, avatarUrl, displayCurrency);
 
   if (scope === ProfileScope.Own) {
     return (
       <TeacherProfileEditForm
+        labels={labels}
         teacherData={editData}
         targetUserId={targetUserId}
         isSaving={isSaving}
@@ -81,6 +88,7 @@ export function TeacherProfileEditBody({
 
   return (
     <TeacherAdminEditForm
+      labels={labels}
       teacherData={editData}
       targetUserId={targetUserId}
       isSaving={isSaving}

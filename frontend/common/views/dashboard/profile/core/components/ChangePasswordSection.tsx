@@ -1,63 +1,24 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import { Alert, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
-import { useState } from "react";
-import { changePasswordMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale";
+import { useChangePasswordSectionViewModel } from "@/frontend/common/views/dashboard/profile/core/useChangePasswordSectionViewModel";
 
 export function ChangePasswordSection() {
-  const t = useAppTranslation();
-  const tProfile = t.profileTranslations.base;
-  const tErrors = t.errorsTranslations;
-
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  const [changePassword, { loading }] = useMutation(changePasswordMutationDocument);
-
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrorMsg(null);
-    setSuccessMsg(null);
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setErrorMsg(tErrors.auth.passwordsDoNotMatch);
-      return;
-    }
-
-    try {
-      const response = await changePassword({
-        variables: {
-          input: {
-            currentPassword,
-            newPassword,
-            confirmPassword,
-          },
-        },
-      });
-
-      if (response.data?.changePassword) {
-        setSuccessMsg(tProfile.changePassword.success);
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      }
-    } catch (err) {
-      logger.error("Failed to change password", err);
-      const message = err instanceof Error ? err.message : tErrors.auth.currentPasswordInvalid;
-      setErrorMsg(message);
-    }
-  };
+  const {
+    labels,
+    currentPassword,
+    newPassword,
+    confirmPassword,
+    errorMsg,
+    successMsg,
+    loading,
+    setCurrentPassword,
+    setNewPassword,
+    setConfirmPassword,
+    handleSubmit,
+  } = useChangePasswordSectionViewModel();
+  const tProfile = labels.profile.changePassword;
 
   return (
     <Paper sx={{ p: 3, borderRadius: 2 }}>
@@ -65,7 +26,7 @@ export function ChangePasswordSection() {
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <LockOutlined color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {tProfile.changePassword.title}
+            {tProfile.title}
           </Typography>
         </Stack>
 
@@ -74,7 +35,7 @@ export function ChangePasswordSection() {
 
         <TextField
           type="password"
-          label={tProfile.changePassword.currentPassword}
+          label={tProfile.currentPassword}
           value={currentPassword}
           onChange={e => setCurrentPassword(e.target.value)}
           required
@@ -84,7 +45,7 @@ export function ChangePasswordSection() {
 
         <TextField
           type="password"
-          label={tProfile.changePassword.newPassword}
+          label={tProfile.newPassword}
           value={newPassword}
           onChange={e => setNewPassword(e.target.value)}
           required
@@ -94,7 +55,7 @@ export function ChangePasswordSection() {
 
         <TextField
           type="password"
-          label={tProfile.changePassword.confirmPassword}
+          label={tProfile.confirmPassword}
           value={confirmPassword}
           onChange={e => setConfirmPassword(e.target.value)}
           required
@@ -108,7 +69,7 @@ export function ChangePasswordSection() {
             variant="contained"
             disabled={loading || !currentPassword || !newPassword || !confirmPassword}
           >
-            {tProfile.changePassword.submit}
+            {tProfile.submit}
           </Button>
         </Box>
       </Stack>

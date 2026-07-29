@@ -8,10 +8,10 @@ import { useMemo } from "react";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CurrentPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
-  fontFamily: "JetBrains Mono, monospace",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+
   typography: "labelMd",
   backgroundColor: theme.palette.surfaceVariant,
   color: theme.palette.onSurfaceVariant,
@@ -69,6 +69,7 @@ const StyledAssignFirstButton = styled(Button)(({ theme }) => ({
 }));
 
 export function CurrentPermissionsTabDesktop({
+  labels,
   group,
   groupPermissions,
   permissionsCount,
@@ -76,7 +77,7 @@ export function CurrentPermissionsTabDesktop({
   onSwitchToAddTab,
   loading = false,
 }: Readonly<CurrentPermissionsTabProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const currentPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {

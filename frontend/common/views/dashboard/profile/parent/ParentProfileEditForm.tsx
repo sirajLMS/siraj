@@ -9,6 +9,7 @@ import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarIm
 import { ParentStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type UseAvatarUploadResult, useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
+import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 import {
   type ParentAdminEditFormData,
   type ParentEditData,
@@ -19,10 +20,14 @@ import { AccountSection } from "@/frontend/common/views/dashboard/profile/parent
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent/sections/ContactSection";
 import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
+import {
+  type ParentProfileViewLabels,
+  toParentSharedBaseLabels,
+} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
+import { useParentProfileEditFormViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileEditFormViewModel";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
-import { useAppTranslation } from "@/shared/locale";
 
 export type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 
@@ -120,9 +125,8 @@ type ParentEditFormSectionsProps = {
   readonly scopeContext: ScopeContext;
   readonly register: UseFormRegister<ParentAdminEditFormData>;
   readonly control: Control<ParentAdminEditFormData>;
+  readonly labels: ParentProfileViewLabels;
 };
-
-import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 
 function ParentEditFormSections({
   parentData,
@@ -130,28 +134,43 @@ function ParentEditFormSections({
   scopeContext,
   register,
   control,
+  labels,
 }: ParentEditFormSectionsProps) {
   const { scope, isAdminScope, canEdit } = scopeContext;
+  const sectionLabels = {
+    parent: labels.parent,
+    baseLabels: toParentSharedBaseLabels(labels.base),
+  };
+  const { parent: pt } = sectionLabels;
 
   return (
     <Box sx={SECTION_GRID_SX}>
       {canEdit("core_identity") ? (
         <AccountSection
           mode="edit"
+          labels={sectionLabels}
           scope={scope}
           parentData={{ name: parentData.name ?? null, email: parentData.email ?? null }}
           register={register}
           control={control}
         />
       ) : null}
-      {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={control} /> : null}
-      {canEdit("parent_social") ? <SocialSection mode="edit" register={register} control={control} /> : null}
-      {canEdit("parent_identity") ? <IdentitySection mode="edit" register={register} control={control} /> : null}
+      {canEdit("core_contact") ? (
+        <ContactSection mode="edit" labels={sectionLabels} scope={scope} control={control} />
+      ) : null}
+      {canEdit("parent_social") ? (
+        <SocialSection mode="edit" labels={pt} register={register} control={control} />
+      ) : null}
+      {canEdit("parent_identity") ? (
+        <IdentitySection mode="edit" labels={pt} register={register} control={control} />
+      ) : null}
 
       {isAdminScope ? (
         <>
           <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} />
-          {canEdit("parent_billing") ? <BillingSection mode="edit" register={register} control={control} /> : null}
+          {canEdit("parent_billing") ? (
+            <BillingSection mode="edit" labels={pt} register={register} control={control} />
+          ) : null}
         </>
       ) : null}
     </Box>
@@ -194,8 +213,8 @@ export function ParentProfileEditForm({
   readonly isSaving: boolean;
   readonly onSubmit: ParentEditFormSubmit;
 }) {
-  const t = useAppTranslation().profileTranslations.base;
-  const pt = useAppTranslation().profileTranslations.parent;
+  const { labels } = useParentProfileEditFormViewModel();
+  const { base: t, parent: pt } = labels;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canEdit } = useProfileFieldAccess({ scope });
   const { onUploadAvatar }: AvatarUploader = useAvatarUpload({ storageOwnerKey: targetUserId });
@@ -223,6 +242,7 @@ export function ParentProfileEditForm({
             scopeContext={scopeContext}
             register={form.register}
             control={form.control}
+            labels={labels}
           />
           <PrimaryPageAction type="submit" disabled={isSaving}>
             {isSaving ? t.shell.loading : t.actions.save}

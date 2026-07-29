@@ -2,11 +2,12 @@
 
 import { NotificationsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
 
-export function NotificationDrawerEmptyState() {
-  const emptyMessage = useAppTranslation().notificationsTranslations.noNotifications;
+export interface NotificationDrawerEmptyStateProps {
+  readonly emptyMessage: string;
+}
 
+export function NotificationDrawerEmptyState({ emptyMessage }: Readonly<NotificationDrawerEmptyStateProps>) {
   return (
     <Box
       sx={{

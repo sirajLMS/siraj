@@ -22,9 +22,10 @@ import type {
 import {
   type TeacherAvailabilityViewModel,
   type UseTeacherAvailabilityViewModelProps,
+  useTeacherAvailabilityCoordinatorLabels,
   useTeacherAvailabilityViewModel,
 } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation } from "@/shared/locale";
 
 function buildGraphQLInput(formData: AvailabilitySearchFormData) {
   const fromTime = formData.fromTime
@@ -145,10 +146,9 @@ const lazyViews = createLazyView<TeacherAvailabilityViewModel>(
 );
 
 export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId: string }>) {
-  const t = useAppTranslation().dashboardTranslations.teacherAvailability;
-  const tc = useAppTranslation().commonTranslations;
+  const { shell: availabilityLabels, common: commonLabels } = useTeacherAvailabilityCoordinatorLabels();
   const notifications = useNotifications();
-  useDocumentTitle(null, "dashboard.teacherAvailability", "pageTitle");
+  useDocumentTitle(null, Translation.Dashboard.TeacherAvailability, "pageTitle");
 
   const [searchInput, setSearchInput] = useState<AvailabilitySearchFormData>({
     fromTime: null,
@@ -188,29 +188,29 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
     (formData: AvailabilitySearchFormData) => {
       setSearchInput(formData);
       if (!formData.fromTime || !formData.toTime) {
-        notifications.show(t.errors.missingTimeRange, { severity: "warning", autoHideDuration: 4000 });
+        notifications.show(availabilityLabels.errors.missingTimeRange, { severity: "warning", autoHideDuration: 4000 });
         return;
       }
       setHasSearched(true);
       const input = buildGraphQLInput(formData);
       void refetch({ input });
     },
-    [refetch, notifications, t]
+    [refetch, notifications, availabilityLabels]
   );
 
   const handleBlockClick = useCallback(
     (entry: AvailabilityEntry) => {
-      notifications.show(t.teacherSlotSelected(entry.teacherName, teacherId), {
+      notifications.show(availabilityLabels.teacherSlotSelected(entry.teacherName, teacherId), {
         severity: "info",
         autoHideDuration: 4000,
       });
     },
-    [notifications, t, teacherId]
+    [notifications, availabilityLabels, teacherId]
   );
 
   const handleExportPdf = useCallback(() => {
-    notifications.show(t.exportPdfComingSoon, { severity: "info", autoHideDuration: 4000 });
-  }, [notifications, t]);
+    notifications.show(availabilityLabels.exportPdfComingSoon, { severity: "info", autoHideDuration: 4000 });
+  }, [notifications, availabilityLabels]);
 
   const props: UseTeacherAvailabilityViewModelProps = {
     availability,
@@ -229,7 +229,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
     return (
       <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <Typography sx={theme => ({ color: theme.palette.error.main })}>{tc.loadFailed}</Typography>
+          <Typography sx={theme => ({ color: theme.palette.error.main })}>{commonLabels.loadFailed}</Typography>
         </Box>
       </RequirePermission>
     );

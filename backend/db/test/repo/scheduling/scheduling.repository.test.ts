@@ -20,6 +20,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 interface ClassStatusEventState {
@@ -535,9 +536,9 @@ describe("Scheduling Repository — CRUD & Queries", () => {
           .values({
             key: "default_timezone",
             value: "Europe/Paris",
-            dataType: "string",
+            dataType: SystemSettingDataType.String,
             description: "desc",
-            category: "test",
+            category: SystemSettingCategory.Scheduling,
             updatedAt: new Date(),
           })
           .onConflictDoUpdate({

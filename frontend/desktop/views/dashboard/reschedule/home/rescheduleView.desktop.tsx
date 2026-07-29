@@ -15,7 +15,6 @@ import { QuickAdjustSectionDesktop } from "@/frontend/desktop/views/dashboard/re
 import { RescheduleDateTimeSectionDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/rescheduleDateTimeSection.desktop";
 import { TimezoneWarningBannerDesktop } from "@/frontend/desktop/views/dashboard/reschedule/home/components/timezoneWarningBanner.desktop";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({
   display: "flex",
@@ -29,6 +28,8 @@ const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({
 }));
 
 export function RescheduleViewDesktop({
+  labels,
+  meetingConfigLabels,
   session,
   control,
   errors,
@@ -41,16 +42,13 @@ export function RescheduleViewDesktop({
   onCancel,
   onDismissSuccess,
 }: Readonly<RescheduleViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm;
-  const tMeeting = useAppTranslation().uiTranslations.meetingConfig;
-
   return (
     <DesktopPageContainer sx={{ maxWidth: 900, mx: "auto" }}>
-      <DesktopPageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-      <TimezoneWarningBannerDesktop timezone={session.teacherTimezone} />
+      <TimezoneWarningBannerDesktop labels={labels} timezone={session.teacherTimezone} />
 
-      <DesktopSectionPanel title={t.sections.classDetails}>
+      <DesktopSectionPanel title={labels.sections.classDetails}>
         <Box
           component="form"
           onSubmit={e => {
@@ -58,7 +56,7 @@ export function RescheduleViewDesktop({
           }}
           sx={theme => ({ p: theme.layout.cardPadding, display: "flex", flexDirection: "column", gap: 4 })}
         >
-          <ClassParticipantsSectionDesktop session={session} />
+          <ClassParticipantsSectionDesktop labels={labels} session={session} />
 
           {session.effectiveMeeting ? (
             <>
@@ -71,7 +69,7 @@ export function RescheduleViewDesktop({
                   underline="hover"
                   sx={{ typography: "labelMd" }}
                 >
-                  {tMeeting.summary.manageLink}
+                  {meetingConfigLabels.summary.manageLink}
                 </MuiLink>
               </Stack>
             </>
@@ -79,13 +77,13 @@ export function RescheduleViewDesktop({
 
           <Divider />
 
-          <RescheduleDateTimeSectionDesktop control={control} errors={errors} />
+          <RescheduleDateTimeSectionDesktop labels={labels} control={control} errors={errors} />
 
-          <QuickAdjustSectionDesktop setValue={setValue} getValues={getValues} />
+          <QuickAdjustSectionDesktop labels={labels} setValue={setValue} getValues={getValues} />
 
           <ActionContainer>
             <DesktopPrimaryPageAction type="submit" disabled={isSubmitting}>
-              {isSubmitting ? t.actions.processing : t.actions.submit}
+              {isSubmitting ? labels.actions.processing : labels.actions.submit}
             </DesktopPrimaryPageAction>
             <DesktopPrimaryPageAction
               type="button"
@@ -96,13 +94,17 @@ export function RescheduleViewDesktop({
                 "&:hover": { color: theme.palette.error.dark },
               })}
             >
-              {t.actions.cancel}
+              {labels.actions.cancel}
             </DesktopPrimaryPageAction>
           </ActionContainer>
         </Box>
       </DesktopSectionPanel>
 
-      <DesktopFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <DesktopFormSuccessSnackbar
+        open={showSuccess}
+        message={labels.actions.successMessage}
+        onClose={onDismissSuccess}
+      />
     </DesktopPageContainer>
   );
 }

@@ -24,18 +24,26 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
+import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
 
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;
   readonly onRemove: (id: string) => void;
   readonly hasScheduleDeleteClass: boolean;
+  readonly labels: TeacherWeeklyScheduleLabels;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
-function MobileSlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonly<MobileSlotItemProps>) {
+function MobileSlotItem({
+  classItem,
+  onRemove,
+  hasScheduleDeleteClass,
+  labels,
+  meetingJoinLabels,
+}: Readonly<MobileSlotItemProps>) {
   const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
-  const tMeeting = useAppTranslation().uiTranslations.meetingConfig.join;
+  const t = labels;
 
   const handleConfirm = () => {
     closeDialog();
@@ -56,7 +64,7 @@ function MobileSlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonl
         joinUrl={classItem.meetingJoinUrl}
         meeting={classItem.effectiveMeeting}
         emptyRole="teacher"
-        label={tMeeting.joinMeeting}
+        label={meetingJoinLabels.joinMeeting}
         setupHref="/profile?tab=meeting"
       />
     );
@@ -127,11 +135,11 @@ function MobileSlotItem({ classItem, onRemove, hasScheduleDeleteClass }: Readonl
 interface DaySelectorProps {
   readonly selectedDay: string;
   readonly onSelect: (day: string) => void;
+  readonly labels: TeacherWeeklyScheduleLabels;
 }
 
-function DaySelector({ selectedDay, onSelect }: Readonly<DaySelectorProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
-
+function DaySelector({ selectedDay, onSelect, labels }: Readonly<DaySelectorProps>) {
+  const t = labels;
   return (
     <Box
       sx={{
@@ -178,10 +186,19 @@ interface TimeSlotRowProps {
   readonly slotClasses: readonly ScheduledClass[];
   readonly onRemoveClass: (id: string) => void;
   readonly hasScheduleDeleteClass: boolean;
+  readonly labels: TeacherWeeklyScheduleLabels;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
-function TimeSlotRow({ time, slotClasses, onRemoveClass, hasScheduleDeleteClass }: Readonly<TimeSlotRowProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherWeeklySchedule;
+function TimeSlotRow({
+  time,
+  slotClasses,
+  onRemoveClass,
+  hasScheduleDeleteClass,
+  labels,
+  meetingJoinLabels,
+}: Readonly<TimeSlotRowProps>) {
+  const t = labels;
   const isLunch = time === "12:00 PM";
 
   let content = (
@@ -220,6 +237,8 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass, hasScheduleDeleteClass 
             classItem={c}
             onRemove={onRemoveClass}
             hasScheduleDeleteClass={hasScheduleDeleteClass}
+            labels={labels}
+            meetingJoinLabels={meetingJoinLabels}
           />
         ))}
       </Box>
@@ -260,6 +279,8 @@ export default function MobileScheduleList({
   classes,
   onRemoveClass,
   hasScheduleDeleteClass,
+  labels,
+  meetingJoinLabels,
 }: Readonly<MobileScheduleListProps>) {
   const { selectedDay, setSelectedDay } = useSelectedDayFilter("monday");
 
@@ -269,7 +290,7 @@ export default function MobileScheduleList({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <DaySelector selectedDay={selectedDay} onSelect={setSelectedDay} />
+      <DaySelector selectedDay={selectedDay} onSelect={setSelectedDay} labels={labels} />
 
       <Box
         sx={theme => ({
@@ -289,6 +310,8 @@ export default function MobileScheduleList({
             slotClasses={getClassesForSlot(selectedDay, time)}
             onRemoveClass={onRemoveClass}
             hasScheduleDeleteClass={hasScheduleDeleteClass}
+            labels={labels}
+            meetingJoinLabels={meetingJoinLabels}
           />
         ))}
       </Box>

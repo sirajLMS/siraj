@@ -3,6 +3,7 @@ import type {
   SupportedOnlineAccountFieldsFragment,
   SupportedPaymentLinkFieldsFragment,
 } from "@/frontend/common/graphql/generated/gql/operations";
+import type { PaymentCatalogsLabels } from "@/shared/locale";
 
 export type PaymentCatalogKind = "mobileWallet" | "paymentLink" | "onlineAccount";
 
@@ -17,6 +18,7 @@ export interface CatalogGridActionHandlers {
 }
 
 export interface CatalogDeleteDialogProps {
+  readonly labels: PaymentCatalogsLabels;
   readonly open: boolean;
   readonly entryName: string;
   readonly isLoading: boolean;
@@ -25,6 +27,7 @@ export interface CatalogDeleteDialogProps {
 }
 
 export interface CatalogEditDialogProps {
+  readonly labels: PaymentCatalogsLabels;
   readonly open: boolean;
   readonly kind: PaymentCatalogKind;
   readonly row: PaymentCatalogRow | null;

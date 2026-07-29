@@ -13,7 +13,6 @@ import { ManualInvoiceDateFieldDesktop } from "@/frontend/desktop/views/dashboar
 import { ManualInvoiceFeeFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceFeeField.desktop";
 import { ManualInvoiceParentFieldDesktop } from "@/frontend/desktop/views/dashboard/billing/manual/components/manualInvoiceParentField.desktop";
 import type { BillingManualLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
 
 function CurrencyField({
   control,
@@ -81,10 +80,10 @@ export function ManualInvoiceFormFieldsDesktop({
   control,
   errors,
   labels,
+  profileLabels,
   selectedParentId,
 }: Readonly<BaseManualInvoiceFormFieldsProps>) {
-  const tProfile = useAppTranslation().profileTranslations.parent;
-  const currencyLabel = tProfile.fields.currency;
+  const currencyLabel = profileLabels.fields.currency;
   const watchedParentId = useWatch({ control, name: "parentId" });
   const parentIdForStudents = watchedParentId || selectedParentId;
 

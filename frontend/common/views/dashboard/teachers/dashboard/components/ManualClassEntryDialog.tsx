@@ -19,7 +19,8 @@ import { logger } from "@/frontend/common/utils/logger";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { ManualClassEntryStudentFieldContext } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
 import type { TeacherDashboardLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+
+type ManualClassEntryLabels = TeacherDashboardLabels["manualClassEntry"];
 
 interface ManualClassEntryDialogProps {
   readonly open: boolean;
@@ -34,6 +35,7 @@ interface ManualClassEntryDialogProps {
   }) => Promise<void>;
   readonly defaultActive?: boolean;
   readonly studentSelect: ReactNode;
+  readonly labels: ManualClassEntryLabels;
 }
 
 export function ManualClassEntryDialog({
@@ -42,8 +44,8 @@ export function ManualClassEntryDialog({
   onSubmit,
   defaultActive = false,
   studentSelect,
+  labels,
 }: Readonly<ManualClassEntryDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
   const [studentId, setStudentId] = useState("");
   const [subjectId, setSubjectId] = useState("");
   const [date, setDate] = useState("");
@@ -81,19 +83,19 @@ export function ManualClassEntryDialog({
   const handleFormSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!studentId) {
-      setError(t.manualClassEntry.selectStudent);
+      setError(labels.selectStudent);
       return;
     }
     if (!subjectId) {
-      setError(t.manualClassEntry.selectSubject);
+      setError(labels.selectSubject);
       return;
     }
     if (!date) {
-      setError(t.manualClassEntry.selectDate);
+      setError(labels.selectDate);
       return;
     }
     if (!startTime) {
-      setError(t.manualClassEntry.selectTime);
+      setError(labels.selectTime);
       return;
     }
 
@@ -115,7 +117,7 @@ export function ManualClassEntryDialog({
       onClose();
     } catch (err) {
       logger.error("Manual class entry creation failed:", { err });
-      setError(t.manualClassEntry.createFailed);
+      setError(labels.createFailed);
     } finally {
       setSubmitting(false);
     }
@@ -125,7 +127,7 @@ export function ManualClassEntryDialog({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleFormSubmit}>
         <DialogTitle sx={{ typography: "titleLg" }}>
-          {defaultActive ? t.manualClassEntry.titleCreateActive : t.manualClassEntry.titleCreate}
+          {defaultActive ? labels.titleCreateActive : labels.titleCreate}
         </DialogTitle>
         <DialogContent dividers>
           <ManualClassEntryStudentFieldContext.Provider
@@ -145,16 +147,16 @@ export function ManualClassEntryDialog({
               classType={classType}
               setClassType={setClassType}
               submitting={submitting}
-              t={t}
+              labels={labels}
             />
           </ManualClassEntryStudentFieldContext.Provider>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={onClose} disabled={submitting}>
-            {t.manualClassEntry.cancel}
+            {labels.cancel}
           </Button>
           <Button type="submit" variant="contained" disabled={submitting}>
-            {submitting ? t.manualClassEntry.creating : t.manualClassEntry.create}
+            {submitting ? labels.creating : labels.create}
           </Button>
         </DialogActions>
       </form>
@@ -176,7 +178,7 @@ interface ManualClassEntryFormFieldsProps {
   readonly classType: string;
   readonly setClassType: (value: string) => void;
   readonly submitting: boolean;
-  readonly t: TeacherDashboardLabels;
+  readonly labels: ManualClassEntryLabels;
 }
 
 function ManualClassEntryFormFields({
@@ -193,7 +195,7 @@ function ManualClassEntryFormFields({
   classType,
   setClassType,
   submitting,
-  t,
+  labels,
 }: Readonly<ManualClassEntryFormFieldsProps>) {
   return (
     <Stack spacing={3} sx={{ mt: 1 }}>
@@ -204,13 +206,13 @@ function ManualClassEntryFormFields({
       <SubjectSelect
         value={subjectId}
         onChange={setSubjectId}
-        label={t.manualClassEntry.subjectLabel}
-        placeholder={t.manualClassEntry.subjectPlaceholder}
+        label={labels.subjectLabel}
+        placeholder={labels.subjectPlaceholder}
         disabled={submitting}
       />
 
       <TextField
-        label={t.manualClassEntry.scheduledDate}
+        label={labels.scheduledDate}
         type="date"
         required
         fullWidth
@@ -222,7 +224,7 @@ function ManualClassEntryFormFields({
       />
 
       <TextField
-        label={t.manualClassEntry.startTime}
+        label={labels.startTime}
         type="time"
         required
         fullWidth
@@ -234,7 +236,7 @@ function ManualClassEntryFormFields({
       />
 
       <TextField
-        label={t.manualClassEntry.durationMinutes}
+        label={labels.durationMinutes}
         type="number"
         required
         fullWidth
@@ -247,17 +249,17 @@ function ManualClassEntryFormFields({
 
       <FormControl fullWidth required>
         <InputLabel id="class-type-select-label" shrink>
-          {t.manualClassEntry.classType}
+          {labels.classType}
         </InputLabel>
         <Select
           labelId="class-type-select-label"
           value={classType}
-          label={t.manualClassEntry.classType}
+          label={labels.classType}
           onChange={e => setClassType(e.target.value)}
         >
-          <MenuItem value="REGULAR">{t.manualClassEntry.classTypeRegular}</MenuItem>
-          <MenuItem value="TRIAL">{t.manualClassEntry.classTypeTrial}</MenuItem>
-          <MenuItem value="PROMOTION">{t.manualClassEntry.classTypePromotion}</MenuItem>
+          <MenuItem value="REGULAR">{labels.classTypeRegular}</MenuItem>
+          <MenuItem value="TRIAL">{labels.classTypeTrial}</MenuItem>
+          <MenuItem value="PROMOTION">{labels.classTypePromotion}</MenuItem>
         </Select>
       </FormControl>
     </Stack>

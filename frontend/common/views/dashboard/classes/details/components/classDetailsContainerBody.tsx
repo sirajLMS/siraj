@@ -44,6 +44,7 @@ export function ClassDetailsContainerBody({ viewModel, slots }: Readonly<ClassDe
         onCloseDeleteDialog={() => viewModel.setDeleteDialogOpen(false)}
         onConfirmDelete={viewModel.handlers.handleDeleteConfirm}
         t={viewModel.t}
+        headerLabels={viewModel.headerLabels}
         formattedScheduledDate={viewModel.formattedScheduledDate}
         formattedStartTime={viewModel.formattedStartTime}
         formattedEndTime={viewModel.formattedEndTime}

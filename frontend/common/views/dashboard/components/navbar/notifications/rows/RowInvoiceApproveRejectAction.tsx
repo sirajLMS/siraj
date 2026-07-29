@@ -1,9 +1,10 @@
 "use client";
 
 import { Button, Stack } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale/client";
 
 export interface RowInvoiceApproveRejectActionProps {
+  readonly approveLabel: string;
+  readonly rejectLabel: string;
   readonly deliveryId: string;
   readonly invoiceId: string;
   readonly onApprove: (deliveryId: string, invoiceId: string) => void;
@@ -11,13 +12,13 @@ export interface RowInvoiceApproveRejectActionProps {
 }
 
 export function RowInvoiceApproveRejectAction({
+  approveLabel,
+  rejectLabel,
   deliveryId,
   invoiceId,
   onApprove,
   onReject,
 }: Readonly<RowInvoiceApproveRejectActionProps>) {
-  const { approveInvoice: approveLabel, rejectInvoice: rejectLabel } = useAppTranslation().notificationsTranslations;
-
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignSelf: "flex-start" }}>
       <Button

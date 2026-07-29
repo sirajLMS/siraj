@@ -6,7 +6,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
-import { TeacherAvailabilityService } from "@/backend/services/teacher/teacher-availability.service";
+import { TeacherAvailabilitySeedService } from "@/backend/services/seed/teacher-availability-seed.service";
 import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(
@@ -46,7 +46,7 @@ export async function seedOrGet(
     }
   }
 
-  const results = await TeacherAvailabilityService.upsertManyAvailabilityWindows(inputs);
+  const results = await TeacherAvailabilitySeedService.seedManyAvailabilityWindows(inputs);
   logger.info(`Teacher availability windows seeded (${results.length} rows).`);
   return results;
 }

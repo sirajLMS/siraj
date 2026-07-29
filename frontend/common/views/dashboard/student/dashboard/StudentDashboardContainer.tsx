@@ -26,7 +26,7 @@ export function StudentDashboardContainer() {
   return (
     <RequirePermission permissions={[AppPermission.StudentViewOwnDashboard]} fallback={null}>
       <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-      <ReflectionDialog />
+      <ReflectionDialog labels={viewModel.labels} commonLabels={viewModel.commonLabels} />
     </RequirePermission>
   );
 }

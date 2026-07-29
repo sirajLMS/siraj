@@ -13,7 +13,7 @@ import { resolveFieldName } from "@/frontend/common/components/ui/input/paymentM
 import { PhoneFormField } from "@/frontend/common/components/ui/input/phoneInput/PhoneFormField";
 import { TagInput } from "@/frontend/common/components/ui/input/tagInput/TagInput";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type {
   PaymentMethodCatalogFormValue,
@@ -39,7 +39,7 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
   detailsPrefix,
   catalogPrefix,
 }: Readonly<PaymentMethodTypeFieldsProps<T>>): React.ReactNode {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tTypeFields = t.typeFields;
 
   const renderCatalogMetadata = () => {

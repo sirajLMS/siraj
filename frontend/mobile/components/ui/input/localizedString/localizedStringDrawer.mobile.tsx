@@ -21,7 +21,7 @@ import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
 import type { AppLocale, LocalizedStringLabels } from "@/shared/locale";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
@@ -239,7 +239,7 @@ export const LocalizedStringDrawerMobile: React.FC<LocalizedStringDrawerProps> =
   showActions,
   dismissAction = "save",
 }) => {
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const uiLocale = useAppLocale();
   const [draft, setDraft] = useState<LocalizedString>(value);
 

@@ -15,8 +15,9 @@ import {
   parentOnboardingSchema,
 } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethodType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+import type { ParentOnboardingLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types/parentOnboardingViewModel.types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const defaultValues: ParentOnboardingFormData = {
   name: "",
@@ -56,18 +57,16 @@ export interface ParentOnboardingViewModel {
   readonly meetingSetupHref: string | undefined;
   readonly showSuccess: boolean;
   readonly onDismissSuccess: () => void;
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["parentOnboarding"];
-  readonly tMeeting: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfig"]["manager"];
-  readonly tJoin: ReturnType<typeof useAppTranslation>["uiTranslations"]["meetingConfig"]["join"];
+  readonly labelsBySection: ParentOnboardingLabelsBySection;
   readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
 export type UseParentOnboardingViewModelProps = Record<string, never>;
 
 export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
-  const t = useAppTranslation().dashboardTranslations.parentOnboarding;
-  const tMeeting = useAppTranslation().uiTranslations.meetingConfig.manager;
-  const tJoin = useAppTranslation().uiTranslations.meetingConfig.join;
+  const t = useAppTranslation(Translation.Dashboard.ParentOnboarding);
+  const tMeeting = useAppTranslation(Translation.Ui.MeetingConfig).manager;
+  const tJoin = useAppTranslation(Translation.Ui.MeetingConfig).join;
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateParentOnboarding();
   const createdParent = useParentOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -134,9 +133,13 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
     meetingSetupHref,
     showSuccess,
     onDismissSuccess,
-    t,
-    tMeeting,
-    tJoin,
+    labelsBySection: {
+      form: t,
+      meeting: {
+        manager: tMeeting,
+        join: tJoin,
+      },
+    },
     onUploadAvatar,
   };
 }

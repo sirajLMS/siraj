@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { getGlobalSingleton } from "@/backend/lib/global-singleton";
+import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
 
@@ -386,6 +386,17 @@ function warnIfVercelDatabaseUrlNotPooled(databaseUrl: string): void {
   if (!isPooled) {
     logger.warn("⚠️  On Vercel, use a Neon pooled connection string (-pooler host) with Fluid compute TCP pooling.");
   }
+}
+
+/**
+ * Clears the in-memory cached environment configuration singleton.
+ *
+ * This forces the next call to `getEnvironmentConfig()` or `ensureEnvironmentValidated()`
+ * to re-parse and re-validate process.env (for example when switching `.env` files via CLI).
+ */
+export function resetEnvironmentCache(): void {
+  clearGlobalSingleton(ENV_KEY);
+  cachedConfig = undefined;
 }
 
 /**

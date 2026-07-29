@@ -18,11 +18,6 @@ import {
 } from "@/frontend/mobile/components/ui";
 import { ParentCardListMobile } from "@/frontend/mobile/views/dashboard/admin/parents/home/components/parentCardList.mobile";
 
-// VARIANT JUSTIFICATION: ParentsViewMobileProps is structurally identical to BaseParentsViewProps
-// — the mobile tier supplies no extra fields beyond the shared contract. The mobile view renders
-// sentinel rows / in-list skeletons instead of the desktop grid-level loading overlay, so
-// `loading` is omitted (kept on the desktop twin only). Implemented as a `type` alias to satisfy
-// `@typescript-eslint/no-empty-object-type` while still keeping a tier-suffixed public name.
 export type ParentsViewMobileProps = BaseParentsViewProps;
 
 function ParentMobileSearchField({
@@ -63,7 +58,7 @@ function ParentMobileSearchField({
 export function ParentsViewMobile({
   metrics,
   rows,
-  labels,
+  labelsBySection,
   page,
   pageSize,
   totalCount,
@@ -77,26 +72,26 @@ export function ParentsViewMobile({
   onExport,
   onLifecycleStatusFilterChange,
   onResetFilters,
-  // NEW FOR PLAN v5: lifted permission boolean consumed by the tier view
-  // instead of a `RequirePermission` wrapper (specs.md §3 N3).
   canParentsCreate,
 }: Readonly<ParentsViewMobileProps>) {
+  const { shell, filters, card, actions } = labelsBySection;
+
   return (
     <MobilePageContainer>
       <MobilePageHeader
-        title={labels.pageTitle}
-        subtitle={labels.pageSubtitle}
+        title={shell.pageTitle}
+        subtitle={shell.pageSubtitle}
         edgeToEdge={false}
         actions={
           canParentsCreate ? (
-            <MobilePrimaryPageAction onClick={onAddParent}>{labels.addParent}</MobilePrimaryPageAction>
+            <MobilePrimaryPageAction onClick={onAddParent}>{actions.addParent}</MobilePrimaryPageAction>
           ) : undefined
         }
       />
 
       <MobileContentStack gap={2} paddingBottom={4}>
         <MobileContentInset>
-          <ParentMobileSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />
+          <ParentMobileSearchField placeholder={filters.searchPlaceholder} onSearch={onSearch} />
         </MobileContentInset>
 
         <MobileContentInset>
@@ -104,12 +99,12 @@ export function ParentsViewMobile({
         </MobileContentInset>
 
         <MobileSectionPanel
-          title={labels.records}
+          title={shell.records}
           contentInset={false}
           actions={
             <Stack direction="row" spacing={1} sx={{ display: "flex", alignItems: "center" }}>
               <MobileFilterButton size="small" onClick={onFilter}>
-                {labels.filterLabel}
+                {filters.filterLabel}
               </MobileFilterButton>
               <MobileExportButton size="small" onClick={onExport} />
             </Stack>
@@ -119,20 +114,16 @@ export function ParentsViewMobile({
             <ParentFilterPanel
               open={filterPanelOpen}
               lifecycleStatusFilter={lifecycleStatusFilter}
-              filterLabel={labels.filterLabel}
-              clearFiltersLabel={labels.clearFilters}
-              statusLabels={labels.statusLabels}
+              filterLabel={filters.filterLabel}
+              clearFiltersLabel={filters.clearFilters}
+              statusLabels={filters.statusLabels}
               onLifecycleStatusFilterChange={onLifecycleStatusFilterChange}
               onResetFilters={onResetFilters}
             />
           </MobileContentInset>
           <ParentCardListMobile
             rows={rows}
-            labels={{
-              ...labels.card,
-              statusLabels: labels.statusLabels,
-              accountStatusLabels: labels.accountStatusLabels,
-            }}
+            labels={card}
             onOpenSettings={onOpenSettings}
             paginationOptions={
               totalCount !== undefined && onPageChange !== undefined

@@ -22,7 +22,7 @@ import {
   type UseExchangeRateHistoryViewModel,
   useExchangeRateHistoryViewModel,
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/hooks";
-import { type ExchangeRatesLabels, useAppTranslation } from "@/shared/locale";
+import { type ExchangeRatesLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 type FeedbackFn = (message: string, severity: "success" | "error") => void;
 
@@ -108,8 +108,7 @@ function mapExchangeRatesToRows(
 }
 
 export function useExchangeRatesViewModel(_props: Readonly<UseExchangeRatesViewModelProps>): ExchangeRatesViewModel {
-  const t = useAppTranslation().dashboardTranslations.billing;
-  const labels: ExchangeRatesLabels = t.exchangeRates;
+  const labels = useAppTranslation(Translation.Dashboard.BillingExchangeRates);
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;
   // NEW FOR PLAN v5: read hasPermission from userStore so we can surface granular permission

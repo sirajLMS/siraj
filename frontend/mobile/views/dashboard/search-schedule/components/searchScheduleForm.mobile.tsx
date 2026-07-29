@@ -9,9 +9,9 @@ import type { SearchScheduleFormProps } from "@/frontend/common/views/dashboard/
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { SearchScheduleSortMenuMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleSortMenu.mobile";
 import { SearchScheduleFilterDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/searchScheduleFilterDrawer.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 export function SearchScheduleFormMobile({
+  labels,
   draft,
   isSearching,
   onDraftChange,
@@ -26,7 +26,6 @@ export function SearchScheduleFormMobile({
   selectedTeacher,
   onSelectTeacher,
 }: Readonly<SearchScheduleFormProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const activeFilterCount = countActiveDrawerFilters(draft);
 
   const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
@@ -61,9 +60,9 @@ export function SearchScheduleFormMobile({
       >
         <Box sx={{ flex: "1 1 100%" }}>
           <AppDateRangePicker
-            label={t.dateRange}
-            fromLabel={t.fromDate}
-            toLabel={t.toDate}
+            label={labels.dateRange}
+            fromLabel={labels.fromDate}
+            toLabel={labels.toDate}
             fromDate={draft.fromDate}
             toDate={draft.toDate}
             onChange={handleDateRangeChange}
@@ -72,9 +71,9 @@ export function SearchScheduleFormMobile({
 
         <Box sx={{ flex: "1 1 100%" }}>
           <AppTimeRangePicker
-            label={t.timeRange}
-            fromLabel={t.fromTime}
-            toLabel={t.toTime}
+            label={labels.timeRange}
+            fromLabel={labels.fromTime}
+            toLabel={labels.toTime}
             fromTime={draft.fromTime}
             toTime={draft.toTime}
             onChange={handleTimeRangeChange}
@@ -85,14 +84,15 @@ export function SearchScheduleFormMobile({
           <TeacherAutocompleteMobile
             value={selectedTeacher}
             onChange={onSelectTeacher}
-            label={t.teacherName}
-            placeholder={t.teacherNamePlaceholder}
+            label={labels.teacherName}
+            placeholder={labels.teacherNamePlaceholder}
           />
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 0.5 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <SearchScheduleSortMenuMobile
+              labels={labels}
               sortBy={draft.sortBy}
               sortMenuAnchorEl={sortMenuAnchorEl}
               onSortMenuOpen={onSortMenuOpen}
@@ -100,8 +100,8 @@ export function SearchScheduleFormMobile({
               onSortChange={onSortChange}
             />
 
-            <Tooltip title={t.filters}>
-              <IconButton aria-label={t.filters} size="small" onClick={onOpenFormFilterDrawer}>
+            <Tooltip title={labels.filters}>
+              <IconButton aria-label={labels.filters} size="small" onClick={onOpenFormFilterDrawer}>
                 <Badge badgeContent={activeFilterCount} color="primary" invisible={activeFilterCount === 0}>
                   <FilterListOutlined fontSize="small" />
                 </Badge>
@@ -116,12 +116,13 @@ export function SearchScheduleFormMobile({
             disabled={isSearching}
             startIcon={isSearching ? <CircularProgress size={16} color="inherit" /> : <SearchOutlined />}
           >
-            {t.searchBtn}
+            {labels.searchBtn}
           </Button>
         </Box>
       </Box>
 
       <SearchScheduleFilterDrawerMobile
+        labels={labels}
         open={formFilterDrawerOpen}
         draft={draft}
         onClose={onCloseFormFilterDrawer}

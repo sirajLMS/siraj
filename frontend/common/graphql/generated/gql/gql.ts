@@ -224,6 +224,33 @@ type Documents = {
     "\n  \n  query statusTrackingSchedule($date: String!, $search: String, $viewerTimezone: IanaTimezone) {\n    statusTrackingSchedule(date: $date, search: $search, viewerTimezone: $viewerTimezone) {\n      id\n      studentId\n      studentName\n      studentInitials\n      studentAvatarUrl\n      studentStatus\n      teacherId\n      teacherName\n      teacherAvatarUrl\n      courseName\n      avatarUrl\n      scheduledStartAt\n      scheduledEndAt\n      durationMinutes\n      executionState\n      outcome\n      isFrozen\n      meetingJoinUrl\n      effectiveMeeting {\n        ...EffectiveMeetingFields\n      }\n    }\n  }\n": typeof types.StatusTrackingScheduleDocument,
     "\n  \n  query teacherWeeklyScheduleGrid($teacherId: String, $weekDate: String!) {\n    teacherWeeklyScheduleGrid(teacherId: $teacherId, weekDate: $weekDate) {\n      id\n      teacherId\n      weekStart\n      weekEnd\n      classes {\n        id\n        studentName\n        studentId\n        duration\n        startTime\n        day\n        executionState\n        outcome\n        isFrozen\n        subjectName\n        classType\n        meetingJoinUrl\n        effectiveMeeting {\n          ...EffectiveMeetingFields\n        }\n      }\n    }\n  }\n": typeof types.TeacherWeeklyScheduleGridDocument,
     "\n  query teacherWorkloadMetrics($teacherId: String, $weekDate: String!) {\n    teacherWorkloadMetrics(teacherId: $teacherId, weekDate: $weekDate) {\n      id\n      weeklyHoursWorked\n      totalMinutes\n      classCount\n    }\n  }\n": typeof types.TeacherWorkloadMetricsDocument,
+    "\n  fragment EnvConfigEntryFields on EnvConfigEntry {\n    id\n    key\n    category\n    displayStrategy\n    description\n    isSecret\n    excludeFromDb\n    value\n    source\n    hasDbOverride\n    editable\n  }\n": typeof types.EnvConfigEntryFieldsFragmentDoc,
+    "\n  fragment EnvConfigUpsertResultFields on EnvConfigUpsertResult {\n    id\n    key\n    source\n    hasDbOverride\n    updatedAt\n  }\n": typeof types.EnvConfigUpsertResultFieldsFragmentDoc,
+    "\n  fragment EnvConfigDeleteResultFields on EnvConfigDeleteResult {\n    id\n    key\n    deleted\n    source\n  }\n": typeof types.EnvConfigDeleteResultFieldsFragmentDoc,
+    "\n  \n  query envConfigEntries {\n    envConfigEntries {\n      ...EnvConfigEntryFields\n    }\n  }\n": typeof types.EnvConfigEntriesDocument,
+    "\n  \n  mutation upsertEnvConfigEntry($input: EnvConfigUpsertInput!) {\n    upsertEnvConfigEntry(input: $input) {\n      ...EnvConfigUpsertResultFields\n    }\n  }\n": typeof types.UpsertEnvConfigEntryDocument,
+    "\n  \n  mutation deleteEnvConfigEntry($key: String!) {\n    deleteEnvConfigEntry(key: $key) {\n      ...EnvConfigDeleteResultFields\n    }\n  }\n": typeof types.DeleteEnvConfigEntryDocument,
+    "\n  fragment SystemSettingFields on SystemSetting {\n    id\n    key\n    value\n    dataType\n    description\n    category\n    updatedByUserId\n    updatedAt\n  }\n": typeof types.SystemSettingFieldsFragmentDoc,
+    "\n  \n  query systemSettings {\n    systemSettings {\n      ...SystemSettingFields\n    }\n  }\n": typeof types.SystemSettingsDocument,
+    "\n  \n  query systemSetting($key: String!) {\n    systemSetting(key: $key) {\n      ...SystemSettingFields\n    }\n  }\n": typeof types.SystemSettingDocument,
+    "\n  \n  mutation upsertSystemSetting($input: SystemSettingUpsertInput!) {\n    upsertSystemSetting(input: $input) {\n      ...SystemSettingFields\n    }\n  }\n": typeof types.UpsertSystemSettingDocument,
+    "\n  mutation deleteSystemSetting($key: String!) {\n    deleteSystemSetting(key: $key)\n  }\n": typeof types.DeleteSystemSettingDocument,
+    "\n  fragment SessionConfigFields on SessionConfig {\n    id\n    roleName\n    ttlSeconds\n    maxConcurrentSessions\n    createdAt\n    updatedAt\n  }\n": typeof types.SessionConfigFieldsFragmentDoc,
+    "\n  \n  query sessionConfigs {\n    sessionConfigs {\n      ...SessionConfigFields\n    }\n  }\n": typeof types.SessionConfigsDocument,
+    "\n  \n  query sessionConfig($roleName: String!) {\n    sessionConfig(roleName: $roleName) {\n      ...SessionConfigFields\n    }\n  }\n": typeof types.SessionConfigDocument,
+    "\n  \n  mutation upsertSessionConfig($input: SessionConfigUpsertInput!) {\n    upsertSessionConfig(input: $input) {\n      ...SessionConfigFields\n    }\n  }\n": typeof types.UpsertSessionConfigDocument,
+    "\n  mutation deleteSessionConfig($roleName: String!) {\n    deleteSessionConfig(roleName: $roleName)\n  }\n": typeof types.DeleteSessionConfigDocument,
+    "\n  fragment AuditLogFields on AuditLog {\n    id\n    actorUserId\n    actorType\n    entityType\n    entityId\n    action\n    description\n    previousState\n    newState\n    changes\n    ipAddress\n    userAgent\n    metadata\n    createdAt\n  }\n": typeof types.AuditLogFieldsFragmentDoc,
+    "\n  \n  query settingsAuditLogs($filter: SettingsAuditLogFilter) {\n    settingsAuditLogs(filter: $filter) {\n      id\n      total\n      hasMore\n      logs {\n        ...AuditLogFields\n      }\n    }\n  }\n": typeof types.SettingsAuditLogsDocument,
+    "\n  fragment SiteContentEntryFields on SiteContentEntry {\n    id\n    slug\n    title\n    body\n    contentType\n    isPublished\n    updatedByUserId\n    createdAt\n    updatedAt\n  }\n": typeof types.SiteContentEntryFieldsFragmentDoc,
+    "\n  \n  query siteContentEntries {\n    siteContentEntries {\n      ...SiteContentEntryFields\n    }\n  }\n": typeof types.SiteContentEntriesDocument,
+    "\n  \n  query siteContentEntry($id: ID!) {\n    siteContentEntry(id: $id) {\n      ...SiteContentEntryFields\n    }\n  }\n": typeof types.SiteContentEntryDocument,
+    "\n  \n  mutation upsertSiteContent($input: SiteContentUpsertInput!) {\n    upsertSiteContent(input: $input) {\n      ...SiteContentEntryFields\n    }\n  }\n": typeof types.UpsertSiteContentDocument,
+    "\n  \n  mutation updateSiteContentPublishState($id: ID!, $isPublished: Boolean!) {\n    updateSiteContentPublishState(id: $id, isPublished: $isPublished) {\n      ...SiteContentEntryFields\n    }\n  }\n": typeof types.UpdateSiteContentPublishStateDocument,
+    "\n  mutation deleteSiteContent($id: ID!) {\n    deleteSiteContent(id: $id)\n  }\n": typeof types.DeleteSiteContentDocument,
+    "\n  fragment SettingsTimezoneFields on SettingsTimezone {\n    id\n    ianaId\n    name\n    baseOffsetMinutes\n    offsetMinutes\n    isDstSupported\n  }\n": typeof types.SettingsTimezoneFieldsFragmentDoc,
+    "\n  \n  query settingsTimezones($paginationArgs: PaginationArgs) {\n    settingsTimezones(paginationArgs: $paginationArgs) {\n      id\n      totalCount\n      rows {\n        ...SettingsTimezoneFields\n      }\n      pageInfo {\n        count\n        currentPage\n        endCursor\n        firstItem\n        hasMorePages\n        lastItem\n        lastPage\n        perPage\n        startCursor\n        total\n      }\n    }\n  }\n": typeof types.SettingsTimezonesDocument,
+    "\n  mutation ensureDemoUsers {\n    ensureDemoUsers\n  }\n": typeof types.EnsureDemoUsersDocument,
     "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      studentName\n      parentUserEmail\n      parentUserId\n      parentId\n      parentName\n      teacherUserEmail\n      teacherUserId\n      teacherId\n      teacherName\n    }\n  }\n": typeof types.CreateTestEntitiesDocument,
     "\n  mutation cleanupTestEntities(\n    $studentUserId: String!\n    $teacherUserId: String!\n    $parentUserId: String!\n    $studentId: String!\n    $teacherId: String!\n    $parentId: String!\n  ) {\n    cleanupTestEntities(\n      studentUserId: $studentUserId\n      teacherUserId: $teacherUserId\n      parentUserId: $parentUserId\n      studentId: $studentId\n      teacherId: $teacherId\n      parentId: $parentId\n    )\n  }\n": typeof types.CleanupTestEntitiesDocument,
     "\n  mutation createTestGroupClass($classInstanceId: String!, $teacherName: String!) {\n    createTestGroupClass(classInstanceId: $classInstanceId, teacherName: $teacherName) {\n      groupClassId\n    }\n  }\n": typeof types.CreateTestGroupClassDocument,
@@ -498,6 +525,33 @@ const documents: Documents = {
     "\n  \n  query statusTrackingSchedule($date: String!, $search: String, $viewerTimezone: IanaTimezone) {\n    statusTrackingSchedule(date: $date, search: $search, viewerTimezone: $viewerTimezone) {\n      id\n      studentId\n      studentName\n      studentInitials\n      studentAvatarUrl\n      studentStatus\n      teacherId\n      teacherName\n      teacherAvatarUrl\n      courseName\n      avatarUrl\n      scheduledStartAt\n      scheduledEndAt\n      durationMinutes\n      executionState\n      outcome\n      isFrozen\n      meetingJoinUrl\n      effectiveMeeting {\n        ...EffectiveMeetingFields\n      }\n    }\n  }\n": types.StatusTrackingScheduleDocument,
     "\n  \n  query teacherWeeklyScheduleGrid($teacherId: String, $weekDate: String!) {\n    teacherWeeklyScheduleGrid(teacherId: $teacherId, weekDate: $weekDate) {\n      id\n      teacherId\n      weekStart\n      weekEnd\n      classes {\n        id\n        studentName\n        studentId\n        duration\n        startTime\n        day\n        executionState\n        outcome\n        isFrozen\n        subjectName\n        classType\n        meetingJoinUrl\n        effectiveMeeting {\n          ...EffectiveMeetingFields\n        }\n      }\n    }\n  }\n": types.TeacherWeeklyScheduleGridDocument,
     "\n  query teacherWorkloadMetrics($teacherId: String, $weekDate: String!) {\n    teacherWorkloadMetrics(teacherId: $teacherId, weekDate: $weekDate) {\n      id\n      weeklyHoursWorked\n      totalMinutes\n      classCount\n    }\n  }\n": types.TeacherWorkloadMetricsDocument,
+    "\n  fragment EnvConfigEntryFields on EnvConfigEntry {\n    id\n    key\n    category\n    displayStrategy\n    description\n    isSecret\n    excludeFromDb\n    value\n    source\n    hasDbOverride\n    editable\n  }\n": types.EnvConfigEntryFieldsFragmentDoc,
+    "\n  fragment EnvConfigUpsertResultFields on EnvConfigUpsertResult {\n    id\n    key\n    source\n    hasDbOverride\n    updatedAt\n  }\n": types.EnvConfigUpsertResultFieldsFragmentDoc,
+    "\n  fragment EnvConfigDeleteResultFields on EnvConfigDeleteResult {\n    id\n    key\n    deleted\n    source\n  }\n": types.EnvConfigDeleteResultFieldsFragmentDoc,
+    "\n  \n  query envConfigEntries {\n    envConfigEntries {\n      ...EnvConfigEntryFields\n    }\n  }\n": types.EnvConfigEntriesDocument,
+    "\n  \n  mutation upsertEnvConfigEntry($input: EnvConfigUpsertInput!) {\n    upsertEnvConfigEntry(input: $input) {\n      ...EnvConfigUpsertResultFields\n    }\n  }\n": types.UpsertEnvConfigEntryDocument,
+    "\n  \n  mutation deleteEnvConfigEntry($key: String!) {\n    deleteEnvConfigEntry(key: $key) {\n      ...EnvConfigDeleteResultFields\n    }\n  }\n": types.DeleteEnvConfigEntryDocument,
+    "\n  fragment SystemSettingFields on SystemSetting {\n    id\n    key\n    value\n    dataType\n    description\n    category\n    updatedByUserId\n    updatedAt\n  }\n": types.SystemSettingFieldsFragmentDoc,
+    "\n  \n  query systemSettings {\n    systemSettings {\n      ...SystemSettingFields\n    }\n  }\n": types.SystemSettingsDocument,
+    "\n  \n  query systemSetting($key: String!) {\n    systemSetting(key: $key) {\n      ...SystemSettingFields\n    }\n  }\n": types.SystemSettingDocument,
+    "\n  \n  mutation upsertSystemSetting($input: SystemSettingUpsertInput!) {\n    upsertSystemSetting(input: $input) {\n      ...SystemSettingFields\n    }\n  }\n": types.UpsertSystemSettingDocument,
+    "\n  mutation deleteSystemSetting($key: String!) {\n    deleteSystemSetting(key: $key)\n  }\n": types.DeleteSystemSettingDocument,
+    "\n  fragment SessionConfigFields on SessionConfig {\n    id\n    roleName\n    ttlSeconds\n    maxConcurrentSessions\n    createdAt\n    updatedAt\n  }\n": types.SessionConfigFieldsFragmentDoc,
+    "\n  \n  query sessionConfigs {\n    sessionConfigs {\n      ...SessionConfigFields\n    }\n  }\n": types.SessionConfigsDocument,
+    "\n  \n  query sessionConfig($roleName: String!) {\n    sessionConfig(roleName: $roleName) {\n      ...SessionConfigFields\n    }\n  }\n": types.SessionConfigDocument,
+    "\n  \n  mutation upsertSessionConfig($input: SessionConfigUpsertInput!) {\n    upsertSessionConfig(input: $input) {\n      ...SessionConfigFields\n    }\n  }\n": types.UpsertSessionConfigDocument,
+    "\n  mutation deleteSessionConfig($roleName: String!) {\n    deleteSessionConfig(roleName: $roleName)\n  }\n": types.DeleteSessionConfigDocument,
+    "\n  fragment AuditLogFields on AuditLog {\n    id\n    actorUserId\n    actorType\n    entityType\n    entityId\n    action\n    description\n    previousState\n    newState\n    changes\n    ipAddress\n    userAgent\n    metadata\n    createdAt\n  }\n": types.AuditLogFieldsFragmentDoc,
+    "\n  \n  query settingsAuditLogs($filter: SettingsAuditLogFilter) {\n    settingsAuditLogs(filter: $filter) {\n      id\n      total\n      hasMore\n      logs {\n        ...AuditLogFields\n      }\n    }\n  }\n": types.SettingsAuditLogsDocument,
+    "\n  fragment SiteContentEntryFields on SiteContentEntry {\n    id\n    slug\n    title\n    body\n    contentType\n    isPublished\n    updatedByUserId\n    createdAt\n    updatedAt\n  }\n": types.SiteContentEntryFieldsFragmentDoc,
+    "\n  \n  query siteContentEntries {\n    siteContentEntries {\n      ...SiteContentEntryFields\n    }\n  }\n": types.SiteContentEntriesDocument,
+    "\n  \n  query siteContentEntry($id: ID!) {\n    siteContentEntry(id: $id) {\n      ...SiteContentEntryFields\n    }\n  }\n": types.SiteContentEntryDocument,
+    "\n  \n  mutation upsertSiteContent($input: SiteContentUpsertInput!) {\n    upsertSiteContent(input: $input) {\n      ...SiteContentEntryFields\n    }\n  }\n": types.UpsertSiteContentDocument,
+    "\n  \n  mutation updateSiteContentPublishState($id: ID!, $isPublished: Boolean!) {\n    updateSiteContentPublishState(id: $id, isPublished: $isPublished) {\n      ...SiteContentEntryFields\n    }\n  }\n": types.UpdateSiteContentPublishStateDocument,
+    "\n  mutation deleteSiteContent($id: ID!) {\n    deleteSiteContent(id: $id)\n  }\n": types.DeleteSiteContentDocument,
+    "\n  fragment SettingsTimezoneFields on SettingsTimezone {\n    id\n    ianaId\n    name\n    baseOffsetMinutes\n    offsetMinutes\n    isDstSupported\n  }\n": types.SettingsTimezoneFieldsFragmentDoc,
+    "\n  \n  query settingsTimezones($paginationArgs: PaginationArgs) {\n    settingsTimezones(paginationArgs: $paginationArgs) {\n      id\n      totalCount\n      rows {\n        ...SettingsTimezoneFields\n      }\n      pageInfo {\n        count\n        currentPage\n        endCursor\n        firstItem\n        hasMorePages\n        lastItem\n        lastPage\n        perPage\n        startCursor\n        total\n      }\n    }\n  }\n": types.SettingsTimezonesDocument,
+    "\n  mutation ensureDemoUsers {\n    ensureDemoUsers\n  }\n": types.EnsureDemoUsersDocument,
     "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      studentName\n      parentUserEmail\n      parentUserId\n      parentId\n      parentName\n      teacherUserEmail\n      teacherUserId\n      teacherId\n      teacherName\n    }\n  }\n": types.CreateTestEntitiesDocument,
     "\n  mutation cleanupTestEntities(\n    $studentUserId: String!\n    $teacherUserId: String!\n    $parentUserId: String!\n    $studentId: String!\n    $teacherId: String!\n    $parentId: String!\n  ) {\n    cleanupTestEntities(\n      studentUserId: $studentUserId\n      teacherUserId: $teacherUserId\n      parentUserId: $parentUserId\n      studentId: $studentId\n      teacherId: $teacherId\n      parentId: $parentId\n    )\n  }\n": types.CleanupTestEntitiesDocument,
     "\n  mutation createTestGroupClass($classInstanceId: String!, $teacherName: String!) {\n    createTestGroupClass(classInstanceId: $classInstanceId, teacherName: $teacherName) {\n      groupClassId\n    }\n  }\n": types.CreateTestGroupClassDocument,
@@ -1416,6 +1470,114 @@ export function graphql(source: "\n  \n  query teacherWeeklyScheduleGrid($teache
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query teacherWorkloadMetrics($teacherId: String, $weekDate: String!) {\n    teacherWorkloadMetrics(teacherId: $teacherId, weekDate: $weekDate) {\n      id\n      weeklyHoursWorked\n      totalMinutes\n      classCount\n    }\n  }\n"): (typeof documents)["\n  query teacherWorkloadMetrics($teacherId: String, $weekDate: String!) {\n    teacherWorkloadMetrics(teacherId: $teacherId, weekDate: $weekDate) {\n      id\n      weeklyHoursWorked\n      totalMinutes\n      classCount\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment EnvConfigEntryFields on EnvConfigEntry {\n    id\n    key\n    category\n    displayStrategy\n    description\n    isSecret\n    excludeFromDb\n    value\n    source\n    hasDbOverride\n    editable\n  }\n"): (typeof documents)["\n  fragment EnvConfigEntryFields on EnvConfigEntry {\n    id\n    key\n    category\n    displayStrategy\n    description\n    isSecret\n    excludeFromDb\n    value\n    source\n    hasDbOverride\n    editable\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment EnvConfigUpsertResultFields on EnvConfigUpsertResult {\n    id\n    key\n    source\n    hasDbOverride\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment EnvConfigUpsertResultFields on EnvConfigUpsertResult {\n    id\n    key\n    source\n    hasDbOverride\n    updatedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment EnvConfigDeleteResultFields on EnvConfigDeleteResult {\n    id\n    key\n    deleted\n    source\n  }\n"): (typeof documents)["\n  fragment EnvConfigDeleteResultFields on EnvConfigDeleteResult {\n    id\n    key\n    deleted\n    source\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query envConfigEntries {\n    envConfigEntries {\n      ...EnvConfigEntryFields\n    }\n  }\n"): (typeof documents)["\n  \n  query envConfigEntries {\n    envConfigEntries {\n      ...EnvConfigEntryFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation upsertEnvConfigEntry($input: EnvConfigUpsertInput!) {\n    upsertEnvConfigEntry(input: $input) {\n      ...EnvConfigUpsertResultFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation upsertEnvConfigEntry($input: EnvConfigUpsertInput!) {\n    upsertEnvConfigEntry(input: $input) {\n      ...EnvConfigUpsertResultFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation deleteEnvConfigEntry($key: String!) {\n    deleteEnvConfigEntry(key: $key) {\n      ...EnvConfigDeleteResultFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation deleteEnvConfigEntry($key: String!) {\n    deleteEnvConfigEntry(key: $key) {\n      ...EnvConfigDeleteResultFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment SystemSettingFields on SystemSetting {\n    id\n    key\n    value\n    dataType\n    description\n    category\n    updatedByUserId\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment SystemSettingFields on SystemSetting {\n    id\n    key\n    value\n    dataType\n    description\n    category\n    updatedByUserId\n    updatedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query systemSettings {\n    systemSettings {\n      ...SystemSettingFields\n    }\n  }\n"): (typeof documents)["\n  \n  query systemSettings {\n    systemSettings {\n      ...SystemSettingFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query systemSetting($key: String!) {\n    systemSetting(key: $key) {\n      ...SystemSettingFields\n    }\n  }\n"): (typeof documents)["\n  \n  query systemSetting($key: String!) {\n    systemSetting(key: $key) {\n      ...SystemSettingFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation upsertSystemSetting($input: SystemSettingUpsertInput!) {\n    upsertSystemSetting(input: $input) {\n      ...SystemSettingFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation upsertSystemSetting($input: SystemSettingUpsertInput!) {\n    upsertSystemSetting(input: $input) {\n      ...SystemSettingFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteSystemSetting($key: String!) {\n    deleteSystemSetting(key: $key)\n  }\n"): (typeof documents)["\n  mutation deleteSystemSetting($key: String!) {\n    deleteSystemSetting(key: $key)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment SessionConfigFields on SessionConfig {\n    id\n    roleName\n    ttlSeconds\n    maxConcurrentSessions\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment SessionConfigFields on SessionConfig {\n    id\n    roleName\n    ttlSeconds\n    maxConcurrentSessions\n    createdAt\n    updatedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query sessionConfigs {\n    sessionConfigs {\n      ...SessionConfigFields\n    }\n  }\n"): (typeof documents)["\n  \n  query sessionConfigs {\n    sessionConfigs {\n      ...SessionConfigFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query sessionConfig($roleName: String!) {\n    sessionConfig(roleName: $roleName) {\n      ...SessionConfigFields\n    }\n  }\n"): (typeof documents)["\n  \n  query sessionConfig($roleName: String!) {\n    sessionConfig(roleName: $roleName) {\n      ...SessionConfigFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation upsertSessionConfig($input: SessionConfigUpsertInput!) {\n    upsertSessionConfig(input: $input) {\n      ...SessionConfigFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation upsertSessionConfig($input: SessionConfigUpsertInput!) {\n    upsertSessionConfig(input: $input) {\n      ...SessionConfigFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteSessionConfig($roleName: String!) {\n    deleteSessionConfig(roleName: $roleName)\n  }\n"): (typeof documents)["\n  mutation deleteSessionConfig($roleName: String!) {\n    deleteSessionConfig(roleName: $roleName)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment AuditLogFields on AuditLog {\n    id\n    actorUserId\n    actorType\n    entityType\n    entityId\n    action\n    description\n    previousState\n    newState\n    changes\n    ipAddress\n    userAgent\n    metadata\n    createdAt\n  }\n"): (typeof documents)["\n  fragment AuditLogFields on AuditLog {\n    id\n    actorUserId\n    actorType\n    entityType\n    entityId\n    action\n    description\n    previousState\n    newState\n    changes\n    ipAddress\n    userAgent\n    metadata\n    createdAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query settingsAuditLogs($filter: SettingsAuditLogFilter) {\n    settingsAuditLogs(filter: $filter) {\n      id\n      total\n      hasMore\n      logs {\n        ...AuditLogFields\n      }\n    }\n  }\n"): (typeof documents)["\n  \n  query settingsAuditLogs($filter: SettingsAuditLogFilter) {\n    settingsAuditLogs(filter: $filter) {\n      id\n      total\n      hasMore\n      logs {\n        ...AuditLogFields\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment SiteContentEntryFields on SiteContentEntry {\n    id\n    slug\n    title\n    body\n    contentType\n    isPublished\n    updatedByUserId\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment SiteContentEntryFields on SiteContentEntry {\n    id\n    slug\n    title\n    body\n    contentType\n    isPublished\n    updatedByUserId\n    createdAt\n    updatedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query siteContentEntries {\n    siteContentEntries {\n      ...SiteContentEntryFields\n    }\n  }\n"): (typeof documents)["\n  \n  query siteContentEntries {\n    siteContentEntries {\n      ...SiteContentEntryFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query siteContentEntry($id: ID!) {\n    siteContentEntry(id: $id) {\n      ...SiteContentEntryFields\n    }\n  }\n"): (typeof documents)["\n  \n  query siteContentEntry($id: ID!) {\n    siteContentEntry(id: $id) {\n      ...SiteContentEntryFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation upsertSiteContent($input: SiteContentUpsertInput!) {\n    upsertSiteContent(input: $input) {\n      ...SiteContentEntryFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation upsertSiteContent($input: SiteContentUpsertInput!) {\n    upsertSiteContent(input: $input) {\n      ...SiteContentEntryFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation updateSiteContentPublishState($id: ID!, $isPublished: Boolean!) {\n    updateSiteContentPublishState(id: $id, isPublished: $isPublished) {\n      ...SiteContentEntryFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation updateSiteContentPublishState($id: ID!, $isPublished: Boolean!) {\n    updateSiteContentPublishState(id: $id, isPublished: $isPublished) {\n      ...SiteContentEntryFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteSiteContent($id: ID!) {\n    deleteSiteContent(id: $id)\n  }\n"): (typeof documents)["\n  mutation deleteSiteContent($id: ID!) {\n    deleteSiteContent(id: $id)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment SettingsTimezoneFields on SettingsTimezone {\n    id\n    ianaId\n    name\n    baseOffsetMinutes\n    offsetMinutes\n    isDstSupported\n  }\n"): (typeof documents)["\n  fragment SettingsTimezoneFields on SettingsTimezone {\n    id\n    ianaId\n    name\n    baseOffsetMinutes\n    offsetMinutes\n    isDstSupported\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query settingsTimezones($paginationArgs: PaginationArgs) {\n    settingsTimezones(paginationArgs: $paginationArgs) {\n      id\n      totalCount\n      rows {\n        ...SettingsTimezoneFields\n      }\n      pageInfo {\n        count\n        currentPage\n        endCursor\n        firstItem\n        hasMorePages\n        lastItem\n        lastPage\n        perPage\n        startCursor\n        total\n      }\n    }\n  }\n"): (typeof documents)["\n  \n  query settingsTimezones($paginationArgs: PaginationArgs) {\n    settingsTimezones(paginationArgs: $paginationArgs) {\n      id\n      totalCount\n      rows {\n        ...SettingsTimezoneFields\n      }\n      pageInfo {\n        count\n        currentPage\n        endCursor\n        firstItem\n        hasMorePages\n        lastItem\n        lastPage\n        perPage\n        startCursor\n        total\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation ensureDemoUsers {\n    ensureDemoUsers\n  }\n"): (typeof documents)["\n  mutation ensureDemoUsers {\n    ensureDemoUsers\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

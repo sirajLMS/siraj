@@ -13,16 +13,15 @@ import {
   RESCHEDULE_DATE_FORMAT,
   RESCHEDULE_TIME_FORMAT,
 } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
-import { useAppTranslation } from "@/shared/locale";
+import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
 interface Props {
+  readonly labels: RescheduleFormLabels;
   readonly control: Control<RescheduleFormData>;
   readonly errors: FieldErrors<RescheduleFormData>;
 }
 
-export function RescheduleDateTimeSectionMobile({ control, errors }: Readonly<Props>) {
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm;
-
+export function RescheduleDateTimeSectionMobile({ labels, control, errors }: Readonly<Props>) {
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -37,13 +36,13 @@ export function RescheduleDateTimeSectionMobile({ control, errors }: Readonly<Pr
               }}
               slotProps={{
                 textField: {
-                  label: t.fields.newDate,
+                  label: labels.fields.newDate,
                   required: true,
                   fullWidth: true,
                   variant: "outlined",
                   error: !!errors.newDate,
                   helperText: errors.newDate
-                    ? t.validation[errors.newDate.message as keyof typeof t.validation]
+                    ? labels.validation[errors.newDate.message as keyof typeof labels.validation]
                     : undefined,
                   slotProps: {
                     htmlInput: { autoComplete: "off" },
@@ -73,13 +72,13 @@ export function RescheduleDateTimeSectionMobile({ control, errors }: Readonly<Pr
               }}
               slotProps={{
                 textField: {
-                  label: t.fields.newTime,
+                  label: labels.fields.newTime,
                   required: true,
                   fullWidth: true,
                   variant: "outlined",
                   error: !!errors.newTime,
                   helperText: errors.newTime
-                    ? t.validation[errors.newTime.message as keyof typeof t.validation]
+                    ? labels.validation[errors.newTime.message as keyof typeof labels.validation]
                     : undefined,
                   sx: timeInputOutlinedSx,
                   slotProps: {

@@ -22,7 +22,7 @@ import {
 import { logger } from "@/frontend/common/utils/logger";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type StudentPortalProfileLabels, useAppTranslation } from "@/shared/locale";
+import { type StudentPortalProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function toDateInputValue(value: string | null | undefined): string {
   if (!value) return "";
@@ -43,7 +43,11 @@ function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDra
   };
 }
 
-function useStudentProfileLabels(t: StudentPortalProfileLabels): StudentPortalProfileLabels {
+export type StudentProfileViewLabels = StudentPortalProfileLabels & {
+  readonly editAvatarTitle: string;
+};
+
+function useStudentProfileLabels(t: StudentPortalProfileLabels, editAvatarTitle: string): StudentProfileViewLabels {
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,
@@ -71,14 +75,15 @@ function useStudentProfileLabels(t: StudentPortalProfileLabels): StudentPortalPr
       loadingMessage: t.loadingMessage,
       saveSuccess: t.saveSuccess,
       saveError: t.saveError,
+      editAvatarTitle,
     }),
-    [t]
+    [t, editAvatarTitle]
   );
 }
 
 export interface StudentProfileViewModel {
   readonly profile: StudentProfileRow | null;
-  readonly labels: StudentPortalProfileLabels;
+  readonly labels: StudentProfileViewLabels;
   readonly loading: boolean;
   readonly saving: boolean;
   readonly isEditing: boolean;
@@ -107,16 +112,51 @@ export interface UseStudentProfileViewModelProps {
   readonly activeTab?: string;
 }
 
+function mapStudentProfileFromQuery(
+  profileData: { studentProfile?: Record<string, unknown> | null } | undefined
+): StudentProfileRow | null {
+  if (!profileData?.studentProfile) return null;
+  const p = profileData.studentProfile;
+  return {
+    id: (p.id as string) ?? "",
+    name: (p.name as string) ?? "",
+    status: (p.status as string) ?? "",
+    avatarUrl: (p.avatarUrl as string | null) ?? null,
+    dateOfBirth: (p.dateOfBirth as string | null) ?? null,
+    gender: (p.gender as Gender | null) ?? null,
+    language: (p.language as AppLanguage | null) ?? null,
+    timezoneOverride: (p.timezoneOverride as string | null) ?? null,
+    email: (p.email as string | null) ?? null,
+    phone: (p.phone as string | null) ?? null,
+    parentId: (p.parentId as string | null) ?? null,
+    parentUserId: (p.parentUserId as string | null) ?? null,
+    parentName: (p.parentName as string | null) ?? null,
+    parentEmail: (p.parentEmail as string | null) ?? null,
+    parentPhone: (p.parentPhone as string | null) ?? null,
+    isAssociatedViewer: (p.isAssociatedViewer as boolean) ?? false,
+    primaryTeacherId: (p.primaryTeacherId as string | null) ?? null,
+    teacherUserId: (p.teacherUserId as string | null) ?? null,
+    teacherName: (p.teacherName as string | null) ?? null,
+    hoursPerWeek: (p.hoursPerWeek as number | null) ?? null,
+    classesRemaining: (p.classesRemaining as number | null) ?? null,
+    classesTotal: (p.classesTotal as number | null) ?? null,
+    version: (p.version as number) ?? 0,
+    createdAt: (p.createdAt as string | null) ?? null,
+    updatedAt: (p.updatedAt as string | null) ?? null,
+  };
+}
+
 export function useStudentProfileViewModel({
   scope,
   mode,
   targetUserId: _targetUserId,
   activeTab = "profile",
 }: UseStudentProfileViewModelProps): StudentProfileViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentPortalProfile;
+  const t = useAppTranslation(Translation.Dashboard.StudentPortalProfile);
+  const tProfileBase = useAppTranslation(Translation.Profile.Base);
   const router = useRouter();
   const locale = useAppLocale();
-  const labels = useStudentProfileLabels(t);
+  const labels = useStudentProfileLabels(t, tProfileBase.editAvatarTitle);
 
   const isEditing = useStudentPortalProfileStore(s => s.isEditing);
   const draft = useStudentPortalProfileStore(s => s.draft);
@@ -139,37 +179,7 @@ export function useStudentProfileViewModel({
 
   const [recordEdit, { loading: saving }] = useMutation(recordStudentProfileEditMutationDocument);
 
-  const profile: StudentProfileRow | null = useMemo(() => {
-    if (!profileData?.studentProfile) return null;
-    const p = profileData.studentProfile;
-    return {
-      id: p.id ?? "",
-      name: p.name ?? "",
-      status: p.status ?? "",
-      avatarUrl: p.avatarUrl ?? null,
-      dateOfBirth: p.dateOfBirth ?? null,
-      gender: p.gender ?? null,
-      language: p.language ?? null,
-      timezoneOverride: p.timezoneOverride ?? null,
-      email: p.email ?? null,
-      phone: p.phone ?? null,
-      parentId: p.parentId ?? null,
-      parentUserId: p.parentUserId ?? null,
-      parentName: p.parentName ?? null,
-      parentEmail: p.parentEmail ?? null,
-      parentPhone: p.parentPhone ?? null,
-      isAssociatedViewer: p.isAssociatedViewer ?? false,
-      primaryTeacherId: p.primaryTeacherId ?? null,
-      teacherUserId: p.teacherUserId ?? null,
-      teacherName: p.teacherName ?? null,
-      hoursPerWeek: p.hoursPerWeek ?? null,
-      classesRemaining: p.classesRemaining ?? null,
-      classesTotal: p.classesTotal ?? null,
-      version: p.version ?? 0,
-      createdAt: p.createdAt ?? null,
-      updatedAt: p.updatedAt ?? null,
-    };
-  }, [profileData]);
+  const profile: StudentProfileRow | null = useMemo(() => mapStudentProfileFromQuery(profileData), [profileData]);
 
   const storageOwnerKey = profile?.id || _targetUserId;
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey });

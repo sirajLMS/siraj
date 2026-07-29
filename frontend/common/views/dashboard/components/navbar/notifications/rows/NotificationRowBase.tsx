@@ -13,6 +13,7 @@ import type {
 
 export interface NotificationRowBaseProps {
   readonly alert: NotificationDrawerAlert;
+  readonly markReadLabel: string;
   readonly icon: ReactNode;
   readonly iconColor?: (theme: Theme) => string;
   readonly accentColor?: (theme: Theme) => string;
@@ -25,6 +26,7 @@ export interface NotificationRowBaseProps {
 
 export function NotificationRowBase({
   alert,
+  markReadLabel,
   icon,
   iconColor,
   accentColor,
@@ -50,7 +52,12 @@ export function NotificationRowBase({
       disablePadding
       secondaryAction={
         <RequirePermission permissions={[AppPermission.NotificationViewAlerts]} fallback={null}>
-          <RowMarkReadAction deliveryId={alert.deliveryId} readAt={alert.readAt} onMarkRead={onMarkRead} />
+          <RowMarkReadAction
+            markReadLabel={markReadLabel}
+            deliveryId={alert.deliveryId}
+            readAt={alert.readAt}
+            onMarkRead={onMarkRead}
+          />
         </RequirePermission>
       }
     >

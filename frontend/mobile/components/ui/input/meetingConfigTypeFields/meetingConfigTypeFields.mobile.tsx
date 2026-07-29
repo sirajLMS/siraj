@@ -3,7 +3,7 @@
 import TextField from "@mui/material/TextField";
 import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type MeetingProviderFieldsFragment = {
   readonly id: string | null;
@@ -49,7 +49,7 @@ export function MeetingConfigTypeFieldsMobile({
   passwordHelperText,
   onMeetingUrlBlur,
 }: MeetingConfigTypeFieldsProps) {
-  const { fields: t } = useAppTranslation().uiTranslations.meetingConfig;
+  const { fields: t } = useAppTranslation(Translation.Ui.MeetingConfig);
 
   if (!provider) {
     return null;

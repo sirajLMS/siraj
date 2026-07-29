@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LessonReportSubmitDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog";
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
 import type { LessonReportLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function buildLabels(lessonReportI18n: LessonReportLabels): LessonReportFormLabels {
   return {
@@ -27,7 +27,7 @@ function buildLabels(lessonReportI18n: LessonReportLabels): LessonReportFormLabe
 }
 
 export function MockLessonReportSubmitDialog() {
-  const lessonReportI18n = useAppTranslation().dashboardTranslations.lmsLessonReports;
+  const lessonReportI18n = useAppTranslation(Translation.Dashboard.LmsLessonReports);
   const labels = buildLabels(lessonReportI18n);
 
   return (

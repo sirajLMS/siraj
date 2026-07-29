@@ -31,7 +31,7 @@ import {
   aggregatePaidAmountTotals,
   formatReportPaidAmounts,
 } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ReportsViewLabels {
   readonly pageTitle: string;
@@ -137,8 +137,8 @@ export function useReportsViewModel(props: Readonly<UseReportsViewModelProps> = 
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
   const locale = useAppLocale();
-  const tProfile = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
+  const tProfile = useAppTranslation(Translation.Profile.Base);
+  const tErrors = useAppTranslation(Translation.Errors);
 
   const { labels, rows, summary, canGenerate, loading, onSubmit, onExportCsv, onPrintReport, onRowClick } = props;
   // NEW FOR PLAN v5: empty/no-op defaults so the Container can invoke this

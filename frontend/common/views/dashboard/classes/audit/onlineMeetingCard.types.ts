@@ -2,13 +2,14 @@
 import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingInfoLabels } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 
+export interface OnlineMeetingCardProps extends BaseOnlineMeetingCardProps {
+  readonly labels: MeetingInfoLabels;
+}
+
 export interface BaseOnlineMeetingCardProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;
   readonly showJoin?: boolean;
 }
 
-// VARIANT JUSTIFICATION: extra field labels — desktop renders meeting title/labels from
-// a localized labels prop passed by the Container, while mobile reads useAppTranslation() inline.
-export interface OnlineMeetingCardDesktopProps extends BaseOnlineMeetingCardProps {
-  readonly labels: MeetingInfoLabels;
-}
+/** @deprecated Use {@link OnlineMeetingCardProps} */
+export type OnlineMeetingCardDesktopProps = OnlineMeetingCardProps;

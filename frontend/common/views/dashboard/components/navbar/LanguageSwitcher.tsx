@@ -1,23 +1,36 @@
 "use client";
 
 import { TranslateOutlined } from "@mui/icons-material";
+
 import { Paper, type PaperProps, Popover, Stack, styled } from "@mui/material";
+
 import { useState } from "react";
+
 import { LanguageDisplay } from "@/frontend/common/components/ui/display";
+
 import { useLanguageSwitch } from "@/frontend/common/hooks/useLanguageSwitch";
+
 import { languages } from "@/frontend/common/lib/locale";
+
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
+
 import type { AppLocale } from "@/shared/i18n/routing";
-import { useAppTranslation } from "@/shared/locale/client";
+
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 // --- Styled Components ---
 
 /**
+
  * A styled wrapper for the language list menu items.
+
  * Handles background shifts, transitions, and conditional borders.
+
  */
+
 interface LanguageOptionProps extends PaperProps {
   isSelected: boolean;
+
   isLastItem: boolean;
 }
 
@@ -25,10 +38,15 @@ const LanguageOption = styled(Paper, {
   shouldForwardProp: prop => prop !== "isSelected" && prop !== "isLastItem",
 })<LanguageOptionProps>(({ theme, isSelected, isLastItem }) => ({
   padding: theme.spacing(1.5),
+
   cursor: "pointer",
+
   transition: "all 0.2s ease-in-out",
+
   backgroundColor: isSelected ? theme.palette.action.selected : theme.palette.background.paper,
+
   borderBottom: isLastItem ? "none" : "1px solid",
+
   borderColor: theme.palette.outlineVariant,
 
   "&:hover": {
@@ -37,19 +55,26 @@ const LanguageOption = styled(Paper, {
 }));
 
 /**
+
  * Ensures the text contents inside the option align neatly.
+
  */
+
 const LanguageOptionLayout = styled(Stack)(({ theme }) => ({
   flexDirection: "row",
+
   alignItems: "center",
+
   gap: theme.spacing(1.5),
 }));
 
 // --- Main Component ---
 
 export function LanguageSwitcher() {
-  const t = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Common);
+
   const { currentLocale, switchLanguage, isPending } = useLanguageSwitch();
+
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -62,6 +87,7 @@ export function LanguageSwitcher() {
 
   const handleLanguageChange = (nextLocale: AppLocale) => {
     switchLanguage(nextLocale);
+
     handleClose();
   };
 
@@ -79,6 +105,7 @@ export function LanguageSwitcher() {
         onClose={handleClose}
         anchorOrigin={{
           vertical: "bottom",
+
           horizontal: "left",
         }}
         disableAutoFocus
@@ -86,6 +113,7 @@ export function LanguageSwitcher() {
         <Stack>
           {languages.map((language, index, array) => {
             const isSelected = currentLocale === language.code;
+
             const isLastItem = index === array.length - 1;
 
             return (

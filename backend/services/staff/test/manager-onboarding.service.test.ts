@@ -80,6 +80,34 @@ async function testCreateManagerInRollback(
   });
 }
 
+interface CreateManagerRejectionCase {
+  context: UserContextMock;
+  name: string;
+  email: string;
+  assertError: (error: Error) => void;
+}
+
+async function expectCreateManagerRejection({ context, name, email, assertError }: CreateManagerRejectionCase) {
+  const { hasPermissionSpy, getUserContextSpy } = mockUserContext(context);
+
+  const error = await expectRejection(() =>
+    ManagerOnboardingService.createManager(
+      DEFAULT_ACTOR_ID,
+      {
+        name,
+        email,
+        password: randomUUID(),
+        accountType: "manager",
+      },
+      "en"
+    )
+  );
+
+  assertError(error);
+
+  restoreSpies(hasPermissionSpy, getUserContextSpy);
+}
+
 describe("ManagerOnboardingService.createManager", () => {
   test("rejects non-super-admin user", async () => {
     const { hasPermissionSpy } = mockUserContext({
@@ -103,30 +131,20 @@ describe("ManagerOnboardingService.createManager", () => {
   });
 
   test("rejects when actor is not super admin context-wise", async () => {
-    const { hasPermissionSpy, getUserContextSpy } = mockUserContext({
-      hasPermission: true,
-      permissions: [],
-      permissionGroups: [SystemPermissionGroupSlug.STAFF_DEFAULT],
-      isSuperAdmin: false,
-      role: UserRole.STAFF,
+    await expectCreateManagerRejection({
+      context: {
+        hasPermission: true,
+        permissions: [],
+        permissionGroups: [SystemPermissionGroupSlug.STAFF_DEFAULT],
+        isSuperAdmin: false,
+        role: UserRole.STAFF,
+      },
+      name: "Test",
+      email: "test@test.com",
+      assertError: error => {
+        expect(error.message).toBeDefined();
+      },
     });
-
-    const error = await expectRejection(() =>
-      ManagerOnboardingService.createManager(
-        DEFAULT_ACTOR_ID,
-        {
-          name: "Test",
-          email: "test@test.com",
-          password: randomUUID(),
-          accountType: "manager",
-        },
-        "en"
-      )
-    );
-
-    expect(error.message).toBeDefined();
-
-    restoreSpies(hasPermissionSpy, getUserContextSpy);
   });
 
   test("creates manager with admin account type", async () => {
@@ -218,29 +236,19 @@ describe("ManagerOnboardingService.createManager", () => {
   });
 
   test("academy admin cannot create manager", async () => {
-    const { hasPermissionSpy, getUserContextSpy } = mockUserContext({
-      hasPermission: false,
-      permissions: [AppPermission.TEACHERS_CREATE, AppPermission.PARENTS_CREATE],
-      permissionGroups: [SystemPermissionGroupSlug.ACADEMY_ADMIN],
-      isSuperAdmin: false,
-      role: UserRole.ACADEMY_ADMIN,
+    await expectCreateManagerRejection({
+      context: {
+        hasPermission: false,
+        permissions: [AppPermission.TEACHERS_CREATE, AppPermission.PARENTS_CREATE],
+        permissionGroups: [SystemPermissionGroupSlug.ACADEMY_ADMIN],
+        isSuperAdmin: false,
+        role: UserRole.ACADEMY_ADMIN,
+      },
+      name: "Should Fail",
+      email: "fail@test.com",
+      assertError: error => {
+        expect(error.message).toContain("permission");
+      },
     });
-
-    const error = await expectRejection(() =>
-      ManagerOnboardingService.createManager(
-        DEFAULT_ACTOR_ID,
-        {
-          name: "Should Fail",
-          email: "fail@test.com",
-          password: randomUUID(),
-          accountType: "manager",
-        },
-        "en"
-      )
-    );
-
-    expect(error.message).toContain("permission");
-
-    restoreSpies(hasPermissionSpy, getUserContextSpy);
   });
 });

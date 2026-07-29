@@ -12,7 +12,17 @@ export interface EntityLinkTargets {
 
 import type { ClassInstanceDetail, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import type { ClassDetailsLabels } from "@/shared/locale";
+import type { ClassDetailsLabels, SessionLabels } from "@/shared/locale";
+
+export interface ClassDetailsHeaderLabels {
+  readonly pageSubtitleAdmin: string;
+  readonly pageSubtitleTeacher: string;
+  readonly classTypes: SessionLabels["classTypes"];
+  readonly breadcrumbs: {
+    readonly dashboard: string;
+    readonly classes: string;
+  };
+}
 
 export function formatClassDetailDate(value: string | null | undefined, locale: string): string {
   if (!value) {
@@ -108,6 +118,7 @@ export interface TierSessionActionProps {
 export interface ClassDetailsHeaderProps {
   readonly instance: ClassInstanceDetail;
   readonly canOverride: boolean;
+  readonly labels: ClassDetailsHeaderLabels;
 }
 
 // NEW FOR PLAN v5: lifted from classDetailsContent.{mobile,desktop}.tsx inline declaration
@@ -126,6 +137,7 @@ export interface ClassDetailsContentProps {
   readonly onCloseDeleteDialog: () => void;
   readonly onConfirmDelete: () => Promise<void>;
   readonly t: ClassDetailsLabels;
+  readonly headerLabels: ClassDetailsHeaderLabels;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;

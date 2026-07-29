@@ -5,18 +5,19 @@ import type { ListPaginationOptions } from "@/frontend/common/components/ui/filt
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
 import { formatStatusLabel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsStatusFormatters";
+import type { AssignedStudentsListLabels } from "@/frontend/common/views/dashboard/profile/teacher/students/types/assignedStudentsList.types";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
-import { useAppTranslation } from "@/shared/locale";
 
 type AssignedStudentsCardListProps = {
   readonly rows: readonly AssignedStudentsRow[];
+  readonly labels: AssignedStudentsListLabels;
   readonly paginationOptions: ListPaginationOptions;
 };
 
-export function AssignedStudentsCardList({ rows, paginationOptions }: Readonly<AssignedStudentsCardListProps>) {
-  const t = useAppTranslation().profileTranslations.base.students;
+export function AssignedStudentsCardList({ rows, labels, paginationOptions }: Readonly<AssignedStudentsCardListProps>) {
+  const { columns } = labels;
 
   return (
     <MobileCardList
@@ -24,7 +25,7 @@ export function AssignedStudentsCardList({ rows, paginationOptions }: Readonly<A
       getKey={row => row.id}
       paginationOptions={paginationOptions}
       layout="edge-to-edge"
-      emptyMessage={t.mobileListLabel}
+      emptyMessage={labels.emptyMessage}
       renderItem={row => (
         <MobileCardListItem variant="edge-to-edge">
           <Stack spacing={1}>
@@ -45,19 +46,19 @@ export function AssignedStudentsCardList({ rows, paginationOptions }: Readonly<A
               avatarUrl={row.parentAvatarUrl}
               name={row.parentName}
               fallbackInitial="P"
-              label={t.columns.parent}
+              label={columns.parent}
               showAvatar
               avatarSize={24}
               fontWeight={400}
             />
             <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-              {t.columns.class}: {row.className}
+              {columns.class}: {row.className}
             </Typography>
             <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-              {t.columns.hoursPerWeek}: {row.hoursPerWeek}
+              {columns.hoursPerWeek}: {row.hoursPerWeek}
             </Typography>
             <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-              {t.columns.classes}: {row.classesRemaining} / {row.classesTotal}
+              {columns.classes}: {row.classesRemaining} / {row.classesTotal}
             </Typography>
           </Stack>
         </MobileCardListItem>

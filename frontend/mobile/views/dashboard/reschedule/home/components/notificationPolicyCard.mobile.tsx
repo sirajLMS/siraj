@@ -2,10 +2,14 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale";
+import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
-export function NotificationPolicyCardMobile() {
-  const t = useAppTranslation().dashboardTranslations.rescheduleForm.notificationPolicy;
+interface Props {
+  readonly labels: RescheduleFormLabels;
+}
+
+export function NotificationPolicyCardMobile({ labels }: Readonly<Props>) {
+  const notificationPolicy = labels.notificationPolicy;
 
   return (
     <Box
@@ -21,10 +25,10 @@ export function NotificationPolicyCardMobile() {
       <InfoOutlined sx={theme => ({ color: theme.palette.secondary.main })} />
       <Box>
         <Typography variant="labelMd" sx={theme => ({ fontWeight: 700, color: theme.palette.secondary.main, mb: 0.5 })}>
-          {t.title}
+          {notificationPolicy.title}
         </Typography>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t.description}
+          {notificationPolicy.description}
         </Typography>
       </Box>
     </Box>

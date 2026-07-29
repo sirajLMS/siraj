@@ -8,7 +8,7 @@ import { useDisplayCurrencyHintDismissed } from "@/frontend/common/hooks/useDisp
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale/client";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type DisplayCurrencyHintMode = "viewer" | "subject";
 type DisplayCurrencyHintVariant = "full" | "compact";
@@ -25,7 +25,7 @@ export function DisplayCurrencyHint({
   subjectUserId,
 }: Readonly<DisplayCurrencyHintProps>): React.ReactNode {
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
-  const t = useAppTranslation().dashboardTranslations.billing.displayCurrencyHint;
+  const t = useAppTranslation(Translation.Dashboard.Billing).displayCurrencyHint;
   const { dismissed, dismiss } = useDisplayCurrencyHintDismissed();
   const { data: subjectData, loading: subjectLoading } = useQuery(userQueryDocument, {
     variables: { id: subjectUserId ?? "" },

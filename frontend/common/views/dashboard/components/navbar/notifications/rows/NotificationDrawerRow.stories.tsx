@@ -66,6 +66,19 @@ const invoiceProofPendingAlert: NotificationDrawerAlert = {
 
 function createMockViewModel(): NotificationsDrawerViewModel {
   return {
+    labels: {
+      drawerTitle: "Notifications",
+      managePreferences: "Manage preferences",
+      markAllRead: "Mark all read",
+      markAsRead: "Mark as read",
+      reschedule: "Reschedule",
+      viewEntity: "View",
+      approveInvoice: "Approve",
+      rejectInvoice: "Reject",
+      noNotifications: "No notifications",
+      unreadCount: (count: number) => `${count} unread`,
+    } as NotificationsDrawerViewModel["labels"],
+    errorLoadingMessage: "Failed to load notifications.",
     alerts: [],
     unreadCount: 1,
     totalCount: 1,

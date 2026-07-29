@@ -114,7 +114,14 @@ export function TeacherDashboardDesktopView({
         onClose={onManualEntryClose}
         onSubmit={onManualEntrySubmit}
         defaultActive={manualEntryDefaultActive}
-        studentSelect={<ManualClassEntryStudentSelectDesktop teacherId={teacherId} open={manualEntryOpen} />}
+        labels={labels.manualClassEntry}
+        studentSelect={
+          <ManualClassEntryStudentSelectDesktop
+            teacherId={teacherId}
+            open={manualEntryOpen}
+            studentLabel={labels.manualClassEntry.studentLabel}
+          />
+        }
       />
     </>
   );

@@ -5,11 +5,12 @@ import { AssignmentIndOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui";
 import type { CurrentTeacherCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
-import { useAppTranslation } from "@/shared/locale";
 
-export function CurrentTeacherCardDesktop({ currentTeacherName, teacherId }: Readonly<CurrentTeacherCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment.currentTeacher;
-
+export function CurrentTeacherCardDesktop({
+  currentTeacherName,
+  teacherId,
+  labels,
+}: Readonly<CurrentTeacherCardProps>) {
   return (
     <BaseCard
       sx={theme => ({
@@ -28,44 +29,44 @@ export function CurrentTeacherCardDesktop({ currentTeacherName, teacherId }: Rea
           : {}),
       })}
     >
-      <Box sx={{ position: "relative", zIndex: 1 }}>
+      <Box sx={{ position: "relative", zIndex: 1, p: 2 }}>
         <Typography
           variant="labelUppercase"
           sx={theme => ({
-            mb: 1,
+            mb: 0.5,
             opacity: 0.9,
             color: theme.palette.onPrimary,
           })}
         >
-          {t.title}
+          {labels.title}
         </Typography>
         <Typography
-          variant="headlineMd"
+          variant="titleLg"
           sx={theme => ({
             fontWeight: 700,
-            mb: 2,
+            mb: 1,
             color: theme.palette.onPrimary,
           })}
         >
-          {currentTeacherName || t.unset}
+          {currentTeacherName || labels.unset}
         </Typography>
         <Typography
           variant="labelSm"
           sx={theme => ({
             opacity: 0.8,
-            lineHeight: 1.5,
+            lineHeight: 1.4,
             color: theme.palette.onPrimary,
           })}
         >
-          {t.notice}
+          {labels.notice}
         </Typography>
       </Box>
       <AssignmentIndOutlined
         sx={theme => ({
           position: "absolute",
-          right: -16,
-          bottom: -16,
-          fontSize: 120,
+          right: -12,
+          bottom: -12,
+          fontSize: 96,
           opacity: 0.1,
           color: theme.palette.onPrimary,
         })}

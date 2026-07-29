@@ -17,7 +17,7 @@ import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface LiveSessionToolbarProps {
   readonly classInstanceId: string;
@@ -290,7 +290,7 @@ export function LiveSessionToolbar({
   isResetting = false,
   error = null,
 }: LiveSessionToolbarProps) {
-  const t = useAppTranslation().dashboardTranslations.classDetails.liveSession;
+  const t = useAppTranslation(Translation.Dashboard.ClassDetails).liveSession;
 
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const [leaveReason, setLeaveReason] = useState("");

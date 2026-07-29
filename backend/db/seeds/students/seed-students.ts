@@ -13,7 +13,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { StudentStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
-import { StudentBootstrapService } from "@/backend/services/student/student-bootstrap.service";
+import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
 const DEMO_STUDENTS = [
@@ -132,7 +132,7 @@ function buildStudentRowSpec(
 }
 
 async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Promise<StudentEntity> {
-  const student = await StudentBootstrapService.upsertByIdempotencyKey({
+  const student = await StudentSeedService.seedStudentByKey({
     parentId: spec.parentId,
     userId: spec.userId,
     primaryTeacherId: spec.primaryTeacherId,
@@ -145,7 +145,7 @@ async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Pro
     classesRemaining: 5,
   });
 
-  await StudentBootstrapService.ensureTeacherAssignment(student.id, spec.primaryTeacherId, assignmentDate);
+  await StudentSeedService.seedTeacherAssignment(student.id, spec.primaryTeacherId, assignmentDate);
   return student;
 }
 

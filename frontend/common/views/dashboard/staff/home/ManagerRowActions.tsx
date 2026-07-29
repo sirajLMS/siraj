@@ -26,9 +26,9 @@ import {
 import { logger } from "@/frontend/common/utils/logger";
 import type { Manager } from "@/frontend/common/views/dashboard/staff/home/types";
 import type { StaffDirectoryLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
 
 interface ManagerRowActionsProps {
+  readonly labels: StaffDirectoryLabels;
   readonly manager: Manager;
 }
 
@@ -62,6 +62,7 @@ async function executeManagerUpdate(
 }
 
 interface EditProfileDialogProps {
+  readonly labels: StaffDirectoryLabels;
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onSubmit: () => void;
@@ -72,6 +73,7 @@ interface EditProfileDialogProps {
 }
 
 function EditProfileDialog({
+  labels: t,
   open,
   onClose,
   onSubmit,
@@ -80,8 +82,6 @@ function EditProfileDialog({
   onPhoneChange,
   updateLoading,
 }: Readonly<EditProfileDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory;
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>{t.actions.editProfile}</DialogTitle>
@@ -109,6 +109,7 @@ function EditProfileDialog({
 }
 
 interface DeactivateDialogProps {
+  readonly labels: StaffDirectoryLabels;
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onSubmit: () => void;
@@ -128,6 +129,7 @@ function resolveSubmitLabel(
 }
 
 function DeactivateDialog({
+  labels: t,
   open,
   onClose,
   onSubmit,
@@ -135,7 +137,6 @@ function DeactivateDialog({
   manager,
   updateLoading,
 }: Readonly<DeactivateDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory;
   const actions = t.actions;
 
   const dialogTitle = isDeactivate ? actions.deactivate : actions.activate;
@@ -166,8 +167,8 @@ function DeactivateDialog({
   );
 }
 
-export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>) {
-  const t = useAppTranslation().dashboardTranslations.staffDirectory;
+export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowActionsProps>) {
+  const t = labels;
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [editPhone, setEditPhone] = useState(manager.phone);
@@ -241,6 +242,7 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
       </Stack>
 
       <EditProfileDialog
+        labels={labels}
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
         onSubmit={handleEditSubmit}
@@ -251,6 +253,7 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
       />
 
       <DeactivateDialog
+        labels={labels}
         open={deactivateDialogOpen}
         onClose={() => setDeactivateDialogOpen(false)}
         onSubmit={handleDeactivateSubmit}

@@ -13,7 +13,7 @@ import { LocalizedStringFormFieldDesktop } from "@/frontend/desktop/components/u
 import { PaymentMethodSelectDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect";
 import { PhoneFormFieldDesktop } from "@/frontend/desktop/components/ui/input/phoneInput";
 import { TagInputDesktop } from "@/frontend/desktop/components/ui/input/tagInput";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function PaymentMethodTypeFieldsDesktop<T extends FieldValues>({
   type,
@@ -33,7 +33,7 @@ export function PaymentMethodTypeFieldsDesktop<T extends FieldValues>({
   detailsPrefix,
   catalogPrefix,
 }: Readonly<PaymentMethodTypeFieldsProps<T>>): React.ReactNode {
-  const t = useAppTranslation().uiTranslations.paymentMethod;
+  const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tTypeFields = t.typeFields;
 
   const renderCatalogMetadata = () => {

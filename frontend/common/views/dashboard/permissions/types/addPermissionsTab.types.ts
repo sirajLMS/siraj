@@ -1,7 +1,10 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
+
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionsLabels } from "@/shared/locale";
 
 export interface AddPermissionsTabProps {
+  readonly labels: PermissionsLabels;
   readonly filteredAvailablePermissions: readonly Permission[];
   readonly selectedAddPermissionIds: readonly string[];
   readonly searchQuery: string;

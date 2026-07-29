@@ -3,11 +3,12 @@
 import type { Breakpoint } from "@mui/material";
 import { Box } from "@mui/material";
 import Grid, { type GridSize } from "@mui/material/Grid";
+import { useMetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelSources";
+import type { MetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import { useAppTranslation } from "@/shared/locale";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };
 
@@ -28,15 +29,15 @@ function renderMetricCard({
   index,
   selectedKey,
   onMetricClick,
-  translations,
+  labelSources,
 }: {
   metric: MetricItem;
   index: number;
   selectedKey?: string;
   onMetricClick?: (key: string) => void;
-  translations: ReturnType<typeof useAppTranslation>;
+  labelSources: MetricLabelSources;
 }) {
-  const label = metric.label || resolveMetricLabel(metric.labelKey, translations);
+  const label = metric.label || resolveMetricLabel(metric.labelKey, labelSources);
   return (
     <MetricCard
       icon={metric.icon}
@@ -57,7 +58,7 @@ function renderMetricCard({
 }
 
 export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size, layout = "grid" }: MetricCardGridProps) {
-  const translations = useAppTranslation();
+  const labelSources = useMetricLabelSources();
   const isScroll = layout === "scroll";
 
   if (isScroll) {
@@ -73,7 +74,7 @@ export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size, layo
               borderRadius: 0,
             }}
           >
-            {renderMetricCard({ metric, index, selectedKey, onMetricClick, translations })}
+            {renderMetricCard({ metric, index, selectedKey, onMetricClick, labelSources })}
           </Box>
         ))}
       </HorizontalScrollRow>
@@ -84,7 +85,7 @@ export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size, layo
     <Grid container spacing={2}>
       {metrics.map((metric, index) => (
         <Grid key={metric.key} size={size ?? defaultSize} sx={{ minWidth: 0 }}>
-          {renderMetricCard({ metric, index, selectedKey, onMetricClick, translations })}
+          {renderMetricCard({ metric, index, selectedKey, onMetricClick, labelSources })}
         </Grid>
       ))}
     </Grid>

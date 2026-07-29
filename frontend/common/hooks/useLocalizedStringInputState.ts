@@ -12,7 +12,8 @@ import { getLanguageDisplayName } from "@/frontend/common/lib/locale";
 import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AppLocale } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { LocalizedStringLabels } from "@/shared/locale/types/ui";
 import type { LocalizedString } from "@/shared/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
@@ -52,7 +53,7 @@ export type LocalizedStringInputState = {
   readonly setDrawerOpen: (open: boolean) => void;
 };
 
-type LocalizedStringT = ReturnType<typeof useAppTranslation>["uiTranslations"]["localizedString"];
+type LocalizedStringT = LocalizedStringLabels;
 
 const SUCCESS_FIELD_SX: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
@@ -250,7 +251,7 @@ export const useLocalizedStringInputState = (props: LocalizedStringInputStatePro
     multiline,
     containerRef,
   } = props;
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const uiLocale = useAppLocale();
   const isCompact = useNarrowContainer(containerRef);
 

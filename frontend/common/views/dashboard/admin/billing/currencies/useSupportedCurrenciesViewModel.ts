@@ -12,7 +12,9 @@ import {
 import { countryCodeToEmoji } from "@/frontend/common/lib/locale";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { useAppTranslation } from "@/shared/locale";
+import type { SupportedCurrenciesLabelsBySection } from "@/frontend/common/views/dashboard/admin/billing/currencies/types/supportedCurrencies.types";
+import { Translation, useAppTranslation } from "@/shared/locale";
+import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies";
 
 export type SupportedCurrencyRow = {
   readonly id: string;
@@ -32,33 +34,9 @@ export interface SupportedCurrencyUpsertFormInput {
 }
 
 export interface SupportedCurrenciesViewModel {
+  readonly labelsBySection: SupportedCurrenciesLabelsBySection;
   readonly rows: readonly SupportedCurrencyRow[];
   readonly loading: boolean;
-  readonly emptyMessage: string;
-  readonly footerNote: string;
-  readonly pageTitle: string;
-  readonly pageSubtitle: string;
-  readonly flagColumnLabel: string;
-  readonly codeColumnLabel: string;
-  readonly symbolColumnLabel: string;
-  readonly nameColumnLabel: string;
-  readonly countryColumnLabel: string;
-  readonly activeColumnLabel: string;
-  readonly actionsColumnLabel: string;
-  readonly activateLabel: string;
-  readonly editLabel: string;
-  readonly deactivateLabel: string;
-  readonly activateTitle: string;
-  readonly editTitle: string;
-  readonly deactivateConfirmTitle: string;
-  readonly deactivateConfirmBody: (code: string) => string;
-  readonly deactivateConfirmCancel: string;
-  readonly deactivateConfirmConfirm: string;
-  readonly saveSuccess: string;
-  readonly saveError: string;
-  readonly deactivateSuccess: string;
-  readonly deactivateError: string;
-  readonly currencyInUseMessage: string;
   readonly canManage: boolean;
   readonly onActivate: () => void;
   readonly onEdit: (row: SupportedCurrencyRow) => void;
@@ -77,11 +55,51 @@ export interface SupportedCurrenciesViewModel {
 
 export type UseSupportedCurrenciesViewModelProps = Record<string, never>;
 
+function buildLabelsBySection(labels: SupportedCurrenciesLabels): SupportedCurrenciesLabelsBySection {
+  return {
+    shell: {
+      pageTitle: labels.pageTitle,
+      pageSubtitle: labels.pageSubtitle,
+      empty: labels.empty,
+      footerNote: labels.footerNote,
+    },
+    columns: {
+      flag: labels.flag,
+      code: labels.code,
+      symbol: labels.symbol,
+      name: labels.name,
+      country: labels.country,
+      active: labels.active,
+      actions: labels.actions,
+    },
+    actions: {
+      activateLabel: labels.activateLabel,
+      editLabel: labels.editLabel,
+      deactivateLabel: labels.deactivateLabel,
+    },
+    dialogs: {
+      activateTitle: labels.activateTitle,
+      editTitle: labels.editTitle,
+      deactivateConfirmTitle: labels.deactivateConfirmTitle,
+      deactivateConfirmBody: labels.deactivateConfirmBody,
+      deactivateConfirmCancel: labels.deactivateConfirmCancel,
+      deactivateConfirmConfirm: labels.deactivateConfirmConfirm,
+    },
+    notifications: {
+      saveSuccess: labels.saveSuccess,
+      saveError: labels.saveError,
+      deactivateSuccess: labels.deactivateSuccess,
+      deactivateError: labels.deactivateError,
+      currencyInUse: labels.currencyInUse,
+    },
+  };
+}
+
 export function useSupportedCurrenciesViewModel(
   _props: Readonly<UseSupportedCurrenciesViewModelProps>
 ): SupportedCurrenciesViewModel {
-  const t = useAppTranslation().dashboardTranslations.billing;
-  const labels = t.supportedCurrencies;
+  const labels = useAppTranslation(Translation.Dashboard.BillingSupportedCurrencies);
+  const labelsBySection = useMemo(() => buildLabelsBySection(labels), [labels]);
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManage = hasPermission(AppPermission.BillingManageCurrencies);
@@ -90,9 +108,6 @@ export function useSupportedCurrenciesViewModel(
   const [editRow, setEditRow] = useState<SupportedCurrencyRow | null>(null);
   const [deactivateRow, setDeactivateRow] = useState<SupportedCurrencyRow | null>(null);
 
-  // Admin view queries ALL currencies (active + inactive) directly from the
-  // supported_currencies table — no static fallback. An empty table must render
-  // the empty state, not the hardcoded frontend catalog.
   const { data, loading, refetch } = useQuery(supportedCurrenciesQueryDocument, {
     variables: { activeOnly: false },
     fetchPolicy: "cache-and-network",
@@ -121,7 +136,7 @@ export function useSupportedCurrenciesViewModel(
   const handleSaved = async (): Promise<void> => {
     setActivateOpen(false);
     setEditRow(null);
-    notifications.show(labels.saveSuccess, { severity: "success" });
+    notifications.show(labelsBySection.notifications.saveSuccess, { severity: "success" });
     await refetch();
   };
 
@@ -129,16 +144,14 @@ export function useSupportedCurrenciesViewModel(
     if (!deactivateRow?.code) return;
     try {
       await deactivateCurrency({ variables: { code: deactivateRow.code } });
-      notifications.show(labels.deactivateSuccess, { severity: "success" });
+      notifications.show(labelsBySection.notifications.deactivateSuccess, { severity: "success" });
       setDeactivateRow(null);
       await refetch();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      // The backend throws tErrors.currencyInUse when the currency is referenced.
-      // Detect it heuristically (the localized message contains the in-use text)
-      // and surface the dedicated currencyInUse label; otherwise show generic error.
-      const isInUse = message === labels.currencyInUse || message.includes(labels.currencyInUse);
-      notifications.show(isInUse ? labels.currencyInUse : labels.deactivateError, { severity: "error" });
+      const { currencyInUse, deactivateError } = labelsBySection.notifications;
+      const isInUse = message === currencyInUse || message.includes(currencyInUse);
+      notifications.show(isInUse ? currencyInUse : deactivateError, { severity: "error" });
       if (!isInUse) {
         setDeactivateRow(null);
       }
@@ -147,33 +160,9 @@ export function useSupportedCurrenciesViewModel(
   };
 
   return {
+    labelsBySection,
     rows,
     loading,
-    emptyMessage: labels.empty,
-    footerNote: labels.footerNote,
-    pageTitle: labels.pageTitle,
-    pageSubtitle: labels.pageSubtitle,
-    flagColumnLabel: labels.flag,
-    codeColumnLabel: labels.code,
-    symbolColumnLabel: labels.symbol,
-    nameColumnLabel: labels.name,
-    countryColumnLabel: labels.country,
-    activeColumnLabel: labels.active,
-    actionsColumnLabel: labels.actions,
-    activateLabel: labels.activateLabel,
-    editLabel: labels.editLabel,
-    deactivateLabel: labels.deactivateLabel,
-    activateTitle: labels.activateTitle,
-    editTitle: labels.editTitle,
-    deactivateConfirmTitle: labels.deactivateConfirmTitle,
-    deactivateConfirmBody: labels.deactivateConfirmBody,
-    deactivateConfirmCancel: labels.deactivateConfirmCancel,
-    deactivateConfirmConfirm: labels.deactivateConfirmConfirm,
-    saveSuccess: labels.saveSuccess,
-    saveError: labels.saveError,
-    deactivateSuccess: labels.deactivateSuccess,
-    deactivateError: labels.deactivateError,
-    currencyInUseMessage: labels.currencyInUse,
     canManage,
     onActivate: () => {
       setEditRow(null);
@@ -197,5 +186,4 @@ export function useSupportedCurrenciesViewModel(
   };
 }
 
-// Expose the activate mutation document for the dialog to use.
 export { activateSupportedCurrencyMutationDocument };

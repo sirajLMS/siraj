@@ -2,11 +2,13 @@ import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import type { ComponentProps, ComponentType } from "react";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type {
   UpcomingClassDisplay,
   UpcomingClassesTableProps,
 } from "@/frontend/common/views/dashboard/students/status/types";
+import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
@@ -14,7 +16,6 @@ import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/displ
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppLocale, useAppTranslation } from "@/shared/locale";
 
 type ProfileLinkCellProps = ComponentProps<typeof DesktopClassProfileLinkCell>;
 type ProfileLinkCellComponent = ComponentType<ProfileLinkCellProps>;
@@ -70,7 +71,7 @@ function formatTime(locale: string, dateStr: string): string {
 }
 
 function DesktopHeader({ pendingCount }: Readonly<{ pendingCount: number }>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   return (
     <Box
       sx={theme => ({
@@ -111,7 +112,7 @@ function DesktopHeader({ pendingCount }: Readonly<{ pendingCount: number }>) {
 }
 
 function DesktopFooter() {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   return (
     <Box
       sx={theme => ({
@@ -130,7 +131,7 @@ function DesktopFooter() {
 }
 
 export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClassesTableProps>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   const locale = useAppLocale();
 
   const columns: GridColDef<UpcomingClassDisplay>[] = [

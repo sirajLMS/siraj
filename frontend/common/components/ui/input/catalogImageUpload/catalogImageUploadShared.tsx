@@ -14,7 +14,7 @@ import type {
   UrlFallbackFieldProps,
 } from "@/frontend/common/components/ui/input/catalogImageUpload/types/catalogImageUploadShared.types";
 import { ACCEPTED_TYPES, DEFAULT_MAX_SIZE_MB, useImageUpload } from "@/frontend/common/hooks/useImageUpload";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export const PREVIEW_SIZE = 96;
 
@@ -326,7 +326,7 @@ export function CatalogImageUploadScaffold({
     previewShape = "square",
   } = props;
 
-  const t = useAppTranslation().uiTranslations.catalogImageUpload;
+  const t = useAppTranslation(Translation.Ui.CatalogImageUpload);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const upload = useImageUpload({
     onImageUrlChangeAction,

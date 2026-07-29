@@ -9,10 +9,17 @@ import type {
 } from "@/frontend/common/views/dashboard/search-schedule/types";
 import { shiftMonth } from "@/frontend/common/views/dashboard/search-schedule/utils";
 import { TeacherAvailabilityCalendarGridMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityCalendarGrid.mobile";
-import { useAppTranslation } from "@/shared/locale";
+import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 
-function DrawerHeader({ title, onClose }: { readonly title: string; readonly onClose: () => void }) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
+function DrawerHeader({
+  labels,
+  title,
+  onClose,
+}: {
+  readonly labels: SearchScheduleLabels;
+  readonly title: string;
+  readonly onClose: () => void;
+}) {
   return (
     <Box
       sx={{
@@ -31,7 +38,7 @@ function DrawerHeader({ title, onClose }: { readonly title: string; readonly onC
           {title}
         </Typography>
       </Box>
-      <IconButton aria-label={t.closeMonthSchedule} onClick={onClose} size="small">
+      <IconButton aria-label={labels.closeMonthSchedule} onClick={onClose} size="small">
         <CloseOutlined />
       </IconButton>
     </Box>
@@ -39,13 +46,14 @@ function DrawerHeader({ title, onClose }: { readonly title: string; readonly onC
 }
 
 function MonthNavigator({
+  labels,
   currentMonth,
   onMonthChange,
 }: {
+  readonly labels: SearchScheduleLabels;
   readonly currentMonth: Date;
   readonly onMonthChange: (next: Date) => void;
 }) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
   const yearStr = currentMonth.getFullYear();
 
@@ -55,7 +63,11 @@ function MonthNavigator({
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, py: 2 }}>
-      <IconButton aria-label={t.previousMonth} onClick={() => onMonthChange(shiftMonth(currentMonth, -1))} sx={flipSx}>
+      <IconButton
+        aria-label={labels.previousMonth}
+        onClick={() => onMonthChange(shiftMonth(currentMonth, -1))}
+        sx={flipSx}
+      >
         <ChevronLeft />
       </IconButton>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -64,7 +76,7 @@ function MonthNavigator({
           {monthStr} {yearStr}
         </Typography>
       </Box>
-      <IconButton aria-label={t.nextMonth} onClick={() => onMonthChange(shiftMonth(currentMonth, 1))} sx={flipSx}>
+      <IconButton aria-label={labels.nextMonth} onClick={() => onMonthChange(shiftMonth(currentMonth, 1))} sx={flipSx}>
         <ChevronRight />
       </IconButton>
     </Box>
@@ -72,17 +84,18 @@ function MonthNavigator({
 }
 
 function DrawerContent({
+  labels,
   loading,
   error,
   currentMonth,
   daysByDate,
 }: {
+  readonly labels: SearchScheduleLabels;
   readonly loading: boolean;
   readonly error: unknown;
   readonly currentMonth: Date;
   readonly daysByDate: Readonly<Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>>;
 }) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   return (
     <Box sx={{ flex: 1, overflow: "auto", px: 2, pb: 3 }}>
       {loading ? (
@@ -93,18 +106,19 @@ function DrawerContent({
 
       {error ? (
         <Typography color="error" sx={{ textAlign: "center", py: 4 }}>
-          {t.monthScheduleError}
+          {labels.monthScheduleError}
         </Typography>
       ) : null}
 
       {!loading && !error ? (
-        <TeacherAvailabilityCalendarGridMobile currentMonth={currentMonth} daysByDate={daysByDate} />
+        <TeacherAvailabilityCalendarGridMobile labels={labels} currentMonth={currentMonth} daysByDate={daysByDate} />
       ) : null}
     </Box>
   );
 }
 
 export function TeacherAvailabilityMonthDrawerMobile({
+  labels,
   open,
   teacher,
   currentMonth,
@@ -114,8 +128,6 @@ export function TeacherAvailabilityMonthDrawerMobile({
   onClose,
   onMonthChange,
 }: Readonly<TeacherAvailabilityMonthDrawerProps>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
-
   return (
     <Drawer
       anchor="bottom"
@@ -133,9 +145,10 @@ export function TeacherAvailabilityMonthDrawerMobile({
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <DrawerHeader title={t.monthScheduleTitle(teacher?.name ?? "")} onClose={onClose} />
-        <MonthNavigator currentMonth={currentMonth} onMonthChange={onMonthChange} />
+        <DrawerHeader title={labels.monthScheduleTitle(teacher?.name ?? "")} labels={labels} onClose={onClose} />
+        <MonthNavigator labels={labels} currentMonth={currentMonth} onMonthChange={onMonthChange} />
         <DrawerContent
+          labels={labels}
           loading={monthDrawerLoading}
           error={monthDrawerError}
           currentMonth={currentMonth}

@@ -260,6 +260,8 @@ in one file breaks another file.
 
 1. Run `bun run codescene --scan` to get the list of flagged files.
 
+   For CodeScene-only fix runs (no full quality gate), use the `fix-codescene` skill instead.
+
 2. **Dispatch one subagent per flagged file** — launch all in a SINGLE response (parallel).
    Each subagent receives:
    - `lifecycle: codescene`

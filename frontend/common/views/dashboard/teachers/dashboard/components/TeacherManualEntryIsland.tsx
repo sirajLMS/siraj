@@ -5,7 +5,11 @@ import { useCallback, useEffect } from "react";
 import type { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+
+interface TeacherManualEntryIslandProps {
+  readonly labels: TeacherDashboardViewLabels;
+}
 
 /**
  * Owns the manual-class-entry creation mutation and registers
@@ -14,8 +18,8 @@ import { useAppTranslation } from "@/shared/locale";
  * flags live in the store (`manualEntryOpen`, `manualEntryDefaultActive`) so
  * tier switching never loses the modal midpoint state.
  */
-export function TeacherManualEntryIsland() {
-  const t = useAppTranslation().dashboardTranslations.teacherDashboard;
+export function TeacherManualEntryIsland({ labels }: Readonly<TeacherManualEntryIslandProps>) {
+  const teacherIdNotFoundMessage = labels.manualClassEntry.teacherIdNotFound;
   const teacherId = useTeacherDashboardStore(state => state.data.teacherId);
   const setManualEntryOpen = useTeacherDashboardStore(state => state.setManualEntryOpen);
   const setManualEntryDefaultActive = useTeacherDashboardStore(state => state.setManualEntryDefaultActive);
@@ -54,7 +58,7 @@ export function TeacherManualEntryIsland() {
       readonly classType: string;
     }) => {
       if (!teacherId) {
-        throw new Error(t.manualClassEntry.teacherIdNotFound);
+        throw new Error(teacherIdNotFoundMessage);
       }
       await createManualEntry({
         variables: {
@@ -71,7 +75,7 @@ export function TeacherManualEntryIsland() {
       });
       refetch();
     },
-    [createManualEntry, refetch, teacherId, t.manualClassEntry.teacherIdNotFound]
+    [createManualEntry, refetch, teacherId, teacherIdNotFoundMessage]
   );
 
   useEffect(() => {

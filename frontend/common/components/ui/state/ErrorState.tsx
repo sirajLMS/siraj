@@ -1,5 +1,5 @@
 import { Alert, Box, Button } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ErrorStateProps = {
   readonly message?: string;
@@ -9,7 +9,7 @@ type ErrorStateProps = {
 };
 
 export function ErrorState({ message, onRetry, retryLabel, embedded = false }: ErrorStateProps) {
-  const tDefault = useAppTranslation().commonTranslations;
+  const tDefault = useAppTranslation(Translation.Common);
   const displayMessage = message ?? tDefault.loadFailed ?? "";
 
   const alert = (

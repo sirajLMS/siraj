@@ -170,6 +170,13 @@ export type AppPermission =
   | 'SESSION_UPDATE_STATUS_LEAVE'
   | 'SESSION_UPDATE_STATUS_START'
   | 'SESSION_VIEW_DETAILS'
+  | 'SETTINGS_AUDIT_VIEW'
+  | 'SETTINGS_EDIT_ENV'
+  | 'SETTINGS_EDIT_GENERAL'
+  | 'SETTINGS_EDIT_SESSION'
+  | 'SETTINGS_SITE_CONTENT_MANAGE'
+  | 'SETTINGS_TIMEZONES_VIEW'
+  | 'SETTINGS_VIEW'
   | 'STAFF_CREATE'
   | 'STAFF_EDIT'
   | 'STAFF_EDIT_PROFILE'
@@ -781,6 +788,11 @@ export type EffectiveMeetingSource =
   | 'none'
   | 'recurring'
   | 'teacher';
+
+export type EnvConfigUpsertInput = {
+  key: string;
+  value: string;
+};
 
 export type FxProvider =
   | 'Fixer'
@@ -1556,6 +1568,32 @@ export type RevokePermissionGroupFromUserInput = {
   userId: string;
 };
 
+/** Input for creating or updating a per-role session configuration. */
+export type SessionConfigUpsertInput = {
+  maxConcurrentSessions: number;
+  roleName: string;
+  ttlSeconds: number;
+};
+
+/** Filter and pagination options for the settings audit log query. */
+export type SettingsAuditLogFilter = {
+  action: string | null | undefined;
+  actorUserId: string | null | undefined;
+  endDate: string | null | undefined;
+  entityType: string | null | undefined;
+  limit: number | null | undefined;
+  offset: number | null | undefined;
+  startDate: string | null | undefined;
+};
+
+export type SiteContentUpsertInput = {
+  body: string;
+  contentType: string;
+  isPublished: boolean;
+  slug: string;
+  title: string;
+};
+
 export type StaffAdminProfileUpdateInput = {
   phone: string | null | undefined;
   status: string | null | undefined;
@@ -1756,6 +1794,38 @@ export type SupportedPaymentLinkUpdateInput = {
   supportedDirections: PaymentDirection | null | undefined;
   urlAllowlist: Array<string> | null | undefined;
   urlExample: string | null | undefined;
+};
+
+export type SystemSettingCategory =
+  | 'app'
+  | 'auth'
+  | 'billing'
+  | 'cache'
+  | 'communication'
+  | 'email'
+  | 'fx'
+  | 'general'
+  | 'meeting'
+  | 'push'
+  | 'redis'
+  | 'scheduling'
+  | 'security'
+  | 'sms'
+  | 'storage'
+  | 'system';
+
+export type SystemSettingDataType =
+  | 'boolean'
+  | 'integer'
+  | 'json'
+  | 'string';
+
+export type SystemSettingUpsertInput = {
+  category: SystemSettingCategory | null | undefined;
+  dataType: SystemSettingDataType | null | undefined;
+  description: string | null | undefined;
+  key: string;
+  value: string;
 };
 
 export type TeacherDueStatus =
@@ -4538,6 +4608,239 @@ export type TeacherWorkloadMetricsQueryVariables = Exact<{
 
 
 export type TeacherWorkloadMetricsQuery = TeacherWorkloadMetricsQuery_Query;
+
+export type EnvConfigEntryFieldsFragment = { id: string | null, key: string | null, category: string | null, displayStrategy: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSecret: boolean | null, excludeFromDb: boolean | null, value: string | null, source: string | null, hasDbOverride: boolean | null, editable: boolean | null };
+
+export type EnvConfigUpsertResultFieldsFragment = { id: string | null, key: string | null, source: string | null, hasDbOverride: boolean | null, updatedAt: string | null };
+
+export type EnvConfigDeleteResultFieldsFragment = { id: string | null, key: string | null, deleted: boolean | null, source: string | null };
+
+export type EnvConfigEntriesQuery_envConfigEntries_EnvConfigEntry = { id: string | null, key: string | null, category: string | null, displayStrategy: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSecret: boolean | null, excludeFromDb: boolean | null, value: string | null, source: string | null, hasDbOverride: boolean | null, editable: boolean | null };
+
+export type EnvConfigEntriesQuery_Query = { envConfigEntries: Array<EnvConfigEntriesQuery_envConfigEntries_EnvConfigEntry> | null };
+
+
+export type EnvConfigEntriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EnvConfigEntriesQuery = EnvConfigEntriesQuery_Query;
+
+export type UpsertEnvConfigEntryMutation_upsertEnvConfigEntry_EnvConfigUpsertResult = { id: string | null, key: string | null, source: string | null, hasDbOverride: boolean | null, updatedAt: string | null };
+
+export type UpsertEnvConfigEntryMutation_Mutation = { upsertEnvConfigEntry: UpsertEnvConfigEntryMutation_upsertEnvConfigEntry_EnvConfigUpsertResult | null };
+
+
+export type UpsertEnvConfigEntryMutationVariables = Exact<{
+  input: Types.EnvConfigUpsertInput;
+}>;
+
+
+export type UpsertEnvConfigEntryMutation = UpsertEnvConfigEntryMutation_Mutation;
+
+export type DeleteEnvConfigEntryMutation_deleteEnvConfigEntry_EnvConfigDeleteResult = { id: string | null, key: string | null, deleted: boolean | null, source: string | null };
+
+export type DeleteEnvConfigEntryMutation_Mutation = { deleteEnvConfigEntry: DeleteEnvConfigEntryMutation_deleteEnvConfigEntry_EnvConfigDeleteResult | null };
+
+
+export type DeleteEnvConfigEntryMutationVariables = Exact<{
+  key: string;
+}>;
+
+
+export type DeleteEnvConfigEntryMutation = DeleteEnvConfigEntryMutation_Mutation;
+
+export type SystemSettingFieldsFragment = { id: string | null, key: string | null, value: string | null, dataType: Types.SystemSettingDataType | null, description: string | null, category: Types.SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
+
+export type SystemSettingsQuery_systemSettings_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: Types.SystemSettingDataType | null, description: string | null, category: Types.SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
+
+export type SystemSettingsQuery_Query = { systemSettings: Array<SystemSettingsQuery_systemSettings_SystemSetting> | null };
+
+
+export type SystemSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SystemSettingsQuery = SystemSettingsQuery_Query;
+
+export type SystemSettingQuery_systemSetting_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: Types.SystemSettingDataType | null, description: string | null, category: Types.SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
+
+export type SystemSettingQuery_Query = { systemSetting: SystemSettingQuery_systemSetting_SystemSetting | null };
+
+
+export type SystemSettingQueryVariables = Exact<{
+  key: string;
+}>;
+
+
+export type SystemSettingQuery = SystemSettingQuery_Query;
+
+export type UpsertSystemSettingMutation_upsertSystemSetting_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: Types.SystemSettingDataType | null, description: string | null, category: Types.SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
+
+export type UpsertSystemSettingMutation_Mutation = { upsertSystemSetting: UpsertSystemSettingMutation_upsertSystemSetting_SystemSetting | null };
+
+
+export type UpsertSystemSettingMutationVariables = Exact<{
+  input: Types.SystemSettingUpsertInput;
+}>;
+
+
+export type UpsertSystemSettingMutation = UpsertSystemSettingMutation_Mutation;
+
+export type DeleteSystemSettingMutation_Mutation = { deleteSystemSetting: boolean | null };
+
+
+export type DeleteSystemSettingMutationVariables = Exact<{
+  key: string;
+}>;
+
+
+export type DeleteSystemSettingMutation = DeleteSystemSettingMutation_Mutation;
+
+export type SessionConfigFieldsFragment = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type SessionConfigsQuery_sessionConfigs_SessionConfig = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type SessionConfigsQuery_Query = { sessionConfigs: Array<SessionConfigsQuery_sessionConfigs_SessionConfig> | null };
+
+
+export type SessionConfigsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SessionConfigsQuery = SessionConfigsQuery_Query;
+
+export type SessionConfigQuery_sessionConfig_SessionConfig = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type SessionConfigQuery_Query = { sessionConfig: SessionConfigQuery_sessionConfig_SessionConfig | null };
+
+
+export type SessionConfigQueryVariables = Exact<{
+  roleName: string;
+}>;
+
+
+export type SessionConfigQuery = SessionConfigQuery_Query;
+
+export type UpsertSessionConfigMutation_upsertSessionConfig_SessionConfig = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpsertSessionConfigMutation_Mutation = { upsertSessionConfig: UpsertSessionConfigMutation_upsertSessionConfig_SessionConfig | null };
+
+
+export type UpsertSessionConfigMutationVariables = Exact<{
+  input: Types.SessionConfigUpsertInput;
+}>;
+
+
+export type UpsertSessionConfigMutation = UpsertSessionConfigMutation_Mutation;
+
+export type DeleteSessionConfigMutation_Mutation = { deleteSessionConfig: boolean | null };
+
+
+export type DeleteSessionConfigMutationVariables = Exact<{
+  roleName: string;
+}>;
+
+
+export type DeleteSessionConfigMutation = DeleteSessionConfigMutation_Mutation;
+
+export type AuditLogFieldsFragment = { id: string | null, actorUserId: string | null, actorType: string | null, entityType: string | null, entityId: string | null, action: string | null, description: string | null, previousState: unknown, newState: unknown, changes: unknown, ipAddress: string | null, userAgent: string | null, metadata: unknown, createdAt: string | null };
+
+export type SettingsAuditLogsQuery_settingsAuditLogs_SettingsAuditLogsResult_logs_AuditLog = { id: string | null, actorUserId: string | null, actorType: string | null, entityType: string | null, entityId: string | null, action: string | null, description: string | null, previousState: unknown, newState: unknown, changes: unknown, ipAddress: string | null, userAgent: string | null, metadata: unknown, createdAt: string | null };
+
+export type SettingsAuditLogsQuery_settingsAuditLogs_SettingsAuditLogsResult = { id: string | null, total: number | null, hasMore: boolean | null, logs: Array<SettingsAuditLogsQuery_settingsAuditLogs_SettingsAuditLogsResult_logs_AuditLog> | null };
+
+export type SettingsAuditLogsQuery_Query = { settingsAuditLogs: SettingsAuditLogsQuery_settingsAuditLogs_SettingsAuditLogsResult | null };
+
+
+export type SettingsAuditLogsQueryVariables = Exact<{
+  filter: Types.SettingsAuditLogFilter | null | undefined;
+}>;
+
+
+export type SettingsAuditLogsQuery = SettingsAuditLogsQuery_Query;
+
+export type SiteContentEntryFieldsFragment = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SiteContentEntriesQuery_siteContentEntries_SiteContentEntry = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SiteContentEntriesQuery_Query = { siteContentEntries: Array<SiteContentEntriesQuery_siteContentEntries_SiteContentEntry> | null };
+
+
+export type SiteContentEntriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SiteContentEntriesQuery = SiteContentEntriesQuery_Query;
+
+export type SiteContentEntryQuery_siteContentEntry_SiteContentEntry = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SiteContentEntryQuery_Query = { siteContentEntry: SiteContentEntryQuery_siteContentEntry_SiteContentEntry | null };
+
+
+export type SiteContentEntryQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type SiteContentEntryQuery = SiteContentEntryQuery_Query;
+
+export type UpsertSiteContentMutation_upsertSiteContent_SiteContentEntry = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpsertSiteContentMutation_Mutation = { upsertSiteContent: UpsertSiteContentMutation_upsertSiteContent_SiteContentEntry | null };
+
+
+export type UpsertSiteContentMutationVariables = Exact<{
+  input: Types.SiteContentUpsertInput;
+}>;
+
+
+export type UpsertSiteContentMutation = UpsertSiteContentMutation_Mutation;
+
+export type UpdateSiteContentPublishStateMutation_updateSiteContentPublishState_SiteContentEntry = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpdateSiteContentPublishStateMutation_Mutation = { updateSiteContentPublishState: UpdateSiteContentPublishStateMutation_updateSiteContentPublishState_SiteContentEntry | null };
+
+
+export type UpdateSiteContentPublishStateMutationVariables = Exact<{
+  id: string | number;
+  isPublished: boolean;
+}>;
+
+
+export type UpdateSiteContentPublishStateMutation = UpdateSiteContentPublishStateMutation_Mutation;
+
+export type DeleteSiteContentMutation_Mutation = { deleteSiteContent: boolean | null };
+
+
+export type DeleteSiteContentMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteSiteContentMutation = DeleteSiteContentMutation_Mutation;
+
+export type SettingsTimezoneFieldsFragment = { id: string | null, ianaId: string | null, name: string | null, baseOffsetMinutes: number | null, offsetMinutes: number | null, isDstSupported: boolean | null };
+
+export type SettingsTimezonesQuery_settingsTimezones_SettingsTimezonesResult_rows_SettingsTimezone = { id: string | null, ianaId: string | null, name: string | null, baseOffsetMinutes: number | null, offsetMinutes: number | null, isDstSupported: boolean | null };
+
+export type SettingsTimezonesQuery_settingsTimezones_SettingsTimezonesResult_pageInfo_PageInfo = { count: number, currentPage: number, endCursor: string | null, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, startCursor: string | null, total: number };
+
+export type SettingsTimezonesQuery_settingsTimezones_SettingsTimezonesResult = { id: string | null, totalCount: number | null, rows: Array<SettingsTimezonesQuery_settingsTimezones_SettingsTimezonesResult_rows_SettingsTimezone> | null, pageInfo: SettingsTimezonesQuery_settingsTimezones_SettingsTimezonesResult_pageInfo_PageInfo | null };
+
+export type SettingsTimezonesQuery_Query = { settingsTimezones: SettingsTimezonesQuery_settingsTimezones_SettingsTimezonesResult | null };
+
+
+export type SettingsTimezonesQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type SettingsTimezonesQuery = SettingsTimezonesQuery_Query;
+
+export type EnsureDemoUsersMutation_Mutation = { ensureDemoUsers: boolean | null };
+
+
+export type EnsureDemoUsersMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EnsureDemoUsersMutation = EnsureDemoUsersMutation_Mutation;
 
 export type CreateTestEntitiesMutation_createTestEntities_TestEntities = { studentUserEmail: string | null, studentUserId: string | null, studentId: string | null, studentName: string | null, parentUserEmail: string | null, parentUserId: string | null, parentId: string | null, parentName: string | null, teacherUserEmail: string | null, teacherUserId: string | null, teacherId: string | null, teacherName: string | null };
 

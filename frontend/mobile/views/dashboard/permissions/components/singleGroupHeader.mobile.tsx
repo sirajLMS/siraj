@@ -6,7 +6,6 @@ import { styled } from "@mui/material/styles";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { SingleGroupHeaderProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledBreadcrumbNav = styled(Box)({
   display: "flex",
@@ -92,8 +91,8 @@ const StyledEditButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export function SingleGroupHeaderMobile({ group, onBack, onEditGroup }: Readonly<SingleGroupHeaderProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+export function SingleGroupHeaderMobile({ labels, group, onBack, onEditGroup }: Readonly<SingleGroupHeaderProps>) {
+  const t = labels;
   const groupName = resolveLocalizedString(group.name);
   const groupDescription = resolveLocalizedString(group.description);
 

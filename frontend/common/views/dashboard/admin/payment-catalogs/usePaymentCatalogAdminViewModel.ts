@@ -21,9 +21,10 @@ import type {
   PaymentCatalogKind,
   PaymentCatalogRow,
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
-import { useAppTranslation } from "@/shared/locale";
+import { type PaymentCatalogsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface PaymentCatalogAdminViewModel {
+  readonly labels: PaymentCatalogsLabels;
   readonly activeTab: PaymentCatalogKind;
   readonly onTabChange: (tab: PaymentCatalogKind) => void;
   readonly mobileWallets: readonly SupportedMobileWalletFieldsFragment[];
@@ -50,7 +51,7 @@ export type UsePaymentCatalogAdminViewModelProps = Record<string, never>;
 export function usePaymentCatalogAdminViewModel(
   _props: Readonly<UsePaymentCatalogAdminViewModelProps>
 ): PaymentCatalogAdminViewModel {
-  const t = useAppTranslation().dashboardTranslations.paymentCatalogs;
+  const labels = useAppTranslation(Translation.Dashboard.PaymentCatalogs);
   const notifications = useNotifications();
   const [activeTab, setActiveTab] = useState<PaymentCatalogKind>("mobileWallet");
   const [editOpen, setEditOpen] = useState(false);
@@ -114,7 +115,7 @@ export function usePaymentCatalogAdminViewModel(
   const handleSaved = async () => {
     setEditOpen(false);
     setEditRow(null);
-    notifications.show(t.saveSuccess, { severity: "success" });
+    notifications.show(labels.saveSuccess, { severity: "success" });
     await refetchActive();
   };
 
@@ -131,11 +132,11 @@ export function usePaymentCatalogAdminViewModel(
       } else {
         return;
       }
-      notifications.show(t.deactivateSuccess, { severity: "success" });
+      notifications.show(labels.deactivateSuccess, { severity: "success" });
       await refetchActive();
     } catch (error) {
       logger.error("Failed to deactivate catalog entry", { error });
-      notifications.show(t.deactivateError, { severity: "error" });
+      notifications.show(labels.deactivateError, { severity: "error" });
     } finally {
       setIsDeactivating(false);
       setDeleteRow(null);
@@ -143,6 +144,7 @@ export function usePaymentCatalogAdminViewModel(
   };
 
   return {
+    labels,
     activeTab,
     onTabChange: setActiveTab,
     mobileWallets,

@@ -9,7 +9,6 @@ import type { AddPermissionsTabProps } from "@/frontend/common/views/dashboard/p
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { AddPermissionBulkBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionBulkBar.desktop";
 import { AddPermissionFilterBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionFilterBar.desktop";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledTabContainer = styled(Box)({
   display: "flex",
@@ -18,7 +17,8 @@ const StyledTabContainer = styled(Box)({
 });
 
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
-  fontFamily: "JetBrains Mono, monospace",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+
   typography: "labelMd",
   backgroundColor: theme.palette.surfaceVariant,
   color: theme.palette.onSurfaceVariant,
@@ -28,6 +28,7 @@ const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
 }));
 
 export function AddPermissionsTabDesktop({
+  labels,
   filteredAvailablePermissions,
   selectedAddPermissionIds,
   searchQuery,
@@ -39,7 +40,7 @@ export function AddPermissionsTabDesktop({
   onCategoryChange,
   loading = false,
 }: Readonly<AddPermissionsTabProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const addPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {

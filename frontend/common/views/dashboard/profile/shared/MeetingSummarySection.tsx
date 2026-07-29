@@ -1,12 +1,10 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
-import { useAppTranslation } from "@/shared/locale";
+import { useMeetingSummarySectionViewModel } from "@/frontend/common/views/dashboard/profile/shared/useMeetingSummarySectionViewModel";
 
 export type MeetingSummarySectionProps = {
   readonly userId: string;
@@ -26,13 +24,8 @@ function toDisplayData(config: UserMeetingConfigFieldsFragment) {
 }
 
 export function MeetingSummarySection({ userId, meetingTabHref }: MeetingSummarySectionProps) {
-  const t = useAppTranslation().uiTranslations.meetingConfigSummary;
-  const { data, loading } = useQuery(userMeetingConfigsQueryDocument, {
-    variables: { userId },
-  });
-
-  const configs = data?.userMeetingConfigs ?? [];
-  const defaultConfig = configs.find(config => config.isDefault) ?? (configs.length === 1 ? configs[0] : null);
+  const { labels, loading, defaultConfig } = useMeetingSummarySectionViewModel({ userId });
+  const t = labels.summary;
 
   const renderConfigContent = () => {
     if (loading) {

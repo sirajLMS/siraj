@@ -19,9 +19,11 @@ import { logger } from "@/frontend/common/utils/logger";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import type {
   AssociatedStudents,
+  ParentProfileViewLabels,
   ParentViewData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 
@@ -56,6 +58,7 @@ function toEditData(
 }
 
 export interface ParentProfileViewModel {
+  readonly labels: ParentProfileViewLabels;
   readonly scope: ProfileScope;
   readonly mode: ProfileMode;
   readonly targetUserId: string;
@@ -87,6 +90,9 @@ export function useParentProfileViewModel(
   props: Readonly<UseParentProfileViewModelProps> & { readonly canView: (groupKey: ProfileFieldGroupKey) => boolean }
 ): ParentProfileViewModel {
   const { scope, mode, targetUserId, activeTab = "profile", canView } = props;
+  const base = useAppTranslation(Translation.Profile.Base);
+  const parent = useAppTranslation(Translation.Profile.Parent);
+  const labels: ParentProfileViewLabels = { base, parent };
   const isAdminScope = scope === ProfileScope.Other;
   const [isSaving, setIsSaving] = useState(false);
 
@@ -162,6 +168,7 @@ export function useParentProfileViewModel(
   };
 
   return {
+    labels,
     scope,
     mode,
     targetUserId,

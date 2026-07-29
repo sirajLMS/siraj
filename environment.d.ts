@@ -69,6 +69,27 @@ declare global {
       // Environment
       NODE_ENV: "development" | "production" | "test";
 
+      /**
+       * Set to "true" in GitHub Actions CI test jobs (see `.github/workflows/ci.yml`).
+       * Signals that test/build harnesses should keep workflow job env (e.g. DATABASE_URL
+       * for the Postgres service) instead of clearing parent vars before `bun --env-file=.env.test`.
+       * Leave unset or "false" locally — `.env.test` is then the sole source of test config.
+       */
+      TEST_CI?: string;
+
+      /**
+       * Set to "1" by GraphQL/UI test harnesses (`frontend/common/graphql/test/testServer.ts`)
+       * when spawning `next start` against `.next-test-prod`. Required for test-helper GraphQL
+       * mutations when NODE_ENV=production. Never set on real production deployments.
+       */
+      TEST_SERVER?: string;
+
+      /**
+       * Vercel deployment target (`production`, `preview`, `development`).
+       * Test helpers are hard-disabled when this is `production` (see `test-helper-gate.ts`).
+       */
+      VERCEL_ENV?: "production" | "preview" | "development";
+
       // CORS Configuration
       ALLOWED_ORIGIN?: string;
 
@@ -101,6 +122,15 @@ declare global {
       // guard — it must be "true" for demo login to work server-side.
       NEXT_PUBLIC_IS_DEMO?: string;
       IS_DEMO?: string;
+
+      /**
+       * When "false", auth cookies (session_id, refresh_token, access_token) are
+       * written without the Secure flag even when NODE_ENV=production.
+       * Production deployments over HTTPS should omit this (defaults to secure).
+       * Set to "false" for local production-mode servers over HTTP (e.g. E2E tests
+       * via `next start` on http://localhost).
+       */
+      AUTH_COOKIE_SECURE?: string;
 
       // Logging
       // ENABLE_LOGGING gates the server-side BaseLogger (shared/lib/logger/base-logger.ts)

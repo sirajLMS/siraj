@@ -3,6 +3,7 @@ import type {
   TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote,
   TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_supportContact_SupportContact,
 } from "@/frontend/common/graphql/generated/gql/operations";
+import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
 
 export type ImportantNoteItem =
   TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote;
@@ -24,6 +25,7 @@ export interface MiniCalendarProps {
   readonly selectedDate: string;
   readonly onSelectDate: (date: string) => void;
   readonly classDates: readonly string[];
+  readonly labels: TeacherFutureScheduleLabels;
 }
 
 export interface JumpToDateHeaderProps {
@@ -32,15 +34,18 @@ export interface JumpToDateHeaderProps {
   readonly totalClasses: number;
   readonly selectedDate: string;
   readonly onDateChange: (date: string) => void;
+  readonly labels: TeacherFutureScheduleLabels;
 }
 
 export interface FutureClassCardProps {
   readonly item: FutureClass;
   readonly onRequestLeave?: () => void;
+  readonly labels: TeacherFutureScheduleLabels;
 }
 
 export interface ImportantNotesProps {
   readonly notes: readonly ImportantNoteItem[];
+  readonly labels: TeacherFutureScheduleLabels;
 }
 
 export interface SupportContactProps {

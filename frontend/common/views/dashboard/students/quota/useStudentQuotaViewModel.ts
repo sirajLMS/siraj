@@ -21,7 +21,8 @@ import {
 } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type { StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type CommonLabels, useAppTranslation } from "@/shared/locale";
+import { type CommonLabels, Translation, useAppTranslation } from "@/shared/locale";
+import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 function resolveGenderLabel(raw: string | null | undefined): "MALE" | "FEMALE" | null {
   if (raw == null) return null;
@@ -75,7 +76,7 @@ export interface UseStudentQuotaViewModelProps {
 export type StudentQuotaMethods = UseFormReturn<StudentQuotaFormInput, undefined, StudentQuotaFormData>;
 
 export interface StudentQuotaViewModel {
-  readonly t: ReturnType<typeof useAppTranslation>["dashboardTranslations"]["studentQuota"];
+  readonly t: StudentQuotaLabels;
   readonly tc: CommonLabels;
   readonly studentData: StudentProfileData | null;
   readonly isSaving: boolean;
@@ -95,8 +96,8 @@ export interface StudentQuotaViewModel {
 }
 
 export function useStudentQuotaViewModel(props: Readonly<UseStudentQuotaViewModelProps>): StudentQuotaViewModel {
-  const t = useAppTranslation().dashboardTranslations.studentQuota;
-  const tc = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Dashboard.StudentQuota);
+  const tc = useAppTranslation(Translation.Common);
   const router = useRouter();
   const notifications = useNotifications();
   const profileContext = useStudentProfileContext();

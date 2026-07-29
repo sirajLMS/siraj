@@ -4,7 +4,6 @@ import { BlockOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { OverrideEffectiveDisplayProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledEffectiveContainer = styled(Box)({
   display: "flex",
@@ -41,10 +40,11 @@ const StyledOverrideLabel = styled(Typography)(({ theme }) => ({
 }));
 
 export function OverrideEffectiveDisplayDesktop({
+  labels,
   effectiveState,
   overrideState,
 }: Readonly<OverrideEffectiveDisplayProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <StyledEffectiveContainer>

@@ -3,7 +3,7 @@
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useRef, useState } from "react";
 import logger from "@/frontend/common/lib/logger";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 // Configuration
 const CONNECTIVITY_CHECK_URL = "/api/graphql";
@@ -18,9 +18,27 @@ const getReconnectionDelay = (attempt: number): number | null => {
   return delay;
 };
 
+const fetchConnectivityStatus = async (): Promise<boolean> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CONNECTIVITY_CHECK_TIMEOUT);
+
+  const response = await fetch(CONNECTIVITY_CHECK_URL, {
+    method: "HEAD",
+    credentials: "include",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "apollo-require-preflight": "true",
+    },
+    signal: controller.signal,
+  }).catch(() => ({ ok: false, status: 0 }));
+
+  clearTimeout(timeoutId);
+  return (response as { ok: boolean }).ok;
+};
+
 export const useApolloConnectivity = () => {
   const notifications = useNotifications();
-  const t = useAppTranslation().commonTranslations;
+  const t = useAppTranslation(Translation.Common);
 
   const [isConnected, setIsConnected] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -46,21 +64,7 @@ export const useApolloConnectivity = () => {
     queueMicrotask(() => setIsChecking(true));
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), CONNECTIVITY_CHECK_TIMEOUT);
-
-      const response = await fetch(CONNECTIVITY_CHECK_URL, {
-        method: "HEAD",
-        credentials: "include",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "apollo-require-preflight": "true",
-        },
-        signal: controller.signal,
-      }).catch(() => ({ ok: false, status: 0 }));
-
-      clearTimeout(timeoutId);
-      const connected = (response as { ok: boolean }).ok;
+      const connected = await fetchConnectivityStatus();
 
       if (connected && !isConnectedRef.current) {
         reconnectAttemptRef.current = 0;
@@ -134,21 +138,20 @@ export const useApolloConnectivity = () => {
       return;
     }
 
+    const attemptReconnect = async (): Promise<void> => {
+      const connected = await checkConnectivity();
+      if (connected) {
+        reconnectAttemptRef.current = 0;
+        return;
+      }
+      reconnectAttemptRef.current += 1;
+      scheduleReconnect();
+    };
+
     const scheduleReconnect = () => {
       const delay = getReconnectionDelay(reconnectAttemptRef.current);
       if (delay === null) return;
-
-      reconnectTimeoutRef.current = setTimeout(async () => {
-        const connected = await checkConnectivity();
-
-        if (connected) {
-          reconnectAttemptRef.current = 0;
-          return;
-        }
-
-        reconnectAttemptRef.current += 1;
-        scheduleReconnect();
-      }, delay);
+      reconnectTimeoutRef.current = setTimeout(() => void attemptReconnect(), delay);
     };
 
     scheduleReconnect();

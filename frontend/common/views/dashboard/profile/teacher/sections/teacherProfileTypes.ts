@@ -1,4 +1,14 @@
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teachers/profile";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ProfileLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
+
+export type TeacherProfileViewLabels = {
+  readonly base: ProfileLabels;
+  readonly teacher: ProfileTeacherLabels;
+  readonly dashboard: TeacherProfileLabels;
+  readonly errors: ErrorsLabels;
+};
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 

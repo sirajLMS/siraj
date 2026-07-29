@@ -80,6 +80,13 @@ export type TimezoneUpsertInput = {
 };
 export type TimezoneInsertInput = typeof timezones.$inferInsert;
 
+export type SettingsTimezonesPaginatedResult = {
+  readonly id: string;
+  readonly rows: TimezoneEntity[];
+  readonly totalCount: number;
+  readonly pageInfo: PageInfo | null;
+};
+
 export type RescheduleTrackingRow = {
   id: string;
   originalClassId: string | null;

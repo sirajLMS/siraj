@@ -4,16 +4,11 @@ import { Box, Typography } from "@mui/material";
 import { AppDataGridLoadingOverlay, SectionPanel } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type {
-  AssociatedStudents,
-  AssociatedStudentsSectionVariantProps,
-} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { useAppTranslation } from "@/shared/locale";
+import type { AssociatedStudentsSectionVariantProps } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import type { UseAssociatedStudentsSectionViewModelProps } from "@/frontend/common/views/dashboard/profile/parent/useAssociatedStudentsSectionViewModel";
+import { useAssociatedStudentsSectionViewModel } from "@/frontend/common/views/dashboard/profile/parent/useAssociatedStudentsSectionViewModel";
 
-type AssociatedStudentsSectionProps = {
-  readonly associatedStudents: AssociatedStudents;
-  readonly loading?: boolean;
-};
+type AssociatedStudentsSectionProps = UseAssociatedStudentsSectionViewModelProps;
 
 function StudentsLoadingState() {
   return (
@@ -34,32 +29,33 @@ const lazyViews = createLazyView<AssociatedStudentsSectionVariantProps>(
     }))
 );
 
-export function AssociatedStudentsSection({ associatedStudents, loading = false }: AssociatedStudentsSectionProps) {
-  const t = useAppTranslation().profileTranslations.parent;
-  const rows = associatedStudents?.rows ?? [];
+export function AssociatedStudentsSection(props: Readonly<AssociatedStudentsSectionProps>) {
+  const viewModel = useAssociatedStudentsSectionViewModel(props);
+  const { labels, rows, loading, emptyMessage, hasRows, showLoadingFallback } = viewModel;
 
-  if (loading && !associatedStudents) {
+  if (showLoadingFallback) {
     return (
-      <SectionPanel title={t.sections.students}>
+      <SectionPanel title={labels.parent.sections.students}>
         <StudentsLoadingState />
       </SectionPanel>
     );
   }
 
-  if (rows.length === 0) {
+  if (!hasRows) {
     return (
-      <SectionPanel title={t.sections.students}>
+      <SectionPanel title={labels.parent.sections.students}>
         <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {t.students.empty}
+          {emptyMessage}
         </Typography>
       </SectionPanel>
     );
   }
 
   const variantProps: AssociatedStudentsSectionVariantProps = {
+    labels,
     rows,
     loading,
-    emptyMessage: t.students.empty,
+    emptyMessage,
   };
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={variantProps} />;

@@ -6,10 +6,10 @@ import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
+import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "success",
@@ -78,7 +78,7 @@ function StudentAvatar({
 }
 
 function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   const { showField, canView } = useStudentFieldAccess();
   const showIdentity = showField(student.name, "student_identity");
   const showTeacher = showField(student.teacherName, "student_teacher");
@@ -116,7 +116,7 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["
 }
 
 function HeaderActions({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
   const router = useRouter();
   const { canView } = useStudentFieldAccess();
 

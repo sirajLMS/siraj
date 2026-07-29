@@ -2,7 +2,7 @@
 
 import { CheckCircleOutlined, GavelOutlined, InfoOutlined } from "@mui/icons-material";
 import { Box, Divider, Paper, Typography } from "@mui/material";
-import { useAppTranslation } from "@/shared/locale";
+import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 
 function PolicyItem({ title, description }: Readonly<{ readonly title: string; readonly description: string }>) {
   return (
@@ -28,7 +28,7 @@ function PolicyItem({ title, description }: Readonly<{ readonly title: string; r
 }
 
 export function PolicyOverviewCardMobile() {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
 
   return (
     <Paper
@@ -93,7 +93,7 @@ export function PolicyOverviewCardMobile() {
 }
 
 export function SuspensionWarningBannerMobile() {
-  const t = useAppTranslation().dashboardTranslations.studentStatus;
+  const t = useStudentStatusLabels();
 
   return (
     <Box

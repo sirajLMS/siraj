@@ -3,6 +3,7 @@
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/staff/onboarding/types";
 
 export interface ManagerOnboardingViewModel {
+  readonly labels: ManagerOnboardingViewProps["labels"];
   readonly register: ManagerOnboardingViewProps["register"];
   readonly control: ManagerOnboardingViewProps["control"];
   readonly errors: ManagerOnboardingViewProps["errors"];

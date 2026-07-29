@@ -1,5 +1,5 @@
 {
-  "manifestHash": "992cec90d15e58f98cd4692342e31028c70ab580ada16867915befe9ba8eb1dd",
+  "manifestHash": "579dde074cb76d333c00756c72e9717a629e3aadd8dfaa3dba9d23a2e80e2ecb",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -35,7 +35,7 @@
     },
     {
       "file": "4b-teacher_support_contact_setting.sql",
-      "sha256": "b19e35018be43c4e47fa9b558e6bb20be18d1750759c8ac64419e41e21adf729"
+      "sha256": "99cc67bc43f241877d39baaf46fc1f39fd90fe6f3c4194136b88043ffbc9a86e"
     },
     {
       "file": "4c-system_settings_seed.sql",
@@ -72,6 +72,18 @@
     {
       "file": "6c-payment-method-permissions.sql",
       "sha256": "1f6cee0c26f97440b46c21978ad34bb3237c5db0f80f559e7d80d7f00c9024ee"
+    },
+    {
+      "file": "7a-settings-permissions-enum.sql",
+      "sha256": "aea3d9dbb34c0c219741023e825c06c6dbe2cac433b48871785bcaf3d43fbef1"
+    },
+    {
+      "file": "7b-settings-permissions-data.sql",
+      "sha256": "ecbf57d7aa5dc681ca3151e6dc5926232ad3501d812b5efe73484d9a23c0a08d"
+    },
+    {
+      "file": "8a-system-setting-enums.sql",
+      "sha256": "7d1f38de7fa1d10f430abc571c02f8138f761586a20606ea57b3c508411071b5"
     },
     {
       "file": "add_test_custom_alt_permission.sql",
@@ -142,5 +154,44 @@
       "sha256": "d846dab1b8bd32322114adbfeb34dca648c9f472905ff3299a9f8063f5bb0300"
     }
   ],
-  "appliedFolders": ["20260727152656_custom_23623615", "20260727225423_custom_992cec90"]
+  "appliedFolders": [
+    "20260729025937_custom_2-functions",
+    "20260729025938_custom_3-system_permissions_and_groups",
+    "20260729025939_custom_30-a-class_instances_rls_policies",
+    "20260729025940_custom_30-b-class_instances_state_transition_trigger",
+    "20260729025941_custom_30-c-class_instances_auto_miss_transition",
+    "20260729025942_custom_4-class_categories_and_subjects",
+    "20260729025943_custom_4-fx_exchange_rate_permissions",
+    "20260729025944_custom_4a-class_categories_and_subjects_seed",
+    "20260729025945_custom_4b-teacher_support_contact_setting",
+    "20260729025946_custom_4c-system_settings_seed",
+    "20260729025947_custom_4d-timezones_seed",
+    "20260729025948_custom_4e-default_super_admin_seed",
+    "20260729025949_custom_5-billing_fx_admin_permissions",
+    "20260729025950_custom_5a-billing_manage_currencies_permission",
+    "20260729025951_custom_6-lms-permissions-and-groups",
+    "20260729025952_custom_6a-profile-field-permissions",
+    "20260729025953_custom_6b-meeting-permissions",
+    "20260729025954_custom_6c-payment-method-permissions",
+    "20260729025955_custom_7a-settings-permissions-enum",
+    "20260729025956_custom_7b-settings-permissions-data",
+    "20260729025957_custom_8a-system-setting-enums",
+    "20260729025958_custom_add_test_custom_alt_permission",
+    "20260729025959_custom_audit_log_immutability_trigger",
+    "20260729030000_custom_auth_rate_limiting",
+    "20260729030001_custom_books_rls_policies",
+    "20260729030002_custom_cache_split",
+    "20260729030003_custom_exclude_jerusalem_timezone",
+    "20260729030004_custom_hours_per_week_recalculation",
+    "20260729030005_custom_impersonation_sessions",
+    "20260729030006_custom_leave_quota_limits_trigger",
+    "20260729030007_custom_permissions_rls_policies",
+    "20260729030008_custom_profile_permissions",
+    "20260729030009_custom_soft_delete_rls_policies",
+    "20260729030010_custom_student_created_at_immutability",
+    "20260729030011_custom_student_progress_rls",
+    "20260729030012_custom_student_status_transition_trigger",
+    "20260729030013_custom_timezone_dst_logic",
+    "20260729030014_custom_user_notification_preferences"
+  ]
 }

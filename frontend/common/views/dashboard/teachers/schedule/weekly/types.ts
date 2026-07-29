@@ -11,6 +11,8 @@ import type {
   MeetingConfigRecurringScheduleLabels,
   TeacherCreateRecurringClassLabels,
 } from "@/shared/locale";
+import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
+import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
 
 export type ScheduledClass = Omit<
   TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass,
@@ -28,18 +30,22 @@ export interface TeacherWeeklySchedule {
   readonly lastUpdated: string;
 }
 
-export interface WeeklyScheduleGridProps {
-  readonly classes: readonly ScheduledClass[];
-  readonly onRemoveClass: (id: string) => void;
-  // NEW FOR PLAN v5: gate-prop lifted out of tier per specs §6.1 + §3 N3.
-  readonly hasScheduleDeleteClass: boolean;
-}
-
 export interface MobileScheduleListProps {
   readonly classes: readonly ScheduledClass[];
   readonly onRemoveClass: (id: string) => void;
   // NEW FOR PLAN v5: gate-prop lifted out of tier per specs §6.1 + §3 N3.
   readonly hasScheduleDeleteClass: boolean;
+  readonly labels: TeacherWeeklyScheduleLabels;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
+}
+
+export interface WeeklyScheduleGridProps {
+  readonly classes: readonly ScheduledClass[];
+  readonly onRemoveClass: (id: string) => void;
+  // NEW FOR PLAN v5: gate-prop lifted out of tier per specs §6.1 + §3 N3.
+  readonly hasScheduleDeleteClass: boolean;
+  readonly labels: TeacherWeeklyScheduleLabels;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
 export interface TeacherWeeklyScheduleViewProps {
@@ -56,6 +62,8 @@ export interface TeacherWeeklyScheduleViewProps {
   readonly hasScheduleClearWeekly: boolean;
   readonly hasScheduleViewWorkload: boolean;
   readonly hasScheduleDeleteClass: boolean;
+  readonly labels: TeacherWeeklyScheduleLabels;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
 export interface TeacherWeeklyScheduleContainerProps {

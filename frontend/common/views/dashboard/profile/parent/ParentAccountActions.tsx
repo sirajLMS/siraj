@@ -1,24 +1,14 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
-import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
-import { AccountStatus, AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ParentAccountActionsLabels } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
 import {
-  deactivateParentMutationDocument,
-  profileByUserIdQueryDocument,
-  reactivateParentMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
-import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
-import { useAppTranslation } from "@/shared/locale";
-
-type ParentAccountActionsProps = {
-  readonly parentId: string;
-  readonly targetUserId: string;
-  readonly accountStatus: AccountStatus | null | undefined;
-};
+  type ParentAccountActionsProps,
+  useParentAccountActionsViewModel,
+} from "@/frontend/common/views/dashboard/profile/parent/useParentAccountActionsViewModel";
 
 type AccountActionDialogProps = {
   readonly open: boolean;
@@ -27,10 +17,10 @@ type AccountActionDialogProps = {
   readonly loading: boolean;
   readonly error: string | null;
   readonly mode: "deactivate" | "reactivate";
+  readonly labels: ParentAccountActionsLabels;
 };
 
-function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }: AccountActionDialogProps) {
-  const t = useAppTranslation().profileTranslations.parent.actions;
+function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode, labels: t }: AccountActionDialogProps) {
   const isDeactivate = mode === "deactivate";
 
   const dialogTitle = isDeactivate ? t.deactivateDialogTitle : t.reactivateDialogTitle;
@@ -66,61 +56,32 @@ function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode }:
   );
 }
 
-export function ParentAccountActions({ parentId, targetUserId, accountStatus }: ParentAccountActionsProps) {
-  const t = useAppTranslation().profileTranslations.parent.actions;
-  const [dialogMode, setDialogMode] = useState<"deactivate" | "reactivate" | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [mutationError, setMutationError] = useState<string | null>(null);
-
-  const refetchProfile = [{ query: profileByUserIdQueryDocument, variables: { userId: targetUserId } }];
-
-  const [deactivateParent, { loading: deactivating }] = useMutation(deactivateParentMutationDocument, {
-    refetchQueries: refetchProfile,
-    onCompleted: () => {
-      setDialogMode(null);
-      setMutationError(null);
-      setSuccessMessage(t.deactivateSuccess);
-    },
-    onError: error => {
-      setMutationError(getGraphQLErrorMessage(error, t.deactivateAccount));
-    },
-  });
-
-  const [reactivateParent, { loading: reactivating }] = useMutation(reactivateParentMutationDocument, {
-    refetchQueries: refetchProfile,
-    onCompleted: () => {
-      setDialogMode(null);
-      setMutationError(null);
-      setSuccessMessage(t.reactivateSuccess);
-    },
-    onError: error => {
-      setMutationError(getGraphQLErrorMessage(error, t.reactivateAccount));
-    },
-  });
-
-  const isActivated = accountStatus !== AccountStatus.Deactivated;
-  const isLoading = deactivating || reactivating;
-
-  const handleConfirm = () => {
-    setMutationError(null);
-    if (dialogMode === "deactivate") {
-      void deactivateParent({ variables: { parentId } });
-      return;
-    }
-    if (dialogMode === "reactivate") {
-      void reactivateParent({ variables: { parentId } });
-    }
-  };
+export function ParentAccountActions(props: Readonly<ParentAccountActionsProps>) {
+  const {
+    labels,
+    dialogMode,
+    successMessage,
+    mutationError,
+    isActivated,
+    isLoading,
+    openDeactivateDialog,
+    openReactivateDialog,
+    closeDialog,
+    handleConfirm,
+    clearSuccessMessage,
+    clearMutationError,
+  } = useParentAccountActionsViewModel(props);
+  const t = labels;
 
   return (
     <RequirePermission permissions={[AppPermission.ParentManageStatus]}>
       <Stack direction="row" spacing={1}>
         {isActivated ? (
-          <Button variant="outlined" color="error" onClick={() => setDialogMode("deactivate")}>
+          <Button variant="outlined" color="error" onClick={openDeactivateDialog}>
             {t.deactivateAccount}
           </Button>
         ) : (
-          <Button variant="outlined" color="success" onClick={() => setDialogMode("reactivate")}>
+          <Button variant="outlined" color="success" onClick={openReactivateDialog}>
             {t.reactivateAccount}
           </Button>
         )}
@@ -129,28 +90,24 @@ export function ParentAccountActions({ parentId, targetUserId, accountStatus }: 
       {dialogMode ? (
         <AccountActionDialog
           open
-          onClose={() => {
-            if (!isLoading) {
-              setDialogMode(null);
-              setMutationError(null);
-            }
-          }}
+          onClose={closeDialog}
           onConfirm={handleConfirm}
           loading={isLoading}
           error={mutationError}
           mode={dialogMode}
+          labels={labels}
         />
       ) : null}
 
       <FormSuccessSnackbar
         open={Boolean(successMessage)}
         message={successMessage ?? ""}
-        onClose={() => setSuccessMessage(null)}
+        onClose={clearSuccessMessage}
       />
       <FormErrorSnackbar
         open={Boolean(mutationError) && !dialogMode}
         message={mutationError ?? ""}
-        onClose={() => setMutationError(null)}
+        onClose={clearMutationError}
       />
     </RequirePermission>
   );

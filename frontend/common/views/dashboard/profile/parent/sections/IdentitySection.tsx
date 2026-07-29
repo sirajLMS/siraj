@@ -13,21 +13,23 @@ import {
   type ParentAdminData,
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { useAppTranslation } from "@/shared/locale";
+import type { ProfileParentLabels } from "@/shared/locale/types/profile";
 
 type IdentitySectionProps =
   | {
       readonly mode: "view";
+      readonly labels: ProfileParentLabels;
       readonly adminData: ParentAdminData;
     }
   | {
       readonly mode: "edit";
+      readonly labels: ProfileParentLabels;
       readonly register: UseFormRegister<ParentAdminEditFormData>;
       readonly control: Control<ParentAdminEditFormData>;
     };
 
 export function IdentitySection(props: IdentitySectionProps) {
-  const t = useAppTranslation().profileTranslations.parent;
+  const t = props.labels;
 
   if (props.mode === "edit") {
     return (

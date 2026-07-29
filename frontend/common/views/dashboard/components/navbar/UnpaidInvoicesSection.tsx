@@ -14,8 +14,7 @@ import {
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useRouter } from "@/shared/i18n/navigation";
 import type { ErrorsLabels } from "@/shared/locale";
-import { useAppTranslation } from "@/shared/locale/client";
-import type { ProfileLabels } from "@/shared/locale/types/profile";
+import { type ProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function buildUnpaidInvoicesFxMessages(
   tProfile: Pick<ProfileLabels, "convertedAmount" | "convertedTotalApprox">,
@@ -173,9 +172,9 @@ function InvoiceItemRow({ item, fxMessages, onUserClick }: InvoiceItemRowProps) 
 }
 
 export function UnpaidInvoicesSection() {
-  const t = useAppTranslation().dashboardTranslations.coreNotifications;
-  const tProfile = useAppTranslation().profileTranslations.base;
-  const tErrors = useAppTranslation().errorsTranslations;
+  const t = useAppTranslation(Translation.Dashboard.CoreNotifications);
+  const tProfile = useAppTranslation(Translation.Profile.Base);
+  const tErrors = useAppTranslation(Translation.Errors);
   const router = useRouter();
   const displayCurrency = useUserStore(state => state.displayCurrency);
 

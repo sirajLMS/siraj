@@ -1,12 +1,13 @@
 "use client";
 
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
-import { useAppTranslation } from "@/shared/locale";
+import type { MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
 export type MeetingConfigDeleteDialogProps = {
   readonly open: boolean;
   readonly configLabel: string;
   readonly isLoading: boolean;
+  readonly labels: MeetingConfigManagerLabels;
   readonly onClose: () => void;
   readonly onConfirm: () => void;
 };
@@ -15,10 +16,11 @@ export function MeetingConfigDeleteDialog({
   open,
   configLabel,
   isLoading,
+  labels,
   onClose,
   onConfirm,
 }: MeetingConfigDeleteDialogProps) {
-  const t = useAppTranslation().uiTranslations.meetingConfigManager;
+  const t = labels;
 
   return (
     <BaseDeleteDialog

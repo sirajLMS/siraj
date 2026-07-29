@@ -7,8 +7,10 @@ import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
+import { buildCategoryManagementDialogs } from "@/frontend/common/views/dashboard/subjects/home/categoryManagementDialogBuilders";
 import { useCategoryFormState } from "@/frontend/common/views/dashboard/subjects/home/hooks/useCategoryFormState";
 import { useSubjectFormState } from "@/frontend/common/views/dashboard/subjects/home/hooks/useSubjectFormState";
+import { buildSubjectManagementDialogs } from "@/frontend/common/views/dashboard/subjects/home/subjectManagementDialogBuilders";
 import {
   buildActionHandlers,
   CATEGORY_PERMS,
@@ -27,9 +29,11 @@ import type {
 } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { useSubjectMutations } from "@/frontend/common/views/dashboard/subjects/home/useSubjectMutations";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import type { SubjectsLabels } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface SubjectsViewModel {
+  readonly labels: SubjectsLabels;
   readonly categories: readonly CategoryItem[];
   readonly subjects: readonly SubjectItem[];
   readonly filteredSubjects: readonly SubjectItem[];
@@ -83,7 +87,7 @@ interface SelectedEntitiesResult {
 }
 
 function useSubjectsDialogLabels(): SubjectsDialogLabels {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+  const t = useAppTranslation(Translation.Dashboard.Subjects);
   return useMemo<SubjectsDialogLabels>(
     () => ({
       createSubject: t.createSubject,
@@ -186,26 +190,35 @@ function useSelectedEntities(
   return { selectedSubject, selectedCategory, pendingDeleteSubject, pendingDeleteCategory };
 }
 
-export function useSubjectsViewModel(_props: Readonly<UseSubjectsViewModelProps>): SubjectsViewModel {
-  const router = useRouter();
-  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
-  const store = useSubjectManagementStore();
+type SubjectFormState = ReturnType<typeof useSubjectFormState>;
+type CategoryFormState = ReturnType<typeof useCategoryFormState>;
 
-  const { categories, subjects, filteredSubjects, isLoading, refetchSubjects } = useSubjectsData(activeCategoryId);
-  const { canManageSubjects, canManageCategories } = useSubjectPermissions();
-  const { selectedSubject, selectedCategory, pendingDeleteSubject, pendingDeleteCategory } = useSelectedEntities(
-    subjects,
-    categories
-  );
-  const labels = useSubjectsDialogLabels();
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: "subjects" });
+interface SubjectsFormAndActionsStore {
+  readonly createSubjectDialogOpen: boolean;
+  readonly editSubjectDialogOpen: boolean;
+  readonly createCategoryDialogOpen: boolean;
+  readonly editCategoryDialogOpen: boolean;
+  readonly openCreateDialog: (target: "subject" | "category") => void;
+  readonly openEditDialog: (id: string, target: "subject" | "category") => void;
+  readonly openDeleteDialog: (id: string, target: "subject" | "category") => void;
+}
 
-  const mutations = useSubjectMutations({
-    refetchSubjects,
-    activeCategoryId,
-    onCategoryReset: () => setActiveCategoryId(null),
-  });
+interface SubjectsFormAndActionsResult {
+  readonly createSubjectForm: SubjectFormState;
+  readonly editSubjectForm: SubjectFormState;
+  readonly createCategoryForm: CategoryFormState;
+  readonly editCategoryForm: CategoryFormState;
+  readonly subjectActions: ReturnType<typeof buildActionHandlers>;
+  readonly categoryActions: ReturnType<typeof buildActionHandlers>;
+}
 
+function useSubjectsFormsAndActions(
+  store: SubjectsFormAndActionsStore,
+  selectedSubject: SubjectItem | null,
+  selectedCategory: CategoryItem | null,
+  canManageSubjects: boolean,
+  canManageCategories: boolean
+): SubjectsFormAndActionsResult {
   const createSubjectForm = useSubjectFormState({ open: store.createSubjectDialogOpen, subject: null });
   const editSubjectForm = useSubjectFormState({ open: store.editSubjectDialogOpen, subject: selectedSubject });
   const createCategoryForm = useCategoryFormState({ open: store.createCategoryDialogOpen, category: null });
@@ -225,89 +238,126 @@ export function useSubjectsViewModel(_props: Readonly<UseSubjectsViewModelProps>
     (id: string) => store.openDeleteDialog(id, "category")
   );
 
-  const createSubjectDialog: CreateSubjectDialogProps = {
-    open: store.createSubjectDialogOpen,
-    onClose: store.closeCreateDialog,
-    onSubmit: mutations.handleCreateSubject,
-    categories,
-    isLoading: mutations.isCreatingSubject,
-    onUploadAvatar,
-    form: {
-      control: createSubjectForm.control,
-      errors: createSubjectForm.errors,
-      handleSubmit: createSubjectForm.handleSubmit,
-      values: createSubjectForm.values,
-      reset: createSubjectForm.reset,
-    },
-    labels,
-  };
-
-  const editSubjectDialog: EditSubjectDialogProps = {
-    open: store.editSubjectDialogOpen,
-    onClose: store.closeEditDialog,
-    onSubmit: mutations.handleUpdateSubject,
-    subject: selectedSubject,
-    categories,
-    isLoading: mutations.isUpdatingSubject,
-    onUploadAvatar,
-    form: {
-      control: editSubjectForm.control,
-      errors: editSubjectForm.errors,
-      handleSubmit: editSubjectForm.handleSubmit,
-      values: editSubjectForm.values,
-      reset: editSubjectForm.reset,
-    },
-    labels,
-  };
-
-  const deleteSubjectDialog: DeleteSubjectDialogProps = {
-    open: store.isDeleteDialogOpen && store.dialogTarget === "subject",
-    onClose: store.closeDeleteDialog,
-    onConfirm: mutations.handleDeleteSubject,
-    subjectName: pendingDeleteSubject?.name ?? "",
-    isLoading: mutations.isDeletingSubject,
-  };
-
-  const createCategoryDialog: CreateCategoryDialogProps = {
-    open: store.createCategoryDialogOpen,
-    onClose: store.closeCreateDialog,
-    onSubmit: mutations.handleCreateCategory,
-    isLoading: mutations.isCreatingCategory,
-    form: {
-      control: createCategoryForm.control,
-      errors: createCategoryForm.errors,
-      handleSubmit: createCategoryForm.handleSubmit,
-      values: createCategoryForm.values,
-      reset: createCategoryForm.reset,
-    },
-    labels,
-  };
-
-  const editCategoryDialog: EditCategoryDialogProps = {
-    open: store.editCategoryDialogOpen,
-    onClose: store.closeEditDialog,
-    onSubmit: mutations.handleUpdateCategory,
-    category: selectedCategory,
-    isLoading: mutations.isUpdatingCategory,
-    form: {
-      control: editCategoryForm.control,
-      errors: editCategoryForm.errors,
-      handleSubmit: editCategoryForm.handleSubmit,
-      values: editCategoryForm.values,
-      reset: editCategoryForm.reset,
-    },
-    labels,
-  };
-
-  const deleteCategoryDialog: DeleteCategoryDialogProps = {
-    open: store.isDeleteDialogOpen && store.dialogTarget === "category",
-    onClose: store.closeDeleteDialog,
-    onConfirm: mutations.handleDeleteCategory,
-    categoryName: pendingDeleteCategory?.name ?? "",
-    isLoading: mutations.isDeletingCategory,
-  };
-
   return {
+    createSubjectForm,
+    editSubjectForm,
+    createCategoryForm,
+    editCategoryForm,
+    subjectActions,
+    categoryActions,
+  };
+}
+
+interface SubjectsViewModelResultParams {
+  readonly labels: SubjectsLabels;
+  readonly categories: readonly CategoryItem[];
+  readonly subjects: readonly SubjectItem[];
+  readonly filteredSubjects: readonly SubjectItem[];
+  readonly isLoading: boolean;
+  readonly activeCategoryId: string | null;
+  readonly categoriesSectionOpen: boolean;
+  readonly onToggleCategoriesSection: () => void;
+  readonly onCategoryChange: (categoryId: string | null) => void;
+  readonly subjectActions: ReturnType<typeof buildActionHandlers>;
+  readonly categoryActions: ReturnType<typeof buildActionHandlers>;
+  readonly onSubjectClick: (id: string) => void;
+  readonly canManageSubjects: boolean;
+  readonly canManageCategories: boolean;
+  readonly createSubjectDialog: CreateSubjectDialogProps;
+  readonly editSubjectDialog: EditSubjectDialogProps;
+  readonly deleteSubjectDialog: DeleteSubjectDialogProps;
+  readonly createCategoryDialog: CreateCategoryDialogProps;
+  readonly editCategoryDialog: EditCategoryDialogProps;
+  readonly deleteCategoryDialog: DeleteCategoryDialogProps;
+  readonly selectedSubject: SubjectItem | null;
+  readonly selectedCategory: CategoryItem | null;
+}
+
+function buildSubjectsViewModelResult(params: SubjectsViewModelResultParams): SubjectsViewModel {
+  return {
+    labels: params.labels,
+    categories: params.categories,
+    subjects: params.subjects,
+    filteredSubjects: params.filteredSubjects,
+    isLoading: params.isLoading,
+    activeCategoryId: params.activeCategoryId,
+    categoriesSectionOpen: params.categoriesSectionOpen,
+    onToggleCategoriesSection: params.onToggleCategoriesSection,
+    onCategoryChange: params.onCategoryChange,
+    onAddSubject: params.subjectActions.onAdd,
+    onEditSubject: params.subjectActions.onEdit,
+    onDeleteSubject: params.subjectActions.onDelete,
+    onSubjectClick: params.onSubjectClick,
+    onCreateCategory: params.categoryActions.onAdd,
+    onEditCategory: params.categoryActions.onEdit,
+    onDeleteCategory: params.categoryActions.onDelete,
+    canManageSubjects: params.canManageSubjects,
+    canManageCategories: params.canManageCategories,
+    createSubjectDialog: params.createSubjectDialog,
+    editSubjectDialog: params.editSubjectDialog,
+    deleteSubjectDialog: params.deleteSubjectDialog,
+    createCategoryDialog: params.createCategoryDialog,
+    editCategoryDialog: params.editCategoryDialog,
+    deleteCategoryDialog: params.deleteCategoryDialog,
+    selectedSubject: params.selectedSubject,
+    selectedCategory: params.selectedCategory,
+  };
+}
+
+export function useSubjectsViewModel(_props: Readonly<UseSubjectsViewModelProps>): SubjectsViewModel {
+  const router = useRouter();
+  const labels = useAppTranslation(Translation.Dashboard.Subjects);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const store = useSubjectManagementStore();
+
+  const { categories, subjects, filteredSubjects, isLoading, refetchSubjects } = useSubjectsData(activeCategoryId);
+  const { canManageSubjects, canManageCategories } = useSubjectPermissions();
+  const { selectedSubject, selectedCategory, pendingDeleteSubject, pendingDeleteCategory } = useSelectedEntities(
+    subjects,
+    categories
+  );
+  const dialogLabels = useSubjectsDialogLabels();
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: "subjects" });
+
+  const mutations = useSubjectMutations({
+    refetchSubjects,
+    activeCategoryId,
+    onCategoryReset: () => setActiveCategoryId(null),
+  });
+
+  const { createSubjectForm, editSubjectForm, createCategoryForm, editCategoryForm, subjectActions, categoryActions } =
+    useSubjectsFormsAndActions(store, selectedSubject, selectedCategory, canManageSubjects, canManageCategories);
+
+  const subjectDialogs = buildSubjectManagementDialogs({
+    store,
+    mutations,
+    categories,
+    selectedSubject,
+    pendingDeleteSubject,
+    onUploadAvatar,
+    createSubjectForm,
+    editSubjectForm,
+    labels: dialogLabels,
+    shellLabels: labels,
+  });
+
+  const categoryDialogs = buildCategoryManagementDialogs({
+    store,
+    mutations,
+    selectedCategory,
+    pendingDeleteCategory,
+    createCategoryForm,
+    editCategoryForm,
+    labels: dialogLabels,
+    shellLabels: labels,
+  });
+
+  const { createSubjectDialog, editSubjectDialog, deleteSubjectDialog } = subjectDialogs;
+
+  const { createCategoryDialog, editCategoryDialog, deleteCategoryDialog } = categoryDialogs;
+
+  return buildSubjectsViewModelResult({
+    labels,
     categories,
     subjects,
     filteredSubjects,
@@ -316,13 +366,9 @@ export function useSubjectsViewModel(_props: Readonly<UseSubjectsViewModelProps>
     categoriesSectionOpen: store.categoriesSectionOpen,
     onToggleCategoriesSection: store.toggleCategoriesSection,
     onCategoryChange: setActiveCategoryId,
-    onAddSubject: subjectActions.onAdd,
-    onEditSubject: subjectActions.onEdit,
-    onDeleteSubject: subjectActions.onDelete,
+    subjectActions,
+    categoryActions,
     onSubjectClick: (id: string) => router.push(`/subjects/${id}`),
-    onCreateCategory: categoryActions.onAdd,
-    onEditCategory: categoryActions.onEdit,
-    onDeleteCategory: categoryActions.onDelete,
     canManageSubjects,
     canManageCategories,
     createSubjectDialog,
@@ -333,5 +379,5 @@ export function useSubjectsViewModel(_props: Readonly<UseSubjectsViewModelProps>
     deleteCategoryDialog,
     selectedSubject,
     selectedCategory,
-  };
+  });
 }

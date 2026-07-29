@@ -11,6 +11,7 @@ import {
   ScheduleOverviewCardSkeleton,
   ScheduleOverviewEmptyState,
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
+import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import {
@@ -46,41 +47,131 @@ const StyledMobileSectionBody = styled(Stack)(({ theme }) => ({
   paddingBottom: theme.spacing(2),
 }));
 
-export function AdminDashboardMobileView({
-  t,
-  loading,
-  metrics,
-  onMetricClick,
-  selectedMetricKey,
+type AdminDashboardMobileViewProps = Readonly<AdminDashboardViewModel>;
+
+function AdminDashboardMobileHeader({
+  scheduleTitle,
   selectedMetricLabel,
-  searchValue,
+}: {
+  readonly scheduleTitle: string;
+  readonly selectedMetricLabel: string | null;
+}) {
+  return (
+    <StyledSectionTitleRow>
+      <StyledSectionTitle variant="titleLg">{scheduleTitle}</StyledSectionTitle>
+      {selectedMetricLabel ? (
+        <MobileStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
+      ) : null}
+    </StyledSectionTitleRow>
+  );
+}
+
+function AdminDashboardMobileToolbar({
+  canScheduleFilterAdvanced,
+  filters,
   dateValue,
+  onDateChange,
   selectedTeacher,
+  onTeacherChange,
+  canDashboardSearch,
+  searchPlaceholder,
+  searchValue,
+  onSearchChange,
+}: Pick<
+  AdminDashboardMobileViewProps,
+  | "canScheduleFilterAdvanced"
+  | "dateValue"
+  | "onDateChange"
+  | "selectedTeacher"
+  | "onTeacherChange"
+  | "canDashboardSearch"
+  | "searchValue"
+  | "onSearchChange"
+> & {
+  readonly filters: AdminDashboardLabelsBySection["filters"];
+  readonly searchPlaceholder: string;
+}) {
+  const theme = useTheme();
+
+  return (
+    <StyledMobileSectionBody>
+      {canScheduleFilterAdvanced ? (
+        <ScheduleFilters
+          dateLabel={filters.listOfClassesOn}
+          dateValue={dateValue}
+          todayLabel={filters.today}
+          previousDayLabel={filters.previousDay}
+          nextDayLabel={filters.nextDay}
+          onDateChange={onDateChange}
+          teacherSelect={
+            <TeacherAutocompleteMobile
+              value={selectedTeacher}
+              onChange={onTeacherChange}
+              label={filters.selectTeacher}
+            />
+          }
+        />
+      ) : null}
+
+      {canDashboardSearch ? (
+        <TextField
+          placeholder={searchPlaceholder}
+          value={searchValue}
+          onChange={event => {
+            onSearchChange(event.target.value);
+          }}
+          fullWidth
+          size="small"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <StyledSearchIcon />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              backgroundColor: theme.palette.surfaceContainerLowest,
+            },
+          }}
+        />
+      ) : null}
+    </StyledMobileSectionBody>
+  );
+}
+
+function AdminDashboardMobileScheduleList({
   rows,
-  headers,
-  statusLabels,
+  loading,
+  emptyMessage,
+  labelsBySection,
+  showTimezones,
+  locale,
   page,
+  pageSize,
   totalCount,
   onPageChange,
-  onSearchChange,
-  onDateChange,
-  onTeacherChange,
-  pageSize,
-  canDashboardSearch,
-  canScheduleFilterAdvanced,
-  canScheduleViewTimezones,
-}: Readonly<AdminDashboardViewModel>) {
-  const theme = useTheme();
-  const locale = useAppLocale();
-  const showTimezones = canScheduleViewTimezones;
+}: Pick<
+  AdminDashboardMobileViewProps,
+  "rows" | "loading" | "page" | "pageSize" | "totalCount" | "onPageChange" | "canScheduleViewTimezones"
+> & {
+  readonly labelsBySection: AdminDashboardLabelsBySection;
+  readonly showTimezones: boolean;
+  readonly locale: string;
+  readonly emptyMessage: string;
+}) {
+  const { columns, status, shell } = labelsBySection;
 
   const renderItem = (row: DailyScheduleRow): ReactNode => (
     <MobileCardListItem variant="edge-to-edge">
       <ScheduleOverviewMobileCard
         row={row}
-        headers={headers}
-        statusLabels={statusLabels}
-        detailsLabel={t.details}
+        headers={columns}
+        statusLabels={status}
+        detailsLabel={shell.details}
         showTimezones={showTimezones}
         locale={locale}
       />
@@ -88,84 +179,75 @@ export function AdminDashboardMobileView({
   );
 
   return (
+    <MobileCardList<DailyScheduleRow>
+      rows={rows as readonly DailyScheduleRow[]}
+      loading={loading}
+      emptyMessage={emptyMessage}
+      renderSkeleton={() => (
+        <MobileCardListItem variant="edge-to-edge">
+          <ScheduleOverviewCardSkeleton />
+        </MobileCardListItem>
+      )}
+      renderEmptyState={msg => (
+        <MobileCardListItem variant="edge-to-edge">
+          <ScheduleOverviewEmptyState message={msg} />
+        </MobileCardListItem>
+      )}
+      gap={2}
+      layout="edge-to-edge"
+      getKey={row => row.id ?? ""}
+      renderItem={renderItem}
+      paginationOptions={buildServerPaginationOptions({
+        page,
+        pageSize,
+        totalCount: totalCount ?? 0,
+        onPageChange,
+      })}
+    />
+  );
+}
+
+export function AdminDashboardMobileView(props: AdminDashboardMobileViewProps) {
+  const locale = useAppLocale();
+  const showTimezones = props.canScheduleViewTimezones;
+  const { shell, filters } = props.labelsBySection;
+
+  return (
     <Stack direction="column" sx={{ gap: { xs: 0, md: 2 } }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <StyledSectionTitleRow>
-          <StyledSectionTitle variant="titleLg">{t.scheduleOverview}</StyledSectionTitle>
-          {selectedMetricLabel ? (
-            <MobileStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
-          ) : null}
-        </StyledSectionTitleRow>
-
-        <MobileMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
-
-        <StyledMobileSectionBody>
-          {canScheduleFilterAdvanced ? (
-            <ScheduleFilters
-              dateLabel={t.listOfClassesOn}
-              dateValue={dateValue}
-              todayLabel={t.today}
-              previousDayLabel={t.previousDay}
-              nextDayLabel={t.nextDay}
-              onDateChange={onDateChange}
-              teacherSelect={
-                <TeacherAutocompleteMobile value={selectedTeacher} onChange={onTeacherChange} label={t.selectTeacher} />
-              }
-            />
-          ) : null}
-
-          {canDashboardSearch ? (
-            <TextField
-              placeholder={t.searchPlaceholder}
-              value={searchValue}
-              onChange={event => {
-                onSearchChange(event.target.value);
-              }}
-              fullWidth
-              size="small"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <StyledSearchIcon />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  backgroundColor: theme.palette.surfaceContainerLowest,
-                },
-              }}
-            />
-          ) : null}
-        </StyledMobileSectionBody>
-
-        <MobileCardList<DailyScheduleRow>
-          rows={rows as readonly DailyScheduleRow[]}
-          loading={loading}
-          emptyMessage={t.noClasses}
-          renderSkeleton={() => (
-            <MobileCardListItem variant="edge-to-edge">
-              <ScheduleOverviewCardSkeleton />
-            </MobileCardListItem>
-          )}
-          renderEmptyState={msg => (
-            <MobileCardListItem variant="edge-to-edge">
-              <ScheduleOverviewEmptyState message={msg} />
-            </MobileCardListItem>
-          )}
-          gap={2}
-          layout="edge-to-edge"
-          getKey={row => row.id ?? ""}
-          renderItem={renderItem}
-          paginationOptions={buildServerPaginationOptions({
-            page,
-            pageSize,
-            totalCount: totalCount ?? 0,
-            onPageChange,
-          })}
+        <AdminDashboardMobileHeader
+          scheduleTitle={shell.scheduleOverview}
+          selectedMetricLabel={props.selectedMetricLabel}
+        />
+        <MobileMetricCardGrid
+          metrics={props.metrics}
+          onMetricClick={props.onMetricClick}
+          selectedKey={props.selectedMetricKey}
+        />
+        <AdminDashboardMobileToolbar
+          canScheduleFilterAdvanced={props.canScheduleFilterAdvanced}
+          filters={filters}
+          dateValue={props.dateValue}
+          onDateChange={props.onDateChange}
+          selectedTeacher={props.selectedTeacher}
+          onTeacherChange={props.onTeacherChange}
+          canDashboardSearch={props.canDashboardSearch}
+          searchPlaceholder={shell.searchPlaceholder}
+          searchValue={props.searchValue}
+          onSearchChange={props.onSearchChange}
+        />
+        <AdminDashboardMobileScheduleList
+          rows={props.rows}
+          loading={props.loading}
+          emptyMessage={shell.noClasses}
+          labelsBySection={props.labelsBySection}
+          showTimezones={showTimezones}
+          locale={locale}
+          page={props.page}
+          pageSize={props.pageSize}
+          totalCount={props.totalCount}
+          onPageChange={props.onPageChange}
+          canScheduleViewTimezones={props.canScheduleViewTimezones}
         />
       </Box>
     </Stack>

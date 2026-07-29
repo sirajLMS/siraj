@@ -5,13 +5,18 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
 import {
   type StaffProfileData,
+  type StaffRoleSectionLabels,
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
-import { useAppTranslation } from "@/shared/locale";
 
-export function RoleSection({ staffData }: { readonly staffData: StaffProfileData }) {
-  const t = useAppTranslation().profileTranslations.staff;
-  const tc = useAppTranslation().profileTranslations.base;
+export function RoleSection({
+  staffData,
+  labels,
+}: {
+  readonly staffData: StaffProfileData;
+  readonly labels: StaffRoleSectionLabels;
+}) {
+  const { staff: t, base: tc } = labels;
 
   return (
     <SectionPanel title={t.sections.role}>

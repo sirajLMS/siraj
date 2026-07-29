@@ -20,7 +20,7 @@ import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
-import { type LocalizedStringLabels, useAppLocale, useAppTranslation } from "@/shared/locale";
+import { type LocalizedStringLabels, Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import type { LocalizedString } from "@/shared/types/localized-string";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
@@ -234,7 +234,7 @@ export const LocalizedStringDrawerDesktop: React.FC<LocalizedStringDrawerProps> 
   dismissAction = "save",
   anchor = "right",
 }) => {
-  const t = useAppTranslation().uiTranslations.localizedString;
+  const t = useAppTranslation(Translation.Ui.LocalizedString);
   const uiLocale = useAppLocale();
   const [draft, setDraft] = useState<LocalizedString>(value);
 

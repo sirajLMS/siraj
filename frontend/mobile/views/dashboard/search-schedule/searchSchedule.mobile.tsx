@@ -18,7 +18,6 @@ import { SearchScheduleFormMobile } from "@/frontend/mobile/views/dashboard/sear
 import { SearchScheduleResultsSkeletonMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleResultsSkeleton.mobile";
 import { TeacherAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityGrid.mobile";
 import { TeacherAvailabilityMonthDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 function SearchScheduleMobileBody({
   isInitialLoading,
@@ -26,7 +25,7 @@ function SearchScheduleMobileBody({
   columnCount,
   fromDate,
   toDate,
-  t,
+  labels,
   onOpenMonthDrawer,
   pageInfo,
   teacherCount,
@@ -46,7 +45,7 @@ function SearchScheduleMobileBody({
       searchResult={searchResult}
       fromDate={fromDate}
       toDate={toDate}
-      t={t}
+      labels={labels}
       onOpenMonthDrawer={onOpenMonthDrawer}
       pageInfo={pageInfo}
       teacherCount={teacherCount}
@@ -60,7 +59,7 @@ function SearchScheduleMobileResults({
   searchResult,
   fromDate,
   toDate,
-  t,
+  labels,
   onOpenMonthDrawer,
   pageInfo,
   teacherCount,
@@ -97,17 +96,18 @@ function SearchScheduleMobileResults({
           color: theme.palette.text.secondary,
         })}
       >
-        {t.resultsCount(searchResult.totalCount ?? activeTeachers.length, totalGaps)}
+        {labels.resultsCount(searchResult.totalCount ?? activeTeachers.length, totalGaps)}
       </Typography>
 
       <MobileCardList
         rows={activeTeachers}
-        emptyMessage={t.noResults}
+        emptyMessage={labels.noResults}
         getKey={teacher => teacher.id ?? ""}
         paginationOptions={paginationOptions}
         layout="edge-to-edge"
         renderItem={teacher => (
           <TeacherAvailabilityGridMobile
+            labels={labels}
             teacher={teacher}
             fromDate={fromDate}
             dateColumns={dateColumns}
@@ -121,6 +121,7 @@ function SearchScheduleMobileResults({
 }
 
 export function SearchScheduleMobileView({
+  labels,
   searchResult,
   fromDate,
   toDate,
@@ -152,7 +153,6 @@ export function SearchScheduleMobileView({
   onCloseMonthDrawer,
   onMonthDrawerChangeMonth,
 }: Readonly<SearchScheduleViewModel>) {
-  const t = useAppTranslation().dashboardTranslations.coreSearchSchedule;
   const columnCount = getColumnCount(fromDate, toDate);
 
   return (
@@ -164,7 +164,7 @@ export function SearchScheduleMobileView({
         minHeight: `calc(100dvh - ${theme.layout.navbarHeight} - ${theme.layout.bottomNavHeight} - ${theme.spacing(4)})`,
       })}
     >
-      <MobilePageHeader title={t.pageTitle} titleVariant="headlineLg" edgeToEdge={false} />
+      <MobilePageHeader title={labels.pageTitle} titleVariant="headlineLg" edgeToEdge={false} />
 
       <Box
         sx={{
@@ -177,6 +177,7 @@ export function SearchScheduleMobileView({
         }}
       >
         <SearchScheduleFormMobile
+          labels={labels}
           draft={draft}
           isSearching={isInitialLoading}
           onDraftChange={onDraftChange}
@@ -194,7 +195,7 @@ export function SearchScheduleMobileView({
 
         {error ? (
           <Typography color="error" sx={{ px: 2 }}>
-            {t.errorLoading}
+            {labels.errorLoading}
           </Typography>
         ) : null}
 
@@ -204,7 +205,7 @@ export function SearchScheduleMobileView({
           columnCount={columnCount}
           fromDate={fromDate}
           toDate={toDate}
-          t={t}
+          labels={labels}
           onOpenMonthDrawer={onOpenMonthDrawer}
           pageInfo={pageInfo}
           teacherCount={teacherCount}
@@ -214,6 +215,7 @@ export function SearchScheduleMobileView({
       </Box>
 
       <TeacherAvailabilityMonthDrawerMobile
+        labels={labels}
         open={monthDrawerOpen}
         teacher={monthDrawerTeacher}
         currentMonth={monthDrawerCurrentMonth}

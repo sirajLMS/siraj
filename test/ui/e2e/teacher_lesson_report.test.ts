@@ -27,9 +27,9 @@ async function isVisible(locator: LocatorLike): Promise<boolean> {
   }
 }
 
-async function waitForSuccessOrHidden(dialog: Locator, snackbar: Locator, snackbarTimeout = 5000): Promise<void> {
+async function waitForSuccessOrHidden(dialog: Locator, snackbar: Locator): Promise<void> {
   try {
-    await snackbar.waitFor({ state: "visible", timeout: snackbarTimeout });
+    await snackbar.waitFor({ state: "visible" });
   } catch {
     expect(await dialog.isVisible()).toBe(false);
   }
@@ -51,12 +51,11 @@ async function loginDemo(role: "teacher" | "supervisor"): Promise<void> {
   context = await createContext();
   page = await context.newPage();
   await loginAsDemoUser(page, context, DEMO_USERS[role].groupSlug);
-  await page.waitForLoadState("networkidle");
 }
 
 async function fillLessonReportDialog(page: Page): Promise<void> {
   const dialog = page.getByRole("dialog", { name: /lesson\s+report|تقرير\s+الدرس/i });
-  await dialog.waitFor({ state: "visible", timeout: 5000 });
+  await dialog.waitFor({ state: "visible" });
 
   const attendanceSelect = dialog.getByLabel(/attendance\s+evaluation|تقييم\s+الحضور/i);
   await attendanceSelect.waitFor({ state: "visible" });
@@ -82,8 +81,7 @@ async function fillLessonReportDialog(page: Page): Promise<void> {
   await submitButton.waitFor({ state: "visible" });
   await submitButton.click();
 
-  await dialog.waitFor({ state: "hidden", timeout: 10000 });
-  await page.waitForLoadState("networkidle");
+  await dialog.waitFor({ state: "hidden" });
 
   const successSnackbar = page.getByRole("status", { name: /success|successfully|تم\s+بنجاح/i });
   await waitForSuccessOrHidden(dialog, successSnackbar);
@@ -107,7 +105,7 @@ async function approvePendingReportIfAvailable(page: Page): Promise<void> {
   const reviewsTitle = page.getByRole("heading", {
     name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i,
   });
-  await reviewsTitle.first().waitFor({ state: "visible", timeout: 10000 });
+  await reviewsTitle.first().waitFor({ state: "visible" });
 
   const reportRow = page
     .locator('[role="row"]')
@@ -123,15 +121,14 @@ async function approvePendingReportIfAvailable(page: Page): Promise<void> {
   const approveButton = reportRow.getByRole("button", { name: /approve|موافقة/i }).first();
   await approveButton.waitFor({ state: "visible" });
   await approveButton.click();
-  await page.waitForLoadState("networkidle");
 
   const successSnackbar = page.getByRole("status", { name: /approved|تم\s+الموافقة|success|نجاح/i });
   try {
-    await successSnackbar.waitFor({ state: "visible", timeout: 5000 });
+    await successSnackbar.waitFor({ state: "visible" });
   } catch {
     const approvedStatus = reportRow.getByText(/approved|موافق\s+عليه/i);
     try {
-      await approvedStatus.waitFor({ state: "visible", timeout: 5000 });
+      await approvedStatus.waitFor({ state: "visible" });
     } catch {
       expect(await approveButton.isVisible()).toBe(false);
     }
@@ -161,7 +158,6 @@ describe("Teacher Lesson Report E2E Flow", () => {
     await loginDemo("supervisor");
 
     await page.goto("/lesson-reports");
-    await page.waitForLoadState("networkidle");
     await page.waitForURL("**/lesson-reports**");
     expect(page.url()).toContain("/lesson-reports");
 
@@ -175,7 +171,6 @@ describe("Teacher Lesson Report E2E Flow", () => {
     page = await context.newPage();
 
     await loginAsDemoUser(page, context, DEMO_USERS.teacher.groupSlug);
-    await page.waitForLoadState("networkidle");
 
     // Verify teacher dashboard loads
     const dashboardTitle = page.getByRole("heading", { level: 1 });
@@ -189,7 +184,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
     // Check for schedule grid or list view
     const scheduleGrid = page.locator('[role="rowgroup"], [class*="schedule"], [class*="Schedule"]').first();
     try {
-      await scheduleGrid.waitFor({ state: "visible", timeout: 10000 });
+      await scheduleGrid.waitFor({ state: "visible" });
     } catch {
       // Fallback: verify the dashboard heading is still visible
       expect(await dashboardTitle.first().isVisible()).toBe(true);
@@ -201,10 +196,8 @@ describe("Teacher Lesson Report E2E Flow", () => {
     page = await context.newPage();
 
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    await page.waitForLoadState("networkidle");
 
     await page.goto("/lesson-reports");
-    await page.waitForLoadState("networkidle");
     await page.waitForURL("**/lesson-reports**");
     expect(page.url()).toContain("/lesson-reports");
 
@@ -212,6 +205,6 @@ describe("Teacher Lesson Report E2E Flow", () => {
     const pageTitle = page.getByRole("heading", {
       name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i,
     });
-    await pageTitle.first().waitFor({ state: "visible", timeout: 10000 });
+    await pageTitle.first().waitFor({ state: "visible" });
   });
 });

@@ -61,5 +61,5 @@ export {
   TeacherNotesRepository,
   TeacherRepository,
 } from "@/backend/db/repo/teachers";
-export { UserRepository } from "@/backend/db/repo/users";
+export { SessionConfigRepository, UserRepository } from "@/backend/db/repo/users";
 export type { UserReturnType, UserSelectType } from "@/backend/types";

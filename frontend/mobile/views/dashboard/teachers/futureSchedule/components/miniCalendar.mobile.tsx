@@ -12,21 +12,8 @@ import type {
   MiniCalendarProps,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
-import { useAppTranslation } from "@/shared/locale";
 
-/**
- * Mobile variant of the mini-calendar.
- *
- * Plan v5: per specs.md §3 N7 (state), N9 (pure-data helpers), N25
- * (`function useX` declarations), and §5 (custom hooks live in common), the
- * previously inline `useState`/`useViewingMonth`/`getCalendarGrid`/`DAYS`
- * constant were lifted to
- * `frontend/common/views/dashboard/teachers/futureSchedule/hooks/useMiniCalendar.hooks.ts`.
- * Per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
- * `MiniCalendarProps` interface was lifted to
- * `frontend/common/views/dashboard/teachers/futureSchedule/types.ts`.
- */
-export function MiniCalendarMobile({ selectedDate, onSelectDate, classDates }: Readonly<MiniCalendarProps>) {
+export function MiniCalendarMobile({ selectedDate, onSelectDate, classDates, labels }: Readonly<MiniCalendarProps>) {
   const [{ year, month }, shiftMonth] = useViewingMonth(selectedDate);
   const dates = getCalendarGrid(year, month, classDates, selectedDate);
   const monthName = new Date(year, month).toLocaleString("en-US", { month: "long" });
@@ -44,6 +31,7 @@ export function MiniCalendarMobile({ selectedDate, onSelectDate, classDates }: R
         year={year}
         onPrev={() => shiftMonth(-1)}
         onNext={() => shiftMonth(1)}
+        labels={labels}
       />
       <Grid container columns={7} sx={{ textAlign: "center" }}>
         {MINI_CALENDAR_WEEKDAYS.map(day => (
@@ -73,13 +61,14 @@ function MiniCalendarHeader({
   year,
   onPrev,
   onNext,
+  labels,
 }: {
   readonly monthName: string;
   readonly year: number;
   readonly onPrev: () => void;
   readonly onNext: () => void;
+  readonly labels: MiniCalendarProps["labels"];
 }) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
   return (
     <Stack
       direction="row"
@@ -91,7 +80,7 @@ function MiniCalendarHeader({
       }}
     >
       <Typography variant="labelMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-        {t.monthDisplay(monthName, String(year))}
+        {labels.monthDisplay(monthName, String(year))}
       </Typography>
       <Stack direction="row" spacing={0.5}>
         <IconButton size="small" onClick={onPrev} sx={{ p: 0.5 }}>

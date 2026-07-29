@@ -1,9 +1,98 @@
 "use client";
 
-import { useAppTranslation } from "@/shared/locale";
+import type { StatusTrackingLabels } from "@/frontend/common/views/dashboard/classes/status/tracking/status-tracking.types";
+import type { StatusTrackingLabelsBySection } from "@/frontend/common/views/dashboard/classes/status/tracking/types/statusTrackingViewModel.types";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
-export function useStatusTrackingLabels() {
-  const t = useAppTranslation().dashboardTranslations.coreStatusTracking;
+function buildCardListLabels(labels: StatusTrackingLabels): StatusTrackingLabelsBySection["cardList"] {
+  return {
+    joinSession: labels.joinSession,
+    activate: labels.activate,
+    reschedule: labels.reschedule,
+    verifyDocuments: labels.verifyDocuments,
+    sessionLocked: labels.sessionLocked,
+    sessionEnded: labels.sessionEnded,
+    todaysSchedule: labels.todaysSchedule,
+    regular: labels.regular,
+    suspendedPending: labels.suspendedPending,
+    onLeave: labels.onLeave,
+    pendingVerification: labels.pendingVerification,
+    noEntries: labels.noEntries,
+  };
+}
+
+function buildAnalyticsLabels(labels: StatusTrackingLabels): StatusTrackingLabelsBySection["analytics"] {
+  return {
+    suspensionAnalytics: labels.suspensionAnalytics,
+    analyticsNote: labels.analyticsNote,
+    urgentTask: labels.urgentTask,
+    accountsLocked: labels.accountsLocked,
+    auditDescription: labels.auditDescription,
+    openAuditLogs: labels.openAuditLogs,
+    suspended: labels.suspendedPending,
+    days: labels.days,
+  };
+}
+
+function buildColumnLabels(labels: StatusTrackingLabels): StatusTrackingLabelsBySection["columns"] {
+  return {
+    studentClass: labels.studentClass,
+    teacher: labels.teacher,
+    schedule: labels.schedule,
+    status: labels.status,
+    actions: labels.actions,
+    joinSession: labels.joinSession,
+    activate: labels.activate,
+    reschedule: labels.reschedule,
+    verifyDocuments: labels.verifyDocuments,
+    administrativeHold: labels.administrativeHold,
+    holdDescription: labels.holdDescription,
+    regular: labels.regular,
+    suspendedPending: labels.suspendedPending,
+    onLeave: labels.onLeave,
+    pendingVerification: labels.pendingVerification,
+    sessionEnded: labels.sessionEnded,
+    noEntries: labels.noEntries,
+    showingOf: labels.showingOf,
+    previous: labels.previous,
+    next: labels.next,
+  };
+}
+
+export function buildStatusTrackingLabelsBySection(labels: StatusTrackingLabels): StatusTrackingLabelsBySection {
+  return {
+    shell: {
+      pageTitle: labels.pageTitle,
+      pageSubtitle: labels.pageSubtitle,
+      filters: labels.filters,
+      newReport: labels.newReport,
+      todaysClassSchedule: labels.todaysClassSchedule,
+      totalSessions: labels.totalSessions,
+      seeAll: labels.seeAll,
+      todaysSchedule: labels.todaysSchedule,
+    },
+    filters: {
+      dateFilter: labels.dateFilter,
+    },
+    columns: buildColumnLabels(labels),
+    cardList: buildCardListLabels(labels),
+    analytics: buildAnalyticsLabels(labels),
+    notifications: {
+      errorNoStudentId: labels.errorNoStudentId,
+      errorAuditLogsComingSoon: labels.errorAuditLogsComingSoon,
+      errorFailedToLoad: labels.errorFailedToLoad,
+    },
+    metrics: {
+      regularSubLabel: labels.regularSubLabel,
+      pendingSubLabel: labels.pendingSubLabel,
+      suspendedSubLabel: labels.suspendedSubLabel,
+      onLeaveSubLabel: labels.onLeaveSubLabel,
+    },
+  };
+}
+
+export function useStatusTrackingLabels(): StatusTrackingLabels {
+  const t = useAppTranslation(Translation.Dashboard.CoreStatusTracking);
 
   return {
     pageTitle: t.pageTitle,

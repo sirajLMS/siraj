@@ -12,6 +12,7 @@ import { managerOnboardingSchema } from "@/frontend/common/views/dashboard/staff
 import type { OnboardingMetricsViewModel } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
 import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
 import { useRouter } from "@/shared/i18n/navigation";
+import { type StaffOnboardingLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 const defaultValues: ManagerOnboardingFormData = {
   name: "",
@@ -23,6 +24,7 @@ const defaultValues: ManagerOnboardingFormData = {
 };
 
 export interface ManagerOnboardingContainerViewModel {
+  readonly labels: StaffOnboardingLabels;
   readonly register: ReturnType<typeof useForm<ManagerOnboardingFormData>>["register"];
   readonly control: ReturnType<typeof useForm<ManagerOnboardingFormData>>["control"];
   readonly errors: ReturnType<typeof useForm<ManagerOnboardingFormData>>["formState"]["errors"];
@@ -42,6 +44,7 @@ export type UseManagerOnboardingContainerViewModelProps = Record<string, never>;
 export function useManagerOnboardingContainerViewModel(
   _props: Readonly<UseManagerOnboardingContainerViewModelProps>
 ): ManagerOnboardingContainerViewModel {
+  const labels = useAppTranslation(Translation.Dashboard.StaffOnboarding);
   const router = useRouter();
   const { execute, loading } = useCreateManagerOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -91,6 +94,7 @@ export function useManagerOnboardingContainerViewModel(
   };
 
   return {
+    labels,
     register,
     control,
     errors,

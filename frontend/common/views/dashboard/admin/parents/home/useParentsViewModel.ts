@@ -16,13 +16,13 @@ import {
   type ParentDirectoryExportLabels,
   type ParentDirectoryRow,
   type ParentLifecycleStatus,
-  type ParentsViewLabels,
   type ParentsViewModel,
   toParentAccountStatusKey,
   toParentLifecycleStatus,
 } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
+import type { ParentsDirectoryLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/home/types/parentsDirectory.types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";
 
 function useDirectoryMetrics(
@@ -99,7 +99,7 @@ function useDirectoryRows(
   }));
 }
 
-function useDirectoryLabels(t: ParentsDirectoryLabels): ParentsViewLabels {
+function buildLabelsBySection(t: ParentsDirectoryLabels): ParentsDirectoryLabelsBySection {
   const statusLabels: Record<ParentLifecycleStatus, string> = {
     regular: t.metrics.regular,
     on_leave: t.metrics.onLeave,
@@ -113,21 +113,46 @@ function useDirectoryLabels(t: ParentsDirectoryLabels): ParentsViewLabels {
   };
 
   return {
-    pageTitle: t.pageTitle,
-    pageSubtitle: t.pageSubtitle,
-    addParent: t.actions.addParent,
-    records: t.records,
-    searchPlaceholder: t.searchPlaceholder,
-    filterLabel: t.actions.filter,
-    clearFilters: t.actions.clearFilters,
-    // NEW FOR PLAN v5: populate the lifted noEntries + manageLifecycle from the shared i18n schema
-    // (ParentsDirectoryLabels already carries these — see shared/locale/types/dashboard/parents/directory.ts).
-    noEntries: t.noEntries,
-    manageLifecycle: t.actions.manageLifecycle,
-    table: t.table,
-    card: t.card,
-    statusLabels,
-    accountStatusLabels,
+    shell: {
+      pageTitle: t.pageTitle,
+      pageSubtitle: t.pageSubtitle,
+      records: t.records,
+      noEntries: t.noEntries,
+    },
+    filters: {
+      searchPlaceholder: t.searchPlaceholder,
+      filterLabel: t.actions.filter,
+      clearFilters: t.actions.clearFilters,
+      statusLabels,
+    },
+    columns: {
+      index: t.table.index,
+      image: t.table.image,
+      name: t.table.name,
+      email: t.table.email,
+      time: t.table.time,
+      status: t.table.status,
+      accountStatus: t.table.accountStatus,
+      unpaidInvoices: t.table.unpaidInvoices,
+      options: t.table.options,
+      noEntries: t.noEntries,
+      guardianOf: t.card.guardianOf,
+      statusLabels,
+      accountStatusLabels,
+      manageLifecycle: t.actions.manageLifecycle,
+    },
+    card: {
+      guardianOf: t.card.guardianOf,
+      unpaidCount: t.card.unpaidCount,
+      invoicesCleared: t.card.invoicesCleared,
+      statusLabels,
+      accountStatusLabels,
+    },
+    actions: {
+      addParent: t.actions.addParent,
+      manageLifecycle: t.actions.manageLifecycle,
+      accountStatusLabels,
+    },
   };
 }
 
@@ -187,7 +212,7 @@ function useParentsDirectoryQuery() {
 
 function useParentHandlers(
   rows: readonly ParentDirectoryRow[],
-  labels: ParentsViewLabels
+  labelsBySection: ParentsDirectoryLabelsBySection
 ): Pick<ParentsViewModel, "onAddParent" | "onOpenSettings" | "onSearch" | "onPageChange" | "onFilter" | "onExport"> {
   const router = useRouter();
   const { setSearchQuery, setPage, setFilterPanelOpen, filterPanelOpen } = useParentsStore();
@@ -220,20 +245,21 @@ function useParentHandlers(
   }, [filterPanelOpen, setFilterPanelOpen]);
 
   const onExport = useCallback(() => {
+    const { shell, columns } = labelsBySection;
     const exportLabels: ParentDirectoryExportLabels = {
-      pageTitle: labels.pageTitle,
+      pageTitle: shell.pageTitle,
       table: {
-        index: labels.table.index,
-        name: labels.table.name,
-        email: labels.table.email,
-        time: labels.table.time,
-        status: labels.table.status,
-        unpaidInvoices: labels.table.unpaidInvoices,
-        statusLabels: labels.statusLabels,
+        index: columns.index,
+        name: columns.name,
+        email: columns.email,
+        time: columns.time,
+        status: columns.status,
+        unpaidInvoices: columns.unpaidInvoices,
+        statusLabels: columns.statusLabels,
       },
     };
     void exportParentDirectory({ rows, labels: exportLabels });
-  }, [rows, labels]);
+  }, [rows, labelsBySection]);
 
   return { onAddParent, onOpenSettings, onSearch, onPageChange, onFilter, onExport };
 }
@@ -241,7 +267,7 @@ function useParentHandlers(
 export type UseParentsViewModelProps = Record<string, never>;
 
 export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>): ParentsViewModel {
-  const t = useAppTranslation().dashboardTranslations.parentsDirectory;
+  const t = useAppTranslation(Translation.Dashboard.ParentsDirectory);
 
   const { canParentsCreate, canParentManageStatus } = useParentPermissionGates();
 
@@ -252,14 +278,14 @@ export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>):
   const directory = data?.parentDirectory;
   const metrics = useDirectoryMetrics(directory ?? null);
   const rows = useDirectoryRows(directory ?? null);
-  const labels = useDirectoryLabels(t);
+  const labelsBySection = buildLabelsBySection(t);
 
-  const handlers = useParentHandlers(rows, labels);
+  const handlers = useParentHandlers(rows, labelsBySection);
 
   return {
     metrics,
     rows,
-    labels,
+    labelsBySection,
     loading,
     page,
     pageSize,

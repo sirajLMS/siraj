@@ -4,15 +4,12 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { ImportantNotesProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
-import { useAppTranslation } from "@/shared/locale";
 
-export function ImportantNotesDesktop({ notes }: Readonly<ImportantNotesProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherFutureSchedule;
-
+export function ImportantNotesDesktop({ notes, labels }: Readonly<ImportantNotesProps>) {
   return (
     <BaseCard
       sx={theme => ({
-        p: 3,
+        p: 2,
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary,
         border: 1,
@@ -28,24 +25,24 @@ export function ImportantNotesDesktop({ notes }: Readonly<ImportantNotesProps>) 
           spacing={1}
           sx={theme => ({
             alignItems: "center",
-            mb: 2,
+            mb: 1.5,
             color: theme.palette.primary.main,
           })}
         >
-          <InfoOutlined sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
+          <InfoOutlined sx={theme => ({ fontSize: 18, color: theme.palette.primary.main })} />
           <Typography variant="titleLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-            {t.importantNotes}
+            {labels.importantNotes}
           </Typography>
         </Stack>
 
-        <Stack spacing={1.5}>
+        <Stack spacing={1}>
           {notes.map(note => (
             <Box
               key={note.id}
               sx={theme => ({
-                p: 2,
+                p: 1.5,
                 backgroundColor: theme.palette.surfaceContainerLow,
-                borderRadius: 2,
+                borderRadius: 1.5,
                 border: 1,
                 borderStyle: "solid",
                 borderColor: theme.palette.border.main,
@@ -67,10 +64,10 @@ export function ImportantNotesDesktop({ notes }: Readonly<ImportantNotesProps>) 
       <Box
         sx={theme => ({
           position: "absolute",
-          right: -40,
-          bottom: -40,
-          width: 160,
-          height: 160,
+          right: -32,
+          bottom: -32,
+          width: 120,
+          height: 120,
           backgroundColor: theme.palette.primary.main,
           opacity: 0.05,
           borderRadius: "50%",

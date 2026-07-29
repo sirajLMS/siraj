@@ -6,11 +6,8 @@ import type { StudentContextCardProps } from "@/frontend/common/views/dashboard/
 import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
-import { useAppTranslation } from "@/shared/locale";
 
-export function StudentContextCardMobile({ student }: Readonly<StudentContextCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.teacherReassignment.studentContext;
-
+export function StudentContextCardMobile({ student, labels }: Readonly<StudentContextCardProps>) {
   return (
     <MobileBaseCard>
       <Stack spacing={2} sx={{ alignItems: "center", textAlign: "center" }}>
@@ -47,7 +44,7 @@ export function StudentContextCardMobile({ student }: Readonly<StudentContextCar
               mb: 0.5,
             })}
           >
-            {t.enrollment}
+            {labels.enrollment}
           </Typography>
           <MobileStatusBadge category="studentAccount" status={student.accountStatus} label={student.accountStatus} />
         </Box>

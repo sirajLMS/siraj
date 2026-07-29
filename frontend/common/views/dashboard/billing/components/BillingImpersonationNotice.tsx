@@ -2,11 +2,11 @@
 
 import { Alert } from "@mui/material";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function BillingImpersonationNotice(): React.ReactNode {
   const { isImpersonating } = useImpersonation();
-  const t = useAppTranslation().errorsTranslations;
+  const t = useAppTranslation(Translation.Errors);
   const auth = t.auth;
 
   if (!isImpersonating) {

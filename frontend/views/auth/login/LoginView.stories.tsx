@@ -1,10 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LoginView } from "@/frontend/views/auth/login/LoginView";
+import { LoginView, type LoginViewProps } from "@/frontend/views/auth/login/LoginView";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
-const meta: Meta<typeof LoginView> = {
+function LoginViewWithLabels(props: Omit<LoginViewProps, "labels">) {
+  const labels = useAppTranslation(Translation.Auth.Login);
+  return <LoginView labels={labels} {...props} />;
+}
+
+const meta: Meta<typeof LoginViewWithLabels> = {
   title: "Views /login/LoginView",
-  component: LoginView,
+  component: LoginViewWithLabels,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -28,7 +34,7 @@ const meta: Meta<typeof LoginView> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof LoginView>;
+type Story = StoryObj<typeof LoginViewWithLabels>;
 
 export const Default: Story = {
   args: {

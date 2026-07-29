@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import type { TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent } from "@/frontend/common/graphql/generated/gql/operations";
 import { teacherAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * TeacherStudents ViewModel.
@@ -40,7 +40,7 @@ export type UseTeacherStudentsViewModelProps = Record<string, never>;
 export function useTeacherStudentsViewModel(
   _props: Readonly<UseTeacherStudentsViewModelProps> = {}
 ): TeacherStudentsViewModel {
-  const t = useAppTranslation().dashboardTranslations.teacherStudents;
+  const t = useAppTranslation(Translation.Dashboard.TeacherStudents);
   const { data, loading, error } = useQuery(teacherAssignedStudentsQueryDocument);
 
   const rows = data?.teacherAssignedStudents?.rows ?? [];

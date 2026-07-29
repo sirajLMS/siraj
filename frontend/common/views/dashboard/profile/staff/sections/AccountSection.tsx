@@ -10,13 +10,16 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import type { StaffProfileData } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import type {
+  StaffProfileData,
+  StaffSectionLabelsBundle,
+} from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
-import { useAppTranslation } from "@/shared/locale";
 
 type AccountSectionProps =
   | {
       readonly mode: "view";
+      readonly labels: StaffSectionLabelsBundle;
       readonly scope?: ProfileScope;
       readonly staffData: StaffProfileData;
       readonly isAdminScope: boolean;
@@ -24,6 +27,7 @@ type AccountSectionProps =
     }
   | {
       readonly mode: "edit";
+      readonly labels: StaffSectionLabelsBundle;
       readonly scope?: ProfileScope;
       readonly staffData: StaffProfileData;
       readonly isAdminScope: boolean;
@@ -51,7 +55,8 @@ function StaffRoleStatusView({
 }
 
 export function AccountSection(props: AccountSectionProps) {
-  const t = useAppTranslation().profileTranslations.staff;
+  const t = props.labels.staff;
+  const { baseLabels } = props.labels;
   const { canView, canEdit } = useProfileFieldAccess({ scope: props.scope });
 
   if (props.mode === "edit") {
@@ -65,6 +70,7 @@ export function AccountSection(props: AccountSectionProps) {
           nameLabel={t.fields.fullName}
           emailLabel={t.fields.primaryEmail}
           currencyLabel={t.fields.displayCurrency}
+          baseLabels={baseLabels}
           register={props.register}
           control={props.control}
         />
@@ -103,6 +109,7 @@ export function AccountSection(props: AccountSectionProps) {
       nameLabel={t.fields.fullName}
       emailLabel={t.fields.primaryEmail}
       currencyLabel={t.fields.displayCurrency}
+      baseLabels={baseLabels}
       additionalViewContent={roleStatusContent ?? undefined}
     />
   );

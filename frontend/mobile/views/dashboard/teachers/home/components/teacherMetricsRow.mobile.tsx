@@ -4,7 +4,7 @@ import { CancelOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
-import { useAppTranslation } from "@/shared/locale";
+import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
 interface TeacherMetricsRowProps {
   readonly metrics:
@@ -14,16 +14,15 @@ interface TeacherMetricsRowProps {
       }
     | null
     | undefined;
+  readonly labels: TeachersDirectoryLabels["metrics"];
 }
 
-export function TeacherMetricsRow({ metrics }: Readonly<TeacherMetricsRowProps>) {
-  const t = useAppTranslation().dashboardTranslations.teachersDirectory.metrics;
-
+export function TeacherMetricsRow({ metrics, labels }: Readonly<TeacherMetricsRowProps>) {
   const metricItems: readonly MetricItem[] = useMemo(
     () => [
       {
         key: "activated",
-        label: t.activated,
+        label: labels.activated,
         count: metrics?.activated ?? 0,
         icon: CheckCircleOutlined,
         labelKey: "activated",
@@ -31,14 +30,14 @@ export function TeacherMetricsRow({ metrics }: Readonly<TeacherMetricsRowProps>)
       },
       {
         key: "deactivated",
-        label: t.deactivated,
+        label: labels.deactivated,
         count: metrics?.deactivated ?? 0,
         icon: CancelOutlined,
         labelKey: "deactivated",
         variant: "default",
       },
     ],
-    [metrics?.activated, metrics?.deactivated, t.activated, t.deactivated]
+    [labels.activated, labels.deactivated, metrics?.activated, metrics?.deactivated]
   );
 
   return <MobileMetricCardGrid metrics={metricItems} />;

@@ -1,14 +1,19 @@
 import { index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { systemSettingCategoryEnum, systemSettingDataTypeEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
+import { type SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 
 export const systemSettings = pgTable(
   "system_settings",
   {
     key: varchar("key", { length: 100 }).primaryKey(),
     value: text("value").notNull(),
-    dataType: varchar("data_type", { length: 20 }).notNull().default("string"),
+    dataType: systemSettingDataTypeEnum("data_type")
+      .$type<SystemSettingDataType>()
+      .notNull()
+      .default(SystemSettingDataType.String),
     description: text("description").notNull(),
-    category: varchar("category", { length: 100 }).notNull(),
+    category: systemSettingCategoryEnum("category").$type<SystemSettingCategory>().notNull(),
     updatedByUserId: uuid("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },

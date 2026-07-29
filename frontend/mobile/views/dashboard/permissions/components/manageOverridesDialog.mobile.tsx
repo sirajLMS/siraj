@@ -8,7 +8,6 @@ import { OverridesDataGridMobile } from "@/frontend/mobile/views/dashboard/permi
 import { OverridesDialogFooterMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overridesDialogFooter.mobile";
 import { OverridesToolbarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overridesToolbar.mobile";
 import { OverridesUserSidebarMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overridesUserSidebar.mobile";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
@@ -39,11 +38,12 @@ const StyledRightContentArea = styled(Box)({
 });
 
 export function ManageOverridesDialogMobile({
+  labels,
   open,
   onClose,
   manageOverridesState,
 }: Readonly<ManageOverridesDialogProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   const {
     user,
@@ -84,10 +84,11 @@ export function ManageOverridesDialogMobile({
       </StyledDialogTitle>
 
       <StyledDialogContent>
-        <OverridesUserSidebarMobile user={user} userGroups={userGroups} />
+        <OverridesUserSidebarMobile labels={labels} user={user} userGroups={userGroups} />
 
         <StyledRightContentArea>
           <OverridesToolbarMobile
+            labels={labels}
             mode={mode}
             onModeChange={setMode}
             searchQuery={searchQuery}
@@ -95,6 +96,7 @@ export function ManageOverridesDialogMobile({
           />
 
           <OverridesDataGridMobile
+            labels={labels}
             filteredPermissions={filteredPermissions}
             userGroups={userGroups}
             localOverrides={localOverrides}

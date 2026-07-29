@@ -11,7 +11,6 @@ import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboa
 import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n";
-import { useAppTranslation } from "@/shared/locale";
 
 const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   width: 40,
@@ -23,6 +22,7 @@ const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
 }));
 
 interface UserOverridesCardProps {
+  readonly labels: UserOverridesDataGridProps["labels"];
   readonly user: User;
   readonly groups: readonly PermissionGroup[];
   readonly onManageOverrides: (userId: string) => void;
@@ -39,8 +39,8 @@ function StatisticBoxMobile({ label, children }: { readonly label: string; reado
   );
 }
 
-function UserOverridesCardMobile({ user, groups, onManageOverrides }: Readonly<UserOverridesCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+function UserOverridesCardMobile({ labels, user, groups, onManageOverrides }: Readonly<UserOverridesCardProps>) {
+  const t = labels;
   const userId = user.id ?? "";
   const userGroups = getUserGroupsForUser(userId, groups);
 
@@ -142,12 +142,13 @@ function UserOverridesCardMobile({ user, groups, onManageOverrides }: Readonly<U
 }
 
 export function UserOverridesDataGridMobile({
+  labels,
   users,
   groups,
   onManageOverrides,
   loading = false,
 }: Readonly<UserOverridesDataGridProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <MobileCardList
@@ -157,7 +158,9 @@ export function UserOverridesDataGridMobile({
       getKey={user => user.id ?? user.email ?? ""}
       paginationOptions={{ mode: "client" }}
       layout="edge-to-edge"
-      renderItem={user => <UserOverridesCardMobile user={user} groups={groups} onManageOverrides={onManageOverrides} />}
+      renderItem={user => (
+        <UserOverridesCardMobile labels={labels} user={user} groups={groups} onManageOverrides={onManageOverrides} />
+      )}
     />
   );
 }

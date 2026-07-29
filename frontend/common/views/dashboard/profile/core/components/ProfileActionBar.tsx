@@ -2,8 +2,8 @@
 
 import { Button, Stack } from "@mui/material";
 import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ProfileActionBarLabels } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { useAppTranslation } from "@/shared/locale";
 
 type ProfileActionBarProps = {
   readonly mode?: ProfileMode;
@@ -11,6 +11,7 @@ type ProfileActionBarProps = {
   readonly cancelHref?: string;
   readonly onSave?: () => void;
   readonly saving?: boolean;
+  readonly labels: ProfileActionBarLabels;
 };
 
 export function ProfileActionBar({
@@ -19,21 +20,22 @@ export function ProfileActionBar({
   cancelHref,
   onSave,
   saving = false,
+  labels,
 }: ProfileActionBarProps) {
   const router = useRouter();
-  const t = useAppTranslation().profileTranslations.base;
+  const t = labels;
 
   if (mode === ProfileMode.Edit) {
     return (
       <Stack direction="row" spacing={1}>
         {cancelHref ? (
           <Button variant="outlined" onClick={() => router.push(cancelHref)} disabled={saving}>
-            {t.actions.cancel}
+            {t.cancel}
           </Button>
         ) : null}
         {onSave ? (
           <Button variant="contained" onClick={onSave} disabled={saving}>
-            {t.actions.save}
+            {t.save}
           </Button>
         ) : null}
       </Stack>
@@ -46,7 +48,7 @@ export function ProfileActionBar({
 
   return (
     <Button variant="contained" onClick={() => router.push(editHref)}>
-      {t.actions.edit}
+      {t.edit}
     </Button>
   );
 }

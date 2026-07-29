@@ -10,3 +10,8 @@ export type TeacherDashboardLabels = BaseTeacherDashboardLabels & {
 export interface TeacherDashboardViewLabels extends TeacherDashboardLabels {
   readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
 }
+
+export interface TeacherDashboardLastUpdatedLabels {
+  readonly updatedJustNow: string;
+  readonly updatedMinutesAgo: (minutes: number) => string;
+}

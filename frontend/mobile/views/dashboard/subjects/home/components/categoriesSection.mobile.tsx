@@ -5,13 +5,13 @@ import { Chip, IconButton } from "@mui/material";
 import { CategoryChip } from "@/frontend/common/views/dashboard/subjects/home/components/categoryChip";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobileHorizontalScrollRow, MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
-import { useAppTranslation } from "@/shared/locale";
 
 /**
  * CategoriesSectionMobile — mobile-tier category filter strip.
  * Horizontal scroll row so chips stay on one swipeable line.
  */
 export function CategoriesSectionMobile({
+  labels,
   categories,
   activeCategoryId,
   onCategoryChange,
@@ -20,7 +20,7 @@ export function CategoriesSectionMobile({
   onDeleteCategory,
   canManage,
 }: Readonly<CategoriesSectionProps>) {
-  const t = useAppTranslation().dashboardTranslations.subjects;
+  const t = labels;
 
   return (
     <MobileSectionPanel

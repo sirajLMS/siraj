@@ -11,10 +11,11 @@ import { ProfileHeader } from "@/frontend/common/views/dashboard/profile/core/Pr
 import { ProfileSkeleton } from "@/frontend/common/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
 import type { ProfileShellProps } from "@/frontend/common/views/dashboard/profile/core/profileShellTypes";
+import type { ProfileShellViewModel } from "@/frontend/common/views/dashboard/profile/core/types/profileShell.types";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui";
-import { useAppTranslation } from "@/shared/locale";
+import type { ProfileLabels } from "@/shared/locale/types/profile";
 
-export type ProfileShellDesktopViewProps = ProfileShellProps;
+export type ProfileShellDesktopViewProps = ProfileShellViewModel;
 
 function renderBody(
   {
@@ -33,7 +34,7 @@ function renderBody(
     roleLabel,
     avatarUrl,
   }: Readonly<ProfileShellProps>,
-  t: ReturnType<typeof useAppTranslation>["profileTranslations"]["base"]
+  t: ProfileLabels
 ): ReactNode {
   const showTabs = mode === ProfileMode.View && currentTab && onTabChange;
   const isEditMode = mode === ProfileMode.Edit;
@@ -113,9 +114,8 @@ function renderBody(
   );
 }
 
-export function ProfileShellDesktopView(props: Readonly<ProfileShellDesktopViewProps>) {
-  const t = useAppTranslation().profileTranslations.base;
-
+export function ProfileShellDesktopView({ labels, ...shellProps }: Readonly<ProfileShellDesktopViewProps>) {
+  const props: ProfileShellProps = shellProps;
   return (
     <DesktopPageContainer sx={{ px: 0 }}>
       <Box
@@ -126,7 +126,7 @@ export function ProfileShellDesktopView(props: Readonly<ProfileShellDesktopViewP
           width: "100%",
         })}
       >
-        {renderBody(props, t)}
+        {renderBody(props, labels)}
       </Box>
     </DesktopPageContainer>
   );

@@ -8,7 +8,7 @@ describe("E2E Lifecycle", () => {
   test("browser launches and navigates to dev server", async () => {
     const context = await createContext();
     const page = await context.newPage();
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(page.url()).toContain(getTestBaseUrl());
     await context.close();
   });

@@ -8,9 +8,9 @@ import type { BasePermissionGroupListProps } from "@/frontend/common/views/dashb
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
-import { useAppTranslation } from "@/shared/locale";
 
 interface GroupCardProps {
+  readonly labels: BasePermissionGroupListProps["labels"];
   readonly group: PermissionGroup;
   readonly onViewGroup: (id: string) => void;
   readonly onEditGroup: (id: string) => void;
@@ -20,6 +20,7 @@ interface GroupCardProps {
 }
 
 function GroupCardMobile({
+  labels,
   group,
   onViewGroup,
   onEditGroup,
@@ -27,7 +28,7 @@ function GroupCardMobile({
   onAssignGroup,
   rowMenuAnchor,
 }: Readonly<GroupCardProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
   const { anchorEl, openMenu, closeMenu } = rowMenuAnchor;
   const open = Boolean(anchorEl);
 
@@ -62,7 +63,7 @@ function GroupCardMobile({
             <Typography
               variant="labelMd"
               sx={theme => ({
-                fontFamily: "JetBrains Mono, monospace",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
                 color: theme.palette.text.secondary,
               })}
             >
@@ -134,6 +135,7 @@ function GroupCardMobile({
 }
 
 export function PermissionGroupCardListMobile({
+  labels,
   groups,
   onViewGroup,
   onEditGroup,
@@ -141,7 +143,7 @@ export function PermissionGroupCardListMobile({
   onAssignGroup,
   groupRowMenuAnchor,
 }: Readonly<BasePermissionGroupListProps>) {
-  const t = useAppTranslation().dashboardTranslations.permissions;
+  const t = labels;
 
   return (
     <MobileCardList
@@ -152,6 +154,7 @@ export function PermissionGroupCardListMobile({
       layout="edge-to-edge"
       renderItem={group => (
         <GroupCardMobile
+          labels={labels}
           group={group}
           onViewGroup={onViewGroup}
           onEditGroup={onEditGroup}

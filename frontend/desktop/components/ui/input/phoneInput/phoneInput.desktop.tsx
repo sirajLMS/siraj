@@ -11,7 +11,7 @@ import { usePhoneInput } from "@/frontend/common/hooks/usePhoneInput";
 import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { PhoneCountryPickerDesktop } from "@/frontend/desktop/components/ui/input/phoneInput/phoneCountryPicker.desktop";
-import { useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const StyledInput = styled("input")();
 
@@ -208,7 +208,7 @@ export const PhoneInputDesktop: React.FC<PhoneInputProps> = ({
   helperText,
   hideLabel,
 }: PhoneInputProps): React.ReactNode => {
-  const t = useAppTranslation().uiTranslations.phoneInput;
+  const t = useAppTranslation(Translation.Ui.PhoneInput);
 
   const {
     country,
