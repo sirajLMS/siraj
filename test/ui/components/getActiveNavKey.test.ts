@@ -40,14 +40,14 @@ describe("getActiveNavKey", () => {
     expect(getActiveNavKey("/students", items)).toBe("your-students");
   });
 
-  test("highlights regular-schedule on /schedule", () => {
+  test("highlights regular-schedule on /teachers/me/schedule/weekly", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
-    expect(getActiveNavKey("/schedule", items)).toBe("regular-schedule");
+    expect(getActiveNavKey("/teachers/me/schedule/weekly", items)).toBe("regular-schedule");
   });
 
-  test("highlights regular-schedule on /schedule/weekly", () => {
+  test("highlights regular-schedule on /teachers/me/schedule/weekly/extra", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
-    expect(getActiveNavKey("/schedule/weekly", items)).toBe("regular-schedule");
+    expect(getActiveNavKey("/teachers/me/schedule/weekly/extra", items)).toBe("regular-schedule");
   });
 
   test("prefers longest matching href when multiple items match", () => {
@@ -63,5 +63,15 @@ describe("getActiveNavKey", () => {
   test("strips locale prefix before matching", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
     expect(getActiveNavKey("/ar/students", items)).toBe("your-students");
+  });
+
+  test("returns null (not 'home') for orphan routes with no matching nav item", () => {
+    const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, ADMIN_PERMISSIONS);
+    expect(getActiveNavKey("/this-route-does-not-exist-anywhere", items)).toBeNull();
+  });
+
+  test("returns null when no items match a deep dynamic segment without a parent nav item", () => {
+    const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, ADMIN_PERMISSIONS);
+    expect(getActiveNavKey("/some/orphan/route", items)).toBeNull();
   });
 });

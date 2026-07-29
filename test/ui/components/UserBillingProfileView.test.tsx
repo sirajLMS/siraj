@@ -397,6 +397,16 @@ const mockLabels: BillingLabels = {
     confirmReject: "Confirm Rejection",
     confirmRejectMessage: "Reject this payment proof? The invoice will return to unpaid status.",
   },
+  tabsPageTitle: "Billing",
+  tabsPageSubtitle: "Track invoices, currency exposure, exchange rates, and create manual invoices.",
+  billingTabs: {
+    overview: "Overview",
+    invoices: "Invoices",
+    exchangeRates: "Exchange Rates",
+    currencies: "Supported Currencies",
+    hedges: "Currency Hedges",
+    manual: "Manual Invoice",
+  },
   notifications: {
     popupBlocked: "Popup blocked — allow popups to download PDF",
     paymentPendingReview: "Your payments are under review",

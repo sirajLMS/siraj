@@ -6,6 +6,7 @@ import { TopNavbarDesktop } from "@/frontend/desktop/views/dashboard/components/
 
 export function DashboardLayoutDesktop({
   children,
+  sidebarGroups,
   sidebarItems,
   userName,
   userEmail,
@@ -41,6 +42,7 @@ export function DashboardLayoutDesktop({
         })}
       >
         <DashboardLayoutIsland
+          sidebarGroups={sidebarGroups}
           sidebarItems={sidebarItems}
           sidebarWidth={sidebarWidth}
           initialSidebarOpen={initialSidebarOpen}

@@ -2,6 +2,7 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
@@ -67,6 +68,7 @@ function useEnvironmentConfigMutations(
   draftValues: Readonly<Record<string, string>>,
   refetch: () => Promise<unknown>
 ) {
+  const router = useRouter();
   const notifications = useNotifications();
   const setSaving = useEnvironmentConfigSettingsStore(state => state.setSaving);
   const removeDraftValue = useEnvironmentConfigSettingsStore(state => state.removeDraftValue);
@@ -82,6 +84,7 @@ function useEnvironmentConfigMutations(
       try {
         await upsertEntry({ variables: { input: { key, value } } });
         await refetch();
+        router.refresh();
         notifications.show(labels.notifications.saveSuccess, { severity: "success" });
       } catch (saveError) {
         logger.error("Failed to save environment config override", { key, error: saveError });
@@ -96,6 +99,7 @@ function useEnvironmentConfigMutations(
       labels.notifications.saveSuccess,
       notifications,
       refetch,
+      router,
       setSaving,
       upsertEntry,
     ]
@@ -109,6 +113,7 @@ function useEnvironmentConfigMutations(
         await deleteEntry({ variables: { key } });
         await refetch();
         removeDraftValue(key);
+        router.refresh();
         notifications.show(labels.notifications.revertSuccess, { severity: "success" });
       } catch (revertError) {
         logger.error("Failed to revert environment config override", { key, error: revertError });
@@ -124,6 +129,7 @@ function useEnvironmentConfigMutations(
       notifications,
       refetch,
       removeDraftValue,
+      router,
       setSaving,
     ]
   );

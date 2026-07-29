@@ -45,7 +45,7 @@ describe("supervisor sidebar navigation", () => {
     expect(keys).not.toContain("status-tracking");
     expect(keys).not.toContain("schedule-alerts");
     expect(keys).not.toContain("students");
-    expect(keys).not.toContain("complaints-manage");
+    expect(keys).not.toContain("feedback-manage");
 
     expect(keys).not.toContain("today-classes");
     expect(keys).not.toContain("regular-schedule");
@@ -68,6 +68,39 @@ describe("supervisor sidebar navigation", () => {
 
     expect(keys).not.toContain("supervisor-home");
     expect(keys).not.toContain("pending-reviews");
+    expect(keys).toContain("home");
+  });
+
+  test("SUPERADMIN sees supervisor-only items (pending-reviews, teacher-dues, monthly-reports, supervisor-profile) but NOT supervisor-home", () => {
+    // SUPERADMIN holds PermissionGroupsManage (the super_admin discriminator)
+    // along with DashboardViewMetrics (admin metrics) and all 4 supervisor
+    // route permissions seeded for super_admin in
+    // 20260728171744_custom_6-lms-permissions-and-groups/migration.sql.
+    const SUPERADMIN_PERMISSIONS: AppPermission[] = [
+      AppPermission.DashboardView,
+      AppPermission.DashboardViewMetrics,
+      AppPermission.PermissionGroupsManage,
+      AppPermission.SupervisorViewDashboard,
+      AppPermission.LessonReportsReview,
+      AppPermission.LessonReportsApprove,
+      AppPermission.TeacherDuesView,
+      AppPermission.MonthlyReportsView,
+      AppPermission.AuthViewOwnProfile,
+    ];
+    const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, SUPERADMIN_PERMISSIONS);
+    const keys = items.map(item => item.key);
+
+    // The 4 supervisor-only items become visible to SUPERADMIN.
+    expect(keys).toContain("pending-reviews");
+    expect(keys).toContain("teacher-dues");
+    expect(keys).toContain("monthly-reports");
+    expect(keys).toContain("supervisor-profile");
+
+    // supervisor-home stays HIDDEN for SUPERADMIN because the admin `home`
+    // item already serves /dashboard (user decision: consolidate).
+    expect(keys).not.toContain("supervisor-home");
+
+    // The admin `home` item still shows for SUPERADMIN.
     expect(keys).toContain("home");
   });
 });

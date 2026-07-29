@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { isPeopleDirectoryEnabled } from "@/backend/lib/features/is-people-directory-enabled";
 import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DashboardClientProviders } from "@/frontend/common/providers/DashboardClientProviders";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
@@ -22,6 +23,7 @@ export async function DashboardLayoutContainer({
   const t = getTranslations(locale).dashboardTranslations;
   const adminT = t.admin;
   const coreLayoutT = t.coreLayout;
+  const enablePeopleDirectory = await isPeopleDirectoryEnabled();
 
   return (
     <DashboardClientProviders>
@@ -32,6 +34,7 @@ export async function DashboardLayoutContainer({
         appTitle={coreLayoutT.appTitle}
         logoAriaLabel={coreLayoutT.appTitle}
         initialSidebarOpen={initialSidebarOpen}
+        enablePeopleDirectory={enablePeopleDirectory}
       >
         {children}
       </DashboardClientBridge>

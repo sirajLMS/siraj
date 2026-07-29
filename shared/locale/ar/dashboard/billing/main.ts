@@ -196,4 +196,14 @@ export const dashboardBillingAr: BillingLabels = {
   displayCurrencyStale: values => `${values.lockedAmount} ${values.lockedCurrency} (قد تكون الأسعار قديمة)`,
   currencyHedges,
   supportedCurrencies,
+  tabsPageTitle: "الفوترة",
+  tabsPageSubtitle: "تتبع الفواتير، التعرض للعملات، أسعار الصرف، وإنشاء الفواتير اليدوية.",
+  billingTabs: {
+    overview: "نظرة عامة",
+    invoices: "الفواتير",
+    exchangeRates: "أسعار الصرف",
+    currencies: "العملات المدعومة",
+    hedges: "تحوطات العملات",
+    manual: "فاتورة يدوية",
+  },
 };

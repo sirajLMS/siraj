@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { AppPermission } from "@/backend/enum";
 import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { isPeopleDirectoryEnabled } from "@/backend/lib/features/is-people-directory-enabled";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ManagersContainer } from "@/frontend/common/views/dashboard/staff/home/ManagersContainer";
 import { getTranslations } from "@/shared/locale";
@@ -14,6 +16,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StaffPage() {
+  if (await isPeopleDirectoryEnabled()) {
+    redirect("/people?tab=staff");
+  }
+
   const locale = await getLocale();
   const { userId, context } = await getServerUserContext();
   if (!userId) {

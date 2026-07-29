@@ -69,8 +69,9 @@ describe("academy admin sidebar navigation", () => {
 
     expect(keys).toContain("home");
     expect(keys).toContain("students");
-    expect(keys).toContain("suggestions-manage");
-    expect(keys).toContain("complaints-manage");
+    expect(keys).toContain("feedback-manage");
+    expect(keys).not.toContain("suggestions-manage");
+    expect(keys).not.toContain("complaints-manage");
     expect(keys).toContain("reports");
     expect(keys).toContain("billing-admin");
     expect(keys).toContain("logout");

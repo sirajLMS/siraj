@@ -3,7 +3,7 @@ import { AppPermission } from "@/backend/enum";
 import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { AdminBillingContainer } from "@/frontend/common/views/dashboard/admin/billing/AdminBillingContainer";
+import { BillingPageContainer } from "@/frontend/common/views/dashboard/billing/BillingPageContainer";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
@@ -20,6 +20,16 @@ export default async function BillingPage() {
     await redirectToLogin();
     return;
   }
-  await requirePermissionForPage(userId, [AppPermission.BILLING_VIEW_HISTORY], locale, context);
-  return <AdminBillingContainer />;
+  await requirePermissionForPage(
+    userId,
+    [
+      AppPermission.BILLING_VIEW_HISTORY,
+      AppPermission.BILLING_VIEW_EXCHANGE_RATES,
+      AppPermission.BILLING_MANAGE_CURRENCY_HEDGES,
+      AppPermission.BILLING_CREATE_INVOICE,
+    ],
+    locale,
+    context
+  );
+  return <BillingPageContainer />;
 }

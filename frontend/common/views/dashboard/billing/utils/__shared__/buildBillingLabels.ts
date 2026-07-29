@@ -277,5 +277,8 @@ export function buildBillingLabels(t: BillingLabels): BillingLabels {
     displayCurrencyNotSet: t.displayCurrencyNotSet,
     displayCurrencyStale: t.displayCurrencyStale,
     manual: buildManualInvoiceLabels(t.manual),
+    tabsPageTitle: t.tabsPageTitle,
+    tabsPageSubtitle: t.tabsPageSubtitle,
+    billingTabs: t.billingTabs,
   };
 }

@@ -4,6 +4,10 @@ import { ChevronRightOutlined } from "@mui/icons-material";
 import { Box, Breadcrumbs, Link, type SxProps, type Theme, Typography } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import {
+  type UsePageBreadcrumbsOptions,
+  usePageBreadcrumbs,
+} from "@/frontend/common/views/dashboard/lib/usePageBreadcrumbs";
 
 export interface MobilePageHeaderBreadcrumb {
   readonly label: string;
@@ -15,7 +19,10 @@ export interface MobilePageHeaderProps {
   readonly title: string;
   readonly subtitle?: string;
   readonly titleVariant?: TypographyProps["variant"];
+  /** Explicit crumbs override auto-generation from the sidebar nav config. */
   readonly breadcrumbs?: readonly MobilePageHeaderBreadcrumb[];
+  /** Options for auto-generated crumbs when `breadcrumbs` is omitted. */
+  readonly breadcrumbOptions?: UsePageBreadcrumbsOptions;
   readonly actions?: ReactNode;
   /**
    * Full-width chrome (header spans the viewport). Does not remove content
@@ -36,11 +43,15 @@ export function MobilePageHeader({
   subtitle,
   titleVariant = "headlineMd",
   breadcrumbs,
+  breadcrumbOptions,
   actions,
   edgeToEdge = true,
   sticky = false,
   sx,
 }: MobilePageHeaderProps) {
+  const autoBreadcrumbs = usePageBreadcrumbs(breadcrumbOptions ?? {});
+  const resolvedBreadcrumbs = breadcrumbs ?? autoBreadcrumbs;
+
   const headerSx: SxProps<Theme> = {
     px: { xs: 2, md: 3 },
     py: { xs: 1, md: 2 },
@@ -78,12 +89,12 @@ export function MobilePageHeader({
             gap: 0.5,
           }}
         >
-          {breadcrumbs && breadcrumbs.length > 0 ? (
+          {resolvedBreadcrumbs.length > 0 ? (
             <Breadcrumbs
               separator={<ChevronRightOutlined sx={theme => ({ fontSize: 14, color: theme.palette.text.secondary })} />}
               sx={{ mb: 1 }}
             >
-              {breadcrumbs.map(crumb => {
+              {resolvedBreadcrumbs.map(crumb => {
                 if (crumb.current) {
                   return (
                     <Typography

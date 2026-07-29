@@ -10,7 +10,7 @@ import {
 
 interface BottomNavbarMobileProps {
   readonly items: readonly NavItem[];
-  readonly activeKey: string;
+  readonly activeKey: string | null;
 }
 
 export function BottomNavbarMobile({ items, activeKey }: Readonly<BottomNavbarMobileProps>) {

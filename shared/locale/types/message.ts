@@ -27,6 +27,7 @@ import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core
 import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts.ts";
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule.ts";
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core/statusTracking.ts";
+import type { FeedbackManageParentLabels } from "@/shared/locale/types/dashboard/feedback/main.ts";
 import type { CreditLabels } from "@/shared/locale/types/dashboard/lms/credit.ts";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports.ts";
 import type { MonthlyReportLabels } from "@/shared/locale/types/dashboard/lms/monthlyReports.ts";
@@ -40,9 +41,12 @@ import type { ParentRulesLabels } from "@/shared/locale/types/dashboard/parents/
 import type { ParentSocialLabels } from "@/shared/locale/types/dashboard/parents/social.ts";
 import type { ParentStudentsLabels } from "@/shared/locale/types/dashboard/parents/students.ts";
 import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/payment-catalogs/main.ts";
+import type { PaymentCatalogsParentLabels } from "@/shared/locale/types/dashboard/payment-catalogs/parent.ts";
+import type { PeopleDirectoryParentLabels } from "@/shared/locale/types/dashboard/people/main.ts";
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main.ts";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main.ts";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
+import type { ScheduleTrackingParentLabels } from "@/shared/locale/types/dashboard/schedule-tracking/main.ts";
 import type { SettingsLabels } from "@/shared/locale/types/dashboard/settings/main.ts";
 import type { StaffDirectoryLabels } from "@/shared/locale/types/dashboard/staff/directory.ts";
 import type { StaffOnboardingLabels } from "@/shared/locale/types/dashboard/staff/onboarding.ts";
@@ -163,7 +167,11 @@ export interface DashboardTranslations {
   parentProfile: ParentProfileLabels;
   parentRules: ParentRulesLabels;
   parentSocial: ParentSocialLabels;
+  feedbackManageParent: FeedbackManageParentLabels;
+  peopleDirectoryParent: PeopleDirectoryParentLabels;
   paymentCatalogs: PaymentCatalogsLabels;
+  paymentCatalogsParent: PaymentCatalogsParentLabels;
+  scheduleTrackingParent: ScheduleTrackingParentLabels;
   permissions: PermissionsLabels;
   settings: SettingsLabels;
   reports: ReportsLabels;

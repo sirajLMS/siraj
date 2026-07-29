@@ -24,6 +24,7 @@ import { dashboardCoreParentDashboardEn } from "@/shared/locale/en/dashboard/cor
 import { dashboardCoreScheduleAlertsEn } from "@/shared/locale/en/dashboard/core/scheduleAlerts.ts";
 import { dashboardCoreSearchScheduleEn } from "@/shared/locale/en/dashboard/core/searchSchedule.ts";
 import { dashboardCoreStatusTrackingEn } from "@/shared/locale/en/dashboard/core/statusTracking.ts";
+import { dashboardFeedbackManageParentEn } from "@/shared/locale/en/dashboard/feedback/main.ts";
 import { dashboardLmsCreditEn } from "@/shared/locale/en/dashboard/lms/credit.ts";
 import { dashboardLmsLessonReportsEn } from "@/shared/locale/en/dashboard/lms/lessonReports.ts";
 import { dashboardLmsMonthlyReportsEn } from "@/shared/locale/en/dashboard/lms/monthlyReports.ts";
@@ -37,10 +38,13 @@ import { dashboardParentRulesEn } from "@/shared/locale/en/dashboard/parents/rul
 import { dashboardParentSocialEn } from "@/shared/locale/en/dashboard/parents/social.ts";
 import { dashboardParentStudentsEn } from "@/shared/locale/en/dashboard/parents/students.ts";
 import { dashboardPaymentCatalogsEn } from "@/shared/locale/en/dashboard/payment-catalogs/main.ts";
+import { dashboardPaymentCatalogsParentEn } from "@/shared/locale/en/dashboard/payment-catalogs/parent.ts";
+import { dashboardPeopleDirectoryParentEn } from "@/shared/locale/en/dashboard/people/main.ts";
 import { dashboardPermissionsEn } from "@/shared/locale/en/dashboard/permissions/main.ts";
 import { dashboardReportsEn } from "@/shared/locale/en/dashboard/reports/main.ts";
 import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesEn } from "@/shared/locale/en/dashboard/resources/main.ts";
+import { dashboardScheduleTrackingParentEn } from "@/shared/locale/en/dashboard/schedule-tracking/main.ts";
 import { dashboardSettingsEn } from "@/shared/locale/en/dashboard/settings/main.ts";
 import { dashboardStaffDirectoryEn } from "@/shared/locale/en/dashboard/staff/directory.ts";
 import { dashboardStaffOnboardingEn } from "@/shared/locale/en/dashboard/staff/onboarding.ts";
@@ -170,7 +174,9 @@ export const enMessages: Translations = {
     createRecurringClass: dashboardCreateRecurringClassEn,
     rescheduleForm: dashboardRescheduleFormEn,
     rescheduleTracking: dashboardRescheduleTrackingEn,
+    scheduleTrackingParent: dashboardScheduleTrackingParentEn,
     complaints: dashboardComplaintsEn,
+    feedbackManageParent: dashboardFeedbackManageParentEn,
     coreLayout: dashboardCoreLayoutEn,
     coreNav: dashboardCoreNavEn,
     coreNotifications: dashboardCoreNotificationsEn,
@@ -193,6 +199,8 @@ export const enMessages: Translations = {
     parentRules: dashboardParentRulesEn,
     parentSocial: dashboardParentSocialEn,
     paymentCatalogs: dashboardPaymentCatalogsEn,
+    paymentCatalogsParent: dashboardPaymentCatalogsParentEn,
+    peopleDirectoryParent: dashboardPeopleDirectoryParentEn,
     permissions: dashboardPermissionsEn,
     settings: dashboardSettingsEn,
     reports: dashboardReportsEn,
