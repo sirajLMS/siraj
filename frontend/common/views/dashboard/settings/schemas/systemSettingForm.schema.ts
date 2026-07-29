@@ -7,9 +7,9 @@ export { SystemSettingCategory, SystemSettingDataType };
 export const SYSTEM_SETTING_DATA_TYPES = Object.values(SystemSettingDataType) as readonly SystemSettingDataType[];
 export const SYSTEM_SETTING_CATEGORIES = Object.values(SystemSettingCategory) as readonly SystemSettingCategory[];
 
-export type SystemSettingFormLabels = Pick<
+export type SystemSettingValueLabels = Pick<
   SettingsGeneralTabLabels,
-  "keyRequired" | "valueRequired" | "valueInteger" | "valueBoolean" | "valueJson"
+  "valueRequired" | "valueInteger" | "valueBoolean" | "valueJson"
 >;
 
 const parseJson = (value: string): boolean => {
@@ -21,42 +21,25 @@ const parseJson = (value: string): boolean => {
   }
 };
 
-export function createSystemSettingFormSchema(labels: SystemSettingFormLabels) {
-  return z.discriminatedUnion("dataType", [
-    z.object({
-      key: z.string().trim().min(1, labels.keyRequired),
-      value: z.string().trim().min(1, labels.valueRequired),
-      dataType: z.literal(SystemSettingDataType.String),
-      description: z.string().optional(),
-      category: z.enum(SYSTEM_SETTING_CATEGORIES),
-    }),
-    z.object({
-      key: z.string().trim().min(1, labels.keyRequired),
-      value: z
-        .string()
-        .trim()
-        .min(1, labels.valueRequired)
-        .refine(v => Number.isInteger(Number(v)) && Number(v) >= 0, { message: labels.valueInteger }),
-      dataType: z.literal(SystemSettingDataType.Integer),
-      description: z.string().optional(),
-      category: z.enum(SYSTEM_SETTING_CATEGORIES),
-    }),
-    z.object({
-      key: z.string().trim().min(1, labels.keyRequired),
-      value: z.enum(["true", "false"], { message: labels.valueBoolean }),
-      dataType: z.literal(SystemSettingDataType.Boolean),
-      description: z.string().optional(),
-      category: z.enum(SYSTEM_SETTING_CATEGORIES),
-    }),
-    z.object({
-      key: z.string().trim().min(1, labels.keyRequired),
-      value: z.string().min(1, labels.valueRequired).refine(parseJson, { message: labels.valueJson }),
-      dataType: z.literal(SystemSettingDataType.Json),
-      description: z.string().optional(),
-      category: z.enum(SYSTEM_SETTING_CATEGORIES),
-    }),
-  ]);
-}
+const valueSchemaByDataType = {
+  [SystemSettingDataType.String]: (labels: SystemSettingValueLabels) => z.string().trim().min(1, labels.valueRequired),
+  [SystemSettingDataType.Integer]: (labels: SystemSettingValueLabels) =>
+    z
+      .string()
+      .trim()
+      .min(1, labels.valueRequired)
+      .refine(v => Number.isInteger(Number(v)) && Number(v) >= 0, { message: labels.valueInteger }),
+  [SystemSettingDataType.Boolean]: (labels: SystemSettingValueLabels) =>
+    z.enum(["true", "false"], { message: labels.valueBoolean }),
+  [SystemSettingDataType.Json]: (labels: SystemSettingValueLabels) =>
+    z.string().min(1, labels.valueRequired).refine(parseJson, { message: labels.valueJson }),
+} as const;
 
-export type SystemSettingFormSchema = ReturnType<typeof createSystemSettingFormSchema>;
-export type SystemSettingFormValues = z.infer<SystemSettingFormSchema>;
+export function validateSystemSettingValue(
+  dataType: SystemSettingDataType,
+  value: string,
+  labels: SystemSettingValueLabels
+): string | null {
+  const result = valueSchemaByDataType[dataType](labels).safeParse(value);
+  return result.success ? null : (result.error.issues[0]?.message ?? labels.valueRequired);
+}

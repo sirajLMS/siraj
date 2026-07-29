@@ -1,8 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { SystemSettingCategory, SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
-  deleteSystemSettingMutationDocument,
   systemSettingQueryDocument,
   systemSettingsQueryDocument,
   upsertSystemSettingMutationDocument,
@@ -14,7 +12,7 @@ describe("GraphQL General Settings Integration Tests", () => {
   setupTestServerLifecycle();
 
   let superAdminToken = "";
-  const testSettingKey = `test_general_setting_${randomUUID().replaceAll("-", "").slice(0, 8)}`;
+  const testSettingCode = "maintenance_mode";
 
   test("provision super admin for general settings tests", async () => {
     const provisioned = await loginAndProvision("GeneralSettingsTest");
@@ -37,27 +35,42 @@ describe("GraphQL General Settings Integration Tests", () => {
     expect(setting?.id).toBe("auth_max_attempts");
     expect(setting?.key).toBe("auth_max_attempts");
     expect(setting?.value).toBeDefined();
+    expect(setting?.dataType).toBe(SystemSettingDataType.Integer);
+    expect(setting?.category).toBe(SystemSettingCategory.Security);
   });
 
-  test("super admin can upsert and delete a general system setting", async () => {
+  test("super admin can upsert a known general system setting value", async () => {
+    const beforeData = await authenticatedRequest(superAdminToken, "query", systemSettingQueryDocument, {
+      key: testSettingCode,
+    });
+    const originalValue = beforeData.systemSetting?.value ?? "false";
+
     const upsertData = await authenticatedRequest(superAdminToken, "mutate", upsertSystemSettingMutationDocument, {
       input: {
-        key: testSettingKey,
-        value: "42",
-        dataType: SystemSettingDataType.Integer,
-        description: "GraphQL integration test setting",
+        key: testSettingCode,
+        value: "true",
+        dataType: SystemSettingDataType.Boolean,
+        description: "Enable maintenance mode",
         category: SystemSettingCategory.System,
       },
     });
 
     const upserted = upsertData.upsertSystemSetting;
-    expect(upserted?.id).toBe(testSettingKey);
-    expect(upserted?.key).toBe(testSettingKey);
-    expect(upserted?.value).toBe("42");
+    expect(upserted?.id).toBe(testSettingCode);
+    expect(upserted?.key).toBe(testSettingCode);
+    expect(upserted?.value).toBe("true");
+    expect(upserted?.dataType).toBe(SystemSettingDataType.Boolean);
+    expect(upserted?.category).toBe(SystemSettingCategory.System);
 
-    const deleteData = await authenticatedRequest(superAdminToken, "mutate", deleteSystemSettingMutationDocument, {
-      key: testSettingKey,
+    const restoreData = await authenticatedRequest(superAdminToken, "mutate", upsertSystemSettingMutationDocument, {
+      input: {
+        key: testSettingCode,
+        value: originalValue,
+        dataType: SystemSettingDataType.Boolean,
+        description: "Enable maintenance mode",
+        category: SystemSettingCategory.System,
+      },
     });
-    expect(deleteData.deleteSystemSetting).toBeTrue();
+    expect(restoreData.upsertSystemSetting?.value).toBe(originalValue);
   });
 });

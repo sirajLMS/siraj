@@ -2,51 +2,46 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useMemo } from "react";
-import {
-  AppPermission,
-  SystemSettingCategory,
-  SystemSettingDataType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { deleteSystemSettingMutationDocument } from "@/frontend/common/graphql/sharedDocuments/settings/general-settings.documents";
+import { useCallback, useMemo, useState } from "react";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { upsertSystemSettingMutationDocument } from "@/frontend/common/graphql/sharedDocuments/settings/general-settings.documents";
 import { useSystemSettingsQuery } from "@/frontend/common/hooks/settings";
-import { useGeneralSettingsStore } from "@/frontend/common/stores/generalSettingsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
+import { validateSystemSettingValue } from "@/frontend/common/views/dashboard/settings/schemas/systemSettingForm.schema";
 import type {
   GeneralSettingsViewModel,
   SystemSettingRow,
   UseGeneralSettingsViewModelProps,
 } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
+import { GENERAL_SETTINGS_DEFINITIONS } from "@/shared/constants/settings/generalSettings.constants";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-function toSystemSettingRow(
-  setting: {
-    readonly id: string | null;
-    readonly key: string | null;
-    readonly value: string | null;
-    readonly dataType: SystemSettingDataType | null;
-    readonly description: string | null;
-    readonly category: SystemSettingCategory | null;
-    readonly updatedByUserId: string | null;
-    readonly updatedAt: string | null;
-  },
-  index: number
-): SystemSettingRow | null {
-  if (!setting.key) {
-    return null;
-  }
+type DbSystemSetting = {
+  readonly key: string | null;
+  readonly value: string | null;
+  readonly updatedByUserId: string | null;
+  readonly updatedAt: string | null;
+};
 
-  return {
-    id: setting.id ?? `${setting.key}-${index}`,
-    key: setting.key,
-    value: setting.value ?? "",
-    dataType: setting.dataType ?? SystemSettingDataType.String,
-    description: setting.description ?? "",
-    category: setting.category ?? SystemSettingCategory.System,
-    updatedByUserId: setting.updatedByUserId,
-    updatedAt: setting.updatedAt,
-  };
+function mergeDefinitionsWithDbRows(dbSettings: readonly DbSystemSetting[]): readonly SystemSettingRow[] {
+  const dbByCode = new Map(
+    dbSettings
+      .filter((setting): setting is DbSystemSetting & { key: string } => setting.key != null)
+      .map(setting => [setting.key, setting] as const)
+  );
+
+  return GENERAL_SETTINGS_DEFINITIONS.map(definition => {
+    const dbRow = dbByCode.get(definition.code);
+
+    return {
+      ...definition,
+      value: dbRow?.value ?? definition.defaultValue,
+      isFromDb: dbRow != null,
+      updatedByUserId: dbRow?.updatedByUserId ?? null,
+      updatedAt: dbRow?.updatedAt ?? null,
+    };
+  });
 }
 
 export function useGeneralSettingsViewModel(
@@ -56,65 +51,60 @@ export function useGeneralSettingsViewModel(
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManage = hasPermission(AppPermission.SettingsEditGeneral);
-
-  const formOpen = useGeneralSettingsStore(state => state.formOpen);
-  const editRow = useGeneralSettingsStore(state => state.editRow);
-  const deleteRow = useGeneralSettingsStore(state => state.deleteRow);
-  const openCreateForm = useGeneralSettingsStore(state => state.openCreateForm);
-  const openEditForm = useGeneralSettingsStore(state => state.openEditForm);
-  const closeForm = useGeneralSettingsStore(state => state.closeForm);
-  const openDeleteDialog = useGeneralSettingsStore(state => state.openDeleteDialog);
-  const closeDeleteDialog = useGeneralSettingsStore(state => state.closeDeleteDialog);
+  const [savingCode, setSavingCode] = useState<string | null>(null);
 
   const { data, loading, refetch } = useSystemSettingsQuery();
+  const [upsertSetting] = useMutation(upsertSystemSettingMutationDocument);
 
-  const [deleteSetting, { loading: deleting }] = useMutation(deleteSystemSettingMutationDocument);
+  const rows = useMemo<readonly SystemSettingRow[]>(
+    () => mergeDefinitionsWithDbRows(data?.systemSettings ?? []),
+    [data?.systemSettings]
+  );
 
-  const rows = useMemo<readonly SystemSettingRow[]>(() => {
-    const settings = data?.systemSettings ?? [];
-    return settings
-      .map((setting, index) => toSystemSettingRow(setting, index))
-      .filter((row): row is SystemSettingRow => row != null)
-      .sort((left, right) => left.key.localeCompare(right.key));
-  }, [data?.systemSettings]);
+  const onValueChange = useCallback(
+    async (code: string, value: string): Promise<void> => {
+      const definition = GENERAL_SETTINGS_DEFINITIONS.find(setting => setting.code === code);
+      if (!definition) {
+        return;
+      }
 
-  const onSaved = async (): Promise<void> => {
-    closeForm();
-    notifications.show(labels.saveSuccess, { severity: "success" });
-    await refetch();
-  };
+      const validationError = validateSystemSettingValue(definition.dataType, value, labels);
+      if (validationError) {
+        notifications.show(validationError, { severity: "error" });
+        return;
+      }
 
-  const onConfirmDelete = async (): Promise<void> => {
-    if (!deleteRow?.key) {
-      return;
-    }
-
-    try {
-      await deleteSetting({ variables: { key: deleteRow.key } });
-      notifications.show(labels.deleteSuccess, { severity: "success" });
-      closeDeleteDialog();
-      await refetch();
-    } catch (error) {
-      notifications.show(labels.deleteError, { severity: "error" });
-      logger.error("Failed to delete system setting", { error, key: deleteRow.key });
-    }
-  };
+      setSavingCode(code);
+      try {
+        await upsertSetting({
+          variables: {
+            input: {
+              key: definition.code,
+              value,
+              dataType: definition.dataType,
+              description: definition.description,
+              category: definition.category,
+            },
+          },
+        });
+        notifications.show(labels.saveSuccess, { severity: "success" });
+        await refetch();
+      } catch (error) {
+        notifications.show(labels.saveError, { severity: "error" });
+        logger.error("Failed to save system setting", { error, code });
+      } finally {
+        setSavingCode(null);
+      }
+    },
+    [labels, notifications, refetch, upsertSetting]
+  );
 
   return {
     rows,
     loading,
     canManage,
     labels,
-    formOpen,
-    editRow,
-    deleteRow,
-    isDeleting: deleting,
-    onAdd: openCreateForm,
-    onEdit: openEditForm,
-    onDelete: openDeleteDialog,
-    onFormClose: closeForm,
-    onDeleteClose: closeDeleteDialog,
-    onSaved,
-    onConfirmDelete,
+    savingCode,
+    onValueChange,
   };
 }
