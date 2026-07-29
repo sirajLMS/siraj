@@ -96,6 +96,7 @@ export const PAGE_PERMISSIONS = {
   studentSelfDashboard: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
   studentCredits: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
   studentOwnHistory: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
+  studentSessions: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
   studentSelfProfile: [
     AppPermission.StudentViewOwnDashboard,
     AppPermission.ProfileCoreIdentityViewOwn,

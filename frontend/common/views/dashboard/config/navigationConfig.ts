@@ -246,11 +246,20 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-schedule",
-    labelKey: "studentSchedule",
+    labelKey: "studentLessonHistory",
     iconKey: "eventRepeat",
     href: "/students/history",
     section: "main",
     permission: PAGE_PERMISSIONS.studentOwnHistory,
+    audience: "student",
+  },
+  {
+    key: "student-sessions",
+    labelKey: "studentSessions",
+    iconKey: "history",
+    href: "/students/sessions",
+    section: "main",
+    permission: PAGE_PERMISSIONS.studentSessions,
     audience: "student",
   },
   {
@@ -654,11 +663,20 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "student-schedule",
-    labelKey: "studentSchedule",
+    labelKey: "studentLessonHistory",
     iconKey: "eventRepeat",
     href: "/students/history",
     section: "main",
     permission: PAGE_PERMISSIONS.studentOwnHistory,
+    audience: "student",
+  },
+  {
+    key: "student-sessions",
+    labelKey: "studentSessions",
+    iconKey: "history",
+    href: "/students/sessions",
+    section: "main",
+    permission: PAGE_PERMISSIONS.studentSessions,
     audience: "student",
   },
   {

@@ -9,23 +9,16 @@ import {
   TrendingUpOutlined,
   VerifiedUserOutlined,
 } from "@mui/icons-material";
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, type Theme, Typography } from "@mui/material";
+import { Box, Button, type Theme, Typography } from "@mui/material";
 import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import { scheduleOverviewCardShellSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
-import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import {
-  MobileCardList,
-  MobileCardListItem,
-  MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
-  MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
-import { HistorySessionCardMobile } from "@/frontend/mobile/views/dashboard/student/history/components/historySessionCard.mobile";
 import { HistoryWeeklyScrollerMobile } from "@/frontend/mobile/views/dashboard/student/history/components/historyWeeklyScroller.mobile";
 
 function useStudentHistoryMetricItems(
@@ -107,124 +100,21 @@ function MonthNavigator({
   );
 }
 
-function HistoryFilters({
-  subjectFilter,
-  statusFilter,
-  subjectOptions,
-  statusOptions,
-  labels,
-  onSubjectFilterChange,
-  onStatusFilterChange,
-}: Readonly<{
-  subjectFilter: string;
-  statusFilter: string;
-  subjectOptions: readonly string[];
-  statusOptions: readonly string[];
-  labels: StudentHistoryViewModel["labels"];
-  onSubjectFilterChange: StudentHistoryViewModel["onSubjectFilterChange"];
-  onStatusFilterChange: StudentHistoryViewModel["onStatusFilterChange"];
-}>): React.ReactNode {
-  return (
-    <MobileContentInset sx={{ pt: 2.5 }}>
-      <Stack spacing={2} sx={{ mb: 2 }}>
-        <FormControl fullWidth size="small">
-          <InputLabel id="mobile-history-subject-filter" shrink>
-            {labels.filterBySubject}
-          </InputLabel>
-          <Select
-            labelId="mobile-history-subject-filter"
-            label={labels.filterBySubject}
-            value={subjectFilter}
-            onChange={e => onSubjectFilterChange(e.target.value)}
-          >
-            <MenuItem value="">{labels.allSubjects}</MenuItem>
-            {subjectOptions.map(subject => (
-              <MenuItem key={subject} value={subject}>
-                {subject}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl fullWidth size="small">
-          <InputLabel id="mobile-history-status-filter" shrink>
-            {labels.filterByStatus}
-          </InputLabel>
-          <Select
-            labelId="mobile-history-status-filter"
-            label={labels.filterByStatus}
-            value={statusFilter}
-            onChange={e => onStatusFilterChange(e.target.value)}
-          >
-            <MenuItem value="">{labels.allStatuses}</MenuItem>
-            {statusOptions.map(status => (
-              <MenuItem key={status} value={status}>
-                {status}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Stack>
-    </MobileContentInset>
-  );
-}
-
-function HistorySessionList({
-  listRows,
-  labels,
-  locale,
-  onOpenMeetingUrl,
-}: Readonly<{
-  listRows: readonly StudentHistorySessionRow[];
-  labels: StudentHistoryViewModel["labels"];
-  locale: string;
-  onOpenMeetingUrl: StudentHistoryViewModel["onOpenMeetingUrl"];
-}>): React.ReactNode {
-  return (
-    <MobileCardList<StudentHistorySessionRow>
-      rows={listRows}
-      emptyMessage={labels.noHistory}
-      getKey={row => row.id}
-      gap={0}
-      layout="edge-to-edge"
-      paginationOptions={{ mode: "client" }}
-      renderItem={row => (
-        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
-          <HistorySessionCardMobile row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
-        </MobileCardListItem>
-      )}
-    />
-  );
-}
-
 export function StudentHistoryMobileView({
   metrics,
-  filteredSessions,
   sessionsByDay,
-  subjectOptions,
-  statusOptions,
-  subjectFilter,
-  statusFilter,
   currentMonth,
   monthLabel,
   selectedDay,
   selectedWeek,
   canGoNext,
   labels,
-  locale,
   loading,
-  onOpenMeetingUrl,
   onPrevMonth,
   onNextMonth,
   onSelectDay,
   onSelectWeek,
-  onSubjectFilterChange,
-  onStatusFilterChange,
 }: Readonly<StudentHistoryViewModel>) {
-  const listRows = useMemo(() => {
-    if (selectedDay == null) return filteredSessions;
-    return filteredSessions.filter(s => s.dayOfMonth === selectedDay);
-  }, [filteredSessions, selectedDay]);
-
   const metricItems = useStudentHistoryMetricItems(metrics, labels);
 
   if (loading && metrics.totalClasses === 0) {
@@ -265,19 +155,6 @@ export function StudentHistoryMobileView({
             onSelectDay={onSelectDay}
           />
         </Box>
-
-        <MobileSectionPanel title={labels.sessionsList} contentInset={false} sx={{ mt: 2 }}>
-          <HistoryFilters
-            subjectFilter={subjectFilter}
-            statusFilter={statusFilter}
-            subjectOptions={subjectOptions}
-            statusOptions={statusOptions}
-            labels={labels}
-            onSubjectFilterChange={onSubjectFilterChange}
-            onStatusFilterChange={onStatusFilterChange}
-          />
-          <HistorySessionList listRows={listRows} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
-        </MobileSectionPanel>
       </MobileContentStack>
     </MobilePageContainer>
   );

@@ -1,6 +1,5 @@
 import { mock } from "bun:test";
 
-// Defensive mocks against bleed from earlier test files (Bun mock.module is process-global).
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
@@ -71,10 +70,6 @@ const HISTORY_YEAR = 2026;
 const HISTORY_MONTH = 7;
 const studentId = "student-history-1";
 
-/**
- * Production-shaped desktop container for tests.
- * Bypasses ResponsiveViewSwitch / next/dynamic (not preloaded for this view).
- */
 function StudentHistoryContainerImpl() {
   const viewModel = useStudentHistoryViewModel({});
   return <StudentHistoryDesktopView {...viewModel} />;
@@ -197,7 +192,7 @@ afterEach(() => {
 });
 
 describe("StudentHistoryContainer", () => {
-  test("renders month nav, metrics, filters, and class sessions", async () => {
+  test("renders month nav, metrics, and lesson history calendar", async () => {
     useStudentPortalHistoryStore.setState({
       year: HISTORY_YEAR,
       month: HISTORY_MONTH,
@@ -220,8 +215,8 @@ describe("StudentHistoryContainer", () => {
       expect(screen.getByText(expectedMonthLabel)).toBeInTheDocument();
     });
 
-    expect(screen.getByLabelText("Previous month", { hidden: true })).toBeInTheDocument();
-    expect(screen.getByLabelText("Next month", { hidden: true })).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Previous month").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByLabelText("Next month").length).toBeGreaterThanOrEqual(1);
 
     expect(screen.getByText("Total Classes")).toBeInTheDocument();
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(1);
@@ -232,27 +227,10 @@ describe("StudentHistoryContainer", () => {
     expect(screen.getByText("Performance")).toBeInTheDocument();
     expect(screen.getByText("85%")).toBeInTheDocument();
 
-    expect(screen.getByLabelText("Filter by Subject")).toBeInTheDocument();
-    expect(screen.getByLabelText("Filter by Status")).toBeInTheDocument();
-
     expect(screen.getAllByText("Lesson History").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Sessions")).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.getAllByText("Quran Recitation").length).toBeGreaterThanOrEqual(1);
-    });
-    expect(screen.getAllByText("Tajweed").length).toBeGreaterThanOrEqual(1);
-    await waitFor(() => {
-      expect(screen.getAllByText("Ustadh Yusuf").length).toBeGreaterThanOrEqual(1);
-    });
-
-    const quranLinks = screen.getAllByRole("link", { name: "Quran Recitation", hidden: true });
-    expect(quranLinks.some(link => link.getAttribute("href") === "/classes/session-1")).toBe(true);
-
-    const tajweedLinks = screen.getAllByRole("link", { name: "Tajweed", hidden: true });
-    expect(tajweedLinks.some(link => link.getAttribute("href") === "/classes/session-2")).toBe(true);
-
-    expect(screen.getAllByText("Ended").length).toBeGreaterThanOrEqual(1);
-    expect(screen.queryByText("COMPLETED")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Filter by Subject")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Filter by Status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("grid")).not.toBeInTheDocument();
   });
 });

@@ -66,6 +66,8 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   booksAndBags: "الكتب والحقائب",
   studentTodayClasses: "حصص اليوم",
   studentSchedule: "جدولي",
+  studentLessonHistory: "سجل الدروس",
+  studentSessions: "الجلسات",
   studentCredits: "رصيدي",
   studentProfile: "ملفي",
   lessonReports: "تقارير الحصص",

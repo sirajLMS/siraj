@@ -50,6 +50,7 @@ import { dashboardStaffOnboardingEn } from "@/shared/locale/en/dashboard/staff/o
 import { dashboardStudentPortalCreditsEn } from "@/shared/locale/en/dashboard/studentPortal/studentCredits.ts";
 import { dashboardStudentPortalDashboardEn } from "@/shared/locale/en/dashboard/studentPortal/studentDashboard.ts";
 import { dashboardStudentPortalHistoryEn } from "@/shared/locale/en/dashboard/studentPortal/studentHistory.ts";
+import { dashboardStudentPortalSessionsEn } from "@/shared/locale/en/dashboard/studentPortal/studentSessions.ts";
 import { dashboardStudentPortalProfileEn } from "@/shared/locale/en/dashboard/studentPortal/studentProfile.ts";
 import { dashboardStudentDirectoryEn } from "@/shared/locale/en/dashboard/students/directory.ts";
 import { dashboardStudentHistoryEn } from "@/shared/locale/en/dashboard/students/history.ts";
@@ -209,6 +210,7 @@ export const enMessages: Translations = {
     studentPortalDashboard: dashboardStudentPortalDashboardEn,
     studentPortalCredits: dashboardStudentPortalCreditsEn,
     studentPortalHistory: dashboardStudentPortalHistoryEn,
+    studentPortalSessions: dashboardStudentPortalSessionsEn,
     studentPortalProfile: dashboardStudentPortalProfileEn,
     studentDirectory: dashboardStudentDirectoryEn,
     studentHistory: dashboardStudentHistoryEn,

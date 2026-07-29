@@ -20,12 +20,12 @@ import {
   scheduleSessionCardContentSx,
 } from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout.styles";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
-import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import {
   formatStudentHistoryDuration,
   mapStudentHistoryStatusToBadge,
   resolveStudentHistoryStatusLabel,
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistorySessionPresentation";
+import type { StudentSessionsViewModel } from "@/frontend/common/views/dashboard/student/sessions/useStudentSessionsViewModel";
 import { MobileActionIconLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -36,9 +36,9 @@ function isSessionJoinable(row: StudentHistorySessionRow): boolean {
 
 export interface HistorySessionCardMobileProps {
   readonly row: StudentHistorySessionRow;
-  readonly labels: StudentHistoryViewModel["labels"];
+  readonly labels: StudentSessionsViewModel["labels"];
   readonly locale: string;
-  readonly onOpenMeetingUrl: StudentHistoryViewModel["onOpenMeetingUrl"];
+  readonly onOpenMeetingUrl: StudentSessionsViewModel["onOpenMeetingUrl"];
 }
 
 export function HistorySessionCardMobile({

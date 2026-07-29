@@ -66,6 +66,8 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   booksAndBags: "Books & Bags",
   studentTodayClasses: "Today's Classes",
   studentSchedule: "My Schedule",
+  studentLessonHistory: "Lesson History",
+  studentSessions: "Sessions",
   studentCredits: "My Credits",
   studentProfile: "My Profile",
   lessonReports: "Lesson Reports",

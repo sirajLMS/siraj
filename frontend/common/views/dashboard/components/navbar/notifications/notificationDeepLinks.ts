@@ -44,7 +44,7 @@ export function resolveNotificationDeepLink(
     }
     case "class": {
       if (isStudentViewer(permissions)) {
-        return "/students/history";
+        return "/students/sessions";
       }
       return classHref(metadata.classInstanceId ?? metadata.entityId);
     }

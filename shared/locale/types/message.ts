@@ -52,6 +52,7 @@ import type { StaffOnboardingLabels } from "@/shared/locale/types/dashboard/staf
 import type { StudentPortalCreditsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentCredits.ts";
 import type { StudentPortalDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard.ts";
 import type { StudentPortalHistoryLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory.ts";
+import type { StudentPortalSessionsLabels } from "@/shared/locale/types/dashboard/studentPortal/studentSessions.ts";
 import type { StudentPortalProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile.ts";
 import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students/directory.ts";
 import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students/history.ts";
@@ -180,6 +181,7 @@ export interface DashboardTranslations {
   studentPortalDashboard: StudentPortalDashboardLabels;
   studentPortalCredits: StudentPortalCreditsLabels;
   studentPortalHistory: StudentPortalHistoryLabels;
+  studentPortalSessions: StudentPortalSessionsLabels;
   studentPortalProfile: StudentPortalProfileLabels;
   studentDirectory: StudentDirectoryLabels;
   studentHistory: StudentHistoryLabels;

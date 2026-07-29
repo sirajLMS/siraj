@@ -50,6 +50,7 @@ import { dashboardStaffOnboardingAr } from "@/shared/locale/ar/dashboard/staff/o
 import { dashboardStudentPortalCreditsAr } from "@/shared/locale/ar/dashboard/studentPortal/studentCredits.ts";
 import { dashboardStudentPortalDashboardAr } from "@/shared/locale/ar/dashboard/studentPortal/studentDashboard.ts";
 import { dashboardStudentPortalHistoryAr } from "@/shared/locale/ar/dashboard/studentPortal/studentHistory.ts";
+import { dashboardStudentPortalSessionsAr } from "@/shared/locale/ar/dashboard/studentPortal/studentSessions.ts";
 import { dashboardStudentPortalProfileAr } from "@/shared/locale/ar/dashboard/studentPortal/studentProfile.ts";
 import { dashboardStudentDirectoryAr } from "@/shared/locale/ar/dashboard/students/directory.ts";
 import { dashboardStudentHistoryAr } from "@/shared/locale/ar/dashboard/students/history.ts";
@@ -209,6 +210,7 @@ export const arMessages: Translations = {
     studentPortalDashboard: dashboardStudentPortalDashboardAr,
     studentPortalCredits: dashboardStudentPortalCreditsAr,
     studentPortalHistory: dashboardStudentPortalHistoryAr,
+    studentPortalSessions: dashboardStudentPortalSessionsAr,
     studentPortalProfile: dashboardStudentPortalProfileAr,
     studentDirectory: dashboardStudentDirectoryAr,
     studentHistory: dashboardStudentHistoryAr,

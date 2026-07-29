@@ -21,6 +21,7 @@ describe("student sidebar navigation", () => {
 
     expect(keys).toContain("student-today-classes");
     expect(keys).toContain("student-schedule");
+    expect(keys).toContain("student-sessions");
     expect(keys).toContain("student-credits");
     expect(keys).not.toContain("student-profile");
     expect(keys).not.toContain("logout");
