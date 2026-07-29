@@ -4,11 +4,14 @@ import CakeOutlined from "@mui/icons-material/CakeOutlined";
 import LanguageOutlined from "@mui/icons-material/LanguageOutlined";
 import ScheduleOutlined from "@mui/icons-material/ScheduleOutlined";
 import WcOutlined from "@mui/icons-material/WcOutlined";
-import { FormControl, InputLabel, MenuItem, Select, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { AppDatePicker } from "@/frontend/common/components/ui/form";
+import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
+import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getLanguageByCode } from "@/frontend/common/lib/locale";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
@@ -54,49 +57,47 @@ function StudentExtensionProfileEditSection({
   onDraftChange,
   timezoneOverrideLabel,
 }: Readonly<StudentExtensionProfileEditSectionProps>) {
+  const dateValue = draft.dateOfBirth ? new Date(draft.dateOfBirth) : null;
+  const validDate = dateValue && !Number.isNaN(dateValue.getTime()) ? dateValue : null;
+
   return (
     <SectionPanel title={sectionTitle}>
       <Stack spacing={2}>
         <AppDatePicker
-          label={labels.dateOfBirth}
-          value={draft.dateOfBirth ? new Date(draft.dateOfBirth) : null}
+          value={validDate}
           onChange={date => {
-            onDraftChange({
-              dateOfBirth: date && !Number.isNaN(date.getTime()) ? date.toISOString().slice(0, 10) : "",
-            });
+            if (date && !Number.isNaN(date.getTime())) {
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, "0");
+              const day = String(date.getDate()).padStart(2, "0");
+              onDraftChange({ dateOfBirth: `${year}-${month}-${day}` });
+            } else {
+              onDraftChange({ dateOfBirth: "" });
+            }
           }}
-          slotProps={{ textField: { size: "small", fullWidth: true } }}
+          slotProps={{
+            textField: {
+              label: labels.dateOfBirth,
+              variant: "outlined",
+              fullWidth: true,
+              size: "small",
+              slotProps: { htmlInput: { autoComplete: "off" } },
+            },
+          }}
         />
-        <FormControl fullWidth size="small">
-          <InputLabel id="student-profile-gender-label" shrink>
-            {labels.gender}
-          </InputLabel>
-          <Select
-            labelId="student-profile-gender-label"
-            label={labels.gender}
-            value={draft.gender}
-            onChange={e => onDraftChange({ gender: e.target.value as Gender | "" })}
-          >
-            <MenuItem value="">—</MenuItem>
-            <MenuItem value={Gender.Male}>{Gender.Male}</MenuItem>
-            <MenuItem value={Gender.Female}>{Gender.Female}</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl fullWidth size="small">
-          <InputLabel id="student-profile-language-label" shrink>
-            {labels.language}
-          </InputLabel>
-          <Select
-            labelId="student-profile-language-label"
-            label={labels.language}
-            value={draft.language}
-            onChange={e => onDraftChange({ language: e.target.value as AppLanguage | "" })}
-          >
-            <MenuItem value="">—</MenuItem>
-            <MenuItem value={AppLanguage.En}>English</MenuItem>
-            <MenuItem value={AppLanguage.Ar}>العربية</MenuItem>
-          </Select>
-        </FormControl>
+        <GenderSelector
+          gender={draft.gender ? (draft.gender as Gender) : null}
+          setGenderAction={gender => onDraftChange({ gender: gender ?? "" })}
+          fullWidth
+          allowEmpty
+          labels={{ title: labels.gender }}
+        />
+        <LanguageSelector
+          fullWidth
+          label={labels.language}
+          language={draft.language ? getLanguageByCode(draft.language) : undefined}
+          setLanguageAction={option => onDraftChange({ language: option.code as AppLanguage })}
+        />
         {timezoneOverrideLabel ? (
           <TimezoneSelect
             value={draft.timezoneOverride ? toGraphqlIanaTimezone(draft.timezoneOverride) : null}

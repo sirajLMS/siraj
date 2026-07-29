@@ -158,7 +158,7 @@ export function StudentHistoryDesktopView({
 
       <HistoryMetricsRow metrics={metrics} labels={labels} />
 
-      <DesktopSectionPanel title={labels.lessonHistory} contentPadding={false} sx={{ mb: 2 }}>
+      <DesktopSectionPanel title={labels.lessonHistory} contentPadding={false} sx={{ mb: 2, borderRadius: 0 }}>
         <StudentPortalHistoryCalendar
           currentMonth={currentMonth}
           sessionsByDay={sessionsByDay}

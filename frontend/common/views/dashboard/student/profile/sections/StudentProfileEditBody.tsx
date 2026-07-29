@@ -5,7 +5,6 @@ import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/compon
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
-import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
 import { StudentUserDetailsProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentUserDetailsProfileSection";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import type { StudentProfileViewLabels } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
@@ -23,6 +22,7 @@ type StudentProfileEditBodyProps = {
   readonly onSave: () => Promise<void>;
   readonly onSnackbarClose: () => void;
   readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
+  readonly onCancel?: () => void;
 };
 
 export function StudentProfileEditBody({
@@ -37,6 +37,7 @@ export function StudentProfileEditBody({
   onSave,
   onSnackbarClose,
   onUploadAvatar,
+  onCancel,
 }: Readonly<StudentProfileEditBodyProps>) {
   const parentLabels = useAppTranslation(Translation.Profile.Parent);
   const baseLabels = useAppTranslation(Translation.Profile.Base);
@@ -71,11 +72,17 @@ export function StudentProfileEditBody({
         currencyLabel={parentLabels.fields.displayCurrency}
       />
       <StudentExtensionProfileSection {...sectionBase} sectionTitle={labels.personalInfo} />
-      <StudentParentAssignmentProfileSection {...sectionBase} sectionTitle={labels.parentInfo} />
 
-      <Button variant="contained" onClick={() => void onSave()} disabled={saving} sx={{ alignSelf: "flex-start" }}>
-        {labels.saveChanges}
-      </Button>
+      <Stack direction="row" spacing={1} sx={{ alignSelf: "flex-start" }}>
+        {onCancel ? (
+          <Button variant="outlined" onClick={onCancel} disabled={saving}>
+            {labels.cancel}
+          </Button>
+        ) : null}
+        <Button variant="contained" onClick={() => void onSave()} disabled={saving}>
+          {labels.saveChanges}
+        </Button>
+      </Stack>
 
       {snackbarSeverity === "success" ? (
         <FormSuccessSnackbar open={snackbarOpen} message={snackbarMessage} onClose={onSnackbarClose} />

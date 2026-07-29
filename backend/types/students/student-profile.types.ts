@@ -40,6 +40,8 @@ export type StudentProfileReturnType = {
  * Excludes email, teacher assignment, academic/quota fields, and parent reassignment.
  */
 export type StudentProfileEditInput = {
+  /** When set, edits the given student (manager/parent/teacher with edit_other). Omit for own LMS student profile. */
+  readonly studentId?: string | null;
   readonly phone?: string | null;
   readonly timezone?: string | null;
   readonly displayCurrency?: CurrencyCode | null;

@@ -4,16 +4,17 @@ import { Alert, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
+import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
 import type { ParentAdminData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import { toParentSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
-import { hasParentBillingData, hasParentSocialData } from "@/frontend/common/views/dashboard/profile/parent/utils";
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { ParentExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/ParentExtensionProfileSection";
-import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function ParentProfileDesktopView({
   labels,
@@ -38,6 +39,7 @@ export function ParentProfileDesktopView({
   canView,
 }: Readonly<ParentProfileViewModel>) {
   const { base: t, parent: pt } = labels;
+  const tErrors = useAppTranslation(Translation.Errors);
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
@@ -88,39 +90,7 @@ export function ParentProfileDesktopView({
     if (!canView("parent_social")) {
       return null;
     }
-    if (!hasParentSocialData(parentData)) {
-      return <ProfileRestrictedSection title={pt.sections.social} />;
-    }
-    return (
-      <DesktopSectionPanel title={pt.sections.social}>
-        <Stack spacing={2}>
-          {parentData?.facebook && (
-            <Stack sx={{ gap: 0.25 }}>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.facebook}
-              </Typography>
-              <Typography variant="bodyLg">{parentData.facebook}</Typography>
-            </Stack>
-          )}
-          {parentData?.whatsapp && (
-            <Stack sx={{ gap: 0.25 }}>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.whatsapp}
-              </Typography>
-              <Typography variant="bodyLg">{parentData.whatsapp}</Typography>
-            </Stack>
-          )}
-          {parentData?.twitter && (
-            <Stack sx={{ gap: 0.25 }}>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.twitter}
-              </Typography>
-              <Typography variant="bodyLg">{parentData.twitter}</Typography>
-            </Stack>
-          )}
-        </Stack>
-      </DesktopSectionPanel>
-    );
+    return <SocialSection mode="view" labels={pt} parentData={parentData} />;
   };
 
   const renderIdentitySection = () => {
@@ -134,48 +104,17 @@ export function ParentProfileDesktopView({
     if (!isAdminScope || !adminData || !canView("parent_billing")) {
       return null;
     }
-    if (!hasParentBillingData(adminData)) {
-      return <ProfileRestrictedSection title={pt.sections.billing} />;
-    }
     return (
-      <DesktopSectionPanel title={pt.sections.billing}>
-        <Stack spacing={2}>
-          {adminData.invoiceType && (
-            <Stack sx={{ gap: 0.25 }}>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.invoiceType}
-              </Typography>
-              <Typography variant="bodyLg">{adminData.invoiceType}</Typography>
-            </Stack>
-          )}
-          {adminData.feeAmount && adminData.currency && (
-            <Stack sx={{ gap: 0.25 }}>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.feeAmount}
-              </Typography>
-              <Typography variant="bodyLg">
-                {adminData.feeAmount} {adminData.currency}
-              </Typography>
-            </Stack>
-          )}
-          {adminData.timezone && (
-            <Stack sx={{ gap: 0.25 }}>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.timezone}
-              </Typography>
-              <Typography variant="bodyLg">{adminData.timezone}</Typography>
-            </Stack>
-          )}
-          {adminData.lifecycleStatus && (
-            <Stack sx={{ gap: 0.25 }}>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {pt.fields.lifecycleStatus}
-              </Typography>
-              <Typography variant="bodyLg">{adminData.lifecycleStatus}</Typography>
-            </Stack>
-          )}
-        </Stack>
-      </DesktopSectionPanel>
+      <BillingSection
+        mode="view"
+        labels={{
+          parent: pt,
+          base: { notSet: t.notSet, convertedTotalApprox: t.convertedTotalApprox },
+          errors: tErrors,
+        }}
+        adminData={adminData}
+        parentId={_parentId}
+      />
     );
   };
 

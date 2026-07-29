@@ -90,7 +90,10 @@ function filterUpdatesToAllowlist(
 }
 
 async function assertOwnProfileAccess(actorUserId: string, locale?: string): Promise<void> {
-  const canView = await PermissionsService.hasPermission(actorUserId, AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN);
+  const canView = await PermissionsService.hasAnyPermission(actorUserId, [
+    AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN,
+    AppPermission.STUDENT_IDENTITY_VIEW_OWN,
+  ]);
   if (!canView) {
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
     throw new Error(tErrors.unauthorizedAction);

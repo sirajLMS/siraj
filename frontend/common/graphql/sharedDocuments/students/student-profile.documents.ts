@@ -145,6 +145,7 @@ interface RecordStudentProfileEditMutationShape {
 
 interface RecordStudentProfileEditMutationArgs {
   input: {
+    studentId?: string | null;
     phone?: string | null;
     timezone?: string | null;
     displayCurrency?: string | null;

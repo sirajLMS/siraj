@@ -1,9 +1,7 @@
 "use client";
 
-import { AssignmentOutlined, CalendarTodayOutlined, PersonOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Grid, Stack } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
@@ -11,51 +9,7 @@ import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/studen
 import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
 import { StudentUserProfileTabContent } from "@/frontend/common/views/dashboard/student/profile/sections/StudentUserProfileTabContent";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
-import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
-import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { Translation, useAppTranslation } from "@/shared/locale";
-
-function AcademicInfoPanel({
-  profile,
-  labels,
-}: Readonly<{ profile: NonNullable<StudentProfileViewModel["profile"]>; labels: StudentProfileViewModel["labels"] }>) {
-  const metrics = [
-    {
-      key: "teacher",
-      count: profile.teacherName ?? "—",
-      labelKey: "teacher",
-      label: labels.teacher,
-      icon: SchoolOutlined,
-    },
-    {
-      key: "hours-per-week",
-      count: profile.hoursPerWeek ?? 0,
-      labelKey: "hours-per-week",
-      label: labels.hoursPerWeek,
-      icon: CalendarTodayOutlined,
-    },
-    {
-      key: "classes-remaining",
-      count: profile.classesRemaining ?? 0,
-      labelKey: "classes-remaining",
-      label: labels.classesRemaining,
-      icon: PersonOutlined,
-    },
-    {
-      key: "classes-total",
-      count: profile.classesTotal ?? 0,
-      labelKey: "classes-total",
-      label: labels.classesTotal,
-      icon: AssignmentOutlined,
-    },
-  ] satisfies MetricItem[];
-
-  return (
-    <DesktopSectionPanel title={labels.academicInfo} sx={{ mb: 3 }}>
-      <DesktopMetricCardGrid metrics={metrics} size={{ xs: 12, md: 4 }} />
-    </DesktopSectionPanel>
-  );
-}
 
 function StudentOwnProfileView({
   profile,
@@ -102,7 +56,6 @@ function StudentOwnProfileView({
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
         <StudentParentAssignmentProfileSection {...sectionBase} sectionTitle={labels.parentInfo} />
-        <AcademicInfoPanel profile={profile} labels={labels} />
       </Grid>
     </Grid>
   );

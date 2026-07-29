@@ -1,13 +1,15 @@
 "use client";
 
-import { Stack } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
+import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileEditBody";
 import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
+import { useStudentManagerProfileTabViewModel } from "@/frontend/common/views/dashboard/students/profile/useStudentManagerProfileTabViewModel";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 function toStudentProfileRow(profile: StudentProfileQueryData): StudentProfileRow {
@@ -45,16 +47,24 @@ function toStudentProfileRow(profile: StudentProfileQueryData): StudentProfileRo
 export function StudentManagerProfileTab() {
   const profileContext = useStudentProfileContext();
   const profile = profileContext?.profile;
-  const labels = useAppTranslation(Translation.Dashboard.StudentPortalProfile);
+  const portalLabels = useAppTranslation(Translation.Dashboard.StudentPortalProfile);
   const parentLabels = useAppTranslation(Translation.Profile.Parent);
   const teacherLabels = useAppTranslation(Translation.Profile.Teacher);
   const baseLabels = useAppTranslation(Translation.Profile.Base);
+  const tProfileBase = useAppTranslation(Translation.Profile.Base);
 
-  if (!profile) {
+  const studentProfile = profile ? toStudentProfileRow(profile) : null;
+  const editViewModel = useStudentManagerProfileTabViewModel(studentProfile);
+
+  if (!profile || !studentProfile) {
     return null;
   }
 
-  const studentProfile = toStudentProfileRow(profile);
+  const labels = {
+    ...portalLabels,
+    editAvatarTitle: tProfileBase.editAvatarTitle,
+  };
+
   const sectionProps = {
     profile: studentProfile,
     labels,
@@ -63,8 +73,33 @@ export function StudentManagerProfileTab() {
     enforceFieldAccess: true,
   };
 
+  if (editViewModel.isEditing) {
+    return (
+      <StudentProfileEditBody
+        profile={studentProfile}
+        labels={labels}
+        draft={editViewModel.draft}
+        saving={editViewModel.saving}
+        snackbarOpen={editViewModel.snackbarOpen}
+        snackbarMessage={editViewModel.snackbarMessage}
+        snackbarSeverity={editViewModel.snackbarSeverity}
+        onDraftChange={editViewModel.onDraftChange}
+        onSave={editViewModel.onSave}
+        onSnackbarClose={editViewModel.onSnackbarClose}
+        onUploadAvatar={editViewModel.onUploadAvatar}
+        onCancel={editViewModel.onCancelEdit}
+      />
+    );
+  }
+
   return (
     <Stack spacing={3}>
+      {editViewModel.canEditProfile ? (
+        <Button variant="contained" onClick={editViewModel.onStartEdit} sx={{ alignSelf: "flex-start" }}>
+          {labels.editProfile}
+        </Button>
+      ) : null}
+
       <StudentProfileUserDetailsSection
         profile={studentProfile}
         scope={ProfileScope.Other}

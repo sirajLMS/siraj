@@ -94,7 +94,7 @@ export function HistoryWeeklyScrollerMobile({
     <Box
       sx={theme => ({
         backgroundColor: theme.palette.surfaceContainerLowest,
-        borderRadius: 2,
+        borderRadius: 0,
         boxShadow: theme.palette.shadow.card,
         border: `1px solid ${theme.palette.outlineVariant}`,
         py: 2,

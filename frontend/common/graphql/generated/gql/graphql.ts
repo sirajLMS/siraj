@@ -1663,6 +1663,7 @@ export type StudentProfileEditInput = {
   language: AppLanguage | null | undefined;
   parentPhone: string | null | undefined;
   phone: string | null | undefined;
+  studentId: string | number | null | undefined;
   timezone: string | null | undefined;
   timezoneOverride: string | null | undefined;
 };

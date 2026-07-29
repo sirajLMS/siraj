@@ -177,11 +177,8 @@ export namespace StudentProfileService {
   }
 
   /**
-   * Lets a student update their own editable profile fields.
-   * Gated by fine-grained student field-group edit_own permissions:
-   * - phone / dateOfBirth / gender / language → `student_identity` (STUDENT_IDENTITY_EDIT_OWN)
-   * - parentPhone (when linked) → `student_parent` (STUDENT_PARENT_EDIT_OWN)
-   * Rejects email, teacher assignment, and quota/credit changes (not accepted on input).
+   * Updates editable student profile fields for own profile (omit studentId) or a target student (studentId).
+   * Gated by fine-grained student field-group edit_own / edit_other permissions.
    */
   export async function recordStudentProfileEdit(
     actorUserId: string,
@@ -189,18 +186,36 @@ export namespace StudentProfileService {
     tErrors: ErrorsLabels,
     locale?: string
   ): Promise<StudentProfileReturnType> {
-    const studentId = await resolveOwnStudentId(actorUserId, tErrors);
-    const profile = await requireOwnStudentProfile(actorUserId, studentId, tErrors);
+    const targetStudentId =
+      input.studentId?.trim() ? input.studentId.trim() : await resolveOwnStudentId(actorUserId, tErrors);
+
+    const profile = await StudentRepository.findProfileById(targetStudentId);
+    if (!profile) {
+      throw new Error(tErrors.studentNotFound(targetStudentId));
+    }
+
+    const isOwnProfile = profile.userId === actorUserId;
+    if (!input.studentId && !isOwnProfile) {
+      throw new Error(tErrors.insufficientPermissions);
+    }
 
     const submittedGroups = collectStudentProfileEditGroups(input);
     if (submittedGroups.length === 0) {
       throw new Error(tErrors.invalidInput);
     }
 
-    await assertCanEditSubmittedGroups(actorUserId, studentId, submittedGroups, tErrors);
-    await applyStudentProfileEdit(actorUserId, studentId, profile, input, tErrors, locale);
+    const isAssociatedViewer = isOwnProfile || (await resolveIsAssociatedViewer(actorUserId, targetStudentId));
 
-    return getProfile(actorUserId, studentId, tErrors, {});
+    await assertCanEditSubmittedGroups(
+      actorUserId,
+      targetStudentId,
+      isAssociatedViewer,
+      submittedGroups,
+      tErrors
+    );
+    await applyStudentProfileEdit(profile.userId, targetStudentId, profile, input, tErrors, locale);
+
+    return getProfile(actorUserId, targetStudentId, tErrors, {});
   }
 }
 
@@ -212,24 +227,10 @@ async function resolveOwnStudentId(actorUserId: string, tErrors: ErrorsLabels): 
   return studentId;
 }
 
-async function requireOwnStudentProfile(
-  actorUserId: string,
-  studentId: string,
-  tErrors: ErrorsLabels
-): Promise<NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>> {
-  const profile = await StudentRepository.findProfileById(studentId);
-  if (!profile) {
-    throw new Error(tErrors.studentNotFound(studentId));
-  }
-  if (profile.userId !== actorUserId) {
-    throw new Error(tErrors.insufficientPermissions);
-  }
-  return profile;
-}
-
 async function assertCanEditSubmittedGroups(
   actorUserId: string,
   studentId: string,
+  isAssociatedViewer: boolean,
   submittedGroups: readonly string[],
   tErrors: ErrorsLabels
 ): Promise<void> {
@@ -237,7 +238,7 @@ async function assertCanEditSubmittedGroups(
   const filterCtx: StudentFieldFilterContext = {
     actorUserId,
     studentId,
-    isAssociatedViewer: true,
+    isAssociatedViewer,
     permissions: new Set(permissionContext.permissions),
   };
 
@@ -249,7 +250,7 @@ async function assertCanEditSubmittedGroups(
 }
 
 async function applyStudentProfileEdit(
-  actorUserId: string,
+  studentUserId: string,
   studentId: string,
   profile: NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>,
   input: StudentProfileEditInput,
@@ -292,15 +293,15 @@ async function applyStudentProfileEdit(
   }
 
   if (input.phone !== undefined) {
-    await UserRepository.updateProfileFields(actorUserId, { phone: input.phone }, locale);
+    await UserRepository.updateProfileFields(studentUserId, { phone: input.phone }, locale);
   }
 
   if (input.timezone !== undefined && input.timezone) {
-    await UserRepository.updateTimezone(actorUserId, input.timezone, undefined, locale);
+    await UserRepository.updateTimezone(studentUserId, input.timezone, undefined, locale);
   }
 
   if (input.displayCurrency !== undefined) {
-    await UserRepository.updateProfileFields(actorUserId, { displayCurrency: input.displayCurrency }, locale);
+    await UserRepository.updateProfileFields(studentUserId, { displayCurrency: input.displayCurrency }, locale);
   }
 
   if (input.parentPhone !== undefined) {

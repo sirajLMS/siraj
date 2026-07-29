@@ -12,11 +12,6 @@ export interface StudentPortalProfileLabels {
   readonly parentName: string;
   readonly parentEmail: string;
   readonly parentPhone: string;
-  readonly academicInfo: string;
-  readonly teacher: string;
-  readonly hoursPerWeek: string;
-  readonly classesRemaining: string;
-  readonly classesTotal: string;
   readonly editProfile: string;
   readonly saveChanges: string;
   readonly cancel: string;

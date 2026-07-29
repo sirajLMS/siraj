@@ -1,9 +1,7 @@
 "use client";
 
-import { AssignmentOutlined, CalendarTodayOutlined, PersonOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Stack } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
@@ -11,55 +9,7 @@ import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/studen
 import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
 import { StudentUserProfileTabContent } from "@/frontend/common/views/dashboard/student/profile/sections/StudentUserProfileTabContent";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
-import { MobileMetricCardGrid, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 import { Translation, useAppTranslation } from "@/shared/locale";
-
-function AcademicMetricsGrid({
-  title,
-  profile,
-  labels,
-}: Readonly<{
-  title: string;
-  profile: NonNullable<StudentProfileViewModel["profile"]>;
-  labels: StudentProfileViewModel["labels"];
-}>): React.ReactNode {
-  const academicMetrics: readonly MetricItem[] = [
-    {
-      key: "teacher",
-      label: labels.teacher,
-      count: profile.teacherName ?? "—",
-      icon: SchoolOutlined,
-      labelKey: "teacher",
-    },
-    {
-      key: "hoursPerWeek",
-      label: labels.hoursPerWeek,
-      count: profile.hoursPerWeek ?? 0,
-      icon: CalendarTodayOutlined,
-      labelKey: "hoursPerWeek",
-    },
-    {
-      key: "classesRemaining",
-      label: labels.classesRemaining,
-      count: profile.classesRemaining ?? 0,
-      icon: PersonOutlined,
-      labelKey: "classesRemaining",
-    },
-    {
-      key: "classesTotal",
-      label: labels.classesTotal,
-      count: profile.classesTotal ?? 0,
-      icon: AssignmentOutlined,
-      labelKey: "classesTotal",
-    },
-  ];
-
-  return (
-    <MobileSectionPanel title={title} contentInset={false}>
-      <MobileMetricCardGrid metrics={academicMetrics} />
-    </MobileSectionPanel>
-  );
-}
 
 function StudentOwnProfileView({
   profile,
@@ -101,7 +51,6 @@ function StudentOwnProfileView({
       {profile.parentName ? (
         <StudentParentAssignmentProfileSection {...sectionBase} sectionTitle={labels.parentInfo} />
       ) : null}
-      <AcademicMetricsGrid title={labels.academicInfo} profile={profile} labels={labels} />
     </Stack>
   );
 }

@@ -3,11 +3,12 @@
 import AttachMoneyOutlined from "@mui/icons-material/AttachMoneyOutlined";
 import PhoneOutlined from "@mui/icons-material/PhoneOutlined";
 import ScheduleOutlined from "@mui/icons-material/ScheduleOutlined";
-import { Stack, TextField } from "@mui/material";
+import { Stack } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDisplay/PhoneDisplay";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
+import { PhoneInput } from "@/frontend/common/components/ui/input/phoneInput/PhoneInput";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
@@ -51,12 +52,11 @@ export function StudentUserDetailsProfileSection({
     return (
       <SectionPanel title={sectionTitle}>
         <Stack spacing={2}>
-          <TextField
+          <PhoneInput
             label={labels.phone}
-            value={draft.phone}
-            onChange={e => onDraftChange({ phone: e.target.value })}
+            value={draft.phone || null}
+            onChangeAction={value => onDraftChange({ phone: value ?? "" })}
             fullWidth
-            size="small"
           />
           <TimezoneSelect
             value={draft.timezone ? toGraphqlIanaTimezone(draft.timezone) : null}

@@ -155,8 +155,6 @@ describe("StudentProfileContainer", () => {
     });
 
     expect(screen.getByText("Parent Information")).toBeInTheDocument();
-    expect(screen.getByText("Academic Information")).toBeInTheDocument();
     expect(screen.getByText("Parent One")).toBeInTheDocument();
-    expect(screen.getByText("Ustadh Yusuf")).toBeInTheDocument();
   });
 });

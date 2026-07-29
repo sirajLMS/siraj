@@ -164,7 +164,7 @@ export function StudentPortalHistoryCalendar({
   return (
     <Box
       sx={theme => ({
-        borderRadius: 2,
+        borderRadius: 0,
         border: `1px solid ${theme.palette.outlineVariant}`,
         overflow: "hidden",
         backgroundColor: theme.palette.surfaceContainerLowest,

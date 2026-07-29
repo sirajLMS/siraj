@@ -13,6 +13,7 @@ const StudentProfileEditInputPothosObject = gqlSchemaBuilder
   .inputRef<StudentProfileEditInput>("StudentProfileEditInput")
   .implement({
     fields: t => ({
+      studentId: t.id({ required: false }),
       phone: t.string({ required: false }),
       timezone: t.string({ required: false }),
       displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),

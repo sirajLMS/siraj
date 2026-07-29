@@ -5390,6 +5390,7 @@ export type StudentProfileEditInput = {
   language: InputMaybe<AppLanguage>;
   parentPhone: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
+  studentId: InputMaybe<Scalars['ID']['input']>;
   timezone: InputMaybe<Scalars['String']['input']>;
   timezoneOverride: InputMaybe<Scalars['String']['input']>;
 };

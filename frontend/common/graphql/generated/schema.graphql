@@ -4031,6 +4031,7 @@ input StudentProfileEditInput {
   language: AppLanguage
   parentPhone: String
   phone: String
+  studentId: ID
   timezone: String
   timezoneOverride: String
 }
