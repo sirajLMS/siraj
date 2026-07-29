@@ -1,5 +1,5 @@
 {
-  "manifestHash": "017d904292e27b699ada292e2264f6f886bfc5b6e1f127bb9ad5beef730c0f02",
+  "manifestHash": "2f060dc4f1651f9c5e3d86b9f7e200da2964cdb469e0ae3004c17cec9bfe38c4",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -75,7 +75,7 @@
     },
     {
       "file": "6d-profile-fine-grained-only.sql",
-      "sha256": "c6d58eb5e77a530378a45784bf37a3a4514899cb55e5a126c88ed8a80ddb13b3"
+      "sha256": "aa70fa521f16f50b0151b3d16d2fe6adcb68c0d8e5af664a8207210547327d6c"
     },
     {
       "file": "7a-settings-permissions-enum.sql",
@@ -200,6 +200,7 @@
     "20260729073854_custom_6d-profile-fine-grained-only",
     "20260729150220_custom_3-system_permissions_and_groups",
     "20260729152150_custom_6d-profile-fine-grained-only",
-    "20260729153127_custom_6d-profile-fine-grained-only"
+    "20260729153127_custom_6d-profile-fine-grained-only",
+    "20260729155331_custom_6d-profile-fine-grained-only"
   ]
 }

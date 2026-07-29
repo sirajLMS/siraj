@@ -4168,8 +4168,8 @@ export type Query = {
   /** List all permission catalog entries. */
   permissions: Maybe<Array<Permission>>;
   profileByUserId: Maybe<UnifiedProfile>;
-  /** Get the most recently approved lesson reports for the supervisor dashboard */
-  recentApprovedLessonReports: Maybe<Array<LessonReport>>;
+  /** Get paginated recently approved lesson reports for the supervisor dashboard */
+  recentApprovedLessonReports: Maybe<PendingLessonReportsPayload>;
   recurringMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
   recurringSchedule: Maybe<RecurringScheduleDetail>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
@@ -4500,7 +4500,7 @@ export type QueryProfileByUserIdArgs = {
 
 
 export type QueryRecentApprovedLessonReportsArgs = {
-  limit: InputMaybe<Scalars['Int']['input']>;
+  paginationArgs: InputMaybe<PaginationArgs>;
 };
 
 
@@ -5574,7 +5574,6 @@ export type SupervisorDashboard = {
   monthlySnapshot: Maybe<SupervisorMonthlySnapshot>;
   pendingDuesSummary: Maybe<TeacherPendingDuesSummary>;
   pendingReviewCount: Maybe<Scalars['Int']['output']>;
-  recentApprovals: Maybe<Array<LessonReport>>;
   supervisorName: Maybe<Scalars['String']['output']>;
 };
 

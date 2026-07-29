@@ -306,6 +306,8 @@ WHERE
     'profile.core_identity.view_own',
     'profile.core_contact.view_own',
     'profile.staff_role.view_own',
+    'profile.core_identity.edit_own',
+    'profile.core_contact.edit_own',
     'profile.core_identity.view_other',
     'profile.core_contact.view_other',
     'profile.teacher_professional.view_other',

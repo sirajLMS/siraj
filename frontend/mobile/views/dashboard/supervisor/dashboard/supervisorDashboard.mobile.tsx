@@ -2,6 +2,7 @@
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { RecentApprovalCardLabels } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/RecentApprovalCardList";
 import {
   RecentApprovalCardSkeleton,
@@ -41,8 +42,10 @@ export function SupervisorDashboardMobileView({
   pendingDuesSummary,
   monthlySnapshot,
   recentApprovals,
+  recentApprovalsPagination,
   labels,
   loading,
+  recentApprovalsLoading,
   onGoToReviews,
   onGoToDues,
   onGoToMonthlyReports,
@@ -95,10 +98,16 @@ export function SupervisorDashboardMobileView({
         <MobileSectionPanel title={labels.recentApprovals} contentInset={false}>
           <MobileCardList
             rows={recentApprovals}
-            loading={loading}
+            loading={recentApprovalsLoading}
             emptyMessage={labels.noRecentApprovals}
             getKey={item => item.id}
-            paginationOptions={false}
+            paginationOptions={buildServerPaginationOptions({
+              page: recentApprovalsPagination.page,
+              pageSize: recentApprovalsPagination.pageSize,
+              totalCount: recentApprovalsPagination.totalCount,
+              onPageChange: recentApprovalsPagination.onPageChange,
+              pageSizeOptions: [recentApprovalsPagination.pageSize],
+            })}
             layout="edge-to-edge"
             gap={0}
             renderSkeleton={() => (

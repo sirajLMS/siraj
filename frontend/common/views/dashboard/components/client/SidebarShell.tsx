@@ -492,13 +492,7 @@ function SidebarAccountFooter({
         ) : (
           profileButton
         )}
-        {isCollapsed ? (
-          <Tooltip title={logoutLabel} placement="right">
-            {logoutButton}
-          </Tooltip>
-        ) : (
-          logoutButton
-        )}
+        {!isCollapsed ? logoutButton : null}
       </Box>
     </Box>
   );

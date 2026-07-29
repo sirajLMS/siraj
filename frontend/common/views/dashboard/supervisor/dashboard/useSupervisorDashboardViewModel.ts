@@ -3,12 +3,15 @@
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 import { formatDate, formatDateTime } from "@/frontend/common/components/intl/dateFormat";
+import { recentApprovedLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { supervisorDashboardQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { useSupervisorDashboardRecentApprovalsStore } from "@/frontend/common/stores/supervisorDashboardRecentApprovalsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   RecentApproval,
+  RecentApprovalsPagination,
   SupervisorDashboardViewModel,
   UseSupervisorDashboardViewModelProps,
 } from "@/frontend/common/views/dashboard/supervisor/dashboard/types/supervisorDashboardTypes";
@@ -25,9 +28,34 @@ export function useSupervisorDashboardViewModel(
   const router = useRouter();
   const userName = useUserStore(state => state.name);
 
+  const page = useSupervisorDashboardRecentApprovalsStore(state => state.page);
+  const pageSize = useSupervisorDashboardRecentApprovalsStore(state => state.pageSize);
+  const setPage = useSupervisorDashboardRecentApprovalsStore(state => state.setPage);
+
+  const paginationArgs = useMemo(
+    () => ({
+      page: page + 1,
+      first: pageSize,
+      skip: null,
+      after: null,
+      before: null,
+      last: null,
+      maxCount: null,
+    }),
+    [page, pageSize]
+  );
+
   const { data, loading } = useQuery(supervisorDashboardQueryDocument, {
     fetchPolicy: "cache-and-network",
   });
+
+  const { data: recentApprovalsData, loading: recentApprovalsLoading } = useQuery(
+    recentApprovedLessonReportsQueryDocument,
+    {
+      variables: { paginationArgs },
+      fetchPolicy: "cache-and-network",
+    }
+  );
 
   const dashboard = data?.supervisorDashboard;
 
@@ -56,7 +84,7 @@ export function useSupervisorDashboardViewModel(
   }, [dashboard?.monthlySnapshot]);
 
   const recentApprovals: RecentApproval[] = useMemo(() => {
-    const rows = dashboard?.recentApprovals ?? [];
+    const rows = recentApprovalsData?.recentApprovedLessonReports?.rows ?? [];
     return rows.map(r => ({
       id: r?.id ?? "",
       classInstanceId: r?.classInstanceId ?? "",
@@ -78,7 +106,19 @@ export function useSupervisorDashboardViewModel(
       reviewedAt: r?.reviewedAt ? formatDateTime(r.reviewedAt, locale) : "",
       reviewedAtRaw: r?.reviewedAt ?? null,
     }));
-  }, [dashboard?.recentApprovals, locale]);
+  }, [recentApprovalsData?.recentApprovedLessonReports?.rows, locale]);
+
+  const totalCount = recentApprovalsData?.recentApprovedLessonReports?.totalCount ?? 0;
+
+  const recentApprovalsPagination = useMemo<RecentApprovalsPagination>(
+    () => ({
+      page,
+      pageSize,
+      totalCount,
+      onPageChange: setPage,
+    }),
+    [page, pageSize, totalCount, setPage]
+  );
 
   return {
     userName: dashboard?.supervisorName ?? userName,
@@ -86,8 +126,10 @@ export function useSupervisorDashboardViewModel(
     pendingDuesSummary,
     monthlySnapshot,
     recentApprovals,
+    recentApprovalsPagination,
     labels: t,
     loading,
+    recentApprovalsLoading,
     onGoToReviews: () => {
       router.push("/lesson-reports");
     },

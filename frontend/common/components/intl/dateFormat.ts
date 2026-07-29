@@ -31,6 +31,16 @@ export function formatDateTime(date: DateInput, locale: string): string {
 }
 
 /**
+ * Locale-aware time (e.g. "01:20 PM").
+ */
+export function formatTime(date: DateInput, locale: string): string {
+  return new Intl.DateTimeFormat(getLatnLocaleTag(locale), {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(toDate(date));
+}
+
+/**
  * Locale-aware month and year (e.g. "July 2026").
  */
 export function formatMonthYear(date: DateInput, locale: string): string {

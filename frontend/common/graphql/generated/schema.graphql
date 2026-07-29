@@ -3307,9 +3307,9 @@ type Query {
   profileByUserId(userId: String!): UnifiedProfile
 
   """
-  Get the most recently approved lesson reports for the supervisor dashboard
+  Get paginated recently approved lesson reports for the supervisor dashboard
   """
-  recentApprovedLessonReports(limit: Int): [LessonReport!]
+  recentApprovedLessonReports(paginationArgs: PaginationArgs): PendingLessonReportsPayload
   recurringMeetingConfigs(recurringScheduleId: ID!): [ClassMeetingConfig!]
   recurringSchedule(id: ID!): RecurringScheduleDetail
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
@@ -4205,7 +4205,6 @@ type SupervisorDashboard {
   monthlySnapshot: SupervisorMonthlySnapshot
   pendingDuesSummary: TeacherPendingDuesSummary
   pendingReviewCount: Int
-  recentApprovals: [LessonReport!]
   supervisorName: String
 }
 

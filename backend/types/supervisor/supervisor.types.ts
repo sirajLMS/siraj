@@ -1,4 +1,3 @@
-import type { LessonReportReturnType } from "@/backend/types/classes/lesson-report.types";
 import type { TeacherPendingDuesSummaryReturnType } from "@/backend/types/teachers/teacher-due.types";
 
 export interface SupervisorMonthlySnapshotReturnType {
@@ -12,6 +11,5 @@ export interface SupervisorDashboardReturnType {
   supervisorName: string;
   pendingReviewCount: number;
   pendingDuesSummary: TeacherPendingDuesSummaryReturnType;
-  recentApprovals: LessonReportReturnType[];
   monthlySnapshot: SupervisorMonthlySnapshotReturnType;
 }

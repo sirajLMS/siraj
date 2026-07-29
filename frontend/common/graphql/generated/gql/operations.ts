@@ -3129,13 +3129,15 @@ export type PendingLessonReportsQueryVariables = Exact<{
 
 export type PendingLessonReportsQuery = PendingLessonReportsQuery_Query;
 
-export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports_PendingLessonReportsPayload_rows_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type RecentApprovedLessonReportsQuery_Query = { recentApprovedLessonReports: Array<RecentApprovedLessonReportsQuery_recentApprovedLessonReports_LessonReport> | null };
+export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports_PendingLessonReportsPayload = { totalCount: number | null, rows: Array<RecentApprovedLessonReportsQuery_recentApprovedLessonReports_PendingLessonReportsPayload_rows_LessonReport> | null };
+
+export type RecentApprovedLessonReportsQuery_Query = { recentApprovedLessonReports: RecentApprovedLessonReportsQuery_recentApprovedLessonReports_PendingLessonReportsPayload | null };
 
 
 export type RecentApprovedLessonReportsQueryVariables = Exact<{
-  limit: number | null | undefined;
+  paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 
 
@@ -5246,11 +5248,9 @@ export type SuggestionContributorStatsQuery = SuggestionContributorStatsQuery_Qu
 
 export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary = { totalCount: number | null, totalAmount: number | null, currency: Types.CurrencyCode | null };
 
-export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_recentApprovals_LessonReport = { id: string | null, classInstanceId: string | null, subjectName: string | null, classAvatarUrl: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, studentAvatarUrl: string | null, teacherAvatarUrl: string | null, studentUserId: string | null, teacherUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedAt: string | null, reviewedAt: string | null, createdAt: string | null, updatedAt: string | null };
-
 export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot = { year: number | null, month: number | null, label: string | null };
 
-export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard = { supervisorName: string | null, pendingReviewCount: number | null, pendingDuesSummary: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary | null, recentApprovals: Array<SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_recentApprovals_LessonReport> | null, monthlySnapshot: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot | null };
+export type SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard = { supervisorName: string | null, pendingReviewCount: number | null, pendingDuesSummary: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_pendingDuesSummary_TeacherPendingDuesSummary | null, monthlySnapshot: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard_monthlySnapshot_SupervisorMonthlySnapshot | null };
 
 export type SupervisorDashboardQuery_Query = { supervisorDashboard: SupervisorDashboardQuery_supervisorDashboard_SupervisorDashboard | null };
 

@@ -118,35 +118,38 @@ export const recentApprovedLessonReportsQueryDocument: TypedDocumentNode<
   Operations.RecentApprovedLessonReportsQuery,
   Types.QueryRecentApprovedLessonReportsArgs
 > = gql`
-  query RecentApprovedLessonReports($limit: Int) {
-    recentApprovedLessonReports(limit: $limit) {
-      id
-      classInstanceId
-      studentId
-      teacherId
-      teacherName
-      studentName
-      subjectName
-      classAvatarUrl
-      teacherAvatarUrl
-      studentAvatarUrl
-      teacherUserId
-      studentUserId
-      lessonDate
-      durationMinutes
-      attendanceEvaluation
-      teacherNotes
-      studentNotes
-      completionPercentage
-      status
-      submittedByUserId
-      submittedAt
-      reviewedByUserId
-      reviewedAt
-      rejectionReason
-      idempotencyKey
-      createdAt
-      updatedAt
+  query RecentApprovedLessonReports($paginationArgs: PaginationArgs) {
+    recentApprovedLessonReports(paginationArgs: $paginationArgs) {
+      totalCount
+      rows {
+        id
+        classInstanceId
+        studentId
+        teacherId
+        teacherName
+        studentName
+        subjectName
+        classAvatarUrl
+        teacherAvatarUrl
+        studentAvatarUrl
+        teacherUserId
+        studentUserId
+        lessonDate
+        durationMinutes
+        attendanceEvaluation
+        teacherNotes
+        studentNotes
+        completionPercentage
+        status
+        submittedByUserId
+        submittedAt
+        reviewedByUserId
+        reviewedAt
+        rejectionReason
+        idempotencyKey
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
