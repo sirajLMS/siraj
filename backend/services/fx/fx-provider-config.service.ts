@@ -1,5 +1,5 @@
 import { SystemSettingsRepository, UserRepository } from "@/backend/db/repo";
-import { AppPermission, type FxProvider } from "@/backend/enum";
+import { AppPermission, type FxProvider, SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   getResolvedFxProviderConfig,
@@ -57,9 +57,9 @@ export namespace FxProviderConfigService {
     await SystemSettingsRepository.upsertSetting({
       key: FX_PROVIDER_SETTING_KEY,
       value: provider,
-      dataType: "string",
+      dataType: SystemSettingDataType.String,
       description: "Active FX rate provider",
-      category: "billing",
+      category: SystemSettingCategory.Billing,
       updatedByUserId: actorUserId,
     });
 

@@ -1,8 +1,7 @@
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
-import { Hanken_Grotesk, Inter } from "next/font/google";
-import { cookies } from "next/headers";
+import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 import { logger } from "@/backend/lib/logger";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
@@ -10,9 +9,8 @@ import { buildServerThemeCss } from "@/frontend/common/lib/server-theme-css";
 import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import MuiProvider from "@/frontend/common/providers/theme/MuiProvider";
+import { VercelObservability } from "@/frontend/common/providers/VercelObservability";
 import "@/app/index.css";
-import { AppApolloProvider } from "@/frontend/common/context";
-import { AuthProvider } from "@/frontend/common/providers/apollo/AuthProvider";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
@@ -43,6 +41,12 @@ const hankenGrotesk = Hanken_Grotesk({
   display: "swap",
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = getTranslations(locale).commonTranslations;
@@ -70,6 +74,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const locale = await getLocale();
+  const headersList = await headers();
+  const nonce = headersList.get("x-nonce") ?? undefined;
 
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get(THEME_COOKIE_NAME);
@@ -91,7 +97,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       data-mui-color-scheme={initialTheme}
       data-theme={initialTheme}
       suppressHydrationWarning
-      className={`${inter.variable} ${hankenGrotesk.variable}`}
+      className={`${inter.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Safe server-side generated theme CSS variables */}
@@ -103,21 +109,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             cssVars-aware ThemeProvider paints the user's preferred mode on the
             very first render — no dark-mode hydration flash. `defaultMode`
             matches the cookie value read above and passed to MuiProvider. */}
-        <InitColorSchemeScript
-          attribute="data" // match `colorSchemeSelector: "data"` in `createAppCssVarsTheme`
-          defaultMode={initialTheme}
-          modeStorageKey="theme" // match the existing localStorage key from `theme-detection.ts`
-        />
-        {/* LocaleProvider supplies locale + TranslationProvider (Suspense cache).
-            Handle-based useAppTranslation lazy-loads namespaces per route. */}
+        <InitColorSchemeScript attribute="data" defaultMode={initialTheme} modeStorageKey="theme" nonce={nonce} />
         <LocaleProvider locale={locale}>
-          <MuiProvider initialTheme={initialTheme}>
-            <AppApolloProvider>
-              <AuthProvider>{children}</AuthProvider>
-            </AppApolloProvider>
+          <MuiProvider initialTheme={initialTheme} nonce={nonce}>
+            {children}
           </MuiProvider>
         </LocaleProvider>
-        <SpeedInsights />
+        <VercelObservability />
       </body>
     </html>
   );

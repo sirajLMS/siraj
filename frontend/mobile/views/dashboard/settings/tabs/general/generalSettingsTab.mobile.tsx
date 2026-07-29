@@ -1,94 +1,62 @@
 "use client";
 
-import { AddOutlined, CalendarMonthOutlined, LockOutlined, TagOutlined } from "@mui/icons-material";
-import { Box, Stack, Typography } from "@mui/material";
-import { formatDateTime } from "@/frontend/common/components/intl/dateFormat";
-import { SystemSettingDeleteDialog } from "@/frontend/common/views/dashboard/settings/tabs/general/components/SystemSettingDeleteDialog";
-import { SystemSettingFormDialog } from "@/frontend/common/views/dashboard/settings/tabs/general/components/SystemSettingFormDialog";
+import { LockOutlined, TagOutlined } from "@mui/icons-material";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import { SystemSettingMetadataRow } from "@/frontend/common/views/dashboard/settings/tabs/general/components/SystemSettingMetadataRow";
-import { SystemSettingRowActions } from "@/frontend/common/views/dashboard/settings/tabs/general/components/SystemSettingRowActions";
+import { SystemSettingValueField } from "@/frontend/common/views/dashboard/settings/tabs/general/components/SystemSettingValueField";
 import type {
   GeneralSettingsViewModel,
   SystemSettingRow,
 } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
-import { MobileCardList, MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
-import { useAppLocale } from "@/shared/locale";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 
 function GeneralSettingCard({
   row,
-  locale,
   canManage,
   labels,
-  onEdit,
-  onDelete,
+  savingCode,
+  onValueChange,
 }: Readonly<{
   readonly row: SystemSettingRow;
-  readonly locale: string;
   readonly canManage: boolean;
   readonly labels: GeneralSettingsViewModel["labels"];
-  readonly onEdit: (row: SystemSettingRow) => void;
-  readonly onDelete: (row: SystemSettingRow) => void;
+  readonly savingCode: string | null;
+  readonly onValueChange: (code: string, value: string) => void | Promise<void>;
 }>) {
-  const dataTypeLabel = row.dataType === "integer" ? labels.dataTypeInteger : labels.dataTypeString;
+  const dataTypeLabel = labels.dataTypeLabels[row.dataType];
+  const isSaving = savingCode === row.code;
 
   return (
     <MobileCardListItem variant="edge-to-edge">
       <Stack spacing={2}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
-          <Typography sx={{ typography: "titleSm", fontWeight: 700, wordBreak: "break-word", flex: 1 }}>
-            {row.key}
+        <Box>
+          <Typography sx={{ typography: "titleSm", fontWeight: 700, wordBreak: "break-word" }}>{row.label}</Typography>
+          <Typography
+            sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary, wordBreak: "break-word" }}
+          >
+            {row.slug}
           </Typography>
-          {canManage ? (
-            <SystemSettingRowActions
-              editLabel={labels.editLabel}
-              deleteLabel={labels.deleteLabel}
-              onEdit={() => onEdit(row)}
-              onDelete={() => onDelete(row)}
-            />
-          ) : null}
         </Box>
 
-        <Typography
-          sx={theme => ({
-            typography: "headlineMd",
-            fontWeight: 700,
-            color: theme.palette.primary.main,
-            wordBreak: "break-word",
-          })}
-        >
-          {row.value}
-        </Typography>
+        <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
+          <Chip size="small" variant="outlined" label={dataTypeLabel} icon={<TagOutlined />} />
+          <Chip size="small" variant="outlined" label={labels.categories[row.category]} icon={<LockOutlined />} />
+        </Stack>
 
         <Box>
-          {row.category ? (
-            <SystemSettingMetadataRow
-              icon={<LockOutlined fontSize="small" />}
-              label={labels.categoryColumn}
-              value={row.category}
-            />
-          ) : null}
-          <SystemSettingMetadataRow
-            icon={<TagOutlined fontSize="small" />}
-            label={labels.dataTypeColumn}
-            value={dataTypeLabel}
-          />
-          {row.updatedAt ? (
-            <SystemSettingMetadataRow
-              icon={<CalendarMonthOutlined fontSize="small" />}
-              label={labels.updatedAtColumn}
-              value={formatDateTime(row.updatedAt, locale)}
-            />
-          ) : null}
+          <Typography sx={{ typography: "labelUppercase", color: theme => theme.palette.text.secondary, mb: 1 }}>
+            {labels.valueColumn}
+          </Typography>
+          <SystemSettingValueField row={row} canEdit={canManage} disabled={isSaving} onValueChange={onValueChange} />
         </Box>
 
-        {row.description ? (
-          <Typography sx={{ typography: "bodySm", wordBreak: "break-word" }}>
-            <Box component="span" sx={{ color: theme => theme.palette.text.secondary }}>
-              {labels.descriptionColumn}:{" "}
-            </Box>
-            {row.description}
-          </Typography>
-        ) : null}
+        <Box>
+          <SystemSettingMetadataRow
+            icon={<TagOutlined fontSize="small" />}
+            label={labels.descriptionColumn}
+            value={row.description}
+          />
+        </Box>
       </Stack>
     </MobileCardListItem>
   );
@@ -99,74 +67,35 @@ export function GeneralSettingsTabMobileView({
   loading,
   canManage,
   labels,
-  formOpen,
-  editRow,
-  deleteRow,
-  isDeleting,
-  onAdd,
-  onEdit,
-  onDelete,
-  onFormClose,
-  onDeleteClose,
-  onSaved,
-  onConfirmDelete,
+  savingCode,
+  onValueChange,
 }: Readonly<GeneralSettingsViewModel>) {
-  const locale = useAppLocale();
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ px: 2 }}>
         <Typography sx={{ typography: "titleLg", mb: 1 }}>{labels.title}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, mb: 2 }}>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
           {labels.subtitle}
         </Typography>
-        {canManage ? (
-          <MobilePrimaryPageAction onClick={onAdd} startIcon={<AddOutlined />} fullWidth>
-            {labels.addLabel}
-          </MobilePrimaryPageAction>
-        ) : null}
       </Box>
 
       <MobileCardList
         rows={rows}
         loading={loading}
         emptyMessage={labels.empty}
-        getKey={row => row.id}
+        getKey={row => row.code}
         paginationOptions={{ mode: "client" }}
         layout="edge-to-edge"
         renderItem={row => (
           <GeneralSettingCard
             row={row}
-            locale={locale}
             canManage={canManage}
             labels={labels}
-            onEdit={onEdit}
-            onDelete={onDelete}
+            savingCode={savingCode}
+            onValueChange={onValueChange}
           />
         )}
       />
-
-      {canManage ? (
-        <>
-          <SystemSettingFormDialog
-            open={formOpen}
-            row={editRow}
-            labels={labels}
-            onClose={onFormClose}
-            onSaved={onSaved}
-          />
-          <SystemSettingDeleteDialog
-            open={deleteRow != null}
-            row={deleteRow}
-            labels={labels}
-            isLoading={isDeleting}
-            onClose={onDeleteClose}
-            onConfirm={() => {
-              void onConfirmDelete();
-            }}
-          />
-        </>
-      ) : null}
     </Box>
   );
 }

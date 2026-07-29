@@ -7,7 +7,7 @@ VALUES (
   '',
   'string',
   'Staff profile ID of the teacher support coordinator displayed on the teacher schedule page',
-  'Scheduling',
+  'scheduling',
   NOW()
 )
 ON CONFLICT (key) DO UPDATE SET

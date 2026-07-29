@@ -1796,9 +1796,33 @@ export type SupportedPaymentLinkUpdateInput = {
   urlExample: string | null | undefined;
 };
 
+export type SystemSettingCategory =
+  | 'app'
+  | 'auth'
+  | 'billing'
+  | 'cache'
+  | 'communication'
+  | 'email'
+  | 'fx'
+  | 'general'
+  | 'meeting'
+  | 'push'
+  | 'redis'
+  | 'scheduling'
+  | 'security'
+  | 'sms'
+  | 'storage'
+  | 'system';
+
+export type SystemSettingDataType =
+  | 'boolean'
+  | 'integer'
+  | 'json'
+  | 'string';
+
 export type SystemSettingUpsertInput = {
-  category: string | null | undefined;
-  dataType: string | null | undefined;
+  category: SystemSettingCategory | null | undefined;
+  dataType: SystemSettingDataType | null | undefined;
   description: string | null | undefined;
   key: string;
   value: string;
@@ -4625,9 +4649,9 @@ export type DeleteEnvConfigEntryMutationVariables = Exact<{
 
 export type DeleteEnvConfigEntryMutation = DeleteEnvConfigEntryMutation_Mutation;
 
-export type SystemSettingFieldsFragment = { id: string | null, key: string | null, value: string | null, dataType: string | null, description: string | null, category: string | null, updatedByUserId: string | null, updatedAt: string | null };
+export type SystemSettingFieldsFragment = { id: string | null, key: string | null, value: string | null, dataType: Types.SystemSettingDataType | null, description: string | null, category: Types.SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
 
-export type SystemSettingsQuery_systemSettings_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: string | null, description: string | null, category: string | null, updatedByUserId: string | null, updatedAt: string | null };
+export type SystemSettingsQuery_systemSettings_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: Types.SystemSettingDataType | null, description: string | null, category: Types.SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
 
 export type SystemSettingsQuery_Query = { systemSettings: Array<SystemSettingsQuery_systemSettings_SystemSetting> | null };
 
@@ -4637,7 +4661,7 @@ export type SystemSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type SystemSettingsQuery = SystemSettingsQuery_Query;
 
-export type SystemSettingQuery_systemSetting_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: string | null, description: string | null, category: string | null, updatedByUserId: string | null, updatedAt: string | null };
+export type SystemSettingQuery_systemSetting_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: Types.SystemSettingDataType | null, description: string | null, category: Types.SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
 
 export type SystemSettingQuery_Query = { systemSetting: SystemSettingQuery_systemSetting_SystemSetting | null };
 
@@ -4649,7 +4673,7 @@ export type SystemSettingQueryVariables = Exact<{
 
 export type SystemSettingQuery = SystemSettingQuery_Query;
 
-export type UpsertSystemSettingMutation_upsertSystemSetting_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: string | null, description: string | null, category: string | null, updatedByUserId: string | null, updatedAt: string | null };
+export type UpsertSystemSettingMutation_upsertSystemSetting_SystemSetting = { id: string | null, key: string | null, value: string | null, dataType: Types.SystemSettingDataType | null, description: string | null, category: Types.SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
 
 export type UpsertSystemSettingMutation_Mutation = { upsertSystemSetting: UpsertSystemSettingMutation_upsertSystemSetting_SystemSetting | null };
 

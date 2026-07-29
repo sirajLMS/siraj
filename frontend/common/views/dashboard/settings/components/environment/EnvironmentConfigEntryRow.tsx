@@ -54,7 +54,7 @@ export function EnvironmentConfigEntryRow({
       <Typography
         sx={{
           typography: "bodyMd",
-          fontFamily: "monospace",
+          fontFamily: "var(--font-jetbrains-mono), monospace",
           wordBreak: "break-word",
           overflowWrap: "anywhere",
         }}

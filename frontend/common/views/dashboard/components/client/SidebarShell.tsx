@@ -17,6 +17,7 @@ import {
 import type { SxProps, Theme } from "@mui/material/styles";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
+import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistry";
 import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n";
 
@@ -70,7 +71,6 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
 }
 
 function SidebarNavItem({ item, isActive = false, isCollapsed, isFooter = false }: SidebarNavItemProps) {
-  const IconComponent = item.icon;
   const isLogout = item.href === "/logout";
 
   const button = (
@@ -94,7 +94,7 @@ function SidebarNavItem({ item, isActive = false, isCollapsed, isFooter = false 
           color: "inherit",
         }}
       >
-        <IconComponent fontSize="small" />
+        <NavIcon iconKey={item.iconKey} fontSize="small" />
       </ListItemIcon>
       {!isCollapsed && (
         <ListItemText
@@ -133,7 +133,6 @@ interface SidebarGroupHeaderProps {
 }
 
 function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: SidebarGroupHeaderProps) {
-  const IconComponent = group.icon;
   const Chevron = collapsed ? KeyboardArrowDownOutlined : KeyboardArrowUpOutlined;
 
   if (isCollapsed) {
@@ -159,9 +158,9 @@ function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: Sidebar
         },
       }}
     >
-      {IconComponent ? (
+      {group.iconKey ? (
         <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
-          <IconComponent fontSize="small" />
+          <NavIcon iconKey={group.iconKey} fontSize="small" />
         </ListItemIcon>
       ) : null}
       <ListItemText

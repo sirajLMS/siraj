@@ -1,50 +1,84 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
-import { AdminDashboardContainer } from "@/frontend/common/views/dashboard/admin/home/AdminDashboardContainer";
 import { DashboardRoleSkeleton } from "@/frontend/common/views/dashboard/dashboard/DashboardRoleSkeleton";
 import type { DashboardContainerViewModel } from "@/frontend/common/views/dashboard/dashboard/useDashboardContainerViewModel";
-import { ParentDashboardContainer } from "@/frontend/common/views/dashboard/parent/dashboard/ParentDashboardContainer";
-import { StudentDashboardContainer } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer";
-import { SupervisorDashboardContainer } from "@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer";
-import { TeacherDashboardContainer } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
+
+const LazyParentDashboardContainer = dynamic(
+  () =>
+    import("@/frontend/common/views/dashboard/parent/dashboard/ParentDashboardContainer").then(m => ({
+      default: m.ParentDashboardContainer,
+    })),
+  { ssr: true }
+);
+
+const LazyTeacherDashboardContainer = dynamic(
+  () =>
+    import("@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer").then(m => ({
+      default: m.TeacherDashboardContainer,
+    })),
+  { ssr: true }
+);
+
+const LazyStudentDashboardContainer = dynamic(
+  () =>
+    import("@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer").then(m => ({
+      default: m.StudentDashboardContainer,
+    })),
+  { ssr: true }
+);
+
+const LazySupervisorDashboardContainer = dynamic(
+  () =>
+    import("@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer").then(m => ({
+      default: m.SupervisorDashboardContainer,
+    })),
+  { ssr: true }
+);
+
+const LazyAdminDashboardContainer = dynamic(
+  () =>
+    import("@/frontend/common/views/dashboard/admin/home/AdminDashboardContainer").then(m => ({
+      default: m.AdminDashboardContainer,
+    })),
+  { ssr: true }
+);
 
 /**
- * Role dispatch for the dashboard body. Each role-specific container is wrapped
- * in `<Suspense fallback={<DashboardRoleSkeleton />} />` so the layout chrome
- * paints first and the role body streams in without layout shift — the
- * skeleton reserves the metric grid + content body proportions.
+ * Role dispatch for the dashboard body. Each role-specific container is lazy-loaded
+ * and wrapped in `<Suspense fallback={<DashboardRoleSkeleton />} />`.
  */
 export function DashboardContainerView(viewModel: Readonly<DashboardContainerViewModel>) {
   switch (viewModel.role) {
     case "parent":
       return (
         <Suspense fallback={<DashboardRoleSkeleton />}>
-          <ParentDashboardContainer />
+          <LazyParentDashboardContainer />
         </Suspense>
       );
     case "teacher":
       return (
         <Suspense fallback={<DashboardRoleSkeleton />}>
-          <TeacherDashboardContainer />
+          <LazyTeacherDashboardContainer />
         </Suspense>
       );
     case "student":
       return (
         <Suspense fallback={<DashboardRoleSkeleton />}>
-          <StudentDashboardContainer />
+          <LazyStudentDashboardContainer />
         </Suspense>
       );
     case "supervisor":
       return (
         <Suspense fallback={<DashboardRoleSkeleton />}>
-          <SupervisorDashboardContainer />
+          <LazySupervisorDashboardContainer />
         </Suspense>
       );
     default:
       return (
         <Suspense fallback={<DashboardRoleSkeleton />}>
-          <AdminDashboardContainer />
+          <LazyAdminDashboardContainer />
         </Suspense>
       );
   }

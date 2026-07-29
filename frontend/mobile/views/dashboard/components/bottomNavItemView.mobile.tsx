@@ -1,7 +1,8 @@
 "use client";
 
-import type { SvgIconComponent } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
+import type { NavIconKey } from "@/frontend/common/views/dashboard/config/navIconKeys";
+import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistry";
 import { Link } from "@/shared/i18n";
 
 export const BOTTOM_NAV_SCROLL_THRESHOLD = 5;
@@ -11,7 +12,7 @@ interface BottomNavItemViewMobileProps {
   readonly itemKey: string;
   readonly href: string;
   readonly label: string;
-  readonly icon: SvgIconComponent;
+  readonly iconKey: NavIconKey;
   readonly isActive: boolean;
   readonly isScrollable: boolean;
 }
@@ -20,12 +21,10 @@ export function BottomNavItemViewMobile({
   itemKey,
   href,
   label,
-  icon,
+  iconKey,
   isActive,
   isScrollable,
 }: Readonly<BottomNavItemViewMobileProps>) {
-  const IconComponent = icon;
-
   return (
     <Box
       key={itemKey}
@@ -49,7 +48,7 @@ export function BottomNavItemViewMobile({
         overflow: "hidden",
       })}
     >
-      <IconComponent sx={{ fontSize: 20, flexShrink: 0 }} />
+      <NavIcon iconKey={iconKey} sx={{ fontSize: 20, flexShrink: 0 }} />
       <Typography
         variant="labelSm"
         sx={{

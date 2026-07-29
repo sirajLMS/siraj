@@ -96,20 +96,37 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
   });
 
   test("Teacher denied from manager directory", async () => {
-    const teacherToken = await loginAndProvision("MgrDirTestDenied").then(r => r.teacherToken);
+    const denied = await loginAndProvision("MgrDirTestDenied");
+    const teacherToken = denied.teacherToken;
 
-    const result = await testClient.query({
-      query: managerDirectoryQueryDocument,
-      variables: { paginationArgs: null, roleFilter: null, statusFilter: null },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
+    try {
+      const result = await testClient.query({
+        query: managerDirectoryQueryDocument,
+        variables: { paginationArgs: null, roleFilter: null, statusFilter: null },
+        errorPolicy: "all",
+        context: {
+          headers: {
+            Authorization: `Bearer ${teacherToken}`,
+          },
         },
-      },
-    });
+      });
 
-    expect(result.error).toBeDefined();
+      expect(result.error).toBeDefined();
+    } finally {
+      // The helper-provisioned entities (student/parent/teacher users) must be
+      // cleaned up; otherwise the deterministic-prefix rows leak across runs
+      // and pollute `managerDirectory` counts (which read all staff profiles).
+      await cleanupTestEntities(denied.superAdminToken, {
+        studentUserId: denied.studentUserId,
+        teacherUserId: denied.teacherUserId,
+        parentUserId: denied.parentUserId,
+        studentId: denied.studentId,
+        teacherId: denied.teacherId,
+        parentId: denied.parentId,
+      }).catch(() => {
+        // Best-effort cleanup: a failed provisioning attempt may not have created all entities.
+      });
+    }
   });
 
   test("Super Admin can update any manager profile", async () => {

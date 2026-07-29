@@ -26,6 +26,7 @@
  */
 
 import { SystemSettingsRepository } from "@/backend/db/repo";
+import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import type { EnvConfigKeyDescriptor } from "@/backend/lib/env-config-keys";
 import { ENV_CONFIG_KEYS, isEnvConfigKeyExposedInSettings } from "@/backend/lib/env-config-keys";
 import { invalidateEnvConfigCache } from "@/backend/lib/env-config-resolver";
@@ -192,9 +193,9 @@ export async function upsertEnvConfigOverride(input: EnvConfigUpsertInput): Prom
   const row = await SystemSettingsRepository.upsertSetting({
     key: dbKey,
     value: input.value,
-    dataType: "string",
+    dataType: SystemSettingDataType.String,
     description: descriptor.description.en,
-    category: "system",
+    category: SystemSettingCategory.System,
     updatedByUserId: null,
   });
 

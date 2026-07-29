@@ -53,14 +53,16 @@ export default function proxy(request: NextRequest) {
   }
 
   const isDev = process.env.NODE_ENV === "development";
+  const devScriptSrc = isDev ? " https://va.vercel-scripts.com" : "";
+  const devConnectSrc = isDev ? " https://vitals.vercel-insights.com" : "";
   const cspValue =
     `default-src 'self'; ` +
-    `script-src 'self' 'nonce-${nonce}' https://vercel.live` +
+    `script-src 'self' 'nonce-${nonce}' https://vercel.live${devScriptSrc}` +
     (isDev ? " 'unsafe-eval' 'unsafe-inline'" : "") +
     `; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ` +
     `font-src 'self' https://fonts.gstatic.com; ` +
     `img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com https://*.blob.vercel-storage.com http://localhost http://127.0.0.1 https://localhost https://127.0.0.1; ` +
-    `connect-src 'self' https://*.upstash.com https://vercel.live https://*.blob.vercel-storage.com; ` +
+    `connect-src 'self' https://*.upstash.com https://vercel.live https://*.blob.vercel-storage.com${devConnectSrc}; ` +
     `frame-ancestors 'none';`;
 
   response.headers.set("x-pathname", pathname);

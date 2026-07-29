@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { isPeopleDirectoryEnabled } from "@/backend/lib/features/is-people-directory-enabled";
 import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DashboardClientProviders } from "@/frontend/common/providers/DashboardClientProviders";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
@@ -25,16 +26,18 @@ export async function DashboardLayoutContainer({
   const enablePeopleDirectory = await isPeopleDirectoryEnabled();
 
   return (
-    <DashboardClientBridge
-      userProfile={userProfile}
-      isSuperAdmin={isSuperAdmin}
-      roleLabel={adminT.roleLabel}
-      appTitle={coreLayoutT.appTitle}
-      logoAriaLabel={coreLayoutT.appTitle}
-      initialSidebarOpen={initialSidebarOpen}
-      enablePeopleDirectory={enablePeopleDirectory}
-    >
-      {children}
-    </DashboardClientBridge>
+    <DashboardClientProviders>
+      <DashboardClientBridge
+        userProfile={userProfile}
+        isSuperAdmin={isSuperAdmin}
+        roleLabel={adminT.roleLabel}
+        appTitle={coreLayoutT.appTitle}
+        logoAriaLabel={coreLayoutT.appTitle}
+        initialSidebarOpen={initialSidebarOpen}
+        enablePeopleDirectory={enablePeopleDirectory}
+      >
+        {children}
+      </DashboardClientBridge>
+    </DashboardClientProviders>
   );
 }

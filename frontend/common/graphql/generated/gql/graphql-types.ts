@@ -5760,8 +5760,8 @@ export type SystemAlert = {
 
 export type SystemSetting = {
   __typename?: 'SystemSetting';
-  category: Maybe<Scalars['String']['output']>;
-  dataType: Maybe<Scalars['String']['output']>;
+  category: Maybe<SystemSettingCategory>;
+  dataType: Maybe<SystemSettingDataType>;
   description: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   key: Maybe<Scalars['String']['output']>;
@@ -5770,9 +5770,35 @@ export type SystemSetting = {
   value: Maybe<Scalars['String']['output']>;
 };
 
+export enum SystemSettingCategory {
+  App = 'app',
+  Auth = 'auth',
+  Billing = 'billing',
+  Cache = 'cache',
+  Communication = 'communication',
+  Email = 'email',
+  Fx = 'fx',
+  General = 'general',
+  Meeting = 'meeting',
+  Push = 'push',
+  Redis = 'redis',
+  Scheduling = 'scheduling',
+  Security = 'security',
+  Sms = 'sms',
+  Storage = 'storage',
+  System = 'system'
+}
+
+export enum SystemSettingDataType {
+  Boolean = 'boolean',
+  Integer = 'integer',
+  Json = 'json',
+  String = 'string'
+}
+
 export type SystemSettingUpsertInput = {
-  category: InputMaybe<Scalars['String']['input']>;
-  dataType: InputMaybe<Scalars['String']['input']>;
+  category: InputMaybe<SystemSettingCategory>;
+  dataType: InputMaybe<SystemSettingDataType>;
   description: InputMaybe<Scalars['String']['input']>;
   key: Scalars['String']['input'];
   value: Scalars['String']['input'];

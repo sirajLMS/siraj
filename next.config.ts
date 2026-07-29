@@ -36,7 +36,13 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions"],
   turbopack: {},
   experimental: {
-    optimizePackageImports: ["@mui/x-data-grid", "@mui/x-date-pickers"],
+    optimizePackageImports: [
+      "@mui/x-data-grid",
+      "@mui/x-date-pickers",
+      "@mui/icons-material",
+      "@mui/material",
+      "date-fns",
+    ],
   },
   allowedDevOrigins: buildDevOrigins(), // NoSonar
   async headers() {

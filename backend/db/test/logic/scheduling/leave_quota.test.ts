@@ -6,6 +6,7 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { getServerTranslations } from "@/shared/locale";
@@ -48,8 +49,8 @@ async function setLeaveLimit(tx: DBTransaction, key: "teacher_max_leaves" | "stu
     .values({
       key,
       value,
-      dataType: "number",
-      category: "leave",
+      dataType: SystemSettingDataType.Integer,
+      category: SystemSettingCategory.Scheduling,
       description: `${key === "teacher_max_leaves" ? "Teacher" : "Student"} maximum leaves per month`,
       updatedAt: new Date(),
     })

@@ -86,5 +86,6 @@ export function getTestProductionEnv(
     IS_DEMO: "true",
     TEST_SERVER: "1",
     AUTH_COOKIE_SECURE: "false",
+    DISABLE_RATE_LIMITING: "true",
   };
 }

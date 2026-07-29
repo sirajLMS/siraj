@@ -2,7 +2,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { systemSettings } from "@/backend/db/schema";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
@@ -121,9 +121,9 @@ export namespace SystemSettingsService {
     await SystemSettingsRepository.upsertSetting({
       key: config.settingKey,
       value: bucketPath,
-      dataType: "string",
+      dataType: SystemSettingDataType.String,
       description: config.description,
-      category: "system",
+      category: SystemSettingCategory.System,
       updatedByUserId: userId,
     });
   }
@@ -227,9 +227,9 @@ export namespace SystemSettingsService {
   export type SystemSettingUpsertInput = {
     key: string;
     value: string;
-    dataType?: "string" | "integer";
+    dataType?: SystemSettingDataType;
     description: string;
-    category: "security" | "system" | "scheduling" | "communication";
+    category: SystemSettingCategory;
   };
 
   export async function upsertManySettings(inputs: SystemSettingUpsertInput[], updatedByUserId: string | null = null) {
@@ -254,10 +254,10 @@ export namespace SystemSettingsService {
     key: string;
     /** String value — DB stores all settings as strings; the UI casts for display. */
     value: string;
-    dataType?: "string" | "integer";
+    dataType?: SystemSettingDataType;
     description?: string;
-    /** Defaults to `"system"`. Kept generic since stage-3 owns `env::*` and FX uses `"billing"`. */
-    category?: string;
+    /** Defaults to `SystemSettingCategory.System` at the repo layer. Stage-3 owns `env::*` and FX uses `SystemSettingCategory.Billing`. */
+    category?: SystemSettingCategory;
   }
 
   /**
@@ -300,6 +300,43 @@ export namespace SystemSettingsService {
         }`
       );
     }
+  }
+
+  /**
+   * Serializes a raw string `value` for persistence based on its `dataType`.
+   *
+   * - `Boolean`: coerces to the canonical `"true"`/`"false"` string the repo
+   *   stores (and `getBooleanValue` parses). Accepts case-insensitive truthy
+   *   input from the GraphQL layer.
+   * - `Json`: validates `JSON.parse` succeeds BEFORE the repo write so the
+   *   service surfaces a typed error rather than persisting garbage that
+   *   `getJsonValue<T>` cannot round-trip. Throws `Error(tErrors.invalidInput)`
+   *   on parse failure — the GraphQL resolver maps the message via i18n.
+   * - `String` / `Integer`: no extra serialization — values are stored as
+   *   provided by the caller.
+   */
+  function serializeSettingValue(
+    value: string,
+    dataType: SystemSettingDataType | undefined,
+    tErrors: ErrorsLabels
+  ): string {
+    if (dataType === SystemSettingDataType.Boolean) {
+      return String(value.trim().toLowerCase() === "true");
+    }
+    if (dataType === SystemSettingDataType.Json) {
+      try {
+        JSON.parse(value);
+      } catch (error) {
+        logger.error(
+          `system-settings-service: invalid JSON value for setting. Error: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        throw new Error(tErrors.invalidInput, { cause: error });
+      }
+      return value;
+    }
+    return value;
   }
 
   /**
@@ -346,10 +383,12 @@ export namespace SystemSettingsService {
   ): Promise<SystemSettingSelectType> {
     await assertGeneralEditPermission(actorUserId, tErrors, input.key);
 
+    const persistedValue = serializeSettingValue(input.value, input.dataType, tErrors);
+
     const row = await SystemSettingsRepository.upsertSetting(
       {
         key: input.key,
-        value: input.value,
+        value: persistedValue,
         dataType: input.dataType,
         description: input.description,
         category: input.category,

@@ -124,7 +124,7 @@ export function PermissionGroupsDataGridDesktop({
           <Typography
             variant="labelMd"
             sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
               color: theme.palette.text.secondary,
             })}
           >

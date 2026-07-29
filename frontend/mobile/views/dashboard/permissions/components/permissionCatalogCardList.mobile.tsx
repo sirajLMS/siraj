@@ -31,7 +31,7 @@ export function PermissionCatalogCardListMobile({
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box
                   sx={theme => ({
-                    fontFamily: "JetBrains Mono, monospace",
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
                     typography: "bodyMd",
                     fontWeight: 500,
                     backgroundColor: theme.palette.primaryContainer,
