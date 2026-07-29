@@ -43,6 +43,67 @@ describe("ProfileService.resolvePageContext", () => {
     expect(context.scope).toBe(ProfileScope.OTHER);
     expect(context.targetUserId).toBe("admin-user");
   });
+
+  test("allows staff own profile edit when granted core edit_own permissions", async () => {
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(ParentRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue({
+      id: "staff-profile-1",
+      userId: "staff-user",
+    } as never);
+    spyOn(StudentRepository, "getStudentIdByUserId").mockResolvedValue(null);
+    spyOn(PermissionsService, "hasAnyPermission").mockImplementation(async (_userId, keys) => {
+      const list = keys as AppPermission[];
+      return (
+        list.includes(AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN) ||
+        list.includes(AppPermission.PROFILE_CORE_CONTACT_EDIT_OWN) ||
+        list.includes(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN)
+      );
+    });
+    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
+      permissions: [
+        AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN,
+        AppPermission.PROFILE_CORE_CONTACT_VIEW_OWN,
+        AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN,
+        AppPermission.PROFILE_CORE_CONTACT_EDIT_OWN,
+      ],
+      permissionGroups: [],
+      isSuperAdmin: false,
+      role: UserRole.STAFF,
+    });
+
+    const result = await ProfileService.resolvePageContext("staff-user", { mode: ProfileMode.EDIT });
+
+    expect(isRedirect(result)).toBe(false);
+    if (isRedirect(result)) {
+      throw new Error(`expected profile edit context, got redirect to ${result.redirect}`);
+    }
+    const context = result as ProfilePageContext;
+    expect(context.audience).toBe(ProfileAudience.STAFF);
+    expect(context.scope).toBe(ProfileScope.OWN);
+    expect(context.mode).toBe(ProfileMode.EDIT);
+  });
+
+  test("redirects staff own profile edit to /profile without edit_own permissions", async () => {
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(ParentRepository, "findByUserId").mockResolvedValue(null as never);
+    spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue({
+      id: "staff-profile-1",
+      userId: "staff-user",
+    } as never);
+    spyOn(StudentRepository, "getStudentIdByUserId").mockResolvedValue(null);
+    spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(false);
+    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
+      permissions: [AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN, AppPermission.PROFILE_CORE_CONTACT_VIEW_OWN],
+      permissionGroups: [],
+      isSuperAdmin: false,
+      role: UserRole.STAFF,
+    });
+
+    const result = await ProfileService.resolvePageContext("staff-user", { mode: ProfileMode.EDIT });
+
+    expect(result).toEqual({ redirect: "/profile" });
+  });
 });
 
 describe("ProfileService helpers", () => {

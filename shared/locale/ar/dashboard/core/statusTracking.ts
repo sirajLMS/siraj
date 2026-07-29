@@ -37,6 +37,7 @@ export const dashboardCoreStatusTrackingAr: StatusTrackingLabels = {
     student: "الطالب",
     teacher: "المعلم",
     schedule: "الجدول",
+    duration: "المدة",
     status: "الحالة",
     actions: "الإجراءات",
   },

@@ -1,5 +1,5 @@
 {
-  "manifestHash": "bcccf0c8267736524eab6f8474160b3733445aac7a7121fdb4fbeb36eca54f22",
+  "manifestHash": "9038641b59d47472c4a48e86b15d36c7d92b1426b6cce090a8888a69c5f44966",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -75,7 +75,7 @@
     },
     {
       "file": "6d-profile-fine-grained-only.sql",
-      "sha256": "f632c6356f6dc33e82915c9db79b8be65a3ed63d0ba47f1b472b636488a9fa3a"
+      "sha256": "13f03e5408b355563796c08666e1407cbea78f183908f4d3060598ff90aede77"
     },
     {
       "file": "7a-settings-permissions-enum.sql",
@@ -198,6 +198,7 @@
     "20260729030013_custom_timezone_dst_logic",
     "20260729030014_custom_user_notification_preferences",
     "20260729073854_custom_6d-profile-fine-grained-only",
-    "20260729150220_custom_3-system_permissions_and_groups"
+    "20260729150220_custom_3-system_permissions_and_groups",
+    "20260729152150_custom_6d-profile-fine-grained-only"
   ]
 }

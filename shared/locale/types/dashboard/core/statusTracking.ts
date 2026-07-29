@@ -52,6 +52,7 @@ export interface StatusTrackingLabels {
     readonly student: string;
     readonly teacher: string;
     readonly schedule: string;
+    readonly duration: string;
     readonly status: string;
     readonly actions: string;
   };

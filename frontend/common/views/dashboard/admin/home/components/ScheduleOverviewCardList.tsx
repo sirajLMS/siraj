@@ -1,8 +1,7 @@
 "use client";
 
 import { AccessTimeOutlined, CalendarTodayOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Avatar, Box, Skeleton, type Theme, Tooltip, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, Skeleton, Tooltip, Typography } from "@mui/material";
 import type * as React from "react";
 import { ActionIconLink } from "@/frontend/common/components/ui";
 import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
@@ -21,11 +20,24 @@ import {
   formatDurationMinutes,
   formatScheduleYourTime,
 } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
+import {
+  ScheduleSessionCardMetaBar,
+  ScheduleSessionCardPersonCell,
+  type ScheduleSessionMetaStatItem,
+  StyledScheduleSessionCardActions,
+  StyledScheduleSessionCardHeader,
+  StyledScheduleSessionCardHeaderMain,
+  StyledScheduleSessionPeopleRow,
+  StyledScheduleSessionTimeHighlight,
+  StyledScheduleSessionTimeHighlightContent,
+  StyledScheduleSessionTimeHighlightLabel,
+  StyledScheduleSessionTimeHighlightText,
+  scheduleSessionCardContentSx,
+} from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout";
 import type {
   ScheduleOverviewDataHeaders,
   ScheduleOverviewDataStatusLabels,
 } from "@/frontend/common/views/dashboard/types/dashboard";
-import { Link } from "@/shared/i18n";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface ScheduleOverviewCardProps {
@@ -37,270 +49,14 @@ export interface ScheduleOverviewCardProps {
   readonly locale: string;
 }
 
-function getNameInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) {
-    return "?";
-  }
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
-}
-
-type PersonAccentTone = "teacher" | "student" | "default";
-
-function getPersonAccentColor(tone: PersonAccentTone, theme: Theme): string {
-  switch (tone) {
-    case "teacher":
-      return theme.palette.onSurfaceVariant;
-    case "student":
-      return theme.palette.primary.main;
-    case "default":
-      return theme.palette.onSurface;
-  }
-}
-
-const StyledCardHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "flex-start",
-  justifyContent: "space-between",
-  gap: theme.spacing(1.5),
-  marginBottom: theme.spacing(1.5),
-}));
-
-const StyledCardHeaderMain = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-start",
-  gap: theme.spacing(0.75),
-  minWidth: 0,
-  flex: 1,
-}));
-
-const StyledCardActions = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(0.5),
-  flexShrink: 0,
-  padding: theme.spacing(0.25),
-  borderRadius: theme.layout.radius.card,
-  backgroundColor: theme.palette.surfaceContainerHigh,
-  border: `1px solid ${theme.palette.outlineVariant}`,
-}));
-
-const StyledTimeHighlight = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  marginBottom: theme.spacing(1.5),
-  padding: theme.spacing(1.25, 1.5),
-  borderRadius: theme.layout.radius.card,
-  backgroundColor: theme.palette.primaryContainer,
-  border: `1px solid ${theme.palette.outlineVariant}`,
-  minWidth: 0,
-  overflow: "hidden",
-}));
-
-const StyledTimeHighlightContent = styled(Box)({
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  minWidth: 0,
-  flex: 1,
-  overflow: "hidden",
-});
-
-const StyledTimeHighlightLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onPrimaryContainer,
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-  opacity: 0.8,
-}));
-
-const StyledTimeHighlightText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onPrimaryContainer,
-  fontWeight: 700,
-  minWidth: 0,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-}));
-
-const StyledMetaPanel = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "stretch",
-  marginBottom: theme.spacing(1.5),
-  borderRadius: theme.layout.radius.card,
-  backgroundColor: theme.palette.surfaceContainerHigh,
-  border: `1px solid ${theme.palette.outlineVariant}`,
-  overflow: "hidden",
-}));
-
-const StyledMetaTile = styled(Box)(({ theme }) => ({
-  flex: 1,
-  minWidth: 0,
-  padding: theme.spacing(1.25, 1),
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  textAlign: "center",
-  gap: theme.spacing(0.375),
-  "&:not(:last-child)": {
-    borderInlineEnd: `1px solid ${theme.palette.outlineVariant}`,
-  },
-}));
-
-const StyledMetaLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onSurfaceVariant,
-  display: "block",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  width: "100%",
-}));
-
-const StyledMetaValue = styled(Typography, {
-  shouldForwardProp: prop => prop !== "tone",
-})<{ tone?: PersonAccentTone }>(({ theme, tone = "default" }) => ({
-  color: getPersonAccentColor(tone, theme),
-  fontFamily: "var(--font-jetbrains-mono), monospace",
-  fontWeight: 700,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  width: "100%",
-}));
-
-const StyledPeopleRow = styled(Box)(({ theme }) => ({
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: theme.spacing(1.5),
-  paddingTop: theme.spacing(1.25),
-  borderTop: `1px solid ${theme.palette.outlineVariant}`,
-}));
-
-const StyledPersonCell = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "stretch",
-  gap: theme.spacing(0.75),
-  minWidth: 0,
-  overflow: "hidden",
-  "&:first-of-type": {
-    paddingInlineEnd: theme.spacing(0.75),
-    borderInlineEnd: `1px solid ${theme.palette.outlineVariant}`,
-  },
-}));
-
-const StyledPersonContentRow = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  minWidth: 0,
-  width: "100%",
-}));
-
-const StyledPersonAvatar = styled(Avatar)(({ theme }) => ({
-  width: 32,
-  height: 32,
-  flexShrink: 0,
-  fontSize: theme.typography.labelSm.fontSize,
-  fontWeight: theme.typography.labelSm.fontWeight,
-  backgroundColor: theme.palette.surfaceContainerHighest,
-  color: theme.palette.onSurfaceVariant,
-}));
-
-const StyledPersonText = styled(Box)({
-  minWidth: 0,
-  flex: 1,
-  overflow: "hidden",
-});
-
-const StyledPersonLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onSurfaceVariant,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-}));
-
-const StyledPersonName = styled(Typography, {
-  shouldForwardProp: prop => prop !== "tone",
-})<{ tone: PersonAccentTone }>(({ theme, tone }) => ({
-  color: getPersonAccentColor(tone, theme),
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  display: "block",
-}));
-
-interface MetaStatItem {
-  readonly label: string;
-  readonly value: React.ReactNode;
-  readonly tone?: PersonAccentTone;
-}
+type MetaStatItem = ScheduleSessionMetaStatItem;
 
 function ScheduleMetaStatBar({ items }: { readonly items: readonly MetaStatItem[] }) {
-  if (items.length === 0) {
-    return null;
-  }
-
-  return (
-    <StyledMetaPanel>
-      {items.map(item => (
-        <StyledMetaTile key={item.label}>
-          <StyledMetaLabel variant="labelMd" title={item.label}>
-            {item.label}
-          </StyledMetaLabel>
-          <StyledMetaValue variant="bodyMd" tone={item.tone}>
-            {item.value}
-          </StyledMetaValue>
-        </StyledMetaTile>
-      ))}
-    </StyledMetaPanel>
-  );
+  return <ScheduleSessionCardMetaBar items={items} />;
 }
 
-interface PersonCellProps {
-  readonly name: string;
-  readonly label: string;
-  readonly tone: PersonAccentTone;
-  readonly href?: string;
-  readonly avatarUrl?: string | null;
-}
-
-function PersonCell({ name, label, tone, href, avatarUrl }: PersonCellProps) {
-  return (
-    <StyledPersonCell>
-      <StyledPersonLabel variant="labelMd" title={label}>
-        {label}
-      </StyledPersonLabel>
-      <StyledPersonContentRow>
-        <StyledPersonAvatar src={avatarUrl ?? undefined} alt={name} aria-hidden={!avatarUrl}>
-          {getNameInitials(name)}
-        </StyledPersonAvatar>
-        <StyledPersonText>
-          <StyledPersonName
-            variant="bodyMd"
-            title={name}
-            tone={tone}
-            {...(href ? { component: Link, href } : {})}
-            sx={
-              href
-                ? {
-                    textDecoration: "none",
-                    "&:hover": { textDecoration: "underline" },
-                  }
-                : undefined
-            }
-          >
-            {name}
-          </StyledPersonName>
-        </StyledPersonText>
-      </StyledPersonContentRow>
-    </StyledPersonCell>
-  );
+function PersonCell(props: React.ComponentProps<typeof ScheduleSessionCardPersonCell>) {
+  return <ScheduleSessionCardPersonCell {...props} />;
 }
 
 interface ScheduleCardActionsProps {
@@ -317,7 +73,7 @@ function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }:
   const meeting = isJoinable ? row.effectiveMeeting : undefined;
 
   return (
-    <StyledCardActions>
+    <StyledScheduleSessionCardActions>
       <MeetingJoinAction
         variant="icon"
         joinUrl={joinUrl}
@@ -339,7 +95,7 @@ function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }:
           </ActionIconLink>
         </Tooltip>
       ) : null}
-    </StyledCardActions>
+    </StyledScheduleSessionCardActions>
   );
 }
 
@@ -399,19 +155,9 @@ export function ScheduleOverviewCard({
   const duration = formatDurationMinutes(row.duration);
 
   return (
-    <Box
-      sx={{
-        paddingBlock: 2,
-        paddingInline: 2,
-        opacity: isAbsent ? 0.85 : 1,
-        width: "100%",
-        minHeight: 220,
-        boxSizing: "border-box",
-        overflow: "hidden",
-      }}
-    >
-      <StyledCardHeader>
-        <StyledCardHeaderMain>
+    <Box sx={{ ...scheduleSessionCardContentSx, opacity: isAbsent ? 0.85 : 1 }}>
+      <StyledScheduleSessionCardHeader>
+        <StyledScheduleSessionCardHeaderMain>
           <ClassProfileLink
             href={classId ? classHref(classId) : undefined}
             name={courseName}
@@ -430,7 +176,7 @@ export function ScheduleOverviewCard({
             statusLabels={statusLabels}
             size="small"
           />
-        </StyledCardHeaderMain>
+        </StyledScheduleSessionCardHeaderMain>
 
         <ScheduleCardActions
           row={row}
@@ -439,21 +185,23 @@ export function ScheduleOverviewCard({
           studentId={studentId ?? undefined}
           classId={classId}
         />
-      </StyledCardHeader>
+      </StyledScheduleSessionCardHeader>
 
-      <StyledTimeHighlight>
+      <StyledScheduleSessionTimeHighlight>
         <AccessTimeOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onPrimaryContainer, flexShrink: 0 })} />
-        <StyledTimeHighlightContent>
-          <StyledTimeHighlightLabel variant="labelMd">{headers.yourTime}</StyledTimeHighlightLabel>
-          <StyledTimeHighlightText variant="bodyLg" title={yourTime}>
+        <StyledScheduleSessionTimeHighlightContent>
+          <StyledScheduleSessionTimeHighlightLabel variant="labelMd">
+            {headers.yourTime}
+          </StyledScheduleSessionTimeHighlightLabel>
+          <StyledScheduleSessionTimeHighlightText variant="bodyLg" title={yourTime}>
             {yourTime}
-          </StyledTimeHighlightText>
-        </StyledTimeHighlightContent>
-      </StyledTimeHighlight>
+          </StyledScheduleSessionTimeHighlightText>
+        </StyledScheduleSessionTimeHighlightContent>
+      </StyledScheduleSessionTimeHighlight>
 
       <ScheduleMetaStatBar items={buildScheduleMetaItems(headers, row, duration, showTimezones)} />
 
-      <StyledPeopleRow>
+      <StyledScheduleSessionPeopleRow>
         <PersonCell
           label={headers.teacher}
           name={teacherName}
@@ -468,23 +216,14 @@ export function ScheduleOverviewCard({
           href={studentId ? studentHref(studentId) : undefined}
           avatarUrl={row.student?.avatarUrl}
         />
-      </StyledPeopleRow>
+      </StyledScheduleSessionPeopleRow>
     </Box>
   );
 }
 
 export function ScheduleOverviewCardSkeleton() {
   return (
-    <Box
-      sx={{
-        paddingBlock: 2,
-        paddingInline: 2,
-        width: "100%",
-        minHeight: 220,
-        boxSizing: "border-box",
-        overflow: "hidden",
-      }}
-    >
+    <Box sx={scheduleSessionCardContentSx}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1 }}>
           <Skeleton variant="circular" width={40} height={40} />

@@ -37,6 +37,7 @@ export const dashboardCoreStatusTrackingEn: StatusTrackingLabels = {
     student: "Student",
     teacher: "Teacher",
     schedule: "Schedule",
+    duration: "Duration",
     status: "Status",
     actions: "Actions",
   },
