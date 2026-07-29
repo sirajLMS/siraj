@@ -55,7 +55,7 @@ export function TeacherDailyScheduleSectionDesktop({
 }: Readonly<TeacherDailyScheduleSectionProps>) {
   return (
     <StyledDesktopPanel elevation={0}>
-      <DesktopSectionPanel title={title}>
+      <DesktopSectionPanel contentPadding={false} title={title}>
         <StyledFilterContainer>
           <DateNavigatorDesktop
             dateValue={dateValue}

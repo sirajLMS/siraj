@@ -5,9 +5,9 @@ import type { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "r
 import { Controller } from "react-hook-form";
 import type { UserEntityOnboardingFieldsShape } from "@/frontend/common/components/onboarding/sections/types";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
-import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";

@@ -74,7 +74,7 @@ export function TeachersDesktopView({
         <TeacherMetricsRow metrics={metrics} labels={labels.metrics} />
       </Box>
 
-      <DesktopSectionPanel title={t.table.showingOf(rows.length, totalTeachers)}>
+      <DesktopSectionPanel contentPadding={false} title={t.table.showingOf(rows.length, totalTeachers)}>
         <TeacherDataGrid
           rows={rows}
           labels={labels}

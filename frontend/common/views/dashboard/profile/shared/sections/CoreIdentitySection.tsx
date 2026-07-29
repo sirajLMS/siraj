@@ -92,8 +92,7 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
     );
   }
 
-  const hasIdentityFields =
-    canViewField("core_identity") || props.additionalViewContent != null;
+  const hasIdentityFields = canViewField("core_identity") || props.additionalViewContent != null;
 
   if (!hasIdentityFields) {
     return null;

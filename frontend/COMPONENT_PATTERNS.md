@@ -69,6 +69,7 @@ DashboardLayoutMobile (px: 0 — edge-to-edge)
 - **Purpose:** Bordered `Paper` with optional title bar and action slot
 - **Use for:** Table sections, list sections with filter/export buttons
 - **Children:** `AppDataGrid` (desktop) or card lists (mobile)
+- **Desktop grid sections:** Use `DesktopSectionPanel` with `contentPadding={false}` so the data grid is flush under the title bar. The header bar keeps its own padding; only the grid body is edge-to-edge. For mixed sections (filters + grid), apply `desktopSectionContentInsetSx` to non-grid prefix content.
 
 ---
 

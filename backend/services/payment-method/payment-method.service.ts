@@ -180,7 +180,10 @@ export namespace PaymentMethodService {
 
     const revealSensitive = actorUserId === targetUserId;
     if (!revealSensitive) {
-      const canView = await PermissionsService.hasPermission(actorUserId, AppPermission.PROFILE_PAYMENT_METHODS_VIEW_OTHER);
+      const canView = await PermissionsService.hasPermission(
+        actorUserId,
+        AppPermission.PROFILE_PAYMENT_METHODS_VIEW_OTHER
+      );
       if (!canView) {
         return null;
       }

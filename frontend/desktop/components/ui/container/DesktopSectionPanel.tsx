@@ -4,6 +4,7 @@ import { alpha, Box, Paper, type SxProps, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container/desktopSectionContentInsetSx";
 
 export interface DesktopSectionPanelProps {
   readonly id?: string;
@@ -11,6 +12,12 @@ export interface DesktopSectionPanelProps {
   readonly subTitle?: string;
   readonly actions?: ReactNode;
   readonly children?: ReactNode;
+  /**
+   * When `true` (default), children are wrapped in padded inset.
+   * Set to `false` for data grids (`DesktopAppDataGrid`, `*DataGrid.desktop.tsx`)
+   * so the grid sits flush under the title bar. Use `desktopSectionContentInsetSx`
+   * on any non-grid prefix siblings (filters, toolbars) in the same section.
+   */
   readonly contentPadding?: boolean;
   readonly sx?: SxProps<Theme>;
 }
@@ -19,6 +26,8 @@ export interface DesktopSectionPanelProps {
  * Desktop section shell: bordered Paper with optional title bar + actions.
  * Title bar uses 3-unit horizontal / 2.5-unit vertical padding and supports
  * `flexWrap` so multiple action buttons stack gracefully on wider screens.
+ *
+ * Data grid sections must pass `contentPadding={false}` so the grid is edge-to-edge.
  */
 export function DesktopSectionPanel({
   id,
@@ -93,16 +102,7 @@ export function DesktopSectionPanel({
       return children;
     }
 
-    return (
-      <Box
-        sx={{
-          px: { xs: 2, md: 3 },
-          py: 2.5,
-        }}
-      >
-        {children}
-      </Box>
-    );
+    return <Box sx={desktopSectionContentInsetSx}>{children}</Box>;
   }
 }
 

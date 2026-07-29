@@ -1,8 +1,8 @@
 "use client";
 
-import { Box, CircularProgress } from "@mui/material";
-import type { ReactNode } from "react";
+import { Box } from "@mui/material";
 import { type ComponentType, Suspense } from "react";
+import { TabPanelFallback } from "@/frontend/common/views/dashboard/lib/TabPanelFallback";
 
 /**
  * Generic tab pane panels — replicates `SettingsTabPanels` for any tabbed
@@ -51,14 +51,6 @@ interface CreateTabbedPanePanelsOptions<TabId extends string> {
   readonly panels: readonly TabbedPaneDefinition<TabId>[];
   /** Optional aria prefix for tabpanel ids — defaults to "tabpanel". */
   readonly ariaPrefix?: string;
-}
-
-function TabPanelFallback(): ReactNode {
-  return (
-    <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-      <CircularProgress size={28} />
-    </Box>
-  );
 }
 
 function getTabPanelSx(isActive: boolean) {

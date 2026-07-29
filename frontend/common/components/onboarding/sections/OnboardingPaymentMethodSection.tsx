@@ -6,10 +6,7 @@ import type { Control, FieldErrors, FieldPath, FieldValues, Path } from "react-h
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
-import {
-  PaymentDirection,
-  PaymentMethodType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 

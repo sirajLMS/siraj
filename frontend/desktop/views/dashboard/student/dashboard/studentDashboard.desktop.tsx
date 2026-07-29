@@ -81,6 +81,7 @@ export function StudentDashboardDesktopView({
       </Box>
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.recentLessonReports}
         actions={
           <Button variant="text" sx={theme => ({ color: theme.palette.primary.main })} onClick={onViewHistory}>

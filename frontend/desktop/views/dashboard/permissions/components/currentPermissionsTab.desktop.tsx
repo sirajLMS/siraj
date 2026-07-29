@@ -125,7 +125,7 @@ export function CurrentPermissionsTabDesktop({
   }, [t, group.isSystem, onRevokePermission]);
 
   return (
-    <DesktopSectionPanel title={t.currentPermissions}>
+    <DesktopSectionPanel contentPadding={false} title={t.currentPermissions}>
       {permissionsCount === 0 && !loading ? (
         <StyledEmptyStateContainer>
           <StyledEmptyStateIconCircle>

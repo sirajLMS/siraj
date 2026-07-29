@@ -96,6 +96,7 @@ export function ParentsViewDesktop({
       <ParentsMetricGrid metrics={metrics} />
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={shell.records}
         actions={
           <Box sx={{ display: "flex", gap: 1 }}>

@@ -38,7 +38,7 @@ export function PermissionTabContentDesktop({
   return (
     <Box>
       {activeTab === "groups" && (
-        <DesktopSectionPanel title={t.groupsTab}>
+        <DesktopSectionPanel contentPadding={false} title={t.groupsTab}>
           <PermissionGroupsDataGridDesktop
             labels={labels}
             groups={groups}
@@ -68,7 +68,7 @@ export function PermissionTabContentDesktop({
       )}
 
       {activeTab === "overrides" && (
-        <DesktopSectionPanel title={t.overridesTab}>
+        <DesktopSectionPanel contentPadding={false} title={t.overridesTab}>
           <UserOverridesDataGridDesktop
             labels={labels}
             users={users}

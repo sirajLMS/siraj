@@ -4,10 +4,7 @@ export const STUDENT_PROFILE_TABS = ["profile", "status", "classes", "quota", "h
 
 export type StudentProfileTab = (typeof STUDENT_PROFILE_TABS)[number];
 
-const PROFILE_TAB_GROUPS: readonly StudentFieldGroupKey[] = [
-  "student_identity",
-  "student_parent",
-];
+const PROFILE_TAB_GROUPS: readonly StudentFieldGroupKey[] = ["student_identity", "student_parent"];
 
 const STATUS_TAB_GROUPS: readonly StudentFieldGroupKey[] = [
   "student_identity",

@@ -55,9 +55,9 @@ type TeacherExtensionProfileSectionEditProps<T extends TeacherExtensionFormField
   readonly control: Control<T>;
 };
 
-type TeacherExtensionProfileSectionProps<T extends TeacherExtensionFormFields = TeacherAdminEditFormData | TeacherOwnEditFormData> =
-  | TeacherExtensionProfileSectionViewProps
-  | TeacherExtensionProfileSectionEditProps<T>;
+type TeacherExtensionProfileSectionProps<
+  T extends TeacherExtensionFormFields = TeacherAdminEditFormData | TeacherOwnEditFormData,
+> = TeacherExtensionProfileSectionViewProps | TeacherExtensionProfileSectionEditProps<T>;
 
 /**
  * Teacher extension fields (nationality, address, DOB, gender, qualifications) —

@@ -40,6 +40,7 @@ export function ParentBillingDesktopView({
       <DesktopPageHeader title={labels.parentPageTitle} subtitle={labels.parentPageSubtitle} />
       <BillingMetricsRowDesktop metrics={parentMetrics} loading={summaryLoading} />
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
         actions={

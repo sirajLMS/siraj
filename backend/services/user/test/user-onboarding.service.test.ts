@@ -53,9 +53,7 @@ async function expectCreateUserOfTypeError(
     readonly listAllGroups?: Array<{ id: string; slug: SystemPermissionGroupSlug }>;
   }
 ): Promise<void> {
-  const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(
-    spies?.hasPermission ?? true
-  );
+  const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(spies?.hasPermission ?? true);
   const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(spies?.existsByEmail ?? false);
   const listAllGroupsSpy =
     spies?.listAllGroups === undefined

@@ -96,7 +96,10 @@ export const PAGE_PERMISSIONS = {
   studentSelfDashboard: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
   studentCredits: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
   studentOwnHistory: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
-  studentSelfProfile: [AppPermission.StudentViewOwnDashboard, AppPermission.ProfileCoreIdentityViewOwn] as PagePermissions,
+  studentSelfProfile: [
+    AppPermission.StudentViewOwnDashboard,
+    AppPermission.ProfileCoreIdentityViewOwn,
+  ] as PagePermissions,
   supervisorDashboard: [AppPermission.SupervisorViewDashboard] as PagePermissions,
   lessonReportsReview: [AppPermission.LessonReportsReview, AppPermission.LessonReportsApprove] as PagePermissions,
   teacherDuesView: [AppPermission.TeacherDuesView] as PagePermissions,

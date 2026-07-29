@@ -1,8 +1,8 @@
 "use client";
 
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { studentFieldGroupGraphqlPermission } from "@/shared/lib/field-group-permission-key";
 
@@ -19,8 +19,7 @@ export function useStudentFieldAccess(options: UseStudentFieldAccessOptions = {}
   const hasPermission = useUserStore(state => state.hasPermission);
   const profileContext = useStudentProfileContext();
 
-  const isAssociatedViewer =
-    options.isAssociatedViewerOverride ?? profileContext?.profile?.isAssociatedViewer ?? false;
+  const isAssociatedViewer = options.isAssociatedViewerOverride ?? profileContext?.profile?.isAssociatedViewer ?? false;
 
   const resolvePermission = (
     groupKey: StudentFieldGroupKey,

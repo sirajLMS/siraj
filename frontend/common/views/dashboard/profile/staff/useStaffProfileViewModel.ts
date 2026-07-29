@@ -4,8 +4,8 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import {
   type CurrencyCode,
-  type ProfileMode,
   type IanaTimezone,
+  type ProfileMode,
   ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";

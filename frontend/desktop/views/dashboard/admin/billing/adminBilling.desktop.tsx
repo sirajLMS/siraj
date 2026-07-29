@@ -87,6 +87,7 @@ function StudentCreditSection({
   return (
     <DesktopSectionPanel
       id="student-credit-section"
+      contentPadding={false}
       title={labels.sections.studentCreditStatus}
       actions={
         isNegativeFilter ? (
@@ -171,6 +172,7 @@ export function AdminBillingDesktopView({
       <BillingMetricsRowDesktop metrics={adminMetrics} loading={summaryLoading} />
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.sections.recentInvoices}
         actions={
           <BillingSearchBar

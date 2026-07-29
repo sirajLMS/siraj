@@ -6,12 +6,12 @@ import {
   OnboardingPaymentMethodSection,
   UserEntityFieldsSection,
 } from "@/frontend/common/components/onboarding/sections";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
 import { SalaryDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";
 import { TeacherExtensionSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/TeacherExtensionSection";
 import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingViewModel";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   DesktopFormErrorSnackbar,
   DesktopFormSuccessSnackbar,
@@ -106,12 +106,7 @@ export function TeacherOnboardingDesktopView({
             />
           </DesktopSectionPanel>
           <DesktopSectionPanel title={labels.sections.teacherInfo}>
-            <TeacherExtensionSection
-              register={register}
-              control={control}
-              errors={errors}
-              labels={labels}
-            />
+            <TeacherExtensionSection register={register} control={control} errors={errors} labels={labels} />
           </DesktopSectionPanel>
           <DesktopSectionPanel title={labels.sections.officialDetails}>
             <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />

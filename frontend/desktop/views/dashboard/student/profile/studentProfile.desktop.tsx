@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  AssignmentOutlined,
-  CalendarTodayOutlined,
-  PersonOutlined,
-  SchoolOutlined,
-} from "@mui/icons-material";
+import { AssignmentOutlined, CalendarTodayOutlined, PersonOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Grid, Stack } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
@@ -180,7 +175,5 @@ export function StudentProfileDesktopView({
     );
   }
 
-  return (
-    <StudentOwnProfileView profile={profile} labels={labels} formattedDateOfBirth={formattedDateOfBirth} />
-  );
+  return <StudentOwnProfileView profile={profile} labels={labels} formattedDateOfBirth={formattedDateOfBirth} />;
 }

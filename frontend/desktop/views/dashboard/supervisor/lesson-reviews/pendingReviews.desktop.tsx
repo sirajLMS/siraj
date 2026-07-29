@@ -205,7 +205,7 @@ export function PendingReviewsDesktopView(props: Readonly<PendingReviewsViewMode
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, lg: selectedReport ? 8 : 12 }}>
-          <DesktopSectionPanel sx={{ flex: 1 }}>
+          <DesktopSectionPanel contentPadding={false} sx={{ flex: 1 }}>
             <DesktopAppDataGrid<PendingReviewRow>
               rows={rows}
               columns={columns}

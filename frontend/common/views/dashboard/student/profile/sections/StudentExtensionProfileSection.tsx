@@ -10,11 +10,14 @@ import { AppDatePicker } from "@/frontend/common/components/ui/form";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import type {
   StudentProfileEditableSectionProps,
   StudentProfileSectionBaseProps,
+  StudentProfileSectionLabels,
 } from "@/frontend/common/views/dashboard/student/profile/sections/studentProfileSection.types";
+import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 
 type StudentExtensionProfileSectionProps = StudentProfileSectionBaseProps &
@@ -23,92 +26,104 @@ type StudentExtensionProfileSectionProps = StudentProfileSectionBaseProps &
     readonly timezoneOverrideLabel?: string;
   };
 
-export function StudentExtensionProfileSection({
-  profile,
-  labels,
+type StudentExtensionProfileEditSectionProps = {
+  readonly sectionTitle: string;
+  readonly labels: StudentProfileSectionLabels;
+  readonly draft: StudentPortalProfileEditDraft;
+  readonly onDraftChange: StudentProfileEditableSectionProps["onDraftChange"];
+  readonly timezoneOverrideLabel?: string;
+};
+
+type StudentExtensionProfileViewSectionProps = {
+  readonly sectionTitle: string;
+  readonly labels: StudentProfileSectionLabels;
+  readonly profile: StudentProfileRow;
+  readonly notSetLabel: string;
+  readonly dateOfBirthDisplay: string;
+  readonly showDateOfBirth: boolean;
+  readonly showGender: boolean;
+  readonly showLanguage: boolean;
+  readonly showTimezoneOverride: boolean;
+  readonly timezoneOverrideLabel?: string;
+};
+
+function StudentExtensionProfileEditSection({
   sectionTitle,
-  notSetLabel,
-  enforceFieldAccess = false,
-  isEditing = false,
+  labels,
   draft,
   onDraftChange,
-  formattedDateOfBirth,
   timezoneOverrideLabel,
-}: Readonly<StudentExtensionProfileSectionProps>) {
-  const { canView, canViewField } = useStudentFieldAccess();
-  const canViewIdentity = enforceFieldAccess ? canView("student_identity") : true;
-
-  if (!canViewIdentity) {
-    return null;
-  }
-
-  const dateOfBirthDisplay = formattedDateOfBirth ?? profile.dateOfBirth ?? notSetLabel;
-  const showDateOfBirth = enforceFieldAccess ? canViewField("student_identity") : true;
-  const showGender = enforceFieldAccess ? canViewField("student_identity") : true;
-  const showLanguage = enforceFieldAccess ? canViewField("student_identity") : true;
-  const showTimezoneOverride = enforceFieldAccess
-    ? canViewField("student_identity")
-    : Boolean(timezoneOverrideLabel);
-
-  if (isEditing && draft && onDraftChange) {
-    return (
-      <SectionPanel title={sectionTitle}>
-        <Stack spacing={2}>
-          <AppDatePicker
-            label={labels.dateOfBirth}
-            value={draft.dateOfBirth ? new Date(draft.dateOfBirth) : null}
-            onChange={date => {
-              onDraftChange({
-                dateOfBirth: date && !Number.isNaN(date.getTime()) ? date.toISOString().slice(0, 10) : "",
-              });
+}: Readonly<StudentExtensionProfileEditSectionProps>) {
+  return (
+    <SectionPanel title={sectionTitle}>
+      <Stack spacing={2}>
+        <AppDatePicker
+          label={labels.dateOfBirth}
+          value={draft.dateOfBirth ? new Date(draft.dateOfBirth) : null}
+          onChange={date => {
+            onDraftChange({
+              dateOfBirth: date && !Number.isNaN(date.getTime()) ? date.toISOString().slice(0, 10) : "",
+            });
+          }}
+          slotProps={{ textField: { size: "small", fullWidth: true } }}
+        />
+        <FormControl fullWidth size="small">
+          <InputLabel id="student-profile-gender-label" shrink>
+            {labels.gender}
+          </InputLabel>
+          <Select
+            labelId="student-profile-gender-label"
+            label={labels.gender}
+            value={draft.gender}
+            onChange={e => onDraftChange({ gender: e.target.value as Gender | "" })}
+          >
+            <MenuItem value="">—</MenuItem>
+            <MenuItem value={Gender.Male}>{Gender.Male}</MenuItem>
+            <MenuItem value={Gender.Female}>{Gender.Female}</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl fullWidth size="small">
+          <InputLabel id="student-profile-language-label" shrink>
+            {labels.language}
+          </InputLabel>
+          <Select
+            labelId="student-profile-language-label"
+            label={labels.language}
+            value={draft.language}
+            onChange={e => onDraftChange({ language: e.target.value as AppLanguage | "" })}
+          >
+            <MenuItem value="">—</MenuItem>
+            <MenuItem value={AppLanguage.En}>English</MenuItem>
+            <MenuItem value={AppLanguage.Ar}>العربية</MenuItem>
+          </Select>
+        </FormControl>
+        {timezoneOverrideLabel ? (
+          <TimezoneSelect
+            value={draft.timezoneOverride ? toGraphqlIanaTimezone(draft.timezoneOverride) : null}
+            onChangeAction={value => {
+              onDraftChange({ timezoneOverride: value ? fromGraphqlIanaTimezone(value) : "" });
             }}
-            slotProps={{ textField: { size: "small", fullWidth: true } }}
+            label={timezoneOverrideLabel}
+            fullWidth
           />
-          <FormControl fullWidth size="small">
-            <InputLabel id="student-profile-gender-label" shrink>
-              {labels.gender}
-            </InputLabel>
-            <Select
-              labelId="student-profile-gender-label"
-              label={labels.gender}
-              value={draft.gender}
-              onChange={e => onDraftChange({ gender: e.target.value as Gender | "" })}
-            >
-              <MenuItem value="">—</MenuItem>
-              <MenuItem value={Gender.Male}>{Gender.Male}</MenuItem>
-              <MenuItem value={Gender.Female}>{Gender.Female}</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth size="small">
-            <InputLabel id="student-profile-language-label" shrink>
-              {labels.language}
-            </InputLabel>
-            <Select
-              labelId="student-profile-language-label"
-              label={labels.language}
-              value={draft.language}
-              onChange={e => onDraftChange({ language: e.target.value as AppLanguage | "" })}
-            >
-              <MenuItem value="">—</MenuItem>
-              <MenuItem value={AppLanguage.En}>English</MenuItem>
-              <MenuItem value={AppLanguage.Ar}>العربية</MenuItem>
-            </Select>
-          </FormControl>
-          {timezoneOverrideLabel ? (
-            <TimezoneSelect
-              value={draft.timezoneOverride ? toGraphqlIanaTimezone(draft.timezoneOverride) : null}
-              onChangeAction={value => {
-                onDraftChange({ timezoneOverride: value ? fromGraphqlIanaTimezone(value) : "" });
-              }}
-              label={timezoneOverrideLabel}
-              fullWidth
-            />
-          ) : null}
-        </Stack>
-      </SectionPanel>
-    );
-  }
+        ) : null}
+      </Stack>
+    </SectionPanel>
+  );
+}
 
+function StudentExtensionProfileViewSection({
+  sectionTitle,
+  labels,
+  profile,
+  notSetLabel,
+  dateOfBirthDisplay,
+  showDateOfBirth,
+  showGender,
+  showLanguage,
+  showTimezoneOverride,
+  timezoneOverrideLabel,
+}: Readonly<StudentExtensionProfileViewSectionProps>) {
   return (
     <SectionPanel title={sectionTitle}>
       <Stack spacing={1}>
@@ -130,5 +145,66 @@ export function StudentExtensionProfileSection({
         ) : null}
       </Stack>
     </SectionPanel>
+  );
+}
+
+function getIdentityFieldVisibility(
+  enforceFieldAccess: boolean,
+  canViewField: (field: "student_identity") => boolean,
+  timezoneOverrideLabel?: string
+) {
+  const canViewIdentityField = enforceFieldAccess ? canViewField("student_identity") : true;
+
+  return {
+    showDateOfBirth: canViewIdentityField,
+    showGender: canViewIdentityField,
+    showLanguage: canViewIdentityField,
+    showTimezoneOverride: enforceFieldAccess ? canViewIdentityField : Boolean(timezoneOverrideLabel),
+  };
+}
+
+export function StudentExtensionProfileSection({
+  profile,
+  labels,
+  sectionTitle,
+  notSetLabel,
+  enforceFieldAccess = false,
+  isEditing = false,
+  draft,
+  onDraftChange,
+  formattedDateOfBirth,
+  timezoneOverrideLabel,
+}: Readonly<StudentExtensionProfileSectionProps>) {
+  const { canView, canViewField } = useStudentFieldAccess();
+  const canViewIdentity = enforceFieldAccess ? canView("student_identity") : true;
+
+  if (!canViewIdentity) {
+    return null;
+  }
+
+  if (isEditing && draft && onDraftChange) {
+    return (
+      <StudentExtensionProfileEditSection
+        sectionTitle={sectionTitle}
+        labels={labels}
+        draft={draft}
+        onDraftChange={onDraftChange}
+        timezoneOverrideLabel={timezoneOverrideLabel}
+      />
+    );
+  }
+
+  const visibility = getIdentityFieldVisibility(enforceFieldAccess, canViewField, timezoneOverrideLabel);
+
+  return (
+    <StudentExtensionProfileViewSection
+      sectionTitle={sectionTitle}
+      labels={labels}
+      profile={profile}
+      notSetLabel={notSetLabel}
+      dateOfBirthDisplay={formattedDateOfBirth ?? profile.dateOfBirth ?? notSetLabel}
+      timezoneOverrideLabel={timezoneOverrideLabel}
+      {...visibility}
+    />
   );
 }

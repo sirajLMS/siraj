@@ -39,6 +39,7 @@ export function UserBillingProfileDesktopView({
       <DesktopPageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} />
       <BillingMetricsRowDesktop metrics={metrics} loading={summaryLoading} />
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
         actions={

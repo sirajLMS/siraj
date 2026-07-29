@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { AppLanguage, CurrencyCode, Gender, IanaTimezone, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppLanguage,
+  CurrencyCode,
+  Gender,
+  IanaTimezone,
+  StudentStatus,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export const studentOnboardingSchema = z.object({
   parentId: z.string().optional().nullable(),

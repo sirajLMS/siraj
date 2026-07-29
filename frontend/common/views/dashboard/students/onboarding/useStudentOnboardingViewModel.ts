@@ -12,7 +12,7 @@ import {
 } from "react-hook-form";
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
-import { StudentStatus, CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCreateStudentOnboarding } from "@/frontend/common/hooks/useCreateStudentOnboarding";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import {

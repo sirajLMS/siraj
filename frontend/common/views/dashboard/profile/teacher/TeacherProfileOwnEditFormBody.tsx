@@ -6,11 +6,11 @@ import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarIm
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import type { ProfilePersonalFieldLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
-import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
 import type { toTeacherSectionLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
 import type { TeacherOwnEditFormData } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
+import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 
 type TeacherProfileOwnEditFormBodyProps = {
   readonly canEdit: (groupKey: ProfileFieldGroupKey) => boolean;

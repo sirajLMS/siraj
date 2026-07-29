@@ -67,7 +67,7 @@ export function ReportsDesktopView({
         />
       </BaseCard>
 
-      <DesktopSectionPanel>
+      <DesktopSectionPanel contentPadding={false}>
         <ReportsDataGridDesktop
           rows={rows}
           labels={labels.tableLabels}

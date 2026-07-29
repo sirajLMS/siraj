@@ -25,7 +25,7 @@ type CoreContactViewProps = {
   readonly mode: "view";
   readonly scope?: ProfileScope;
   readonly phone: string | null | undefined;
-  readonly timezone?: string | null | undefined;
+  readonly timezone?: string | null;
   readonly sectionTitle: string;
   readonly phoneLabel: string;
   readonly timezoneLabel?: string;
@@ -132,9 +132,7 @@ export function CoreContactSection<T extends CoreContactFormFields = CoreContact
   }
 
   if (props.mode === "edit") {
-    return (
-      <CoreContactEditSection props={props} contactEditable={canEdit("core_contact")} />
-    );
+    return <CoreContactEditSection props={props} contactEditable={canEdit("core_contact")} />;
   }
 
   const showPhone = canViewField("core_contact");

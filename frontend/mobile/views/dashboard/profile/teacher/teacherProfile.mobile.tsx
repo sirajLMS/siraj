@@ -2,8 +2,8 @@
 
 import { Box } from "@mui/material";
 import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
+import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/CompensationSection";
 import { StatsSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/StatsSection";

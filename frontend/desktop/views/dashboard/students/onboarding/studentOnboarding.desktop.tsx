@@ -1,9 +1,7 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import {
-  UserEntityFieldsSection,
-} from "@/frontend/common/components/onboarding/sections";
+import { UserEntityFieldsSection } from "@/frontend/common/components/onboarding/sections";
 import { StudentExtensionSection } from "@/frontend/common/views/dashboard/students/onboarding/components/StudentExtensionSection";
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
 import { DesktopFormSuccessSnackbar, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";

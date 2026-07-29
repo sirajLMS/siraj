@@ -4,4 +4,5 @@ export type { DesktopHorizontalScrollRowProps } from "@/frontend/desktop/compone
 export { DesktopHorizontalScrollRow } from "@/frontend/desktop/components/ui/container/DesktopHorizontalScrollRow";
 export type { DesktopSectionPanelProps } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 export { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
+export { desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container/desktopSectionContentInsetSx";
 export * from "@/frontend/desktop/components/ui/container/page";

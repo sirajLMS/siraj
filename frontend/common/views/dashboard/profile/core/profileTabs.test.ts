@@ -12,7 +12,10 @@ describe("getVisibleProfileTabs", () => {
     const tabs = getVisibleProfileTabs({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Other,
-      hasPermission: hasPermissions([AppPermission.ProfileStaffPermissionsEditOther, AppPermission.ProfileCoreIdentityViewOwn]),
+      hasPermission: hasPermissions([
+        AppPermission.ProfileStaffPermissionsEditOther,
+        AppPermission.ProfileCoreIdentityViewOwn,
+      ]),
     });
 
     expect(tabs.some(tab => tab.id === "permissions")).toBe(false);
@@ -22,7 +25,10 @@ describe("getVisibleProfileTabs", () => {
     const tabs = getVisibleProfileTabs({
       audience: ProfileAudience.Staff,
       scope: ProfileScope.Other,
-      hasPermission: hasPermissions([AppPermission.ProfileStaffPermissionsViewOther, AppPermission.ProfileCoreIdentityViewOwn]),
+      hasPermission: hasPermissions([
+        AppPermission.ProfileStaffPermissionsViewOther,
+        AppPermission.ProfileCoreIdentityViewOwn,
+      ]),
     });
 
     expect(tabs.some(tab => tab.id === "permissions")).toBe(true);
@@ -32,7 +38,10 @@ describe("getVisibleProfileTabs", () => {
     const tabs = getVisibleProfileTabs({
       audience: ProfileAudience.Parent,
       scope: ProfileScope.Own,
-      hasPermission: hasPermissions([AppPermission.ProfilePaymentMethodsViewOwn, AppPermission.ProfileCoreIdentityViewOwn]),
+      hasPermission: hasPermissions([
+        AppPermission.ProfilePaymentMethodsViewOwn,
+        AppPermission.ProfileCoreIdentityViewOwn,
+      ]),
     });
 
     expect(tabs.some(tab => tab.id === "paymentMethods")).toBe(true);
@@ -42,7 +51,10 @@ describe("getVisibleProfileTabs", () => {
     const tabs = getVisibleProfileTabs({
       audience: ProfileAudience.Teacher,
       scope: ProfileScope.Own,
-      hasPermission: hasPermissions([AppPermission.ProfileMeetingConfigsViewOwn, AppPermission.ProfileCoreIdentityViewOwn]),
+      hasPermission: hasPermissions([
+        AppPermission.ProfileMeetingConfigsViewOwn,
+        AppPermission.ProfileCoreIdentityViewOwn,
+      ]),
     });
 
     expect(tabs.some(tab => tab.id === "meeting")).toBe(true);

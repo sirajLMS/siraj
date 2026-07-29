@@ -3,14 +3,16 @@
 import type { Control, UseFormRegister } from "react-hook-form";
 import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CoreContactSection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreContactSection";
+import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
+import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type {
   TeacherAdminEditFormData,
   TeacherOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 
-type ContactSectionLabels = Pick<TeacherProfileViewLabels, "teacher"> & { readonly baseLabels: ProfileSharedBaseLabels };
+type ContactSectionLabels = Pick<TeacherProfileViewLabels, "teacher"> & {
+  readonly baseLabels: ProfileSharedBaseLabels;
+};
 
 type ContactSectionOwnEditProps = {
   readonly labels: ContactSectionLabels;

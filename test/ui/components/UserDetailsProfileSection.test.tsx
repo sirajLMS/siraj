@@ -2,8 +2,8 @@ import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 expect.extend(matchers);
@@ -27,10 +27,7 @@ describe("UserDetailsProfileSection", () => {
       />,
       {
         locale: "en",
-        permissions: [
-          AppPermission.ProfileCoreContactViewOwn,
-          AppPermission.ProfileCoreIdentityViewOwn,
-        ],
+        permissions: [AppPermission.ProfileCoreContactViewOwn, AppPermission.ProfileCoreIdentityViewOwn],
       }
     );
 

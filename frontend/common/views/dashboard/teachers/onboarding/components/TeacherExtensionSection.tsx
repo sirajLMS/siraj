@@ -2,6 +2,7 @@
 
 import { Grid, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import type { OnboardingSectionTranslations } from "@/frontend/common/components/onboarding/sections/types";
 import {
   UserPersonalAddressField,
   UserPersonalDateOfBirthField,
@@ -9,7 +10,6 @@ import {
   UserPersonalNationalityField,
   UserPersonalQualificationsField,
 } from "@/frontend/common/components/onboarding/sections/userPersonalFieldComponents";
-import type { OnboardingSectionTranslations } from "@/frontend/common/components/onboarding/sections/types";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers/onboarding";
@@ -29,12 +29,7 @@ function toSectionTranslations(labels: TeacherOnboardingLabels): OnboardingSecti
   };
 }
 
-export function TeacherExtensionSection({
-  register,
-  control,
-  errors,
-  labels,
-}: Readonly<TeacherExtensionSectionProps>) {
+export function TeacherExtensionSection({ register, control, errors, labels }: Readonly<TeacherExtensionSectionProps>) {
   const translate = toSectionTranslations(labels);
 
   return (

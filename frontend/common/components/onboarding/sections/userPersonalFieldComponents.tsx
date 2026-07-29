@@ -3,7 +3,10 @@
 import { FormControl, FormHelperText, Grid, TextField } from "@mui/material";
 import type { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { OnboardingSectionTranslations, UserPersonalFieldsShape } from "@/frontend/common/components/onboarding/sections/types";
+import type {
+  OnboardingSectionTranslations,
+  UserPersonalFieldsShape,
+} from "@/frontend/common/components/onboarding/sections/types";
 import { AppDatePicker, outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";

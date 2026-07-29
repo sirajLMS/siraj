@@ -89,6 +89,7 @@ export function StatusTrackingDesktopView({
       <DesktopMetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={shell.todaysClassSchedule}
         actions={<StyledTotalSessionsBadge>{shell.totalSessions(totalSessions)}</StyledTotalSessionsBadge>}
       >

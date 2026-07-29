@@ -322,6 +322,7 @@ export function StudentHistoryDesktopView({
       </DesktopSectionPanel>
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={labels.lessonHistory}
         actions={
           <HistoryFilters

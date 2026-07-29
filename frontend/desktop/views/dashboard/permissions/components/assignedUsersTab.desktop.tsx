@@ -242,7 +242,7 @@ function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlot
   ]);
 
   return (
-    <DesktopSectionPanel title={labels.assignedGroupMembers}>
+    <DesktopSectionPanel contentPadding={false} title={labels.assignedGroupMembers}>
       <DesktopAppDataGrid<GroupUser>
         rows={filteredAssignedUsers}
         columns={assignedUsersColumns}

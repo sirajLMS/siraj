@@ -11,7 +11,7 @@ export function AssociatedStudentsSectionDesktopView({
   emptyMessage,
 }: Readonly<AssociatedStudentsSectionVariantProps>) {
   return (
-    <DesktopSectionPanel title={labels.parent.sections.students}>
+    <DesktopSectionPanel contentPadding={false} title={labels.parent.sections.students}>
       <AssociatedStudentsDataGridDesktop rows={rows} labels={labels} loading={loading} emptyMessage={emptyMessage} />
     </DesktopSectionPanel>
   );

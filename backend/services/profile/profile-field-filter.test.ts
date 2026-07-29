@@ -138,7 +138,11 @@ describe("filterProfileByFieldGroups", () => {
   });
 
   test("fine-grained edit_other grants edit for matching groups only", () => {
-    const ctx = buildEditCtx("teacher-1", ProfileAudience.TEACHER, AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER);
+    const ctx = buildEditCtx(
+      "teacher-1",
+      ProfileAudience.TEACHER,
+      AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER
+    );
 
     expect(canEditProfileFieldGroup(ctx, "teacher_professional")).toBe(true);
     expect(canEditProfileFieldGroup(ctx, "staff_permissions")).toBe(false);

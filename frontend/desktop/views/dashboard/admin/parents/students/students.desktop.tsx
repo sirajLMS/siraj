@@ -38,6 +38,7 @@ export function StudentsDesktopView({
       <DesktopMetricCardGrid metrics={metrics} size={{ md: 6, lg: "grow" }} />
 
       <DesktopSectionPanel
+        contentPadding={false}
         title={shell.globalRecord}
         actions={
           <>
