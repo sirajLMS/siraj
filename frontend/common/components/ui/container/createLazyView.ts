@@ -15,11 +15,12 @@ const emptyLoading: () => ReactNode = () => null;
 export function createLazyView<T>(
   mobileImporter: () => Promise<{ default: ComponentType<ViewProps<T>> }>,
   desktopImporter: () => Promise<{ default: ComponentType<ViewProps<T>> }>,
-  options?: { readonly ssr?: boolean }
+  options?: { readonly ssr?: boolean; readonly loading?: () => ReactNode }
 ): CreateLazyViewResult<T> {
   const ssr = options?.ssr ?? true;
+  const loading = options?.loading ?? emptyLoading;
   return {
-    mobile: dynamic(mobileImporter, { ssr, loading: emptyLoading }),
-    desktop: dynamic(desktopImporter, { ssr, loading: emptyLoading }),
+    mobile: dynamic(mobileImporter, { ssr, loading }),
+    desktop: dynamic(desktopImporter, { ssr, loading }),
   };
 }

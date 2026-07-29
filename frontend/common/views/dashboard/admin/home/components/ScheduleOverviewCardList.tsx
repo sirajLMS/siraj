@@ -163,7 +163,7 @@ const StyledMetaValue = styled(Typography, {
   shouldForwardProp: prop => prop !== "tone",
 })<{ tone?: PersonAccentTone }>(({ theme, tone = "default" }) => ({
   color: getPersonAccentColor(tone, theme),
-  fontFamily: "monospace",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
   fontWeight: 700,
   overflow: "hidden",
   textOverflow: "ellipsis",

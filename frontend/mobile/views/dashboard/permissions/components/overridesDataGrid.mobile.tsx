@@ -12,7 +12,6 @@ import { OverrideEffectiveDisplayMobile } from "@/frontend/mobile/views/dashboar
 import { useAppLocale } from "@/shared/locale";
 
 const StyledPermissionKeyText = styled(Typography)(({ theme }) => ({
-  fontFamily: "JetBrains Mono, monospace",
   fontSize: theme.typography.labelMd.fontSize,
   fontWeight: 600,
   color: theme.palette.primary.main,

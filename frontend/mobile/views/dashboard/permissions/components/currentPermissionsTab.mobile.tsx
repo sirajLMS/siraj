@@ -55,7 +55,6 @@ const StyledAssignFirstButton = styled(Button)(({ theme }) => ({
 }));
 
 const StyledPermissionKeyChip = styled(Box)(({ theme }) => ({
-  fontFamily: "JetBrains Mono, monospace",
   typography: "labelMd",
   backgroundColor: theme.palette.surfaceVariant,
   color: theme.palette.onSurfaceVariant,

@@ -36,7 +36,7 @@ function AddPermissionCardMobile({ permission, checked, onToggle }: Readonly<Per
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1, minWidth: 0 }}>
           <Box
             sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
               typography: "labelMd",
               backgroundColor: theme.palette.surfaceVariant,
               color: theme.palette.onSurfaceVariant,

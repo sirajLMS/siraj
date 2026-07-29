@@ -3,7 +3,6 @@
 import { Box, CircularProgress } from "@mui/material";
 import { type ComponentType, lazy, Suspense } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { useSettingsStore } from "@/frontend/common/stores/settingsStore";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { SettingsTabId } from "@/frontend/common/views/dashboard/settings/types/settings.types";
 
@@ -70,59 +69,26 @@ function TabPanelFallback() {
   );
 }
 
-function getTabPanelSx(isActive: boolean) {
-  if (isActive) {
-    return {
-      position: "relative" as const,
-      width: "100%",
-      visibility: "visible" as const,
-      overflow: "visible" as const,
-      pointerEvents: "auto" as const,
-    };
+export function SettingsTabPanels({ activeTab }: Readonly<SettingsTabPanelsProps>) {
+  const panel = TAB_PANELS.find(entry => entry.id === activeTab);
+  if (!panel) {
+    return null;
   }
 
-  // Keep visited panels mounted without display:none so DataGrid can retain width.
-  return {
-    position: "absolute" as const,
-    top: 0,
-    left: 0,
-    width: "100%",
-    visibility: "hidden" as const,
-    height: 0,
-    overflow: "hidden" as const,
-    pointerEvents: "none" as const,
-  };
-}
-
-export function SettingsTabPanels({ activeTab }: Readonly<SettingsTabPanelsProps>) {
-  const visitedTabs = useSettingsStore(state => state.visitedTabs);
+  const { permissions, Component } = panel;
 
   return (
-    <Box sx={{ position: "relative", width: "100%" }}>
-      {TAB_PANELS.map(({ id, permissions, Component }) => {
-        if (!visitedTabs[id]) {
-          return null;
-        }
-
-        const isActive = activeTab === id;
-
-        return (
-          <Box
-            key={id}
-            role="tabpanel"
-            id={`settings-tabpanel-${id}`}
-            aria-labelledby={`settings-tab-${id}`}
-            aria-hidden={!isActive}
-            sx={getTabPanelSx(isActive)}
-          >
-            <RequirePermission permissions={permissions} fallback={null}>
-              <Suspense fallback={<TabPanelFallback />}>
-                <Component />
-              </Suspense>
-            </RequirePermission>
-          </Box>
-        );
-      })}
+    <Box
+      role="tabpanel"
+      id={`settings-tabpanel-${activeTab}`}
+      aria-labelledby={`settings-tab-${activeTab}`}
+      sx={{ width: "100%" }}
+    >
+      <RequirePermission permissions={permissions} fallback={null}>
+        <Suspense fallback={<TabPanelFallback />}>
+          <Component />
+        </Suspense>
+      </RequirePermission>
     </Box>
   );
 }

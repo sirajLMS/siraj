@@ -10,7 +10,8 @@ import type { CurrentPermissionsTabProps } from "@/frontend/common/views/dashboa
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
-  fontFamily: "JetBrains Mono, monospace",
+  fontFamily: "var(--font-jetbrains-mono), monospace",
+
   typography: "labelMd",
   backgroundColor: theme.palette.surfaceVariant,
   color: theme.palette.onSurfaceVariant,

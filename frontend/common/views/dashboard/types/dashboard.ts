@@ -1,4 +1,3 @@
-import type { SvgIconComponent } from "@mui/icons-material";
 import type {
   AppPermission,
   ClassExecutionState,
@@ -9,6 +8,7 @@ import type {
   DailyScheduleList,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
+import type { NavIconKey } from "@/frontend/common/views/dashboard/config/navIconKeys";
 import type { DashboardNavigationLabels } from "@/shared/locale";
 
 export type DailyScheduleRow = DailyScheduleList;
@@ -18,7 +18,7 @@ export type NavAudience = "teacher" | "parent" | "student" | "supervisor";
 export interface NavItem {
   readonly key: string;
   readonly labelKey: keyof DashboardNavigationLabels;
-  readonly icon: SvgIconComponent;
+  readonly iconKey: NavIconKey;
   readonly href: string;
   readonly section: "main" | "footer";
   readonly permission?: AppPermission | readonly AppPermission[];

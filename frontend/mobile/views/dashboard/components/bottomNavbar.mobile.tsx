@@ -49,7 +49,7 @@ export function BottomNavbarMobile({ items, activeKey }: Readonly<BottomNavbarMo
             itemKey={item.key}
             href={item.href}
             label={t(item.labelKey)}
-            icon={item.icon}
+            iconKey={item.iconKey}
             isActive={item.key === activeKey}
             isScrollable={isScrollable}
           />
