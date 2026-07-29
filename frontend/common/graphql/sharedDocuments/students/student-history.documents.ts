@@ -27,6 +27,7 @@ export const studentClassHistoryQueryDocument: TypedDocumentNode<
         outcome
         isFrozen
         instructor
+        teacherId
         timeSlot
         room
         notes

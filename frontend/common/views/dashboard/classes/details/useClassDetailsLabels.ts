@@ -66,6 +66,15 @@ export interface TeacherViewLabels {
   };
 }
 
+export interface StudentViewLabels {
+  readonly timezone: TeacherViewLabels["timezone"];
+  readonly instanceDetails: TeacherViewLabels["instanceDetails"];
+  readonly remarks: TeacherViewLabels["remarks"];
+  readonly teacherProfile: {
+    readonly viewFullProfile: string;
+  };
+}
+
 function buildAdminActionsLabels(t: ClassDetailsTranslations) {
   return {
     administrativeActions: t.adminActions.administrativeActions,
@@ -244,6 +253,24 @@ function buildTeacherViewLabels(t: ClassDetailsTranslations): TeacherViewLabels 
   };
 }
 
+function buildStudentViewLabels(t: ClassDetailsTranslations): StudentViewLabels {
+  const statusLabels = buildTeacherStatusLabels(t);
+
+  return {
+    timezone: {
+      title: t.timezone.title,
+      message: t.timezone.message,
+    },
+    instanceDetails: buildTeacherInstanceDetailsLabels(t, statusLabels),
+    remarks: {
+      remarksTitle: t.remarks.remarksTitle,
+    },
+    teacherProfile: {
+      viewFullProfile: t.studentProfile.viewFullProfile,
+    },
+  };
+}
+
 export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
   const t = useAppTranslation(Translation.Dashboard.ClassDetails);
 
@@ -254,4 +281,10 @@ export const useTeacherViewLabels = (_timezone: string): TeacherViewLabels => {
   const t = useAppTranslation(Translation.Dashboard.ClassDetails);
 
   return useMemo(() => buildTeacherViewLabels(t), [t]);
+};
+
+export const useStudentViewLabels = (_timezone: string): StudentViewLabels => {
+  const t = useAppTranslation(Translation.Dashboard.ClassDetails);
+
+  return useMemo(() => buildStudentViewLabels(t), [t]);
 };

@@ -6,7 +6,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { classHref } from "@/frontend/common/utils/profileHref";
+import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import {
   formatStudentHistoryDuration,
@@ -63,6 +63,7 @@ function buildColumns(
       minWidth: 160,
       renderCell: ({ row }) => (
         <DesktopPersonProfileLinkCell
+          href={profileHrefForTeacher({ teacherId: row.teacherId })}
           name={row.instructor?.trim() || "—"}
           avatarSize={36}
           typographyVariant="bodyMd"

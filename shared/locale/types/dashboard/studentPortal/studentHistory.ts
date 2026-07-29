@@ -53,4 +53,5 @@ export interface StudentPortalHistoryLabels {
   readonly joinSession: string;
   readonly sessionsList: string;
   readonly calendarWeekdays: StudentPortalHistoryCalendarWeekdayLabels;
+  readonly scheduleFor: (weekday: string, month: string, day: number) => string;
 }

@@ -16,6 +16,7 @@ export interface StudentHistorySessionRow {
   readonly outcome: string;
   readonly isFrozen: boolean;
   readonly instructor: string;
+  readonly teacherId: string;
   readonly timeSlot: string;
   readonly room: string;
   readonly notes: string;

@@ -15,12 +15,13 @@ interface StudentProfileCardProps {
   };
 }
 
-const StyledTopAccentBar = styled(Box)(() => ({
+const StyledTopAccentBar = styled(Box)(({ theme }) => ({
   height: 4,
   position: "absolute",
   top: 0,
   left: 0,
   right: 0,
+  backgroundColor: theme.palette.primary.main,
 }));
 
 const StyledViewProfileButton = styled(Link)(() => ({
@@ -64,12 +65,13 @@ export function StudentProfileCard({ student, labels }: StudentProfileCardProps)
         href={profileHref}
         id="view-student-profile-btn"
         sx={theme => ({
-          border: `1px solid ${theme.palette.header}`,
-          color: theme.palette.header,
+          border: `1px solid ${theme.palette.outline}`,
+          color: theme.palette.primary.main,
           paddingBlock: theme.spacing(1.25),
           "&:hover": {
-            backgroundColor: theme.palette.header,
-            color: theme.palette.onHeader,
+            backgroundColor: theme.palette.action.hover,
+            borderColor: theme.palette.primary.main,
+            color: theme.palette.primary.main,
           },
         })}
       >

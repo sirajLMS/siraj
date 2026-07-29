@@ -1,6 +1,7 @@
 export interface ClassDetailsLabels {
   readonly pageSubtitleAdmin: string;
   readonly pageSubtitleTeacher: string;
+  readonly pageSubtitleStudent: string;
   readonly breadcrumbs: {
     readonly dashboard: string;
     readonly classes: string;

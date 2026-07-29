@@ -51,4 +51,5 @@ export const dashboardStudentPortalHistoryEn: StudentPortalHistoryLabels = {
     fri: "Fri",
     sat: "Sat",
   },
+  scheduleFor: (weekday, month, day) => `Schedule for ${weekday}, ${month} ${day}`,
 };

@@ -12,6 +12,32 @@ export function mapSessionsByDay(
   return map;
 }
 
+export function groupSessionsByDay(
+  sessions: readonly StudentHistorySessionRow[]
+): Readonly<Partial<Record<number, readonly StudentHistorySessionRow[]>>> {
+  const map: Partial<Record<number, StudentHistorySessionRow[]>> = {};
+  for (const session of sessions) {
+    if (session.dayOfMonth <= 0) continue;
+    const existing = map[session.dayOfMonth];
+    if (existing) {
+      map[session.dayOfMonth] = [...existing, session];
+    } else {
+      map[session.dayOfMonth] = [session];
+    }
+  }
+  return map;
+}
+
+export function collectDaysWithSessions(sessions: readonly StudentHistorySessionRow[]): ReadonlySet<number> {
+  const days = new Set<number>();
+  for (const session of sessions) {
+    if (session.dayOfMonth > 0) {
+      days.add(session.dayOfMonth);
+    }
+  }
+  return days;
+}
+
 export function filterHistorySessions(
   sessions: readonly StudentHistorySessionRow[],
   subjectFilter: string,

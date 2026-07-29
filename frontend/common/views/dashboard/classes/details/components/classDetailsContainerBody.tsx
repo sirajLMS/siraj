@@ -34,6 +34,7 @@ export function ClassDetailsContainerBody({ viewModel, slots }: Readonly<ClassDe
         instance={viewModel.instance}
         canOverride={viewModel.canOverride}
         isParentView={viewModel.isParentView}
+        isStudentView={viewModel.isStudentView}
         canViewSessionDetails={viewModel.canViewSessionDetails}
         isWarningDismissed={viewModel.isWarningDismissed}
         onDismissWarning={() => viewModel.setIsWarningDismissed(true)}

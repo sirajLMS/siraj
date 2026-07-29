@@ -3925,6 +3925,7 @@ type StudentHistorySession {
   outcome: String
   room: String
   status: String
+  teacherId: String
   time: String
   timeSlot: String
   title: String

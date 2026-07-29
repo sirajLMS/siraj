@@ -54,7 +54,9 @@ const STUDENT_HISTORY_SESSION_FIELDS = gql`
     duration
     status
     outcome
+    isFrozen
     instructor
+    teacherId
     timeSlot
     room
     notes

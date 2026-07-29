@@ -4,10 +4,9 @@ import { AccessTimeOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Tooltip, Typography } from "@mui/material";
 import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
 import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
-import { classHref } from "@/frontend/common/utils/profileHref";
+import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import {
   ScheduleSessionCardMetaBar,
-  ScheduleSessionCardPersonCell,
   type ScheduleSessionMetaStatItem,
 } from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout";
 import {
@@ -26,7 +25,7 @@ import {
   resolveStudentHistoryStatusLabel,
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistorySessionPresentation";
 import type { StudentSessionsViewModel } from "@/frontend/common/views/dashboard/student/sessions/useStudentSessionsViewModel";
-import { MobileActionIconLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileActionIconLink, MobilePersonProfileLinkCell, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
@@ -118,7 +117,16 @@ export function HistorySessionCardMobile({
           borderTop: `1px solid ${theme.palette.outlineVariant}`,
         })}
       >
-        <ScheduleSessionCardPersonCell label={labels.instructor} name={instructorName} tone="teacher" />
+        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 0.75 })}>
+          {labels.instructor}
+        </Typography>
+        <MobilePersonProfileLinkCell
+          href={profileHrefForTeacher({ teacherId: row.teacherId })}
+          name={instructorName}
+          avatarSize={32}
+          typographyVariant="bodyMd"
+          fontWeight={700}
+        />
       </Box>
 
       {row.notes ? (

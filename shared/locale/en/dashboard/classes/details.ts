@@ -3,6 +3,7 @@ import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes
 export const dashboardClassDetailsEn: ClassDetailsLabels = {
   pageSubtitleAdmin: "Live class metrics monitoring and administrative controls",
   pageSubtitleTeacher: "Class details overview and action management",
+  pageSubtitleStudent: "Your class session details and join link",
   breadcrumbs: {
     dashboard: "Dashboard",
     classes: "Classes",

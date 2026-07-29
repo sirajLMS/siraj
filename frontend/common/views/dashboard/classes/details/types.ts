@@ -17,6 +17,7 @@ import type { ClassDetailsLabels, SessionLabels } from "@/shared/locale";
 export interface ClassDetailsHeaderLabels {
   readonly pageSubtitleAdmin: string;
   readonly pageSubtitleTeacher: string;
+  readonly pageSubtitleStudent: string;
   readonly classTypes: SessionLabels["classTypes"];
   readonly breadcrumbs: {
     readonly dashboard: string;
@@ -99,6 +100,8 @@ export interface TeacherViewProps extends CommonViewProps {
   readonly onInfoEdit: () => void;
 }
 
+export interface StudentViewProps extends CommonViewProps {}
+
 // NEW FOR PLAN v5: lifted from classDetailsContent.{mobile,desktop}.tsx inline declaration
 // specs.md §4.1 Class-B unified shape (mobile/desktop content bodies were identical).
 export interface TierSessionActionProps {
@@ -118,6 +121,7 @@ export interface TierSessionActionProps {
 export interface ClassDetailsHeaderProps {
   readonly instance: ClassInstanceDetail;
   readonly canOverride: boolean;
+  readonly isStudentView: boolean;
   readonly labels: ClassDetailsHeaderLabels;
 }
 
@@ -127,6 +131,7 @@ export interface ClassDetailsContentProps {
   readonly instance: ClassInstanceDetail;
   readonly canOverride: boolean;
   readonly isParentView: boolean;
+  readonly isStudentView: boolean;
   readonly canViewSessionDetails: boolean;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;

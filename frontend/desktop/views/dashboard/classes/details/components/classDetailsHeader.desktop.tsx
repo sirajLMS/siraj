@@ -6,14 +6,19 @@ import type { ClassDetailsHeaderProps } from "@/frontend/common/views/dashboard/
 import { getLocalizedClassTypeName } from "@/frontend/common/views/dashboard/classes/details/utils/localizedClassTypeName";
 import { DesktopPageHeader } from "@/frontend/desktop/components/ui";
 
-export function ClassDetailsHeaderDesktop({ instance, canOverride, labels }: Readonly<ClassDetailsHeaderProps>) {
+export function ClassDetailsHeaderDesktop({ instance, canOverride, isStudentView, labels }: Readonly<ClassDetailsHeaderProps>) {
   const title = getLocalizedClassTypeName(instance.classType, labels.classTypes, instance.courseName);
+  const subtitle = canOverride
+    ? labels.pageSubtitleAdmin
+    : isStudentView
+      ? labels.pageSubtitleStudent
+      : labels.pageSubtitleTeacher;
 
   return (
     <Box sx={classDetailsContentPaddingSx}>
       <DesktopPageHeader
         title={title}
-        subtitle={canOverride ? labels.pageSubtitleAdmin : labels.pageSubtitleTeacher}
+        subtitle={subtitle}
         titleVariant="headlineLg"
         breadcrumbs={[
           { label: labels.breadcrumbs.dashboard, href: "/dashboard" },

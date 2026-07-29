@@ -19,7 +19,8 @@ import {
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
-import { HistoryWeeklyScrollerMobile } from "@/frontend/mobile/views/dashboard/student/history/components/historyWeeklyScroller.mobile";
+import { HistoryDayScheduleSectionMobile } from "@/frontend/mobile/views/dashboard/student/history/components/historyDayScheduleSection.mobile";
+import { HistoryDayTabNavMobile } from "@/frontend/mobile/views/dashboard/student/history/components/historyDayTabNav.mobile";
 
 function useStudentHistoryMetricItems(
   metrics: StudentHistoryViewModel["metrics"],
@@ -102,18 +103,18 @@ function MonthNavigator({
 
 export function StudentHistoryMobileView({
   metrics,
-  sessionsByDay,
   currentMonth,
   monthLabel,
-  selectedDay,
-  selectedWeek,
+  effectiveSelectedDay,
+  daysWithSessions,
+  sessionsForSelectedDay,
   canGoNext,
   labels,
+  locale,
   loading,
   onPrevMonth,
   onNextMonth,
-  onSelectDay,
-  onSelectWeek,
+  onTabChange,
 }: Readonly<StudentHistoryViewModel>) {
   const metricItems = useStudentHistoryMetricItems(metrics, labels);
 
@@ -142,19 +143,21 @@ export function StudentHistoryMobileView({
 
         <MobileMetricCardGrid metrics={metricItems} />
 
-        <Box sx={{ mt: 0 }}>
-          <HistoryWeeklyScrollerMobile
-            selectedWeek={selectedWeek}
-            selectedDay={selectedDay}
-            currentMonth={currentMonth}
-            sessionsByDay={sessionsByDay}
-            weeklyAttendanceLabel={labels.weeklyAttendance}
-            weekLabel={labels.week(selectedWeek)}
-            calendarWeekdays={labels.calendarWeekdays}
-            onSelectWeek={onSelectWeek}
-            onSelectDay={onSelectDay}
-          />
-        </Box>
+        <HistoryDayTabNavMobile
+          currentMonth={currentMonth}
+          effectiveSelectedDay={effectiveSelectedDay}
+          daysWithSessions={daysWithSessions}
+          labels={labels}
+          onTabChange={onTabChange}
+        />
+
+        <HistoryDayScheduleSectionMobile
+          currentMonth={currentMonth}
+          effectiveSelectedDay={effectiveSelectedDay}
+          sessions={sessionsForSelectedDay}
+          labels={labels}
+          locale={locale}
+        />
       </MobileContentStack>
     </MobilePageContainer>
   );

@@ -3,6 +3,7 @@ import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes
 export const dashboardClassDetailsAr: ClassDetailsLabels = {
   pageSubtitleAdmin: "مراقبة مقاييس الحصة المباشرة والضوابط الإدارية",
   pageSubtitleTeacher: "عرض تفاصيل الحصة وإدارة الإجراءات",
+  pageSubtitleStudent: "تفاصيل حصتك ورابط الانضمام",
   breadcrumbs: {
     dashboard: "لوحة التحكم",
     classes: "الحصص",

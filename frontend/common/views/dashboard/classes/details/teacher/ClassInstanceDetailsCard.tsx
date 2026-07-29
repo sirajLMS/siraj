@@ -31,6 +31,8 @@ interface ClassInstanceDetailsCardProps {
   readonly rateCurrency: string | null;
   readonly rateSource: string | null;
   readonly isRateOverridden: boolean;
+  readonly hideStudentField?: boolean;
+  readonly hideRateSection?: boolean;
   readonly labels: {
     readonly classInstanceDetails: string;
     readonly studentName: string;
@@ -77,10 +79,10 @@ const StyledStatusDot = styled(Box)({
 function DetailField({ label, value }: DetailFieldProps) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-      <StyledDetailFieldLabel variant="labelUppercase" sx={theme => ({ color: theme.palette.header })}>
+      <StyledDetailFieldLabel variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
         {label}
       </StyledDetailFieldLabel>
-      <Box>{value}</Box>
+      <Box sx={theme => ({ color: theme.palette.onSurface })}>{value}</Box>
     </Box>
   );
 }
@@ -94,9 +96,9 @@ function ClassInstanceDetailsHeader({ title }: ClassInstanceDetailsHeaderProps) 
     <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}>
       <StyledCardHeading
         variant="headlineMd"
-        sx={theme => ({ color: theme.palette.primary.main, gap: theme.spacing(1) })}
+        sx={theme => ({ color: theme.palette.onSurface, gap: theme.spacing(1) })}
       >
-        <StyledHeadingInfoIcon sx={theme => ({ color: theme.palette.header })} />
+        <StyledHeadingInfoIcon sx={theme => ({ color: theme.palette.onSurfaceVariant })} />
         {title}
       </StyledCardHeading>
     </Stack>
@@ -114,6 +116,7 @@ interface ClassInstanceDetailsFieldsProps {
   readonly durationMinutes: number;
   readonly statusKey: "active" | "confirmed" | "pending" | "completed" | "cancelled";
   readonly statusLabel: string;
+  readonly hideStudentField?: boolean;
   readonly labels: ClassInstanceDetailsCardProps["labels"];
 }
 
@@ -128,24 +131,27 @@ function ClassInstanceDetailsFields({
   durationMinutes,
   statusKey,
   statusLabel,
+  hideStudentField = false,
   labels,
 }: ClassInstanceDetailsFieldsProps) {
   return (
-    <Grid container spacing={3} sx={theme => ({ pb: 4, borderBottom: 1, borderColor: theme.palette.border.light })}>
-      <Grid size={{ xs: 12, sm: 6 }}>
-        <DetailField
-          label={labels.studentName}
-          value={
-            studentId ? (
-              <StudentEntityLink studentId={studentId} name={studentName} variant="bodyLg" />
-            ) : (
-              <Typography variant="bodyLg" sx={theme => ({ fontWeight: theme.typography.fontWeightBold })}>
-                {studentName}
-              </Typography>
-            )
-          }
-        />
-      </Grid>
+    <Grid container spacing={3} sx={theme => ({ pb: 4, borderBottom: 1, borderColor: theme.palette.outlineVariant })}>
+      {!hideStudentField ? (
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <DetailField
+            label={labels.studentName}
+            value={
+              studentId ? (
+                <StudentEntityLink studentId={studentId} name={studentName} variant="bodyLg" />
+              ) : (
+                <Typography variant="bodyLg" sx={theme => ({ fontWeight: theme.typography.fontWeightBold })}>
+                  {studentName}
+                </Typography>
+              )
+            }
+          />
+        </Grid>
+      ) : null}
       <Grid size={{ xs: 12, sm: 6 }}>
         <DetailField
           label={labels.courseModule}
@@ -162,7 +168,15 @@ function ClassInstanceDetailsFields({
                   variant="outlined"
                   size="small"
                   startIcon={<MenuBookOutlined />}
-                  sx={{ alignSelf: "flex-start" }}
+                  sx={theme => ({
+                    alignSelf: "flex-start",
+                    borderColor: theme.palette.outline,
+                    color: theme.palette.primary.main,
+                    "&:hover": {
+                      borderColor: theme.palette.primary.main,
+                      backgroundColor: theme.palette.action.hover,
+                    },
+                  })}
                 >
                   {labels.viewSubject}
                 </Button>
@@ -218,8 +232,8 @@ function ClassInstanceRateSection({
   labels,
 }: ClassInstanceRateSectionProps) {
   return (
-    <Stack sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: theme => theme.palette.border.light }}>
-      <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.header, mb: 2 })}>
+    <Stack sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: theme => theme.palette.outlineVariant }}>
+      <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 2 })}>
         {labels.rateSectionTitle}
       </Typography>
       <Grid container spacing={3}>
@@ -276,6 +290,8 @@ export function ClassInstanceDetailsCard({
   rateCurrency,
   rateSource,
   isRateOverridden,
+  hideStudentField = false,
+  hideRateSection = false,
   labels,
 }: ClassInstanceDetailsCardProps) {
   const statusKey = STATUS_COLOR_MAP[status];
@@ -297,9 +313,10 @@ export function ClassInstanceDetailsCard({
         durationMinutes={durationMinutes}
         statusKey={statusKey}
         statusLabel={statusLabel}
+        hideStudentField={hideStudentField}
         labels={labels}
       />
-      {rateAmount != null && (
+      {!hideRateSection && rateAmount != null && (
         <ClassInstanceRateSection
           rateAmount={rateAmount}
           rateCurrency={rateCurrency}

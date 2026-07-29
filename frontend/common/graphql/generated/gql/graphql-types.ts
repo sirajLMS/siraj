@@ -5288,6 +5288,7 @@ export type StudentHistorySession = {
   outcome: Maybe<Scalars['String']['output']>;
   room: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
   time: Maybe<Scalars['String']['output']>;
   timeSlot: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;

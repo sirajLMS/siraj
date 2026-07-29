@@ -46,6 +46,7 @@ export function mapStudentHistorySessions(
       outcome: s.outcome ?? "",
       isFrozen: s.isFrozen ?? false,
       instructor: s.instructor ?? "",
+      teacherId: s.teacherId ?? "",
       timeSlot: s.timeSlot ?? "",
       room: s.room ?? "",
       notes: s.notes ?? "",

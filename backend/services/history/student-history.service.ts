@@ -101,6 +101,8 @@ export namespace StudentHistoryService {
       throw new Error(tErrors.notFound);
     }
 
+    await assertCanViewStudentHistory(userId, detail.studentId, tErrors);
+
     const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId, tErrors);
 
     return {

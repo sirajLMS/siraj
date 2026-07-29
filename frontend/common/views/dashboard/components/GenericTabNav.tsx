@@ -2,12 +2,9 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { TabNavVariantProps } from "@/frontend/common/views/dashboard/lib/tabbedPane";
+import type { GenericTabNavVariantProps } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
 
-export type GenericTabNavVariantProps<TabId extends string> = TabNavVariantProps<TabId> & {
-  /** Optional aria-label for the mobile tablist. Defaults to "Sections". */
-  readonly ariaLabel?: string;
-};
+export type { DateTabNavItem, GenericTabNavVariantProps } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
 
 const lazyViews = createLazyView<GenericTabNavVariantProps<string>>(
   () =>
@@ -27,12 +24,7 @@ const lazyViews = createLazyView<GenericTabNavVariantProps<string>>(
  * entirely owned by the caller's ViewModel (resolved against permissions),
  * so this component never reads search params itself.
  *
- * TIL: We mirror `SettingsTabNav` exactly to keep the tier contract intact
- * — a single shared/tier-neutral entry that delegates to per-tier lazy
- * views via `createLazyView` + `ResponsiveViewSwitch`. Inline-rendering
- * either tier here would break the convention that tier-specific styling
- * (the chip row scrollrail on mobile vs the MUI Tabs on desktop) lives in
- * its own tier-named file.
+ * Supports `variant="date"` for scrollable month-day strips (button mode).
  */
 export function GenericTabNav<TabId extends string>(props: Readonly<GenericTabNavVariantProps<TabId>>) {
   if (props.tabs.length === 0) {
@@ -43,7 +35,7 @@ export function GenericTabNav<TabId extends string>(props: Readonly<GenericTabNa
     <ResponsiveViewSwitch
       mobile={lazyViews.mobile as never}
       desktop={lazyViews.desktop as never}
-      props={props as GenericTabNavVariantProps<string>}
+      props={props as never}
     />
   );
 }
