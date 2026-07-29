@@ -2,11 +2,11 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 export interface NavFeatureFlags {
-  readonly enablePeopleDirectory: boolean;
+  readonly enableUsersDirectory: boolean;
 }
 
 export const DEFAULT_NAV_FEATURE_FLAGS: NavFeatureFlags = {
-  enablePeopleDirectory: false,
+  enableUsersDirectory: false,
 };
 
 /**
@@ -40,15 +40,8 @@ export const DEFAULT_NAV_FEATURE_FLAGS: NavFeatureFlags = {
  */
 export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
   {
-    id: "grp_home",
-    labelKey: "navGroupHome",
-    iconKey: "dashboard",
-    section: "main",
-    permission: PAGE_PERMISSIONS.dashboard,
-  },
-  {
-    id: "grp_people",
-    labelKey: "navGroupPeople",
+    id: "grp_users",
+    labelKey: "navGroupUsers",
     iconKey: "group",
     section: "main",
     permission: [
@@ -73,15 +66,16 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     separator: true,
   },
   {
-    id: "grp_classes",
-    labelKey: "navGroupClasses",
-    iconKey: "class",
+    id: "grp_content",
+    labelKey: "navGroupContent",
+    iconKey: "folderOpen",
     section: "main",
-    permission: [AppPermission.SessionViewDetails, AppPermission.ScheduleManageRecurring],
+    permission: [AppPermission.ResourcesList, AppPermission.SubjectsList, AppPermission.SessionViewDetails],
+    separator: true,
   },
   {
-    id: "grp_billing",
-    labelKey: "navGroupBilling",
+    id: "grp_finance",
+    labelKey: "navGroupFinance",
     iconKey: "payments",
     section: "main",
     permission: [
@@ -89,15 +83,11 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.BillingViewExchangeRates,
       AppPermission.BillingManageCurrencyHedges,
       AppPermission.BillingCreateInvoice,
+      AppPermission.PaymentMethodsManageCatalogs,
+      AppPermission.MeetingProvidersManageCatalog,
+      AppPermission.TeacherDuesView,
     ],
     separator: true,
-  },
-  {
-    id: "grp_catalogs",
-    labelKey: "navGroupCatalogs",
-    iconKey: "category",
-    section: "main",
-    permission: [AppPermission.PaymentMethodsManageCatalogs, AppPermission.MeetingProvidersManageCatalog],
   },
   {
     id: "grp_reports",
@@ -107,18 +97,10 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     permission: [
       AppPermission.ReportGenerateCustom,
       AppPermission.MonthlyReportsView,
-      AppPermission.TeacherDuesView,
       AppPermission.LessonReportsReview,
       AppPermission.LessonReportsApprove,
     ],
     separator: true,
-  },
-  {
-    id: "grp_resources",
-    labelKey: "navGroupResources",
-    iconKey: "folderOpen",
-    section: "main",
-    permission: [AppPermission.ResourcesList, AppPermission.SubjectsList],
   },
   {
     id: "grp_feedback",
@@ -134,11 +116,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     iconKey: "security",
     section: "main",
     permission: [AppPermission.PermissionGroupsManage, AppPermission.SettingsView, AppPermission.SystemBulkUpdateDst],
-  },
-  {
-    id: "footer_account",
-    labelKey: "navGroupAccount",
-    section: "footer",
+    separator: true,
   },
 ] as const;
 
@@ -154,7 +132,6 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.dashboard,
-    groupId: "grp_home",
   },
   {
     key: "today-classes",
@@ -200,7 +177,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.teacherClassDetails,
     audience: "teacher",
-    groupId: "grp_classes",
+    groupId: "grp_content",
   },
   {
     key: "teacher-rules",
@@ -318,6 +295,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.lessonReportsReview,
     audience: "supervisor",
+    groupId: "grp_reports",
   },
   {
     key: "teacher-dues",
@@ -327,6 +305,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDuesView,
     audience: "supervisor",
+    groupId: "grp_finance",
   },
   {
     key: "monthly-reports",
@@ -336,6 +315,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.monthlyReportsView,
     audience: "supervisor",
+    groupId: "grp_reports",
   },
   {
     key: "supervisor-profile",
@@ -353,7 +333,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/search-schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.searchSchedule,
-    groupId: "grp_home",
+    groupId: "grp_schedule",
   },
   {
     key: "schedule-tracking",
@@ -374,13 +354,12 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     groupId: "grp_schedule",
   },
   {
-    key: "people-directory",
-    labelKey: "peopleDirectory",
+    key: "users-directory",
+    labelKey: "usersDirectory",
     iconKey: "group",
-    href: "/people",
+    href: "/users",
     section: "main",
-    permission: PAGE_PERMISSIONS.peopleDirectoryParent,
-    groupId: "grp_people",
+    permission: PAGE_PERMISSIONS.usersDirectoryParent,
   },
   {
     key: "teachers",
@@ -389,7 +368,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/teachers",
     section: "main",
     permission: PAGE_PERMISSIONS.teachers,
-    groupId: "grp_people",
+    groupId: "grp_users",
   },
   {
     key: "parents",
@@ -398,7 +377,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/parents",
     section: "main",
     permission: PAGE_PERMISSIONS.parents,
-    groupId: "grp_people",
+    groupId: "grp_users",
   },
   {
     key: "students",
@@ -407,7 +386,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.students,
-    groupId: "grp_people",
+    groupId: "grp_users",
   },
   {
     key: "staff",
@@ -416,25 +395,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/staff",
     section: "main",
     permission: PAGE_PERMISSIONS.staff,
-    groupId: "grp_people",
-  },
-  {
-    key: "classes",
-    labelKey: "classDetails",
-    iconKey: "class",
-    href: "/classes",
-    section: "main",
-    permission: PAGE_PERMISSIONS.classesPage,
-    groupId: "grp_classes",
-  },
-  {
-    key: "resources",
-    labelKey: "resources",
-    iconKey: "folderOpen",
-    href: "/resources",
-    section: "main",
-    permission: PAGE_PERMISSIONS.resources,
-    groupId: "grp_resources",
+    groupId: "grp_users",
   },
   {
     key: "subjects",
@@ -443,7 +404,25 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/subjects",
     section: "main",
     permission: PAGE_PERMISSIONS.subjects,
-    groupId: "grp_resources",
+    groupId: "grp_content",
+  },
+  {
+    key: "classes",
+    labelKey: "classDetails",
+    iconKey: "class",
+    href: "/classes",
+    section: "main",
+    permission: PAGE_PERMISSIONS.classesPage,
+    groupId: "grp_content",
+  },
+  {
+    key: "resources",
+    labelKey: "resources",
+    iconKey: "folderOpen",
+    href: "/resources",
+    section: "main",
+    permission: PAGE_PERMISSIONS.resources,
+    groupId: "grp_content",
   },
   {
     key: "books-and-bags",
@@ -452,7 +431,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/resources/books-and-bags",
     section: "main",
     permission: PAGE_PERMISSIONS.booksAndBags,
-    groupId: "grp_resources",
+    groupId: "grp_content",
   },
   {
     key: "reports",
@@ -470,7 +449,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/billing",
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
-    groupId: "grp_billing",
+    groupId: "grp_finance",
   },
   {
     key: "payment-catalogs",
@@ -479,7 +458,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/payment-catalogs",
     section: "main",
     permission: PAGE_PERMISSIONS.paymentCatalogsParent,
-    groupId: "grp_catalogs",
+    groupId: "grp_finance",
   },
   {
     key: "feedback-manage",
@@ -518,15 +497,6 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     groupId: "grp_admin",
   },
   {
-    key: "user-profile",
-    labelKey: "yourProfile",
-    iconKey: "personOutline",
-    href: "/users",
-    section: "main",
-    permission: PAGE_PERMISSIONS.userProfile,
-    groupId: "grp_admin",
-  },
-  {
     key: "permissions",
     labelKey: "permissions",
     iconKey: "security",
@@ -543,23 +513,6 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.settings,
     groupId: "grp_admin",
-  },
-  {
-    key: "own-profile",
-    labelKey: "yourProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "footer",
-    permission: PAGE_PERMISSIONS.profile,
-    groupId: "footer_account",
-  },
-  {
-    key: "logout",
-    labelKey: "logout",
-    iconKey: "logout",
-    href: "/logout",
-    section: "footer",
-    groupId: "footer_account",
   },
 ] as const;
 
@@ -786,6 +739,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.lessonReportsReview,
     audience: "supervisor",
+    groupId: "grp_reports",
   },
   {
     key: "teacher-dues",
@@ -813,14 +767,6 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsSubmit,
     audience: "parent",
-  },
-  {
-    key: "own-profile",
-    labelKey: "yourProfile",
-    iconKey: "personOutline",
-    href: "/profile",
-    section: "main",
-    permission: PAGE_PERMISSIONS.profile,
   },
   {
     key: "feedback-manage",
@@ -931,7 +877,7 @@ export function getNavItemsForPermissions(
       applySupervisorNavOverrides(
         applyStudentNavOverrides(
           applyParentNavOverrides(
-            applyTeacherNavOverrides(applyPeopleDirectoryNavOverrides(filtered, featureFlags), permissions),
+            applyTeacherNavOverrides(applyUsersDirectoryNavOverrides(filtered, featureFlags), permissions),
             permissions
           ),
           permissions
@@ -988,25 +934,29 @@ export function getNavItemsForPermissions(
   return survivingGroups;
 }
 
-function applyPeopleDirectoryNavOverrides(items: readonly NavItem[], featureFlags: NavFeatureFlags): NavItem[] {
-  const peopleKeys = new Set(["teachers", "parents", "students", "staff"]);
-  if (featureFlags.enablePeopleDirectory) {
-    return items.filter(item => !peopleKeys.has(item.key));
+function applyUsersDirectoryNavOverrides(items: readonly NavItem[], featureFlags: NavFeatureFlags): NavItem[] {
+  const directoryKeys = new Set(["teachers", "parents", "students", "staff"]);
+  if (featureFlags.enableUsersDirectory) {
+    return items.filter(item => !directoryKeys.has(item.key));
   }
-  return items.filter(item => item.key !== "people-directory");
+  return items.filter(item => item.key !== "users-directory");
 }
 
+const PORTAL_PROFILE_NAV_KEYS = new Set(["teacher-profile", "parent-profile", "student-profile", "supervisor-profile"]);
+
 function applyProfileNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
-  if (
+  const isPortalUser =
     isTeacherPortalUser(permissions) ||
     isParentPortalUser(permissions) ||
     isStudentPortalUser(permissions) ||
-    isSupervisorPortalUser(permissions)
-  ) {
+    isSupervisorPortalUser(permissions);
+
+  if (isPortalUser) {
     return items.filter(item => item.key !== "own-profile");
   }
 
-  return [...items];
+  // Admin/staff: profile is only in SidebarAccountFooter, not the main nav list.
+  return items.filter(item => !PORTAL_PROFILE_NAV_KEYS.has(item.key));
 }
 
 function isParentPortalUser(permissions: readonly AppPermission[]): boolean {

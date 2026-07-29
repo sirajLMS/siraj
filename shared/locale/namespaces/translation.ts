@@ -39,7 +39,6 @@ import { DashboardParentSocial } from "@/shared/locale/namespaces/dashboard/pare
 import { DashboardParentStudents } from "@/shared/locale/namespaces/dashboard/parents/students.namespace";
 import { DashboardPaymentCatalogs } from "@/shared/locale/namespaces/dashboard/payment-catalogs/main.namespace";
 import { DashboardPaymentCatalogsParent } from "@/shared/locale/namespaces/dashboard/payment-catalogs/parent.namespace";
-import { DashboardPeopleDirectoryParent } from "@/shared/locale/namespaces/dashboard/people/main.namespace";
 import { DashboardPermissions } from "@/shared/locale/namespaces/dashboard/permissions/main.namespace";
 import { DashboardReports } from "@/shared/locale/namespaces/dashboard/reports/main.namespace";
 import { DashboardBooksAndBags } from "@/shared/locale/namespaces/dashboard/resources/booksAndBags.namespace";
@@ -82,6 +81,7 @@ import { DashboardTeacherProfile } from "@/shared/locale/namespaces/dashboard/te
 import { DashboardTeacherReassignment } from "@/shared/locale/namespaces/dashboard/teachers/reassignment.namespace";
 import { DashboardTeacherStudents } from "@/shared/locale/namespaces/dashboard/teachers/students.namespace";
 import { DashboardTeacherWeeklySchedule } from "@/shared/locale/namespaces/dashboard/teachers/weeklySchedule.namespace";
+import { DashboardUsersDirectoryParent } from "@/shared/locale/namespaces/dashboard/users/directory.namespace";
 import { Emails } from "@/shared/locale/namespaces/emails/emails.namespace";
 import { Errors } from "@/shared/locale/namespaces/errors/errors.namespace";
 import { Notifications } from "@/shared/locale/namespaces/notifications/notifications.namespace";
@@ -163,7 +163,7 @@ export const Translation = {
     ParentSocial: DashboardParentSocial,
     ParentStudents: DashboardParentStudents,
     ParentsDirectory: DashboardParentsDirectory,
-    PeopleDirectoryParent: DashboardPeopleDirectoryParent,
+    UsersDirectoryParent: DashboardUsersDirectoryParent,
     PaymentCatalogs: DashboardPaymentCatalogs,
     PaymentCatalogsParent: DashboardPaymentCatalogsParent,
     Permissions: DashboardPermissions,

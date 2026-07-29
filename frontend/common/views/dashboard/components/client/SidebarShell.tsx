@@ -1,6 +1,12 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, KeyboardArrowDownOutlined, KeyboardArrowUpOutlined } from "@mui/icons-material";
+import {
+  ChevronLeft,
+  ChevronRight,
+  KeyboardArrowDownOutlined,
+  KeyboardArrowUpOutlined,
+  LogoutOutlined,
+} from "@mui/icons-material";
 import {
   Box,
   Collapse,
@@ -16,6 +22,7 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { type RefObject, useEffect, useRef, useState } from "react";
+import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
 import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistry";
 import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
@@ -35,6 +42,9 @@ interface SidebarShellProps {
   readonly activeKey: string | null;
   readonly sidebarWidth: string;
   readonly initialSidebarOpen?: boolean;
+  readonly userName: string;
+  readonly avatarUrl: string;
+  readonly logoutLabel: string;
 }
 
 interface SidebarNavItemProps {
@@ -125,11 +135,42 @@ function SidebarNavItem({ item, isActive = false, isCollapsed, isFooter = false 
   );
 }
 
+function getGroupTitleStyles(): SxProps<Theme> {
+  return {
+    typography: "labelSm",
+    fontWeight: 600,
+    color: "var(--mui-palette-onSurfaceVariant)",
+    opacity: 0.85,
+    letterSpacing: "0.04em",
+    px: 2,
+    py: 0.5,
+    display: "block",
+  };
+}
+
 interface SidebarGroupHeaderProps {
   readonly group: TranslatedNavGroup;
   readonly isCollapsed: boolean;
   readonly collapsed: boolean;
   readonly onToggle: () => void;
+}
+
+function SidebarGroupStaticTitle({
+  group,
+  isCollapsed,
+}: {
+  readonly group: TranslatedNavGroup;
+  readonly isCollapsed: boolean;
+}) {
+  if (isCollapsed) {
+    return <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", my: 1, mx: 1.5 }} />;
+  }
+
+  return (
+    <Box component="span" sx={getGroupTitleStyles()}>
+      {group.label}
+    </Box>
+  );
 }
 
 function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: SidebarGroupHeaderProps) {
@@ -167,16 +208,11 @@ function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: Sidebar
         primary={group.label}
         slotProps={{
           primary: {
-            sx: {
-              typography: "labelSm",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            },
+            sx: getGroupTitleStyles(),
           },
         }}
       />
-      <Chevron fontSize="small" sx={{ color: "inherit" }} />
+      <Chevron fontSize="small" sx={{ color: "inherit", opacity: 0.7 }} />
     </ListItemButton>
   );
 }
@@ -276,26 +312,18 @@ function GroupedNavList({
             ))
           : null}
 
-        {noGroup.length > 0 && grouped.length > 0 ? (
-          <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", my: 1, mx: 0.5 }} />
-        ) : null}
-
         {grouped.map(({ group, items: groupItems }, index) => {
+          const isSingleItemGroup = groupItems.length === 1;
           const collapsed = collapsedGroups[group.id] ?? group.defaultCollapsed ?? false;
           const showSeparator = index > 0 || noGroup.length > 0;
           return (
             <Box key={group.id}>
-              {group.separator && showSeparator ? (
+              {group.separator && showSeparator && !isCollapsed ? (
                 <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", my: 1, mx: 0.5 }} />
               ) : null}
-              <SidebarGroupHeader
-                group={group}
-                isCollapsed={isCollapsed}
-                collapsed={collapsed}
-                onToggle={() => toggleGroupCollapsed(group.id)}
-              />
-              <Collapse in={!collapsed} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding sx={{ px: 0, pb: 0.5 }}>
+              {isSingleItemGroup ? (
+                <>
+                  <SidebarGroupStaticTitle group={group} isCollapsed={isCollapsed} />
                   {groupItems.map(item => (
                     <SidebarNavItem
                       key={item.key}
@@ -304,12 +332,131 @@ function GroupedNavList({
                       isCollapsed={isCollapsed}
                     />
                   ))}
-                </List>
-              </Collapse>
+                </>
+              ) : (
+                <>
+                  <SidebarGroupHeader
+                    group={group}
+                    isCollapsed={isCollapsed}
+                    collapsed={collapsed}
+                    onToggle={() => toggleGroupCollapsed(group.id)}
+                  />
+                  <Collapse in={!collapsed} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding sx={{ px: 0, pb: 0.5, paddingInlineStart: 2 }}>
+                      {groupItems.map(item => (
+                        <SidebarNavItem
+                          key={item.key}
+                          item={item}
+                          isActive={item.key === activeKey}
+                          isCollapsed={isCollapsed}
+                        />
+                      ))}
+                    </List>
+                  </Collapse>
+                </>
+              )}
             </Box>
           );
         })}
       </List>
+    </Box>
+  );
+}
+
+function SidebarAccountFooter({
+  userName,
+  avatarUrl,
+  logoutLabel,
+  isCollapsed,
+}: {
+  readonly userName: string;
+  readonly avatarUrl: string;
+  readonly logoutLabel: string;
+  readonly isCollapsed: boolean;
+}) {
+  const profileButton = (
+    <ListItemButton
+      component={Link}
+      href="/profile"
+      sx={{
+        borderRadius: 2,
+        py: 1,
+        px: isCollapsed ? 1 : 2,
+        flex: 1,
+        minWidth: 0,
+        justifyContent: isCollapsed ? "center" : "flex-start",
+        color: "var(--mui-palette-onSurfaceVariant)",
+        "&:hover": {
+          backgroundColor: "color-mix(in srgb, var(--mui-palette-primary-main) 8%, transparent)",
+          color: "var(--mui-palette-primary-main)",
+        },
+      }}
+    >
+      <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40, color: "inherit" }}>
+        <UserAvatar src={avatarUrl} sx={{ width: 32, height: 32 }} />
+      </ListItemIcon>
+      {!isCollapsed ? (
+        <ListItemText
+          primary={userName}
+          slotProps={{
+            primary: {
+              sx: {
+                typography: "labelMd",
+                fontWeight: 600,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              },
+            },
+          }}
+        />
+      ) : null}
+    </ListItemButton>
+  );
+
+  const logoutButton = (
+    <IconButton
+      aria-label={logoutLabel}
+      onClick={() => {
+        globalThis.location.href = "/logout";
+      }}
+      sx={{
+        color: "var(--mui-palette-onSurfaceVariant)",
+        "&:hover": {
+          backgroundColor: "color-mix(in srgb, var(--mui-palette-primary-main) 8%, transparent)",
+          color: "var(--mui-palette-primary-main)",
+        },
+      }}
+    >
+      <LogoutOutlined fontSize="small" />
+    </IconButton>
+  );
+
+  return (
+    <Box sx={{ px: 1.5, py: 1.5, flexShrink: 0 }}>
+      <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", mb: 1 }} />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+        }}
+      >
+        {isCollapsed ? (
+          <Tooltip title={userName} placement="right">
+            {profileButton}
+          </Tooltip>
+        ) : (
+          profileButton
+        )}
+        {isCollapsed ? (
+          <Tooltip title={logoutLabel} placement="right">
+            {logoutButton}
+          </Tooltip>
+        ) : (
+          logoutButton
+        )}
+      </Box>
     </Box>
   );
 }
@@ -320,17 +467,21 @@ function SidebarContent({
   activeKey,
   isCollapsed,
   navListRef,
+  userName,
+  avatarUrl,
+  logoutLabel,
 }: {
   readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string | null;
   readonly isCollapsed: boolean;
   readonly navListRef?: RefObject<HTMLElement | null>;
+  readonly userName: string;
+  readonly avatarUrl: string;
+  readonly logoutLabel: string;
 }) {
   const mainItems = navItems.filter(item => item.section === "main");
-  const footerItems = navItems.filter(item => item.section === "footer");
   const mainGroups = navGroups.filter(group => group.section === "main");
-  const footerGroups = navGroups.filter(group => group.section === "footer");
 
   return (
     <Box
@@ -350,14 +501,12 @@ function SidebarContent({
         navListRef={navListRef}
       />
 
-      {footerItems.length > 0 || footerGroups.length > 0 ? (
-        <>
-          <Divider sx={{ borderColor: "var(--mui-palette-outlineVariant)", mx: 1.5 }} />
-          <Box sx={{ overflow: "auto", overscrollBehavior: "contain" }}>
-            <GroupedNavList groups={footerGroups} items={footerItems} activeKey={activeKey} isCollapsed={isCollapsed} />
-          </Box>
-        </>
-      ) : null}
+      <SidebarAccountFooter
+        userName={userName}
+        avatarUrl={avatarUrl}
+        logoutLabel={logoutLabel}
+        isCollapsed={isCollapsed}
+      />
     </Box>
   );
 }
@@ -381,38 +530,22 @@ function SidebarMobileNav({
   );
 }
 
-function MobileFooterItems({
-  navGroups,
-  navItems,
-  activeKey,
-}: {
-  readonly navGroups: readonly TranslatedNavGroup[];
-  readonly navItems: readonly TranslatedNavItem[];
-  readonly activeKey: string | null;
-}) {
-  const footerItems = navItems.filter(item => item.section === "footer");
-  const footerGroups = navGroups.filter(group => group.section === "footer");
-  if (footerItems.length === 0 && footerGroups.length === 0) {
-    return null;
-  }
-  return (
-    <>
-      <Divider sx={theme => ({ borderColor: theme.palette.outlineVariant, mx: 1.5 })} />
-      <GroupedNavList groups={footerGroups} items={footerItems} activeKey={activeKey} isCollapsed={false} />
-    </>
-  );
-}
-
 function SidebarMobileDrawer({
   sidebarWidth,
   navGroups,
   navItems,
   activeKey,
+  userName,
+  avatarUrl,
+  logoutLabel,
 }: {
   readonly sidebarWidth: string;
   readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string | null;
+  readonly userName: string;
+  readonly avatarUrl: string;
+  readonly logoutLabel: string;
 }) {
   const mobileDrawerOpen = useLayoutStore(state => state.mobileDrawerOpen);
   const closeMobileDrawer = useLayoutStore(state => state.closeMobileDrawer);
@@ -451,24 +584,34 @@ function SidebarMobileDrawer({
       })}
     >
       <Box
-        ref={navListRef}
         sx={{
           flex: 1,
           minHeight: 0,
           flexBasis: 0,
-          overflow: "auto",
-          overscrollBehavior: "contain",
-          WebkitOverflowScrolling: "touch",
-          py: 2,
-          "&::-webkit-scrollbar": { width: 4 },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "var(--mui-palette-outlineVariant)",
-            borderRadius: 10,
-          },
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
       >
-        <SidebarMobileNav navGroups={navGroups} navItems={navItems} activeKey={activeKey} />
-        <MobileFooterItems navGroups={navGroups} navItems={navItems} activeKey={activeKey} />
+        <Box
+          ref={navListRef}
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflow: "auto",
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
+            py: 2,
+            "&::-webkit-scrollbar": { width: 4 },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "var(--mui-palette-outlineVariant)",
+              borderRadius: 10,
+            },
+          }}
+        >
+          <SidebarMobileNav navGroups={navGroups} navItems={navItems} activeKey={activeKey} />
+        </Box>
+        <SidebarAccountFooter userName={userName} avatarUrl={avatarUrl} logoutLabel={logoutLabel} isCollapsed={false} />
       </Box>
     </Drawer>
   );
@@ -480,12 +623,18 @@ function SidebarDesktop({
   navItems,
   activeKey,
   initialSidebarOpen = true,
+  userName,
+  avatarUrl,
+  logoutLabel,
 }: {
   readonly sidebarWidth: string;
   readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string | null;
   readonly initialSidebarOpen?: boolean;
+  readonly userName: string;
+  readonly avatarUrl: string;
+  readonly logoutLabel: string;
 }) {
   const collapsedWidth = "80px";
   const storeSidebarOpen = useLayoutStore(state => state.sidebarOpen);
@@ -516,7 +665,15 @@ function SidebarDesktop({
         transition: "width 0.3s ease",
       }}
     >
-      <SidebarContent navGroups={navGroups} navItems={navItems} activeKey={activeKey} isCollapsed={isCollapsed} />
+      <SidebarContent
+        navGroups={navGroups}
+        navItems={navItems}
+        activeKey={activeKey}
+        isCollapsed={isCollapsed}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        logoutLabel={logoutLabel}
+      />
 
       <Box
         onClick={toggleSidebar}
@@ -579,7 +736,16 @@ function SidebarDesktop({
   );
 }
 
-export function SidebarShell({ navGroups, navItems, activeKey, sidebarWidth, initialSidebarOpen }: SidebarShellProps) {
+export function SidebarShell({
+  navGroups,
+  navItems,
+  activeKey,
+  sidebarWidth,
+  initialSidebarOpen,
+  userName,
+  avatarUrl,
+  logoutLabel,
+}: SidebarShellProps) {
   return (
     <>
       <SidebarMobileDrawer
@@ -587,6 +753,9 @@ export function SidebarShell({ navGroups, navItems, activeKey, sidebarWidth, ini
         navGroups={navGroups}
         navItems={navItems}
         activeKey={activeKey}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        logoutLabel={logoutLabel}
       />
       <SidebarDesktop
         sidebarWidth={sidebarWidth}
@@ -594,6 +763,9 @@ export function SidebarShell({ navGroups, navItems, activeKey, sidebarWidth, ini
         navItems={navItems}
         activeKey={activeKey}
         initialSidebarOpen={initialSidebarOpen}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        logoutLabel={logoutLabel}
       />
     </>
   );

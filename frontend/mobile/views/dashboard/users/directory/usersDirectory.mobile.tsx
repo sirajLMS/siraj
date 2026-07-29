@@ -4,18 +4,14 @@ import { Box } from "@mui/material";
 import type { ReactNode } from "react";
 import { GenericTabNav } from "@/frontend/common/views/dashboard/components/GenericTabNav";
 import { resolveActiveTabLabel } from "@/frontend/common/views/dashboard/lib/tabbedPane";
-import type { PeopleDirectoryTabsViewModel } from "@/frontend/common/views/dashboard/people/tabs/usePeopleDirectoryTabsViewModel";
+import type { UsersDirectoryTabsViewModel } from "@/frontend/common/views/dashboard/users/directory/tabs/useUsersDirectoryTabsViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
-export function PeopleDirectoryMobilePageShell({ children }: Readonly<{ readonly children: ReactNode }>) {
+export function UsersDirectoryMobilePageShell({ children }: Readonly<{ readonly children: ReactNode }>) {
   return <MobilePageContainer>{children}</MobilePageContainer>;
 }
 
-export function PeopleDirectoryMobileChrome({
-  labels,
-  activeTab,
-  tabNavItems,
-}: Readonly<PeopleDirectoryTabsViewModel>) {
+export function UsersDirectoryMobileChrome({ labels, activeTab, tabNavItems }: Readonly<UsersDirectoryTabsViewModel>) {
   return (
     <>
       <MobilePageHeader
@@ -24,7 +20,7 @@ export function PeopleDirectoryMobileChrome({
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 2 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="People directory sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Users directory sections" />
       </Box>
     </>
   );

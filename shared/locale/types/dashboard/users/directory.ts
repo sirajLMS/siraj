@@ -1,4 +1,4 @@
-export interface PeopleDirectoryParentLabels {
+export interface UsersDirectoryParentLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly tabs: {

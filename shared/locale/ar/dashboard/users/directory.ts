@@ -1,7 +1,7 @@
-import type { PeopleDirectoryParentLabels } from "@/shared/locale/types/dashboard/people/main";
+import type { UsersDirectoryParentLabels } from "@/shared/locale/types/dashboard/users/directory";
 
-export const dashboardPeopleDirectoryParentAr: PeopleDirectoryParentLabels = {
-  pageTitle: "الأشخاص",
+export const dashboardUsersDirectoryParentAr: UsersDirectoryParentLabels = {
+  pageTitle: "المستخدمون",
   pageSubtitle: "تصفح دلائل المعلمين وأولياء الأمور والطلاب والموظفين.",
   tabs: {
     teachers: "المعلمون",

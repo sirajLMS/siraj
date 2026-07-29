@@ -46,6 +46,8 @@ export function DashboardLayoutDesktop({
           sidebarItems={sidebarItems}
           sidebarWidth={sidebarWidth}
           initialSidebarOpen={initialSidebarOpen}
+          userName={userName}
+          avatarUrl={avatarUrl}
         >
           {children}
         </DashboardLayoutIsland>

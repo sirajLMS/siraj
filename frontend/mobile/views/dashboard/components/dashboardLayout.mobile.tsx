@@ -23,6 +23,7 @@ import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/
 import { BottomNavbarMobile } from "@/frontend/mobile/views/dashboard/components/bottomNavbar.mobile";
 import { MobileMenuButton } from "@/frontend/mobile/views/dashboard/components/mobileMenuButton.mobile";
 import { usePathname } from "@/shared/i18n/navigation";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
 
 function MobileMainScrollArea({ children }: { readonly children: ReactNode }) {
@@ -90,6 +91,7 @@ export function DashboardLayoutMobile({
 }: Readonly<DashboardLayoutProps>) {
   const pathname = usePathname();
   const t = useNavLabels();
+  const navLabels = useAppTranslation(Translation.Dashboard.CoreNav);
   const activeNavKey = getActiveNavKey(pathname, sidebarItems);
   const translatedNavGroups = buildTranslatedNavGroups(sidebarGroups, t);
   const translatedNavItems = buildTranslatedNavItems(sidebarItems, t);
@@ -114,6 +116,9 @@ export function DashboardLayoutMobile({
         navItems={translatedNavItems}
         activeKey={activeNavKey}
         sidebarWidth={sidebarWidth}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        logoutLabel={navLabels.nav.logout}
       />
 
       {/* NavbarChrome is position:fixed — offset content like desktop (pt: navbarHeight) */}

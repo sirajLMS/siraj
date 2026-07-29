@@ -7,6 +7,7 @@ import {
 } from "@/frontend/common/views/dashboard/components/client/SidebarShell";
 import { useNavLabels } from "@/frontend/common/views/dashboard/components/useNavLabels";
 import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface SidebarDesktopProps {
   readonly navGroups: readonly NavGroup[];
@@ -14,6 +15,8 @@ interface SidebarDesktopProps {
   readonly activeKey: string | null;
   readonly sidebarWidth: string;
   readonly initialSidebarOpen?: boolean;
+  readonly userName: string;
+  readonly avatarUrl: string;
 }
 
 export function SidebarDesktop({
@@ -22,8 +25,11 @@ export function SidebarDesktop({
   activeKey,
   sidebarWidth,
   initialSidebarOpen,
+  userName,
+  avatarUrl,
 }: Readonly<SidebarDesktopProps>) {
   const t = useNavLabels();
+  const navLabels = useAppTranslation(Translation.Dashboard.CoreNav);
 
   const translatedNavGroups: TranslatedNavGroup[] = navGroups.map(group => ({
     ...group,
@@ -41,6 +47,9 @@ export function SidebarDesktop({
       activeKey={activeKey}
       sidebarWidth={sidebarWidth}
       initialSidebarOpen={initialSidebarOpen}
+      userName={userName}
+      avatarUrl={avatarUrl}
+      logoutLabel={navLabels.nav.logout}
     />
   );
 }

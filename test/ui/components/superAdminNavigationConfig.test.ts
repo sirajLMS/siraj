@@ -116,7 +116,7 @@ describe("super admin sidebar navigation", () => {
     expect(keys).toContain("dst-migration");
     expect(keys).toContain("reports");
     expect(keys).toContain("billing-admin");
-    expect(keys).toContain("logout");
+    expect(keys).not.toContain("logout");
 
     expect(keys).not.toContain("today-classes");
     expect(keys).not.toContain("regular-schedule");

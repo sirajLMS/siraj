@@ -3,35 +3,41 @@
 import { Box, CircularProgress } from "@mui/material";
 import { type ComponentType, lazy, Suspense } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { usePeopleDirectoryTabsStore } from "@/frontend/common/stores/peopleDirectoryTabsStore";
+import { useUsersDirectoryTabsStore } from "@/frontend/common/stores/usersDirectoryTabsStore";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
-import type { PeopleDirectoryTabId } from "@/frontend/common/views/dashboard/people/tabs/types";
+import type { UsersDirectoryTabId } from "@/frontend/common/views/dashboard/users/directory/tabs/types";
 
-type PeopleDirectoryTabPanelsProps = { readonly activeTab: PeopleDirectoryTabId };
+type UsersDirectoryTabPanelsProps = { readonly activeTab: UsersDirectoryTabId };
 type TabPanelDefinition = {
-  readonly id: PeopleDirectoryTabId;
+  readonly id: UsersDirectoryTabId;
   readonly permissions: (typeof PAGE_PERMISSIONS)[keyof typeof PAGE_PERMISSIONS];
   readonly Component: ComponentType;
 };
 
 const LazyTeachersTab = lazy(() =>
-  import("@/frontend/common/views/dashboard/people/tabs/teachers/TeachersTab").then(m => ({ default: m.TeachersTab }))
+  import("@/frontend/common/views/dashboard/users/directory/tabs/teachers/TeachersTab").then(m => ({
+    default: m.TeachersTab,
+  }))
 );
 const LazyParentsTab = lazy(() =>
-  import("@/frontend/common/views/dashboard/people/tabs/parents/ParentsTab").then(m => ({ default: m.ParentsTab }))
+  import("@/frontend/common/views/dashboard/users/directory/tabs/parents/ParentsTab").then(m => ({
+    default: m.ParentsTab,
+  }))
 );
 const LazyStudentsTab = lazy(() =>
-  import("@/frontend/common/views/dashboard/people/tabs/students/StudentsTab").then(m => ({ default: m.StudentsTab }))
+  import("@/frontend/common/views/dashboard/users/directory/tabs/students/StudentsTab").then(m => ({
+    default: m.StudentsTab,
+  }))
 );
 const LazyStaffTab = lazy(() =>
-  import("@/frontend/common/views/dashboard/people/tabs/staff/StaffTab").then(m => ({ default: m.StaffTab }))
+  import("@/frontend/common/views/dashboard/users/directory/tabs/staff/StaffTab").then(m => ({ default: m.StaffTab }))
 );
 
 const TAB_PANELS: readonly TabPanelDefinition[] = [
-  { id: "teachers", permissions: PAGE_PERMISSIONS.peopleTeachers, Component: LazyTeachersTab },
-  { id: "parents", permissions: PAGE_PERMISSIONS.peopleParents, Component: LazyParentsTab },
-  { id: "students", permissions: PAGE_PERMISSIONS.peopleStudents, Component: LazyStudentsTab },
-  { id: "staff", permissions: PAGE_PERMISSIONS.peopleStaff, Component: LazyStaffTab },
+  { id: "teachers", permissions: PAGE_PERMISSIONS.usersTeachers, Component: LazyTeachersTab },
+  { id: "parents", permissions: PAGE_PERMISSIONS.usersParents, Component: LazyParentsTab },
+  { id: "students", permissions: PAGE_PERMISSIONS.usersStudents, Component: LazyStudentsTab },
+  { id: "staff", permissions: PAGE_PERMISSIONS.usersStaff, Component: LazyStaffTab },
 ];
 
 function TabPanelFallback() {
@@ -63,8 +69,8 @@ function getTabPanelSx(isActive: boolean) {
       };
 }
 
-export function PeopleDirectoryTabPanels({ activeTab }: Readonly<PeopleDirectoryTabPanelsProps>) {
-  const visitedTabs = usePeopleDirectoryTabsStore(state => state.visitedTabs);
+export function UsersDirectoryTabPanels({ activeTab }: Readonly<UsersDirectoryTabPanelsProps>) {
+  const visitedTabs = useUsersDirectoryTabsStore(state => state.visitedTabs);
   return (
     <Box sx={{ position: "relative", width: "100%" }}>
       {TAB_PANELS.map(({ id, permissions, Component }) => {
@@ -74,8 +80,8 @@ export function PeopleDirectoryTabPanels({ activeTab }: Readonly<PeopleDirectory
           <Box
             key={id}
             role="tabpanel"
-            id={`people-directory-tabpanel-${id}`}
-            aria-labelledby={`people-directory-tab-${id}`}
+            id={`users-directory-tabpanel-${id}`}
+            aria-labelledby={`users-directory-tab-${id}`}
             aria-hidden={!isActive}
             sx={getTabPanelSx(isActive)}
           >

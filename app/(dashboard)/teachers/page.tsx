@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { AppPermission } from "@/backend/enum";
 import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { isPeopleDirectoryEnabled } from "@/backend/lib/features/is-people-directory-enabled";
+import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directory-enabled";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { TeachersContainer } from "@/frontend/common/views/dashboard/teachers/home/TeachersContainer";
 import { getTranslations } from "@/shared/locale";
@@ -16,8 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TeachersPage() {
-  if (await isPeopleDirectoryEnabled()) {
-    redirect("/people?tab=teachers");
+  if (await isUsersDirectoryEnabled()) {
+    redirect("/users?tab=teachers");
   }
 
   const locale = await getLocale();

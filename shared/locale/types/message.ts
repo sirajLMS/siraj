@@ -42,7 +42,6 @@ import type { ParentSocialLabels } from "@/shared/locale/types/dashboard/parents
 import type { ParentStudentsLabels } from "@/shared/locale/types/dashboard/parents/students.ts";
 import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/payment-catalogs/main.ts";
 import type { PaymentCatalogsParentLabels } from "@/shared/locale/types/dashboard/payment-catalogs/parent.ts";
-import type { PeopleDirectoryParentLabels } from "@/shared/locale/types/dashboard/people/main.ts";
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main.ts";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main.ts";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
@@ -79,6 +78,7 @@ import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teach
 import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers/reassignment.ts";
 import type { TeacherStudentsLabels } from "@/shared/locale/types/dashboard/teachers/students.ts";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule.ts";
+import type { UsersDirectoryParentLabels } from "@/shared/locale/types/dashboard/users/directory.ts";
 import type { EmailsLabels } from "@/shared/locale/types/emails";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { NotificationsLabels } from "@/shared/locale/types/notifications";
@@ -168,7 +168,7 @@ export interface DashboardTranslations {
   parentRules: ParentRulesLabels;
   parentSocial: ParentSocialLabels;
   feedbackManageParent: FeedbackManageParentLabels;
-  peopleDirectoryParent: PeopleDirectoryParentLabels;
+  usersDirectoryParent: UsersDirectoryParentLabels;
   paymentCatalogs: PaymentCatalogsLabels;
   paymentCatalogsParent: PaymentCatalogsParentLabels;
   scheduleTrackingParent: ScheduleTrackingParentLabels;

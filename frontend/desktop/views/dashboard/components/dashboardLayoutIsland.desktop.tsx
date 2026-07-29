@@ -15,6 +15,8 @@ interface DashboardLayoutIslandProps {
   readonly sidebarWidth: string;
   readonly children: ReactNode;
   readonly initialSidebarOpen?: boolean;
+  readonly userName: string;
+  readonly avatarUrl: string;
 }
 
 function DesktopMainScrollArea({ children }: { readonly children: ReactNode }) {
@@ -58,6 +60,8 @@ export function DashboardLayoutIsland({
   sidebarWidth,
   children,
   initialSidebarOpen,
+  userName,
+  avatarUrl,
 }: Readonly<DashboardLayoutIslandProps>) {
   const pathname = usePathname();
   const activeNavKey = getActiveNavKey(pathname, sidebarItems);
@@ -70,6 +74,8 @@ export function DashboardLayoutIsland({
         activeKey={activeNavKey}
         sidebarWidth={sidebarWidth}
         initialSidebarOpen={initialSidebarOpen}
+        userName={userName}
+        avatarUrl={avatarUrl}
       />
       <DesktopMainScrollArea>{children}</DesktopMainScrollArea>
     </>

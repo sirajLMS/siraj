@@ -39,7 +39,6 @@ import { dashboardParentSocialEn } from "@/shared/locale/en/dashboard/parents/so
 import { dashboardParentStudentsEn } from "@/shared/locale/en/dashboard/parents/students.ts";
 import { dashboardPaymentCatalogsEn } from "@/shared/locale/en/dashboard/payment-catalogs/main.ts";
 import { dashboardPaymentCatalogsParentEn } from "@/shared/locale/en/dashboard/payment-catalogs/parent.ts";
-import { dashboardPeopleDirectoryParentEn } from "@/shared/locale/en/dashboard/people/main.ts";
 import { dashboardPermissionsEn } from "@/shared/locale/en/dashboard/permissions/main.ts";
 import { dashboardReportsEn } from "@/shared/locale/en/dashboard/reports/main.ts";
 import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/booksAndBags.ts";
@@ -77,6 +76,7 @@ import { dashboardTeacherProfileEn } from "@/shared/locale/en/dashboard/teachers
 import { dashboardTeacherReassignmentEn } from "@/shared/locale/en/dashboard/teachers/reassignment.ts";
 import { dashboardTeacherStudentsEn } from "@/shared/locale/en/dashboard/teachers/students.ts";
 import { dashboardTeacherWeeklyScheduleEn } from "@/shared/locale/en/dashboard/teachers/weeklySchedule.ts";
+import { dashboardUsersDirectoryParentEn } from "@/shared/locale/en/dashboard/users/directory.ts";
 import { emailsEn } from "@/shared/locale/en/emails";
 import { errorsEn } from "@/shared/locale/en/errors";
 import { notificationsEn } from "@/shared/locale/en/notifications";
@@ -200,7 +200,7 @@ export const enMessages: Translations = {
     parentSocial: dashboardParentSocialEn,
     paymentCatalogs: dashboardPaymentCatalogsEn,
     paymentCatalogsParent: dashboardPaymentCatalogsParentEn,
-    peopleDirectoryParent: dashboardPeopleDirectoryParentEn,
+    usersDirectoryParent: dashboardUsersDirectoryParentEn,
     permissions: dashboardPermissionsEn,
     settings: dashboardSettingsEn,
     reports: dashboardReportsEn,

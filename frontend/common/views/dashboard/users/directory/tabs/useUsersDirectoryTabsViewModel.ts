@@ -2,32 +2,32 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import { usePeopleDirectoryTabsStore } from "@/frontend/common/stores/peopleDirectoryTabsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { useUsersDirectoryTabsStore } from "@/frontend/common/stores/usersDirectoryTabsStore";
 import { buildTabHref, buildTabNavItems, resolveTab } from "@/frontend/common/views/dashboard/lib/tabbedPane";
-import { getVisiblePeopleDirectoryTabs } from "@/frontend/common/views/dashboard/people/tabs/config/peopleDirectoryTabs.config";
+import { getVisibleUsersDirectoryTabs } from "@/frontend/common/views/dashboard/users/directory/tabs/config/usersDirectoryTabs.config";
 import type {
-  PeopleDirectoryTabId,
-  PeopleDirectoryTabLabelKey,
-  PeopleDirectoryTabsViewModel,
-  PeopleDirectoryViewLabels,
-} from "@/frontend/common/views/dashboard/people/tabs/types";
+  UsersDirectoryTabId,
+  UsersDirectoryTabLabelKey,
+  UsersDirectoryTabsViewModel,
+  UsersDirectoryViewLabels,
+} from "@/frontend/common/views/dashboard/users/directory/tabs/types";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type { PeopleDirectoryTabsViewModel };
+export type { UsersDirectoryTabsViewModel };
 
-export function usePeopleDirectoryTabsViewModel(): PeopleDirectoryTabsViewModel {
+export function useUsersDirectoryTabsViewModel(): UsersDirectoryTabsViewModel {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const labels = useAppTranslation(Translation.Dashboard.PeopleDirectoryParent);
+  const labels = useAppTranslation(Translation.Dashboard.UsersDirectoryParent);
   const hasPermission = useUserStore(state => state.hasPermission);
-  const markTabVisited = usePeopleDirectoryTabsStore(state => state.markTabVisited);
+  const markTabVisited = useUsersDirectoryTabsStore(state => state.markTabVisited);
 
-  const visibleTabs = useMemo(() => getVisiblePeopleDirectoryTabs(hasPermission), [hasPermission]);
+  const visibleTabs = useMemo(() => getVisibleUsersDirectoryTabs(hasPermission), [hasPermission]);
   const tabParam = searchParams.get("tab");
   const resolvedActiveTab =
-    resolveTab<PeopleDirectoryTabId, PeopleDirectoryTabLabelKey>(tabParam, visibleTabs) ?? "teachers";
+    resolveTab<UsersDirectoryTabId, UsersDirectoryTabLabelKey>(tabParam, visibleTabs) ?? "teachers";
 
   useEffect(() => {
     markTabVisited(resolvedActiveTab);
@@ -38,14 +38,14 @@ export function usePeopleDirectoryTabsViewModel(): PeopleDirectoryTabsViewModel 
     router.replace(buildTabHref(pathname, searchParams, resolvedActiveTab), { scroll: false });
   }, [resolvedActiveTab, tabParam, pathname, router, searchParams]);
 
-  const viewLabels: PeopleDirectoryViewLabels = useMemo(
+  const viewLabels: UsersDirectoryViewLabels = useMemo(
     () => ({ title: labels.pageTitle, subtitle: labels.pageSubtitle, tabs: labels.tabs }),
     [labels]
   );
 
   const tabNavItems = useMemo(
     () =>
-      buildTabNavItems<PeopleDirectoryTabId, PeopleDirectoryTabLabelKey, PeopleDirectoryViewLabels>({
+      buildTabNavItems<UsersDirectoryTabId, UsersDirectoryTabLabelKey, UsersDirectoryViewLabels>({
         labels: viewLabels,
         visibleTabs,
         activeTab: resolvedActiveTab,

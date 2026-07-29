@@ -36,7 +36,7 @@ describe("supervisor sidebar navigation", () => {
     expect(keys).toContain("teacher-dues");
     expect(keys).toContain("monthly-reports");
     expect(keys).toContain("supervisor-profile");
-    expect(keys).toContain("logout");
+    expect(keys).not.toContain("logout");
 
     expect(keys).not.toContain("home");
     expect(keys).not.toContain("own-profile");
@@ -71,7 +71,7 @@ describe("supervisor sidebar navigation", () => {
     expect(keys).toContain("home");
   });
 
-  test("SUPERADMIN sees supervisor-only items (pending-reviews, teacher-dues, monthly-reports, supervisor-profile) but NOT supervisor-home", () => {
+  test("SUPERADMIN sees supervisor-only items (pending-reviews, teacher-dues, monthly-reports) but NOT supervisor-home or supervisor-profile", () => {
     // SUPERADMIN holds PermissionGroupsManage (the super_admin discriminator)
     // along with DashboardViewMetrics (admin metrics) and all 4 supervisor
     // route permissions seeded for super_admin in
@@ -90,11 +90,11 @@ describe("supervisor sidebar navigation", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, SUPERADMIN_PERMISSIONS);
     const keys = items.map(item => item.key);
 
-    // The 4 supervisor-only items become visible to SUPERADMIN.
+    // The 3 supervisor-only route items become visible to SUPERADMIN.
     expect(keys).toContain("pending-reviews");
     expect(keys).toContain("teacher-dues");
     expect(keys).toContain("monthly-reports");
-    expect(keys).toContain("supervisor-profile");
+    expect(keys).not.toContain("supervisor-profile");
 
     // supervisor-home stays HIDDEN for SUPERADMIN because the admin `home`
     // item already serves /dashboard (user decision: consolidate).

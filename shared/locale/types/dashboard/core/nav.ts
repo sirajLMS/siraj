@@ -43,7 +43,7 @@ export interface DashboardNavigationLabels {
   readonly currencyHedges: string;
   readonly paymentCatalogs: string;
   readonly feedbackManage: string;
-  readonly peopleDirectory: string;
+  readonly usersDirectory: string;
   readonly meetingProviders: string;
   readonly billingParent: string;
   readonly billingManual: string;
@@ -84,6 +84,9 @@ export interface DashboardNavigationLabels {
    */
   readonly navGroupHome: string;
   readonly navGroupPeople: string;
+  readonly navGroupUsers: string;
+  readonly navGroupContent: string;
+  readonly navGroupFinance: string;
   readonly navGroupSchedule: string;
   readonly navGroupBilling: string;
   readonly navGroupCatalogs: string;
