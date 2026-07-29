@@ -36,7 +36,8 @@ function buildAnalyticsLabels(labels: StatusTrackingLabels): StatusTrackingLabel
 
 function buildColumnLabels(labels: StatusTrackingLabels): StatusTrackingLabelsBySection["columns"] {
   return {
-    studentClass: labels.studentClass,
+    class: labels.class,
+    student: labels.student,
     teacher: labels.teacher,
     schedule: labels.schedule,
     status: labels.status,
@@ -101,7 +102,8 @@ export function useStatusTrackingLabels(): StatusTrackingLabels {
     newReport: t.newReport,
     todaysClassSchedule: t.todaysClassSchedule,
     totalSessions: (total: number) => t.totalSessions(total),
-    studentClass: t.table.studentClass,
+    class: t.table.class,
+    student: t.table.student,
     teacher: t.table.teacher,
     schedule: t.table.schedule,
     status: t.table.status,

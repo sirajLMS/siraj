@@ -21,7 +21,8 @@ export interface StatusTrackingLabels {
   readonly newReport: string;
   readonly todaysClassSchedule: string;
   readonly totalSessions: (total: number) => string;
-  readonly studentClass: string;
+  readonly class: string;
+  readonly student: string;
   readonly teacher: string;
   readonly schedule: string;
   readonly status: string;
@@ -67,7 +68,8 @@ export interface StatusTrackingLabels {
 }
 
 export interface StatusTrackingDataGridLabels {
-  readonly studentClass: string;
+  readonly class: string;
+  readonly student: string;
   readonly teacher: string;
   readonly schedule: string;
   readonly status: string;

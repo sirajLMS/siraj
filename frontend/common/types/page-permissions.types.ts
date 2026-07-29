@@ -53,8 +53,8 @@ export const PAGE_PERMISSIONS = {
     AppPermission.ParentViewDirectory,
     AppPermission.StudentsList,
   ] as PagePermissions,
-  usersTeachers: [AppPermission.StaffViewDirectory] as PagePermissions,
-  usersParents: [AppPermission.ParentViewDirectory] as PagePermissions,
+  usersTeachers: [AppPermission.StaffViewDirectory, AppPermission.TeachersList] as PagePermissions,
+  usersParents: [AppPermission.ParentViewDirectory, AppPermission.ParentsList] as PagePermissions,
   usersStudents: [AppPermission.StudentsList] as PagePermissions,
   usersStaff: [AppPermission.StaffViewDirectory] as PagePermissions,
   parents: [AppPermission.ParentViewDirectory] as PagePermissions,
@@ -121,7 +121,7 @@ export const PAGE_PERMISSIONS = {
   settingsSiteContent: [AppPermission.SettingsSiteContentManage] as PagePermissions,
   settingsTimezones: [AppPermission.SettingsTimezonesView] as PagePermissions,
   // Phase 2 nav additions for previously-orphaned routes.
-  classesPage: [AppPermission.SessionViewDetails, AppPermission.ScheduleManageRecurring] as PagePermissions,
+  classesPage: [AppPermission.ScheduleManageRecurring] as PagePermissions,
   recurringSchedules: [AppPermission.ScheduleManageRecurring] as PagePermissions,
   userProfile: [
     AppPermission.ProfileCoreContactViewOther,

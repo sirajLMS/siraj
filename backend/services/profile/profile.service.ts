@@ -271,7 +271,7 @@ export namespace ProfileService {
 
     return {
       teacherOwnProfile: null,
-      teacherAdminProfile: await StaffProfileService.getTeacherProfileForEdit(actorUserId, roleIds.teacherId, locale),
+      teacherAdminProfile: await StaffProfileService.getTeacherProfileForView(actorUserId, roleIds.teacherId, locale),
       assignedStudents: await StudentRepository.getAssignedToTeacher(roleIds.teacherId),
     };
   }

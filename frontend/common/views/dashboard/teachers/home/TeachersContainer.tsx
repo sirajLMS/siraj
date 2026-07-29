@@ -24,7 +24,7 @@ export function TeachersContainer(props: Readonly<UseTeachersViewModelProps> = {
   const viewModel = useTeachersViewModel(props);
 
   return (
-    <RequirePermission permissions={[AppPermission.StaffViewDirectory]}>
+    <RequirePermission permissions={[AppPermission.StaffViewDirectory, AppPermission.TeachersList]}>
       <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
     </RequirePermission>
   );

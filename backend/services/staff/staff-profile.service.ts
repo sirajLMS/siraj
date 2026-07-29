@@ -1,6 +1,7 @@
 import { TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -64,6 +65,27 @@ export namespace StaffProfileService {
     if (!success) {
       const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(tFunc.teacherNotFound(teacherId));
+    }
+
+    const profile = await TeacherRepository.getTeacherProfileForEdit(teacherId);
+    if (!profile) {
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.teacherNotFound(teacherId));
+    }
+
+    return toMaskedTeacherProfile(profile);
+  }
+
+  export async function getTeacherProfileForView(
+    actorUserId: string,
+    teacherId: string,
+    locale?: string
+  ): Promise<TeacherProfileReturnType> {
+    const viewOtherKeys = PROFILE_FIELD_GROUPS.map(group => group.viewOther);
+    const hasPermission = await PermissionsService.hasAnyPermission(actorUserId, viewOtherKeys);
+    if (!hasPermission) {
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.insufficientPermissions);
     }
 
     const profile = await TeacherRepository.getTeacherProfileForEdit(teacherId);

@@ -194,24 +194,22 @@ function StatusTrackingCard({
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
             <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
+              <MobileClassProfileLink
+                href={row.id ? classHref(row.id) : undefined}
+                name={row.courseName?.trim() || "—"}
+                avatarUrl={row.avatarUrl}
+                avatarSize={32}
+                typographyVariant="bodyMd"
+                fontWeight={700}
+              />
               <MobilePersonProfileLink
                 href={row.studentId ? studentHref(row.studentId) : undefined}
                 name={row.studentName ?? ""}
                 avatarUrl={row.studentAvatarUrl}
                 showAvatar={false}
-                typographyVariant="bodyMd"
-                fontWeight={700}
+                typographyVariant="labelMd"
+                fontWeight={500}
               />
-              {row.courseName ? (
-                <MobileClassProfileLink
-                  href={row.id ? classHref(row.id) : undefined}
-                  name={row.courseName}
-                  avatarUrl={row.avatarUrl}
-                  showAvatar={false}
-                  typographyVariant="labelMd"
-                  fontWeight={500}
-                />
-              ) : null}
             </Box>
             <MobileStatusBadge
               category="sessionTracking"

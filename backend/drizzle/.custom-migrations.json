@@ -1,5 +1,5 @@
 {
-  "manifestHash": "ba4b78ed44fd4c46d9bfe452142548995ef24120550eaa7e8b6e2940ed7cb7c4",
+  "manifestHash": "bcccf0c8267736524eab6f8474160b3733445aac7a7121fdb4fbeb36eca54f22",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -7,7 +7,7 @@
     },
     {
       "file": "3-system_permissions_and_groups.sql",
-      "sha256": "66375a575b826d04f72ef6c2e5ad7fdf46d3c3313ed0e7c8672369d3a53148d5"
+      "sha256": "ceebaa72441610105f300e3ce7c93e7d1fab49f08dcb5ecb6be397fd07990e1f"
     },
     {
       "file": "30-a-class_instances_rls_policies.sql",
@@ -197,6 +197,7 @@
     "20260729030012_custom_student_status_transition_trigger",
     "20260729030013_custom_timezone_dst_logic",
     "20260729030014_custom_user_notification_preferences",
-    "20260729073854_custom_6d-profile-fine-grained-only"
+    "20260729073854_custom_6d-profile-fine-grained-only",
+    "20260729150220_custom_3-system_permissions_and_groups"
   ]
 }

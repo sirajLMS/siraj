@@ -48,7 +48,8 @@ export interface StatusTrackingLabels {
 
   // ─── Table ──────────────────────────────────────────────────────────
   readonly table: {
-    readonly studentClass: string;
+    readonly class: string;
+    readonly student: string;
     readonly teacher: string;
     readonly schedule: string;
     readonly status: string;

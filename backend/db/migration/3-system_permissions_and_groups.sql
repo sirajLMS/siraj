@@ -1413,6 +1413,7 @@ WHERE
     g.slug = 'staff_default'
     AND p.key IN (
         'dashboard.view',
+        'dashboard.view_metrics',
         'dashboard.metrics.view_all',
         'schedule.view_all',
         'session.view_details',

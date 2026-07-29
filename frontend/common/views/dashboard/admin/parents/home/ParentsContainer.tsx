@@ -10,7 +10,7 @@ interface ParentsContainerProps {
 
 export function ParentsContainer(_props: ParentsContainerProps) {
   return (
-    <RequirePermission permissions={PAGE_PERMISSIONS.parents} fallback={null}>
+    <RequirePermission permissions={PAGE_PERMISSIONS.usersParents} fallback={null}>
       <ParentsView />
     </RequirePermission>
   );

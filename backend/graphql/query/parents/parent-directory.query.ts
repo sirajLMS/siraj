@@ -1,4 +1,3 @@
-import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ParentDirectoryAutocompleteRowPothosObject,
@@ -53,7 +52,7 @@ gqlSchemaBuilder.queryField("parentsDirectory", t =>
   t.field({
     type: [ParentDirectoryAutocompleteRowPothosObject],
     nullable: false,
-    authScopes: { permission: AppPermission.PARENT_VIEW_DIRECTORY },
+    authScopes: { loggedIn: true },
     args: {
       search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       limit: t.arg.int({

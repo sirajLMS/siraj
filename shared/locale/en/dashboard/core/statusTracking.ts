@@ -33,7 +33,8 @@ export const dashboardCoreStatusTrackingEn: StatusTrackingLabels = {
     onLeave: "Approved absences",
   },
   table: {
-    studentClass: "Student / Class",
+    class: "Class",
+    student: "Student",
     teacher: "Teacher",
     schedule: "Schedule",
     status: "Status",
