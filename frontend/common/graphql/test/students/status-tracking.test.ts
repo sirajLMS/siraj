@@ -220,7 +220,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
     });
   });
 
-  describe.serial("security: T10-004 — SUSPENDED→REGULAR restores isFrozen = false", () => {
+  describe("security: T10-004 — SUSPENDED→REGULAR restores isFrozen = false", () => {
     let localAdminToken = "";
     let localSuperAdminToken = "";
     let localStudentId = "";
