@@ -9,28 +9,14 @@ import {
   TimerOutlined,
   TrendingUpOutlined,
   VerifiedUserOutlined,
-  VisibilityOutlined,
 } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Chip,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  type Theme,
-  Typography,
-} from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, type Theme, Typography } from "@mui/material";
 import { useMemo } from "react";
-import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import {
   MobileCardList,
-  MobileCardListItem,
   MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
@@ -38,104 +24,8 @@ import {
   MobilePageHeader,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
+import { HistorySessionCardMobile } from "@/frontend/mobile/views/dashboard/student/history/components/historySessionCard.mobile";
 import { HistoryWeeklyScrollerMobile } from "@/frontend/mobile/views/dashboard/student/history/components/historyWeeklyScroller.mobile";
-
-function StatusChip({ status }: Readonly<{ status: string }>) {
-  const getStatusColors = (theme: Theme, statusKey: string) => {
-    switch (statusKey.toUpperCase()) {
-      case "COMPLETED":
-      case "PRESENT":
-      case "TAKEN":
-        return {
-          backgroundColor: theme.palette.success.light,
-          color: theme.palette.onSuccessContainer,
-        };
-      case "CANCELLED":
-      case "ABSENT":
-        return {
-          backgroundColor: theme.palette.error.light,
-          color: theme.palette.onErrorContainer,
-        };
-      case "SCHEDULED":
-        return {
-          backgroundColor: theme.palette.primaryContainer,
-          color: theme.palette.onPrimaryContainer,
-        };
-      case "PENDING":
-        return {
-          backgroundColor: theme.palette.warning.light,
-          color: theme.palette.onWarningContainer,
-        };
-      default:
-        return {
-          backgroundColor: theme.palette.surfaceVariant,
-          color: theme.palette.onSurfaceVariant,
-        };
-    }
-  };
-
-  return <Chip label={status} size="small" sx={theme => getStatusColors(theme, status)} />;
-}
-
-function MobileSessionItem({
-  row,
-  labels,
-  locale,
-  onOpenMeetingUrl,
-}: Readonly<{
-  row: StudentHistorySessionRow;
-  labels: StudentHistoryViewModel["labels"];
-  locale: string;
-  onOpenMeetingUrl: StudentHistoryViewModel["onOpenMeetingUrl"];
-}>): React.ReactNode {
-  let dateLabel = row.time || "—";
-  if (row.time) {
-    try {
-      dateLabel = formatDate(row.time, locale);
-    } catch {
-      dateLabel = row.time;
-    }
-  }
-
-  return (
-    <MobileCardListItem variant="edge-to-edge">
-      <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 700 })}>
-            {row.title}
-          </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.sessionDate}: {dateLabel}
-          </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.instructor}: {row.instructor || "—"}
-          </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {labels.duration}: {row.duration} min
-          </Typography>
-        </Box>
-        <StatusChip status={row.status || "—"} />
-      </Stack>
-      {row.notes ? (
-        <Typography variant="labelMd" sx={theme => ({ mt: 1, color: theme.palette.onSurfaceVariant })}>
-          {row.notes}
-        </Typography>
-      ) : null}
-      {row.meetingJoinUrl ? (
-        <Box sx={{ mt: 1 }}>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<VisibilityOutlined />}
-            onClick={() => onOpenMeetingUrl(row.meetingJoinUrl)}
-          >
-            {labels.viewReport}
-          </Button>
-        </Box>
-      ) : null}
-    </MobileCardListItem>
-  );
-}
 
 function useStudentHistoryMetricItems(
   metrics: StudentHistoryViewModel["metrics"],
@@ -234,7 +124,7 @@ function HistoryFilters({
   onStatusFilterChange: StudentHistoryViewModel["onStatusFilterChange"];
 }>): React.ReactNode {
   return (
-    <MobileContentInset>
+    <MobileContentInset sx={{ pt: 2.5 }}>
       <Stack spacing={2} sx={{ mb: 2 }}>
         <FormControl fullWidth size="small">
           <InputLabel id="mobile-history-subject-filter" shrink>
@@ -295,7 +185,7 @@ function HistorySessionList({
       getKey={row => row.id}
       paginationOptions={{ mode: "client" }}
       renderItem={row => (
-        <MobileSessionItem row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
+        <HistorySessionCardMobile row={row} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
       )}
     />
   );
@@ -380,18 +270,21 @@ export function StudentHistoryMobileView({
 
         <MobileMetricCardGrid metrics={metricItems} />
 
-        <HistoryWeeklyScrollerMobile
-          selectedWeek={selectedWeek}
-          selectedDay={selectedDay}
-          currentMonth={currentMonth}
-          sessionsByDay={sessionsByDay}
-          weeklyAttendanceLabel={labels.weeklyAttendance}
-          weekLabel={labels.week(selectedWeek)}
-          onSelectWeek={onSelectWeek}
-          onSelectDay={onSelectDay}
-        />
+        <Box sx={{ mt: 0 }}>
+          <HistoryWeeklyScrollerMobile
+            selectedWeek={selectedWeek}
+            selectedDay={selectedDay}
+            currentMonth={currentMonth}
+            sessionsByDay={sessionsByDay}
+            weeklyAttendanceLabel={labels.weeklyAttendance}
+            weekLabel={labels.week(selectedWeek)}
+            calendarWeekdays={labels.calendarWeekdays}
+            onSelectWeek={onSelectWeek}
+            onSelectDay={onSelectDay}
+          />
+        </Box>
 
-        <MobileSectionPanel title={labels.lessonHistory} contentInset={false}>
+        <MobileSectionPanel title={labels.sessionsList} contentInset={false} sx={{ mt: 2 }}>
           <HistoryFilters
             subjectFilter={subjectFilter}
             statusFilter={statusFilter}

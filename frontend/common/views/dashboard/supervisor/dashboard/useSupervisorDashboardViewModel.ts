@@ -3,8 +3,8 @@
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 import { formatDate, formatDateTime } from "@/frontend/common/components/intl/dateFormat";
-import { recentApprovedLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { supervisorDashboardQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { recentApprovedLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useSupervisorDashboardRecentApprovalsStore } from "@/frontend/common/stores/supervisorDashboardRecentApprovalsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

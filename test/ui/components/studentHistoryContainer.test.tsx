@@ -220,8 +220,8 @@ describe("StudentHistoryContainer", () => {
       expect(screen.getByText(expectedMonthLabel)).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("button", { name: "Previous month" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Next month" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Previous month", { hidden: true })).toBeInTheDocument();
+    expect(screen.getByLabelText("Next month", { hidden: true })).toBeInTheDocument();
 
     expect(screen.getByText("Total Classes")).toBeInTheDocument();
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(1);
@@ -236,11 +236,23 @@ describe("StudentHistoryContainer", () => {
     expect(screen.getByLabelText("Filter by Status")).toBeInTheDocument();
 
     expect(screen.getAllByText("Lesson History").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Sessions")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getAllByText("Quran Recitation").length).toBeGreaterThanOrEqual(1);
     });
     expect(screen.getAllByText("Tajweed").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Ustadh Yusuf").length).toBeGreaterThanOrEqual(1);
+    await waitFor(() => {
+      expect(screen.getAllByText("Ustadh Yusuf").length).toBeGreaterThanOrEqual(1);
+    });
+
+    const quranLinks = screen.getAllByRole("link", { name: "Quran Recitation", hidden: true });
+    expect(quranLinks.some(link => link.getAttribute("href") === "/classes/session-1")).toBe(true);
+
+    const tajweedLinks = screen.getAllByRole("link", { name: "Tajweed", hidden: true });
+    expect(tajweedLinks.some(link => link.getAttribute("href") === "/classes/session-2")).toBe(true);
+
+    expect(screen.getAllByText("Ended").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("COMPLETED")).not.toBeInTheDocument();
   });
 });

@@ -3,6 +3,8 @@
 import { Box, Typography } from "@mui/material";
 import { useMemo } from "react";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
+import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
+import type { StudentPortalHistoryCalendarWeekdayLabels } from "@/shared/locale/types/dashboard/studentPortal/studentHistory";
 
 interface WeekDayData {
   readonly dayKey: string;
@@ -12,12 +14,18 @@ interface WeekDayData {
   readonly isInMonth: boolean;
 }
 
+const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+
+function weekdayLabelsFromLocale(calendarWeekdays: StudentPortalHistoryCalendarWeekdayLabels): readonly string[] {
+  return WEEKDAY_KEYS.map(key => calendarWeekdays[key]);
+}
+
 function computeWeekDays(
   currentMonth: Date,
   selectedWeek: number,
-  sessionsByDay: Readonly<Partial<Record<number, StudentHistorySessionRow>>>
+  sessionsByDay: Readonly<Partial<Record<number, StudentHistorySessionRow>>>,
+  dayKeys: readonly string[]
 ): WeekDayData[] {
-  const dayKeys = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
   const weekStartDay = (selectedWeek - 1) * 7 + 1 - firstDayOfMonth;
@@ -31,7 +39,7 @@ function computeWeekDays(
           ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate() + dayAbs
           : dayAbs - daysInMonth;
       result.push({
-        dayKey: dayKeys[i],
+        dayKey: dayKeys[i] ?? "",
         dayOfMonth: -1,
         displayDate,
         hasSession: false,
@@ -40,7 +48,7 @@ function computeWeekDays(
       continue;
     }
     result.push({
-      dayKey: dayKeys[i],
+      dayKey: dayKeys[i] ?? "",
       dayOfMonth: dayAbs,
       displayDate: dayAbs,
       hasSession: Boolean(sessionsByDay[dayAbs]),
@@ -57,6 +65,7 @@ export interface HistoryWeeklyScrollerProps {
   readonly sessionsByDay: Readonly<Partial<Record<number, StudentHistorySessionRow>>>;
   readonly weeklyAttendanceLabel: string;
   readonly weekLabel: string;
+  readonly calendarWeekdays: StudentPortalHistoryCalendarWeekdayLabels;
   readonly onSelectWeek: (week: number) => void;
   readonly onSelectDay: (day: number | null) => void;
 }
@@ -68,12 +77,15 @@ export function HistoryWeeklyScrollerMobile({
   sessionsByDay,
   weeklyAttendanceLabel,
   weekLabel,
+  calendarWeekdays,
   onSelectWeek,
   onSelectDay,
 }: Readonly<HistoryWeeklyScrollerProps>) {
+  const dayKeys = useMemo(() => weekdayLabelsFromLocale(calendarWeekdays), [calendarWeekdays]);
+
   const weekDays = useMemo(
-    () => computeWeekDays(currentMonth, selectedWeek, sessionsByDay),
-    [currentMonth, selectedWeek, sessionsByDay]
+    () => computeWeekDays(currentMonth, selectedWeek, sessionsByDay, dayKeys),
+    [currentMonth, selectedWeek, sessionsByDay, dayKeys]
   );
 
   const maxWeek = 6;
@@ -85,14 +97,15 @@ export function HistoryWeeklyScrollerMobile({
         borderRadius: 2,
         boxShadow: theme.palette.shadow.card,
         border: `1px solid ${theme.palette.outlineVariant}`,
-        p: 2,
+        py: 2,
+        px: 2,
       })}
     >
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, gap: 1 }}>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
           {weeklyAttendanceLabel}
         </Typography>
-        <Box sx={{ display: "flex", gap: 0.5 }}>
+        <Box sx={{ display: "flex", gap: 0.75, flexShrink: 0 }}>
           {Array.from({ length: maxWeek }, (_, i) => i + 1).map(week => (
             <Box
               key={week}
@@ -106,14 +119,17 @@ export function HistoryWeeklyScrollerMobile({
                 }
               }}
               sx={theme => ({
-                px: 1,
-                py: 0.25,
-                borderRadius: 1,
+                minWidth: 32,
+                px: 1.25,
+                py: 0.5,
+                borderRadius: 999,
                 cursor: "pointer",
+                textAlign: "center",
                 backgroundColor: selectedWeek === week ? theme.palette.primary.main : "transparent",
                 color: selectedWeek === week ? theme.palette.onPrimary : theme.palette.primary.main,
                 typography: "labelMd",
                 fontWeight: 700,
+                border: `1px solid ${selectedWeek === week ? theme.palette.primary.main : theme.palette.outlineVariant}`,
               })}
             >
               {week}
@@ -126,7 +142,7 @@ export function HistoryWeeklyScrollerMobile({
         {weekLabel}
       </Typography>
 
-      <Box sx={{ display: "flex", gap: 1, overflowX: "auto" }}>
+      <MobileHorizontalScrollRow leadSpacing={0} sx={theme => ({ gap: theme.spacing(1.25), paddingBottom: 0 })}>
         {weekDays.map(day => {
           const isSelected = day.isInMonth && selectedDay === day.dayOfMonth;
           return (
@@ -153,15 +169,17 @@ export function HistoryWeeklyScrollerMobile({
                   backgroundColor = theme.palette.secondaryContainer;
                 }
                 return {
-                  flex: "1 0 44px",
-                  minWidth: 44,
+                  flex: "0 0 auto",
+                  minWidth: 52,
                   py: 1.5,
-                  borderRadius: 2,
+                  px: 1,
+                  borderRadius: 999,
                   textAlign: "center",
                   opacity: day.isInMonth ? 1 : 0.4,
                   cursor: day.isInMonth ? "pointer" : "default",
                   backgroundColor,
                   border: `1px solid ${isSelected ? theme.palette.primary.main : theme.palette.outlineVariant}`,
+                  scrollSnapAlign: "start",
                 };
               }}
             >
@@ -180,7 +198,7 @@ export function HistoryWeeklyScrollerMobile({
             </Box>
           );
         })}
-      </Box>
+      </MobileHorizontalScrollRow>
     </Box>
   );
 }

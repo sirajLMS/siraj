@@ -5,8 +5,8 @@ import { Box, Grid, IconButton, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { getServerPaginationOptions } from "@/frontend/common/components/ui/filter/serverPaginationProps";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   PendingReviewRow,

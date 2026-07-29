@@ -3,9 +3,17 @@
 import { ScheduleOutlined } from "@mui/icons-material";
 import type { SxProps, Theme } from "@mui/material";
 import { Box, Typography } from "@mui/material";
+import { formatTime } from "@/frontend/common/components/intl/dateFormat";
+import { classHref } from "@/frontend/common/utils/profileHref";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
+import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
+import {
+  mapStudentHistoryStatusToBadge,
+  resolveStudentHistoryStatusLabel,
+} from "@/frontend/common/views/dashboard/student/history/utils/studentHistorySessionPresentation";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { Link } from "@/shared/i18n";
 
 export interface StudentPortalHistoryCalendarProps {
   readonly currentMonth: Date;
@@ -13,15 +21,8 @@ export interface StudentPortalHistoryCalendarProps {
   readonly selectedDay: number | null;
   readonly onSelectDay: (day: number | null) => void;
   readonly weekdayLabels: readonly string[];
-}
-
-function statusBadgeValue(status: string): string {
-  const lower = status.toLowerCase();
-  if (lower === "completed" || lower === "present" || lower === "taken") return "completed";
-  if (lower === "cancelled" || lower === "absent") return "cancelled";
-  if (lower === "pending" || lower === "scheduled") return "pending";
-  if (lower === "late") return "late";
-  return "pending";
+  readonly labels: StudentHistoryViewModel["labels"];
+  readonly locale: string;
 }
 
 const SPILLOVER_CELL_SX: SxProps<Theme> = (theme: Theme) => ({
@@ -62,12 +63,26 @@ function renderSpilloverDay(day: number, keyPrefix: string) {
   );
 }
 
+function formatSessionTime(time: string, locale: string): string {
+  if (!time) return "—";
+  try {
+    return formatTime(time, locale);
+  } catch {
+    return time;
+  }
+}
+
 function renderDayCell(
   day: number,
   session: StudentHistorySessionRow | undefined,
   isSelected: boolean,
-  onSelectDay: (day: number | null) => void
+  onSelectDay: (day: number | null) => void,
+  labels: StudentHistoryViewModel["labels"],
+  locale: string
 ) {
+  const statusLabel = session ? resolveStudentHistoryStatusLabel(session, labels.statusLabels) : "";
+  const badgeStatus = session ? mapStudentHistoryStatusToBadge(session.status, session.outcome) : "pending";
+
   return (
     <Box
       key={`day-${day}`}
@@ -104,11 +119,29 @@ function renderDayCell(
       </Typography>
       {session ? (
         <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
-          <DesktopStatusBadge category="classStatus" status={statusBadgeValue(session.status)} label={session.title} />
+          <Typography
+            component={Link}
+            href={classHref(session.id)}
+            variant="labelMd"
+            onClick={e => e.stopPropagation()}
+            sx={theme => ({
+              color: theme.palette.primary.main,
+              fontWeight: 700,
+              textDecoration: "none",
+              display: "block",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              "&:hover": { textDecoration: "underline" },
+            })}
+          >
+            {session.title}
+          </Typography>
+          <DesktopStatusBadge category="classStatus" status={badgeStatus} label={statusLabel} />
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <ScheduleOutlined sx={theme => ({ fontSize: 12, color: theme.palette.onSurfaceVariant })} />
             <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {session.time || "—"}
+              {formatSessionTime(session.time, locale)}
             </Typography>
           </Box>
         </Box>
@@ -123,6 +156,8 @@ export function StudentPortalHistoryCalendar({
   selectedDay,
   onSelectDay,
   weekdayLabels,
+  labels,
+  locale,
 }: Readonly<StudentPortalHistoryCalendarProps>) {
   const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
@@ -139,7 +174,7 @@ export function StudentPortalHistoryCalendar({
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
         {emptyStartDays.map(day => renderSpilloverDay(day, "prev"))}
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day =>
-          renderDayCell(day, sessionsByDay[day], selectedDay === day, onSelectDay)
+          renderDayCell(day, sessionsByDay[day], selectedDay === day, onSelectDay, labels, locale)
         )}
         {emptyEndDays.map(day => renderSpilloverDay(day, "next"))}
       </Box>

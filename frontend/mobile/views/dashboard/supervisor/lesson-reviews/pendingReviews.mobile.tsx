@@ -18,8 +18,8 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { StudentAutocompleteMobile, TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
-import { PendingReviewCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/pendingReviewCard.mobile";
 import { LessonReportDetailPanelMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/lessonReportDetailPanel.mobile";
+import { PendingReviewCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/pendingReviewCard.mobile";
 import { RejectReportDialogMobile } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/rejectReportDialog.mobile";
 
 export function PendingReviewsMobileView(props: Readonly<PendingReviewsViewModel>) {

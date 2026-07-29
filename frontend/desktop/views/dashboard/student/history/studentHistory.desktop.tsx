@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowBackOutlined,
   CalendarToday,
   ChevronLeft,
   ChevronRight,
@@ -14,26 +13,30 @@ import {
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import { formatDate, formatTime } from "@/frontend/common/components/intl/dateFormat";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { classHref } from "@/frontend/common/utils/profileHref";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
+import {
+  formatStudentHistoryDuration,
+  mapStudentHistoryStatusToBadge,
+  resolveStudentHistoryStatusLabel,
+} from "@/frontend/common/views/dashboard/student/history/utils/studentHistorySessionPresentation";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopActionIconLink } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
+import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
 import { StudentPortalHistoryCalendar } from "@/frontend/desktop/views/dashboard/student/history/components/historyCalendar.desktop";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
-const WEEKDAY_LABELS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
-const WEEKDAY_LABELS_AR = ["أحد", "إثن", "ثلا", "أرب", "خمي", "جمع", "سبت"] as const;
-
-function statusBadgeValue(status: string): string {
-  const lower = status.toLowerCase();
-  if (lower === "completed" || lower === "present" || lower === "taken") return "completed";
-  if (lower === "cancelled" || lower === "absent") return "cancelled";
-  if (lower === "pending" || lower === "scheduled") return "pending";
-  return "pending";
+function isSessionJoinable(row: StudentHistorySessionRow): boolean {
+  return Boolean(row.meetingJoinUrl) && isJoinableClassInstance(undefined, row.outcome, { isFrozen: row.isFrozen });
 }
 
 function buildColumns(
@@ -43,59 +46,115 @@ function buildColumns(
 ): GridColDef<StudentHistorySessionRow>[] {
   return [
     {
+      field: "title",
+      headerName: labels.subject,
+      flex: 1.2,
+      minWidth: 160,
+      renderCell: ({ row }) => (
+        <DesktopClassProfileLinkCell
+          href={classHref(row.id)}
+          name={row.title?.trim() || "—"}
+          avatarSize={40}
+          typographyVariant="bodyMd"
+          fontWeight={700}
+        />
+      ),
+    },
+    {
       field: "time",
       headerName: labels.sessionDate,
       flex: 1,
       minWidth: 140,
-      valueGetter: (_value, row) => {
-        if (!row.time) return "—";
+      renderCell: ({ row }) => {
+        if (!row.time) {
+          return "—";
+        }
         try {
-          return formatDate(row.time, locale);
+          return (
+            <Stack spacing={0.25}>
+              <Typography variant="bodyMd">{formatDate(row.time, locale)}</Typography>
+              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+                {formatTime(row.time, locale)}
+              </Typography>
+            </Stack>
+          );
         } catch {
           return row.time;
         }
       },
     },
-    { field: "title", headerName: labels.subject, flex: 1.2, minWidth: 140 },
-    { field: "instructor", headerName: labels.instructor, flex: 1, minWidth: 120 },
+    {
+      field: "instructor",
+      headerName: labels.instructor,
+      flex: 1.1,
+      minWidth: 160,
+      renderCell: ({ row }) => (
+        <DesktopPersonProfileLinkCell
+          name={row.instructor?.trim() || "—"}
+          avatarSize={36}
+          typographyVariant="bodyMd"
+          fontWeight={700}
+        />
+      ),
+    },
     {
       field: "duration",
       headerName: labels.duration,
-      width: 100,
-      valueGetter: (_value, row) => `${row.duration} min`,
+      flex: 0.7,
+      minWidth: 90,
+      renderCell: ({ row }) => (
+        <Typography variant="bodyMd">{formatStudentHistoryDuration(row.duration, labels)}</Typography>
+      ),
     },
     {
       field: "status",
       headerName: labels.status,
-      width: 140,
-      renderCell: params => (
+      flex: 0.9,
+      minWidth: 120,
+      sortable: false,
+      renderCell: ({ row }) => (
         <DesktopStatusBadge
           category="classStatus"
-          status={statusBadgeValue(params.row.status)}
-          label={params.row.status || "—"}
+          status={mapStudentHistoryStatusToBadge(row.status, row.outcome)}
+          label={resolveStudentHistoryStatusLabel(row, labels.statusLabels)}
         />
       ),
     },
-    { field: "outcome", headerName: labels.outcome, flex: 0.8, minWidth: 100 },
-    { field: "notes", headerName: labels.notes, flex: 1.2, minWidth: 140 },
     {
-      field: "meetingJoinUrl",
-      headerName: labels.joinUrl,
-      width: 140,
+      field: "notes",
+      headerName: labels.notes,
+      flex: 1.2,
+      minWidth: 140,
+      renderCell: ({ row }) => (
+        <Typography variant="bodyMd" noWrap title={row.notes || undefined}>
+          {row.notes?.trim() || "—"}
+        </Typography>
+      ),
+    },
+    {
+      field: "actions",
+      headerName: "",
+      width: 72,
       sortable: false,
-      renderCell: params =>
-        params.row.meetingJoinUrl ? (
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<VisibilityOutlined />}
-            onClick={() => onOpenMeetingUrl(params.row.meetingJoinUrl)}
-          >
-            {labels.viewReport}
-          </Button>
-        ) : (
-          "—"
-        ),
+      renderCell: ({ row }) => {
+        if (isSessionJoinable(row)) {
+          return (
+            <MeetingJoinAction
+              joinUrl={row.meetingJoinUrl}
+              meeting={row.effectiveMeeting}
+              onJoinAction={() => onOpenMeetingUrl(row.meetingJoinUrl)}
+              variant="icon"
+              label={labels.joinSession}
+              emptyRole="class"
+            />
+          );
+        }
+        return (
+          <DesktopActionIconLink href={classHref(row.id)} aria-label={labels.viewClass}>
+            <VisibilityOutlined fontSize="small" />
+          </DesktopActionIconLink>
+        );
+      },
     },
   ];
 }
@@ -114,7 +173,7 @@ function MonthNavigator({
   onNextMonth: () => void;
 }>) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 3, gap: 2 }}>
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2, gap: 2 }}>
       <Button
         aria-label={labels.previousMonth}
         onClick={onPrevMonth}
@@ -152,7 +211,7 @@ function HistoryMetricsRow({
   labels,
 }: Readonly<{ metrics: StudentHistoryViewModel["metrics"]; labels: StudentHistoryViewModel["labels"] }>) {
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 2 }}>
       <DesktopMetricCardGrid
         metrics={
           [
@@ -261,6 +320,11 @@ function LoadingHistoryView({ labels }: Readonly<{ labels: StudentHistoryViewMod
   );
 }
 
+function calendarWeekdayLabels(labels: StudentHistoryViewModel["labels"]): readonly string[] {
+  const weekdays = labels.calendarWeekdays;
+  return [weekdays.sun, weekdays.mon, weekdays.tue, weekdays.wed, weekdays.thu, weekdays.fri, weekdays.sat];
+}
+
 export function StudentHistoryDesktopView({
   metrics,
   filteredSessions,
@@ -276,7 +340,6 @@ export function StudentHistoryDesktopView({
   labels,
   locale,
   loading,
-  onBackToDashboard,
   onOpenMeetingUrl,
   onPrevMonth,
   onNextMonth,
@@ -284,7 +347,7 @@ export function StudentHistoryDesktopView({
   onSubjectFilterChange,
   onStatusFilterChange,
 }: Readonly<StudentHistoryViewModel>) {
-  const weekdayLabels = locale.startsWith("ar") ? WEEKDAY_LABELS_AR : WEEKDAY_LABELS_EN;
+  const weekdayLabels = calendarWeekdayLabels(labels);
 
   const columns = useMemo(() => buildColumns(labels, locale, onOpenMeetingUrl), [labels, locale, onOpenMeetingUrl]);
 
@@ -311,19 +374,22 @@ export function StudentHistoryDesktopView({
 
       <HistoryMetricsRow metrics={metrics} labels={labels} />
 
-      <DesktopSectionPanel title={labels.lessonHistory} sx={{ mb: 3 }}>
+      <DesktopSectionPanel title={labels.lessonHistory} contentPadding={false} sx={{ mb: 2 }}>
         <StudentPortalHistoryCalendar
           currentMonth={currentMonth}
           sessionsByDay={sessionsByDay}
           selectedDay={selectedDay}
           onSelectDay={onSelectDay}
           weekdayLabels={weekdayLabels}
+          labels={labels}
+          locale={locale}
         />
       </DesktopSectionPanel>
 
       <DesktopSectionPanel
         contentPadding={false}
-        title={labels.lessonHistory}
+        title={labels.sessionsList}
+        sx={{ borderRadius: 0 }}
         actions={
           <HistoryFilters
             subjectFilter={subjectFilter}
@@ -343,21 +409,12 @@ export function StudentHistoryDesktopView({
           emptyMessage={labels.noHistory}
           getRowId={row => row.id}
           autoHeight
-          ariaLabel={labels.lessonHistory}
+          rowHeight={72}
+          ariaLabel={labels.sessionsList}
           paginationOptions={{ mode: "client" }}
+          sx={{ borderRadius: 0 }}
         />
       </DesktopSectionPanel>
-
-      <Box sx={{ mt: 3 }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackOutlined />}
-          sx={theme => ({ color: theme.palette.primary.main, borderColor: theme.palette.primary.main })}
-          onClick={onBackToDashboard}
-        >
-          {labels.backToDashboard}
-        </Button>
-      </Box>
     </DesktopPageContainer>
   );
 }

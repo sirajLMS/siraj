@@ -60,6 +60,12 @@ function useStudentHistoryLabels(t: StudentHistoryLabels): StudentHistoryLabels 
       backToDashboard: t.backToDashboard,
       weeklyAttendance: t.weeklyAttendance,
       week: t.week,
+      statusLabels: t.statusLabels,
+      minutesShort: t.minutesShort,
+      viewClass: t.viewClass,
+      joinSession: t.joinSession,
+      sessionsList: t.sessionsList,
+      calendarWeekdays: t.calendarWeekdays,
     }),
     [t]
   );
