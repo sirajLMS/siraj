@@ -21,6 +21,7 @@ The backend follows a consistent pattern for defining and using types across all
 - Focus solely on data access operations
 - Apply business logic constraints at the service layer, not in repositories
 - Example: Using `{Entity}InsertType` for insert operations and `{Entity}SelectType` for select operations in `{entity}.repository.ts`
+- **Prepared Statements**: All simple read-only methods MUST use Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) defined at module level. See `docs/drizzle/prepared-statements.md` for the complete pattern reference.
 
 ### 4. Service Layer (`backend/services/**/*.ts`)
 - Import and use types from `backend/types/` for function signatures

@@ -405,4 +405,5 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `frontend/NEW_PAGE_WORKFLOW.md` - Required workflow for new pages
 - `frontend/THEME_PALETTE.md` - Color tokens and access patterns
 - `docs/IDEMPOTENCY.md` - Idempotency patterns
+- `docs/drizzle/prepared-statements.md` - Drizzle Prepared Statements 2.0 pattern reference
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines

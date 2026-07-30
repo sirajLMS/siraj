@@ -68,6 +68,7 @@ export function clearDbConnectionSingleton(): void {
   clearGlobalSingleton(DB_POOL_KEY);
 }
 
+export { getNeonHttpClient, getNeonHttpDb } from "@/backend/db/http-client";
 export { relations };
 
 export type DrizzleRelations = typeof relations;

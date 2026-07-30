@@ -34,6 +34,7 @@ Each sub-directory (except `scheduling/` and `utils/` which pre-date this refact
 ## Rules
 
 - **Drizzle ORM**: This layer exclusively uses Drizzle ORM for PostgreSQL.
+- **Prepared Statements (CRITICAL)**: All simple read-only repository methods MUST use Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) defined at module level. See `docs/drizzle/prepared-statements.md` for the complete pattern reference, supported query types, and what NOT to prepare.
 - **Query Guidelines**: When `findMany` with complex relations creates `SQL<unknown>` errors or TypeScript property missing errors, revert to standard `.select().from().leftJoin()` or manual ID-based mapping. This is the required pattern for this environment to avoid type resolution issues.
 - **Separation of Concerns**: Repositories are strictly for data access. Business logic, permission checking, and complex orchestration must reside in the `backend/services/` layer.
 - **No Hardcoded Error Strings**: Repositories must not contain hardcoded user-facing error strings, messages, or warnings. Instead, use `getServerTranslations(locale, "<namespace>")` from `@/shared/locale/server-graphql` (optionally accepts a `locale?: string` parameter) to look up localized message templates. The legacy `getBackendTranslations` helper is deprecated and must not be used.

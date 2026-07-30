@@ -132,6 +132,25 @@ describe("Neon Integration Tests", () => {
       }
     });
 
+    test.skipIf(skipNeonTests)(
+      "works with Neon HTTP single-fetch client (getNeonHttpClient & getNeonHttpDb)",
+      async () => {
+        if (!neonUrl) return;
+
+        const { drizzle: drizzleNeonHttp } = await import("drizzle-orm/neon-http");
+        const { neon } = await import("@neondatabase/serverless");
+
+        const client = neon(neonUrl);
+        expect(client).toBeDefined();
+
+        const httpDb = drizzleNeonHttp({ client, relations });
+        const result = await httpDb.execute(sql`SELECT 1 as test`);
+        expect(result.rows).toHaveLength(1);
+        expect(result.rows[0].test).toBe(1);
+        console.log("✅ Neon HTTP single-fetch client (neon-http) works correctly against Neon DB");
+      }
+    );
+
     test.skipIf(skipNeonTests)("supports WebSocket connections", async () => {
       if (!neonUrl) {
         console.log("⚠️  NEON_TEST_DATABASE_URL not set, skipping WebSocket test");

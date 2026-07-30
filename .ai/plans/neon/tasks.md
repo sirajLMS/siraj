@@ -79,7 +79,7 @@
     - _Requirements: Spec 3, 4, 5, 6, 7, 15, 16, 17, 18, 19_
 
 - [ ] 3. **GraphQL DataLoader Integration (GraphQL Layer)**
-  - [ ] 3.1 **Pilot Candidate Domain (`users` Domain)**
+  - [x] 3.1 **Pilot Candidate Domain (`users` Domain)**
     - Read all existing files in `.ai/plans/neon/outcome/`.
     - Configure Pothos DataLoader plugin on pilot domain `backend/graphql/pothos/users/`.
     - Run per-file quality verification on modified GraphQL files.
