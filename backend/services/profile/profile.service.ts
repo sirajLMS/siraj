@@ -114,11 +114,13 @@ export function toParentRepoInput(
   input: ParentOwnProfileUpdateInput | ParentAdminProfileUpdateInput
 ): ParentProfileUpdateInput {
   return {
+    phone: input.phone,
     nationality: input.nationality,
     address: input.address,
     facebook: input.facebook,
     whatsapp: input.whatsapp,
     twitter: input.twitter,
+    timezone: input.timezone,
     invoiceType: "invoiceType" in input ? input.invoiceType : undefined,
     feeAmount: "feeAmount" in input ? input.feeAmount : undefined,
     currency: "currency" in input ? input.currency : undefined,

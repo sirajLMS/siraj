@@ -209,6 +209,7 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
+      timezone: IanaTimezone.Asia_Riyadh,
       invoiceType: "monthly",
       feeAmount: "500",
       currency: CurrencyCode.SAR,
@@ -230,10 +231,10 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
+      timezone: undefined,
       invoiceType: undefined,
       feeAmount: undefined,
       currency: undefined,
-      timezone: undefined,
     });
   });
 

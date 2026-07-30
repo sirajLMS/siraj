@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { SupportedMobileWalletRepository } from "@/backend/db/repo/billing/supported-mobile-wallet.repository";
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-payment-method.repository";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
+import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { NotificationEventType } from "@/backend/enum/notifications/notificationDeliveries.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -65,6 +66,12 @@ describe("PaymentMethodService notification dispatch", () => {
 
   beforeEach(() => {
     tErrors = getServerTranslations("en").errorsTranslations;
+
+    const userSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue({
+      email: "owner@test.com",
+      phone: "+1234567890",
+    } as never);
+    spies.push(userSpy);
 
     dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockResolvedValue([
       { channel: "on_app", success: true },

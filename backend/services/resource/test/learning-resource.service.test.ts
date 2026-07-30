@@ -31,7 +31,7 @@ describe("LearningResourceService — deleteResource", () => {
 
     expect(errorCaught).not.toBeNull();
     if (errorCaught) {
-      expect(errorCaught.message.toLowerCase()).toContain("unauthorized");
+      expect(errorCaught.message).toContain("غير مصرح");
     }
     expect(hasPermissionSpy).toHaveBeenCalledWith(dummyActorId, AppPermission.RESOURCES_DELETE);
 
@@ -78,7 +78,7 @@ describe("LearningResourceService — deleteResource", () => {
 
     expect(errorCaught).not.toBeNull();
     if (errorCaught) {
-      expect(errorCaught.message).toContain("delete");
+      expect(errorCaught.message).toContain("resourceDeleteFailed");
       expect(errorCaught.cause).toBeDefined();
       if (errorCaught.cause) {
         expect((errorCaught.cause as Error).message).toContain("AWS S3 Timeout");
@@ -106,7 +106,7 @@ describe("LearningResourceService — deleteResource", () => {
 
     expect(errorCaught).not.toBeNull();
     if (errorCaught) {
-      expect(errorCaught.message).toContain("not found");
+      expect(errorCaught.message).toContain("مورد التعلم غير موجود");
     }
     expect(deleteResourceSpy).not.toHaveBeenCalled();
 

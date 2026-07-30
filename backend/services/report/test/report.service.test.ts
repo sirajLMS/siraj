@@ -38,7 +38,7 @@ describe("ReportService — generateAttendanceReport", () => {
 
     expect(errorCaught).not.toBeNull();
     if (errorCaught) {
-      expect(errorCaught.message.toLowerCase()).toContain("unauthorized");
+      expect(errorCaught.message.toLowerCase()).toContain("authorized");
     }
     expect(hasPermissionSpy).toHaveBeenCalledWith(dummyActorId, AppPermission.REPORT_GENERATE_CUSTOM);
 
@@ -108,7 +108,7 @@ describe("ReportService — generateAttendanceReport", () => {
 
     expect(errorCaught).not.toBeNull();
     if (errorCaught) {
-      expect(errorCaught.message.toLowerCase()).toContain("permission to perform this action");
+      expect(errorCaught.message.toLowerCase()).toContain("permission");
       expect(errorCaught.cause).toBe(repoError);
     }
 

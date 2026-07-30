@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationRepository } from "@/backend/db/repo";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
+import { resetEnvironmentCache } from "@/backend/lib/env";
 import { emailChannel, resetEmailChannel } from "@/backend/services/communication/channels/email";
 import type { NotificationDeliverySelectType } from "@/backend/types";
 
@@ -45,6 +46,8 @@ describe("Email Channel", () => {
   let updateDeliveryStatusSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
+    resetEmailChannel();
+    resetEnvironmentCache();
     process.env.RESEND_API_KEY = "test-api-key";
     process.env.RESEND_FROM_EMAIL = "test@example.com";
     createDeliverySpy = spyOn(NotificationRepository, "createDelivery").mockResolvedValue(mockDelivery);
@@ -134,6 +137,7 @@ describe("Email Channel", () => {
     test("validateConfig returns false when RESEND_API_KEY is missing", async () => {
       const channel = await import("@/backend/services/communication/channels/email").then(m => m.getEmailChannel());
       delete process.env.RESEND_API_KEY;
+      resetEnvironmentCache();
       const result = await channel.validateConfig();
       expect(result).toBe(false);
     });
@@ -141,6 +145,7 @@ describe("Email Channel", () => {
     test("validateConfig returns false when RESEND_FROM_EMAIL is missing", async () => {
       const channel = await import("@/backend/services/communication/channels/email").then(m => m.getEmailChannel());
       delete process.env.RESEND_FROM_EMAIL;
+      resetEnvironmentCache();
       const result = await channel.validateConfig();
       expect(result).toBe(false);
     });
