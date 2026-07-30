@@ -1,14 +1,12 @@
 // cspell:ignore circlehollow
 import type { Decorator, Preview } from "@storybook/react";
-import { initialize, mswLoader } from "msw-storybook-addon";
+import { setupWorker } from "msw/browser";
+import { mswLoader } from "msw-storybook-addon/csf3";
 import { mswHandlers } from "./msw-handlers";
 import { StoryWrapper } from "./StoryWrapper";
 
 // Import global styles
 import "@/app/index.css";
-
-// Initialize MSW
-initialize({ onUnhandledRequest: "bypass" });
 
 const withAllProviders: Decorator = (Story, context) => <StoryWrapper Story={Story} context={context} />;
 
@@ -54,7 +52,13 @@ const preview: Preview = {
       },
     },
   },
-  loaders: [mswLoader],
+  loaders: [
+    mswLoader(async () => {
+      const worker = setupWorker();
+      await worker.start({ onUnhandledRequest: "bypass" });
+      return worker;
+    }),
+  ],
   parameters: {
     msw: { handlers: mswHandlers },
 
