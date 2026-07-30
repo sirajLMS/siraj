@@ -3,7 +3,7 @@
 ## Document Information
 
 - **Feature Name**: Quota Entity + Recurring-Class Integration
-- **Version**: 1.1 (updated after ground-truth verification)
+- **Version**: 1.2 (updated with navigation/permissions, quality loop, instruction verification)
 - **Date**: 2026-07-30
 - **Related Documents**:
   - [Implementation Guide](./implementation.md)

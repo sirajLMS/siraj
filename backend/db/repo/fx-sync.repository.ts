@@ -5,6 +5,27 @@ import { fxSyncRuns } from "@/backend/db/schema";
 import { type FxProvider, FxSyncStatus } from "@/backend/enum/fx/fx-provider.enum";
 import type * as Types from "@/backend/types";
 
+// ============================================================================
+// Prepared Statements (Drizzle Prepared Statements 2.0)
+// ============================================================================
+// These are defined at module level to be compiled once and reused across requests.
+// Prepared statements cannot be used inside transactions (they're tied to the session
+// they were created with) — methods fall back to regular queries when a tx is provided.
+
+const getLatestSyncRunPrepared = db
+  .select()
+  .from(fxSyncRuns)
+  .orderBy(desc(fxSyncRuns.startedAt))
+  .limit(1)
+  .prepare("fx_get_latest_sync_run");
+
+const getRunningSyncRunPrepared = db
+  .select()
+  .from(fxSyncRuns)
+  .where(eq(fxSyncRuns.status, sql.placeholder("status")))
+  .limit(1)
+  .prepare("fx_get_running_sync_run");
+
 export namespace FxSyncRepository {
   type SyncRunInsertInput = {
     provider: FxProvider;
@@ -80,8 +101,11 @@ export namespace FxSyncRepository {
    * Returns the most recent sync run by `startedAt DESC`, or null if none.
    */
   export const getLatestSyncRun = async (tx?: DBTransaction): Promise<Types.FxSyncRunSelectType | null> => {
-    const queryDb = tx ?? db;
-    const rows = await queryDb.select().from(fxSyncRuns).orderBy(desc(fxSyncRuns.startedAt)).limit(1);
+    if (!tx) {
+      const rows = await getLatestSyncRunPrepared.execute();
+      return rows[0] ?? null;
+    }
+    const rows = await tx.select().from(fxSyncRuns).orderBy(desc(fxSyncRuns.startedAt)).limit(1);
     return rows[0] ?? null;
   };
 
@@ -89,8 +113,11 @@ export namespace FxSyncRepository {
    * Returns the currently-running sync run, or null if none.
    */
   export const getRunningSyncRun = async (tx?: DBTransaction): Promise<Types.FxSyncRunSelectType | null> => {
-    const queryDb = tx ?? db;
-    const rows = await queryDb.select().from(fxSyncRuns).where(eq(fxSyncRuns.status, FxSyncStatus.Running)).limit(1);
+    if (!tx) {
+      const rows = await getRunningSyncRunPrepared.execute({ status: FxSyncStatus.Running });
+      return rows[0] ?? null;
+    }
+    const rows = await tx.select().from(fxSyncRuns).where(eq(fxSyncRuns.status, FxSyncStatus.Running)).limit(1);
     return rows[0] ?? null;
   };
 

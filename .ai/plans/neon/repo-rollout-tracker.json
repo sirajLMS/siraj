@@ -1,0 +1,19 @@
+{
+  "totalFiles": 10,
+  "maxConcurrency": 16,
+  "completedFiles": [
+    "backend/db/repo/users/user.repository.ts",
+    "backend/db/repo/teachers/teacher.repository.ts",
+    "backend/db/repo/books/book.repository.ts",
+    "backend/db/repo/billing/credit.repository.ts",
+    "backend/db/repo/parents/parent.repository.ts",
+    "backend/db/repo/complaints/complaint.repository.ts",
+    "backend/db/repo/users/session-config.repository.ts",
+    "backend/db/repo/shared/signedUrl.repository.ts",
+    "backend/db/repo/shared/timezone.repository.ts",
+    "backend/db/repo/fx-sync.repository.ts"
+  ],
+  "activeSubagents": {},
+  "failedFiles": [],
+  "pendingFiles": []
+}

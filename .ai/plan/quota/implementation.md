@@ -3,7 +3,7 @@
 ## Document Information
 
 - **Feature Name**: Quota Entity + Recurring-Class Integration
-- **Version**: 1.1 (updated after ground-truth verification)
+- **Version**: 1.2 (updated with navigation/permissions, quality loop, instruction verification)
 - **Date**: 2026-07-30
 - **Related Documents**:
   - [Design Specifications](./specs.md)
@@ -20,7 +20,9 @@ Before starting any task in [trackable-tasks.md](./trackable-tasks.md):
 - [ ] Mark the task `[-]` in trackable-tasks.md when starting
 - [ ] Mark the task `[x]` when complete and verified
 - [ ] Run per-file verification loop before importing new code elsewhere
-- [ ] **After quality loop: Run instruction verification subtask to revalidate files against instruction files**
+- [ ] **MANDATORY: After quality loop, run instruction verification subtask to revalidate files against instruction files**
+- [ ] **MANDATORY: Every task includes Quality Loop subtask (tsgo + biome:check + lint queue)**
+- [ ] **MANDATORY: Every task includes Instruction Verification subtask with absolute AGENTS.md/instructions paths**
 
 ## User Experience & Navigation (from specs.md)
 
@@ -48,6 +50,13 @@ Enhanced for **all audiences** (student, parent, teacher, supervisor) with per-a
 ### Mobile vs Desktop
 
 Separate view trees under `frontend/desktop/` and `frontend/mobile/` with shared ViewModels and navigation config.
+
+### Permission Matrix
+
+| Permission | Value | Granted To (via groups) |
+|------------|-------|------------------------|
+| `QUOTAS_VIEW` | `quotas.view` | `super_admin`, `academy_admin`, `staff_default` |
+| `QUOTAS_MANAGE` | `quotas.manage` | `super_admin`, `academy_admin` |
 
 ## Task-to-Instructions Mapping
 
@@ -82,7 +91,7 @@ Build bottom-up in dependency order:
 4. **Cron scripts** after services they depend on
 5. **Frontend GraphQL docs + codegen** before any frontend views
 6. **Frontend views** after i18n namespace exists
-7. **Quality gate** as final verification
+7. **Quality loop per file** as primary verification
 
 ### Development Conventions (from AGENTS.md)
 
@@ -96,7 +105,12 @@ Build bottom-up in dependency order:
 - After schema changes: `bun run generate:gqlSchema && bun codegen`
 - After DB schema: `bun run db push` (no migrate for new tables during dev)
 
-### Per-File Verification Loop
+### Drizzle Schema Convention (CRITICAL)
+
+- **Schema changes** (new tables, columns, indexes): Use `bun run db push` — creates schema automatically
+- **Custom SQL migrations** (seed data, complex transforms): Use `bun db migrate` — for non-Drizzle SQL only
+
+### Per-File Quality Loop (MANDATORY)
 
 After creating or extracting a file, before importing it elsewhere:
 
@@ -107,6 +121,12 @@ curl -s -X POST http://localhost:4777/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"verify","files":["<the-file>"]}'
 ```
+
+**Fix all errors before proceeding to next file/subtask.**
+
+### Instruction Verification (MANDATORY after Quality Loop)
+
+After quality loop passes, validate the file against ALL applicable AGENTS.md and .agents/instructions files from the Task-to-Instructions Mapping table above.
 
 ## Phase 1: Database Schema & Enums
 

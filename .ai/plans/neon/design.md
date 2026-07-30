@@ -2,6 +2,8 @@
 
 **Target Directory:** `.ai/plans/neon`  
 **Outcome Directory:** `.ai/plans/neon/outcome`  
+**Repo Rollout Tracker:** `.ai/plans/neon/repo-rollout-tracker.json`  
+**GraphQL Rollout Tracker:** `.ai/plans/neon/graphql-rollout-tracker.json`  
 **Phase:** 2 — Technical Design Document  
 **Related Spec:** [spec.md](file://.ai/plans/neon/spec.md)  
 
@@ -9,37 +11,31 @@
 
 ## 1. Architectural Overview
 
-This design details the technical architecture for optimizing Neon database performance across Siraj's stack. The optimization spans 4 key layers with explicit **Pilot Candidate Isolation** to verify each pattern on a single file/domain before full repo rollout, backed by a persistent **Outcome Knowledge Base** (`.ai/plans/neon/outcome/`).
+This design details the technical architecture for optimizing Neon database performance across Siraj's stack. The optimization spans 4 key layers with explicit **Dynamic 16-Worker Pool Orchestration** for both the Repository Rollout (Task 2.2) and the GraphQL Rollout (Task 3.2).
 
 ```
-[ Client Request ]
-       │
-       ▼
-[ Vercel Edge / Lambda ] (Region aligned with Neon DB, e.g. fra1 / iad1)
-       │
-       ▼
-[ Pothos GraphQL Layer ] ──► Pilot Domain: `users` (DataLoader batching for nested relations)
-       │                    Commands: `bun generate:gqlSchema` ➔ `bun codegen` ➔ `bun test:graphql`
-       │
-       ▼
-[ Repository Layer ]     ──► Pilot Repo: `backend/db/repo/users/user.repository.ts`
-       │                    Commands: `bun test:db` ➔ `bun test:services`
-       │
-  ┌────┴──────────────────────────┐
-  │ Mode Switcher                 │
-  ├───────────────────────────────┤
-  │ Read-only single query:       │ ──► HTTP Fetch Client (`neon(url)`) — Fast 0-pool RTT
-  │ Multi-query / Transaction:    │ ──► Serverless Pool Client (`NeonPool`) — WebSocket pool
-  └───────────────────────────────┘
-       │
-       ▼
-[ Neon Serverless PostgreSQL ]
-
  ═════════════════════════════════════════════════════════════════════════════════
-  OUTCOME & KNOWLEDGE TRANSFER PROTOCOL (.ai/plans/neon/outcome/)
-  • BEFORE execution: Read ALL files in .ai/plans/neon/outcome/ to avoid re-analysis.
-  • AFTER execution: Write .ai/plans/neon/outcome/<task-id>-outcome.md with findings.
-  • PROGRESS TRACKING: Update task checkbox [ ] ➔ [x] in tasks.md.
+  DYNAMIC 16-WORKER POOL WATCHER ARCHITECTURE (Task 2.2 & Task 3.2)
+ ═════════════════════════════════════════════════════════════════════════════════
+                       ┌──────────────────────────────┐
+                       │  Parent Orchestrator Agent   │
+                       └──────────────┬───────────────┘
+                                      │ Continuous Watcher Loop:
+                                      │ 1. Monitors active subagent status & completion
+                                      │ 2. Updates rollout tracker JSON state
+                                      │ 3. Immediately spawns new worker whenever a slot frees up
+                                      │    to maintain EXACTLY 16 active subagents until queue empty
+        ┌─────────────────────────────┼─────────────────────────────┐
+        ▼                             ▼                             ▼
+┌──────────────┐              ┌──────────────┐              ┌──────────────┐
+│  Worker 1    │              │  Worker 2    │ ... up to 16 │  Worker N    │
+│  (Target 1)  │              │  (Target 2)  │              │  (Target Z)  │
+└──────┬───────┘              └──────┬───────┘              └──────┬───────┘
+       │ Reads outcome/               │ Reads outcome/               │ Reads outcome/
+       │ Edits Assigned Scope         │ Edits Assigned Scope         │ Edits Assigned Scope
+       │ Per-file sub-loop            │ Per-file sub-loop            │ Per-file sub-loop
+       │ Writes outcome file          │ Writes outcome file          │ Writes outcome file
+       ▼                              ▼                              ▼
  ═════════════════════════════════════════════════════════════════════════════════
 ```
 
@@ -47,13 +43,50 @@ This design details the technical architecture for optimizing Neon database perf
 
 ## 2. Component Design & Interfaces
 
-### 2.1 Outcome Knowledge Base (`.ai/plans/neon/outcome/`)
-Persistent store for research, documentation lookups, search findings, edge case analysis, and task results:
-- **Input Rule:** Agent reads all `.md` files in `.ai/plans/neon/outcome/` before beginning any task.
-- **Output Rule:** Agent writes `.ai/plans/neon/outcome/<task-id>-outcome.md` upon completing any task.
-- **Tracking Rule:** Agent marks `[ ]` -> `[x]` in `tasks.md`.
+### 2.1 Parent Orchestrator Watcher Loop
+The Parent Orchestrator maintains a dynamic pool of **exactly 16 running subagents**:
+- **Initialization:** Spawns 16 worker subagents for the first 16 pending targets in the queue.
+- **Monitoring Loop:** As soon as any worker subagent finishes, the orchestrator updates `repo-rollout-tracker.json` / `graphql-rollout-tracker.json` and immediately spawns a new subagent for the next pending target.
+- **Completion Criteria:** When all targets in the queue are completed, the orchestrator triggers layer-wide test execution (`bun test:db`, `bun test:services`, `bun generate:gqlSchema`, `bun codegen`, `bun test:graphql`).
 
-### 2.2 Dual Client Helper (`backend/db/http-client.ts`)
+### 2.2 Rollout Trackers
+State tracking files created and updated by parent orchestrator subagents during rollout tasks:
+
+1. **Repository Rollout Tracker (`.ai/plans/neon/repo-rollout-tracker.json`)**:
+```json
+{
+  "totalFiles": 18,
+  "maxConcurrency": 16,
+  "completedFiles": [],
+  "activeSubagents": {
+    "backend/db/repo/auth/auth.repository.ts": {
+      "conversationId": "subagent-uuid-1",
+      "status": "in_progress",
+      "startedAt": "2026-07-30T21:00:00Z"
+    }
+  },
+  "failedFiles": []
+}
+```
+
+2. **GraphQL Rollout Tracker (`.ai/plans/neon/graphql-rollout-tracker.json`)**:
+```json
+{
+  "totalDomains": 16,
+  "maxConcurrency": 16,
+  "completedDomains": [],
+  "activeSubagents": {
+    "backend/graphql/pothos/classes/": {
+      "conversationId": "subagent-uuid-2",
+      "status": "in_progress",
+      "startedAt": "2026-07-30T21:05:00Z"
+    }
+  },
+  "failedDomains": []
+}
+```
+
+### 2.3 Dual Client Helper (`backend/db/http-client.ts`)
 Helper for stateless single read queries using Neon's HTTP driver:
 
 ```typescript
@@ -70,86 +103,24 @@ export function getNeonHttpClient() {
 }
 ```
 
-### 2.3 Prepared Statements 2.0 (Pilot Candidate: `user.repository.ts`)
-Pilot implementation on `backend/db/repo/users/user.repository.ts`:
-
-```typescript
-import { eq, sql } from "drizzle-orm";
-import { db } from "@/backend/db/factory";
-import { users } from "@/backend/db/schema";
-
-// Prepared statement for single user lookup by ID
-export const findUserByIdPrepared = db
-  .select()
-  .from(users)
-  .where(eq(users.id, sql.placeholder("userId")))
-  .prepare("find_user_by_id");
-```
-
-- **Targeted Test Command:**  
-  `bun run scripts/run-test/run-test.ts backend/db/test/repo/users/user.repository.test.ts`
-- **Suite Verification Commands:**  
-  `bun test:db` and `bun test:services`
-
-### 2.4 GraphQL DataLoader Integration (Pilot Candidate: `users` Domain)
-Pilot implementation on `backend/graphql/pothos/users/`:
-
-```typescript
-// Pothos DataLoader batching for users relation
-t.loadable({
-  type: UserType,
-  load: async (keys: string[], ctx) => {
-    const usersList = await userService.findManyByIds(keys);
-    return keys.map((id) => usersList.find((u) => u.id === id) || null);
-  },
-  resolve: (parent) => parent.userId,
-});
-```
-
-- **GraphQL Codegen Commands:**  
-  `bun generate:gqlSchema` and `bun codegen`
-- **Suite Verification Command:**  
-  `bun test:graphql`
-
 ---
 
 ## 3. Strict Quality Verification Loop & Outcome Protocol
 
-Every task step MUST strictly adhere to the project's non-negotiable verification loop:
-
-### 3.1 Pre-Execution Knowledge Read
-Read ALL files in `.ai/plans/neon/outcome/` to absorb prior research, search findings, and carry-over points.
-
-### 3.2 Per-File Quality Loop (Immediate post-edit)
-Immediately after modifying any file, execute per-file verification before editing other files:
-1. `bun tsgo`
-2. `bun biome:check`
-3. Lint queue check via client for target file:
-   ```bash
-   curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" -d '{"id":"verify","files":["<edited-file>"]}'
-   ```
-
-### 3.3 Global Subtask Health Check (Completion gate)
-Before marking any subtask as complete, run full global checks:
-- `bun tsgo` — MUST exit 0
-- `bun biome:check` — MUST exit 0
-- `bun run lint` — MUST exit 0 (zero errors, zero warnings across repository)
-
-### 3.4 Outcome Documentation & Task Checkbox Update
-1. Create/update `.ai/plans/neon/outcome/<task-id>-outcome.md` with full findings, docs/web search notes, and implementation details.
-2. Mark task checkbox `[ ]` -> `[x]` in [tasks.md](file://.ai/plans/neon/tasks.md).
+1. **Pre-Execution Knowledge Read:** Read ALL files in `.ai/plans/neon/outcome/`.
+2. **Per-File Quality Loop:** Execute per-file verification (`tsgo` + `biome` + `lint-queue`) immediately after modifying any file.
+3. **Global Subtask Health Check:** Execute `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
+4. **Outcome Documentation & Task Checkbox Update:**
+   - Create `.ai/plans/neon/outcome/<task-id>-outcome.md`.
+   - Update `[ ]` -> `[x]` in `tasks.md`.
 
 ---
 
 ## 4. Decision Log
 
-### Decision 1: Single Candidate Pilot Validation
-- **Context:** Refactoring all repositories or GraphQL domains simultaneously risks widespread regression.
-- **Decision:** Validate pattern on candidate files (`user.repository.ts` for DB, `users` for GraphQL). Run schema generation, codegen, and targeted test suites. Only expand to remaining repos/domains after clean verification.
-
-### Decision 2: Outcome Knowledge Base (`.ai/plans/neon/outcome/`)
-- **Context:** Subagents or future agent sessions risk re-doing analysis or missing past learnings.
-- **Decision:** Mandate reading all outcome files before task start and writing a structured outcome file upon task completion.
+### Decision 1: Dynamic 16-Worker Pool Replenishment
+- **Context:** Fixed batching leaves slots idle when some subagents finish earlier than others.
+- **Decision:** The parent orchestrator continuously monitors active subagent status and immediately spawns a new subagent whenever a worker finishes, keeping throughput maximized at 16 active subagents until the queue is exhausted.
 
 ---
 
@@ -157,6 +128,7 @@ Before marking any subtask as complete, run full global checks:
 
 | Layer | Candidate File / Domain | Targeted Test / Generator Command | Full Suite Verification |
 |---|---|---|---|
-| Repository | `backend/db/repo/users/user.repository.ts` | `bun run scripts/run-test/run-test.ts backend/db/test/repo/users/user.repository.test.ts` | `bun test:db` <br> `bun test:services` |
-| GraphQL | `backend/graphql/pothos/users/` | `bun generate:gqlSchema` <br> `bun codegen` | `bun test:graphql` |
-| Quality | Any modified file | Per-file sub-loop (`tsgo` + `biome` + `lint-queue`) | `bun tsgo` <br> `bun biome:check` <br> `bun run lint` |
+| Repository Pilot | `backend/db/repo/users/user.repository.ts` | `bun run scripts/run-test/run-test.ts backend/db/test/repo/users/user.repository.test.ts` | `bun test:db` <br> `bun test:services` |
+| Repository Rollout (Task 2.2) | All files in `backend/db/repo/` (Dynamic 16-pool watcher subagents) | Per-file sub-loop (`tsgo` + `biome` + `lint-queue`) per assigned file | `bun test:db` <br> `bun test:services` |
+| GraphQL Pilot | `backend/graphql/pothos/users/` | `bun generate:gqlSchema` <br> `bun codegen` | `bun test:graphql` |
+| GraphQL Rollout (Task 3.2) | All domains in `backend/graphql/pothos/` (Dynamic 16-pool watcher subagents) | `bun generate:gqlSchema` <br> `bun codegen` | `bun test:graphql` |

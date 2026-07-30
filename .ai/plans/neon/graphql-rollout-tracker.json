@@ -1,0 +1,189 @@
+{
+  "totalDomains": 18,
+  "maxConcurrency": 16,
+  "completedDomains": [],
+  "activeSubagents": {},
+  "failedDomains": [],
+  "pendingDomains": [
+    {
+      "domain": "auth",
+      "directory": "backend/graphql/pothos/auth/",
+      "resolverFiles": [
+        "backend/graphql/pothos/auth/auth.pothos.ts",
+        "backend/graphql/pothos/auth/impersonation.pothos.ts",
+        "backend/graphql/pothos/auth/user.pothos.ts"
+      ]
+    },
+    {
+      "domain": "billing",
+      "directory": "backend/graphql/pothos/billing/",
+      "resolverFiles": [
+        "backend/graphql/pothos/billing/billing-alerts.pothos.ts",
+        "backend/graphql/pothos/billing/billing-history.pothos.ts",
+        "backend/graphql/pothos/billing/billing-management.pothos.ts",
+        "backend/graphql/pothos/billing/billing-payments.pothos.ts",
+        "backend/graphql/pothos/billing/credit.pothos.ts",
+        "backend/graphql/pothos/billing/currency-hedge.pothos.ts",
+        "backend/graphql/pothos/billing/currency.pothos.ts",
+        "backend/graphql/pothos/billing/fx-display.pothos.ts",
+        "backend/graphql/pothos/billing/fx-ingestion.pothos.ts",
+        "backend/graphql/pothos/billing/payment-method.pothos.ts"
+      ]
+    },
+    {
+      "domain": "books",
+      "directory": "backend/graphql/pothos/books/",
+      "resolverFiles": [
+        "backend/graphql/pothos/books/book.pothos.ts",
+        "backend/graphql/pothos/books/report.pothos.ts"
+      ]
+    },
+    {
+      "domain": "classes",
+      "directory": "backend/graphql/pothos/classes/",
+      "resolverFiles": [
+        "backend/graphql/pothos/classes/class-category.pothos.ts",
+        "backend/graphql/pothos/classes/class-session.pothos.ts",
+        "backend/graphql/pothos/classes/class-subject.pothos.ts",
+        "backend/graphql/pothos/classes/dst-migration.pothos.ts",
+        "backend/graphql/pothos/classes/group-class.pothos.ts",
+        "backend/graphql/pothos/classes/lesson-report.pothos.ts",
+        "backend/graphql/pothos/classes/recurring-class.pothos.ts"
+      ]
+    },
+    {
+      "domain": "complaints",
+      "directory": "backend/graphql/pothos/complaints/",
+      "resolverFiles": [
+        "backend/graphql/pothos/complaints/complaint.pothos.ts",
+        "backend/graphql/pothos/complaints/complaintResponses.pothos.ts"
+      ]
+    },
+    {
+      "domain": "meeting",
+      "directory": "backend/graphql/pothos/meeting/",
+      "resolverFiles": [
+        "backend/graphql/pothos/meeting/effective-meeting.pothos.ts",
+        "backend/graphql/pothos/meeting/meeting.pothos.ts"
+      ]
+    },
+    {
+      "domain": "notifications",
+      "directory": "backend/graphql/pothos/notifications/",
+      "resolverFiles": [
+        "backend/graphql/pothos/notifications/notification-alerts.pothos.ts",
+        "backend/graphql/pothos/notifications/notification-preferences.pothos.ts"
+      ]
+    },
+    {
+      "domain": "parents",
+      "directory": "backend/graphql/pothos/parents/",
+      "resolverFiles": [
+        "backend/graphql/pothos/parents/parent-dashboard.pothos.ts",
+        "backend/graphql/pothos/parents/parent-directory.pothos.ts",
+        "backend/graphql/pothos/parents/parent-document.pothos.ts",
+        "backend/graphql/pothos/parents/parent-lifecycle.pothos.ts",
+        "backend/graphql/pothos/parents/parent-onboarding.pothos.ts",
+        "backend/graphql/pothos/parents/parent-portal.pothos.ts",
+        "backend/graphql/pothos/parents/parent-profile.pothos.ts",
+        "backend/graphql/pothos/parents/suggestion.pothos.ts"
+      ]
+    },
+    {
+      "domain": "permissions",
+      "directory": "backend/graphql/pothos/permissions/",
+      "resolverFiles": [
+        "backend/graphql/pothos/permissions/permission-group-simulation.objects.pothos.ts",
+        "backend/graphql/pothos/permissions/permission-group-simulation.pothos.ts",
+        "backend/graphql/pothos/permissions/permission-management.pothos.ts"
+      ]
+    },
+    {
+      "domain": "profile",
+      "directory": "backend/graphql/pothos/profile/",
+      "resolverFiles": [
+        "backend/graphql/pothos/profile/profile.pothos.ts"
+      ]
+    },
+    {
+      "domain": "reports",
+      "directory": "backend/graphql/pothos/reports/",
+      "resolverFiles": [
+        "backend/graphql/pothos/reports/monthly-report.pothos.ts"
+      ]
+    },
+    {
+      "domain": "scheduling",
+      "directory": "backend/graphql/pothos/scheduling/",
+      "resolverFiles": [
+        "backend/graphql/pothos/scheduling/availability-search.pothos.ts",
+        "backend/graphql/pothos/scheduling/recurring-schedule.pothos.ts",
+        "backend/graphql/pothos/scheduling/schedule.pothos.ts",
+        "backend/graphql/pothos/scheduling/weekly-schedule.pothos.ts"
+      ]
+    },
+    {
+      "domain": "shared",
+      "directory": "backend/graphql/pothos/shared/",
+      "resolverFiles": [
+        "backend/graphql/pothos/shared/enum.pothos.ts",
+        "backend/graphql/pothos/shared/pagination.objects.ts"
+      ]
+    },
+    {
+      "domain": "storage",
+      "directory": "backend/graphql/pothos/storage/",
+      "resolverFiles": [
+        "backend/graphql/pothos/storage/learning-resource.pothos.ts",
+        "backend/graphql/pothos/storage/storage.pothos.ts"
+      ]
+    },
+    {
+      "domain": "students",
+      "directory": "backend/graphql/pothos/students/",
+      "resolverFiles": [
+        "backend/graphql/pothos/students/student-directory.pothos.ts",
+        "backend/graphql/pothos/students/student-history.pothos.ts",
+        "backend/graphql/pothos/students/student-lifecycle.pothos.ts",
+        "backend/graphql/pothos/students/student-onboarding.pothos.ts",
+        "backend/graphql/pothos/students/student-profile.pothos.ts",
+        "backend/graphql/pothos/students/student-status.pothos.ts",
+        "backend/graphql/pothos/students/student.pothos.ts"
+      ]
+    },
+    {
+      "domain": "supervisor",
+      "directory": "backend/graphql/pothos/supervisor/",
+      "resolverFiles": [
+        "backend/graphql/pothos/supervisor/supervisor-dashboard.pothos.ts"
+      ]
+    },
+    {
+      "domain": "system",
+      "directory": "backend/graphql/pothos/system/",
+      "resolverFiles": [
+        "backend/graphql/pothos/system/environment-config.pothos.ts",
+        "backend/graphql/pothos/system/general-settings.pothos.ts",
+        "backend/graphql/pothos/system/session-config.pothos.ts",
+        "backend/graphql/pothos/system/settings-audit.pothos.ts",
+        "backend/graphql/pothos/system/site-content-settings.pothos.ts",
+        "backend/graphql/pothos/system/timezones-settings.pothos.ts"
+      ]
+    },
+    {
+      "domain": "teachers",
+      "directory": "backend/graphql/pothos/teachers/",
+      "resolverFiles": [
+        "backend/graphql/pothos/teachers/manager-onboarding.pothos.ts",
+        "backend/graphql/pothos/teachers/staff-directory.pothos.ts",
+        "backend/graphql/pothos/teachers/staff-profile.pothos.ts",
+        "backend/graphql/pothos/teachers/teacher-dashboard.pothos.ts",
+        "backend/graphql/pothos/teachers/teacher-due.pothos.ts",
+        "backend/graphql/pothos/teachers/teacher-notes.pothos.ts",
+        "backend/graphql/pothos/teachers/teacher-onboarding.pothos.ts",
+        "backend/graphql/pothos/teachers/teacher-portal.pothos.ts",
+        "backend/graphql/pothos/teachers/teacher.pothos.ts"
+      ]
+    }
+  ]
+}

@@ -49,6 +49,26 @@ import type {
 import { PaginationUtils } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 
+// ============================================================================
+// Prepared Statements (Drizzle Prepared Statements 2.0)
+// ============================================================================
+// These are defined at module level to be compiled once and reused across requests.
+// Note: Prepared statements cannot be used inside transactions (they're tied to the session they were created with).
+
+const findByUserIdPrepared = db
+  .select()
+  .from(parents)
+  .where(eq(parents.userId, sql.placeholder("userId")))
+  .limit(1)
+  .prepare("find_parent_by_user_id");
+
+const findUserIdByParentIdPrepared = db
+  .select({ userId: parents.userId })
+  .from(parents)
+  .where(eq(parents.id, sql.placeholder("parentId")))
+  .limit(1)
+  .prepare("find_user_id_by_parent_id");
+
 export namespace ParentRepository {
   export async function create(
     input: ParentEntityInput,
@@ -388,18 +408,20 @@ export namespace ParentRepository {
   };
 
   export const findByUserId = async (userId: string, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
-    const [parent] = await queryDb.select().from(parents).where(eq(parents.userId, userId)).limit(1);
+    if (!tx) {
+      const result = await findByUserIdPrepared.execute({ userId });
+      return result[0] ?? null;
+    }
+    const [parent] = await tx.select().from(parents).where(eq(parents.userId, userId)).limit(1);
     return parent ?? null;
   };
 
   export const findUserIdByParentId = async (parentId: string, tx?: DBTransaction): Promise<string | null> => {
-    const queryDb = tx ?? db;
-    const [parent] = await queryDb
-      .select({ userId: parents.userId })
-      .from(parents)
-      .where(eq(parents.id, parentId))
-      .limit(1);
+    if (!tx) {
+      const result = await findUserIdByParentIdPrepared.execute({ parentId });
+      return result[0]?.userId ?? null;
+    }
+    const [parent] = await tx.select({ userId: parents.userId }).from(parents).where(eq(parents.id, parentId)).limit(1);
     return parent?.userId ?? null;
   };
 

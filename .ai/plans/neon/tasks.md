@@ -2,6 +2,8 @@
 
 **Target Directory:** `.ai/plans/neon`  
 **Outcome Directory:** `.ai/plans/neon/outcome`  
+**Repo Rollout Tracker:** `.ai/plans/neon/repo-rollout-tracker.json`  
+**GraphQL Rollout Tracker:** `.ai/plans/neon/graphql-rollout-tracker.json`  
 **Phase:** 3 — Actionable Task Breakdown  
 **Related Spec:** [spec.md](file://.ai/plans/neon/spec.md)  
 **Related Design:** [design.md](file://.ai/plans/neon/design.md)  
@@ -33,15 +35,15 @@
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/neon/outcome/1.1-region-alignment-outcome.md`.
     - Update progress: Mark task 1.1 as `[x]` in `tasks.md`.
-    - _Requirements: Spec 5, 6, 11, 12, 13_
-  - [ ] 1.2 Neon HTTP Single-Fetch Helper
+    - _Requirements: Spec 8, 9, 17, 18, 19_
+  - [x] 1.2 Neon HTTP Single-Fetch Helper
     - Read all existing files in `.ai/plans/neon/outcome/`.
     - Create `backend/db/http-client.ts` implementing `getNeonHttpClient()` for zero-pool HTTP single-fetch queries.
     - Run per-file quality verification on `backend/db/http-client.ts`.
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/neon/outcome/1.2-neon-http-client-outcome.md`.
     - Update progress: Mark task 1.2 as `[x]` in `tasks.md`.
-    - _Requirements: Spec 1, 2, 11, 12, 13_
+    - _Requirements: Spec 1, 2, 17, 18, 19_
 
 - [x] 2. **Prepared Statements 2.0 (Repository Layer)**
   - [x] 2.1 **Pilot Candidate Refactor (`user.repository.ts`)**
@@ -52,18 +54,29 @@
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/neon/outcome/2.1-prepared-statements-pilot-outcome.md`.
     - Update progress: Mark task 2.1 as `[x]` in `tasks.md`.
-    - _Requirements: Spec 3, 4, 9, 10, 11, 12, 13_
-  - [ ] 2.2 **Repository Layer Rollout & Test Verification**
+    - _Requirements: Spec 3, 4, 15, 16, 17, 18, 19_
+  - [x] 2.2 **Repository Layer Rollout & Test Verification (Dynamic 16-Worker Pool Watcher)**
     - Read all existing files in `.ai/plans/neon/outcome/`.
-    - Rollout prepared statements to remaining repositories in `backend/db/repo/` (e.g. `auth`, `classes`, `scheduling`, `students`).
-    - Run per-file quality verification on each modified file.
-    - Run full repository test suites:
+    - Gather context from `backend/db/repo/AGENTS.md` and `.github/instructions/backend.instructions.md`.
+    - Spawn **Parent Orchestration Subagent** to manage the rollout across `backend/db/repo/`.
+    - Parent Orchestrator creates and manages tracking state file `.ai/plans/neon/repo-rollout-tracker.json`.
+    - Parent Orchestrator maintains a **continuous watcher loop** to maximize concurrency at **exactly 16 running subagents**:
+      - Monitors running subagent status and immediately spawns a new subagent whenever a worker completes or a slot opens up.
+      - Each nested subagent is assigned a **single repository file** from `backend/db/repo/`.
+      - Each nested subagent receives full absolute plan file paths (`spec.md`, `design.md`, `tasks.md`), parent task context, and relevant `AGENTS.md` / instruction rules.
+      - Each nested subagent is strictly restricted to its assigned single repository file (MUST NOT modify any other file).
+      - Each nested subagent reads all existing files in `.ai/plans/neon/outcome/` before starting.
+      - Each nested subagent refactors its assigned file to use Drizzle prepared statements (`sql.placeholder(...)`).
+      - Each nested subagent runs per-file quality verification (`tsgo` + `biome` + `lint-queue`) on its assigned file.
+      - Each nested subagent writes its file outcome document `.ai/plans/neon/outcome/2.2-<repo-name>-outcome.md`.
+      - Parent Orchestrator updates `.ai/plans/neon/repo-rollout-tracker.json` with completed file status and subagent IDs.
+    - Upon completion of all nested worker subagents, run full repository test suites:
       - `bun test:db` (Database repository tests)
       - `bun test:services` (Backend services integration tests)
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
-    - Write outcome file: `.ai/plans/neon/outcome/2.2-prepared-statements-rollout-outcome.md`.
+    - Write rollout summary outcome file: `.ai/plans/neon/outcome/2.2-prepared-statements-rollout-outcome.md`.
     - Update progress: Mark task 2.2 as `[x]` in `tasks.md`.
-    - _Requirements: Spec 3, 4, 9, 10, 11, 12, 13_
+    - _Requirements: Spec 3, 4, 5, 6, 7, 15, 16, 17, 18, 19_
 
 - [ ] 3. **GraphQL DataLoader Integration (GraphQL Layer)**
   - [ ] 3.1 **Pilot Candidate Domain (`users` Domain)**
@@ -77,20 +90,30 @@
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/neon/outcome/3.1-graphql-dataloader-pilot-outcome.md`.
     - Update progress: Mark task 3.1 as `[x]` in `tasks.md`.
-    - _Requirements: Spec 7, 8, 9, 10, 11, 12, 13_
-  - [ ] 3.2 **GraphQL Layer Rollout & Integration Verification**
+    - _Requirements: Spec 10, 11, 15, 16, 17, 18, 19_
+  - [ ] 3.2 **GraphQL Layer Rollout & Integration Verification (Dynamic 16-Worker Pool Watcher)**
     - Read all existing files in `.ai/plans/neon/outcome/`.
-    - Rollout DataLoader batching to remaining GraphQL domains in `backend/graphql/pothos/`.
-    - Run per-file quality verification on each modified file.
-    - Run GraphQL schema generation and codegen:
+    - Gather context from `backend/graphql/AGENTS.md` and `.github/instructions/backend.instructions.md`.
+    - Spawn **Parent Orchestration Subagent** to manage the GraphQL rollout across `backend/graphql/pothos/`.
+    - Parent Orchestrator creates and manages tracking state file `.ai/plans/neon/graphql-rollout-tracker.json`.
+    - Parent Orchestrator maintains a **continuous watcher loop** to maximize concurrency at **exactly 16 running subagents**:
+      - Monitors running subagent status and immediately spawns a new subagent whenever a worker completes or a slot opens up.
+      - Each nested subagent is assigned a **single GraphQL domain folder** from `backend/graphql/pothos/`.
+      - Each nested subagent receives full absolute plan file paths (`spec.md`, `design.md`, `tasks.md`), parent task context, and relevant `AGENTS.md` / instruction rules.
+      - Each nested subagent is strictly restricted to its assigned single GraphQL domain folder (MUST NOT modify any other file in the codebase).
+      - Each nested subagent reads all existing files in `.ai/plans/neon/outcome/` before starting.
+      - Each nested subagent refactors its assigned domain to implement Pothos DataLoader batching for relations.
+      - Each nested subagent runs per-file quality verification (`tsgo` + `biome` + `lint-queue`) on its modified files.
+      - Each nested subagent writes its domain outcome document `.ai/plans/neon/outcome/3.2-<domain-name>-outcome.md`.
+      - Parent Orchestrator updates `.ai/plans/neon/graphql-rollout-tracker.json` with completed domain status and subagent IDs.
+    - Upon completion of all nested worker subagents, run GraphQL schema generation, codegen, and test suite:
       - `bun generate:gqlSchema`
       - `bun codegen`
-    - Run full GraphQL integration test suite:
-      - `bun test:graphql`
+      - `bun test:graphql` (GraphQL integration tests)
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
-    - Write outcome file: `.ai/plans/neon/outcome/3.2-graphql-dataloader-rollout-outcome.md`.
+    - Write rollout summary outcome file: `.ai/plans/neon/outcome/3.2-graphql-dataloader-rollout-outcome.md`.
     - Update progress: Mark task 3.2 as `[x]` in `tasks.md`.
-    - _Requirements: Spec 7, 8, 9, 10, 11, 12, 13_
+    - _Requirements: Spec 10, 11, 12, 13, 14, 15, 16, 17, 18, 19_
 
 - [ ] 4. **Schema Indexing Audit**
   - [ ] 4.1 Schema Index Review
@@ -100,7 +123,7 @@
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/neon/outcome/4.1-schema-indexing-audit-outcome.md`.
     - Update progress: Mark task 4.1 as `[x]` in `tasks.md`.
-    - _Requirements: Spec 9, 10, 11, 12, 13_
+    - _Requirements: Spec 15, 16, 17, 18, 19_
 
 - [ ] 5. **Final Comprehensive Quality Gate & Test Verification**
   - [ ] 5.1 Full Suite Execution & Final Outcome Documentation
@@ -111,4 +134,4 @@
     - Execute global health checks: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings across full repository).
     - Write comprehensive final outcome summary: `.ai/plans/neon/outcome/5.1-final-verification-outcome.md`.
     - Update progress: Mark task 5.1 as `[x]` in `tasks.md`.
-    - _Requirements: Spec 1–13_
+    - _Requirements: Spec 1–19_

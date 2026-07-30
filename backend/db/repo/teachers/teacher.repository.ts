@@ -18,6 +18,26 @@ import type {
 import { escapeLikeWildcards } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 
+// ============================================================================
+// Prepared Statements (Drizzle Prepared Statements 2.0)
+// ============================================================================
+// These are defined at module level to be compiled once and reused across requests.
+// Note: Prepared statements cannot be used inside transactions (they're tied to the session they were created with).
+
+const findByUserIdPrepared = db
+  .select()
+  .from(teachers)
+  .where(eq(teachers.userId, sql.placeholder("userId")))
+  .limit(1)
+  .prepare("find_teacher_by_user_id");
+
+const findByIdPrepared = db
+  .select()
+  .from(teachers)
+  .where(eq(teachers.id, sql.placeholder("id")))
+  .limit(1)
+  .prepare("find_teacher_by_id");
+
 export namespace TeacherRepository {
   export async function create(
     input: TeacherEntityInput,
@@ -76,14 +96,20 @@ export namespace TeacherRepository {
   }
 
   export const findByUserId = async (userId: string, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
-    const [teacher] = await queryDb.select().from(teachers).where(eq(teachers.userId, userId)).limit(1);
+    if (!tx) {
+      const result = await findByUserIdPrepared.execute({ userId });
+      return result[0] ?? null;
+    }
+    const [teacher] = await tx.select().from(teachers).where(eq(teachers.userId, userId)).limit(1);
     return teacher ?? null;
   };
 
   export const findById = async (id: string, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
-    const [teacher] = await queryDb.select().from(teachers).where(eq(teachers.id, id)).limit(1);
+    if (!tx) {
+      const result = await findByIdPrepared.execute({ id });
+      return result[0] ?? null;
+    }
+    const [teacher] = await tx.select().from(teachers).where(eq(teachers.id, id)).limit(1);
     return teacher ?? null;
   };
 

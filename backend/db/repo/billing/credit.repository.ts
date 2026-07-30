@@ -9,6 +9,15 @@ import type { CreditInsertInput, CreditTransactionSelectType, PaginationArgs } f
 
 type ReadExecutor = DBTransaction | typeof db;
 
+// ============================================================================
+// Prepared Statements (Drizzle Prepared Statements 2.0)
+// ============================================================================
+const findByIdempotencyKeysPrepared = db
+  .select()
+  .from(creditTransactions)
+  .where(inArray(creditTransactions.idempotencyKey, sql.placeholder("keys")))
+  .prepare("find_credit_tx_by_idempotency_keys");
+
 export namespace CreditRepository {
   export const getBalance = async (
     tx: ReadExecutor,
@@ -127,8 +136,10 @@ export namespace CreditRepository {
     tx?: DBTransaction
   ): Promise<CreditTransactionSelectType[]> => {
     if (keys.length === 0) return [];
-    const executor = tx ?? db;
-    return executor
+    if (!tx) {
+      return findByIdempotencyKeysPrepared.execute({ keys: [...keys] });
+    }
+    return tx
       .select()
       .from(creditTransactions)
       .where(inArray(creditTransactions.idempotencyKey, [...keys]));
