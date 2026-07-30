@@ -1,0 +1,1 @@
+consider https://github.com/wwebjs/whatsapp-web.js
