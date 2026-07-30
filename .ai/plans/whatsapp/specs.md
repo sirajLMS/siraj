@@ -293,7 +293,7 @@ References:
 ### Definition of done
 
 - [ ] All REQ acceptance criteria satisfied (including new REQ-10)
-- [ ] `bun quality-gate` passes
+- [ ] **Quality loop** (tsgo + biome + lint) passes on all modified files
 - [ ] `@live-comm` matrix complete (REQ-9) + coverage guard test green
 - [ ] `trackable-tasks.md` all phases marked complete
 - [ ] GraphQL schema + frontend codegen updated

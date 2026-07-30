@@ -3,7 +3,7 @@
 ## Document Information
 
 - **Feature Name**: Quota Entity + Recurring-Class Integration
-- **Version**: 1.0
+- **Version**: 1.1 (updated after ground-truth verification)
 - **Date**: 2026-07-30
 - **Related Documents**:
   - [Implementation Guide](./implementation.md)
@@ -28,6 +28,7 @@ The recurring-class create form exposes **three parent scheduling modes**:
 - Support three scheduling modes with backward-compatible defaults
 - Prevent double-booking for students and teachers across all scheduling paths
 - Deliver progressive notifications for quota expiry and on-demand credit gaps
+- **Eliminate the existing double-deduction bug** in recurring-class creation (repo direct SQL + service CreditService both decrement `classesRemaining`)
 
 ### Key Design Decisions
 
@@ -38,6 +39,8 @@ The recurring-class create form exposes **three parent scheduling modes**:
 5. **On-demand deduction at session-start** — credits are not deducted when instance flips to AVAILABLE
 6. **Dual status for on-demand** — `executionState` for rendering + `ondemandStatus` for on-demand lifecycle
 7. **Scheduling conflict prevention everywhere** — shared `AvailabilityService` called by create/update/one-off booking/on-demand generator
+8. **Quota ledger REPLACES repo-level direct SQL** — `handleQuotaDeduction` / `adjustQuotaOnUpdate` in `state-changes.ts` must be removed; all quota-backed deductions go through `QuotaService` + ledger
+9. **Teacher timezone derived from schedule/availability** — no `timezoneOverride` on `teachers` table; use `recurring_schedules.timezone` or `teacher_availability_windows.timezone`
 
 ## Architecture
 
@@ -123,8 +126,8 @@ graph TB
 | `status` | enum | `ACTIVE` \| `EXPIRED` \| `ARCHIVED` |
 | `priority` | int default 0 | FIFO burn-down ordering |
 | `rolloverPolicy` | jsonb nullable | `{ maxRolloverPercent, accumulationCap }` |
-| `version` | int | optimistic lock |
-| `idempotencyKey` | varchar unique | |
+| `version` | int | optimistic lock (mirrors `students.version`) |
+| `idempotencyKey` | varchar unique | sha256 pattern matching `CreditService` |
 | `createdAt`, `updatedAt`, `deletedAt` | timestamptz | soft-delete |
 
 **Quota type matrix:**
@@ -135,6 +138,8 @@ graph TB
 | `PERIODIC` | `WEEKLY` | 7 | Refreshes every Monday |
 | `PERIODIC` | `MONTHLY` | 30 | Refreshes on 1st of month |
 | `PERIODIC` | `CUSTOM` | 90/180/365 | Custom window fenced by `validFrom`/`validUntil` |
+
+**Indexes:** `(studentId, status, remaining) WHERE deletedAt IS NULL AND status='ACTIVE' AND remaining>0` (for FIFO), `(validUntil) WHERE status='ACTIVE'` (for sweeper).
 
 ### Entity: `quota_ledger` (append-only, source of truth)
 
@@ -148,11 +153,11 @@ graph TB
 | `delta` | int | +/- amount |
 | `reason` | enum | `GRANT` \| `RESERVE` \| `REDEEM` \| `RELEASE` \| `EXPIRE` \| `ADJUST` |
 | `reasonNote` | text nullable | |
-| `idempotencyKey` | varchar 255 unique | at-most-once guarantee |
+| `idempotencyKey` | varchar 255 unique | sha256(`studentId:classInstanceId:operation`) pattern |
 | `actorUserId` | UUID FK nullable | |
 | `createdAt`, `updatedAt` | timestamptz | |
 
-**Indexes:** `(quotaId, createdAt)`, `unique(idempotencyKey)`, `(studentId)`, `(classInstanceId)`, `(recurringScheduleId)`
+**Indexes:** `(quotaId, createdAt)`, `unique(idempotencyKey)`, `(studentId)`, `(classInstanceId)`, `(recurringScheduleId)`.
 
 ### Schema extensions: `recurring_schedules`
 
@@ -164,9 +169,13 @@ graph TB
 | `generationHorizonWeeks` | int nullable | ON_DEMAND only |
 | `ondemandNoCreditsOutcome` | enum nullable | per-schedule override |
 
+**Existing columns unchanged:** `generateInstancesForWeeks` does NOT exist on the table — only service/repo input param (defaults to 1 week).
+
 ### Schema extensions: `class_instances`
 
-**New `executionState` values:**
+**Existing `executionState` enum (4 values):** `NOT_ACTIVATED` (default), `ACTIVATED`, `RUNNING`, `COMPLETED`. **Already has `quotaDeducted` boolean column** with CHECK constraint coupling it to `is_rescheduled`.
+
+**New `executionState` values to add:**
 - `ON_DEMAND_PENDING_CREDITS`
 - `ON_DEMAND_CONFLICT_HELD`
 - `ON_DEMAND_NO_CREDITS_CANCELLED`
@@ -176,6 +185,8 @@ graph TB
 `PENDING_CREDIT` \| `AVAILABLE` \| `CONVERTED` \| `NO_CREDITS_CANCELLED` \| `NO_CREDITS_ABSENT` \| `CANCELLED`
 
 NULL for non-on-demand instances (backward-compatible).
+
+**Existing unique index:** `idempotencyKey` (varchar 255, unique) — used for recurring instance dedupe with key pattern `recurring-${recurringScheduleId}-${day}-${iso}`.
 
 ### System Settings (new keys)
 
@@ -187,14 +198,16 @@ NULL for non-on-demand instances (backward-compatible).
 | `ondemand_no_credits_resolution_lead_minutes` | 240 | Resolver lead time before session |
 | `quota_low_balance_threshold_percent` | 20 | Low-balance notification threshold |
 
+**Table exists:** `system_settings` (`backend/db/schema/shared/settings.ts`) — read via `SystemSettingsService`. No seed defaults currently; must add seed script.
+
 ## Scheduling Modes — Detailed Behavior
 
 ### Number of Classes (existing, refined)
 
-- Admin specifies `generateInstancesForWeeks`; system pre-generates instances
+- Admin specifies `generateInstancesForWeeks` (input param, defaults to 1 week); system pre-generates instances
 - Optional `quotaId` + `earmarkedClasses` for quota consumption
-- Pool mode: per-instance REDEEM ledger rows
-- Earmark mode: RESERVE up front, RELEASE on cancellation of unused instances
+- Pool mode: per-instance REDEEM ledger rows via `QuotaService.redeemForInstance` (replaces `handleQuotaDeduction`)
+- Earmark mode: RESERVE up front via `QuotaService.reserveForRecurringSchedule`, RELEASE on cancellation of unused instances via `QuotaService.releaseForRecurringSchedule`
 
 ### On-Demand
 
@@ -204,9 +217,9 @@ NULL for non-on-demand instances (backward-compatible).
   - `classesRemaining == 0` → `executionState=ON_DEMAND_PENDING_CREDITS`
   - Slot conflict → `executionState=ON_DEMAND_CONFLICT_HELD` + admin notification
 - Status refresh dual-triggered:
-  1. Cron re-evaluates PENDING_CREDIT instances each run
+  1. Cron re-evaluates PENDING_CREDIT instances each run (optimized: only students with `classesRemaining > 0`)
   2. Any credit change calls `QuotaService.refreshStudentOndemandInstances(studentId, tx)` (FIFO flip)
-- Credit deduction happens at **session-start**, not at availability flip
+- Credit deduction happens at **session-start** (`activateClassInstance` / `startSession`), not at availability flip
 - No-credits outcome configurable per schedule (override) or system default:
   - `AUTO_CANCEL` — cancel instance
   - `AUTO_ABSENT_NO_CREDITS` — mark absent
@@ -220,12 +233,12 @@ NULL for non-on-demand instances (backward-compatible).
 
 ## Credit Interaction
 
-- `recordCreditPurchase` unchanged — still bumps `students.classesRemaining`
-- Creating a quota does NOT touch `students.classesRemaining`
-- Creates `quotas` row + `quota_ledger` GRANT row in same transaction
-- Invariant enforced at service layer: `SUM(active quotas.totalClasses) <= students.classesTotal`
+- `recordCreditPurchase` unchanged — still bumps `students.classesRemaining` via `StudentRepository.addClasses` (which also increments `classesTotal`)
+- Creating a quota does NOT touch `students.classesRemaining`. It inserts a `quotas` row + a `quota_ledger` GRANT row in same transaction
+- **Invariant enforced at service layer:** `SUM(active quotas.totalClasses) <= students.classesTotal` — **BUT** note: `addClasses` on refund inflates `classesTotal`, so this invariant is a soft cap that may over-allow. Consider tracking `classesPurchased` separately if precise enforcement needed.
 - `credit_transactions` ledger is NOT modified — quota ledger sits beside it
 - Periodic refresh: sweeper writes new GRANT + EXPIRE rows per rollover policy
+- **CRITICAL FIX:** `QuotaService.redeemForInstance` replaces `handleQuotaDeduction` (direct SQL `-1` on `students.classesRemaining` with no ledger). All quota-backed deductions must go through the ledger.
 
 ## Availability & Conflict Prevention
 
@@ -237,6 +250,8 @@ NULL for non-on-demand instances (backward-compatible).
 | `assertSchedulePatternAvailable(...)` | Validates entire recurring pattern before creation |
 | `findAvailableSlots(studentId, teacherId, dateRange, durationMinutes)` | Returns free slots for frontend picker |
 | `isSlotAvailable(...)` | Boolean check |
+
+**Implementation:** Point lookups on `class_instances` (indexes on `studentId, scheduledStartAt` and `teacherId, scheduledStartAt` exist) + `TeacherAvailabilityRepository` queries for teacher windows/unavailability/vacations. **NOT** `AvailabilitySearchService` (that is cross-staff search).
 
 **Called by:** RecurringClassService create/update, TeacherDashboardService one-off booking, on-demand generator.
 
@@ -256,9 +271,9 @@ NULL for non-on-demand instances (backward-compatible).
 | `ON_DEMAND_INSTANCE_REMINDER_T1` | urgent | student (+ parent if linked) | T-1 day before class |
 | `ON_DEMAND_TEACHER_DAILY_DIGEST` | digest | teacher | Daily at `ondemand_teacher_digest_hour` in teacher's local TZ |
 
-**Parent handling:** Check `student.parentId` before parent delivery; student-only fallback when no parent linked.
+**Parent handling:** Check `student.parentId` before parent delivery; student-only fallback when no parent linked (pattern from `STUDENT_TEACHER_REASSIGNED` builder at lines 228-230).
 
-**Notification prefs:** Category-level mute toggle (`info`/`reminder`/`urgent`/`digest`) alongside per-event toggles.
+**Notification prefs:** Category-level mute toggle (`info`/`reminder`/`urgent`/`digest`) alongside per-event toggles — **greenfield** (no existing category field on `NotificationEventType`).
 
 ## Permissions
 
@@ -266,6 +281,8 @@ NULL for non-on-demand instances (backward-compatible).
 |------------|-------|-------|
 | `QUOTAS_VIEW` | `quotas.view` | Read quotas, ledger, balance |
 | `QUOTAS_MANAGE` | `quotas.manage` | Create, update, delete quotas |
+
+**Existing permission pattern:** dot-notation (e.g., `students.override_quota`, `student.edit_quota`, `billing.view_history`). Seed grants in `backend/db/seeds/permissions/`.
 
 ## API Design (GraphQL)
 
@@ -296,8 +313,8 @@ When admin edits a recurring schedule to switch `schedulingMode` away from `NUMB
 
 1. Archive all un-taken future instances with `cancelled-mode-switch` state
 2. For archived instances with unrefunded credit deductions:
-   - Call `CreditService.refundOnCancel`
-   - Call `QuotaService.releaseForRecurringSchedule`
+   - Call `CreditService.refundOnCancel` (global balance)
+   - Call `QuotaService.releaseForRecurringSchedule` (quota ledger)
 3. New mode takes over (cron for ON_DEMAND, quota link for QUOTA)
 
 ## Industry Research Patterns Applied
@@ -307,13 +324,13 @@ When admin edits a recurring schedule to switch `schedulingMode` away from `NUMB
 3. **Reserve / commit / release** — canonical transactional primitive for earmarks
 4. **Expiry sweeper** — negative EXPIRE ledger rows, not balance filtering
 5. **Credit batches** — single polymorphic table with kind discriminator
-6. **Idempotency keys + optimistic locking** — mirrors existing `students.version` pattern
+6. **Idempotency keys + optimistic locking** — mirrors existing `students.version` pattern; sha256 key pattern from `CreditService`
 7. **Visibility + notifications** — expiry reminders drive utilization (Tutorbase, Lago)
 
 ## Backward Compatibility
 
 - Existing `recurring_schedules` default to `schedulingMode=NUMBER_OF_CLASSES`
-- `quotaId=null` preserves existing per-instance global credit deduction
+- `quotaId=null` preserves existing per-instance global credit deduction (but FIXED to single deduction via `CreditService` only)
 - `ondemandStatus` NULL for non-on-demand instances
 - Soft-delete for expired/zero-remaining quotas (preserves audit history)
 
@@ -321,3 +338,49 @@ When admin edits a recurring schedule to switch `schedulingMode` away from `NUMB
 
 - **Expired/zero-remaining quotas** — soft-delete only (recommended default)
 - **Low-balance threshold** — `system_settings.quota_low_balance_threshold_percent` (default 20%)
+- **Precise credit invariant** — whether to add `classesPurchased` column to fix `addClasses` inflating `classesTotal` on refunds (deferred)
+
+---
+
+### Summary of Ground-Truth Corrections Applied
+
+| Area | Was | Now |
+|------|-----|-----|
+| `quota_deducted` column | Plan said "to be added" | Already exists — reference existing |
+| Unique index for on-demand | `(recurringScheduleId, scheduledStartAt)` | Use existing `idempotencyKey` pattern |
+| `classesTotal` on students | Plan assumed missing | Exists — but inflated by refunds |
+| Double deduction | Not mentioned | **Eliminated** — quota ledger replaces repo direct SQL |
+| Teacher timezone | `teacher.timezoneOverride` | Derive from `recurring_schedules.timezone` / availability windows |
+| Teacher availability service | `TeacherAvailabilityService` | Compose `TeacherAvailabilityRepository` directly |
+| Notification categories | Implicit | Greenfield — add to enum builder + allowlist + UI |
+| `system_settings` seed | Assumed existing defaults | No seed — must create |
+| Student quota tab | New page | Exists as redirect → enhance existing tab |
+
+### Implementation Instruction References
+
+**For subagents implementing any task, read these instruction files before starting:**
+
+| Layer | AGENTS.md | .agents/instructions |
+|-------|-----------|---------------------|
+| Root | `/home/ahmed/Projects/siraj/AGENTS.md` | — |
+| Backend Schema | `/home/ahmed/Projects/siraj/backend/db/schema/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Repos | `/home/ahmed/Projects/siraj/backend/db/repo/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Services | `/home/ahmed/Projects/siraj/backend/services/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend GraphQL | `/home/ahmed/Projects/siraj/backend/graphql/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Types | `/home/ahmed/Projects/siraj/backend/types/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Enums | `/home/ahmed/Projects/siraj/backend/enum/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Tests | `/home/ahmed/Projects/siraj/backend/db/test/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md` |
+| Scripts | `/home/ahmed/Projects/siraj/scripts/run-test/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md` |
+| Shared Locale | `/home/ahmed/Projects/siraj/shared/AGENTS.md` | — |
+| App Router | `/home/ahmed/Projects/siraj/app/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md` |
+| Frontend Common | `/home/ahmed/Projects/siraj/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/stores/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md` |
+| Frontend Desktop | `/home/ahmed/Projects/siraj/frontend/desktop/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/mobile-desktop.instructions.md` |
+| Frontend Mobile | `/home/ahmed/Projects/siraj/frontend/mobile/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/mobile-desktop.instructions.md` |
+
+**Per-file verification loop after quality loop:**
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" -d '{"id":"verify","files":["<file-path>"]}'
+# Then validate against ALL applicable AGENTS.md and .agents/instructions files listed above
+```

@@ -47,7 +47,9 @@ Build bottom-up in dependency order:
 - After DB schema: `bun run db push` (no migrate for new tables during dev)
 - **No official Meta Node SDK** — use typed `fetch` builders + `@live-comm` integration tests (REQ-9)
 
-### Per-File Verification Loop
+### Per-File Verification Loop (with layer-specific AGENTS.md)
+
+After creating or extracting a file, before importing it elsewhere:
 
 ```bash
 bun tsgo
@@ -56,6 +58,37 @@ curl -s -X POST http://localhost:4777/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"verify","files":["<the-file>"]}'
 ```
+
+Then read **all applicable AGENTS.md files** for that file's layer (per `scripts/health/sub-loop.ts` mapping):
+
+| File Path Prefix | AGENTS.md Files to Read (in addition to root `AGENTS.md`) |
+|------------------|----------------------------------------------------------|
+| `app/` | `app/AGENTS.md` |
+| `backend/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/graphql/` | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/db/repo/` | `backend/db/repo/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/db/schema/` | `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/enum/` | `backend/enum/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/types/` | `backend/types/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/lib/` | `backend/AGENTS.md` |
+| `shared/` | `shared/AGENTS.md` |
+| `frontend/common/graphql/sharedDocuments/` | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/common/graphql/` | `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/common/views/` | `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/common/stores/` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/desktop/views/` | `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/mobile/views/` | `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
+
+
+**Applicable instruction files by file path:**
+| File Path Prefix | Instruction File(s) |
+|------------------|---------------------|
+| `backend/**/*.ts` | `.agents/instructions/backend.instructions.md` |
+| `frontend/**/*.tsx`, `app/**/*.tsx` | `.agents/instructions/frontend.instructions.md` |
+| `**/*.test.ts`, `**/*.test.tsx`, `scripts/run-test/**` | `.agents/instructions/tests.instructions.md` |
+| `frontend/desktop/**`, `frontend/mobile/**` | `.agents/instructions/mobile-desktop.instructions.md` |
+
+Fix any violations found before importing the file elsewhere.
 
 ## Architecture Overview
 
@@ -217,13 +250,36 @@ export const whatsappAccounts = pgTable("whatsapp_accounts", {
   isActive: boolean("is_active").notNull().default(true),
   lastWebhookAt: timestamp("last_webhook_at", { withTimezone: true, precision: 3 }),
   createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),  // B4 — repository need not set this manually
 }, table => [index("whatsapp_accounts_waba_id_idx").on(table.wabaId)]);
 ```
 
 Export via `backend/db/schema/whatsapp/index.ts` and `backend/db/schema/index.ts`.
 
-Use `drizzle-generate` skill for migration SQL; then `bun run db push`.
+**Partial index on `notification_deliveries.provider_message_id`** (B5) — add to `backend/db/schema/communications/communications.ts` in the table's index list:
+
+```typescript
+index("notification_deliveries_provider_message_id_idx")
+  .on(table.providerMessageId)
+  .where(sql`${table.providerMessageId} IS NOT NULL`)
+```
+
+**Migrations:**
+
+- **Drizzle-generated**: the `whatsapp_accounts` table + partial index above will be picked up by Drizzle when you run `bun db push` (after schema edits)
+- **Custom SQL (edit in place — our `bun db migrate` auto-detects modified SQL files):**
+  1. `backend/db/migration/8a-whatsapp-permissions-enum.sql` — enum values only (REQ-6, BL2: exactly 3 perms)
+  2. `backend/db/migration/8b-whatsapp-permissions-data.sql` — seed rows + `super_admin` grants; mirror `7a/7b` with `trg_protect_system_permissions` wrap
+
+After editing the custom SQL files, run:
+
+```bash
+bun db migrate
+bun db push
+```
 
 ### 2.2 Types
 
@@ -249,7 +305,7 @@ Use `drizzle-generate` skill for migration SQL; then `bun run db push`.
 WHATSAPP_VIEW = "whatsapp.view"
 WHATSAPP_CONFIG_MANAGE = "whatsapp.config_manage"
 WHATSAPP_TEMPLATES_MANAGE = "whatsapp.templates_manage"
-WHATSAPP_DISPATCH = "whatsapp.dispatch"
+// whatsapp.dispatch intentionally omitted — no send-mutation exists in v1 (BL2)
 ```
 
 **`8a-whatsapp-permissions-enum.sql`** — enum values only  
@@ -261,7 +317,13 @@ WHATSAPP_DISPATCH = "whatsapp.dispatch"
 
 **`backend/graphql/pothos/whatsapp/whatsapp.pothos.ts`** — objects + inputs from `backend/types/whatsapp` only; always `id`
 
-**Mutations** (`whatsapp.mutation.ts`): `createWhatsappAccount`, `updateWhatsappAccount`, `deleteWhatsappAccount`, `syncWhatsappAccountsFromMeta`, `setWhatsappAccessToken`, `setWhatsappTwoStepPin`, optional `syncWhatsappTemplates`
+**Mutations** (`whatsapp.mutation.ts`):
+- `createWhatsappAccount`
+- `updateWhatsappAccount` — also calls `resetWhatsappChannel()` on success (S4)
+- `deleteWhatsappAccount`
+- `syncWhatsappAccountsFromMeta` — includes `list-message-templates` reconciliation (BL3)
+- `setWhatsappAccessToken` — also calls `resetWhatsappChannel()` (S4)
+- `setWhatsappTwoStepPin` — also calls `resetWhatsappChannel()` (S4)
 
 **Queries** (`whatsapp.query.ts`): `whatsappAccounts`, `whatsappAccount`
 
@@ -275,10 +337,37 @@ Barrel exports + `bun run generate:gqlSchema && bun codegen`.
 
 **`app/api/webhooks/whatsapp/route.ts`**
 
-Read `node_modules/next/dist/docs/` for Next.js 16 App Router before writing.
+Read `node_modules/next/dist/docs/` for Next.js 16 App Router before writing. `after` is available in this repo (verified: `node_modules/next/server.d.ts` exports it from `next/dist/server/after`).
 
-- **GET**: compare `hub.verify_token` to resolved `WHATSAPP_VERIFY_TOKEN`; return `hub.challenge` text 200; else 403
-- **POST**: `const rawBody = await req.text()` first; HMAC-SHA256 with `WHATSAPP_APP_SECRET`; `timingSafeEqual` on `x-hub-signature-256` (strip `sha256=`); 401 on fail; parse JSON only after verify; return 200 immediately; defer work via `queueMicrotask`
+- **GET**:
+  - Rate-limit per IP via existing middleware / edge-config counter (S1)
+  - Compare `hub.verify_token` against resolved `WHATSAPP_VERIFY_TOKEN` via `crypto.timingSafeEqual` over equal-length buffers (S5) — pad both sides with null bytes to length-equal before compare
+  - On match: return `hub.challenge` text/plain 200
+  - On mismatch: log `(ip, userAgent, contentLength)` only (S2); return 403
+- **POST**:
+  - `const rawBody = await req.text()` first
+  - If `rawBody.length > 1_000_000` bytes → 413 without parsing
+  - HMAC-SHA256 with resolved `WHATSAPP_APP_SECRET`; `timingSafeEqual` against `x-hub-signature-256` (strip `sha256=`)
+  - On mismatch: log `(ip, userAgent, contentLength, signaturePrefix)` only (S2); return 401
+  - Parse JSON
+  - If `body.object !== "whatsapp_business_account"` → return 404
+  - **Strip inbound messages now** (S3):
+    ```typescript
+    for (const entry of body.entry ?? []) {
+      for (const change of entry.changes ?? []) {
+        if (change.value) {
+          delete change.value.messages;   // never enters handler / logs / audit
+        }
+      }
+    }
+    ```
+  - Acknowledge immediately and defer heavy work (C3):
+    ```typescript
+    after(async () => {
+      await whatsappWebhookHandler.process(body);  // rejects surface here, not after response
+    });
+    return NextResponse.json({ ok: true });
+    ```
 
 ### 3.2 Handler
 
@@ -340,15 +429,27 @@ DB tests: `bun run scripts/run-test/run-test.ts <path>` — never raw `bun test`
 
 Webhook handler tests: mock `req.text()`, no DB unless using `runInRollback`.
 
-## Phase 6: Quality Gates
+## Phase 6: Quality Loop
 
 ```bash
-bun quality-gate:fresh
+# Run quality loop (tsgo + biome + lint) on all modified files
+bun tsgo && bun biome:check
+# For whole repo via lint queue:
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"verify","files":["<the-file>"]}'
 ```
 
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle <stage>`
+Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle <stage>` (tsgo → biome → lint only)
 
-Apply schema: `bun run db push` after drizzle-generate migration for `whatsapp_accounts` + 8a/8b.
+Apply schema: after editing schema files, run:
+
+```bash
+bun db migrate
+bun db push
+```
+
+Custom migrations (8a/8b) are edited in place and picked up by `bun db migrate`; Drizzle-generated changes (whatsapp_accounts table, partial index) are picked up by `bun db push`.
 
 ## Common Pitfalls
 
