@@ -113,19 +113,6 @@ const [result] = await existsByEmailPrepared.execute({ email });
 return Number(result?.count ?? 0) > 0;
 ```
 
-### Batch Lookup by IDs (inArray)
-
-```typescript
-const findByIdsPrepared = db
-  .select()
-  .from(table)
-  .where(inArray(table.id, sql.placeholder("ids")))
-  .prepare("find_entities_by_ids");
-
-// Usage:
-const results = await findByIdsPrepared.execute({ ids: [...idArray] });
-```
-
 ### Select All (No Parameters)
 
 ```typescript
@@ -185,6 +172,54 @@ const getRunningSyncRunPrepared = db
 
 The following patterns are **not suitable** for prepared statements:
 
+### Array Parameters (`inArray`) — CRITICAL PROHIBITION
+
+Queries using `inArray(column, sql.placeholder("arrayParam"))` **MUST NOT** use prepared statements. This is a PostgreSQL protocol limitation, not a Drizzle bug.
+
+**Root Cause:** PostgreSQL's prepared statement protocol (`PREPARE stmt AS SELECT ... WHERE id IN ($1)`) binds `$1` as a **single scalar parameter**. When Drizzle passes an array (e.g., `["id1", "id2", "id3"]`) to `.execute({ ids: [...] })`, PostgreSQL treats the entire array as one value rather than expanding it into individual elements for the `IN` clause. This produces runtime errors like:
+
+```
+CombinedGraphQLErrors: Failed query: ... where "users"."id" in $1
+with parameter 46d1b0df-...
+```
+
+This bug was discovered during the Neon optimization rollout and caused cascading failures across user loading, permissions lookup, impersonation, and role resolution in GraphQL queries.
+
+```typescript
+// ❌ WRONG — DO NOT prepare queries with inArray:
+const findByUserIdsPrepared = db
+  .select({ userId: teachers.userId, teacherId: teachers.id })
+  .from(teachers)
+  .where(inArray(teachers.userId, sql.placeholder("userIds")))
+  .prepare("find_teachers_by_user_ids");
+// FAILS at runtime: PostgreSQL treats $1 as a single array, not expanded elements
+
+// ✅ CORRECT — use standard dynamic query for inArray:
+export const findByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<Map<string, string | null>> => {
+  if (userIds.length === 0) return new Map();
+
+  const queryDb = tx ?? db;
+  const rows = await queryDb
+    .select({ userId: teachers.userId, teacherId: teachers.id })
+    .from(teachers)
+    .where(inArray(teachers.userId, userIds));
+
+  const map = new Map<string, string | null>(userIds.map(id => [id, null]));
+  for (const row of rows) {
+    map.set(row.userId, row.teacherId);
+  }
+  return map;
+};
+```
+
+**Affected repositories (fixed):**
+- `users/user.repository.ts` — `loadByIds`, `findDisplayCurrenciesByIds`
+- `teachers/teacher.repository.ts` — `findByUserIds`
+- `parents/parent.repository.ts` — `findByUserIds`
+- `shared/timezone.repository.ts` — `findByIanaIds`
+
+**DataLoader note:** Batch lookup methods used by DataLoader `load` functions MUST use dynamic queries (not prepared statements) when they involve `inArray`. See `docs/graphql/dataloader-batching.md` for the correct pattern.
+
 ### Write Operations
 Insert, update, delete, and upsert operations should never use prepared statements. They are inherently transactional and benefit less from query plan caching.
 
@@ -243,7 +278,7 @@ Queries with correlated sub-selects or complex aggregation are not suitable for 
 
 | Repository | Prepared Statements | Methods Refactored |
 |---|---|---|
-| `users/user.repository.ts` | 6 | `findById`, `findByEmail`, `findSafeById`, `existsByEmail`, `findDisplayCurrenciesByIds`, `loadByIds`, `usersTotalCount` |
+| `users/user.repository.ts` | 4 | `findById`, `findByEmail`, `findSafeById`, `existsByEmail`, `usersTotalCount` |
 | `teachers/teacher.repository.ts` | 2 | `findByUserId`, `findById` |
 | `books/book.repository.ts` | 1 | `findById` |
 | `billing/credit.repository.ts` | 1 | `findByIdempotencyKeys` |
@@ -251,7 +286,7 @@ Queries with correlated sub-selects or complex aggregation are not suitable for 
 | `complaints/complaint.repository.ts` | 3 | `getComplaintById`, `getUnansweredComplaints`, `getComplaintFiles` |
 | `users/session-config.repository.ts` | 4 | `listAll`, `findByRoleName`, `findById`, `listByRoleNames` |
 | `shared/signedUrl.repository.ts` | 1 | `getSignedUrlById` |
-| `shared/timezone.repository.ts` | 2 | `listAll`, `findByIanaIds` |
+| `shared/timezone.repository.ts` | 1 | `listAll` |
 | `fx-sync.repository.ts` | 2 | `getLatestSyncRun`, `getRunningSyncRun` |
 
 ### Test Verification
@@ -272,7 +307,9 @@ Queries with correlated sub-selects or complex aggregation are not suitable for 
 
 - `backend/db/repo/AGENTS.md` — Repository layer rules
 - `backend/AGENTS.md` — Backend architecture patterns
+- `docs/graphql/dataloader-batching.md` — DataLoader batching (uses batch prepared statements)
 - `.ai/plans/neon/outcome/2.1-prepared-statements-pilot-outcome.md` — Pilot refactor details
 - `.ai/plans/neon/outcome/2.2-prepared-statements-rollout-outcome.md` — Rollout summary
+- `.ai/plans/neon/outcome/3.1-graphql-dataloader-pilot-outcome.md` — DataLoader pilot (batch repo methods)
 - `.ai/plans/neon/spec.md` — Neon optimization specification
 - `.ai/plans/neon/design.md` — Technical design document

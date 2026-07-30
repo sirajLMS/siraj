@@ -61,6 +61,13 @@ As a developer, I want nested GraphQL query fields to fetch data in bulk rather 
 18. **WHEN** an executing agent completes any task **THEN** system **SHALL** write a new outcome document under `.ai/plans/neon/outcome/<task-id>-outcome.md` detailing research findings, docs/web search results, misunderstandings, and carry-over points.
 19. **WHEN** an executing agent completes any subtask **THEN** system **SHALL** update the corresponding task checkbox `[ ]` -> `[x]` in `tasks.md`.
 
+### Feature 7: Knowledge Propagation Protocol
+20. **WHEN** all implementation tasks are complete **THEN** system **SHALL** execute the MANDATORY Knowledge Propagation task that reads all outcome files and propagates learnings into the project's permanent knowledge base.
+21. **WHEN** executing knowledge propagation **THEN** system **SHALL** create canonical reference docs under `docs/drizzle/` (prepared statements, Neon HTTP client) and `docs/graphql/` (DataLoader batching) consolidating patterns, rules, and gotchas from all outcome files.
+22. **WHEN** executing knowledge propagation **THEN** system **SHALL** update layer AGENTS.md files (`backend/db/repo/AGENTS.md`, `backend/AGENTS.md`, `backend/graphql/AGENTS.md`) with new rules and references to the canonical docs.
+23. **WHEN** executing knowledge propagation **THEN** system **SHALL** update `.agents/skills/drizzle/SKILL.md` with prepared statements patterns and `.agents/instructions/backend.instructions.md` with required reading references.
+24. **WHEN** executing knowledge propagation **THEN** system **SHALL** update root `AGENTS.md` Important References section with the new canonical docs.
+
 ---
 
 ## 4. Edge Cases & Constraints

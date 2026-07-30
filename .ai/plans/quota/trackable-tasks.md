@@ -9,6 +9,36 @@
   - [Design Specifications](./specs.md)
   - [Implementation Guide](./implementation.md)
 
+## Non-Negotiable Execution Protocol
+
+Every executing agent MUST follow these 5 rules for every task in this plan:
+
+1. **Pre-Execution Outcome Knowledge Read:** Before executing ANY task, read ALL existing files in `.ai/plans/quota/outcome/`. This ensures the agent absorbs prior research, web search results, documentation lookups, pitfalls, and misunderstandings without re-doing past analysis.
+
+2. **Per-File Quality Loop (MANDATORY)**: After creating or modifying ANY file, run the per-file verification loop BEFORE importing or using the file elsewhere:
+   ```bash
+   bun tsgo
+   bun biome:check
+   curl -s -X POST http://localhost:4777/lint \
+     -H "Content-Type: application/json" \
+     -d '{"id":"verify","files":["<the-file>"]}'
+   ```
+   Fix all errors before proceeding to the next file/subtask.
+
+3. **Global Health Check**: After all files in a task pass per-file verification, run a global health check:
+   ```bash
+   bun tsgo && bun biome:check && bun run lint
+   ```
+   All three must exit 0 before marking the task complete.
+
+4. **Post-Execution Outcome File Creation**: Upon completing a task, create a new outcome document under `.ai/plans/quota/outcome/<task-id>-outcome.md` detailing:
+   - Research findings and documentation/web search results
+   - Implementation details and decisions made
+   - Pitfalls encountered and how they were resolved
+   - Carry-over points for future subtasks
+
+5. **Task Progress Checkbox Tracking**: Update the task checkbox `[ ]` → `[x]` in this file upon completing each subtask. Mark parent tasks `[-]` when in progress, `[x]` only when ALL sub-tasks are `[x]`.
+
 ## Task Status Legend
 
 | Marker | Meaning |
@@ -16,11 +46,6 @@
 | `[ ]` | Not started |
 | `[-]` | In progress |
 | `[x]` | Completed |
-
-**Rules:**
-- Mark a parent task `[-]` when any of its sub-tasks are in progress
-- Mark a parent task `[x]` only when ALL sub-tasks are `[x]`
-- Update this file as you work — it is the single source of truth for execution progress
 
 **MANDATORY SUBTASKS FOR EVERY IMPLEMENTATION TASK:**
 Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
@@ -360,6 +385,38 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ---
 
+---
+
+## Phase 12: Knowledge Propagation & Documentation
+
+- [ ] **31. Knowledge Propagation & Documentation**
+  - [ ] 31.1 Read all outcome files in `.ai/plans/quota/outcome/` to synthesize all learnings from the plan
+  - [ ] 31.2 Create canonical reference doc under `docs/billing/quota-system.md` consolidating patterns, rules, gotchas, and rollout summary
+  - [ ] 31.3 Update layer AGENTS.md files with new rules/patterns and reference to the new doc:
+    - `backend/db/schema/AGENTS.md` — quota schema patterns, append-only ledger convention
+    - `backend/db/repo/AGENTS.md` — quota repository patterns, ledger-in-transaction rule
+    - `backend/services/AGENTS.md` — QuotaService, AvailabilityService, on-demand refresh patterns
+    - `backend/graphql/AGENTS.md` — quota GraphQL patterns
+    - `backend/types/AGENTS.md` — quota type definitions
+    - `backend/enum/AGENTS.md` — quota/scheduling enum conventions
+    - `backend/AGENTS.md` — quota system overview in Backend Services section
+    - `frontend/common/graphql/AGENTS.md` — quota GraphQL document patterns
+    - `frontend/common/views/AGENTS.md` — quota view patterns
+    - `frontend/AGENTS.md` — quota frontend patterns
+    - `shared/AGENTS.md` — quota i18n namespace patterns
+  - [ ] 31.4 Update `.agents/skills/` if applicable:
+    - `.agents/skills/drizzle/SKILL.md` — append-only ledger pattern, quota schema conventions
+    - `.agents/skills/frontend-patterns/SKILL.md` — quota view patterns (if new patterns introduced)
+  - [ ] 31.5 Update `.agents/instructions/` if new conventions should be enforced:
+    - `.agents/instructions/backend.instructions.md` — quota ledger, append-only, idempotency key patterns
+    - `.agents/instructions/frontend.instructions.md` — quota view, mobile/desktop tier patterns
+  - [ ] 31.6 Update root `AGENTS.md` Important References section with `docs/billing/quota-system.md`
+  - [ ] 31.7 Run global health check: `bun tsgo && bun biome:check && bun run lint` (0 errors, 0 warnings)
+  - [ ] 31.8 Write outcome file: `.ai/plans/quota/outcome/31-knowledge-propagation-outcome.md`
+  - [ ] 31.9 Update progress: Mark task 31 as `[x]` in this file
+
+---
+
 ## Progress Summary
 
 | Phase | Parent Tasks | Completed | Status |
@@ -375,6 +432,7 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 | 9. Frontend Quota Pages | 5 | 0 | `[ ]` |
 | 10. Recurring Class Form | 2 | 0 | `[ ]` |
 | 11. Seeds & Quality Loop | 2 | 0 | `[ ]` |
-| **Total** | **29** | **0** | **0%** |
+| 12. Knowledge Propagation | 1 | 0 | `[ ]` |
+| **Total** | **30** | **0** | **0%** |
 
 _Update the Progress Summary table as tasks are completed._

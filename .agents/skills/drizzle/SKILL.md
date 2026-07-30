@@ -41,6 +41,8 @@ When reading or editing any `backend/db/repo/**/*.repository.ts` file, follow th
 - `$count()` does NOT support `.prepare()` — use `select({ count: count() })` instead
 - Write operations (insert, update, delete) should NOT use prepared statements
 - Dynamic WHERE clauses, `$dynamic()` queries, and raw SQL template literals should NOT be prepared
+- **`inArray` + `sql.placeholder` PROHIBITED**: PostgreSQL prepared statement protocol treats `$1` as a single scalar — it cannot expand array parameters for `IN` clauses. Use dynamic queries for `inArray` batch lookups. See `docs/drizzle/prepared-statements.md`.
+- **Batch lookups for DataLoader**: Use `inArray(column, ids)` with plain arrays (NOT `sql.placeholder`). Return `Map<string, T | null>` pre-initialized with all keys → null. See `docs/graphql/dataloader-batching.md`.
 
 Full reference: `docs/drizzle/prepared-statements.md`
 

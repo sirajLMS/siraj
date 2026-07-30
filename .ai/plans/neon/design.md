@@ -114,9 +114,27 @@ export function getNeonHttpClient() {
    - Create `.ai/plans/neon/outcome/<task-id>-outcome.md`.
    - Update `[ ]` -> `[x]` in `tasks.md`.
 
+## 4. Knowledge Propagation Protocol (MANDATORY Final Phase)
+
+After all implementation tasks are complete, the final task (Task 6) propagates all learnings from outcome files into the project's permanent knowledge base:
+
+1. **Create canonical reference docs** under `docs/drizzle/` and `docs/graphql/` consolidating patterns, rules, anti-patterns, and rollout summaries from all outcome files.
+2. **Update layer AGENTS.md files** (`backend/db/repo/AGENTS.md`, `backend/AGENTS.md`, `backend/graphql/AGENTS.md`) with new rules and references to the canonical docs.
+3. **Update `.agents/skills/drizzle/SKILL.md`** with prepared statements patterns and doc references.
+4. **Update `.agents/instructions/backend.instructions.md`** with required reading references for backend files.
+5. **Update root `AGENTS.md`** Important References section with the new canonical docs.
+6. **Quality check**: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
+
+This follows the Knowledge Propagation from Plan Outcomes protocol defined in `.agents/skills/spec-driven-development/SKILL.md`. The domain-to-artifacts mapping for this plan (Drizzle/DB + GraphQL) is:
+
+| Plan Domain | Docs Subdir | AGENTS.md to Update | Skills to Update | Instructions to Update |
+|---|---|---|---|---|
+| Drizzle / DB patterns | `docs/drizzle/` | `backend/db/repo/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle/SKILL.md` | `.agents/instructions/backend.instructions.md` |
+| GraphQL / Pothos | `docs/graphql/` | `backend/graphql/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
+
 ---
 
-## 4. Decision Log
+## 5. Decision Log
 
 ### Decision 1: Dynamic 16-Worker Pool Replenishment
 - **Context:** Fixed batching leaves slots idle when some subagents finish earlier than others.
@@ -124,7 +142,7 @@ export function getNeonHttpClient() {
 
 ---
 
-## 5. Testing & Verification Suite Table
+## 6. Testing & Verification Suite Table
 
 | Layer | Candidate File / Domain | Targeted Test / Generator Command | Full Suite Verification |
 |---|---|---|---|

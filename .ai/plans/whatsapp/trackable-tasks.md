@@ -3,12 +3,27 @@
 ## Document Information
 
 - **Feature Name**: WhatsApp Business Cloud API (Meta direct)
-- **Version**: 1.1
+- **Version**: 1.2
 - **Date**: 2026-07-30
 - **Status**: Post-review; all C/B/S/P/BL/Q findings applied
+- **Target Directory**: `.ai/plans/whatsapp`
+- **Outcome Directory**: `.ai/plans/whatsapp/outcome`
 - **Related Documents**:
   - [Requirements (Specs)](./specs.md)
   - [Implementation Guide](./implementation.md)
+
+## Non-Negotiable Execution Protocol for All Tasks
+
+1. **Pre-Execution Outcome Knowledge Read:**  
+   Before executing ANY task, the executing agent MUST read ALL existing files in `.ai/plans/whatsapp/outcome/` to absorb prior research, search results, docs, and pitfalls so analysis is not repeated.
+2. **Per-File Quality Verification Loop (Immediate post-edit):**  
+   Whenever a file is modified, execute per-file verification (`bun tsgo` + `bun biome:check` + lint queue for target file) BEFORE moving to another file or subtask.
+3. **Global Health Check (Completion Gate):**  
+   Before marking any subtask as complete, run full global checks: `bun tsgo`, `bun biome:check`, and `bun run lint` globally. All MUST exit with **zero errors and zero warnings**.
+4. **Post-Execution Outcome File Creation:**  
+   Upon completing the task implementation and quality checks, write a new outcome document under `.ai/plans/whatsapp/outcome/<task-id>-outcome.md` summarizing research, analysis, changes, and carry-over knowledge.
+5. **Task Progress Tracking:**  
+   The executing agent MUST update the task checkbox `[ ]` -> `[x]` in this `trackable-tasks.md` file upon successful completion.
 
 ## Task Status Legend
 
@@ -353,6 +368,23 @@ Tasks 14-17 below are kept for i18n and GraphQL documents which are still needed
 
 ---
 
+## Phase 9: Knowledge Propagation (MANDATORY Final Task)
+
+- [ ] **30. Knowledge Propagation & Documentation**
+  - [ ] 30.1 Read all outcome files in `.ai/plans/whatsapp/outcome/` to synthesize all learnings
+  - [ ] 30.2 Create canonical reference doc under `docs/services/whatsapp-cloud-api.md` consolidating patterns, rules, and gotchas from all outcome files
+  - [ ] 30.3 Update `backend/services/AGENTS.md` with WhatsApp channel patterns and reference to the new doc
+  - [ ] 30.4 Update `backend/AGENTS.md` with WhatsApp integration reference
+  - [ ] 30.5 Update `backend/graphql/AGENTS.md` if GraphQL patterns were introduced
+  - [ ] 30.6 Update `.agents/instructions/backend.instructions.md` if new conventions should be enforced
+  - [ ] 30.7 Update root `AGENTS.md` Important References section with the new doc
+  - [ ] 30.8 Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+  - [ ] 30.9 Write outcome file: `.ai/plans/whatsapp/outcome/30.1-knowledge-propagation-outcome.md`
+  - [ ] 30.10 Update progress: Mark task 30 as `[x]` in `trackable-tasks.md`
+  - _Requirements: Knowledge propagation protocol_
+
+---
+
 ## Blocker Log
 
 | Date | Task | Blocker | Resolution | Status |
@@ -374,7 +406,8 @@ _Add rows when blocked. Remove or mark resolved when unblocked._
 | 5. Tests | 2 | 0 | `[ ]` |
 | 6. Integrations Nav & UX | 9 | 0 | `[ ]` |
 | 7. Quality Loop | 1 | 0 | `[ ]` |
-| **Total** | **29** | **0** | **0%** |
+| 8. Knowledge Propagation | 1 | 0 | `[ ]` |
+| **Total** | **30** | **0** | **0%** |
 
 _Update the Progress Summary table as tasks are completed._
 

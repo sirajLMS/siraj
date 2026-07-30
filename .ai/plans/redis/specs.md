@@ -1,6 +1,6 @@
 # Redis Caching Layer — Specification
 
-> Plan group: `.ai/plan/redis/`
+> Plan group: `.ai/plans/redis/`
 > Companion docs: [implementation.md](./implementation.md), [trackable-tasks.md](./trackable-tasks.md)
 > Source plan: v2 hardened plan (permission-scoped, pipelined invalidation, canonical JSON, TTL guards).
 > Standards followed: `.agents/spec-process-guide/` — Requirements (EARS) + Design templates.
@@ -8,6 +8,8 @@
 ## Document Information
 
 - **Feature Name**: Provider-Agnostic Caching Layer with Tag-Based Invalidation
+- **Target Directory**: `.ai/plans/redis`
+- **Outcome Directory**: `.ai/plans/redis/outcome`
 - **Version**: 1.0
 - **Date**: 2026-07-30
 - **Status**: Ready for execution
@@ -51,6 +53,22 @@ Add a domain-aware caching layer on top of Siraj's existing provider-agnostic `c
 ---
 
 ## 2. Requirements (EARS)
+
+### Requirement 0: Execution Outcome Protocol & Task Progress Tracking
+
+**User Story:** As an AI agent or developer, I want persistent task outcome tracking and progress updates, so that subsequent tasks do not repeat past research or analysis.
+
+#### Acceptance Criteria
+
+1. WHEN an executing agent starts any task THEN system SHALL read ALL existing outcome files in `.ai/plans/redis/outcome/` to absorb prior research, search results, and pitfalls.
+2. WHEN an executing agent completes any task THEN system SHALL write a new outcome document under `.ai/plans/redis/outcome/<task-id>-outcome.md` detailing research findings, docs/web search results, implementation details, and carry-over points.
+3. WHEN an executing agent completes any subtask THEN system SHALL update the corresponding task checkbox `[ ]` -> `[x]` in `trackable-tasks.md`.
+4. WHEN any file is modified THEN system SHALL execute per-file verification (`tsgo` + `biome` + `lint-queue`) on that specific file.
+5. WHEN any subtask is completed THEN system SHALL execute `bun tsgo`, `bun biome:check`, and `bun run lint` globally, exiting with zero errors and zero warnings.
+
+**Priority**: High
+**Complexity**: Low — protocol enforcement, no code changes.
+**Dependencies**: None.
 
 ### Requirement 1: Identity-and-Role-Scoped Cache Reads
 
@@ -171,7 +189,35 @@ Add a domain-aware caching layer on top of Siraj's existing provider-agnostic `c
 
 ---
 
-## 3. Non-Functional Requirements
+## 3. UX/Navigation Requirements (MANDATORY)
+
+This feature is a **backend-only caching layer** with no new routes, pages, sidebar items, or user-facing UI changes. The cache layer is transparent to end users — it optimizes existing resolver performance without altering any user-observable contract.
+
+### New Routes & Role-Based Access
+
+| Route | Purpose | Permission | Roles with Access |
+|-------|---------|------------|-------------------|
+| N/A | No new routes introduced | N/A | N/A |
+
+### Sidebar Navigation Placement
+
+No new sidebar items. The feature is purely backend infrastructure.
+
+### Per-Audience Rendering
+
+No per-audience rendering differences. The cache layer is transparent — all audiences experience the same resolver behavior with improved performance.
+
+### Mobile vs Desktop
+
+No differences. The cache layer operates server-side only.
+
+### Permission Mapping
+
+No new permissions. Existing permission checks remain outside the cache wrapper per Requirement 1.2.
+
+---
+
+## 4. Non-Functional Requirements
 
 ### Performance Requirements
 
@@ -193,7 +239,7 @@ Add a domain-aware caching layer on top of Siraj's existing provider-agnostic `c
 
 ---
 
-## 4. Constraints and Assumptions
+## 5. Constraints and Assumptions
 
 ### Technical Constraints
 
@@ -216,15 +262,16 @@ Add a domain-aware caching layer on top of Siraj's existing provider-agnostic `c
 
 ---
 
-## 5. Success Criteria
+## 6. Success Criteria
 
 ### Definition of Done
 
-- [ ] All acceptance criteria are met for requirements 1-8.
+- [ ] All acceptance criteria are met for requirements 0-8.
 - [ ] All new files pass `bun tsgo` + `bun biome:check` + lint queue client.
 - [ ] The PG integration test (`cache_tag_invalidation.test.ts`) passes via `bun run scripts/run-test/run-test.ts`.
 - [ ] Unit tests (`EntityCacheService.test.ts`) pass against mocked `cacheService`.
 - [ ] `bun quality-gate` passes through tsgo + biome + lint + codescene + sonar stages.
+- [ ] Knowledge propagation complete: canonical doc created under `docs/services/`, layer AGENTS.md files updated, root `AGENTS.md` Important References updated, outcome file written to `.ai/plans/redis/outcome/12.1-knowledge-propagation-outcome.md`.
 
 ### Acceptance Metrics (qualitative)
 
@@ -233,9 +280,9 @@ Add a domain-aware caching layer on top of Siraj's existing provider-agnostic `c
 
 ---
 
-## 6. Design
+## 7. Design
 
-### 6.1 Architecture Context
+### 7.1 Architecture Context
 
 ```mermaid
 graph TB
@@ -255,11 +302,11 @@ graph TB
   MutationServices --> EntityCache
 ```
 
-### 6.2 Target Architecture (mermaid in implementation.md for fuller picture)
+### 7.2 Target Architecture (mermaid in implementation.md for fuller picture)
 
 See [implementation.md § Target Architecture](./implementation.md) for the full component diagram.
 
-### 6.3 Components and Interfaces
+### 7.3 Components and Interfaces
 
 #### Component 1: `EntityCacheService` (new file: `backend/services/cache/EntityCacheService.ts`)
 
@@ -303,7 +350,7 @@ See implementation.md § PG adapter tightening for the full contract.
 **Notes**:
 - NOT exposed on any HTTP route. Reserved for unit tests and internal tooling.
 
-### 6.4 Code Contracts
+### 7.4 Code Contracts
 
 #### Named invalidation helpers — fixed tag-set map
 
@@ -402,7 +449,7 @@ async function cachedRead<T>(
 }
 ```
 
-### 6.5 Tag index key routing
+### 7.5 Tag index key routing
 
 ```typescript
 // backend/db/repo/shared/cache.repository.ts (extended getTable)
@@ -414,11 +461,11 @@ const getTable = (key: string) => {
 };
 ```
 
-### 6.6 Verification Loop
+### 7.6 Verification Loop
 
 See [implementation.md § Verification per file](./implementation.md) for the per-file `tsgo` + `biome:check` + lint queue client loop (root AGENTS.md alignment).
 
-### 6.7 Testing Strategy
+### 7.7 Testing Strategy
 
 **Unit** (`backend/services/cache/test/EntityCacheService.test.ts`):
 - Mock `cacheService.get/set/del/pipeline`.
@@ -433,7 +480,7 @@ See [implementation.md § Verification per file](./implementation.md) for the pe
 
 ---
 
-## 7. Glossary
+## 8. Glossary
 
 | Term | Definition |
 |------|------------|
@@ -448,7 +495,7 @@ See [implementation.md § Verification per file](./implementation.md) for the pe
 
 ---
 
-## 8. Design Review Checklist (filled)
+## 9. Design Review Checklist (filled)
 
 ### Architecture
 - [x] High-level architecture clearly described (§6.1, §6.2, plus mermaid in implementation.md).
@@ -458,9 +505,9 @@ See [implementation.md § Verification per file](./implementation.md) for the pe
 
 ### Requirements Alignment
 - [x] Design addresses all functional requirements (req 1-8 mapped to components).
-- [x] Non-functional requirements considered (§3).
-- [x] Success criteria measurable (§5).
-- [x] Constraints and assumptions addressed (§4).
+- [x] Non-functional requirements considered (§4).
+- [x] Success criteria measurable (§6).
+- [x] Constraints and assumptions addressed (§5).
 
 ### Technical Quality
 - [x] Design follows established patterns (adapter on existing `cacheService`).

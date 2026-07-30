@@ -3,11 +3,31 @@
 ## Document Information
 
 - **Feature Name**: WhatsApp Business Cloud API (Meta direct)
-- **Version**: 1.0
+- **Version**: 1.1
 - **Date**: 2026-07-30
+- **Target Directory**: `.ai/plans/whatsapp`
+- **Outcome Directory**: `.ai/plans/whatsapp/outcome`
 - **Related Documents**:
   - [Requirements (Specs)](./specs.md)
   - [Trackable Tasks](./trackable-tasks.md)
+
+## Outcome & Knowledge Transfer Protocol
+
+### BEFORE Execution
+Executing agents MUST read ALL existing files in `.ai/plans/whatsapp/outcome/` to absorb prior research, search results, docs, and pitfalls so analysis is not repeated.
+
+### AFTER Execution
+Executing agents MUST write `.ai/plans/whatsapp/outcome/<task-id>-outcome.md` with research/doc findings, implementation details, and carry-over knowledge.
+
+### PROGRESS TRACKING
+Executing agents MUST update task checkboxes `[ ]` → `[x]` in `trackable-tasks.md`.
+
+### Knowledge Propagation (Final Task)
+After all implementation tasks complete, the final task MUST:
+1. Create canonical reference doc under `docs/services/whatsapp-cloud-api.md` consolidating all outcome learnings
+2. Update `backend/services/AGENTS.md`, `backend/AGENTS.md` with new patterns and doc reference
+3. Update `.agents/instructions/backend.instructions.md` if new conventions should be enforced
+4. Update root `AGENTS.md` Important References section
 
 ## Pre-Implementation Checklist
 

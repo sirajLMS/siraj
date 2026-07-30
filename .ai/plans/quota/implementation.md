@@ -3,11 +3,12 @@
 ## Document Information
 
 - **Feature Name**: Quota Entity + Recurring-Class Integration
-- **Version**: 1.2 (updated with navigation/permissions, quality loop, instruction verification)
+- **Version**: 1.3 (updated with knowledge propagation protocol)
 - **Date**: 2026-07-30
 - **Related Documents**:
   - [Design Specifications](./specs.md)
   - [Trackable Tasks](./trackable-tasks.md)
+- **Outcome Directory**: `.ai/plans/quota/outcome/` — all task outcomes, research findings, and knowledge artifacts
 
 ## Pre-Implementation Checklist
 
@@ -17,12 +18,14 @@ Before starting any task in [trackable-tasks.md](./trackable-tasks.md):
 - [ ] Read layer-specific AGENTS.md for each file you touch (see Task-to-Instructions Mapping below)
 - [ ] Read applicable `.agents/instructions/*.instructions.md` files (see Task-to-Instructions Mapping below)
 - [ ] Read [specs.md](./specs.md) for the design decisions that govern your task
+- [ ] **Read ALL existing files in `.ai/plans/quota/outcome/`** to absorb prior research, pitfalls, and learnings
 - [ ] Mark the task `[-]` in trackable-tasks.md when starting
 - [ ] Mark the task `[x]` when complete and verified
 - [ ] Run per-file verification loop before importing new code elsewhere
 - [ ] **MANDATORY: After quality loop, run instruction verification subtask to revalidate files against instruction files**
 - [ ] **MANDATORY: Every task includes Quality Loop subtask (tsgo + biome:check + lint queue)**
 - [ ] **MANDATORY: Every task includes Instruction Verification subtask with absolute AGENTS.md/instructions paths**
+- [ ] **MANDATORY: After completing a task, write outcome file to `.ai/plans/quota/outcome/<task-id>-outcome.md`**
 
 ## User Experience & Navigation (from specs.md)
 
@@ -57,6 +60,41 @@ Separate view trees under `frontend/desktop/` and `frontend/mobile/` with shared
 |------------|-------|------------------------|
 | `QUOTAS_VIEW` | `quotas.view` | `super_admin`, `academy_admin`, `staff_default` |
 | `QUOTAS_MANAGE` | `quotas.manage` | `super_admin`, `academy_admin` |
+
+## Outcome & Knowledge Transfer Protocol (`.ai/plans/quota/outcome/`)
+
+Every task in this plan follows the Non-Negotiable Execution Protocol defined in `trackable-tasks.md`. This section defines the knowledge transfer lifecycle:
+
+### BEFORE Execution
+
+Executing agents MUST read ALL existing files in `.ai/plans/quota/outcome/` to avoid re-analysis. This ensures the agent absorbs:
+- Prior research findings and documentation/web search results
+- Implementation decisions and their rationale
+- Pitfalls encountered and how they were resolved
+- Carry-over points for subsequent tasks
+
+### AFTER Execution
+
+Executing agents MUST write `.ai/plans/quota/outcome/<task-id>-outcome.md` containing:
+- Research findings and documentation/web search results
+- Implementation details and decisions made
+- Pitfalls encountered and how they were resolved
+- Carry-over points for future subtasks
+
+### PROGRESS TRACKING
+
+Executing agents MUST update task checkboxes `[ ]` → `[x]` in `trackable-tasks.md` upon completing each subtask. Parent tasks are marked `[-]` when in progress, `[x]` only when ALL sub-tasks are `[x]`.
+
+### Knowledge Propagation (Final Task)
+
+After all implementation tasks complete, task 31 consolidates all outcome learnings into the project's permanent knowledge base:
+1. Create canonical reference doc under `docs/billing/quota-system.md`
+2. Update layer AGENTS.md files with new rules/patterns
+3. Update `.agents/skills/drizzle/SKILL.md` and `.agents/skills/frontend-patterns/SKILL.md`
+4. Update `.agents/instructions/backend.instructions.md` and `.agents/instructions/frontend.instructions.md`
+5. Update root `AGENTS.md` Important References section
+6. Run global health check: `bun tsgo && bun biome:check && bun run lint`
+7. Write outcome file: `.ai/plans/quota/outcome/31-knowledge-propagation-outcome.md`
 
 ## Task-to-Instructions Mapping
 
@@ -562,9 +600,12 @@ curl -s -X POST http://localhost:4777/lint \
 # Fix failures, re-run until clean
 # Then run instruction verification: validate against ALL applicable AGENTS.md and .agents/instructions files
 # See Task-to-Instructions Mapping in implementation.md for the complete list per layer
+
+# Global health check (run after all files in a task pass per-file verification)
+bun tsgo && bun biome:check && bun run lint
 ```
 
-Run the per-file loop for every new/modified file before importing it elsewhere. After all files pass per-file verification, the full quality gate can be run as final confirmation if needed (`bun quality-gate`), but the primary verification is the per-file loop with instruction validation.
+Run the per-file loop for every new/modified file before importing it elsewhere. After all files in a task pass per-file verification, run the global health check. All three commands must exit 0 before marking the task complete. The full quality gate (`bun quality-gate`) can be run as final confirmation if needed, but the primary verification is the per-file loop with instruction validation followed by the global health check.
 
 ## Idempotency Key Conventions
 

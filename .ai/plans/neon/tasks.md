@@ -135,3 +135,28 @@
     - Write comprehensive final outcome summary: `.ai/plans/neon/outcome/5.1-final-verification-outcome.md`.
     - Update progress: Mark task 5.1 as `[x]` in `tasks.md`.
     - _Requirements: Spec 1–19_
+
+- [x] 6. **Knowledge Propagation & Documentation (MANDATORY Final Task)**
+  - Read all outcome files in `.ai/plans/neon/outcome/` to synthesize all learnings from the plan
+  - Create canonical reference docs under `docs/drizzle/` consolidating patterns, rules, and gotchas from all outcome files:
+    - `docs/drizzle/prepared-statements.md` — Drizzle Prepared Statements 2.0 pattern, rules, anti-patterns, rollout summary
+    - `docs/drizzle/neon-http-client.md` — Neon HTTP single-fetch client pattern, when to use vs WebSocket pool
+    - If `docs/drizzle/` does not exist, create it: `mkdir -p docs/drizzle/`
+    - Follow the docs file structure: Why → Pattern → Rules → Anti-patterns → Rollout Summary → Related Documents
+  - Create canonical reference doc under `docs/graphql/` consolidating GraphQL DataLoader patterns:
+    - `docs/graphql/dataloader-batching.md` — Pothos DataLoader batching pattern, rules, anti-patterns, rollout summary
+    - If `docs/graphql/` does not exist, create it: `mkdir -p docs/graphql/`
+  - Update layer AGENTS.md files with new rules/patterns discovered during implementation:
+    - `backend/db/repo/AGENTS.md` — Add "Prepared Statements (CRITICAL)" rule referencing `docs/drizzle/prepared-statements.md`
+    - `backend/AGENTS.md` — Add prepared statements bullet to Repository Layer section, add Neon HTTP client reference
+    - `backend/graphql/AGENTS.md` — Add DataLoader batching rule referencing `docs/graphql/dataloader-batching.md`
+  - Update `.agents/skills/drizzle/SKILL.md` — Add "Prepared Statements" section with key rules and reference to `docs/drizzle/prepared-statements.md`
+  - Update `.agents/instructions/backend.instructions.md` — Add prepared statements and DataLoader batching as required reading for backend files
+  - Update root `AGENTS.md` Important References section with the new docs:
+    - `docs/drizzle/prepared-statements.md` — Drizzle Prepared Statements 2.0 pattern reference
+    - `docs/drizzle/neon-http-client.md` — Neon HTTP single-fetch client pattern
+    - `docs/graphql/dataloader-batching.md` — Pothos DataLoader batching pattern
+  - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+  - Write outcome file: `.ai/plans/neon/outcome/6.1-knowledge-propagation-outcome.md`
+  - Update progress: Mark task 6.1 as `[x]` in `tasks.md`
+  - _Requirements: Knowledge propagation protocol (Spec-Driven Development SKILL.md § Knowledge Propagation from Plan Outcomes)_

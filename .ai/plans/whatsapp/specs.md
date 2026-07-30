@@ -1,9 +1,11 @@
 # WhatsApp Integration — Requirements (Specs)
 
 **Feature**: WhatsApp Business Cloud API integration for Siraj  
-**Version**: 1.1  
+**Version**: 1.2  
 **Date**: 2026-07-30  
 **Status**: Approved for implementation (post-review; all C/B/S/P/BL/Q findings applied)  
+**Target Directory**: `.ai/plans/whatsapp`  
+**Outcome Directory**: `.ai/plans/whatsapp/outcome`  
 **Related**: [implementation.md](./implementation.md) · [trackable-tasks.md](./trackable-tasks.md)
 
 **Process**: [.agents/spec-process-guide](../../.agents/spec-process-guide/NAVIGATION.md) — Requirements → Design (`implementation.md`) → Tasks (`trackable-tasks.md`)
@@ -362,6 +364,7 @@ References:
 - [ ] `trackable-tasks.md` all phases marked complete
 - [ ] GraphQL schema + frontend codegen updated
 - [ ] Inbound events provably not logged anywhere (S3 — checked via webhook unit test asserting logger receives only whitelisted fields)
+- [ ] **Knowledge propagation complete**: canonical doc created under `docs/services/`, AGENTS.md files updated, skills/instructions updated, root AGENTS.md updated
 
 ### Acceptance metrics
 

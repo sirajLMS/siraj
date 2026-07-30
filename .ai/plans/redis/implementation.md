@@ -8,6 +8,8 @@
 ## Document Information
 
 - **Feature Name**: Provider-Agnostic Caching Layer with Tag-Based Invalidation
+- **Target Directory**: `.ai/plans/redis`
+- **Outcome Directory**: `.ai/plans/redis/outcome`
 - **Version**: 1.0
 - **Date**: 2026-07-30
 - **Status**: Ready for execution
@@ -35,6 +37,42 @@ This implementation plan takes the v2 hardened cache plan and breaks it into ord
 - **Tag index reset to `[]`** instead of `del`-leted → concurrent writes re-register and self-heal desync.
 - **Canonical JSON via `stableStringify`** → all cache keys hash identically regardless of property order.
 - **TTL upper-bound guard** → `cachedRead` throws if `ttlSeconds > 86400` so no payload outlives the tag index.
+
+### UX/Navigation Specification (REQUIRED)
+
+This feature is a **backend-only caching layer** with no new routes, pages, sidebar items, or user-facing UI changes. The cache layer is transparent to end users — it optimizes existing resolver performance without altering any user-observable contract.
+
+#### New Routes & URLs
+
+| Route | Purpose | Permission Required | Roles with Access |
+|-------|---------|---------------------|-------------------|
+| N/A | No new routes introduced | N/A | N/A |
+
+#### Sidebar Navigation Integration
+
+No new sidebar items. The feature is purely backend infrastructure.
+
+#### Role-Based Access Matrix
+
+No new roles or permissions. Existing permission checks remain outside the cache wrapper per Requirement 1.2.
+
+#### Per-Audience Rendering
+
+No per-audience rendering differences. The cache layer is transparent — all audiences experience the same resolver behavior with improved performance.
+
+#### Mobile vs Desktop Variants
+
+No differences. The cache layer operates server-side only.
+
+#### Permission Mapping
+
+No new permissions. Existing permission checks remain outside the cache wrapper.
+
+### Outcome & Knowledge Transfer Protocol (`.ai/plans/redis/outcome/`)
+
+- **BEFORE Execution:** Executing agents MUST read ALL existing files in `.ai/plans/redis/outcome/` to avoid re-analysis.
+- **AFTER Execution:** Executing agents MUST write `.ai/plans/redis/outcome/<task-id>-outcome.md` with research/doc findings and implementation details.
+- **PROGRESS TRACKING:** Executing agents MUST update task checkboxes `[ ]` -> `[x]` in `trackable-tasks.md`.
 
 ---
 
@@ -451,6 +489,7 @@ For the `backend/services/cache/test/EntityCacheService.test.ts` unit test file,
 9. **AGENTS.md "Hot-resolver caching" subsection**.
 10. **Drop `@upstash/ratelimit`** + `bun install` + `bun tsgo`.
 11. **Final `bun quality-gate` run**.
+12. **Knowledge Propagation & Documentation** — create canonical reference doc under `docs/services/`, update layer AGENTS.md files, update root `AGENTS.md` Important References, write outcome file.
 
 The sequence above mirrors the [trackable-tasks.md](./trackable-tasks.md) parent-task ordering so task status updates parallel the rollout.
 
@@ -487,3 +526,11 @@ The sequence above mirrors the [trackable-tasks.md](./trackable-tasks.md) parent
 - [x] Components loosely coupled (EntityCacheService depends only on `cacheService` and `logger`).
 - [x] Configuration externalized (constants — `CACHE_TAG_INDEX_TTL`, key prefixes).
 - [x] Observability included (`stats()` with hit/miss — internal only).
+
+### UX/Navigation Completeness (MANDATORY)
+- [x] New routes table complete with permissions and roles (N/A — backend-only feature).
+- [x] Sidebar navigation placement specified (N/A — no new UI).
+- [x] Role-based access matrix for ALL user types (N/A — transparent cache layer).
+- [x] Per-audience rendering differences documented (N/A — no UI changes).
+- [x] Mobile vs Desktop variants defined (N/A — server-side only).
+- [x] Permission mapping for each route/component specified (N/A — no new permissions).

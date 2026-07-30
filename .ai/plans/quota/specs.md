@@ -3,11 +3,12 @@
 ## Document Information
 
 - **Feature Name**: Quota Entity + Recurring-Class Integration
-- **Version**: 1.2 (updated with navigation/permissions, quality loop, instruction verification)
+- **Version**: 1.3 (updated with knowledge propagation protocol)
 - **Date**: 2026-07-30
 - **Related Documents**:
   - [Implementation Guide](./implementation.md)
   - [Trackable Tasks](./trackable-tasks.md)
+- **Outcome Directory**: `.ai/plans/quota/outcome/` — all task outcomes, research findings, and knowledge artifacts
 
 ## Overview
 
@@ -409,6 +410,38 @@ When admin edits a recurring schedule to switch `schedulingMode` away from `NUMB
 - **Expired/zero-remaining quotas** — soft-delete only (recommended default)
 - **Low-balance threshold** — `system_settings.quota_low_balance_threshold_percent` (default 20%)
 - **Precise credit invariant** — whether to add `classesPurchased` column to fix `addClasses` inflating `classesTotal` on refunds (deferred)
+
+## Acceptance Criteria — Knowledge Propagation Protocol
+
+All implementation tasks MUST satisfy these acceptance criteria in addition to their functional requirements:
+
+1. **Outcome Knowledge Base**: Every task writes an outcome file to `.ai/plans/quota/outcome/<task-id>-outcome.md` containing research findings, implementation details, pitfalls, and carry-over points.
+
+2. **Pre-Execution Knowledge Read**: Before executing any task, the agent reads ALL existing outcome files in `.ai/plans/quota/outcome/` to absorb prior learnings.
+
+3. **Per-File Quality Loop**: Every file passes `bun tsgo` + `bun biome:check` + lint queue before being imported or used elsewhere.
+
+4. **Global Health Check**: After all files in a task pass per-file verification, `bun tsgo && bun biome:check && bun run lint` exits 0.
+
+5. **Instruction Verification**: Every file is validated against ALL applicable AGENTS.md and `.agents/instructions/*.md` files from the Task-to-Instructions Mapping in `implementation.md`.
+
+6. **Knowledge Propagation (Final Task)**: After all implementation tasks complete, task 31 consolidates all outcome learnings into:
+   - A canonical reference doc under `docs/billing/quota-system.md`
+   - Updates to layer AGENTS.md files (`backend/db/schema/`, `backend/db/repo/`, `backend/services/`, `backend/graphql/`, `backend/types/`, `backend/enum/`, `backend/`, `frontend/common/graphql/`, `frontend/common/views/`, `frontend/`, `shared/`)
+   - Updates to `.agents/skills/drizzle/SKILL.md` and `.agents/skills/frontend-patterns/SKILL.md`
+   - Updates to `.agents/instructions/backend.instructions.md` and `.agents/instructions/frontend.instructions.md`
+   - Update to root `AGENTS.md` Important References section
+
+7. **Progress Tracking**: Task checkboxes in `trackable-tasks.md` are updated `[ ]` → `[x]` upon completion of each subtask.
+
+## Execution Protocol
+
+All tasks follow the Non-Negotiable Execution Protocol defined in `trackable-tasks.md`:
+1. Pre-execution outcome knowledge read
+2. Per-file quality loop (tsgo + biome:check + lint queue)
+3. Global health check
+4. Post-execution outcome file creation
+5. Task progress checkbox tracking
 
 ---
 
