@@ -408,7 +408,8 @@ describe("PermissionManagementService Business Logic", () => {
     });
 
     test("should prevent modifying custom permission to system permission", async () => {
-      if (!testPerm1) return;
+      expect(testPerm1).toBeDefined();
+      if (!testPerm1) throw new Error("testPerm1 missing");
       const perm1Id = testPerm1.id;
       await runInRollback(async tx => {
         let err: unknown = null;
@@ -507,7 +508,7 @@ describe("PermissionManagementService Business Logic", () => {
 
       expect(testPerm1).toBeDefined();
       expect(testPerm2).toBeDefined();
-      if (!testPerm1 || !testPerm2) return;
+      if (!testPerm1 || !testPerm2) throw new Error("Test permissions missing");
 
       const perm1Id = testPerm1.id;
       const perm1Key = testPerm1.key;
