@@ -19,6 +19,119 @@ import {
 import { NextClassJoinCard } from "@/frontend/mobile/views/dashboard/student/dashboard/components/nextClassJoinCard.mobile";
 import { RecentLessonReportCardMobile } from "@/frontend/mobile/views/dashboard/student/dashboard/components/recentLessonReportCard.mobile";
 
+function LoadingState({ message }: { message: string }) {
+  return (
+    <MobilePageContainer>
+      <Typography variant="bodyMd" sx={{ p: 3 }}>
+        {message}
+      </Typography>
+    </MobilePageContainer>
+  );
+}
+
+function NextClassSection({
+  nextLesson,
+  labels,
+  locale,
+  onJoin,
+}: {
+  nextLesson: StudentDashboardViewModel["nextLesson"];
+  labels: StudentDashboardViewModel["labels"];
+  locale: StudentDashboardViewModel["locale"];
+  onJoin: StudentDashboardViewModel["onJoinLesson"];
+}) {
+  if (!nextLesson) return null;
+
+  return (
+    <MobileContentInset>
+      <NextClassJoinCard lesson={nextLesson} labels={labels} locale={locale} onJoin={onJoin} />
+    </MobileContentInset>
+  );
+}
+
+function MetricsSection({
+  metrics,
+  onMetricClick,
+}: {
+  metrics: readonly MetricItem[];
+  onMetricClick: (key: string) => void;
+}) {
+  return <MobileMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} />;
+}
+
+function NoUpcomingClassesMessage({ labels }: { labels: StudentDashboardViewModel["labels"] }) {
+  return (
+    <MobileContentInset>
+      <Box
+        sx={theme => ({
+          px: 1.5,
+          py: 1.25,
+          borderRadius: 2,
+          backgroundColor: theme.palette.surfaceContainer,
+          border: `1px solid ${theme.palette.outlineVariant}`,
+        })}
+      >
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+          {labels.noUpcomingClasses}
+        </Typography>
+      </Box>
+    </MobileContentInset>
+  );
+}
+
+function RecentLessonReportsSection({
+  recentLessonReports,
+  reportsPagination,
+  labels,
+  lessonReportStatusLabels,
+  locale,
+  onAddReflection,
+}: Pick<
+  StudentDashboardViewModel,
+  "recentLessonReports" | "reportsPagination" | "labels" | "lessonReportStatusLabels" | "locale" | "onAddReflection"
+>) {
+  return (
+    <MobileSectionPanel title={labels.recentLessonReports} contentInset={false}>
+      <MobileCardList<StudentDashboardViewModel["recentLessonReports"][number]>
+        rows={recentLessonReports}
+        emptyMessage={labels.noLessonReports}
+        getKey={row => row.id}
+        gap={2}
+        layout="edge-to-edge"
+        sx={theme => ({
+          backgroundColor: theme.palette.surfaceContainerLowest,
+          py: 2,
+        })}
+        paginationOptions={buildServerPaginationOptions({
+          page: reportsPagination.page,
+          pageSize: reportsPagination.pageSize,
+          totalCount: reportsPagination.totalCount,
+          onPageChange: reportsPagination.onPageChange,
+        })}
+        renderItem={row => (
+          <MobileCardListItem
+            variant="edge-to-edge"
+            sx={theme => ({
+              backgroundColor: theme.palette.surfaceContainer,
+              borderRadius: 0,
+              border: "none",
+              borderBottom: "none",
+            })}
+          >
+            <RecentLessonReportCardMobile
+              report={row}
+              labels={labels}
+              lessonReportStatusLabels={lessonReportStatusLabels}
+              locale={locale}
+              onAddReflection={onAddReflection}
+            />
+          </MobileCardListItem>
+        )}
+      />
+    </MobileSectionPanel>
+  );
+}
+
 export function StudentDashboardMobileView({
   userName,
   locale,
@@ -62,13 +175,7 @@ export function StudentDashboardMobileView({
   );
 
   if (loading && !nextLesson && recentLessonReports.length === 0) {
-    return (
-      <MobilePageContainer>
-        <Typography variant="bodyMd" sx={{ p: 3 }}>
-          {labels.loadingMessage}
-        </Typography>
-      </MobilePageContainer>
-    );
+    return <LoadingState message={labels.loadingMessage} />;
   }
 
   return (
@@ -76,75 +183,25 @@ export function StudentDashboardMobileView({
       <MobileContentStack>
         <MobilePageHeader title={labels.welcomeMessage(userName ?? "")} subtitle={labels.pageTitle} />
 
-        {nextLesson ? (
-          <MobileContentInset>
-            <NextClassJoinCard lesson={nextLesson} labels={labels} locale={locale} onJoin={onJoinLesson} />
-          </MobileContentInset>
-        ) : null}
+        <NextClassSection nextLesson={nextLesson} labels={labels} locale={locale} onJoin={onJoinLesson} />
 
-        <MobileMetricCardGrid
+        <MetricsSection
           metrics={metrics}
           onMetricClick={key => {
             if (key === "remaining") onViewCredits();
           }}
         />
 
-        {!nextLesson ? (
-          <MobileContentInset>
-            <Box
-              sx={theme => ({
-                px: 1.5,
-                py: 1.25,
-                borderRadius: 2,
-                backgroundColor: theme.palette.surfaceContainer,
-                border: `1px solid ${theme.palette.outlineVariant}`,
-              })}
-            >
-              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {labels.noUpcomingClasses}
-              </Typography>
-            </Box>
-          </MobileContentInset>
-        ) : null}
+        <NoUpcomingClassesMessage labels={labels} />
 
-        <MobileSectionPanel title={labels.recentLessonReports} contentInset={false}>
-          <MobileCardList<StudentDashboardViewModel["recentLessonReports"][number]>
-            rows={recentLessonReports}
-            emptyMessage={labels.noLessonReports}
-            getKey={row => row.id}
-            gap={2}
-            layout="edge-to-edge"
-            sx={theme => ({
-              backgroundColor: theme.palette.surfaceContainerLowest,
-              py: 2,
-            })}
-            paginationOptions={buildServerPaginationOptions({
-              page: reportsPagination.page,
-              pageSize: reportsPagination.pageSize,
-              totalCount: reportsPagination.totalCount,
-              onPageChange: reportsPagination.onPageChange,
-            })}
-            renderItem={row => (
-              <MobileCardListItem
-                variant="edge-to-edge"
-                sx={theme => ({
-                  backgroundColor: theme.palette.surfaceContainer,
-                  borderRadius: 0,
-                  border: "none",
-                  borderBottom: "none",
-                })}
-              >
-                <RecentLessonReportCardMobile
-                  report={row}
-                  labels={labels}
-                  lessonReportStatusLabels={lessonReportStatusLabels}
-                  locale={locale}
-                  onAddReflection={onAddReflection}
-                />
-              </MobileCardListItem>
-            )}
-          />
-        </MobileSectionPanel>
+        <RecentLessonReportsSection
+          recentLessonReports={recentLessonReports}
+          reportsPagination={reportsPagination}
+          labels={labels}
+          lessonReportStatusLabels={lessonReportStatusLabels}
+          locale={locale}
+          onAddReflection={onAddReflection}
+        />
       </MobileContentStack>
     </MobilePageContainer>
   );

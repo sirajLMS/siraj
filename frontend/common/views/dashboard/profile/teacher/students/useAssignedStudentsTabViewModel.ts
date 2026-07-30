@@ -37,6 +37,92 @@ function toViewRow(student: AssignedStudentsItem, t: ProfileStudentsLabels): Ass
   };
 }
 
+function buildRows(
+  assignedStudents: AssignedStudentsResult | null | undefined,
+  t: ProfileStudentsLabels
+): AssignedStudentsRow[] {
+  const sourceRows = assignedStudents?.rows ?? [];
+  return sourceRows
+    .filter((student): student is AssignedStudentsItem => Boolean(student?.id && student?.name))
+    .map(student => toViewRow(student, t));
+}
+
+function buildClassOptions(rows: readonly AssignedStudentsRow[], t: ProfileStudentsLabels): string[] {
+  const options = Array.from(
+    new Set(
+      rows
+        .map(row => row.className)
+        .filter(className => className !== t.classUnknown)
+        .sort((a, b) => a.localeCompare(b))
+    )
+  );
+  return [t.allClasses, ...options];
+}
+
+function filterRowsByClass(rows: readonly AssignedStudentsRow[], selectedClass: string): AssignedStudentsRow[] {
+  if (selectedClass === "all") {
+    return [...rows];
+  }
+  return rows.filter(row => row.className === selectedClass);
+}
+
+function handleClassChangeHandler(
+  className: string,
+  t: ProfileStudentsLabels,
+  setSelectedClass: React.Dispatch<React.SetStateAction<string>>,
+  setPage: React.Dispatch<React.SetStateAction<number>>
+): void {
+  setSelectedClass(className === t.allClasses ? "all" : className);
+  setPage(0);
+}
+
+function buildLabelsBySection(t: ProfileStudentsLabels) {
+  return {
+    columns: t.columns,
+    list: {
+      mobileEmptyMessage: t.mobileListLabel,
+      desktopEmptyMessage: t.noRows,
+    },
+  };
+}
+
+function buildEmptyState(t: ProfileStudentsLabels) {
+  return { title: t.empty.title, description: t.empty.description };
+}
+
+function buildClassFilter(
+  classOptions: string[],
+  selectedClass: string,
+  handleClassChange: (className: string) => void,
+  t: ProfileStudentsLabels
+) {
+  return {
+    options: classOptions,
+    selected: selectedClass,
+    onSelect: handleClassChange,
+    allClassesLabel: t.allClasses,
+  };
+}
+
+function buildPagination(
+  page: number,
+  pageSize: number,
+  totalCount: number,
+  setPage: React.Dispatch<React.SetStateAction<number>>,
+  setPageSize: React.Dispatch<React.SetStateAction<number>>
+) {
+  return {
+    page,
+    pageSize,
+    totalCount,
+    onPageChange: setPage,
+    onPaginationModelChange: (nextPage: number, nextPageSize: number) => {
+      setPage(nextPage);
+      setPageSize(nextPageSize);
+    },
+  };
+}
+
 export function useAssignedStudentsTabViewModel(
   props: Readonly<UseAssignedStudentsTabViewModelProps>
 ): AssignedStudentsTabViewModel {
@@ -46,47 +132,18 @@ export function useAssignedStudentsTabViewModel(
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const rows = useMemo(() => {
-    const sourceRows = assignedStudents?.rows ?? [];
-    return sourceRows
-      .filter((student): student is AssignedStudentsItem => Boolean(student?.id && student?.name))
-      .map(student => toViewRow(student, t));
-  }, [assignedStudents?.rows, t]);
+  const rows = useMemo(() => buildRows(assignedStudents, t), [assignedStudents, t]);
 
-  const classOptions = useMemo(() => {
-    const options = Array.from(
-      new Set(
-        rows
-          .map(row => row.className)
-          .filter(className => className !== t.classUnknown)
-          .sort((a, b) => a.localeCompare(b))
-      )
-    );
-    return [t.allClasses, ...options];
-  }, [rows, t]);
+  const classOptions = useMemo(() => buildClassOptions(rows, t), [rows, t]);
 
-  const filteredRows = useMemo(() => {
-    if (selectedClass === "all") {
-      return rows;
-    }
-    return rows.filter(row => row.className === selectedClass);
-  }, [rows, selectedClass]);
+  const filteredRows = useMemo(() => filterRowsByClass(rows, selectedClass), [rows, selectedClass]);
 
   const totalCount = filteredRows.length;
 
-  const handleClassChange = (className: string) => {
-    setSelectedClass(className === t.allClasses ? "all" : className);
-    setPage(0);
-  };
+  const handleClassChange = (className: string) => handleClassChangeHandler(className, t, setSelectedClass, setPage);
 
   return {
-    labelsBySection: {
-      columns: t.columns,
-      list: {
-        mobileEmptyMessage: t.mobileListLabel,
-        desktopEmptyMessage: t.noRows,
-      },
-    },
+    labelsBySection: buildLabelsBySection(t),
     title: t.title,
     description: t.description,
     rows: filteredRows,
@@ -95,22 +152,8 @@ export function useAssignedStudentsTabViewModel(
     retryLabel: t.errors.retry,
     errorLabel: t.errors.failedToLoad,
     onRetry,
-    empty: { title: t.empty.title, description: t.empty.description },
-    classFilter: {
-      options: classOptions,
-      selected: selectedClass,
-      onSelect: handleClassChange,
-      allClassesLabel: t.allClasses,
-    },
-    pagination: {
-      page,
-      pageSize,
-      totalCount,
-      onPageChange: setPage,
-      onPaginationModelChange: (nextPage, nextPageSize) => {
-        setPage(nextPage);
-        setPageSize(nextPageSize);
-      },
-    },
+    empty: buildEmptyState(t),
+    classFilter: buildClassFilter(classOptions, selectedClass, handleClassChange, t),
+    pagination: buildPagination(page, pageSize, totalCount, setPage, setPageSize),
   };
 }

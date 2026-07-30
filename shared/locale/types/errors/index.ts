@@ -245,6 +245,10 @@ export interface ErrorsLabels {
   readonly invalidNationalId: string;
   readonly permissionGroupNotFound: string;
 
+  // ─── Lesson Report errors ─────────────────────────────────────────
+  readonly rejectedReportsRequireReason: string;
+  readonly approvedReportsNoRejectionReason: string;
+
   // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
   readonly displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) => string;
   readonly displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) => string;

@@ -34,6 +34,7 @@ mock.module("@/frontend/common/views/dashboard/supervisor/lesson-reviews/Pending
   PendingReviewsContainer: PendingReviewsContainerImpl,
 }));
 
+import type { TypedDocumentNode } from "@apollo/client";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen, waitFor } from "@testing-library/react";
@@ -128,21 +129,6 @@ function makeTeacherRow(id: string, name: string) {
   return { id, name, avatarUrl: null };
 }
 
-function makeTeachersMock(): MockLink.MockedResponse {
-  return {
-    request: {
-      query: teachersQueryDocument,
-      variables: { search: "", limit: USER_SELECT_LIMIT },
-    },
-    result: {
-      data: {
-        teachers: [makeTeacherRow("teacher-1", "Teacher One"), makeTeacherRow("teacher-2", "Teacher Two")],
-      },
-    },
-    maxUsageCount: Number.POSITIVE_INFINITY,
-  };
-}
-
 function makeStudentRow(id: string, name: string) {
   return {
     id,
@@ -159,19 +145,51 @@ function makeStudentRow(id: string, name: string) {
   };
 }
 
-function makeStudentsDirectoryMock(): MockLink.MockedResponse {
+function makeAutocompleteMock<TData, TVariables extends { search?: string | null; limit?: number }>(
+  queryDoc: TypedDocumentNode<TData, TVariables>,
+  dataKey: string,
+  rowFactory: (id: string, name: string) => { id: string; name: string },
+  items: { id: string; name: string }[],
+  searchValue: string | null
+): MockLink.MockedResponse {
   return {
     request: {
-      query: studentsDirectoryQueryDocument,
-      variables: { search: null, limit: USER_SELECT_LIMIT },
+      query: queryDoc,
+      variables: { search: searchValue, limit: USER_SELECT_LIMIT },
     },
     result: {
       data: {
-        studentsDirectory: [makeStudentRow("student-1", "Student One"), makeStudentRow("student-2", "Student Two")],
+        [dataKey]: items.map(item => rowFactory(item.id, item.name)),
       },
     },
     maxUsageCount: Number.POSITIVE_INFINITY,
   };
+}
+
+function makeTeachersMock(): MockLink.MockedResponse {
+  return makeAutocompleteMock(
+    teachersQueryDocument,
+    "teachers",
+    makeTeacherRow,
+    [
+      { id: "teacher-1", name: "Teacher One" },
+      { id: "teacher-2", name: "Teacher Two" },
+    ],
+    ""
+  );
+}
+
+function makeStudentsDirectoryMock(): MockLink.MockedResponse {
+  return makeAutocompleteMock(
+    studentsDirectoryQueryDocument,
+    "studentsDirectory",
+    makeStudentRow,
+    [
+      { id: "student-1", name: "Student One" },
+      { id: "student-2", name: "Student Two" },
+    ],
+    null
+  );
 }
 
 function approveLessonReportMock(): MockLink.MockedResponse {

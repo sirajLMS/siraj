@@ -191,6 +191,10 @@ export const errorsEn: ErrorsLabels = {
   invalidNationalId: "The national ID is invalid for the selected nationality.",
   permissionGroupNotFound: "Permission group not found.",
 
+  // ─── Lesson Report errors ─────────────────────────────────────────
+  rejectedReportsRequireReason: "REJECTED reports must include a rejection reason.",
+  approvedReportsNoRejectionReason: "APPROVED reports must not include a rejection reason.",
+
   // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
   displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) =>
     `Display currency not set. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`,

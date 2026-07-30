@@ -29,26 +29,15 @@ function resolveSourceLabel(source: string | null | undefined, labels: Environme
   }
 }
 
-export function EnvironmentConfigEntryRow({
-  entry,
-  viewModel,
-  layout = "grid",
-}: Readonly<EnvironmentConfigEntryRowProps>) {
-  const { labels, locale, canEdit, onDraftChange, onSave, onRevert, getDisplayValue, isEntryDirty, isEntrySaving } =
-    viewModel;
+interface KeyBlockProps {
+  readonly key: string;
+  readonly description: string | undefined;
+  readonly editable: boolean;
+  readonly labels: EnvironmentConfigViewModel["labels"];
+}
 
-  const key = entry.key ?? "";
-  const isSecret = isEnvConfigSecretEntry(entry);
-  const editable = entry.editable === true && canEdit;
-  const displayValue = getDisplayValue(entry);
-  const description = resolveLocalizedEnvDescription(entry.description, locale);
-  const saving = isEntrySaving(key);
-  const dirty = isEntryDirty(entry);
-  const sourceLabel = resolveSourceLabel(entry.source, labels);
-  const valueLabel = labels.columns.value;
-  const emptyPlaceholder = labels.emptyValue;
-
-  const keyBlock = (
+function KeyBlock({ key, description, editable, labels }: KeyBlockProps) {
+  return (
     <Stack sx={{ gap: 0.75, minWidth: 0 }}>
       <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.columns.key}</Typography>
       <Typography
@@ -64,25 +53,69 @@ export function EnvironmentConfigEntryRow({
       {description ? (
         <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{description}</Typography>
       ) : null}
-      {!entry.editable ? (
+      {!editable ? (
         <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.readOnlyHint}</Typography>
       ) : null}
     </Stack>
   );
+}
 
-  const sourceBlock = (
+interface SourceBlockProps {
+  readonly sourceLabel: string;
+  readonly hasDbOverride: boolean | null;
+  readonly labels: EnvironmentConfigViewModel["labels"];
+}
+
+function SourceBlock({ sourceLabel, hasDbOverride, labels }: SourceBlockProps) {
+  return (
     <Stack sx={{ gap: 1, minWidth: 0 }}>
       <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.columns.source}</Typography>
       <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
         <Chip size="small" variant="outlined" label={sourceLabel} />
-        {entry.hasDbOverride ? (
+        {hasDbOverride ? (
           <Chip size="small" color="primary" variant="outlined" label={labels.badges.dbOverride} />
         ) : null}
       </Stack>
     </Stack>
   );
+}
 
-  const valueBlock = (
+interface ValueBlockProps {
+  readonly key: string;
+  readonly displayValue: string;
+  readonly editable: boolean;
+  readonly saving: boolean;
+  readonly dirty: boolean;
+  readonly isSecret: boolean;
+  readonly valueLabel: string;
+  readonly emptyPlaceholder: string;
+  readonly showValueLabel: string;
+  readonly hideValueLabel: string;
+  readonly hasDbOverride: boolean | null;
+  readonly onDraftChange: (key: string, value: string) => void;
+  readonly onSave: (key: string) => void;
+  readonly onRevert: (key: string) => void;
+  readonly labels: EnvironmentConfigViewModel["labels"];
+}
+
+function ValueBlock({
+  key,
+  displayValue,
+  editable,
+  saving,
+  dirty,
+  isSecret,
+  valueLabel,
+  emptyPlaceholder,
+  showValueLabel,
+  hideValueLabel,
+  hasDbOverride,
+  onDraftChange,
+  onSave,
+  onRevert,
+  labels,
+}: ValueBlockProps) {
+  return (
     <Stack sx={{ gap: 1.5, minWidth: 0 }}>
       <EnvSecretField
         configKey={key}
@@ -95,8 +128,8 @@ export function EnvironmentConfigEntryRow({
         readOnly={!editable}
         isSecret={isSecret}
         placeholder={displayValue ? undefined : emptyPlaceholder}
-        showValueLabel={labels.actions.showValue}
-        hideValueLabel={labels.actions.hideValue}
+        showValueLabel={showValueLabel}
+        hideValueLabel={hideValueLabel}
       />
 
       {editable ? (
@@ -112,7 +145,7 @@ export function EnvironmentConfigEntryRow({
           >
             {labels.actions.save}
           </Button>
-          {entry.hasDbOverride ? (
+          {hasDbOverride ? (
             <Button
               size="small"
               variant="outlined"
@@ -130,7 +163,16 @@ export function EnvironmentConfigEntryRow({
       ) : null}
     </Stack>
   );
+}
 
+interface LayoutBlockProps {
+  readonly keyBlock: React.ReactNode;
+  readonly sourceBlock: React.ReactNode;
+  readonly valueBlock: React.ReactNode;
+  readonly layout: "grid" | "stacked";
+}
+
+function LayoutBlock({ keyBlock, sourceBlock, valueBlock, layout }: LayoutBlockProps) {
   if (layout === "stacked") {
     return (
       <Box
@@ -169,4 +211,48 @@ export function EnvironmentConfigEntryRow({
       {valueBlock}
     </Box>
   );
+}
+
+export function EnvironmentConfigEntryRow({
+  entry,
+  viewModel,
+  layout = "grid",
+}: Readonly<EnvironmentConfigEntryRowProps>) {
+  const { labels, locale, canEdit, onDraftChange, onSave, onRevert, getDisplayValue, isEntryDirty, isEntrySaving } =
+    viewModel;
+
+  const key = entry.key ?? "";
+  const isSecret = isEnvConfigSecretEntry(entry);
+  const editable = entry.editable === true && canEdit;
+  const displayValue = getDisplayValue(entry);
+  const description = resolveLocalizedEnvDescription(entry.description, locale);
+  const saving = isEntrySaving(key);
+  const dirty = isEntryDirty(entry);
+  const sourceLabel = resolveSourceLabel(entry.source, labels);
+  const valueLabel = labels.columns.value;
+  const emptyPlaceholder = labels.emptyValue;
+
+  const keyBlock = <KeyBlock key={key} description={description} editable={editable} labels={labels} />;
+  const sourceBlock = <SourceBlock sourceLabel={sourceLabel} hasDbOverride={entry.hasDbOverride} labels={labels} />;
+  const valueBlock = (
+    <ValueBlock
+      key={key}
+      displayValue={displayValue}
+      editable={editable}
+      saving={saving}
+      dirty={dirty}
+      isSecret={isSecret}
+      valueLabel={valueLabel}
+      emptyPlaceholder={emptyPlaceholder}
+      showValueLabel={labels.actions.showValue}
+      hideValueLabel={labels.actions.hideValue}
+      hasDbOverride={entry.hasDbOverride}
+      onDraftChange={onDraftChange}
+      onSave={onSave}
+      onRevert={onRevert}
+      labels={labels}
+    />
+  );
+
+  return <LayoutBlock keyBlock={keyBlock} sourceBlock={sourceBlock} valueBlock={valueBlock} layout={layout} />;
 }

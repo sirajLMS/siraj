@@ -47,16 +47,33 @@ export type UseMeetingConfigFormStateOptions = {
   readonly labels: MeetingConfigManagerLabels;
 };
 
-export function useMeetingConfigFormState({
-  open,
+function initializeFormState({
   editConfig,
   existingCount,
-  labels,
-}: UseMeetingConfigFormStateOptions) {
-  const t = labels;
-  const locale = useAppLocale();
-  const isEdit = editConfig?.id != null;
+  open,
+}: Pick<UseMeetingConfigFormStateOptions, "editConfig" | "existingCount" | "open">) {
+  if (!open) return { action: "none" as const };
+  if (editConfig) {
+    return {
+      action: "edit" as const,
+      label: editConfig.label ?? "",
+      provider: editConfig.provider ?? null,
+      initialProviderId: editConfig.providerId ?? null,
+      details: meetingConfigDetailsFromConfig(editConfig),
+      isDefault: editConfig.isDefault ?? false,
+    };
+  }
+  return {
+    action: "create" as const,
+    label: "",
+    provider: null,
+    initialProviderId: null,
+    details: emptyMeetingConfigDetails(),
+    isDefault: existingCount === 0,
+  };
+}
 
+function useFormInitialization(open: boolean, editConfig: MeetingConfigFormEditInfo | null, existingCount: number) {
   const [label, setLabel] = useState("");
   const [provider, setProvider] = useState<MeetingProviderFieldsFragment | null>(null);
   const [details, setDetails] = useState<MeetingConfigDetailsForm>(emptyMeetingConfigDetails);
@@ -66,33 +83,80 @@ export function useMeetingConfigFormState({
   const [initialProviderId, setInitialProviderId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) return;
-    if (editConfig) {
-      setLabel(editConfig.label ?? "");
-      setProvider(editConfig.provider ?? null);
-      setInitialProviderId(editConfig.providerId ?? null);
-      setDetails(meetingConfigDetailsFromConfig(editConfig));
-      setIsDefault(editConfig.isDefault ?? false);
-      return;
-    }
-    setLabel("");
-    setProvider(null);
-    setInitialProviderId(null);
-    setDetails(emptyMeetingConfigDetails());
-    setIsDefault(existingCount === 0);
-    setUrlError(null);
-    setSaveError(null);
+    initializeFromConfig(open, editConfig, existingCount, {
+      setLabel,
+      setProvider,
+      setInitialProviderId,
+      setDetails,
+      setIsDefault,
+      setUrlError,
+      setSaveError,
+    });
   }, [editConfig, existingCount, open]);
 
-  const providerChanged =
-    isEdit && provider?.id != null && initialProviderId != null && provider.id !== initialProviderId;
+  return {
+    label,
+    setLabel,
+    provider,
+    setProvider,
+    details,
+    setDetails,
+    isDefault,
+    setIsDefault,
+    urlError,
+    setUrlError,
+    saveError,
+    setSaveError,
+    initialProviderId,
+    setInitialProviderId,
+  };
+}
 
-  const instructions = useMemo(() => {
+function initializeFromConfig(
+  open: boolean,
+  editConfig: MeetingConfigFormEditInfo | null,
+  existingCount: number,
+  setters: {
+    readonly setLabel: React.Dispatch<React.SetStateAction<string>>;
+    readonly setProvider: React.Dispatch<React.SetStateAction<MeetingProviderFieldsFragment | null>>;
+    readonly setInitialProviderId: React.Dispatch<React.SetStateAction<string | null>>;
+    readonly setDetails: React.Dispatch<React.SetStateAction<MeetingConfigDetailsForm>>;
+    readonly setIsDefault: React.Dispatch<React.SetStateAction<boolean>>;
+    readonly setUrlError: React.Dispatch<React.SetStateAction<string | null>>;
+    readonly setSaveError: React.Dispatch<React.SetStateAction<string | null>>;
+  }
+) {
+  const init = initializeFormState({ editConfig, existingCount, open });
+  if (init.action === "none") return;
+
+  const { setLabel, setProvider, setInitialProviderId, setDetails, setIsDefault, setUrlError, setSaveError } = setters;
+
+  setLabel(init.label);
+  setProvider(init.provider);
+  setInitialProviderId(init.initialProviderId);
+  setDetails(init.details);
+  setIsDefault(init.isDefault);
+
+  if (init.action === "create") {
+    setUrlError(null);
+    setSaveError(null);
+  }
+}
+
+function useProviderInstructions(provider: MeetingProviderFieldsFragment | null, locale: string) {
+  return useMemo(() => {
     if (!provider?.instructions) return null;
     return resolveLocalizedString(provider.instructions, locale);
   }, [locale, provider?.instructions]);
+}
 
-  const validateUrl = (): boolean => {
+function createValidateUrl(
+  provider: MeetingProviderFieldsFragment | null,
+  details: MeetingConfigDetailsForm,
+  t: MeetingConfigManagerLabels,
+  setUrlError: (error: string | null) => void
+) {
+  return (): boolean => {
     if (!provider || !details.meetingUrl.trim()) return false;
     const allowlist = provider.urlAllowlist ?? [];
     if (allowlist.length === 0) return true;
@@ -103,6 +167,43 @@ export function useMeetingConfigFormState({
     setUrlError(t.urlNotAllowed);
     return false;
   };
+}
+
+export function useMeetingConfigFormState({
+  open,
+  editConfig,
+  existingCount,
+  labels,
+}: UseMeetingConfigFormStateOptions) {
+  const t = labels;
+  const locale = useAppLocale();
+  const isEdit = editConfig?.id != null;
+
+  const {
+    label,
+    setLabel,
+    provider,
+    setProvider,
+    details,
+    setDetails,
+    isDefault,
+    setIsDefault,
+    urlError,
+    setUrlError,
+    saveError,
+    setSaveError,
+    initialProviderId,
+  } = useFormInitialization(open, editConfig, existingCount);
+
+  const providerChanged =
+    isEdit && provider?.id != null && initialProviderId != null && provider.id !== initialProviderId;
+
+  const instructions = useProviderInstructions(provider, locale);
+
+  const validateUrl = useMemo(
+    () => createValidateUrl(provider, details, t, setUrlError),
+    [provider, details, t, setUrlError]
+  );
 
   return {
     t,

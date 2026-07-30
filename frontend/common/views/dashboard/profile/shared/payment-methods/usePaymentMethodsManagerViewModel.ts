@@ -42,53 +42,99 @@ export type UsePaymentMethodsManagerViewModelProps = {
   readonly canManage: boolean;
 };
 
-export function usePaymentMethodsManagerViewModel(props: Readonly<UsePaymentMethodsManagerViewModelProps>) {
-  const { targetUserId, slot, canManage } = props;
-  const labels = usePaymentMethodProfileLabels();
-  const t = labels.manager;
-  const tType = labels.type;
-  const { hasPermission } = useUserStore();
-  const canVerify = hasPermission(AppPermission.PaymentMethodsVerifyBankTransfer);
+function buildSlotDirection(slot: PaymentMethodsSlot): PaymentDirection.Payin | PaymentDirection.Payout {
+  return slot === "payin" ? PaymentDirection.Payin : PaymentDirection.Payout;
+}
 
-  const slotDirection: PaymentDirection.Payin | PaymentDirection.Payout =
-    slot === "payin" ? PaymentDirection.Payin : PaymentDirection.Payout;
-  const allowedDirections =
-    slot === "payin"
-      ? ([PaymentDirection.Payin, PaymentDirection.Both] as const)
-      : ([PaymentDirection.Payout, PaymentDirection.Both] as const);
+function buildAllowedDirections(
+  slot: PaymentMethodsSlot
+): readonly (PaymentDirection.Payin | PaymentDirection.Payout | PaymentDirection.Both)[] {
+  return slot === "payin"
+    ? [PaymentDirection.Payin, PaymentDirection.Both]
+    : [PaymentDirection.Payout, PaymentDirection.Both];
+}
 
-  const { data, loading, error, refetch } = useQuery(userPaymentMethodsQueryDocument, {
+function filterMethodsBySlot(methods: readonly PaymentMethodRow[], slot: PaymentMethodsSlot): PaymentMethodRow[] {
+  return methods.filter(row => matchesSlot(row.direction, slot));
+}
+
+function buildMethodMap(
+  methods: readonly UserPaymentMethodFieldsFragment[] | undefined
+): Map<string, UserPaymentMethodFieldsFragment> {
+  const map = new Map<string, UserPaymentMethodFieldsFragment>();
+  for (const method of methods ?? []) {
+    if (method.id) map.set(method.id, method);
+  }
+  return map;
+}
+
+function buildDeleteLabel(
+  deleteId: string | null,
+  methods: readonly PaymentMethodRow[],
+  tType: ReturnType<typeof usePaymentMethodProfileLabels>["type"]
+): string {
+  if (!deleteId) return "";
+  const row = methods.find(m => m.id === deleteId);
+  if (!row) return "";
+  return (
+    row.label?.trim() || getPaymentMethodTypeLabel(row.type, key => tType.type[key as keyof typeof tType.type] ?? "")
+  );
+}
+
+function computeBusy(loading: boolean, deleting: boolean, settingDefault: boolean, verifying: boolean): boolean {
+  return loading || deleting || settingDefault || verifying;
+}
+
+function usePaymentMethodsQuery(targetUserId: string) {
+  return useQuery(userPaymentMethodsQueryDocument, {
     variables: { userId: targetUserId, direction: null },
   });
+}
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [editMethod, setEditMethod] = useState<UserPaymentMethodFieldsFragment | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const methods = useMemo(() => {
-    const rows = (data?.userPaymentMethods ?? [])
-      .map(toRow)
-      .filter((row): row is PaymentMethodRow => row != null)
-      .filter(row => matchesSlot(row.direction, slot));
-    return rows;
-  }, [data?.userPaymentMethods, slot]);
-
-  const methodById = useMemo(() => {
-    const map = new Map<string, UserPaymentMethodFieldsFragment>();
-    for (const method of data?.userPaymentMethods ?? []) {
-      if (method.id) map.set(method.id, method);
-    }
-    return map;
-  }, [data?.userPaymentMethods]);
-
-  const refetchData = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
-
+function usePaymentMethodsMutations() {
   const [deleteMethod, { loading: deleting }] = useMutation(deleteUserPaymentMethodMutationDocument);
   const [setDefaultMut, { loading: settingDefault }] = useMutation(setDefaultUserPaymentMethodMutationDocument);
   const [verifyMethod, { loading: verifying }] = useMutation(verifyBankTransferPaymentMethodMutationDocument);
+  return { deleteMethod, deleting, setDefaultMut, settingDefault, verifyMethod, verifying };
+}
 
+function useFormState() {
+  const [formOpen, setFormOpen] = useState(false);
+  const [editMethod, setEditMethod] = useState<UserPaymentMethodFieldsFragment | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  return { formOpen, setFormOpen, editMethod, setEditMethod, deleteId, setDeleteId };
+}
+
+function useComputedMethods(
+  userPaymentMethods: readonly UserPaymentMethodFieldsFragment[] | undefined,
+  slot: PaymentMethodsSlot
+): readonly PaymentMethodRow[] {
+  return useMemo(() => {
+    const rows = (userPaymentMethods ?? []).map(toRow).filter((row): row is PaymentMethodRow => row != null);
+    return filterMethodsBySlot(rows, slot);
+  }, [userPaymentMethods, slot]);
+}
+
+function useMethodMap(
+  userPaymentMethods: readonly UserPaymentMethodFieldsFragment[] | undefined
+): Map<string, UserPaymentMethodFieldsFragment> {
+  return useMemo(() => buildMethodMap(userPaymentMethods), [userPaymentMethods]);
+}
+
+function useDeleteLabel(
+  deleteId: string | null,
+  methods: readonly PaymentMethodRow[],
+  tType: ReturnType<typeof usePaymentMethodProfileLabels>["type"]
+): string {
+  return useMemo(() => buildDeleteLabel(deleteId, methods, tType), [deleteId, methods, tType]);
+}
+
+function useActionCallbacks(
+  deleteMethod: (options: { variables: { id: string } }) => Promise<unknown>,
+  setDefaultMut: (options: { variables: { id: string } }) => Promise<unknown>,
+  verifyMethod: (options: { variables: { id: string } }) => Promise<unknown>,
+  refetch: () => Promise<unknown>
+) {
   const confirmDelete = useCallback(
     async (id: string) => {
       await deleteMethod({ variables: { id } });
@@ -113,32 +159,77 @@ export function usePaymentMethodsManagerViewModel(props: Readonly<UsePaymentMeth
     [verifyMethod, refetch]
   );
 
-  const deleteLabel = useMemo(() => {
-    if (!deleteId) return "";
-    const row = methods.find(m => m.id === deleteId);
-    if (!row) return "";
-    return (
-      row.label?.trim() || getPaymentMethodTypeLabel(row.type, key => tType.type[key as keyof typeof tType.type] ?? "")
-    );
-  }, [deleteId, methods, tType]);
+  return { confirmDelete, setDefault, verify };
+}
 
-  const handleConfirmDelete = useCallback(async () => {
+function useHandleConfirmDelete(
+  confirmDelete: (id: string) => Promise<void>,
+  deleteId: string | null,
+  setDeleteId: (id: string | null) => void
+) {
+  return useCallback(async () => {
     if (!deleteId) return;
     await confirmDelete(deleteId);
     setDeleteId(null);
-  }, [confirmDelete, deleteId]);
+  }, [confirmDelete, deleteId, setDeleteId]);
+}
 
-  const handleEdit = useCallback(
+function useHandleEdit(
+  canManage: boolean,
+  methodById: Map<string, UserPaymentMethodFieldsFragment>,
+  setEditMethod: (method: UserPaymentMethodFieldsFragment | null) => void,
+  setFormOpen: (open: boolean) => void
+) {
+  return useCallback(
     (id: string) => {
       if (!canManage) return;
       const method = methodById.get(id) ?? null;
       setEditMethod(method);
       setFormOpen(true);
     },
-    [canManage, methodById]
+    [canManage, methodById, setEditMethod, setFormOpen]
   );
+}
 
-  const busy = loading || deleting || settingDefault || verifying;
+function useCanVerify(): boolean {
+  const { hasPermission } = useUserStore();
+  return hasPermission(AppPermission.PaymentMethodsVerifyBankTransfer);
+}
+
+export function usePaymentMethodsManagerViewModel(props: Readonly<UsePaymentMethodsManagerViewModelProps>) {
+  const { targetUserId, slot, canManage } = props;
+  const labels = usePaymentMethodProfileLabels();
+  const t = labels.manager;
+  const tType = labels.type;
+  const canVerify = useCanVerify();
+
+  const slotDirection = buildSlotDirection(slot);
+  const allowedDirections = buildAllowedDirections(slot);
+
+  const { data, loading, error, refetch } = usePaymentMethodsQuery(targetUserId);
+
+  const { formOpen, setFormOpen, editMethod, setEditMethod, deleteId, setDeleteId } = useFormState();
+
+  const methods = useComputedMethods(data?.userPaymentMethods as UserPaymentMethodFieldsFragment[] | undefined, slot);
+
+  const methodById = useMethodMap(data?.userPaymentMethods as UserPaymentMethodFieldsFragment[] | undefined);
+
+  const refetchData = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+
+  const { deleteMethod, deleting, setDefaultMut, settingDefault, verifyMethod, verifying } =
+    usePaymentMethodsMutations();
+
+  const { confirmDelete, setDefault, verify } = useActionCallbacks(deleteMethod, setDefaultMut, verifyMethod, refetch);
+
+  const deleteLabel = useDeleteLabel(deleteId, methods, tType);
+
+  const handleConfirmDelete = useHandleConfirmDelete(confirmDelete, deleteId, setDeleteId);
+
+  const handleEdit = useHandleEdit(canManage, methodById, setEditMethod, setFormOpen);
+
+  const busy = computeBusy(loading, deleting, settingDefault, verifying);
 
   return {
     labels,

@@ -7,69 +7,61 @@ function hasPermissions(permissions: readonly AppPermission[]) {
   return (permission: AppPermission) => set.has(permission);
 }
 
+function createTabs(audience: ProfileAudience, scope: ProfileScope, permissions: readonly AppPermission[]) {
+  return getVisibleProfileTabs({
+    audience,
+    scope,
+    hasPermission: hasPermissions(permissions),
+  });
+}
+
+function expectTab(tabs: ReturnType<typeof getVisibleProfileTabs>, tabId: string, expected: boolean) {
+  expect(tabs.some(tab => tab.id === tabId)).toBe(expected);
+}
+
 describe("getVisibleProfileTabs", () => {
   test("hides permissions tab for teacher other scope even with legacy edit", () => {
-    const tabs = getVisibleProfileTabs({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Other,
-      hasPermission: hasPermissions([
-        AppPermission.ProfileStaffPermissionsEditOther,
-        AppPermission.ProfileCoreIdentityViewOwn,
-      ]),
-    });
+    const tabs = createTabs(ProfileAudience.Teacher, ProfileScope.Other, [
+      AppPermission.ProfileStaffPermissionsEditOther,
+      AppPermission.ProfileCoreIdentityViewOwn,
+    ]);
 
-    expect(tabs.some(tab => tab.id === "permissions")).toBe(false);
+    expectTab(tabs, "permissions", false);
   });
 
   test("shows permissions tab for staff other scope with staff permissions view", () => {
-    const tabs = getVisibleProfileTabs({
-      audience: ProfileAudience.Staff,
-      scope: ProfileScope.Other,
-      hasPermission: hasPermissions([
-        AppPermission.ProfileStaffPermissionsViewOther,
-        AppPermission.ProfileCoreIdentityViewOwn,
-      ]),
-    });
+    const tabs = createTabs(ProfileAudience.Staff, ProfileScope.Other, [
+      AppPermission.ProfileStaffPermissionsViewOther,
+      AppPermission.ProfileCoreIdentityViewOwn,
+    ]);
 
-    expect(tabs.some(tab => tab.id === "permissions")).toBe(true);
+    expectTab(tabs, "permissions", true);
   });
 
   test("shows payment methods tab when view permission is granted", () => {
-    const tabs = getVisibleProfileTabs({
-      audience: ProfileAudience.Parent,
-      scope: ProfileScope.Own,
-      hasPermission: hasPermissions([
-        AppPermission.ProfilePaymentMethodsViewOwn,
-        AppPermission.ProfileCoreIdentityViewOwn,
-      ]),
-    });
+    const tabs = createTabs(ProfileAudience.Parent, ProfileScope.Own, [
+      AppPermission.ProfilePaymentMethodsViewOwn,
+      AppPermission.ProfileCoreIdentityViewOwn,
+    ]);
 
-    expect(tabs.some(tab => tab.id === "paymentMethods")).toBe(true);
+    expectTab(tabs, "paymentMethods", true);
   });
 
   test("shows meeting tab with view permission without manage permission", () => {
-    const tabs = getVisibleProfileTabs({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
-      hasPermission: hasPermissions([
-        AppPermission.ProfileMeetingConfigsViewOwn,
-        AppPermission.ProfileCoreIdentityViewOwn,
-      ]),
-    });
+    const tabs = createTabs(ProfileAudience.Teacher, ProfileScope.Own, [
+      AppPermission.ProfileMeetingConfigsViewOwn,
+      AppPermission.ProfileCoreIdentityViewOwn,
+    ]);
 
-    expect(tabs.some(tab => tab.id === "meeting")).toBe(true);
+    expectTab(tabs, "meeting", true);
   });
 
   test("shows notifications tab for student own scope", () => {
-    const tabs = getVisibleProfileTabs({
-      audience: "STUDENT" as ProfileAudience,
-      scope: ProfileScope.Own,
-      hasPermission: hasPermissions([AppPermission.ProfileCoreIdentityViewOwn]),
-    });
+    const tabs = createTabs("STUDENT" as ProfileAudience, ProfileScope.Own, [AppPermission.ProfileCoreIdentityViewOwn]);
 
-    expect(tabs.some(tab => tab.id === "notifications")).toBe(true);
-    expect(tabs.some(tab => tab.id === "profile")).toBe(true);
-    expect(tabs.some(tab => tab.id === "paymentMethods")).toBe(false);
+    expectTab(tabs, "notifications", true);
+    expectTab(tabs, "profile", true);
+    expectTab(tabs, "paymentMethods", false);
   });
 });
 

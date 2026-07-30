@@ -191,6 +191,10 @@ export const errorsAr: ErrorsLabels = {
   invalidNationalId: "الرقم القومي غير صالح للجنسية المحددة.",
   permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
 
+  // ─── Lesson Report errors ─────────────────────────────────────────
+  rejectedReportsRequireReason: "يجب أن تتضمن التقارير المرفوضة سبب الرفض.",
+  approvedReportsNoRejectionReason: "لا يجب أن تتضمن التقارير المعتمدة سبب رفض.",
+
   // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
   displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) =>
     `عرض العملة غير محدد. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
