@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationRepository } from "@/backend/db/repo";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
+import { resetEnvironmentCache } from "@/backend/lib/env";
 import { resetSmsChannel, smsChannel } from "@/backend/services/communication/channels/sms";
 import type { NotificationDeliverySelectType } from "@/backend/types";
 
@@ -47,6 +48,8 @@ describe("SMS Channel", () => {
   let updateDeliveryStatusSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
+    resetSmsChannel();
+    resetEnvironmentCache();
     process.env.TWILIO_ACCOUNT_SID = "ACtest-sid-1234567890";
     process.env.TWILIO_AUTH_TOKEN = "test-token";
     process.env.TWILIO_FROM_NUMBER = "+1234567890";
@@ -155,6 +158,7 @@ describe("SMS Channel", () => {
     test("validateConfig returns false when TWILIO_ACCOUNT_SID is missing", async () => {
       const channel = await import("@/backend/services/communication/channels/sms").then(m => m.getSmsChannel());
       delete process.env.TWILIO_ACCOUNT_SID;
+      resetEnvironmentCache();
       const result = await channel.validateConfig();
       expect(result).toBe(false);
     });
@@ -162,6 +166,7 @@ describe("SMS Channel", () => {
     test("validateConfig returns false when TWILIO_AUTH_TOKEN is missing", async () => {
       const channel = await import("@/backend/services/communication/channels/sms").then(m => m.getSmsChannel());
       delete process.env.TWILIO_AUTH_TOKEN;
+      resetEnvironmentCache();
       const result = await channel.validateConfig();
       expect(result).toBe(false);
     });
@@ -169,6 +174,7 @@ describe("SMS Channel", () => {
     test("validateConfig returns false when TWILIO_FROM_NUMBER is missing", async () => {
       const channel = await import("@/backend/services/communication/channels/sms").then(m => m.getSmsChannel());
       delete process.env.TWILIO_FROM_NUMBER;
+      resetEnvironmentCache();
       const result = await channel.validateConfig();
       expect(result).toBe(false);
     });

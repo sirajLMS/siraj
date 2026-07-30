@@ -5,8 +5,8 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
 
 const targetRow = {
-  id: "target-user-1",
-  staffProfileId: "staff-profile-1",
+  id: "00000000-0000-0000-0000-000000000002",
+  staffProfileId: "00000000-0000-0000-0000-000000000003",
   name: "Target Staff",
   email: "target@example.com",
   avatarUrl: null,
@@ -27,6 +27,7 @@ const updatedRow = {
 describe("ManagerProfileService admin update", () => {
   beforeEach(() => {
     spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(true);
     spyOn(StaffProfileRepository, "getUserPermissionGroupSlugs").mockResolvedValue(["academy-admin"]);
     spyOn(StaffProfileRepository, "getManagerDirectory").mockResolvedValue({
       id: "manager-directory",
@@ -56,10 +57,14 @@ describe("ManagerProfileService admin update", () => {
       status: AccountStatus.DEACTIVATED,
     } as never);
 
-    const result = await ManagerProfileService.updateManagerProfile("actor-user-1", "staff-profile-1", {
-      phone: "+966500000000",
-      status: AccountStatus.DEACTIVATED,
-    });
+    const result = await ManagerProfileService.updateManagerProfile(
+      "00000000-0000-0000-0000-000000000001",
+      "00000000-0000-0000-0000-000000000003",
+      {
+        phone: "+966500000000",
+        status: AccountStatus.DEACTIVATED,
+      }
+    );
 
     expect(updateProfileFieldsSpy).toHaveBeenCalledWith(targetRow.id, { phone: "+966500000000" }, undefined);
     expect(updateStatusSpy).toHaveBeenCalledWith(targetRow.id, AccountStatus.DEACTIVATED, undefined, undefined);

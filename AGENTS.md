@@ -39,8 +39,10 @@ bun codegen                    # Generate TypeScript types from schema
 # Testing (layer-specific)
 bun run build:test             # Build production bundle for UI/E2E tests (.next-test-prod) — REQUIRED before test:ui:e2e
 bun run test                   # All tests
-bun run test:db                # Database repository tests (parallel)
+bun run test:db                # Database repository tests (parallel via scripts/run-db-tests-parallel.ts)
 bun run test:db:sequential     # Database tests (sequential, for debugging)
+bun run test:services          # Backend services tests (parallel via scripts/run-services-tests-parallel.ts)
+bun run test:services:sequential # Backend services tests (sequential, for debugging)
 bun run test:graphql           # GraphQL integration tests (dev server)
 bun run test:ui:components     # UI component tests (Happy DOM, no server)
 bun run test:ui:e2e            # End-to-end tests (production server — run build:test first)

@@ -252,7 +252,7 @@ describe("SuggestionService", () => {
       getSuggestionByIdSpy.mockResolvedValue(null);
       await expectErrorMatching(
         SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, "nonexistent-uuid", "Response"),
-        msg => msg.includes("not found")
+        msg => msg.includes("suggestionnotfound")
       );
     });
   });
@@ -349,7 +349,7 @@ describe("SuggestionService", () => {
       mockSuggestionLookup();
       await expectErrorMatching(
         SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID),
-        msg => msg.includes("not found")
+        msg => msg.includes("suggestion.notfound")
       );
     });
 

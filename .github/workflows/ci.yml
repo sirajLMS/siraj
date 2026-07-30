@@ -5,8 +5,9 @@
 # `bun quality-gate` orchestration. Biome (which is concurrency-safe) IS
 # run here as the CI-safe format/lint gate.
 #
-# Tests: ONLY `bun run test:db` and `bun run test:graphql` — never `bun test`
-# or UI test scripts. UI tests run locally via `bun run test:ui`.
+# Tests run sequentially in order: `bun run test:db`, `bun run test:services`, then `bun run test:graphql`.
+# If any test step fails, CI execution halts immediately. Never run raw `bun test` or UI test scripts.
+# UI tests run locally via `bun run test:ui`.
 #
 # `.env.test` is gitignored — CI has no file on disk. Job-level env below supplies
 # all required vars. Set TEST_CI=true so test runners keep workflow DATABASE_URL
@@ -161,13 +162,14 @@ jobs:
         run: bun run build:test
 
       # Migrate-only: do NOT run drizzleSeed.ts or any seed step here.
-      # DB and GraphQL tests provision required data via test helpers (ensureDemoUsers,
-      # createTestEntities, etc.) — they must not depend on bun db seed / SEED_PROFILE.
       - name: Prepare database
         run: bun run backend/db/scripts/migrate.ts
 
       - name: Database tests
         run: bun run test:db
+
+      - name: Backend services tests
+        run: bun run test:services
 
       - name: GraphQL integration tests
         env:
