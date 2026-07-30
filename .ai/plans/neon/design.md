@@ -1,6 +1,7 @@
 # Technical Design: Neon Database Performance Optimization
 
 **Target Directory:** `.ai/plans/neon`  
+**Outcome Directory:** `.ai/plans/neon/outcome`  
 **Phase:** 2 — Technical Design Document  
 **Related Spec:** [spec.md](file://.ai/plans/neon/spec.md)  
 
@@ -8,7 +9,7 @@
 
 ## 1. Architectural Overview
 
-This design details the technical architecture for optimizing Neon database performance across Siraj's stack. The optimization spans 4 key layers with explicit **Pilot Candidate Isolation** to verify each pattern on a single file/domain before full repo rollout.
+This design details the technical architecture for optimizing Neon database performance across Siraj's stack. The optimization spans 4 key layers with explicit **Pilot Candidate Isolation** to verify each pattern on a single file/domain before full repo rollout, backed by a persistent **Outcome Knowledge Base** (`.ai/plans/neon/outcome/`).
 
 ```
 [ Client Request ]
@@ -33,13 +34,26 @@ This design details the technical architecture for optimizing Neon database perf
        │
        ▼
 [ Neon Serverless PostgreSQL ]
+
+ ═════════════════════════════════════════════════════════════════════════════════
+  OUTCOME & KNOWLEDGE TRANSFER PROTOCOL (.ai/plans/neon/outcome/)
+  • BEFORE execution: Read ALL files in .ai/plans/neon/outcome/ to avoid re-analysis.
+  • AFTER execution: Write .ai/plans/neon/outcome/<task-id>-outcome.md with findings.
+  • PROGRESS TRACKING: Update task checkbox [ ] ➔ [x] in tasks.md.
+ ═════════════════════════════════════════════════════════════════════════════════
 ```
 
 ---
 
 ## 2. Component Design & Interfaces
 
-### 2.1 Dual Client Helper (`backend/db/http-client.ts`)
+### 2.1 Outcome Knowledge Base (`.ai/plans/neon/outcome/`)
+Persistent store for research, documentation lookups, search findings, edge case analysis, and task results:
+- **Input Rule:** Agent reads all `.md` files in `.ai/plans/neon/outcome/` before beginning any task.
+- **Output Rule:** Agent writes `.ai/plans/neon/outcome/<task-id>-outcome.md` upon completing any task.
+- **Tracking Rule:** Agent marks `[ ]` -> `[x]` in `tasks.md`.
+
+### 2.2 Dual Client Helper (`backend/db/http-client.ts`)
 Helper for stateless single read queries using Neon's HTTP driver:
 
 ```typescript
@@ -56,7 +70,7 @@ export function getNeonHttpClient() {
 }
 ```
 
-### 2.2 Prepared Statements 2.0 (Pilot Candidate: `user.repository.ts`)
+### 2.3 Prepared Statements 2.0 (Pilot Candidate: `user.repository.ts`)
 Pilot implementation on `backend/db/repo/users/user.repository.ts`:
 
 ```typescript
@@ -77,7 +91,7 @@ export const findUserByIdPrepared = db
 - **Suite Verification Commands:**  
   `bun test:db` and `bun test:services`
 
-### 2.3 GraphQL DataLoader Integration (Pilot Candidate: `users` Domain)
+### 2.4 GraphQL DataLoader Integration (Pilot Candidate: `users` Domain)
 Pilot implementation on `backend/graphql/pothos/users/`:
 
 ```typescript
@@ -99,11 +113,14 @@ t.loadable({
 
 ---
 
-## 3. Strict Quality Verification Loop
+## 3. Strict Quality Verification Loop & Outcome Protocol
 
 Every task step MUST strictly adhere to the project's non-negotiable verification loop:
 
-### 3.1 Per-File Quality Loop (Immediate post-edit)
+### 3.1 Pre-Execution Knowledge Read
+Read ALL files in `.ai/plans/neon/outcome/` to absorb prior research, search findings, and carry-over points.
+
+### 3.2 Per-File Quality Loop (Immediate post-edit)
 Immediately after modifying any file, execute per-file verification before editing other files:
 1. `bun tsgo`
 2. `bun biome:check`
@@ -112,11 +129,15 @@ Immediately after modifying any file, execute per-file verification before editi
    curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" -d '{"id":"verify","files":["<edited-file>"]}'
    ```
 
-### 3.2 Global Subtask Health Check (Completion gate)
+### 3.3 Global Subtask Health Check (Completion gate)
 Before marking any subtask as complete, run full global checks:
 - `bun tsgo` — MUST exit 0
 - `bun biome:check` — MUST exit 0
 - `bun run lint` — MUST exit 0 (zero errors, zero warnings across repository)
+
+### 3.4 Outcome Documentation & Task Checkbox Update
+1. Create/update `.ai/plans/neon/outcome/<task-id>-outcome.md` with full findings, docs/web search notes, and implementation details.
+2. Mark task checkbox `[ ]` -> `[x]` in [tasks.md](file://.ai/plans/neon/tasks.md).
 
 ---
 
@@ -125,6 +146,10 @@ Before marking any subtask as complete, run full global checks:
 ### Decision 1: Single Candidate Pilot Validation
 - **Context:** Refactoring all repositories or GraphQL domains simultaneously risks widespread regression.
 - **Decision:** Validate pattern on candidate files (`user.repository.ts` for DB, `users` for GraphQL). Run schema generation, codegen, and targeted test suites. Only expand to remaining repos/domains after clean verification.
+
+### Decision 2: Outcome Knowledge Base (`.ai/plans/neon/outcome/`)
+- **Context:** Subagents or future agent sessions risk re-doing analysis or missing past learnings.
+- **Decision:** Mandate reading all outcome files before task start and writing a structured outcome file upon task completion.
 
 ---
 

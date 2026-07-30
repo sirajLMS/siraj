@@ -1,6 +1,7 @@
 # Specification: Neon Database Performance Optimization
 
 **Target Directory:** `.ai/plans/neon`  
+**Outcome Directory:** `.ai/plans/neon/outcome`  
 **Methodology:** Spec-Driven Development  
 **Feature:** Advanced Neon Database Performance & Latency Optimization  
 
@@ -47,21 +48,27 @@ As a developer, I want nested GraphQL query fields to fetch data in bulk rather 
 9. **WHEN** any file is modified **THEN** system **SHALL** execute the per-file quality verification loop on that specific file.
 10. **WHEN** any subtask is completed **THEN** system **SHALL** execute `bun tsgo`, `bun biome:check`, and `bun run lint` globally, exiting with zero errors and zero warnings.
 
+### Feature 6: Execution Outcome Protocol & Task Progress Tracking
+11. **WHEN** an executing agent starts any task **THEN** system **SHALL** read ALL existing outcome files in `.ai/plans/neon/outcome/` to absorb prior research, analysis, and pitfalls without re-doing existing work.
+12. **WHEN** an executing agent completes any task **THEN** system **SHALL** write a new outcome document under `.ai/plans/neon/outcome/<task-id>-outcome.md` detailing research findings, docs/web search results, misunderstandings, and carry-over points.
+13. **WHEN** an executing agent completes any subtask **THEN** system **SHALL** update the corresponding task checkbox `[ ]` -> `[x]` in `tasks.md`.
+
 ---
 
 ## 4. Edge Cases & Constraints
 
+- **Knowledge Continuity:** All agents executing tasks must consult `.ai/plans/neon/outcome/` before performing work so that discovered constraints, docs, and search findings are preserved across subtasks.
 - **Single Pilot Validation:** Always validate pilot candidates (`user.repository.ts` for repositories and `users` for GraphQL) with their specific targeted tests before expanding to other modules.
 - **Transaction Safety:** HTTP fetch mode (`neon()`) cannot maintain multi-query transactions; transactions MUST remain on pool/WebSocket connections.
 - **Serverless Isolation:** In-memory caches (such as DataLoader) MUST be scoped per-request to prevent data leakage between different users.
-- **Environment Parity:** Local development using PostgreSQL (`DB_PROVIDER=postgres`) MUST continue functioning seamlessly without breaking local `pg-pooled` drivers.
 
 ---
 
 ## 5. Requirements Quality Checklist
 
+- [x] Outcome directory protocol (`.ai/plans/neon/outcome/`) defined for task knowledge transfer
+- [x] Task checkbox tracking (`[ ]` -> `[x]`) required in `tasks.md`
 - [x] Pilot candidates specified for single-repo and single-domain validation
 - [x] All test commands (`bun test:db`, `bun test:services`, `bun generate:gqlSchema`, `bun codegen`, `bun test:graphql`) explicitly integrated
 - [x] Per-file quality verification loop required on file modification
 - [x] Global quality verification (`tsgo`, `biome:check`, `lint`) required with zero errors and warnings
-- [x] EARS format used consistently for all acceptance criteria

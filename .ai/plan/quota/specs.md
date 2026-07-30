@@ -42,7 +42,7 @@ The recurring-class create form exposes **three parent scheduling modes**:
 8. **Quota ledger REPLACES repo-level direct SQL** — `handleQuotaDeduction` / `adjustQuotaOnUpdate` in `state-changes.ts` must be removed; all quota-backed deductions go through `QuotaService` + ledger
 9. **Teacher timezone derived from schedule/availability** — no `timezoneOverride` on `teachers` table; use `recurring_schedules.timezone` or `teacher_availability_windows.timezone`
 
-## User Experience & Navigation
+## User Experience & Navigation (MANDATORY SECTION)
 
 ### New Routes & Role-Based Access
 
