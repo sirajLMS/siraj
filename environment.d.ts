@@ -31,6 +31,8 @@ declare global {
       DB_CONNECTION_MODE?: "auto" | "pg" | "neon";
       DATABASE_URL: string;
       DATABASE_ENCRYPTION_KEY: string;
+      /** Neon integration test database URL (loaded from .env.test, not for production use) */
+      NEON_TEST_DATABASE_URL?: string;
 
       // JWT Configuration
       JWT_SECRET: string;

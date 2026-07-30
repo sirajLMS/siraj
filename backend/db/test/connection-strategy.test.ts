@@ -73,16 +73,28 @@ describe("resolveConnectionStrategy", () => {
     expect(resolveConnectionStrategy()).toBe("pg-pooled");
   });
 
-  test("auto + VERCEL=1 uses pg-pooled", () => {
+  test("auto + VERCEL=1 uses pg-pooled when DB_PROVIDER=postgres", () => {
     snapshotEnv();
-    setEnv({ VERCEL: "1", DB_PROVIDER: "neon" });
+    setEnv({ VERCEL: "1", DB_PROVIDER: "postgres" });
     expect(resolveConnectionStrategy()).toBe("pg-pooled");
   });
 
-  test("auto + RAILWAY_ENVIRONMENT=production uses pg-pooled", () => {
+  test("auto + RAILWAY_ENVIRONMENT=production uses pg-pooled when DB_PROVIDER=postgres", () => {
+    snapshotEnv();
+    setEnv({ RAILWAY_ENVIRONMENT: "production", DB_PROVIDER: "postgres" });
+    expect(resolveConnectionStrategy()).toBe("pg-pooled");
+  });
+
+  test("auto + VERCEL=1 uses neon-serverless when DB_PROVIDER=neon", () => {
+    snapshotEnv();
+    setEnv({ VERCEL: "1", DB_PROVIDER: "neon" });
+    expect(resolveConnectionStrategy()).toBe("neon-serverless");
+  });
+
+  test("auto + RAILWAY_ENVIRONMENT=production uses neon-serverless when DB_PROVIDER=neon", () => {
     snapshotEnv();
     setEnv({ RAILWAY_ENVIRONMENT: "production", DB_PROVIDER: "neon" });
-    expect(resolveConnectionStrategy()).toBe("pg-pooled");
+    expect(resolveConnectionStrategy()).toBe("neon-serverless");
   });
 });
 

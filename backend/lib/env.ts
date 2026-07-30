@@ -126,7 +126,54 @@ function validateDatabaseUrl(): string {
     logger.warn("⚠️  DATABASE_URL may not be a valid PostgreSQL connection string.");
   }
 
+  // Validate SSL mode and Neon pooling on Vercel
+  validateDatabaseUrlForVercel(databaseUrl);
+
   return databaseUrl;
+}
+
+/**
+ * Validate DATABASE_URL for Vercel deployment with Neon
+ * - Enforces sslmode=verify-full (or sslmode=require with usews=true)
+ * - Warns/errors if not using Neon pooled connection string on Vercel
+ */
+function validateDatabaseUrlForVercel(databaseUrl: string): void {
+  if (!process.env.VERCEL) return;
+
+  try {
+    const parsed = new URL(databaseUrl);
+
+    // Check SSL mode
+    const sslMode = parsed.searchParams.get("sslmode");
+    const useLibpqCompat = parsed.searchParams.get("uselibpqcompat");
+    const isRequireWithCompat = sslMode === "require" && useLibpqCompat === "true";
+
+    if (sslMode !== "verify-full" && !isRequireWithCompat) {
+      const message =
+        "⚠️  On Vercel, DATABASE_URL should use sslmode=verify-full (or sslmode=require with uselibpqcompat=true) for secure connections.";
+      if (process.env.NODE_ENV === "production") {
+        throw new Error(`CRITICAL: ${message}`);
+      }
+      logger.warn(message);
+    }
+
+    // Check for Neon pooled connection string (only when DB_PROVIDER === "neon")
+    if (process.env.DB_PROVIDER?.toLowerCase() === "neon") {
+      const isPooled = databaseUrl.includes("-pooler.") || databaseUrl.includes("pooler=true");
+      if (!isPooled) {
+        const message =
+          "⚠️  On Vercel, use a Neon pooled connection string (-pooler host) with Fluid compute TCP pooling.";
+        logger.warn(message);
+      }
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("CRITICAL")) {
+      throw error;
+    }
+    logger.warn(
+      `⚠️  Could not parse DATABASE_URL for validation: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 }
 
 /**
@@ -381,6 +428,7 @@ let cachedConfig: EnvironmentConfig | undefined;
 
 function warnIfVercelDatabaseUrlNotPooled(databaseUrl: string): void {
   if (!process.env.VERCEL || !databaseUrl) return;
+  if (process.env.DB_PROVIDER?.toLowerCase() !== "neon") return;
 
   const isPooled = databaseUrl.includes("-pooler.") || databaseUrl.includes("pooler=true");
   if (!isPooled) {

@@ -51,10 +51,16 @@ async function resolveAuthFromRequest(
     return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
   }
 
+  // Ensure we never return an empty string as userId
+  const realUserId = groupSimulationIdentity.realUserId;
+  if (!realUserId) {
+    return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
+  }
+
   return {
-    effectiveUserId: groupSimulationIdentity.realUserId,
+    effectiveUserId: realUserId,
     isImpersonating: false,
-    realUserId: groupSimulationIdentity.realUserId,
+    realUserId,
     isSimulatingGroup: groupSimulationIdentity.isSimulatingGroup,
     simulatedGroupSlug: groupSimulationIdentity.simulatedGroupSlug,
   };
