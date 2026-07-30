@@ -22,6 +22,33 @@ Before starting any task in [trackable-tasks.md](./trackable-tasks.md):
 - [ ] Run per-file verification loop before importing new code elsewhere
 - [ ] **After quality loop: Run instruction verification subtask to revalidate files against instruction files**
 
+## User Experience & Navigation (from specs.md)
+
+### New Routes & Permissions
+
+| Route | Permission | Roles |
+|-------|------------|-------|
+| `/quotas` | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/quotas/new` | `QUOTAS_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN |
+| `/quotas/[id]` | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/quotas/[id]/edit` | `QUOTAS_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN |
+| `/quotas/insights` | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/students/[id]/profile?tab=quota` | `StudentsOverrideQuota` | ALL (student, parent, teacher, supervisor) |
+
+### Sidebar Navigation
+
+Quota pages are **sub-items under Billing** in the **Finance (grp_finance)** group:
+- Billing → Quotas (list, new, view, edit, insights)
+- Mobile: add to `BOTTOM_NAV_ITEMS` for STAFF+ roles
+
+### Student Quota Tab
+
+Enhanced for **all audiences** (student, parent, teacher, supervisor) with per-audience rendering. No dedicated teacher quota page.
+
+### Mobile vs Desktop
+
+Separate view trees under `frontend/desktop/` and `frontend/mobile/` with shared ViewModels and navigation config.
+
 ## Task-to-Instructions Mapping
 
 Each task in trackable-tasks.md falls under one or more instruction files. Read ALL matching files before starting:
@@ -257,7 +284,7 @@ After all Pothos changes:
 bun run generate:gqlSchema && bun codegen
 ```
 
-## Phase 6: Permissions & Notifications
+## Phase 6: Permissions, Notifications & Navigation
 
 ### Permissions
 
@@ -268,6 +295,18 @@ QUOTAS_MANAGE = "quotas.manage"
 ```
 
 Seed grants in `backend/db/seeds/permissions/`.
+
+**Navigation & Sidebar Config for Quota Pages**
+
+`frontend/common/views/dashboard/config/navigationConfig.ts`:
+- Add quota nav items under Billing group (grp_finance) as children of Billing:
+  - `quotas.list` → `/quotas` (permission: `QUOTAS_VIEW`)
+  - `quotas.create` → `/quotas/new` (permission: `QUOTAS_MANAGE`)
+  - `quotas.view` → `/quotas/[id]` (permission: `QUOTAS_VIEW`)
+  - `quotas.edit` → `/quotas/[id]/edit` (permission: `QUOTAS_MANAGE`)
+  - `quotas.insights` → `/quotas/insights` (permission: `QUOTAS_VIEW`)
+- Ensure `SUPERVISOR` and `STAFF` roles get `QUOTAS_VIEW` in seeded permission groups (add to `staff_default` and `supervisor_default` groups in SQL migration)
+- Add quota items to `BOTTOM_NAV_ITEMS` for mobile (filter by `QUOTAS_VIEW`)
 
 ### Notifications
 
@@ -384,14 +423,14 @@ Re-export from billing index barrel. Run codegen.
 
 ### Routes (`app/(dashboard)/`)
 
-| Route | Purpose | Permission |
-|-------|---------|------------|
-| `/quotas` | Admin list | `QUOTAS_VIEW` |
-| `/quotas/new` | Create form | `QUOTAS_MANAGE` |
-| `/quotas/[id]` | Detail view | `QUOTAS_VIEW` |
-| `/quotas/[id]/edit` | Edit form | `QUOTAS_MANAGE` |
-| `/quotas/insights` | Admin charts | `QUOTAS_VIEW` |
-| `/students/[id]/quotas` | Redirect → `?tab=quota` | `QUOTAS_VIEW` |
+| Route | Purpose | Permission | Roles |
+|-------|---------|------------|-------|
+| `/quotas` | Admin list | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/quotas/new` | Create form | `QUOTAS_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN |
+| `/quotas/[id]` | Detail view | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/quotas/[id]/edit` | Edit form | `QUOTAS_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN |
+| `/quotas/insights` | Admin charts | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/students/[id]/profile?tab=quota` | Student quota tab | `StudentsOverrideQuota` | ALL (student, parent, teacher, supervisor) |
 
 ### View structure (mirror existing dashboard patterns)
 
@@ -412,12 +451,32 @@ Re-export from billing index barrel. Run codegen.
 
 **Store:** `frontend/common/stores/quotaStore.ts` — form state survives tier switch.
 
+### Navigation & Sidebar Config
+
+`frontend/common/views/dashboard/config/navigationConfig.ts`:
+- Add quota nav items under Billing group (grp_finance) as children of Billing page
+- Items: list, new, view, edit, insights (all filtered by QUOTAS_VIEW/MANAGE)
+- Add to `BOTTOM_NAV_ITEMS` for mobile with permission filtering
+
 **Insights page charts:**
 - Quota purchases over time
 - Redemption rate by quota type
 - On-demand class delivery rate
 - PENDING_CREDIT backlog gauge
 - Expired slippage
+
+### Student Profile Quota Tab (Enhanced)
+
+**Existing tab** at `app/(dashboard)/students/[id]/profile?tab=quota` — enhanced for **all audiences**:
+
+| Audience | Prominent Content |
+|----------|-------------------|
+| **Student** | Own active quotas, PENDING_CREDIT on-demand classes, upcoming expirations |
+| **Parent** | Children's quotas (read-only), low-balance alerts, on-demand reminders |
+| **Teacher** | Assigned students' quotas, CONFLICT_HELD on-demand classes at top, redemption status |
+| **Supervisor** | All students' quotas, analytics summary, expired quota alerts |
+
+No dedicated teacher quota page — teachers access via student profile when viewing assigned students.
 
 ## Phase 11: Frontend — Recurring Class Form
 

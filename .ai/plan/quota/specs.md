@@ -42,6 +42,76 @@ The recurring-class create form exposes **three parent scheduling modes**:
 8. **Quota ledger REPLACES repo-level direct SQL** — `handleQuotaDeduction` / `adjustQuotaOnUpdate` in `state-changes.ts` must be removed; all quota-backed deductions go through `QuotaService` + ledger
 9. **Teacher timezone derived from schedule/availability** — no `timezoneOverride` on `teachers` table; use `recurring_schedules.timezone` or `teacher_availability_windows.timezone`
 
+## User Experience & Navigation
+
+### New Routes & Role-Based Access
+
+| Route | Purpose | Permissions Required | Roles with Access |
+|-------|---------|---------------------|-------------------|
+| `/quotas` | Quota list (admin) | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/quotas/new` | Create quota | `QUOTAS_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN |
+| `/quotas/[id]` | Quota detail view | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/quotas/[id]/edit` | Edit quota | `QUOTAS_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN |
+| `/quotas/insights` | Admin analytics | `QUOTAS_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/students/[id]/profile?tab=quota` | Student quota tab (enhanced) | `StudentsOverrideQuota` | ALL (student, parent, teacher, supervisor) |
+
+### Sidebar Navigation Placement
+
+Quota admin pages appear as **sub-items under the Billing page** in the **Finance (grp_finance)** group:
+
+```
+grp_finance (Finance)
+  ├── Billing (/billing) → BillingViewHistory
+  ├── Invoices (/invoices) → InvoicesView
+  ├── Quotas (/quotas) → QUOTAS_VIEW
+  │   ├── List (/quotas)
+  │   ├── New (/quotas/new) → QUOTAS_MANAGE
+  │   ├── View (/quotas/[id])
+  │   ├── Edit (/quotas/[id]/edit) → QUOTAS_MANAGE
+  │   └── Insights (/quotas/insights)
+  └── ...other finance items
+```
+
+**Navigation Config Updates** (`frontend/common/views/dashboard/config/navigationConfig.ts`):
+- Add quota nav items to `SIDEBAR_NAV_ITEMS` as children of Billing item (using `groupId: "grp_finance"` and parent reference)
+- Mobile bottom nav: add `quotas` to `BOTTOM_NAV_ITEMS` for STAFF+ roles
+
+### Per-Audience Rendering: Student Quota Tab
+
+The existing `/students/[id]/profile?tab=quota` page is enhanced for **all audiences** with role-specific rendering:
+
+| Audience | Prominent Content |
+|----------|-------------------|
+| **Student** | Own active quotas, PENDING_CREDIT on-demand classes, upcoming expirations |
+| **Parent** | Children's quotas (read-only), low-balance alerts, on-demand reminders |
+| **Teacher** | Assigned students' quotas, CONFLICT_HELD on-demand classes at top, redemption status |
+| **Supervisor** | All students' quotas, analytics summary, expired quota alerts |
+
+**No dedicated teacher quota page** — teachers access quota info only through the student profile quota tab when viewing assigned students.
+
+### Mobile vs Desktop
+
+| Aspect | Desktop | Mobile |
+|--------|---------|--------|
+| Quota list | DataGrid with columns | Card list with key metrics |
+| Quota form | Modal/drawer form | Inline stacked sections |
+| Quota detail | Side panel + tabs | Full-screen with collapsible sections |
+| Insights | Dashboard with charts | Vertical card stack with mini-charts |
+| Student quota tab | Tab in profile | Accordion in profile |
+
+**Shared**: Navigation config, permission checks, ViewModels, GraphQL documents.
+
+### Permission Matrix
+
+| Permission | Value | Granted To (via groups) |
+|------------|-------|------------------------|
+| `QUOTAS_VIEW` | `quotas.view` | `super_admin`, `academy_admin`, `staff_default` |
+| `QUOTAS_MANAGE` | `quotas.manage` | `super_admin`, `academy_admin` |
+
+**Existing `StudentsOverrideQuota`** permission already grants student quota tab access to SUPER_ADMIN, ACADEMY_ADMIN, TEACHER, PARENT, SUPERVISOR.
+
+---
+
 ## Architecture
 
 ### System Context

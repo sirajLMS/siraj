@@ -192,9 +192,17 @@
 
 ---
 
-## Phase 4: Admin Numbers Page
+## Phase 4: Admin WhatsApp Configuration (Frontend) — REPLACED BY PHASE 7
 
-- [ ] **14. i18n (REQ-7, R7, B6)**
+The original Phase 4 (Tasks 14-17) defined a single Numbers page. This has been superseded by the expanded UX in **Phase 7** (Tasks 21-29) which adds:
+- Integrations NavGroup in sidebar
+- Three-tab WhatsApp config (Numbers, Templates, Opt-in)
+- Opt-in schema extension
+- Per-role permission matrix
+
+Tasks 14-17 below are kept for i18n and GraphQL documents which are still needed, but the view tasks (16-17) are replaced by Phase 7 tasks 24-26.
+
+- [ ] **14. i18n (REQ-7, R7, B6, REQ-11)**
   - [ ] 14.1 Create `shared/locale/types/whatsapp/index.ts`
   - [ ] 14.2 Create `shared/locale/en/whatsapp/index.ts`
   - [ ] 14.3 Create `shared/locale/ar/whatsapp/index.ts`
@@ -203,38 +211,22 @@
   - [ ] 14.6 Coexistence warning (Business App vs Cloud API, 20 mps cap) + unverified 2-slot warning strings (R7)
   - [ ] 14.7 **Opt-in toggle + consent copy** strings (REQ-10)
   - [ ] 14.8 Tier-label captions map raw Meta enum → localized strings (Q5); template `language.code` is data-driven from synced rows, never a hardcoded locale mapping (B6)
-  - [ ] 14.9 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
-  - [ ] 14.10 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
-      - Shared locale files: `shared/AGENTS.md` + `.agents/instructions/backend.instructions.md` (shared layer used by both frontend/backend)
+  - [ ] 14.9 Quality loop per file
+  - [ ] 14.10 **AGENTS.md/instruction compliance**: `shared/AGENTS.md` + `.agents/instructions/backend.instructions.md`
 
-- [ ] **15. Frontend GraphQL documents**
+- [ ] **15. Frontend GraphQL documents (REQ-8, REQ-11)**
   - [ ] 15.1 Create `frontend/common/graphql/sharedDocuments/whatsapp/whatsapp.documents.ts` — every object includes `id`
   - [ ] 15.2 Run `bun codegen` if schema already generated in task 11
-  - [ ] 15.3 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
-  - [ ] 15.4 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
-      - GraphQL documents: `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`
+  - [ ] 15.3 Quality loop per file
+  - [ ] 15.4 **AGENTS.md/instruction compliance**: `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`
 
-- [ ] **16. ViewModel (REQ-4, Q2)**
-  - [ ] 16.1 Create `useWhatsappAccountsViewModel.ts` — `useQuery` with `fetchPolicy: "cache-and-network"`, `useMemo` mapping, flat VM return
-  - [ ] 16.2 Create `types/whatsappConfigTypes.ts` if needed
-  - [ ] 16.3 **No Zustand store** (Q2): token/PIN edit dialog state is component-local `useState`
-  - [ ] 16.4 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
-  - [ ] 16.5 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
-      - ViewModel hook: `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`
-      - Types file: `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`
+- [ ] **16. ViewModel & Types for WhatsApp Settings (REQ-11)**
+  - [ ] 16.1 Create `frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes.ts`
+  - [ ] 16.2 Create `frontend/common/views/dashboard/settings/whatsapp/useWhatsappSettingsViewModel.ts`
+  - [ ] 16.3 Quality loop per file
+  - [ ] 16.4 **AGENTS.md/instruction compliance**: `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`
 
-- [ ] **17. Tier-isolated views (REQ-4, Q2)**
-  - [ ] 17.1 Create `WhatsappConfigView.tsx` — `ResponsiveViewSwitch` + `createLazyView`
-  - [ ] 17.2 Create `whatsappConfig.desktop.tsx` + account card components (token/PIN dialogs with local state)
-  - [ ] 17.3 Create `whatsappConfig.mobile.tsx` + account card components
-  - [ ] 17.4 Wire settings navigation + `WHATSAPP_VIEW` permission gate
-  - [ ] 17.5 Opt-in toggle surface in notification-preferences UI (REQ-10) with consent copy from task 14.7
-  - [ ] 17.6 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
-  - [ ] 17.7 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
-      - Common switcher/ViewModel: `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`
-      - Desktop views: `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/mobile-desktop.instructions.md`
-      - Mobile views: `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/mobile-desktop.instructions.md`
-  - [ ] 17.6 Per-file verification on frontend files
+- [ ] **17. REMOVED** — Replaced by Phase 7 tasks 24-26 (Numbers/Templates/Opt-in tabs with tier isolation)
 
 ---
 
@@ -274,9 +266,80 @@
       - Unit tests: `scripts/run-test/AGENTS.md`, `backend/db/test/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/tests.instructions.md`
       - Frontend test: `test/ui/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 
+- [ ] 19.7 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [ ] 19.8 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
+      - Unit tests: `scripts/run-test/AGENTS.md`, `backend/db/test/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/tests.instructions.md`
+      - Frontend test: `test/ui/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
+
 ---
 
-## Phase 6: Quality Loops
+## Phase 7: Integrations Navigation & Admin UX (NEW)
+
+- [ ] **21. NavigationConfig extension (REQ-11, REQ-12)**
+  - [ ] 21.1 Edit `frontend/common/views/dashboard/config/navigationConfig.ts` — add `Integrations` NavGroup after `Admin` with `WHATSAPP_VIEW` permission gate
+  - [ ] 21.2 Add WhatsApp NavItem: `href: "/settings/whatsapp"`, icon, permission: `WHATSAPP_VIEW`
+  - [ ] 21.3 Ensure `applyTeacherNavOverrides` / `applyParentNavOverrides` / `applyStudentNavOverrides` hide Integrations group for portal users
+  - [ ] 21.4 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on modified file
+  - [ ] 21.5 **AGENTS.md/instruction compliance**: `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
+
+- [ ] **22. Settings route for WhatsApp (REQ-11)**
+  - [ ] 22.1 Create `app/(dashboard)/settings/whatsapp/page.tsx` — Server Component with `requirePermissionForPage` checking `WHATSAPP_VIEW`
+  - [ ] 22.2 Create `app/(dashboard)/settings/whatsapp/WhatsappSettingsContainer.tsx` — Client Component with `RequirePermission` wrapper
+  - [ ] 22.3 Quality loop per file
+  - [ ] 22.4 **AGENTS.md/instruction compliance**: `app/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`
+
+- [ ] **23. WhatsApp Settings Three-Tab UI (REQ-11)**
+  - [ ] 23.1 Create `frontend/common/views/dashboard/settings/whatsapp/WhatsappConfigView.tsx` — `ResponsiveViewSwitch` + `createLazyView`
+  - [ ] 23.2 Create `frontend/common/views/dashboard/settings/whatsapp/useWhatsappSettingsViewModel.ts` — ViewModel with three tab states, data fetching
+  - [ ] 23.3 Create `frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes.ts` — shared types
+  - [ ] 23.4 Quality loop per file
+  - [ ] 23.5 **AGENTS.md/instruction compliance**: `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
+
+- [ ] **24. Numbers Tab (REQ-11, REQ-4)**
+  - [ ] 24.1 Create `frontend/common/views/dashboard/settings/whatsapp/tabs/NumbersTab.tsx` — shared tab component
+  - [ ] 24.2 Create `frontend/desktop/views/dashboard/settings/whatsapp/tabs/NumbersTab.desktop.tsx` — account cards, sync button, token/PIN dialogs
+  - [ ] 24.3 Create `frontend/mobile/views/dashboard/settings/whatsapp/tabs/NumbersTab.mobile.tsx` — account list, sync, dialogs
+  - [ ] 24.4 Quality loop per file
+  - [ ] 24.5 **AGENTS.md/instruction compliance**: desktop tier → `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/mobile-desktop.instructions.md`; mobile tier → `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/mobile-desktop.instructions.md`
+
+- [ ] **25. Templates Tab (Read-Only Sync) (REQ-11, REQ-4)**
+  - [ ] 25.1 Create shared + desktop + mobile template tab components
+  - [ ] 25.2 Template list with name, language (exact from Meta), category, status, last synced
+  - [ ] 25.3 "Sync Templates" button → `syncTemplates` mutation
+  - [ ] 25.4 Quality loop per file
+  - [ ] 25.5 **AGENTS.md/instruction compliance**: same tier mapping as above
+
+- [ ] **26. Opt-in Management Tab (REQ-11, REQ-10)**
+  - [ ] 26.1 Create shared + desktop + mobile opt-in tab components
+  - [ ] 26.2 Paginated table: User (name + role), Phone (E.164), Opt-in Status (toggle), Last Change, Changed By
+  - [ ] 26.3 Filters: role (parent/student), opt-in status, search by name/phone
+  - [ ] 26.4 Bulk actions: Enable/Disable selected (SUPER_ADMIN only, confirmed dialog)
+  - [ ] 26.5 Row action: "View Audit Trail" → opens drawer with opt-in change history (user, timestamp, from→to, changed by)
+  - [ ] 26.6 Quality loop per file
+  - [ ] 26.7 **AGENTS.md/instruction compliance**: same tier mapping
+
+- [ ] **27. Shared WhatsApp Settings Types & Hooks (REQ-11)**
+  - [ ] 27.1 Create `frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes.ts`
+  - [ ] 27.2 Create `frontend/common/views/dashboard/settings/whatsapp/useWhatsappSettingsViewModel.ts`
+  - [ ] 27.3 Create `frontend/common/stores/whatsappSettingsStore.ts` (if needed for cross-tab state)
+  - [ ] 27.4 Quality loop per file
+  - [ ] 27.5 **AGENTS.md/instruction compliance**: `frontend/common/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`
+
+- [ ] **28. i18n for WhatsApp Admin UX (REQ-11, REQ-7)**
+  - [ ] 28.1 Add tab labels, column headers, action buttons, warnings to `shared/locale/{types,en,ar}/whatsapp/index.ts`
+  - [ ] 28.2 Add opt-in consent copy, coexistence warnings, unverified slot warnings
+  - [ ] 28.3 Quality loop per file
+  - [ ] 28.4 **AGENTS.md/instruction compliance**: `shared/AGENTS.md` + `.agents/instructions/backend.instructions.md` (shared layer)
+
+- [ ] **29. Per-user opt-in schema extension (REQ-10)**
+  - [ ] 29.1 Extend existing notification-preference storage with `whatsappEnabled` boolean default false
+  - [ ] 29.2 Add `whatsapp_opt_in` audit event type to `AuditEntityType` / audit service
+  - [ ] 29.3 Quality loop per file
+  - [ ] 29.4 **AGENTS.md/instruction compliance**: `backend/db/schema/AGENTS.md`, `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
+
+---
+
+## Phase 8: Quality Loop (renamed from Quality Gates)
 
 - [ ] **20. Final verification**
   - [ ] 20.1 All REQ acceptance criteria checked against [specs.md](./specs.md) — including REQ-10 opt-in and REQ-9 core-set alignment (Q1)
@@ -307,10 +370,11 @@ _Add rows when blocked. Remove or mark resolved when unblocked._
 | 1. Channel Foundations | 6 | 0 | `[ ]` |
 | 2. Accounts Backend | 5 | 0 | `[ ]` |
 | 3. Webhook Receiver | 2 | 0 | `[ ]` |
-| 4. Admin Numbers Page | 4 | 0 | `[ ]` |
+| 4. Admin WhatsApp Config (Frontend) | 4 | 0 | `[ ]` |
 | 5. Tests | 2 | 0 | `[ ]` |
-| 6. Quality Loops | 1 | 0 | `[ ]` |
-| **Total** | **20** | **0** | **0%** |
+| 6. Integrations Nav & UX | 9 | 0 | `[ ]` |
+| 7. Quality Loop | 1 | 0 | `[ ]` |
+| **Total** | **29** | **0** | **0%** |
 
 _Update the Progress Summary table as tasks are completed._
 
@@ -323,13 +387,15 @@ _Update the Progress Summary table as tasks are completed._
 | REQ-1 Channel | 1, 6 |
 | REQ-2 Send template messages | 4, 5, 18 |
 | REQ-3 Credentials | 2, 7, 8, 9 |
-| REQ-4 Numbers admin | 9, 16, 17 |
+| REQ-4 Numbers admin | 9, 24, 25, 26 |
 | REQ-5 Webhooks | 12, 13, 19.2 |
 | REQ-6 Permissions | 10 |
-| REQ-7 i18n | 14 |
+| REQ-7 i18n | 14, 28 |
 | REQ-8 GraphQL | 11, 15 |
 | REQ-9 Integration tests | 4, 18 |
-| REQ-10 Opt-in | 9.4, 14.7, 17.5, 19.3 |
+| REQ-10 Opt-in | 9.4, 14.7, 17.5, 19.3, 26, 29 |
+| REQ-11 Admin Integrations Nav & WhatsApp Config UX | 22, 23, 24, 25, 26, 27, 28 |
+| REQ-12 Permission Matrix for WhatsApp Admin UX | 10, 22, 23, 24, 25, 26 |
 
 ## Review-Finding Traceability
 
@@ -361,3 +427,6 @@ _Update the Progress Summary table as tasks are completed._
 | Q3 ViewModel unit test | 19.5 |
 | Q4 failed sends consume budget | 5.1 |
 | Q5 raw tier enum verbatim | 7.1, 9.1, 13.5, 14.8, 19.2 |
+| UX1 Integrations nav group + tabbed config | 22, 23, 24, 25, 26, 27 |
+| UX2 Per-role permission matrix | 10, 20.2 |
+| UX3 Opt-in admin management | 26, 29 |

@@ -124,6 +124,19 @@
     - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/enum/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/db/seeds/AGENTS.md`
     - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
 
+- [ ] **10. Navigation & Sidebar Config for Quota Pages**
+  - [ ] 10.1 Edit `frontend/common/views/dashboard/config/navigationConfig.ts` — add quota nav items under Billing group (grp_finance):
+    - `quotas.list` → `/quotas` (permission: `QUOTAS_VIEW`, audience: all)
+    - `quotas.create` → `/quotas/new` (permission: `QUOTAS_MANAGE`, audience: all)
+    - `quotas.view` → `/quotas/[id]` (permission: `QUOTAS_VIEW`, audience: all)
+    - `quotas.edit` → `/quotas/[id]/edit` (permission: `QUOTAS_MANAGE`, audience: all)
+    - `quotas.insights` → `/quotas/insights` (permission: `QUOTAS_VIEW`, audience: all)
+  - [ ] 10.2 Ensure `SUPERVISOR` and `STAFF` roles get `QUOTAS_VIEW` in seeded permission groups
+  - [ ] 10.3 Add quota items to `BOTTOM_NAV_ITEMS` for mobile (filter by `QUOTAS_VIEW`)
+  - [ ] 10.4 **Instruction verification**: Verify against:
+    - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md`
+    - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`
+
 ---
 
 ## Phase 5: Notifications

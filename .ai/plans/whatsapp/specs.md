@@ -34,20 +34,29 @@ Add WhatsApp outbound notifications via **pre-approved utility templates** (arbi
 | Reuse `notification_deliveries` for delivery rows + index on `provider_message_id` | Dedicated `whatsapp_message_deliveries` table |
 | Hybrid creds: env-config (global) + `whatsapp_accounts` (per-account, encrypted) | Templates admin CRUD page |
 | Webhook: status + 4 template lifecycle events + account quality/capability | Periodic template sync cron (one-shot `syncTemplates` remains) |
-| Numbers admin page (desktop + mobile tier-isolated) | Multi-WABA admin beyond list + sync |
+| **Integrations nav group** with WhatsApp config (desktop + mobile tier-isolated) | Multi-WABA admin beyond list + sync |
+| **Three tabs**: Numbers + Templates (read-only sync) + Opt-in Management | Multi-tenant WABA isolation |
 | Permissions `whatsapp.view` / `whatsapp.config_manage` / `whatsapp.templates_manage` (3 only — see REQ-6) | Paid out-of-window reply toggles |
 | Per-user WhatsApp opt-in preference (default OFF) | Opt-in via inbound message parsing |
 | AR/EN `whatsapp` locale namespace | |
 
 ### Confirmed decisions (stakeholder + post-review)
 
-1. Full product in one PR: channel + Numbers admin + webhooks + tests + permissions + i18n.
+1. Full product in one PR: channel + Integrations nav group + webhooks + tests + permissions + i18n.
 2. Delivery storage: existing `notification_deliveries` only, with new partial index on `provider_message_id`.
 3. Credentials: hybrid env-config + encrypted DB per account.
 4. Webhooks: outbound status only; inbound `messages[]` acknowledged with 200, **stripped at the route level before any logging/audit** (S3), not persisted.
 5. Provider: Meta Cloud API only; `WHATSAPP_PROVIDER` env slot fixed to `cloud_api` (forward-compat).
 6. Every Graph API call must have a matching `@live-comm` integration test (REQ-9) — builders reduced to the **core set actually invoked by runtime code** (Q1).
 7. Template-only sends for all v1 events (BL4 deferred optimization).
+8. **Navigation**: New `Integrations` NavGroup in sidebar with `WHATSAPP_VIEW` permission. Contains WhatsApp config at `/settings/whatsapp` (or `/integrations/whatsapp`). Settings tab also added for deep config.
+9. **Audience**: `SUPER_ADMIN`, `ACADEMY_ADMIN`, `STAFF_DEFAULT`, `SUPERVISOR_DEFAULT` with `WHATSAPP_VIEW` permission. Portal users (teachers, parents, students) never see it — they only receive notifications.
+10. **Tab-level permissions**: Numbers tab (view: `WHATSAPP_VIEW`, config: `WHATSAPP_CONFIG_MANAGE`), Templates tab (read-only sync, `WHATSAPP_TEMPLATES_MANAGE`), Opt-in tab (view: `WHATSAPP_VIEW`, bulk mutate: `SUPER_ADMIN` only).
+11. **Secret rotation**: `setAccessToken` / `setTwoStepPin` / Opt-in bulk / Sync → `SUPER_ADMIN` only. `WHATSAPP_CONFIG_MANAGE` = view + sync only.
+11. **Audience**: `SUPER_ADMIN`, `ACADEMY_ADMIN`, `STAFF_DEFAULT`, `SUPERVISOR_DEFAULT` with `WHATSAPP_VIEW` permission. Portal users (teachers, parents, students) never see it — they only receive notifications.
+12. **Tab-level permissions**: Numbers tab (view: `WHATSAPP_VIEW`, config: `WHATSAPP_CONFIG_MANAGE`), Templates tab (read-only sync, `WHATSAPP_TEMPLATES_MANAGE`), Opt-in tab (view: `WHATSAPP_VIEW`, bulk mutate: `SUPER_ADMIN` only).
+13. **Secret rotation**: `setAccessToken` / `setTwoStepPin` / Opt-in bulk / Sync → `SUPER_ADMIN` only. `WHATSAPP_CONFIG_MANAGE` = view + sync only.
+14. **Opt-in default OFF**: All users (parents, students) start with `whatsappEnabled: false`. Admins can toggle individually or bulk in Opt-in tab. Users can opt-in via profile settings.
 
 ### Official integration path
 Meta discontinued `WhatsApp/WhatsApp-Nodejs-SDK` (archived June 2023, alpha v0.0.5). Meta docs state community SDKs are not endorsed. **Official path**: HTTPS to `https://graph.facebook.com/v23.0/...`.
@@ -225,6 +234,61 @@ References:
 
 **Priority**: High | **Complexity**: Medium  
 **Dependencies**: REQ-1, REQ-2, user notification-preference storage (extend existing schema)
+
+---
+
+### REQ-11: Admin Integrations Navigation & WhatsApp Configuration UX
+
+**User story:** As a SUPER_ADMIN / ACADEMY_ADMIN / STAFF_DEFAULT / SUPERVISOR_DEFAULT with `WHATSAPP_VIEW` permission, I want a dedicated Integrations section in the sidebar with WhatsApp configuration, so I can manage WhatsApp numbers, templates, and user opt-ins from one place.
+
+#### Acceptance criteria
+
+1. WHEN a user with `WHATSAPP_VIEW` permission logs in THEN the sidebar SHALL show a new **Integrations** NavGroup (after Admin) containing **WhatsApp** NavItem linking to `/settings/whatsapp` (or `/integrations/whatsapp`).
+2. WHEN a user WITHOUT `WHATSAPP_VIEW` permission (including all portal users: teachers, parents, students) logs in THEN the Integrations NavGroup SHALL NOT appear.
+3. WHEN a SUPER_ADMIN logs in THEN they SHALL see the full Integrations group including any future integrations.
+4. The WhatsApp config page SHALL use the existing tier-isolated pattern: `ResponsiveViewSwitch` with `createLazyView` importing desktop/mobile variants.
+5. The WhatsApp config page SHALL have **three tabs** with independent permission gates:
+   - **Numbers** — List/sync accounts, edit token/PIN. View: `WHATSAPP_VIEW`. Mutate: `WHATSAPP_CONFIG_MANAGE`. `SUPER_ADMIN` can rotate secrets.
+   - **Templates** — Read-only sync from Meta (list templates, show name/language/category/status). View: `WHATSAPP_TEMPLATES_MANAGE`. No create/edit/delete in v1.
+   - **Opt-in Management** — Table of all users (parents, students) with `whatsappEnabled` flag, search/filter, bulk toggle. View: `WHATSAPP_VIEW`. Bulk mutate: `SUPER_ADMIN` only. Per-row toggle: `SUPER_ADMIN` only. Audit trail per change.
+6. WHEN on Numbers tab THEN show account cards with: display phone, quality badge (GREEN/YELLOW/RED), tier badge (raw Meta enum), throughput badge, active toggle, last webhook timestamp, "Sync from Meta" button, "Edit Token"/"Edit PIN" menu actions.
+7. WHEN on Templates tab THEN show synced template list with: name, language code (exact from Meta), category, status, last synced timestamp. "Sync Templates" button triggers `syncTemplates` mutation.
+8. WHEN on Opt-in Management tab THEN show paginated table with columns: User (name + role), Phone (E.164), Current Opt-in Status (toggle), Last Opt-in Change, Changed By. Filters: role (parent/student), opt-in status, search by name/phone. Bulk actions: Enable/Disable selected (SUPER_ADMIN only). Row actions: View audit trail for this user's opt-in changes.
+9. All tabs SHALL use tier-isolated components: desktop cards / mobile lists, no `useMediaQuery` in tier files.
+10. i18n namespace `whatsapp` SHALL cover all tab labels, column headers, action buttons, warning copy (coexistence, unverified slots), opt-in consent copy.
+
+**Priority**: High | **Complexity**: High  
+**Dependencies**: REQ-3, REQ-4, REQ-8, REQ-10, navigationConfig.ts extension, tier-isolated view components
+
+---
+
+### REQ-12: Permission Matrix for WhatsApp Admin UX
+
+**User story:** As a security administrator, I want a clear permission matrix for every WhatsApp admin action, so that only authorized roles perform sensitive operations.
+
+#### Acceptance criteria
+
+| Action | Required Permission(s) | Roles Allowed |
+|--------|------------------------|---------------|
+| View Integrations NavGroup / WhatsApp NavItem | `WHATSAPP_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| View Numbers tab | `WHATSAPP_VIEW` | Same as above |
+| Sync from Meta (Numbers) | `WHATSAPP_CONFIG_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| Edit Access Token / Two-step PIN | `WHATSAPP_CONFIG_MANAGE` + `SUPER_ADMIN` (rotation) | SUPER_ADMIN only |
+| Toggle Account Active | `WHATSAPP_CONFIG_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| View Templates tab | `WHATSAPP_TEMPLATES_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| Sync Templates | `WHATSAPP_TEMPLATES_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| View Opt-in Management tab | `WHATSAPP_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| Toggle Single User Opt-in | `SUPER_ADMIN` | SUPER_ADMIN only |
+| Bulk Toggle Opt-in | `SUPER_ADMIN` | SUPER_ADMIN only |
+| View Opt-in Audit Trail | `WHATSAPP_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+
+2. Portal users (Teacher, Parent, Student) SHALL NEVER see the Integrations NavGroup regardless of permissions.
+3. `WHATSAPP_DISPATCH` permission does not exist in v1 (no send mutation to gate).
+4. All mutations that modify secrets (`setAccessToken`, `setTwoStepPin`) or bulk opt-in SHALL call `resetWhatsappChannel()` and emit audit with `changedBy`, `previousValue`, `newValue`.
+5. Navigation filtering SHALL use existing `getNavItemsForPermissions()` + `apply*NavOverrides()` pattern — Integrations group filtered by `WHATSAPP_VIEW`, then portal overrides hide it for teacher/parent/student portals.
+
+**Priority**: High | **Complexity**: Medium  
+**Dependencies**: REQ-6, REQ-11, navigationConfig.ts, existing permission system
 
 ---
 

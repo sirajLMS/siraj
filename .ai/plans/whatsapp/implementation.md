@@ -386,35 +386,67 @@ Read `node_modules/next/dist/docs/` for Next.js 16 App Router before writing. `a
 
 Update `whatsapp_accounts.lastWebhookAt` on account-scoped events.
 
-## Phase 4: Admin Numbers Page (Frontend)
+## Phase 4: Admin WhatsApp Configuration (Frontend)
 
 ### Routes
 
-Add WhatsApp settings entry under dashboard settings (mirror environment config navigation pattern). Permission gate: `WHATSAPP_VIEW`.
+Add new **Integrations** NavGroup in sidebar navigation (after Admin) with WhatsApp NavItem linking to `/settings/whatsapp` (or `/integrations/whatsapp`). Permission gate: `WHATSAPP_VIEW`. Only visible to SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT — never to portal users (teachers, parents, students).
+
+Settings page at `/settings` adds **WhatsApp** tab (alongside General, Environment, Session, Audit, Site Content, Timezones) OR dedicated `/settings/whatsapp` route. The tab approach follows existing settings pattern; dedicated route allows deep linking. Decision: **dedicated `/settings/whatsapp` route** with tabbed UI inside.
 
 ### Files
 
 | Layer | Path |
 |-------|------|
+| Navigation Config | `frontend/common/views/dashboard/config/navigationConfig.ts` (add Integrations NavGroup + WhatsApp NavItem) |
 | Store | `frontend/common/stores/whatsappAccountsStore.ts` |
 | Documents | `frontend/common/graphql/sharedDocuments/whatsapp/whatsapp.documents.ts` |
-| ViewModel | `frontend/common/views/dashboard/settings/whatsapp/useWhatsappAccountsViewModel.ts` |
+| ViewModel | `frontend/common/views/dashboard/settings/whatsapp/useWhatsappConfigViewModel.ts` |
 | Switcher | `frontend/common/views/dashboard/settings/whatsapp/WhatsappConfigView.tsx` |
 | Desktop | `frontend/desktop/views/dashboard/settings/whatsapp/whatsappConfig.desktop.tsx` |
+| Desktop Components | `frontend/desktop/views/dashboard/settings/whatsapp/components/` — `WhatsAppNumbersTab.desktop.tsx`, `WhatsAppTemplatesTab.desktop.tsx`, `WhatsAppOptInTab.desktop.tsx`, `AccountCard.desktop.tsx` |
 | Mobile | `frontend/mobile/views/dashboard/settings/whatsapp/whatsappConfig.mobile.tsx` |
+| Mobile Components | `frontend/mobile/views/dashboard/settings/whatsapp/components/` — `WhatsAppNumbersTab.mobile.tsx`, `WhatsAppTemplatesTab.mobile.tsx`, `WhatsAppOptInTab.mobile.tsx`, `AccountCard.mobile.tsx` |
 
 Patterns: `createLazyView` + `ResponsiveViewSwitch`; `DesktopPageContainer` / `MobilePageContainer`; no `useMediaQuery` in tier files.
 
-UI: account cards with quality badge, tier, throughput; Sync from Meta; edit token/PIN dialogs.
+### UI Structure (Three Tabs)
+
+**Tab 1: Numbers** — Account cards with: display phone, quality badge (GREEN/YELLOW/RED), tier badge (raw Meta enum), throughput badge, active toggle, last webhook timestamp, "Sync from Meta" button, "Edit Token"/"Edit PIN" menu actions (SUPER_ADMIN only for secrets). Permission: view `WHATSAPP_VIEW`; mutate `WHATSAPP_CONFIG_MANAGE`; secrets `SUPER_ADMIN` only.
+
+**Tab 2: Templates** — Read-only synced list from `list-message-templates`. Columns: name, language code (exact from Meta), category, status, last synced. "Sync Templates" button triggers `syncTemplates` mutation. Permission: `WHATSAPP_TEMPLATES_MANAGE`.
+
+**Tab 3: Opt-in Management** — Paginated table of all parents/students with `whatsappEnabled` flag. Columns: User (name + role), Phone (E.164), Opt-in Status (toggle), Last Opt-in Change, Changed By. Filters: role (parent/student), opt-in status, search by name/phone. Bulk actions: Enable/Disable selected (SUPER_ADMIN only). Row actions: View audit trail for this user's opt-in changes. Permission: view `WHATSAPP_VIEW`; single/bulk mutate `SUPER_ADMIN` only.
 
 ### i18n (REQ-7)
 
 **`shared/locale/types/whatsapp/index.ts`**, `en/whatsapp`, `ar/whatsapp`  
 Register in `shared/locale/types/message.ts` and `shared/locale/server.ts`
 
-Keys: page title, sync button, tier labels, quality badges, coexistence warning (R7: Business App vs Cloud API, 20 mps cap), unverified slot warning (2 numbers until verification).
+Keys: page title, tab labels (Numbers, Templates, Opt-in), sync buttons, tier labels (raw Meta enum → localized), quality badges, coexistence warning (R7: Business App vs Cloud API, 20 mps cap), unverified slot warning (2 numbers until verification), opt-in consent copy, audit trail labels.
 
 Delivery failure labels: extend existing `notifications` namespace for `whatsapp` channel.
+
+### Permission Matrix (REQ-12)
+
+| Action | Required Permission(s) | Roles Allowed |
+|--------|------------------------|---------------|
+| View Integrations NavGroup / WhatsApp NavItem | `WHATSAPP_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| View Numbers tab | `WHATSAPP_VIEW` | Same as above |
+| Sync from Meta (Numbers) | `WHATSAPP_CONFIG_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| Edit Access Token / Two-step PIN | `WHATSAPP_CONFIG_MANAGE` + `SUPER_ADMIN` (rotation) | SUPER_ADMIN only |
+| Toggle Account Active | `WHATSAPP_CONFIG_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| View Templates tab | `WHATSAPP_TEMPLATES_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| Sync Templates | `WHATSAPP_TEMPLATES_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| View Opt-in Management tab | `WHATSAPP_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+| Toggle Single User Opt-in | `SUPER_ADMIN` | SUPER_ADMIN only |
+| Bulk Toggle Opt-in | `SUPER_ADMIN` | SUPER_ADMIN only |
+| View Opt-in Audit Trail | `WHATSAPP_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF_DEFAULT, SUPERVISOR_DEFAULT |
+
+- Portal users (Teacher, Parent, Student) NEVER see Integrations NavGroup regardless of permissions.
+- `WHATSAPP_DISPATCH` does not exist in v1.
+- All mutations modifying secrets or bulk opt-in call `resetWhatsappChannel()` and emit audit with `changedBy`, `previousValue`, `newValue`.
+- Navigation filtering uses existing `getNavItemsForPermissions()` + `apply*NavOverrides()` — Integrations group filtered by `WHATSAPP_VIEW`, then portal overrides hide for teacher/parent/student portals.
 
 ## Phase 5: Tests
 
