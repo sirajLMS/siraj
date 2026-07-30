@@ -4,7 +4,7 @@ import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
@@ -33,6 +33,34 @@ export function StatusTrackingDataGridDesktop({
   loading = false,
 }: StatusTrackingDataGridProps) {
   const locale = useAppLocale();
+
+  // Helper to render a profile link cell with common props, reducing duplication across columns
+  const renderProfileCell = useCallback(
+    ({
+      href,
+      name,
+      avatarUrl,
+      avatarSize = 40,
+      fontWeight = 700,
+    }: {
+      href?: string;
+      name: string;
+      avatarUrl?: string | null;
+      avatarSize?: number;
+      fontWeight?: number;
+    }) => (
+      <DesktopPersonProfileLinkCell
+        href={href}
+        name={name}
+        avatarUrl={avatarUrl ?? undefined}
+        avatarSize={avatarSize}
+        typographyVariant="bodyMd"
+        fontWeight={fontWeight}
+      />
+    ),
+    []
+  );
+
   // RENDER OPT JUSTIFICATION: cache `useMemo` to maintain stable column array identity for the MUI AppDataGrid consumer (prevents column re-allocation across renders when labels/locale props are unchanged)
   const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
     const actionLabels = {
@@ -66,32 +94,28 @@ export function StatusTrackingDataGridDesktop({
         headerName: labels.student,
         flex: 1.1,
         minWidth: 160,
-        renderCell: ({ row }) => (
-          <DesktopPersonProfileLinkCell
-            href={row.studentId ? studentHref(row.studentId) : undefined}
-            name={row.studentName ?? ""}
-            avatarUrl={row.studentAvatarUrl}
-            avatarSize={40}
-            typographyVariant="bodyMd"
-            fontWeight={700}
-          />
-        ),
+        renderCell: ({ row }) =>
+          renderProfileCell({
+            href: row.studentId ? studentHref(row.studentId) : undefined,
+            name: row.studentName ?? "",
+            avatarUrl: row.studentAvatarUrl,
+            avatarSize: 40,
+            fontWeight: 700,
+          }),
       },
       {
         field: "teacherName",
         headerName: labels.teacher,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => (
-          <DesktopPersonProfileLinkCell
-            href={profileHrefForTeacher({ teacherId: row.teacherId })}
-            name={row.teacherName ?? ""}
-            avatarUrl={row.teacherAvatarUrl}
-            avatarSize={32}
-            typographyVariant="bodyMd"
-            fontWeight={600}
-          />
-        ),
+        renderCell: ({ row }) =>
+          renderProfileCell({
+            href: profileHrefForTeacher({ teacherId: row.teacherId }),
+            name: row.teacherName ?? "",
+            avatarUrl: row.teacherAvatarUrl,
+            avatarSize: 32,
+            fontWeight: 600,
+          }),
       },
       {
         field: "schedule",
@@ -172,7 +196,7 @@ export function StatusTrackingDataGridDesktop({
         ),
       },
     ];
-  }, [labels, locale, onActivate, onReschedule, onVerify]);
+  }, [labels, locale, onActivate, onReschedule, onVerify, renderProfileCell]);
 
   return (
     <AppDataGrid<StatusTrackingRow>

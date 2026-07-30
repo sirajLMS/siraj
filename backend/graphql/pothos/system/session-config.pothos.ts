@@ -34,6 +34,34 @@ function handleSessionConfigServiceError(error: unknown, tErrors: ErrorsLabels):
   throw error;
 }
 
+/**
+ * Helper to execute a session-config service operation with standard auth + error handling.
+ * Extracts common pattern from mutation resolvers to eliminate CodeScene duplication warnings.
+ */
+async function executeSessionConfigMutation<T>(
+  ctx: BaseContext,
+  operation: (userId: string, tErrors: ErrorsLabels) => Promise<T>
+): Promise<T> {
+  const userId = await requireAuth(ctx);
+  const tErrors = ctx.t().errorsTranslations;
+
+  try {
+    return await operation(userId, tErrors);
+  } catch (error) {
+    handleSessionConfigServiceError(error, tErrors);
+  }
+}
+
+/**
+ * Helper for query fields that need auth + permission check but no mutation.
+ */
+async function executeSessionConfigQuery<T>(ctx: BaseContext, operation: () => Promise<T>): Promise<T> {
+  const tErrors = ctx.t().errorsTranslations;
+  await requireAuth(ctx);
+  assertCanViewSessionConfig(ctx, tErrors);
+  return operation();
+}
+
 const SessionConfigRef = gqlSchemaBuilder.objectRef<SessionConfigSelectType>("SessionConfig");
 
 export const SessionConfigPothosObject = SessionConfigRef.implement({
@@ -81,10 +109,7 @@ gqlSchemaBuilder.queryField("sessionConfigs", t =>
     authScopes: { loggedIn: true },
     description: "Lists all per-role session configurations.",
     resolve: async (_root, _args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      await requireAuth(ctx);
-      assertCanViewSessionConfig(ctx, tErrors);
-      return SessionConfigService.listSessionConfigs();
+      return executeSessionConfigQuery(ctx, () => SessionConfigService.listSessionConfigs());
     },
   })
 );
@@ -99,10 +124,7 @@ gqlSchemaBuilder.queryField("sessionConfig", t =>
       roleName: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      await requireAuth(ctx);
-      assertCanViewSessionConfig(ctx, tErrors);
-      return SessionConfigService.getSessionConfig(args.roleName);
+      return executeSessionConfigQuery(ctx, () => SessionConfigService.getSessionConfig(args.roleName));
     },
   })
 );
@@ -116,14 +138,9 @@ gqlSchemaBuilder.mutationField("upsertSessionConfig", t =>
       input: t.arg({ type: SessionConfigUpsertInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-
-      try {
-        return await SessionConfigService.upsertSessionConfig(args.input, userId, tErrors);
-      } catch (error) {
-        handleSessionConfigServiceError(error, tErrors);
-      }
+      return executeSessionConfigMutation(ctx, (userId, tErrors) =>
+        SessionConfigService.upsertSessionConfig(args.input, userId, tErrors)
+      );
     },
   })
 );
@@ -137,15 +154,10 @@ gqlSchemaBuilder.mutationField("deleteSessionConfig", t =>
       roleName: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-
-      try {
+      await executeSessionConfigMutation(ctx, async (userId, tErrors) => {
         await SessionConfigService.deleteSessionConfig(args.roleName, userId, tErrors);
-        return true;
-      } catch (error) {
-        handleSessionConfigServiceError(error, tErrors);
-      }
+      });
+      return true;
     },
   })
 );

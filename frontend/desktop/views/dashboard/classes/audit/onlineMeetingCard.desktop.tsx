@@ -4,7 +4,7 @@ import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/common/components/ui";
-import type { OnlineMeetingCardDesktopProps } from "@/frontend/common/views/dashboard/classes/audit/onlineMeetingCard.types";
+import type { OnlineMeetingCardProps } from "@/frontend/common/views/dashboard/classes/audit/onlineMeetingCard.types";
 import { resolveProviderDisplayName, toEffectiveMeeting } from "@/frontend/common/views/dashboard/classes/audit/utils";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { useAppLocale } from "@/shared/locale";
@@ -82,11 +82,7 @@ function MeetingPreviewIcon({ logoUrl }: Readonly<{ logoUrl?: string | null }>) 
   return <StyledDesktopVideoIcon />;
 }
 
-export function OnlineMeetingCardDesktop({
-  meetingInfo,
-  labels,
-  showJoin = false,
-}: Readonly<OnlineMeetingCardDesktopProps>) {
+export function OnlineMeetingCardDesktop({ meetingInfo, labels, showJoin = false }: Readonly<OnlineMeetingCardProps>) {
   const locale = useAppLocale();
   const providerName = resolveProviderDisplayName(meetingInfo, locale);
   const meeting = toEffectiveMeeting(meetingInfo);

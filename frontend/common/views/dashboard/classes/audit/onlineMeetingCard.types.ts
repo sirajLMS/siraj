@@ -10,6 +10,3 @@ export interface BaseOnlineMeetingCardProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;
   readonly showJoin?: boolean;
 }
-
-/** @deprecated Use {@link OnlineMeetingCardProps} */
-export type OnlineMeetingCardDesktopProps = OnlineMeetingCardProps;

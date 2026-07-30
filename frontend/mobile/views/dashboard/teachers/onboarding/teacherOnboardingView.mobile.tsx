@@ -92,7 +92,6 @@ export function TeacherOnboardingMobileView({
         >
           <MobileSectionPanel title={userEntityLabels.sectionTitle}>
             <UserEntityFieldsSection
-              register={register}
               control={control}
               errors={errors}
               labels={userEntityLabels}

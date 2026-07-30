@@ -121,6 +121,30 @@ function assertCanViewEnvironmentConfig(ctx: BaseContext, tErrors: ErrorsLabels)
   }
 }
 
+/**
+ * Executes an env config mutation with standard auth, audit, and error handling.
+ * Extracts the common pattern from upsert/delete mutations to eliminate duplication.
+ */
+async function executeEnvConfigMutation<TResult>(
+  ctx: BaseContext,
+  key: string,
+  operation: "upsert" | "delete",
+  mutationFn: () => Promise<TResult>,
+  auditValue?: string,
+  priorValue?: string
+): Promise<TResult> {
+  const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
+  const priorEntry = await findEnvConfigEntry(key);
+
+  try {
+    const result = await mutationFn();
+    await auditEnvConfigChange(actorUserId, operation, key, priorEntry?.value ?? priorValue, auditValue);
+    return result;
+  } catch (error) {
+    return handleEnvConfigServiceError(error, tErrors);
+  }
+}
+
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 gqlSchemaBuilder.queryField("envConfigEntries", t =>
@@ -146,16 +170,13 @@ gqlSchemaBuilder.mutationField("upsertEnvConfigEntry", t =>
       input: t.arg({ type: EnvConfigUpsertInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      const priorEntry = await findEnvConfigEntry(args.input.key);
-
-      try {
-        const result = await upsertEnvConfigOverride(args.input);
-        await auditEnvConfigChange(actorUserId, "upsert", args.input.key, priorEntry?.value, args.input.value);
-        return result;
-      } catch (error) {
-        return handleEnvConfigServiceError(error, tErrors);
-      }
+      return executeEnvConfigMutation(
+        ctx,
+        args.input.key,
+        "upsert",
+        () => upsertEnvConfigOverride(args.input),
+        args.input.value
+      );
     },
   })
 );
@@ -168,16 +189,13 @@ gqlSchemaBuilder.mutationField("deleteEnvConfigEntry", t =>
       key: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      const priorEntry = await findEnvConfigEntry(args.key);
-
-      try {
-        const result = await deleteEnvConfigOverride(args.key);
-        await auditEnvConfigChange(actorUserId, "delete", args.key, priorEntry?.value);
-        return result;
-      } catch (error) {
-        return handleEnvConfigServiceError(error, tErrors);
-      }
+      return executeEnvConfigMutation(
+        ctx,
+        args.key,
+        "delete",
+        () => deleteEnvConfigOverride(args.key),
+        undefined // no new value for delete
+      );
     },
   })
 );

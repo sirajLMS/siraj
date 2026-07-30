@@ -47,6 +47,141 @@ interface MobileSlotItemProps {
   readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
+// --- Sub-components for MobileSlotItem ---
+
+interface DeleteConfirmDialogProps {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly onConfirm: () => void;
+  readonly title: string;
+  readonly message: string;
+  readonly cancelLabel: string;
+  readonly confirmLabel: string;
+}
+
+function DeleteConfirmDialog({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  cancelLabel,
+  confirmLabel,
+}: Readonly<DeleteConfirmDialogProps>) {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{message}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <MuiButton onClick={onClose}>{cancelLabel}</MuiButton>
+        <MuiButton onClick={onConfirm} color="error" variant="contained" autoFocus>
+          {confirmLabel}
+        </MuiButton>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+interface SlotItemActionsProps {
+  readonly canJoin: boolean;
+  readonly showDelete: boolean;
+  readonly hasScheduleDeleteClass: boolean;
+  readonly classItem: ScheduledClass;
+  readonly meetingJoinLabels: MeetingConfigJoinLabels;
+  readonly onDeleteClick: (event: React.MouseEvent) => void;
+}
+
+function SlotItemActions({
+  canJoin,
+  showDelete,
+  hasScheduleDeleteClass,
+  classItem,
+  meetingJoinLabels,
+  onDeleteClick,
+}: Readonly<SlotItemActionsProps>) {
+  if (!canJoin && !(showDelete && hasScheduleDeleteClass)) {
+    return null;
+  }
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.75, minHeight: 24 }}>
+      {canJoin ? (
+        <MobileMeetingJoinAction
+          variant="icon"
+          joinUrl={classItem.meetingJoinUrl}
+          meeting={classItem.effectiveMeeting}
+          emptyRole="teacher"
+          label={meetingJoinLabels.joinMeeting}
+          setupHref="/profile?tab=meeting"
+        />
+      ) : null}
+      {showDelete && hasScheduleDeleteClass ? (
+        <Box
+          component="span"
+          className="material-symbols-outlined"
+          sx={theme => ({
+            fontSize: 20,
+            cursor: "pointer",
+            opacity: 0.7,
+            "&:hover": { color: theme.palette.error.main, opacity: 1 },
+          })}
+          onClick={onDeleteClick}
+        >
+          delete
+        </Box>
+      ) : null}
+    </Box>
+  );
+}
+
+interface SlotItemContentProps {
+  readonly classItem: ScheduledClass;
+  readonly classInstanceId: string;
+  readonly subjectLabel: string;
+  readonly statusLabel: string;
+}
+
+function SlotItemContent({ classItem, classInstanceId, subjectLabel, statusLabel }: Readonly<SlotItemContentProps>) {
+  return (
+    <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
+      {classInstanceId ? (
+        <Link href={classHref(classInstanceId)} style={{ textDecoration: "none", minWidth: 0 }}>
+          <Typography
+            variant="bodyMd"
+            sx={theme => ({
+              ...linkTypographySx,
+              fontWeight: 700,
+              color: theme.palette.primary.main,
+              lineHeight: 1.25,
+              "&:hover": { textDecoration: "underline" },
+            })}
+          >
+            {subjectLabel}
+          </Typography>
+        </Link>
+      ) : (
+        <Typography variant="bodyMd" sx={{ ...linkTypographySx, fontWeight: 700, lineHeight: 1.25 }}>
+          {subjectLabel}
+        </Typography>
+      )}
+
+      <MobilePersonProfileLink
+        href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
+        name={classItem.studentName || "—"}
+        showAvatar={false}
+        typographyVariant="bodySm"
+        fontWeight={500}
+      />
+
+      <Typography variant="caption" sx={{ color: "inherit", opacity: 0.85, lineHeight: 1.2 }}>
+        {classItem.duration}m · {statusLabel}
+      </Typography>
+    </Box>
+  );
+}
+
 function MobileSlotItem({
   classItem,
   onRemove,
@@ -60,6 +195,12 @@ function MobileSlotItem({
   const subjectLabel = classItem.subjectName?.trim() || t.grid.unknownSubject;
   const statusLabel = resolveWeeklyScheduleSlotStatus(classItem, t.grid.status);
 
+  const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
+    isFrozen: classItem.isFrozen ?? false,
+  });
+  const isTerminal = isTerminalClassInstance(classItem.executionState, classItem.outcome);
+  const showDelete = !classItem.isFrozen && !isTerminal;
+
   const handleConfirm = () => {
     closeDialog();
     onRemove(classInstanceId);
@@ -70,12 +211,6 @@ function MobileSlotItem({
     event.stopPropagation();
     openDialog();
   };
-
-  const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
-    isFrozen: classItem.isFrozen ?? false,
-  });
-  const isTerminal = isTerminalClassInstance(classItem.executionState, classItem.outcome);
-  const showDelete = !classItem.isFrozen && !isTerminal;
 
   return (
     <>
@@ -98,84 +233,32 @@ function MobileSlotItem({
           opacity: isTerminal ? 0.9 : 1,
         })}
       >
-        <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
-          {classInstanceId ? (
-            <Link href={classHref(classInstanceId)} style={{ textDecoration: "none", minWidth: 0 }}>
-              <Typography
-                variant="bodyMd"
-                sx={theme => ({
-                  ...linkTypographySx,
-                  fontWeight: 700,
-                  color: theme.palette.primary.main,
-                  lineHeight: 1.25,
-                  "&:hover": { textDecoration: "underline" },
-                })}
-              >
-                {subjectLabel}
-              </Typography>
-            </Link>
-          ) : (
-            <Typography variant="bodyMd" sx={{ ...linkTypographySx, fontWeight: 700, lineHeight: 1.25 }}>
-              {subjectLabel}
-            </Typography>
-          )}
+        <SlotItemContent
+          classItem={classItem}
+          classInstanceId={classInstanceId}
+          subjectLabel={subjectLabel}
+          statusLabel={statusLabel}
+        />
 
-          <MobilePersonProfileLink
-            href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
-            name={classItem.studentName || "—"}
-            showAvatar={false}
-            typographyVariant="bodySm"
-            fontWeight={500}
-          />
-
-          <Typography variant="caption" sx={{ color: "inherit", opacity: 0.85, lineHeight: 1.2 }}>
-            {classItem.duration}m · {statusLabel}
-          </Typography>
-        </Box>
-
-        {canJoin || (showDelete && hasScheduleDeleteClass) ? (
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.75, minHeight: 24 }}>
-            {canJoin ? (
-              <MobileMeetingJoinAction
-                variant="icon"
-                joinUrl={classItem.meetingJoinUrl}
-                meeting={classItem.effectiveMeeting}
-                emptyRole="teacher"
-                label={meetingJoinLabels.joinMeeting}
-                setupHref="/profile?tab=meeting"
-              />
-            ) : null}
-            {showDelete && hasScheduleDeleteClass ? (
-              <Box
-                component="span"
-                className="material-symbols-outlined"
-                sx={theme => ({
-                  fontSize: 20,
-                  cursor: "pointer",
-                  opacity: 0.7,
-                  "&:hover": { color: theme.palette.error.main, opacity: 1 },
-                })}
-                onClick={handleDeleteClick}
-              >
-                delete
-              </Box>
-            ) : null}
-          </Box>
-        ) : null}
+        <SlotItemActions
+          canJoin={canJoin}
+          showDelete={showDelete}
+          hasScheduleDeleteClass={hasScheduleDeleteClass}
+          classItem={classItem}
+          meetingJoinLabels={meetingJoinLabels}
+          onDeleteClick={handleDeleteClick}
+        />
       </Box>
 
-      <Dialog open={open} onClose={closeDialog}>
-        <DialogTitle>{t.dialogs.deleteClassTitle}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{t.dialogs.deleteClassMessage}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <MuiButton onClick={closeDialog}>{t.dialogs.cancel}</MuiButton>
-          <MuiButton onClick={handleConfirm} color="error" variant="contained" autoFocus>
-            {t.dialogs.confirmYes}
-          </MuiButton>
-        </DialogActions>
-      </Dialog>
+      <DeleteConfirmDialog
+        open={open}
+        onClose={closeDialog}
+        onConfirm={handleConfirm}
+        title={t.dialogs.deleteClassTitle}
+        message={t.dialogs.deleteClassMessage}
+        cancelLabel={t.dialogs.cancel}
+        confirmLabel={t.dialogs.confirmYes}
+      />
     </>
   );
 }

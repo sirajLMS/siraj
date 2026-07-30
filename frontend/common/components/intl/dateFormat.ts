@@ -47,53 +47,43 @@ function formatWithFallback(
 }
 
 /**
+ * Creates a date/time formatter with the given Intl.DateTimeFormatOptions.
+ * Eliminates code duplication across formatDate, formatDateTime, formatTime.
+ */
+function createFormatFunction(
+  options: Intl.DateTimeFormatOptions
+): (date: DateInput, locale: string, fallback?: string) => string {
+  return (date: DateInput, locale: string, fallback = "—"): string =>
+    formatWithFallback(date, locale, options, fallback);
+}
+
+/**
  * Locale-aware calendar date (e.g. "Jul 18, 2026" / Arabic with Latin numerals).
  */
-export function formatDate(date: DateInput, locale: string, fallback = "—"): string {
-  return formatWithFallback(
-    date,
-    locale,
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    },
-    fallback
-  );
-}
+export const formatDate = createFormatFunction({
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
 
 /**
  * Locale-aware date and time (e.g. "Jul 18, 2026, 01:20 PM").
  */
-export function formatDateTime(date: DateInput, locale: string, fallback = "—"): string {
-  return formatWithFallback(
-    date,
-    locale,
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-    fallback
-  );
-}
+export const formatDateTime = createFormatFunction({
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 /**
  * Locale-aware time (e.g. "01:20 PM").
  */
-export function formatTime(date: DateInput, locale: string, fallback = "—"): string {
-  return formatWithFallback(
-    date,
-    locale,
-    {
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-    fallback
-  );
-}
+export const formatTime = createFormatFunction({
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 /**
  * Locale-aware month and year (e.g. "July 2026").

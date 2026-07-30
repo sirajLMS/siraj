@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { LessonReportRepository, type PendingReviewFilters } from "@/backend/db/repo/classes/lesson-report.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
@@ -21,7 +22,7 @@ import type {
   LessonReviewInput,
   PendingReviewCountReturnType,
 } from "@/backend/types";
-import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
+import { PaginationArgs } from "@/backend/types/shared/pagination.types";
 import { getServerTranslations } from "@/shared/locale";
 
 /**
@@ -94,6 +95,43 @@ export namespace LessonReportService {
   }
 
   /**
+   * Validates common lesson report input fields.
+   * Throws error with the provided error message if validation fails.
+   */
+  function validateLessonReportInput(
+    completionPercentage: number,
+    durationMinutes: number,
+    invalidInputError: string
+  ): void {
+    if (completionPercentage < 0 || completionPercentage > 100) {
+      throw new Error(invalidInputError);
+    }
+    if (durationMinutes <= 0) {
+      throw new Error(invalidInputError);
+    }
+  }
+
+  /**
+   * Validates rejection reason based on lesson report status.
+   * Throws error if validation fails.
+   */
+  function validateRejectionReason(
+    status: LessonReportStatus,
+    rejectionReason: string | null | undefined,
+    tErrors: {
+      rejectedReportsRequireReason: string;
+      approvedReportsNoRejectionReason: string;
+    }
+  ): void {
+    if (status === LessonReportStatus.REJECTED && (!rejectionReason || rejectionReason.trim().length === 0)) {
+      throw new Error(tErrors.rejectedReportsRequireReason);
+    }
+    if (status === LessonReportStatus.APPROVED && rejectionReason) {
+      throw new Error(tErrors.approvedReportsNoRejectionReason);
+    }
+  }
+
+  /**
    * Notify users with `LESSON_REPORTS_REVIEW` that a report was submitted.
    * Fire-and-forget: dispatch failure must not roll back the submit.
    */
@@ -154,12 +192,7 @@ export namespace LessonReportService {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_SUBMIT, locale);
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
-    if (input.completionPercentage < 0 || input.completionPercentage > 100) {
-      throw new Error(tErrors.invalidInput);
-    }
-    if (input.durationMinutes <= 0) {
-      throw new Error(tErrors.invalidInput);
-    }
+    validateLessonReportInput(input.completionPercentage, input.durationMinutes, tErrors.invalidInput);
 
     const teacherId = await resolveTeacherIdForUser(actorUserId, locale);
     await requireClassInstanceOwnedByTeacher(input.classInstanceId, teacherId, locale);
@@ -244,6 +277,7 @@ export namespace LessonReportService {
     reviewedAt?: Date | null;
     rejectionReason?: string | null;
     idempotencyKey?: string;
+    locale?: string;
   }): Promise<LessonReportReturnType | null> {
     const existing = await LessonReportRepository.findByClassInstanceId(input.classInstanceId);
     if (existing) {
@@ -258,21 +292,9 @@ export namespace LessonReportService {
       return toReturnType(existing);
     }
 
-    if (input.completionPercentage < 0 || input.completionPercentage > 100) {
-      throw new Error("completionPercentage must be between 0 and 100");
-    }
-    if (input.durationMinutes <= 0) {
-      throw new Error("durationMinutes must be greater than 0");
-    }
-    if (
-      input.status === LessonReportStatus.REJECTED &&
-      (!input.rejectionReason || input.rejectionReason.trim() === "")
-    ) {
-      throw new Error("REJECTED reports must include a rejectionReason");
-    }
-    if (input.status === LessonReportStatus.APPROVED && input.rejectionReason) {
-      throw new Error("APPROVED reports must not include a rejectionReason");
-    }
+    const tErrors = getServerTranslations(input.locale ?? "en").errorsTranslations;
+    validateLessonReportInput(input.completionPercentage, input.durationMinutes, tErrors.invalidInput);
+    validateRejectionReason(input.status, input.rejectionReason, tErrors);
 
     const now = new Date();
     const created = await LessonReportRepository.create({
@@ -298,26 +320,40 @@ export namespace LessonReportService {
     return toReturnType(created);
   }
 
-  export async function getPendingReviews(
+  async function fetchPaginatedReports(
     actorUserId: string,
-    filters: PendingReviewFilters,
+    locale: string | undefined,
+    findFn: (paginationArgs: PaginationArgs) => Promise<LessonReportSelectType[]>,
+    countFn: () => Promise<number>,
     paginationArgs: PaginationArgs,
-    locale?: string
+    permission: AppPermission = AppPermission.LESSON_REPORTS_REVIEW
   ): Promise<{ rows: LessonReportReturnType[]; totalCount: number }> {
-    await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REVIEW, locale);
-    const [rows, totalCount] = await Promise.all([
-      LessonReportRepository.findPendingReviews(filters, paginationArgs),
-      LessonReportRepository.countPendingReviews(filters),
-    ]);
+    await requirePermission(actorUserId, permission, locale);
+    const [rows, totalCount] = await Promise.all([findFn(paginationArgs), countFn()]);
     return { rows: rows.map(toReturnType), totalCount };
   }
 
-  export async function approveReport(
+  /**
+   * Generic function to transition a lesson report status (APPROVED/REJECTED).
+   * Handles permission check, validation, transaction, side effects, logging, and notification.
+   */
+  async function transitionReportStatus(
     actorUserId: string,
     reportId: string,
-    locale?: string
+    newStatus: LessonReportStatus,
+    locale: string | undefined,
+    approvePermission: AppPermission,
+    rejectPermission: AppPermission,
+    sideEffect: (tx: DBTransaction, report: LessonReportSelectType) => Promise<void>,
+    successLogMessage: string,
+    dispatchDecision: "approved" | "rejected",
+    rejectionReason?: string | null
   ): Promise<LessonReportReturnType> {
-    await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_APPROVE, locale);
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+
+    // Check appropriate permission based on the target status
+    const requiredPermission = newStatus === LessonReportStatus.APPROVED ? approvePermission : rejectPermission;
+    await requirePermission(actorUserId, requiredPermission, locale);
 
     const report = await LessonReportRepository.findById(reportId);
     if (!report) {
@@ -327,43 +363,65 @@ export namespace LessonReportService {
       throw new Error("lessonReport.alreadyReviewed");
     }
 
-    // Wrap the status transition + teacher-due creation in a single transaction so
-    // the side effect only commits if the report flips to APPROVED successfully,
-    // and vice-versa (avoids orphan dues on a rollback).
+    // Validate rejection reason using shared helper
+    validateRejectionReason(newStatus, rejectionReason, tErrors);
+
+    // Wrap the status transition + side effect in a single transaction
     const updated = await db.transaction(async tx => {
-      const approved = await LessonReportRepository.updateStatus(
+      const statusUpdated = await LessonReportRepository.updateStatus(
         reportId,
-        LessonReportStatus.APPROVED,
+        newStatus,
         actorUserId,
-        null,
+        rejectionReason ?? null,
         tx
       );
 
-      // Side effect (Work Stream 4): create a TeacherDue row so the teacher is
-      // owed for this approved lesson. Idempotent at the DB level via the
-      // unique (class_instance_id) index on teacher_dues.
-      await TeacherDueService.createDueEntry(
-        report.classInstanceId,
-        report.teacherId,
-        report.studentId,
-        actorUserId,
-        tx,
-        locale
-      );
+      await sideEffect(tx, report);
 
-      return approved;
+      return statusUpdated;
     });
 
-    logger.info("Lesson report approved and teacher due entry created", {
+    logger.info(successLogMessage, {
       reportId,
       classInstanceId: report.classInstanceId,
       teacherId: report.teacherId,
+      studentId: report.studentId,
       actorUserId,
     });
 
-    await dispatchLessonReportReviewed(report, "approved", locale);
+    await dispatchLessonReportReviewed(report, dispatchDecision, locale);
 
     return toReturnType(updated);
+  }
+
+  export async function approveReport(
+    actorUserId: string,
+    reportId: string,
+    locale?: string
+  ): Promise<LessonReportReturnType> {
+    return transitionReportStatus(
+      actorUserId,
+      reportId,
+      LessonReportStatus.APPROVED,
+      locale,
+      AppPermission.LESSON_REPORTS_APPROVE,
+      AppPermission.LESSON_REPORTS_REJECT,
+      async (tx, report) => {
+        // Side effect (Work Stream 4): create a TeacherDue row so the teacher is
+        // owed for this approved lesson. Idempotent at the DB level via the
+        // unique (class_instance_id) index on teacher_dues.
+        await TeacherDueService.createDueEntry(
+          report.classInstanceId,
+          report.teacherId,
+          report.studentId,
+          actorUserId,
+          tx,
+          locale
+        );
+      },
+      "Lesson report approved and teacher due entry created",
+      "approved"
+    );
   }
 
   export async function rejectReport(
@@ -371,59 +429,33 @@ export namespace LessonReportService {
     input: LessonReviewInput,
     locale?: string
   ): Promise<LessonReportReturnType> {
-    await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REJECT, locale);
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-
-    const report = await LessonReportRepository.findById(input.reportId);
-    if (!report) {
-      throw new Error("lessonReport.notFound");
-    }
-    if (report.status !== LessonReportStatus.PENDING_REVIEW) {
-      throw new Error("lessonReport.alreadyReviewed");
-    }
-    if (!input.rejectionReason || input.rejectionReason.trim().length === 0) {
-      throw new Error(tErrors.invalidInput);
-    }
-
-    // Wrap the status transition + credit refund in a single transaction so a
-    // refund failure rolls back the rejection (and a rejection failure never
-    // leaves a dangling refund).
-    const updated = await db.transaction(async tx => {
-      const rejected = await LessonReportRepository.updateStatus(
-        input.reportId,
-        LessonReportStatus.REJECTED,
-        actorUserId,
-        input.rejectionReason ?? null,
-        tx
-      );
-
-      // Side effect (Work Stream 2): refund the student's reserved credit for
-      // the rejected lesson. The refund is idempotent on the booking key
-      // (derived from classInstanceId), so re-running approve/reject cycles
-      // never double-refunds.
-      const refundIdempotencyKey = `credit-refund:${report.classInstanceId}`;
-      await CreditService.refundOnCancel(
-        report.studentId,
-        report.classInstanceId,
-        actorUserId,
-        refundIdempotencyKey,
-        tx,
-        tErrors
-      );
-
-      return rejected;
-    });
-
-    logger.info("Lesson report rejected and credit refunded", {
-      reportId: input.reportId,
-      classInstanceId: report.classInstanceId,
-      studentId: report.studentId,
+    return transitionReportStatus(
       actorUserId,
-    });
-
-    await dispatchLessonReportReviewed(report, "rejected", locale);
-
-    return toReturnType(updated);
+      input.reportId,
+      LessonReportStatus.REJECTED,
+      locale,
+      AppPermission.LESSON_REPORTS_APPROVE,
+      AppPermission.LESSON_REPORTS_REJECT,
+      async (tx, report) => {
+        // Side effect (Work Stream 2): refund the student's reserved credit for
+        // the rejected lesson. The refund is idempotent on the booking key
+        // (derived from classInstanceId), so re-running approve/reject cycles
+        // never double-refunds.
+        const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+        const refundIdempotencyKey = `credit-refund:${report.classInstanceId}`;
+        await CreditService.refundOnCancel(
+          report.studentId,
+          report.classInstanceId,
+          actorUserId,
+          refundIdempotencyKey,
+          tx,
+          tErrors
+        );
+      },
+      "Lesson report rejected and credit refunded",
+      "rejected",
+      input.rejectionReason
+    );
   }
 
   export async function getReportById(
@@ -445,12 +477,13 @@ export namespace LessonReportService {
     paginationArgs: PaginationArgs,
     locale?: string
   ): Promise<{ rows: LessonReportReturnType[]; totalCount: number }> {
-    await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REVIEW, locale);
-    const [rows, totalCount] = await Promise.all([
-      LessonReportRepository.findRecentApproved(paginationArgs),
-      LessonReportRepository.countRecentApproved(),
-    ]);
-    return { rows: rows.map(toReturnType), totalCount };
+    return fetchPaginatedReports(
+      actorUserId,
+      locale,
+      LessonReportRepository.findRecentApproved,
+      LessonReportRepository.countRecentApproved,
+      paginationArgs
+    );
   }
 
   /**
@@ -499,6 +532,23 @@ export namespace LessonReportService {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REVIEW, locale);
     const pendingCount = await LessonReportRepository.countPendingReviews(filters);
     return { pendingCount };
+  }
+
+  export async function getPendingReviews(
+    actorUserId: string,
+    filters?: PendingReviewFilters,
+    paginationArgs?: PaginationArgs,
+    locale?: string
+  ): Promise<{ rows: LessonReportReturnType[]; totalCount: number }> {
+    const resolvedFilters = filters ?? {};
+    const resolvedPagination = paginationArgs ?? new PaginationArgs();
+    return fetchPaginatedReports(
+      actorUserId,
+      locale,
+      pagination => LessonReportRepository.findPendingReviews(resolvedFilters, pagination),
+      () => LessonReportRepository.countPendingReviews(resolvedFilters),
+      resolvedPagination
+    );
   }
 
   export async function submitStudentReflection(

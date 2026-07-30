@@ -97,7 +97,6 @@ export function TeacherOnboardingDesktopView({
         >
           <DesktopSectionPanel title={userEntityLabels.sectionTitle}>
             <UserEntityFieldsSection
-              register={register}
               control={control}
               errors={errors}
               labels={userEntityLabels}

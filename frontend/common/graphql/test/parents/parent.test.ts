@@ -172,7 +172,8 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    if (!_r) return;
+    expect(_r).not.toBeNull();
+    if (!_r) throw new Error("Entities not provisioned");
     await cleanupTestEntities(superAdminToken, {
       studentUserId: _r.studentUserId,
       teacherUserId: _r.teacherUserId,
@@ -227,7 +228,8 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
   });
 
   test("cleanup provisioned entities", async () => {
-    if (!_r) return;
+    expect(_r).not.toBeNull();
+    if (!_r) throw new Error("Entities not provisioned");
     await cleanupTestEntities(superAdminToken, {
       studentUserId: _r.studentUserId,
       teacherUserId: _r.teacherUserId,
@@ -396,7 +398,8 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    if (!_r) return;
+    expect(_r).not.toBeNull();
+    if (!_r) throw new Error("Entities not provisioned");
     await cleanupTestEntities(_r.superAdminToken, {
       studentUserId: _r.studentUserId,
       teacherUserId: _r.teacherUserId,

@@ -29,7 +29,6 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
 
 export function ManagerOnboardingMobileView({
   labels,
-  register,
   onUploadAvatar,
   control,
   errors,
@@ -57,7 +56,6 @@ export function ManagerOnboardingMobileView({
         <StyledFormWrapper>
           <MobileSectionPanel title={userEntityLabels.sectionTitle}>
             <UserEntityFieldsSection
-              register={register}
               control={control}
               errors={errors}
               labels={userEntityLabels}

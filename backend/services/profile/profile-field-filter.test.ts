@@ -88,24 +88,25 @@ describe("filterProfileByFieldGroups", () => {
     expect(filtered.email).toBe("ada@example.com");
   });
 
-  test.each(
-    ownViewCases
-  )("allows viewing own core_contact (phone) with $audience fine-grained view_own permission", c => {
-    const payload = {
-      teacherOwnProfile: { phone: "+1234567890" },
-      parentOwnProfile: { phone: "+1987654321" },
-    };
+  test.each(ownViewCases)(
+    "allows viewing own core_contact (phone) with $audience fine-grained view_own permission",
+    c => {
+      const payload = {
+        teacherOwnProfile: { phone: "+1234567890" },
+        parentOwnProfile: { phone: "+1987654321" },
+      };
 
-    const filtered = filterProfileByFieldGroups(
-      payload,
-      buildOwnFilterCtx(c, new Set<AppPermission>([AppPermission.PROFILE_CORE_CONTACT_VIEW_OWN]))
-    );
+      const filtered = filterProfileByFieldGroups(
+        payload,
+        buildOwnFilterCtx(c, new Set<AppPermission>([AppPermission.PROFILE_CORE_CONTACT_VIEW_OWN]))
+      );
 
-    const profileGroup =
-      c.audience === ProfileAudience.TEACHER ? filtered.teacherOwnProfile : filtered.parentOwnProfile;
-    const expectedPhone = c.audience === ProfileAudience.TEACHER ? "+1234567890" : "+1987654321";
-    expect(profileGroup?.phone).toBe(expectedPhone);
-  });
+      const profileGroup =
+        c.audience === ProfileAudience.TEACHER ? filtered.teacherOwnProfile : filtered.parentOwnProfile;
+      const expectedPhone = c.audience === ProfileAudience.TEACHER ? "+1234567890" : "+1987654321";
+      expect(profileGroup?.phone).toBe(expectedPhone);
+    }
+  );
 
   test.each(ownViewCases)("allows viewing own core_identity with $audience fine-grained view_own permission", c => {
     const payload = {

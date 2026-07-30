@@ -48,6 +48,35 @@ function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDra
   };
 }
 
+function buildEditVariables(studentId: string, draft: StudentPortalProfileEditDraft) {
+  return {
+    input: {
+      studentId,
+      phone: draft.phone.trim() || null,
+      timezone: draft.timezone.trim() || null,
+      displayCurrency: draft.displayCurrency || null,
+      dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString() : null,
+      gender: draft.gender || null,
+      language: draft.language || null,
+      timezoneOverride: draft.timezoneOverride?.trim() || null,
+      parentPhone: draft.parentPhone.trim() || null,
+      avatarUrl: draft.avatarUrl,
+    },
+  };
+}
+
+async function performSave(
+  recordEdit: ReturnType<typeof useMutation>[0],
+  profileContext: ReturnType<typeof useStudentProfileContext> | undefined,
+  studentId: string,
+  draft: StudentPortalProfileEditDraft
+) {
+  if (!profileContext || !studentId) return;
+
+  await recordEdit({ variables: buildEditVariables(studentId, draft) });
+  await profileContext.refetch();
+}
+
 export function useStudentManagerProfileTabViewModel(profile: StudentProfileRow | null) {
   const profileContext = useStudentProfileContext();
   const studentId = profileContext?.studentId ?? profile?.id ?? "";
@@ -88,23 +117,7 @@ export function useStudentManagerProfileTabViewModel(profile: StudentProfileRow 
   const onSave = useCallback(async () => {
     if (!profile || !studentId) return;
     try {
-      await recordEdit({
-        variables: {
-          input: {
-            studentId,
-            phone: draft.phone.trim() || null,
-            timezone: draft.timezone.trim() || null,
-            displayCurrency: draft.displayCurrency || null,
-            dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString() : null,
-            gender: draft.gender || null,
-            language: draft.language || null,
-            timezoneOverride: draft.timezoneOverride?.trim() || null,
-            parentPhone: draft.parentPhone.trim() || null,
-            avatarUrl: draft.avatarUrl,
-          },
-        },
-      });
-      await profileContext?.refetch();
+      await performSave(recordEdit, profileContext, studentId, draft);
       setIsEditing(false);
       setDraft(EMPTY_DRAFT);
       setSnackbar({ open: true, message: labels.saveSuccess, severity: "success" });
@@ -112,7 +125,7 @@ export function useStudentManagerProfileTabViewModel(profile: StudentProfileRow 
       logger.error("Failed to save student profile", { error, studentId });
       setSnackbar({ open: true, message: labels.saveError, severity: "error" });
     }
-  }, [draft, labels.saveError, labels.saveSuccess, profile, profileContext, recordEdit, studentId]);
+  }, [draft, profile, profileContext, recordEdit, studentId, labels]);
 
   return {
     canEditProfile: profile ? canEditProfile : false,

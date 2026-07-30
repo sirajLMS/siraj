@@ -189,13 +189,52 @@ const createMockProps = (overrides: Partial<UseScheduleOverviewViewModelProps> =
   };
 };
 
+/** Helper to create props with overridden shell labels (title, emptyMessage) */
+const createMockPropsWithShell = (
+  shellOverrides: Partial<{ title: string; emptyMessage: string }>
+): ScheduleOverviewViewModel => {
+  return createMockProps({
+    labelsBySection: {
+      ...createMockProps().labelsBySection,
+      shell: { ...createMockProps().labelsBySection.shell, ...shellOverrides },
+    },
+  });
+};
+
+/** Helper to create props with overridden filter labels */
+const createMockPropsWithFilters = (
+  filterOverrides: Partial<{
+    searchPlaceholder: string;
+    dateLabel: string;
+    teacherPlaceholder: string;
+    todayLabel: string;
+    previousDayLabel: string;
+    nextDayLabel: string;
+  }>
+): ScheduleOverviewViewModel => {
+  return createMockProps({
+    labelsBySection: {
+      ...createMockProps().labelsBySection,
+      filters: { ...createMockProps().labelsBySection.filters, ...filterOverrides },
+    },
+  });
+};
+
+/** Helper to render the view with common test setup */
+const renderScheduleView = (
+  props: ScheduleOverviewViewModel,
+  options: { permissions?: AppPermission[]; viewport?: "desktop" | "mobile" } = {}
+) => {
+  return renderWithWrapper(React.createElement(ScheduleOverviewView, props), {
+    permissions: options.permissions ?? [],
+    viewport: options.viewport ?? "desktop",
+  });
+};
+
 describe("ScheduleOverviewSection", () => {
   test("search input visible with DashboardSearch permission", () => {
     const props = createMockProps();
-    renderWithWrapper(React.createElement(ScheduleOverviewView, props), {
-      permissions: [AppPermission.DashboardSearch],
-      viewport: "desktop",
-    });
+    renderScheduleView(props, { permissions: [AppPermission.DashboardSearch], viewport: "desktop" });
 
     const textboxes = screen.getAllByRole("textbox");
     expect(textboxes.length).toBeGreaterThan(0);
@@ -203,47 +242,29 @@ describe("ScheduleOverviewSection", () => {
   });
 
   test("search input hidden without DashboardSearch permission", () => {
-    const props = createMockProps({
-      labelsBySection: {
-        ...createMockProps().labelsBySection,
-        filters: {
-          ...createMockProps().labelsBySection.filters,
-          searchPlaceholder: "Search by student name",
-        },
-      },
+    const props = createMockPropsWithFilters({
+      searchPlaceholder: "Search by student name",
     });
-    renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
+    renderScheduleView(props, { permissions: [], viewport: "desktop" });
 
     expect(screen.queryByPlaceholderText("Search by student name")).toBeNull();
   });
 
   test("search input has correct placeholder", () => {
-    const props = createMockProps({
-      labelsBySection: {
-        ...createMockProps().labelsBySection,
-        filters: {
-          ...createMockProps().labelsBySection.filters,
-          searchPlaceholder: "Search by student name",
-        },
-      },
+    const props = createMockPropsWithFilters({
+      searchPlaceholder: "Search by student name",
     });
-    renderWithWrapper(React.createElement(ScheduleOverviewView, props), {
-      permissions: [AppPermission.DashboardSearch],
-      viewport: "desktop",
-    });
+    renderScheduleView(props, { permissions: [AppPermission.DashboardSearch], viewport: "desktop" });
 
     const textbox = screen.getAllByRole("textbox")[0];
     expect(textbox).toHaveAttribute("placeholder", "Search by student name");
   });
 
   test("section title renders correctly", () => {
-    const props = createMockProps({
-      labelsBySection: {
-        ...createMockProps().labelsBySection,
-        shell: { ...createMockProps().labelsBySection.shell, title: "Schedule Overview" },
-      },
+    const props = createMockPropsWithShell({
+      title: "Schedule Overview",
     });
-    renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
+    renderScheduleView(props, { permissions: [], viewport: "desktop" });
 
     const titles = screen.getAllByText("Schedule Overview");
     expect(titles.length).toBeGreaterThan(0);
@@ -251,14 +272,10 @@ describe("ScheduleOverviewSection", () => {
   });
 
   test("empty message shown when no rows", () => {
-    const props = createMockProps({
-      rows: [],
-      labelsBySection: {
-        ...createMockProps().labelsBySection,
-        shell: { ...createMockProps().labelsBySection.shell, emptyMessage: "No classes scheduled" },
-      },
+    const props = createMockPropsWithShell({
+      emptyMessage: "No classes scheduled",
     });
-    renderWithWrapper(React.createElement(ScheduleOverviewView, props), { permissions: [], viewport: "desktop" });
+    renderScheduleView(props, { permissions: [], viewport: "desktop" });
 
     const messages = screen.getAllByText("No classes scheduled");
     expect(messages.length).toBeGreaterThan(0);

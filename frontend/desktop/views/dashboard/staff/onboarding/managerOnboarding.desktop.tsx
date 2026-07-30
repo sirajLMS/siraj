@@ -29,7 +29,6 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
 
 export function ManagerOnboardingDesktopView({
   labels,
-  register,
   onUploadAvatar,
   control,
   errors,
@@ -56,7 +55,6 @@ export function ManagerOnboardingDesktopView({
         <StyledFormWrapper>
           <DesktopSectionPanel title={userEntityLabels.sectionTitle}>
             <UserEntityFieldsSection
-              register={register}
               control={control}
               errors={errors}
               labels={userEntityLabels}

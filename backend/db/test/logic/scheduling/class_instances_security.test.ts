@@ -164,7 +164,8 @@ describe("Class Instances Security Logic", () => {
           .where(eq(classInstances.id, instance.id));
         expect(updated.executionState).toBe("COMPLETED");
         expect(updated.outcome).toBe(outcome);
-      }));
+      })
+    );
 
     it("blocks ACTIVATED → COMPLETED with outcome=TAKEN", () =>
       runInRollback(async tx => {

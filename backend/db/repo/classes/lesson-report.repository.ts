@@ -1,4 +1,5 @@
 import { and, count, desc, eq, inArray, type SQL } from "drizzle-orm";
+import type { PgColumn } from "drizzle-orm/pg-core";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -89,18 +90,54 @@ function reportsByIdQuery(whereClause: SQL, tx?: DBTransaction) {
   return withReportJoins(queryDb.select(reportSelectFields)).where(whereClause);
 }
 
+function buildPaginatedReportQuery(
+  queryBuilder: ReturnType<typeof db.select<typeof reportSelectFields>>,
+  whereClause: SQL,
+  orderBy: SQL | PgColumn,
+  paginationArgs: PaginationArgs
+) {
+  return withReportJoins(queryBuilder)
+    .where(whereClause)
+    .orderBy(orderBy)
+    .limit(paginationArgs.perPage)
+    .offset(paginationArgs.offset);
+}
+
+async function findPaginatedReports(
+  whereClause: SQL,
+  orderBy: SQL | PgColumn,
+  paginationArgs: PaginationArgs,
+  tx?: DBTransaction
+): Promise<LessonReportWithNames[]> {
+  const queryDb = tx ?? db;
+  const queryBuilder = queryDb.select(reportSelectFields);
+  const rows = await buildPaginatedReportQuery(queryBuilder, whereClause, orderBy, paginationArgs);
+  return rows.map(mapReportWithNames);
+}
+
+async function findReportByQuery(whereClause: SQL, tx?: DBTransaction): Promise<LessonReportWithNames | null> {
+  const [row] = await reportsByIdQuery(whereClause, tx).limit(1);
+  return row ? mapReportWithNames(row) : null;
+}
+
+async function buildUpdateFields(
+  reportId: string,
+  fields: Partial<LessonReportInsertType>,
+  tx?: DBTransaction
+): Promise<LessonReportSelectType> {
+  return updateReportFields(reportId, { ...fields, updatedAt: new Date() }, tx);
+}
+
 export namespace LessonReportRepository {
   export async function findByClassInstanceId(
     classInstanceId: string,
     tx?: DBTransaction
   ): Promise<LessonReportWithNames | null> {
-    const [row] = await reportsByIdQuery(eq(lessonReports.classInstanceId, classInstanceId), tx).limit(1);
-    return row ? mapReportWithNames(row) : null;
+    return findReportByQuery(eq(lessonReports.classInstanceId, classInstanceId), tx);
   }
 
   export async function findById(reportId: string, tx?: DBTransaction): Promise<LessonReportWithNames | null> {
-    const [row] = await reportsByIdQuery(eq(lessonReports.id, reportId), tx).limit(1);
-    return row ? mapReportWithNames(row) : null;
+    return findReportByQuery(eq(lessonReports.id, reportId), tx);
   }
 
   export async function findPendingReviews(
@@ -108,30 +145,29 @@ export namespace LessonReportRepository {
     paginationArgs: PaginationArgs,
     tx?: DBTransaction
   ): Promise<LessonReportWithNames[]> {
-    const queryDb = tx ?? db;
-    const conditions = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];
+    const conditions: SQL<unknown>[] = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];
     if (filters.teacherId) conditions.push(eq(lessonReports.teacherId, filters.teacherId));
     if (filters.studentId) conditions.push(eq(lessonReports.studentId, filters.studentId));
 
-    const rows = await withReportJoins(queryDb.select(reportSelectFields))
-      .where(and(...conditions))
-      .orderBy(lessonReports.submittedAt)
-      .limit(paginationArgs.perPage)
-      .offset(paginationArgs.offset);
-    return rows.map(mapReportWithNames);
+    const whereClause = and(...conditions);
+    return findPaginatedReports(
+      whereClause ?? eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW),
+      desc(lessonReports.submittedAt),
+      paginationArgs,
+      tx
+    );
   }
 
   export async function findRecentApproved(
     paginationArgs: PaginationArgs,
     tx?: DBTransaction
   ): Promise<LessonReportWithNames[]> {
-    const queryDb = tx ?? db;
-    const rows = await withReportJoins(queryDb.select(reportSelectFields))
-      .where(eq(lessonReports.status, LessonReportStatus.APPROVED))
-      .orderBy(desc(lessonReports.reviewedAt))
-      .limit(paginationArgs.perPage)
-      .offset(paginationArgs.offset);
-    return rows.map(mapReportWithNames);
+    return findPaginatedReports(
+      eq(lessonReports.status, LessonReportStatus.APPROVED),
+      desc(lessonReports.reviewedAt),
+      paginationArgs,
+      tx
+    );
   }
 
   export async function countRecentApproved(tx?: DBTransaction): Promise<number> {
@@ -149,13 +185,12 @@ export namespace LessonReportRepository {
     paginationArgs: PaginationArgs,
     tx?: DBTransaction
   ): Promise<LessonReportWithNames[]> {
-    const queryDb = tx ?? db;
-    const rows = await withReportJoins(queryDb.select(reportSelectFields))
-      .where(eq(lessonReports.studentId, studentId))
-      .orderBy(desc(lessonReports.lessonDate))
-      .limit(paginationArgs.perPage)
-      .offset(paginationArgs.offset);
-    return rows.map(mapReportWithNames);
+    return findPaginatedReports(
+      eq(lessonReports.studentId, studentId),
+      desc(lessonReports.lessonDate),
+      paginationArgs,
+      tx
+    );
   }
 
   export async function countForStudent(studentId: string, tx?: DBTransaction): Promise<number> {
@@ -180,14 +215,13 @@ export namespace LessonReportRepository {
     rejectionReason: string | null,
     tx?: DBTransaction
   ): Promise<LessonReportSelectType> {
-    return updateReportFields(
+    return buildUpdateFields(
       reportId,
       {
         status,
         reviewedByUserId,
         reviewedAt: new Date(),
         rejectionReason,
-        updatedAt: new Date(),
       },
       tx
     );
@@ -200,12 +234,11 @@ export namespace LessonReportRepository {
     reviewedAt: Date | null,
     tx?: DBTransaction
   ): Promise<LessonReportSelectType> {
-    return updateReportFields(
+    return buildUpdateFields(
       reportId,
       {
         reviewedByUserId,
         reviewedAt,
-        updatedAt: new Date(),
       },
       tx
     );

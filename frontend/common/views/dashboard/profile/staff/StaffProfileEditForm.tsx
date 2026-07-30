@@ -22,6 +22,108 @@ import {
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
 import { useStaffProfileEditFormViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileEditFormViewModel";
 
+interface StaffProfileEditFormProps {
+  readonly staffData: StaffProfileData;
+  readonly avatarUrl?: string | null;
+  readonly displayCurrency: StaffAdminEditFormData["displayCurrency"];
+  readonly profileTimezone?: string | null;
+  readonly targetUserId: string;
+  readonly isAdminScope: boolean;
+  readonly isSaving: boolean;
+  readonly onSubmit: (values: StaffAdminEditFormData) => Promise<void>;
+}
+
+function buildSectionLabels(labels: ReturnType<typeof useStaffProfileEditFormViewModel>["labels"]) {
+  const { base: tc, staff: st } = labels;
+  return {
+    staff: st,
+    baseLabels: toStaffSharedBaseLabels(tc),
+  };
+}
+
+function buildCompensationViewLabels(
+  labels: ReturnType<typeof useStaffProfileEditFormViewModel>["labels"],
+  errorLabels: ReturnType<typeof useStaffProfileEditFormViewModel>["errorLabels"]
+) {
+  const { base: tc, staff: st } = labels;
+  return {
+    staff: st,
+    baseLabels: {
+      convertedAmount: tc.convertedAmount,
+      convertedTotalApprox: tc.convertedTotalApprox,
+    },
+    errorLabels,
+  };
+}
+
+function CompensationSectionRenderer({
+  showCompensationEditSection,
+  showCompensationViewSection,
+  compensationViewLabels,
+  st,
+  form,
+  staffData,
+}: {
+  readonly showCompensationEditSection: boolean;
+  readonly showCompensationViewSection: boolean;
+  readonly compensationViewLabels: ReturnType<typeof buildCompensationViewLabels>;
+  readonly st: ReturnType<typeof useStaffProfileEditFormViewModel>["labels"]["staff"];
+  readonly form: ReturnType<typeof useForm<StaffAdminEditFormData>>;
+  readonly staffData: StaffProfileData;
+}): React.ReactNode {
+  if (showCompensationEditSection) {
+    return <CompensationSection mode="edit" labels={{ staff: st }} register={form.register} control={form.control} />;
+  }
+  if (showCompensationViewSection) {
+    return (
+      <CompensationSection
+        mode="view"
+        labels={compensationViewLabels}
+        staffData={staffData}
+        subjectUserId={staffData.id ?? undefined}
+      />
+    );
+  }
+  return null;
+}
+
+function useFormSubmitHandler(
+  onSubmit: StaffProfileEditFormProps["onSubmit"],
+  setSuccessOpen: React.Dispatch<React.SetStateAction<boolean>>,
+  setErrorOpen: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  return async (values: StaffAdminEditFormData) => {
+    try {
+      await onSubmit(values);
+      setSuccessOpen(true);
+    } catch {
+      setErrorOpen(true);
+    }
+  };
+}
+
+function useFormResetEffect(
+  form: ReturnType<typeof useForm<StaffAdminEditFormData>>,
+  staffData: StaffProfileData,
+  avatarUrl: string | null | undefined,
+  displayCurrency: StaffAdminEditFormData["displayCurrency"],
+  profileTimezone: string | null | undefined
+) {
+  useEffect(() => {
+    form.reset({
+      name: staffData.name ?? "",
+      email: staffData.email ?? "",
+      avatarUrl: avatarUrl ?? staffData.avatarUrl ?? null,
+      phone: staffData.phone ?? "",
+      timezone: profileTimezone ?? "",
+      status: staffData.status ?? AccountStatus.Activated,
+      displayCurrency: displayCurrency ?? null,
+      hourlyRate: staffData.hourlyRate ?? "",
+      rateCurrency: staffData.rateCurrency ?? null,
+    });
+  }, [avatarUrl, displayCurrency, form, profileTimezone, staffData]);
+}
+
 export function StaffProfileEditForm({
   staffData,
   avatarUrl,
@@ -31,30 +133,10 @@ export function StaffProfileEditForm({
   isAdminScope,
   isSaving,
   onSubmit,
-}: {
-  readonly staffData: StaffProfileData;
-  readonly avatarUrl?: string | null;
-  readonly displayCurrency: StaffAdminEditFormData["displayCurrency"];
-  readonly profileTimezone?: string | null;
-  readonly targetUserId: string;
-  readonly isAdminScope: boolean;
-  readonly isSaving: boolean;
-  readonly onSubmit: (values: StaffAdminEditFormData) => Promise<void>;
-}) {
+}: StaffProfileEditFormProps) {
   const { labels, errorLabels } = useStaffProfileEditFormViewModel();
-  const { base: tc, staff: st } = labels;
-  const sectionLabels = {
-    staff: st,
-    baseLabels: toStaffSharedBaseLabels(tc),
-  };
-  const compensationViewLabels = {
-    staff: st,
-    baseLabels: {
-      convertedAmount: tc.convertedAmount,
-      convertedTotalApprox: tc.convertedTotalApprox,
-    },
-    errorLabels,
-  };
+  const sectionLabels = buildSectionLabels(labels);
+  const compensationViewLabels = buildCompensationViewLabels(labels, errorLabels);
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canView, canEdit } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
@@ -75,49 +157,13 @@ export function StaffProfileEditForm({
     },
   });
 
-  useEffect(() => {
-    form.reset({
-      name: staffData.name ?? "",
-      email: staffData.email ?? "",
-      avatarUrl: avatarUrl ?? staffData.avatarUrl ?? null,
-      phone: staffData.phone ?? "",
-      timezone: profileTimezone ?? "",
-      status: staffData.status ?? AccountStatus.Activated,
-      displayCurrency: displayCurrency ?? null,
-      hourlyRate: staffData.hourlyRate ?? "",
-      rateCurrency: staffData.rateCurrency ?? null,
-    });
-  }, [avatarUrl, displayCurrency, form, profileTimezone, staffData]);
-
-  const onValidSubmit = async (values: StaffAdminEditFormData) => {
-    try {
-      await onSubmit(values);
-      setSuccessOpen(true);
-    } catch {
-      setErrorOpen(true);
-    }
-  };
+  useFormResetEffect(form, staffData, avatarUrl, displayCurrency, profileTimezone);
+  const onValidSubmit = useFormSubmitHandler(onSubmit, setSuccessOpen, setErrorOpen);
 
   const showAccountSection = canEdit("core_identity") || (isAdminScope && canEdit("staff_role"));
   const showCompensationViewSection =
     canView("staff_role") && (isAdminScope || Boolean(staffData.hourlyRate || staffData.rateCurrency));
   const showCompensationEditSection = isAdminScope && canEdit("staff_role");
-
-  let compensationSection: React.ReactNode = null;
-  if (showCompensationEditSection) {
-    compensationSection = (
-      <CompensationSection mode="edit" labels={{ staff: st }} register={form.register} control={form.control} />
-    );
-  } else if (showCompensationViewSection) {
-    compensationSection = (
-      <CompensationSection
-        mode="view"
-        labels={compensationViewLabels}
-        staffData={staffData}
-        subjectUserId={staffData.id ?? undefined}
-      />
-    );
-  }
 
   return (
     <Stack spacing={3}>
@@ -127,8 +173,8 @@ export function StaffProfileEditForm({
             <AvatarImageField
               control={form.control}
               name="avatarUrl"
-              label={st.fields.avatar}
-              title={tc.editAvatarTitle}
+              label={labels.staff.fields.avatar}
+              title={labels.base.editAvatarTitle}
               onUploadAvatar={onUploadAvatar}
             />
           ) : null}
@@ -158,16 +204,27 @@ export function StaffProfileEditForm({
             {canEdit("core_contact") ? (
               <ContactSection mode="edit" labels={sectionLabels} scope={scope} control={form.control} />
             ) : null}
-            {compensationSection}
+            <CompensationSectionRenderer
+              showCompensationEditSection={showCompensationEditSection}
+              showCompensationViewSection={showCompensationViewSection}
+              compensationViewLabels={compensationViewLabels}
+              st={labels.staff}
+              form={form}
+              staffData={staffData}
+            />
           </Box>
           <PrimaryPageAction type="submit" disabled={isSaving}>
-            {tc.actions.save}
+            {labels.base.actions.save}
           </PrimaryPageAction>
         </Stack>
       </Box>
       {!isAdminScope ? <ChangePasswordSection /> : null}
-      <FormSuccessSnackbar open={successOpen} message={tc.actions.saveSuccess} onClose={() => setSuccessOpen(false)} />
-      <FormErrorSnackbar open={errorOpen} message={tc.actions.saveError} onClose={() => setErrorOpen(false)} />
+      <FormSuccessSnackbar
+        open={successOpen}
+        message={labels.base.actions.saveSuccess}
+        onClose={() => setSuccessOpen(false)}
+      />
+      <FormErrorSnackbar open={errorOpen} message={labels.base.actions.saveError} onClose={() => setErrorOpen(false)} />
     </Stack>
   );
 }
