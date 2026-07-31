@@ -36,6 +36,7 @@ export type EnvConfigCategory =
   | "app"
   | "meeting"
   | "billing"
+  | "whatsapp"
   | "general";
 
 /**
@@ -577,6 +578,76 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
     },
     isSecret: true,
     excludeFromDb: true,
+  },
+
+  // ---------------------------------------------------------------------------
+  // WhatsApp
+  // ---------------------------------------------------------------------------
+  {
+    key: "WHATSAPP_PROVIDER",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Active WhatsApp provider. Only valid value: cloud_api.",
+      ar: "مزوّد واتساب النشط. القيمة الصالحة الوحيدة: cloud_api.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_APP_ID",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Meta app ID for the WhatsApp Business API.",
+      ar: "معرّف تطبيق Meta لواجهة برمجة تطبيقات واتساب للأعمال.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_APP_SECRET",
+    category: "whatsapp",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "App secret used for webhook HMAC verification.",
+      ar: "سرّ التطبيق المستخدم للتحقق من HMAC في webhook.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_VERIFY_TOKEN",
+    category: "whatsapp",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Verify token for WhatsApp webhook GET verification.",
+      ar: "رمز التحقق لاست verificar GET webhook في واتساب.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_WABA_ID",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Default WhatsApp Business Account ID for account sync.",
+      ar: "معرّف حساب واتساب للأعمال الافتراضي لمزامنة الحساب.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_WEBHOOK_BASE_URL",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Public HTTPS base URL for WhatsApp webhook endpoints.",
+      ar: "رابط HTTPS عام لقاعدة webhook في واتساب.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
   },
 ];
 

@@ -59,11 +59,11 @@
       - `backend/graphql/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (Pothos enum)
       - `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (utils.ts)
 
-- [ ] **2. Env-config registry (REQ-3)**
-  - [ ] 2.1 Edit `backend/lib/env-config-keys.ts` — `whatsapp` category with 6 keys
-  - [ ] 2.2 Edit `backend/types/shared/env-config.types.ts` — `whatsapp` in `EnvConfigCategory`
-  - [ ] 2.3 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
-  - [ ] 2.4 **AGENTS.md/instruction compliance**: read and fix violations against:
+- [x] **2. Env-config registry (REQ-3)**
+  - [x] 2.1 Edit `backend/lib/env-config-keys.ts` — `whatsapp` category with 6 keys
+  - [x] 2.2 Edit `backend/types/shared/env-config.types.ts` — `whatsapp` in `EnvConfigCategory`
+  - [x] 2.3 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 2.4 **AGENTS.md/instruction compliance**: read and fix violations against:
       - `backend/lib/AGENTS.md` (or `backend/AGENTS.md`) + `.agents/instructions/backend.instructions.md` (env-config files)
       - `backend/types/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (env-config types)
 
