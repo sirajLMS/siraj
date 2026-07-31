@@ -62,6 +62,26 @@ describe("Cache Split Routing & Functionality", () => {
     expect(retrieved?.value).toBe(TEST_VALUE);
   });
 
+  it("should route ec: and tag: keys explicitly to session_cache table", async () => {
+    const ecKey = `ec:user:${uid}:admin`;
+    const tagKey = `tag:teacher:${uid}`;
+    allKeys.push(ecKey, tagKey);
+
+    await CacheDbRepository.set(ecKey, TEST_VALUE, FUTURE_EXPIRES);
+    await CacheDbRepository.set(tagKey, TEST_VALUE, FUTURE_EXPIRES);
+
+    await runInRollback(async tx => {
+      const ecSessionResult = await tx.select().from(sessionCache).where(eq(sessionCache.key, ecKey)).limit(1);
+      expect(ecSessionResult).toHaveLength(1);
+
+      const tagSessionResult = await tx.select().from(sessionCache).where(eq(sessionCache.key, tagKey)).limit(1);
+      expect(tagSessionResult).toHaveLength(1);
+
+      const ecRlResult = await tx.select().from(rateLimitCache).where(eq(rateLimitCache.key, ecKey)).limit(1);
+      expect(ecRlResult).toHaveLength(0);
+    });
+  });
+
   it("should handle increment on rate limit keys", async () => {
     await CacheDbRepository.del(INCR_KEY);
 

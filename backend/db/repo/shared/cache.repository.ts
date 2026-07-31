@@ -1,4 +1,4 @@
-import { and, eq, gt, lt, sql } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema/shared/cache";
@@ -10,6 +10,9 @@ export namespace CacheDbRepository {
    * Rate limiting keys go to UNLOGGED table
    */
   const getTable = (key: string) => {
+    if (key.startsWith("ec:") || key.startsWith("tag:")) {
+      return sessionCache;
+    }
     if (key.startsWith("ratelimit:") || key.startsWith("auth:")) {
       return rateLimitCache;
     }
@@ -23,20 +26,18 @@ export namespace CacheDbRepository {
     try {
       const table = getTable(key);
       const q = queryDb();
-      const result = await q.select().from(table).where(eq(table.key, key)).limit(1);
+      const now = new Date();
+      const result = await q
+        .select()
+        .from(table)
+        .where(and(eq(table.key, key), gte(table.expiresAt, now)))
+        .limit(1);
 
       if (result.length === 0 || !result[0]) {
         return null;
       }
 
       const entry = result[0];
-
-      // Check if expired
-      if (entry.expiresAt < new Date()) {
-        // Delete expired entry
-        await del(key);
-        return null;
-      }
 
       return {
         value: entry.value,
@@ -75,6 +76,20 @@ export namespace CacheDbRepository {
   };
 
   /**
+   * Update expiration for a specific key
+   */
+  export const setExpiry = async (key: string, expiresAt: Date): Promise<number> => {
+    try {
+      const table = getTable(key);
+      const result = await db.update(table).set({ expiresAt }).where(eq(table.key, key)).returning({ key: table.key });
+      return result.length;
+    } catch (error) {
+      logger.error(`Failed to set expiry for key ${key}:`, error);
+      throw error;
+    }
+  };
+
+  /**
    * Increment cache value and return new count
    */
   export const incr = async (key: string): Promise<number> => {
@@ -83,24 +98,17 @@ export namespace CacheDbRepository {
       const now = new Date();
       const defaultExpiresAt = new Date(now.getTime() + 60 * 60 * 1000);
 
-      const updated = await db
-        .update(table)
-        .set({ value: sql`(${table.value}::int + 1)::text` })
-        .where(and(eq(table.key, key), gt(table.expiresAt, now)))
-        .returning({ value: table.value });
-
-      if (updated.length > 0) {
-        return Number.parseInt(updated[0].value, 10);
-      }
-
       const inserted = await db
         .insert(table)
         .values({ key, value: "1", expiresAt: defaultExpiresAt })
         .onConflictDoUpdate({
           target: table.key,
-          set: { value: sql`(${table.value}::int + 1)::text`, expiresAt: defaultExpiresAt },
+          set: {
+            value: sql`(${table.value}::int + 1)::text`,
+            expiresAt: sql`EXCLUDED.expires_at`,
+          },
         })
-        .returning();
+        .returning({ value: table.value });
 
       return Number.parseInt(inserted[0]?.value ?? "1", 10);
     } catch (error) {
@@ -143,7 +151,7 @@ export namespace CacheDbRepository {
           and(
             sql`${table.key} LIKE ${prefix + "%"}`,
             sql`${table.value}::bigint <= ${BigInt(maxScore)}`,
-            gt(table.expiresAt, now)
+            gte(table.expiresAt, now)
           )
         )
         .returning();

@@ -1,6 +1,8 @@
 import { TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { invalidateTeacherWrite } from "@/backend/services/cache";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 import { getServerTranslations } from "@/shared/locale";
@@ -71,6 +73,12 @@ export namespace StaffProfileService {
     if (!profile) {
       const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(tFunc.teacherNotFound(teacherId));
+    }
+
+    try {
+      await invalidateTeacherWrite(teacherId, profile.userId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate teacher cache tags", { teacherId, userId: profile.userId, error: cacheErr });
     }
 
     return toMaskedTeacherProfile(profile);

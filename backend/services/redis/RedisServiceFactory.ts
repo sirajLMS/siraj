@@ -230,4 +230,8 @@ export const redisService: IRedisService = {
     const service = await getRedisService();
     return service.disconnect();
   },
+  stats: async () => {
+    const service = await getRedisService();
+    return service.stats();
+  },
 };

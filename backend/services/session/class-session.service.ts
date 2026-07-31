@@ -14,6 +14,7 @@ import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { invalidateClassLifecycle } from "@/backend/services/cache";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
@@ -156,6 +157,20 @@ export namespace ClassSessionService {
     try {
       const instance = await SchedulingRepository.getClassInstanceById(classInstanceId);
       if (!instance) return;
+
+      const teacherId = instance.teacherId ?? undefined;
+      const parentId = instance.student?.parentId ?? undefined;
+
+      try {
+        await invalidateClassLifecycle(teacherId, parentId);
+      } catch (cacheErr) {
+        logger.error("Failed to invalidate class lifecycle cache tags", {
+          classInstanceId,
+          teacherId,
+          parentId,
+          error: cacheErr,
+        });
+      }
 
       const studentName = instance.student?.name ?? "—";
       const affectedUserIds = classLifecycleAffectedUserIds(affected);

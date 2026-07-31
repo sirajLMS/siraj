@@ -1,3 +1,9 @@
+export interface CacheStats {
+  provider: string;
+  size: number;
+  hitsByPrefix: Record<string, { hits: number; misses: number }>;
+}
+
 /**
  * Shared Cache/Redis Service Interface
  * Defines the contract for all cache and redis adapters
@@ -47,4 +53,9 @@ export interface ICacheServiceBase {
    * Close the connection
    */
   disconnect(): Promise<void>;
+
+  /**
+   * Get cache statistics and metrics
+   */
+  stats(): Promise<CacheStats>;
 }

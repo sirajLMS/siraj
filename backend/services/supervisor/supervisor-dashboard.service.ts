@@ -1,6 +1,7 @@
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { cachedRead } from "@/backend/services/cache";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type { SupervisorDashboardReturnType } from "@/backend/types/supervisor";
@@ -40,22 +41,31 @@ export namespace SupervisorDashboardService {
       throw new Error(tErrors.insufficientPermissions);
     }
 
-    const [user, pendingReview, pendingDuesSummary] = await Promise.all([
-      UserRepository.findById(actorUserId),
-      LessonReportService.getPendingReviewCount(actorUserId, undefined, locale),
-      TeacherDueService.getPendingDuesSummary(actorUserId, locale),
-    ]);
+    const cacheKey = `ec:supervisor:dash:${actorUserId}`;
 
-    if (!user) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.userNotFound(actorUserId));
-    }
+    return await cachedRead(
+      cacheKey,
+      30,
+      async () => {
+        const [user, pendingReview, pendingDuesSummary] = await Promise.all([
+          UserRepository.findById(actorUserId),
+          LessonReportService.getPendingReviewCount(actorUserId, undefined, locale),
+          TeacherDueService.getPendingDuesSummary(actorUserId, locale),
+        ]);
 
-    return {
-      supervisorName: user.name,
-      pendingReviewCount: pendingReview.pendingCount,
-      pendingDuesSummary,
-      monthlySnapshot: buildMonthlySnapshot(locale),
-    };
+        if (!user) {
+          const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+          throw new Error(tErrors.userNotFound(actorUserId));
+        }
+
+        return {
+          supervisorName: user.name,
+          pendingReviewCount: pendingReview.pendingCount,
+          pendingDuesSummary,
+          monthlySnapshot: buildMonthlySnapshot(locale),
+        };
+      },
+      ["dashboard:supervisor"]
+    );
   }
 }

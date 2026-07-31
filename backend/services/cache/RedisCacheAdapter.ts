@@ -1,5 +1,8 @@
+import logger from "@/backend/lib/logger";
+import { getEntityCacheStats } from "@/backend/services/cache/EntityCacheService";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
 import { getRedisService } from "@/backend/services/redis";
+import type { CacheStats } from "@/backend/services/shared/CacheInterface";
 
 /**
  * Redis Cache Adapter
@@ -77,5 +80,34 @@ export class RedisCacheAdapter implements ICacheService {
   async disconnect(): Promise<void> {
     const redis = await getRedisService();
     await redis.disconnect();
+  }
+
+  /**
+   * Get cache statistics and metrics
+   */
+  async stats(): Promise<CacheStats> {
+    try {
+      const redis = await getRedisService();
+      let size = 0;
+      let providerName = "redis";
+      if ("dbsize" in redis && typeof (redis as { dbsize?: () => Promise<number> }).dbsize === "function") {
+        size = await (redis as { dbsize: () => Promise<number> }).dbsize();
+      }
+      if ("providerName" in redis && typeof (redis as { providerName?: () => string }).providerName === "function") {
+        providerName = (redis as { providerName: () => string }).providerName();
+      }
+      return {
+        provider: providerName,
+        size,
+        hitsByPrefix: getEntityCacheStats(),
+      };
+    } catch (error) {
+      logger.error("Redis cache stats error:", error);
+      return {
+        provider: "redis",
+        size: 0,
+        hitsByPrefix: getEntityCacheStats(),
+      };
+    }
   }
 }

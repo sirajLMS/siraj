@@ -1,5 +1,7 @@
+import { getEntityCacheStats } from "@/backend/services/cache/EntityCacheService";
 import type { IRedisService } from "@/backend/services/redis/IRedisService";
 import { buildRedisPipeline } from "@/backend/services/redis/redis-utils";
+import type { CacheStats } from "@/backend/services/shared/CacheInterface";
 
 /**
  * Common interface for Redis clients (ioredis, upstash) to allow safe delegation
@@ -96,6 +98,30 @@ export abstract class BaseRedisAdapter<TClient> implements IRedisService {
   }
 
   abstract disconnect(): Promise<void>;
+
+  /**
+   * Get cache statistics and metrics
+   */
+  async stats(): Promise<CacheStats> {
+    try {
+      let size = 0;
+      const client = this.clientRef as unknown as { dbsize?(): Promise<number> };
+      if (typeof client.dbsize === "function") {
+        size = await client.dbsize();
+      }
+      return {
+        provider: "redis",
+        size,
+        hitsByPrefix: getEntityCacheStats(),
+      };
+    } catch {
+      return {
+        provider: "redis",
+        size: 0,
+        hitsByPrefix: getEntityCacheStats(),
+      };
+    }
+  }
 
   /**
    * Get the native client for advanced operations

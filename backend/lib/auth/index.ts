@@ -1,5 +1,7 @@
 export * from "./cached-parent";
+export * from "./cached-parent-by-user-id";
 export * from "./cached-profile";
+export * from "./cached-teacher-by-user-id";
 export * from "./cached-user";
 export * from "./is-prefetch";
 export * from "./jwt";

@@ -2,6 +2,7 @@ import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission, ParentStatus } from "@/backend/enum";
 import { parseAccountStatus, parseParentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { cachedRead, stableStringify } from "@/backend/services/cache";
 import type {
   PaginationArgs,
   ParentDirectoryAutocompleteRow,
@@ -43,47 +44,58 @@ export namespace ParentDirectoryService {
   ): Promise<ParentDirectoryResult> {
     await assertDirectoryAccess(actorUserId, locale);
 
-    const {
-      metrics,
-      rows: rawRows,
-      totalCount,
-      pageInfo,
-    } = await ParentRepository.getParentDirectory({ search, pagination, lifecycleStatus });
+    const context = await PermissionsService.getUserContext(actorUserId);
+    const roleId = context?.role ?? "anonymous";
+    const cacheKey = `ec:parent:dir:${roleId}:${stableStringify({ search, pagination, lifecycleStatus })}`;
 
-    const parentIds = rawRows.map(r => r.id);
-    const studentsMap = await ParentRepository.getStudentsForParents(parentIds);
+    return await cachedRead(
+      cacheKey,
+      30,
+      async () => {
+        const {
+          metrics,
+          rows: rawRows,
+          totalCount,
+          pageInfo,
+        } = await ParentRepository.getParentDirectory({ search, pagination, lifecycleStatus });
 
-    const rows: ParentDirectoryRow[] = [];
-    for (let i = 0; i < rawRows.length; i++) {
-      const row = rawRows[i];
-      const students = studentsMap.get(row.id) ?? [];
-      const guardianOf = students.map(s => s.name).join(", ") || "No students";
+        const parentIds = rawRows.map(r => r.id);
+        const studentsMap = await ParentRepository.getStudentsForParents(parentIds);
 
-      rows.push({
-        id: row.id,
-        userId: row.userId,
-        index: (pagination?.offset ?? 0) + i + 1,
-        name: row.name,
-        email: row.email,
-        avatarUrl: row.avatarUrl,
-        guardianOf,
-        time: row.updatedAt.toLocaleTimeString(),
-        lifecycleStatus: parseParentStatus(row.lifecycleStatus) ?? ParentStatus.REGULAR,
-        accountStatus: parseAccountStatus(row.accountStatus),
-        unpaidInvoices: row.unpaidInvoices,
-      });
-    }
+        const rows: ParentDirectoryRow[] = [];
+        for (let i = 0; i < rawRows.length; i++) {
+          const row = rawRows[i];
+          const students = studentsMap.get(row.id) ?? [];
+          const guardianOf = students.map(s => s.name).join(", ") || "No students";
 
-    return {
-      id: "parent-directory",
-      metrics: {
-        id: "parent-metrics",
-        ...metrics,
+          rows.push({
+            id: row.id,
+            userId: row.userId,
+            index: (pagination?.offset ?? 0) + i + 1,
+            name: row.name,
+            email: row.email,
+            avatarUrl: row.avatarUrl,
+            guardianOf,
+            time: row.updatedAt.toLocaleTimeString(),
+            lifecycleStatus: parseParentStatus(row.lifecycleStatus) ?? ParentStatus.REGULAR,
+            accountStatus: parseAccountStatus(row.accountStatus),
+            unpaidInvoices: row.unpaidInvoices,
+          });
+        }
+
+        return {
+          id: "parent-directory",
+          metrics: {
+            id: "parent-metrics",
+            ...metrics,
+          },
+          rows,
+          totalCount,
+          pageInfo,
+        };
       },
-      rows,
-      totalCount,
-      pageInfo,
-    };
+      ["parentDirectory"]
+    );
   }
 
   /**

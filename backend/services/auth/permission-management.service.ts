@@ -4,7 +4,9 @@ import { PermissionManagementRepository } from "@/backend/db/repo";
 import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { invalidateRoleChange } from "@/backend/services/cache";
 import type {
   GroupWithPermissionIds,
   PermissionReturnType,
@@ -259,6 +261,12 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "assign", "existsFull", tErrors);
     await PermissionManagementRepository.bulkAssignUsersToGroup([input.userId], input.groupId, actorUserId);
+
+    try {
+      await invalidateRoleChange(input.userId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate role change cache", { userId: input.userId, error: cacheErr });
+    }
   }
 
   export async function revokeGroupFromUser(
@@ -268,6 +276,12 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "assign", "nonSuperAdmin", tErrors);
     await PermissionManagementRepository.bulkRevokeUsersFromGroup([input.userId], input.groupId);
+
+    try {
+      await invalidateRoleChange(input.userId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate role change cache", { userId: input.userId, error: cacheErr });
+    }
   }
 
   export async function listGroupsForUser(
@@ -296,6 +310,17 @@ export namespace PermissionManagementService {
     if (foundUsers.length !== input.userIds.length) throw new Error(tErrors.permissionManagement.userNotFound(""));
 
     await PermissionManagementRepository.bulkAssignUsersToGroup(input.userIds, input.groupId, actorUserId);
+
+    try {
+      for (const uid of input.userIds) {
+        await invalidateRoleChange(uid);
+      }
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate role change cache for bulk assign", {
+        userIds: input.userIds,
+        error: cacheErr,
+      });
+    }
   }
 
   export async function bulkRevokeUsersFromGroup(
@@ -315,6 +340,17 @@ export namespace PermissionManagementService {
     if (nonSuperAdminUserIds.length === 0) return;
 
     await PermissionManagementRepository.bulkRevokeUsersFromGroup(nonSuperAdminUserIds, input.groupId);
+
+    try {
+      for (const uid of nonSuperAdminUserIds) {
+        await invalidateRoleChange(uid);
+      }
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate role change cache for bulk revoke", {
+        userIds: nonSuperAdminUserIds,
+        error: cacheErr,
+      });
+    }
   }
 
   export async function listUserOverrides(
@@ -333,6 +369,15 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "manage", "nonSuperAdmin", tErrors);
     await PermissionManagementRepository.setUserOverrides(input.userId, input.overrides, actorUserId);
+
+    try {
+      await invalidateRoleChange(input.userId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate role change cache for user overrides", {
+        userId: input.userId,
+        error: cacheErr,
+      });
+    }
   }
 
   export async function getEffectiveUserPermissions(

@@ -31,6 +31,7 @@ The backend follows a consistent pattern for defining and using types across all
 - Perform data transformations as needed between types
 - Example: Using `{Entity}SubmitInput` for input validation and `{Entity}ReturnType` for output in `{entity}.service.ts`
 - **Batch Service Methods**: Services called from GraphQL resolvers MUST expose batch versions (e.g., `resolveTeacherIdsForUsers(userIds: string[])`) returning `Map<string, T | null>` for DataLoader support. See `docs/graphql/dataloader-batching.md`.
+- **Hot-Resolver & Read Caching**: Hot read paths use `cachedRead` from `@/backend/services/cache` with identity+role-scoped key formats. Mutation write paths invoke tag invalidation helpers in `try/catch`. See `docs/services/entity-cache-service.md`.
 
 ### 5. GraphQL Layer (`backend/graphql/pothos/*.pothos.ts`)
 - Reference types from `backend/types/` for Pothos object implementations
