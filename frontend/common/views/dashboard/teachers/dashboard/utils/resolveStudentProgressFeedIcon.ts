@@ -1,11 +1,3 @@
-// NEW FOR PLAN v5 (newly created for the migration wave): Pure-data icon
-// resolver lifted out of both the mobile and desktop
-// `studentProgressFeed.*.tsx` tier files per specs.md §3 N9 + §5 (lowercase
-// pure-data helpers belong in `frontend/common/views/dashboard/<domain>/utils/`,
-// not inlined in tier files). The two tier files previously declared
-// byte-identical `function resolveFeedIcon(eventKind: TeacherProgressFeedEventKind): SvgIconComponent`
-// helpers — both now import this single shared implementation.
-
 import type { SvgIconComponent } from "@mui/icons-material";
 import {
   CheckCircleOutlineOutlined,
@@ -16,23 +8,23 @@ import {
   PlayCircleOutlineOutlined,
   SensorsOutlined,
 } from "@mui/icons-material";
-import type { TeacherProgressFeedEventKind } from "@/frontend/common/types/shared.types";
+import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 // NEW FOR PLAN v5: resolveStudentProgressFeedIcon — pure-data icon resolver
 // for the student-progress feed event-kind → Material icon mapping.
 export function resolveStudentProgressFeedIcon(eventKind: TeacherProgressFeedEventKind): SvgIconComponent {
   switch (eventKind) {
-    case "auto_missed":
+    case TeacherProgressFeedEventKind.AutoMissed:
       return EventBusyOutlined;
-    case "marked_absent":
+    case TeacherProgressFeedEventKind.MarkedAbsent:
       return PersonOffOutlined;
-    case "activated":
+    case TeacherProgressFeedEventKind.Activated:
       return PlayCircleOutlineOutlined;
-    case "started":
+    case TeacherProgressFeedEventKind.Started:
       return SensorsOutlined;
-    case "completed":
+    case TeacherProgressFeedEventKind.Completed:
       return CheckCircleOutlineOutlined;
-    case "leave":
+    case TeacherProgressFeedEventKind.Leave:
       return EventAvailableOutlined;
     default:
       return DescriptionOutlined;

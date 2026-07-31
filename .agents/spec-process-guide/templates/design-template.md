@@ -19,6 +19,8 @@ Use this template to create comprehensive design documents that translate requir
 ## Document Information
 
 - **Feature Name**: [Your Feature Name]
+- **Target Directory**: `.ai/plans/<feature-name>`
+- **Outcome Directory**: `.ai/plans/<feature-name>/outcome`
 - **Version**: 1.0
 - **Date**: [Current Date]
 - **Author**: [Your Name]
@@ -38,6 +40,60 @@ Use this template to create comprehensive design documents that translate requir
 - [Decision 1 and rationale]
 - [Decision 2 and rationale]
 - [Decision 3 and rationale]
+
+### UX/Navigation Specification (REQUIRED)
+Every feature design MUST include a complete UX/Navigation section:
+
+#### New Routes & URLs
+| Route | Purpose | Permission Required | Roles with Access |
+|-------|---------|---------------------|-------------------|
+| `/feature` | List view | `FEATURE_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/feature/new` | Create form | `FEATURE_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN |
+| `/feature/[id]` | Detail/edit | `FEATURE_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+
+#### Sidebar Navigation Integration
+- **Group**: [Parent navigation group name, e.g., "Billing (grp_billing)"]
+- **Parent Item**: [Parent nav item, if nested]
+- **Children**: [Child items with order]
+- **Mobile Bottom Nav**: [Whether item appears in bottom nav, and order]
+
+#### Role-Based Access Matrix
+| Role | Routes Accessible | Permissions Granted |
+|------|-------------------|---------------------|
+| SUPER_ADMIN | All routes | All permissions |
+| ACADEMY_ADMIN | `/feature`, `/feature/new`, `/feature/[id]` | `FEATURE_VIEW`, `FEATURE_MANAGE` |
+| SUPERVISOR | `/feature`, `/feature/[id]` | `FEATURE_VIEW` |
+| TEACHER | `/feature/[id]` (read-only) | `FEATURE_VIEW` (scoped) |
+| PARENT | N/A | N/A |
+| STUDENT | N/A | N/A |
+
+#### Per-Audience Rendering
+| Audience | Prominent Content / Differences |
+|----------|----------------------------------|
+| Student | [What students see - may be empty/limited] |
+| Parent | [What parents see - may be empty/limited] |
+| Teacher | [What teachers see - typically read-only views] |
+| Supervisor | [What supervisors see - typically read access] |
+| Admin/Staff | [Full CRUD access, management controls] |
+
+#### Mobile vs Desktop Variants
+| Aspect | Desktop | Mobile |
+|--------|---------|--------|
+| Navigation | Sidebar item under [Group] | Bottom nav / drawer under [Group] |
+| [Component] | [Implementation] | [Implementation] |
+| [Layout] | [Implementation] | [Implementation] |
+
+#### Permission Mapping
+| Component/Route | Required Permission | Source |
+|-----------------|---------------------|--------|
+| FeatureList | `FEATURE_VIEW` | `requirePermissionForPage` / `<RequirePermission>` |
+| FeatureCreate | `FEATURE_MANAGE` | `requirePermissionForPage` / `<RequirePermission>` |
+| FeatureDetail | `FEATURE_VIEW` | `requirePermissionForPage` / `<RequirePermission>` |
+
+### Outcome & Knowledge Transfer Protocol (`.ai/plans/<feature-name>/outcome/`)
+- **BEFORE Execution:** Executing agents MUST read ALL existing files in `.ai/plans/<feature-name>/outcome/` to avoid re-analysis.
+- **AFTER Execution:** Executing agents MUST write `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` with research/doc findings and implementation details.
+- **PROGRESS TRACKING:** Executing agents MUST update task checkboxes `[ ]` -> `[x]` in `tasks.md`.
 
 ## Architecture
 
@@ -400,6 +456,14 @@ Use this checklist to validate your design document:
 - [ ] Components are loosely coupled
 - [ ] Configuration is externalized
 - [ ] Monitoring and observability are included
+
+### UX/Navigation Completeness (MANDATORY)
+- [ ] New routes table complete with permissions and roles
+- [ ] Sidebar navigation placement specified (group, parent, children, order)
+- [ ] Role-based access matrix for ALL user types
+- [ ] Per-audience rendering differences documented
+- [ ] Mobile vs Desktop variants defined
+- [ ] Permission mapping for each route/component specified
 
 ---
 

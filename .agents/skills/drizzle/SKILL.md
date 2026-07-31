@@ -31,6 +31,21 @@ If no project-installed `drizzle-kit` can be found or run AND the pending operat
 
 If `drizzle-kit` is found and runs but the call errors — non-zero exit, stdout that does not parse as a positive integer, or any other failure — stop silently as before. The "required" notice is only for the not-found case above.
 
+## Prepared Statements (Drizzle Prepared Statements 2.0)
+
+When reading or editing any `backend/db/repo/**/*.repository.ts` file, follow the prepared statements pattern documented in `docs/drizzle/prepared-statements.md`. Key rules:
+
+- Define prepared statements at **module level** (outside the namespace) using `sql.placeholder("paramName")` and `.prepare("descriptive_name")`
+- For methods accepting `tx?: DBTransaction`: use prepared statement when `!tx`, fall back to regular query when `tx` is provided
+- Prepared statements **cannot** be used inside transactions (bound to the session they were created with)
+- `$count()` does NOT support `.prepare()` — use `select({ count: count() })` instead
+- Write operations (insert, update, delete) should NOT use prepared statements
+- Dynamic WHERE clauses, `$dynamic()` queries, and raw SQL template literals should NOT be prepared
+- **`inArray` + `sql.placeholder` PROHIBITED**: PostgreSQL prepared statement protocol treats `$1` as a single scalar — it cannot expand array parameters for `IN` clauses. Use dynamic queries for `inArray` batch lookups. See `docs/drizzle/prepared-statements.md`.
+- **Batch lookups for DataLoader**: Use `inArray(column, ids)` with plain arrays (NOT `sql.placeholder`). Return `Map<string, T | null>` pre-initialized with all keys → null. See `docs/graphql/dataloader-batching.md`.
+
+Full reference: `docs/drizzle/prepared-statements.md`
+
 ## Surface selection
 
 drizzle-kit exposes the same migration verbs (`generate`, `push`, `pull`, `up`, `check`, `export`) over three surfaces — CLI, SDK, and an MCP server — that all return the identical JSON envelope and consume the same `hints` array. The procedural skills (`drizzle-hints`, `drizzle-responses-and-errors`) apply unchanged regardless of surface; only the invocation differs. Pick the surface per verb:

@@ -1,0 +1,18 @@
+{
+  "pageTitle": "تفاصيل الراتب",
+  "pageSubtitle": "اعرض ملفك الرسمي وتفاصيل التعويض.",
+  "notSet": "غير محدد",
+  "sections": {
+    "contact": "معلومات الاتصال",
+    "salary": "تفاصيل الراتب"
+  },
+  "baseSalary": {
+    "__fn": "(amount, currency) => `\\u0627\\u0644\\u0631\\u0627\\u062A\\u0628 \\u0627\\u0644\\u0623\\u0633\\u0627\\u0633\\u064A: ${amount} ${currency}`"
+  },
+  "paymentMethod": {
+    "__fn": "(method) => `\\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639: ${method}`"
+  },
+  "errors": {
+    "failedToLoad": "فشل تحميل ملفك الشخصي."
+  }
+}

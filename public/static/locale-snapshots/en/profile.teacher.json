@@ -1,0 +1,87 @@
+{
+  "ownSubtitle": "View and update your teaching profile and contact details.",
+  "subtitle": "Manage institutional credentials and administrative details for faculty.",
+  "adminBanner": "Admin view: Identity, Zoom details, and status visible.",
+  "sections": {
+    "account": "Account",
+    "contact": "Contact Information",
+    "zoom": "Zoom",
+    "compensation": "Compensation",
+    "identity": "Identity",
+    "professional": "Professional Qualifications",
+    "stats": "Statistics",
+    "adminOnly": "Administrative Details"
+  },
+  "baseSalary": {
+    "__fn": "(amount, currency) => `${amount} ${currency}`"
+  },
+  "paymentMethod": {
+    "__fn": "(method) => method"
+  },
+  "convertedAmount": {
+    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
+  },
+  "stats": {
+    "totalClasses": "Total Classes",
+    "avgEngagement": "Average Engagement"
+  },
+  "fields": {
+    "fullName": "Full Name",
+    "primaryEmail": "Primary Email",
+    "phone": "Phone",
+    "address": "Address",
+    "timezone": "Timezone",
+    "nationalId": "National ID",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "qualifications": "Qualifications",
+    "hourlyRate": "Hourly Rate",
+    "currency": "Currency",
+    "paymentMethod": "Payment Method",
+    "status": "Account Status",
+    "displayCurrency": "Display Currency",
+    "avatar": "Avatar"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female"
+  },
+  "status": {
+    "activated": "Activated",
+    "deactivated": "Deactivated"
+  },
+  "nationalIdCompletion": {
+    "banner": "You must enter your National ID before you can use the dashboard.",
+    "action": "Enter your National ID in the Identity section below and save."
+  },
+  "validation": {
+    "nationalIdRequired": "National ID is required.",
+    "nationalIdInvalid": "National ID is invalid for the selected nationality."
+  },
+  "shell": {
+    "tabs": {
+      "profile": "Profile",
+      "paymentMethods": "Payment Methods",
+      "meeting": "Meeting Settings",
+      "students": "Students",
+      "notifications": "Notifications",
+      "permissions": "Permissions"
+    },
+    "loading": "Loading profile...",
+    "error": {
+      "retry": "Retry"
+    }
+  },
+  "actions": {
+    "edit": "Edit Profile",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "saveSuccess": "Profile saved successfully.",
+    "saveError": "Failed to save profile."
+  },
+  "errors": {
+    "failedToLoad": "Failed to load profile.",
+    "notFound": "Profile not found."
+  }
+}

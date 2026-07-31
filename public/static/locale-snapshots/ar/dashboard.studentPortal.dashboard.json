@@ -1,0 +1,28 @@
+{
+  "pageTitle": "لوحتي",
+  "welcomeMessage": {
+    "__fn": "(name) => `\\u0623\\u0647\\u0644\\u064B\\u0627\\u060C ${name}`"
+  },
+  "nextClass": "الحصة القادمة",
+  "joinNow": "انضم",
+  "noUpcomingClasses": "لا توجد حصص قادمة مجدولة",
+  "creditBalance": "الرصيد المتبقي",
+  "classesRemaining": "الحصص المتبقية",
+  "classesTotal": "إجمالي الحصص",
+  "recentLessonReports": "تقارير الحصص الأخيرة",
+  "viewAllHistory": "عرض كل السجل",
+  "viewCredits": "عرض الرصيد",
+  "addReflection": "إضافة ملاحظة",
+  "reflectionDialogTitle": "إضافة ملاحظة",
+  "reflectionNotesLabel": "ملاحظاتك",
+  "reflectionNotesPlaceholder": "شاركنا أفكارك حول هذه الحصة…",
+  "reflectionSaveError": "فشل حفظ الملاحظة",
+  "upcomingToday": "حصص اليوم",
+  "upcomingThisWeek": "هذا الأسبوع",
+  "noLessonReports": "لا توجد تقارير حصص بعد",
+  "loadingMessage": "جارٍ التحميل...",
+  "columnDate": "التاريخ",
+  "columnDuration": "المدة",
+  "columnStatus": "الحالة",
+  "columnActions": "الإجراءات"
+}

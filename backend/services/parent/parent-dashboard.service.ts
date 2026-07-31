@@ -1,6 +1,7 @@
 import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type {
   PaginationArgs,
   ParentDashboardMetricsReturnType,
@@ -35,7 +36,23 @@ export namespace ParentDashboardService {
       locale,
     });
 
-    return result;
+    const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+
+    const enrichedRows = await Promise.all(
+      result.rows.map(async row => {
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tFunc);
+        return {
+          ...row,
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+          effectiveMeeting,
+        };
+      })
+    );
+
+    return {
+      ...result,
+      rows: enrichedRows,
+    };
   }
 
   export async function getDashboardMetrics(

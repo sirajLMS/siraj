@@ -21,18 +21,22 @@ The backend follows a consistent pattern for defining and using types across all
 - Focus solely on data access operations
 - Apply business logic constraints at the service layer, not in repositories
 - Example: Using `{Entity}InsertType` for insert operations and `{Entity}SelectType` for select operations in `{entity}.repository.ts`
+- **Prepared Statements**: All simple read-only methods MUST use Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) defined at module level. See `docs/drizzle/prepared-statements.md` for the complete pattern reference.
+- **Batch Lookup Methods**: Repositories that support DataLoader batching MUST expose `findBy{Key}Ids(ids: string[], tx?)` methods returning `Map<string, T | null>`. Use `inArray(column, sql.placeholder("ids"))` with the transaction fallback pattern. See `docs/graphql/dataloader-batching.md`.
 
 ### 4. Service Layer (`backend/services/**/*.ts`)
 - Import and use types from `backend/types/` for function signatures
 - Handle business logic, permissions, and orchestration
 - Perform data transformations as needed between types
 - Example: Using `{Entity}SubmitInput` for input validation and `{Entity}ReturnType` for output in `{entity}.service.ts`
+- **Batch Service Methods**: Services called from GraphQL resolvers MUST expose batch versions (e.g., `resolveTeacherIdsForUsers(userIds: string[])`) returning `Map<string, T | null>` for DataLoader support. See `docs/graphql/dataloader-batching.md`.
 
 ### 5. GraphQL Layer (`backend/graphql/pothos/*.pothos.ts`)
 - Reference types from `backend/types/` for Pothos object implementations
 - Create Pothos input and object types that map to backend types
 - Maintain consistency between GraphQL types and backend service types
 - Example: Using `{Entity}ReturnType` for the GraphQL `{Entity}` object in `{entity}.pothos.ts`
+- **DataLoader Batching**: All field resolvers that call services per-parent-object MUST use `t.loadable()` or `loadableObject` to eliminate N+1 queries. See `docs/graphql/dataloader-batching.md`.
 
 ### 6. Test Layer (`backend/db/test/repo/*.test.ts`)
 - Import and use the same types from `backend/types/` for consistent testing

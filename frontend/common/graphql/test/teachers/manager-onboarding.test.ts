@@ -9,6 +9,7 @@ import {
   provisionTestSuperAdmin,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { testClient } from "@/frontend/common/graphql/test/testClient";
 
 const createMinimalManagerInput = (
   overrides?: Partial<{
@@ -73,7 +74,6 @@ describe("Manager Onboarding GraphQL API", () => {
 
   const assertManagerCreationDeniedForRole = async (role: string): Promise<boolean> => {
     const token = await loginDemoUser(role);
-    const { testClient } = await import("@/frontend/common/graphql/test/testClient");
     const result = await testClient.mutate({
       mutation: createManagerMutationDocument,
       variables: { input: createMinimalManagerInput() },
@@ -95,8 +95,6 @@ describe("Manager Onboarding GraphQL API", () => {
   });
 
   test("Unauthenticated denied creating manager", async () => {
-    const { testClient } = await import("@/frontend/common/graphql/test/testClient");
-
     const result = await testClient.mutate({
       mutation: createManagerMutationDocument,
       variables: {

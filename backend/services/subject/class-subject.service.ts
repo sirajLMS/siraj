@@ -26,7 +26,15 @@ export namespace ClassSubjectService {
   ): Promise<ClassSubjectReturnType[]> {
     await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 
-    return await ClassSubjectRepository.listSubjects(categoryId);
+    const subjects = await ClassSubjectRepository.listSubjects(categoryId);
+
+    const subjectIds = subjects.map(s => s.id);
+    const resourcesBySubjectId = await SubjectResourceRepository.loadResourcesBySubjectIds(subjectIds);
+
+    return subjects.map(s => ({
+      ...s,
+      resources: resourcesBySubjectId.get(s.id) ?? [],
+    }));
   }
 
   export async function getSubjectById(
@@ -36,7 +44,12 @@ export namespace ClassSubjectService {
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 
-    return await ClassSubjectRepository.getSubjectById(id);
+    const subject = await ClassSubjectRepository.getSubjectById(id);
+    const resources = await SubjectResourceRepository.loadResourcesBySubjectIds([id]);
+    return {
+      ...subject,
+      resources: resources.get(id) ?? [],
+    };
   }
 
   export async function createSubject(
@@ -46,7 +59,11 @@ export namespace ClassSubjectService {
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_CREATE, tErrors);
 
-    return await ClassSubjectRepository.createSubject(input);
+    const subject = await ClassSubjectRepository.createSubject(input);
+    return {
+      ...subject,
+      resources: [],
+    };
   }
 
   export async function updateSubject(
@@ -57,7 +74,12 @@ export namespace ClassSubjectService {
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_UPDATE, tErrors);
 
-    return await ClassSubjectRepository.updateSubject(id, input);
+    const subject = await ClassSubjectRepository.updateSubject(id, input);
+    const resources = await SubjectResourceRepository.loadResourcesBySubjectIds([id]);
+    return {
+      ...subject,
+      resources: resources.get(id) ?? [],
+    };
   }
 
   export async function deleteSubject(userId: string, id: string, tErrors: ErrorsLabels): Promise<{ id: string }> {

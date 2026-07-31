@@ -1,13 +1,14 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   DisplayAmountPothosObject,
-  resolveDisplayAmountField,
+  resolveDisplayAmountFields,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { AccountStatusPothosObject, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
 import type {
+  DisplayAmountReturnType,
   ManagerDirectoryMetrics,
   ManagerDirectoryResult,
   ManagerDirectoryRow,
@@ -93,7 +94,7 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "hourlyRate", "rateCurrency", parent.id),
+      resolve: parent => (parent as unknown as Record<string, unknown>).displayAmount as DisplayAmountReturnType | null,
     }),
   }),
 });
@@ -184,10 +185,21 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
 
       const result = await ManagerDirectoryService.getManagerDirectory(userId, pagination, locale, filters);
 
+      const displayAmounts = await resolveDisplayAmountFields(
+        result.rows as unknown as Record<string, unknown>[],
+        ctx,
+        "hourlyRate",
+        "rateCurrency",
+        "id"
+      );
+
       return {
         id: "manager-directory",
         metrics: result.metrics,
-        rows: result.rows,
+        rows: result.rows.map(row => ({
+          ...row,
+          displayAmount: displayAmounts.get(row.id) ?? null,
+        })),
         totalCount: result.totalCount,
         pageInfo: result.pageInfo,
       };
@@ -223,6 +235,8 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
     }),
   });
 
+import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
+
 gqlSchemaBuilder.mutationField("updateManagerProfile", t =>
   t.field({
     type: ManagerDirectoryRowPothosObject,
@@ -232,7 +246,6 @@ gqlSchemaBuilder.mutationField("updateManagerProfile", t =>
       input: t.arg({ type: UpdateManagerProfileInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const { ManagerProfileService } = await import("@/backend/services/staff/manager-profile.service");
       const actorUserId = await requireAuth(ctx);
       const locale = ctx.locale || "en";
 

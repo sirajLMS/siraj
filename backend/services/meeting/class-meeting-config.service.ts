@@ -13,12 +13,15 @@ import {
   buildMaskedClassMeetingConfigs,
 } from "@/backend/services/meeting/class-meeting-config-mask";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
+import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type {
   ClassMeetingConfigReturnType,
+  ClassMeetingConfigSelectType,
   ClassMeetingConfigSubmitInput,
   EffectiveMeetingReturnType,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
+import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ClassMeetingConfigService {
@@ -29,6 +32,13 @@ export namespace ClassMeetingConfigService {
     }
   }
 
+  async function resolveProvidersForClassConfigs(
+    configs: ClassMeetingConfigSelectType[]
+  ): Promise<Map<string, MeetingProviderSelectType>> {
+    const ids = [...new Set(configs.map(c => c.providerId))];
+    return MeetingProviderCatalogService.getProvidersByIds(ids);
+  }
+
   export async function listClassMeetingConfigs(
     actorUserId: string,
     classInstanceId: string,
@@ -36,7 +46,8 @@ export namespace ClassMeetingConfigService {
   ): Promise<ClassMeetingConfigReturnType[]> {
     await assertCanManageClass(actorUserId, tErrors);
     const rows = await ClassMeetingConfigRepository.listByScope({ classInstanceId });
-    return buildMaskedClassMeetingConfigs(rows, true);
+    const providerMap = await resolveProvidersForClassConfigs(rows);
+    return buildMaskedClassMeetingConfigs(rows, true, providerMap);
   }
 
   export async function listRecurringMeetingConfigs(
@@ -46,7 +57,8 @@ export namespace ClassMeetingConfigService {
   ): Promise<ClassMeetingConfigReturnType[]> {
     await assertCanManageClass(actorUserId, tErrors);
     const rows = await ClassMeetingConfigRepository.listByScope({ recurringScheduleId });
-    return buildMaskedClassMeetingConfigs(rows, true);
+    const providerMap = await resolveProvidersForClassConfigs(rows);
+    return buildMaskedClassMeetingConfigs(rows, true, providerMap);
   }
 
   async function loadConfigForActor(actorUserId: string, id: string, tErrors: ErrorsLabels) {
@@ -61,7 +73,8 @@ export namespace ClassMeetingConfigService {
     tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
     const config = await loadConfigForActor(actorUserId, id, tErrors);
-    return buildMaskedClassMeetingConfig(config, true);
+    const providerMap = await resolveProvidersForClassConfigs([config]);
+    return buildMaskedClassMeetingConfig(config, true, providerMap);
   }
 
   export async function createClassMeetingConfig(
@@ -91,7 +104,8 @@ export namespace ClassMeetingConfigService {
       tErrors
     );
 
-    return buildMaskedClassMeetingConfig(created, true);
+    const providerMap = await resolveProvidersForClassConfigs([created]);
+    return buildMaskedClassMeetingConfig(created, true, providerMap);
   }
 
   export async function updateClassMeetingConfig(
@@ -118,7 +132,8 @@ export namespace ClassMeetingConfigService {
       tErrors
     );
 
-    return buildMaskedClassMeetingConfig(updated, true);
+    const providerMap = await resolveProvidersForClassConfigs([updated]);
+    return buildMaskedClassMeetingConfig(updated, true, providerMap);
   }
 
   export async function deleteClassMeetingConfig(
@@ -138,7 +153,8 @@ export namespace ClassMeetingConfigService {
   ): Promise<ClassMeetingConfigReturnType> {
     await loadConfigForActor(actorUserId, id, tErrors);
     const updated = await ClassMeetingConfigRepository.setDefault(id, tErrors);
-    return buildMaskedClassMeetingConfig(updated, true);
+    const providerMap = await resolveProvidersForClassConfigs([updated]);
+    return buildMaskedClassMeetingConfig(updated, true, providerMap);
   }
 }
 

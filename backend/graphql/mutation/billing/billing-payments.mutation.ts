@@ -4,6 +4,10 @@ import {
   PaymentPothosObject,
   TeacherPaymentPothosObject,
 } from "@/backend/graphql/pothos/billing/billing-payments.pothos";
+import {
+  resolveDisplayAmountFields,
+  setBillingFxDisplayCurrencyForInvoiceParent,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { PermissionsService } from "@/backend/services";
@@ -48,7 +52,12 @@ gqlSchemaBuilder.mutationField("recordPayment", t =>
         tErrors
       );
 
-      return payment;
+      await setBillingFxDisplayCurrencyForInvoiceParent(ctx, args.invoiceId, actorUserId);
+      const displayAmounts = await resolveDisplayAmountFields([payment], ctx, "amount", "currency");
+      return {
+        ...payment,
+        displayAmount: displayAmounts.get(payment.id) ?? null,
+      };
     },
   })
 );
@@ -68,7 +77,7 @@ gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
     resolve: async (_root, args, ctx) => {
       await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return PaymentMethodService.recordPayout(
+      const payment = await PaymentMethodService.recordPayout(
         {
           teacherId: args.teacherId,
           amount: args.amount,
@@ -79,6 +88,12 @@ gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
         },
         tErrors
       );
+
+      const displayAmounts = await resolveDisplayAmountFields([payment], ctx, "amount", "currency");
+      return {
+        ...payment,
+        displayAmount: displayAmounts.get(payment.id) ?? null,
+      };
     },
   })
 );

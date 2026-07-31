@@ -4,7 +4,9 @@ import type { CurrencyCode } from "@/backend/enum";
 export type ClassSubjectSelectType = typeof classSubjects.$inferSelect;
 export type ClassSubjectInsertType = typeof classSubjects.$inferInsert;
 
-export type ClassSubjectReturnType = Omit<ClassSubjectSelectType, "createdAt" | "updatedAt" | "deletedAt">;
+export type ClassSubjectReturnType = Omit<ClassSubjectSelectType, "createdAt" | "updatedAt" | "deletedAt"> & {
+  resources?: SubjectResourceReturnType[];
+};
 
 export type ClassSubjectSubmitInput = {
   name: string;

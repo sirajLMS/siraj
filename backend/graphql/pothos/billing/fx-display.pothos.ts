@@ -99,3 +99,44 @@ export function resolveDisplayAmountField<P extends { id: string }>(
     ctx.locale
   );
 }
+
+export async function resolveDisplayAmountFields(
+  parents: Record<string, unknown>[],
+  ctx: BaseContext,
+  amountKey: string,
+  currencyKey: string,
+  subjectUserIdKey?: string | null
+): Promise<Map<string, DisplayAmountReturnType | null>> {
+  const map = new Map<string, DisplayAmountReturnType | null>();
+  await Promise.all(
+    parents.map(async parent => {
+      const parentId = parent.id as string;
+      const displayCurrency = resolveEffectiveDisplayCurrency(
+        ctx,
+        subjectUserIdKey ? (parent[subjectUserIdKey] as string | null | undefined) : null
+      );
+      if (!displayCurrency) {
+        map.set(parentId, null);
+        return;
+      }
+
+      const amount = parent[amountKey] as string | null | undefined;
+      const currencyStr = parent[currencyKey] as string | null | undefined;
+      if (amount == null || currencyStr == null) {
+        map.set(parentId, null);
+        return;
+      }
+
+      const result = await FxDisplayService.convertForDisplay(
+        amount,
+        parseCurrencyCode(currencyStr),
+        displayCurrency,
+        parentId,
+        undefined,
+        ctx.locale
+      );
+      map.set(parentId, result);
+    })
+  );
+  return map;
+}

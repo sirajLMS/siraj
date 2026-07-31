@@ -788,8 +788,8 @@ export type FxProvider =
   | 'OpenExchangeRates';
 
 export type FxProviderConfigSource =
-  | 'database'
-  | 'env';
+  | 'DATABASE'
+  | 'ENV';
 
 export type FxSyncStatus =
   | 'Failed'
@@ -1259,9 +1259,9 @@ export type IdentifierKind =
   | 'HANDLE';
 
 export type InvoicePaymentSubmissionStatus =
-  | 'approved'
-  | 'pending'
-  | 'rejected';
+  | 'APPROVED'
+  | 'PENDING'
+  | 'REJECTED';
 
 export type InvoiceStatus =
   | 'CANCELLED'
@@ -1894,13 +1894,13 @@ export type TeacherProfileUpdateInput = {
 };
 
 export type TeacherProgressFeedEventKind =
-  | 'activated'
-  | 'auto_missed'
-  | 'completed'
-  | 'leave'
-  | 'marked_absent'
-  | 'other'
-  | 'started';
+  | 'ACTIVATED'
+  | 'AUTO_MISSED'
+  | 'COMPLETED'
+  | 'LEAVE'
+  | 'MARKED_ABSENT'
+  | 'OTHER'
+  | 'STARTED';
 
 export type UpdateManagerProfileInput = {
   hourlyRate: string | null | undefined;

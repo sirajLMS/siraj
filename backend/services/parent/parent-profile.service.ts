@@ -1,8 +1,9 @@
 import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
-import { AppPermission, StudentStatus } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, StudentStatus } from "@/backend/enum";
 import { parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
+import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
 import type {
   AssociatedStudentResult,
   DeactivateParentResult,
@@ -22,8 +23,20 @@ export type {
 
 type ParentProfileRepoResult = NonNullable<Awaited<ReturnType<typeof ParentRepository.getParentProfile>>>;
 
-async function toParentProfileResult(profile: ParentProfileRepoResult): Promise<ParentProfileResult> {
-  return profile;
+async function toParentProfileResult(profile: ParentProfileRepoResult, locale?: string): Promise<ParentProfileResult> {
+  const displayAmount = await FxDisplayService.convertForDisplay(
+    profile.feeAmount,
+    profile.currency as CurrencyCode | null | undefined,
+    profile.displayCurrency as CurrencyCode | null | undefined,
+    profile.id,
+    undefined,
+    locale
+  );
+
+  return {
+    ...profile,
+    displayAmount,
+  };
 }
 
 async function requirePermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
@@ -115,7 +128,7 @@ export namespace ParentProfileService {
 
     const profile = await requireParentProfile(parentId, locale);
 
-    return toParentProfileResult(profile);
+    return toParentProfileResult(profile, locale);
   }
 
   /**

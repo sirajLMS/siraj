@@ -1,0 +1,19 @@
+{
+  "pageTitle": "My Credits",
+  "pageSubtitle": "Track your credit balance and transaction history",
+  "currentBalance": "Current Balance",
+  "hoursRemaining": "Credits Remaining",
+  "hoursTotal": "Total Credits",
+  "transactionHistory": "Transaction History",
+  "dateColumn": "Date",
+  "typeColumn": "Type",
+  "amountColumn": "Amount",
+  "notesColumn": "Notes",
+  "purchase": "Purchase",
+  "deduction": "Deduction",
+  "refund": "Refund",
+  "adjustment": "Adjustment",
+  "filterAll": "All",
+  "noTransactions": "No transactions yet",
+  "backToDashboard": "Back to Dashboard"
+}

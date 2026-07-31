@@ -1,0 +1,93 @@
+{
+  "parent": {
+    "pageTitle": "Parent Feedback Portal",
+    "heroTitle": "Parent Feedback Portal",
+    "heroSubtitle": "We value your input on teaching methods and program improvements. Your feedback helps us enhance your child's learning experience.",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "suggestion": "Your Suggestion",
+    "suggestionPlaceholder": "Share how we can improve...",
+    "submit": "Submit",
+    "successMessage": "We’ve received your message",
+    "socialProof": "Reviewed by the management team daily",
+    "support": {
+      "privacy": {
+        "title": "Privacy Guaranteed",
+        "body": "Your feedback remains strictly confidential and is shared only with the core development team."
+      },
+      "fastResponse": {
+        "title": "Fast Response",
+        "body": "We typically review and acknowledge parent suggestions within 48 working hours."
+      },
+      "constantEvolution": {
+        "title": "Continuous Evolution",
+        "body": "Over 40% of our new features originate directly from parent feedback."
+      }
+    },
+    "validation": {
+      "fullNameRequired": "Please enter your full name.",
+      "suggestionRequired": "Suggestion must be at least 10 characters."
+    },
+    "notifications": {
+      "submitSuccess": "Your suggestion has been sent successfully!",
+      "submitError": "Failed to submit suggestion. Please try again."
+    }
+  },
+  "admin": {
+    "pageTitle": "Suggestions Management",
+    "pageSubtitle": "Review and acknowledge incoming parent feedback.",
+    "metrics": {
+      "pending": "Pending",
+      "reviewed": "Reviewed",
+      "duplicate": "Duplicate",
+      "avgResponse": "Average Response Time",
+      "efficiencyNote": "Efficiency improved by 12%"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "reviewed": "Reviewed",
+      "duplicate": "Duplicate"
+    },
+    "searchPlaceholder": "Search suggestions...",
+    "table": {
+      "parentName": "Parent",
+      "suggestion": "Suggestion",
+      "submittedAt": "Submitted At",
+      "status": "Status",
+      "actions": "Actions",
+      "markReviewed": "Mark as Reviewed",
+      "respond": "Respond",
+      "markDuplicate": "Mark as Duplicate",
+      "delete": "Delete",
+      "noEntries": "No matching suggestions found"
+    },
+    "statusLabels": {
+      "pending": "Pending",
+      "reviewed": "Reviewed",
+      "duplicate": "Duplicate"
+    },
+    "notifications": {
+      "markReviewedSuccess": "Suggestion marked as reviewed.",
+      "markReviewedError": "Failed to mark suggestion as reviewed.",
+      "respondSuccess": "Response sent successfully.",
+      "respondError": "Failed to send response.",
+      "markDuplicateSuccess": "Suggestion marked as duplicate.",
+      "markDuplicateError": "Failed to mark suggestion as duplicate.",
+      "deleteSuccess": "Suggestion deleted successfully.",
+      "deleteError": "Failed to delete suggestion."
+    },
+    "dialogs": {
+      "deleteConfirmTitle": "Delete Suggestion",
+      "deleteConfirmBody": "Are you sure you want to delete this suggestion? This action cannot be undone.",
+      "deleteConfirmAction": "Delete",
+      "cancel": "Cancel",
+      "respondTitle": "Respond to Suggestion",
+      "respondPlaceholder": "Write your response...",
+      "respondAction": "Send Response",
+      "duplicateTitle": "Mark as Duplicate",
+      "duplicateSearchPlaceholder": "Search for the original suggestion...",
+      "duplicateAction": "Mark as Duplicate",
+      "duplicateNoneFound": "No suggestions found."
+    }
+  }
+}

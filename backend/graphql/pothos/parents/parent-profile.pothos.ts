@@ -1,9 +1,6 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  DisplayAmountPothosObject,
-  resolveDisplayAmountField,
-} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
   AccountStatusPothosObject,
   CurrencyCodePothosObject,
@@ -42,10 +39,9 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
     feeAmount: t.exposeString("feeAmount", { nullable: true }),
     currency: t.expose("currency", { type: CurrencyCodePothosObject, nullable: true }),
     timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
-    displayAmount: t.field({
+    displayAmount: t.expose("displayAmount", {
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "feeAmount", "currency", parent.userId),
     }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),

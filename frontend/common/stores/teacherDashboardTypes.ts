@@ -3,7 +3,6 @@ export type {
   StudentProgressFeedItem,
   TeacherDashboardMetrics,
   TeacherScheduleRow,
-  TeacherSessionStatus,
 } from "@/frontend/common/types/shared.types";
 
 import type {

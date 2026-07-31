@@ -1,0 +1,14 @@
+{
+  "emptyMessage": "No timezones match your search.",
+  "searchPlaceholder": "Search by IANA ID or name…",
+  "searchingLabel": "Searching…",
+  "columns": {
+    "ianaId": "IANA ID",
+    "name": "Name",
+    "offsetMinutes": "UTC Offset",
+    "isDstSupported": "DST Supported"
+  },
+  "dstSupportedYes": "Yes",
+  "dstSupportedNo": "No",
+  "offsetUtcPrefix": "UTC"
+}

@@ -17,5 +17,10 @@ export const systemSettings = pgTable(
     updatedByUserId: uuid("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("system_settings_category_idx").on(table.category)]
+  table => [
+    index("system_settings_category_idx").on(table.category),
+    index("system_settings_updated_by_user_id_idx").on(table.updatedByUserId),
+    index("system_settings_updated_at_idx").on(table.updatedAt),
+    index("system_settings_data_type_idx").on(table.dataType),
+  ]
 );

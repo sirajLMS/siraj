@@ -5,6 +5,7 @@ import {
   TeacherDashboardPothosObject,
   TeacherHandbookUrlPothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 import { PaginationArgs } from "@/backend/types";
 
@@ -18,21 +19,31 @@ async function resolveTeacherDashboard(
   }
   const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
   const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, pagination);
+  const tErrors = ctx.t().errorsTranslations;
+
+  const effectiveMeetings = await Promise.all(
+    result.scheduleRows.map(r => EffectiveMeetingService.resolveForClassInstance(r.id, tErrors))
+  );
+
   return {
     ...result,
-    scheduleRows: result.scheduleRows.map(r => ({
-      id: r.id,
-      studentId: r.studentId,
-      studentName: r.student?.name || "Unknown",
-      scheduledStartAt: r.scheduledStartAt,
-      scheduledEndAt: r.scheduledEndAt,
-      durationMinutes: r.durationMinutes,
-      executionState: r.executionState,
-      outcome: r.outcome ?? null,
-      meetingJoinUrl: r.meetingJoinUrl ?? null,
-      yourTimeFormatted: r.yourTimeFormatted ?? null,
-      isFrozen: r.isFrozen ?? false,
-    })),
+    scheduleRows: result.scheduleRows.map((r, i) => {
+      const meeting = effectiveMeetings[i];
+      return {
+        id: r.id,
+        studentId: r.studentId,
+        studentName: r.student?.name || "Student",
+        scheduledStartAt: r.scheduledStartAt,
+        scheduledEndAt: r.scheduledEndAt,
+        durationMinutes: r.durationMinutes,
+        executionState: r.executionState,
+        outcome: r.outcome ?? null,
+        meetingJoinUrl: meeting?.joinUrl ?? null,
+        effectiveMeeting: meeting ?? null,
+        yourTimeFormatted: r.yourTimeFormatted ?? null,
+        isFrozen: r.isFrozen ?? false,
+      };
+    }),
   };
 }
 

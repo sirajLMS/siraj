@@ -1,0 +1,8 @@
+{
+  "pageTitle": "Payment Catalogs",
+  "pageSubtitle": "Manage payment method catalogs and meeting provider integrations.",
+  "tabs": {
+    "paymentCatalogs": "Payment Methods",
+    "meetingProviders": "Meeting Providers"
+  }
+}

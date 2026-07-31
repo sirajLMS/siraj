@@ -1,5 +1,6 @@
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { ClassInstanceDetailReturnType } from "@/backend/types/classes/class-instance-detail.types";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type {
   SupportContactReturnType,
@@ -37,6 +38,8 @@ export type LeaveProcessResultReturnType = {
   id: string;
   completedInstanceId: string;
   rescheduledInstanceId: string;
+  completedInstance?: ClassInstanceDetailReturnType;
+  rescheduledInstance?: ClassInstanceDetailReturnType;
 };
 
 export type FutureClassReturnType = {
@@ -55,6 +58,7 @@ export type FutureClassReturnType = {
   subjectName?: string | null;
   classType?: ClassType | null;
   meetingJoinUrl?: string | null;
+  effectiveMeeting?: EffectiveMeetingReturnType | null;
   avatarUrl?: string | null;
   executionState?: string | null;
   outcome?: string | null;

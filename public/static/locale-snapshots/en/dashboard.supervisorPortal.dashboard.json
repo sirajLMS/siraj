@@ -1,0 +1,29 @@
+{
+  "pageTitle": "Supervisor Dashboard",
+  "welcomeMessage": {
+    "__fn": "(name) => `Welcome, ${name}`"
+  },
+  "pendingReviewsHero": {
+    "__fn": "(count) => `${count} pending reviews need your attention`"
+  },
+  "pendingReviewsSubtitle": "Review lesson reports submitted by teachers",
+  "goToReviews": "Go to Reviews",
+  "teacherDuesSummary": "Teacher Dues Summary",
+  "totalPendingDues": "Total Pending Dues",
+  "goToDues": "View Teacher Dues",
+  "monthlyReportsShortcut": "Monthly Reports",
+  "goToMonthlyReports": "View Monthly Reports",
+  "recentApprovals": "Recent Approvals",
+  "noRecentApprovals": "No recent approvals",
+  "loadingMessage": "Loading...",
+  "approvedTime": "Approved time",
+  "lessonDate": "Lesson date",
+  "duration": "Duration",
+  "completion": "Completion",
+  "teacher": "Teacher",
+  "student": "Student",
+  "viewReport": "View report",
+  "viewClass": "View class",
+  "history": "Student history",
+  "approvedStatus": "Approved"
+}

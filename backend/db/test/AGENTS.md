@@ -1,6 +1,18 @@
 # Backend Database Testing Rules
 
-This directory contains database integration tests. Follow these guidelines to ensure tests remain isolated, clean, performant, and maintainable.
+This directory contains **database-layer** tests (repository coverage, business-logic workflows, RLS, constraints) against the local `siraj_test` PostgreSQL instance. Follow these guidelines to ensure tests remain isolated, clean, performant, and maintainable.
+
+## Provider / external integration tests (NOT here)
+
+**Do NOT add provider or third-party integration tests under `backend/db/test/`** (including subdirectories). Examples that belong elsewhere:
+
+- Neon HTTP / serverless driver smokes
+- Redis Cloud / Upstash live connection tests
+- Any `*.integration.test.ts` that calls an external SaaS API
+
+Place those in **`test/integration/`** only (e.g. `test/integration/db/neon.integration.test.ts`). Run with `bun run test:integration`. Each provider gets **one** smoke test that confirms the adapter reaches the live API — not full app/service behaviour.
+
+Tests in this directory may still exercise **multiple repositories/services together** inside `runInRollback`; that is in-process DB integration, not external provider integration.
 
 ## Core Guidelines
 

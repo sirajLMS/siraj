@@ -1,0 +1,22 @@
+{
+  "pageTitle": "ملفي الشخصي",
+  "personalInfo": "المعلومات الشخصية",
+  "fullName": "الاسم الكامل",
+  "email": "البريد الإلكتروني",
+  "phone": "الهاتف",
+  "dateOfBirth": "تاريخ الميلاد",
+  "gender": "الجنس",
+  "language": "اللغة",
+  "avatar": "الصورة الشخصية",
+  "parentInfo": "معلومات ولي الأمر",
+  "parentName": "اسم ولي الأمر",
+  "parentEmail": "بريد ولي الأمر",
+  "parentPhone": "هاتف ولي الأمر",
+  "editProfile": "تعديل الملف",
+  "saveChanges": "حفظ التغييرات",
+  "cancel": "إلغاء",
+  "backToDashboard": "العودة إلى لوحة التحكم",
+  "loadingMessage": "جاري التحميل...",
+  "saveSuccess": "تم تحديث الملف بنجاح",
+  "saveError": "فشل تحديث الملف"
+}

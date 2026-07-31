@@ -1,0 +1,23 @@
+{
+  "appTitle": "Siraj LMS",
+  "notifications": "Notifications",
+  "comingSoon": "Coming soon...",
+  "studentTodayClasses": "Today's Classes",
+  "studentSchedule": "My Schedule",
+  "studentCredits": "My Credits",
+  "studentHistory": "Lesson History",
+  "studentProfile": "My Profile",
+  "lessonReports": "Lesson Reports",
+  "lessonReportDetail": "Lesson Report Detail",
+  "supervisorHome": "Dashboard",
+  "pendingReviews": "Pending Reviews",
+  "teacherDues": "Teacher Dues",
+  "monthlyReports": "Monthly Reports",
+  "supervisorProfile": "My Profile",
+  "pageNotFoundTitle": "Page not found",
+  "pageNotFoundDescription": "The page you are looking for does not exist or you may not have access to it.",
+  "pageNotFoundBackToDashboard": "Back to dashboard",
+  "welcomeUser": {
+    "__fn": "(name) => `Welcome ${name}`"
+  }
+}

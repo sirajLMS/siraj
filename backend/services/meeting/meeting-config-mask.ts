@@ -7,20 +7,23 @@ import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-
 
 export function buildMaskedMeetingConfig(
   config: UserMeetingConfigSelectType,
-  isAdminScope: boolean
+  isAdminScope: boolean,
+  providerMap?: Map<string, MeetingProviderSelectType>
 ): UserMeetingConfigReturnType {
   return {
     ...config,
     hasSecret: Boolean(config.encryptedSecret),
     encryptedSecret: isAdminScope ? config.encryptedSecret : null,
+    provider: providerMap?.get(config.providerId),
   };
 }
 
 export function buildMaskedMeetingConfigs(
   configs: UserMeetingConfigSelectType[],
-  isAdminScope: boolean
+  isAdminScope: boolean,
+  providerMap?: Map<string, MeetingProviderSelectType>
 ): UserMeetingConfigReturnType[] {
-  return configs.map(c => buildMaskedMeetingConfig(c, isAdminScope));
+  return configs.map(c => buildMaskedMeetingConfig(c, isAdminScope, providerMap));
 }
 
 export function buildMeetingProviderCatalogSnapshot(

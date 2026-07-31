@@ -10,3 +10,9 @@ export enum InvoiceType {
   MONTHLY = "MONTHLY",
   MANUAL = "MANUAL",
 }
+
+export enum InvoicePaymentSubmissionStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+}

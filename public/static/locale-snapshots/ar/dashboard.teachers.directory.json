@@ -1,0 +1,35 @@
+{
+  "pageTitle": "دليل المعلمين",
+  "pageSubtitle": "إدارة شاملة لجميع الكوادر التعليمية النشطة وغير النشطة.",
+  "metrics": {
+    "activated": "نشط",
+    "deactivated": "غير نشط"
+  },
+  "actions": {
+    "updateSchedules": "تحديث الجداول",
+    "addTeacher": "إضافة معلم",
+    "joinRoom": "انضمام للغرفة",
+    "viewSchedule": "عرض الجدول",
+    "options": "خيارات"
+  },
+  "table": {
+    "hash": "#",
+    "image": "الصورة",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "zoom": "زووم",
+    "schedule": "الجدول",
+    "options": "خيارات",
+    "showingOf": {
+      "__fn": "(count, total) => `\\u0639\\u0631\\u0636 ${count} \\u0645\\u0646 \\u0623\\u0635\\u0644 ${total} \\u0645\\u0639\\u0644\\u0645`"
+    },
+    "linkPending": "الرابط قيد الانتظار"
+  },
+  "fields": {
+    "phone": "الهاتف"
+  },
+  "status": {
+    "active": "نشط",
+    "offline": "غير متصل"
+  }
+}

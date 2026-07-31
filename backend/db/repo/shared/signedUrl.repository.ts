@@ -1,10 +1,21 @@
-import { and, eq, gt, lt } from "drizzle-orm";
+import { and, eq, gt, lt, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { signedUrls } from "@/backend/db/schema/storage/storage";
 import logger from "@/backend/lib/logger";
 
 export type SignedUrlEntity = typeof signedUrls.$inferSelect;
 export type SignedUrlEntityInput = typeof signedUrls.$inferInsert;
+
+// ============================================================================
+// Prepared Statements (Drizzle Prepared Statements 2.0)
+// ============================================================================
+
+const findSignedUrlByIdPrepared = db
+  .select()
+  .from(signedUrls)
+  .where(eq(signedUrls.id, sql.placeholder("id")))
+  .limit(1)
+  .prepare("find_signed_url_by_id");
 
 export namespace SignedUrlRepository {
   /**
@@ -21,7 +32,7 @@ export namespace SignedUrlRepository {
    * // NOTE: Authorization should be checked by the calling service before using this method
    */
   export const getSignedUrlById = async (id: string): Promise<SignedUrlEntity | null> => {
-    const result = await db.select().from(signedUrls).where(eq(signedUrls.id, id)).limit(1);
+    const result = await findSignedUrlByIdPrepared.execute({ id });
     return result[0] || null;
   };
 

@@ -1,4 +1,4 @@
-import type * as Types from "@/backend/types";
+import { TeacherProgressFeedEventKind } from "@/backend/enum";
 
 type ClassStatusEventState = {
   executionState?: string;
@@ -9,27 +9,27 @@ export function resolveTeacherProgressFeedEventKind(
   fromState: unknown,
   toState: unknown,
   actorUserId: string | null
-): Types.TeacherProgressFeedEventKind {
+): TeacherProgressFeedEventKind {
   const from = (fromState ?? {}) as ClassStatusEventState;
   const to = (toState ?? {}) as ClassStatusEventState;
 
   if (to.executionState === "COMPLETED" && to.outcome === "ABSENT") {
     if (from.executionState === "NOT_ACTIVATED" && actorUserId === null) {
-      return "auto_missed";
+      return TeacherProgressFeedEventKind.AUTO_MISSED;
     }
-    return "marked_absent";
+    return TeacherProgressFeedEventKind.MARKED_ABSENT;
   }
   if (to.executionState === "ACTIVATED") {
-    return "activated";
+    return TeacherProgressFeedEventKind.ACTIVATED;
   }
   if (to.executionState === "RUNNING") {
-    return "started";
+    return TeacherProgressFeedEventKind.STARTED;
   }
   if (to.executionState === "COMPLETED" && to.outcome === "TAKEN") {
-    return "completed";
+    return TeacherProgressFeedEventKind.COMPLETED;
   }
   if (to.executionState === "COMPLETED" && to.outcome === "LEAVE") {
-    return "leave";
+    return TeacherProgressFeedEventKind.LEAVE;
   }
-  return "other";
+  return TeacherProgressFeedEventKind.OTHER;
 }

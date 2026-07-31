@@ -1,0 +1,47 @@
+{
+  "pageTitle": "دليل أولياء الأمور",
+  "pageSubtitle": "إدارة ملفات أولياء الأمور، حالات الاشتراك، والسجلات المالية.",
+  "searchPlaceholder": "البحث عن أولياء الأمور...",
+  "records": "سجلات أولياء الأمور",
+  "metrics": {
+    "regular": "عادي",
+    "onLeave": "في إجازة",
+    "suspended": "موقوف",
+    "onTrial": "تجريبي"
+  },
+  "table": {
+    "index": "#",
+    "image": "الصورة",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "time": "الوقت",
+    "status": "دورة الحياة",
+    "accountStatus": "الحساب",
+    "unpaidInvoices": "الفواتير غير المدفوعة",
+    "options": "خيارات",
+    "guardianOf": {
+      "__fn": "(name) => `\\u0648\\u0644\\u064A \\u0623\\u0645\\u0631 ${name}`"
+    }
+  },
+  "card": {
+    "guardianOf": {
+      "__fn": "(name) => `\\u0648\\u0644\\u064A \\u0623\\u0645\\u0631 ${name}`"
+    },
+    "unpaidCount": {
+      "__fn": "(count) => `\\u063A\\u064A\\u0631 \\u0645\\u062F\\u0641\\u0648\\u0639: ${count}`"
+    },
+    "invoicesCleared": "تم تسوية الفواتير"
+  },
+  "accountStatus": {
+    "activated": "مفعّل",
+    "deactivated": "غير مفعّل"
+  },
+  "actions": {
+    "addParent": "إضافة ولي أمر جديد",
+    "filter": "تصفية",
+    "clearFilters": "مسح التصفية",
+    "export": "تصدير",
+    "manageLifecycle": "إدارة دورة الحياة"
+  },
+  "noEntries": "لا يوجد أولياء أمور"
+}

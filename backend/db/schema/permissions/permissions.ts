@@ -21,23 +21,37 @@ export const permissions = pgTable(
     category: jsonb("category").$type<LocalizedString>().notNull(),
     isSystem: boolean("is_system").notNull().default(false),
   },
-  table => [index("permissions_key_idx").on(table.key)]
+  table => [
+    index("permissions_key_idx").on(table.key),
+    index("permissions_resource_idx").on(table.resource),
+    index("permissions_action_idx").on(table.action),
+    index("permissions_is_system_idx").on(table.isSystem),
+  ]
 );
 
 /**
  * Permission groups. name/description are JSONB locale maps.
  * Uniqueness is on slug only (name is localized and not unique).
  */
-export const permissionGroups = pgTable("permission_groups", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: jsonb("name").$type<LocalizedString>().notNull(),
-  description: jsonb("description").$type<LocalizedString>(),
-  isSystem: boolean("is_system").notNull().default(false),
-  slug: varchar("slug", { length: 100 }).notNull().unique(),
-  createdByUserId: uuid("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
-});
+export const permissionGroups = pgTable(
+  "permission_groups",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: jsonb("name").$type<LocalizedString>().notNull(),
+    description: jsonb("description").$type<LocalizedString>(),
+    isSystem: boolean("is_system").notNull().default(false),
+    slug: varchar("slug", { length: 100 }).notNull().unique(),
+    createdByUserId: uuid("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+  },
+  table => [
+    index("permission_groups_is_system_idx").on(table.isSystem),
+    index("permission_groups_created_by_user_id_idx").on(table.createdByUserId),
+    index("permission_groups_created_at_idx").on(table.createdAt),
+    index("permission_groups_updated_at_idx").on(table.updatedAt),
+  ]
+);
 
 export const groupPermissions = pgTable(
   "group_permissions",
@@ -52,6 +66,7 @@ export const groupPermissions = pgTable(
   table => [
     primaryKey({ columns: [table.groupId, table.permissionId] }),
     index("group_permissions_group_id_idx").on(table.groupId),
+    index("group_permissions_permission_id_idx").on(table.permissionId),
   ]
 );
 
@@ -70,6 +85,8 @@ export const userPermissionGroups = pgTable(
   table => [
     primaryKey({ columns: [table.userId, table.groupId] }),
     index("user_permission_groups_user_id_idx").on(table.userId),
+    index("user_permission_groups_assigned_at_idx").on(table.assignedAt),
+    index("user_permission_groups_assigned_by_user_id_idx").on(table.assignedByUserId),
   ]
 );
 
@@ -89,5 +106,8 @@ export const userPermissionOverrides = pgTable(
   table => [
     primaryKey({ columns: [table.userId, table.permissionId] }),
     index("user_permission_overrides_user_id_idx").on(table.userId),
+    index("user_permission_overrides_state_idx").on(table.state),
+    index("user_permission_overrides_assigned_by_user_id_idx").on(table.assignedByUserId),
+    index("user_permission_overrides_created_at_idx").on(table.createdAt),
   ]
 );

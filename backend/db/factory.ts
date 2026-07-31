@@ -44,6 +44,7 @@ const createNeonDb = () => {
   const pool = new Pool({
     connectionString: getEnvironmentConfig().databaseUrl,
     max: poolMax(),
+    idleTimeoutMillis: 30_000,
   });
   const db = drizzleNeon({ client: pool, relations });
   return db;
@@ -97,5 +98,6 @@ export function createPool(): PgPool | Pool {
   return new Pool({
     connectionString: getEnvironmentConfig().databaseUrl,
     max: poolMax(),
+    idleTimeoutMillis: 30_000,
   });
 }

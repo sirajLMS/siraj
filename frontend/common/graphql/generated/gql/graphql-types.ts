@@ -1648,8 +1648,8 @@ export type FxProviderConfig = {
 };
 
 export enum FxProviderConfigSource {
-  Database = 'database',
-  Env = 'env'
+  Database = 'DATABASE',
+  Env = 'ENV'
 }
 
 export type FxSyncHealth = {
@@ -2215,9 +2215,9 @@ export type InvoicePaymentSubmission = {
 };
 
 export enum InvoicePaymentSubmissionStatus {
-  Approved = 'approved',
-  Pending = 'pending',
-  Rejected = 'rejected'
+  Approved = 'APPROVED',
+  Pending = 'PENDING',
+  Rejected = 'REJECTED'
 }
 
 export enum InvoiceStatus {
@@ -6157,13 +6157,13 @@ export type TeacherProfileUpdateInput = {
 };
 
 export enum TeacherProgressFeedEventKind {
-  Activated = 'activated',
-  AutoMissed = 'auto_missed',
-  Completed = 'completed',
-  Leave = 'leave',
-  MarkedAbsent = 'marked_absent',
-  Other = 'other',
-  Started = 'started'
+  Activated = 'ACTIVATED',
+  AutoMissed = 'AUTO_MISSED',
+  Completed = 'COMPLETED',
+  Leave = 'LEAVE',
+  MarkedAbsent = 'MARKED_ABSENT',
+  Other = 'OTHER',
+  Started = 'STARTED'
 }
 
 export type TeacherProgressFeedItem = {

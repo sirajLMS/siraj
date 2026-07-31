@@ -1,7 +1,7 @@
 import { defineNamespace } from "@/shared/locale/namespaces/define-namespace";
 import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
-export const DashboardTeachersDirectory = defineNamespace<TeachersDirectoryLabels>({
+export const DashboardTeachersDirectory = defineNamespace<TeachersDirectoryLabels>("dashboard.teachers.directory", {
   load: {
     en: () =>
       import("@/shared/locale/en/dashboard/teachers/directory").then(module => module.dashboardTeachersDirectoryEn),

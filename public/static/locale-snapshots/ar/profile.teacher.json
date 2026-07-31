@@ -1,0 +1,87 @@
+{
+  "ownSubtitle": "عرض وتحديث ملفك التدريسي وبيانات الاتصال.",
+  "subtitle": "إدارة بيانات الاعتماد المؤسسية والتفاصيل الإدارية لأعضاء هيئة التدريس.",
+  "adminBanner": "عرض إداري: تظهر حقول الهوية وبيانات زووم والحالة.",
+  "sections": {
+    "account": "الحساب",
+    "contact": "معلومات الاتصال",
+    "zoom": "زووم",
+    "compensation": "التعويضات",
+    "identity": "الهوية",
+    "professional": "المؤهلات المهنية",
+    "stats": "الإحصائيات",
+    "adminOnly": "تفاصيل إدارية"
+  },
+  "baseSalary": {
+    "__fn": "(amount, currency) => `${amount} ${currency}`"
+  },
+  "paymentMethod": {
+    "__fn": "(method) => method"
+  },
+  "convertedAmount": {
+    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
+  },
+  "stats": {
+    "totalClasses": "إجمالي الحصص",
+    "avgEngagement": "متوسط التفاعل"
+  },
+  "fields": {
+    "fullName": "الاسم الكامل",
+    "primaryEmail": "البريد الإلكتروني الأساسي",
+    "phone": "رقم الهاتف",
+    "address": "العنوان السكني",
+    "timezone": "المنطقة الزمنية",
+    "nationalId": "رقم الهوية",
+    "dateOfBirth": "تاريخ الميلاد",
+    "gender": "الجنس",
+    "qualifications": "المؤهلات",
+    "hourlyRate": "الأجر بالساعة",
+    "currency": "العملة",
+    "paymentMethod": "طريقة الدفع",
+    "status": "حالة الحساب",
+    "displayCurrency": "عملة العرض",
+    "avatar": "الصورة الشخصية"
+  },
+  "gender": {
+    "male": "ذكر",
+    "female": "أنثى"
+  },
+  "status": {
+    "activated": "مفعّل",
+    "deactivated": "غير مفعّل"
+  },
+  "nationalIdCompletion": {
+    "banner": "يجب إدخال الرقم القومي قبل التمكن من استخدام لوحة التحكم.",
+    "action": "أدخل رقمك القومي في قسم الهوية بالأسفل واحفظ."
+  },
+  "validation": {
+    "nationalIdRequired": "الرقم القومي مطلوب.",
+    "nationalIdInvalid": "الرقم القومي غير صالح للجنسية المحددة."
+  },
+  "shell": {
+    "tabs": {
+      "profile": "الملف الشخصي",
+      "paymentMethods": "طرق الدفع",
+      "meeting": "إعدادات الاجتماع",
+      "students": "الطلاب",
+      "notifications": "الإشعارات",
+      "permissions": "الصلاحيات"
+    },
+    "loading": "جارٍ تحميل الملف الشخصي...",
+    "error": {
+      "retry": "أعد المحاولة"
+    }
+  },
+  "actions": {
+    "edit": "تعديل الملف الشخصي",
+    "save": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "retry": "إعادة المحاولة",
+    "saveSuccess": "تم حفظ الملف الشخصي بنجاح.",
+    "saveError": "فشل حفظ الملف الشخصي."
+  },
+  "errors": {
+    "failedToLoad": "Failed to load profile.",
+    "notFound": "Profile not found."
+  }
+}

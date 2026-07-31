@@ -1,0 +1,28 @@
+{
+  "pageTitle": "My Dashboard",
+  "welcomeMessage": {
+    "__fn": "(name) => `Welcome, ${name}`"
+  },
+  "nextClass": "Next Class",
+  "joinNow": "Join",
+  "noUpcomingClasses": "No upcoming classes scheduled",
+  "creditBalance": "Credit Balance",
+  "classesRemaining": "Classes Remaining",
+  "classesTotal": "Total Classes",
+  "recentLessonReports": "Recent Lesson Reports",
+  "viewAllHistory": "View All History",
+  "viewCredits": "View Credits",
+  "addReflection": "Add Reflection",
+  "reflectionDialogTitle": "Add Reflection",
+  "reflectionNotesLabel": "Your notes",
+  "reflectionNotesPlaceholder": "Share your thoughts about this lesson…",
+  "reflectionSaveError": "Failed to save reflection",
+  "upcomingToday": "Today's Classes",
+  "upcomingThisWeek": "This Week",
+  "noLessonReports": "No lesson reports yet",
+  "loadingMessage": "Loading...",
+  "columnDate": "Date",
+  "columnDuration": "Duration",
+  "columnStatus": "Status",
+  "columnActions": "Actions"
+}

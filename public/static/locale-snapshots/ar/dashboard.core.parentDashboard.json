@@ -1,0 +1,65 @@
+{
+  "pageTitle": "لوحة التحكم",
+  "welcome": {
+    "__fn": "(name) => `\\u0645\\u0631\\u062D\\u0628\\u0627\\u064B\\u060C ${name}`"
+  },
+  "welcomeBack": "مرحباً بعودتك،",
+  "pendingMessages": {
+    "__fn": "(count) => `${count} \\u0631\\u0633\\u0627\\u0626\\u0644 \\u0645\\u0639\\u0644\\u0642\\u0629 \\u0645\\u0646 \\u0627\\u0644\\u0645\\u0639\\u0644\\u0645\\u064A\\u0646`"
+  },
+  "metrics": {
+    "totalStudents": "إجمالي الطلاب",
+    "todaysClasses": "حصص اليوم",
+    "pendingInvoices": "فواتير معلقة",
+    "performanceAvg": "متوسط الأداء"
+  },
+  "schedule": {
+    "title": "جدول حصص اليوم",
+    "titleMobile": "جدول اليوم",
+    "filter": "تصفية",
+    "viewFullWeek": "عرض الأسبوع كاملاً",
+    "viewAll": "عرض الكل",
+    "rowNumber": "#",
+    "classTime": "وقت الحصة",
+    "studentName": "اسم الطالب",
+    "teacherName": "اسم المعلم",
+    "history": "السجل",
+    "status": "الحالة",
+    "contact": "التواصل",
+    "classStatus": "حالة الحصة",
+    "duration": {
+      "__fn": "(minutes) => `\\u0627\\u0644\\u0645\\u062F\\u0629: ${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
+    },
+    "teacherLabel": {
+      "__fn": "(name) => `\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645: ${name}`"
+    },
+    "joinVideo": "الانضمام للجلسة المرئية",
+    "frozen": "مجمّد",
+    "contactAdmin": "تواصل مع المشرف (تجميد)",
+    "noEntries": "لا توجد حصص مجدولة لليوم"
+  },
+  "bookingStatus": {
+    "confirmed": "مؤكد",
+    "rescheduled": "معاد جدولته"
+  },
+  "liveClassStatus": {
+    "startingSoon": "تبدأ قريباً",
+    "pending": "معلقة",
+    "scheduled": "مجدولة"
+  },
+  "progress": {
+    "title": "ملخص التقدم الأكاديمي",
+    "subtitle": "نظرة أسبوعية لكلا الطالبين",
+    "completion": {
+      "__fn": "(percent) => `${percent}% \\u0625\\u0646\\u062C\\u0627\\u0632`"
+    },
+    "downloadReport": "تحميل التقرير الكامل"
+  },
+  "workshop": {
+    "badge": "تحديثات",
+    "learnMore": "اعرف المزيد"
+  },
+  "support": {
+    "liveSupport": "دعم مباشر"
+  }
+}

@@ -1,19 +1,23 @@
-import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { afterAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SessionRepository } from "@/backend/db/repo";
 import { users } from "@/backend/db/schema";
 import { IP_ADDRESS_1, IP_ADDRESS_2 } from "@/backend/db/test/const";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
+import { resetEnvironmentCache } from "@/backend/lib/env";
+import { resetCacheService } from "@/backend/services/cache/CacheServiceFactory";
 import { checkRedisHealth, getRedisService, resetRedisService } from "@/backend/services/redis";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 config({ path: ".env.redis", override: true });
+resetEnvironmentCache();
+resetCacheService();
+resetRedisService();
 
-let redisAvailable = false;
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+const redisAvailable = await checkRedisHealth();
 
 async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): Promise<void> {
   try {
@@ -67,10 +71,6 @@ async function setupTestSession(
 }
 
 describe("Session Scalability and Redis Integration", () => {
-  beforeAll(async () => {
-    redisAvailable = await checkRedisHealth();
-  });
-
   afterAll(async () => {
     if (redisAvailable) {
       const redisService = await getRedisService();

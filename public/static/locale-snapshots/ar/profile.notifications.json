@@ -1,0 +1,35 @@
+{
+  "title": "تفضيلات الإشعارات",
+  "description": "اختر كيفية استلام التحديثات لكل نوع حدث وقناة.",
+  "saved": "تم حفظ تفضيلات الإشعارات.",
+  "errorLoading": "تعذر تحميل تفضيلات الإشعارات.",
+  "errorSaving": "تعذر حفظ تفضيلات الإشعارات.",
+  "channels": {
+    "EMAIL": "البريد الإلكتروني",
+    "SMS": "رسائل SMS",
+    "PUSH": "إشعارات الدفع",
+    "ON_APP": "داخل التطبيق"
+  },
+  "events": {
+    "CLASS_REMINDER": "تذكيرات الحصص",
+    "INVOICE_GENERATED": "إنشاء الفواتير",
+    "COMPLAINT_RESPONSE": "ردود الشكاوى",
+    "PAYMENT_METHOD_CHANGED": "تغيير طريقة الدفع",
+    "NEW_COMPLAINT": "شكاوى جديدة",
+    "NEW_SUGGESTION": "اقتراحات جديدة",
+    "SUGGESTION_ACKNOWLEDGED": "تأكيد استلام الاقتراح",
+    "SUGGESTION_DUPLICATE_MARKED": "اقتراح مكرر",
+    "CLASS_SCHEDULED": "جدولة حصة",
+    "CLASS_ACTIVATED": "تفعيل الحصة",
+    "CLASS_STARTED": "بدء الحصة",
+    "CLASS_COMPLETED": "اكتمال الحصة",
+    "CLASS_MARKED_ABSENT": "تسجيل الغياب",
+    "CLASS_MARKED_MISSED": "تفويت الحصة",
+    "CLASS_LEAVE_REQUESTED": "طلب إجازة",
+    "CLASS_RESCHEDULED": "إعادة جدولة الحصة",
+    "CLASS_CANCELLED": "إلغاء الحصة",
+    "CLASS_RESET": "إعادة ضبط الحصة",
+    "LESSON_REPORT_SUBMITTED": "تقديم تقرير حصة",
+    "LESSON_REPORT_REVIEWED": "مراجعة تقرير حصة"
+  }
+}

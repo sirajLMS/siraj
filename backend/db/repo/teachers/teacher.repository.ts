@@ -1,4 +1,4 @@
-import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
@@ -17,6 +17,26 @@ import type {
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
+
+// ============================================================================
+// Prepared Statements (Drizzle Prepared Statements 2.0)
+// ============================================================================
+// These are defined at module level to be compiled once and reused across requests.
+// Note: Prepared statements cannot be used inside transactions (they're tied to the session they were created with).
+
+const findByUserIdPrepared = db
+  .select()
+  .from(teachers)
+  .where(eq(teachers.userId, sql.placeholder("userId")))
+  .limit(1)
+  .prepare("find_teacher_by_user_id");
+
+const findByIdPrepared = db
+  .select()
+  .from(teachers)
+  .where(eq(teachers.id, sql.placeholder("id")))
+  .limit(1)
+  .prepare("find_teacher_by_id");
 
 export namespace TeacherRepository {
   export async function create(
@@ -76,15 +96,37 @@ export namespace TeacherRepository {
   }
 
   export const findByUserId = async (userId: string, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
-    const [teacher] = await queryDb.select().from(teachers).where(eq(teachers.userId, userId)).limit(1);
+    if (!tx) {
+      const result = await findByUserIdPrepared.execute({ userId });
+      return result[0] ?? null;
+    }
+    const [teacher] = await tx.select().from(teachers).where(eq(teachers.userId, userId)).limit(1);
     return teacher ?? null;
   };
 
   export const findById = async (id: string, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
-    const [teacher] = await queryDb.select().from(teachers).where(eq(teachers.id, id)).limit(1);
+    if (!tx) {
+      const result = await findByIdPrepared.execute({ id });
+      return result[0] ?? null;
+    }
+    const [teacher] = await tx.select().from(teachers).where(eq(teachers.id, id)).limit(1);
     return teacher ?? null;
+  };
+
+  export const findByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<Map<string, string | null>> => {
+    if (userIds.length === 0) return new Map();
+
+    const queryDb = tx ?? db;
+    const rows = await queryDb
+      .select({ userId: teachers.userId, teacherId: teachers.id })
+      .from(teachers)
+      .where(inArray(teachers.userId, userIds));
+
+    const map = new Map<string, string | null>(userIds.map(id => [id, null]));
+    for (const row of rows) {
+      map.set(row.userId, row.teacherId);
+    }
+    return map;
   };
 
   export const searchTeachers = async (searchQuery: string, limit: number, tx?: DBTransaction) => {

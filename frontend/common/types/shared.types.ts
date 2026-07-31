@@ -19,6 +19,7 @@ import type {
   ManagerOnboardingInput,
   ParentOnboardingInput,
   TeacherOnboardingInput,
+  TeacherProgressFeedEventKind,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { OnboardingPaymentMethodFormValues } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
@@ -150,15 +151,6 @@ export interface TeacherDashboardMetrics {
   readonly studentsToday: number;
   readonly activeSessions?: number;
 }
-
-export type TeacherProgressFeedEventKind =
-  | "auto_missed"
-  | "marked_absent"
-  | "activated"
-  | "started"
-  | "completed"
-  | "leave"
-  | "other";
 
 export interface StudentProgressFeedItem {
   readonly id: string;

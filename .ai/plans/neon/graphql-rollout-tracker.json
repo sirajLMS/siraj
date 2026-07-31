@@ -1,0 +1,9 @@
+{
+  "totalDomains": 18,
+  "maxConcurrency": 16,
+  "completedDomains": ["users", "auth", "billing", "classes", "meeting", "parents", "permissions", "teachers"],
+  "activeSubagents": {},
+  "failedDomains": [],
+  "cleanDomains": ["books", "complaints", "notifications", "profile", "reports", "scheduling", "shared", "storage", "supervisor", "system", "students"],
+  "rolloutCompletedAt": "2026-07-31T03:50:00Z"
+}

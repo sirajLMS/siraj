@@ -19,6 +19,8 @@ export const userMeetingConfigs = pgTable(
   },
   table => [
     index(`${TABLE_NAME}_user_id_idx`).on(table.userId),
+    index(`${TABLE_NAME}_is_default_idx`).on(table.isDefault),
+    index(`${TABLE_NAME}_user_id_is_default_idx`).on(table.userId, table.isDefault),
     meetingConfigProviderIndex(TABLE_NAME, table),
     meetingConfigOneDefaultPerScopeIndex(TABLE_NAME, "per_user", table.userId, table.isDefault),
   ]

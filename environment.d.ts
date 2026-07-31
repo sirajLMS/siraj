@@ -31,6 +31,8 @@ declare global {
       DB_CONNECTION_MODE?: "auto" | "pg" | "neon";
       DATABASE_URL: string;
       DATABASE_ENCRYPTION_KEY: string;
+      /** Neon integration test database URL (loaded from .env.test, not for production use) */
+      NEON_TEST_DATABASE_URL?: string;
 
       // JWT Configuration
       JWT_SECRET: string;
@@ -40,6 +42,12 @@ declare global {
       REDIS_URL?: string;
       UPSTASH_REDIS_REST_URL?: string;
       UPSTASH_REDIS_REST_TOKEN?: string;
+      /** Upstash Redis integration test REST URL (loaded from .env.test, not for production use) */
+      UPSTASH_TEST_REDIS_REST_URL?: string;
+      /** Upstash Redis integration test REST Token (loaded from .env.test, not for production use) */
+      UPSTASH_TEST_REDIS_REST_TOKEN?: string;
+      /** Redis Cloud integration test connection URL (loaded from .env.test, not for production use) */
+      REDIS_CLOUD_TEST_REDIS_URL?: string;
 
       // Cache Configuration
       CACHE_PROVIDER: "redis" | "postgres";
@@ -48,6 +56,12 @@ declare global {
       EMAIL_PROVIDER?: "resend";
       RESEND_API_KEY?: string;
       RESEND_FROM_EMAIL?: string;
+      /** Verified Resend recipient for test/live-comm runs (loaded from .env.test) */
+      RESEND_TEST_TO_EMAIL?: string;
+      /** Verified Twilio recipient for test/live-comm runs (loaded from .env.test) */
+      TWILIO_VERIFIED_TEST_RECIPIENT?: string;
+      /** Valid FCM device token for test/live-comm runs (loaded from .env.test) */
+      FCM_TEST_DEVICE_TOKEN?: string;
 
       // SMS Configuration
       SMS_PROVIDER?: "twilio";

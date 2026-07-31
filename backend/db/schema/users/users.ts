@@ -44,6 +44,17 @@ export const users = pgTable(
   table => [
     check("users_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
     index("users_status_idx").on(table.status),
+    index("users_last_login_at_idx").on(table.lastLoginAt),
+    index("users_created_at_idx").on(table.createdAt),
+    index("users_updated_at_idx").on(table.updatedAt),
+    index("users_deleted_at_idx").on(table.deletedAt),
+    index("users_display_currency_idx").on(table.displayCurrency),
+    index("users_timezone_idx").on(table.timezone),
+    index("users_is_super_admin_idx").on(table.isSuperAdmin),
+    index("users_phone_idx").on(table.phone),
+    index("users_name_idx").on(table.name),
+    index("users_status_deleted_at_idx").on(table.status, table.deletedAt),
+    index("users_status_created_at_idx").on(table.status, table.createdAt),
   ]
 );
 

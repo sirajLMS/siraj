@@ -16,7 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, InvoicePaymentSubmissionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   InvoicePaymentSubmissionQuery,
   InvoicePaymentsQuery,
@@ -146,12 +146,12 @@ function SubmissionDetailsSection({
 }): React.ReactNode {
   return (
     <Stack spacing={1.5}>
-      {submission.status === "pending" ? (
+      {submission.status === InvoicePaymentSubmissionStatus.Pending ? (
         <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
           {labels.pending}
         </Typography>
       ) : null}
-      {submission.status === "rejected" ? (
+      {submission.status === InvoicePaymentSubmissionStatus.Rejected ? (
         <Typography variant="bodyMd" sx={{ color: "error.main" }}>
           {labels.rejected}
         </Typography>
@@ -581,7 +581,8 @@ function useInvoicePaymentReview({
   const submissionLoadingCombined = submissionLoading || paymentsLoading;
   const loadFailed = Boolean(submissionError ?? paymentsError);
   const reviewBusy = approving || rejecting;
-  const showReviewActions = canManage && !billingActionsDisabled && submission?.status === "pending";
+  const showReviewActions =
+    canManage && !billingActionsDisabled && submission?.status === InvoicePaymentSubmissionStatus.Pending;
 
   const executeReview = async (mutation: () => Promise<unknown>, action: "approve" | "reject") => {
     if (!invoiceId || billingActionsDisabled) {

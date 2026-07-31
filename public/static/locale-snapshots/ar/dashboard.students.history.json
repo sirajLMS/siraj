@@ -1,0 +1,87 @@
+{
+  "breadcrumbs": {
+    "archive": "أرشيف الطلاب",
+    "history": "تاريخ الحصص"
+  },
+  "common": {
+    "student": "طالب"
+  },
+  "pageTitle": {
+    "__fn": "(name) => `\\u062A\\u0627\\u0631\\u064A\\u062E \\u062D\\u0635\\u0635 ${name}`"
+  },
+  "pageSubtitle": {
+    "__fn": "(month) => `${month}`"
+  },
+  "exportPdf": "تصدير PDF",
+  "changeMonth": "تغيير الشهر",
+  "metrics": {
+    "totalClasses": {
+      "__fn": "(_count) => \"\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A \\u0627\\u0644\\u062D\\u0635\\u0635\""
+    },
+    "attendanceRate": {
+      "__fn": "(_rate) => \"\\u0645\\u0639\\u062F\\u0644 \\u0627\\u0644\\u062D\\u0636\\u0648\\u0631\""
+    },
+    "hoursStudied": {
+      "__fn": "(_hours) => \"\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u062F\\u0631\\u0627\\u0633\\u0629\""
+    },
+    "performance": {
+      "__fn": "(_score) => \"\\u0627\\u0644\\u0623\\u062F\\u0627\\u0621\""
+    }
+  },
+  "calendar": {
+    "weeklyAttendance": "الحضور الأسبوعي",
+    "week": {
+      "__fn": "(number) => `\\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639 ${number}`"
+    },
+    "days": {
+      "sun": "الأحد",
+      "mon": "الاثنين",
+      "tue": "الثلاثاء",
+      "wed": "الأربعاء",
+      "thu": "الخميس",
+      "fri": "الجمعة",
+      "sat": "السبت"
+    }
+  },
+  "classDetails": {
+    "title": "تفاصيل الحصة",
+    "classDetails": {
+      "__fn": "(date) => `\\u062A\\u0641\\u0627\\u0635\\u064A\\u0644 \\u0627\\u0644\\u062D\\u0635\\u0629 - ${date}`"
+    },
+    "instructor": {
+      "__fn": "(name) => `\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645: ${name}`"
+    },
+    "timeSlot": "فترة الحصة",
+    "roomNo": "رقم الغرفة",
+    "contentNotes": "محتوى وملاحظات الحصة",
+    "viewAssignments": "عرض الواجبات",
+    "downloadLogs": "تنزيل السجلات",
+    "joinSession": "الانضمام للحصة",
+    "status": {
+      "present": "حاضر",
+      "absent": "غائب",
+      "late": "متأخر",
+      "PENDING": "معلّق",
+      "TAKEN": "مأخوذ",
+      "ABSENT": "غائب",
+      "LEAVE": "إجازة",
+      "NOT_ACTIVATED": "غير مفعّل",
+      "ACTIVATED": "مفعّل",
+      "RUNNING": "جارٍ",
+      "COMPLETED": "مكتمل"
+    },
+    "noSessions": "لا توجد حصص مجدولة لهذا التاريخ.",
+    "dayOfMonth": {
+      "__fn": "(day, month) => `\\u064A\\u0648\\u0645 ${day} \\u0645\\u0646 ${month}`"
+    }
+  },
+  "performanceStreak": {
+    "title": "سلسلة الأداء",
+    "description": {
+      "__fn": "(_count) => \"\\u0644\\u0642\\u062F \\u062D\\u0636\\u0631\\u062A 100% \\u0645\\u0646 \\u0627\\u0644\\u062D\\u0635\\u0635 \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639. \\u0648\\u0627\\u0635\\u0644 \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0632\\u062E\\u0645!\""
+    }
+  },
+  "errors": {
+    "loadFailed": "فشل في تحميل سجل الطالب."
+  }
+}

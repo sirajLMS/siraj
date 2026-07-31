@@ -22,12 +22,15 @@ export function resolveConnectionStrategy(): DbConnectionStrategy {
   if (mode === "pg") return "pg-pooled";
   if (mode === "neon") return "neon-serverless";
 
-  if (isVercelRuntime() || isServerlessRuntime()) {
-    return "pg-pooled";
+  // When DB_CONNECTION_MODE is not explicitly set (auto), respect DB_PROVIDER
+  // Default DB_PROVIDER to "neon" so neon-serverless is the default strategy
+  const provider = getStringEnv("DB_PROVIDER", "neon");
+  if (provider === "neon") {
+    return "neon-serverless";
   }
 
-  const provider = getStringEnv("DB_PROVIDER", "postgres");
-  return provider === "neon" ? "neon-serverless" : "pg-pooled";
+  // Only use pg-pooled if DB_PROVIDER is explicitly set to postgres
+  return "pg-pooled";
 }
 
 export function resolvePoolMax(context: PoolMaxContext): number {

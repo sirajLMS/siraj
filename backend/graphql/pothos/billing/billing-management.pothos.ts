@@ -4,16 +4,17 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { BillingMonthInputRef } from "@/backend/graphql/pothos/billing/billing-history.pothos";
 import {
   DisplayAmountPothosObject,
-  resolveDisplayAmountField,
+  resolveDisplayAmountFields,
   setBillingFxDisplayCurrencyForInvoiceParent,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
   CurrencyCodePothosObject,
+  InvoicePaymentSubmissionStatusPothosEnum,
   InvoiceStatusPothosObject,
   InvoiceTypePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
+import { BillingManagementService } from "@/backend/services";
 import type {
   DeleteInvoiceResult,
   DeleteInvoiceReturnType,
@@ -81,10 +82,9 @@ export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement(
     paidDate: t.exposeString("paidDate", { nullable: true }),
     version: t.exposeInt("version"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
-    displayAmount: t.field({
+    displayAmount: t.expose("displayAmount", {
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx),
     }),
   }),
 });
@@ -119,10 +119,6 @@ export const DeleteInvoiceResultPothosObject = DeleteInvoiceResultRef.implement(
   }),
 });
 
-const InvoicePaymentSubmissionStatusEnum = gqlSchemaBuilder.enumType("InvoicePaymentSubmissionStatus", {
-  values: ["pending", "approved", "rejected"] as const,
-});
-
 const InvoicePaymentSubmissionRef =
   gqlSchemaBuilder.objectRef<InvoicePaymentSubmissionReturnType>("InvoicePaymentSubmission");
 
@@ -133,7 +129,7 @@ export const InvoicePaymentSubmissionPothosObject = InvoicePaymentSubmissionRef.
     fileId: t.exposeString("fileId"),
     filePath: t.exposeString("filePath"),
     mimeType: t.exposeString("mimeType"),
-    status: t.expose("status", { type: InvoicePaymentSubmissionStatusEnum }),
+    status: t.expose("status", { type: InvoicePaymentSubmissionStatusPothosEnum }),
     submittedByUserId: t.exposeString("submittedByUserId"),
     submittedAt: t.exposeString("submittedAt"),
     reviewedByUserId: t.exposeString("reviewedByUserId", { nullable: true }),
@@ -164,7 +160,7 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return BillingManagementService.createManualInvoice(
+      const result = await BillingManagementService.createManualInvoice(
         userId,
         {
           parentId: args.parentId,
@@ -181,6 +177,12 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
         },
         tErrors
       );
+
+      const displayAmounts = await resolveDisplayAmountFields([result], ctx, "amount", "currency");
+      return {
+        ...result,
+        displayAmount: displayAmounts.get(result.id) ?? null,
+      };
     },
   })
 );

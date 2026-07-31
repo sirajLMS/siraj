@@ -22,3 +22,4 @@ export * from "@/backend/graphql/pothos/students";
 export * from "@/backend/graphql/pothos/supervisor";
 export * from "@/backend/graphql/pothos/system";
 export * from "@/backend/graphql/pothos/teachers";
+export * from "@/backend/graphql/pothos/users";

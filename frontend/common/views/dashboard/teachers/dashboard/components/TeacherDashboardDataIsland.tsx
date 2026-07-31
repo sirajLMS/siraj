@@ -4,16 +4,12 @@ import { useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useState } from "react";
 import { teacherDashboardQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
-import type {
-  MissedClassAlert,
-  StudentProgressFeedItem,
-  TeacherProgressFeedEventKind,
-  TeacherScheduleRow,
-} from "@/frontend/common/types/shared.types";
+import type { MissedClassAlert, TeacherScheduleRow } from "@/frontend/common/types/shared.types";
 import type {
   TeacherDashboardLastUpdatedLabels,
   TeacherDashboardViewLabels,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import { buildStudentProgressFeedItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildStudentProgressFeedItems";
 import { buildTeacherActiveMetricItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
 import { useTeacherDashboardLastUpdated } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/useTeacherDashboardLastUpdated";
 
@@ -27,12 +23,6 @@ interface RawRow {
   readonly outcome?: string | null;
   readonly zoomMeetingUrl?: string | null;
   readonly yourTimeFormatted?: string | null;
-}
-
-interface RawFeedItem {
-  readonly id?: string | null;
-  readonly title?: string | null;
-  readonly type?: string | null;
 }
 
 interface DataIslandProps {
@@ -99,7 +89,18 @@ export function TeacherDashboardDataIsland({ labels, lastUpdatedLabels }: Readon
     const totalCount = dashboardData?.teacherDashboard?.totalCount ?? 0;
     const dashboardMetrics = dashboardData?.teacherDashboard?.metrics;
     const metricItems = buildTeacherActiveMetricItems(dashboardMetrics, labels.activeMetrics);
-    const progressFeed = mapProgressFeed(dashboardData?.teacherDashboard?.progressFeed);
+    const progressFeed = buildStudentProgressFeedItems(
+      dashboardData?.teacherDashboard?.progressFeed,
+      labels.progressFeed,
+      labels.schedule.durationValue,
+      value => {
+        const elapsedMin = Math.floor((Date.now() - value.getTime()) / 60_000);
+        if (elapsedMin < 1) {
+          return lastUpdatedLabels.updatedJustNow;
+        }
+        return lastUpdatedLabels.updatedMinutesAgo(elapsedMin);
+      }
+    );
     const missedRow = scheduleRows.find(r => r.status === "missed");
     const missedAlert: MissedClassAlert | null = missedRow
       ? { classId: missedRow.classId, scheduledTime: missedRow.timeRange }
@@ -116,7 +117,7 @@ export function TeacherDashboardDataIsland({ labels, lastUpdatedLabels }: Readon
       teacherId,
       lastUpdated,
     });
-  }, [dashboardData, loading, filterDate, labels, lastUpdated, setData]);
+  }, [dashboardData, loading, filterDate, labels, lastUpdated, lastUpdatedLabels, setData]);
 
   return null;
 }
@@ -169,31 +170,5 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
       isLive: row.executionState === "ACTIVATED" || row.executionState === "IN_PROGRESS",
       isCurrent: row.executionState === "ACTIVATED" || row.executionState === "IN_PROGRESS",
     } as unknown as TeacherScheduleRow;
-  });
-}
-
-function mapProgressFeed(feed: readonly RawFeedItem[] | null | undefined): StudentProgressFeedItem[] {
-  return (feed || []).map(f => {
-    let icon: "grade" | "login" | "description" = "description";
-    const fType = f.type?.toLowerCase();
-    if (fType === "quiz") {
-      icon = "grade";
-    } else if (fType === "login") {
-      icon = "login";
-    }
-
-    return {
-      id: f.id || "",
-      studentId: f.id || "",
-      studentName: f.title ? f.title.split(" ")[0] : "Student",
-      studentInitials: f.title ? f.title.slice(0, 2).toUpperCase() : "ST",
-      summary: f.title || "",
-      scheduledTime: null,
-      durationMinutes: null,
-      eventKind: icon as unknown as TeacherProgressFeedEventKind,
-      occurredAt: new Date(),
-      timeAgo: "1m ago",
-      infoTooltip: null,
-    };
   });
 }

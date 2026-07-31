@@ -161,6 +161,7 @@ This document provides comprehensive checklists for each phase of the spec-drive
 - [ ] **Integration Tasks**: System integration work is planned
 - [ ] **Testing Tasks**: Comprehensive testing tasks are included
 - [ ] **Documentation Tasks**: Documentation updates are planned
+- [ ] **Knowledge Propagation Task**: Final task to propagate outcome learnings into AGENTS.md, skills, instructions, and docs is included
 
 ### Implementation Planning
 
@@ -399,6 +400,7 @@ This document provides comprehensive checklists for each phase of the spec-drive
 - [ ] Requirements traceability
 - [ ] Testing strategy for each component
 - [ ] Dependency management
+- [ ] Knowledge propagation task (final task)
 
 ## Quality Check
 - [ ] Tasks are appropriately sized
@@ -406,6 +408,7 @@ This document provides comprehensive checklists for each phase of the spec-drive
 - [ ] Tasks build incrementally
 - [ ] Implementation risks identified
 - [ ] Development team has reviewed
+- [ ] Knowledge propagation task updates AGENTS.md, skills, instructions, and docs
 ```
 
 ### Success Metrics and Measurement

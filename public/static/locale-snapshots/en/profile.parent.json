@@ -1,0 +1,86 @@
+{
+  "ownSubtitle": "View and update your contact and communication details.",
+  "subtitle": "Manage contact and communication details for the student's primary guardian.",
+  "adminBanner": "Admin view: Identity and billing fields visible.",
+  "convertedAmount": {
+    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
+  },
+  "sections": {
+    "account": "Account",
+    "contact": "Contact Information",
+    "social": "Social & Communication",
+    "identity": "Identity",
+    "billing": "Billing",
+    "students": "Associated Students"
+  },
+  "fields": {
+    "fullName": "Full Name",
+    "primaryEmail": "Primary Email",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "facebook": "Facebook",
+    "twitter": "Twitter",
+    "nationality": "Nationality",
+    "address": "Address",
+    "invoiceType": "Invoice Type",
+    "feeAmount": "Base Fee Value",
+    "paymentMethod": "Default Payment Method",
+    "currency": "Currency",
+    "displayCurrency": "Display Currency",
+    "timezone": "Timezone",
+    "lifecycleStatus": "Lifecycle Status",
+    "accountStatus": "Account Status",
+    "avatar": "Avatar"
+  },
+  "status": {
+    "regular": "Regular",
+    "on_trial": "On Trial",
+    "on_leave": "On Leave",
+    "suspended": "Suspended",
+    "deactivated": "Deactivated"
+  },
+  "accountStatus": {
+    "activated": "Activated",
+    "deactivated": "Deactivated"
+  },
+  "actions": {
+    "deactivateAccount": "Revoke Login Access",
+    "deactivateDialogTitle": "Revoke Parent Login Access",
+    "deactivateConfirmText": "Are you sure you want to revoke this parent's login access? They will be immediately logged out and unable to sign in until access is restored.",
+    "reactivateAccount": "Restore Login Access",
+    "reactivateDialogTitle": "Restore Parent Login Access",
+    "reactivateConfirmText": "Are you sure you want to restore login access for this parent? They will be able to sign in again. This does not change their lifecycle status.",
+    "cancel": "Cancel",
+    "deactivating": "Revoking access...",
+    "reactivating": "Restoring access...",
+    "deactivateSuccess": "Parent login access has been revoked.",
+    "reactivateSuccess": "Parent login access has been restored.",
+    "manageLifecycle": "Manage Lifecycle"
+  },
+  "common": {
+    "student": {
+      "fallbackInitial": "S"
+    },
+    "teacher": {
+      "fallbackInitial": "T"
+    }
+  },
+  "students": {
+    "empty": "No students currently associated.",
+    "mobileListLabel": "Associated Students List",
+    "columns": {
+      "name": "Student Name",
+      "status": "Status",
+      "teacher": "Teacher",
+      "hoursPerWeek": "Hours/Week"
+    },
+    "statusLabel": {
+      "regular": "Regular",
+      "on_trial": "On Trial",
+      "on_leave": "On Leave",
+      "suspended": "Suspended",
+      "deactivated": "Deactivated"
+    }
+  },
+  "notSet": "Not set"
+}

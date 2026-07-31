@@ -1,0 +1,299 @@
+{
+  "auth": {
+    "invalidRoleTab": "علامة التبويب المحددة للدور غير صالحة.",
+    "passwordMinLength": "يجب أن تكون كلمة المرور ٨ أحرف على الأقل.",
+    "passwordRequiresUppercase": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل.",
+    "passwordRequiresLowercase": "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
+    "passwordRequiresDigit": "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
+    "passwordRequiresSpecialChar": "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
+    "tooManyLoginAttempts": "عدد محاولات تسجيل الدخول كثيرة جداً. يرجى المحاولة لاحقاً.",
+    "serviceUnavailable": "خدمة المصادقة غير متاحة مؤقتاً",
+    "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صالحة",
+    "currentPasswordInvalid": "كلمة المرور الحالية غير صحيحة.",
+    "passwordsDoNotMatch": "كلمة المرور الجديدة وتأكيد كلمة المرور غير متطابقين.",
+    "accountDeactivated": "تم إلغاء تفعيل هذا الحساب. يرجى التواصل مع الدعم.",
+    "accountLocked": "عدد محاولات تسجيل الدخول كثيرة جداً. تم قفل حسابك مؤقتاً.",
+    "demoLoginNotEnabled": "تسجيل الدخول التجريبي غير مفعل",
+    "demoLoginFailed": "فشل تسجيل الدخول التجريبي",
+    "impersonationNotAllowed": "غير مسموح لك بانتحال هوية المستخدمين",
+    "cannotImpersonateSelf": "لا يمكنك انتحال هويتك",
+    "cannotImpersonateSuperAdmin": "لا يمكنك انتحال هوية مسؤول نظام آخر",
+    "impersonationTargetNotFound": "المستخدم المراد انتحال هويته غير موجود",
+    "impersonationTargetInactive": "المستخدم المراد انتحال هويته غير نشط أو محذوف",
+    "impersonationSessionInvalid": "جلستك غير صالحة لانتحال الهوية",
+    "impersonationNotActive": "لا توجد جلسة انتحال هوية نشطة",
+    "impersonationExpired": "انتهت جلسة انتحال الهوية",
+    "impersonationNotAllowedDuringSession": "هذا الإجراء غير مسموح أثناء انتحال هوية مستخدم",
+    "groupSimulationNotAllowed": "غير مسموح لك بمحاكاة مجموعات الأذونات",
+    "groupSimulationSessionInvalid": "جلستك غير صالحة لمحاكاة مجموعة الأذونات",
+    "groupSimulationNotActive": "لا توجد محاكاة نشطة لمجموعة أذونات",
+    "groupSimulationNotAllowedDuringSession": "هذا الإجراء غير مسموح أثناء محاكاة مجموعة أذونات",
+    "groupSimulationNotAllowedWhileImpersonating": "أنهِ انتحال الهوية قبل محاكاة مجموعة أذونات",
+    "groupSimulationAlreadyHasGroup": "لديك هذه المجموعة بالفعل؛ اختر مجموعة أخرى للمحاكاة",
+    "insufficientPermissions": "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
+    "impersonationNotAllowedWhileImpersonating": "لا يمكنك انتحال هوية أثناء انتحال هوية أخرى.",
+    "demoGroupNotFound": {
+      "__fn": "(groupSlug) => `\\u0645\\u062C\\u0645\\u0648\\u0639\\u0629 \\u0627\\u0644\\u0639\\u0631\\u0636 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F\\u0629: ${groupSlug}`"
+    },
+    "demoGroupNoUser": {
+      "__fn": "(groupSlug) => `\\u0644\\u0645 \\u064A\\u062A\\u0645 \\u0627\\u0644\\u0639\\u062B\\u0648\\u0631 \\u0639\\u0644\\u0649 \\u0645\\u0633\\u062A\\u062E\\u062F\\u0645 \\u0644\\u0645\\u062C\\u0645\\u0648\\u0639\\u0629 \\u0627\\u0644\\u0639\\u0631\\u0636: ${groupSlug}`"
+    }
+  },
+  "permissionManagement": {
+    "unauthorized": "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
+    "userNotFound": {
+      "__fn": "(id) => `\\u0627\\u0644\\u0645\\u0633\\u062A\\u062E\\u062F\\u0645 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    },
+    "permissionGroupNotFound": {
+      "__fn": "(id) => `\\u0645\\u062C\\u0645\\u0648\\u0639\\u0629 \\u0627\\u0644\\u0623\\u0630\\u0648\\u0646\\u0627\\u062A \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F\\u0629: ${id}`"
+    },
+    "permissionGroupNameRequired": "اسم المجموعة مطلوب.",
+    "permissionGroupNameTooLong": "اسم المجموعة طويل جداً (255 حرف كحد أقصى).",
+    "permissionGroupInvalidName": "اسم المجموعة غير صالح.",
+    "cannotModifySuperAdmin": "لا يمكن تعديل المستخدم المسؤول الأعلى.",
+    "cannotModifySystemPermissionGroup": "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام",
+    "cannotDeleteSystemPermissionGroup": "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام"
+  },
+  "billing": {
+    "invoiceNotFound": {
+      "__fn": "(id) => `\\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F\\u0629: ${id}`"
+    },
+    "invoiceNotPendingReview": {
+      "__fn": "(id) => `\\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 \\u0644\\u064A\\u0633\\u062A \\u0641\\u064A \\u062D\\u0627\\u0644\\u0629 \\u0627\\u0646\\u062A\\u0638\\u0627\\u0631 \\u0627\\u0644\\u0645\\u0631\\u0627\\u062C\\u0639\\u0629: ${id}`"
+    },
+    "invoicePaymentProofNotFound": {
+      "__fn": "(id) => `\\u0625\\u062B\\u0628\\u0627\\u062A \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0644\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${id} \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F`"
+    },
+    "invoiceAlreadyPaid": {
+      "__fn": "({ id, status }) => `\\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${id} \\u0628\\u0627\\u0644\\u0641\\u0639\\u0644 \\u0641\\u064A \\u062D\\u0627\\u0644\\u0629 ${status.toLowerCase()}.`"
+    },
+    "paymentProofRequired": "إثبات الدفع مطلوب.",
+    "cannotDeletePaidInvoice": {
+      "__fn": "(id) => `\\u0644\\u0627 \\u064A\\u0645\\u0643\\u0646 \\u062D\\u0630\\u0641 \\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${id} \\u0644\\u0623\\u0646\\u0647\\u0627 \\u0645\\u062F\\u0641\\u0648\\u0639\\u0629.`"
+    },
+    "invalidParentId": "معرف ولي الأمر غير صالح.",
+    "invalidInvoiceAmount": "مبلغ الفاتورة غير صالح.",
+    "parentNotFound": "ولي الأمر غير موجود.",
+    "invoiceVersionMismatch": {
+      "__fn": "({\n      id,\n      expectedVersion,\n      gotVersion\n    }) => `\\u0639\\u062F\\u0645 \\u062A\\u0637\\u0627\\u0628\\u0642 \\u0641\\u064A \\u0625\\u0635\\u062F\\u0627\\u0631 \\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${id}: \\u0627\\u0644\\u0645\\u062A\\u0648\\u0642\\u0639 ${expectedVersion}\\u060C \\u0627\\u0644\\u0641\\u0639\\u0644\\u064A ${gotVersion}.`"
+    },
+    "exchangeRateStale": {
+      "__fn": "({ fromCurrency, toCurrency }) => `\\u0633\\u0639\\u0631 \\u0627\\u0644\\u0635\\u0631\\u0641 \\u0644\\u0640 ${fromCurrency} \\u0625\\u0644\\u0649 ${toCurrency} \\u0642\\u062F\\u064A\\u0645 (\\u0623\\u0642\\u062F\\u0645 \\u0645\\u0646 24 \\u0633\\u0627\\u0639\\u0629)`"
+    }
+  },
+  "credit": {
+    "duplicatePurchase": "تمت معالجة عملية شراء الرصيد هذه بالفعل.",
+    "insufficientBalance": {
+      "__fn": "({ studentId, remaining }) => `\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentId} \\u063A\\u064A\\u0631 \\u0643\\u0627\\u0641\\u064D. \\u0627\\u0644\\u0645\\u062A\\u0628\\u0642\\u064A: ${remaining}`"
+    },
+    "invalidInput": "إدخال غير صالح."
+  },
+  "file": {
+    "recordNotFound": {
+      "__fn": "({ tableName, entityId }) => `${tableName} \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${entityId}`"
+    },
+    "invalidFileType": "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و HEIC.",
+    "invoicePaymentProofPending": "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل."
+  },
+  "meetingProvider": {
+    "meetingProviderInactive": "موفر الاجتماعات غير نشط.",
+    "meetingConfigNotFound": {
+      "__fn": "(id) => `\\u062A\\u0643\\u0648\\u064A\\u0646 \\u0627\\u0644\\u0627\\u062C\\u062A\\u0645\\u0627\\u0639 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    },
+    "meetingConfigCreateFailed": "فشل إنشاء تكوين الاجتماع.",
+    "meetingConfigUpdateFailed": "فشل تحديث تكوين الاجتماع.",
+    "meetingProviderNotFound": {
+      "__fn": "(id) => `\\u0645\\u0648\\u0641\\u0631 \\u0627\\u0644\\u0627\\u062C\\u062A\\u0645\\u0627\\u0639\\u0627\\u062A \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    },
+    "meetingProviderCreateFailed": "فشل إنشاء موفر الاجتماعات.",
+    "meetingProviderUpdateFailed": "فشل تحديث موفر الاجتماعات.",
+    "meetingProviderInUse": "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه."
+  },
+  "parent": {
+    "alreadyExists": "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",
+    "invalidTimezone": "المنطقة الزمنية غير صالحة.",
+    "createFailed": "فشل إنشاء ملف ولي الأمر."
+  },
+  "staff": {
+    "alreadyExists": "ملف الموظف لهذا المستخدم موجود بالفعل."
+  },
+  "teacher": {
+    "alreadyExists": "ملف المعلم لهذا المستخدم موجود بالفعل.",
+    "teacherNotFound": {
+      "__fn": "(id) => `\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    },
+    "staffProfileNotFound": "ملف الموظف غير موجود.",
+    "quotaMustBeNonNegative": "الحصة يجب أن تكون رقمًا غير سالب.",
+    "quotaExceedsTotal": {
+      "__fn": "({ requested, total }) => `\\u0627\\u0644\\u062D\\u0635\\u0629 (${requested}) \\u062A\\u062A\\u062C\\u0627\\u0648\\u0632 \\u0627\\u0644\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A (${total}).`"
+    }
+  },
+  "student": {
+    "studentNotFound": {
+      "__fn": "(id) => `\\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    },
+    "studentCreateFailed": "فشل إنشاء الطالب.",
+    "studentUpdateFailed": {
+      "__fn": "(id) => `\\u0641\\u0634\\u0644 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 (\\u0627\\u0644\\u0645\\u0639\\u0631\\u0641: ${id}).`"
+    },
+    "studentVersionMismatch": {
+      "__fn": "({\n      id,\n      expectedVersion,\n      gotVersion\n    }) => `\\u0639\\u062F\\u0645 \\u062A\\u0637\\u0627\\u0628\\u0642 \\u0641\\u064A \\u0625\\u0635\\u062F\\u0627\\u0631 \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 ${id}: \\u0627\\u0644\\u0645\\u062A\\u0648\\u0642\\u0639 ${expectedVersion}\\u060C \\u0627\\u0644\\u0641\\u0639\\u0644\\u064A ${gotVersion}.`"
+    },
+    "insufficientClasses": {
+      "__fn": "({ id, remaining, required }) => `\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u062D\\u0635\\u0635 \\u063A\\u064A\\u0631 \\u0643\\u0627\\u0641\\u064D \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${id}: \\u0645\\u062A\\u0628\\u0642\\u064D ${remaining}\\u060C \\u0645\\u0637\\u0644\\u0648\\u0628 ${required}.`"
+    },
+    "invalidStatusTransition": {
+      "__fn": "({ currentStatus, newStatus }) => `\\u0627\\u0646\\u062A\\u0642\\u0627\\u0644 \\u062D\\u0627\\u0644\\u0629 \\u063A\\u064A\\u0631 \\u0635\\u0627\\u0644\\u062D: ${currentStatus} -> ${newStatus}.`"
+    },
+    "studentEmailRequired": "بريد الطالب الإلكتروني مطلوب.",
+    "studentPasswordRequired": "كلمة مرور الطالب مطلوبة."
+  },
+  "category": {
+    "categoryNotFound": {
+      "__fn": "(id) => `\\u0627\\u0644\\u0641\\u0626\\u0629 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F\\u0629: ${id}`"
+    },
+    "categoryCreateFailed": "فشل إنشاء فئة الحصة.",
+    "categoryHasSubjects": "لا يمكن حذف الفئة لأن لديها مواد مرتبطة بها."
+  },
+  "user": {
+    "userNotFound": {
+      "__fn": "(id) => `\\u0627\\u0644\\u0645\\u0633\\u062A\\u062E\\u062F\\u0645 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    },
+    "userEmailExists": "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
+    "cannotModifyBankingFields": "لا يمكن تعديل الحقول المصرفية.",
+    "parentNotFound": "ولي الأمر غير موجود."
+  },
+  "scheduling": {
+    "cannotRescheduleToSelf": "لا يمكن إعادة الجدولة للذات.",
+    "cannotRescheduleCompleted": "لا يمكن إعادة جدولة جلسة مكتملة.",
+    "cannotRescheduleAlreadyRescheduled": "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
+    "outOfQuota": "نفدت الحصة.",
+    "leaveQuotaExceeded": {
+      "__fn": "({ maxLeaves }) => `\\u062A\\u0645 \\u062A\\u062C\\u0627\\u0648\\u0632 \\u062D\\u0635\\u0629 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629: \\u0627\\u0644\\u062D\\u062F \\u0627\\u0644\\u0623\\u0642\\u0635\\u0649 ${maxLeaves} \\u0625\\u062C\\u0627\\u0632\\u0627\\u062A \\u0645\\u0633\\u0645\\u0648\\u062D \\u0628\\u0647\\u0627.`"
+    },
+    "classInstanceNotFound": {
+      "__fn": "({ id }) => `\\u0645\\u062B\\u064A\\u0644 \\u0627\\u0644\\u0641\\u0635\\u0644 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    },
+    "originalClassNotFound": "الفصل الأصلي غير موجود.",
+    "invalidTransition": "انتقال غير صالح.",
+    "teacherNotAssigned": {
+      "__fn": "({\n      teacherId,\n      studentId,\n      startTime\n    }) => `\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645 ${teacherId} \\u063A\\u064A\\u0631 \\u0645\\u0639\\u064A\\u0646 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentId} \\u0641\\u064A ${startTime}.`"
+    },
+    "teacherBooked": "المعلم محجوز بالفعل في هذا الوقت.",
+    "studentBooked": "الطالب محجوز بالفعل في هذا الوقت.",
+    "meetingUrlInUse": "رابط الاجتماع مستخدم بالفعل.",
+    "sessionNotActivated": "الجلسة غير مفعلة.",
+    "missedClassTime": "لقد فات وقت الحصة."
+  },
+  "permissionGroup": {
+    "permissionGroupNotFound": "مجموعة الأذونات غير موجودة."
+  },
+  "sessionConfig": {
+    "roleNameRequired": "اسم الدور مطلوب.",
+    "ttlOutOfRange": "يجب أن تكون مدة الجلسة بين 60 و 2,419,200 ثانية.",
+    "maxConcurrentOutOfRange": "يجب أن يكون الحد الأقصى للجلسات المتزامنة بين 1 و 50."
+  },
+  "rateLimitExceeded": "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
+  "duplicateRequest": "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
+  "internalServerError": "حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.",
+  "insufficientPermissions": "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
+  "unauthorized": "يجب تسجيل الدخول أولاً.",
+  "unauthorizedAction": "غير مصرح لك بتنفيذ هذا الإجراء.",
+  "unauthorizedViewList": "غير مصرح لك بعرض هذه القائمة.",
+  "unauthorizedSearch": "غير مصرح لك بالبحث.",
+  "unauthorizedViewMetrics": "غير مصرح لك بعرض المقاييس.",
+  "notFound": "المورد المطلوب غير موجود.",
+  "unknownName": "غير معروف",
+  "invalidInput": "إدخال غير صالح.",
+  "invalidNationalId": "الرقم القومي غير صالح للجنسية المحددة.",
+  "permissionGroupNotFound": "مجموعة الأذونات غير موجودة.",
+  "rejectedReportsRequireReason": "يجب أن تتضمن التقارير المرفوضة سبب الرفض.",
+  "approvedReportsNoRejectionReason": "لا يجب أن تتضمن التقارير المعتمدة سبب رفض.",
+  "displayCurrencyNotSet": {
+    "__fn": "(values) => `\\u0639\\u0631\\u0636 \\u0627\\u0644\\u0639\\u0645\\u0644\\u0629 \\u063A\\u064A\\u0631 \\u0645\\u062D\\u062F\\u062F. \\u0627\\u0644\\u0645\\u0628\\u0644\\u063A \\u0627\\u0644\\u0645\\u0642\\u0641\\u0644: ${values.lockedAmount} ${values.lockedCurrency}`"
+  },
+  "displayCurrencyStale": {
+    "__fn": "(values) => `\\u0639\\u0631\\u0636 \\u0627\\u0644\\u0639\\u0645\\u0644\\u0629 \\u0642\\u062F\\u064A\\u0645. \\u0627\\u0644\\u0645\\u0628\\u0644\\u063A \\u0627\\u0644\\u0645\\u0642\\u0641\\u0644: ${values.lockedAmount} ${values.lockedCurrency}`"
+  },
+  "displayCurrencyMixed": {
+    "__fn": "(values) => `\\u0639\\u0645\\u0644\\u0627\\u062A \\u0639\\u0631\\u0636 \\u0645\\u062E\\u062A\\u0644\\u0637\\u0629. \\u0627\\u0644\\u0645\\u0628\\u0644\\u063A \\u0627\\u0644\\u0645\\u0642\\u0641\\u0644: ${values.lockedAmount} ${values.lockedCurrency}`"
+  },
+  "categoryNotFound": {
+    "__fn": "(id) => `\\u0627\\u0644\\u0641\\u0626\\u0629 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F\\u0629: ${id}`"
+  },
+  "categoryCreateFailed": "فشل إنشاء فئة الحصة.",
+  "categoryHasSubjects": "لا يمكن حذف الفئة لأن لديها مواد مرتبطة بها.",
+  "meetingProviderNotFound": {
+    "__fn": "(id) => `\\u0645\\u0648\\u0641\\u0631 \\u0627\\u0644\\u0627\\u062C\\u062A\\u0645\\u0627\\u0639\\u0627\\u062A \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+  },
+  "meetingProviderCreateFailed": "فشل إنشاء موفر الاجتماعات.",
+  "meetingProviderUpdateFailed": "فشل تحديث موفر الاجتماعات.",
+  "meetingProviderInUse": "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
+  "meetingProviderInactive": "موفر الاجتماعات غير نشط.",
+  "meetingConfigNotFound": {
+    "__fn": "(id) => `\\u062A\\u0643\\u0648\\u064A\\u0646 \\u0627\\u0644\\u0627\\u062C\\u062A\\u0645\\u0627\\u0639 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+  },
+  "meetingConfigCreateFailed": "فشل إنشاء تكوين الاجتماع.",
+  "meetingConfigUpdateFailed": "فشل تحديث تكوين الاجتماع.",
+  "studentNotFound": {
+    "__fn": "(id) => `\\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+  },
+  "studentCreateFailed": "فشل في إنشاء الطالب.",
+  "studentUpdateFailed": {
+    "__fn": "(id) => `\\u0641\\u0634\\u0644 \\u0641\\u064A \\u062A\\u062D\\u062F\\u064A\\u062B \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 (\\u0627\\u0644\\u0645\\u0639\\u0631\\u0641: ${id}).`"
+  },
+  "studentVersionMismatch": {
+    "__fn": "({\n    id,\n    expectedVersion,\n    gotVersion\n  }) => `\\u0639\\u062F\\u0645 \\u062A\\u0637\\u0627\\u0628\\u0642 \\u0641\\u064A \\u0625\\u0635\\u062F\\u0627\\u0631 \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 ${id}: \\u0627\\u0644\\u0645\\u062A\\u0648\\u0642\\u0639 ${expectedVersion}\\u060C \\u0627\\u0644\\u0641\\u0639\\u0644\\u064A ${gotVersion}.`"
+  },
+  "insufficientClasses": {
+    "__fn": "({ id, remaining, required }) => `\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u062D\\u0635\\u0635 \\u063A\\u064A\\u0631 \\u0643\\u0627\\u0641\\u064D \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${id}: \\u0645\\u062A\\u0628\\u0642\\u064D ${remaining}\\u060C \\u0645\\u0637\\u0644\\u0648\\u0628 ${required}.`"
+  },
+  "invalidStatusTransition": {
+    "__fn": "({ currentStatus, newStatus }) => `\\u0627\\u0646\\u062A\\u0642\\u0627\\u0644 \\u062D\\u0627\\u0644\\u0629 \\u063A\\u064A\\u0631 \\u0635\\u0627\\u0644\\u062D: ${currentStatus} -> ${newStatus}.`"
+  },
+  "studentEmailRequired": "بريد الطالب الإلكتروني مطلوب.",
+  "studentPasswordRequired": "كلمة مرور الطالب مطلوبة.",
+  "teacherNotFound": {
+    "__fn": "(id) => `\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+  },
+  "staffProfileNotFound": "ملف الموظف غير موجود.",
+  "quotaMustBeNonNegative": "الحصة يجب أن تكون رقمًا غير سالب.",
+  "quotaExceedsTotal": {
+    "__fn": "({ requested, total }) => `\\u0627\\u0644\\u062D\\u0635\\u0629 (${requested}) \\u062A\\u062A\\u062C\\u0627\\u0648\\u0632 \\u0627\\u0644\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A (${total}).`"
+  },
+  "userNotFound": {
+    "__fn": "(id) => `\\u0627\\u0644\\u0645\\u0633\\u062A\\u062E\\u062F\\u0645 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+  },
+  "userEmailExists": "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
+  "cannotModifyBankingFields": "لا يمكن تعديل الحقول المصرفية.",
+  "parentNotFound": "ولي الأمر غير موجود.",
+  "parentAlreadyDeactivated": "حساب ولي الأمر معطل بالفعل.",
+  "parentAlreadyActivated": "حساب ولي الأمر مفعّل بالفعل.",
+  "exchangeRateStale": {
+    "__fn": "({ fromCurrency, toCurrency }) => `\\u0633\\u0639\\u0631 \\u0627\\u0644\\u0635\\u0631\\u0641 \\u0644\\u0640 ${fromCurrency} \\u0625\\u0644\\u0649 ${toCurrency} \\u0642\\u062F\\u064A\\u0645 (\\u0623\\u0642\\u062F\\u0645 \\u0645\\u0646 24 \\u0633\\u0627\\u0639\\u0629)`"
+  },
+  "cannotRescheduleToSelf": "لا يمكن إعادة الجدولة للذات.",
+  "cannotRescheduleCompleted": "لا يمكن إعادة جدولة جلسة مكتملة.",
+  "cannotRescheduleAlreadyRescheduled": "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
+  "outOfQuota": "نفدت الحصة.",
+  "leaveQuotaExceeded": {
+    "__fn": "({ maxLeaves }) => `\\u062A\\u0645 \\u062A\\u062C\\u0627\\u0648\\u0632 \\u062D\\u0635\\u0629 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629: \\u0627\\u0644\\u062D\\u062F \\u0627\\u0644\\u0623\\u0642\\u0635\\u0649 ${maxLeaves} \\u0625\\u062C\\u0627\\u0632\\u0627\\u062A \\u0645\\u0633\\u0645\\u0648\\u062D \\u0628\\u0647\\u0627.`"
+  },
+  "classInstanceNotFound": {
+    "__fn": "({ id }) => `\\u0645\\u062B\\u064A\\u0644 \\u0627\\u0644\\u0641\\u0635\\u0644 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+  },
+  "originalClassNotFound": "الفصل الأصلي غير موجود.",
+  "invalidTransition": "انتقال غير صالح.",
+  "teacherNotAssigned": {
+    "__fn": "({\n    teacherId,\n    studentId,\n    startTime\n  }) => `\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645 ${teacherId} \\u063A\\u064A\\u0631 \\u0645\\u0639\\u064A\\u0646 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentId} \\u0641\\u064A ${startTime}.`"
+  },
+  "teacherBooked": "المعلم محجوز بالفعل في هذا الوقت.",
+  "studentBooked": "الطالب محجوز بالفعل في هذا الوقت.",
+  "meetingUrlInUse": "رابط الاجتماع مستخدم بالفعل.",
+  "sessionNotActivated": "الجلسة غير مفعلة.",
+  "outsideAvailability": "الحجز خارج نوافذ توفر المعلم.",
+  "teacherUnavailabilityConflict": "الحجز محظور بسبب نمط عدم التفرغ المتكرر.",
+  "teacherOnVacation": "الحجز محظور بسبب إجازة معتمدة.",
+  "resourceNotFound": "مورد التعلم غير موجود.",
+  "currencyInUse": "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين."
+}

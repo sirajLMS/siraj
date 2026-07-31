@@ -15,9 +15,11 @@ import {
   CurrencyCode,
   DayOfWeek,
   FxProvider,
+  FxProviderConfigSource,
   FxSyncStatus,
   Gender,
   GroupClassAttendanceStatus,
+  InvoicePaymentSubmissionStatus,
   InvoiceStatus,
   InvoiceType,
   LeaveRequestStatus,
@@ -37,6 +39,7 @@ import {
   SystemSettingCategory,
   SystemSettingDataType,
   TeacherDueStatus,
+  TeacherProgressFeedEventKind,
   UserRole,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
@@ -235,4 +238,16 @@ export const SystemSettingDataTypePothos = gqlSchemaBuilder.enumType("SystemSett
     json: { value: SystemSettingDataType.Json },
     string: { value: SystemSettingDataType.String },
   },
+});
+
+export const InvoicePaymentSubmissionStatusPothosEnum = gqlSchemaBuilder.enumType(InvoicePaymentSubmissionStatus, {
+  name: "InvoicePaymentSubmissionStatus",
+});
+
+export const FxProviderConfigSourcePothosEnum = gqlSchemaBuilder.enumType(FxProviderConfigSource, {
+  name: "FxProviderConfigSource",
+});
+
+export const TeacherProgressFeedEventKindPothosEnum = gqlSchemaBuilder.enumType(TeacherProgressFeedEventKind, {
+  name: "TeacherProgressFeedEventKind",
 });

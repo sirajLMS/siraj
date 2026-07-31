@@ -127,8 +127,8 @@ export namespace CreditRepository {
     tx?: DBTransaction
   ): Promise<CreditTransactionSelectType[]> => {
     if (keys.length === 0) return [];
-    const executor = tx ?? db;
-    return executor
+    const queryDb = tx ?? db;
+    return queryDb
       .select()
       .from(creditTransactions)
       .where(inArray(creditTransactions.idempotencyKey, [...keys]));

@@ -20,6 +20,7 @@ export const classMeetingConfigs = pgTable(
   table => [
     index(`${TABLE_NAME}_class_instance_id_idx`).on(table.classInstanceId),
     index(`${TABLE_NAME}_recurring_schedule_id_idx`).on(table.recurringScheduleId),
+    index(`${TABLE_NAME}_is_default_idx`).on(table.isDefault),
     meetingConfigProviderIndex(TABLE_NAME, table),
     meetingConfigOneDefaultPerNullableScopeIndex(TABLE_NAME, "per_instance", table.classInstanceId, table.isDefault),
     meetingConfigOneDefaultPerNullableScopeIndex(

@@ -1,6 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UnpaidInvoicesSummaryPothosObject } from "@/backend/graphql/pothos/billing/billing-alerts.pothos";
-import { populateBillingFxDisplayCurrencyByUserId } from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import {
+  populateBillingFxDisplayCurrencyByUserId,
+  resolveDisplayAmountFields,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { BillingAlertsService } from "@/backend/services/billing/billing-alerts.service";
 
 gqlSchemaBuilder.queryFields(t => ({
@@ -17,7 +20,22 @@ gqlSchemaBuilder.queryFields(t => ({
         ctx,
         result.items.map(item => item.userId)
       );
-      return result;
+
+      const displayAmounts = await resolveDisplayAmountFields(
+        result.items,
+        ctx,
+        "totalUnpaidAmount",
+        "currency",
+        "userId"
+      );
+
+      return {
+        ...result,
+        items: result.items.map(item => ({
+          ...item,
+          displayAmount: displayAmounts.get(item.id) ?? null,
+        })),
+      };
     },
   }),
 }));

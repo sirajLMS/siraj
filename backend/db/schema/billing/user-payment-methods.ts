@@ -32,6 +32,13 @@ export const userPaymentMethods = pgTable(
   table => [
     index("user_payment_methods_user_id_idx").on(table.userId),
     index("user_payment_methods_type_idx").on(table.type),
+    index("user_payment_methods_verified_at_idx").on(table.verifiedAt),
+    index("user_payment_methods_verified_by_user_id_idx").on(table.verifiedByUserId),
+    index("user_payment_methods_created_at_idx").on(table.createdAt),
+    index("user_payment_methods_direction_idx").on(table.direction),
+    index("user_payment_methods_is_default_idx").on(table.isDefault),
+    index("user_payment_methods_user_id_is_default_idx").on(table.userId, table.isDefault),
+    index("user_payment_methods_user_id_direction_idx").on(table.userId, table.direction),
     uniqueIndex("user_payment_methods_payin_default_idx")
       .on(table.userId)
       .where(sql`${table.isDefault} = true AND ${table.direction} IN ('PAYIN', 'BOTH')`),

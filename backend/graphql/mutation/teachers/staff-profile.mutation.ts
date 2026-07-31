@@ -1,10 +1,30 @@
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { resolveDisplayAmountFields } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
   TeacherProfileResultPothosObject,
   TeacherProfileUpdateInputPothosObject,
 } from "@/backend/graphql/pothos/teachers/staff-profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
+import { StaffProfileService } from "@/backend/services";
+import type { TeacherProfileReturnType } from "@/backend/types";
+
+async function enrichWithDisplayAmount(
+  profile: TeacherProfileReturnType,
+  ctx: BaseContext
+): Promise<TeacherProfileReturnType & { displayAmount: unknown }> {
+  const displayAmounts = await resolveDisplayAmountFields(
+    [profile as unknown as Record<string, unknown>],
+    ctx,
+    "hourlyRate",
+    "rateCurrency",
+    "userId"
+  );
+  return {
+    ...profile,
+    displayAmount: displayAmounts.get(profile.id) ?? null,
+  };
+}
 
 gqlSchemaBuilder.queryField("teacherProfileForEdit", t =>
   t.field({
@@ -13,7 +33,8 @@ gqlSchemaBuilder.queryField("teacherProfileForEdit", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return StaffProfileService.getTeacherProfileForEdit(userId, args.teacherId, ctx.locale);
+      const result = await StaffProfileService.getTeacherProfileForEdit(userId, args.teacherId, ctx.locale);
+      return enrichWithDisplayAmount(result, ctx);
     },
   })
 );
@@ -28,7 +49,8 @@ gqlSchemaBuilder.mutationField("updateTeacherProfile", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return StaffProfileService.updateTeacherProfile(userId, args.teacherId, args.input, ctx.locale);
+      const result = await StaffProfileService.updateTeacherProfile(userId, args.teacherId, args.input, ctx.locale);
+      return enrichWithDisplayAmount(result, ctx);
     },
   })
 );

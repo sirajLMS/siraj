@@ -1,0 +1,73 @@
+{
+  "pageTitle": {
+    "__fn": "(name) => `\\u062C\\u062F\\u0648\\u0644 ${name}`"
+  },
+  "breadcrumbs": {
+    "teachers": "المعلمون",
+    "schedule": "الجدول"
+  },
+  "metrics": {
+    "weeklyHoursWorkedTitle": "ساعات العمل الأسبوعية",
+    "weeklyHoursWorked": {
+      "__fn": "(hours) => `\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u0639\\u0645\\u0644 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\\u064A\\u0629: ${hours}`"
+    }
+  },
+  "actions": {
+    "addSlot": "إضافة فترة",
+    "delete": "حذف",
+    "clearSchedule": "مسح الجدول",
+    "deleteClass": "حذف الحصة"
+  },
+  "grid": {
+    "teacherTime": "وقت المعلم",
+    "available": "متاح",
+    "lunchBreak": "استراحة غداء",
+    "bookedClass": "حصة محجوزة",
+    "availableSlot": "فترة متاحة",
+    "lastUpdated": {
+      "__fn": "(time) => `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${time}`"
+    },
+    "unknownSubject": "حصة",
+    "status": {
+      "ended": "انتهت",
+      "absent": "غائب",
+      "leave": "إجازة",
+      "pending": "معلّقة",
+      "activated": "نشطة",
+      "running": "مباشرة",
+      "frozen": "مجمّدة"
+    }
+  },
+  "days": {
+    "monday": "الاثنين",
+    "tuesday": "الثلاثاء",
+    "wednesday": "الأربعاء",
+    "thursday": "الخميس",
+    "friday": "الجمعة",
+    "saturday": "السبت",
+    "sunday": "الأحد",
+    "mon": "اثنين",
+    "tue": "ثلاثاء",
+    "wed": "أربعاء",
+    "thu": "خميس",
+    "fri": "جمعة",
+    "sat": "سبت",
+    "sun": "أحد"
+  },
+  "dialogs": {
+    "deleteConfirm": "هل أنت متأكد أنك تريد إزالة هذا الحجز؟",
+    "deleteConfirmClass": "هل أنت متأكد أنك تريد إزالة هذه الحصة من جدولك؟",
+    "deleteClassTitle": "تأكيد الحذف",
+    "deleteClassMessage": "هل أنت متأكد أنك تريد حذف هذه الحصة؟",
+    "clearScheduleTitle": "مسح الجدول الأسبوعي",
+    "clearScheduleMessage": "هل أنت متأكد أنك تريد حذف الجدول؟",
+    "confirmYes": "نعم",
+    "cancel": "إلغاء"
+  },
+  "notifications": {
+    "classDeleted": "تم حذف الحصة بنجاح",
+    "classDeleteFailed": "فشل حذف الحصة",
+    "scheduleCleared": "تم مسح الجدول بنجاح",
+    "scheduleClearFailed": "فشل مسح الجدول"
+  }
+}

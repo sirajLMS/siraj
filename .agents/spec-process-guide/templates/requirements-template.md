@@ -19,6 +19,8 @@ Use this template to create comprehensive requirements documents using the EARS 
 ## Document Information
 
 - **Feature Name**: [Your Feature Name]
+- **Target Directory**: `.ai/plans/<feature-name>`
+- **Outcome Directory**: `.ai/plans/<feature-name>/outcome`
 - **Version**: 1.0
 - **Date**: [Current Date]
 - **Author**: [Your Name]
@@ -38,6 +40,18 @@ Use this template to create comprehensive requirements documents using the EARS 
 [Define what is included and excluded from this feature]
 
 ## Requirements
+
+### Requirement 0: Execution Outcome Protocol & Task Progress Tracking
+
+**User Story:** As an AI agent or developer, I want persistent task outcome tracking and progress updates, so that subsequent tasks do not repeat past research or analysis.
+
+#### Acceptance Criteria
+
+1. WHEN an executing agent starts any task THEN system SHALL read ALL existing outcome files in `.ai/plans/<feature-name>/outcome/` to absorb prior research, search results, and pitfalls.
+2. WHEN an executing agent completes any task THEN system SHALL write a new outcome document under `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` detailing research findings, docs/web search results, implementation details, and carry-over points.
+3. WHEN an executing agent completes any subtask THEN system SHALL update the corresponding task checkbox `[ ]` -> `[x]` in `tasks.md`.
+4. WHEN any file is modified THEN system SHALL execute per-file verification (`tsgo` + `biome` + `lint-queue`) on that specific file.
+5. WHEN any subtask is completed THEN system SHALL execute `bun tsgo`, `bun biome:check`, and `bun run lint` globally, exiting with zero errors and zero warnings.
 
 ### Requirement 1: [Requirement Title]
 
@@ -85,6 +99,34 @@ Use this template to create comprehensive requirements documents using the EARS 
 - **Complexity**: [High/Medium/Low]
 - **Dependencies**: [List any dependencies]
 - **Assumptions**: [List any assumptions]
+
+## UX/Navigation Requirements (MANDATORY)
+
+Every feature MUST define its navigation, sidebar, tabs, and permissions for ALL user types.
+
+### New Routes & Role-Based Access
+
+| Route | Purpose | Permission | Roles with Access |
+|-------|---------|------------|-------------------|
+| `/feature` | List view | `FEATURE_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+| `/feature/new` | Create form | `FEATURE_MANAGE` | SUPER_ADMIN, ACADEMY_ADMIN |
+| `/feature/[id]` | Detail view | `FEATURE_VIEW` | SUPER_ADMIN, ACADEMY_ADMIN, STAFF |
+
+### Sidebar Navigation Placement
+Feature pages appear as **sub-items under [Parent Group]** in the **[Group Name] (grp_xxx)** group.
+
+### Per-Audience Rendering
+| Audience | Prominent Content |
+|----------|-------------------|
+| Student | [What students see] |
+| Parent | [What parents see] |
+| Teacher | [What teachers see] |
+| Supervisor | [What supervisors see] |
+
+### Mobile vs Desktop
+| Aspect | Desktop | Mobile |
+|--------|---------|--------|
+| [Component] | [Implementation] | [Implementation] |
 
 ## Non-Functional Requirements
 
@@ -151,6 +193,8 @@ Use this checklist to validate your requirements document:
 - [ ] Each requirement has specific acceptance criteria using EARS format
 - [ ] Non-functional requirements are addressed
 - [ ] Success criteria are defined and measurable
+- [ ] **Navigation/sidebar/tabs defined for all user types**
+- [ ] **Permissions mapped to all new routes/pages**
 
 ### Quality
 - [ ] Requirements are written in active voice

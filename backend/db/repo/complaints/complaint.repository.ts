@@ -18,6 +18,60 @@ import type {
 } from "@/backend/types";
 import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
 
+// ============================================================================
+// Prepared Statements (Drizzle Prepared Statements 2.0)
+// ============================================================================
+// These are defined at module level to be compiled once and reused across requests.
+// Note: Prepared statements cannot be used inside transactions (they're tied to the session they were created with).
+
+const getComplaintByIdPrepared = db
+  .select({
+    id: complaints.id,
+    parentId: complaints.parentId,
+    parentName: users.name,
+    studentId: complaints.studentId,
+    studentName: students.name,
+    category: complaints.category,
+    submitterEmail: complaints.submitterEmail,
+    body: complaints.body,
+    status: complaints.status,
+    createdAt: complaints.createdAt,
+    updatedAt: complaints.updatedAt,
+  })
+  .from(complaints)
+  .leftJoin(parents, eq(complaints.parentId, parents.id))
+  .leftJoin(users, eq(parents.userId, users.id))
+  .leftJoin(students, eq(complaints.studentId, students.id))
+  .where(and(eq(complaints.id, sql.placeholder("complaintId")), isNull(complaints.deletedAt)))
+  .limit(1)
+  .prepare("get_complaint_by_id");
+
+const getUnansweredComplaintsPrepared = db
+  .select({
+    id: complaints.id,
+    body: complaints.body,
+    createdAt: complaints.createdAt,
+  })
+  .from(complaints)
+  .where(and(eq(complaints.status, sql.placeholder("status")), isNull(complaints.deletedAt)))
+  .orderBy(desc(complaints.createdAt))
+  .limit(sql.placeholder("limit"))
+  .prepare("get_unanswered_complaints");
+
+const getComplaintFilesPrepared = db
+  .select({
+    fileId: storageFiles.id,
+    publicUrl: storageFiles.path,
+    isProtected: storageFiles.isProtected,
+    usageType: complaintFiles.usageType,
+    createdAt: complaintFiles.createdAt,
+  })
+  .from(complaintFiles)
+  .innerJoin(storageFiles, eq(complaintFiles.fileId, storageFiles.id))
+  .where(eq(complaintFiles.complaintId, sql.placeholder("complaintId")))
+  .orderBy(desc(complaintFiles.createdAt))
+  .prepare("get_complaint_files");
+
 function formatDuration(hours: number): string {
   if (hours < 1) {
     return `${Math.round(hours * 60)}m`;
@@ -286,7 +340,12 @@ export namespace ComplaintRepository {
   };
 
   export const getComplaintById = async (complaintId: string, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
+    if (!tx) {
+      const result = await getComplaintByIdPrepared.execute({ complaintId });
+      return result[0] ?? null;
+    }
+
+    const queryDb = tx;
 
     const results = await queryDb
       .select({
@@ -361,7 +420,11 @@ export namespace ComplaintRepository {
   };
 
   export const getUnansweredComplaints = async (limit: number, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
+    if (!tx) {
+      return getUnansweredComplaintsPrepared.execute({ status: ComplaintStatus.UNANSWERED, limit });
+    }
+
+    const queryDb = tx;
 
     return queryDb
       .select({
@@ -379,7 +442,11 @@ export namespace ComplaintRepository {
     complaintId: string,
     tx?: DBTransaction
   ): Promise<ComplaintFileReturnType[]> => {
-    const queryDb = tx ?? db;
+    if (!tx) {
+      return getComplaintFilesPrepared.execute({ complaintId });
+    }
+
+    const queryDb = tx;
 
     return queryDb
       .select({

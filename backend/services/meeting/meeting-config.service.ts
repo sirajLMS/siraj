@@ -6,6 +6,7 @@ import { AppPermission } from "@/backend/enum";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
+import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type {
   ClassMeetingConfigInsertType,
   ClassMeetingConfigSelectType,
@@ -16,7 +17,15 @@ import type {
   UserMeetingConfigSelectType,
   UserMeetingConfigSubmitInput,
 } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import type { ErrorsLabels } from "@/shared/locale";
+
+async function resolveProvidersForConfigs(
+  configs: UserMeetingConfigSelectType[]
+): Promise<Map<string, MeetingProviderSelectType>> {
+  const ids = [...new Set(configs.map(c => c.providerId))];
+  return MeetingProviderCatalogService.getProvidersByIds(ids);
+}
 
 export namespace MeetingConfigService {
   async function assertCanManageUser(
@@ -60,7 +69,8 @@ export namespace MeetingConfigService {
   ): Promise<UserMeetingConfigReturnType[]> {
     const { isAdminScope } = await assertCanManageUser(actorUserId, userId, tErrors);
     const rows = await UserMeetingConfigRepository.listByUserId(userId);
-    return buildMaskedMeetingConfigs(rows, isAdminScope);
+    const providerMap = await resolveProvidersForConfigs(rows);
+    return buildMaskedMeetingConfigs(rows, isAdminScope, providerMap);
   }
 
   async function loadConfigForActor(actorUserId: string, id: string, tErrors: ErrorsLabels) {
@@ -75,7 +85,8 @@ export namespace MeetingConfigService {
     tErrors: ErrorsLabels
   ): Promise<UserMeetingConfigReturnType> {
     const { config, isAdminScope } = await loadConfigForActor(actorUserId, id, tErrors);
-    return buildMaskedMeetingConfig(config, isAdminScope);
+    const providerMap = await resolveProvidersForConfigs([config]);
+    return buildMaskedMeetingConfig(config, isAdminScope, providerMap);
   }
 
   export async function createUserMeetingConfig(
@@ -104,7 +115,8 @@ export namespace MeetingConfigService {
       tErrors
     );
 
-    return buildMaskedMeetingConfig(created, isAdminScope);
+    const providerMap = await resolveProvidersForConfigs([created]);
+    return buildMaskedMeetingConfig(created, isAdminScope, providerMap);
   }
 
   export async function updateUserMeetingConfig(
@@ -141,7 +153,8 @@ export namespace MeetingConfigService {
       tErrors
     );
 
-    return buildMaskedMeetingConfig(updated, isAdminScope);
+    const providerMap = await resolveProvidersForConfigs([updated]);
+    return buildMaskedMeetingConfig(updated, isAdminScope, providerMap);
   }
 
   export async function deleteUserMeetingConfig(
@@ -162,7 +175,8 @@ export namespace MeetingConfigService {
   ): Promise<UserMeetingConfigReturnType> {
     const { isAdminScope } = await loadConfigForActor(actorUserId, id, tErrors);
     const updated = await UserMeetingConfigRepository.setDefault(id, tErrors);
-    return buildMaskedMeetingConfig(updated, isAdminScope);
+    const providerMap = await resolveProvidersForConfigs([updated]);
+    return buildMaskedMeetingConfig(updated, isAdminScope, providerMap);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
@@ -195,7 +209,8 @@ export namespace MeetingConfigService {
       results.push(...upserted);
     }
 
-    return buildMaskedMeetingConfigs(results, true);
+    const providerMap = await resolveProvidersForConfigs(results);
+    return buildMaskedMeetingConfigs(results, true, providerMap);
   }
 
   export async function upsertManyClassMeetingConfigs(

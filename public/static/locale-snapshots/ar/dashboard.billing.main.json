@@ -1,0 +1,438 @@
+{
+  "paymentMethodSelector": {
+    "label": "طريقة الدفع",
+    "placeholder": "اختر طريقة دفع محفوظة"
+  },
+  "paymentStatusBadge": {
+    "paid": "مدفوع",
+    "pending": "قيد الانتظار",
+    "unpaid": "غير مدفوع",
+    "overdue": "متأخر",
+    "cancelled": "ملغى",
+    "refunded": "مسترد"
+  },
+  "paymentSummaryCard": {
+    "amount": "المبلغ",
+    "date": "التاريخ",
+    "paymentMethod": "طريقة الدفع"
+  },
+  "adminPageTitle": "إدارة الفواتير",
+  "adminPageSubtitle": "نظرة عامة مالية وسجلات المعاملات",
+  "parentPageTitle": "الفواتير والمدفوعات",
+  "parentPageSubtitle": "تتبع وتحميل سجلات الفوترة المؤسسية.",
+  "manualInvoice": "فاتورة يدوية",
+  "exchangeRatesLink": "أسعار الصرف",
+  "quickPay": "دفع سريع",
+  "viewAllNegativeBalance": "عرض جميع الطلاب برصيد سالب",
+  "requiresAttention": "يتطلب اهتماماً",
+  "showingResults": {
+    "__fn": "(shown, total) => `\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u0646\\u062A\\u0627\\u0626\\u062C`"
+  },
+  "invalidUserId": "معرف المستخدم غير صالح",
+  "billingProfileTitle": "الملف المالي للمستخدم",
+  "profileForUser": "تفاصيل الملف المالي",
+  "reminderSent": "تم إرسال تذكير الدفع",
+  "reminderFailed": "فشل إرسال تذكير الدفع",
+  "adminMetrics": {
+    "totalOutstanding": "إجمالي المستحقات",
+    "pendingInvoices": "الفواتير المعلقة",
+    "negativeBalance": {
+      "__fn": "(count) => `\\u0631\\u0635\\u064A\\u062F \\u0633\\u0627\\u0644\\u0628 (${count})`"
+    },
+    "mtdRevenue": "إيرادات الشهر"
+  },
+  "parentMetrics": {
+    "outstandingBalance": "الرصيد المستحق",
+    "paidThisTerm": "المدفوع هذا الفصل",
+    "nextDueDate": "تاريخ الاستحقاق التالي",
+    "activeStudents": "الطلاب النشطون"
+  },
+  "sections": {
+    "recentInvoices": "الفواتير الأخيرة",
+    "studentCreditStatus": "حالة رصيد الطالب",
+    "invoiceHistory": "سجل الفواتير",
+    "invoiceHistorySubtitle": "تتبع وتحميل سجلات الفوترة المؤسسية."
+  },
+  "search": {
+    "invoicesPlaceholder": "البحث في الفواتير...",
+    "parentPlaceholder": "البحث برقم الفاتورة...",
+    "searching": "جاري البحث…"
+  },
+  "adminTable": {
+    "invoiceId": "رقم الفاتورة",
+    "studentName": "اسم الطالب",
+    "dateIssued": "تاريخ الإصدار",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "actions": "إجراءات",
+    "markAsPaid": "تحديد كمدفوعة",
+    "quickPay": "دفع سريع",
+    "reviewSubmission": "مراجعة",
+    "viewRejection": "عرض الرفض",
+    "deleteInvoice": "حذف الفاتورة",
+    "noEntries": "لا توجد فواتير مطابقة للبحث"
+  },
+  "creditTable": {
+    "student": "الطالب",
+    "parentContact": "تواصل ولي الأمر",
+    "planType": "نوع الخطة",
+    "classesLeft": "الحصص المتبقية",
+    "status": "الحالة",
+    "quickAction": "إجراء سريع",
+    "sendReminder": "إرسال تذكير",
+    "negativeBalance": "رصيد سالب",
+    "activeCredit": "رصيد نشط",
+    "noEntries": "لا توجد سجلات رصيد للطلاب",
+    "showingNegativeBalanceOnly": "عرض الطلاب برصيد سالب فقط",
+    "clearFilter": "مسح الفلتر"
+  },
+  "parentTable": {
+    "invoiceNumber": "#",
+    "month": "الشهر",
+    "issueDate": "تاريخ الإصدار",
+    "dueDate": "تاريخ الاستحقاق",
+    "paidDate": "تاريخ الدفع",
+    "fee": "الرسوم",
+    "status": "الحالة",
+    "options": "خيارات",
+    "viewDetails": "عرض التفاصيل",
+    "downloadPdf": "تحميل PDF",
+    "payNow": "ادفع الآن",
+    "viewSubmission": "عرض إثبات الدفع",
+    "viewFeedback": "عرض الملاحظات",
+    "noEntries": "لا توجد فواتير مطابقة للبحث",
+    "emptyTitle": "لا توجد لديك فواتير.",
+    "emptySubtitle": "ستظهر دورات الفوترة القادمة هنا تلقائياً."
+  },
+  "invoiceStatus": {
+    "OVERDUE": "متأخرة",
+    "PAYMENT_PENDING": "قيد مراجعة الدفع",
+    "PENDING": "معلقة",
+    "PAID": "مدفوعة",
+    "UNPAID": "غير مدفوعة",
+    "CANCELLED": "ملغاة"
+  },
+  "creditStatus": {
+    "negative_balance": "رصيد سالب",
+    "active_credit": "رصيد نشط"
+  },
+  "manual": {
+    "pageTitle": "إنشاء فاتورة يدوية",
+    "pageSubtitle": "إنشاء سجلات رسوم لمرة واحدة للفوترة المؤسسية.",
+    "backToFinancials": "العودة إلى المالية",
+    "parentSelection": "اختيار ولي الأمر",
+    "parentPlaceholder": "اختر سجل ولي أمر...",
+    "studentSelection": "اختيار الطالب",
+    "feeAmount": "مبلغ الرسوم",
+    "feeAmountPlaceholder": "0.00",
+    "issueDate": "تاريخ الإصدار",
+    "dueDate": "تاريخ الاستحقاق",
+    "billingMonths": "اختر أشهر الفوترة",
+    "billingMonthsMobile": "فترة الفوترة (الأشهر)",
+    "summaryTitle": "ملخص الفاتورة",
+    "summarySubtitle": "سيتم حساب الضريبة تلقائياً بناءً على مبلغ الرسوم المحدد.",
+    "totalDraftValue": "إجمالي قيمة المسودة",
+    "submit": "إرسال",
+    "submitAndSendEmail": "إرسال وإرسال بريد إلكتروني",
+    "successMessage": "تم إرسال الفاتورة اليدوية بنجاح.",
+    "createSuccess": {
+      "__fn": "(id) => `\\u062A\\u0645 \\u0625\\u0646\\u0634\\u0627\\u0621 \\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${id} \\u0628\\u0646\\u062C\\u0627\\u062D`"
+    },
+    "manualInvoiceFxNote": "يُخزَّن مبلغ الفاتورة بالعملة المحددة. تظهر التحويلات في صفحات الفوترة بناءً على عملة عرض كل مستخدم.",
+    "unknown": "غير معروف",
+    "months": {
+      "jan": "يناير",
+      "feb": "فبراير",
+      "mar": "مارس",
+      "apr": "أبريل",
+      "may": "مايو",
+      "jun": "يونيو",
+      "jul": "يوليو",
+      "aug": "أغسطس",
+      "sep": "سبتمبر",
+      "oct": "أكتوبر",
+      "nov": "نوفمبر",
+      "dec": "ديسمبر"
+    },
+    "validation": {
+      "parentRequired": "يرجى اختيار ولي أمر.",
+      "feeAmountRequired": "مبلغ الرسوم مطلوب.",
+      "feeAmountPositive": "يجب أن يكون مبلغ الرسوم أكبر من صفر.",
+      "issueDateRequired": "تاريخ الإصدار مطلوب.",
+      "dueDateRequired": "تاريخ الاستحقاق مطلوب.",
+      "billingMonthsRequired": "اختر شهر فوترة واحداً على الأقل.",
+      "dueDateBeforeIssueDate": "يجب أن يكون تاريخ الاستحقاق في أو بعد تاريخ الإصدار."
+    },
+    "support": {
+      "secureBilling": {
+        "title": "فوترة آمنة",
+        "body": "جميع الفواتير اليدوية مشفرة ومسجلة لأغراض التدقيق."
+      },
+      "automatedLedgers": {
+        "title": "دفاتر آلية",
+        "body": "يتم مزامنة السجلات تلقائياً مع البيان المالي لولي الأمر."
+      },
+      "draftMode": {
+        "title": "وضع المسودة",
+        "body": "يمكن حفظ الفواتير كمسودات قبل الإصدار المؤسسي النهائي."
+      }
+    }
+  },
+  "markAsPaidSuccess": "تم تحديد الفاتورة كمدفوعة بنجاح",
+  "submitProofSuccess": "تم إرسال إثبات الدفع بنجاح",
+  "approveProofSuccess": "تمت الموافقة على إثبات الدفع",
+  "rejectProofSuccess": "تم رفض إثبات الدفع",
+  "deleteInvoiceSuccess": "تم حذف الفاتورة بنجاح",
+  "deleteInvoiceDialog": {
+    "title": "حذف الفاتورة",
+    "body": {
+      "__fn": "(invoiceId) => `\\u0633\\u064A\\u0624\\u062F\\u064A \\u0647\\u0630\\u0627 \\u0625\\u0644\\u0649 \\u0625\\u0632\\u0627\\u0644\\u0629 \\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId} \\u0646\\u0647\\u0627\\u0626\\u064A\\u0627\\u064B. \\u0644\\u0627 \\u064A\\u0645\\u0643\\u0646 \\u0627\\u0644\\u062A\\u0631\\u0627\\u062C\\u0639 \\u0639\\u0646 \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0625\\u062C\\u0631\\u0627\\u0621.`"
+    },
+    "confirm": "حذف الفاتورة"
+  },
+  "noUnpaidInvoices": "لا توجد فواتير غير مدفوعة للدفع",
+  "hasPaymentProofHint": "إثبات دفع مرفق",
+  "submitProofDialog": {
+    "titleSubmit": "إرسال إثبات الدفع",
+    "titleMarkPaid": "تحديد الفاتورة كمدفوعة",
+    "confirm": "إرسال الإثبات",
+    "confirmMarkPaid": "تحديد كمدفوعة",
+    "confirming": "جاري الإرسال…",
+    "selectFile": "ملف إثبات الدفع",
+    "fileHint": "ارفع ملف PDF أو صورة (JPEG أو PNG أو WebP) كإثبات للدفع.",
+    "invalidFileType": "نوع الملف غير مسموح. استخدم PDF أو JPEG أو PNG أو WebP.",
+    "fileTooLarge": {
+      "__fn": "(maxMb) => `\\u0627\\u0644\\u0645\\u0644\\u0641 \\u0643\\u0628\\u064A\\u0631 \\u062C\\u062F\\u0627\\u064B. \\u0627\\u0644\\u062D\\u062F \\u0627\\u0644\\u0623\\u0642\\u0635\\u0649 ${maxMb} \\u0645\\u064A\\u063A\\u0627\\u0628\\u0627\\u064A\\u062A.`"
+    },
+    "cancel": "إلغاء",
+    "errorGeneric": "تعذر إرسال إثبات الدفع. يرجى المحاولة مرة أخرى.",
+    "invoiceNumber": "الفاتورة",
+    "amount": "المبلغ",
+    "dueDate": "تاريخ الاستحقاق",
+    "student": "الطالب",
+    "uploadFailed": "فشل رفع الملف. يرجى المحاولة مرة أخرى.",
+    "uploadPrepareFailed": "تعذر تجهيز رفع الملف. يرجى المحاولة مرة أخرى.",
+    "impersonationBlocked": "إجراءات الدفع معطلة أثناء انتحال شخصية مستخدم آخر."
+  },
+  "paymentDetailsDialog": {
+    "title": "تفاصيل الدفع",
+    "empty": "لا توجد سجلات دفع متاحة لهذه الفاتورة.",
+    "pending": "إثبات الدفع قيد المراجعة.",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "rejecting": "جاري الرفض…",
+    "approving": "جاري الموافقة…",
+    "rejected": "تم رفض إثبات الدفع",
+    "rejectionReason": "سبب الرفض",
+    "rejectionReasonPlaceholder": "سبب اختياري للرفض",
+    "viewProof": "عرض ملف الإثبات",
+    "viewProofFailed": "تعذرت معاينة الملف. افتحه في علامة تبويب جديدة.",
+    "noProof": "لا يوجد ملف إثبات دفع مرفق.",
+    "loadFailed": "تعذر تحميل تفاصيل الدفع. يرجى المحاولة مرة أخرى.",
+    "close": "إغلاق",
+    "amount": "المبلغ",
+    "date": "تاريخ الدفع",
+    "submittedAt": "تاريخ الإرسال",
+    "reviewActions": "مراجعة الإرسال",
+    "tryAgain": "إعادة المحاولة",
+    "confirmReject": "تأكيد الرفض",
+    "confirmRejectMessage": "رفض إثبات الدفع هذا؟ ستعود الفاتورة إلى غير مدفوعة."
+  },
+  "notifications": {
+    "popupBlocked": "تم حظر النافذة المنبثقة. اسمح بالنوافذ المنبثقة لتحميل الملف.",
+    "paymentPendingReview": "مدفوعاتك قيد المراجعة. لا توجد فواتير غير مدفوعة تحتاج إلى إجراء الآن."
+  },
+  "errors": {
+    "invalidId": "معرف ولي الأمر غير صالح في عرض الفواتير.",
+    "retry": "إعادة المحاولة"
+  },
+  "exchangeRates": {
+    "pageTitle": "أسعار الصرف",
+    "pageSubtitle": "أحدث أسعار صرف العملات وحالة المزامنة",
+    "status": "الحالة",
+    "refreshing": "جاري تحديث الأسعار…",
+    "refreshSuccess": "تم تحديث الأسعار بنجاح",
+    "refreshFailed": "فشل التحديث",
+    "noRates": "لا تتوفر أسعار صرف",
+    "noSyncRuns": "لا توجد عمليات مزامنة بعد",
+    "staleWarning": "أسعار الصرف قديمة (أكثر من 24 ساعة). قد لا تظهر التحويلات في العملة المعروضة حتى يتم التحديث.",
+    "viewRates": "عرض أسعار الصرف",
+    "syncStatus": {
+      "title": "حالة المزامنة",
+      "refresh": "تحديث الأسعار",
+      "lastSync": "آخر مزامنة",
+      "provider": "المزود",
+      "pairsWritten": "الأزواج المكتوبة",
+      "pairsFailed": "الأزواج الفاشلة",
+      "errorMessage": "خطأ",
+      "statusSuccess": "نجاح",
+      "statusRunning": "قيد التشغيل",
+      "statusPartial": "جزئي",
+      "statusFailed": "فشل",
+      "statusUnknown": "غير معروف"
+    },
+    "rateTable": {
+      "title": "أحدث الأسعار",
+      "fromCurrency": "من",
+      "toCurrency": "إلى",
+      "rate": "السعر",
+      "source": "المصدر",
+      "effectiveDate": "تاريخ السريان"
+    },
+    "history": {
+      "title": "سجل الأسعار",
+      "subtitle": "أسعار الصرف التاريخية للزوج المحدد",
+      "pairLabel": "زوج العملات",
+      "empty": "لا يوجد سجل أسعار لهذا الزوج في النطاق المحدد",
+      "maxDays": {
+        "__fn": "(days) => `\\u0639\\u0631\\u0636 \\u0622\\u062E\\u0631 ${days} \\u064A\\u0648\\u0645\\u0627\\u064B`"
+      },
+      "daysLabel": "نطاق السجل"
+    },
+    "providerSettings": {
+      "title": "إعدادات المزود",
+      "sourceEnv": "المصدر: متغيرات البيئة",
+      "sourceDatabase": "المصدر: قاعدة البيانات",
+      "activeProvider": "المزود النشط",
+      "confirmTitle": "تأكيد تغيير المزود",
+      "confirmBody": "سيؤثر تغيير مزود أسعار الصرف على المزامنات المستقبلية. هل تريد المتابعة؟",
+      "saveSuccess": "تم تحديث مزود أسعار الصرف",
+      "saveFailed": "تعذر تحديث مزود أسعار الصرف",
+      "lastChangedBy": {
+        "__fn": "(name, date) => `\\u0622\\u062E\\u0631 \\u062A\\u0639\\u062F\\u064A\\u0644 \\u0628\\u0648\\u0627\\u0633\\u0637\\u0629 ${name} \\u0641\\u064A ${date}`"
+      },
+      "cancel": "إلغاء",
+      "save": "حفظ"
+    },
+    "manualOverride": {
+      "title": "تجاوز يدوي لسعر الصرف",
+      "fromCurrency": "من عملة",
+      "toCurrency": "إلى عملة",
+      "rate": "السعر",
+      "effectiveDate": "تاريخ السريان",
+      "submit": "حفظ السعر",
+      "success": "تم حفظ سعر الصرف اليدوي",
+      "failed": "تعذر حفظ سعر الصرف اليدوي",
+      "cancel": "إلغاء"
+    },
+    "errors": {
+      "loadFailed": "فشل تحميل البيانات",
+      "retry": "إعادة المحاولة"
+    }
+  },
+  "fxStaleBanner": {
+    "adminBody": "أسعار الصرف قديمة. قد لا تظهر التحويلات في العملة المعروضة حتى يتم التحديث.",
+    "userBody": "أسعار الصرف قديمة. قد لا تظهر التحويلات في عملتك المعروضة حتى يتم التحديث.",
+    "adminCta": "إدارة الأسعار",
+    "userCta": "تحديث الملف"
+  },
+  "displayCurrencyHint": {
+    "title": "لم يتم تعيين عملة العرض",
+    "body": "عيّن عملة عرض في ملفك الشخصي لرؤية المبالغ المحوّلة في الفواتير والتقارير.",
+    "cta": "تعديل الملف",
+    "dismiss": "إغلاق",
+    "subject": {
+      "title": "لم يتم تعيين عملة عرض لهذا المستخدم",
+      "body": "لم يعيّن هذا المستخدم عملة عرض. لن تظهر المبالغ المحوّلة حتى يعيّنها في ملفه الشخصي.",
+      "cta": "تعديل ملف المستخدم",
+      "dismiss": "إغلاق"
+    }
+  },
+  "fxConversionNote": {
+    "__fn": "(code) => `\\u062A\\u0633\\u062A\\u062E\\u062F\\u0645 \\u0627\\u0644\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A\\u0627\\u062A \\u0627\\u0644\\u0645\\u062D\\u0648\\u0651\\u0644\\u0629 \\u0639\\u0645\\u0644\\u0629 \\u0627\\u0644\\u0639\\u0631\\u0636 \\u0627\\u0644\\u062E\\u0627\\u0635\\u0629 \\u0628\\u0643 (${code})`"
+  },
+  "fxConversionNoteSubject": {
+    "__fn": "(code) => `\\u062A\\u0633\\u062A\\u062E\\u062F\\u0645 \\u0627\\u0644\\u0645\\u0628\\u0627\\u0644\\u063A \\u0627\\u0644\\u0645\\u062D\\u0648\\u0651\\u0644\\u0629 \\u0639\\u0645\\u0644\\u0629 \\u0639\\u0631\\u0636 \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0645\\u0633\\u062A\\u062E\\u062F\\u0645 (${code})`"
+  },
+  "adminBillingFxNote": "تستخدم المقاييس عملة العرض الخاصة بك؛ تستخدم كل فاتورة عملة ولي الأمر",
+  "displayCurrencyMixed": {
+    "__fn": "(values) => `\\u062A\\u0645 \\u0627\\u0643\\u062A\\u0634\\u0627\\u0641 \\u0639\\u062F\\u0629 \\u0639\\u0645\\u0644\\u0627\\u062A \\u0639\\u0631\\u0636\\u061B \\u0639\\u0631\\u0636 \\u0627\\u0644\\u0645\\u0628\\u0627\\u0644\\u063A \\u0627\\u0644\\u0645\\u0642\\u0641\\u0644\\u0629 \\u0641\\u0642\\u0637: ${values.lockedAmount} ${values.lockedCurrency}`"
+  },
+  "displayCurrencyNotSet": {
+    "__fn": "(values) => `${values.lockedAmount} ${values.lockedCurrency} (\\u0639\\u0645\\u0644\\u0629 \\u0627\\u0644\\u0639\\u0631\\u0636 \\u063A\\u064A\\u0631 \\u0645\\u062D\\u062F\\u062F\\u0629)`"
+  },
+  "displayCurrencyStale": {
+    "__fn": "(values) => `${values.lockedAmount} ${values.lockedCurrency} (\\u0642\\u062F \\u062A\\u0643\\u0648\\u0646 \\u0627\\u0644\\u0623\\u0633\\u0639\\u0627\\u0631 \\u0642\\u062F\\u064A\\u0645\\u0629)`"
+  },
+  "currencyHedges": {
+    "pageTitle": "تحوط العملات",
+    "pageSubtitle": "إدارة مراكز التحوط بالعملات الأجنبية",
+    "addHedge": "إضافة تحوط",
+    "editHedge": "تعديل التحوط",
+    "deleteHedge": "حذف التحوط",
+    "deleteConfirm": "هل أنت متأكد من حذف هذا التحوط؟",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "createSuccess": "تم إنشاء التحوط",
+    "updateSuccess": "تم تحديث التحوط",
+    "deleteSuccess": "تم حذف التحوط",
+    "saveFailed": "تعذر حفظ التحوط",
+    "empty": "لا توجد سجلات تحوط",
+    "columns": {
+      "currency": "العملة",
+      "amount": "المبلغ",
+      "hedgeType": "نوع التحوط",
+      "notes": "ملاحظات",
+      "updatedAt": "آخر تحديث",
+      "actions": "إجراءات"
+    },
+    "fields": {
+      "currency": "العملة",
+      "amount": "المبلغ",
+      "hedgeType": "نوع التحوط",
+      "notes": "ملاحظات"
+    },
+    "hedgeTypes": {
+      "long": "LONG",
+      "short": "SHORT"
+    }
+  },
+  "supportedCurrencies": {
+    "pageTitle": "العملات المدعومة",
+    "pageSubtitle": "قائمة العملات المتاحة في النظام للفوترة وأسعار الصرف",
+    "code": "الرمز",
+    "symbol": "الرمز المختصر",
+    "name": "الاسم",
+    "country": "الدولة",
+    "flag": "العلم",
+    "active": "نشط",
+    "actions": "إجراءات",
+    "empty": "لا تتوفر عملات في الكتالوج",
+    "footerNote": "لإضافة رموز ISO جديدة، حدّث تعداد العملات في الخادم وكتالوج العملات في الواجهة الأمامية، ثم أعد تشغيل البذور إذا لزم الأمر.",
+    "activateLabel": "تفعيل عملة",
+    "editLabel": "تعديل",
+    "deactivateLabel": "إلغاء التفعيل",
+    "activateTitle": "تفعيل عملة مدعومة",
+    "editTitle": "تعديل عملة مدعومة",
+    "deactivateConfirmTitle": "إلغاء تفعيل العملة",
+    "deactivateConfirmBody": {
+      "__fn": "(code) => `\\u0625\\u0644\\u063A\\u0627\\u0621 \\u062A\\u0641\\u0639\\u064A\\u0644 ${code}\\u061F \\u0644\\u0646 \\u062A\\u0643\\u0648\\u0646 \\u0645\\u062A\\u0627\\u062D\\u0629 \\u0644\\u0625\\u062F\\u062E\\u0627\\u0644\\u0627\\u062A \\u0627\\u0644\\u0641\\u0648\\u062A\\u0631\\u0629 \\u0627\\u0644\\u062C\\u062F\\u064A\\u062F\\u0629. \\u062A\\u064F\\u062D\\u0641\\u0638 \\u0627\\u0644\\u0645\\u0631\\u0627\\u062C\\u0639 \\u0627\\u0644\\u062D\\u0627\\u0644\\u064A\\u0629.`"
+    },
+    "deactivateConfirmCancel": "إلغاء",
+    "deactivateConfirmConfirm": "إلغاء التفعيل",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "saveSuccess": "تم حفظ العملة المدعومة بنجاح.",
+    "saveError": "فشل حفظ العملة المدعومة. يرجى المحاولة مرة أخرى.",
+    "deactivateSuccess": "تم إلغاء تفعيل العملة بنجاح.",
+    "deactivateError": "فشل إلغاء تفعيل العملة. يرجى المحاولة مرة أخرى.",
+    "currencyInUse": "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
+    "currencyField": "العملة",
+    "symbolField": "الرمز",
+    "countryField": "الدولة",
+    "decimalsField": "الكسور العشرية",
+    "sortOrderField": "ترتيب الفرز",
+    "codeRequired": "يرجى اختيار عملة.",
+    "symbolRequired": "الرمز مطلوب."
+  },
+  "tabsPageTitle": "الفوترة",
+  "tabsPageSubtitle": "تتبع الفواتير، التعرض للعملات، أسعار الصرف، وإنشاء الفواتير اليدوية.",
+  "billingTabs": {
+    "overview": "نظرة عامة",
+    "invoices": "الفواتير",
+    "exchangeRates": "أسعار الصرف",
+    "currencies": "العملات المدعومة",
+    "hedges": "تحوطات العملات",
+    "manual": "فاتورة يدوية"
+  }
+}

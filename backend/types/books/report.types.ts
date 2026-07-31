@@ -1,9 +1,11 @@
 import type { CurrencyCode } from "@/backend/enum";
+import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
 
 export interface AttendanceReportPaidAmountReturnType {
   readonly id: string;
   readonly amount: string;
   readonly currency: CurrencyCode;
+  readonly displayAmount?: DisplayAmountReturnType | null;
 }
 
 export interface AttendanceReportRowReturnType {

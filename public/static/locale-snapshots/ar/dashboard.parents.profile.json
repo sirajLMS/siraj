@@ -1,0 +1,95 @@
+{
+  "pageTitle": "الملف الشخصي لولي الأمر",
+  "status": {
+    "regular": "عادي",
+    "on_trial": "فترة تجريبية",
+    "on_leave": "في إجازة",
+    "suspended": "موقوف",
+    "deactivated": "غير مفعّل"
+  },
+  "accountStatus": {
+    "activated": "مفعّل",
+    "deactivated": "غير مفعّل"
+  },
+  "actions": {
+    "editPicture": "تعديل الصورة",
+    "editProfile": "تعديل الملف الشخصي",
+    "uploadDocs": "رفع الوثائق",
+    "addNewStudent": "إضافة طالب جديد",
+    "viewInvoices": "عرض الفواتير",
+    "deactivateAccount": "تعطيل الحساب",
+    "deactivateDialogTitle": "تعطيل حساب ولي الأمر",
+    "deactivateConfirmText": "هل أنت متأكد من رغبتك في تعطيل هذا الحساب؟ سيتم تسجيل خروج ولي الأمر فورًا ويفقد صلاحية الوصول إلى نظام إدارة التعلم (LMS).",
+    "cancel": "إلغاء",
+    "deactivating": "جاري التعطيل...",
+    "deactivateSuccess": "تم تعطيل حساب ولي الأمر بنجاح.",
+    "selectPicture": "اختر صورة",
+    "changePicture": "تغيير الصورة",
+    "upload": "رفع",
+    "avatarFileTypeError": "نوع الملف غير مدعوم. يرجى اختيار صورة JPG أو PNG أو WebP.",
+    "avatarFileSizeError": {
+      "__fn": "(maxMb) => `\\u062D\\u062C\\u0645 \\u0627\\u0644\\u0645\\u0644\\u0641 \\u0643\\u0628\\u064A\\u0631 \\u062C\\u062F\\u064B\\u0627. \\u0627\\u0644\\u062D\\u062F \\u0627\\u0644\\u0623\\u0642\\u0635\\u0649 ${maxMb} \\u0645\\u064A\\u062C\\u0627\\u0628\\u0627\\u064A\\u062A.`"
+    },
+    "avatarUploadSuccess": "تم رفع الصورة الشخصية بنجاح."
+  },
+  "errors": {
+    "invalidId": "معرف ولي الأمر غير صالح.",
+    "notFound": "ولي الأمر غير موجود.",
+    "invalidData": "بيانات ولي الأمر غير صالحة."
+  },
+  "sections": {
+    "parentInfo": "معلومات ولي الأمر",
+    "socialMedia": "وسائل التواصل الاجتماعي والاتصالات",
+    "feesDetails": "تفاصيل الرسوم",
+    "paymentMethods": "طرق الدفع",
+    "parentStudents": "طلاب ولي الأمر"
+  },
+  "fields": {
+    "nationality": "الجنسية",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "address": "العنوان",
+    "facebook": "فيسبوك",
+    "whatsapp": "واتساب",
+    "invoiceType": "نوع الفاتورة",
+    "feeAmount": "مبلغ الرسوم",
+    "paymentMethod": "طريقة الدفع",
+    "currency": "العملة",
+    "displayCurrency": "عملة العرض"
+  },
+  "table": {
+    "studentName": "اسم الطالب",
+    "teacher": "المعلم",
+    "hoursPerWeek": "الساعات/الأسبوع",
+    "classesLeft": "الحصص المتبقية",
+    "language": "اللغة",
+    "gender": "الجنس",
+    "info": "معلومات",
+    "options": "خيارات",
+    "status": "الحالة",
+    "viewAllStudents": "عرض جميع الطلاب"
+  },
+  "students": {
+    "reassignTeacherTitle": "إعادة تعيين المعلم",
+    "currentTeacher": "المعلم الحالي",
+    "selectNewTeacher": "اختر معلمًا جديدًا",
+    "selectTeacherPlaceholder": "اختر معلمًا...",
+    "cancel": "إلغاء",
+    "reassigning": "جارٍ إعادة التعيين...",
+    "confirmReassign": "تأكيد إعادة التعيين",
+    "reassignSuccess": "تم إعادة تعيين المعلم بنجاح",
+    "changeStatusTitle": "تغيير حالة الطالب",
+    "currentStatus": "الحالة الحالية",
+    "selectNewStatus": "اختر الحالة الجديدة",
+    "noStatusTransitionsAvailable": "لا تتوفر تحولات حالة لهذا الطالب",
+    "changingStatus": "جارٍ تحديث الحالة...",
+    "confirmStatusChange": "تأكيد تغيير الحالة",
+    "statusChangeSuccess": "تم تحديث حالة الطالب بنجاح",
+    "statusLabel": {
+      "regular": "منتظم",
+      "suspended": "موقوف",
+      "on_leave": "في إجازة",
+      "on_trial": "تحت التجربة"
+    }
+  }
+}

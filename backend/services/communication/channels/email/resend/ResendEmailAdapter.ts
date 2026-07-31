@@ -11,6 +11,37 @@ import type {
 import type { ResendEmailContext } from "@/backend/services/communication/channels/email/resend/resend.types";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 
+/** Resend simulator inboxes — integration tests send here intentionally; never redirect. */
+const RESEND_SIMULATOR_DOMAIN = "@resend.dev";
+
+/** Dedupes redirected test sends so N reviewers do not burn N API calls to the same inbox. */
+const redirectedTestSendKeys = new Set<string>();
+
+/**
+ * In `NODE_ENV=test`, redirect outbound email to `RESEND_TEST_TO_EMAIL` so service
+ * tests that dispatch without mocks can hit the real adapter without Resend rejecting
+ * seed/DB addresses like `@example.com`. Simulator addresses are left unchanged.
+ */
+function resolveEmailRecipientForTest(to: string): string {
+  if (process.env.NODE_ENV !== "test") return to;
+
+  const testTo = process.env.RESEND_TEST_TO_EMAIL?.trim();
+  if (!testTo) return to;
+  if (to.endsWith(RESEND_SIMULATOR_DOMAIN)) return to;
+
+  return testTo;
+}
+
+function shouldSkipRedirectedTestDuplicate(originalTo: string, recipient: string, subject: string): boolean {
+  if (process.env.NODE_ENV !== "test") return false;
+  if (originalTo === recipient) return false;
+
+  const key = `${recipient}\0${subject}`;
+  if (redirectedTestSendKeys.has(key)) return true;
+  redirectedTestSendKeys.add(key);
+  return false;
+}
+
 /**
  * Optional explicit overrides for the Resend adapter credentials.
  *
@@ -58,8 +89,15 @@ export class ResendEmailAdapter implements IEmailChannel {
       return this.handleEmptyRecipient(payload);
     }
 
+    const originalTo = payload.to.trim();
+    const recipient = resolveEmailRecipientForTest(originalTo);
+
+    if (shouldSkipRedirectedTestDuplicate(originalTo, recipient, payload.subject)) {
+      return { success: true, providerMessageId: "test-redirect-deduped" };
+    }
+
     const delivery = await this.createEmailDelivery(payload);
-    return this.executeSend(delivery, payload);
+    return this.executeSend(delivery, payload, recipient);
   }
 
   private async handleEmptyRecipient(payload: EmailPayload): Promise<EmailSendResult> {
@@ -94,12 +132,13 @@ export class ResendEmailAdapter implements IEmailChannel {
 
   private async executeSend(
     delivery: Awaited<ReturnType<typeof NotificationRepository.createDelivery>>,
-    payload: EmailPayload
+    payload: EmailPayload,
+    recipient: string
   ): Promise<EmailSendResult> {
     try {
       const response = await this.context.client.emails.send({
         from: this.context.fromEmail,
-        to: payload.to,
+        to: recipient,
         subject: payload.subject,
         html: payload.html,
       });

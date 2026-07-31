@@ -14,5 +14,12 @@ export const siteContent = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("site_content_slug_idx").on(table.slug), index("site_content_type_idx").on(table.contentType)]
+  table => [
+    index("site_content_slug_idx").on(table.slug),
+    index("site_content_type_idx").on(table.contentType),
+    index("site_content_updated_by_user_id_idx").on(table.updatedByUserId),
+    index("site_content_created_at_idx").on(table.createdAt),
+    index("site_content_updated_at_idx").on(table.updatedAt),
+    index("site_content_is_published_content_type_idx").on(table.isPublished, table.contentType),
+  ]
 );

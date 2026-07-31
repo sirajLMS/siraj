@@ -12,7 +12,10 @@ export const rateLimitCache = pgTable(
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   },
-  table => [index("rate_limit_cache_expires_at_idx").on(table.expiresAt)]
+  table => [
+    index("rate_limit_cache_expires_at_idx").on(table.expiresAt),
+    index("rate_limit_cache_value_idx").on(table.value),
+  ]
 );
 
 /**
@@ -26,7 +29,7 @@ export const sessionCache = pgTable(
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   },
-  table => [index("session_cache_expires_at_idx").on(table.expiresAt)]
+  table => [index("session_cache_expires_at_idx").on(table.expiresAt), index("session_cache_value_idx").on(table.value)]
 );
 
 // Export types

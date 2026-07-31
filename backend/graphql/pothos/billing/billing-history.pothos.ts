@@ -3,7 +3,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   DisplayAmountPothosObject,
   populateBillingFxDisplayCurrencyByUserId,
-  resolveDisplayAmountField,
+  resolveDisplayAmountFields,
   setBillingFxDisplayCurrencyForSubject,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
@@ -18,6 +18,7 @@ import { BillingHistoryService } from "@/backend/services/billing/billing-histor
 import type {
   AdminBillingSummaryResult,
   BillingCurrencyTotal,
+  DisplayAmountReturnType,
   InvoiceHistoryPaginatedResult,
   InvoiceHistoryRow,
   NextUnpaidInvoiceSummary,
@@ -40,6 +41,16 @@ function parsePaginationArgs(input: PaginationInput | null | undefined): Paginat
     page: input.page ?? null,
     maxCount: input.maxCount ?? null,
   });
+}
+
+function enrichCurrencyTotalsWithDisplay(
+  totals: readonly BillingCurrencyTotal[],
+  displayAmounts: Map<string, DisplayAmountReturnType | null>
+): (BillingCurrencyTotal & { displayAmount: DisplayAmountReturnType | null })[] {
+  return totals.map(t => ({
+    ...t,
+    displayAmount: displayAmounts.get(t.id) ?? null,
+  }));
 }
 
 interface ParentScopedResolverArgs {
@@ -74,11 +85,9 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     parentUserId: t.exposeString("parentUserId", { nullable: true }),
     hasPaymentProof: t.exposeBoolean("hasPaymentProof"),
     hasRejectedSubmission: t.exposeBoolean("hasRejectedSubmission"),
-    displayAmount: t.field({
+    displayAmount: t.expose("displayAmount", {
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) =>
-        resolveDisplayAmountField(parent, ctx, "amount", "currency", parent.parentUserId),
     }),
   }),
 });
@@ -114,11 +123,9 @@ export const BillingCurrencyTotalPothosObject = BillingCurrencyTotalRef.implemen
     id: t.exposeString("id"),
     currency: t.expose("currency", { type: CurrencyCodePothosObject }),
     amount: t.exposeString("amount"),
-    displayAmount: t.field({
+    displayAmount: t.expose("displayAmount", {
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) =>
-        resolveDisplayAmountField(parent, ctx, "amount", "currency", parent.subjectUserId),
     }),
   }),
 });
@@ -205,7 +212,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
       const { callerUserId, tErrors } = await prepareParentScopedResolver(ctx, args);
       const pagination = parsePaginationArgs(args.paginationArgs);
 
-      return BillingHistoryService.getParentInvoiceHistory(
+      const result = await BillingHistoryService.getParentInvoiceHistory(
         callerUserId,
         args.parentId ?? null,
         args.userId ?? null,
@@ -213,6 +220,15 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
         pagination,
         args.search ?? null
       );
+
+      const displayAmounts = await resolveDisplayAmountFields(result.rows, ctx, "amount", "currency", "parentUserId");
+      return {
+        ...result,
+        rows: result.rows.map(row => ({
+          ...row,
+          displayAmount: displayAmounts.get(row.id) ?? null,
+        })),
+      };
     },
   })
 );
@@ -235,7 +251,15 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
         ctx,
         result.rows.map(row => row.parentUserId)
       );
-      return result;
+
+      const displayAmounts = await resolveDisplayAmountFields(result.rows, ctx, "amount", "currency", "parentUserId");
+      return {
+        ...result,
+        rows: result.rows.map(row => ({
+          ...row,
+          displayAmount: displayAmounts.get(row.id) ?? null,
+        })),
+      };
     },
   })
 );
@@ -247,7 +271,22 @@ gqlSchemaBuilder.queryField("adminBillingSummary", t =>
     resolve: async (_root, _args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return BillingHistoryService.getAdminBillingSummary(userId, tErrors);
+      const result = await BillingHistoryService.getAdminBillingSummary(userId, tErrors);
+
+      const allCurrencyTotals = [...result.outstandingByCurrency, ...result.mtdRevenueByCurrency];
+      const displayAmounts = await resolveDisplayAmountFields(
+        allCurrencyTotals,
+        ctx,
+        "amount",
+        "currency",
+        "subjectUserId"
+      );
+
+      return {
+        ...result,
+        outstandingByCurrency: enrichCurrencyTotalsWithDisplay(result.outstandingByCurrency, displayAmounts),
+        mtdRevenueByCurrency: enrichCurrencyTotalsWithDisplay(result.mtdRevenueByCurrency, displayAmounts),
+      };
     },
   })
 );
@@ -275,12 +314,27 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
     resolve: async (_root, args, ctx) => {
       const { callerUserId, tErrors } = await prepareParentScopedResolver(ctx, args);
 
-      return BillingHistoryService.getParentBillingSummary(
+      const result = await BillingHistoryService.getParentBillingSummary(
         callerUserId,
         args.parentId ?? null,
         args.userId ?? null,
         tErrors
       );
+
+      const allCurrencyTotals = [...result.outstandingByCurrency, ...result.paidThisTermByCurrency];
+      const displayAmounts = await resolveDisplayAmountFields(
+        allCurrencyTotals,
+        ctx,
+        "amount",
+        "currency",
+        "subjectUserId"
+      );
+
+      return {
+        ...result,
+        outstandingByCurrency: enrichCurrencyTotalsWithDisplay(result.outstandingByCurrency, displayAmounts),
+        paidThisTermByCurrency: enrichCurrencyTotalsWithDisplay(result.paidThisTermByCurrency, displayAmounts),
+      };
     },
   })
 );

@@ -46,6 +46,19 @@ export namespace MeetingProviderCatalogService {
     return provider;
   }
 
+  /**
+   * Batch-fetch providers by IDs. Returns a Map keyed by provider ID.
+   * Does NOT perform permission checks — callers must handle auth.
+   */
+  export async function getProvidersByIds(
+    ids: string[],
+    tx?: DBTransaction
+  ): Promise<Map<string, MeetingProviderSelectType>> {
+    if (ids.length === 0) return new Map();
+    const providers = await MeetingProviderRepository.getByIds(ids, tx);
+    return new Map(providers.map(p => [p.id, p]));
+  }
+
   export async function createProvider(
     userId: string,
     input: MeetingProviderSubmitInput,

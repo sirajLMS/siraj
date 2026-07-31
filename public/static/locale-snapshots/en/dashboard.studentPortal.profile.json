@@ -1,0 +1,22 @@
+{
+  "pageTitle": "My Profile",
+  "personalInfo": "Personal Information",
+  "fullName": "Full Name",
+  "email": "Email",
+  "phone": "Phone",
+  "dateOfBirth": "Date of Birth",
+  "gender": "Gender",
+  "language": "Language",
+  "avatar": "Avatar",
+  "parentInfo": "Parent Information",
+  "parentName": "Parent Name",
+  "parentEmail": "Parent Email",
+  "parentPhone": "Parent Phone",
+  "editProfile": "Edit Profile",
+  "saveChanges": "Save Changes",
+  "cancel": "Cancel",
+  "backToDashboard": "Back to Dashboard",
+  "loadingMessage": "Loading...",
+  "saveSuccess": "Profile updated successfully",
+  "saveError": "Failed to update profile"
+}

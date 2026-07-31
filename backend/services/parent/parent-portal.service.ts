@@ -71,4 +71,8 @@ export namespace ParentPortalService {
     const parent = await ParentRepository.findByUserId(userId);
     return parent?.id ?? null;
   }
+
+  export async function resolveParentIdsForUsers(userIds: string[]): Promise<Map<string, string | null>> {
+    return ParentRepository.findByUserIds(userIds);
+  }
 }

@@ -19,12 +19,72 @@ Use this template to create actionable implementation plans that break down your
 ## Document Information
 
 - **Feature Name**: [Your Feature Name]
+- **Target Directory**: `.ai/plans/<feature-name>`
+- **Outcome Directory**: `.ai/plans/<feature-name>/outcome`
 - **Version**: 1.0
 - **Date**: [Current Date]
 - **Author**: [Your Name]
 - **Related Documents**: 
   - Requirements: [Link to requirements document]
   - Design: [Link to design document]
+
+## Non-Negotiable Execution Protocol for All Tasks
+
+1. **Pre-Execution Outcome Knowledge Read:**  
+   Before executing ANY task, the executing agent MUST read ALL existing files in `.ai/plans/<feature-name>/outcome/` to absorb prior research, search results, docs, and pitfalls so analysis is not repeated.
+2. **Per-File Quality Verification Loop (Immediate post-edit):**  
+   Whenever a file is modified, execute per-file verification (`bun tsgo` + `bun biome:check` + lint queue for target file) BEFORE moving to another file or subtask.
+3. **Global Health Check (Completion Gate):**  
+   Before marking any subtask as complete, run full global checks: `bun tsgo`, `bun biome:check`, and `bun run lint` globally. All MUST exit with **zero errors and zero warnings**.
+4. **Post-Execution Outcome File Creation:**  
+   Upon completing the task implementation and quality checks, write a new outcome document under `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` summarizing research, analysis, changes, and carry-over knowledge.
+5. **Task Progress Tracking:**  
+   The executing agent MUST update the task checkbox `[ ]` -> `[x]` in this `tasks.md` file upon successful completion.
+
+## MANDATORY Subtasks for Every Implementation Task
+
+**EVERY implementation task (X.Y) MUST include these subtasks:**
+
+### Quality Loop Subtask (X.Y.QL)
+```markdown
+- [ ] X.Y.QL **Quality Loop**: Per-file verification on `<file-path>`
+  - Run: `bun tsgo`
+  - Run: `bun biome:check`
+  - Run: lint queue for target file
+  - Fix all errors before proceeding
+```
+
+### Instruction Verification Subtask (X.Y.IV)
+```markdown
+- [ ] X.Y.IV **Instruction Verification**: Validate `<file-path>` against:
+  - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/<layer>/AGENTS.md`, ...
+  - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, ...
+  - (Use absolute paths from the Layer-to-Instructions mapping table below)
+```
+
+### Layer-to-Instructions Mapping (Reference for ALL Plans)
+
+| Layer | AGENTS.md Files (absolute paths) | .agents/instructions Files (absolute paths) |
+|-------|----------------------------------|---------------------------------------------|
+| Root | `/home/ahmed/Projects/siraj/AGENTS.md` | — |
+| Backend Schema | `/home/ahmed/Projects/siraj/backend/db/schema/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Repos | `/home/ahmed/Projects/siraj/backend/db/repo/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Tests | `/home/ahmed/Projects/siraj/backend/db/test/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md` |
+| Backend Services | `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend GraphQL | `/home/ahmed/Projects/siraj/backend/graphql/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Types | `/home/ahmed/Projects/siraj/backend/types/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Backend Enums | `/home/ahmed/Projects/siraj/backend/enum/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md` |
+| Scripts | `/home/ahmed/Projects/siraj/scripts/run-test/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md` |
+| Shared Locale | `/home/ahmed/Projects/siraj/shared/AGENTS.md` | (none) |
+| App Router | `/home/ahmed/Projects/siraj/app/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md` |
+| Frontend Common | `/home/ahmed/Projects/siraj/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/stores/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md` |
+| Frontend Desktop | `/home/ahmed/Projects/siraj/frontend/desktop/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/mobile-desktop.instructions.md` |
+| Frontend Mobile | `/home/ahmed/Projects/siraj/frontend/mobile/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/mobile-desktop.instructions.md` |
+| Test UI | `/home/ahmed/Projects/siraj/test/ui/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md` |
+
+### Drizzle Schema Convention (Reference)
+- **Schema changes** (new tables, columns, indexes): `bun run db push` — creates schema automatically
+- **Custom SQL migrations** (seed data, complex transforms): `bun db migrate` — for non-Drizzle SQL only
 
 ## Implementation Overview
 
@@ -45,21 +105,31 @@ Use this template to create actionable implementation plans that break down your
 ### Phase 1: Foundation and Setup
 
 - [ ] 1. Set up project structure and development environment
-  - Create directory structure for the feature
+  - Read all existing files in `.ai/plans/<feature-name>/outcome/`
+  - Create directory structure for the feature and outcome directory `.ai/plans/<feature-name>/outcome/`
   - Set up build configuration and dependencies
   - Configure development tools and linting
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+  - Write outcome file: `.ai/plans/<feature-name>/outcome/1.1-setup-outcome.md`
+  - Update progress: Mark task 1.1 as `[x]` in `tasks.md`
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 2. Implement core data models and interfaces
   - Define TypeScript interfaces for all data models
   - Implement validation functions for data integrity
   - Create unit tests for data model validation
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 3. Set up database schema and migrations
   - Create database tables and relationships
   - Write migration scripts for schema changes
   - Set up database connection and configuration
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 2: Core Business Logic
@@ -69,18 +139,24 @@ Use this template to create actionable implementation plans that break down your
   - Implement core business rules and validation
   - Add error handling and logging
   - Write comprehensive unit tests
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 4.2 Create [Component Name] repository
   - Implement data access layer with CRUD operations
   - Add query optimization and caching
   - Write integration tests with database
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 4.3 Implement [Business Process] workflow
   - Code the main business process flow
   - Add state management and transitions
   - Write unit tests for workflow logic
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 3: API Layer
@@ -90,18 +166,24 @@ Use this template to create actionable implementation plans that break down your
   - Implement GET, POST, PUT, DELETE operations
   - Add request validation and sanitization
   - Write API integration tests
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 5.2 Add authentication and authorization
   - Implement JWT token validation
   - Add role-based access control
   - Write security tests and validation
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 5.3 Implement error handling and logging
   - Create consistent error response format
   - Add comprehensive logging and monitoring
   - Write error handling tests
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 4: User Interface
@@ -111,18 +193,24 @@ Use this template to create actionable implementation plans that break down your
   - Build reusable UI components
   - Add responsive design and accessibility
   - Write component unit tests
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 6.2 Implement [Feature] user flows
   - Create complete user interaction flows
   - Add form validation and error handling
   - Write end-to-end tests for user scenarios
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 6.3 Add state management and data fetching
   - Implement client-side state management
   - Add API integration and caching
   - Write integration tests for data flow
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 5: Integration and Testing
@@ -132,18 +220,24 @@ Use this template to create actionable implementation plans that break down your
   - Implement external API integrations
   - Add retry logic and error handling
   - Write integration tests with mocked services
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 7.2 Add monitoring and observability
   - Implement health checks and metrics
   - Add performance monitoring and alerting
   - Write monitoring validation tests
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 7.3 Implement comprehensive testing suite
   - Create end-to-end test scenarios
   - Add performance and load testing
   - Write security and penetration tests
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 6: Deployment and Documentation
@@ -153,19 +247,70 @@ Use this template to create actionable implementation plans that break down your
   - Write deployment scripts and configuration
   - Set up environment-specific settings
   - Create rollback procedures
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 8.2 Create operational documentation
   - Write API documentation and examples
   - Create troubleshooting guides
   - Document configuration and maintenance procedures
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 8.3 Implement final validation and cleanup
   - Run complete test suite and validation
   - Perform code review and quality checks
   - Clean up temporary code and comments
+  - **Quality Loop**: Run per-file verification on modified files
+  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
+
+### Phase 7: Knowledge Propagation (MANDATORY Final Task)
+
+- [ ] 9. **Knowledge Propagation & Documentation**
+  - Read all outcome files in `.ai/plans/<feature-name>/outcome/` to synthesize all learnings
+  - Create canonical reference doc under `docs/<domain>/<topic>.md` consolidating patterns, rules, and gotchas from all outcome files
+    - If a matching subdirectory exists under `docs/`, create the file inside it
+    - If no matching subdirectory exists, create one: `mkdir -p docs/<domain>/`
+    - File naming: `kebab-case.md` (e.g., `prepared-statements.md`, `dataloader-batching.md`)
+    - Follow the docs file structure: Why → Pattern → Rules → Anti-patterns → Rollout Summary → Related Documents
+  - Update layer AGENTS.md files with new rules/patterns discovered during implementation
+    - Add rules inline with a reference to the new doc: `See docs/<domain>/<topic>.md for the complete pattern reference.`
+  - Update `.agents/skills/<skill>/SKILL.md` if new patterns affect the skill's domain
+    - Add a domain-specific section with key rules and a reference to the new doc
+  - Update `.agents/instructions/<layer>.instructions.md` if new conventions should be enforced by instruction files
+  - Update root `AGENTS.md` Important References section with the new doc
+  - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+  - Write outcome file: `.ai/plans/<feature-name>/outcome/9.1-knowledge-propagation-outcome.md`
+  - Update progress: Mark task 9.1 as `[x]` in `tasks.md`
+  - _Requirements: Knowledge propagation protocol_
+
+### Domain-to-Artifacts Mapping (Reference for Knowledge Propagation)
+
+Use this table to determine which docs subdir, AGENTS.md files, skills, and instructions to update:
+
+| Plan Domain | Docs Subdir | AGENTS.md to Update | Skills to Update | Instructions to Update |
+|---|---|---|---|---|
+| Drizzle / DB patterns | `docs/drizzle/` | `backend/db/repo/AGENTS.md`, `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle/SKILL.md` | `.agents/instructions/backend.instructions.md` |
+| DB migrations | `docs/drizzle/` | `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle-migrations/SKILL.md`, `.agents/skills/drizzle-generate/SKILL.md` | `.agents/instructions/backend.instructions.md` |
+| GraphQL / Pothos | `docs/graphql/` | `backend/graphql/AGENTS.md`, `backend/graphql/pothos/AGENTS.md`, `frontend/common/graphql/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
+| Backend services | `docs/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
+| Backend types / enums | `docs/backend/` | `backend/types/AGENTS.md`, `backend/enum/AGENTS.md`, `backend/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
+| Frontend components / views | `docs/frontend/` | `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/components/ui/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend mobile/desktop | `docs/frontend/` | `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md` | `.agents/skills/refactor-mobile-desktop/SKILL.md` | `.agents/instructions/mobile-desktop.instructions.md` |
+| Frontend stores / state | `docs/frontend/` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend GraphQL / Apollo | `docs/frontend/` | `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
+| Testing (DB) | `docs/testing/` | `backend/db/test/AGENTS.md`, `backend/db/test/logic/AGENTS.md` | `.agents/skills/fix-db-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| Testing (UI / E2E) | `docs/testing/` | `test/ui/AGENTS.md` | `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| Testing (general) | `docs/testing/` | `scripts/run-test/AGENTS.md` | `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| i18n / locale | `docs/i18n/` | `shared/AGENTS.md` | — | — |
+| Auth / security | `docs/auth/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/security-review/SKILL.md` | `.agents/instructions/backend.instructions.md` |
+| App Router / Next.js | `docs/app/` | `app/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
+| Quality gates / CI | `docs/quality/` | `AGENTS.md` (root) | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` | — |
+| Idempotency | `docs/` (top-level) | `backend/services/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
+| Bun / runtime | `docs/bun/` | `AGENTS.md` (root) | — | — |
 
 ---
 
@@ -190,6 +335,7 @@ Use this template to create actionable implementation plans that break down your
 - Each sub-task should be completable in 1-2 days
 - Maintain logical sequence and dependencies
 - Ensure each sub-task has clear deliverables
+- **EVERY sub-task MUST include Quality Loop + Instruction Verification subtasks**
 
 ### Requirements Traceability
 
@@ -230,12 +376,15 @@ Use this checklist when executing each task:
 - [ ] Tests pass and coverage is adequate
 - [ ] Code review is completed
 - [ ] Integration with existing code is verified
+- [ ] **Quality Loop passed** (tsgo + biome:check + lint queue)
+- [ ] **Instruction Verification passed** (validated against all applicable AGENTS.md and .agents/instructions)
 
 ### Task Completion
 - [ ] Feature works as specified in requirements
 - [ ] No regressions in existing functionality
 - [ ] Documentation is updated if needed
 - [ ] Task is marked as complete in tracking system
+- [ ] Outcome file written to `.ai/plans/<feature-name>/outcome/`
 
 ---
 
@@ -248,6 +397,8 @@ Use this checklist when executing each task:
   - Implement database schema and migrations
   - Add CRUD operations with error handling
   - Write unit and integration tests
+  - **Quality Loop**: Run per-file verification
+  - **Instruction Verification**: Validate against layer AGENTS.md
   - _Requirements: [X.X]_
 ```
 
@@ -258,6 +409,8 @@ Use this checklist when executing each task:
   - Add error handling and logging
   - Create service interfaces and abstractions
   - Write comprehensive unit tests
+  - **Quality Loop**: Run per-file verification
+  - **Instruction Verification**: Validate against layer AGENTS.md
   - _Requirements: [X.X]_
 ```
 
@@ -268,6 +421,8 @@ Use this checklist when executing each task:
   - Add request/response validation
   - Implement authentication and authorization
   - Write API integration tests
+  - **Quality Loop**: Run per-file verification
+  - **Instruction Verification**: Validate against layer AGENTS.md
   - _Requirements: [X.X]_
 ```
 
@@ -278,6 +433,8 @@ Use this checklist when executing each task:
   - Implement responsive design
   - Add accessibility features
   - Write component tests and user scenarios
+  - **Quality Loop**: Run per-file verification
+  - **Instruction Verification**: Validate against layer AGENTS.md
   - _Requirements: [X.X]_
 ```
 
@@ -288,6 +445,8 @@ Use this checklist when executing each task:
   - Add retry logic and circuit breakers
   - Create integration tests with mocking
   - Document integration procedures
+  - **Quality Loop**: Run per-file verification
+  - **Instruction Verification**: Validate against layer AGENTS.md
   - _Requirements: [X.X]_
 ```
 

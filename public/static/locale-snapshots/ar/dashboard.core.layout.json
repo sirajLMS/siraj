@@ -1,0 +1,23 @@
+{
+  "appTitle": "سراج LMS",
+  "notifications": "الإشعارات",
+  "comingSoon": "قريبًا...",
+  "studentTodayClasses": "حصص اليوم",
+  "studentSchedule": "جدولي",
+  "studentCredits": "رصيدي",
+  "studentHistory": "سجل الحصص",
+  "studentProfile": "ملفي",
+  "lessonReports": "تقارير الحصص",
+  "lessonReportDetail": "تفاصيل تقرير الحصة",
+  "supervisorHome": "لوحة التحكم",
+  "pendingReviews": "المراجعات المعلقة",
+  "teacherDues": "مستحقات المعلمين",
+  "monthlyReports": "التقارير الشهرية",
+  "supervisorProfile": "ملفي",
+  "pageNotFoundTitle": "الصفحة غير موجودة",
+  "pageNotFoundDescription": "الصفحة التي تبحث عنها غير موجودة أو قد لا تملك صلاحية الوصول إليها.",
+  "pageNotFoundBackToDashboard": "العودة إلى لوحة التحكم",
+  "welcomeUser": {
+    "__fn": "(name) => `\\u0645\\u0631\\u062D\\u0628\\u064B\\u0627 ${name}`"
+  }
+}

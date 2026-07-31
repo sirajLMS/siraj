@@ -56,6 +56,10 @@ export const invoices = pgTable(
     index("invoices_student_id_idx").on(table.studentId),
     index("invoices_status_due_date_idx").on(table.status, table.dueDate),
     uniqueIndex("invoices_idempotency_key_unique_idx").on(table.idempotencyKey),
+    index("invoices_due_date_idx").on(table.dueDate),
+    index("invoices_paid_date_idx").on(table.paidDate),
+    index("invoices_created_by_user_id_idx").on(table.createdByUserId),
+    index("invoices_email_sent_at_idx").on(table.emailSentAt),
   ]
 );
 
@@ -103,6 +107,8 @@ export const payments = pgTable(
     index("payments_user_payment_method_id_idx").on(table.userPaymentMethodId),
     index("payments_payment_method_type_idx").on(table.paymentMethodType),
     uniqueIndex("payments_idempotency_key_unique_idx").on(table.idempotencyKey),
+    index("payments_payment_date_idx").on(table.paymentDate),
+    index("payments_created_at_idx").on(table.createdAt),
   ]
 );
 
@@ -126,6 +132,8 @@ export const currencyExchangeRates = pgTable(
       table.toCurrency,
       table.effectiveDate
     ),
+    index("currency_exchange_rates_effective_date_idx").on(table.effectiveDate),
+    index("currency_exchange_rates_created_at_idx").on(table.createdAt),
   ]
 );
 
@@ -145,7 +153,11 @@ export const currencyExchangeAuditLogs = pgTable(
     changedByUserId: uuid("changed_by_user_id").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("currency_exchange_audit_from_to_idx").on(table.fromCurrency, table.toCurrency)]
+  table => [
+    index("currency_exchange_audit_from_to_idx").on(table.fromCurrency, table.toCurrency),
+    index("currency_exchange_audit_logs_created_at_idx").on(table.createdAt),
+    index("currency_exchange_audit_logs_changed_by_user_id_idx").on(table.changedByUserId),
+  ]
 );
 
 /**
@@ -163,5 +175,9 @@ export const currencyHedges = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("currency_hedges_currency_idx").on(table.currency)]
+  table => [
+    index("currency_hedges_currency_idx").on(table.currency),
+    index("currency_hedges_hedge_type_idx").on(table.hedgeType),
+    index("currency_hedges_created_at_idx").on(table.createdAt),
+  ]
 );

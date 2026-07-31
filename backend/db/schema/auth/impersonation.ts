@@ -25,6 +25,8 @@ export const impersonationSessions = pgTable(
     index("impersonation_sessions_target_idx").on(table.targetUserId),
     index("impersonation_sessions_session_idx").on(table.sessionId),
     index("impersonation_sessions_active_actor_idx").on(table.actorUserId, table.isActive),
+    index("impersonation_sessions_started_at_idx").on(table.startedAt),
+    index("impersonation_sessions_ended_at_idx").on(table.endedAt),
     uniqueIndex("impersonation_sessions_one_active_per_actor")
       .on(table.actorUserId)
       .where(sql`${table.isActive} = true`),

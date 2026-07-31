@@ -1577,8 +1577,8 @@ type FxProviderConfig {
 }
 
 enum FxProviderConfigSource {
-  database
-  env
+  DATABASE
+  ENV
 }
 
 type FxSyncHealth {
@@ -2137,9 +2137,9 @@ type InvoicePaymentSubmission {
 }
 
 enum InvoicePaymentSubmissionStatus {
-  approved
-  pending
-  rejected
+  APPROVED
+  PENDING
+  REJECTED
 }
 
 enum InvoiceStatus {
@@ -4778,13 +4778,13 @@ input TeacherProfileUpdateInput {
 }
 
 enum TeacherProgressFeedEventKind {
-  activated
-  auto_missed
-  completed
-  leave
-  marked_absent
-  other
-  started
+  ACTIVATED
+  AUTO_MISSED
+  COMPLETED
+  LEAVE
+  MARKED_ABSENT
+  OTHER
+  STARTED
 }
 
 type TeacherProgressFeedItem {

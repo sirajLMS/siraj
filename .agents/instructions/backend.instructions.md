@@ -63,6 +63,8 @@ applyTo: "backend/**/*.ts"
 - `id` field on all GraphQL objects (Apollo cache normalization)
 - Error translation: direct errors in resolvers must use `ctx.t("<namespace>")` (already bound to `ctx.locale`)
 - Resolvers must propagate `ctx.locale` to service and repository calls
+- **DataLoader Batching (CRITICAL)**: All field resolvers calling services/repos per-parent MUST use `t.loadable()` (scalar/object fields) or `loadableObject`/`loadableObjectRef` (top-level entities) to eliminate N+1 queries. `t.loadable()` does NOT support list-typed returns — use `t.field()` for array fields. See `docs/graphql/dataloader-batching.md`.
+- **No Dynamic Imports in Pothos Files**: NEVER use `await import(...)` inside resolver functions or anywhere in `*.pothos.ts` files. Bun's module bundler marks the entire module tree as async ESM, causing `TypeError: require() async module` when CommonJS `graphql-tag` tries to `require('graphql')`. Use top-level static imports instead. This caused all GraphQL integration tests to fail.
 
 ### i18n / Localized Errors
 
@@ -88,6 +90,9 @@ applyTo: "backend/**/*.ts"
 - No hardcoded error strings - use `getServerTranslations(locale, "<namespace>")` from `@/shared/locale/server-graphql` with `locale?: string` (standalone contexts); repositories accessed from GraphQL resolvers receive translated messages via `ctx.t("<namespace>")` propagated from the resolver
 - Repos use `{Entity}SelectType` / `{Entity}InsertType` from `backend/types/`, not raw schema references
 - Repos must NOT contain business logic, permission checks, or complex orchestration (service layer only)
+- **Prepared Statements (CRITICAL)**: All simple read-only methods MUST use Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) at module level. See `docs/drizzle/prepared-statements.md`.
+- **`inArray` + Prepared Statements PROHIBITED**: PostgreSQL prepared statement protocol treats `$1` as a single scalar — cannot expand array parameters for `IN` clauses. Use dynamic queries for `inArray` batch lookups. This caused cascading GraphQL failures (user loading, permissions, impersonation, role resolution).
+- **Batch Lookup Methods**: For DataLoader support, expose `findBy{Key}Ids(ids: string[], tx?)` returning `Map<string, T | null>`. Use `inArray(col, ids)` with plain arrays (NOT `sql.placeholder`). Pre-init map with all keys → null, fill matches. See `docs/graphql/dataloader-batching.md`.
 
 ### Service Layer
 
@@ -97,6 +102,7 @@ applyTo: "backend/**/*.ts"
 - Never call other services outside your domain boundary - each domain owns its own service
 - SSR-compatible: must not rely on GraphQL-specific contexts unless passed explicitly
 - Treat `locale` as optional parameter - pass from GraphQL context or Server Component as needed
+- **Batch Service Methods**: Services called from GraphQL resolvers MUST expose batch versions (e.g., `resolveTeacherIdsForUsers(userIds: string[])`) returning `Map<string, T | null>`. Delegate to batch repository methods. See `docs/graphql/dataloader-batching.md`.
 
 ### Seeds (CRITICAL)
 

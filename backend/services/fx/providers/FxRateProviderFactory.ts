@@ -1,9 +1,9 @@
 import { SystemSettingsRepository } from "@/backend/db/repo";
-import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
+import { FxProvider, FxProviderConfigSource } from "@/backend/enum/fx/fx-provider.enum";
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
-import type { FxProviderConfigSource, FxProviderFetchResult } from "@/backend/types";
+import type { FxProviderFetchResult } from "@/backend/types";
 
 const FX_PROVIDER_SETTING_KEY = "fx_provider";
 
@@ -47,10 +47,10 @@ export async function getResolvedFxProviderConfig(): Promise<{
   const dbProvider = dbValue ? normalizeProvider(dbValue) : null;
 
   if (dbProvider) {
-    return { provider: dbProvider, source: "database" };
+    return { provider: dbProvider, source: FxProviderConfigSource.DATABASE };
   }
 
-  return { provider: getFxProviderFromEnv(), source: "env" };
+  return { provider: getFxProviderFromEnv(), source: FxProviderConfigSource.ENV };
 }
 
 /**

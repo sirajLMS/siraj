@@ -14,3 +14,8 @@ export enum FxSyncTrigger {
   Cron = "cron",
   Manual = "manual",
 }
+
+export enum FxProviderConfigSource {
+  ENV = "env",
+  DATABASE = "database",
+}

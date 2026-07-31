@@ -61,6 +61,7 @@ function toGroupReturn(
     createdAt: group.createdAt,
     updatedAt: group.updatedAt,
     permissionIds,
+    assignedUsers: [],
   };
 }
 

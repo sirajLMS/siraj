@@ -31,6 +31,8 @@ export const adminAuditLogs = pgTable(
     index("admin_audit_logs_actor_idx").on(table.actorUserId),
     index("admin_audit_logs_target_idx").on(table.targetUserId),
     index("admin_audit_logs_action_idx").on(table.action),
+    index("admin_audit_logs_created_at_idx").on(table.createdAt),
+    index("admin_audit_logs_ip_address_idx").on(table.ipAddress),
   ]
 );
 
@@ -80,5 +82,8 @@ export const auditLogs = pgTable(
     index("audit_logs_action_idx").on(table.action),
     index("audit_logs_created_at_idx").on(table.createdAt),
     index("audit_logs_actor_type_idx").on(table.actorType),
+    index("audit_logs_entity_type_entity_id_created_at_idx").on(table.entityType, table.entityId, table.createdAt),
+    index("audit_logs_actor_user_id_created_at_idx").on(table.actorUserId, table.createdAt),
+    index("audit_logs_action_created_at_idx").on(table.action, table.createdAt),
   ]
 );

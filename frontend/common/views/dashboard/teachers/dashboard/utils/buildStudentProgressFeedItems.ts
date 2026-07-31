@@ -1,15 +1,9 @@
-import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/common/types/shared.types";
+import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem } from "@/frontend/common/graphql/generated/gql/operations";
+import type { StudentProgressFeedItem } from "@/frontend/common/types/shared.types";
 import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
-interface RawProgressFeedItem {
-  readonly id?: string | null;
-  readonly studentId?: string | null;
-  readonly studentName?: string | null;
-  readonly scheduledTimeFormatted?: string | null;
-  readonly durationMinutes?: number | null;
-  readonly eventKind?: string | null;
-  readonly occurredAt?: string | Date | null;
-}
+type ProgressFeedEventLabelKey = keyof TeacherDashboardLabels["progressFeed"]["events"];
 
 function toStudentInitials(studentName: string): string {
   const parts = studentName.trim().split(/\s+/).filter(Boolean);
@@ -22,13 +16,42 @@ function toStudentInitials(studentName: string): string {
     .join("");
 }
 
+function resolveProgressFeedEventKind(
+  eventKind: TeacherProgressFeedEventKind | null | undefined
+): TeacherProgressFeedEventKind {
+  return eventKind ?? TeacherProgressFeedEventKind.Other;
+}
+
+function progressFeedEventLabelKey(eventKind: TeacherProgressFeedEventKind): ProgressFeedEventLabelKey {
+  switch (eventKind) {
+    case TeacherProgressFeedEventKind.AutoMissed:
+      return "auto_missed";
+    case TeacherProgressFeedEventKind.MarkedAbsent:
+      return "marked_absent";
+    case TeacherProgressFeedEventKind.Activated:
+      return "activated";
+    case TeacherProgressFeedEventKind.Started:
+      return "started";
+    case TeacherProgressFeedEventKind.Completed:
+      return "completed";
+    case TeacherProgressFeedEventKind.Leave:
+      return "leave";
+    case TeacherProgressFeedEventKind.Other:
+      return "other";
+    default: {
+      const exhaustiveCheck: never = eventKind;
+      return exhaustiveCheck;
+    }
+  }
+}
+
 function formatFeedSummary(
-  item: RawProgressFeedItem,
+  item: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem,
   labels: TeacherDashboardLabels["progressFeed"],
   durationTemplate: (minutes: number) => string
 ): string {
-  const eventKind = (item.eventKind ?? "other") as TeacherProgressFeedEventKind;
-  const eventLabel = labels.events[eventKind] ?? labels.events.other;
+  const eventKind = resolveProgressFeedEventKind(item.eventKind);
+  const eventLabel = labels.events[progressFeedEventLabelKey(eventKind)];
   const parts = [eventLabel];
 
   if (item.scheduledTimeFormatted) {
@@ -42,14 +65,17 @@ function formatFeedSummary(
 }
 
 export function buildStudentProgressFeedItems(
-  feed: readonly RawProgressFeedItem[] | null | undefined,
+  feed:
+    | readonly TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem[]
+    | null
+    | undefined,
   labels: TeacherDashboardLabels["progressFeed"],
   durationTemplate: (minutes: number) => string,
   formatRelativeTime: (value: Date) => string
 ): StudentProgressFeedItem[] {
   return (feed ?? []).map(item => {
     const studentName = item.studentName?.trim() || "Student";
-    const eventKind = (item.eventKind ?? "other") as TeacherProgressFeedEventKind;
+    const eventKind = resolveProgressFeedEventKind(item.eventKind);
     const occurredAt = item.occurredAt ? new Date(item.occurredAt) : new Date();
 
     return {
@@ -63,7 +89,7 @@ export function buildStudentProgressFeedItems(
       eventKind,
       occurredAt,
       timeAgo: formatRelativeTime(occurredAt),
-      infoTooltip: eventKind === "auto_missed" ? labels.autoMissedTooltip : null,
+      infoTooltip: eventKind === TeacherProgressFeedEventKind.AutoMissed ? labels.autoMissedTooltip : null,
     };
   });
 }

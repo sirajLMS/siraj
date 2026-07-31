@@ -1,0 +1,17 @@
+{
+  "pageTitle": "اجتماع السلسلة المتكررة",
+  "scheduleSummary": {
+    "__fn": "(student, teacher, duration, timezone) => `${student} \\u0645\\u0639 ${teacher} \\xB7 ${duration} \\u062F\\u0642\\u064A\\u0642\\u0629 \\xB7 ${timezone}`"
+  },
+  "invalidId": "معرّف الجدول غير صالح",
+  "breadcrumbDashboard": "لوحة التحكم",
+  "breadcrumbClasses": "الحصص",
+  "goToClass": "الانتقال إلى الحصة",
+  "rateSectionTitle": "سعر الفصل المتكرر",
+  "hourlyRateLabel": "السعر بالساعة",
+  "currencyLabel": "العملة",
+  "rateSaveLabel": "حفظ السعر",
+  "rateClearLabel": "مسح السعر",
+  "rateSuccessMessage": "تم تحديث السعر بنجاح",
+  "rateErrorMessage": "فشل تحديث السعر"
+}

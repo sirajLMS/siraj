@@ -1,0 +1,12 @@
+{
+  "complaintResponse": {
+    "urgentResponse": {
+      "__fn": "({ parentName, complaintTitle, responseSummary }) => `Dear ${parentName}, regarding \"${complaintTitle}\": ${responseSummary}. - Support Team`"
+    }
+  },
+  "suggestionAcknowledged": {
+    "acknowledged": {
+      "__fn": "({ parentName, suggestionTitle }) => `Dear ${parentName}, your suggestion \"${suggestionTitle}\" has been acknowledged. Thank you!`"
+    }
+  }
+}

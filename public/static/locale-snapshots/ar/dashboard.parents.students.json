@@ -1,0 +1,19 @@
+{
+  "pageTitle": "طلابك",
+  "pageSubtitle": "الطلاب المرتبطون بحساب عائلتك.",
+  "noStudents": "لا يوجد طلاب مرتبطون بحسابك بعد.",
+  "card": {
+    "classesLeft": "الحصص المتبقية",
+    "weeklyHours": "الساعات الأسبوعية"
+  },
+  "status": {
+    "deactivated": "موقوف",
+    "regular": "منتظم",
+    "onLeave": "في إجازة",
+    "suspended": "معلق",
+    "onTrial": "تجريبي"
+  },
+  "errors": {
+    "failedToLoad": "تعذر تحميل طلابك."
+  }
+}

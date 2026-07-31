@@ -31,5 +31,8 @@ export const creditTransactions = pgTable(
     index("credit_transactions_student_id_idx").on(table.studentId),
     index("credit_transactions_reason_idx").on(table.reason),
     index("credit_transactions_class_instance_id_idx").on(table.classInstanceId),
+    index("credit_transactions_created_at_idx").on(table.createdAt),
+    index("credit_transactions_source_payment_id_idx").on(table.sourcePaymentId),
+    index("credit_transactions_credited_by_user_id_idx").on(table.creditedByUserId),
   ]
 );

@@ -1,27 +1,22 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  EffectiveMeetingPothosObject,
-  resolveEffectiveMeetingForClassInstanceFromContext,
-} from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
+import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
   ClassTypePothosObject,
+  TeacherProgressFeedEventKindPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
   ClassSessionMetrics,
   CreateManualClassEntryInput,
+  EffectiveMeetingReturnType,
   LogSupportRequestInput,
   TeacherDashboardPaginatedResult,
   TeacherDashboardScheduleRow,
   TeacherHandbookUrl,
   TeacherProgressFeedItem,
 } from "@/backend/types";
-
-const TeacherProgressFeedEventKindRef = gqlSchemaBuilder.enumType("TeacherProgressFeedEventKind", {
-  values: ["auto_missed", "marked_absent", "activated", "started", "completed", "leave", "other"] as const,
-});
 
 const TeacherDashboardScheduleRowRef =
   gqlSchemaBuilder.objectRef<TeacherDashboardScheduleRow>("TeacherDashboardScheduleRow");
@@ -40,14 +35,13 @@ export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleR
     meetingJoinUrl: t.string({
       nullable: true,
       deprecationReason: "Use effectiveMeeting.joinUrl",
-      resolve: async (parent, _args, ctx) => {
-        const meeting = await resolveEffectiveMeetingForClassInstanceFromContext(parent.id, ctx);
-        return meeting.joinUrl;
-      },
+      resolve: parent => (parent as unknown as Record<string, unknown>).meetingJoinUrl as string | null,
     }),
     effectiveMeeting: t.field({
       type: EffectiveMeetingPothosObject,
-      resolve: (parent, _args, ctx) => resolveEffectiveMeetingForClassInstanceFromContext(parent.id, ctx),
+      nullable: true,
+      resolve: parent =>
+        (parent as unknown as Record<string, unknown>).effectiveMeeting as EffectiveMeetingReturnType | null,
     }),
     yourTimeFormatted: t.exposeString("yourTimeFormatted", { nullable: true }),
   }),
@@ -62,7 +56,7 @@ export const TeacherProgressFeedItemPothosObject = TeacherProgressFeedItemRef.im
     studentName: t.exposeString("studentName"),
     scheduledTimeFormatted: t.exposeString("scheduledTimeFormatted", { nullable: true }),
     durationMinutes: t.exposeInt("durationMinutes", { nullable: true }),
-    eventKind: t.expose("eventKind", { type: TeacherProgressFeedEventKindRef }),
+    eventKind: t.expose("eventKind", { type: TeacherProgressFeedEventKindPothosEnum }),
     occurredAt: t.expose("occurredAt", { type: "DateTime" }),
   }),
 });

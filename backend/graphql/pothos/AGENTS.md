@@ -69,3 +69,7 @@ Other prohibited variants:
 ## Other Rules
 
 - All remaining rules from the parent `backend/graphql/AGENTS.md` still apply: single canonical object type per entity, types imported from `@/backend/types`, no local type definitions in Pothos files, `id` fields exposed for Apollo cache normalization, locale propagation to service/repository calls, etc.
+- **DataLoader Batching (CRITICAL)**: All field resolvers that call services or repositories per-parent-object MUST use Pothos DataLoader (`t.loadable()` for scalar/object fields, `loadableObject`/`loadableObjectRef` for top-level entity types) to batch requests and eliminate N+1 queries. See `docs/graphql/dataloader-batching.md` for the complete pattern reference.
+  - `t.loadable()` does NOT support list-typed returns (e.g., `[AppPermissionPothosEnum]`) — use `t.field()` for array fields
+  - Batch service methods must return `Map<string, T | null>` keyed by the parent ID
+  - Batch repository methods must use `inArray(column, sql.placeholder("ids"))` with the transaction fallback pattern

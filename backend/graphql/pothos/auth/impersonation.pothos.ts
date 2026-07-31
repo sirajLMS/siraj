@@ -1,7 +1,6 @@
 import { GraphQLError } from "graphql";
-import { UserRepository } from "@/backend/db/repo";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { UserPothosObject } from "@/backend/graphql/pothos/auth/user.pothos";
+import { UserPothosObject } from "@/backend/graphql/pothos/users";
 import { setAuthCookies } from "@/backend/lib/auth/cookies";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import type {
@@ -9,7 +8,6 @@ import type {
   ImpersonationStatusReturnType,
   StartImpersonationReturnType,
 } from "@/backend/types";
-import { AuthUtils } from "@/backend/utils";
 
 const ImpersonationStatusPothosObjectRef =
   gqlSchemaBuilder.objectRef<ImpersonationStatusReturnType>("ImpersonationStatus");
@@ -21,23 +19,17 @@ export const ImpersonationStatusPothosObject = ImpersonationStatusPothosObjectRe
     startedAt: t.expose("startedAt", { type: "DateTime", nullable: true }),
     expiresAt: t.expose("expiresAt", { type: "DateTime", nullable: true }),
     reason: t.exposeString("reason", { nullable: true }),
-    targetUser: t.field({
+    targetUser: t.loadable({
       type: UserPothosObject,
       nullable: true,
-      resolve: async parent => {
-        if (!parent.targetUserId) return null;
-        const user = await UserRepository.findById(parent.targetUserId);
-        return user ? AuthUtils.toUserReturnType(user) : null;
-      },
+      load: (ids: string[], ctx) => UserPothosObject.getDataloader(ctx).loadMany(ids),
+      resolve: parent => parent.targetUserId,
     }),
-    actorUser: t.field({
+    actorUser: t.loadable({
       type: UserPothosObject,
       nullable: true,
-      resolve: async parent => {
-        if (!parent.actorUserId) return null;
-        const user = await UserRepository.findById(parent.actorUserId);
-        return user ? AuthUtils.toUserReturnType(user) : null;
-      },
+      load: (ids: string[], ctx) => UserPothosObject.getDataloader(ctx).loadMany(ids),
+      resolve: parent => parent.actorUserId,
     }),
   }),
 });

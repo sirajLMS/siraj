@@ -1,0 +1,85 @@
+{
+  "pageTitle": "حالة حصص الجلسات",
+  "pageSubtitle": "راقب حصص الجلسات حسب حالة الطالب — عادي، معلّق، موقوف، وفي إجازة.",
+  "filters": "الفلاتر",
+  "newReport": "حصة جديدة",
+  "todaysClassSchedule": "جدول حصص اليوم",
+  "totalSessions": {
+    "__fn": "(total) => `\\u0627\\u0644\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A: ${total} \\u062D\\u0635\\u0629`"
+  },
+  "previous": "السابق",
+  "next": "التالي",
+  "showingOf": {
+    "__fn": "(shown, total) => `\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u062D\\u0635\\u0629 \\u0625\\u062C\\u0645\\u0627\\u0644\\u0627\\u064B`"
+  },
+  "seeAll": "عرض الكل",
+  "todaysSchedule": "جدول اليوم",
+  "administrativeHold": "تعليق إداري",
+  "holdDescription": "تم تعليق الحساب بسبب رصيد مستحق أو مخالفة للسياسة. تواصل مع الفوترة.",
+  "dateFilter": {
+    "today": "اليوم",
+    "previousDay": "اليوم السابق",
+    "nextDay": "اليوم التالي",
+    "dateLabel": "التاريخ"
+  },
+  "metrics": {
+    "regular": "عادي",
+    "pending": "معلّق",
+    "suspended": "موقوف",
+    "onLeave": "في إجازة"
+  },
+  "subLabels": {
+    "regular": "12% مقارنة بالأسبوع الماضي",
+    "pending": "يحتاج مراجعة",
+    "suspended": "يستلزم إجراء فوري",
+    "onLeave": "غيابات معتمدة"
+  },
+  "table": {
+    "class": "الحصة",
+    "student": "الطالب",
+    "teacher": "المعلم",
+    "schedule": "الجدول",
+    "duration": "المدة",
+    "status": "الحالة",
+    "actions": "الإجراءات"
+  },
+  "status": {
+    "regular": "عادي",
+    "suspendedPending": "موقوف (معلّق)",
+    "onLeave": "في إجازة",
+    "pendingVerification": "في انتظار التحقق"
+  },
+  "actions": {
+    "joinSession": "الانضمام للحصة",
+    "activate": "تفعيل",
+    "reschedule": "إعادة جدولة",
+    "verifyDocuments": "التحقق من الوثائق",
+    "sessionLocked": "الحصة مقفلة",
+    "sessionEnded": "انتهت الحصة"
+  },
+  "noEntries": "لا توجد حصص",
+  "analytics": {
+    "title": "تحليلات الإيقاف",
+    "note": "ملاحظة: ارتفاع حاد في الإيقافات يوم الخميس بسبب تدقيق معالجة المدفوعات في نهاية الشهر.",
+    "urgentTask": "مهمة إدارية عاجلة",
+    "accountsLocked": {
+      "__fn": "(count) => `${count} \\u062D\\u0633\\u0627\\u0628 \\u0645\\u0642\\u0641\\u0644`"
+    },
+    "auditDescription": "راجع سجلات الإيقاف لتحديد ما إذا كان يمكن الإفراج عن أي تعليقات إدارية يدوياً.",
+    "openAuditLogs": "فتح سجلات التدقيق"
+  },
+  "errors": {
+    "noStudentId": "معرّف الطالب غير متاح لهذه الحصة",
+    "auditLogsComingSoon": "ميزة سجلات التدقيق قريباً",
+    "failedToLoad": "فشل تحميل بيانات تتبع الحالة."
+  },
+  "days": {
+    "mon": "إ",
+    "tue": "ث",
+    "wed": "ر",
+    "thu": "خ",
+    "fri": "ج",
+    "sat": "س",
+    "sun": "أ"
+  }
+}
