@@ -1,4 +1,5 @@
 import { and, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { studentProgress } from "@/backend/db/schema/students/students";
@@ -44,10 +45,10 @@ export namespace StudentProgressRepository {
     tx?: DBTransaction
   ): Promise<StudentProgressSelectType[]> {
     if (pairs.length === 0) return [];
-    const executor = tx ?? db;
+    const q = queryDb(tx);
     const studentIds = [...new Set(pairs.map(p => p.studentId))];
     const classInstanceIds = [...new Set(pairs.map(p => p.classInstanceId))];
-    const rows = await executor
+    const rows = await q
       .select()
       .from(studentProgress)
       .where(

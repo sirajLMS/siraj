@@ -1,9 +1,17 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { poolMax, resolveConnectionStrategy, resolvePoolMax } from "@/backend/db/connection-strategy";
+import {
+  getActiveHttpProvider,
+  isNeonHttpEligible,
+  poolMax,
+  resolveConnectionStrategy,
+  resolvePoolMax,
+} from "@/backend/db/connection-strategy";
 
 const ENV_KEYS = [
   "DB_CONNECTION_MODE",
   "DB_PROVIDER",
+  "DB_NEON_HTTP_ENABLED",
+  "DATABASE_URL",
   "VERCEL",
   "RAILWAY_ENVIRONMENT",
   "NETLIFY",
@@ -119,5 +127,63 @@ describe("resolvePoolMax", () => {
 describe("poolMax", () => {
   test("returns test pool size under bun test runner", () => {
     expect(poolMax()).toBe(3);
+  });
+});
+
+describe("isNeonHttpEligible", () => {
+  afterEach(() => {
+    restoreEnv();
+  });
+
+  test("returns true when DB_PROVIDER=neon, *.neon.tech host, mode!=pg, enabled!=false", () => {
+    snapshotEnv();
+    setEnv({
+      DB_PROVIDER: "neon",
+      DATABASE_URL: "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb",
+      DB_CONNECTION_MODE: "auto",
+      DB_NEON_HTTP_ENABLED: "true",
+    });
+    expect(isNeonHttpEligible()).toBe(true);
+    expect(getActiveHttpProvider()).toBe("neon");
+  });
+
+  test("returns false when DB_NEON_HTTP_ENABLED=false", () => {
+    snapshotEnv();
+    setEnv({
+      DB_PROVIDER: "neon",
+      DATABASE_URL: "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb",
+      DB_NEON_HTTP_ENABLED: "false",
+    });
+    expect(isNeonHttpEligible()).toBe(false);
+    expect(getActiveHttpProvider()).toBe("none");
+  });
+
+  test("returns false when DB_PROVIDER=postgres", () => {
+    snapshotEnv();
+    setEnv({
+      DB_PROVIDER: "postgres",
+      DATABASE_URL: "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb",
+    });
+    expect(isNeonHttpEligible()).toBe(false);
+    expect(getActiveHttpProvider()).toBe("none");
+  });
+
+  test("returns false when DB_CONNECTION_MODE=pg", () => {
+    snapshotEnv();
+    setEnv({
+      DB_PROVIDER: "neon",
+      DB_CONNECTION_MODE: "pg",
+      DATABASE_URL: "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb",
+    });
+    expect(isNeonHttpEligible()).toBe(false);
+  });
+
+  test("returns false when DATABASE_URL hostname is not *.neon.tech", () => {
+    snapshotEnv();
+    setEnv({
+      DB_PROVIDER: "neon",
+      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/siraj",
+    });
+    expect(isNeonHttpEligible()).toBe(false);
   });
 });

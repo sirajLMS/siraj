@@ -1,4 +1,5 @@
 import { and, eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherPayments } from "@/backend/db/schema/teachers/teacher-payments";
@@ -11,8 +12,8 @@ export namespace TeacherPaymentRepository {
     tx?: DBTransaction
   ): Promise<TeacherPaymentSelectType[]> {
     if (paymentDates.length === 0) return [];
-    const executor = tx ?? db;
-    return executor
+    const q = queryDb(tx);
+    return q
       .select()
       .from(teacherPayments)
       .where(and(eq(teacherPayments.teacherId, teacherId), inArray(teacherPayments.paymentDate, paymentDates)));

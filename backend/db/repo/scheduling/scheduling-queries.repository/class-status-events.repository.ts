@@ -1,14 +1,14 @@
 import { and, eq, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { resolveTeacherProgressFeedEventKind } from "@/backend/db/repo/scheduling/scheduling-queries.repository/teacher-progress-feed.utils";
 import { classInstances, classStatusEvents, students } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type * as Types from "@/backend/types";
 
 export const getClassStatusEvents = async (classInstanceId: string, tx?: DBTransaction) => {
-  const queryDb = tx ?? db;
-  return queryDb
+  const q = queryDb(tx);
+  return q
     .select()
     .from(classStatusEvents)
     .where(eq(classStatusEvents.classInstanceId, classInstanceId))
@@ -22,13 +22,13 @@ export const getTeacherProgressFeed = async (
   locale?: string,
   tx?: DBTransaction
 ): Promise<Types.TeacherProgressFeedItem[]> => {
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
   const startOfDay = new Date(date);
   startOfDay.setUTCHours(0, 0, 0, 0);
   const endOfDay = new Date(date);
   endOfDay.setUTCHours(23, 59, 59, 999);
 
-  const rows = await queryDb
+  const rows = await q
     .select({
       id: classStatusEvents.id,
       actorUserId: classStatusEvents.actorUserId,

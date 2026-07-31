@@ -64,6 +64,7 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
     justifyContent: isCollapsed ? "center" : "flex-start",
     backgroundColor: isActive ? "var(--mui-palette-primaryContainer)" : "transparent",
     color: isActive ? "var(--mui-palette-primary-main)" : "var(--mui-palette-onSurfaceVariant)",
+    touchAction: "pan-y",
     "&:hover": {
       backgroundColor: "color-mix(in srgb, var(--mui-palette-primary-main) 8%, transparent)",
       color: "var(--mui-palette-primary-main)",
@@ -205,6 +206,7 @@ function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: Sidebar
         alignItems: "center",
         gap: 1.5,
         color: "var(--mui-palette-onSurfaceVariant)",
+        touchAction: "pan-y",
         "&:hover": {
           backgroundColor: "color-mix(in srgb, var(--mui-palette-primary-main) 6%, transparent)",
         },
@@ -315,8 +317,11 @@ function GroupedNavList({
         flex: 1,
         minHeight: 0,
         flexBasis: 0,
-        overflow: "auto",
+        overflowY: "auto",
+        overflowX: "hidden",
         overscrollBehavior: "contain",
+        WebkitOverflowScrolling: "touch",
+        touchAction: "pan-y",
         py: isCollapsed ? 1.5 : 2,
         px: isCollapsed ? 0 : 1.5,
         "&::-webkit-scrollbar": { width: 4 },
@@ -527,6 +532,7 @@ function SidebarContent({
         flexDirection: "column",
         flex: 1,
         minHeight: 0,
+        height: "100%",
         overflow: "hidden",
       }}
     >
@@ -546,25 +552,6 @@ function SidebarContent({
         activeKey={activeKey}
       />
     </Box>
-  );
-}
-
-function SidebarMobileNav({
-  navGroups,
-  navItems,
-  activeKey,
-}: {
-  readonly navGroups: readonly TranslatedNavGroup[];
-  readonly navItems: readonly TranslatedNavItem[];
-  readonly activeKey: string | null;
-}) {
-  return (
-    <GroupedNavList
-      groups={navGroups.filter(group => group.section === "main")}
-      items={navItems.filter(item => item.section === "main")}
-      activeKey={activeKey}
-      isCollapsed={false}
-    />
   );
 }
 
@@ -604,12 +591,13 @@ function SidebarMobileDrawer({
       variant="temporary"
       open={mobileDrawerOpen}
       onClose={closeMobileDrawer}
-      ModalProps={{ keepMounted: true, disableScrollLock: true }}
+      ModalProps={{ keepMounted: true }}
       sx={theme => ({
         display: { xs: "block", md: "none" },
         "& .MuiDrawer-paper": {
           width: sidebarWidth,
           height: "100dvh",
+          maxHeight: "100dvh",
           boxSizing: "border-box",
           display: "flex",
           flexDirection: "column",
@@ -618,45 +606,21 @@ function SidebarMobileDrawer({
           color: "var(--mui-palette-onSurface)",
           borderRight: "1px solid var(--mui-palette-border-light)",
           pt: theme.layout.navbarHeight,
+          touchAction: "pan-y",
+          WebkitOverflowScrolling: "touch",
         },
       })}
     >
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          flexBasis: 0,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        <Box
-          ref={navListRef}
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            overflow: "auto",
-            overscrollBehavior: "contain",
-            WebkitOverflowScrolling: "touch",
-            py: 2,
-            "&::-webkit-scrollbar": { width: 4 },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "var(--mui-palette-outlineVariant)",
-              borderRadius: 10,
-            },
-          }}
-        >
-          <SidebarMobileNav navGroups={navGroups} navItems={navItems} activeKey={activeKey} />
-        </Box>
-        <SidebarAccountFooter
-          userName={userName}
-          avatarUrl={avatarUrl}
-          logoutLabel={logoutLabel}
-          isCollapsed={false}
-          activeKey={activeKey}
-        />
-      </Box>
+      <SidebarContent
+        navGroups={navGroups}
+        navItems={navItems}
+        activeKey={activeKey}
+        isCollapsed={false}
+        navListRef={navListRef}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        logoutLabel={logoutLabel}
+      />
     </Drawer>
   );
 }

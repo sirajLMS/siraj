@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 import { alias } from "drizzle-orm/pg-core";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
@@ -87,14 +88,15 @@ export namespace StudentRepository {
   }
 
   export const findById = async (id: string): Promise<Types.StudentEntity | null | undefined> => {
-    return await db.query.students.findFirst({
+    const q = queryDb();
+    return await q.query.students.findFirst({
       where: { id: id },
     });
   };
 
   export const getStudentIdByUserId = async (userId: string, tx?: DBTransaction): Promise<string | null> => {
-    const executor = tx ?? db;
-    const [row] = await executor.select({ id: students.id }).from(students).where(eq(students.userId, userId)).limit(1);
+    const q = queryDb(tx);
+    const [row] = await q.select({ id: students.id }).from(students).where(eq(students.userId, userId)).limit(1);
     return row?.id ?? null;
   };
 
@@ -183,7 +185,8 @@ export namespace StudentRepository {
 
   export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.Student | Error)[]> => {
     if (ids.length === 0) return [];
-    const foundStudents = await db.select().from(students).where(inArray(students.id, ids));
+    const q = queryDb();
+    const foundStudents = await q.select().from(students).where(inArray(students.id, ids));
     const { studentNotFound } = getServerTranslations(locale ?? "en").errorsTranslations.student;
 
     return ids.map(id => {
@@ -193,15 +196,18 @@ export namespace StudentRepository {
   };
 
   export const existsById = async (id: string): Promise<boolean> => {
-    return (await db.$count(students, eq(students.id, id))) > 0;
+    const q = queryDb();
+    return (await q.$count(students, eq(students.id, id))) > 0;
   };
 
   export const allExistsByIds = async (ids: string[]): Promise<boolean> => {
-    return (await db.$count(students, inArray(students.id, ids))) === ids.length;
+    const q = queryDb();
+    return (await q.$count(students, inArray(students.id, ids))) === ids.length;
   };
 
   export const countAllStudents = async (): Promise<number> => {
-    return await db.$count(students);
+    const q = queryDb();
+    return await q.$count(students);
   };
 
   export const deleteById = async (id: string, tErrors: ErrorsLabels): Promise<Types.StudentEntity> => {

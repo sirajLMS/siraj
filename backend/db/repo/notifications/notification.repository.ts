@@ -1,4 +1,5 @@
 import { and, count, desc, eq, gt, gte, lte, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
@@ -186,8 +187,8 @@ export namespace NotificationRepository {
     userId: string,
     tx?: DBTransaction
   ): Promise<UserDeviceTokenSelectType[]> => {
-    const t = tx ?? db;
-    return t
+    const q = queryDb(tx);
+    return q
       .select()
       .from(userDeviceTokens)
       .where(and(eq(userDeviceTokens.userId, userId), eq(userDeviceTokens.isActive, true)));
@@ -289,8 +290,8 @@ export namespace NotificationRepository {
     providerMessageId: string,
     tx?: DBTransaction
   ): Promise<NotificationDeliverySelectType | null> => {
-    const t = tx ?? db;
-    const results = await t
+    const q = queryDb(tx);
+    const results = await q
       .select()
       .from(notificationDeliveries)
       .where(eq(notificationDeliveries.providerMessageId, providerMessageId))
@@ -345,7 +346,7 @@ export namespace NotificationRepository {
     filters: NotificationDeliveryAnalyticsFilter = {},
     tx?: DBTransaction
   ): Promise<NotificationDeliveryAnalyticsResult> => {
-    const t = tx ?? db;
+    const q = queryDb(tx);
     const conditions = [];
 
     if (filters.userId) {
@@ -366,12 +367,12 @@ export namespace NotificationRepository {
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const [{ totalDeliveries }] = await t
+    const [{ totalDeliveries }] = await q
       .select({ totalDeliveries: count() })
       .from(notificationDeliveries)
       .where(whereClause);
 
-    const statusCounts = await t
+    const statusCounts = await q
       .select({
         status: notificationDeliveries.status,
         count: count(),
@@ -404,9 +405,9 @@ export namespace NotificationRepository {
     eventType: NotificationEventType,
     tx?: DBTransaction
   ): Promise<UserNotificationPreferenceSelectType | null> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const results = await queryDb
+    const results = await q
       .select()
       .from(userNotificationPreferences)
       .where(
@@ -493,9 +494,9 @@ export namespace NotificationRepository {
   };
 
   export const getSmsCountInLastHour = async (userId: string, tx?: DBTransaction): Promise<number> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const [result] = await queryDb
+    const [result] = await q
       .select({
         count: sql<number>`COUNT(*)`.mapWith(Number),
       })
@@ -516,7 +517,7 @@ export namespace NotificationRepository {
     options: { limit: number; offset: number; channel?: NotificationChannel; eventType?: NotificationEventType },
     tx?: DBTransaction
   ): Promise<UserDeliveryHistoryResult> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     const conditions = [eq(notificationDeliveries.userId, userId)];
 
@@ -530,7 +531,7 @@ export namespace NotificationRepository {
 
     const whereClause = and(...conditions);
 
-    const rows = await queryDb
+    const rows = await q
       .select()
       .from(notificationDeliveries)
       .where(whereClause)
@@ -538,7 +539,7 @@ export namespace NotificationRepository {
       .limit(options.limit)
       .offset(options.offset);
 
-    const [totalCount] = await queryDb.select({ count: count() }).from(notificationDeliveries).where(whereClause);
+    const [totalCount] = await q.select({ count: count() }).from(notificationDeliveries).where(whereClause);
 
     return {
       rows,

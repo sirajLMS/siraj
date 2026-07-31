@@ -1,6 +1,6 @@
 import { and, eq, gte, isNull, lte } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { classInstances } from "@/backend/db/schema";
 import { ClassExecutionState } from "@/backend/enum";
 import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
@@ -42,8 +42,8 @@ export async function findUpcomingInstances(
   const now = options.now ?? new Date();
   const windowEnd = new Date(now.getTime() + withinHours * 60 * 60 * 1000);
 
-  const queryDb = options.tx ?? db;
-  return queryDb
+  const q = queryDb(options.tx);
+  return q
     .select()
     .from(classInstances)
     .where(

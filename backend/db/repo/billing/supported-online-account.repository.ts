@@ -1,4 +1,5 @@
 import { and, eq, inArray, or } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { supportedOnlineAccounts } from "@/backend/db/schema";
@@ -30,7 +31,7 @@ function directionFilter(direction?: PaymentDirection) {
 
 export namespace SupportedOnlineAccountRepository {
   export async function listAll(tx?: DBTransaction): Promise<SupportedOnlineAccountSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(supportedOnlineAccounts)
@@ -42,7 +43,7 @@ export namespace SupportedOnlineAccountRepository {
     filters: ListActiveFilters = {},
     tx?: DBTransaction
   ): Promise<SupportedOnlineAccountSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const conditions = [eq(supportedOnlineAccounts.isActive, true), directionFilter(filters.direction)].filter(Boolean);
 
     return client
@@ -54,7 +55,7 @@ export namespace SupportedOnlineAccountRepository {
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<SupportedOnlineAccountSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(supportedOnlineAccounts)
@@ -64,7 +65,7 @@ export namespace SupportedOnlineAccountRepository {
   }
 
   export async function getBySlug(slug: string, tx?: DBTransaction): Promise<SupportedOnlineAccountSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(supportedOnlineAccounts)
@@ -129,7 +130,7 @@ export namespace SupportedOnlineAccountRepository {
     tx?: DBTransaction
   ): Promise<SupportedOnlineAccountSelectType[]> {
     if (ids.length === 0) return [];
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(supportedOnlineAccounts)

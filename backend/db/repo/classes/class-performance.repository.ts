@@ -1,4 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstancePerformance } from "@/backend/db/schema/classes/scheduling";
@@ -12,8 +13,8 @@ export namespace ClassPerformanceRepository {
     classInstanceId: string,
     tx?: DBTransaction
   ): Promise<ClassInstancePerformanceSelectType | null> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
+    const q = queryDb(tx);
+    const [row] = await q
       .select()
       .from(classInstancePerformance)
       .where(eq(classInstancePerformance.classInstanceId, classInstanceId))
@@ -59,8 +60,8 @@ export namespace ClassPerformanceRepository {
     const map = new Map<string, ClassInstancePerformanceSelectType>();
     if (classInstanceIds.length === 0) return map;
 
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select()
       .from(classInstancePerformance)
       .where(inArray(classInstancePerformance.classInstanceId, [...classInstanceIds]));

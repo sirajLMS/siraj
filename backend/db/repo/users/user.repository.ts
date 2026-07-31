@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
-import { and, count, eq, ilike, inArray, or, type SQL, sql } from "drizzle-orm";
+import { and, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
@@ -26,51 +27,6 @@ import { getServerTranslations } from "@/shared/locale";
 // ============================================================================
 // Prepared Statements (Drizzle Prepared Statements 2.0)
 // ============================================================================
-// These are defined at module level to be compiled once and reused across requests
-// Note: Prepared statements cannot be used inside transactions (they're tied to the session they were created with)
-
-const findByIdPrepared = db
-  .select()
-  .from(users)
-  .where(eq(users.id, sql.placeholder("userId")))
-  .prepare("find_user_by_id");
-
-const findByEmailPrepared = db
-  .select()
-  .from(users)
-  .where(eq(users.email, sql.placeholder("email")))
-  .prepare("find_user_by_email");
-
-const findSafeByIdPrepared = db
-  .select({
-    id: users.id,
-    name: users.name,
-    email: users.email,
-    emailVerifiedAt: users.emailVerifiedAt,
-    password: users.password,
-    rememberTokenHash: users.rememberTokenHash,
-    avatarFilePath: users.avatarFilePath,
-    avatarUrl: users.avatarUrl,
-    phone: users.phone,
-    status: users.status,
-    isSuperAdmin: users.isSuperAdmin,
-    timezone: users.timezone,
-    displayCurrency: users.displayCurrency,
-    lastLoginAt: users.lastLoginAt,
-    createdAt: users.createdAt,
-    updatedAt: users.updatedAt,
-    deletedAt: users.deletedAt,
-  })
-  .from(users)
-  .where(eq(users.id, sql.placeholder("userId")))
-  .limit(1)
-  .prepare("find_safe_user_by_id");
-
-const existsByEmailPrepared = db
-  .select({ count: count() })
-  .from(users)
-  .where(eq(users.email, sql.placeholder("email")))
-  .prepare("user_exists_by_email");
 
 const usersTotalCountPrepared = db.select({ total: count() }).from(users).prepare("users_total_count");
 
@@ -86,14 +42,9 @@ export async function findOne(condition: SQL | undefined): Promise<UserSelectTyp
 
 export namespace UserRepository {
   export const existsByEmail = async (email: string, tx?: DBTransaction): Promise<boolean> => {
-    const queryDb = tx ?? db;
-    // Use the prepared statement via execute (only when no transaction)
-    if (!tx) {
-      const [result] = await existsByEmailPrepared.execute({ email });
-      return Number(result?.count ?? 0) > 0;
-    }
-    // Fall back to regular query for transactions
-    return (await queryDb.$count(users, eq(users.email, email))) > 0;
+    const q = queryDb(tx);
+    const [result] = await q.select({ count: count() }).from(users).where(eq(users.email, email));
+    return Number(result?.count ?? 0) > 0;
   };
 
   export const findUserByIdOrThrow = async (id: string, locale?: string): Promise<UserSelectType> => {
@@ -105,19 +56,15 @@ export namespace UserRepository {
   };
 
   export const findById = async (id: string): Promise<UserSelectType | null> => {
-    const result = await findByIdPrepared.execute({ userId: id });
+    const q = queryDb();
+    const result = await q.select().from(users).where(eq(users.id, id)).limit(1);
     return result[0] ?? null;
   };
 
   export const findSafeById = async (id: string, tx?: DBTransaction): Promise<UserSelectType | null> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     try {
-      if (!tx) {
-        const result = await findSafeByIdPrepared.execute({ userId: id });
-        return result[0] ?? null;
-      }
-      // Fall back to regular query for transactions
-      const results = await queryDb
+      const results = await q
         .select({
           id: users.id,
           name: users.name,
@@ -152,7 +99,8 @@ export namespace UserRepository {
       return new Map();
     }
 
-    const results = await db
+    const q = queryDb();
+    const results = await q
       .select({ id: users.id, displayCurrency: users.displayCurrency })
       .from(users)
       .where(inArray(users.id, ids));
@@ -165,7 +113,8 @@ export namespace UserRepository {
   };
 
   export const findByEmail = async (email: string): Promise<UserSelectType | null> => {
-    const result = await findByEmailPrepared.execute({ email });
+    const q = queryDb();
+    const result = await q.select().from(users).where(eq(users.email, email)).limit(1);
     return result[0] ?? null;
   };
 

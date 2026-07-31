@@ -1,4 +1,5 @@
 import { desc, eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { bulkInsertOnConflictDoNothing } from "@/backend/db/repo/shared/bulk-upsert";
@@ -52,19 +53,15 @@ export namespace GroupClassRepository {
     classInstanceId: string,
     tx?: DBTransaction
   ): Promise<GroupClassSelectType | null> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
-      .select()
-      .from(groupClasses)
-      .where(eq(groupClasses.classInstanceId, classInstanceId))
-      .limit(1);
+    const q = queryDb(tx);
+    const [row] = await q.select().from(groupClasses).where(eq(groupClasses.classInstanceId, classInstanceId)).limit(1);
 
     return row ?? null;
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<GroupClassSelectType | null> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb.select().from(groupClasses).where(eq(groupClasses.id, id)).limit(1);
+    const q = queryDb(tx);
+    const [row] = await q.select().from(groupClasses).where(eq(groupClasses.id, id)).limit(1);
 
     return row ?? null;
   }
@@ -77,8 +74,8 @@ export namespace GroupClassRepository {
     groupClassId: string,
     tx?: DBTransaction
   ): Promise<GroupClassEnrollmentWithStudent[]> {
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select({
         enrollment: groupClassEnrollments,
         studentName: students.name,
@@ -106,8 +103,8 @@ export namespace GroupClassRepository {
     groupClassId: string,
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType[]> {
-    const queryDb = tx ?? db;
-    return queryDb
+    const q = queryDb(tx);
+    return q
       .select()
       .from(classCommunications)
       .where(eq(classCommunications.groupClassId, groupClassId))
@@ -161,8 +158,8 @@ export namespace GroupClassRepository {
       studentAvatarUrl: string | null;
     }[]
   > {
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select({
         id: groupClassEnrollments.id,
         groupClassId: groupClassEnrollments.groupClassId,
@@ -180,8 +177,8 @@ export namespace GroupClassRepository {
   }
 
   export async function getParentUserIdsForGroupClass(groupClassId: string, tx?: DBTransaction): Promise<string[]> {
-    const queryDb = tx ?? db;
-    const studentRows = await queryDb
+    const q = queryDb(tx);
+    const studentRows = await q
       .select({ parentId: students.parentId })
       .from(groupClassEnrollments)
       .innerJoin(students, eq(groupClassEnrollments.studentId, students.id))
@@ -191,7 +188,7 @@ export namespace GroupClassRepository {
 
     if (parentIds.length === 0) return [];
 
-    const parentRows = await queryDb
+    const parentRows = await q
       .select({ userId: parents.userId })
       .from(parents)
       .innerJoin(users, eq(parents.userId, users.id))
@@ -204,8 +201,8 @@ export namespace GroupClassRepository {
     tx?: DBTransaction
   ): Promise<GroupClassSelectType[]> {
     if (classInstanceIds.length === 0) return [];
-    const queryDb = tx ?? db;
-    return queryDb
+    const q = queryDb(tx);
+    return q
       .select()
       .from(groupClasses)
       .where(inArray(groupClasses.classInstanceId, [...classInstanceIds]));
@@ -224,8 +221,8 @@ export namespace GroupClassRepository {
   ): Promise<Set<string>> {
     if (keys.length === 0) return new Set();
     const groupClassIds = [...new Set(keys.map(k => k.groupClassId))];
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select({
         groupClassId: groupClassEnrollments.groupClassId,
         studentId: groupClassEnrollments.studentId,
@@ -244,8 +241,8 @@ export namespace GroupClassRepository {
     if (keys.length === 0) return map;
 
     const groupClassIds = [...new Set(keys.map(k => k.groupClassId))];
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select()
       .from(groupClassEnrollments)
       .where(inArray(groupClassEnrollments.groupClassId, groupClassIds));
@@ -289,8 +286,8 @@ export namespace GroupClassRepository {
     tx?: DBTransaction
   ): Promise<Set<string>> {
     if (groupClassIds.length === 0) return new Set();
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .selectDistinct({ groupClassId: classCommunications.groupClassId })
       .from(classCommunications)
       .where(inArray(classCommunications.groupClassId, [...groupClassIds]));

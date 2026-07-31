@@ -1,4 +1,5 @@
 import { and, eq, gt, lt, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema/shared/cache";
 import logger from "@/backend/lib/logger";
@@ -21,7 +22,8 @@ export namespace CacheDbRepository {
   export const get = async (key: string): Promise<{ value: string; expiresAt: Date } | null> => {
     try {
       const table = getTable(key);
-      const result = await db.select().from(table).where(eq(table.key, key)).limit(1);
+      const q = queryDb();
+      const result = await q.select().from(table).where(eq(table.key, key)).limit(1);
 
       if (result.length === 0 || !result[0]) {
         return null;
@@ -161,7 +163,8 @@ export namespace CacheDbRepository {
     try {
       const table = getTable(prefix);
       const now = new Date();
-      const result = await db
+      const q = queryDb();
+      const result = await q
         .select({ count: sql<number>`count(*)::int` })
         .from(table)
         .where(sql`${table.key} LIKE ${prefix + "%"} AND ${table.expiresAt} > ${now}`);
@@ -253,7 +256,8 @@ export namespace CacheDbRepository {
    */
   export const ping = async (): Promise<boolean> => {
     try {
-      await Promise.all([db.select().from(rateLimitCache).limit(1), db.select().from(sessionCache).limit(1)]);
+      const q = queryDb();
+      await Promise.all([q.select().from(rateLimitCache).limit(1), q.select().from(sessionCache).limit(1)]);
       return true;
     } catch (error) {
       logger.error("Cache ping failed:", error);

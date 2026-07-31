@@ -29,6 +29,7 @@
 
 import { type NeonQueryFunction, neon } from "@neondatabase/serverless";
 import { drizzle as drizzleNeonHttp, type NeonHttpDatabase } from "drizzle-orm/neon-http";
+import { isNeonHttpEligible } from "@/backend/db/connection-strategy";
 import { relations } from "@/backend/db/drizzleRelations";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 
@@ -46,6 +47,13 @@ let httpDbInstance: NeonHttpDatabase<typeof relations> | null = null;
  */
 export function getNeonHttpClient(): NeonQueryFunction<boolean, boolean> {
   if (!httpClient) {
+    if (!isNeonHttpEligible()) {
+      throw new Error(
+        "Neon HTTP client is not eligible for the current environment. " +
+          "Set DB_PROVIDER=neon, ensure DATABASE_URL hostname matches *.neon.tech, " +
+          'DB_CONNECTION_MODE != "pg", and DB_NEON_HTTP_ENABLED != "false".'
+      );
+    }
     httpClient = neon(getEnvironmentConfig().databaseUrl);
   }
   return httpClient;
@@ -63,4 +71,9 @@ export function getNeonHttpDb(): NeonHttpDatabase<typeof relations> {
     httpDbInstance = drizzleNeonHttp({ client, relations });
   }
   return httpDbInstance;
+}
+
+export function clearHttpClientSingleton(): void {
+  httpClient = null;
+  httpDbInstance = null;
 }

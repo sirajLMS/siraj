@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import type { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
@@ -11,16 +12,18 @@ type ReadExecutor = DBTransaction | typeof db;
 
 export namespace CreditRepository {
   export const getBalance = async (
-    tx: ReadExecutor,
-    studentId: string
+    tx?: ReadExecutor,
+    studentId?: string
   ): Promise<{ classesTotal: number; classesRemaining: number }> => {
-    const [row] = await tx
+    const targetStudentId = studentId ?? (tx as unknown as string);
+    const q = queryDb(typeof tx === "string" ? undefined : tx);
+    const [row] = await q
       .select({
         classesTotal: students.classesTotal,
         classesRemaining: students.classesRemaining,
       })
       .from(students)
-      .where(eq(students.id, studentId))
+      .where(eq(students.id, targetStudentId))
       .limit(1);
     return {
       classesTotal: row?.classesTotal ?? 0,
@@ -29,25 +32,32 @@ export namespace CreditRepository {
   };
 
   export const getTransactions = async (
-    tx: ReadExecutor,
-    studentId: string,
+    tx: ReadExecutor | string,
+    studentId?: string | PaginationArgs | null,
     paginationArgs?: PaginationArgs | null
   ): Promise<CreditTransactionSelectType[]> => {
-    const baseQuery = tx
+    const actualTx = typeof tx === "string" ? undefined : tx;
+    const actualStudentId = typeof tx === "string" ? tx : (studentId as string);
+    const actualPagination = typeof tx === "string" ? (studentId as PaginationArgs | null) : paginationArgs;
+    const q = queryDb(actualTx);
+    const baseQuery = q
       .select()
       .from(creditTransactions)
-      .where(eq(creditTransactions.studentId, studentId))
+      .where(eq(creditTransactions.studentId, actualStudentId))
       .orderBy(desc(creditTransactions.createdAt))
       .$dynamic();
-    const paginated = queryWithPagination(baseQuery, paginationArgs);
+    const paginated = queryWithPagination(baseQuery, actualPagination);
     return paginated;
   };
 
-  export const countTransactions = async (tx: ReadExecutor, studentId: string): Promise<number> => {
-    const [row] = await tx
+  export const countTransactions = async (tx: ReadExecutor | string, studentId?: string): Promise<number> => {
+    const actualTx = typeof tx === "string" ? undefined : tx;
+    const actualStudentId = typeof tx === "string" ? tx : (studentId as string);
+    const q = queryDb(actualTx);
+    const [row] = await q
       .select({ value: count() })
       .from(creditTransactions)
-      .where(eq(creditTransactions.studentId, studentId));
+      .where(eq(creditTransactions.studentId, actualStudentId));
     return Number(row?.value ?? 0);
   };
 
@@ -127,35 +137,42 @@ export namespace CreditRepository {
     tx?: DBTransaction
   ): Promise<CreditTransactionSelectType[]> => {
     if (keys.length === 0) return [];
-    const queryDb = tx ?? db;
-    return queryDb
+    const q = queryDb(tx);
+    return q
       .select()
       .from(creditTransactions)
       .where(inArray(creditTransactions.idempotencyKey, [...keys]));
   };
 
   export const findByClassInstanceId = async (
-    tx: ReadExecutor,
-    classInstanceId: string,
+    tx: ReadExecutor | string,
+    classInstanceId?: string | CreditReason,
     reason?: CreditReason
   ): Promise<CreditTransactionSelectType[]> => {
-    const whereCondition = reason
-      ? and(eq(creditTransactions.classInstanceId, classInstanceId), eq(creditTransactions.reason, reason))
-      : eq(creditTransactions.classInstanceId, classInstanceId);
-    return tx.select().from(creditTransactions).where(whereCondition);
+    const actualTx = typeof tx === "string" ? undefined : tx;
+    const actualClassId = typeof tx === "string" ? tx : (classInstanceId as string);
+    const actualReason = typeof tx === "string" ? (classInstanceId as CreditReason) : reason;
+    const q = queryDb(actualTx);
+    const whereCondition = actualReason
+      ? and(eq(creditTransactions.classInstanceId, actualClassId), eq(creditTransactions.reason, actualReason))
+      : eq(creditTransactions.classInstanceId, actualClassId);
+    return q.select().from(creditTransactions).where(whereCondition);
   };
 
   export const aggregateBalanceFromLedger = async (
-    tx: ReadExecutor,
-    studentId: string
+    tx: ReadExecutor | string,
+    studentId?: string
   ): Promise<{ classesTotal: number; classesRemaining: number }> => {
-    const [row] = await tx
+    const actualTx = typeof tx === "string" ? undefined : tx;
+    const actualStudentId = typeof tx === "string" ? tx : (studentId as string);
+    const q = queryDb(actualTx);
+    const [row] = await q
       .select({
         classesTotal: sql<number>`COALESCE(SUM(CASE WHEN ${creditTransactions.reason} = 'PURCHASE' THEN ${creditTransactions.changeAmount} ELSE 0 END), 0)::int`,
         classesRemaining: sql<number>`COALESCE(SUM(${creditTransactions.changeAmount}), 0)::int`,
       })
       .from(creditTransactions)
-      .where(eq(creditTransactions.studentId, studentId));
+      .where(eq(creditTransactions.studentId, actualStudentId));
     return {
       classesTotal: Number(row?.classesTotal ?? 0),
       classesRemaining: Number(row?.classesRemaining ?? 0),

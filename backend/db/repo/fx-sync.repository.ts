@@ -1,30 +1,10 @@
 import { desc, eq, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { fxSyncRuns } from "@/backend/db/schema";
 import { type FxProvider, FxSyncStatus } from "@/backend/enum/fx/fx-provider.enum";
 import type * as Types from "@/backend/types";
-
-// ============================================================================
-// Prepared Statements (Drizzle Prepared Statements 2.0)
-// ============================================================================
-// These are defined at module level to be compiled once and reused across requests.
-// Prepared statements cannot be used inside transactions (they're tied to the session
-// they were created with) — methods fall back to regular queries when a tx is provided.
-
-const getLatestSyncRunPrepared = db
-  .select()
-  .from(fxSyncRuns)
-  .orderBy(desc(fxSyncRuns.startedAt))
-  .limit(1)
-  .prepare("fx_get_latest_sync_run");
-
-const getRunningSyncRunPrepared = db
-  .select()
-  .from(fxSyncRuns)
-  .where(eq(fxSyncRuns.status, sql.placeholder("status")))
-  .limit(1)
-  .prepare("fx_get_running_sync_run");
 
 export namespace FxSyncRepository {
   type SyncRunInsertInput = {
@@ -101,11 +81,8 @@ export namespace FxSyncRepository {
    * Returns the most recent sync run by `startedAt DESC`, or null if none.
    */
   export const getLatestSyncRun = async (tx?: DBTransaction): Promise<Types.FxSyncRunSelectType | null> => {
-    if (!tx) {
-      const rows = await getLatestSyncRunPrepared.execute();
-      return rows[0] ?? null;
-    }
-    const rows = await tx.select().from(fxSyncRuns).orderBy(desc(fxSyncRuns.startedAt)).limit(1);
+    const q = queryDb(tx);
+    const rows = await q.select().from(fxSyncRuns).orderBy(desc(fxSyncRuns.startedAt)).limit(1);
     return rows[0] ?? null;
   };
 
@@ -113,11 +90,8 @@ export namespace FxSyncRepository {
    * Returns the currently-running sync run, or null if none.
    */
   export const getRunningSyncRun = async (tx?: DBTransaction): Promise<Types.FxSyncRunSelectType | null> => {
-    if (!tx) {
-      const rows = await getRunningSyncRunPrepared.execute({ status: FxSyncStatus.Running });
-      return rows[0] ?? null;
-    }
-    const rows = await tx.select().from(fxSyncRuns).where(eq(fxSyncRuns.status, FxSyncStatus.Running)).limit(1);
+    const q = queryDb(tx);
+    const rows = await q.select().from(fxSyncRuns).where(eq(fxSyncRuns.status, FxSyncStatus.Running)).limit(1);
     return rows[0] ?? null;
   };
 
@@ -126,8 +100,8 @@ export namespace FxSyncRepository {
    * minutes (default 30). Used by the idempotency guard (R8).
    */
   export const isRecentSuccess = async (withinMinutes = 30, tx?: DBTransaction): Promise<boolean> => {
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select({ id: fxSyncRuns.id })
       .from(fxSyncRuns)
       .where(

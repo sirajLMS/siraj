@@ -1,5 +1,5 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
-import { db, invoicePaymentSubmissions } from "@/backend/db";
+import { db, invoicePaymentSubmissions, queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { InvoicePaymentSubmissionStatus } from "@/backend/enum";
 import type * as Types from "@/backend/types";
@@ -19,8 +19,8 @@ export namespace InvoicePaymentSubmissionRepository {
     invoiceId: string,
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType | null> {
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select()
       .from(invoicePaymentSubmissions)
       .where(and(eq(invoicePaymentSubmissions.invoiceId, invoiceId), eq(invoicePaymentSubmissions.status, "pending")))
@@ -33,8 +33,8 @@ export namespace InvoicePaymentSubmissionRepository {
     invoiceId: string,
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType | null> {
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select()
       .from(invoicePaymentSubmissions)
       .where(eq(invoicePaymentSubmissions.invoiceId, invoiceId))
@@ -100,8 +100,8 @@ export namespace InvoicePaymentSubmissionRepository {
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType[]> {
     if (invoiceIds.length === 0) return [];
-    const queryDb = tx ?? db;
-    return queryDb
+    const q = queryDb(tx);
+    return q
       .select()
       .from(invoicePaymentSubmissions)
       .where(inArray(invoicePaymentSubmissions.invoiceId, [...invoiceIds]));

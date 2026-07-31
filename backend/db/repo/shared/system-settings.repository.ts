@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { systemSettings } from "@/backend/db/schema/shared/settings";
@@ -10,8 +11,8 @@ export namespace SystemSettingsRepository {
    * Fetches a system setting by its key.
    */
   export async function getByKey(key: string, tx?: DBTransaction): Promise<SystemSettingSelectType | null> {
-    const queryDb = tx ?? db;
-    const [setting] = await queryDb.select().from(systemSettings).where(eq(systemSettings.key, key)).limit(1);
+    const q = queryDb(tx);
+    const [setting] = await q.select().from(systemSettings).where(eq(systemSettings.key, key)).limit(1);
     return setting ?? null;
   }
 

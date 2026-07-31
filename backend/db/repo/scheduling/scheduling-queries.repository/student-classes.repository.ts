@@ -1,4 +1,5 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
@@ -74,8 +75,8 @@ export const getStudentFutureClasses = async (
   fromDate: Date,
   tx?: DBTransaction
 ): Promise<{ id: string; executionState: string; scheduledStartAt: Date }[]> => {
-  const queryDb = tx ?? db;
-  const rows = await queryDb
+  const q = queryDb(tx);
+  const rows = await q
     .select({
       id: classInstances.id,
       executionState: classInstances.executionState,
@@ -102,9 +103,9 @@ export const getUpcomingClassesForStudent = async (
   studentId: string,
   tx?: DBTransaction
 ): Promise<UpcomingClassRow[]> => {
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
   const fromDate = new Date();
-  const rows = await queryDb
+  const rows = await q
     .select({
       id: classInstances.id,
       scheduledStartAt: classInstances.scheduledStartAt,

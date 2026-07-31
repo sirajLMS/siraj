@@ -1,4 +1,5 @@
 import { asc, eq, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -37,7 +38,7 @@ function toReturnType(row: SupportedCurrencySelectType): SupportedCurrencyReturn
 
 export namespace SupportedCurrencyRepository {
   export async function listAll(tx?: DBTransaction): Promise<SupportedCurrencyReturnType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const rows = await client
       .select()
       .from(supportedCurrencies)
@@ -46,7 +47,7 @@ export namespace SupportedCurrencyRepository {
   }
 
   export async function listActive(tx?: DBTransaction): Promise<SupportedCurrencyReturnType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const rows = await client
       .select()
       .from(supportedCurrencies)
@@ -98,7 +99,7 @@ export namespace SupportedCurrencyRepository {
   }
 
   export async function getByCode(code: CurrencyCode, tx?: DBTransaction): Promise<SupportedCurrencyReturnType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(supportedCurrencies).where(eq(supportedCurrencies.code, code)).limit(1);
     return row ? toReturnType(row) : null;
   }
@@ -130,7 +131,7 @@ export namespace SupportedCurrencyRepository {
    * Returns `true` if **any** of the referencing tables contain the code.
    */
   export async function isCurrencyInUse(code: CurrencyCode, tx?: DBTransaction): Promise<boolean> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select({ exists: sql<boolean>`1` })
       .from(

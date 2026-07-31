@@ -7,6 +7,7 @@ import {
   invoiceFiles,
   learningResourceFiles,
   parentFiles,
+  queryDb,
   recurringScheduleFiles,
   staffProfileFiles,
   storageDirectories,
@@ -637,9 +638,9 @@ export namespace StorageDbRepository {
     parentId: string,
     tx?: DBTransaction
   ): Promise<StorageTypes.LinkedFileReturnType[]> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const results = await queryDb
+    const results = await q
       .select({
         id: parentFiles.id,
         fileId: parentFiles.fileId,
@@ -669,11 +670,11 @@ export namespace StorageDbRepository {
     tx?: DBTransaction,
     limit?: number
   ): Promise<StorageTypes.LinkedFileReturnType[]> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const conditions = [eq(invoiceFiles.invoiceId, invoiceId)];
     if (usageType) conditions.push(eq(invoiceFiles.usageType, usageType));
 
-    const baseQuery = queryDb
+    const baseQuery = q
       .select({
         id: invoiceFiles.id,
         fileId: invoiceFiles.fileId,

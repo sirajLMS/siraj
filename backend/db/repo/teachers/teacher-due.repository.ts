@@ -1,4 +1,5 @@
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students, teacherDues, teachers, users } from "@/backend/db/schema";
@@ -26,12 +27,8 @@ export namespace TeacherDueRepository {
     classInstanceId: string,
     tx?: DBTransaction
   ): Promise<TeacherDueSelectType | null> {
-    const executor = tx ?? db;
-    const [row] = await executor
-      .select()
-      .from(teacherDues)
-      .where(eq(teacherDues.classInstanceId, classInstanceId))
-      .limit(1);
+    const q = queryDb(tx);
+    const [row] = await q.select().from(teacherDues).where(eq(teacherDues.classInstanceId, classInstanceId)).limit(1);
     return row ?? null;
   }
 
@@ -41,8 +38,8 @@ export namespace TeacherDueRepository {
     endDate: Date,
     tx?: DBTransaction
   ): Promise<TeacherDueSelectType[]> {
-    const executor = tx ?? db;
-    return executor
+    const q = queryDb(tx);
+    return q
       .select()
       .from(teacherDues)
       .where(
@@ -209,12 +206,12 @@ export namespace TeacherDueRepository {
     teacherId: string | undefined,
     tx?: DBTransaction
   ): Promise<TeacherDueReturnType[]> {
-    const executor = tx ?? db;
+    const q = queryDb(tx);
     const conditions = [eq(teacherDues.status, TeacherDueStatus.PENDING)];
     if (teacherId) {
       conditions.push(eq(teacherDues.teacherId, teacherId));
     }
-    const rows = await executor
+    const rows = await q
       .select({
         id: teacherDues.id,
         teacherId: teacherDues.teacherId,
@@ -253,8 +250,8 @@ export namespace TeacherDueRepository {
   }
 
   export async function getPendingDuesSummary(tx?: DBTransaction): Promise<TeacherPendingDuesSummaryReturnType> {
-    const executor = tx ?? db;
-    const rows = await executor
+    const q = queryDb(tx);
+    const rows = await q
       .select({ amount: teacherDues.amount, currency: teacherDues.currency })
       .from(teacherDues)
       .where(eq(teacherDues.status, TeacherDueStatus.PENDING));

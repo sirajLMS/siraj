@@ -1,4 +1,5 @@
 import { asc, eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { meetingProviders, userMeetingConfigs } from "@/backend/db/schema";
@@ -12,7 +13,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingProviderRepository {
   export async function listActive(tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(meetingProviders)
@@ -21,19 +22,19 @@ export namespace MeetingProviderRepository {
   }
 
   export async function listAll(tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client.select().from(meetingProviders).orderBy(asc(meetingProviders.slug));
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<MeetingProviderSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(meetingProviders).where(eq(meetingProviders.id, id)).limit(1);
     return row ?? null;
   }
 
   export async function getByIds(ids: string[], tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {
     if (ids.length === 0) return [];
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client.select().from(meetingProviders).where(inArray(meetingProviders.id, ids));
   }
 
@@ -50,7 +51,7 @@ export namespace MeetingProviderRepository {
   }
 
   export async function getBySlug(slug: string, tx?: DBTransaction): Promise<MeetingProviderSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(meetingProviders).where(eq(meetingProviders.slug, slug)).limit(1);
     return row ?? null;
   }

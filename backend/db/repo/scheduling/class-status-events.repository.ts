@@ -1,4 +1,5 @@
 import { inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared/bulk-upsert";
@@ -27,8 +28,8 @@ export namespace ClassStatusEventsRepository {
     const map = new Map<string, ClassStatusEventSelectType>();
     if (classInstanceIds.length === 0) return map;
 
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select()
       .from(classStatusEvents)
       .where(inArray(classStatusEvents.classInstanceId, [...classInstanceIds]));
@@ -47,8 +48,8 @@ export namespace ClassStatusEventsRepository {
   ): Promise<Set<string>> {
     if (classInstanceIds.length === 0) return new Set();
 
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .selectDistinct({ classInstanceId: classStatusEvents.classInstanceId })
       .from(classStatusEvents)
       .where(inArray(classStatusEvents.classInstanceId, [...classInstanceIds]));

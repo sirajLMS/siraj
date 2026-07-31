@@ -1,4 +1,5 @@
 import { and, asc, eq, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
@@ -26,7 +27,7 @@ export namespace ClassMeetingConfigRepository {
     scope: ClassMeetingConfigScopeFilter,
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(classMeetingConfigs)
@@ -39,7 +40,7 @@ export namespace ClassMeetingConfigRepository {
     tx?: DBTransaction,
     _locale?: string
   ): Promise<ClassMeetingConfigSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(classMeetingConfigs).where(eq(classMeetingConfigs.id, id)).limit(1);
     return row ?? null;
   }
@@ -60,7 +61,7 @@ export namespace ClassMeetingConfigRepository {
     scope: ClassMeetingConfigScopeFilter,
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(classMeetingConfigs)
@@ -231,7 +232,7 @@ export namespace ClassMeetingConfigRepository {
     label: string | null | undefined,
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(classMeetingConfigs)

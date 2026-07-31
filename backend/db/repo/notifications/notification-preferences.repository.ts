@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { userNotificationPreferences } from "@/backend/db/schema";
@@ -10,8 +11,8 @@ export namespace NotificationPreferencesRepository {
     userId: string,
     tx?: DBTransaction
   ): Promise<UserNotificationPreferenceSelectType[]> {
-    const queryDb = tx ?? db;
-    return queryDb.select().from(userNotificationPreferences).where(eq(userNotificationPreferences.userId, userId));
+    const q = queryDb(tx);
+    return q.select().from(userNotificationPreferences).where(eq(userNotificationPreferences.userId, userId));
   }
 
   export async function batchUpsert(

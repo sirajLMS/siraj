@@ -1,4 +1,5 @@
 import { and, eq, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { leaveQuotaUsage } from "@/backend/db/schema/classes/scheduling";
@@ -19,7 +20,7 @@ export namespace LeaveQuotaUsageRepository {
     periodMonth: number,
     tx?: DBTransaction
   ): Promise<LeaveQuotaUsageRow | null> {
-    const executor = tx ?? db;
+    const executor = queryDb(tx);
     const [row] = await executor
       .select()
       .from(leaveQuotaUsage)
