@@ -2674,6 +2674,7 @@ enum NotificationChannel {
   ON_APP
   PUSH
   SMS
+  WHATSAPP
 }
 
 enum NotificationEventType {
@@ -4723,6 +4724,7 @@ type TeacherPayment {
   amount: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
   isTestPayment: Boolean
   paymentDate: DateTime

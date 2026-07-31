@@ -124,6 +124,19 @@ export const notificationsAr: NotificationsLabels = {
     title: "شكوى جديدة",
     body: ({ complaintId, category }) => `تم تقديم شكوى جديدة من نوع ${category} (${complaintId}).`,
   },
+  complaintResponse: {
+    title: "رد على الشكوى",
+  },
+  newSuggestion: {
+    title: "تم تقديم اقتراح جديد",
+  },
+  suggestionResponse: {
+    title: "رد على الاقتراح",
+  },
+  suggestionMarkedDuplicate: {
+    title: "تم تعليم الاقتراح كمكرر",
+    body: ({ duplicateId }) => `تم تعليم اقتراحك كمكرر للاقتراح رقم #${duplicateId.slice(0, 8)}`,
+  },
   drawerTitle: "الإشعارات",
   managePreferences: "إدارة التفضيلات",
   markAllRead: "تعليم الكل كمقروء",

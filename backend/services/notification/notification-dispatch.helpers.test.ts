@@ -50,10 +50,10 @@ function buildFourChannelPayloads(
   body = "test-body"
 ): CommunicationPayload[] {
   return [
-    { userId, channel: "on_app", eventType, title, body },
-    { userId, channel: "email", eventType, title, body },
-    { userId, channel: "sms", eventType, title, body },
-    { userId, channel: "push", eventType, title, body },
+    { userId, channel: NotificationChannel.ON_APP, eventType, title, body },
+    { userId, channel: NotificationChannel.EMAIL, eventType, title, body },
+    { userId, channel: NotificationChannel.SMS, eventType, title, body },
+    { userId, channel: NotificationChannel.PUSH, eventType, title, body },
   ];
 }
 
@@ -127,7 +127,12 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     expect(dispatched).toHaveLength(4);
     const dispatchedChannels = dispatched.map(p => p.channel).sort(compareChannels);
-    expect(dispatchedChannels).toEqual(["email", "on_app", "push", "sms"]);
+    expect(dispatchedChannels).toEqual([
+      NotificationChannel.EMAIL,
+      NotificationChannel.ON_APP,
+      NotificationChannel.PUSH,
+      NotificationChannel.SMS,
+    ]);
   });
 
   test("user disabling EMAIL for INVOICE_GENERATED → email payload is filtered out", async () => {
@@ -143,16 +148,18 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     const dispatchedChannels = (dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[])
       .map(p => p.channel)
       .sort(compareChannels);
-    expect(dispatchedChannels).toEqual(["on_app", "push", "sms"]);
-    expect(dispatchedChannels).not.toContain("email");
+    expect(dispatchedChannels).toEqual([NotificationChannel.ON_APP, NotificationChannel.PUSH, NotificationChannel.SMS]);
+    expect(dispatchedChannels).not.toContain(NotificationChannel.EMAIL);
     expect(results.every(r => r.success)).toBe(true);
   });
 
   test("EVENT_CHANNEL_ALLOWLIST filters CLASS_SCHEDULED payloads to ON_APP + EMAIL BEFORE the prefs filter", async () => {
     // Sanity: the allowlist entry is exactly ON_APP + EMAIL for CLASS_SCHEDULED.
     const allowed = EVENT_CHANNEL_ALLOWLIST[NotificationEventType.CLASS_SCHEDULED] ?? [];
-    const allowedLower = allowed.map(c => (c === NotificationChannel.ON_APP ? "on_app" : "email"));
-    expect([...allowedLower].sort(compareChannels)).toEqual(["email", "on_app"]);
+    const allowedLower = allowed.map(c =>
+      c === NotificationChannel.ON_APP ? NotificationChannel.ON_APP : NotificationChannel.EMAIL
+    );
+    expect([...allowedLower].sort(compareChannels)).toEqual([NotificationChannel.EMAIL, NotificationChannel.ON_APP]);
 
     // Even though user has ALL prefs enabled, only ON_APP + EMAIL may dispatch.
     const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.CLASS_SCHEDULED);
@@ -162,7 +169,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     expect(dispatched).toHaveLength(2);
     const dispatchedChannels = dispatched.map(p => p.channel).sort(compareChannels);
-    expect(dispatchedChannels).toEqual(["email", "on_app"]);
+    expect(dispatchedChannels).toEqual([NotificationChannel.EMAIL, NotificationChannel.ON_APP]);
   });
 
   test("prefs fetch error falls back to all-enabled — dispatchMulti still receives all 4 channels", async () => {
@@ -178,7 +185,12 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     expect(dispatchMultiSpy).toHaveBeenCalledTimes(1);
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     expect(dispatched).toHaveLength(4);
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual(["email", "on_app", "push", "sms"]);
+    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+      NotificationChannel.EMAIL,
+      NotificationChannel.ON_APP,
+      NotificationChannel.PUSH,
+      NotificationChannel.SMS,
+    ]);
     expect(results).toHaveLength(4);
     expect(results.every(r => r.success)).toBe(true);
   });
@@ -210,7 +222,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     const secondCallPayloads = dispatchMultiSpy.mock.calls[1][0] as CommunicationPayload[];
     expect(firstCallPayloads).toHaveLength(4);
     expect(secondCallPayloads).toHaveLength(3);
-    expect(secondCallPayloads.map(p => p.channel)).not.toContain("email");
+    expect(secondCallPayloads.map(p => p.channel)).not.toContain(NotificationChannel.EMAIL);
   });
 });
 
@@ -225,7 +237,7 @@ describe("dispatchWithPreferences — recipient resolution", () => {
 
     expect(findSafeByIdSpy).toHaveBeenCalledWith(PARENT_USER_ID);
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
-    const emailPayload = dispatched.find(p => p.channel === "email");
+    const emailPayload = dispatched.find(p => p.channel === NotificationChannel.EMAIL);
     expect(emailPayload?.metadata?.to).toBe("parent@test.com");
   });
 
@@ -236,7 +248,7 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
-    const smsPayload = dispatched.find(p => p.channel === "sms");
+    const smsPayload = dispatched.find(p => p.channel === NotificationChannel.SMS);
     expect(smsPayload?.metadata?.to).toBe("+15555550100");
   });
 
@@ -247,9 +259,13 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
-    expect(dispatched.map(p => p.channel)).not.toContain("email");
+    expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.EMAIL);
     // on_app, push, sms still dispatch.
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual(["on_app", "push", "sms"]);
+    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+      NotificationChannel.ON_APP,
+      NotificationChannel.PUSH,
+      NotificationChannel.SMS,
+    ]);
   });
 
   test("drops sms payload when user.phone is null", async () => {
@@ -259,8 +275,12 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
-    expect(dispatched.map(p => p.channel)).not.toContain("sms");
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual(["email", "on_app", "push"]);
+    expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.SMS);
+    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+      NotificationChannel.EMAIL,
+      NotificationChannel.ON_APP,
+      NotificationChannel.PUSH,
+    ]);
   });
 
   test("drops all email+sms payloads when user not found, still dispatches on_app+push", async () => {
@@ -270,7 +290,10 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual(["on_app", "push"]);
+    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+      NotificationChannel.ON_APP,
+      NotificationChannel.PUSH,
+    ]);
     expect(dispatched).toHaveLength(2);
   });
 
@@ -281,8 +304,8 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
     const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
-    const onAppPayload = dispatched.find(p => p.channel === "on_app");
-    const pushPayload = dispatched.find(p => p.channel === "push");
+    const onAppPayload = dispatched.find(p => p.channel === NotificationChannel.ON_APP);
+    const pushPayload = dispatched.find(p => p.channel === NotificationChannel.PUSH);
     expect(onAppPayload?.metadata?.to).toBeUndefined();
     expect(pushPayload?.metadata?.to).toBeUndefined();
   });

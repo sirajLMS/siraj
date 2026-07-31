@@ -44,16 +44,16 @@
 
 ## Phase 1: Channel Foundations
 
-- [ ] **1. Enum and type extension with both forced compile fixes (REQ-1, C1)**
-  - [ ] 1.1 Edit `backend/types/notifications/communications.types.ts` — add `"whatsapp"` to `CommunicationChannelType`
-  - [ ] 1.2 Edit `backend/enum/notifications/notificationDeliveries.enum.ts` — `WHATSAPP = "WHATSAPP"`
-  - [ ] 1.3 Edit `backend/db/schema/enums.ts` — Drizzle `notificationChannel` enum value
-  - [ ] 1.4 Edit `backend/graphql/pothos/shared/enum.pothos.ts` — register `NotificationChannel.WHATSAPP`
-  - [ ] 1.5 **Edit `backend/services/communication/utils.ts`** — add `whatsapp: "WhatsApp"` to `CHANNEL_LABELS` (C1; without this the enum change breaks `Record<DeliveryChannel, string>` totality)
-  - [ ] 1.6 Run `bun run generate:gqlSchema && bun codegen`
-  - [ ] 1.7 Verify forced errors exist pre-Phase-6: `communication.service.ts` missing `case "whatsapp"`; then resolve them (task 6)
-  - [ ] 1.8 **Quality loop per file**: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
-  - [ ] 1.9 **AGENTS.md/instruction compliance**: read and fix violations against:
+- [x] **1. Enum and type extension with both forced compile fixes (REQ-1, C1)**
+  - [x] 1.1 Edit `backend/types/notifications/communications.types.ts` — add `"whatsapp"` to `CommunicationChannelType`
+  - [x] 1.2 Edit `backend/enum/notifications/notificationDeliveries.enum.ts` — `WHATSAPP = "WHATSAPP"`
+  - [x] 1.3 Edit `backend/db/schema/enums.ts` — Drizzle `notificationChannel` enum value **(AUTO: `createPgEnumFromEnum` picks up new value)**
+  - [x] 1.4 Edit `backend/graphql/pothos/shared/enum.pothos.ts` — register `NotificationChannel.WHATSAPP` **(AUTO: `gqlSchemaBuilder.enumType(NotificationChannel, ...)` picks up new value)**
+  - [x] 1.5 **Edit `backend/services/communication/utils.ts`** — add `whatsapp: "WhatsApp"` to `CHANNEL_LABELS` (C1; without this the enum change breaks `Record<DeliveryChannel, string>` totality)
+  - [x] 1.6 Run `bun run generate:gqlSchema && bun codegen`
+  - [x] 1.7 Verify forced errors exist pre-Phase-6: `communication.service.ts` missing `case "whatsapp"`; then resolve them (task 6)
+  - [x] 1.8 **Quality loop per file**: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 1.9 **AGENTS.md/instruction compliance**: read and fix violations against:
       - `backend/types/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (types/enum files)
       - `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (schema enum)
       - `backend/graphql/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (Pothos enum)

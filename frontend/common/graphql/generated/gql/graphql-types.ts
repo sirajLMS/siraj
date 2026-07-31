@@ -3538,7 +3538,8 @@ export enum NotificationChannel {
   Email = 'EMAIL',
   OnApp = 'ON_APP',
   Push = 'PUSH',
-  Sms = 'SMS'
+  Sms = 'SMS',
+  Whatsapp = 'WHATSAPP'
 }
 
 export enum NotificationEventType {
@@ -6100,6 +6101,7 @@ export type TeacherPayment = {
   amount: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   id: Maybe<Scalars['String']['output']>;
   isTestPayment: Maybe<Scalars['Boolean']['output']>;
   paymentDate: Maybe<Scalars['DateTime']['output']>;

@@ -3,19 +3,16 @@
 import { Switch, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import {
-  NOTIFICATION_CHANNELS,
-  type PreferenceMatrixRow,
-} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import type { NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PreferenceMatrixRow } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 interface PreferencesMatrixDesktopViewProps {
   readonly labels: ProfileNotificationsLabels;
-  // NEW FOR PLAN v5: pre-shaped matrix rows lifted out of the desktop tier
-  // (data-shaping belongs in the ViewModel — specs.md §6.1). The tier view
-  // only consumes them.
+  // Pre-shaped matrix rows lifted out of the desktop tier — data-shaping
+  // belongs in the ViewModel. The tier view only consumes them.
   readonly matrixRows: readonly PreferenceMatrixRow[];
   readonly onToggle: (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => void;
   readonly disabled?: boolean;
@@ -71,7 +68,7 @@ export function PreferencesMatrixDesktopView({
     const eventLabels = labels.events as Record<string, string>;
     const getEventLabel = (eventType: NotificationEventType): string => eventLabels[eventType] ?? eventType;
 
-    const channelColumns: GridColDef<PreferenceMatrixRow>[] = NOTIFICATION_CHANNELS.map(channel => ({
+    const channelColumns: GridColDef<PreferenceMatrixRow>[] = Object.values(NotificationChannel).map(channel => ({
       field: channel,
       headerName: labels.channels[channel],
       width: 120,

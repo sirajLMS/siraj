@@ -11,6 +11,7 @@ export const profileNotificationsAr: ProfileNotificationsLabels = {
     SMS: "رسائل SMS",
     PUSH: "إشعارات الدفع",
     ON_APP: "داخل التطبيق",
+    WHATSAPP: "واتساب",
   },
   events: {
     CLASS_REMINDER: "تذكيرات الحصص",

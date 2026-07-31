@@ -1,4 +1,5 @@
 import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationChannel } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { OnAppChannel } from "@/backend/services";
 import { emailChannel } from "@/backend/services/communication/channels/email";
@@ -6,6 +7,7 @@ import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
 import type { ChannelDispatchResult, CommunicationPayload, NotificationMetadata } from "@/backend/types";
 import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
+import { getServerTranslations } from "@/shared/locale";
 
 function asNotificationMetadata(metadata: Record<string, unknown> | undefined): NotificationMetadata | null {
   if (!metadata || typeof metadata.entityKind !== "string" || typeof metadata.entityId !== "string") {
@@ -17,7 +19,7 @@ function asNotificationMetadata(metadata: Record<string, unknown> | undefined): 
 export namespace CommunicationService {
   async function dispatchOnApp(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
     await OnAppChannel.send(payload, locale);
-    return { channel: "on_app", success: true };
+    return { channel: NotificationChannel.ON_APP, success: true };
   }
 
   async function dispatchRecipientChannel(
@@ -32,7 +34,7 @@ export namespace CommunicationService {
       metadata: asNotificationMetadata(payload.metadata),
     };
 
-    const isEmail = payload.channel === "email";
+    const isEmail = payload.channel === NotificationChannel.EMAIL;
     const result = isEmail
       ? await emailChannel.send({ ...commonFields, subject: payload.title, html: payload.body ?? "" }, locale)
       : await smsChannel.send({ ...commonFields, body: payload.body ?? "" }, locale);
@@ -58,32 +60,44 @@ export namespace CommunicationService {
       locale
     );
     return {
-      channel: "push",
+      channel: NotificationChannel.PUSH,
       success: result.success,
       error: result.errors?.join("; "),
     };
   }
 
   export async function dispatch(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
     try {
       switch (payload.channel) {
-        case "on_app":
+        case NotificationChannel.ON_APP:
           return await dispatchOnApp(payload, locale);
-        case "email":
-        case "sms":
+        case NotificationChannel.EMAIL:
+        case NotificationChannel.SMS:
           return await dispatchRecipientChannel(payload, locale);
-        case "push":
+        case NotificationChannel.PUSH:
           return await dispatchPush(payload, locale);
+        case NotificationChannel.WHATSAPP: {
+          logger.error(tErrors.unknownCommunicationChannel(String(payload.channel)), {
+            channel: payload.channel,
+            userId: payload.userId,
+          });
+          return {
+            channel: payload.channel,
+            success: false,
+            error: tErrors.unknownCommunicationChannel(String(payload.channel)),
+          };
+        }
         default: {
           const _exhaustiveCheck: never = payload.channel;
-          logger.error("Unknown communication channel", {
+          logger.error(tErrors.unknownCommunicationChannel(String(_exhaustiveCheck)), {
             channel: _exhaustiveCheck,
             userId: payload.userId,
           });
           return {
             channel: payload.channel,
             success: false,
-            error: `Unknown communication channel: ${String(_exhaustiveCheck)}`,
+            error: tErrors.unknownCommunicationChannel(String(_exhaustiveCheck)),
           };
         }
       }
@@ -98,7 +112,7 @@ export namespace CommunicationService {
       return {
         channel: payload.channel,
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : tErrors.unknownError,
       };
     }
   }
@@ -110,6 +124,8 @@ export namespace CommunicationService {
     if (payloads.length === 0) {
       return [];
     }
+
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const results = await Promise.allSettled(payloads.map(p => dispatch(p, locale)));
 
@@ -128,7 +144,7 @@ export namespace CommunicationService {
         dispatchResults.push({
           channel: payloads[i].channel,
           success: false,
-          error: result.reason instanceof Error ? result.reason.message : "Unknown dispatch error",
+          error: result.reason instanceof Error ? result.reason.message : tErrors.unknownDispatchError,
         });
       }
     }

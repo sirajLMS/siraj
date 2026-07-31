@@ -2,39 +2,27 @@
 
 import { Box, FormControlLabel, Skeleton, Slide, Stack, Switch, Tab, Tabs, Typography } from "@mui/material";
 import type { SyntheticEvent } from "react";
-import type {
-  NotificationChannel as NotificationChannelType,
-  NotificationEventType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   NOTIFICATION_CHANNEL_ACCENTS,
   NOTIFICATION_CHANNEL_ICONS,
   type NotificationChannelAccent,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferencesConstants";
-import {
-  NOTIFICATION_CHANNELS,
-  NOTIFICATION_EVENT_TYPES,
-  type NotificationPrefRow,
-} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import type { NotificationPrefRow } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import { CHANNEL_ORDER } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
-
-type ChannelId = (typeof NOTIFICATION_CHANNELS)[number];
 
 interface PreferencesChannelTabsMobileViewProps {
   readonly labels: ProfileNotificationsLabels;
   readonly preferences: readonly NotificationPrefRow[];
-  // NEW FOR PLAN v5: pre-computed preference lookup map passed from the
-  // container so the tier view stays render-only (no `buildPreferenceMap`
-  // invocation, no `useMemo` derivation in tier — specs.md §6.1).
   readonly preferenceMap: ReadonlyMap<string, NotificationPrefRow>;
-  /** Role-filtered event catalog; defaults to full matrix when omitted. */
   readonly eventTypes?: readonly NotificationEventType[];
-  readonly onToggle: (channel: NotificationChannelType, eventType: NotificationEventType, enabled: boolean) => void;
+  readonly onToggle: (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => void;
   readonly disabled?: boolean;
   readonly loading?: boolean;
-  readonly activeChannel: NotificationChannelType;
+  readonly activeChannel: NotificationChannel;
   readonly slideDirection: "left" | "right";
-  readonly onChannelChange: (channel: NotificationChannelType, slideDirection: "left" | "right") => void;
+  readonly onChannelChange: (channel: NotificationChannel, slideDirection: "left" | "right") => void;
 }
 
 function ChannelTabsSkeleton() {
@@ -59,7 +47,7 @@ export function PreferencesChannelTabsMobileView({
   labels,
   preferences,
   preferenceMap,
-  eventTypes = NOTIFICATION_EVENT_TYPES,
+  eventTypes = Object.values(NotificationEventType),
   onToggle,
   disabled = false,
   loading = false,
@@ -70,9 +58,9 @@ export function PreferencesChannelTabsMobileView({
   const eventLabels = labels.events as Record<string, string>;
   const getEventLabel = (eventType: NotificationEventType): string => eventLabels[eventType] ?? eventType;
 
-  const handleChannelChange = (_: SyntheticEvent, value: ChannelId) => {
-    const nextIndex = NOTIFICATION_CHANNELS.indexOf(value);
-    const prevIndex = NOTIFICATION_CHANNELS.indexOf(activeChannel);
+  const handleChannelChange = (_: SyntheticEvent, value: NotificationChannel) => {
+    const nextIndex = CHANNEL_ORDER.indexOf(value);
+    const prevIndex = CHANNEL_ORDER.indexOf(activeChannel);
     const direction: "left" | "right" = nextIndex > prevIndex ? "left" : "right";
     onChannelChange(value, direction);
   };
@@ -113,7 +101,7 @@ export function PreferencesChannelTabsMobileView({
           },
         })}
       >
-        {NOTIFICATION_CHANNELS.map(channel => {
+        {CHANNEL_ORDER.map(channel => {
           const Icon = NOTIFICATION_CHANNEL_ICONS[channel];
           const accent = NOTIFICATION_CHANNEL_ACCENTS[channel];
           const isActive = activeChannel === channel;

@@ -25,7 +25,7 @@ import { NotificationPreferencesRepository, UserRepository } from "@/backend/db/
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
-import type { ChannelDispatchResult, CommunicationChannelType, CommunicationPayload } from "@/backend/types";
+import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
 
 // ─── Event/channel allowlist ───────────────────────────────────────────
 
@@ -63,33 +63,21 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
 
 // ─── Channel comparison helper ────────────────────────────────────────
 
-/**
- * Map `NotificationChannel` enum value → `CommunicationChannelType`
- * string literal (`NotificationChannel.EMAIL` is `"EMAIL"` while
- * `CommunicationChannelType` is `"email"` lowercase). Centralized so the
- * allowlist can stay keyed by enum members (F15) while payload
- * filtering matches by lowercase payload-channel string.
- */
-const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, CommunicationChannelType>> = Object.freeze({
-  [NotificationChannel.ON_APP]: "on_app",
-  [NotificationChannel.EMAIL]: "email",
-  [NotificationChannel.SMS]: "sms",
-  [NotificationChannel.PUSH]: "push",
-});
+const ALL_ENUM_CHANNELS: readonly NotificationChannel[] = Object.values(NotificationChannel).filter(
+  ch => ch !== NotificationChannel.WHATSAPP
+);
 
-const ALL_ENUM_CHANNELS: readonly NotificationChannel[] = Object.values(NotificationChannel);
-
-function isAllowed(eventType: NotificationEventType, channel: CommunicationChannelType): boolean {
+function isAllowed(eventType: NotificationEventType, channel: NotificationChannel): boolean {
   const allowedEnums = EVENT_CHANNEL_ALLOWLIST[eventType];
-  if (!allowedEnums) return true; // absent → all 4 channels allowed
-  return allowedEnums.some(enumChannel => CHANNEL_FROM_ENUM[enumChannel] === channel);
+  if (!allowedEnums) return true; // absent → all channels allowed
+  return allowedEnums.includes(channel);
 }
 
 // ─── Preferences helper ───────────────────────────────────────────────
 
 type PreferencesByChannel = Map<string, boolean>;
 
-function prefKey(channel: CommunicationChannelType, eventType: NotificationEventType): string {
+function prefKey(channel: NotificationChannel, eventType: NotificationEventType): string {
   return `${channel}:${eventType}`;
 }
 
@@ -110,8 +98,7 @@ function prefsToMap(
 ): PreferencesByChannel {
   const map = new Map<string, boolean>();
   for (const row of rows) {
-    const channel = CHANNEL_FROM_ENUM[row.channel as NotificationChannel];
-    map.set(prefKey(channel, row.eventType as NotificationEventType), row.enabled);
+    map.set(prefKey(row.channel as NotificationChannel, row.eventType as NotificationEventType), row.enabled);
   }
   return map;
 }
@@ -169,20 +156,20 @@ type RecipientAddress = string | null;
 /**
  * Resolve the recipient address for a payload's channel from the user row.
  *
- *   - `email` → `user.email` (always non-null in the schema, but defended).
- *   - `sms`   → `user.phone` (nullable).
- *   - `on_app` / `push` → `null` (no address needed).
+ *   - `NotificationChannel.EMAIL` → `user.email` (always non-null in the schema, but defended).
+ *   - `NotificationChannel.SMS`   → `user.phone` (nullable).
+ *   - `NotificationChannel.ON_APP` / `NotificationChannel.PUSH` → `null` (no address needed).
  *
  * Returns `null` for channels that don't need an address, and `""` for
  * channels that do but the user lacks the contact field (caller drops the
  * payload). Keeping this pure (no I/O) lets the caller batch the user fetch.
  */
 function recipientAddressForChannel(
-  channel: CommunicationChannelType,
+  channel: NotificationChannel,
   user: { readonly email: string | null; readonly phone: string | null } | null
 ): RecipientAddress {
-  if (channel === "email") return user?.email ?? "";
-  if (channel === "sms") return user?.phone ?? "";
+  if (channel === NotificationChannel.EMAIL) return user?.email ?? "";
+  if (channel === NotificationChannel.SMS) return user?.phone ?? "";
   return null; // on_app, push — no address needed
 }
 

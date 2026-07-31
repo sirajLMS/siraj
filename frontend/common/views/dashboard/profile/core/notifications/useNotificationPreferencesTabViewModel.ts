@@ -15,17 +15,19 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
+import type {
+  NotificationPreferencesTabVariantProps,
+  NotificationPrefRow,
+} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import {
   buildDefaultPreferences,
   buildPreferenceMap,
   buildPreferenceMatrixRows,
+  CHANNEL_ORDER,
   getNotificationEventTypesForRole,
-  NOTIFICATION_CHANNELS,
-  type NotificationPreferencesTabVariantProps,
-  type NotificationPrefRow,
   preferenceKey,
   resolveNotificationPreferenceRole,
-} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
@@ -39,7 +41,7 @@ type PendingChangeArray = NotificationPreferenceInput[];
 export type NotificationPreferencesTabViewModel = NotificationPreferencesTabVariantProps;
 
 function useInitialPreferences(eventTypes: readonly NotificationEventType[]) {
-  return useState<NotificationPrefRow[]>(() => buildDefaultPreferences(eventTypes));
+  return useState<NotificationPrefRow[]>(() => buildDefaultPreferences(CHANNEL_ORDER, eventTypes));
 }
 
 function usePreferenceSync(
@@ -54,13 +56,16 @@ function usePreferenceSync(
       pendingChangesRef.current.clear();
       return;
     }
-    setLocalPreferences(buildDefaultPreferences(eventTypes));
+    setLocalPreferences(buildDefaultPreferences(CHANNEL_ORDER, eventTypes));
   }, [data?.notificationPreferences, eventTypes, setLocalPreferences, pendingChangesRef]);
 }
 
 function useDerivedState(localPreferences: NotificationPrefRow[], eventTypes: readonly NotificationEventType[]) {
   const preferenceMap = useMemo(() => buildPreferenceMap(localPreferences), [localPreferences]);
-  const matrixRows = useMemo(() => buildPreferenceMatrixRows(preferenceMap, eventTypes), [preferenceMap, eventTypes]);
+  const matrixRows = useMemo(
+    () => buildPreferenceMatrixRows(preferenceMap, eventTypes, CHANNEL_ORDER),
+    [preferenceMap, eventTypes]
+  );
   return { preferenceMap, matrixRows };
 }
 
@@ -137,7 +142,7 @@ function useHandleChannelChange(
 ) {
   return useCallback(
     (channel: NotificationChannel, direction: "left" | "right") => {
-      const nextIndex = NOTIFICATION_CHANNELS.indexOf(channel);
+      const nextIndex = CHANNEL_ORDER.indexOf(channel);
       previousChannelIndexRef.current = nextIndex;
       setSlideDirection(direction);
       setActiveChannel(channel);

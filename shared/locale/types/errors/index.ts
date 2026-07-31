@@ -304,4 +304,26 @@ export interface ErrorsLabels {
   readonly teacherOnVacation: string;
   readonly resourceNotFound: string;
   readonly currencyInUse: string;
+
+  // ─── Communication / suggestion / complaint errors ─────────────────────
+  readonly complaintNotFound: string;
+  readonly suggestionNotFound: string;
+  readonly complaintTooManyFiles: (maxFiles: number) => string;
+  readonly complaintFileTooLarge: (maxSizeMb: number) => string;
+  readonly suggestionCannotMarkSelfAsDuplicate: string;
+  readonly suggestionCircularDuplicate: string;
+  readonly suggestionTargetIsAlreadyDuplicate: string;
+
+  // ─── Communication dispatch errors ──────────────────────────────────────
+  readonly unknownCommunicationChannel: (channel: string) => string;
+  readonly unknownError: string;
+  readonly unknownDispatchError: string;
+
+  // ─── Delivery failure messages ───────────────────────────────────────────
+  readonly emailChannelLabel: string;
+  readonly smsChannelLabel: string;
+  readonly pushChannelLabel: string;
+  readonly whatsappChannelLabel: string;
+  readonly onAppChannelLabel: string;
+  readonly deliveryFailed: (channelLabel: string) => string;
 }

@@ -1,15 +1,15 @@
 /**
  * Pure notification payload builders — the SOLE producer of `CommunicationPayload`
  * objects in the codebase. Domain services call these builders and hand the
- * resulting array to `dispatchWithPreferences` (specs.md rule #2).
+ * resulting array to `dispatchWithPreferences`.
  *
- * Contract (specs.md §5.1):
+ * Contract:
  *   - PURE: no I/O, no logger, no side-effects. The only "external" call is
  *     `getServerTranslations(locale)` — a synchronous lookup against the
  *     compile-time i18n registry in `@/shared/locale`, which is safe.
  *   - LOCALIZED: every title/body flows through the `notifications` namespace
  *     in `shared/locale/notifications/`. NO hardcoded English literals
- *     (specs.md F3).
+ *     No hardcoded English literals.
  *   - IDEMPOTENT: same inputs -> same outputs.
  *   - ALL FOUR CHANNELS: every builder emits one payload per channel
  *     (`on_app`, `email`, `sms`, `push`). Channel filtering by user prefs +
@@ -23,12 +23,7 @@
  */
 
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
-import type {
-  ClassInstanceSelectType,
-  CommunicationChannelType,
-  CommunicationPayload,
-  InvoiceSelectType,
-} from "@/backend/types";
+import type { ClassInstanceSelectType, CommunicationPayload, InvoiceSelectType } from "@/backend/types";
 import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 import { getServerTranslations } from "@/shared/locale";
 import type {
@@ -41,24 +36,6 @@ import type {
 type PayloadMetadata = NotificationMetadata & Record<string, unknown>;
 
 // ─── Helpers ───────────────────────────────────────────────────────────
-
-/**
- * The four dispatch channels as `CommunicationChannelType` literals.
- *
- * NOTE: `CommunicationChannelType = "on_app" | "email" | "sms" | "push"`
- * (lowercase) is the existing payload-channel type alias. The
- * `NotificationChannel` enum members (`EMAIL`, `SMS`, `PUSH`, `ON_APP`)
- * are uppercase and are used to key prefs + DB columns. We map enum →
- * payload-channel here in a single place so builders can stay typed
- * against the lowercase alias without sprinkling string literals
- * throughout call sites (specs.md F15 — no `case "EMAIL":` literals).
- */
-const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, CommunicationChannelType>> = Object.freeze({
-  [NotificationChannel.ON_APP]: "on_app",
-  [NotificationChannel.EMAIL]: "email",
-  [NotificationChannel.SMS]: "sms",
-  [NotificationChannel.PUSH]: "push",
-});
 
 const ALL_CHANNELS: readonly NotificationChannel[] = [
   NotificationChannel.ON_APP,
@@ -90,7 +67,7 @@ function buildPerChannel(
       userId,
       title,
       body,
-      channel: CHANNEL_FROM_ENUM[channel],
+      channel,
       eventType,
       metadata,
     });
@@ -442,7 +419,7 @@ const STUDENT_LIFECYCLE_EVENTS: ReadonlySet<NotificationEventType> = new Set([
  * Build payloads for a student-lifecycle event. Emits 4 payloads per
  * affected user (one per channel).
  *
- * Per specs.md §5.1 the signature is `(studentId, eventType, affectedUserIds, locale?, metadata?)`:
+ * Signature is `(studentId, eventType, affectedUserIds, locale?, metadata?)`:
  * builders do NOT read the `students` table. Context (student name, old/new
  * status, quota values, recipient role) is supplied via `metadata` by the
  * domain service that owns the join.

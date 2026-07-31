@@ -165,6 +165,27 @@ export interface NewComplaintLabels {
   readonly body: (params: { complaintId: string; category: string }) => string;
 }
 
+/** Labels for the `COMPLAINT_RESPONSE` event — notifies the submitter of a response. */
+export interface ComplaintResponseLabels {
+  readonly title: string;
+}
+
+/** Labels for the `NEW_SUGGESTION` event — notifies the submitter of acknowledgement. */
+export interface NewSuggestionLabels {
+  readonly title: string;
+}
+
+/** Labels for the `SUGGESTION_RESPONSE` event — notifies the submitter of a response. */
+export interface SuggestionResponseLabels {
+  readonly title: string;
+}
+
+/** Labels for the `SUGGESTION_MARKED_DUPLICATE` event. */
+export interface SuggestionMarkedDuplicateLabels {
+  readonly title: string;
+  readonly body: (params: { duplicateId: string }) => string;
+}
+
 // ─── Top-level namespace ────────────────────────────────────────────────
 
 /**
@@ -192,6 +213,10 @@ export interface NotificationsLabels {
   readonly lessonReportSubmitted: LessonReportSubmittedLabels;
   readonly lessonReportReviewed: LessonReportReviewedLabels;
   readonly newComplaint: NewComplaintLabels;
+  readonly complaintResponse: ComplaintResponseLabels;
+  readonly newSuggestion: NewSuggestionLabels;
+  readonly suggestionResponse: SuggestionResponseLabels;
+  readonly suggestionMarkedDuplicate: SuggestionMarkedDuplicateLabels;
 
   // Drawer UI keys
   readonly drawerTitle: string;

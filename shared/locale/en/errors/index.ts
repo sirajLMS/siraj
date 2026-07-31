@@ -274,4 +274,26 @@ export const errorsEn: ErrorsLabels = {
   resourceNotFound: "Learning resource not found.",
   currencyInUse:
     "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
+
+  // ─── Communication / suggestion / complaint errors ─────────────────────
+  complaintNotFound: "Complaint not found.",
+  suggestionNotFound: "Suggestion not found.",
+  complaintTooManyFiles: (maxFiles: number) => `You can upload a maximum of ${maxFiles} files per complaint.`,
+  complaintFileTooLarge: (maxSizeMb: number) => `File size must not exceed ${maxSizeMb} MB.`,
+  suggestionCannotMarkSelfAsDuplicate: "A suggestion cannot be marked as a duplicate of itself.",
+  suggestionCircularDuplicate: "Cannot create a circular duplicate chain.",
+  suggestionTargetIsAlreadyDuplicate: "The target suggestion is already marked as a duplicate of another suggestion.",
+
+  // ─── Communication dispatch errors ──────────────────────────────────────
+  unknownCommunicationChannel: (channel: string) => `Unknown communication channel: ${channel}`,
+  unknownError: "An unknown error occurred.",
+  unknownDispatchError: "An unknown dispatch error occurred.",
+
+  // ─── Delivery failure messages ───────────────────────────────────────────
+  emailChannelLabel: "Email",
+  smsChannelLabel: "SMS",
+  pushChannelLabel: "Push notification",
+  whatsappChannelLabel: "WhatsApp",
+  onAppChannelLabel: "In-app",
+  deliveryFailed: (channelLabel: string) => `${channelLabel} delivery failed. Please try again later.`,
 };

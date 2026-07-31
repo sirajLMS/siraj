@@ -1368,7 +1368,8 @@ export type NotificationChannel =
   | 'EMAIL'
   | 'ON_APP'
   | 'PUSH'
-  | 'SMS';
+  | 'SMS'
+  | 'WHATSAPP';
 
 export type NotificationEventType =
   | 'CLASS_ACTIVATED'
