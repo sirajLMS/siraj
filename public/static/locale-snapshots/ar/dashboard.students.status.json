@@ -1,0 +1,76 @@
+{
+  "pageTitle": "حالة الطالب وتجميد الجدول",
+  "breadcrumbs": {
+    "students": "الطلاب",
+    "statusHold": "الحالة والتجميد"
+  },
+  "sections": {
+    "adminHold": "تجميد إداري",
+    "policyOverview": "نظرة عامة على السياسة",
+    "upcomingClasses": "جدول الحصص القادمة",
+    "upcomingClassesMobile": "الحصص القادمة"
+  },
+  "fields": {
+    "accountStatus": "حالة الحساب الجديدة",
+    "statusReason": "سبب التغيير",
+    "statusReasonPlaceholder": "أدخل المبررات الإدارية هنا...",
+    "quickReasons": "أسباب سريعة"
+  },
+  "validation": {
+    "reasonMinLength": "يجب أن يكون السبب 5 أحرف على الأقل"
+  },
+  "statusOptions": {
+    "REGULAR": "عادي / نشط",
+    "SUSPENDED": "موقوف (مالي/تأديبي)",
+    "ON_LEAVE": "في إجازة (طبية/مخطط لها)",
+    "ON_TRIAL": "تح التجربة",
+    "DEACTIVATED": "معطّل"
+  },
+  "reasons": {
+    "unpaidInvoice": "فاتورة غير مدفوعة",
+    "misconduct": "سوء سلوك",
+    "vacation": "إجازة"
+  },
+  "actions": {
+    "applyChange": "تطبيق تغيير الحالة",
+    "viewHistory": "عرض السجل",
+    "contactParent": "الاتصال بولي الأمر",
+    "viewAll": "عرض الكل"
+  },
+  "table": {
+    "subject": "المادة",
+    "instructor": "المعلم",
+    "subjectInstructor": "المادة والمعلم",
+    "dateTime": "التاريخ والوقت",
+    "duration": "المدة",
+    "holdStatus": "حالة التعليق",
+    "status": "الحالة",
+    "join": "الانضمام",
+    "pendingHolds": {
+      "__fn": "(count) => `${count} \\u062A\\u062C\\u0645\\u064A\\u062F\\u0627\\u062A \\u0645\\u0639\\u0644\\u0642\\u0629`"
+    },
+    "footerInfo": "نهاية قائمة الحصص القادمة",
+    "noUpcomingClasses": "لا توجد حصص قادمة",
+    "frozen": "مجمّد",
+    "active": "نشط",
+    "minutesShort": {
+      "__fn": "(minutes) => `${minutes} \\u062F`"
+    },
+    "sessionEnded": "انتهت الحصة",
+    "joinSession": "الانضمام للحصة"
+  },
+  "policies": {
+    "suspensionTitle": "الإيقاف",
+    "suspensionDesc": "يوقف محرك الفوترة تماماً ويغلق جميع صلاحيات الوصول لبوابة الطالب فوراً.",
+    "onLeaveTitle": "في إجازة",
+    "onLeaveDesc": "يحافظ على سجلات التسجيل ولكنه يوقف جدولة الحصص. قد يتم احتساب الفوترة بنسب تناسبية."
+  },
+  "warning": {
+    "title": "تنبيه: تعليق الحساب قيد الانتظار",
+    "description": "سيؤدي تغيير الحالة إلى 'موقوف' إلى تفعيل قفل شامل للنظام فوراً. سيتم تجميد جميع الحصص القادمة، مما يمنع المعلمين من بدء الجلسات. سيتم إيقاف محرك الفوترة لهذا المعرف حتى إعادة التفعيل يدوياً."
+  },
+  "successMessage": "تم تحديث حالة الطالب بنجاح.",
+  "errors": {
+    "invalidId": "معرف الطالب غير صالح."
+  }
+}

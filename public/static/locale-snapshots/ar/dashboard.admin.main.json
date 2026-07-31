@@ -1,0 +1,85 @@
+{
+  "pageTitle": "لوحة التحكم",
+  "roleLabel": "لوحة تحكم المدير",
+  "todayClasses": "حصص اليوم",
+  "updatedJustNow": "تم التحديث الآن",
+  "scheduleOverview": "نظرة عامة على الجدول",
+  "searchPlaceholder": "البحث بالطالب أو اسم الحصة...",
+  "listOfClassesOn": "قائمة الحصص في",
+  "teacher": "المعلم",
+  "selectTeacher": "اختر المعلم",
+  "submit": "إرسال",
+  "classId": "رقم الحصة",
+  "className": "الحصة",
+  "student": "الطالب",
+  "time": "الوقت",
+  "yourTime": "وقتك",
+  "teacherTime": "وقت المعلم",
+  "studentTime": "وقت الطالب",
+  "duration": "المدة",
+  "status": "الحالة",
+  "actions": "الإجراءات",
+  "history": "السجل",
+  "details": "التفاصيل",
+  "joinVideo": "الانضمام للحصة",
+  "noClasses": "لا توجد حصص",
+  "loading": "جاري التحميل...",
+  "today": "اليوم",
+  "previousDay": "اليوم السابق",
+  "nextDay": "اليوم التالي",
+  "previousPage": "الصفحة السابقة",
+  "nextPage": "الصفحة التالية",
+  "goToPage": "انتقل إلى صفحة",
+  "dashboardOverview": "نظرة عامة على لوحة التحكم",
+  "viewAll": "عرض الكل",
+  "loadingTimeoutTitle": "انتهت مهلة الطلب",
+  "loadingTimeoutDesc": "استغرق الخادم وقتًا طويلاً للاستجابة. يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
+  "unauthenticatedTitle": "المستخدم غير مصرح له",
+  "unauthenticatedDesc": "يرجى تسجيل الدخول مرة أخرى للوصول إلى لوحة التحكم.",
+  "loadingFailedTitle": "فشل تحميل لوحة التحكم",
+  "loadingFailedDesc": "حدث خطأ غير متوقع أثناء تحميل المخطط.",
+  "retryBtn": "إعادة محاولة التحميل",
+  "loginBtn": "الذهاب لتسجيل الدخول",
+  "timezoneOffsetDetail": {
+    "time": "الوقت",
+    "timezone": "المنطقة الزمنية",
+    "utcOffset": "إزاحة التوقيت العالمي",
+    "yourOffset": "إزاحتك"
+  },
+  "paginationRange": {
+    "__fn": "(from, to, total) => `${from}-${to} \\u0645\\u0646 ${total}`"
+  },
+  "pageOf": {
+    "__fn": "(current, total) => `\\u0635\\u0641\\u062D\\u0629 ${current} \\u0645\\u0646 ${total}`"
+  },
+  "showingOf": {
+    "__fn": "(shown, total) => `\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u062D\\u0635\\u0629`"
+  },
+  "updatedMinutesAgo": {
+    "__fn": "(minutes) => {\n    if (minutes === 0)\n      return \"\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u062F\\u064A\\u062B \\u0644\\u0644\\u062A\\u0648\";\n    if (minutes === 1)\n      return \"\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 \\u062F\\u0642\\u064A\\u0642\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\";\n    if (minutes === 2)\n      return \"\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 \\u062F\\u0642\\u064A\\u0642\\u062A\\u0627\\u0646\";\n    if (minutes >= 3 && minutes <= 10)\n      return `\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u0627\\u0626\\u0642`;\n    return `\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`;\n  }"
+  },
+  "metrics": {
+    "total": "الإجمالي",
+    "regular": "عادي",
+    "trial": "تجريبي",
+    "advance": "مسبق",
+    "rescheduled": "مُعاد جدولته",
+    "suspended": "معلّق",
+    "taken": "مأخوذ",
+    "pending": "قيد الانتظار",
+    "activated": "مفعّل",
+    "running": "جارٍ",
+    "absent": "غائب",
+    "leave": "إجازة"
+  },
+  "statusLabels": {
+    "PENDING": "معلّق",
+    "TAKEN": "مأخوذ",
+    "ABSENT": "غائب",
+    "LEAVE": "إجازة",
+    "NOT_ACTIVATED": "غير مفعّل",
+    "ACTIVATED": "مفعّل",
+    "RUNNING": "جارٍ",
+    "COMPLETED": "مكتمل"
+  }
+}

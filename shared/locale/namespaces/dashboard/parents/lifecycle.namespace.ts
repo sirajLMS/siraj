@@ -1,7 +1,7 @@
 import { defineNamespace } from "@/shared/locale/namespaces/define-namespace";
 import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/parents/lifecycle";
 
-export const DashboardParentLifecycle = defineNamespace<ParentLifecycleLabels>({
+export const DashboardParentLifecycle = defineNamespace<ParentLifecycleLabels>("dashboard.parents.lifecycle", {
   load: {
     en: () =>
       import("@/shared/locale/en/dashboard/parents/lifecycle").then(module => module.dashboardParentLifecycleEn),

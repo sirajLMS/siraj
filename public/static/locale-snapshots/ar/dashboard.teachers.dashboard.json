@@ -1,0 +1,167 @@
+{
+  "pageTitle": "حصص اليوم",
+  "pageSubtitle": "نظرة عامة على جدول التدريس اليومي وتفعيل الحصص.",
+  "overviewTitle": "نظرة عامة",
+  "todayChip": "اليوم",
+  "updatedJustNow": "تم التحديث الآن",
+  "updatedMinutesAgo": {
+    "__fn": "(minutes) => {\n    if (minutes === 1)\n      return `\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`;\n    return `\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u0627\\u0626\\u0642`;\n  }"
+  },
+  "metrics": {
+    "totalClasses": "إجمالي الحصص",
+    "missedSlots": "الحصص الفائتة",
+    "completed": "المكتملة",
+    "studentsToday": "طلاب اليوم"
+  },
+  "activeMetrics": {
+    "totalClasses": "إجمالي الحصص",
+    "activeSessions": "الحصص النشطة",
+    "missedSlots": "الحصص الفائتة",
+    "completed": "المكتملة"
+  },
+  "activeWelcome": {
+    "title": {
+      "__fn": "(name) => `\\u0645\\u0631\\u062D\\u0628\\u0627\\u064B \\u0628\\u0639\\u0648\\u062F\\u062A\\u0643\\u060C ${name}`"
+    },
+    "subtitle": {
+      "__fn": "(date, count) => `\\u0627\\u0644\\u064A\\u0648\\u0645 ${date}. \\u0644\\u062F\\u064A\\u0643 ${count} \\u062D\\u0635\\u0629 \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629.`"
+    },
+    "overviewLabel": "نظرة عامة على لوحة التحكم",
+    "mobileSummary": {
+      "__fn": "(date, count) => `${date} \\u2022 ${count} \\u062D\\u0635\\u0629 \\u0646\\u0634\\u0637\\u0629`"
+    }
+  },
+  "schedule": {
+    "title": "الحصص اليومية",
+    "titleToday": "جدول حصص اليوم",
+    "rowNumber": "#",
+    "classId": "رقم الحصة",
+    "student": "الطالب",
+    "time": "الوقت",
+    "status": "الحالة",
+    "contact": "التواصل",
+    "actions": "الإجراءات",
+    "showing": {
+      "__fn": "(shown, total) => `\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u062D\\u0635\\u0629 \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u064A\\u0648\\u0645.`"
+    },
+    "noEntries": "لا توجد حصص مجدولة لليوم",
+    "sessionEnded": "انتهت الحصة",
+    "frozen": "مجمّد",
+    "contactAdmin": "تواصل مع المشرف (تجميد)",
+    "duration": "المدة",
+    "durationValue": {
+      "__fn": "(minutes) => `${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
+    },
+    "current": "الحالية",
+    "viewAll": "عرض الكل"
+  },
+  "status": {
+    "missed": "فائتة",
+    "pending": "قيد الانتظار",
+    "upcoming": "قادمة",
+    "completed": "مكتملة",
+    "active": "نشطة",
+    "connecting": "جاري الاتصال",
+    "activated": "مفعّلة"
+  },
+  "actions": {
+    "activate": "تفعيل",
+    "activateSession": "تفعيل الحصة",
+    "connecting": "جاري الاتصال",
+    "printSchedule": "طباعة الجدول",
+    "manualEntry": "إدخال يدوي",
+    "newSession": "حصة جديدة",
+    "joinVideo": "انضم للحصة المرئية",
+    "downloadHandbook": "تحميل الدليل",
+    "contactCoordinator": "تواصل مع المنسق",
+    "disabledTooltips": {
+      "activateBeforeWindow": "يفتح التفعيل قبل 5 دقائق من وقت بدء الحصة المجدول",
+      "activateAfterWindow": "انتهت نافذة التفعيل لهذه الحصة",
+      "activateConnecting": "جاري تفعيل الحصة",
+      "joinVideoUnavailable": "لا يوجد رابط اجتماع لهذه الحصة",
+      "markAbsentWaitingPeriod": "يمكن تسجيل الغياب بعد 30 دقيقة من وقت بدء الحصة المجدول"
+    }
+  },
+  "activeControls": {
+    "liveNow": "مباشر الآن",
+    "sessionControls": "التحكم بالحصة",
+    "startSession": "بدء الحصة",
+    "markAbsent": "تسجيل غياب",
+    "requestLeave": "طلب إجازة",
+    "markAbsentDialogTitle": "تسجيل غياب؟",
+    "markAbsentConfirmation": "هل أنت متأكد من تسجيل غياب هذا الطالب؟ سيتم إكمال الجلسة بتسجيل غياب.",
+    "markAbsentConfirm": "تسجيل غياب",
+    "cancel": "إلغاء"
+  },
+  "progressFeed": {
+    "title": "موجز تقدم الطلاب",
+    "autoMissedTooltip": "تم تسجيل الحصة كفائتة تلقائياً بعد انتهاء فترة السماح للتفعيل.",
+    "events": {
+      "auto_missed": "حصة فائتة",
+      "marked_absent": "تم تسجيل الغياب",
+      "activated": "تم تفعيل الحصة",
+      "started": "بدأت الحصة",
+      "completed": "اكتملت الحصة",
+      "leave": "تم تسجيل الإجازة",
+      "other": "تم تحديث الحالة"
+    }
+  },
+  "alert": {
+    "title": "فاتك وقت الحصة",
+    "description": {
+      "__fn": "(time) => `\\u0643\\u0627\\u0646\\u062A \\u0647\\u0646\\u0627\\u0643 \\u062D\\u0635\\u0629 \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0627\\u0644\\u0633\\u0627\\u0639\\u0629 ${time}. \\u064A\\u0631\\u062C\\u0649 \\u0627\\u0644\\u062A\\u0648\\u0627\\u0635\\u0644 \\u0645\\u0639 \\u0627\\u0644\\u0625\\u062F\\u0627\\u0631\\u0629 \\u0644\\u0625\\u0639\\u0627\\u062F\\u0629 \\u0627\\u0644\\u062C\\u062F\\u0648\\u0644\\u0629.`"
+    }
+  },
+  "policy": {
+    "title": "سياسة التفعيل",
+    "description": "يرجى تفعيل حصصك قبل 5 دقائق على الأقل من وقت البدء المجدول. التفعيل المبكر يُرسل إشعارات للطلاب للانضمام في الوقت. إذا فاتتك نافذة التفعيل، ستُسجل الحصة كـ \"فائتة\" بعد 15 دقيقة من وقت انتهاء الحصة المجدول.",
+    "descriptionMobile": "لا يمكن تفعيل الحصص إلا قبل 5 دقائق من وقت البدء المجدول. إذا فاتتك نافذة التفعيل، ستُسجل الحصة كـ \"فائتة\" بعد 15 دقيقة من وقت انتهاء الحصة المجدول."
+  },
+  "dateFilter": {
+    "today": "اليوم",
+    "previousDay": "اليوم السابق",
+    "nextDay": "اليوم التالي",
+    "dateLabel": "التاريخ"
+  },
+  "support": {
+    "liveSupport": "الدعم المباشر"
+  },
+  "errors": {
+    "meetingUrlNotAvailable": "رابط الاجتماع غير متاح.",
+    "handbookUrlNotFound": "رابط دليل المعلم غير موجود.",
+    "missedClassTime": "لا يمكن تفعيل الحصة خارج النافذة الزمنية المسموح بها",
+    "activationFailed": "حدث خطأ أثناء تفعيل الحصة."
+  },
+  "manualClassEntry": {
+    "titleCreate": "إنشاء إدخال يدوي للحصة",
+    "titleCreateActive": "إنشاء حصة نشطة",
+    "cancel": "إلغاء",
+    "create": "إنشاء",
+    "creating": "جارٍ الإنشاء...",
+    "studentLabel": "الطالب",
+    "studentLoading": "جارٍ تحميل الطلاب...",
+    "noStudentsAssigned": "لا يوجد طلاب معينون لك",
+    "subjectLabel": "المادة",
+    "subjectPlaceholder": "اختر مادة",
+    "scheduledDate": "التاريخ المحدد",
+    "startTime": "وقت البدء",
+    "durationMinutes": "المدة (بالدقائق)",
+    "classType": "نوع الحصة",
+    "classTypeRegular": "عادي",
+    "classTypeTrial": "تجريبي",
+    "classTypePromotion": "ترويجي",
+    "selectStudent": "يرجى اختيار طالب.",
+    "selectSubject": "يرجى اختيار مادة.",
+    "selectDate": "يرجى اختيار تاريخ.",
+    "selectTime": "يرجى اختيار وقت بدء.",
+    "createFailed": "فشل إنشاء إدخال الحصة اليدوية.",
+    "teacherIdNotFound": "لم يتم العثور على معرف المعلم."
+  },
+  "supportRequestSubmitted": {
+    "__fn": "(type) => `\\u062A\\u0645 \\u0625\\u0631\\u0633\\u0627\\u0644 \\u0637\\u0644\\u0628 \\u0627\\u0644\\u062F\\u0639\\u0645 \\u0625\\u0644\\u0649 ${type}.`"
+  },
+  "rules": {
+    "pageTitle": "القواعد والسياسات",
+    "pageSubtitle": "سياسة التفعيل وموارد دليل المعلم."
+  }
+}

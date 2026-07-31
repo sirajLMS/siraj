@@ -1,0 +1,31 @@
+{
+  "pageTitle": "Sessions",
+  "sessionDate": "Date",
+  "subject": "Subject",
+  "instructor": "Instructor",
+  "duration": "Duration",
+  "status": "Status",
+  "notes": "Notes",
+  "noHistory": "No lesson history yet",
+  "loadingMessage": "Loading...",
+  "filterBySubject": "Filter by Subject",
+  "filterByStatus": "Filter by Status",
+  "allSubjects": "All Subjects",
+  "allStatuses": "All Statuses",
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "statusLabels": {
+    "ended": "Ended",
+    "present": "Present",
+    "absent": "Absent",
+    "late": "Late",
+    "scheduled": "Scheduled",
+    "pending": "Pending",
+    "cancelled": "Cancelled"
+  },
+  "minutesShort": {
+    "__fn": "(minutes) => `${minutes}m`"
+  },
+  "viewClass": "View class",
+  "joinSession": "Join session"
+}

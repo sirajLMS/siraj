@@ -1,0 +1,10 @@
+{
+  "teacherLabel": "Teacher",
+  "studentLabel": "Student",
+  "parentLabel": "Parent",
+  "userLabel": "User",
+  "staffLabel": "Staff",
+  "searchPlaceholder": "Search…",
+  "noResults": "No results found",
+  "required": "This field is required"
+}

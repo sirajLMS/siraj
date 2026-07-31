@@ -7,6 +7,8 @@
     "debug": "NEXT_DIST_DIR=.next-dev next dev --turbopack -p 3000 -H 0.0.0.0",
     "dev:safe": "NEXT_DIST_DIR=.next-dev bun scripts/safe-dev.ts",
     "dev:inspect": "NEXT_DIST_DIR=.next-dev NODE_OPTIONS='--inspect' next dev --turbopack -p 3000 -H 0.0.0.0",
+    "prebuild": "bun run locale:snapshots",
+    "locale:snapshots": "bun run scripts/locale-snapshots.ts",
     "build": "next build",
     "start": "next start -p 4000 -H 0.0.0.0",
     "format": "bunx @biomejs/biome format --write .",

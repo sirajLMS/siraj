@@ -1,0 +1,19 @@
+{
+  "pageTitle": "رصيدي",
+  "pageSubtitle": "تتبع رصيدك وسجل المعاملات",
+  "currentBalance": "الرصيد الحالي",
+  "hoursRemaining": "الرصيد المتبقي",
+  "hoursTotal": "إجمالي الرصيد",
+  "transactionHistory": "سجل المعاملات",
+  "dateColumn": "التاريخ",
+  "typeColumn": "النوع",
+  "amountColumn": "الكمية",
+  "notesColumn": "ملاحظات",
+  "purchase": "شراء",
+  "deduction": "خصم",
+  "refund": "استرداد",
+  "adjustment": "تسوية",
+  "filterAll": "الكل",
+  "noTransactions": "لا توجد معاملات بعد",
+  "backToDashboard": "العودة إلى لوحة التحكم"
+}

@@ -1,7 +1,7 @@
 import { defineNamespace } from "@/shared/locale/namespaces/define-namespace";
 import type { SettingsTimezonesLabels } from "@/shared/locale/types/dashboard/settings/timezones";
 
-export const DashboardSettingsTimezones = defineNamespace<SettingsTimezonesLabels>({
+export const DashboardSettingsTimezones = defineNamespace<SettingsTimezonesLabels>("dashboard.settings.timezones", {
   load: {
     en: () =>
       import("@/shared/locale/en/dashboard/settings/timezones").then(module => module.dashboardSettingsTimezonesEn),

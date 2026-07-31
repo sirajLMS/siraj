@@ -1,0 +1,18 @@
+{
+  "title": "Credits",
+  "balance": "Remaining Balance",
+  "purchase": "Purchase",
+  "deduction": "Deduction",
+  "refund": "Refund",
+  "adjustment": "Adjustment",
+  "transactionsHistory": "Transactions History",
+  "hoursRemaining": "Hours Remaining",
+  "hoursTotal": "Total Hours",
+  "recordPurchase": "Record Purchase",
+  "purchaseSuccess": {
+    "__fn": "(hours) => `Purchase recorded successfully: ${hours} hours`"
+  },
+  "insufficientCredits": {
+    "__fn": "(remaining) => `Insufficient credits. Remaining: ${remaining} hours`"
+  }
+}

@@ -100,6 +100,14 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       className={`${inter.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <head>
+        <script
+          nonce={nonce}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Service worker registration script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if('serviceWorker' in navigator && window.isSecureContext){navigator.serviceWorker.register('/sw.js').catch(function(){});}",
+          }}
+        />
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Safe server-side generated theme CSS variables */}
         <style id="server-theme-css" dangerouslySetInnerHTML={{ __html: serverThemeCss }} />
       </head>

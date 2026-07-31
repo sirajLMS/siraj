@@ -1,0 +1,60 @@
+{
+  "pageTitle": "Subjects",
+  "pageSubtitle": "Manage class subjects, categories, and learning resources.",
+  "addSubject": "Add Subject",
+  "allCategories": "All Categories",
+  "categoriesTitle": "Categories",
+  "manageCategories": "Manage Categories",
+  "hideCategories": "Hide Categories",
+  "noSubjects": "No subjects found.",
+  "loading": "Loading subjects...",
+  "inactive": "Inactive",
+  "resourceCount": {
+    "__fn": "(count) => `${count} resource`"
+  },
+  "nameLabel": "Name",
+  "nameRequired": "Name is required",
+  "slugLabel": "Unique Identifier",
+  "slugRequired": "Unique identifier is required",
+  "categoryLabel": "Category",
+  "categoryRequired": "Category is required",
+  "selectCategory": "Select a category",
+  "descriptionLabel": "Description",
+  "activeLabel": "Active",
+  "avatarLabel": "Subject Avatar",
+  "hourlyRateLabel": "Hourly Rate",
+  "currencyLabel": "Currency",
+  "createSubject": "Create Subject",
+  "editSubject": "Edit Subject",
+  "deleteSubject": "Delete Subject",
+  "deleteSubjectConfirm": {
+    "__fn": "(name) => `Are you sure you want to delete the subject \"${name}\"? This action cannot be undone.`"
+  },
+  "createCategory": "Create Category",
+  "editCategory": "Edit Category",
+  "deleteCategory": "Delete Category",
+  "deleteCategoryConfirm": {
+    "__fn": "(name) => `Are you sure you want to delete the category \"${name}\"? All subjects in this category will be uncategorized.`"
+  },
+  "cancel": "Cancel",
+  "saveChanges": "Save Changes",
+  "subjectCreated": "Subject created successfully",
+  "subjectUpdated": "Subject updated successfully",
+  "subjectDeleted": "Subject deleted successfully",
+  "categoryCreated": "Category created successfully",
+  "categoryUpdated": "Category updated successfully",
+  "categoryDeleted": "Category deleted successfully",
+  "detail": {
+    "pageTitle": {
+      "__fn": "(name) => `${name}`"
+    },
+    "resourcesTitle": "Resources",
+    "resourcesSubtitle": {
+      "__fn": "(count) => `${count} attached resource`"
+    },
+    "noResources": "No resources attached to this subject.",
+    "notFound": "Subject not found.",
+    "untitledResource": "Untitled Resource",
+    "download": "Download"
+  }
+}

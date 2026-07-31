@@ -1,7 +1,7 @@
 import { defineNamespace } from "@/shared/locale/namespaces/define-namespace";
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core";
 
-export const DashboardCoreSearchSchedule = defineNamespace<SearchScheduleLabels>({
+export const DashboardCoreSearchSchedule = defineNamespace<SearchScheduleLabels>("dashboard.core.searchSchedule", {
   load: {
     en: () =>
       import("@/shared/locale/en/dashboard/core/searchSchedule").then(module => module.dashboardCoreSearchScheduleEn),

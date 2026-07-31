@@ -1,0 +1,78 @@
+{
+  "invalidClassId": "معرف الحصة غير صالح",
+  "pageTitle": "عرض تفاصيل الحصة",
+  "mobileTitle": "سجل تدقيق الحصة",
+  "breadcrumbs": {
+    "dashboard": "لوحة التحكم",
+    "schedules": "الجداول",
+    "current": "سجل تدقيق الحصة"
+  },
+  "actions": {
+    "generateReport": "إنشاء تقرير",
+    "editClass": "تعديل الحصة"
+  },
+  "fields": {
+    "courseCode": "رمز المقرر",
+    "teacher": "المعلم",
+    "originalDate": "التاريخ الأصلي",
+    "rescheduledDate": "تاريخ إعادة الجدولة",
+    "timeSlot": "الفترة الزمنية",
+    "venue": "المكان",
+    "classDetails": "تفاصيل الحصة"
+  },
+  "status": {
+    "regularRescheduled": "عادي (مُعاد جدولته)"
+  },
+  "auditTrail": {
+    "title": "سجل التدقيق الآلي والملاحظات"
+  },
+  "students": {
+    "title": {
+      "__fn": "(count) => `\\u0627\\u0644\\u0637\\u0644\\u0627\\u0628 \\u0627\\u0644\\u0645\\u0633\\u062C\\u0644\\u0648\\u0646 (${count})`"
+    },
+    "exportList": "تصدير القائمة",
+    "studentName": "اسم الطالب",
+    "idNumber": "رقم الهوية",
+    "attendanceStatus": "حالة الحضور",
+    "actions": "الإجراءات",
+    "student": "الطالب",
+    "status": "الحالة",
+    "viewAll": {
+      "__fn": "(count) => `\\u0639\\u0631\\u0636 \\u062C\\u0645\\u064A\\u0639 ${count} \\u0637\\u0627\\u0644\\u0628`"
+    },
+    "pending": "معلّق",
+    "present": "حاضر",
+    "absent": "غائب",
+    "noEntries": "لا يوجد طلاب"
+  },
+  "venue": {
+    "title": "موقع القاعة",
+    "capacity": {
+      "__fn": "(count) => `\\u0627\\u0644\\u0633\\u0639\\u0629: ${count} \\u0637\\u0627\\u0644\\u0628`"
+    },
+    "viewMap": "عرض",
+    "capacityBadge": {
+      "__fn": "(count) => `\\u0633\\u0639\\u0629 ${count} \\u0637\\u0627\\u0644\\u0628`"
+    }
+  },
+  "meeting": {
+    "title": "الاجتماع عبر الإنترنت",
+    "joinMeeting": "انضم إلى الاجتماع"
+  },
+  "communication": {
+    "title": "سجل التواصل",
+    "resendNotifications": "إعادة إرسال الإشعارات"
+  },
+  "adminNote": {
+    "title": "ملاحظة المدير",
+    "titleMobile": "المبرر الإداري",
+    "lastUpdated": {
+      "__fn": "(time) => `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${time}`"
+    },
+    "update": "تحديث",
+    "edit": "تعديل"
+  },
+  "meetingIdLabel": "معرف الاجتماع:",
+  "online": "عبر الإنترنت",
+  "meetingIdNA": "غير متوفر"
+}

@@ -1,6 +1,7 @@
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { getNamespaceConfig } from "@/shared/locale/client/namespace-registry";
-import type { NamespaceHandle } from "@/shared/locale/namespaces/define-namespace";
+import { readSnapshot, wipeIfBuildIdChanged, writeSnapshot } from "@/shared/locale/client/snapshot-cache";
+import { getNamespaceId, type NamespaceHandle } from "@/shared/locale/namespaces/define-namespace";
 
 interface CacheEntry<TLabels> {
   readonly promise: Promise<TLabels>;
@@ -11,6 +12,17 @@ type LocaleCache = Map<AppLocale, CacheEntry<unknown>>;
 type HandleCache = Map<NamespaceHandle<unknown>, LocaleCache>;
 
 const translationCache: HandleCache = new Map();
+
+const useSnapshotFallback = typeof window !== "undefined" && !window.isSecureContext && "indexedDB" in window;
+
+let hasWipedBuildId = false;
+
+function checkBuildIdWipe(): void {
+  if (useSnapshotFallback && !hasWipedBuildId) {
+    hasWipedBuildId = true;
+    wipeIfBuildIdChanged(process.env.NEXT_PUBLIC_BUILD_ID ?? "").catch(() => {});
+  }
+}
 
 function getLocaleCache(handle: NamespaceHandle<unknown>): LocaleCache {
   let localeCache = translationCache.get(handle);
@@ -27,18 +39,49 @@ function startNamespaceLoad<TLabels>(handle: NamespaceHandle<TLabels>, locale: A
     throw new Error("Unknown namespace handle");
   }
 
+  checkBuildIdWipe();
+
   const localeCache = getLocaleCache(handle as NamespaceHandle<unknown>);
   const existing = localeCache.get(locale) as CacheEntry<TLabels> | undefined;
   if (existing) {
     return existing;
   }
 
+  const namespaceId = getNamespaceId(handle as NamespaceHandle<unknown>);
+  const entryHolder: { entry?: CacheEntry<TLabels> } = {};
+
+  const loadPromise = (async (): Promise<TLabels> => {
+    if (useSnapshotFallback && namespaceId) {
+      try {
+        const cached = await readSnapshot<TLabels>(namespaceId, locale);
+        if (cached) {
+          if (entryHolder.entry) {
+            entryHolder.entry.value = cached;
+          }
+          return cached;
+        }
+      } catch {
+        // Fall through to loader
+      }
+    }
+
+    const labels = await config.load[locale]();
+    if (entryHolder.entry) {
+      entryHolder.entry.value = labels;
+    }
+
+    if (useSnapshotFallback && namespaceId) {
+      writeSnapshot(namespaceId, locale, labels).catch(() => {});
+    }
+
+    return labels;
+  })();
+
   const entry: CacheEntry<TLabels> = {
-    promise: config.load[locale]().then(labels => {
-      entry.value = labels;
-      return labels;
-    }),
+    promise: loadPromise,
   };
+  entryHolder.entry = entry;
+
   localeCache.set(locale, entry as CacheEntry<unknown>);
   return entry;
 }

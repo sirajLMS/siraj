@@ -1,8 +1,26 @@
+import { randomUUID } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
 import { networkInterfaces } from "node:os";
 import type { NextConfig } from "next";
 
 function getEnv(name: string, defaultValue: string): string {
   return process.env[name] || defaultValue;
+}
+
+function resolveBuildId(): string {
+  if (process.env.NEXT_PUBLIC_BUILD_ID) {
+    return process.env.NEXT_PUBLIC_BUILD_ID;
+  }
+  const versionFile = ".next-locale-snapshots-version";
+  if (existsSync(versionFile)) {
+    try {
+      const content = readFileSync(versionFile, "utf8").trim();
+      if (content) return content;
+    } catch {
+      // Fall through to UUID fallback
+    }
+  }
+  return randomUUID();
 }
 
 function getLanIpAddresses(): string[] {
@@ -29,10 +47,17 @@ function buildDevOrigins(): string[] {
   return origins.filter(Boolean);
 }
 
+const buildId = resolveBuildId();
+
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
   distDir: getEnv("NEXT_DIST_DIR", ".next"),
   reactStrictMode: true,
+  generateBuildId: () => buildId,
+  env: {
+    NEXT_PUBLIC_BUILD_ID: buildId,
+    NEXT_PUBLIC_LOCALE_SNAPSHOT_BASE: "/static/locale-snapshots",
+  },
   serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions"],
   turbopack: {},
   experimental: {

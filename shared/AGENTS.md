@@ -241,3 +241,11 @@ Canonical `*Labels` interfaces live in `shared/locale/types/**`. View-layer code
 ### Migration Status
 - **Complete**: all translation namespaces now live in `shared/locale/`; the legacy `next-intl` package has been fully removed from `package.json`.
 - **Legacy intact**: nothing — `shared/messages/` directory no longer exists; `next-intl` is no longer installed; `NextIntlClientProvider` is not used anywhere. Do not reintroduce them.
+
+### Browser Translation Cache (Hybrid SW + IndexedDB)
+
+- **Primary Path (HTTPS / Secure Contexts)**: Service Worker (`public/sw.js`) intercepts `/_next/static/chunks/*.js` GET requests and caches responses in Cache API store `siraj-static-chunks-v1`. Per-namespace invalidation happens automatically via Turbopack content hashes in chunk URLs.
+- **Fallback Path (HTTP Staging / Insecure Contexts)**: Auto-detected via `window.isSecureContext === false`. Serves JSON snapshots from IndexedDB (`siraj-locale-snapshots`) keyed by `${BUILD_ID}:${namespaceId}:${locale}`.
+- **Build ID Stamping**: Resolved in `next.config.ts` (`NEXT_PUBLIC_BUILD_ID` env → `.next-locale-snapshots-version` content hash → random UUID fallback). Mismatched `BUILD_ID` automatically wipes stale IndexedDB entries on first access.
+- **Adding New Namespaces**: Each new `defineNamespace` call in `shared/locale/namespaces/**/*.namespace.ts` MUST pass a stable string ID as the first parameter (e.g. `defineNamespace("dashboard.students.directory", config)`).
+

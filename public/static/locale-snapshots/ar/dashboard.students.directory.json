@@ -1,0 +1,58 @@
+{
+  "pageTitle": "دليل الطلاب الرئيسي",
+  "pageSubtitle": "إدارة شاملة لبيانات الطلاب المسجلين والتاريخية.",
+  "mobileTitle": "دليل الطلاب",
+  "searchPlaceholder": "البحث عن الطلاب...",
+  "addStudent": "إضافة طالب",
+  "filters": "الفلاتر",
+  "globalRecord": "سجل الطلاب العام",
+  "previous": "السابق",
+  "next": "التالي",
+  "showingOf": {
+    "__fn": "(shown, total) => `\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u0637\\u0627\\u0644\\u0628`"
+  },
+  "metrics": {
+    "deactivated": "معطّل",
+    "regular": "عادي",
+    "onLeave": "في إجازة",
+    "suspended": "موقوف",
+    "onTrial": "تجريبي"
+  },
+  "table": {
+    "index": "#",
+    "student": "الطالب",
+    "email": "البريد الإلكتروني",
+    "status": "الحالة",
+    "hoursPerWeek": "ساعات/أسبوع",
+    "classesLeft": "الحصص المتبقية",
+    "actions": "الإجراءات"
+  },
+  "status": {
+    "deactivated": "معطّل",
+    "regular": "عادي",
+    "onLeave": "في إجازة",
+    "suspended": "موقوف",
+    "onTrial": "تجريبي"
+  },
+  "enrollment": {
+    "regular": "عادي",
+    "prospect": "محتمل",
+    "withdrawn": "منسحب"
+  },
+  "card": {
+    "weeklyHours": "الساعات الأسبوعية",
+    "enrollmentStatus": "الحالة"
+  },
+  "actions": {
+    "viewProfile": "عرض الملف",
+    "viewHistory": "عرض السجل"
+  },
+  "noEntries": "لا يوجد طلاب",
+  "registrationComingSoon": "تسجيل الطالب قريباً.",
+  "registrationComingSoonDescription": "تسجيل الطالب سيكون متاحاً قريباً.",
+  "registrationComingSoonNotice": "تسجيل الطالب قريباً. يرجى التحقق لاحقاً.",
+  "loadFailed": "فشل تحميل دليل الطلاب.",
+  "errors": {
+    "loadFailed": "فشل تحميل دليل الطلاب."
+  }
+}

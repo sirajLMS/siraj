@@ -1,0 +1,124 @@
+{
+  "sectionTitle": "إعدادات الاجتماعات",
+  "addConfig": "إضافة إعداد اجتماع",
+  "editConfig": "تعديل إعداد الاجتماع",
+  "label": "التسمية",
+  "provider": "المزود",
+  "cancel": "إلغاء",
+  "save": "حفظ",
+  "loading": "جارٍ تحميل إعدادات الاجتماع...",
+  "empty": "لا توجد إعدادات اجتماع بعد",
+  "display": {
+    "defaultBadge": "افتراضي",
+    "meetingUrl": "رابط الاجتماع",
+    "username": "اسم المستخدم",
+    "tenantId": "معرّف المستأجر",
+    "provider": "المزود",
+    "label": "التسمية",
+    "meetingId": "معرّف الاجتماع",
+    "source": "المصدر",
+    "sourceClass": "إعدادات الحصة",
+    "sourceRecurring": "إعدادات الجدول المتكرر",
+    "sourceTeacher": "إعدادات المعلم الافتراضية",
+    "sourceNone": "غير متوفر",
+    "noMeeting": "لا يوجد اجتماع عبر الإنترنت",
+    "passwordProtected": "محمي بكلمة مرور"
+  },
+  "join": {
+    "joinMeeting": "انضم للاجتماع",
+    "joinUnavailable": "رابط الاجتماع غير متوفر",
+    "openInNewTab": "يفتح في علامة تبويب جديدة",
+    "emptyTeacher": "أعدّ رابط الاجتماع من إعدادات الملف الشخصي لتفعيل الانضمام.",
+    "emptyParent": "لم يقم المعلم بإعداد رابط اجتماع لهذه الحصة بعد.",
+    "emptyClass": "قم بإعداد اجتماع للحصة لتوفير رابط انضمام.",
+    "setupLink": "إعداد الاجتماع",
+    "providerTooltip": {
+      "__fn": "(provider, source) => `${provider} \\xB7 ${source}`"
+    }
+  },
+  "manager": {
+    "add": "إضافة إعداد",
+    "addTitle": "إضافة إعداد اجتماع",
+    "editTitle": "تعديل إعداد الاجتماع",
+    "listTitle": "إعدادات الاجتماعات",
+    "empty": "لا توجد إعدادات اجتماع بعد",
+    "label": "التسمية (اختياري)",
+    "provider": "المزود",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "deleteTitle": "حذف إعداد الاجتماع",
+    "deleteBody": {
+      "__fn": "(name) => `\\u062D\\u0630\\u0641 ${name}\\u061F \\u0644\\u0627 \\u064A\\u0645\\u0643\\u0646 \\u0627\\u0644\\u062A\\u0631\\u0627\\u062C\\u0639 \\u0639\\u0646 \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0625\\u062C\\u0631\\u0627\\u0621.`"
+    },
+    "deleteConfirm": "حذف",
+    "loadError": "فشل تحميل إعدادات الاجتماع",
+    "retry": "إعادة المحاولة",
+    "saved": "تم حفظ إعداد الاجتماع",
+    "passwordHint": "اترك كلمة المرور فارغة للإبقاء على القيمة الحالية",
+    "passwordLeaveBlank": "اتركه فارغاً للإبقاء على كلمة المرور الحالية",
+    "providerChangeWarning": "تغيير المزود قد يتطلب تحديث حقول الاجتماع.",
+    "urlNotAllowed": "عنوان URL غير مسموح به لهذا المزود",
+    "setDefault": "تعيين كافتراضي",
+    "setAsDefault": "تعيين كإعداد اجتماع افتراضي",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "saveError": "فشل حفظ إعداد الاجتماع",
+    "deleteError": "فشل حذف إعداد الاجتماع",
+    "postCreateFailure": "تم الإنشاء بنجاح، لكن تعذر حفظ إعداد الاجتماع. يرجى إعداده يدوياً."
+  },
+  "fields": {
+    "meetingUrl": "رابط الاجتماع",
+    "username": "اسم المستخدم",
+    "password": "كلمة المرور",
+    "tenantId": "معرّف المستأجر"
+  },
+  "classScope": {
+    "sectionTitle": "إعدادات اجتماع الحصة",
+    "sectionSubtitle": "تجاوز إعدادات المعلم الافتراضية لهذه الحصة أو الجدول المتكرر.",
+    "selectLabel": "إعداد الاجتماع",
+    "selectPlaceholder": "اختر إعداد اجتماع",
+    "useTeacherDefault": "استخدام إعداد المعلم الافتراضي",
+    "noConfigs": "لا توجد إعدادات اجتماع لهذا النطاق",
+    "inheritedFromTeacher": "يستخدم إعداد المعلم الافتراضي",
+    "overrideActive": "تجاوز الحصة نشط",
+    "effectiveSourceBanner": {
+      "__fn": "(source) => `\\u0645\\u0635\\u062F\\u0631 \\u0627\\u0644\\u0627\\u062C\\u062A\\u0645\\u0627\\u0639 \\u0627\\u0644\\u0641\\u0639\\u0644\\u064A: ${source}`"
+    },
+    "recurringSectionTitle": "اجتماع الجدول المتكرر",
+    "recurringSectionSubtitle": "تجاوز اختياري لجميع حصص هذا الجدول المتكرر.",
+    "createNewConfig": "إنشاء إعداد اجتماع جديد",
+    "recurringFieldsRequired": "اختر مزوداً وأدخل رابط الاجتماع.",
+    "seriesSectionTitle": "إعدادات اجتماع السلسلة",
+    "seriesSectionSubtitle": "تنطبق على جميع الحصص المستقبلية من هذا الجدول المتكرر.",
+    "manageSeriesLink": "إدارة إعدادات السلسلة الكاملة"
+  },
+  "providerSelect": {
+    "emptyCatalogTitle": "لا توجد مزودات اجتماعات",
+    "emptyCatalogBody": "يجب على المسؤول إضافة مزودات اجتماعات قبل إعداد الاجتماعات.",
+    "emptyCatalogAdminLink": "إدارة مزودات الاجتماعات",
+    "emptyCatalogContactAdmin": "تواصل مع المسؤول لإضافة مزودات اجتماعات."
+  },
+  "summary": {
+    "sectionTitle": "الاجتماع عبر الإنترنت",
+    "loading": "جارٍ تحميل إعدادات الاجتماع...",
+    "empty": "لم يتم تكوين اجتماع افتراضي",
+    "manageLink": "إدارة إعدادات الاجتماع"
+  },
+  "recurringSchedule": {
+    "pageTitle": "اجتماع السلسلة المتكررة",
+    "scheduleSummary": {
+      "__fn": "(student, teacher, duration, timezone) => `${student} \\u0645\\u0639 ${teacher} \\xB7 ${duration} \\u062F\\u0642\\u064A\\u0642\\u0629 \\xB7 ${timezone}`"
+    },
+    "invalidId": "معرّف الجدول غير صالح",
+    "breadcrumbDashboard": "لوحة التحكم",
+    "breadcrumbClasses": "الحصص",
+    "goToClass": "الانتقال إلى الحصة",
+    "rateSectionTitle": "سعر الفصل المتكرر",
+    "hourlyRateLabel": "السعر بالساعة",
+    "currencyLabel": "العملة",
+    "rateSaveLabel": "حفظ السعر",
+    "rateClearLabel": "مسح السعر",
+    "rateSuccessMessage": "تم تحديث السعر بنجاح",
+    "rateErrorMessage": "فشل تحديث السعر"
+  }
+}

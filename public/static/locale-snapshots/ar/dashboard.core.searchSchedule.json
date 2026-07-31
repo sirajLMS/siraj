@@ -1,0 +1,69 @@
+{
+  "pageTitle": "البحث عن توفر الجدول",
+  "fromDate": "من تاريخ",
+  "toDate": "إلى تاريخ",
+  "fromTime": "من",
+  "toTime": "إلى",
+  "teacherGender": "جنس المعلم",
+  "allGenders": "الكل",
+  "dateRange": "نطاق التاريخ",
+  "timeRange": "نطاق الوقت",
+  "filters": "الفلاتر",
+  "applyFilters": "تطبيق",
+  "clearFilters": "مسح الفلاتر",
+  "sort": "ترتيب",
+  "male": "ذكر",
+  "female": "أنثى",
+  "teacherName": "اسم المعلم",
+  "teacherNamePlaceholder": "ابحث عن المعلمين…",
+  "teacherNameNoResults": "لم يتم العثور على معلمين",
+  "teacherNameTypeToSearch": "اكتب حرفين على الأقل للبحث",
+  "minAvailableDays": "الحد الأدنى للأيام المتاحة",
+  "minTotalGaps": "الحد الأدنى لإجمالي الفترات",
+  "sortBy": "ترتيب حسب",
+  "daysOfWeek": "أيام الأسبوع",
+  "searchBtn": "بحث",
+  "noResults": "لم يتم العثور على فترات زمنية متاحة للمعايير المحددة.",
+  "resultsCount": {
+    "__fn": "(count, gaps) => `${count} \\u0645\\u0639\\u0644\\u0645\\u064A\\u0646 \\u0645\\u0639 ${gaps} \\u0641\\u062A\\u0631\\u0627\\u062A \\u0645\\u062A\\u0627\\u062D\\u0629`"
+  },
+  "availableDaysCount": {
+    "__fn": "(count) => `${count} \\u0623\\u064A\\u0627\\u0645`"
+  },
+  "errorLoading": "فشل في تحميل بيانات التوفر.",
+  "viewMonthSchedule": "عرض جدول الشهر",
+  "monthScheduleTitle": {
+    "__fn": "(name) => `${name} \\u2014 \\u0627\\u0644\\u062A\\u0648\\u0641\\u0631 \\u0627\\u0644\\u0634\\u0647\\u0631\\u064A`"
+  },
+  "monthScheduleError": "فشل في تحميل التوفر الشهري.",
+  "closeMonthSchedule": "إغلاق جدول الشهر",
+  "previousMonth": "الشهر السابق",
+  "nextMonth": "الشهر التالي",
+  "sortOptions": {
+    "mostAvailableDays": "الأكثر توفراً بالأيام",
+    "mostGaps": "الأكثر فترات",
+    "nameAsc": "الاسم (أ-ي)",
+    "nameDesc": "الاسم (ي-أ)",
+    "timezoneAsc": "المنطقة الزمنية"
+  },
+  "day": {
+    "monday": "الاثنين",
+    "tuesday": "الثلاثاء",
+    "wednesday": "الأربعاء",
+    "thursday": "الخميس",
+    "friday": "الجمعة",
+    "saturday": "السبت",
+    "sunday": "الأحد"
+  },
+  "calendar": {
+    "days": {
+      "sun": "أحد",
+      "mon": "اثنين",
+      "tue": "ثلاثاء",
+      "wed": "أربعاء",
+      "thu": "خميس",
+      "fri": "جمعة",
+      "sat": "سبت"
+    }
+  }
+}

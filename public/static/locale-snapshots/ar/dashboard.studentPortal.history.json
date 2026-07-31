@@ -1,0 +1,59 @@
+{
+  "pageTitle": "سجل الدروس",
+  "lessonHistory": "سجل الدروس",
+  "sessionDate": "التاريخ",
+  "subject": "المادة",
+  "instructor": "المعلم",
+  "duration": "المدة",
+  "status": "الحالة",
+  "outcome": "النتيجة",
+  "notes": "ملاحظات",
+  "joinUrl": "رابط الانضمام",
+  "noHistory": "لا يوجد سجل دروس بعد",
+  "loadingMessage": "جاري التحميل...",
+  "filterBySubject": "تصفية حسب المادة",
+  "filterByDate": "تصفية حسب التاريخ",
+  "filterByStatus": "تصفية حسب الحالة",
+  "allSubjects": "جميع المواد",
+  "allStatuses": "جميع الحالات",
+  "viewReport": "عرض التقرير",
+  "addReflection": "إضافة تأمل",
+  "previousMonth": "الشهر السابق",
+  "nextMonth": "الشهر التالي",
+  "totalClasses": "إجمالي الحصص",
+  "attendanceRate": "معدل الحضور",
+  "hoursStudied": "ساعات الدراسة",
+  "performance": "الأداء",
+  "backToDashboard": "العودة إلى لوحة التحكم",
+  "weeklyAttendance": "الحضور الأسبوعي",
+  "week": {
+    "__fn": "(number) => `\\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639 ${number}`"
+  },
+  "statusLabels": {
+    "ended": "انتهت",
+    "present": "حاضر",
+    "absent": "غائب",
+    "late": "متأخر",
+    "scheduled": "مجدولة",
+    "pending": "قيد الانتظار",
+    "cancelled": "ملغاة"
+  },
+  "minutesShort": {
+    "__fn": "(minutes) => `${minutes} \\u062F`"
+  },
+  "viewClass": "عرض الحصة",
+  "joinSession": "انضم للحصة",
+  "sessionsList": "الحصص",
+  "calendarWeekdays": {
+    "sun": "أحد",
+    "mon": "إثن",
+    "tue": "ثلا",
+    "wed": "أرب",
+    "thu": "خمي",
+    "fri": "جمع",
+    "sat": "سبت"
+  },
+  "scheduleFor": {
+    "__fn": "(weekday, month, day) => `\\u062C\\u062F\\u0648\\u0644 ${weekday}\\u060C ${day} ${month}`"
+  }
+}

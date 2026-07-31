@@ -1,0 +1,24 @@
+{
+  "pageTitle": "قائمة الحصص",
+  "pageSubtitle": "عرض وإدارة حصصك المجدولة",
+  "noClasses": "لم يتم العثور على حصص.",
+  "viewDetails": "عرض التفاصيل",
+  "viewClassAudit": "عرض تدقيق الحصة",
+  "joinVideo": "انضمام للفيديو",
+  "durationMinutes": {
+    "__fn": "(minutes) => `${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
+  },
+  "errors": {
+    "failedToLoad": "فشل تحميل الحصص."
+  },
+  "statusLabels": {
+    "PENDING": "قيد الانتظار",
+    "TAKEN": "مأخوذة",
+    "ABSENT": "غائب",
+    "LEAVE": "إجازة",
+    "NOT_ACTIVATED": "غير مفعلة",
+    "ACTIVATED": "مفعلة",
+    "RUNNING": "جارٍ التنفيذ",
+    "COMPLETED": "مكتملة"
+  }
+}

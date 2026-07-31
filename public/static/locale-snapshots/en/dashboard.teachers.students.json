@@ -1,0 +1,17 @@
+{
+  "pageTitle": "My Students",
+  "pageSubtitle": "View and manage your students",
+  "noStudents": "No students assigned.",
+  "statusLabel": {
+    "__fn": "(status) => `Status: ${status}`"
+  },
+  "quotaLabel": {
+    "__fn": "(remaining, total) => `Remaining quota: ${remaining} / ${total}`"
+  },
+  "hoursLabel": {
+    "__fn": "(hours) => `${hours} hours weekly`"
+  },
+  "errors": {
+    "failedToLoad": "Failed to load students."
+  }
+}

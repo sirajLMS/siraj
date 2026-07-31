@@ -38,8 +38,8 @@
 
 ## Task List
 
-- [ ] 1. **Foundation — Service Worker (Primary Cache, Secure Contexts)**
-  - [ ] 1.1 Create `public/sw.js`
+- [x] 1. **Foundation — Service Worker (Primary Cache, Secure Contexts)**
+  - [x] 1.1 Create `public/sw.js`
     - _Applicable AGENTS.md:_ `app/AGENTS.md`, `shared/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -60,7 +60,7 @@
     - Write outcome file: `.ai/plans/clientCache/outcome/1.1-sw-file-outcome.md`.
     - Update progress: Mark task 1.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-CACHE-SW_
-  - [ ] 1.2 Register Service Worker in `app/layout.tsx`
+  - [x] 1.2 Register Service Worker in `app/layout.tsx`
     - _Applicable AGENTS.md:_ `app/AGENTS.md`, `shared/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -83,8 +83,8 @@
     - Update progress: Mark task 1.2 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-CACHE-SW, REQ-NO-REGRESSION_
 
-- [ ] 2. **Build ID Stamping — `next.config.ts`**
-  - [ ] 2.1 Add `resolveBuildId` + `generateBuildId` + env vars to `next.config.ts`
+- [x] 2. **Build ID Stamping — `next.config.ts`**
+  - [x] 2.1 Add `resolveBuildId` + `generateBuildId` + env vars to `next.config.ts`
     - _Applicable AGENTS.md:_ `app/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -109,8 +109,8 @@
     - Update progress: Mark task 2.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-BUILD-ID_
 
-- [ ] 3. **Stable Namespace IDs — `defineNamespace` Overload**
-  - [ ] 3.1 Add ID overload to `shared/locale/namespaces/define-namespace.ts`
+- [x] 3. **Stable Namespace IDs — `defineNamespace` Overload**
+  - [x] 3.1 Add ID overload to `shared/locale/namespaces/define-namespace.ts`
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -132,7 +132,7 @@
     - Write outcome file: `.ai/plans/clientCache/outcome/3.1-define-namespace-id-overload-outcome.md`.
     - Update progress: Mark task 3.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-FALLBACK-IDB, REQ-NO-REGRESSION_
-  - [ ] 3.2 Pass stable string IDs to all `*.namespace.ts` files (mechanical rollout)
+  - [x] 3.2 Pass stable string IDs to all `*.namespace.ts` files (mechanical rollout)
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -153,8 +153,8 @@
     - Update progress: Mark task 3.2 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-FALLBACK-IDB_
 
-- [ ] 4. **Build-Time Snapshot Codegen — `scripts/locale-snapshots.ts`**
-  - [ ] 4.1 Create `scripts/locale-snapshots.ts`
+- [x] 4. **Build-Time Snapshot Codegen — `scripts/locale-snapshots.ts`**
+  - [x] 4.1 Create `scripts/locale-snapshots.ts`
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `backend/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/backend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -179,7 +179,7 @@
     - Write outcome file: `.ai/plans/clientCache/outcome/4.1-snapshot-codegen-outcome.md`.
     - Update progress: Mark task 4.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-SNAPSHOTS_
-  - [ ] 4.2 Wire `locale:snapshots` + `prebuild` scripts into `package.json`
+  - [x] 4.2 Wire `locale:snapshots` + `prebuild` scripts into `package.json`
     - _Applicable AGENTS.md:_ (root `AGENTS.md` only — `package.json` is project-level config)
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -197,8 +197,8 @@
     - Update progress: Mark task 4.2 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-SNAPSHOTS, REQ-BUILD-ID_
 
-- [ ] 5. **IndexedDB Fallback Module — `shared/locale/client/snapshot-cache.ts`**
-  - [ ] 5.1 Create the snapshot cache module
+- [x] 5. **IndexedDB Fallback Module — `shared/locale/client/snapshot-cache.ts`**
+  - [x] 5.1 Create the snapshot cache module
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `frontend/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -228,8 +228,8 @@
     - Update progress: Mark task 5.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-FALLBACK-IDB, REQ-TELEMETRY_
 
-- [ ] 6. **Integration — Wire fallback into `translation-cache-store.ts`**
-  - [ ] 6.1 Integrate the IndexedDB snapshot branch into `startNamespaceLoad`
+- [x] 6. **Integration — Wire fallback into `translation-cache-store.ts`**
+  - [x] 6.1 Integrate the IndexedDB snapshot branch into `startNamespaceLoad`
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `frontend/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -264,8 +264,8 @@
     - Update progress: Mark task 6.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-NO-REGRESSION, REQ-FALLBACK-IDB_
 
-- [ ] 7. **End-to-End Smoke Verification**
-  - [ ] 7.1 HTTPS Smoke — Service Worker Cache Path
+- [x] 7. **End-to-End Smoke Verification**
+  - [x] 7.1 HTTPS Smoke — Service Worker Cache Path
     - _Applicable AGENTS.md:_ `app/AGENTS.md`, `shared/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -279,7 +279,7 @@
     - Write outcome file: `.ai/plans/clientCache/outcome/7.1-https-smoke-outcome.md`.
     - Update progress: Mark task 7.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-CACHE-SW_
-  - [ ] 7.2 HTTP Staging Smoke — IndexedDB Fallback Path
+  - [x] 7.2 HTTP Staging Smoke — IndexedDB Fallback Path
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `frontend/AGENTS.md`
     - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
@@ -293,7 +293,7 @@
     - Update progress: Mark task 7.2 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-FALLBACK-IDB, REQ-BUILD-ID_
 
-- [ ] 8. **Knowledge Propagation & Documentation (MANDATORY Final Task)**
+- [x] 8. **Knowledge Propagation & Documentation (MANDATORY Final Task)**
   - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `app/AGENTS.md`
   - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
   - Read all outcome files in `.ai/plans/clientCache/outcome/` to synthesize all learnings from the plan.

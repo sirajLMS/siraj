@@ -156,3 +156,19 @@ When invalidation fires:
 **Strategy B** is more powerful (queryable, smaller wire payload, works on HTTP staging) but pays for it with significant complexity: a custom JSON-with-functions reviver, a new codegen step, a build ID env var, and a CSP relaxation for `eval`. The CSP relaxation alone can block adoption.
 
 A hybrid is possible: **Strategy A as default, Strategy B as opt-in for plain-HTTP staging** — but the maintenance cost of supporting both strategies is high. We'd recommend starting with A and adding B only if a real-world pain point (e.g., persistent staging cache needs) emerges.
+
+---
+
+## Decision and Implementation Outcomes
+
+- **Chosen Architecture**: **Hybrid Strategy** (SW + Cache API primary for secure contexts, auto-fallback to IndexedDB JSON snapshots for plain-HTTP staging).
+- **Implementation Plan**: Completed under [.ai/plans/clientCache/](../.ai/plans/clientCache/).
+- **Key Modules Implemented**:
+  - `public/sw.js`: Service Worker Cache-First interceptor for `/_next/static/chunks/*.js`.
+  - `app/layout.tsx`: Root `<head>` SW registration script.
+  - `next.config.ts`: `resolveBuildId()` and `env.NEXT_PUBLIC_BUILD_ID` stamping.
+  - `scripts/locale-snapshots.ts`: Codegen script for JSON snapshots + content hash (`.next-locale-snapshots-version`).
+  - `shared/locale/client/snapshot-cache.ts`: IndexedDB store module with function closure reviver.
+  - `shared/locale/client/translation-cache-store.ts`: Runtime branch router.
+  - `shared/locale/namespaces/**/*.namespace.ts`: Mechanical rollout of stable string IDs across 109 namespace files.
+

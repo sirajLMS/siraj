@@ -1,0 +1,70 @@
+{
+  "pageTitle": "انضمام المعلم",
+  "pageSubtitle": "أكمل النموذج أدناه لتسجيل معلم جديد.",
+  "mandatoryFields": "* الحقول الإلزامية",
+  "sections": {
+    "teacherInfo": "معلومات المعلم",
+    "officialDetails": "التفاصيل الرسمية",
+    "salaryDetails": "تفاصيل سعر الساعة",
+    "paymentMethod": "طريقة الدفع",
+    "addPaymentMethod": "إضافة طريقة دفع الآن",
+    "meetingConfig": "إعدادات الاجتماع"
+  },
+  "fields": {
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "nationality": "الجنسية",
+    "nationalId": "الرقم القومي",
+    "phone": "الهاتف",
+    "dateOfBirth": "تاريخ الميلاد",
+    "gender": "الجنس",
+    "male": "ذكر",
+    "female": "أنثى",
+    "address": "العنوان",
+    "qualifications": "المؤهلات",
+    "country": "البلد",
+    "timezone": "المنطقة الزمنية",
+    "salaryAmount": "سعر الساعة",
+    "currency": "العملة",
+    "meetingProvider": "مقدم الاجتماع",
+    "meetingUrl": "رابط الاجتماع",
+    "meetingLabel": "تسمية رابط الاجتماع",
+    "avatar": "الصورة الشخصية"
+  },
+  "placeholders": {
+    "fullName": "أدخل الاسم الكامل",
+    "email": "أدخل البريد الإلكتروني",
+    "password": "أدخل كلمة المرور",
+    "nationality": "أدخل الجنسية",
+    "nationalId": "أدخل الرقم القومي",
+    "phone": "أدخل رقم الهاتف",
+    "dateOfBirth": "YYYY-MM-DD",
+    "address": "أدخل العنوان الكامل",
+    "qualifications": "أدخل المؤهلات",
+    "salaryAmount": "أدخل سعر الساعة",
+    "meetingUrl": "أدخل رابط الاجتماع",
+    "meetingLabel": "أدخل تسمية رابط الاجتماع"
+  },
+  "actions": {
+    "signup": "إنشاء",
+    "cancel": "إلغاء",
+    "proceeding": "جاري المعالجة...",
+    "successMessage": "تم التسجيل بنجاح!"
+  },
+  "validation": {
+    "fullNameRequired": "الاسم الكامل مطلوب",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "emailInvalid": "البريد الإلكتروني غير صالح",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "nationalIdRequired": "الرقم القومي مطلوب",
+    "phoneRequired": "الهاتف مطلوب",
+    "genderRequired": "الجنس مطلوب",
+    "countryRequired": "البلد مطلوب",
+    "timezoneRequired": "المنطقة الزمنية مطلوبة",
+    "salaryAmountRequired": "سعر الساعة مطلوب",
+    "currencyRequired": "العملة مطلوبة",
+    "urlInvalid": "رابط غير صالح"
+  },
+  "optionalHint": "اختياري"
+}

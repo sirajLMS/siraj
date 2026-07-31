@@ -1,0 +1,438 @@
+{
+  "paymentMethodSelector": {
+    "label": "Payment Method",
+    "placeholder": "Select saved payment method"
+  },
+  "paymentStatusBadge": {
+    "paid": "Paid",
+    "pending": "Pending",
+    "unpaid": "Unpaid",
+    "overdue": "Overdue",
+    "cancelled": "Cancelled",
+    "refunded": "Refunded"
+  },
+  "paymentSummaryCard": {
+    "amount": "Amount",
+    "date": "Date",
+    "paymentMethod": "Payment Method"
+  },
+  "adminPageTitle": "Billing Management",
+  "adminPageSubtitle": "Financial overview and transaction records",
+  "parentPageTitle": "Invoices & Payments",
+  "parentPageSubtitle": "Track and download institutional billing records.",
+  "manualInvoice": "Manual Invoice",
+  "exchangeRatesLink": "Exchange Rates",
+  "quickPay": "Quick Pay",
+  "viewAllNegativeBalance": "View All Students with Negative Balance",
+  "requiresAttention": "Requires Attention",
+  "showingResults": {
+    "__fn": "(shown, total) => `Showing ${shown} of ${total} results`"
+  },
+  "invalidUserId": "Invalid user ID",
+  "billingProfileTitle": "User Billing Profile",
+  "profileForUser": "Billing profile details",
+  "adminMetrics": {
+    "totalOutstanding": "Total Outstanding",
+    "pendingInvoices": "Pending Invoices",
+    "negativeBalance": {
+      "__fn": "(count) => `Negative Balance (${count})`"
+    },
+    "mtdRevenue": "MTD Revenue"
+  },
+  "parentMetrics": {
+    "outstandingBalance": "Outstanding Balance",
+    "paidThisTerm": "Paid This Term",
+    "nextDueDate": "Next Due Date",
+    "activeStudents": "Active Students"
+  },
+  "sections": {
+    "recentInvoices": "Recent Invoices",
+    "studentCreditStatus": "Student Credit Status",
+    "invoiceHistory": "Invoice History",
+    "invoiceHistorySubtitle": "Track and download institutional billing records."
+  },
+  "search": {
+    "invoicesPlaceholder": "Search invoices...",
+    "parentPlaceholder": "Search by invoice number...",
+    "searching": "Searching…"
+  },
+  "adminTable": {
+    "invoiceId": "Invoice ID",
+    "studentName": "Student Name",
+    "dateIssued": "Date Issued",
+    "amount": "Amount",
+    "status": "Status",
+    "actions": "Actions",
+    "markAsPaid": "Mark as Paid",
+    "quickPay": "Quick Pay",
+    "reviewSubmission": "Review",
+    "viewRejection": "View Rejection",
+    "deleteInvoice": "Delete Invoice",
+    "noEntries": "No matching invoices found"
+  },
+  "creditTable": {
+    "student": "Student",
+    "parentContact": "Parent Contact",
+    "planType": "Plan Type",
+    "classesLeft": "Classes Left",
+    "status": "Status",
+    "quickAction": "Quick Action",
+    "sendReminder": "Send Reminder",
+    "negativeBalance": "Negative Balance",
+    "activeCredit": "Active Credit",
+    "noEntries": "No student credit records found",
+    "showingNegativeBalanceOnly": "Showing students with negative balance only",
+    "clearFilter": "Clear filter"
+  },
+  "parentTable": {
+    "invoiceNumber": "#",
+    "month": "Month",
+    "issueDate": "Issue Date",
+    "dueDate": "Due Date",
+    "paidDate": "Paid Date",
+    "fee": "Fees",
+    "status": "Status",
+    "options": "Options",
+    "viewDetails": "View Details",
+    "downloadPdf": "Download PDF",
+    "payNow": "Pay Now",
+    "viewSubmission": "View Payment Proof",
+    "viewFeedback": "View Feedback",
+    "noEntries": "No matching invoices found",
+    "emptyTitle": "You have no invoices.",
+    "emptySubtitle": "Upcoming billing cycles will appear here automatically."
+  },
+  "invoiceStatus": {
+    "OVERDUE": "Overdue",
+    "PAYMENT_PENDING": "Payment Under Review",
+    "PENDING": "Pending",
+    "PAID": "Paid",
+    "UNPAID": "Unpaid",
+    "CANCELLED": "Cancelled"
+  },
+  "creditStatus": {
+    "negative_balance": "Negative Balance",
+    "active_credit": "Active Credit"
+  },
+  "manual": {
+    "pageTitle": "Create Manual Invoice",
+    "pageSubtitle": "Create one-time charge records for institutional billing.",
+    "backToFinancials": "Back to Financials",
+    "parentSelection": "Select Parent",
+    "parentPlaceholder": "Select parent record...",
+    "studentSelection": "Select Student",
+    "feeAmount": "Fee Amount",
+    "feeAmountPlaceholder": "0.00",
+    "issueDate": "Issue Date",
+    "dueDate": "Due Date",
+    "billingMonths": "Select Billing Months",
+    "billingMonthsMobile": "Billing Period (Months)",
+    "summaryTitle": "Invoice Summary",
+    "summarySubtitle": "Tax will be calculated automatically based on the fee amount.",
+    "totalDraftValue": "Draft Total Value",
+    "submit": "Submit",
+    "submitAndSendEmail": "Submit & Send Email",
+    "successMessage": "Manual invoice submitted successfully.",
+    "createSuccess": {
+      "__fn": "(id) => `Invoice ${id} created successfully`"
+    },
+    "manualInvoiceFxNote": "Invoice amount is stored in the selected currency. Conversions appear on billing pages based on each user's display currency.",
+    "unknown": "Unknown Student",
+    "months": {
+      "jan": "January",
+      "feb": "February",
+      "mar": "March",
+      "apr": "April",
+      "may": "May",
+      "jun": "June",
+      "jul": "July",
+      "aug": "August",
+      "sep": "September",
+      "oct": "October",
+      "nov": "November",
+      "dec": "December"
+    },
+    "validation": {
+      "parentRequired": "Please select a parent.",
+      "feeAmountRequired": "Fee amount is required.",
+      "feeAmountPositive": "Fee amount must be greater than zero.",
+      "issueDateRequired": "Issue date is required.",
+      "dueDateRequired": "Due date is required.",
+      "billingMonthsRequired": "Select at least one billing month.",
+      "dueDateBeforeIssueDate": "Due date must be on or after the issue date."
+    },
+    "support": {
+      "secureBilling": {
+        "title": "Secure Billing",
+        "body": "All manual invoices are encrypted and logged for audit purposes."
+      },
+      "automatedLedgers": {
+        "title": "Automated Ledgers",
+        "body": "Records are synced automatically with the parent's financial statement."
+      },
+      "draftMode": {
+        "title": "Draft Mode",
+        "body": "Invoices can be saved as drafts before final institutional issuance."
+      }
+    }
+  },
+  "markAsPaidSuccess": "Invoice marked as paid successfully",
+  "submitProofSuccess": "Payment proof submitted successfully",
+  "approveProofSuccess": "Payment proof approved",
+  "rejectProofSuccess": "Payment proof rejected",
+  "deleteInvoiceSuccess": "Invoice deleted successfully",
+  "deleteInvoiceDialog": {
+    "title": "Delete Invoice",
+    "body": {
+      "__fn": "(invoiceId) => `This will permanently remove invoice ${invoiceId}. This action cannot be undone.`"
+    },
+    "confirm": "Delete Invoice"
+  },
+  "reminderSent": "Payment reminder sent",
+  "reminderFailed": "Failed to send payment reminder",
+  "noUnpaidInvoices": "No unpaid invoices available for payment",
+  "hasPaymentProofHint": "Payment proof attached",
+  "submitProofDialog": {
+    "titleSubmit": "Submit Payment Proof",
+    "titleMarkPaid": "Mark Invoice as Paid",
+    "confirm": "Submit Proof",
+    "confirmMarkPaid": "Mark as Paid",
+    "confirming": "Submitting...",
+    "selectFile": "Payment Proof File",
+    "fileHint": "Upload a PDF, JPEG, PNG, or WebP file as payment proof.",
+    "invalidFileType": "Invalid file type. Use PDF, JPEG, PNG, or WebP.",
+    "fileTooLarge": {
+      "__fn": "(maxMb) => `File is too large. Maximum size is ${maxMb} MB.`"
+    },
+    "cancel": "Cancel",
+    "errorGeneric": "Failed to submit payment proof. Please try again.",
+    "invoiceNumber": "Invoice",
+    "amount": "Amount",
+    "dueDate": "Due Date",
+    "student": "Student",
+    "uploadFailed": "Failed to upload file. Please try again.",
+    "uploadPrepareFailed": "Failed to prepare file upload. Please try again.",
+    "impersonationBlocked": "Payment actions are disabled while impersonating another user."
+  },
+  "paymentDetailsDialog": {
+    "title": "Payment Details",
+    "empty": "No payment records available for this invoice.",
+    "pending": "Payment proof under review.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejecting": "Rejecting...",
+    "approving": "Approving...",
+    "rejected": "Payment proof rejected",
+    "rejectionReason": "Rejection Reason",
+    "rejectionReasonPlaceholder": "Optional reason for rejection",
+    "viewProof": "View Proof File",
+    "viewProofFailed": "Failed to preview file. Open in a new tab.",
+    "noProof": "No payment proof file attached.",
+    "loadFailed": "Failed to load payment details. Please try again.",
+    "close": "Close",
+    "amount": "Amount",
+    "date": "Date",
+    "submittedAt": "Submitted At",
+    "reviewActions": "Review Actions",
+    "tryAgain": "Try Again",
+    "confirmReject": "Confirm Rejection",
+    "confirmRejectMessage": "Reject this payment proof? The invoice will return to unpaid status."
+  },
+  "notifications": {
+    "popupBlocked": "Popup blocked. Allow popups to download the file.",
+    "paymentPendingReview": "Your payments are under review. No unpaid invoices require action at this time."
+  },
+  "errors": {
+    "invalidId": "Invalid parent ID in invoice view.",
+    "retry": "Retry"
+  },
+  "exchangeRates": {
+    "pageTitle": "Exchange Rates",
+    "pageSubtitle": "View and manage currency exchange rates",
+    "status": "Status",
+    "refreshing": "Refreshing rates...",
+    "refreshSuccess": "Rates refreshed successfully",
+    "refreshFailed": "Failed to refresh rates",
+    "noRates": "No current exchange rates available",
+    "noSyncRuns": "No recent sync attempts",
+    "staleWarning": "Rates may be outdated",
+    "viewRates": "View Rates",
+    "syncStatus": {
+      "title": "Sync Status",
+      "refresh": "Refresh Now",
+      "lastSync": "Last Sync",
+      "provider": "Provider",
+      "pairsWritten": "Pairs Written",
+      "pairsFailed": "Pairs Failed",
+      "errorMessage": "Error",
+      "statusSuccess": "Success",
+      "statusRunning": "Running",
+      "statusPartial": "Partial Success",
+      "statusFailed": "Failed",
+      "statusUnknown": "Unknown"
+    },
+    "rateTable": {
+      "title": "Current Exchange Rates",
+      "fromCurrency": "From",
+      "toCurrency": "To",
+      "rate": "Rate",
+      "source": "Source",
+      "effectiveDate": "Effective Date"
+    },
+    "history": {
+      "title": "Exchange Rate History",
+      "subtitle": "Historical exchange rate trends",
+      "pairLabel": "Currency Pair",
+      "empty": "No historical data",
+      "maxDays": {
+        "__fn": "(days) => `Last ${days} days`"
+      },
+      "daysLabel": "Number of days"
+    },
+    "providerSettings": {
+      "title": "Exchange Rate Provider Settings",
+      "sourceEnv": "Configuration (environment-based)",
+      "sourceDatabase": "Custom Database Settings",
+      "activeProvider": "Active Source",
+      "confirmTitle": "Change Provider",
+      "confirmBody": "Switching exchange rate providers will affect all currency conversions across the system.",
+      "saveSuccess": "Provider settings saved",
+      "saveFailed": "Failed to save provider settings",
+      "lastChangedBy": {
+        "__fn": "(name, date) => `Last changed by ${name} on ${date}`"
+      },
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "manualOverride": {
+      "title": "Manual Rate Override",
+      "fromCurrency": "From Currency",
+      "toCurrency": "To Currency",
+      "rate": "Rate",
+      "effectiveDate": "Effective Date",
+      "submit": "Submit Override",
+      "success": "Rate override applied",
+      "failed": "Failed to apply override",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "loadFailed": "Failed to load data",
+      "retry": "Retry"
+    }
+  },
+  "fxStaleBanner": {
+    "adminBody": "Exchange rates are stale. Currency conversions may not reflect current values until updated.",
+    "userBody": "Exchange rates are stale. Currency conversions may not reflect current values until updated.",
+    "adminCta": "Manage Rates",
+    "userCta": "Update Profile"
+  },
+  "displayCurrencyHint": {
+    "title": "Display Currency Not Set",
+    "body": "Set a display currency in your profile to see converted amounts in invoices and reports.",
+    "cta": "Edit Profile",
+    "dismiss": "Dismiss",
+    "subject": {
+      "title": "Display Currency Not Set for This User",
+      "body": "This user has not set a display currency. Converted amounts will not appear until set in their profile.",
+      "cta": "Edit User Profile",
+      "dismiss": "Dismiss"
+    }
+  },
+  "fxConversionNote": {
+    "__fn": "(code) => `Converted totals use your display currency (${code})`"
+  },
+  "fxConversionNoteSubject": {
+    "__fn": "(code) => `Converted amounts use this user's display currency (${code})`"
+  },
+  "adminBillingFxNote": "Metrics use your display currency; each invoice uses its parent's currency",
+  "displayCurrencyMixed": {
+    "__fn": "(values) => `Multiple display currencies detected; showing locked amounts only: ${values.lockedAmount} ${values.lockedCurrency}`"
+  },
+  "displayCurrencyNotSet": {
+    "__fn": "(values) => `${values.lockedAmount} ${values.lockedCurrency} (display currency not set)`"
+  },
+  "displayCurrencyStale": {
+    "__fn": "(values) => `${values.lockedAmount} ${values.lockedCurrency} (rates may be stale)`"
+  },
+  "currencyHedges": {
+    "pageTitle": "Currency Hedges",
+    "pageSubtitle": "Manage currency hedges for financial planning",
+    "addHedge": "Add Hedge",
+    "editHedge": "Edit Hedge",
+    "deleteHedge": "Delete Hedge",
+    "deleteConfirm": "Are you sure you want to delete this hedge?",
+    "cancel": "Cancel",
+    "save": "Save",
+    "createSuccess": "Currency hedge created successfully",
+    "updateSuccess": "Currency hedge updated successfully",
+    "deleteSuccess": "Currency hedge deleted successfully",
+    "saveFailed": "Failed to save hedge",
+    "empty": "No currency hedges defined",
+    "columns": {
+      "currency": "Currency",
+      "amount": "Amount",
+      "hedgeType": "Type",
+      "notes": "Notes",
+      "updatedAt": "Last Updated",
+      "actions": "Actions"
+    },
+    "fields": {
+      "currency": "Currency",
+      "amount": "Amount",
+      "hedgeType": "Hedge Type",
+      "notes": "Notes"
+    },
+    "hedgeTypes": {
+      "long": "Long",
+      "short": "Short"
+    }
+  },
+  "supportedCurrencies": {
+    "pageTitle": "Supported Currencies",
+    "pageSubtitle": "Manage currencies available for use in billing",
+    "code": "Code",
+    "symbol": "Symbol",
+    "name": "Currency Name",
+    "country": "Country",
+    "flag": "Flag",
+    "active": "Active",
+    "actions": "Actions",
+    "empty": "No currencies configured",
+    "footerNote": "Currencies available for accounting, invoicing, and reporting",
+    "activateLabel": "Activate Currency",
+    "editLabel": "Edit",
+    "deactivateLabel": "Deactivate",
+    "activateTitle": "Activate Supported Currency",
+    "editTitle": "Edit Supported Currency",
+    "deactivateConfirmTitle": "Deactivate Currency",
+    "deactivateConfirmBody": {
+      "__fn": "(code) => `Deactivate ${code}? It will no longer be available for new billing entries. Existing references are preserved.`"
+    },
+    "deactivateConfirmCancel": "Cancel",
+    "deactivateConfirmConfirm": "Deactivate",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saveSuccess": "Supported currency saved successfully.",
+    "saveError": "Failed to save supported currency. Please try again.",
+    "deactivateSuccess": "Currency deactivated successfully.",
+    "deactivateError": "Failed to deactivate currency. Please try again.",
+    "currencyInUse": "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
+    "currencyField": "Currency",
+    "symbolField": "Symbol",
+    "countryField": "Country",
+    "decimalsField": "Decimals",
+    "sortOrderField": "Sort Order",
+    "codeRequired": "Please select a currency.",
+    "symbolRequired": "Symbol is required."
+  },
+  "tabsPageTitle": "Billing",
+  "tabsPageSubtitle": "Track invoices, currency exposure, exchange rates, and create manual invoices.",
+  "billingTabs": {
+    "overview": "Overview",
+    "invoices": "Invoices",
+    "exchangeRates": "Exchange Rates",
+    "currencies": "Supported Currencies",
+    "hedges": "Currency Hedges",
+    "manual": "Manual Invoice"
+  }
+}

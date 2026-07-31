@@ -1,0 +1,74 @@
+{
+  "pageTitle": "أسعار الصرف",
+  "pageSubtitle": "أحدث أسعار صرف العملات وحالة المزامنة",
+  "status": "الحالة",
+  "refreshing": "جاري تحديث الأسعار…",
+  "refreshSuccess": "تم تحديث الأسعار بنجاح",
+  "refreshFailed": "فشل التحديث",
+  "noRates": "لا تتوفر أسعار صرف",
+  "noSyncRuns": "لا توجد عمليات مزامنة بعد",
+  "staleWarning": "أسعار الصرف قديمة (أكثر من 24 ساعة). قد لا تظهر التحويلات في العملة المعروضة حتى يتم التحديث.",
+  "viewRates": "عرض أسعار الصرف",
+  "syncStatus": {
+    "title": "حالة المزامنة",
+    "refresh": "تحديث الأسعار",
+    "lastSync": "آخر مزامنة",
+    "provider": "المزود",
+    "pairsWritten": "الأزواج المكتوبة",
+    "pairsFailed": "الأزواج الفاشلة",
+    "errorMessage": "خطأ",
+    "statusSuccess": "نجاح",
+    "statusRunning": "قيد التشغيل",
+    "statusPartial": "جزئي",
+    "statusFailed": "فشل",
+    "statusUnknown": "غير معروف"
+  },
+  "rateTable": {
+    "title": "أحدث الأسعار",
+    "fromCurrency": "من",
+    "toCurrency": "إلى",
+    "rate": "السعر",
+    "source": "المصدر",
+    "effectiveDate": "تاريخ السريان"
+  },
+  "history": {
+    "title": "سجل الأسعار",
+    "subtitle": "أسعار الصرف التاريخية للزوج المحدد",
+    "pairLabel": "زوج العملات",
+    "empty": "لا يوجد سجل أسعار لهذا الزوج في النطاق المحدد",
+    "maxDays": {
+      "__fn": "(days) => `\\u0639\\u0631\\u0636 \\u0622\\u062E\\u0631 ${days} \\u064A\\u0648\\u0645\\u0627\\u064B`"
+    },
+    "daysLabel": "نطاق السجل"
+  },
+  "providerSettings": {
+    "title": "إعدادات المزود",
+    "sourceEnv": "المصدر: متغيرات البيئة",
+    "sourceDatabase": "المصدر: قاعدة البيانات",
+    "activeProvider": "المزود النشط",
+    "confirmTitle": "تأكيد تغيير المزود",
+    "confirmBody": "سيؤثر تغيير مزود أسعار الصرف على المزامنات المستقبلية. هل تريد المتابعة؟",
+    "saveSuccess": "تم تحديث مزود أسعار الصرف",
+    "saveFailed": "تعذر تحديث مزود أسعار الصرف",
+    "lastChangedBy": {
+      "__fn": "(name, date) => `\\u0622\\u062E\\u0631 \\u062A\\u0639\\u062F\\u064A\\u0644 \\u0628\\u0648\\u0627\\u0633\\u0637\\u0629 ${name} \\u0641\\u064A ${date}`"
+    },
+    "cancel": "إلغاء",
+    "save": "حفظ"
+  },
+  "manualOverride": {
+    "title": "تجاوز يدوي لسعر الصرف",
+    "fromCurrency": "من عملة",
+    "toCurrency": "إلى عملة",
+    "rate": "السعر",
+    "effectiveDate": "تاريخ السريان",
+    "submit": "حفظ السعر",
+    "success": "تم حفظ سعر الصرف اليدوي",
+    "failed": "تعذر حفظ سعر الصرف اليدوي",
+    "cancel": "إلغاء"
+  },
+  "errors": {
+    "loadFailed": "فشل تحميل البيانات",
+    "retry": "إعادة المحاولة"
+  }
+}

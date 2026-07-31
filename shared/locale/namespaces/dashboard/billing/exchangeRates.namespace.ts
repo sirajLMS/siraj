@@ -1,7 +1,7 @@
 import { defineNamespace } from "@/shared/locale/namespaces/define-namespace";
 import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
 
-export const DashboardBillingExchangeRates = defineNamespace<ExchangeRatesLabels>({
+export const DashboardBillingExchangeRates = defineNamespace<ExchangeRatesLabels>("dashboard.billing.exchangeRates", {
   load: {
     en: () =>
       import("@/shared/locale/en/dashboard/billing/exchangeRates").then(

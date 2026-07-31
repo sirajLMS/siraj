@@ -1,0 +1,299 @@
+{
+  "auth": {
+    "invalidRoleTab": "The selected role tab is invalid.",
+    "passwordMinLength": "Password must be at least 8 characters long.",
+    "passwordRequiresUppercase": "Password must contain at least one uppercase letter.",
+    "passwordRequiresLowercase": "Password must contain at least one lowercase letter.",
+    "passwordRequiresDigit": "Password must contain at least one digit.",
+    "passwordRequiresSpecialChar": "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
+    "tooManyLoginAttempts": "Too many login attempts. Please try again later.",
+    "serviceUnavailable": "Authentication service temporarily unavailable",
+    "invalidCredentials": "Invalid email or password",
+    "currentPasswordInvalid": "Current password is incorrect.",
+    "passwordsDoNotMatch": "New password and confirmation password do not match.",
+    "accountDeactivated": "This account has been deactivated. Please contact support.",
+    "accountLocked": "Too many login attempts. Your account has been temporarily locked.",
+    "demoLoginNotEnabled": "Demo login is not enabled",
+    "demoLoginFailed": "Demo login failed",
+    "impersonationNotAllowed": "You are not allowed to impersonate users",
+    "cannotImpersonateSelf": "You cannot impersonate yourself",
+    "cannotImpersonateSuperAdmin": "You cannot impersonate another super administrator",
+    "impersonationTargetNotFound": "The user to impersonate was not found",
+    "impersonationTargetInactive": "The user to impersonate is inactive or deleted",
+    "impersonationSessionInvalid": "Your session is invalid for impersonation",
+    "impersonationNotActive": "No active impersonation session",
+    "impersonationExpired": "The impersonation session has expired",
+    "impersonationNotAllowedDuringSession": "This action is not allowed while impersonating a user",
+    "groupSimulationNotAllowed": "You are not allowed to simulate permission groups",
+    "groupSimulationSessionInvalid": "Your session is invalid for permission group simulation",
+    "groupSimulationNotActive": "No active permission group simulation",
+    "groupSimulationNotAllowedDuringSession": "This action is not allowed while simulating a permission group",
+    "groupSimulationNotAllowedWhileImpersonating": "End impersonation before simulating a permission group",
+    "groupSimulationAlreadyHasGroup": "You already have this permission group; choose a different group to simulate",
+    "insufficientPermissions": "You do not have sufficient permissions to perform this action.",
+    "impersonationNotAllowedWhileImpersonating": "You cannot impersonate while already impersonating another user.",
+    "demoGroupNotFound": {
+      "__fn": "(groupSlug) => `Demo group not found: ${groupSlug}`"
+    },
+    "demoGroupNoUser": {
+      "__fn": "(groupSlug) => `No user found for demo group: ${groupSlug}`"
+    }
+  },
+  "permissionManagement": {
+    "unauthorized": "You do not have sufficient permissions to perform this action.",
+    "userNotFound": {
+      "__fn": "(id) => `User not found: ${id}`"
+    },
+    "permissionGroupNotFound": {
+      "__fn": "(id) => `Permission group not found: ${id}`"
+    },
+    "permissionGroupNameRequired": "Permission group name is required.",
+    "permissionGroupNameTooLong": "Permission group name is too long (max 255 characters).",
+    "permissionGroupInvalidName": "Invalid permission group name.",
+    "cannotModifySuperAdmin": "Cannot modify super admin user.",
+    "cannotModifySystemPermissionGroup": "Cannot modify core properties of system permission groups",
+    "cannotDeleteSystemPermissionGroup": "Cannot delete a system permission or group"
+  },
+  "billing": {
+    "invoiceNotFound": {
+      "__fn": "(id) => `Invoice not found: ${id}`"
+    },
+    "invoiceNotPendingReview": {
+      "__fn": "(id) => `Invoice is not pending review: ${id}`"
+    },
+    "invoicePaymentProofNotFound": {
+      "__fn": "(id) => `Payment proof not found for invoice: ${id}`"
+    },
+    "invoiceAlreadyPaid": {
+      "__fn": "({ id, status }) => `Invoice ${id} is already ${status.toLowerCase()}.`"
+    },
+    "paymentProofRequired": "Payment proof is required.",
+    "cannotDeletePaidInvoice": {
+      "__fn": "(id) => `Cannot delete invoice ${id} because it has been paid.`"
+    },
+    "invalidParentId": "Invalid parent ID.",
+    "invalidInvoiceAmount": "Invalid invoice amount.",
+    "parentNotFound": "Parent not found.",
+    "invoiceVersionMismatch": {
+      "__fn": "({\n      id,\n      expectedVersion,\n      gotVersion\n    }) => `Invoice ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
+    },
+    "exchangeRateStale": {
+      "__fn": "({ fromCurrency, toCurrency }) => `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`"
+    }
+  },
+  "credit": {
+    "duplicatePurchase": "This credit purchase has already been processed.",
+    "insufficientBalance": {
+      "__fn": "({ studentId, remaining }) => `Insufficient balance for student ${studentId}. Remaining: ${remaining}`"
+    },
+    "invalidInput": "Invalid input."
+  },
+  "file": {
+    "recordNotFound": {
+      "__fn": "({ tableName, entityId }) => `${tableName} not found: ${entityId}`"
+    },
+    "invalidFileType": "Invalid file type. Only PDF, JPG, PNG, and HEIC files are allowed.",
+    "invoicePaymentProofPending": "A payment proof is already pending review for this invoice."
+  },
+  "meetingProvider": {
+    "meetingProviderInactive": "Meeting provider is inactive.",
+    "meetingConfigNotFound": {
+      "__fn": "(id) => `Meeting config not found: ${id}`"
+    },
+    "meetingConfigCreateFailed": "Failed to create meeting config.",
+    "meetingConfigUpdateFailed": "Failed to update meeting config.",
+    "meetingProviderNotFound": {
+      "__fn": "(id) => `Meeting provider not found: ${id}`"
+    },
+    "meetingProviderCreateFailed": "Failed to create meeting provider.",
+    "meetingProviderUpdateFailed": "Failed to update meeting provider.",
+    "meetingProviderInUse": "Meeting provider is in use and cannot be deleted."
+  },
+  "parent": {
+    "alreadyExists": "Parent profile for this user already exists.",
+    "invalidTimezone": "Invalid timezone.",
+    "createFailed": "Failed to create parent profile."
+  },
+  "staff": {
+    "alreadyExists": "Staff profile for this user already exists."
+  },
+  "teacher": {
+    "alreadyExists": "Teacher profile for this user already exists.",
+    "teacherNotFound": {
+      "__fn": "(id) => `Teacher not found: ${id}`"
+    },
+    "staffProfileNotFound": "Staff profile not found.",
+    "quotaMustBeNonNegative": "Quota must be a non-negative number.",
+    "quotaExceedsTotal": {
+      "__fn": "({ requested, total }) => `Quota (${requested}) exceeds total (${total}).`"
+    }
+  },
+  "student": {
+    "studentNotFound": {
+      "__fn": "(id) => `Student not found: ${id}`"
+    },
+    "studentCreateFailed": "Failed to create student.",
+    "studentUpdateFailed": {
+      "__fn": "(id) => `Failed to update student (id: ${id}).`"
+    },
+    "studentVersionMismatch": {
+      "__fn": "({\n      id,\n      expectedVersion,\n      gotVersion\n    }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
+    },
+    "insufficientClasses": {
+      "__fn": "({ id, remaining, required }) => `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`"
+    },
+    "invalidStatusTransition": {
+      "__fn": "({ currentStatus, newStatus }) => `Invalid status transition: ${currentStatus} -> ${newStatus}.`"
+    },
+    "studentEmailRequired": "Student email is required.",
+    "studentPasswordRequired": "Student password is required."
+  },
+  "category": {
+    "categoryNotFound": {
+      "__fn": "(id) => `Category not found: ${id}`"
+    },
+    "categoryCreateFailed": "Failed to create class category.",
+    "categoryHasSubjects": "Cannot delete category because it has associated subjects."
+  },
+  "user": {
+    "userNotFound": {
+      "__fn": "(id) => `User not found: ${id}`"
+    },
+    "userEmailExists": "User with this email already exists.",
+    "cannotModifyBankingFields": "Cannot modify banking fields.",
+    "parentNotFound": "Parent not found."
+  },
+  "scheduling": {
+    "cannotRescheduleToSelf": "Cannot reschedule to self.",
+    "cannotRescheduleCompleted": "Cannot reschedule a completed session.",
+    "cannotRescheduleAlreadyRescheduled": "Cannot reschedule a session that has already been rescheduled.",
+    "outOfQuota": "Out of quota.",
+    "leaveQuotaExceeded": {
+      "__fn": "({ maxLeaves }) => `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`"
+    },
+    "classInstanceNotFound": {
+      "__fn": "({ id }) => `Class instance not found: ${id}`"
+    },
+    "originalClassNotFound": "Original class not found.",
+    "invalidTransition": "Invalid transition.",
+    "teacherNotAssigned": {
+      "__fn": "({\n      teacherId,\n      studentId,\n      startTime\n    }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`"
+    },
+    "teacherBooked": "Teacher is already booked at this time.",
+    "studentBooked": "Student is already booked at this time.",
+    "meetingUrlInUse": "Meeting URL is already in use.",
+    "sessionNotActivated": "Session is not activated.",
+    "missedClassTime": "You have missed the class time."
+  },
+  "permissionGroup": {
+    "permissionGroupNotFound": "Permission group not found."
+  },
+  "sessionConfig": {
+    "roleNameRequired": "Role name is required.",
+    "ttlOutOfRange": "TTL must be between 60 and 2,419,200 seconds.",
+    "maxConcurrentOutOfRange": "Max concurrent sessions must be between 1 and 50."
+  },
+  "rateLimitExceeded": "Too many requests. Please try again later.",
+  "duplicateRequest": "Duplicate request detected. This operation has already been processed.",
+  "internalServerError": "An unexpected error occurred. Please try again later.",
+  "insufficientPermissions": "You do not have sufficient permissions to perform this action.",
+  "unauthorized": "You must be logged in first.",
+  "unauthorizedAction": "You are not authorized to perform this action.",
+  "unauthorizedViewList": "You are not authorized to view this list.",
+  "unauthorizedSearch": "You are not authorized to search.",
+  "unauthorizedViewMetrics": "You are not authorized to view metrics.",
+  "notFound": "The requested resource was not found.",
+  "unknownName": "Unknown",
+  "invalidInput": "Invalid input.",
+  "invalidNationalId": "The national ID is invalid for the selected nationality.",
+  "permissionGroupNotFound": "Permission group not found.",
+  "rejectedReportsRequireReason": "REJECTED reports must include a rejection reason.",
+  "approvedReportsNoRejectionReason": "APPROVED reports must not include a rejection reason.",
+  "displayCurrencyNotSet": {
+    "__fn": "(values) => `Display currency not set. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
+  },
+  "displayCurrencyStale": {
+    "__fn": "(values) => `Display currency is stale. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
+  },
+  "displayCurrencyMixed": {
+    "__fn": "(values) => `Mixed display currencies detected. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
+  },
+  "categoryNotFound": {
+    "__fn": "(id) => `Category not found: ${id}`"
+  },
+  "categoryCreateFailed": "Failed to create class category.",
+  "categoryHasSubjects": "Cannot delete category because it has associated subjects.",
+  "meetingProviderNotFound": {
+    "__fn": "(id) => `Meeting provider not found: ${id}`"
+  },
+  "meetingProviderCreateFailed": "Failed to create meeting provider.",
+  "meetingProviderUpdateFailed": "Failed to update meeting provider.",
+  "meetingProviderInUse": "Meeting provider is in use and cannot be deleted.",
+  "meetingProviderInactive": "Meeting provider is inactive.",
+  "meetingConfigNotFound": {
+    "__fn": "(id) => `Meeting config not found: ${id}`"
+  },
+  "meetingConfigCreateFailed": "Failed to create meeting config.",
+  "meetingConfigUpdateFailed": "Failed to update meeting config.",
+  "studentNotFound": {
+    "__fn": "(id) => `Student not found: ${id}`"
+  },
+  "studentCreateFailed": "Failed to create student.",
+  "studentUpdateFailed": {
+    "__fn": "(id) => `Failed to update student (id: ${id}).`"
+  },
+  "studentVersionMismatch": {
+    "__fn": "({\n    id,\n    expectedVersion,\n    gotVersion\n  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
+  },
+  "insufficientClasses": {
+    "__fn": "({ id, remaining, required }) => `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`"
+  },
+  "invalidStatusTransition": {
+    "__fn": "({ currentStatus, newStatus }) => `Invalid status transition: ${currentStatus} -> ${newStatus}.`"
+  },
+  "studentEmailRequired": "Student email is required.",
+  "studentPasswordRequired": "Student password is required.",
+  "teacherNotFound": {
+    "__fn": "(id) => `Teacher not found: ${id}`"
+  },
+  "staffProfileNotFound": "Staff profile not found.",
+  "quotaMustBeNonNegative": "Quota must be a non-negative number.",
+  "quotaExceedsTotal": {
+    "__fn": "({ requested, total }) => `Quota (${requested}) exceeds total (${total}).`"
+  },
+  "userNotFound": {
+    "__fn": "(id) => `User not found: ${id}`"
+  },
+  "userEmailExists": "User with this email already exists.",
+  "cannotModifyBankingFields": "Cannot modify banking fields.",
+  "parentNotFound": "Parent not found.",
+  "parentAlreadyDeactivated": "Parent account is already deactivated.",
+  "parentAlreadyActivated": "Parent account is already activated.",
+  "exchangeRateStale": {
+    "__fn": "({ fromCurrency, toCurrency }) => `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`"
+  },
+  "cannotRescheduleToSelf": "Cannot reschedule to self.",
+  "cannotRescheduleCompleted": "Cannot reschedule a completed session.",
+  "cannotRescheduleAlreadyRescheduled": "Cannot reschedule a session that has already been rescheduled.",
+  "outOfQuota": "Out of quota.",
+  "leaveQuotaExceeded": {
+    "__fn": "({ maxLeaves }) => `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`"
+  },
+  "classInstanceNotFound": {
+    "__fn": "({ id }) => `Class instance not found: ${id}`"
+  },
+  "originalClassNotFound": "Original class not found.",
+  "invalidTransition": "Invalid transition.",
+  "teacherNotAssigned": {
+    "__fn": "({\n    teacherId,\n    studentId,\n    startTime\n  }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`"
+  },
+  "teacherBooked": "Teacher is already booked at this time.",
+  "studentBooked": "Student is already booked at this time.",
+  "meetingUrlInUse": "Meeting URL is already in use.",
+  "sessionNotActivated": "Session is not activated.",
+  "outsideAvailability": "Booking is outside teacher availability windows.",
+  "teacherUnavailabilityConflict": "Booking blocked by recurring unavailability pattern.",
+  "teacherOnVacation": "Booking blocked by approved vacation period.",
+  "resourceNotFound": "Learning resource not found.",
+  "currencyInUse": "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles."
+}

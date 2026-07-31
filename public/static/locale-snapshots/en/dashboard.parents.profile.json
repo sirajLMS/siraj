@@ -1,0 +1,95 @@
+{
+  "pageTitle": "Parent Profile",
+  "status": {
+    "regular": "Regular",
+    "on_trial": "On Trial",
+    "on_leave": "On Leave",
+    "suspended": "Suspended",
+    "deactivated": "Deactivated"
+  },
+  "accountStatus": {
+    "activated": "Activated",
+    "deactivated": "Deactivated"
+  },
+  "actions": {
+    "editPicture": "Change Profile Picture",
+    "editProfile": "Edit Profile",
+    "uploadDocs": "Upload Documents",
+    "addNewStudent": "Add New Student",
+    "viewInvoices": "View Invoices",
+    "deactivateAccount": "Deactivate Account",
+    "deactivateDialogTitle": "Confirm Deactivation",
+    "deactivateConfirmText": "Are you sure you want to deactivate this account? This action cannot be undone.",
+    "cancel": "Cancel",
+    "deactivating": "Deactivating...",
+    "deactivateSuccess": "Account deactivated successfully",
+    "selectPicture": "Select Picture",
+    "changePicture": "Change Picture",
+    "upload": "Upload",
+    "avatarFileTypeError": "Only JPG, PNG, or WebP files are allowed",
+    "avatarFileSizeError": {
+      "__fn": "(maxMb) => `File size must be less than ${maxMb}MB`"
+    },
+    "avatarUploadSuccess": "Profile picture updated successfully"
+  },
+  "errors": {
+    "invalidId": "Invalid parent ID",
+    "notFound": "Guardian not found",
+    "invalidData": "Invalid parent data"
+  },
+  "sections": {
+    "parentInfo": "Parent Information",
+    "socialMedia": "Social Media",
+    "feesDetails": "Fees Details",
+    "paymentMethods": "Payment Methods",
+    "parentStudents": "Associated Students"
+  },
+  "fields": {
+    "nationality": "Nationality",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "facebook": "Facebook",
+    "whatsapp": "WhatsApp",
+    "invoiceType": "Invoice Type",
+    "feeAmount": "Fee Amount",
+    "paymentMethod": "Payment Method",
+    "currency": "Currency",
+    "displayCurrency": "Display Currency"
+  },
+  "table": {
+    "studentName": "Student Name",
+    "teacher": "Teacher",
+    "hoursPerWeek": "Hours/Week",
+    "classesLeft": "Classes Left",
+    "language": "Language",
+    "gender": "Gender",
+    "info": "Info",
+    "options": "Options",
+    "status": "Status",
+    "viewAllStudents": "View All Students"
+  },
+  "students": {
+    "reassignTeacherTitle": "Reassign Teacher",
+    "currentTeacher": "Current Teacher",
+    "selectNewTeacher": "Select New Teacher",
+    "selectTeacherPlaceholder": "Choose a teacher",
+    "cancel": "Cancel",
+    "reassigning": "Reassigning...",
+    "confirmReassign": "Are you sure you want to reassign this teacher?",
+    "reassignSuccess": "Teacher reassigned successfully",
+    "changeStatusTitle": "Change Status",
+    "currentStatus": "Current Status",
+    "selectNewStatus": "Select New Status",
+    "noStatusTransitionsAvailable": "No status transitions available",
+    "changingStatus": "Changing Status...",
+    "confirmStatusChange": "Are you sure you want to change the status?",
+    "statusChangeSuccess": "Status changed successfully",
+    "statusLabel": {
+      "regular": "Regular",
+      "suspended": "Suspended",
+      "on_leave": "On Leave",
+      "on_trial": "On Trial"
+    }
+  }
+}

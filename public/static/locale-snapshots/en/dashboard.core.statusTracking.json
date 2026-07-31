@@ -1,0 +1,85 @@
+{
+  "pageTitle": "Class Session Status",
+  "pageSubtitle": "Monitor class sessions by student status — regular, pending, suspended, and on leave.",
+  "filters": "Filters",
+  "newReport": "New Class",
+  "todaysClassSchedule": "Today's Class Schedule",
+  "totalSessions": {
+    "__fn": "(total) => `Total: ${total} classes`"
+  },
+  "previous": "Previous",
+  "next": "Next",
+  "showingOf": {
+    "__fn": "(shown, total) => `Showing ${shown} of ${total} classes`"
+  },
+  "seeAll": "See All",
+  "todaysSchedule": "Today's Schedule",
+  "administrativeHold": "Administrative Hold",
+  "holdDescription": "Account suspended due to overdue balance or policy violation. Contact Billing.",
+  "dateFilter": {
+    "today": "Today",
+    "previousDay": "Previous Day",
+    "nextDay": "Next Day",
+    "dateLabel": "Date"
+  },
+  "metrics": {
+    "regular": "Regular",
+    "pending": "Pending",
+    "suspended": "Suspended",
+    "onLeave": "On Leave"
+  },
+  "subLabels": {
+    "regular": "12% vs week ago",
+    "pending": "Needs review",
+    "suspended": "Requires immediate action",
+    "onLeave": "Approved absences"
+  },
+  "table": {
+    "class": "Class",
+    "student": "Student",
+    "teacher": "Teacher",
+    "schedule": "Schedule",
+    "duration": "Duration",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": {
+    "regular": "Regular",
+    "suspendedPending": "Suspended (Pending)",
+    "onLeave": "On Leave",
+    "pendingVerification": "Pending Verification"
+  },
+  "actions": {
+    "joinSession": "Join Session",
+    "activate": "Activate",
+    "reschedule": "Reschedule",
+    "verifyDocuments": "Verify Documents",
+    "sessionLocked": "Session Locked",
+    "sessionEnded": "Session ended"
+  },
+  "noEntries": "No classes found",
+  "analytics": {
+    "title": "Suspension Analytics",
+    "note": "Note: Spike in suspensions on Thursday due to end-of-month payment processing audit.",
+    "urgentTask": "Urgent administrative task",
+    "accountsLocked": {
+      "__fn": "(count) => `${count} accounts locked`"
+    },
+    "auditDescription": "Review suspension logs to identify if any administrative holds can be released manually.",
+    "openAuditLogs": "Open audit logs"
+  },
+  "errors": {
+    "noStudentId": "Student ID unavailable for this session",
+    "auditLogsComingSoon": "Audit logs feature coming soon",
+    "failedToLoad": "Failed to load status tracking data."
+  },
+  "days": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  }
+}
