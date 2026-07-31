@@ -27,14 +27,21 @@ import {
   ManagerAccountType,
   NotificationChannel,
   NotificationEventType,
+  OnDemandNoCreditsOutcome,
+  OnDemandStatus,
   OrderSortDirection,
   OverrideState,
   ParentStatus,
   ProfileAudience,
   ProfileMode,
   ProfileScope,
+  QuotaKind,
+  QuotaLedgerReason,
+  QuotaPeriodType,
+  QuotaStatus,
   RateSource,
   RescheduleDateLabel,
+  SchedulingMode,
   StudentStatus,
   SystemSettingCategory,
   SystemSettingDataType,
@@ -42,6 +49,7 @@ import {
   TeacherProgressFeedEventKind,
   UserRole,
 } from "@/backend/enum";
+
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -250,4 +258,32 @@ export const FxProviderConfigSourcePothosEnum = gqlSchemaBuilder.enumType(FxProv
 
 export const TeacherProgressFeedEventKindPothosEnum = gqlSchemaBuilder.enumType(TeacherProgressFeedEventKind, {
   name: "TeacherProgressFeedEventKind",
+});
+
+export const QuotaKindPothosEnum = gqlSchemaBuilder.enumType(QuotaKind, {
+  name: "QuotaKind",
+});
+
+export const QuotaStatusPothosEnum = gqlSchemaBuilder.enumType(QuotaStatus, {
+  name: "QuotaStatus",
+});
+
+export const QuotaPeriodTypePothosEnum = gqlSchemaBuilder.enumType(QuotaPeriodType, {
+  name: "QuotaPeriodType",
+});
+
+export const QuotaLedgerReasonPothosEnum = gqlSchemaBuilder.enumType(QuotaLedgerReason, {
+  name: "QuotaLedgerReason",
+});
+
+export const SchedulingModePothosEnum = gqlSchemaBuilder.enumType(SchedulingMode, {
+  name: "SchedulingMode",
+});
+
+export const OnDemandNoCreditsOutcomePothosEnum = gqlSchemaBuilder.enumType(OnDemandNoCreditsOutcome, {
+  name: "OnDemandNoCreditsOutcome",
+});
+
+export const OnDemandStatusPothosEnum = gqlSchemaBuilder.enumType(OnDemandStatus, {
+  name: "OnDemandStatus",
 });

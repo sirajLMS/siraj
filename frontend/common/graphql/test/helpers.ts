@@ -334,6 +334,11 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
     effectiveUntil: null,
     hourlyRate: null,
     rateCurrency: null,
+    quotaId: null,
+    earmarkedClasses: null,
+    schedulingMode: null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: null,
   });
 
   const gridResult = await testClient.query({
@@ -618,6 +623,12 @@ export async function assertRecurringClassDenied(
     effectiveUntil: null,
     hourlyRate: null,
     rateCurrency: null,
+    quotaId: null,
+    earmarkedClasses: null,
+    schedulingMode: null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: null,
   });
+
   expect(result.error).toBeDefined();
 }

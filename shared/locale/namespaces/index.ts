@@ -9,7 +9,9 @@ export { DashboardBillingCurrencyHedges } from "@/shared/locale/namespaces/dashb
 export { DashboardBillingExchangeRates } from "@/shared/locale/namespaces/dashboard/billing/exchangeRates.namespace";
 export { DashboardBilling } from "@/shared/locale/namespaces/dashboard/billing/main.namespace";
 export { DashboardBillingManual } from "@/shared/locale/namespaces/dashboard/billing/manual.namespace";
+export { DashboardBillingQuota } from "@/shared/locale/namespaces/dashboard/billing/quota.namespace";
 export { DashboardBillingSupportedCurrencies } from "@/shared/locale/namespaces/dashboard/billing/supportedCurrencies.namespace";
+
 export { DashboardClassAudit } from "@/shared/locale/namespaces/dashboard/classes/audit.namespace";
 export { DashboardCreateRecurringClass } from "@/shared/locale/namespaces/dashboard/classes/createRecurringClass.namespace";
 export { DashboardClassDetails } from "@/shared/locale/namespaces/dashboard/classes/details.namespace";

@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import {
@@ -312,85 +312,6 @@ async function validateRescheduleState(
   }
 }
 
-async function handleOriginalQuotaRestoration(t: DBTransaction, original: Types.ClassInstanceEntity): Promise<void> {
-  // If the original class had quota deducted, refund it when rescheduling
-  if (original.quotaDeducted) {
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, original.studentId));
-  }
-}
-
-export async function adjustQuotaOnUpdate(
-  t: DBTransaction,
-  existing: Types.ClassInstanceEntity,
-  input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
-  isBeingSoftDeleted: boolean
-): Promise<void> {
-  const newQuotaDeducted = input.quotaDeducted ?? existing.quotaDeducted;
-
-  if (isBeingSoftDeleted) {
-    if (existing.quotaDeducted) {
-      // Refund quota when soft deleting
-      await t
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-        .where(eq(students.id, existing.studentId));
-    }
-    return;
-  }
-
-  if (existing.quotaDeducted && !newQuotaDeducted) {
-    // Was deducted, now not deducted - refund
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, existing.studentId));
-  } else if (!existing.quotaDeducted && newQuotaDeducted) {
-    // Was not deducted, now deducted - deduct
-    const [student] = await t
-      .select({ classesRemaining: students.classesRemaining })
-      .from(students)
-      .where(eq(students.id, existing.studentId))
-      .limit(1);
-
-    if (!student || student.classesRemaining <= 0) {
-      throw new Error("Out of quota");
-    }
-
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-      .where(eq(students.id, existing.studentId));
-  }
-
-  // Handle student swap when quota was deducted
-  if (input.studentId && input.studentId !== existing.studentId && existing.quotaDeducted) {
-    // Refund old student
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, existing.studentId));
-
-    // Deduct from new student
-    const [newStudent] = await t
-      .select({ classesRemaining: students.classesRemaining })
-      .from(students)
-      .where(eq(students.id, input.studentId))
-      .limit(1);
-
-    if (!newStudent || newStudent.classesRemaining <= 0) {
-      throw new Error("Out of quota");
-    }
-
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-      .where(eq(students.id, input.studentId));
-  }
-}
-
 export const activateClassInstance = async (
   id: string,
   actorUserId: string,
@@ -545,10 +466,8 @@ export const resetClassInstance = async (
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
 
-    // Handle quota restoration if the instance was quota-deducted
-    if (existing.quotaDeducted) {
-      await adjustQuotaOnUpdate(t, existing, { quotaDeducted: false }, false);
-    }
+    // Quota handling for cancellations is managed by QuotaService + quota_ledger
+    // (no repository-level quota adjustment needed here)
 
     return runStateChange(
       id,
@@ -687,37 +606,13 @@ export const rescheduleClassInstance = async (
 
     await markOriginalAsRescheduled(t, originalClassId);
 
-    await handleOriginalQuotaRestoration(t, original);
+    // Quota operations are now handled by QuotaService + quota_ledger
 
     return created;
   };
 
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
-
-export async function handleQuotaDeduction(
-  t: DBTransaction,
-  studentId: string,
-  quotaDeducted: boolean,
-  tErrors: ErrorsLabels
-): Promise<void> {
-  if (!quotaDeducted) return;
-
-  const [student] = await t
-    .select({ classesRemaining: students.classesRemaining })
-    .from(students)
-    .where(eq(students.id, studentId))
-    .limit(1);
-
-  if (!student || student.classesRemaining <= 0) {
-    throw new Error(tErrors.outOfQuota);
-  }
-
-  await t
-    .update(students)
-    .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-    .where(eq(students.id, studentId));
-}
 
 export async function processAutomatedClassLeave(
   id: string,

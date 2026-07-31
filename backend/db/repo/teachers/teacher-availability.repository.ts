@@ -89,6 +89,69 @@ function isWithinTimeWindow(
   return bookingStartMinutes >= windowStartMinutes && bookingEndMinutes <= windowEndMinutes;
 }
 
+/** Pure vacation overlap check — shared by DB-querying and in-memory paths */
+function checkVacationOverlap(startTime: Date, endTime: Date, vacations: { startAt: Date; endAt: Date }[]): boolean {
+  return vacations.some(v => v.startAt < endTime && v.endAt > startTime);
+}
+
+/** Pure unavailability pattern check — shared by DB-querying and in-memory paths */
+function checkUnavailabilityConflict(
+  bookingDate: string,
+  bookingDay: DayOfWeek,
+  bookingStartMinutes: number,
+  bookingEndMinutes: number,
+  patterns: {
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    effectiveFrom: string | null;
+    effectiveUntil: string | null;
+  }[]
+): boolean {
+  for (const pattern of patterns) {
+    if ((pattern.dayOfWeek as DayOfWeek) !== bookingDay) continue;
+    if (!isWithinEffectiveRange(bookingDate, pattern.effectiveFrom, pattern.effectiveUntil)) continue;
+    if (
+      timesOverlap(
+        bookingStartMinutes,
+        bookingEndMinutes,
+        timeToMinutes(pattern.startTime),
+        timeToMinutes(pattern.endTime)
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Pure availability window check — shared by DB-querying and in-memory paths */
+function checkWindowsMatch(
+  bookingDate: string,
+  bookingDay: DayOfWeek,
+  bookingStartMinutes: number,
+  bookingEndMinutes: number,
+  windows: {
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    effectiveFrom: string | null;
+    effectiveUntil: string | null;
+  }[]
+): boolean {
+  if (windows.length === 0) return true;
+  return windows.some(window => {
+    if ((window.dayOfWeek as DayOfWeek) !== bookingDay) return false;
+    if (!isWithinEffectiveRange(bookingDate, window.effectiveFrom, window.effectiveUntil)) return false;
+    return isWithinTimeWindow(
+      bookingStartMinutes,
+      bookingEndMinutes,
+      timeToMinutes(window.startTime),
+      timeToMinutes(window.endTime)
+    );
+  });
+}
+
 function getBlockedRanges(
   dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[],
   searchStart: number,
@@ -602,22 +665,9 @@ export namespace TeacherAvailabilityRepository {
         )
       );
 
-    for (const pattern of patterns) {
-      if (!isWithinEffectiveRange(bookingDate, pattern.effectiveFrom, pattern.effectiveUntil)) {
-        continue;
-      }
-
-      if (
-        timesOverlap(
-          bookingStartMinutes,
-          bookingEndMinutes,
-          timeToMinutes(pattern.startTime),
-          timeToMinutes(pattern.endTime)
-        )
-      ) {
-        const { teacherUnavailabilityConflict } = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(teacherUnavailabilityConflict);
-      }
+    if (checkUnavailabilityConflict(bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes, patterns)) {
+      const { teacherUnavailabilityConflict } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(teacherUnavailabilityConflict);
     }
   }
 
@@ -638,20 +688,7 @@ export namespace TeacherAvailabilityRepository {
       .from(teacherAvailabilityWindows)
       .where(eq(teacherAvailabilityWindows.teacherId, input.teacherId));
 
-    if (windows.length === 0) return;
-
-    const matches = windows.some(window => {
-      if ((window.dayOfWeek as DayOfWeek) !== bookingDay) return false;
-      if (!isWithinEffectiveRange(bookingDate, window.effectiveFrom, window.effectiveUntil)) return false;
-      return isWithinTimeWindow(
-        bookingStartMinutes,
-        bookingEndMinutes,
-        timeToMinutes(window.startTime),
-        timeToMinutes(window.endTime)
-      );
-    });
-
-    if (!matches) {
+    if (!checkWindowsMatch(bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes, windows)) {
       const { outsideAvailability } = getServerTranslations(locale ?? "en").errorsTranslations;
       throw new Error(outsideAvailability);
     }
@@ -693,6 +730,82 @@ export namespace TeacherAvailabilityRepository {
       bookingEndMinutes,
       locale
     );
+  };
+
+  /**
+   * In-memory per-slot availability check using pre-fetched rows.
+   * Throws the first conflict error encountered (same errors as per-slot variant).
+   */
+  const validateSlotInMemory = (
+    slot: { startTime: Date; endTime: Date },
+    vacationsRows: { startAt: Date; endAt: Date }[],
+    unavailabilityRows: (typeof teacherRecurringUnavailability.$inferSelect)[],
+    windowRows: (typeof teacherAvailabilityWindows.$inferSelect)[],
+    locale?: string
+  ): void => {
+    const bookingDate = getUtcDateString(slot.startTime);
+    const bookingDay = getUtcDayOfWeek(slot.startTime);
+    const bookingStartMinutes = timeToMinutes(dateToTimeString(slot.startTime));
+    const bookingEndMinutes = timeToMinutes(dateToTimeString(slot.endTime));
+
+    if (checkVacationOverlap(slot.startTime, slot.endTime, vacationsRows)) {
+      const { teacherOnVacation } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(teacherOnVacation);
+    }
+
+    if (
+      checkUnavailabilityConflict(bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes, unavailabilityRows)
+    ) {
+      const { teacherUnavailabilityConflict } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(teacherUnavailabilityConflict);
+    }
+
+    if (!checkWindowsMatch(bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes, windowRows)) {
+      const { outsideAvailability } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(outsideAvailability);
+    }
+  };
+
+  /**
+   * Batched validation of a teacher's availability for multiple occurrences.
+   *
+   * Fetches vacations, recurring unavailability, and availability windows for the
+   * teacher in 3 queries total (regardless of how many occurrences), then validates
+   * each occurrence in-memory. Equivalent to calling validateBookingAvailability N
+   * times but with O(1) DB round-trips instead of O(N).
+   *
+   * @throws the first conflict error encountered (same error messages as the per-slot variant).
+   */
+  export const validateBookingAvailabilityBatch = async (
+    teacherId: string,
+    slots: { startTime: Date; endTime: Date }[],
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<void> => {
+    if (slots.length === 0) return;
+    const t = tx ?? db;
+
+    const earliestStart = slots.reduce((min, s) => (s.startTime < min ? s.startTime : min), slots[0].startTime);
+    const latestEnd = slots.reduce((max, s) => (s.endTime > max ? s.endTime : max), slots[0].endTime);
+
+    const [vacationsRows, unavailabilityRows, windowRows] = await Promise.all([
+      t
+        .select({ startAt: teacherVacationRequests.startAt, endAt: teacherVacationRequests.endAt })
+        .from(teacherVacationRequests)
+        .where(
+          and(
+            eq(teacherVacationRequests.teacherId, teacherId),
+            eq(teacherVacationRequests.status, VacationRequestStatus.APPROVED),
+            sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${earliestStart}, ${latestEnd})`
+          )
+        ),
+      t.select().from(teacherRecurringUnavailability).where(eq(teacherRecurringUnavailability.teacherId, teacherId)),
+      t.select().from(teacherAvailabilityWindows).where(eq(teacherAvailabilityWindows.teacherId, teacherId)),
+    ]);
+
+    for (const slot of slots) {
+      validateSlotInMemory(slot, vacationsRows, unavailabilityRows, windowRows, locale);
+    }
   };
 
   function buildTeacherQueryConditions(gender: Gender | null | undefined, teacherNameSearch?: string | null) {

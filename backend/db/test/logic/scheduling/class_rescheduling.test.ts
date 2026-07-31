@@ -208,7 +208,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
       const { teacher, student } = await setupTestData(tx, { prefix: "refund" });
       const original = await createTestClass(tx, student.id, teacher.id, { quotaDeducted: true });
 
-      await expectStudentQuota(tx, student.id, 4);
+      await expectStudentQuota(tx, student.id, 5);
 
       await rescheduleTestClass(tx, original.id, student.id, teacher.id);
 

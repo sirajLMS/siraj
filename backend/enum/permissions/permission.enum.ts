@@ -23,6 +23,8 @@ export enum AppPermission {
   SESSION_OVERRIDE_ACTIONS = "session.override_actions",
   DASHBOARD_SEARCH = "dashboard.search",
   SCHEDULE_VIEW_TIMEZONES = "schedule.view_timezones",
+  SETTINGS_TIMEZONES_VIEW = "settings.timezones_view",
+
   HISTORY_VIEW_CALENDAR = "history.view_calendar",
   HISTORY_VIEW_DETAILS = "history.view_details",
   TEACHER_VIEW_DASHBOARD = "teacher.view_dashboard",
@@ -245,7 +247,9 @@ export enum AppPermission {
   SETTINGS_EDIT_SESSION = "settings.edit_session",
   SETTINGS_AUDIT_VIEW = "settings.audit_view",
   SETTINGS_SITE_CONTENT_MANAGE = "settings.site_content_manage",
-  SETTINGS_TIMEZONES_VIEW = "settings.timezones_view",
+  // Quota Management
+  QUOTAS_VIEW = "quotas.view",
+  QUOTAS_MANAGE = "quotas.manage",
 }
 
 let knownAppPermissionsCache: Set<string> | undefined;

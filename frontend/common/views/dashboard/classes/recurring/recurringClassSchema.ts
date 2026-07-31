@@ -49,6 +49,10 @@ export const createRecurringClassSchema = (messages: {
       // when omitted the rate falls back to subject then teacher rate.
       hourlyRate: z.string().optional(),
       rateCurrency: z.string().optional(),
+      schedulingMode: z.enum(["NUMBER_OF_CLASSES", "ON_DEMAND", "QUOTA"]).optional(),
+      quotaId: z.string().optional(),
+      earmarkedClasses: z.number().min(1).optional(),
+      ondemandNoCreditsOutcome: z.enum(["AUTO_CANCEL", "AUTO_ABSENT_NO_CREDITS", "REMIND_ONLY"]).optional(),
       days: z.array(dayScheduleSchema),
     })
     .refine(data => data.days.some(day => day.enabled), {

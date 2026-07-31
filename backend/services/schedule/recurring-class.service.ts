@@ -248,9 +248,17 @@ export namespace RecurringClassService {
           tx
         );
       } else if (input.quotaId) {
-        // Pool mode with explicit quota
-        for (const classInstanceId of created.classInstanceIds) {
-          await QuotaService.redeemForInstance(input.studentId, classInstanceId, input.quotaId, userId, tx);
+        // Pool mode with explicit quota — batch redeem all instances in one shot
+        if (created.classInstanceIds.length > 0) {
+          await QuotaService.redeemForInstances(
+            input.studentId,
+            created.classInstanceIds,
+            input.quotaId,
+            created.recurringScheduleId,
+            userId,
+            tx,
+            input.locale
+          );
         }
       } else if (!isOndemand) {
         // Standard credit-backed mode

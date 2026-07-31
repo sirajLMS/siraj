@@ -172,6 +172,8 @@ enum AppPermission {
   PROFILE_TEACHER_STUDENTS_EDIT_OWN
   PROFILE_TEACHER_STUDENTS_VIEW_OTHER
   PROFILE_TEACHER_STUDENTS_VIEW_OWN
+  QUOTAS_MANAGE
+  QUOTAS_VIEW
   REPORTS_GENERATE
   REPORT_GENERATE_CUSTOM
   REPORT_VIEW_FINANCIALS
@@ -434,6 +436,13 @@ enum AvailabilityStatus {
   OUT_OF_STOCK
 }
 
+"""A time slot with availability status"""
+type AvailableSlot {
+  endAt: DateTime
+  isAvailable: Boolean
+  startAt: DateTime
+}
+
 type BillingCurrencyTotal {
   amount: String
   currency: CurrencyCode
@@ -518,6 +527,10 @@ enum ClassExecutionState {
   ACTIVATED
   COMPLETED
   NOT_ACTIVATED
+  ON_DEMAND_CONFLICT_HELD
+  ON_DEMAND_NO_CREDITS_ABSENT
+  ON_DEMAND_NO_CREDITS_CANCELLED
+  ON_DEMAND_PENDING_CREDITS
   RUNNING
 }
 
@@ -1061,11 +1074,16 @@ input CreateRecurringClassInput {
   days: [RecurringClassDayInput!]!
   defaultStartTime: String!
   durationMinutes: Int!
+  earmarkedClasses: Int
   effectiveFrom: String
   effectiveUntil: String
   generateInstancesForWeeks: Int
+  generationHorizonWeeks: Int
   hourlyRate: String
+  ondemandNoCreditsOutcome: OnDemandNoCreditsOutcome
+  quotaId: String
   rateCurrency: CurrencyCode
+  schedulingMode: SchedulingMode
   studentId: String!
   subjectId: String!
   teacherId: String!
@@ -2460,6 +2478,9 @@ type Mutation {
   """Create a new parent account with billing configuration"""
   createParent(input: ParentOnboardingInput!): ParentOnboardingResult
   createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
+
+  """Create a new quota allocation for a student"""
+  createQuota(input: QuotaSubmitInput!): Quota
   createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
 
   """Create a new student profile under an existing parent"""
@@ -2515,6 +2536,9 @@ type Mutation {
   ): Boolean
   deleteMeetingProvider(id: ID!): Boolean
   deletePermissionGroup(groupId: String!): Boolean
+
+  """Soft delete a student quota allocation"""
+  deleteQuota(id: ID!): Quota
   deleteRecurringClass(classInstanceId: ID!): Boolean
 
   """Deletes a per-role session configuration."""
@@ -2622,6 +2646,9 @@ type Mutation {
   updateNotificationPreferences(input: [NotificationPreferenceInput!]!): [NotificationPreference!]
   updateOwnProfile(input: UpdateOwnProfileInput!): UnifiedProfile
   updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
+
+  """Update an existing student quota allocation"""
+  updateQuota(id: ID!, input: QuotaUpdateInput!): Quota
   updateRecurringClassRate(input: UpdateRecurringClassRateInput!): RecurringScheduleDetail
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
@@ -2695,7 +2722,14 @@ enum NotificationEventType {
   LESSON_REPORT_SUBMITTED
   NEW_COMPLAINT
   NEW_SUGGESTION
+  ON_DEMAND_INSTANCE_PENDING_CREDIT
+  ON_DEMAND_INSTANCE_REMINDER_T1
+  ON_DEMAND_INSTANCE_REMINDER_T3
+  ON_DEMAND_TEACHER_DAILY_DIGEST
   PAYMENT_METHOD_CHANGED
+  QUOTA_EXPIRED
+  QUOTA_EXPIRING_SOON
+  QUOTA_LOW_BALANCE
   STUDENT_QUOTA_OVERRIDDEN
   STUDENT_STATUS_CHANGED
   STUDENT_TEACHER_REASSIGNED
@@ -2714,6 +2748,21 @@ input NotificationPreferenceInput {
   channel: NotificationChannel!
   enabled: Boolean!
   eventType: NotificationEventType!
+}
+
+enum OnDemandNoCreditsOutcome {
+  AUTO_ABSENT_NO_CREDITS
+  AUTO_CANCEL
+  REMIND_ONLY
+}
+
+enum OnDemandStatus {
+  AVAILABLE
+  CANCELLED
+  CONVERTED
+  NO_CREDITS_ABSENT
+  NO_CREDITS_CANCELLED
+  PENDING_CREDIT
 }
 
 """Summary metrics for the staff onboarding process"""
@@ -3198,6 +3247,11 @@ type Query {
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
 
+  """
+  Find available time slots between student and teacher for a given date range and duration
+  """
+  availableClassSlots(durationMinutes: Int!, endDate: DateTime!, startDate: DateTime!, studentId: ID!, teacherId: ID!): [AvailableSlot!]
+
   """Lists all books and bags available to the academy."""
   booksAndBags: [Book!]
   classCategories: [ClassCategory!]
@@ -3306,6 +3360,20 @@ type Query {
   permissions: [Permission!]
   profileByUserId(userId: String!): UnifiedProfile
 
+  """Get a specific quota by ID"""
+  quota(id: ID!): Quota
+
+  """
+  Get the aggregated quota balance summary and expiration breakdown for a student
+  """
+  quotaBalance(studentId: ID!): QuotaBalance
+
+  """Get paginated audit ledger history for a quota"""
+  quotaLedger(pagination: PaginationArgs, quotaId: ID!): QuotaLedgerPaginatedResult
+
+  """List quotas with optional filters and pagination"""
+  quotas(filter: QuotaPaginatedFilterInput, pagination: PaginationArgs): QuotaPaginatedResult
+
   """
   Get paginated recently approved lesson reports for the supervisor dashboard
   """
@@ -3381,7 +3449,13 @@ type Query {
   Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
   """
   studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
+
+  """List open active quotas for a student in FIFO priority order"""
+  studentOpenQuotas(studentId: ID!): [Quota!]
   studentProfile(includeUpcomingClasses: Boolean, month: Int, studentId: String, year: Int): StudentProfile
+
+  """List all quotas for a specific student"""
+  studentQuotas(studentId: ID!): [Quota!]
 
   """
   Paginated lesson reports for the logged-in student (student portal dashboard)
@@ -3448,6 +3522,128 @@ type Query {
     search: String
   ): [User!]
   welcomeMessage: String
+}
+
+"""A class quota allocation for a student"""
+type Quota {
+  createdAt: DateTime
+  id: String
+  kind: QuotaKind
+  name: String
+  periodDays: Int
+  periodType: QuotaPeriodType
+  priority: Int
+  remaining: Int
+  reservedClasses: Int
+  status: QuotaStatus
+  studentId: String
+  totalClasses: Int
+  updatedAt: DateTime
+  validFrom: DateTime
+  validUntil: DateTime
+  version: Int
+}
+
+"""Aggregated quota balance summary for a student"""
+type QuotaBalance {
+  breakdownByExpiration: [QuotaExpirationBreakdown!]
+  studentId: String
+  totalActiveClasses: Int
+  totalRemaining: Int
+  totalReserved: Int
+}
+
+"""
+Breakdown of an individual active quota contributing to a student's balance
+"""
+type QuotaExpirationBreakdown {
+  quotaId: String
+  quotaName: String
+  remaining: Int
+  validUntil: DateTime
+}
+
+enum QuotaKind {
+  PACKAGE
+  PERIODIC
+}
+
+"""An append-only transaction ledger row for a quota"""
+type QuotaLedger {
+  actorUserId: String
+  classInstanceId: String
+  createdAt: DateTime
+  delta: Int
+  id: String
+  idempotencyKey: String
+  quotaId: String
+  reason: QuotaLedgerReason
+  reasonNote: String
+  recurringScheduleId: String
+  studentId: String
+}
+
+"""Paginated result set of quota ledger entries"""
+type QuotaLedgerPaginatedResult {
+  rows: [QuotaLedger!]
+  totalCount: Int
+}
+
+enum QuotaLedgerReason {
+  ADJUST
+  EXPIRE
+  GRANT
+  REDEEM
+  RELEASE
+  RESERVE
+}
+
+"""Filter options for querying quotas"""
+input QuotaPaginatedFilterInput {
+  kind: QuotaKind
+  search: String
+  status: QuotaStatus
+  studentId: String
+}
+
+"""Paginated result set of quotas"""
+type QuotaPaginatedResult {
+  rows: [Quota!]
+  totalCount: Int
+}
+
+enum QuotaPeriodType {
+  CUSTOM
+  MONTHLY
+  WEEKLY
+}
+
+enum QuotaStatus {
+  ACTIVE
+  ARCHIVED
+  EXPIRED
+}
+
+"""Input for creating a new student quota"""
+input QuotaSubmitInput {
+  kind: QuotaKind!
+  name: String!
+  periodDays: Int
+  periodType: QuotaPeriodType
+  priority: Int
+  studentId: String!
+  totalClasses: Int!
+  validFrom: DateTime
+  validUntil: DateTime
+}
+
+"""Input for updating an existing quota"""
+input QuotaUpdateInput {
+  name: String
+  priority: Int
+  status: QuotaStatus
+  validUntil: DateTime
+  version: Int!
 }
 
 enum RateSource {
@@ -3593,6 +3789,12 @@ input RespondToSuggestionInput {
 input RevokePermissionGroupFromUserInput {
   groupId: String!
   userId: String!
+}
+
+enum SchedulingMode {
+  NUMBER_OF_CLASSES
+  ON_DEMAND
+  QUOTA
 }
 
 type SendPaymentReminderResult {
@@ -4723,6 +4925,7 @@ type TeacherPayment {
   amount: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
   isTestPayment: Boolean
   paymentDate: DateTime

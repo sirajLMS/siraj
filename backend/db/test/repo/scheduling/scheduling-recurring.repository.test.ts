@@ -183,7 +183,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           .select({ classesRemaining: students.classesRemaining })
           .from(students)
           .where(eq(students.id, student.id));
-        expect(studentAfter.classesRemaining).toBe(1);
+        expect(studentAfter.classesRemaining).toBe(5);
 
         const [schedule] = await tx
           .select()

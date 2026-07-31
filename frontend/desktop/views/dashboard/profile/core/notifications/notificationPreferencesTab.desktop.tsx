@@ -7,7 +7,9 @@ import { PreferencesMatrixDesktopView } from "@/frontend/desktop/views/dashboard
 export function NotificationPreferencesTabDesktop({
   labels,
   matrixRows,
+  categoryRows,
   onToggle,
+  onCategoryToggle,
   disabled,
   loading,
   snackbarOpen,
@@ -36,7 +38,9 @@ export function NotificationPreferencesTabDesktop({
       <PreferencesMatrixDesktopView
         labels={labels}
         matrixRows={matrixRows ?? []}
+        categoryRows={categoryRows}
         onToggle={onToggle}
+        onCategoryToggle={onCategoryToggle}
         disabled={disabled}
         loading={loading}
       />

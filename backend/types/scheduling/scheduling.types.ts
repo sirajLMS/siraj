@@ -10,9 +10,12 @@ import type {
   ClassOutcome,
   CurrencyCode,
   LeaveRequestStatus,
+  OnDemandNoCreditsOutcome,
   RescheduleDateLabel,
+  SchedulingMode,
   StudentStatus,
 } from "@/backend/enum";
+
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import type { PageInfo, PaginationArgs } from "@/backend/types/shared/pagination.types";
@@ -145,6 +148,11 @@ export type CreateRecurringClassInput = {
   hourlyRate?: string | null;
   /** Currency for `hourlyRate`. Required when `hourlyRate` is set. */
   rateCurrency?: CurrencyCode | null;
+  quotaId?: string | null;
+  earmarkedClasses?: number | null;
+  schedulingMode?: SchedulingMode | null;
+  generationHorizonWeeks?: number | null;
+  ondemandNoCreditsOutcome?: OnDemandNoCreditsOutcome | null;
 };
 
 export type CreateRecurringClassReturnType = {

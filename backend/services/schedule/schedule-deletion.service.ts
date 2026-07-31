@@ -5,6 +5,7 @@ import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { QuotaService } from "@/backend/services/billing/quota.service";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -68,21 +69,41 @@ export namespace ScheduleDeletionService {
     // and return `null`.
     const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
 
+    let quotaReleaseFailed = false;
     const result = await db.transaction(async tx => {
       const deleted = await SchedulingRepository.deleteRecurringClass(classInstanceId, tx);
       if (!deleted?.deleted || !deleted.quotaDeducted) {
         return deleted !== null;
       }
 
-      const idempotencyKey = `credit-refund:${deleted.id}`;
-      await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
+      // Release quota if this class was deducted from a quota
+      if (deleted.quotaId) {
+        const releaseResult = await QuotaService.tryReleaseForInstance(
+          deleted.studentId,
+          deleted.id,
+          deleted.quotaId,
+          actorUserId,
+          tx,
+          "en"
+        );
+        if (!releaseResult.ok) {
+          quotaReleaseFailed = true;
+        }
+      } else {
+        // Credit-backed instance — refund credits
+        const idempotencyKey = `credit-refund:${deleted.id}`;
+        await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
+      }
       return true;
     });
 
     if (result) {
       await notifyClassCancelled(classInstanceId, affected);
     }
-    return result;
+    // Return false when quota release failed so the caller knows the deletion
+    // succeeded but the quota balance is still over-decremented and needs a
+    // manual retry. The class soft-delete itself committed successfully.
+    return result && !quotaReleaseFailed;
   }
 
   /**
@@ -106,6 +127,7 @@ export namespace ScheduleDeletionService {
     // future live instances.
     const preAffected = await SchedulingRepository.getClassInstanceAffectedUsersForTeacher(teacherId);
 
+    let quotaReleaseFailed = false;
     const result = await db.transaction(async tx => {
       const cleared = await SchedulingRepository.clearWeeklySchedule(teacherId, tx);
       if (!cleared) return false;
@@ -113,6 +135,30 @@ export namespace ScheduleDeletionService {
       for (const instance of cleared.refundedInstances) {
         const idempotencyKey = `credit-refund:${instance.id}`;
         await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
+      }
+
+      // Release quota reservations for cleared schedules
+      for (const schedule of cleared.quotaSchedules) {
+        try {
+          await QuotaService.releaseForRecurringSchedule(
+            schedule.studentId,
+            schedule.id,
+            schedule.quotaId,
+            schedule.earmarkedClasses,
+            actorUserId,
+            tx
+          );
+        } catch (error) {
+          quotaReleaseFailed = true;
+          logger.warn("Quota release failed on weekly schedule clear — manual retry required", {
+            recurringScheduleId: schedule.id,
+            quotaId: schedule.quotaId,
+            studentId: schedule.studentId,
+            actorUserId,
+            error: error instanceof Error ? error.message : String(error),
+            action: "manual_retry_needed",
+          });
+        }
       }
 
       return true;
@@ -131,6 +177,9 @@ export namespace ScheduleDeletionService {
       }
     }
 
-    return result;
+    // Return false when at least one quota release failed so the caller knows
+    // the clear succeeded but some quota balances are still over-decremented
+    // and need a manual retry.
+    return result && !quotaReleaseFailed;
   }
 }

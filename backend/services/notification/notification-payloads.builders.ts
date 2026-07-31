@@ -53,14 +53,14 @@ type PayloadMetadata = NotificationMetadata & Record<string, unknown>;
  * against the lowercase alias without sprinkling string literals
  * throughout call sites (specs.md F15 — no `case "EMAIL":` literals).
  */
-const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, CommunicationChannelType>> = Object.freeze({
+export const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, CommunicationChannelType>> = Object.freeze({
   [NotificationChannel.ON_APP]: "on_app",
   [NotificationChannel.EMAIL]: "email",
   [NotificationChannel.SMS]: "sms",
   [NotificationChannel.PUSH]: "push",
 });
 
-const ALL_CHANNELS: readonly NotificationChannel[] = [
+export const ALL_CHANNELS: readonly NotificationChannel[] = [
   NotificationChannel.ON_APP,
   NotificationChannel.EMAIL,
   NotificationChannel.SMS,
@@ -76,12 +76,12 @@ function labelsFor(locale: string | undefined): NotificationsLabels {
  * `body` is shared across channels (channel adapters handle format
  * differences — see `CommunicationService.dispatch`).
  */
-function buildPerChannel(
+export function buildPerChannel(
   userId: string,
   eventType: NotificationEventType,
   title: string,
   body: string,
-  metadata: PayloadMetadata
+  metadata: Record<string, unknown>
 ): CommunicationPayload[] {
   if (!userId) return [];
   const payloads: CommunicationPayload[] = [];
@@ -105,12 +105,12 @@ function buildPerChannel(
  * `for (const userId of affectedUserIds) { ... buildPerChannel(...) }`
  * shape lives in exactly one place.
  */
-function fanOutToUsers(
+export function fanOutToUsers(
   affectedUserIds: readonly string[],
   eventType: NotificationEventType,
   title: string,
   body: string,
-  sharedMetadata: PayloadMetadata
+  sharedMetadata: Record<string, unknown>
 ): CommunicationPayload[] {
   const payloads: CommunicationPayload[] = [];
   for (const userId of affectedUserIds) {

@@ -16,10 +16,16 @@ VALUES
   ('student_max_leaves', '2', 'integer', 'Maximum number of leave requests a student can make per calendar month', 'scheduling', NOW()),
   ('complaint_max_file_size_mb', '25', 'integer', 'Maximum file size for complaint attachments in MB', 'communication', NOW()),
   ('complaint_max_files_per_complaint', '5', 'integer', 'Maximum number of files per complaint', 'communication', NOW()),
-  ('sms_rate_limit_per_hour', '3', 'integer', 'Maximum SMS messages per parent per hour', 'communication', NOW())
+  ('sms_rate_limit_per_hour', '3', 'integer', 'Maximum SMS messages per parent per hour', 'communication', NOW()),
+  ('default_ondemand_horizon_weeks', '2', 'integer', 'Default rolling horizon in weeks for on-demand instance generation', 'scheduling', NOW()),
+  ('default_ondemand_no_credits_outcome', 'AUTO_CANCEL', 'string', 'Default action when on-demand instance has no credits at session time: AUTO_CANCEL, AUTO_ABSENT_NO_CREDITS, REMIND_ONLY', 'scheduling', NOW()),
+  ('ondemand_teacher_digest_hour', '9', 'integer', 'Local hour (0-23) for daily teacher digest of on-demand classes with no credits', 'scheduling', NOW()),
+  ('ondemand_no_credits_resolution_lead_minutes', '240', 'integer', 'Minutes before session start to resolve on-demand instances with no credits', 'scheduling', NOW()),
+  ('quota_low_balance_threshold_percent', '20', 'integer', 'Percentage of totalClasses at which quota low-balance notification fires', 'billing', NOW())
 ON CONFLICT (key) DO UPDATE SET
   value = EXCLUDED.value,
   data_type = EXCLUDED.data_type,
   description = EXCLUDED.description,
   category = EXCLUDED.category,
   updated_at = NOW();
+

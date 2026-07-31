@@ -35,7 +35,11 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   scheduleReschedule: "Reschedule Class",
   dstMigration: "DST Migration",
   billingAdmin: "Billing",
+  quotas: "Quotas & Allocations",
+  quotasCreate: "Create Quota",
+  quotasInsights: "Quota Insights",
   exchangeRates: "Exchange Rates",
+
   supportedCurrencies: "Supported Currencies",
   currencyHedges: "Currency Hedges",
   paymentCatalogs: "Payment Methods",

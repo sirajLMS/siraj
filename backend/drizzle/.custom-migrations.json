@@ -1,5 +1,5 @@
 {
-  "manifestHash": "2f060dc4f1651f9c5e3d86b9f7e200da2964cdb469e0ae3004c17cec9bfe38c4",
+  "manifestHash": "22662c9718d37930bfa4323a24413541688b7a781ec05b4edd30cc1a3ac13657",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -39,7 +39,7 @@
     },
     {
       "file": "4c-system_settings_seed.sql",
-      "sha256": "f1bc2f7901144fc931aa60f2bb7f6be47bdce81c6509329071c80e07410f4e2b"
+      "sha256": "9c2926c9ccfca00725de320a39b75cb684edca95f8dfc8f82df6c215afcedff1"
     },
     {
       "file": "4d-timezones_seed.sql",
@@ -84,6 +84,14 @@
     {
       "file": "7b-settings-permissions-data.sql",
       "sha256": "ecbf57d7aa5dc681ca3151e6dc5926232ad3501d812b5efe73484d9a23c0a08d"
+    },
+    {
+      "file": "7c-quota_permissions_enum.sql",
+      "sha256": "cbf273d4168e6f1b0e9978054a96577d840d146333452c878bf4357289ba3004"
+    },
+    {
+      "file": "7d-quota_permissions_data.sql",
+      "sha256": "648cc06b6841458b24046adc266670d04a035652af6993bc7eae71e468abaf8f"
     },
     {
       "file": "8a-system-setting-enums.sql",
@@ -201,6 +209,10 @@
     "20260729150220_custom_3-system_permissions_and_groups",
     "20260729152150_custom_6d-profile-fine-grained-only",
     "20260729153127_custom_6d-profile-fine-grained-only",
-    "20260729155331_custom_6d-profile-fine-grained-only"
+    "20260729155331_custom_6d-profile-fine-grained-only",
+    "20260731155052_custom_4c-system_settings_seed",
+    "20260731155847_custom_7c-quota_permissions",
+    "20260731155858_custom_7c-quota_permissions_enum",
+    "20260731155859_custom_7d-quota_permissions_data"
   ]
 }

@@ -40,6 +40,10 @@ export async function createRecurringClass(
       userId,
       {
         ...input,
+        schedulingMode: input.schedulingMode as unknown as import("@/backend/enum").SchedulingMode | undefined,
+        ondemandNoCreditsOutcome: input.ondemandNoCreditsOutcome as unknown as
+          | import("@/backend/enum").OnDemandNoCreditsOutcome
+          | undefined,
         rateCurrency: (input.rateCurrency as CurrencyCode | null) ?? undefined,
         timezone: parseIanaTimezone(toGraphqlIanaTimezone(input.timezone)),
       },

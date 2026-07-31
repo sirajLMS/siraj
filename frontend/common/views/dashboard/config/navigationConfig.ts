@@ -89,9 +89,12 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.PaymentMethodsManageCatalogs,
       AppPermission.MeetingProvidersManageCatalog,
       AppPermission.TeacherDuesView,
+      AppPermission.QuotasView,
+      AppPermission.QuotasManage,
     ],
     separator: true,
   },
+
   {
     id: "grp_reports",
     labelKey: "navGroupReports",
@@ -436,6 +439,34 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     groupId: "grp_finance",
   },
   {
+    key: "quotas",
+    labelKey: "quotas",
+    iconKey: "accountBalanceWallet",
+    href: "/quotas",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotas,
+    groupId: "grp_finance",
+  },
+  {
+    key: "quotas-create",
+    labelKey: "quotasCreate",
+    iconKey: "accountBalanceWallet",
+    href: "/quotas/new",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotasCreate,
+    groupId: "grp_finance",
+  },
+
+  {
+    key: "quotas-insights",
+    labelKey: "quotasInsights",
+    iconKey: "assessment",
+    href: "/quotas/insights",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotasInsights,
+    groupId: "grp_finance",
+  },
+  {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",
     iconKey: "accountBalanceWallet",
@@ -444,6 +475,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.paymentCatalogsParent,
     groupId: "grp_finance",
   },
+
   {
     key: "feedback-manage",
     labelKey: "feedbackManage",
@@ -608,6 +640,15 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
   },
+  {
+    key: "quotas",
+    labelKey: "quotas",
+    iconKey: "accountBalanceWallet",
+    href: "/quotas",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotas,
+  },
+
   {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",

@@ -14,11 +14,7 @@ import {
   getClassInstanceByIdOrThrow,
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
-import {
-  adjustQuotaOnUpdate,
-  handleQuotaDeduction,
-  updateInstanceState,
-} from "@/backend/db/repo/scheduling/state-changes";
+import { updateInstanceState } from "@/backend/db/repo/scheduling/state-changes";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
@@ -104,9 +100,7 @@ export const createClassInstance = async (
       tFuncErrors
     );
 
-    if (input.quotaDeducted) {
-      await handleQuotaDeduction(t, input.studentId, true, tFuncErrors);
-    }
+    // Quota operations handled by QuotaService + quota_ledger at service layer
 
     const [created] = await t
       .insert(classInstances)
@@ -159,7 +153,7 @@ export const updateClassInstance = async (
       );
     }
 
-    await adjustQuotaOnUpdate(t, existing, input, isBeingSoftDeleted);
+    // Quota adjustments are handled by QuotaService + quota_ledger
 
     const [updated] = await t
       .update(classInstances)
@@ -190,10 +184,7 @@ export const deleteClassInstance = async (
 
     const { entity: deleted } = await SoftDeleteRepository.softDeleteClassInstance(id, null, t);
 
-    // Handle quota restoration if the instance was quota-deducted
-    if (existing.quotaDeducted) {
-      await adjustQuotaOnUpdate(t, existing, { deletedAt: deleted.deletedAt }, true);
-    }
+    // Quota restoration handled by QuotaService + quota_ledger at service layer
 
     return deleted;
   };
@@ -219,9 +210,7 @@ export const softDeleteClassInstance = async (id: string, actorUserId: string, t
       }
     );
 
-    if (updated) {
-      await adjustQuotaOnUpdate(t, existing, { deletedAt: updated.deletedAt }, true);
-    }
+    // Quota adjustment handled by QuotaService + quota_ledger at service layer
     return updated;
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));

@@ -12,8 +12,10 @@ import {
   type NotificationChannelAccent,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferencesConstants";
 import {
+  type CategoryRow,
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENT_TYPES,
+  type NotificationEventCategory,
   type NotificationPrefRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
@@ -23,13 +25,13 @@ type ChannelId = (typeof NOTIFICATION_CHANNELS)[number];
 interface PreferencesChannelTabsMobileViewProps {
   readonly labels: ProfileNotificationsLabels;
   readonly preferences: readonly NotificationPrefRow[];
-  // NEW FOR PLAN v5: pre-computed preference lookup map passed from the
-  // container so the tier view stays render-only (no `buildPreferenceMap`
-  // invocation, no `useMemo` derivation in tier — specs.md §6.1).
   readonly preferenceMap: ReadonlyMap<string, NotificationPrefRow>;
   /** Role-filtered event catalog; defaults to full matrix when omitted. */
   readonly eventTypes?: readonly NotificationEventType[];
+  /** Category grouping rows — one per category for master mute toggles. */
+  readonly categoryRows?: readonly CategoryRow[];
   readonly onToggle: (channel: NotificationChannelType, eventType: NotificationEventType, enabled: boolean) => void;
+  readonly onCategoryToggle?: (category: NotificationEventCategory, enabled: boolean) => void;
   readonly disabled?: boolean;
   readonly loading?: boolean;
   readonly activeChannel: NotificationChannelType;
@@ -60,7 +62,9 @@ export function PreferencesChannelTabsMobileView({
   preferences,
   preferenceMap,
   eventTypes = NOTIFICATION_EVENT_TYPES,
+  categoryRows,
   onToggle,
+  onCategoryToggle,
   disabled = false,
   loading = false,
   activeChannel,
@@ -139,6 +143,36 @@ export function PreferencesChannelTabsMobileView({
       <Box sx={{ overflow: "hidden" }}>
         <Slide key={activeChannel} direction={slideDirection} in appear mountOnEnter unmountOnExit timeout={220}>
           <Stack spacing={0}>
+            {/* Category-level master toggles */}
+            {categoryRows?.map(catRow => {
+              const categoryLabel = labels.categories?.[catRow.category] ?? catRow.category;
+              return (
+                <FormControlLabel
+                  key={`cat-${activeChannel}-${catRow.category}`}
+                  control={
+                    <Switch
+                      color={activeAccent}
+                      checked={catRow.anyEnabled}
+                      disabled={disabled}
+                      onChange={(_, checked) => {
+                        onCategoryToggle?.(catRow.category, checked);
+                      }}
+                    />
+                  }
+                  label={<Typography sx={{ typography: "labelLg", fontWeight: 700 }}>{categoryLabel}</Typography>}
+                  labelPlacement="start"
+                  sx={theme => ({
+                    mx: 0,
+                    px: 2,
+                    py: 1.5,
+                    width: "100%",
+                    justifyContent: "space-between",
+                    backgroundColor: theme.palette.action.selected,
+                    borderTop: `1px solid ${theme.palette.divider}`,
+                  })}
+                />
+              );
+            })}
             {eventTypes.map((eventType, index) => {
               const pref = preferenceMap.get(`${activeChannel}:${eventType}`);
               const enabled = pref?.enabled ?? true;
@@ -162,6 +196,7 @@ export function PreferencesChannelTabsMobileView({
                     mx: 0,
                     px: 2,
                     py: 1.75,
+                    pl: 4,
                     width: "100%",
                     justifyContent: "space-between",
                     backgroundColor: index % 2 === 1 ? theme.palette.action.hover : "transparent",

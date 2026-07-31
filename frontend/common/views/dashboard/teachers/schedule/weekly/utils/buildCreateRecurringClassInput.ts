@@ -47,5 +47,10 @@ export function buildCreateRecurringClassInput(
     effectiveUntil: null,
     hourlyRate: null,
     rateCurrency: null,
+    quotaId: null,
+    earmarkedClasses: null,
+    schedulingMode: null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: null,
   };
 }

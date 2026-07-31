@@ -1,3 +1,5 @@
+import { and, eq, inArray, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
@@ -9,11 +11,13 @@ import {
 import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
-import { AppPermission, type CurrencyCode, NotificationEventType } from "@/backend/enum";
+import { classInstances, recurringSchedules } from "@/backend/db/schema";
+import { AppPermission, type CurrencyCode, NotificationEventType, OnDemandStatus } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { QuotaService } from "@/backend/services/billing/quota.service";
 import { invalidateClassLifecycle } from "@/backend/services/cache";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
@@ -200,6 +204,39 @@ export namespace ClassSessionService {
   }
 
   /**
+   * Release quota for a quota-deducted class instance. The quotaId is resolved
+   * from the class instance's parent recurring schedule. If no quota is found,
+   * the call is a no-op (the instance may have been credit-backed).
+   */
+  async function releaseQuotaIfDeducted(
+    instance: Pick<ClassInstanceEntity, "id" | "studentId" | "quotaDeducted" | "recurringScheduleId">,
+    actorUserId: string,
+    tx: DBTransaction
+  ): Promise<boolean> {
+    if (!instance.quotaDeducted || !instance.recurringScheduleId) return true;
+
+    // Resolve quotaId from the parent recurring schedule
+    const q = queryDb(tx);
+    const [schedule] = await q
+      .select({ quotaId: recurringSchedules.quotaId })
+      .from(recurringSchedules)
+      .where(eq(recurringSchedules.id, instance.recurringScheduleId))
+      .limit(1);
+
+    if (!schedule?.quotaId) return true;
+
+    const result = await QuotaService.tryReleaseForInstance(
+      instance.studentId,
+      instance.id,
+      schedule.quotaId,
+      actorUserId,
+      tx,
+      "en"
+    );
+    return result.ok;
+  }
+
+  /**
    * Shared post-action dispatch: resolves affected users from the live row
    * and emits the given lifecycle event. Consolidates the duplicated
    * `if (result) { resolve + notify }` block repeated across all state
@@ -263,11 +300,67 @@ export namespace ClassSessionService {
     return SchedulingRepository.getClassStatusEvents(classInstanceId);
   }
 
+  async function handleOndemandSessionStartCreditDeduction(
+    instance: ClassInstanceEntity,
+    userId: string,
+    tErrors: ErrorsLabels,
+    tx: DBTransaction
+  ): Promise<void> {
+    if (instance.ondemandStatus === "PENDING_CREDIT") {
+      const openQuota = await QuotaService.selectQuotaForBooking(instance.studentId, tx, userId, "en");
+      if (openQuota) {
+        await QuotaService.redeemForInstance(instance.studentId, instance.id, openQuota.id, userId, tx, "en");
+      } else {
+        const idempotencyKey = `credit-deduction-ondemand:${instance.id}`;
+        await CreditService.deductForBooking(instance.studentId, instance.id, userId, idempotencyKey, tx, tErrors);
+      }
+    }
+  }
+
+  /**
+   * Batch-update on-demand class instances from PENDING_CREDIT to a new
+   * status. The atomic `ondemand_status = PENDING_CREDIT` WHERE guard
+   * provides idempotency: concurrent runs cannot double-process because
+   * only rows still in PENDING_CREDIT are affected.
+   *
+   * Does NOT dispatch notifications — callers handle that.
+   *
+   * @returns Count of rows actually updated.
+   */
+  export async function markNoCreditsBatch(
+    tx: DBTransaction,
+    instanceIds: string[],
+    newStatus: OnDemandStatus,
+    executionState: string
+  ): Promise<number> {
+    if (instanceIds.length === 0) return 0;
+    const now = new Date();
+    const updated = await tx
+      .update(classInstances)
+      .set({
+        executionState,
+        ondemandStatus: newStatus,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          inArray(classInstances.id, instanceIds),
+          eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT),
+          isNull(classInstances.deletedAt)
+        )
+      )
+      .returning({ id: classInstances.id });
+    return updated.length;
+  }
+
   export async function activate(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_CLASS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
     await SystemRulesService.assertActivationTimeWindow(instance);
-    const result = await SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false });
+    const result = await db.transaction(async tx => {
+      await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx);
+      return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false }, tx, tErrors);
+    });
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_ACTIVATED);
     return result;
   }
@@ -275,8 +368,11 @@ export namespace ClassSessionService {
   export async function activateOverride(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_OVERRIDE, tErrors);
-    await getOrThrow(classInstanceId, tErrors);
-    const result = await SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: true });
+    const instance = await getOrThrow(classInstanceId, tErrors);
+    const result = await db.transaction(async tx => {
+      await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx);
+      return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: true }, tx, tErrors);
+    });
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_ACTIVATED, {
       override: "true",
     });
@@ -457,6 +553,7 @@ export namespace ClassSessionService {
       const newInstance = await SchedulingRepository.rescheduleClassInstance(classInstanceId, insertPayload, tx);
 
       if (existing.quotaDeducted && existing.deletedAt === null) {
+        await releaseQuotaIfDeducted(existing, userId, tx);
         const tErrorsLocal = getServerTranslations("ar").errorsTranslations;
         await refundCreditIfDeducted(existing, userId, tErrorsLocal, tx);
       }
@@ -490,6 +587,7 @@ export namespace ClassSessionService {
         throw new Error(tErrors.notFound);
       }
       if (instance.quotaDeducted) {
+        await releaseQuotaIfDeducted(instance, userId, tx);
         await refundCreditIfDeducted(instance, userId, tErrors, tx);
       }
       return resetResult;

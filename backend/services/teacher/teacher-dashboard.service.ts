@@ -8,6 +8,8 @@ import { AppPermission } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { QuotaService } from "@/backend/services/billing/quota.service";
+
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -108,8 +110,13 @@ export namespace TeacherDashboardService {
     return db.transaction(async tx => {
       const created = await SchedulingRepository.createClassInstance(entry, tx);
 
-      const creditIdempotencyKey = `credit-deduction:${created.id}`;
-      await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx, tErrors);
+      const openQuota = await QuotaService.selectQuotaForBooking(input.studentId, tx);
+      if (openQuota) {
+        await QuotaService.redeemForInstance(input.studentId, created.id, openQuota.id, userId, tx);
+      } else {
+        const creditIdempotencyKey = `credit-deduction:${created.id}`;
+        await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx, tErrors);
+      }
 
       return created;
     });

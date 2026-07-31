@@ -1,4 +1,9 @@
-import type { CreateRecurringClassInput, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  CreateRecurringClassInput,
+  CurrencyCode,
+  OnDemandNoCreditsOutcome,
+  SchedulingMode,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 
@@ -33,6 +38,11 @@ export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurrin
     effectiveUntil: data.effectiveUntil ?? null,
     hourlyRate: data.hourlyRate ?? null,
     rateCurrency: (data.rateCurrency as CurrencyCode | null) ?? null,
+    quotaId: data.quotaId ?? null,
+    earmarkedClasses: data.earmarkedClasses ?? null,
+    schedulingMode: (data.schedulingMode as SchedulingMode | null) ?? null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: (data.ondemandNoCreditsOutcome as OnDemandNoCreditsOutcome | null) ?? null,
   };
 }
 
@@ -53,5 +63,9 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
     generateInstancesForWeeks: data.generateInstancesForWeeks,
     hourlyRate: data.hourlyRate ?? null,
     rateCurrency: (data.rateCurrency as CurrencyCode | null) ?? null,
+    schedulingMode: data.schedulingMode ?? undefined,
+    quotaId: data.quotaId ?? undefined,
+    earmarkedClasses: data.earmarkedClasses ?? undefined,
+    ondemandNoCreditsOutcome: data.ondemandNoCreditsOutcome ?? undefined,
   };
 }

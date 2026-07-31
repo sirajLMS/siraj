@@ -35,7 +35,11 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   scheduleReschedule: "إعادة جدولة الحصة",
   dstMigration: "ترحيل التوقيت الصيفي",
   billingAdmin: "الفواتير",
+  quotas: "الحصص والمحفظات",
+  quotasCreate: "إنشاء حصة جديدة",
+  quotasInsights: "تحليلات الحصص",
   exchangeRates: "أسعار الصرف",
+
   supportedCurrencies: "العملات المدعومة",
   currencyHedges: "تحوط العملات",
   paymentCatalogs: "طرق الدفع",

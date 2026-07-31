@@ -468,6 +468,88 @@ export namespace QuotaRepository {
     return updated;
   };
 
+  export const redeemForInstanceBatch = async (
+    tx: DBTransaction,
+    input: {
+      quotaId: string;
+      studentId: string;
+      recurringScheduleId?: string | null;
+      instanceIds: string[];
+      actorUserId?: string | null;
+    }
+  ): Promise<{ redeemedCount: number; quota: QuotaSelectType | null }> => {
+    if (input.instanceIds.length === 0) {
+      return { redeemedCount: 0, quota: null };
+    }
+
+    const count = input.instanceIds.length;
+    const now = new Date();
+
+    // Guard: ensure quota is active and has enough remaining BEFORE inserting ledger rows.
+    // We check here without deducting — the actual deduction uses inserted.length below.
+    const [guardRow] = await tx
+      .select()
+      .from(quotas)
+      .where(
+        and(
+          eq(quotas.id, input.quotaId),
+          eq(quotas.studentId, input.studentId),
+          eq(quotas.status, QuotaStatus.ACTIVE),
+          gte(quotas.remaining, count),
+          isNull(quotas.deletedAt)
+        )
+      )
+      .limit(1);
+
+    if (!guardRow) {
+      return { redeemedCount: 0, quota: null };
+    }
+
+    // Build one ledger row per instance using the same idempotency-key derivation as redeemForInstance
+    const ledgerRows = input.instanceIds.map(instId => ({
+      quotaId: input.quotaId,
+      studentId: input.studentId,
+      recurringScheduleId: input.recurringScheduleId ?? null,
+      classInstanceId: instId,
+      delta: -1,
+      reason: QuotaLedgerReason.REDEEM,
+      reasonNote: `Redeemed 1 class for instance ${instId}`,
+      actorUserId: input.actorUserId ?? null,
+      idempotencyKey: deriveRedeemIdempotencyKey(instId, input.quotaId),
+    }));
+
+    const inserted = await QuotaLedgerRepository.insertBatch(tx, ledgerRows);
+    const redeemedCount = inserted.length;
+
+    // Deduct ONLY by the actual number of newly inserted ledger rows, not the full count.
+    // This prevents quota loss when some instances were already redeemed (idempotency dedup).
+    if (redeemedCount === 0) {
+      // Nothing newly inserted — all instances were already redeemed; no deduction needed
+      return { redeemedCount: 0, quota: guardRow };
+    }
+
+    const [updated] = await tx
+      .update(quotas)
+      .set({
+        remaining: sql<number>`${quotas.remaining} - ${redeemedCount}`,
+        usedThisPeriod: sql<number>`${quotas.usedThisPeriod} + ${redeemedCount}`,
+        version: sql<number>`${quotas.version} + 1`,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(quotas.id, input.quotaId),
+          eq(quotas.studentId, input.studentId),
+          eq(quotas.status, QuotaStatus.ACTIVE),
+          gte(quotas.remaining, redeemedCount),
+          isNull(quotas.deletedAt)
+        )
+      )
+      .returning();
+
+    return { redeemedCount, quota: updated ?? guardRow };
+  };
+
   export const releaseForInstanceBatch = async (
     tx: DBTransaction,
     input: {
@@ -482,33 +564,7 @@ export namespace QuotaRepository {
       return { releasedCount: 0, quota: null };
     }
 
-    const count = input.instanceIds.length;
     const now = new Date();
-
-    // Single atomic UPDATE: bump remaining + decrement usedThisPeriod, guarded by usedThisPeriod >= count
-    const [updated] = await tx
-      .update(quotas)
-      .set({
-        remaining: sql<number>`${quotas.remaining} + ${count}`,
-        usedThisPeriod: sql<number>`GREATEST(${quotas.usedThisPeriod} - ${count}, 0)`,
-        version: sql<number>`${quotas.version} + 1`,
-        updatedAt: now,
-      })
-      .where(
-        and(
-          eq(quotas.id, input.quotaId),
-          eq(quotas.studentId, input.studentId),
-          eq(quotas.status, QuotaStatus.ACTIVE),
-          gte(quotas.usedThisPeriod, count),
-          isNull(quotas.deletedAt)
-        )
-      )
-      .returning();
-
-    // Atomic guard failed (insufficient usedThisPeriod or quota inactive) — release nothing
-    if (!updated) {
-      return { releasedCount: 0, quota: null };
-    }
 
     // Build one ledger row per instance using the same idempotency-key derivation as releaseForInstance
     const ledgerRows = input.instanceIds.map(instId => ({
@@ -526,7 +582,37 @@ export namespace QuotaRepository {
     const inserted = await QuotaLedgerRepository.insertBatch(tx, ledgerRows);
     const releasedCount = inserted.length;
 
-    return { releasedCount, quota: updated };
+    // Credit ONLY by the actual number of newly inserted ledger rows, not the full count.
+    // This prevents over-crediting when some instances were already released (idempotency dedup).
+    if (releasedCount === 0) {
+      // Nothing newly inserted — all instances were already released; no credit needed
+      const [existing] = await tx
+        .select()
+        .from(quotas)
+        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId), isNull(quotas.deletedAt)))
+        .limit(1);
+      return { releasedCount: 0, quota: existing ?? null };
+    }
+
+    const [updated] = await tx
+      .update(quotas)
+      .set({
+        remaining: sql<number>`${quotas.remaining} + ${releasedCount}`,
+        usedThisPeriod: sql<number>`GREATEST(${quotas.usedThisPeriod} - ${releasedCount}, 0)`,
+        version: sql<number>`${quotas.version} + 1`,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(quotas.id, input.quotaId),
+          eq(quotas.studentId, input.studentId),
+          eq(quotas.status, QuotaStatus.ACTIVE),
+          isNull(quotas.deletedAt)
+        )
+      )
+      .returning();
+
+    return { releasedCount, quota: updated ?? null };
   };
 
   export const expireOverdue = async (tx: DBTransaction, asOfDate?: Date): Promise<QuotaSelectType[]> => {

@@ -9,7 +9,9 @@ import { dashboardBillingExchangeRatesAr } from "@/shared/locale/ar/dashboard/bi
 import { dashboardBillingAr } from "@/shared/locale/ar/dashboard/billing/main.ts";
 import { dashboardBillingManualAr } from "@/shared/locale/ar/dashboard/billing/manual.ts";
 import { dashboardBillingPaymentAr } from "@/shared/locale/ar/dashboard/billing/payment.ts";
+import { quotaAr } from "@/shared/locale/ar/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesAr } from "@/shared/locale/ar/dashboard/billing/supportedCurrencies.ts";
+
 import { dashboardClassAuditAr } from "@/shared/locale/ar/dashboard/classes/audit.ts";
 import { dashboardCreateRecurringClassAr } from "@/shared/locale/ar/dashboard/classes/createRecurringClass.ts";
 import { dashboardClassDetailsAr } from "@/shared/locale/ar/dashboard/classes/details.ts";
@@ -165,7 +167,9 @@ export const arMessages: Translations = {
     dstMigration: dashboardDstMigrationAr,
     billing: dashboardBillingAr,
     billingManual: dashboardBillingManualAr,
+    billingQuota: quotaAr,
     billingPayment: dashboardBillingPaymentAr,
+
     billingExchangeRates: dashboardBillingExchangeRatesAr,
     billingCurrencyHedges: dashboardBillingCurrencyHedgesAr,
     billingSupportedCurrencies: dashboardBillingSupportedCurrenciesAr,

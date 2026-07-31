@@ -6,7 +6,6 @@ import {
   type DBTransaction,
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
-import { handleQuotaDeduction } from "@/backend/db/repo/scheduling/state-changes";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import {
   classInstances,
@@ -44,6 +43,11 @@ export interface CreateRecurringScheduleInput {
   hourlyRate?: string | null;
   /** Currency for `hourlyRate`. Required when `hourlyRate` is set. */
   rateCurrency?: CurrencyCode | null;
+  quotaId?: string | null;
+  earmarkedClasses?: number | null;
+  schedulingMode?: import("@/backend/enum").SchedulingMode | null;
+  generationHorizonWeeks?: number | null;
+  ondemandNoCreditsOutcome?: import("@/backend/enum").OnDemandNoCreditsOutcome | null;
 }
 
 /**
@@ -219,10 +223,7 @@ async function createSingleRecurringInstance(params: {
     tFuncErrors
   );
 
-  // Handle quota deduction if quotaDeducted is true
-  if (input.quotaDeducted) {
-    await handleQuotaDeduction(t, input.studentId, true, tFuncErrors);
-  }
+  // Quota deduction handled by QuotaService + quota_ledger at service layer
 
   const idempotencyKey = `recurring-${recurringScheduleId}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
 
@@ -260,7 +261,7 @@ async function createSingleRecurringInstance(params: {
 export async function deleteRecurringClass(
   classInstanceId: string,
   tx?: DBTransaction
-): Promise<{ id: string; studentId: string; quotaDeducted: boolean; deleted: boolean } | null> {
+): Promise<{ id: string; studentId: string; quotaDeducted: boolean; quotaId: string | null; deleted: boolean } | null> {
   const runner = async (t: DBTransaction) => {
     const now = new Date();
 
@@ -270,12 +271,24 @@ export async function deleteRecurringClass(
         quotaDeducted: classInstances.quotaDeducted,
         deletedAt: classInstances.deletedAt,
         studentId: classInstances.studentId,
+        recurringScheduleId: classInstances.recurringScheduleId,
       })
       .from(classInstances)
       .where(eq(classInstances.id, classInstanceId))
       .limit(1);
 
     if (!existing) return null;
+
+    // Resolve the quotaId from the parent recurring schedule
+    let quotaId: string | null = null;
+    if (existing.quotaDeducted && existing.recurringScheduleId) {
+      const [schedule] = await t
+        .select({ quotaId: recurringSchedules.quotaId })
+        .from(recurringSchedules)
+        .where(eq(recurringSchedules.id, existing.recurringScheduleId))
+        .limit(1);
+      quotaId = schedule?.quotaId ?? null;
+    }
 
     const [deleted] = await t
       .update(classInstances)
@@ -291,6 +304,7 @@ export async function deleteRecurringClass(
       id: deleted.id,
       studentId: existing.studentId,
       quotaDeducted: existing.quotaDeducted,
+      quotaId,
       deleted: existing.deletedAt === null,
     };
   };
@@ -300,12 +314,20 @@ export async function deleteRecurringClass(
 export async function clearWeeklySchedule(
   teacherId: string,
   tx?: DBTransaction
-): Promise<{ refundedInstances: { id: string; studentId: string }[] } | null> {
+): Promise<{
+  refundedInstances: { id: string; studentId: string }[];
+  quotaSchedules: { id: string; studentId: string; quotaId: string; earmarkedClasses: number }[];
+} | null> {
   const runner = async (t: DBTransaction) => {
     const now = new Date();
 
     const schedules = await t
-      .select({ id: recurringSchedules.id })
+      .select({
+        id: recurringSchedules.id,
+        studentId: recurringSchedules.studentId,
+        quotaId: recurringSchedules.quotaId,
+        earmarkedClasses: recurringSchedules.earmarkedClasses,
+      })
       .from(recurringSchedules)
       .where(and(eq(recurringSchedules.teacherId, teacherId), isNull(recurringSchedules.deletedAt)));
 
@@ -359,7 +381,19 @@ export async function clearWeeklySchedule(
         );
     }
 
-    return { refundedInstances };
+    const quotaSchedules: { id: string; studentId: string; quotaId: string; earmarkedClasses: number }[] = [];
+    for (const s of schedules) {
+      if (s.quotaId && s.earmarkedClasses && s.earmarkedClasses > 0) {
+        quotaSchedules.push({
+          id: s.id,
+          studentId: s.studentId,
+          quotaId: s.quotaId,
+          earmarkedClasses: s.earmarkedClasses,
+        });
+      }
+    }
+
+    return { refundedInstances, quotaSchedules };
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 }
@@ -398,9 +432,15 @@ export const createRecurringScheduleWithInstances = async (
         rateCurrency: input.rateCurrency ?? null,
         effectiveFrom: input.effectiveFrom ? input.effectiveFrom.toISOString().split("T")[0] : null,
         effectiveUntil: input.effectiveUntil ? input.effectiveUntil.toISOString().split("T")[0] : null,
+        quotaId: input.quotaId ?? null,
+        earmarkedClasses: input.earmarkedClasses ?? null,
+        schedulingMode: input.schedulingMode ?? "NUMBER_OF_CLASSES",
+        generationHorizonWeeks: input.generationHorizonWeeks ?? null,
+        ondemandNoCreditsOutcome: input.ondemandNoCreditsOutcome ?? null,
         createdAt: now,
         updatedAt: now,
       })
+
       .returning();
 
     // Resolve the rate snapshot once for all generated instances (same

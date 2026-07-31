@@ -56,8 +56,13 @@
     "postinstall": "rm -rf node_modules/*/node_modules/typescript && bun -e \"const fs = require('fs'); const file = 'node_modules/typescript/lib/version.cjs'; if (fs.existsSync(file)) fs.writeFileSync(file, 'module.exports = { ...require(\\\"@typescript/typescript6\\\"), version: \\\"7.0.2\\\", versionMajorMinor: \\\"7.0\\\" };'); const pkg = 'node_modules/typescript/package.json'; if (fs.existsSync(pkg)) { const p = JSON.parse(fs.readFileSync(pkg, 'utf8')); if (p.type === 'module') { p.type = 'commonjs'; fs.writeFileSync(pkg, JSON.stringify(p, null, 2)); } }\"",
     "db": "bun --no-env-file run scripts/dbActions/index.ts",
     "validate:seed-assets": "bun run scripts/validate-seed-assets.ts",
-    "generate:icons": "bun scripts/generate-icons.ts"
+    "generate:icons": "bun scripts/generate-icons.ts",
+    "quota:expire": "bun run scripts/quota-expiry-sweeper.ts",
+    "ondemand:generate": "bun run scripts/ondemand-instance-generator.ts",
+    "ondemand:resolve": "bun run scripts/ondemand-no-credits-resolver.ts",
+    "ondemand:teacher-digest": "bun run scripts/ondemand-teacher-digest-cron.ts"
   },
+
   "dependencies": {
     "@apollo/client": "^4.2.9",
     "@apollo/server": "^5.5.1",

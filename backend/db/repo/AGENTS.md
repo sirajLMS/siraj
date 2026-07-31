@@ -60,3 +60,31 @@ Each sub-directory (except `scheduling/` and `utils/` which pre-date this refact
 3. Add `export * from "./<entity>.repository";` to the sub-directory's `index.ts`.
 4. If a new sub-directory was created, add the sub-directory re-export to the top-level `backend/db/repo/index.ts`.
 5. Wired types live in `backend/types/<subdir>/<entity>.types.ts`; wired GraphQL exposure lives in `backend/graphql/pothos/<subdir>/`.
+
+## Append-Only Ledger Pattern (Quota)
+
+The Quota System uses an **append-only ledger** pattern in `quota_ledger`. See `docs/billing/quota-system.md` for the full reference. Key repo-level rules:
+
+### Write Pattern
+
+- **Every quota mutation writes a ledger row + updates cache columns in the SAME transaction** (`tx`). No ledger entry without a cache update, no cache update without a ledger entry.
+- **Idempotency first**: Before inserting a ledger row, check for existing entry with the same `idempotencyKey` (SHA-256). If found, return the existing row — do NOT insert a duplicate.
+- **Cache columns are snapshot only**: `remaining`, `reservedClasses`, `usedThisPeriod` on `quotas` are denormalized snapshots. The ledger is always the authoritative source. Use `computeBalance` to reconstruct truth from ledger.
+
+### idempotency Key Derivations
+
+All keys follow the pattern `"quota-{operation}:{unique-segment}:..."` hashed with SHA-256. Helper functions in `quota.repository.ts`:
+- `deriveGrantIdempotencyKey(quotaId)`
+- `deriveRedeemIdempotencyKey(classInstanceId, quotaId)`
+- `deriveReserveIdempotencyKey(recurringScheduleId, quotaId)`
+- `deriveReleasePoolIdempotencyKey(classInstanceId, quotaId)`
+- `deriveReleaseEarmarkIdempotencyKey(scheduleId, instanceId, quotaId)`
+- `deriveExpireIdempotencyKey(quotaId, periodString)`
+
+### FiF Object Selection
+
+`selectQuotaForBookingFIFO(studentId, tx?)`: filters ACTIVE quotas, sorts by priority DESC → validUntil ASC, returns the first with `remaining > 0`.
+
+### Foreign Key Constraint
+
+`quota_ledger.quotaId` → `quotas.id` uses `ON DELETE RESTRICT`. Hard-deleting a quota while ledger entries exist will fail. Use soft-delete (`deletedAt`) or archive ledger entries first.

@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
@@ -262,6 +262,41 @@ export namespace QuotaService {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
+  export const redeemForInstances = async (
+    studentId: string,
+    classInstanceIds: string[],
+    quotaId: string,
+    recurringScheduleId: string | null,
+    actorUserId: string | null | undefined,
+    tx: DBTransaction,
+    locale = "en"
+  ): Promise<{ redeemedCount: number; quota: QuotaReturnType | null }> => {
+    const runner = async (t: DBTransaction) => {
+      if (classInstanceIds.length === 0) {
+        return { redeemedCount: 0, quota: null };
+      }
+
+      const result = await QuotaRepository.redeemForInstanceBatch(t, {
+        quotaId,
+        studentId,
+        recurringScheduleId,
+        instanceIds: classInstanceIds,
+        actorUserId,
+      });
+
+      if (result.redeemedCount === 0) {
+        const tErrors = getServerTranslations(locale).errorsTranslations;
+        throw new Error(tErrors.quotaNotFound);
+      }
+
+      return {
+        redeemedCount: result.redeemedCount,
+        quota: result.quota ? (result.quota as QuotaReturnType) : null,
+      };
+    };
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
   export const releaseForInstance = async (
     studentId: string,
     classInstanceId: string,
@@ -282,6 +317,37 @@ export namespace QuotaService {
       return updated as QuotaReturnType;
     };
     return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  /**
+   * Try to release quota for a single instance. Returns `{ ok: true }` on
+   * success or `{ ok: false, error }` on failure — does NOT throw. Callers
+   * are responsible for checking the result and surfacing partial-failure
+   * status to their callers so the quota imbalance is visible rather than
+   * silently swallowed.
+   */
+  export const tryReleaseForInstance = async (
+    studentId: string,
+    classInstanceId: string,
+    quotaId: string,
+    actorUserId?: string | null,
+    tx?: DBTransaction,
+    _locale?: string
+  ): Promise<{ ok: true } | { ok: false; error: unknown }> => {
+    try {
+      await releaseForInstance(studentId, classInstanceId, quotaId, actorUserId, tx, _locale);
+      return { ok: true };
+    } catch (error) {
+      logger.warn("Quota release failed — manual retry required", {
+        classInstanceId,
+        quotaId,
+        studentId,
+        actorUserId,
+        error: error instanceof Error ? error.message : String(error),
+        action: "manual_retry_needed",
+      });
+      return { ok: false, error };
+    }
   };
 
   export const releaseForInstances = async (
@@ -355,7 +421,10 @@ export namespace QuotaService {
       let flippedCount = 0;
       const now = new Date();
 
-      for (const inst of pendingInstances) {
+      // Single batched UPDATE for all pending instances instead of N sequential writes.
+      // All instances get the same set of values, so one inArray UPDATE suffices.
+      if (pendingInstances.length > 0) {
+        const instanceIds = pendingInstances.map(inst => inst.id);
         await t
           .update(classInstances)
           .set({
@@ -363,9 +432,9 @@ export namespace QuotaService {
             ondemandStatus: OnDemandStatus.AVAILABLE,
             updatedAt: now,
           })
-          .where(eq(classInstances.id, inst.id));
+          .where(inArray(classInstances.id, instanceIds));
 
-        flippedCount++;
+        flippedCount = pendingInstances.length;
       }
 
       // Deduct from quota for flipped instances to prevent double-counting on refresh
