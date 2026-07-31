@@ -39,9 +39,10 @@ Add a domain-aware caching layer on top of Siraj's existing provider-agnostic `c
 - Named invalidation helpers wired to parent/teacher profile, dues, class-lifecycle, and role-change mutation services.
 - PG adapter + repository atomicity tightening (single-statement incr, atomic setExpiry, SQL-level `gte(expiresAt)` on `get`).
 - Internal-only `stats()` observability (never exposed on unauthenticated HTTP).
-- Unit tests + PG integration test for tag invalidation.
+- Unit tests + PG integration test for tag invalidation (`backend/db/test/logic/shared/cache_tag_invalidation.test.ts`), plus **one smoke test per Redis provider** under `test/integration/redis/` (Upstash REST, Redis Cloud, local `REDIS_URL`) when configured in `.env.test`. Provider smokes run via `bun run test:integration` — see `backend/db/test/AGENTS.md` and `backend/services/AGENTS.md` (no live provider tests under `backend/db/test/` or `backend/services/`).
 - `backend/services/AGENTS.md` "Hot-resolver caching" subsection.
 - Drop unused `@upstash/ratelimit` dependency.
+
 
 **Out of scope**:
 - Flipping `CACHE_PROVIDER` to `redis` (default stays `postgres` in `.env.example:110`).
@@ -244,7 +245,9 @@ No new permissions. Existing permission checks remain outside the cache wrapper 
 ### Technical Constraints
 
 - Must work on all three cache providers from `CacheServiceFactory` (`postgres`, `redis` + `local`, `redis` + `upstash`) without code-path splits.
+- Integration tests support live Redis provider verification using `UPSTASH_TEST_REDIS_REST_URL` / `UPSTASH_TEST_REDIS_REST_TOKEN` (Upstash REST) and `REDIS_CLOUD_TEST_REDIS_URL` (Redis Cloud) loaded from `.env.test`.
 - Must not touch `backend/services/redis/`, sessions/APQ/rate-limit/FX (already correct).
+
 - Must not introduce a new DB schema file or migration.
 - Must respect `backend/services/AGENTS.md` (services own mutations/invalidation, repositories don't).
 - Must respect `backend/db/test/AGENTS.md` (`runInRollback`, no `expect().rejects.toThrow()`).
@@ -478,6 +481,15 @@ See [implementation.md § Verification per file](./implementation.md) for the pe
 
 **Run via**: `bun run scripts/run-test/run-test.ts <path>` (mandatory for PG integration to capture transaction deadlocks).
 
+**Provider integration** (`test/integration/redis/` — one file per provider, **one smoke test each**):
+- `upstash.integration.test.ts` — single SET/GET (or PING) via `RedisCacheAdapter` / `cacheService` when `UPSTASH_TEST_REDIS_REST_URL` + `UPSTASH_TEST_REDIS_REST_TOKEN` are set.
+- `redis-cloud.integration.test.ts` — same when `REDIS_CLOUD_TEST_REDIS_URL` is set.
+- `local-redis.integration.test.ts` — same against `REDIS_URL` when `REDIS_PROVIDER=local` (optional; skips when unset).
+- Gate with `describeLiveWhen` from `test/integration/helpers/describe-live.ts`; skip cleanly when env keys are absent.
+- **Do not** add `*.integration.test.ts` under `backend/db/test/` or `backend/services/` for these providers.
+
+**Run via**: `bun run test:integration` (all provider smokes) or `bun run test:integration test/integration/redis/`.
+
 ---
 
 ## 8. Glossary
@@ -519,7 +531,7 @@ See [implementation.md § Verification per file](./implementation.md) for the pe
 - [x] Sufficient detail for implementation (code contracts for all helpers).
 - [x] Data models complete (`CacheEntry` shape, key shapes).
 - [x] API specifications detailed (cache keys, tag-set maps).
-- [x] Testing strategy comprehensive (unit + PG integration).
+- [x] Testing strategy comprehensive (unit + PG integration + `test/integration/redis/` provider smokes).
 
 ### Maintainability
 - [x] Supports future extension (named helpers + central `CACHE_VERSION`).

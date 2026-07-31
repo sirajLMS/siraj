@@ -14,3 +14,35 @@
 - **Naming:** `*SeedService` namespaces with `seed*` write methods (e.g. `UserSeedService.seedAvatarUrl`, `StudentSeedService.seedStudentByKey`).
 - **Production safety:** All writes call `assertSeedWriteAllowed()` from `backend/lib/bootstrap-gate.ts` (blocked on real Vercel production; allowed in local dev and CI test servers via `TEST_SERVER` / `TEST_CI`).
 
+## Testing (`backend/services/**/*.test.ts`)
+
+Service tests live next to the code they cover (`*.test.ts` or `test/` subdirectories). Run via `bun run test:services`.
+
+### No real external APIs (mandatory)
+
+Service tests **must never** make real network calls to third-party providers. Always mock outbound integrations before exercising the service under test:
+
+- **Notifications:** `spyOn(CommunicationService, "dispatchMulti")`, `spyOn(..., "dispatch")`, and/or `spyOn` / `mock.module` on `dispatchWithPreferences` from `@/backend/services/notification/notification-dispatch.helpers`
+- **Email / SMS / push:** mock channel facades (`emailChannel`, `smsChannel`, `pushChannel`) or the adapters — never let tests reach Resend, Twilio, or FCM
+- **FX:** mock provider adapters or the ingestion service — never call Fixer / OpenExchangeRates live
+- **Redis / cache providers:** mock `cacheService` or `ICacheService` — never hit Upstash / Redis Cloud in service tests
+- **Permissions fan-out:** mock `PermissionsService.getUserIdsWithPermission` when the code dispatches notifications to reviewer lists
+
+If a test needs to confirm a live provider is wired, add a **single smoke** under `test/integration/` and run `bun run test:integration` — not here.
+
+### Provider integration tests belong in `test/integration/`
+
+**Do NOT add `*.integration.test.ts` or live provider smokes under `backend/services/`** (including channel adapters, FX providers, or any subdirectory). Examples:
+
+- Resend / Twilio / FCM live adapter smokes → `test/integration/communication/`
+- Fixer / OpenExchangeRates live FX fetches → `test/integration/fx/`
+- Upstash / Redis Cloud → `test/integration/redis/` (when added)
+
+Run integration smokes with:
+
+- `bun run test:integration` — all provider smokes (parallel runner)
+- `bun run test:live-comm` — communication channels only
+- `bun run test:live-fx` — FX providers only
+
+Each integration file gets **one** smoke test (single API call) to confirm the adapter reaches the live provider — not full service or app behaviour.
+

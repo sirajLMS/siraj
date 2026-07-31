@@ -9,6 +9,7 @@ import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enu
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services";
 import { ComplaintService } from "@/backend/services/communication/complaint.service";
+import * as NotificationDispatchHelpers from "@/backend/services/notification/notification-dispatch.helpers";
 import type { ComplaintSelectType } from "@/backend/types";
 
 const MOCK_ACTOR_ID = "actor-uuid-0001";
@@ -105,9 +106,13 @@ describe("ComplaintService", () => {
   let registerFileUsageSpy: ReturnType<typeof spyOn>;
   let getComplaintByIdSpy: ReturnType<typeof spyOn>;
   let getComplaintFilesSpy: ReturnType<typeof spyOn>;
+  let getUserIdsWithPermissionSpy: ReturnType<typeof spyOn>;
+  let dispatchWithPreferencesSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
     hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    getUserIdsWithPermissionSpy = spyOn(PermissionsService, "getUserIdsWithPermission").mockResolvedValue([]);
+    dispatchWithPreferencesSpy = spyOn(NotificationDispatchHelpers, "dispatchWithPreferences").mockResolvedValue([]);
     findByUserIdSpy = spyOn(ParentRepository, "findByUserId").mockResolvedValue(mockParent);
     getIntValueSpy = spyOn(SystemSettingsRepository, "getIntValue").mockResolvedValue(5);
     submitComplaintSpy = spyOn(ComplaintRepository, "submitComplaint").mockResolvedValue(mockComplaint);
@@ -127,6 +132,8 @@ describe("ComplaintService", () => {
     registerFileUsageSpy.mockRestore();
     getComplaintByIdSpy.mockRestore();
     getComplaintFilesSpy.mockRestore();
+    getUserIdsWithPermissionSpy.mockRestore();
+    dispatchWithPreferencesSpy.mockRestore();
   });
 
   describe("submitComplaint — file validation", () => {

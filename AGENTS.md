@@ -41,6 +41,10 @@ bun run build:test             # Build production bundle for UI/E2E tests (.next
 bun run test                   # All tests
 bun run test:db                # Database repository tests (parallel via scripts/run-db-tests-parallel.ts)
 bun run test:db:sequential     # Database tests (sequential, for debugging)
+bun run test:integration       # Provider integration smokes (parallel via scripts/run-integration-tests-parallel.ts)
+bun run test:integration:sequential  # Integration tests (sequential, for debugging)
+bun run test:live-comm         # Communication provider integration subset
+bun run test:live-fx           # FX provider integration subset
 bun run test:services          # Backend services tests (parallel via scripts/run-services-tests-parallel.ts)
 bun run test:services:sequential # Backend services tests (sequential, for debugging)
 bun run test:graphql           # GraphQL integration tests (dev server)

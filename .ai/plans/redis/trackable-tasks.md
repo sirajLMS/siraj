@@ -99,7 +99,7 @@
 
 ### Development Approach
 
-- **Testing Strategy**: unit tests in `backend/services/cache/test/EntityCacheService.test.ts` (mocked `cacheService`) + PG integration test in `backend/db/test/logic/shared/cache_tag_invalidation.test.ts` (real PG, `runInRollback`).
+- **Testing Strategy**: unit tests in `backend/services/cache/test/EntityCacheService.test.ts` (mocked `cacheService`) + PG integration test in `backend/db/test/logic/shared/cache_tag_invalidation.test.ts` (real PG, `runInRollback`) + provider smokes in `test/integration/redis/` (one test per provider; `bun run test:integration`).
 - **Integration Strategy**: incremental — each phase's read paths are wired only after the previous phase is verified.
 - **Verification**: per-file loop (`tsgo` + `biome:check` + lint queue client) BEFORE importing any new file elsewhere; PG integration test via `bun run scripts/run-test/run-test.ts`; final `bun quality-gate`.
 
@@ -619,8 +619,25 @@
   - [ ] 8.4.IV **Instruction Verification**: Validate `backend/db/test/logic/shared/cache_tag_invalidation.test.ts` against:
     - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/db/test/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md`
     - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - [ ] 8.5 Add Redis provider smokes under `test/integration/redis/` (Upstash, Redis Cloud, local)
+    - `test/integration/redis/upstash.integration.test.ts` — one SET/GET smoke when `UPSTASH_TEST_REDIS_REST_URL` + `UPSTASH_TEST_REDIS_REST_TOKEN` are set in `.env.test`.
+    - `test/integration/redis/redis-cloud.integration.test.ts` — one SET/GET smoke when `REDIS_CLOUD_TEST_REDIS_URL` is set.
+    - `test/integration/redis/local-redis.integration.test.ts` — one SET/GET smoke when `REDIS_PROVIDER=local` and `REDIS_URL` is set.
+    - Use `describeLiveWhen` from `test/integration/helpers/describe-live.ts`; skip cleanly when keys are absent.
+  - Run via `bun run test:integration test/integration/redis/`.
+    - **Do not** place provider integration tests under `backend/db/test/` or `backend/services/` (see layer AGENTS.md).
+    - _Requirements: 2.2, 2.3, 3.4_
+  - [ ] 8.5.QL **Quality Loop**: Per-file verification on each `test/integration/redis/*.integration.test.ts`
+    - Run: `bun tsgo`
+    - Run: `bun biome:check`
+    - Run: lint queue for target file
+    - Fix all errors before proceeding
+  - [ ] 8.5.IV **Instruction Verification**: Validate each `test/integration/redis/*.integration.test.ts` against:
+    - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+    - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
 
 ### Phase 9: Documentation (AGENTS.md "Hot-resolver caching" subsection)
+
 
 - [ ] 9. Add `backend/services/AGENTS.md` "Hot-resolver caching" subsection (≤10 lines)
   - [ ] 9.1 Write the subsection summarizing the cache layer usage rules
@@ -763,4 +780,5 @@
 - The sequence of Phases 1-11 is the single recommended rollout order — each Phase's verification gates into the next.
 - Sub-agents working in parallel on Phase 5/6/7 tasks MUST follow the lint-queue-server pattern from root `AGENTS.md` (`curl -s -X POST http://localhost:4777/lint ...`) — never run raw eslint directly.
 - SonarQube scan is orchestrator-only — subagents must NEVER run `bun sonar-scan` or `bun scripts/sonar-manager.ts`.
-- PG integration tests (`Phase 8`) MUST use `runInRollback` and the `bun run scripts/run-test/run-test.ts` runner.
+- PG integration tests (`Phase 8`, `cache_tag_invalidation.test.ts`) MUST use `runInRollback` and the `bun run scripts/run-test/run-test.ts` runner.
+- Redis provider smokes (`Phase 8.5`, `test/integration/redis/`) MUST use `bun run test:integration` — one smoke per provider file, no live provider tests under `backend/db/test/` or `backend/services/`.

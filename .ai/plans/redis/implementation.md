@@ -408,22 +408,44 @@ LIMIT 1;
 - No `expect().rejects.toThrow()` — use try/catch helper.
 - Run via `bun run scripts/run-test/run-test.ts backend/db/test/logic/shared/cache_tag_invalidation.test.ts`.
 
+### 6.3 Redis Provider Integration (`test/integration/redis/`)
+
+Live provider smokes live under **`test/integration/redis/`** only (not `backend/db/test/` or `backend/services/`). One `*.integration.test.ts` per provider, **one smoke test each** (single round-trip — avoids rate limits / quota burn):
+
+| File | Env keys | Smoke |
+|------|----------|-------|
+| `upstash.integration.test.ts` | `UPSTASH_TEST_REDIS_REST_URL`, `UPSTASH_TEST_REDIS_REST_TOKEN` | SET + GET (or PING) via `RedisCacheAdapter` |
+| `redis-cloud.integration.test.ts` | `REDIS_CLOUD_TEST_REDIS_URL` | SET + GET via `RedisCacheAdapter` |
+| `local-redis.integration.test.ts` | `REDIS_URL` (when `REDIS_PROVIDER=local`) | SET + GET via `RedisCacheAdapter` |
+
+- Gate each suite with `describeLiveWhen` from `test/integration/helpers/describe-live.ts`; skip when keys are absent or empty.
+- Run via `bun run test:integration` (or `bun run test:integration test/integration/redis/`).
+- Confirm the adapter reaches the live provider — **not** full `EntityCacheService` / tag-invalidation behaviour (that is covered by unit tests + the PG integration test in §6.2).
+
 ---
+
 
 ## 7. Files Touched
 
-### 7.1 New files (5)
+### 7.1 New files (8)
 
 - `backend/services/cache/EntityCacheService.ts`
 - `backend/services/cache/test/EntityCacheService.test.ts`
 - `backend/lib/auth/cached-teacher-by-user-id.ts`
 - `backend/lib/auth/cached-parent-by-user-id.ts`
 - `backend/db/test/logic/shared/cache_tag_invalidation.test.ts`
+- `test/integration/redis/upstash.integration.test.ts`
+- `test/integration/redis/redis-cloud.integration.test.ts`
+- `test/integration/redis/local-redis.integration.test.ts`
 
-### 7.2 Modified files (10+)
+### 7.2 Modified files (12+)
 
+- `.env.test` — add `UPSTASH_TEST_REDIS_REST_URL`, `UPSTASH_TEST_REDIS_REST_TOKEN`, and `REDIS_CLOUD_TEST_REDIS_URL`.
+- `.env.example` — add example commented keys for Upstash and Redis Cloud integration tests.
+- `environment.d.ts` — extend `ProcessEnv` with Upstash and Redis Cloud integration test variables.
 - `backend/services/cache/index.ts` — re-export new helpers.
 - `backend/services/cache/ICacheService.ts` — add `stats()` + `CacheStats`.
+
 - `backend/services/cache/PostgresCacheAdapter.ts` — atomic `expire` via `setExpiry`; `stats()` impl; PG `gte(expiresAt)` filter passthrough.
 - `backend/services/cache/RedisCacheAdapter.ts` — `stats()` impl via `dbsize`.
 - `backend/db/repo/shared/cache.repository.ts` — single-statement `incr`; new `setExpiry`; SQL-level `gte(expiresAt)` on `get`; extended `getTable` for `ec:`/`tag:`.
@@ -474,6 +496,8 @@ For the `backend/db/test/logic/shared/cache_tag_invalidation.test.ts` PG integra
 
 For the `backend/services/cache/test/EntityCacheService.test.ts` unit test file, run `bun test <path>` (mocked cacheService — no real DB).
 
+For Redis provider smokes under `test/integration/redis/`, run `bun run test:integration test/integration/redis/` (loads `.env.test`; one API round-trip per provider file).
+
 ---
 
 ## 10. Rollout Order (sequential; each step verified before next)
@@ -485,7 +509,8 @@ For the `backend/services/cache/test/EntityCacheService.test.ts` unit test file,
 5. **Phase 2 directories** (`StaffDirectoryService.getDirectory`, `ParentDirectoryService.getParentDirectory`) with identity+role-scoped keys.
 6. **Phase 3 dashboards** (`ParentDashboardService.getDashboardMetrics`, `SupervisorDashboardService.getDashboard`).
 7. **Wire mutations** — one service at a time, in lockstep with the corresponding wired resolver so cache freshness can be validated. Includes `invalidateRoleChange` wiring.
-8. **PG integration test** for tag invalidation.
+8. **PG integration test** for tag invalidation (`backend/db/test/logic/shared/cache_tag_invalidation.test.ts`).
+8b. **Redis provider smokes** in `test/integration/redis/` (one test per provider).
 9. **AGENTS.md "Hot-resolver caching" subsection**.
 10. **Drop `@upstash/ratelimit`** + `bun install` + `bun tsgo`.
 11. **Final `bun quality-gate` run**.
