@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
-import { TeacherRepository, UserRepository } from "@/backend/db/repo";
+import { SessionRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SessionService } from "@/backend/services/auth/session.service";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import type { UserSelectType } from "@/backend/types";
+import type { SessionSelectType, UserSelectType } from "@/backend/types";
 
 const TEACHER_USER_ID = "11111111-1111-1111-1111-111111111111";
 const NON_TEACHER_USER_ID = "22222222-2222-2222-2222-222222222222";
@@ -117,5 +117,42 @@ describe("SessionService.getCurrentUserProfile nationalIdComplete flag", () => {
     expect(profile.nationalIdComplete).toBe(true);
     // TeacherRepository should not be queried for a non-teacher.
     expect(teacherSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("SessionService.validateSession orphan session handling", () => {
+  afterEach(() => {
+    spyOn(SessionRepository, "findByHmacHash").mockRestore();
+    spyOn(SessionRepository, "validate").mockRestore();
+    spyOn(SessionRepository, "deleteSessionById").mockRestore();
+  });
+
+  test("purges and returns null when session references non-existent user", async () => {
+    const fakeSessionId = "fake-raw-session-id";
+    const fakeUserId = "1bba9ec0-1e51-46f9-be75-9941dcb7fd76";
+
+    spyOn(SessionRepository, "findByHmacHash").mockResolvedValue({
+      hashedId: "hashed-id",
+      userId: fakeUserId,
+      ipAddress: null,
+      userAgent: null,
+      payload: undefined,
+      lastActivity: 100n,
+    } as unknown as SessionSelectType);
+    spyOn(SessionRepository, "validate").mockResolvedValue({
+      hashedId: "hashed-id",
+      userId: fakeUserId,
+      ipAddress: null,
+      userAgent: null,
+      payload: undefined,
+      lastActivity: 100n,
+    } as unknown as SessionSelectType);
+    const deleteSpy = spyOn(SessionRepository, "deleteSessionById").mockResolvedValue(null);
+    spyOn(UserRepository, "findSafeById").mockResolvedValue(null);
+
+    const result = await SessionService.validateSession(fakeSessionId);
+
+    expect(result).toBeNull();
+    expect(deleteSpy).toHaveBeenCalledWith(fakeSessionId);
   });
 });

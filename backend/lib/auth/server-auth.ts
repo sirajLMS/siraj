@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
+import { UserRepository } from "@/backend/db/repo";
+import { UserRole } from "@/backend/enum";
 import { type CustomJWTPayload, logger, verifyToken } from "@/backend/lib";
 import {
   ImpersonationService,
@@ -132,6 +134,13 @@ async function resolveGroupSimulation(
  */
 async function buildSessionOnlyContext(userId: string): Promise<ServerUserContextResult> {
   const context = await PermissionsService.getUserContext(userId);
+  if (context.role === UserRole.GUEST) {
+    const user = await UserRepository.findSafeById(userId);
+    if (!user) {
+      logger.warn("[AuthRedirect] getServerUserContext: session refers to non-existent user", { userId });
+      return emptyContextResult();
+    }
+  }
   return {
     userId,
     isImpersonating: false,

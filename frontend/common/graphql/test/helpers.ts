@@ -536,7 +536,11 @@ export async function provisionTestManager(
 }
 
 export async function cleanupTestManager(superAdminToken: string, userId: string): Promise<void> {
-  await authenticatedRequest(superAdminToken, "mutate", cleanupTestManagerMutationDocument, { userId });
+  try {
+    await authenticatedRequest(superAdminToken, "mutate", cleanupTestManagerMutationDocument, { userId });
+  } catch {
+    // Best-effort cleanup
+  }
 }
 
 export async function cleanupTestEntities(
@@ -550,7 +554,11 @@ export async function cleanupTestEntities(
     parentId: string;
   }
 ): Promise<void> {
-  await authenticatedRequest(superAdminToken, "mutate", cleanupTestEntitiesMutationDocument, ids);
+  try {
+    await authenticatedRequest(superAdminToken, "mutate", cleanupTestEntitiesMutationDocument, ids);
+  } catch {
+    // Best-effort cleanup
+  }
 }
 
 export async function provisionTestSuperAdmin(
@@ -584,7 +592,11 @@ export async function provisionTestSuperAdmin(
 }
 
 export async function cleanupTestSuperAdmin(superAdminToken: string, userId: string): Promise<void> {
-  await authenticatedRequest(superAdminToken, "mutate", cleanupTestSuperAdminMutationDocument, { userId });
+  try {
+    await authenticatedRequest(superAdminToken, "mutate", cleanupTestSuperAdminMutationDocument, { userId });
+  } catch {
+    // Best-effort cleanup
+  }
 }
 
 export async function assertRecurringClassDenied(
