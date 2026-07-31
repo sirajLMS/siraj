@@ -808,6 +808,52 @@ export namespace TeacherAvailabilityRepository {
     }
   };
 
+  /**
+   * Non-throwing batched availability check. Returns a boolean[] (same order as `slots`)
+   * where `true` means the slot is available and `false` means it conflicts with a
+   * vacation, recurring unavailability, or falls outside defined availability windows.
+   *
+   * Uses the same 3-query batch as {@link validateBookingAvailabilityBatch}, but
+   * catches per-slot validation errors instead of throwing on the first conflict.
+   * Ideal for `findAvailableSlots` where you need per-slot results, not all-or-nothing.
+   */
+  export const checkBookingAvailabilityBatch = async (
+    teacherId: string,
+    slots: { startTime: Date; endTime: Date }[],
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<boolean[]> => {
+    if (slots.length === 0) return [];
+    const t = tx ?? db;
+
+    const earliestStart = slots.reduce((min, s) => (s.startTime < min ? s.startTime : min), slots[0]?.startTime);
+    const latestEnd = slots.reduce((max, s) => (s.endTime > max ? s.endTime : max), slots[0]?.endTime);
+
+    const [vacationsRows, unavailabilityRows, windowRows] = await Promise.all([
+      t
+        .select({ startAt: teacherVacationRequests.startAt, endAt: teacherVacationRequests.endAt })
+        .from(teacherVacationRequests)
+        .where(
+          and(
+            eq(teacherVacationRequests.teacherId, teacherId),
+            eq(teacherVacationRequests.status, VacationRequestStatus.APPROVED),
+            sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${earliestStart}, ${latestEnd})`
+          )
+        ),
+      t.select().from(teacherRecurringUnavailability).where(eq(teacherRecurringUnavailability.teacherId, teacherId)),
+      t.select().from(teacherAvailabilityWindows).where(eq(teacherAvailabilityWindows.teacherId, teacherId)),
+    ]);
+
+    return slots.map(slot => {
+      try {
+        validateSlotInMemory(slot, vacationsRows, unavailabilityRows, windowRows, locale);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+  };
+
   function buildTeacherQueryConditions(gender: Gender | null | undefined, teacherNameSearch?: string | null) {
     const conditions = [eq(users.status, "ACTIVATED")];
     if (gender) {

@@ -110,7 +110,7 @@ export namespace TeacherDashboardService {
     return db.transaction(async tx => {
       const created = await SchedulingRepository.createClassInstance(entry, tx);
 
-      const openQuota = await QuotaService.selectQuotaForBooking(input.studentId, tx);
+      const openQuota = await QuotaService.selectQuotaForBooking(input.studentId, tx, userId);
       if (openQuota) {
         await QuotaService.redeemForInstance(input.studentId, created.id, openQuota.id, userId, tx);
       } else {

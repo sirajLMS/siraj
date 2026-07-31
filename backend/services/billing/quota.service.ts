@@ -199,11 +199,15 @@ export namespace QuotaService {
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
     const runner = async (t: DBTransaction) => {
-      const idempotencyKey = `${QuotaRepository.deriveReleaseEarmarkIdempotencyKey(
+      // Use a per-operation unique segment (epoch timestamp) instead of `count`
+      // to prevent idempotency-key collisions across repeated releases of the
+      // same schedule+quota with the same count (e.g. cancel → re-cancel cycles).
+      const operationId = String(Date.now());
+      const idempotencyKey = QuotaRepository.deriveReleaseEarmarkIdempotencyKey(
         recurringScheduleId,
-        String(count),
+        operationId,
         quotaId
-      )}-${count}`;
+      );
       const updated = await QuotaRepository.releaseForRecurringSchedule(t, {
         quotaId,
         studentId,

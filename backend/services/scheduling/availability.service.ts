@@ -203,6 +203,7 @@ export namespace AvailabilityService {
       );
 
     const curr = new Date(dateRange.from);
+    const candidateSlots: { startTime: Date; endTime: Date }[] = [];
 
     while (curr < dateRange.to) {
       const slotEnd = new Date(curr.getTime() + durationMinutes * 60 * 1000);
@@ -213,30 +214,36 @@ export namespace AvailabilityService {
         inst => inst.scheduledStartAt < slotEnd && inst.scheduledEndAt > curr
       );
 
-      let available = !hasConflict;
-
-      // Teacher availability check still needs per-slot queries
-      if (available) {
-        try {
-          await TeacherAvailabilityRepository.validateBookingAvailability(
-            teacherId,
-            curr,
-            slotEnd,
-            tx as DBTransaction | undefined,
-            locale ?? "en"
-          );
-        } catch {
-          available = false;
-        }
+      if (!hasConflict) {
+        candidateSlots.push({ startTime: new Date(curr), endTime: slotEnd });
       }
 
-      slots.push({
-        startAt: new Date(curr),
-        endAt: slotEnd,
-        isAvailable: available,
-      });
-
       curr.setTime(curr.getTime() + 30 * 60 * 1000); // 30-minute steps
+    }
+
+    // Batch-validate teacher availability for all candidate slots in a single DB round-trip
+    const availableSet = new Set<string>();
+    if (candidateSlots.length > 0) {
+      const batchResults = await TeacherAvailabilityRepository.checkBookingAvailabilityBatch(
+        teacherId,
+        candidateSlots,
+        tx as DBTransaction | undefined,
+        locale ?? "en"
+      );
+      for (let i = 0; i < candidateSlots.length; i++) {
+        if (batchResults[i]) {
+          availableSet.add(`${candidateSlots[i]?.startTime.getTime()}`);
+        }
+      }
+    }
+
+    // Build final slots list interleaving available and unavailable candidates
+    for (const candidate of candidateSlots) {
+      slots.push({
+        startAt: candidate.startTime,
+        endAt: candidate.endTime,
+        isAvailable: availableSet.has(`${candidate.startTime.getTime()}`),
+      });
     }
 
     return slots;

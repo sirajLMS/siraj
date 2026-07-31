@@ -547,7 +547,14 @@ export namespace QuotaRepository {
       )
       .returning();
 
-    return { redeemedCount, quota: updated ?? guardRow };
+    if (!updated) {
+      // Concurrent transaction depleted remaining between guard SELECT and this UPDATE.
+      // Throwing forces tx rollback, discarding the already-inserted ledger rows and
+      // preventing ledger/aggregate drift.
+      throw new Error("Quota redemption failed: insufficient remaining after concurrent deduction");
+    }
+
+    return { redeemedCount, quota: updated };
   };
 
   export const releaseForInstanceBatch = async (
@@ -612,7 +619,14 @@ export namespace QuotaRepository {
       )
       .returning();
 
-    return { releasedCount, quota: updated ?? null };
+    if (!updated) {
+      // Concurrent transaction archived/deleted the quota between ledger insert and this UPDATE.
+      // Throwing forces tx rollback, discarding the already-inserted ledger rows and
+      // preventing ledger/aggregate drift.
+      throw new Error("Quota release failed: quota no longer active after concurrent modification");
+    }
+
+    return { releasedCount, quota: updated };
   };
 
   export const expireOverdue = async (tx: DBTransaction, asOfDate?: Date): Promise<QuotaSelectType[]> => {
@@ -625,9 +639,12 @@ export namespace QuotaRepository {
 
     if (expiredQuotas.length === 0) return [];
 
-    // Bulk-update all expired quotas in a single query
+    // Bulk-update all expired quotas in a single query.
+    // Use RETURNING to capture the actual remaining/reservedClasses values that were
+    // zeroed, so ledger entries reflect the true pre-expiry state rather than the
+    // stale snapshot read above.
     const expiredIds = expiredQuotas.map(q => q.id);
-    await tx
+    const updatedRows = await tx
       .update(quotas)
       .set({
         status: QuotaStatus.EXPIRED,
@@ -636,10 +653,17 @@ export namespace QuotaRepository {
         version: sql<number>`${quotas.version} + 1`,
         updatedAt: now,
       })
-      .where(and(inArray(quotas.id, expiredIds), eq(quotas.status, QuotaStatus.ACTIVE)));
+      .where(and(inArray(quotas.id, expiredIds), eq(quotas.status, QuotaStatus.ACTIVE)))
+      .returning({
+        id: quotas.id,
+        studentId: quotas.studentId,
+        remaining: quotas.remaining,
+        reservedClasses: quotas.reservedClasses,
+      });
 
-    // Insert ledger entries for quotas that had remaining balance
-    for (const qRow of expiredQuotas) {
+    // Insert ledger entries for quotas that had remaining balance, using the
+    // values captured from RETURNING (not the stale pre-read snapshot)
+    for (const qRow of updatedRows) {
       if (qRow.remaining > 0) {
         const key = deriveExpireIdempotencyKey(qRow.id, checkDateStr);
         await QuotaLedgerRepository.insert(tx, {
@@ -653,11 +677,13 @@ export namespace QuotaRepository {
       }
     }
 
+    const updatedIds = updatedRows.map(r => r.id);
+
     // Re-select to get the actually updated rows
     return tx
       .select()
       .from(quotas)
-      .where(and(inArray(quotas.id, expiredIds), eq(quotas.status, QuotaStatus.EXPIRED)));
+      .where(and(inArray(quotas.id, updatedIds), eq(quotas.status, QuotaStatus.EXPIRED)));
   };
 
   /**

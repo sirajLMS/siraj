@@ -69,7 +69,7 @@ gqlSchemaBuilder.queryField("quota", t =>
       if (!hasPermission) {
         throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
       }
-      return QuotaService.getQuota(String(args.id), ctx.locale);
+      return QuotaService.getQuota(String(args.id), ctx.locale, undefined, actorUserId);
     },
   })
 );
@@ -101,7 +101,7 @@ gqlSchemaBuilder.queryField("quotas", t =>
           maxCount: args.pagination.maxCount ?? null,
         });
       }
-      return QuotaService.listQuotas(args.filter ?? null, pagination);
+      return QuotaService.listQuotas(args.filter ?? null, pagination, undefined, actorUserId, ctx.locale);
     },
   })
 );
@@ -120,7 +120,13 @@ gqlSchemaBuilder.queryField("studentQuotas", t =>
       if (!hasPermission) {
         throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
       }
-      return QuotaService.listQuotas({ studentId: String(args.studentId) }, null).then(r => r.rows);
+      return QuotaService.listQuotas(
+        { studentId: String(args.studentId) },
+        null,
+        undefined,
+        actorUserId,
+        ctx.locale
+      ).then(r => r.rows);
     },
   })
 );
@@ -139,7 +145,7 @@ gqlSchemaBuilder.queryField("studentOpenQuotas", t =>
       if (!hasPermission) {
         throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
       }
-      return QuotaService.listStudentOpenQuotas(String(args.studentId));
+      return QuotaService.listStudentOpenQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
     },
   })
 );
@@ -158,7 +164,7 @@ gqlSchemaBuilder.queryField("quotaBalance", t =>
       if (!hasPermission) {
         throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
       }
-      return QuotaService.getStudentQuotaBalance(String(args.studentId));
+      return QuotaService.getStudentQuotaBalance(String(args.studentId), undefined, actorUserId, ctx.locale);
     },
   })
 );
@@ -185,7 +191,9 @@ gqlSchemaBuilder.queryField("availableClassSlots", t =>
         String(args.studentId),
         String(args.teacherId),
         { from: args.startDate, to: args.endDate },
-        args.durationMinutes
+        args.durationMinutes,
+        undefined,
+        ctx.locale
       );
     },
   })
