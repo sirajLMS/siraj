@@ -91,7 +91,7 @@
     - Write outcome file: `.ai/plans/neon/outcome/3.1-graphql-dataloader-pilot-outcome.md`.
     - Update progress: Mark task 3.1 as `[x]` in `tasks.md`.
     - _Requirements: Spec 10, 11, 15, 16, 17, 18, 19_
-  - [ ] 3.2 **GraphQL Layer Rollout & Integration Verification (Dynamic 16-Worker Pool Watcher)**
+  - [x] 3.2 **GraphQL Layer Rollout & Integration Verification (Dynamic 16-Worker Pool Watcher)**
     - Read all existing files in `.ai/plans/neon/outcome/`.
     - Gather context from `backend/graphql/AGENTS.md` and `.github/instructions/backend.instructions.md`.
     - Spawn **Parent Orchestration Subagent** to manage the GraphQL rollout across `backend/graphql/pothos/`.

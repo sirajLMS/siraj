@@ -35,6 +35,39 @@ This design translates the [specs.md](./specs.md) requirements into concrete tec
 | D8 | Orphan SW cache cleanup on `activate` | `caches.keys()` sweep deletes any cache name not starting with the current `siraj-static-chunks-` prefix. |
 | D9 | IndexedDB wipe is whole-DB on BUILD_ID mismatch | Per-namespace invalidation would require hashing each snapshot — overkill for the fallback path; whole-DB wipe is bounded (~140 namespaces × 2 locales). |
 
+### UX/Navigation Specification
+
+This feature is a **transparent infrastructure enhancement** with no user-facing UI changes:
+
+| Aspect | Detail |
+|--------|--------|
+| **New Routes & URLs** | None — no new pages or routes are added. |
+| **Sidebar/Navigation Integration** | None — no navigation items are added or modified. |
+| **Role-Based Access Matrix** | All roles benefit equally — the cache is browser-level and applies to all authenticated and unauthenticated users. |
+| **Per-Audience Rendering** | No per-audience differences — the cache layer is transparent to all user types (SUPER_ADMIN, ACADEMY_ADMIN, SUPERVISOR, TEACHER, PARENT, STUDENT, STAFF, USER, GUEST). |
+| **Mobile vs Desktop Variants** | No differences — the service worker and IndexedDB APIs are available on both mobile and desktop browsers. |
+| **Permission Mapping** | No new permissions required — the cache operates at the browser level, not the application authorization level. |
+
+### Outcome & Knowledge Transfer Protocol
+
+All feature plans created using the spec-driven-development skill live under `.ai/plans/<feature-name>/` and include a dedicated outcome directory: `.ai/plans/clientCache/outcome/`.
+
+- **BEFORE Execution:** Executing agents MUST read ALL existing files in `.ai/plans/clientCache/outcome/` to avoid re-analysis.
+- **AFTER Execution:** Executing agents MUST write `.ai/plans/clientCache/outcome/<task-id>-outcome.md` with research/doc findings and implementation details.
+- **PROGRESS TRACKING:** Executing agents MUST update task checkboxes `[ ]` → `[x]` in `trackable-tasks.md`.
+
+### Layer AGENTS.md Compliance
+
+This feature touches the following layers. Executing agents MUST read the corresponding AGENTS.md files before implementing:
+
+| Layer | AGENTS.md Path | Instruction File |
+|-------|---------------|-----------------|
+| App Router | `app/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Shared | `shared/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
+| Backend Types | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
+
 ---
 
 ## Architecture
@@ -458,6 +491,18 @@ No explicit version column — the cache name itself encodes the version (`siraj
 | `shared/locale/namespaces/define-namespace.ts` | Add optional string ID overload + `getNamespaceId` helper. |
 | `shared/locale/namespaces/**/*.namespace.ts` (~109 files) | Pass stable string ID to `defineNamespace`. |
 | `package.json` | Add `locale:snapshots` script and `prebuild` step. |
+
+---
+
+## Quality Checklist
+
+### Design Checklist
+- [x] All requirements addressed in design (REQ-CACHE-SW, REQ-FALLBACK-IDB, REQ-BUILD-ID, REQ-SNAPSHOTS, REQ-SERVE, REQ-NO-REGRESSION, REQ-TELEMETRY, REQ-OUTCOME-KB)
+- [x] Component responsibilities well-defined (SW, IndexedDB, snapshot codegen, cache store integration)
+- [x] Interfaces between components specified (see Components and Interfaces section)
+- [x] Error handling covers expected failures (SW unavailable, IndexedDB unavailable, BUILD_ID mismatch, network errors)
+- [x] Security considerations addressed (no CSP conflict, `new Function` reviver documented as assumption A3)
+- [x] UX/Navigation Specification complete (N/A — transparent infrastructure, documented above)
 
 ---
 

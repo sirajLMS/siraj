@@ -166,6 +166,56 @@ _Requirements: REQ-TELEMETRY_
 
 ---
 
+### Requirement 8: Outcome Knowledge Base & Progress Tracking
+
+**User Story:** As a developer/agent, I want all implementation learnings captured in outcome files so future agents don't repeat analysis.
+
+#### Acceptance Criteria
+
+1. BEFORE executing any task THEN the executing agent SHALL read ALL existing files in `.ai/plans/clientCache/outcome/`.
+2. AFTER completing a task THEN the executing agent SHALL write `.ai/plans/clientCache/outcome/<task-id>-outcome.md` with research/doc findings and implementation details.
+3. AFTER completing a task THEN the executing agent SHALL update the task checkbox `[ ]` → `[x]` in `trackable-tasks.md`.
+
+_Requirements: REQ-OUTCOME-KB_
+
+---
+
+## UX/Navigation Specification
+
+This feature is a **transparent infrastructure enhancement** with no user-facing UI changes:
+
+| Aspect | Detail |
+|--------|--------|
+| **New Routes & URLs** | None — no new pages or routes are added. |
+| **Sidebar/Navigation Integration** | None — no navigation items are added or modified. |
+| **Role-Based Access Matrix** | All roles benefit equally — the cache is browser-level and applies to all authenticated and unauthenticated users. |
+| **Per-Audience Rendering** | No per-audience differences — the cache layer is transparent to all user types (SUPER_ADMIN, ACADEMY_ADMIN, SUPERVISOR, TEACHER, PARENT, STUDENT, STAFF, USER, GUEST). |
+| **Mobile vs Desktop Variants** | No differences — the service worker and IndexedDB APIs are available on both mobile and desktop browsers. |
+| **Permission Mapping** | No new permissions required — the cache operates at the browser level, not the application authorization level. |
+
+---
+
+## Outcome & Knowledge Transfer Protocol
+
+All feature plans created using the spec-driven-development skill live under `.ai/plans/<feature-name>/` and include a dedicated outcome directory: `.ai/plans/clientCache/outcome/`.
+
+- **BEFORE Execution:** Executing agents MUST read ALL existing files in `.ai/plans/clientCache/outcome/` to avoid re-analysis.
+- **AFTER Execution:** Executing agents MUST write `.ai/plans/clientCache/outcome/<task-id>-outcome.md` with research/doc findings and implementation details.
+- **PROGRESS TRACKING:** Executing agents MUST update task checkboxes `[ ]` → `[x]` in `trackable-tasks.md`.
+
+---
+
+## Quality Checklist
+
+### Requirements Checklist
+- [x] All user roles identified and addressed (N/A — transparent infrastructure)
+- [x] Normal, edge, and error cases covered (see Error Handling in implementation.md)
+- [x] Requirements are testable and measurable (EARS format used throughout)
+- [x] No conflicting requirements
+- [x] EARS format used consistently
+
+---
+
 ## Assumptions and Constraints
 
 | # | Assumption / Constraint |
