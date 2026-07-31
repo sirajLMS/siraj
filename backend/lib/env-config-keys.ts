@@ -622,7 +622,7 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
     displayStrategy: "db_with_mask_only",
     description: {
       en: "Verify token for WhatsApp webhook GET verification.",
-      ar: "رمز التحقق لاست verificar GET webhook في واتساب.",
+      ar: "رمز التحقق لـ GET webhook في واتساب.",
     },
     isSecret: true,
     excludeFromDb: false,

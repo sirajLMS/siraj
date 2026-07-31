@@ -147,6 +147,14 @@ declare global {
        */
       AUTH_COOKIE_SECURE?: string;
 
+      // WhatsApp Configuration
+      WHATSAPP_PROVIDER?: "cloud_api";
+      WHATSAPP_APP_ID?: string;
+      WHATSAPP_APP_SECRET?: string;
+      WHATSAPP_VERIFY_TOKEN?: string;
+      WHATSAPP_WABA_ID?: string;
+      WHATSAPP_WEBHOOK_BASE_URL?: string;
+
       // Logging
       // ENABLE_LOGGING gates the server-side BaseLogger (shared/lib/logger/base-logger.ts)
       // AND the client-log ingestion route (app/api/logs/route.ts). When "true", the
