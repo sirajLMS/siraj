@@ -4,6 +4,32 @@ import { cacheService, getCacheService } from "@/backend/services/cache/CacheSer
 import { PostgresCacheAdapter } from "@/backend/services/cache/PostgresCacheAdapter";
 
 export const CACHE_VERSION = 1;
+
+/** ISO 8601 date string pattern – matches dates serialised by JSON.stringify(Date) */
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
+
+/**
+ * JSON reviver that converts ISO-8601 date strings back to Date objects.
+ * Applied on every cache read so callers always receive Date instances,
+ * regardless of whether the value was served from cache (string) or the loader
+ * (Date). This eliminates the need for per-service toISOString() guards.
+ */
+function dateReviver(_key: string, value: unknown): unknown {
+  if (typeof value === "string" && ISO_DATE_RE.test(value)) {
+    return new Date(value);
+  }
+  return value;
+}
+
+/** Deserialize a cache payload, restoring Date objects from ISO strings. */
+function cacheDeserialize(raw: string): unknown {
+  return JSON.parse(raw, dateReviver);
+}
+
+/** Serialize a value to a cache payload string. */
+function cacheSerialize(value: unknown): string {
+  return JSON.stringify(value);
+}
 export const CACHE_TAG_INDEX_TTL = 86400; // 24 hours
 export const CACHE_KEY_PREFIX_ENTITY = "ec:";
 export const CACHE_KEY_PREFIX_TAG = "tag:";
@@ -122,7 +148,7 @@ export async function cachedRead<T>(
     const raw = await cacheService.get(key);
     if (raw) {
       try {
-        const parsed = JSON.parse(raw);
+        const parsed = cacheDeserialize(raw);
         if (validateEntry(parsed)) {
           if (tags.length > 0) {
             await safeIndexTags(key, tags);
@@ -142,7 +168,7 @@ export async function cachedRead<T>(
   const entry: CacheEntry<T> = { version: CACHE_VERSION, data, cachedAt: Date.now() };
 
   try {
-    await cacheService.set(key, JSON.stringify(entry), { ex: ttlSeconds });
+    await cacheService.set(key, cacheSerialize(entry), { ex: ttlSeconds });
     if (tags.length > 0) {
       await safeIndexTags(key, tags);
     }
@@ -183,7 +209,7 @@ export async function cachedReadSingleFlight<T>(
     const raw = await cacheService.get(key);
     if (raw) {
       try {
-        const parsed = JSON.parse(raw);
+        const parsed = cacheDeserialize(raw);
         if (validateEntry(parsed)) {
           if (tags.length > 0) {
             await safeIndexTags(key, tags);
@@ -203,7 +229,7 @@ export async function cachedReadSingleFlight<T>(
   const entry: CacheEntry<T> = { version: CACHE_VERSION, data, cachedAt: Date.now() };
 
   try {
-    const inserted = await setSingleFlight(key, JSON.stringify(entry), ttlSeconds);
+    const inserted = await setSingleFlight(key, cacheSerialize(entry), ttlSeconds);
     if (inserted && tags.length > 0) {
       await safeIndexTags(key, tags);
     }
