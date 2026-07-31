@@ -37,13 +37,16 @@
  *   1. Start the server:  `~/.bun/bin/bun run scripts/lint-queue-server.ts`
  *   2. From any sub-agent or shell:
  *      $body = @{ id = "phase8"; files = @("src/foo.ts","src/bar.ts") } | ConvertTo-Json
- *      Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
+ *      Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/lint -Method POST -ContentType 'application/json' -Body $body
  *   3. Or use the client helper: `scripts/lint-queue-client.ts`
  *
- * The server listens on port 4777 by default (const PORT below).
+ * The server port is defined in `scripts/lint-queue-config.ts` (the single
+ * source of truth shared with the client). To change the port, edit that file
+ * or set the `LINT_QUEUE_PORT` environment variable.
  *
  * Environment variables:
- *   - LINT_QUEUE_PORT            Override the listening port (default: 4777)
+ *   - LINT_QUEUE_PORT            Override the listening port (default defined
+ *                                 in scripts/lint-queue-config.ts)
  *   - LINT_QUEUE_CONCURRENCY      Override eslint --concurrency (default: 4).
  *                                 Set to `auto` to let eslint pick.
  *   - LINT_QUEUE_TIMEOUT_MS       Override per-request exec timeout in ms
@@ -52,9 +55,7 @@
  */
 
 import { createServer } from "node:http";
-
-/** TCP port the lint queue server listens on. */
-const PORT = Number(process.env.LINT_QUEUE_PORT ?? 4777);
+import { PORT } from "./lint-queue-config";
 
 /**
  * eslint --concurrency value. Capped to 4 by default to avoid memory/CPU

@@ -252,7 +252,7 @@ bun biome:check                  # Formatting + lint suggestions
 # Lint via queue (start server first):
 ~/.bun/bin/bun run scripts/lint-queue-server.ts &
 # then per-file:
-curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" \
   -d '{"id":"verify","files":["<each changed file>"]}'
 bun run build                    # Next.js production build must succeed
 ```

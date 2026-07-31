@@ -47,7 +47,7 @@ Tests in this directory may still exercise **multiple repositories/services toge
 4. **Code Cleanliness, Strict Linting & Type Checking**
    - Clean up all unused imports and unused variables (especially those destructured from setup helpers).
    - Run `bun tsgo` and lint via the lint queue client after creating or modifying tests. You MUST fix any resulting errors (e.g., TS6133 unused variables).
-   - You can run `bun run lint` directly — it IS the lint queue client (calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the queue server). Make sure `bun run lint:server` is running first. For file-scoped lint, use the queue client directly: `curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" -d '{"id":"db-test","files":["<file>"]}'`.
+   - You can run `bun run lint` directly — it IS the lint queue client (calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the queue server). Make sure `bun run lint:server` is running first. For file-scoped lint, use the queue client directly: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"db-test","files":["<file>"]}'`.
    - Follow standard Biome/ESLint formatting and linting rules. Do not use `console.log` directly; prefer `testLogger` or no logging if not needed.
    - Make sure all TypeScript types are fully resolved. **NEVER use `any` type overrides** (e.g., `as any`) to bypass validation. Use proper `Partial<...>` or specific object typing instead.
 

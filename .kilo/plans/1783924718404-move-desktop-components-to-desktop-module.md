@@ -262,7 +262,7 @@ bun biome:check                  # Formatting + lint — must pass
 # Lint queue (start server then submit per-file):
 ~/.bun/bin/bun run scripts/lint-queue-server.ts &
 # After lint server is up, for each changed file:
-curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" \
   -d '{"id":"verify","files":["<each changed file>"]}'
 bun run build                    # Next.js production build — MUST succeed
 # Storybook smoke (stories auto-discovered from new path):

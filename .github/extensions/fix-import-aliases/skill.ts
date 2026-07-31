@@ -1,4 +1,5 @@
 import type { SkillContext } from "@opencode-ai/plugin";
+import { LINT_QUEUE_PORT } from "../../../scripts/lint-queue-config";
 
 export async function execute(context: SkillContext) {
   const { askUser, bash, edit } = context.tools;
@@ -120,7 +121,7 @@ export async function execute(context: SkillContext) {
 
         // Verify with lint
         const lintCheck = await bash({
-          command: `curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" -d '{"id":"fix-imports","files":["${filePath.replace(/\/home\/ahmed\/Projects\/siraj\//, "")}"]}'`,
+          command: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"fix-imports","files":["${filePath.replace(/\/home\/ahmed\/Projects\/siraj\//, "")}"]}'`,
           description: "Run lint check on file",
         });
 

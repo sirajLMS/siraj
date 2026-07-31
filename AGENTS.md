@@ -194,7 +194,9 @@ The queue server MUST be running before any `bun run lint` / lint queue client c
 ~/.bun/bin/bun run scripts/lint-queue-server.ts
 ```
 
-This listens on `http://localhost:4777`.
+This listens on `http://localhost:${LINT_QUEUE_PORT}`.
+
+> **Port configuration**: The port is defined in `scripts/lint-queue-config.ts` (the single source of truth for both server and client). To override it for a single run, set the `LINT_QUEUE_PORT` environment variable. In all command examples below, `${LINT_QUEUE_PORT}` refers to the resolved port — set it in your shell: `export LINT_QUEUE_PORT=$(grep -oP 'LINT_QUEUE_PORT = \K\d+' scripts/lint-queue-config.ts)` or set `LINT_QUEUE_PORT=<your-port>` explicitly.
 
 ### Submitting lint requests (from sub-agents)
 
@@ -206,12 +208,12 @@ For file-scoped lint (faster, recommended when a sub-agent only touched a handfu
 ```powershell
 $files = @("backend/types/foo.types.ts","frontend/stores/barStore.ts")  # ALL files the sub-agent modified
 $body = @{ id = "phase8"; files = $files } | ConvertTo-Json
-Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/lint -Method POST -ContentType 'application/json' -Body $body
 ```
 
 **Bash / curl (also works):**
 ```bash
-curl -s -X POST http://localhost:4777/lint \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"phase8","files":["backend/types/foo.types.ts","frontend/stores/barStore.ts"]}'
 ```
@@ -223,7 +225,7 @@ The request **blocks** until the lint run completes (the server processes reques
 ### Health check
 
 ```powershell
-Invoke-RestMethod -Uri http://localhost:4777/status
+Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/status
 # Returns: { running: true, queueLength: 2 }
 ```
 
@@ -245,7 +247,7 @@ When refactoring or creating code, run a per-file verification loop **BEFORE** u
 bun tsgo                          # Type check (safe to run concurrently)
 bun biome:check                   # Biome (safe to run concurrently)
 # Lint via queue client for the specific file:
-curl -s -X POST http://localhost:4777/lint \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"verify","files":["<the-file>"]}'
 ```
