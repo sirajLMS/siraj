@@ -6,6 +6,8 @@ import {
   CurrencyCodePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionsService } from "@/backend/services";
+import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
+import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { UserReturnType } from "@/backend/types";
 
 const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserReturnType>("User");
@@ -32,31 +34,43 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
     phone: t.exposeString("phone", { nullable: true }),
     status: t.expose("status", { type: AccountStatusPothosObject }),
     notificationCount: t.int({ resolve: () => 0 }),
-    permissions: t.field({
-      type: [AppPermissionPothosEnum],
-      resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.permissions),
-    }),
-    role: t.string({
-      resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.role),
-    }),
     displayCurrency: t.field({
       type: CurrencyCodePothosObject,
       nullable: true,
       resolve: user => user.displayCurrency,
     }),
-    teacherId: t.string({
-      nullable: true,
+    permissions: t.field({
+      type: [AppPermissionPothosEnum],
       resolve: async user => {
-        const { TeacherPortalService } = await import("@/backend/services/teacher/teacher-portal.service");
-        return TeacherPortalService.resolveTeacherIdForUser(user.id);
+        const contexts = await PermissionsService.getUserContexts([user.id]);
+        return contexts.get(user.id)?.permissions ?? [];
       },
     }),
-    parentId: t.string({
-      nullable: true,
-      resolve: async user => {
-        const { ParentPortalService } = await import("@/backend/services/parent/parent-portal.service");
-        return ParentPortalService.resolveParentIdForUser(user.id);
+    role: t.loadable({
+      type: "String",
+      load: async (ids: string[]) => {
+        const contexts = await PermissionsService.getUserContexts(ids);
+        return ids.map(id => contexts.get(id)?.role ?? "GUEST");
       },
+      resolve: user => user.id,
+    }),
+    teacherId: t.loadable({
+      type: "String",
+      nullable: true,
+      load: async (ids: string[]) => {
+        const teacherIds = await TeacherPortalService.resolveTeacherIdsForUsers(ids);
+        return ids.map(id => teacherIds.get(id) ?? null);
+      },
+      resolve: user => user.id,
+    }),
+    parentId: t.loadable({
+      type: "String",
+      nullable: true,
+      load: async (ids: string[]) => {
+        const parentIds = await ParentPortalService.resolveParentIdsForUsers(ids);
+        return ids.map(id => parentIds.get(id) ?? null);
+      },
+      resolve: user => user.id,
     }),
   }),
 });

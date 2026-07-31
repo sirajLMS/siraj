@@ -2,6 +2,7 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
+import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { StudentProgressFeedProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 import { resolveStudentProgressFeedIcon } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/resolveStudentProgressFeedIcon";
@@ -52,7 +53,8 @@ export function StudentProgressFeedMobile({ items, title, labels }: Readonly<Stu
                   <EventIcon
                     sx={{
                       color: theme =>
-                        item.eventKind === "auto_missed" || item.eventKind === "marked_absent"
+                        item.eventKind === TeacherProgressFeedEventKind.AutoMissed ||
+                        item.eventKind === TeacherProgressFeedEventKind.MarkedAbsent
                           ? theme.palette.error.main
                           : theme.palette.primary.main,
                     }}

@@ -77,16 +77,23 @@ gqlSchemaBuilder.mutationField("updateSessionStatusLeave", t =>
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
+      const tSession = ctx.t().sessionTranslations;
       const result = await ClassSessionService.updateStatusLeave(
         userId,
         args.classInstanceId,
         tErrors,
         args.leaveReason
       );
+      const [completedInstance, rescheduledInstance] = await Promise.all([
+        ClassSessionService.getClassInstanceDetail(userId, result.originalId, tSession, tErrors),
+        ClassSessionService.getClassInstanceDetail(userId, result.successorId, tSession, tErrors),
+      ]);
       return {
         id: `${result.originalId}:${result.successorId}`,
         completedInstanceId: result.originalId,
         rescheduledInstanceId: result.successorId,
+        completedInstance,
+        rescheduledInstance,
       };
     },
   })

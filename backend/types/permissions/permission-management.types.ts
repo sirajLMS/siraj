@@ -13,6 +13,7 @@ export type UserOverrideReturnType = Omit<UserOverrideEntity, "state"> & {
 
 export type GroupWithPermissionIds = PermissionGroupReturnType & {
   permissionIds: string[];
+  assignedUsers: GroupUserEntity[];
 };
 
 export type CreateGroupInput = {

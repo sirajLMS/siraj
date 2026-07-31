@@ -5,6 +5,7 @@ import {
   ParentRepository,
   StorageDbRepository,
 } from "@/backend/db/repo";
+import type { InvoicePaymentSubmissionStatus } from "@/backend/enum/billing/billing.enum";
 import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
@@ -138,7 +139,7 @@ export async function mapSubmissionToReturnType(
     fileId: submission.fileId,
     filePath: file?.path ?? "",
     mimeType,
-    status: submission.status,
+    status: submission.status as InvoicePaymentSubmissionStatus,
     submittedByUserId: submission.submittedByUserId,
     submittedAt: submission.submittedAt.toISOString(),
     reviewedByUserId: submission.reviewedByUserId,

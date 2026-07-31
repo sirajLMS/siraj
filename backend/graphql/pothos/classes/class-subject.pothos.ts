@@ -2,7 +2,6 @@ import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-categor
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ClassCategoryPothosObject } from "@/backend/graphql/pothos/classes/class-category.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
 import type { ClassSubjectReturnType, SubjectResourceReturnType } from "@/backend/types";
 
 const SubjectResourceRef = gqlSchemaBuilder.objectRef<SubjectResourceReturnType>("SubjectResource");
@@ -43,17 +42,7 @@ export const ClassSubjectPothosObject = ClassSubjectRef.implement({
       },
       resolve: parent => parent.categoryId,
     }),
-    resources: t.field({
-      type: [SubjectResourcePothosObject],
-      resolve: async (parent, _args, ctx) => {
-        try {
-          const tErrors = ctx.t().errorsTranslations;
-          return await ClassSubjectService.getSubjectResources(ctx.user?.id ?? "", parent.id, tErrors);
-        } catch {
-          return [];
-        }
-      },
-    }),
+    resources: t.expose("resources", { type: [SubjectResourcePothosObject] }),
   }),
 });
 

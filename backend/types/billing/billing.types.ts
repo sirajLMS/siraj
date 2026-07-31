@@ -8,7 +8,16 @@ import type {
   invoices,
   payments,
 } from "@/backend/db/schema";
-import type { CurrencyCode, FxProvider, FxSyncStatus, FxSyncTrigger, InvoiceStatus, InvoiceType } from "@/backend/enum";
+import type {
+  CurrencyCode,
+  FxProvider,
+  FxProviderConfigSource,
+  FxSyncStatus,
+  FxSyncTrigger,
+  InvoicePaymentSubmissionStatus,
+  InvoiceStatus,
+  InvoiceType,
+} from "@/backend/enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -37,6 +46,11 @@ export type InvoiceSubmitInput = Omit<
 
 export type PaymentSelectType = typeof payments.$inferSelect;
 export type PaymentInsertType = typeof payments.$inferInsert;
+
+export type PaymentReturnType = PaymentSelectType & {
+  readonly displayAmount?: DisplayAmountReturnType | null;
+  readonly precomputedPaymentMethodSnapshot?: unknown;
+};
 
 export type PaymentSubmitInput = Omit<
   PaymentInsertType,
@@ -105,8 +119,6 @@ export type FxSyncHealthReturnType = {
   readonly finishedAt: Date | null;
 };
 
-export type FxProviderConfigSource = "env" | "database";
-
 export type FxProviderConfigReturnType = {
   readonly id: string;
   readonly activeProvider: FxProvider;
@@ -163,6 +175,7 @@ export type UnpaidInvoiceSummaryItem = {
   overdueCount: number;
   oldestDueDate: string;
   amountsByCurrency: BillingCurrencyTotal[];
+  displayAmount?: DisplayAmountReturnType | null;
 };
 
 export type UnpaidInvoicesSummaryResult = {
@@ -182,7 +195,6 @@ export type InvoiceHistoryPaginatedResult = {
 
 export type InvoicePaymentSubmissionSelectType = typeof invoicePaymentSubmissions.$inferSelect;
 export type InvoicePaymentSubmissionInsertType = typeof invoicePaymentSubmissions.$inferInsert;
-export type InvoicePaymentSubmissionStatus = InvoicePaymentSubmissionSelectType["status"];
 
 export type InvoicePaymentSubmissionReturnType = {
   readonly id: string;
@@ -213,6 +225,7 @@ export type InvoiceHistoryRow = {
   readonly parentUserId: string | null;
   readonly hasPaymentProof: boolean;
   readonly hasRejectedSubmission: boolean;
+  readonly displayAmount?: DisplayAmountReturnType | null;
 };
 
 export type BillingCurrencyTotal = {
@@ -220,6 +233,7 @@ export type BillingCurrencyTotal = {
   readonly currency: CurrencyCode;
   readonly amount: string;
   readonly subjectUserId?: string | null;
+  readonly displayAmount?: DisplayAmountReturnType | null;
 };
 
 export type AdminBillingSummaryResult = {
@@ -283,6 +297,7 @@ export type ManualInvoiceResult = {
   readonly paidDate: string | null;
   readonly version: number;
   readonly createdAt: Date;
+  readonly displayAmount?: DisplayAmountReturnType | null;
 };
 
 export type MarkInvoicePaidResult = {

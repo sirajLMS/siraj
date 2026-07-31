@@ -1,5 +1,6 @@
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { EffectiveMeetingReturnType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -23,7 +24,6 @@ export const EffectiveMeetingPothosObject = EffectiveMeetingRef.implement({
 });
 
 export async function resolveEffectiveMeetingForClassInstance(classInstanceId: string, tErrors: ErrorsLabels) {
-  const { EffectiveMeetingService } = await import("@/backend/services/meeting/class-meeting-config.service");
   return EffectiveMeetingService.resolveForClassInstance(classInstanceId, tErrors);
 }
 

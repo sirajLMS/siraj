@@ -1,4 +1,4 @@
-import { inArray, sql } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { timezones } from "@/backend/db/schema/shared/timezones";
@@ -13,12 +13,6 @@ import type { TimezoneUpsertInput } from "@/backend/types/scheduling/scheduling.
 
 const listAllPrepared = db.select().from(timezones).prepare("list_all_timezones");
 
-const findByIanaIdsPrepared = db
-  .select()
-  .from(timezones)
-  .where(inArray(timezones.ianaId, sql.placeholder("ianaIds")))
-  .prepare("find_timezones_by_iana_ids");
-
 export namespace TimezoneRepository {
   export async function listAll(tx?: DBTransaction): Promise<TimezoneEntity[]> {
     if (!tx) {
@@ -29,10 +23,7 @@ export namespace TimezoneRepository {
 
   export async function findByIanaIds(ianaIds: string[], tx?: DBTransaction): Promise<TimezoneEntity[]> {
     if (ianaIds.length === 0) return [];
-    if (!tx) {
-      return findByIanaIdsPrepared.execute({ ianaIds });
-    }
-    const queryDb = tx;
+    const queryDb = tx ?? db;
     return queryDb.select().from(timezones).where(inArray(timezones.ianaId, ianaIds));
   }
 

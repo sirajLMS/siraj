@@ -425,6 +425,22 @@ export namespace ParentRepository {
     return parent?.userId ?? null;
   };
 
+  export const findByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<Map<string, string | null>> => {
+    if (userIds.length === 0) return new Map();
+
+    const queryDb = tx ?? db;
+    const rows = await queryDb
+      .select({ userId: parents.userId, parentId: parents.id })
+      .from(parents)
+      .where(inArray(parents.userId, userIds));
+
+    const map = new Map<string, string | null>(userIds.map(id => [id, null]));
+    for (const row of rows) {
+      map.set(row.userId, row.parentId);
+    }
+    return map;
+  };
+
   export type DeactivatedParentResult = {
     id: string;
     userId: string;

@@ -20,12 +20,6 @@ const findByIdPrepared = db
   .limit(1)
   .prepare("session_config_find_by_id");
 
-const listByRoleNamesPrepared = db
-  .select()
-  .from(sessionConfig)
-  .where(inArray(sessionConfig.roleName, sql.placeholder("roleNames")))
-  .prepare("session_config_list_by_role_names");
-
 export namespace SessionConfigRepository {
   export async function listAll(tx?: DBTransaction): Promise<SessionConfigSelectType[]> {
     if (!tx) {
@@ -54,10 +48,8 @@ export namespace SessionConfigRepository {
 
   export async function listByRoleNames(roleNames: string[], tx?: DBTransaction): Promise<SessionConfigSelectType[]> {
     if (roleNames.length === 0) return [];
-    if (!tx) {
-      return listByRoleNamesPrepared.execute({ roleNames });
-    }
-    return tx.select().from(sessionConfig).where(inArray(sessionConfig.roleName, roleNames));
+    const queryDb = tx ?? db;
+    return queryDb.select().from(sessionConfig).where(inArray(sessionConfig.roleName, roleNames));
   }
 
   export async function upsert(input: SessionConfigUpsertInput, tx?: DBTransaction): Promise<SessionConfigSelectType> {

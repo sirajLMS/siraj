@@ -13,8 +13,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { expectRepositoryError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { AppPermission } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { type AppPermission, IanaTimezone, TeacherProgressFeedEventKind } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -253,7 +252,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         expect(feed.length).toBeGreaterThan(0);
         expect(feed[0].id).toBe(events[0].id);
         expect(feed[0].studentName).toBeDefined();
-        expect(feed[0].eventKind).toBe("activated");
+        expect(feed[0].eventKind).toBe(TeacherProgressFeedEventKind.ACTIVATED);
 
         const feedNoTx = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), IanaTimezone.UTC);
         expect(Array.isArray(feedNoTx)).toBe(true);

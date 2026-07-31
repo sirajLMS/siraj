@@ -7,8 +7,10 @@ import type {
   CurrencyCode,
   Gender,
   StudentStatus,
+  TeacherProgressFeedEventKind,
 } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
 import type { ClassSessionMetrics } from "@/backend/types/scheduling/schedule.types";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
@@ -17,6 +19,10 @@ export type TeacherEntityInput = typeof teachers.$inferInsert;
 
 export type TeacherPaymentSelectType = typeof teacherPayments.$inferSelect;
 export type TeacherPaymentInsertInput = typeof teacherPayments.$inferInsert;
+
+export type TeacherPaymentReturnType = TeacherPaymentSelectType & {
+  readonly displayAmount?: DisplayAmountReturnType | null;
+};
 
 export type CreateTeacherPaymentInput = {
   readonly teacherId: string;
@@ -45,15 +51,6 @@ export type TeacherDashboardScheduleRow = {
   yourTimeFormatted: string | null;
   isFrozen: boolean;
 };
-
-export type TeacherProgressFeedEventKind =
-  | "auto_missed"
-  | "marked_absent"
-  | "activated"
-  | "started"
-  | "completed"
-  | "leave"
-  | "other";
 
 export type TeacherProgressFeedItem = {
   id: string;
@@ -176,6 +173,7 @@ export type TeacherOwnProfileReturnType = {
   hourlyRate: string | null;
   rateCurrency: CurrencyCode | null;
   totalClasses: number;
+  displayAmount: DisplayAmountReturnType | null;
 };
 
 export type TeacherOwnProfileUpdateInput = {

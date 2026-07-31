@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { UserPothosObject } from "@/backend/graphql/pothos/auth/user.pothos";
+import { UserPothosObject } from "@/backend/graphql/pothos/users";
 import type {
   ChangePasswordInput,
   DemoLoginInput,

@@ -2,16 +2,19 @@ import { AppPermission, type FxProvider, type FxSyncStatus, FxSyncTrigger } from
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CurrencyCodePothosObject,
+  FxProviderConfigSourcePothosEnum,
   FxProviderPothosEnum,
   FxSyncStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
-import { FxProviderConfigService } from "@/backend/services/fx/fx-provider-config.service";
-import { FxRateAdminService } from "@/backend/services/fx/fx-rate-admin.service";
-import { FxRateLimitService } from "@/backend/services/fx/fx-rate-limit.service";
-import { FxRateQueryService } from "@/backend/services/fx/fx-rate-query.service";
+import {
+  FxIngestionService,
+  FxProviderConfigService,
+  FxRateAdminService,
+  FxRateLimitService,
+  FxRateQueryService,
+} from "@/backend/services";
 import type {
   CurrencyExchangeRateReturnType,
   ExchangeRateHistoryPaginatedResult,
@@ -25,10 +28,6 @@ import type {
   UpsertManualExchangeRateResult,
 } from "@/backend/types";
 import { PaginationArgs as PaginationArgsClass } from "@/backend/types";
-
-const FxProviderConfigSourceEnum = gqlSchemaBuilder.enumType("FxProviderConfigSource", {
-  values: ["env", "database"] as const,
-});
 
 function parsePaginationArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
   if (!input) {
@@ -145,7 +144,7 @@ export const FxProviderConfigPothosObject = FxProviderConfigRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     activeProvider: t.expose("activeProvider", { type: FxProviderPothosEnum }),
-    source: t.expose("source", { type: FxProviderConfigSourceEnum }),
+    source: t.expose("source", { type: FxProviderConfigSourcePothosEnum }),
     updatedAt: t.expose("updatedAt", { type: "DateTime", nullable: true }),
     updatedByUserId: t.exposeString("updatedByUserId", { nullable: true }),
     updatedByName: t.exposeString("updatedByName", { nullable: true }),
@@ -217,7 +216,6 @@ gqlSchemaBuilder.queryField("latestFxSyncRun", t =>
         return null;
       }
       // Discard `providerResponse` from the response — uses the `_`-prefix
-      // discard convention honored by `@typescript-eslint/no-unused-vars`.
       const { providerResponse: _providerResponse, ...rest } = syncRun;
       return {
         ...rest,

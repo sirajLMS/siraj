@@ -157,7 +157,12 @@ export namespace PermissionManagementService {
 
   export async function listGroups(actorUserId: string, tErrors: ErrorsLabels): Promise<GroupWithPermissionIds[]> {
     await requireManageAccess(actorUserId, tErrors);
-    return PermissionManagementRepository.listAllGroups();
+    const groups = await PermissionManagementRepository.listAllGroups();
+    const groupUsersMap = await PermissionManagementRepository.listAllGroupUsers();
+    for (const group of groups) {
+      group.assignedUsers = groupUsersMap.get(group.id) ?? [];
+    }
+    return groups;
   }
 
   export async function getGroup(
@@ -166,7 +171,10 @@ export namespace PermissionManagementService {
     tErrors: ErrorsLabels
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, tErrors);
-    return requireGroupExists(groupId, tErrors);
+    const group = await requireGroupExists(groupId, tErrors);
+    const groupUsersMap = await PermissionManagementRepository.listAllGroupUsers();
+    group.assignedUsers = groupUsersMap.get(groupId) ?? [];
+    return group;
   }
 
   // ─── Write Operations ─────────────────────────────────────────────────────

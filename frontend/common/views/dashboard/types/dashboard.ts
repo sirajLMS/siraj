@@ -11,8 +11,6 @@ import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
 import type { NavIconKey } from "@/frontend/common/views/dashboard/config/navIconKeys";
 import type { DashboardNavigationLabels } from "@/shared/locale";
 
-export type DailyScheduleRow = DailyScheduleList;
-
 export type NavAudience = "teacher" | "parent" | "student" | "supervisor";
 
 export interface NavItem {
@@ -89,7 +87,7 @@ export interface ScheduleOverviewData {
   readonly teacherValue: string;
   readonly submitLabel: string;
   readonly teachers: readonly TeacherFilterItem[];
-  readonly rows: readonly DailyScheduleRow[];
+  readonly rows: readonly DailyScheduleList[];
   readonly headers: ScheduleOverviewDataHeaders;
   readonly statusLabels: ScheduleOverviewDataStatusLabels;
   readonly detailsLabel: string;

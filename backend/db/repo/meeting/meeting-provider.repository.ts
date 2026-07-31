@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { meetingProviders, userMeetingConfigs } from "@/backend/db/schema";
@@ -29,6 +29,12 @@ export namespace MeetingProviderRepository {
     const client = tx ?? db;
     const [row] = await client.select().from(meetingProviders).where(eq(meetingProviders.id, id)).limit(1);
     return row ?? null;
+  }
+
+  export async function getByIds(ids: string[], tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {
+    if (ids.length === 0) return [];
+    const client = tx ?? db;
+    return client.select().from(meetingProviders).where(inArray(meetingProviders.id, ids));
   }
 
   export async function getByIdOrThrow(

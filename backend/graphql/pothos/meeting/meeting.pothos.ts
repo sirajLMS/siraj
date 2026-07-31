@@ -1,5 +1,4 @@
 import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
-import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type {
   ClassMeetingConfigReturnType,
@@ -17,16 +16,11 @@ type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
 
 interface MeetingConfigBaseShape {
   providerId: string;
+  provider?: MeetingProviderSelectType | null;
   details: MeetingConfigDetails;
   hasSecret?: boolean;
   createdAt: Date;
   updatedAt: Date;
-}
-
-async function resolveMeetingProvider(parent: MeetingConfigBaseShape, _args: unknown, ctx: BaseContext) {
-  const { MeetingProviderCatalogService } = await import("@/backend/services/meeting/meeting-provider-catalog.service");
-  const tErrors = ctx.t().errorsTranslations;
-  return MeetingProviderCatalogService.getProviderById(ctx.user?.id ?? "", parent.providerId, tErrors);
 }
 
 const MeetingProviderFieldSchemaRef =
@@ -76,11 +70,7 @@ function meetingConfigSharedFields(t: PothosObjectFieldBuilder<MeetingConfigBase
     hasSecret: t.exposeBoolean("hasSecret", { nullable: true }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-    provider: t.field({
-      type: MeetingProviderPothosObject,
-      nullable: true,
-      resolve: resolveMeetingProvider,
-    }),
+    provider: t.expose("provider", { type: MeetingProviderPothosObject, nullable: true }),
   };
 }
 

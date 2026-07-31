@@ -72,12 +72,6 @@ const existsByEmailPrepared = db
   .where(eq(users.email, sql.placeholder("email")))
   .prepare("user_exists_by_email");
 
-const findUsersByIdsPrepared = db
-  .select()
-  .from(users)
-  .where(inArray(users.id, sql.placeholder("userIds")))
-  .prepare("find_users_by_ids");
-
 const usersTotalCountPrepared = db.select({ total: count() }).from(users).prepare("users_total_count");
 
 export async function findOne(condition: SQL | undefined): Promise<UserSelectType | null> {
@@ -158,7 +152,10 @@ export namespace UserRepository {
       return new Map();
     }
 
-    const results = await findUsersByIdsPrepared.execute({ userIds: ids });
+    const results = await db
+      .select({ id: users.id, displayCurrency: users.displayCurrency })
+      .from(users)
+      .where(inArray(users.id, ids));
 
     const map = new Map<string, CurrencyCode | null>();
     for (const row of results) {
@@ -225,7 +222,7 @@ export namespace UserRepository {
 
   export const loadByIds = async (ids: string[], locale?: string): Promise<(UserReturnType | Error)[]> => {
     if (ids.length === 0) return [];
-    const filteredUsers = await findUsersByIdsPrepared.execute({ userIds: ids });
+    const filteredUsers = await db.select().from(users).where(inArray(users.id, ids));
     const { userNotFound } = getServerTranslations(locale ?? "en").errorsTranslations;
 
     return ids.map(id => {

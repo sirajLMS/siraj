@@ -26,7 +26,7 @@ gqlSchemaBuilder.queryField("teacherOwnProfile", t =>
     resolve: async (_parent, _args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return TeacherPortalService.getOwnProfile(userId, tErrors);
+      return TeacherPortalService.getOwnProfile(userId, tErrors, ctx.user?.displayCurrency, ctx.locale);
     },
   })
 );

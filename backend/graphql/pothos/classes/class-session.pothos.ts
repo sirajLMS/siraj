@@ -1,8 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  EffectiveMeetingPothosObject,
-  resolveEffectiveMeetingForClassInstanceFromContext,
-} from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
+import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
@@ -15,7 +12,6 @@ import {
   SupportContactPothosObject,
   TeacherImportantNotePothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-notes.pothos";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import type {
   ClassInstanceDetailReturnType,
   ClassInstancePerformanceReturnType,
@@ -101,17 +97,13 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     hasTimezoneMismatch: t.exposeBoolean("hasTimezoneMismatch"),
     studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
     teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
-    meetingJoinUrl: t.string({
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", {
       nullable: true,
       deprecationReason: "Use effectiveMeeting.joinUrl",
-      resolve: async (parent, _args, ctx) => {
-        const meeting = await resolveEffectiveMeetingForClassInstanceFromContext(parent.id, ctx);
-        return meeting.joinUrl;
-      },
     }),
-    effectiveMeeting: t.field({
+    effectiveMeeting: t.expose("effectiveMeeting", {
       type: EffectiveMeetingPothosObject,
-      resolve: (parent, _args, ctx) => resolveEffectiveMeetingForClassInstanceFromContext(parent.id, ctx),
+      nullable: true,
     }),
     recurringScheduleId: t.exposeString("recurringScheduleId", { nullable: true }),
     payrollCredited: t.exposeBoolean("payrollCredited"),
@@ -195,17 +187,13 @@ export const FutureClassPothosObject = FutureClassRef.implement({
     classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
     executionState: t.exposeString("executionState", { nullable: true }),
     outcome: t.exposeString("outcome", { nullable: true }),
-    meetingJoinUrl: t.string({
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", {
       nullable: true,
       deprecationReason: "Use effectiveMeeting.joinUrl",
-      resolve: async (parent, _args, ctx) => {
-        const meeting = await resolveEffectiveMeetingForClassInstanceFromContext(parent.id, ctx);
-        return meeting.joinUrl;
-      },
     }),
-    effectiveMeeting: t.field({
+    effectiveMeeting: t.expose("effectiveMeeting", {
       type: EffectiveMeetingPothosObject,
-      resolve: (parent, _args, ctx) => resolveEffectiveMeetingForClassInstanceFromContext(parent.id, ctx),
+      nullable: true,
     }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
   }),
@@ -246,29 +234,10 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
     id: t.exposeString("id"),
     completedInstanceId: t.exposeString("completedInstanceId"),
     rescheduledInstanceId: t.exposeString("rescheduledInstanceId"),
-    completedInstance: t.field({
+    completedInstance: t.expose("completedInstance", { type: ClassInstanceDetailPothosObject, nullable: true }),
+    rescheduledInstance: t.expose("rescheduledInstance", {
       type: ClassInstanceDetailPothosObject,
-      resolve: async (parent, _args, ctx) => {
-        if (!ctx.user) {
-          const tErrors = ctx.t().errorsTranslations;
-          throw new Error(tErrors.unauthorized);
-        }
-        const tErrors = ctx.t().errorsTranslations;
-        const tSession = ctx.t().sessionTranslations;
-        return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.completedInstanceId, tSession, tErrors);
-      },
-    }),
-    rescheduledInstance: t.field({
-      type: ClassInstanceDetailPothosObject,
-      resolve: async (parent, _args, ctx) => {
-        if (!ctx.user) {
-          const tErrors = ctx.t().errorsTranslations;
-          throw new Error(tErrors.unauthorized);
-        }
-        const tErrors = ctx.t().errorsTranslations;
-        const tSession = ctx.t().sessionTranslations;
-        return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.rescheduledInstanceId, tSession, tErrors);
-      },
+      nullable: true,
     }),
   }),
 });

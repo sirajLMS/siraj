@@ -1,4 +1,3 @@
-import { PermissionManagementRepository } from "@/backend/db/repo";
 import { AppPermission, OverrideState } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { OverrideStatePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
@@ -39,17 +38,6 @@ function mapUserOverridesSafely(overrides: UserOverrideEntity[]): UserOverrideRe
   });
 }
 
-let groupUsersCache: Map<string, GroupUserEntity[]> | null = null;
-
-function clearGroupUsersCache() {
-  groupUsersCache = null;
-}
-
-async function getGroupUsersMap(): Promise<Map<string, GroupUserEntity[]>> {
-  groupUsersCache ??= await PermissionManagementRepository.listAllGroupUsers();
-  return groupUsersCache;
-}
-
 interface ErrorsTranslationsHolder {
   t(): { errorsTranslations: ErrorsLabels };
 }
@@ -67,7 +55,6 @@ async function runGroupMembershipMutation<T extends GroupMembershipInput>(
   input: T,
   service: (actorId: string, body: T, tErrors: ErrorsLabels) => Promise<unknown>
 ): Promise<boolean> {
-  clearGroupUsersCache();
   await service(resolveActorId(ctx), input, resolveErrorsTranslations(ctx));
   return true;
 }
@@ -77,7 +64,6 @@ async function runBulkGroupMembershipMutation<T extends BulkGroupMembershipInput
   input: T,
   service: (actorId: string, body: T, tErrors: ErrorsLabels) => Promise<unknown>
 ): Promise<boolean> {
-  clearGroupUsersCache();
   const tErrors = resolveErrorsTranslations(ctx);
   await service(resolveActorId(ctx), input, tErrors);
   return true;
@@ -115,12 +101,8 @@ export const PermissionGroupObject = gqlSchemaBuilder.objectRef<GroupWithPermiss
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
     permissionIds: t.exposeStringList("permissionIds"),
-    assignedUsers: t.field({
+    assignedUsers: t.expose("assignedUsers", {
       type: [GroupUserObject],
-      resolve: async group => {
-        const map = await getGroupUsersMap();
-        return map.get(group.id) ?? [];
-      },
     }),
   }),
 });
@@ -187,10 +169,8 @@ gqlSchemaBuilder.queryFields(t => ({
     type: [PermissionGroupObject],
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
     description: "List all permission groups with their permission IDs.",
-    resolve: async (_root, _args, ctx) => {
-      clearGroupUsersCache();
-      return PermissionManagementService.listGroups(resolveActorId(ctx), resolveErrorsTranslations(ctx));
-    },
+    resolve: async (_root, _args, ctx) =>
+      PermissionManagementService.listGroups(resolveActorId(ctx), resolveErrorsTranslations(ctx)),
   }),
   permissionGroup: t.field({
     type: PermissionGroupObject,

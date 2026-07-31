@@ -9,7 +9,7 @@ import {
   StudentRepository,
 } from "@/backend/db/repo";
 import { groupPermissions, invoices, permissions, userPermissionGroups } from "@/backend/db/schema";
-import { AppPermission, type CurrencyCode } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, InvoicePaymentSubmissionStatus } from "@/backend/enum";
 import { logger, NotFoundError } from "@/backend/lib";
 import { parseInvoiceStatus, parseInvoiceType } from "@/backend/lib/enum";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
@@ -408,7 +408,7 @@ export namespace BillingManagementService {
             fileId: proofFileId,
             submittedByUserId: actorUserId,
             submittedAt,
-            status: "pending",
+            status: InvoicePaymentSubmissionStatus.PENDING,
             reviewedByUserId: null,
             reviewedAt: null,
             rejectionReason: null,
@@ -467,7 +467,7 @@ export namespace BillingManagementService {
         );
         await InvoicePaymentSubmissionRepository.updateSubmissionStatus(
           pending.id,
-          "approved",
+          InvoicePaymentSubmissionStatus.APPROVED,
           actorUserId,
           null,
           tErrors,

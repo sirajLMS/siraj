@@ -1,4 +1,4 @@
-import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
@@ -111,6 +111,22 @@ export namespace TeacherRepository {
     }
     const [teacher] = await tx.select().from(teachers).where(eq(teachers.id, id)).limit(1);
     return teacher ?? null;
+  };
+
+  export const findByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<Map<string, string | null>> => {
+    if (userIds.length === 0) return new Map();
+
+    const queryDb = tx ?? db;
+    const rows = await queryDb
+      .select({ userId: teachers.userId, teacherId: teachers.id })
+      .from(teachers)
+      .where(inArray(teachers.userId, userIds));
+
+    const map = new Map<string, string | null>(userIds.map(id => [id, null]));
+    for (const row of rows) {
+      map.set(row.userId, row.teacherId);
+    }
+    return map;
   };
 
   export const searchTeachers = async (searchQuery: string, limit: number, tx?: DBTransaction) => {

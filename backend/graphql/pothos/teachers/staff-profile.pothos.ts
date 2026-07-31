@@ -1,15 +1,13 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  DisplayAmountPothosObject,
-  resolveDisplayAmountField,
-} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
   AccountStatusPothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
   IanaTimezonePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
+import type { DisplayAmountReturnType } from "@/backend/types";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 
 const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnType>("TeacherProfileResult");
@@ -59,8 +57,7 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) =>
-        resolveDisplayAmountField(parent, ctx, "hourlyRate", "rateCurrency", parent.userId),
+      resolve: parent => (parent as unknown as Record<string, unknown>).displayAmount as DisplayAmountReturnType | null,
     }),
   }),
 });

@@ -8,6 +8,8 @@ import type {
   StudentStatus,
 } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
+import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type ParentEntity = typeof import("@/backend/db/schema").parents.$inferSelect;
@@ -103,6 +105,7 @@ export type ParentDashboardScheduleRow = {
   executionState: ClassExecutionState;
   outcome: ClassOutcome;
   meetingJoinUrl: string | null;
+  effectiveMeeting?: EffectiveMeetingReturnType;
   isFrozen: boolean;
   classTimeFormatted: string;
 };
@@ -185,6 +188,7 @@ export interface ParentProfileResult {
   readonly feeAmount: string | null;
   readonly currency: CurrencyCode | null;
   readonly displayCurrency: CurrencyCode | null;
+  readonly displayAmount?: DisplayAmountReturnType | null;
   readonly timezone: IanaTimezone;
   readonly createdAt: Date;
   readonly updatedAt: Date;

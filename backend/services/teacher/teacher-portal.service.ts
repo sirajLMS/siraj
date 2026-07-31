@@ -1,6 +1,7 @@
 import { SchedulingRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
-import { AppPermission, type CountryCode } from "@/backend/enum";
+import { AppPermission, type CountryCode, type CurrencyCode } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type {
   TeacherAssignedClassesResult,
@@ -36,13 +37,27 @@ export namespace TeacherPortalService {
     return StudentRepository.getAssignedToTeacher(teacher.id);
   }
 
-  export async function getOwnProfile(userId: string, tErrors: ErrorsLabels): Promise<TeacherOwnProfileReturnType> {
+  export async function getOwnProfile(
+    userId: string,
+    tErrors: ErrorsLabels,
+    displayCurrency?: CurrencyCode | null,
+    locale?: string
+  ): Promise<TeacherOwnProfileReturnType> {
     await assertPermission(userId, AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN, tErrors);
     const teacher = await resolveTeacherForUser(userId, tErrors);
     const profile = await TeacherRepository.getTeacherProfileForEdit(teacher.id);
     if (!profile) {
       throw new Error(tErrors.notFound);
     }
+
+    const displayAmount = await FxDisplayService.convertForDisplay(
+      profile.hourlyRate,
+      profile.rateCurrency as CurrencyCode | null | undefined,
+      displayCurrency,
+      profile.id,
+      undefined,
+      locale
+    );
 
     return {
       id: profile.id,
@@ -62,6 +77,7 @@ export namespace TeacherPortalService {
       hourlyRate: profile.hourlyRate,
       rateCurrency: profile.rateCurrency,
       totalClasses: profile.totalClasses,
+      displayAmount,
     };
   }
 
@@ -100,6 +116,10 @@ export namespace TeacherPortalService {
   export async function resolveTeacherIdForUser(userId: string): Promise<string | null> {
     const teacher = await TeacherRepository.findByUserId(userId);
     return teacher?.id ?? null;
+  }
+
+  export async function resolveTeacherIdsForUsers(userIds: string[]): Promise<Map<string, string | null>> {
+    return TeacherRepository.findByUserIds(userIds);
   }
 
   export async function updateOwnProfile(
@@ -152,6 +172,6 @@ export namespace TeacherPortalService {
       throw new Error(tErrors.notFound);
     }
 
-    return getOwnProfile(userId, tErrors);
+    return getOwnProfile(userId, tErrors, undefined, undefined);
   }
 }

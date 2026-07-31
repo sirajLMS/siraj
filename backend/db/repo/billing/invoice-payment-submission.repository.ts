@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { db, invoicePaymentSubmissions } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { InvoicePaymentSubmissionStatus } from "@/backend/enum";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -44,7 +45,7 @@ export namespace InvoicePaymentSubmissionRepository {
 
   export async function updateSubmissionStatus(
     submissionId: string,
-    status: Types.InvoicePaymentSubmissionStatus,
+    status: InvoicePaymentSubmissionStatus,
     reviewedByUserId: string,
     rejectionReason: string | null,
     tErrors: ErrorsLabels,
@@ -84,7 +85,14 @@ export namespace InvoicePaymentSubmissionRepository {
     if (!pending) {
       return null;
     }
-    return updateSubmissionStatus(pending.id, "rejected", reviewedByUserId, rejectionReason, tErrors, tx);
+    return updateSubmissionStatus(
+      pending.id,
+      InvoicePaymentSubmissionStatus.REJECTED,
+      reviewedByUserId,
+      rejectionReason,
+      tErrors,
+      tx
+    );
   }
 
   export async function findByInvoiceIds(
