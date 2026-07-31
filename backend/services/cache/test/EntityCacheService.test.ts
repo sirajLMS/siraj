@@ -203,4 +203,26 @@ describe("EntityCacheService Unit Tests", () => {
     const stats = getEntityCacheStats();
     expect(stats).toBeDefined();
   });
+
+  it("Date objects are restored from ISO strings on cache hit", async () => {
+    const now = new Date("2025-01-15T10:30:00.000Z");
+    const cachedEntry = {
+      version: CACHE_VERSION,
+      data: { id: "u1", createdAt: now, nested: { updatedAt: now } },
+      cachedAt: Date.now(),
+    };
+    // Simulate what Redis/Postgres stores: ISO strings (JSON.stringify turns Dates into strings)
+    store.set("ec:user:u1:admin", JSON.stringify(cachedEntry));
+
+    const result = await cachedRead("ec:user:u1:admin", 300, async () => ({
+      id: "u1",
+      createdAt: new Date(),
+      nested: { updatedAt: new Date() },
+    }));
+
+    // The date reviver must have restored ISO string → Date instance
+    expect(result.createdAt).toBeInstanceOf(Date);
+    expect((result.createdAt as Date).toISOString()).toBe("2025-01-15T10:30:00.000Z");
+    expect((result.nested as { updatedAt: Date }).updatedAt).toBeInstanceOf(Date);
+  });
 });
