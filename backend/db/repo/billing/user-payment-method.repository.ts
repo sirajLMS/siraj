@@ -1,4 +1,5 @@
 import { and, asc, eq, inArray, type SQL } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { userPaymentMethods } from "@/backend/db/schema";
@@ -32,7 +33,7 @@ async function selectByCondition(
   tx: DBTransaction | undefined,
   orderBy?: SQL
 ): Promise<UserPaymentMethodSelectType[]> {
-  const client = tx ?? db;
+  const client = queryDb(tx);
   const baseQuery = client.select().from(userPaymentMethods);
   const withWhere = condition ? baseQuery.where(condition) : baseQuery;
   return (orderBy ? withWhere.orderBy(orderBy) : withWhere).then(rows => rows.map(toSelectType));
@@ -44,7 +45,7 @@ export namespace UserPaymentMethodRepository {
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<UserPaymentMethodSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(userPaymentMethods).where(eq(userPaymentMethods.id, id)).limit(1);
     return row ? toSelectType(row) : null;
   }
@@ -146,7 +147,7 @@ export namespace UserPaymentMethodRepository {
     slot: DefaultSlot,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(userPaymentMethods)

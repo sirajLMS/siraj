@@ -11,26 +11,17 @@
 
 ## 1. Overview
 
-This design details the rollout of the Neon HTTP single-fetch client (`getNeonHttpDb()` /
-`getNeonHttpClient()` from `backend/db/http-client.ts`) to the **repository layer**. It introduces a
-runtime guard (`isNeonHttpEligible()`) and a uniform per-method migration pattern (`tx ? tx :
-(eligible ? httpDb : db)` for the bare-read branch) applied across ~52 repository files in a single
-batch wave after a single pilot file.
+This design details the rollout of the HTTP single-fetch client to the **repository layer** via a provider-agnostic `queryDb(tx)` factory handle (exported from `backend/db/drizzleDb.ts`). It encapsulates runtime eligibility (`getActiveHttpProvider()`, `isNeonHttpEligible()`), lazy singleton resolution (`getStatelessHttpDb()`), and `tx` prioritization. It is applied across ~52 repository files in a single batch wave after a single pilot file.
 
-The design addresses R1–R5 of the spec: it gates construction on a Neon host + provider + connection-mode +
-kill-switch check; it migrates only the repository `tx ?? db` fallback (not services — those never import
-`db` directly per `backend/AGENTS.md`); it preserves the `tx` passthrough end-to-end so transactions never
-accidentally route through the HTTP driver (which throws on `.transaction()`); and it converts prepared-
-statement non-tx branches to plain queries (the `neon-http` driver does not support `.prepare()`).
+The design addresses R1–R5 of the spec: it gates construction on provider + host + connection-mode + kill-switch checks; it migrates only the repository query execution seam (not services — those never import `db` directly per `backend/AGENTS.md`); it preserves `tx` passthrough end-to-end so transactions never route through an HTTP driver (which throws on `.transaction()`); and it converts prepared-statement non-tx branches to plain queries (the HTTP drivers do not support `.prepare()`).
 
 ### Design Goals
-- **Safety first:** the HTTP helpers refuse construction against a non-Neon `DATABASE_URL` so local dev,
+- **Safety first:** the HTTP helpers refuse construction against a non-eligible `DATABASE_URL` so local dev,
   forced `pg-pooled` mode, and the kill-switch all short-circuit with a clear error.
-- **Transaction-safety by construction:** the `tx ? tx : (eligible ? httpDb : db)` branch ordering
-  ensures transactions NEVER reach `httpDb`, eliminating the runtime-throw risk of `neon-http`'s
-  `.transaction()`.
-- **Architecture-conforming seam:** only the repository layer changes. Services, resolvers, and Server
-  Components are untouched (they delegate to repositories).
+- **Provider-agnostic & flexible:** repository methods call `queryDb(tx)` instead of referencing vendor-specific helpers directly. Swapping or adding HTTP providers (e.g. Supabase, Turso) requires zero repository changes.
+- **Zero-allocation O(1) performance:** resolved HTTP database handles are cached via global singletons (`getGlobalSingleton`).
+- **Transaction-safety by construction:** `queryDb(tx)` prioritizes `tx` first, ensuring transactions NEVER reach HTTP drivers, eliminating runtime-throw risks on `.transaction()`.
+- **Architecture-conforming seam:** only the repository layer changes. Services, resolvers, and Server Components are untouched (they delegate to repositories).
 - **One wave, maximum parallelism:** a dynamic 16-worker parent orchestrator processes the full ~52-file
   batch concurrently, with one subagent per file restricted to that file.
 
@@ -43,8 +34,7 @@ statement non-tx branches to plain queries (the `neon-http` driver does not supp
   explicitly chose this over call-site-only gating.
 - **Decision 2 — Orthogonal helper, not a new `DbConnectionStrategy` enum value:** the guard is a
   separate predicate, not added to `DbConnectionStrategy` (`pg-pooled` / `neon-serverless`). Rationale:
-  no existing `connection-strategy.test.ts` cases need to change; HTTP remains opt-in via the `tx ? tx : …`
-  branch, not a global strategy switch.
+  no existing `connection-strategy.test.ts` cases need to change; HTTP remains opt-in via `queryDb(tx)`, not a global strategy switch.
 - **Decision 3 — Repository-layer seam only:** per `backend/AGENTS.md`, services delegate to repositories
   and do not import `db` directly. The prior draft's service-file targets were skating on thin
   architecture ice. Only `backend/db/repo/**/*.ts` files change. (User explicitly chose repo-only.)
@@ -58,8 +48,8 @@ statement non-tx branches to plain queries (the `neon-http` driver does not supp
   (`backend/lib/env.ts:353-358`).
 - **Decision 6 — Replace non-tx prepared-statement branches with plain queries:** `drizzle-orm/neon-http`
   does not support module-level `.prepare()` statements (HTTP fetch has no session-bound plan). The
-  non-tx branch of any repo using prepared statements is replaced with a plain `httpDb.select(...)`
-  query; the prepared-statement module that is reused only inside `tx` paths stays untouched.
+  non-tx branch of any repo using prepared statements is replaced with a plain query over `queryDb(tx)`; the prepared-statement module that is reused only inside `tx` paths stays untouched.
+- **Decision 7 — Exported `queryDb(tx)` factory handle with singleton caching:** encapsulates provider resolution, singleton handle retrieval, and `tx` precedence. Decouples 52+ repository files from vendor specifics and ensures zero allocation cost on every query invocation.
 
 ### UX/Navigation Specification (REQUIRED)
 
@@ -150,10 +140,18 @@ environment?"
 **Location:** `backend/db/connection-strategy.ts` (alongside `resolveConnectionStrategy`). Re-exported
 from `backend/db/drizzleDb.ts` next to the existing `getNeonHttpDb` re-export (`drizzleDb.ts:71`).
 
-**Interface:** `function isNeonHttpEligible(): boolean` — no args, pure (reads env directly each call,
-no caching that would go stale on `clearDbConnectionSingleton()`).
+### Component 1: `getActiveHttpProvider()` & `isNeonHttpEligible()` (NEW)
 
-**Logic:**
+**Purpose:** Pure runtime predicates answering "which HTTP / stateless database provider is active, and is it eligible in this environment?"
+
+**Location:** `backend/db/connection-strategy.ts` (alongside `resolveConnectionStrategy`). Re-exported
+from `backend/db/drizzleDb.ts`.
+
+**Interface:** 
+- `function isNeonHttpEligible(): boolean` — checks if Neon HTTP single-fetch is safe to construct.
+- `function getActiveHttpProvider(): "neon" | "supabase" | "none"` — returns the active stateless HTTP DB provider.
+
+**Logic for `isNeonHttpEligible()`:**
 1. If `process.env.DB_NEON_HTTP_ENABLED === "false"` → return `false` (kill-switch).
 2. If `getStringEnv("DB_PROVIDER", "neon").toLowerCase() !== "neon"` → return `false`.
 3. If `getConnectionMode() === "pg"` → return `false` (explicit pg-pooled override wins).
@@ -161,19 +159,50 @@ no caching that would go stale on `clearDbConnectionSingleton()`).
    return `false` (prevents `https://localhost/sql` failure).
 5. Otherwise → return `true`.
 
-**Implementation Notes:**
-- Reuses `getStringEnv` and `getConnectionMode()` from `connection-strategy.ts` (no new env primitives).
-- Lowercases `DB_PROVIDER` for the comparison (hardens the latent case-sensitivity gap at
-  `connection-strategy.ts:27` — flagged as out-of-scope drift but safe to fix inside the guard).
-- URL parse via `new URL(databaseUrl)` (already used in `neon-integration.test.ts:185` and `env.ts:140`).
+**Logic for `getActiveHttpProvider()`:**
+1. If `isNeonHttpEligible()` → return `"neon"`.
+2. Otherwise → return `"none"`.
 
-### Component 2: Internal guards in `http-client.ts` (MODIFY)
+### Component 2: Factory Singleton `getStatelessHttpDb()` & `queryDb(tx)` (NEW / MODIFY)
 
-**Purpose:** Belt-and-suspenders — even if a future caller forgets to check `isNeonHttpEligible()`, the
-helpers refuse to construct a Neon HTTP client against a non-Neon `DATABASE_URL`.
+**Purpose:** Provide a provider-agnostic, zero-allocation database query handle for repositories that transparently routes reads to the active HTTP database singleton when eligible, while preserving `tx` and falling back to default `db`.
+
+**Location:** `backend/db/drizzleDb.ts`.
+
+**Implementation:**
+```typescript
+const HTTP_DB_KEY = Symbol.for("siraj.httpDb");
+
+/**
+ * Lazily resolves and caches the active HTTP database singleton instance via getGlobalSingleton.
+ */
+function getStatelessHttpDb() {
+  return getGlobalSingleton(HTTP_DB_KEY, () => {
+    const provider = getActiveHttpProvider();
+    if (provider === "neon") return getNeonHttpDb();
+    // Future expansion: if (provider === "supabase") return getSupabaseHttpDb();
+    return null;
+  });
+}
+
+/**
+ * Canonical query handle for repository read operations.
+ * - If tx is passed, returns tx (transaction safety guaranteed).
+ * - Otherwise, returns the cached HTTP database singleton if eligible.
+ * - Falls back to default pooled db instance.
+ */
+export function queryDb(tx?: DBTransaction) {
+  if (tx) return tx;
+  return getStatelessHttpDb() ?? db;
+}
+```
+
+### Component 3: Internal guards in `http-client.ts` (MODIFY)
+
+**Purpose:** Belt-and-suspenders — even if a future caller invokes `getNeonHttpDb()` directly, the helper refuses to construct a Neon HTTP client against a non-Neon `DATABASE_URL`.
 
 **Change:** In `getNeonHttpClient()` (`http-client.ts:47-52`) and `getNeonHttpDb()` (`:60-65`), add:
-```
+```typescript
 if (!isNeonHttpEligible()) {
   throw new Error(
     `Neon HTTP client is not eligible for the current environment. ` +
@@ -182,18 +211,10 @@ if (!isNeonHttpEligible()) {
   );
 }
 ```
-before the existing singleton initialization. The error message names which gates exist (the throw site
-does not enumerate each failing gate to keep the helper cheap; callers wanting granular diagnostics use
-`isNeonHttpEligible()` and the env vars directly).
 
-**Interfaces:** unchanged externally (still `() : NeonQueryFunction<…>` / `NeonHttpDatabase<typeof relations>`).
+### Component 4: Migration pattern applied to each repository (MODIFY ~52 files)
 
-**Dependencies:** `isNeonHttpEligible()` from `connection-strategy.ts`.
-
-### Component 3: Migration pattern applied to each repository (MODIFY ~52 files)
-
-**Purpose:** Convert each non-tx read branch from `tx ?? db` to `tx ? tx : (isNeonHttpEligible() ?
-getNeonHttpDb() : db)`, replace non-tx prepared statements with plain queries.
+**Purpose:** Convert each non-tx read branch from `tx ?? db` to `queryDb(tx)`, replace non-tx prepared statements with plain queries.
 
 **Per-method pattern:**
 ```typescript
@@ -202,22 +223,20 @@ export async function findById(id: string, tx?: DBTransaction) {
   const queryDb = tx ?? db;
   return queryDb.select().from(users).where(eq(users.id, id)).limit(1);
 }
-// or for prepared-statement branches:
-// export async function findById(id: string) {
-//   return findByIdPrepared.execute({ id });  // prepared modules run against `db` singleton
-// }
 
 // AFTER
+import { queryDb } from "@/backend/db";
+
 export async function findById(id: string, tx?: DBTransaction) {
-  const queryDb = tx ?? (isNeonHttpEligible() ? getNeonHttpDb() : db);
-  return queryDb.select().from(users).where(eq(users.id, id)).limit(1);
+  const q = queryDb(tx);
+  return q.select().from(users).where(eq(users.id, id)).limit(1);
 }
 ```
 
 **Implementation Notes:**
-- The `tx ?? …` evaluation order is mandatory: `tx` wins first, then eligible-`httpDb`, then `db`.
+- The `queryDb(tx)` evaluation order is mandatory: `tx` wins first, then eligible HTTP singleton, then `db`.
 - For methods whose non-tx branch is a **prepared statement**, the migration replaces that non-tx branch
-  with the plain `httpDb.select(...)` (no `.prepare()` / `.execute()`). The prepared-statement module
+  with a plain `queryDb(tx).select(...)` (no `.prepare()` / `.execute()`). The prepared-statement module
   remains in the file ONLY if it is still used inside `tx` branches; if it was used only on the non-tx
   branch and is now unused, the subagent removes it (dead code).
 - Each subagent handles ONE file. Each subagent reads all `outcome/` first, applies the pattern to every
@@ -328,6 +347,13 @@ Out of scope for this plan (deferred to observability follow-up). The kill-switc
   `DB_PROVIDER=neon` (proves the belt-and-suspenders guard).
 
 ### Integration Testing
+- **Early Stage Provider Smoke (`test/integration/db/query-db.integration.test.ts`):** Created immediately in Phase 1 directly after `queryDb(tx)` foundation creation. Conforms strictly to `test/integration/AGENTS.md`:
+  - Placed at `test/integration/db/query-db.integration.test.ts`.
+  - Reads `process.env.NEON_TEST_DATABASE_URL`; if missing or containing `"ep-example"`, skips via `describeLiveWhen(hasNeonTestUrl, ...)` (does not fail).
+  - When `NEON_TEST_DATABASE_URL` is set, executes a single live HTTP query (`queryDb().execute(sql`SELECT 1 as test`)`).
+  - Uses `testLogger` from `@/shared/lib/logger/testlogger` (no `console.log`).
+  - Command: `bun run test:integration` (or `bun --env-file=.env.test test test/integration/db/query-db.integration.test.ts`).
+  - Verifies live HTTP connectivity and provider setup before any repository files are migrated.
 - **Pilot:** `bun run scripts/run-test/run-test.ts backend/db/test/repo/users/user.repository.test.ts`
   and `bun run test:graphql` exercising the `me` query.
 

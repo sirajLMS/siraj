@@ -1,4 +1,4 @@
-import { getStringEnv } from "@/backend/lib/env";
+import { getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { isServerlessRuntime, isTestEnv, isVercelRuntime } from "@/backend/lib/runtime";
 
 export type DbConnectionStrategy = "pg-pooled" | "neon-serverless";
@@ -52,4 +52,29 @@ export function poolIdleTimeoutMillis(): number {
   if (isVercelRuntime()) return 5_000;
   if (isServerlessRuntime()) return 10_000;
   return 30_000;
+}
+
+export type HttpDbProvider = "neon" | "supabase" | "none";
+
+export function isNeonHttpEligible(): boolean {
+  if (process.env.DB_NEON_HTTP_ENABLED === "false") return false;
+
+  const provider = (getStringEnv("DB_PROVIDER") ?? "neon").toLowerCase();
+  if (provider !== "neon") return false;
+
+  if (getConnectionMode() === "pg") return false;
+
+  try {
+    const databaseUrl = process.env.DATABASE_URL || getEnvironmentConfig().databaseUrl;
+    if (!databaseUrl) return false;
+    const hostname = new URL(databaseUrl).hostname;
+    return /\.neon\.tech$/.test(hostname);
+  } catch {
+    return false;
+  }
+}
+
+export function getActiveHttpProvider(): HttpDbProvider {
+  if (isNeonHttpEligible()) return "neon";
+  return "none";
 }

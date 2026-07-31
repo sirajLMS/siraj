@@ -1,4 +1,5 @@
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
@@ -6,24 +7,6 @@ import { books } from "@/backend/db/schema";
 import type { AvailabilityStatus } from "@/backend/enum";
 import type { PaginationArgs } from "@/backend/types";
 import type { BookReturnType } from "@/backend/types/books/book.types";
-
-// ============================================================================
-// Prepared Statements (Drizzle Prepared Statements 2.0)
-// ============================================================================
-// Defined at module level to be compiled once and reused across requests.
-// Prepared statements cannot be used inside transactions (tied to the session they were created with).
-
-const findByIdPrepared = db
-  .select({
-    id: books.id,
-    name: books.name,
-    availabilityStatus: books.availabilityStatus,
-    createdAt: books.createdAt,
-  })
-  .from(books)
-  .where(and(eq(books.id, sql.placeholder("bookId")), isNull(books.deletedAt)))
-  .limit(1)
-  .prepare("find_book_by_id");
 
 function mapRow(row: { id: string; name: string; availabilityStatus: string; createdAt: Date }): BookReturnType {
   return {
@@ -36,9 +19,9 @@ function mapRow(row: { id: string; name: string; availabilityStatus: string; cre
 
 export namespace BookRepository {
   export async function findMany(pagination?: PaginationArgs | null, tx?: DBTransaction): Promise<BookReturnType[]> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const baseQuery = queryDb
+    const baseQuery = q
       .select({
         id: books.id,
         name: books.name,
@@ -59,11 +42,8 @@ export namespace BookRepository {
   }
 
   export async function findById(bookId: string, tx?: DBTransaction): Promise<BookReturnType | null> {
-    if (!tx) {
-      const result = await findByIdPrepared.execute({ bookId });
-      return result[0] ? mapRow(result[0]) : null;
-    }
-    const results = await tx
+    const q = queryDb(tx);
+    const results = await q
       .select({
         id: books.id,
         name: books.name,
@@ -84,8 +64,8 @@ export namespace BookRepository {
 
   export async function findByNames(names: readonly string[], tx?: DBTransaction): Promise<BookReturnType[]> {
     if (names.length === 0) return [];
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select({
         id: books.id,
         name: books.name,

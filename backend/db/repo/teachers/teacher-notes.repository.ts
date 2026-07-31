@@ -1,4 +1,5 @@
 import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherImportantNotes } from "@/backend/db/schema";
@@ -15,7 +16,7 @@ export namespace TeacherNotesRepository {
     tx?: DBTransaction
   ): Promise<TeacherImportantNoteSelectType[]> {
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       const now = sql`NOW()`;
       const conditions = [
         eq(teacherImportantNotes.isPublished, true),
@@ -159,7 +160,7 @@ export namespace TeacherNotesRepository {
     tx?: DBTransaction
   ): Promise<TeacherImportantNoteSelectType[]> {
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       const conditions = [isNull(teacherImportantNotes.deletedAt)];
       if (teacherId) {
         conditions.push(eq(teacherImportantNotes.teacherId, teacherId));
@@ -181,7 +182,7 @@ export namespace TeacherNotesRepository {
   ): Promise<TeacherImportantNoteSelectType[]> {
     if (titles.length === 0) return [];
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       return await client
         .select()
         .from(teacherImportantNotes)

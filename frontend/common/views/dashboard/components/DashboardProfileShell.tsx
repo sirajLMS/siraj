@@ -17,6 +17,7 @@ import {
   isTeacherProfileCompletionPath,
   TEACHER_PROFILE_COMPLETION_EDIT_HREF,
 } from "@/frontend/common/lib/profileCompletion";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/components/DashboardLayoutContainer";
 import { stripLocaleFromPath } from "@/frontend/common/views/dashboard/lib/stripLocaleFromPath";
 import { redirect } from "@/shared/i18n/routing";
@@ -28,32 +29,52 @@ interface DashboardProfileShellProps {
   readonly children: ReactNode;
 }
 
+async function handleTeacherProfileCompletionRedirect(userId: string): Promise<boolean> {
+  const headersList = await headers();
+  const rawPathname = headersList.get("x-pathname");
+  const pathname = rawPathname ? stripLocaleFromPath(rawPathname) : null;
+  if (pathname && !isTeacherProfileCompletionPath(pathname)) {
+    if (await isPrefetchRequest()) {
+      forbidden();
+      return true;
+    }
+    logger.info("[ProfileCompletion] Redirecting teacher to complete national ID", {
+      userId,
+      pathname,
+    });
+    redirect(TEACHER_PROFILE_COMPLETION_EDIT_HREF);
+    return true;
+  }
+  return false;
+}
+
 export async function DashboardProfileShell({
   userId,
   context,
   initialSidebarOpen,
   children,
 }: Readonly<DashboardProfileShellProps>) {
-  const userProfile = await getCurrentUser(userId, context);
+  let userProfile: Awaited<ReturnType<typeof getCurrentUser>>;
+  try {
+    userProfile = await getCurrentUser(userId, context);
+  } catch (error) {
+    logger.error("[DashboardProfileShell] Failed to get user profile, redirecting to login", {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    if (await isPrefetchRequest()) {
+      forbidden();
+      return;
+    }
+    await redirectToLogin();
+    return;
+  }
 
   const teacherProfileCompletionRequired = userProfile.role === UserRole.TEACHER && !userProfile.nationalIdComplete;
 
   if (teacherProfileCompletionRequired) {
-    const headersList = await headers();
-    const rawPathname = headersList.get("x-pathname");
-    const pathname = rawPathname ? stripLocaleFromPath(rawPathname) : null;
-    if (pathname && !isTeacherProfileCompletionPath(pathname)) {
-      if (await isPrefetchRequest()) {
-        forbidden();
-        return;
-      }
-      logger.info("[ProfileCompletion] Redirecting teacher to complete national ID", {
-        userId,
-        pathname,
-      });
-      redirect(TEACHER_PROFILE_COMPLETION_EDIT_HREF);
-      return;
-    }
+    const handled = await handleTeacherProfileCompletionRedirect(userId);
+    if (handled) return;
   }
 
   const mappedUser: User = {

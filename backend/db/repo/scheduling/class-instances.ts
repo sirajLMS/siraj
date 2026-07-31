@@ -1,4 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import {
   type ClassInstanceUpsertManyOptions,
@@ -30,16 +31,16 @@ import { getServerTranslations } from "@/shared/locale";
 export { resolveStudentTimezone } from "@/backend/db/repo/scheduling/shared";
 
 export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
-  const queryDb = tx ?? db;
-  const [row] = await queryDb.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+  const q = queryDb(tx);
+  const [row] = await q.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
 
   if (!row) return null;
 
   const studentIds = [row.studentId];
   const teacherIds = [row.teacherId];
 
-  const studentsData = await queryDb.select().from(students).where(inArray(students.id, studentIds));
-  const teachersData = await queryDb
+  const studentsData = await q.select().from(students).where(inArray(students.id, studentIds));
+  const teachersData = await q
     .select({ teacher: teachers, user: users })
     .from(teachers)
     .innerJoin(users, eq(teachers.userId, users.id))
@@ -49,16 +50,10 @@ export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
   const teacherMap = new Map(teachersData.map(tc => [tc.teacher.id, { ...tc.teacher, user: tc.user }]));
 
   const subject = row.subjectId
-    ? (await queryDb.select().from(classSubjects).where(eq(classSubjects.id, row.subjectId)).limit(1))[0]
+    ? (await q.select().from(classSubjects).where(eq(classSubjects.id, row.subjectId)).limit(1))[0]
     : undefined;
   const recurring = row.recurringScheduleId
-    ? (
-        await queryDb
-          .select()
-          .from(recurringSchedules)
-          .where(eq(recurringSchedules.id, row.recurringScheduleId))
-          .limit(1)
-      )[0]
+    ? (await q.select().from(recurringSchedules).where(eq(recurringSchedules.id, row.recurringScheduleId)).limit(1))[0]
     : undefined;
 
   return {
@@ -239,8 +234,8 @@ export async function listByIdempotencyKeys(
   const map = new Map<string, Types.ClassInstanceEntity>();
   if (keys.length === 0) return map;
 
-  const queryDb = tx ?? db;
-  const rows = await queryDb
+  const q = queryDb(tx);
+  const rows = await q
     .select()
     .from(classInstances)
     .where(inArray(classInstances.idempotencyKey, [...keys]));

@@ -1,4 +1,5 @@
 import { and, eq, inArray, or } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { supportedMobileWallets } from "@/backend/db/schema";
@@ -32,7 +33,7 @@ function directionFilter(direction?: PaymentDirection) {
 
 export namespace SupportedMobileWalletRepository {
   export async function listAll(tx?: DBTransaction): Promise<SupportedMobileWalletSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(supportedMobileWallets)
@@ -44,7 +45,7 @@ export namespace SupportedMobileWalletRepository {
     filters: ListActiveFilters = {},
     tx?: DBTransaction
   ): Promise<SupportedMobileWalletSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const conditions = [
       eq(supportedMobileWallets.isActive, true),
       filters.countryCode ? eq(supportedMobileWallets.countryCode, filters.countryCode) : undefined,
@@ -60,13 +61,13 @@ export namespace SupportedMobileWalletRepository {
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<SupportedMobileWalletSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(supportedMobileWallets).where(eq(supportedMobileWallets.id, id)).limit(1);
     return row ? toSelectType(row) : null;
   }
 
   export async function getBySlug(slug: string, tx?: DBTransaction): Promise<SupportedMobileWalletSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(supportedMobileWallets)
@@ -130,7 +131,7 @@ export namespace SupportedMobileWalletRepository {
     tx?: DBTransaction
   ): Promise<SupportedMobileWalletSelectType[]> {
     if (ids.length === 0) return [];
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(supportedMobileWallets)

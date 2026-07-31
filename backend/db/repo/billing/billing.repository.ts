@@ -1,5 +1,6 @@
-import { and, asc, count, desc, eq, inArray, isNull, ne, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNull, lte, ne, or, type SQL, sql } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -109,14 +110,19 @@ export namespace BillingRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
-    const t = tx || db;
-    const results = await t
+    const q = queryDb(tx);
+    const now = new Date();
+    const results = await q
       .select()
       .from(currencyExchangeRates)
       .where(
-        and(eq(currencyExchangeRates.fromCurrency, fromCurrency), eq(currencyExchangeRates.toCurrency, toCurrency))
+        and(
+          eq(currencyExchangeRates.fromCurrency, fromCurrency),
+          eq(currencyExchangeRates.toCurrency, toCurrency),
+          lte(currencyExchangeRates.effectiveDate, now)
+        )
       )
-      .orderBy(desc(currencyExchangeRates.effectiveDate))
+      .orderBy(desc(currencyExchangeRates.effectiveDate), desc(currencyExchangeRates.createdAt))
       .limit(1);
 
     if (results.length === 0) {
@@ -152,14 +158,19 @@ export namespace BillingRepository {
     tx?: DBTransaction,
     _locale?: string
   ): Promise<{ rate: string | null; stale: boolean }> => {
-    const queryDb = tx ?? db;
-    const results = await queryDb
+    const q = queryDb(tx);
+    const now = new Date();
+    const results = await q
       .select()
       .from(currencyExchangeRates)
       .where(
-        and(eq(currencyExchangeRates.fromCurrency, fromCurrency), eq(currencyExchangeRates.toCurrency, toCurrency))
+        and(
+          eq(currencyExchangeRates.fromCurrency, fromCurrency),
+          eq(currencyExchangeRates.toCurrency, toCurrency),
+          lte(currencyExchangeRates.effectiveDate, now)
+        )
       )
-      .orderBy(desc(currencyExchangeRates.effectiveDate))
+      .orderBy(desc(currencyExchangeRates.effectiveDate), desc(currencyExchangeRates.createdAt))
       .limit(1);
 
     if (results.length === 0) {
@@ -258,11 +269,11 @@ export namespace BillingRepository {
     pagination: Types.PaginationArgs | null = null,
     tx?: DBTransaction
   ): Promise<Types.CurrencyExchangeRateReturnType[]> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const limit = pagination ? pagination.perPage : 200;
     const offset = pagination ? pagination.offset : 0;
 
-    const rows = await queryDb
+    const rows = await q
       .select()
       .from(currencyExchangeRates)
       .orderBy(
@@ -335,7 +346,7 @@ export namespace BillingRepository {
     maxDays = 90,
     tx?: DBTransaction
   ): Promise<Types.ExchangeRateHistoryPaginatedResult> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const whereCondition = and(
       eq(currencyExchangeRates.fromCurrency, from),
       eq(currencyExchangeRates.toCurrency, to),
@@ -345,7 +356,7 @@ export namespace BillingRepository {
     const historyId = `exchange-rate-history-${from}-${to}`;
 
     if (!pagination) {
-      const rows = await queryDb
+      const rows = await q
         .select(exchangeRateHistoryFields)
         .from(currencyExchangeRates)
         .where(whereCondition)
@@ -360,14 +371,14 @@ export namespace BillingRepository {
     const offset = pagination.offset;
 
     const [dataRows, countResult] = await Promise.all([
-      queryDb
+      q
         .select(exchangeRateHistoryFields)
         .from(currencyExchangeRates)
         .where(whereCondition)
         .orderBy(desc(currencyExchangeRates.effectiveDate))
         .limit(cap)
         .offset(offset),
-      queryDb.select({ count: count() }).from(currencyExchangeRates).where(whereCondition),
+      q.select({ count: count() }).from(currencyExchangeRates).where(whereCondition),
     ]);
 
     const totalCount = countResult[0]?.count ?? 0;
@@ -412,16 +423,16 @@ export namespace BillingRepository {
     invoiceId: string,
     tx?: DBTransaction
   ): Promise<Types.PaymentSelectType[]> => {
-    const t = tx ?? db;
-    return t.select().from(payments).where(eq(payments.invoiceId, invoiceId));
+    const q = queryDb(tx);
+    return q.select().from(payments).where(eq(payments.invoiceId, invoiceId));
   };
 
   /**
    * Fetches rounding rules from system settings.
    */
   export const getRoundingRules = async (tx?: DBTransaction): Promise<number> => {
-    const t = tx || db;
-    const results = await t
+    const q = queryDb(tx);
+    const results = await q
       .select()
       .from(systemSettings)
       .where(eq(systemSettings.key, "billing_rounding_decimals"))
@@ -554,8 +565,9 @@ export namespace BillingRepository {
     return { id, rows, totalCount: rows.length, pageInfo: null };
   }
 
-  async function fetchOverdueInvoices(t: DBTransaction | typeof db): Promise<OverdueInvoiceRow[]> {
-    return t
+  async function fetchOverdueInvoices(t?: DBTransaction): Promise<OverdueInvoiceRow[]> {
+    const q = queryDb(t);
+    return q
       .select({
         invoiceId: invoices.id,
         parentId: invoices.parentId,
@@ -570,10 +582,11 @@ export namespace BillingRepository {
   }
 
   async function fetchParentUsers(
-    t: DBTransaction | typeof db,
+    t: DBTransaction | undefined,
     parentIds: string[]
   ): Promise<Map<string, ParentUserRow>> {
-    const parentUsers = await t
+    const q = queryDb(t);
+    const parentUsers = await q
       .select({
         parentId: parents.id,
         userId: parents.userId,
@@ -632,9 +645,7 @@ export namespace BillingRepository {
   }
 
   export const getUnpaidInvoicesSummary = async (tx?: DBTransaction): Promise<Types.UnpaidInvoicesSummaryResult> => {
-    const t = tx ?? db;
-
-    const overdueInvoices = await fetchOverdueInvoices(t);
+    const overdueInvoices = await fetchOverdueInvoices(tx);
 
     if (overdueInvoices.length === 0) {
       return createEmptySummary(0);
@@ -645,7 +656,7 @@ export namespace BillingRepository {
       return createEmptySummary(overdueInvoices.length);
     }
 
-    const parentMap = await fetchParentUsers(t, parentIds);
+    const parentMap = await fetchParentUsers(tx, parentIds);
     const groupedByParent = groupInvoicesByParent(overdueInvoices);
     const items = buildSummaryItems(groupedByParent, parentMap);
     const overdueAmountsByCurrency = groupAmountsByCurrency(overdueInvoices, "overdue-global");
@@ -756,17 +767,17 @@ export namespace BillingRepository {
     search: string | null | undefined = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const whereCondition = mergeWhereConditions(
       and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt)),
       buildInvoiceSearchCondition(search)
     );
 
     if (!pagination) {
-      return fetchUnpaginatedInvoices(queryDb, whereCondition, `parent-invoice-history-${parentId}`);
+      return fetchUnpaginatedInvoices(q as never, whereCondition, `parent-invoice-history-${parentId}`);
     }
 
-    return fetchInvoicesPaginatedData(queryDb, `parent-invoice-history-${parentId}`, whereCondition, pagination);
+    return fetchInvoicesPaginatedData(q as never, `parent-invoice-history-${parentId}`, whereCondition, pagination);
   };
 
   async function countInvoicesWithJoin(
@@ -837,20 +848,20 @@ export namespace BillingRepository {
     search: string | null | undefined = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const whereCondition = mergeWhereConditions(isNull(invoices.deletedAt), buildInvoiceSearchCondition(search));
 
     if (!pagination) {
-      return fetchUnpaginatedInvoices(queryDb, whereCondition, "admin-invoice-history");
+      return fetchUnpaginatedInvoices(q as never, whereCondition, "admin-invoice-history");
     }
 
-    return fetchInvoicesPaginatedData(queryDb, "admin-invoice-history", whereCondition, pagination);
+    return fetchInvoicesPaginatedData(q as never, "admin-invoice-history", whereCondition, pagination);
   };
 
   export const getAdminBillingSummary = async (tx?: DBTransaction): Promise<Types.AdminBillingSummaryResult> => {
-    const t = tx ?? db;
+    const q = queryDb(tx);
 
-    const unpaidResult = await t
+    const unpaidResult = await q
       .select({
         totalOutstanding: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
         pendingCount: count(),
@@ -858,7 +869,7 @@ export namespace BillingRepository {
       .from(invoices)
       .where(and(eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
 
-    const unpaidByCurrency = await t
+    const unpaidByCurrency = await q
       .select({
         currency: invoices.currency,
         amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
@@ -870,7 +881,7 @@ export namespace BillingRepository {
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
 
-    const mtdResult = await t
+    const mtdResult = await q
       .select({
         mtdRevenue: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
       })
@@ -879,7 +890,7 @@ export namespace BillingRepository {
         and(eq(invoices.status, "PAID"), isNull(invoices.deletedAt), sql`${invoices.paidDate} >= ${firstOfMonth}`)
       );
 
-    const mtdByCurrency = await t
+    const mtdByCurrency = await q
       .select({
         currency: invoices.currency,
         amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
@@ -888,7 +899,7 @@ export namespace BillingRepository {
       .where(and(eq(invoices.status, "PAID"), isNull(invoices.deletedAt), sql`${invoices.paidDate} >= ${firstOfMonth}`))
       .groupBy(invoices.currency);
 
-    const negBalanceResult = await t
+    const negBalanceResult = await q
       .select({
         negativeBalanceCount: count(),
       })
@@ -915,9 +926,9 @@ export namespace BillingRepository {
   };
 
   export const getStudentsWithCreditStatus = async (tx?: DBTransaction): Promise<Types.StudentCreditRow[]> => {
-    const t = tx ?? db;
+    const q = queryDb(tx);
 
-    const rows = await t
+    const rows = await q
       .select({
         id: students.id,
         studentName: students.name,
@@ -945,8 +956,9 @@ export namespace BillingRepository {
     }));
   };
 
-  async function fetchUnpaidInvoiceSummary(t: DBTransaction | typeof db, parentId: string) {
-    const unpaidResult = await t
+  async function fetchUnpaidInvoiceSummary(t: DBTransaction | undefined, parentId: string) {
+    const q = queryDb(t);
+    const unpaidResult = await q
       .select({
         outstandingBalance: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
         nextDueDate: sql<string | null>`MIN(${invoices.dueDate})`,
@@ -954,7 +966,7 @@ export namespace BillingRepository {
       .from(invoices)
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
 
-    const unpaidByCurrency = await t
+    const unpaidByCurrency = await q
       .select({
         currency: invoices.currency,
         amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
@@ -966,15 +978,16 @@ export namespace BillingRepository {
     return { unpaidResult, unpaidByCurrency };
   }
 
-  async function fetchPaidInvoiceSummary(t: DBTransaction | typeof db, parentId: string) {
-    const paidResult = await t
+  async function fetchPaidInvoiceSummary(t: DBTransaction | undefined, parentId: string) {
+    const q = queryDb(t);
+    const paidResult = await q
       .select({
         paidThisTerm: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
       })
       .from(invoices)
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAID"), isNull(invoices.deletedAt)));
 
-    const paidByCurrency = await t
+    const paidByCurrency = await q
       .select({
         currency: invoices.currency,
         amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
@@ -986,13 +999,14 @@ export namespace BillingRepository {
     return { paidResult, paidByCurrency };
   }
 
-  async function fetchParentBillingExtras(t: DBTransaction | typeof db, parentId: string) {
-    const activeStudentsResult = await t
+  async function fetchParentBillingExtras(t: DBTransaction | undefined, parentId: string) {
+    const q = queryDb(t);
+    const activeStudentsResult = await q
       .select({ activeStudents: count() })
       .from(students)
       .where(and(eq(students.parentId, parentId), ne(students.status, StudentStatus.DEACTIVATED)));
 
-    const [nextUnpaidRow] = await t
+    const [nextUnpaidRow] = await q
       .select({
         id: invoices.id,
         amount: invoices.amount,
@@ -1006,7 +1020,7 @@ export namespace BillingRepository {
       .orderBy(asc(invoices.dueDate))
       .limit(1);
 
-    const [pendingCountResult] = await t
+    const [pendingCountResult] = await q
       .select({ pendingPaymentCount: count() })
       .from(invoices)
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAYMENT_PENDING"), isNull(invoices.deletedAt)));
@@ -1018,11 +1032,9 @@ export namespace BillingRepository {
     parentId: string,
     tx?: DBTransaction
   ): Promise<Types.ParentBillingSummaryResult> => {
-    const t = tx ?? db;
-
-    const { unpaidResult, unpaidByCurrency } = await fetchUnpaidInvoiceSummary(t, parentId);
-    const { paidResult, paidByCurrency } = await fetchPaidInvoiceSummary(t, parentId);
-    const { activeStudentsResult, nextUnpaidRow, pendingCountResult } = await fetchParentBillingExtras(t, parentId);
+    const { unpaidResult, unpaidByCurrency } = await fetchUnpaidInvoiceSummary(tx, parentId);
+    const { paidResult, paidByCurrency } = await fetchPaidInvoiceSummary(tx, parentId);
+    const { activeStudentsResult, nextUnpaidRow, pendingCountResult } = await fetchParentBillingExtras(tx, parentId);
 
     return {
       id: `parent-billing-summary-${parentId}`,
@@ -1098,8 +1110,8 @@ export namespace BillingRepository {
     invoiceId: string,
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType | null> => {
-    const t = tx ?? db;
-    const results = await t
+    const q = queryDb(tx);
+    const results = await q
       .select()
       .from(invoices)
       .where(and(eq(invoices.id, invoiceId), isNull(invoices.deletedAt)))
@@ -1162,8 +1174,8 @@ export namespace BillingRepository {
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType[]> => {
     if (keys.length === 0) return [];
-    const t = tx ?? db;
-    return t
+    const q = queryDb(tx);
+    return q
       .select()
       .from(invoices)
       .where(inArray(invoices.idempotencyKey, [...keys]));
@@ -1224,8 +1236,8 @@ export namespace BillingRepository {
     tx?: DBTransaction
   ): Promise<Types.PaymentSelectType[]> => {
     if (keys.length === 0) return [];
-    const t = tx ?? db;
-    return t
+    const q = queryDb(tx);
+    return q
       .select()
       .from(payments)
       .where(inArray(payments.idempotencyKey, [...keys]));
@@ -1295,8 +1307,8 @@ export namespace BillingRepository {
     tx?: DBTransaction
   ): Promise<Types.InvoiceCoverageMonthSelectType[]> => {
     if (invoiceIds.length === 0) return [];
-    const t = tx ?? db;
-    return t
+    const q = queryDb(tx);
+    return q
       .select()
       .from(invoiceCoverageMonths)
       .where(inArray(invoiceCoverageMonths.invoiceId, [...invoiceIds]));

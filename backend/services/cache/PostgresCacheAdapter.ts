@@ -1,7 +1,12 @@
+import { sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { CacheDbRepository } from "@/backend/db/repo/shared/cache.repository";
+import { sessionCache } from "@/backend/db/schema/shared/cache";
 import logger from "@/backend/lib/logger";
+import { getEntityCacheStats } from "@/backend/services/cache/EntityCacheService";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
+import type { CacheStats } from "@/backend/services/shared/CacheInterface";
 
 /**
  * PostgreSQL Cache Adapter
@@ -81,13 +86,8 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   async expire(key: string, seconds: number): Promise<void> {
     try {
-      const entry = await CacheDbRepository.get(key);
-      if (!entry) {
-        return; // Key doesn't exist
-      }
-
       const expiresAt = new Date(Date.now() + seconds * 1000);
-      await CacheDbRepository.set(key, entry.value, expiresAt);
+      await CacheDbRepository.setExpiry(key, expiresAt);
     } catch (error) {
       logger.error("Postgres cache expire error:", error);
       throw error;
@@ -211,6 +211,29 @@ export class PostgresCacheAdapter implements ICacheService {
     } catch (error) {
       logger.error("Postgres cache disconnect error:", error);
       return Promise.resolve();
+    }
+  }
+
+  /**
+   * Get cache statistics and metrics
+   */
+  async stats(): Promise<CacheStats> {
+    try {
+      const q = queryDb();
+      const res = await q.select({ count: sql<number>`count(*)::int` }).from(sessionCache);
+      const size = res[0]?.count ?? 0;
+      return {
+        provider: "postgres",
+        size,
+        hitsByPrefix: getEntityCacheStats(),
+      };
+    } catch (error) {
+      logger.error("Postgres cache stats error:", error);
+      return {
+        provider: "postgres",
+        size: 0,
+        hitsByPrefix: getEntityCacheStats(),
+      };
     }
   }
 

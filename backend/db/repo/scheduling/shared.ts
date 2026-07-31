@@ -1,6 +1,6 @@
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 export type { DBTransaction };
@@ -221,8 +221,8 @@ export async function createRescheduledSuccessor(
 }
 
 export async function resolveStudentTimezone(studentId: string, tx?: DBTransaction): Promise<string> {
-  const queryDb = tx ?? db;
-  const [row] = await queryDb
+  const q = queryDb(tx);
+  const [row] = await q
     .select({
       override: students.timezoneOverride,
       parentTimezone: users.timezone,

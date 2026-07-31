@@ -1,4 +1,5 @@
 import { and, asc, eq, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
@@ -13,7 +14,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace UserMeetingConfigRepository {
   export async function listByUserId(userId: string, tx?: DBTransaction): Promise<UserMeetingConfigSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(userMeetingConfigs)
@@ -26,7 +27,7 @@ export namespace UserMeetingConfigRepository {
     tx?: DBTransaction,
     _locale?: string
   ): Promise<UserMeetingConfigSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(userMeetingConfigs).where(eq(userMeetingConfigs.id, id)).limit(1);
     return row ?? null;
   }
@@ -48,7 +49,7 @@ export namespace UserMeetingConfigRepository {
     userId: string,
     tx?: DBTransaction
   ): Promise<UserMeetingConfigSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(userMeetingConfigs)
@@ -205,7 +206,7 @@ export namespace UserMeetingConfigRepository {
     label: string | null | undefined,
     tx?: DBTransaction
   ): Promise<UserMeetingConfigSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(userMeetingConfigs)

@@ -410,5 +410,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `frontend/THEME_PALETTE.md` - Color tokens and access patterns
 - `docs/IDEMPOTENCY.md` - Idempotency patterns
 - `docs/drizzle/prepared-statements.md` - Drizzle Prepared Statements 2.0 pattern reference
+- `docs/drizzle/neon-http-client.md` - Neon HTTP Client & Provider-Agnostic Stateless Queries reference
 - `docs/graphql/dataloader-batching.md` - Pothos DataLoader batching pattern reference
+- `docs/services/entity-cache-service.md` - Entity Cache Service pattern reference
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines

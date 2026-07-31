@@ -1,4 +1,5 @@
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classSubjects } from "@/backend/db/schema";
@@ -8,7 +9,7 @@ import type { ClassSubjectSelectType, ClassSubjectSubmitInput, ClassSubjectUpdat
 export namespace ClassSubjectRepository {
   export async function listSubjects(categoryId?: string, tx?: DBTransaction): Promise<ClassSubjectSelectType[]> {
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       const conditions = [isNull(classSubjects.deletedAt)];
       if (categoryId) {
         conditions.push(eq(classSubjects.categoryId, categoryId));
@@ -31,7 +32,7 @@ export namespace ClassSubjectRepository {
     tx: DBTransaction | undefined
   ): Promise<ClassSubjectSelectType> {
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       const [result] = await client
         .select()
         .from(classSubjects)
@@ -179,7 +180,7 @@ export namespace ClassSubjectRepository {
   export async function findBySlugs(slugs: readonly string[], tx?: DBTransaction): Promise<ClassSubjectSelectType[]> {
     if (slugs.length === 0) return [];
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       return await client
         .select()
         .from(classSubjects)

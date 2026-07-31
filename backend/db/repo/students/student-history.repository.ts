@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { classInstancePerformance, classInstances, teachers, users } from "@/backend/db/schema";
 import type { SessionSummary } from "@/backend/types";
 
@@ -12,14 +12,14 @@ export namespace StudentHistoryRepository {
     _locale?: string,
     tx?: DBTransaction
   ): Promise<SessionSummary[]> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     // JavaScript months are 0-indexed in Date constructor, but here we expect 1-indexed from GraphQL API
     // e.g., month = 6 for June
     const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
     const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0)); // First day of next month
 
-    const rows = await queryDb
+    const rows = await q
       .select({
         instance: classInstances,
         teacher: teachers,
@@ -64,12 +64,12 @@ export namespace StudentHistoryRepository {
   }
 
   export async function getMonthlyMetrics(studentId: string, year: number, month: number, tx?: DBTransaction) {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
     const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
 
-    const metrics = await queryDb
+    const metrics = await q
       .select({
         totalClasses: sql<number>`count(*)`.mapWith(Number),
         hoursStudied: sql<number>`sum(${classInstances.durationMinutes}) / 60.0`.mapWith(Number),
@@ -101,9 +101,9 @@ export namespace StudentHistoryRepository {
   }
 
   export async function getSessionDetail(classInstanceId: string, _locale?: string, tx?: DBTransaction) {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const [row] = await queryDb
+    const [row] = await q
       .select({
         instance: classInstances,
         teacher: teachers,

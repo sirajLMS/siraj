@@ -180,4 +180,8 @@ export const cacheService = {
     const service = await getCacheService();
     return service.disconnect();
   },
+  stats: async () => {
+    const service = await getCacheService();
+    return service.stats();
+  },
 };

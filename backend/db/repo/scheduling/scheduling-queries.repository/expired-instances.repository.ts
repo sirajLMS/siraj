@@ -1,6 +1,6 @@
 import { and, eq, isNull, lt } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { classInstances } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
 
@@ -10,10 +10,10 @@ export const findExpiredPendingInstances = async (
   now: Date,
   tx?: DBTransaction
 ): Promise<Types.ClassInstanceEntity[]> => {
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
   const missedDeadline = new Date(now.getTime() - graceMinutes * 60_000);
 
-  return queryDb
+  return q
     .select()
     .from(classInstances)
     .where(

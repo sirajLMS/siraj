@@ -1,6 +1,6 @@
 import { and, eq, gte, inArray, isNull, lt, ne, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { classInstances, classSubjects, recurringSchedules, students } from "@/backend/db/schema";
 import type {
   FutureClassRow,
@@ -15,9 +15,9 @@ export async function getTeacherFutureClasses(
   toDate: Date,
   tx?: DBTransaction
 ): Promise<FutureClassRow[]> {
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
 
-  const rows = await queryDb
+  const rows = await q
     .select({
       id: classInstances.id,
       scheduledStartAt: classInstances.scheduledStartAt,
@@ -59,9 +59,9 @@ export const getWeeklyScheduleGrid = async (
   weekEnd: Date,
   tx?: DBTransaction
 ): Promise<WeeklyScheduleGridRow[]> => {
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
 
-  const rows = await queryDb
+  const rows = await q
     .select({
       id: classInstances.id,
       studentId: classInstances.studentId,
@@ -106,9 +106,9 @@ export const getWeeklyWorkloadMetrics = async (
   weekEnd: Date,
   tx?: DBTransaction
 ): Promise<WeeklyWorkloadMetrics> => {
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
 
-  const [metrics] = await queryDb
+  const [metrics] = await q
     .select({
       totalMinutes: sql<number>`coalesce(sum(${classInstances.durationMinutes}), 0)`.mapWith(Number),
       classCount: sql<number>`count(*)`.mapWith(Number),
@@ -140,11 +140,11 @@ export const getTeacherAssignedClasses = async (
   teacherId: string,
   tx?: DBTransaction
 ): Promise<TeacherAssignedClassRow[]> => {
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
   const fromDate = new Date();
   fromDate.setDate(fromDate.getDate() - 7);
 
-  const rows = await queryDb
+  const rows = await q
     .select({
       id: classInstances.id,
       studentName: students.name,

@@ -21,8 +21,9 @@ The backend follows a consistent pattern for defining and using types across all
 - Focus solely on data access operations
 - Apply business logic constraints at the service layer, not in repositories
 - Example: Using `{Entity}InsertType` for insert operations and `{Entity}SelectType` for select operations in `{entity}.repository.ts`
-- **Prepared Statements**: All simple read-only methods MUST use Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) defined at module level. See `docs/drizzle/prepared-statements.md` for the complete pattern reference.
-- **Batch Lookup Methods**: Repositories that support DataLoader batching MUST expose `findBy{Key}Ids(ids: string[], tx?)` methods returning `Map<string, T | null>`. Use `inArray(column, sql.placeholder("ids"))` with the transaction fallback pattern. See `docs/graphql/dataloader-batching.md`.
+- **Neon HTTP Client for Bare Reads**: All non-transactional read methods in database repositories MUST use `queryDb(tx)` from `@/backend/db`. See `docs/drizzle/neon-http-client.md`.
+- **Prepared Statements**: Simple read-only methods executing on TCP mode may use Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) defined at module level. Module-level prepared statements MUST be removed if replaced by `queryDb(tx)`. See `docs/drizzle/prepared-statements.md`.
+- **Batch Lookup Methods**: Repositories that support DataLoader batching MUST expose `findBy{Key}Ids(ids: string[], tx?)` methods returning `Map<string, T | null>`. Use `inArray(column, ids)` with plain arrays. See `docs/graphql/dataloader-batching.md`.
 
 ### 4. Service Layer (`backend/services/**/*.ts`)
 - Import and use types from `backend/types/` for function signatures
@@ -30,6 +31,7 @@ The backend follows a consistent pattern for defining and using types across all
 - Perform data transformations as needed between types
 - Example: Using `{Entity}SubmitInput` for input validation and `{Entity}ReturnType` for output in `{entity}.service.ts`
 - **Batch Service Methods**: Services called from GraphQL resolvers MUST expose batch versions (e.g., `resolveTeacherIdsForUsers(userIds: string[])`) returning `Map<string, T | null>` for DataLoader support. See `docs/graphql/dataloader-batching.md`.
+- **Hot-Resolver & Read Caching**: Hot read paths use `cachedRead` from `@/backend/services/cache` with identity+role-scoped key formats. Mutation write paths invoke tag invalidation helpers in `try/catch`. See `docs/services/entity-cache-service.md`.
 
 ### 5. GraphQL Layer (`backend/graphql/pothos/*.pothos.ts`)
 - Reference types from `backend/types/` for Pothos object implementations

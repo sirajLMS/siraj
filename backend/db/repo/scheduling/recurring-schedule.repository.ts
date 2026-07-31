@@ -1,4 +1,5 @@
 import { and, eq, inArray, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { teachers, users } from "@/backend/db/schema";
@@ -35,8 +36,8 @@ async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTran
 
 export namespace RecurringScheduleRepository {
   export async function findById(id: string, tx?: DBTransaction) {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
+    const q = queryDb(tx);
+    const [row] = await q
       .select({
         schedule: recurringSchedules,
         studentName: students.name,
@@ -53,8 +54,8 @@ export namespace RecurringScheduleRepository {
   }
 
   export async function findDaysByScheduleId(recurringScheduleId: string, tx?: DBTransaction) {
-    const queryDb = tx ?? db;
-    return queryDb
+    const q = queryDb(tx);
+    return q
       .select()
       .from(recurringScheduleDays)
       .where(eq(recurringScheduleDays.recurringScheduleId, recurringScheduleId));
@@ -65,8 +66,8 @@ export namespace RecurringScheduleRepository {
     tx?: DBTransaction
   ): Promise<RecurringScheduleEntity[]> {
     if (studentIds.length === 0) return [];
-    const queryDb = tx ?? db;
-    return queryDb
+    const q = queryDb(tx);
+    return q
       .select()
       .from(recurringSchedules)
       .where(inArray(recurringSchedules.studentId, [...studentIds]));
@@ -129,9 +130,9 @@ export namespace RecurringScheduleRepository {
     rateCurrency: RecurringScheduleEntity["rateCurrency"],
     tx?: DBTransaction
   ): Promise<RecurringScheduleEntity | null> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const now = new Date();
-    const [updated] = await queryDb
+    const [updated] = await q
       .update(recurringSchedules)
       .set({ hourlyRate, rateCurrency, updatedAt: now })
       .where(eq(recurringSchedules.id, recurringScheduleId))
@@ -147,8 +148,8 @@ export namespace RecurringScheduleRepository {
     if (keys.length === 0) return map;
 
     const scheduleIds = [...new Set(keys.map(key => key.recurringScheduleId))];
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select()
       .from(recurringScheduleDays)
       .where(inArray(recurringScheduleDays.recurringScheduleId, scheduleIds));

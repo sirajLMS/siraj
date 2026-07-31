@@ -1,4 +1,5 @@
 import { and, eq, inArray, or } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { supportedPaymentLinks } from "@/backend/db/schema";
@@ -30,7 +31,7 @@ function directionFilter(direction?: PaymentDirection) {
 
 export namespace SupportedPaymentLinkRepository {
   export async function listAll(tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(supportedPaymentLinks)
@@ -42,7 +43,7 @@ export namespace SupportedPaymentLinkRepository {
     filters: ListActiveFilters = {},
     tx?: DBTransaction
   ): Promise<SupportedPaymentLinkSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const conditions = [eq(supportedPaymentLinks.isActive, true), directionFilter(filters.direction)].filter(Boolean);
 
     return client
@@ -54,13 +55,13 @@ export namespace SupportedPaymentLinkRepository {
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(supportedPaymentLinks).where(eq(supportedPaymentLinks.id, id)).limit(1);
     return row ? toSelectType(row) : null;
   }
 
   export async function getBySlug(slug: string, tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client
       .select()
       .from(supportedPaymentLinks)
@@ -124,7 +125,7 @@ export namespace SupportedPaymentLinkRepository {
     tx?: DBTransaction
   ): Promise<SupportedPaymentLinkSelectType[]> {
     if (ids.length === 0) return [];
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(supportedPaymentLinks)

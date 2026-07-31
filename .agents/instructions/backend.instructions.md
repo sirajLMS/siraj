@@ -126,6 +126,8 @@ applyTo: "backend/**/*.ts"
 
 ### Database Access Patterns
 
+- **Neon HTTP Client for Bare Reads**: All non-transactional read methods in database repositories MUST use `queryDb(tx)` from `@/backend/db`. See `docs/drizzle/neon-http-client.md`.
+- **Prepared Statements**: Simple read-only methods executing on TCP mode may use Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) defined at module level. See `docs/drizzle/prepared-statements.md`.
 - Services used by Server Components must not rely on GraphQL-specific contexts - passed explicitly if needed
 - Drizzle `$inferSelect` / `$inferInsert` as foundation for all entity types
 - Database schema relations: `students.id` (PK), `teachers.userId` -> `users.id`, `classInstances.studentId` -> `students.id`, `classInstances.teacherId` -> `teachers.id`

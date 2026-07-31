@@ -1,6 +1,7 @@
 import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { cachedRead } from "@/backend/services/cache";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type {
   PaginationArgs,
@@ -71,17 +72,26 @@ export namespace ParentDashboardService {
       throw new Error(tFunc.parentNotFound);
     }
 
-    const [metrics, studentProgress, workshopPromo] = await Promise.all([
-      ParentRepository.getParentDashboardMetrics(parent.id),
-      ParentRepository.getParentStudentProgress(parent.id),
-      ParentRepository.getParentWorkshopPromo(parent.id),
-    ]);
+    const cacheKey = `ec:parent:dash:metrics:${parent.id}`;
 
-    return {
-      id: `parent-dashboard-metrics-${parent.id}`,
-      metrics,
-      studentProgress,
-      workshopPromo,
-    };
+    return await cachedRead(
+      cacheKey,
+      60,
+      async () => {
+        const [metrics, studentProgress, workshopPromo] = await Promise.all([
+          ParentRepository.getParentDashboardMetrics(parent.id),
+          ParentRepository.getParentStudentProgress(parent.id),
+          ParentRepository.getParentWorkshopPromo(parent.id),
+        ]);
+
+        return {
+          id: `parent-dashboard-metrics-${parent.id}`,
+          metrics,
+          studentProgress,
+          workshopPromo,
+        };
+      },
+      [`parent:dash:metrics:${parent.id}`, "dashboard:parent"]
+    );
   }
 }

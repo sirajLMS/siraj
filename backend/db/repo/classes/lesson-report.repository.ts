@@ -1,5 +1,6 @@
 import { and, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 import type { PgColumn } from "drizzle-orm/pg-core";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -86,8 +87,8 @@ function withReportJoins(query: ReportSelectBuilder) {
 }
 
 function reportsByIdQuery(whereClause: SQL, tx?: DBTransaction) {
-  const queryDb = tx ?? db;
-  return withReportJoins(queryDb.select(reportSelectFields)).where(whereClause);
+  const q = queryDb(tx);
+  return withReportJoins(q.select(reportSelectFields) as never).where(whereClause);
 }
 
 function buildPaginatedReportQuery(
@@ -109,9 +110,9 @@ async function findPaginatedReports(
   paginationArgs: PaginationArgs,
   tx?: DBTransaction
 ): Promise<LessonReportWithNames[]> {
-  const queryDb = tx ?? db;
-  const queryBuilder = queryDb.select(reportSelectFields);
-  const rows = await buildPaginatedReportQuery(queryBuilder, whereClause, orderBy, paginationArgs);
+  const q = queryDb(tx);
+  const queryBuilder = q.select(reportSelectFields);
+  const rows = await buildPaginatedReportQuery(queryBuilder as never, whereClause, orderBy, paginationArgs);
   return rows.map(mapReportWithNames);
 }
 
@@ -171,8 +172,8 @@ export namespace LessonReportRepository {
   }
 
   export async function countRecentApproved(tx?: DBTransaction): Promise<number> {
-    const queryDb = tx ?? db;
-    const [result] = await queryDb
+    const q = queryDb(tx);
+    const [result] = await q
       .select({ value: count() })
       .from(lessonReports)
       .where(eq(lessonReports.status, LessonReportStatus.APPROVED));
@@ -194,8 +195,8 @@ export namespace LessonReportRepository {
   }
 
   export async function countForStudent(studentId: string, tx?: DBTransaction): Promise<number> {
-    const queryDb = tx ?? db;
-    const [result] = await queryDb
+    const q = queryDb(tx);
+    const [result] = await q
       .select({ value: count() })
       .from(lessonReports)
       .where(eq(lessonReports.studentId, studentId));
@@ -245,12 +246,12 @@ export namespace LessonReportRepository {
   }
 
   export async function countPendingReviews(filters?: PendingReviewFilters, tx?: DBTransaction): Promise<number> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const conditions = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];
     if (filters?.teacherId) conditions.push(eq(lessonReports.teacherId, filters.teacherId));
     if (filters?.studentId) conditions.push(eq(lessonReports.studentId, filters.studentId));
 
-    const [result] = await queryDb
+    const [result] = await q
       .select({ value: count() })
       .from(lessonReports)
       .where(and(...conditions));
@@ -262,8 +263,8 @@ export namespace LessonReportRepository {
     tx?: DBTransaction
   ): Promise<LessonReportSelectType[]> {
     if (keys.length === 0) return [];
-    const queryDb = tx ?? db;
-    return queryDb
+    const q = queryDb(tx);
+    return q
       .select()
       .from(lessonReports)
       .where(inArray(lessonReports.idempotencyKey, [...keys]));

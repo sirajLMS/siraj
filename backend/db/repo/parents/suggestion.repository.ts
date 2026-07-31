@@ -1,4 +1,5 @@
 import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
@@ -19,9 +20,9 @@ export namespace SuggestionRepository {
   };
 
   export const insertSuggestion = async (input: SuggestionInsertInput, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const now = new Date();
-    const [created] = await queryDb
+    const [created] = await q
       .insert(suggestions)
       .values({
         parentId: input.parentId,
@@ -45,10 +46,10 @@ export namespace SuggestionRepository {
     tx?: DBTransaction,
     _locale?: string
   ) => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const now = new Date();
 
-    const [created] = await queryDb
+    const [created] = await q
       .insert(suggestions)
       .values({
         parentId: input.parentId,
@@ -70,11 +71,11 @@ export namespace SuggestionRepository {
     options: { limit: number; offset: number },
     tx?: DBTransaction
   ): Promise<SuggestionReturnType[]> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     const dupSuggestions = aliasedTable(suggestions, "dup_suggestions");
 
-    const rows = await queryDb
+    const rows = await q
       .select({
         id: suggestions.id,
         parentId: suggestions.parentId,
@@ -125,7 +126,7 @@ export namespace SuggestionRepository {
     options: { search?: string | null; status?: string | null; limit: number; offset: number },
     tx?: DBTransaction
   ): Promise<AdminSuggestionQueueResult> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     const dupSuggestions = aliasedTable(suggestions, "dup_suggestions");
 
@@ -141,7 +142,7 @@ export namespace SuggestionRepository {
 
     const whereClause = and(...conditions);
 
-    const rows = await queryDb
+    const rows = await q
       .select({
         id: suggestions.id,
         parentId: suggestions.parentId,
@@ -168,7 +169,7 @@ export namespace SuggestionRepository {
       .limit(options.limit)
       .offset(options.offset);
 
-    const [totalCount] = await queryDb
+    const [totalCount] = await q
       .select({ count: count() })
       .from(suggestions)
       .leftJoin(parents, eq(suggestions.parentId, parents.id))
@@ -203,12 +204,12 @@ export namespace SuggestionRepository {
     suggestionId: string,
     tx?: DBTransaction
   ): Promise<SuggestionDetailRow | null> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     const dupSuggestions = aliasedTable(suggestions, "dup_suggestions");
     const reviewerUsers = aliasedTable(users, "reviewer_users");
 
-    const results = await queryDb
+    const results = await q
       .select({
         id: suggestions.id,
         parentId: suggestions.parentId,
@@ -317,9 +318,9 @@ export namespace SuggestionRepository {
     excludeId: string,
     tx?: DBTransaction
   ): Promise<SuggestionSearchResult[]> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const rows = await queryDb
+    const rows = await q
       .select({
         id: suggestions.id,
         body: suggestions.body,
@@ -350,9 +351,9 @@ export namespace SuggestionRepository {
   };
 
   export const getSuggestionMetrics = async (tx?: DBTransaction): Promise<SuggestionMetrics> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const statusCounts = await queryDb
+    const statusCounts = await q
       .select({
         status: suggestions.status,
         count: count(),
@@ -368,7 +369,7 @@ export namespace SuggestionRepository {
     const duplicate =
       statusCounts.find((r: { status: string; count: number }) => r.status === SuggestionStatus.DUPLICATE)?.count ?? 0;
 
-    const [avgResult] = await queryDb
+    const [avgResult] = await q
       .select({
         avgHours: sql<number>`COALESCE(
           AVG(
@@ -394,14 +395,14 @@ export namespace SuggestionRepository {
   };
 
   export const getContributorStats = async (days: number, tx?: DBTransaction): Promise<SuggestionContributorStats> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
     const baseWhere = and(isNull(suggestions.deletedAt), gte(suggestions.createdAt, cutoffDate));
 
     const [contributorRows, uniqueContributorResult] = await Promise.all([
-      queryDb
+      q
         .select({
           parentId: suggestions.parentId,
           name: users.name,
@@ -414,7 +415,7 @@ export namespace SuggestionRepository {
         .groupBy(suggestions.parentId, users.name)
         .orderBy(desc(count()))
         .limit(10),
-      queryDb
+      q
         .select({
           count: sql<number>`COUNT(DISTINCT ${suggestions.parentId})`.mapWith(Number),
         })

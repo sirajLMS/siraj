@@ -1,6 +1,7 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import type { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { type ComplaintCategory, ComplaintStatus } from "@/backend/enum";
@@ -18,60 +19,6 @@ import type {
 } from "@/backend/types";
 import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
 
-// ============================================================================
-// Prepared Statements (Drizzle Prepared Statements 2.0)
-// ============================================================================
-// These are defined at module level to be compiled once and reused across requests.
-// Note: Prepared statements cannot be used inside transactions (they're tied to the session they were created with).
-
-const getComplaintByIdPrepared = db
-  .select({
-    id: complaints.id,
-    parentId: complaints.parentId,
-    parentName: users.name,
-    studentId: complaints.studentId,
-    studentName: students.name,
-    category: complaints.category,
-    submitterEmail: complaints.submitterEmail,
-    body: complaints.body,
-    status: complaints.status,
-    createdAt: complaints.createdAt,
-    updatedAt: complaints.updatedAt,
-  })
-  .from(complaints)
-  .leftJoin(parents, eq(complaints.parentId, parents.id))
-  .leftJoin(users, eq(parents.userId, users.id))
-  .leftJoin(students, eq(complaints.studentId, students.id))
-  .where(and(eq(complaints.id, sql.placeholder("complaintId")), isNull(complaints.deletedAt)))
-  .limit(1)
-  .prepare("get_complaint_by_id");
-
-const getUnansweredComplaintsPrepared = db
-  .select({
-    id: complaints.id,
-    body: complaints.body,
-    createdAt: complaints.createdAt,
-  })
-  .from(complaints)
-  .where(and(eq(complaints.status, sql.placeholder("status")), isNull(complaints.deletedAt)))
-  .orderBy(desc(complaints.createdAt))
-  .limit(sql.placeholder("limit"))
-  .prepare("get_unanswered_complaints");
-
-const getComplaintFilesPrepared = db
-  .select({
-    fileId: storageFiles.id,
-    publicUrl: storageFiles.path,
-    isProtected: storageFiles.isProtected,
-    usageType: complaintFiles.usageType,
-    createdAt: complaintFiles.createdAt,
-  })
-  .from(complaintFiles)
-  .innerJoin(storageFiles, eq(complaintFiles.fileId, storageFiles.id))
-  .where(eq(complaintFiles.complaintId, sql.placeholder("complaintId")))
-  .orderBy(desc(complaintFiles.createdAt))
-  .prepare("get_complaint_files");
-
 function formatDuration(hours: number): string {
   if (hours < 1) {
     return `${Math.round(hours * 60)}m`;
@@ -86,7 +33,7 @@ function formatDuration(hours: number): string {
 
 function buildComplaintQueueConditions(
   options: { search?: string | null; status?: string | null },
-  _queryDb: typeof db | DBTransaction
+  _queryDb: unknown
 ): SQL | undefined {
   const conditions = [isNull(complaints.deletedAt)];
 
@@ -101,8 +48,8 @@ function buildComplaintQueueConditions(
   return and(...conditions);
 }
 
-function buildComplaintQueueSelect(queryDb: typeof db | DBTransaction) {
-  return queryDb
+function buildComplaintQueueSelect(q: ReturnType<typeof queryDb>) {
+  return (q as typeof db)
     .select({
       id: complaints.id,
       parentId: complaints.parentId,
@@ -168,10 +115,10 @@ export namespace ComplaintRepository {
     input: ComplaintInsertInput,
     tx?: DBTransaction
   ): Promise<ComplaintSelectType> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const now = new Date();
 
-    const [created] = await queryDb
+    const [created] = await q
       .insert(complaints)
       .values({
         parentId: input.parentId,
@@ -198,10 +145,10 @@ export namespace ComplaintRepository {
     tx?: DBTransaction,
     _locale?: string
   ): Promise<ComplaintSelectType> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const now = new Date();
 
-    const [created] = await queryDb
+    const [created] = await q
       .insert(complaints)
       .values({
         ...input,
@@ -226,11 +173,11 @@ export namespace ComplaintRepository {
     pagination: PaginationArgs | null = null,
     tx?: DBTransaction
   ): Promise<ParentComplaintPaginatedResult> => {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     const whereCondition = and(eq(complaints.parentId, parentId), isNull(complaints.deletedAt));
 
-    const baseQuery = queryDb
+    const baseQuery = q
       .select({
         id: complaints.id,
         parentId: complaints.parentId,
@@ -251,7 +198,7 @@ export namespace ComplaintRepository {
 
     const [rows, countResult] = await Promise.all([
       queryWithPagination(baseQuery, pagination),
-      queryDb.select({ total: count() }).from(complaints).where(whereCondition),
+      q.select({ total: count() }).from(complaints).where(whereCondition),
     ]);
 
     const total = countResult[0]?.total ?? 0;
@@ -281,17 +228,17 @@ export namespace ComplaintRepository {
     options: { search?: string | null; status?: string | null; limit: number; offset: number },
     tx?: DBTransaction
   ): Promise<ComplaintQueueResult> => {
-    const queryDb = tx ?? db;
-    const whereClause = buildComplaintQueueConditions(options, queryDb);
+    const q = queryDb(tx);
+    const whereClause = buildComplaintQueueConditions(options, q);
 
-    const rows = await buildComplaintQueueSelect(queryDb)
+    const rows = await buildComplaintQueueSelect(q)
       .where(whereClause)
       .orderBy(desc(complaints.createdAt))
       .limit(options.limit)
       .offset(options.offset);
 
     const typedRows: ComplaintReturnType[] = rows.map(mapComplaintQueueRow);
-    const metrics = await getComplaintMetrics(whereClause, queryDb);
+    const metrics = await getComplaintMetrics(whereClause, tx);
 
     return {
       id: `complaint-queue-${Date.now()}`,
@@ -305,13 +252,10 @@ export namespace ComplaintRepository {
     paginationArgs: PaginationArgs | null,
     tx?: DBTransaction
   ): Promise<ComplaintQueuePaginatedResult> => {
-    const queryDb = tx ?? db;
-    const whereClause = buildComplaintQueueConditions(options, queryDb);
+    const q = queryDb(tx);
+    const whereClause = buildComplaintQueueConditions(options, q);
 
-    let rowsQuery = buildComplaintQueueSelect(queryDb)
-      .where(whereClause)
-      .orderBy(desc(complaints.createdAt))
-      .$dynamic();
+    let rowsQuery = buildComplaintQueueSelect(q).where(whereClause).orderBy(desc(complaints.createdAt)).$dynamic();
 
     if (paginationArgs) {
       rowsQuery = queryWithPagination(rowsQuery, paginationArgs);
@@ -319,7 +263,7 @@ export namespace ComplaintRepository {
 
     const [rows, countResult] = await Promise.all([
       rowsQuery,
-      queryDb
+      q
         .select({ total: count() })
         .from(complaints)
         .leftJoin(parents, eq(complaints.parentId, parents.id))
@@ -340,14 +284,9 @@ export namespace ComplaintRepository {
   };
 
   export const getComplaintById = async (complaintId: string, tx?: DBTransaction) => {
-    if (!tx) {
-      const result = await getComplaintByIdPrepared.execute({ complaintId });
-      return result[0] ?? null;
-    }
+    const q = queryDb(tx);
 
-    const queryDb = tx;
-
-    const results = await queryDb
+    const results = await q
       .select({
         id: complaints.id,
         parentId: complaints.parentId,
@@ -375,12 +314,12 @@ export namespace ComplaintRepository {
     whereClause?: SQL | undefined,
     txOrDb?: DBTransaction | typeof db
   ): Promise<ComplaintMetrics> => {
-    const queryDb = txOrDb ?? db;
+    const q = queryDb(typeof txOrDb === "function" ? undefined : txOrDb);
 
     const baseCondition = isNull(complaints.deletedAt);
     const finalWhereClause = whereClause ? and(baseCondition, whereClause) : baseCondition;
 
-    const statusCounts = await queryDb
+    const statusCounts = await q
       .select({
         status: complaints.status,
         count: count(),
@@ -395,7 +334,7 @@ export namespace ComplaintRepository {
     const answered = statusCounts.find(r => r.status === ComplaintStatus.ANSWERED)?.count ?? 0;
     const totalCount = statusCounts.reduce((sum, r) => sum + r.count, 0);
 
-    const [avgResult] = await queryDb
+    const [avgResult] = await q
       .select({
         avgHours: sql<number>`COALESCE(
           AVG(
@@ -420,13 +359,9 @@ export namespace ComplaintRepository {
   };
 
   export const getUnansweredComplaints = async (limit: number, tx?: DBTransaction) => {
-    if (!tx) {
-      return getUnansweredComplaintsPrepared.execute({ status: ComplaintStatus.UNANSWERED, limit });
-    }
+    const q = queryDb(tx);
 
-    const queryDb = tx;
-
-    return queryDb
+    return q
       .select({
         id: complaints.id,
         body: complaints.body,
@@ -442,13 +377,9 @@ export namespace ComplaintRepository {
     complaintId: string,
     tx?: DBTransaction
   ): Promise<ComplaintFileReturnType[]> => {
-    if (!tx) {
-      return getComplaintFilesPrepared.execute({ complaintId });
-    }
+    const q = queryDb(tx);
 
-    const queryDb = tx;
-
-    return queryDb
+    return q
       .select({
         fileId: storageFiles.id,
         publicUrl: storageFiles.path,

@@ -1,4 +1,5 @@
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classCategories } from "@/backend/db/schema";
@@ -11,20 +12,20 @@ export namespace ClassCategoryRepository {
    * Shared base query builder for non-deleted class categories.
    * Appends additional conditions to the existing `deletedAt IS NULL` filter.
    */
-  function selectActiveCategories(client: DBTransaction | typeof db, extraCondition?: ReturnType<typeof and>) {
+  function selectActiveCategories(client: typeof db | DBTransaction, extraCondition?: ReturnType<typeof and>) {
     const condition = extraCondition
       ? and(extraCondition, isNull(classCategories.deletedAt))
       : isNull(classCategories.deletedAt);
-    return client.select().from(classCategories).where(condition);
+    return (client as typeof db).select().from(classCategories).where(condition);
   }
 
   async function executeQuery<T>(
     tx: DBTransaction | undefined,
     errorLabel: string,
-    query: (client: DBTransaction | typeof db) => Promise<T>
+    query: (client: ReturnType<typeof queryDb>) => Promise<T>
   ): Promise<T> {
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       return await query(client);
     } catch (error) {
       logger.error(errorLabel, error);
@@ -34,14 +35,14 @@ export namespace ClassCategoryRepository {
 
   export async function listCategories(tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
     return executeQuery(tx, "Error listing class categories:", client =>
-      selectActiveCategories(client).orderBy(asc(classCategories.sortOrder))
+      selectActiveCategories(client as never).orderBy(asc(classCategories.sortOrder))
     );
   }
 
   export async function loadByIds(ids: string[], tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
     if (ids.length === 0) return [];
     return executeQuery(tx, "Error loading class categories by IDs:", client =>
-      selectActiveCategories(client, inArray(classCategories.id, ids))
+      selectActiveCategories(client as never, inArray(classCategories.id, ids))
     );
   }
 
@@ -51,7 +52,7 @@ export namespace ClassCategoryRepository {
     tx?: DBTransaction
   ): Promise<ClassCategorySelectType> {
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       const [result] = await client
         .select()
         .from(classCategories)
@@ -183,7 +184,7 @@ export namespace ClassCategoryRepository {
   export async function findBySlugs(slugs: readonly string[], tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
     if (slugs.length === 0) return [];
     return executeQuery(tx, "Error finding class categories by slugs:", client =>
-      selectActiveCategories(client, inArray(classCategories.slug, [...slugs]))
+      selectActiveCategories(client as never, inArray(classCategories.slug, [...slugs]))
     );
   }
 

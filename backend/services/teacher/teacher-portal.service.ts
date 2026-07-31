@@ -1,7 +1,9 @@
 import { SchedulingRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
 import { AppPermission, type CountryCode, type CurrencyCode } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
+import { invalidateTeacherWrite } from "@/backend/services/cache";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type {
   TeacherAssignedClassesResult,
@@ -170,6 +172,12 @@ export namespace TeacherPortalService {
 
     if (!success) {
       throw new Error(tErrors.notFound);
+    }
+
+    try {
+      await invalidateTeacherWrite(teacherId, userId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate teacher cache tags", { teacherId, userId, error: cacheErr });
     }
 
     return getOwnProfile(userId, tErrors, undefined, undefined);

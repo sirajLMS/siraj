@@ -1,4 +1,5 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { learningResources, subjectResources } from "@/backend/db/schema";
@@ -50,7 +51,7 @@ export namespace SubjectResourceRepository {
     tx?: DBTransaction
   ): Promise<SubjectResourceReturnType[]> {
     try {
-      const client = tx ?? db;
+      const client = queryDb(tx);
       const rows = await client
         .select(resourceSelectColumns)
         .from(subjectResources)
@@ -71,7 +72,7 @@ export namespace SubjectResourceRepository {
   ): Promise<Map<string, SubjectResourceReturnType[]>> {
     try {
       if (subjectIds.length === 0) return new Map();
-      const client = tx ?? db;
+      const client = queryDb(tx);
       const rows = await client
         .select(resourceSelectColumns)
         .from(subjectResources)

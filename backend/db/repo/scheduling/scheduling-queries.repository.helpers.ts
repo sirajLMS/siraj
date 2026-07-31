@@ -1,6 +1,6 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { classInstances, parents, students, teachers, users } from "@/backend/db/schema";
 
 /**
@@ -95,10 +95,10 @@ export async function getClassInstanceAffectedUsers(
 ): Promise<ClassInstanceAffectedUsers | null> {
   if (!classInstanceId) return null;
 
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
   const liveInstanceFilter = and(eq(classInstances.id, classInstanceId), isNull(classInstances.deletedAt));
 
-  const [parentRow] = await queryDb
+  const [parentRow] = await q
     .select({
       studentId: classInstances.studentId,
       studentUserId: students.userId,
@@ -113,7 +113,7 @@ export async function getClassInstanceAffectedUsers(
 
   if (!parentRow) return null;
 
-  const [teacherRow] = await queryDb
+  const [teacherRow] = await q
     .select({
       teacherUserId: teachers.userId,
     })
@@ -159,8 +159,8 @@ export async function getClassInstanceAffectedUsersForTeacher(
 ): Promise<ClassInstanceWithAffectedUsers[]> {
   if (!teacherId) return [];
 
-  const queryDb = tx ?? db;
-  const futureInstanceIds = await queryDb
+  const q = queryDb(tx);
+  const futureInstanceIds = await q
     .select({ id: classInstances.id })
     .from(classInstances)
     .where(
@@ -175,7 +175,7 @@ export async function getClassInstanceAffectedUsersForTeacher(
 
   const ids = futureInstanceIds.map(row => row.id);
 
-  const parentRows = await queryDb
+  const parentRows = await q
     .select({
       classInstanceId: classInstances.id,
       studentId: classInstances.studentId,
@@ -188,7 +188,7 @@ export async function getClassInstanceAffectedUsersForTeacher(
     .innerJoin(users, eq(parents.userId, users.id))
     .where(and(inArray(classInstances.id, ids), isNull(classInstances.deletedAt)));
 
-  const [teacherUser] = await queryDb
+  const [teacherUser] = await q
     .select({ teacherUserId: users.id })
     .from(teachers)
     .innerJoin(users, eq(teachers.userId, users.id))

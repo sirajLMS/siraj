@@ -34,30 +34,48 @@ export namespace SessionService {
 
     // 1. Fast path — session was already stored with HMAC hash
     const hmacSession = await SessionRepository.findByHmacHash(hmacHash);
+    let session: SessionSelectType | null;
     if (hmacSession) {
-      return await SessionRepository.validate(rawSessionId);
+      session = await SessionRepository.validate(rawSessionId);
+    } else {
+      // 2. Slow path — try legacy SHA-256 hash for sessions created before HMAC migration
+      const legacySession = await SessionRepository.findByLegacyHash(legacyHash);
+      if (!legacySession) {
+        return null;
+      }
+
+      // 3. Verify and rehash — move the stored hash from legacy to HMAC
+      if (!legacySession.hashedId || !legacySession.userId) {
+        return null;
+      }
+      const verification = verifyAndMigrateSessionHash(rawSessionId, legacySession.hashedId);
+      if (!verification.valid || !verification.needsRehash || !verification.newHash) {
+        return null;
+      }
+
+      logger.info("Migrating legacy session hash to HMAC", { userId: legacySession.userId });
+      await SessionRepository.rehashSession(legacySession.hashedId, verification.newHash, legacySession.userId);
+
+      // 4. Re-validate under the new HMAC key (handles TTL & activity touch)
+      session = await SessionRepository.validate(rawSessionId);
     }
 
-    // 2. Slow path — try legacy SHA-256 hash for sessions created before HMAC migration
-    const legacySession = await SessionRepository.findByLegacyHash(legacyHash);
-    if (!legacySession) {
+    if (!session?.userId) {
       return null;
     }
 
-    // 3. Verify and rehash — move the stored hash from legacy to HMAC
-    if (!legacySession.hashedId || !legacySession.userId) {
-      return null;
-    }
-    const verification = verifyAndMigrateSessionHash(rawSessionId, legacySession.hashedId);
-    if (!verification.valid || !verification.needsRehash || !verification.newHash) {
+    // 5. Verify the user actually exists in the database (handles orphan sessions from deleted/purged users)
+    const safeUser = await UserRepository.findSafeById(session.userId);
+    if (!safeUser) {
+      logger.warn("[SessionService] Session references non-existent user, purging orphan session", {
+        sessionId: rawSessionId,
+        userId: session.userId,
+      });
+      await SessionRepository.deleteSessionById(rawSessionId).catch(() => {});
       return null;
     }
 
-    logger.info("Migrating legacy session hash to HMAC", { userId: legacySession.userId });
-    await SessionRepository.rehashSession(legacySession.hashedId, verification.newHash, legacySession.userId);
-
-    // 4. Re-validate under the new HMAC key (handles TTL & activity touch)
-    return await SessionRepository.validate(rawSessionId);
+    return session;
   }
 
   export async function getCurrentUserProfile(userId: string): Promise<CurrentUserProfile> {

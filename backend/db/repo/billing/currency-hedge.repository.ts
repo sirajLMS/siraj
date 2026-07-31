@@ -1,4 +1,5 @@
 import { desc, eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { currencyHedges } from "@/backend/db/schema";
@@ -12,12 +13,12 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace CurrencyHedgeRepository {
   export async function listAll(tx?: DBTransaction): Promise<CurrencyHedgeSelectType[]> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client.select().from(currencyHedges).orderBy(desc(currencyHedges.updatedAt));
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<CurrencyHedgeSelectType | null> {
-    const client = tx ?? db;
+    const client = queryDb(tx);
     const [row] = await client.select().from(currencyHedges).where(eq(currencyHedges.id, id)).limit(1);
     return row ?? null;
   }
@@ -80,7 +81,7 @@ export namespace CurrencyHedgeRepository {
     tx?: DBTransaction
   ): Promise<CurrencyHedgeSelectType[]> {
     if (currencies.length === 0) return [];
-    const client = tx ?? db;
+    const client = queryDb(tx);
     return client
       .select()
       .from(currencyHedges)

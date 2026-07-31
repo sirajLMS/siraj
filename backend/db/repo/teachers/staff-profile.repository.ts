@@ -1,4 +1,5 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
@@ -254,7 +255,7 @@ export namespace StaffProfileRepository {
     options: { search?: string | null; limit: number; permissionGroupFilter?: string | null },
     tx?: DBTransaction
   ): Promise<StaffDirectoryAutocompleteRow[]> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const filters: ManagerDirectoryFilters = {
       roleFilter: options.permissionGroupFilter ?? null,
     };
@@ -268,7 +269,7 @@ export namespace StaffProfileRepository {
 
     const whereClause = searchConditions.length > 0 ? and(roleWhere, searchConditions[0]) : roleWhere;
 
-    return await queryDb
+    return await q
       .select({
         id: users.id,
         name: users.name,
@@ -317,11 +318,11 @@ export namespace StaffProfileRepository {
   }
 
   export async function getOnboardingMetrics(tx?: DBTransaction): Promise<OnboardingMetricsResult> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     const ninetyDaysAgo = sql`NOW() - INTERVAL '90 days'`;
 
-    const result = await queryDb
+    const result = await q
       .select({
         activeStaff: sql<number>`COUNT(*) FILTER (WHERE ${users.status} = 'ACTIVATED')`.mapWith(Number),
         pendingApproval: sql<number>`COUNT(*) FILTER (WHERE ${users.status} = 'DEACTIVATED')`.mapWith(Number),
@@ -344,10 +345,10 @@ export namespace StaffProfileRepository {
 
   async function findManagerDirectoryRow(
     whereCondition: ReturnType<typeof eq>,
-    queryDb: typeof db | DBTransaction,
+    queryDbInstance: typeof db | DBTransaction,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
-    const results = await queryDb
+    const results = await queryDbInstance
       .select(MANAGER_DIRECTORY_SELECT)
       .from(staffProfiles)
       .innerJoin(users, eq(staffProfiles.userId, users.id))
@@ -364,8 +365,8 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
-    const queryDb = tx ?? db;
-    return findManagerDirectoryRow(eq(users.id, userId), queryDb, locale);
+    const q = queryDb(tx);
+    return findManagerDirectoryRow(eq(users.id, userId), q as never, locale);
   }
 
   export async function findByStaffProfileId(
@@ -373,8 +374,8 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
-    const queryDb = tx ?? db;
-    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), queryDb, locale);
+    const q = queryDb(tx);
+    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), q as never, locale);
   }
 
   export async function updateManagerProfile(
@@ -445,9 +446,9 @@ export namespace StaffProfileRepository {
   }
 
   export async function getUserPermissionGroupSlugs(userId: string, tx?: DBTransaction): Promise<string[]> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const results = await queryDb
+    const results = await q
       .select({ slug: permissionGroups.slug })
       .from(userPermissionGroups)
       .innerJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
@@ -461,10 +462,10 @@ export namespace StaffProfileRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<StaffPermissionGroupReturnType[]> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const key = localeJsonKey(locale);
 
-    const rows = await queryDb
+    const rows = await q
       .select({
         id: permissionGroups.id,
         name: permissionGroups.name,
@@ -491,9 +492,9 @@ export namespace StaffProfileRepository {
     userId: string,
     tx?: DBTransaction
   ): Promise<StaffPermissionOverrideReturnType[]> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const rows = await queryDb
+    const rows = await q
       .select({
         permissionId: userPermissionOverrides.permissionId,
         permissionKey: permissions.key,

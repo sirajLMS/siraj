@@ -1,4 +1,5 @@
 import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
@@ -48,26 +49,6 @@ import type {
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
-
-// ============================================================================
-// Prepared Statements (Drizzle Prepared Statements 2.0)
-// ============================================================================
-// These are defined at module level to be compiled once and reused across requests.
-// Note: Prepared statements cannot be used inside transactions (they're tied to the session they were created with).
-
-const findByUserIdPrepared = db
-  .select()
-  .from(parents)
-  .where(eq(parents.userId, sql.placeholder("userId")))
-  .limit(1)
-  .prepare("find_parent_by_user_id");
-
-const findUserIdByParentIdPrepared = db
-  .select({ userId: parents.userId })
-  .from(parents)
-  .where(eq(parents.id, sql.placeholder("parentId")))
-  .limit(1)
-  .prepare("find_user_id_by_parent_id");
 
 export namespace ParentRepository {
   export async function create(
@@ -408,28 +389,22 @@ export namespace ParentRepository {
   };
 
   export const findByUserId = async (userId: string, tx?: DBTransaction) => {
-    if (!tx) {
-      const result = await findByUserIdPrepared.execute({ userId });
-      return result[0] ?? null;
-    }
-    const [parent] = await tx.select().from(parents).where(eq(parents.userId, userId)).limit(1);
+    const q = queryDb(tx);
+    const [parent] = await q.select().from(parents).where(eq(parents.userId, userId)).limit(1);
     return parent ?? null;
   };
 
   export const findUserIdByParentId = async (parentId: string, tx?: DBTransaction): Promise<string | null> => {
-    if (!tx) {
-      const result = await findUserIdByParentIdPrepared.execute({ parentId });
-      return result[0]?.userId ?? null;
-    }
-    const [parent] = await tx.select({ userId: parents.userId }).from(parents).where(eq(parents.id, parentId)).limit(1);
+    const q = queryDb(tx);
+    const [parent] = await q.select({ userId: parents.userId }).from(parents).where(eq(parents.id, parentId)).limit(1);
     return parent?.userId ?? null;
   };
 
   export const findByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<Map<string, string | null>> => {
     if (userIds.length === 0) return new Map();
 
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const q = queryDb(tx);
+    const rows = await q
       .select({ userId: parents.userId, parentId: parents.id })
       .from(parents)
       .where(inArray(parents.userId, userIds));

@@ -4,6 +4,7 @@ import { parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
+import { invalidateParentWrite } from "@/backend/services/cache";
 import type {
   AssociatedStudentResult,
   DeactivateParentResult,
@@ -189,6 +190,12 @@ export namespace ParentProfileService {
       });
     }
 
+    try {
+      await invalidateParentWrite(parentId, result.userId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate parent cache tags", { parentId, userId: result.userId, error: cacheErr });
+    }
+
     return {
       id: result.id,
       userId: result.userId,
@@ -208,6 +215,12 @@ export namespace ParentProfileService {
     await requirePermission(actorUserId, AppPermission.PARENT_MANAGE_STATUS, locale);
 
     const result = await ParentRepository.reactivateParent(parentId, undefined, locale);
+
+    try {
+      await invalidateParentWrite(parentId, result.userId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate parent cache tags", { parentId, userId: result.userId, error: cacheErr });
+    }
 
     return {
       id: result.id,
@@ -248,6 +261,13 @@ export namespace ParentProfileService {
     }
 
     const updated = await ParentRepository.updateParentProfile(parentId, repoInput, locale);
+
+    try {
+      await invalidateParentWrite(parentId, actorUserId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate parent cache tags", { parentId, userId: actorUserId, error: cacheErr });
+    }
+
     return toParentProfileResult(updated);
   }
 
@@ -274,6 +294,13 @@ export namespace ParentProfileService {
     }
 
     const updated = await ParentRepository.updateParentProfile(parentId, repoInput, locale);
+
+    try {
+      await invalidateParentWrite(parentId, updated.userId);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate parent cache tags", { parentId, userId: updated.userId, error: cacheErr });
+    }
+
     return toParentProfileResult(updated);
   }
 }

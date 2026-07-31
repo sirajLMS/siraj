@@ -19,23 +19,23 @@ every repository still routes bare reads through the stateful pooled/WebSocket `
 
 ### Feature Summary
 
-Roll out the Neon HTTP single-fetch client to the repository layer's non-transactional read paths, gated
-by a new `isNeonHttpEligible()` runtime guard that prevents the helpers from being constructed against a
-non-Neon database (a Neon-specific `/sql` HTTP endpoint that plain Postgres does not serve).
+Roll out the HTTP single-fetch client to the repository layer's non-transactional read paths via a provider-agnostic `queryDb(tx)` factory handle. The factory encapsulates runtime gating (`getActiveHttpProvider()`, `isNeonHttpEligible()`) and returns a cached HTTP database singleton (`getStatelessHttpDb()`) when eligible, or falls back to `tx` / `db`. This avoids hardcoding vendor-specific logic in repository files while supporting future stateless DB providers (e.g. Supabase, Turso).
 
 ### Business Value
 
 - Faster cold-start and per-query latency (~15-30 ms saved) on Vercel serverless Lambdas.
 - Connection-limit protection: HTTP single-fetch does not consume PostgreSQL `max_connections` pool slots.
 - Architecture-conforming migration seam (repository layer, per `backend/AGENTS.md`).
+- Provider flexibility: Decouples 52+ repository files from vendor specifics (Neon, Supabase, etc.).
 
 ### Scope
 
 **In scope:**
-- Add `isNeonHttpEligible()` runtime guard + internal guards inside `getNeonHttpDb()`/`getNeonHttpClient()`.
+- Add `isNeonHttpEligible()`, `getActiveHttpProvider()`, and `getStatelessHttpDb()` with singleton caching + internal guards inside `getNeonHttpDb()`/`getNeonHttpClient()`.
+- Export `queryDb(tx?: DBTransaction)` from `backend/db/drizzleDb.ts` as the canonical repository query handle.
 - Migrate the **non-tx read paths** of repository files under `backend/db/repo/**` to use
-  `isNeonHttpEligible() ? getNeonHttpDb() : db` for the bare-`db` branch (the `tx` branch stays on `tx`).
-- Replace prepared-statement branches on the non-tx path with plain `httpDb.select(...)` queries
+  `queryDb(tx)` (which resolves `tx ?? (getStatelessHttpDb() ?? db)`).
+- Replace prepared-statement branches on the non-tx path with plain queries executed over `queryDb(tx)`
   (prepared statements are not supported on `drizzle-orm/neon-http`).
 - Knowledge propagation: canonical docs + AGENTS.md/instruction updates.
 
@@ -99,17 +99,30 @@ non-Neon database, so that local dev against plain Postgres does not silently PO
    environment NOT eligible (prevents the `https://localhost/sql` failure mode).
 6. IF env var `DB_NEON_HTTP_ENABLED` is set to the string `"false"` THEN system SHALL consider the
    environment NOT eligible (kill-switch for fast rollback without redeploy).
-7. WHEN `isNeonHttpEligible()` is exported THEN system SHALL expose it from `backend/db/connection-strategy.ts`
-   and re-export it from `backend/db/drizzleDb.ts` alongside the existing `getNeonHttpDb` re-export, so
-   callers can branch without invoking the singleton constructor.
-8. The guard SHALL be pure and idempotent — reading env directly each call (no caching that could go stale
-   on `clearDbConnectionSingleton()`).
+7. WHEN `queryDb(tx?: DBTransaction)` is exported THEN system SHALL expose it from `backend/db/drizzleDb.ts`
+   as the canonical repository query handle, encapsulating `isNeonHttpEligible()`, provider selection,
+   singleton caching via `getStatelessHttpDb()`, and `tx` prioritization.
+8. The guard and factory SHALL be pure, idempotent, and backed by singleton caching (reusing `getGlobalSingleton`).
 
 #### Additional Details
 
 - **Assumptions:** `DATABASE_URL` is always set when the app boots (`drizzleDb.ts:20-24` exits otherwise).
 - **Case-sensitivity fix:** `connection-strategy.ts:27`'s `DB_PROVIDER` comparison is case-sensitive today;
   the guard SHOULD mirror that but lowercases for the eligibility check to harden it.
+
+### Requirement 1.1: Early Provider Integration Smoke Test (`test/integration/db/query-db.integration.test.ts`)
+
+**Priority:** High  **Complexity:** Low  **Dependencies:** R1
+
+**User Story:** As a developer, I want an integration smoke test under `test/integration/db/` created immediately after `queryDb` foundation is built, so that we empirically verify that live HTTP query execution works before migrating any repository files.
+
+#### Acceptance Criteria
+
+1. WHEN `test/integration/db/query-db.integration.test.ts` is created THEN system SHALL place it under `test/integration/db/` per `test/integration/AGENTS.md`.
+2. WHEN `process.env.NEON_TEST_DATABASE_URL` is missing or contains `"ep-example"` THEN system SHALL skip the suite via `describeLiveWhen(hasNeonTestUrl, ...)` (not fail).
+3. WHEN `NEON_TEST_DATABASE_URL` is present AND valid THEN system SHALL execute a real HTTP single-fetch POST query against `NEON_TEST_DATABASE_URL` using `queryDb()` (or `getNeonHttpDb()`) and assert `{ test: 1 }`.
+4. WHEN debug logging is needed THEN system SHALL log using `testLogger` from `@/shared/lib/logger/testlogger` (NEVER `console.log`).
+5. WHEN `bun run test:integration` runs THEN the new integration test SHALL be included in the provider smoke runner.
 
 ### Requirement 2: Repository Pilot (`user.repository.ts`)
 
@@ -122,18 +135,18 @@ helper, and SSR page titles — the highest-traffic single reads in the app).
 #### Acceptance Criteria
 
 1. WHEN `backend/db/repo/users/user.repository.ts` `findById(id)` runs AND `DB_PROVIDER=neon`/Neon host
-   THEN system SHALL execute via `getNeonHttpDb()` (plain `httpDb.select(...).from(users).where(eq(...))`,
+   THEN system SHALL execute via `queryDb(tx)` (plain `queryDb(tx).select(...).from(users).where(eq(...))`,
    NOT a prepared statement).
-2. WHEN `findSafeById(id, tx?)` runs WITHOUT a `tx` THEN system SHALL use `getNeonHttpDb()` (plain query);
-   WHEN it runs WITH a `tx` THEN system SHALL use the passed `tx` (NEVER `httpDb`).
+2. WHEN `findSafeById(id, tx?)` runs WITHOUT a `tx` THEN system SHALL use `queryDb(tx)` (which resolves the HTTP singleton);
+   WHEN it runs WITH a `tx` THEN system SHALL use the passed `tx` (NEVER an HTTP driver).
 3. WHEN `findByEmail(email)`, `loadByIds(ids, locale)`, `findDisplayCurrenciesByIds(ids)`, or
    `existsByEmail(email, tx?)` (non-tx branch) runs on an eligible environment THEN system SHALL route via
-   `getNeonHttpDb()`.
+   `queryDb(tx)`.
 4. WHEN any of these methods runs on a non-eligible environment (local dev, `DB_PROVIDER=postgres`,
    `DB_CONNECTION_MODE=pg`) THEN system SHALL fall back to the existing `db` singleton (no behavior change).
 5. WHEN module-level prepared statements (`findByIdPrepared`, `findByEmailPrepared`, `findSafeByIdPrepared`,
    `existsByEmailPrepared`) are currently used on the non-tx path THEN system SHALL replace that non-tx
-   branch with the plain `getNeonHttpDb().select(...)` query (prepared statements are NOT supported on
+   branch with a plain `queryDb(tx).select(...)` query (prepared statements are NOT supported on
    `drizzle-orm/neon-http`).
 6. WHEN the migrated repository's callers (gqlContext, auth mutation/query, teacher-dashboard service,
    FX-display pothos, cached-page-title helpers) run THEN system SHALL produce identical results to the
@@ -157,9 +170,9 @@ preserved and per-query latency drops across the app — not just for the `users
 
 1. WHEN a repository file from the approved batch list (see `tasks.md` Phase 3 table) has a read method
    whose non-tx branch currently runs against `db` THEN system SHALL migrate that branch to
-   `isNeonHttpEligible() ? getNeonHttpDb() : db`.
+   `queryDb(tx)` (or `const q = queryDb(tx);`).
 2. WHEN a method has a `tx` parameter AND a `tx` IS passed by the caller THEN system SHALL keep using `tx`
-   (NEVER `httpDb`) — the `tx ? tx : <http-or-db>` branch ordering is mandatory.
+   (NEVER `httpDb`) — `queryDb(tx)` automatically prioritizes `tx` first.
 3. WHEN a method is a multi-query pipeline (e.g., paginated data+count in `Promise.all`, sequential
    dependent sub-queries) THEN system SHALL leave that method unchanged (out of scope) but MAY migrate
    other single-read methods in the same file.
@@ -168,7 +181,7 @@ preserved and per-query latency drops across the app — not just for the `users
 5. WHEN a method's primary purpose is a write (INSERT/UPDATE/DELETE) or a stored-procedure that writes
    THEN system SHALL leave it unchanged.
 6. WHEN a method's non-tx branch uses a module-level prepared statement THEN system SHALL replace that
-   non-tx branch with a plain `getNeonHttpDb().select(...)` query (prepared statements unsupported on
+   non-tx branch with a plain `queryDb(tx).select(...)` query (prepared statements unsupported on
    `neon-http`).
 7. WHEN all batch repositories are migrated THEN system SHALL run `bun test:db`, `bun test:services`,
    `bun test:graphql` — all MUST exit zero failures.
@@ -184,8 +197,8 @@ preserved and per-query latency drops across the app — not just for the `users
 1. WHEN a repository method runs inside `db.transaction(runner)` (i.e., `runInTransaction`/`withTransaction`)
    THEN system SHALL NOT route any query in that runner through `httpDb` — `drizzle-orm/neon-http`'s
    `.transaction()` throws at runtime (the method type-checks fine).
-2. WHEN a repository method accepts `tx?: DBTransaction` AND the caller passes `tx` THEN system SHALL use
-   `tx`, even on an eligible environment.
+2. WHEN a repository method accepts `tx?: DBTransaction` AND the caller passes `tx` THEN `queryDb(tx)` SHALL
+   return `tx`, even on an eligible environment.
 3. WHEN a service layers a `db.transaction(async tx => repo.read(tx, ...))` THEN system SHALL preserve
    the `tx` passthrough end-to-end (no silent `httpDb` substitution that would break the transaction).
 

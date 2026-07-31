@@ -1,6 +1,6 @@
 import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
 import { parseCurrencyCode } from "@/backend/lib/enum";
@@ -35,7 +35,7 @@ async function fetchPaidAmountsByGroup(
   tx: DBTransaction | undefined,
   studentJoin: boolean
 ): Promise<Map<string, AttendanceReportPaidAmountReturnType[]>> {
-  const queryDb = tx ?? db;
+  const q = queryDb(tx);
   const conditions = [
     gte(classInstances.scheduledStartAt, filters.fromDate),
     lte(classInstances.scheduledStartAt, filters.toDate),
@@ -48,7 +48,7 @@ async function fetchPaidAmountsByGroup(
   }
 
   const paidRows = studentJoin
-    ? await queryDb
+    ? await q
         .select({
           groupKey: sql<string>`${groupKeyExpr}::text`,
           currency: classInstances.rateCurrency,
@@ -60,7 +60,7 @@ async function fetchPaidAmountsByGroup(
         .leftJoin(users, eq(users.id, teachers.userId))
         .where(and(...conditions))
         .groupBy(groupKeyExpr, classInstances.rateCurrency)
-    : await queryDb
+    : await q
         .select({
           groupKey: sql<string>`${groupKeyExpr}::text`,
           currency: classInstances.rateCurrency,
@@ -127,7 +127,7 @@ export namespace ReportRepository {
     try {
       logger.debug(`[ReportRepository.generateAttendanceReport] Compiling query for groupBy: ${filters.groupBy}`);
 
-      const queryDb = tx ?? db;
+      const q = queryDb(tx);
 
       const conditions = [
         gte(classInstances.scheduledStartAt, filters.fromDate),
@@ -141,7 +141,7 @@ export namespace ReportRepository {
       const { groupKeyExpr, groupLabelExpr } = buildGroupingExpressions(filters.groupBy);
 
       if (filters.groupBy === ReportGroupingMode.STUDENT) {
-        const results = await queryDb
+        const results = await q
           .select({
             groupKey: sql<string>`${groupKeyExpr}::text`,
             groupLabel: sql<string>`COALESCE(${groupLabelExpr}, ${groupKeyExpr}::text)`,
@@ -168,7 +168,7 @@ export namespace ReportRepository {
         }));
       }
 
-      const results = await queryDb
+      const results = await q
         .select({
           groupKey: sql<string>`${groupKeyExpr}::text`,
           groupLabel: sql<string>`COALESCE(${groupLabelExpr}, ${groupKeyExpr}::text)`,
@@ -203,14 +203,14 @@ export namespace ReportRepository {
     tx?: DBTransaction
   ): Promise<number | null> {
     try {
-      const queryDb = tx ?? db;
+      const q = queryDb(tx);
       const durationMs = filters.toDate.getTime() - filters.fromDate.getTime();
       const previousToDate = new Date(filters.fromDate.getTime() - 1);
       const previousFromDate = new Date(previousToDate.getTime() - durationMs);
 
       const teacherCondition = filters.teacherId ? eq(classInstances.teacherId, filters.teacherId) : undefined;
 
-      const result = await queryDb
+      const result = await q
         .select({
           prevTaken: sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${previousFromDate} AND ${classInstances.scheduledStartAt} <= ${previousToDate} AND ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)::int`,
           prevAbsent: sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${previousFromDate} AND ${classInstances.scheduledStartAt} <= ${previousToDate} AND ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)::int`,

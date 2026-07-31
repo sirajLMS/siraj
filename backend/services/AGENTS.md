@@ -46,3 +46,18 @@ Run integration smokes with:
 
 Each integration file gets **one** smoke test (single API call) to confirm the adapter reaches the live provider — not full service or app behaviour.
 
+## Hot-resolver & Read Caching (`EntityCacheService`)
+
+- **Cache Keys**: Always use identity+role-scoped key formats:
+  - User profile / context: `ec:user:${userId}:${roleId}`
+  - Teacher by User ID: `ec:teacher:byUserId:${userId}:${roleId}`
+  - Parent by User ID: `ec:parent:byUserId:${userId}:${roleId}`
+  - Staff Directory: `ec:teacher:dir:${roleId}:${stableStringify(queryArgs)}`
+  - Parent Directory: `ec:parent:dir:${roleId}:${stableStringify(queryArgs)}`
+  - Parent Dashboard: `ec:parent:dash:metrics:${parentId}`
+  - Supervisor Dashboard: `ec:supervisor:dash:${actorUserId}`
+- **Fail-Open Contract**: All cache reads and invalidation calls MUST wrap provider errors in `try/catch` and fall through gracefully to the underlying data source / database without crashing caller requests.
+- **Permission Checking**: Keep permission gating (e.g. `assertDirectoryAccess`, `hasPermission`) OUTSIDE `cachedRead` — authorization checks must execute before cache lookups so unauthorized users never receive cached payloads or execute cache queries.
+- **Tag Invalidation**: Use named helpers (`invalidateParentWrite`, `invalidateTeacherWrite`, `invalidateClassLifecycle`, `invalidateRoleChange`) in mutation write paths.
+
+

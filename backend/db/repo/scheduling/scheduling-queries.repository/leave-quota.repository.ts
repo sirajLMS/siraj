@@ -1,4 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
@@ -38,8 +39,8 @@ export async function getTeacherLeaveQuotaUsage(
   periodMonth: number,
   tx?: DBTransaction
 ): Promise<number> {
-  const queryDb = tx ?? db;
-  const [row] = await queryDb
+  const q = queryDb(tx);
+  const [row] = await q
     .select({ usedCount: leaveQuotaUsage.usedCount })
     .from(leaveQuotaUsage)
     .where(
@@ -105,8 +106,8 @@ export async function getTeacherByUserId(
   userId: string,
   tx?: DBTransaction
 ): Promise<{ id: string; userId: string } | null> {
-  const queryDb = tx ?? db;
-  const [row] = await queryDb
+  const q = queryDb(tx);
+  const [row] = await q
     .select({ id: teachers.id, userId: teachers.userId })
     .from(teachers)
     .where(eq(teachers.userId, userId))

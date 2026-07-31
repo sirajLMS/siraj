@@ -9,6 +9,7 @@ import { classInstances } from "@/backend/db/schema";
 import { AppPermission, type CurrencyCode, RateSource, TeacherDueStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { invalidateClassLifecycle } from "@/backend/services/cache";
 import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
 import type {
   TeacherDueInsertType,
@@ -102,6 +103,16 @@ export namespace TeacherDueService {
     };
 
     const row: TeacherDueSelectType = await TeacherDueRepository.create(insertPayload, tx);
+
+    try {
+      await invalidateClassLifecycle(teacherId, undefined);
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate class lifecycle tags after creating due entry", {
+        teacherId,
+        error: cacheErr,
+      });
+    }
+
     return row;
   }
 
@@ -207,6 +218,16 @@ export namespace TeacherDueService {
       throw new Error(t.insufficientPermissions);
     }
     const updated = await TeacherDueRepository.markAsPaid([...dueIds], teacherPaymentId);
+
+    try {
+      const teacherIds = [...new Set(updated.map(d => d.teacherId))];
+      for (const tid of teacherIds) {
+        await invalidateClassLifecycle(tid, undefined);
+      }
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate class lifecycle tags after marking dues as paid", { error: cacheErr });
+    }
+
     return updated;
   }
 }

@@ -1,4 +1,5 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { learningResources } from "@/backend/db/schema";
@@ -45,8 +46,8 @@ function resourceReturnShape<
 
 export namespace LearningResourceRepository {
   export async function findByFilePath(filePath: string, tx?: DBTransaction): Promise<LearningResourceRow | null> {
-    const queryDb = tx ?? db;
-    const results = await queryDb
+    const q = queryDb(tx);
+    const results = await q
       .select(resourceSelectColumns)
       .from(learningResources)
       .where(and(eq(learningResources.filePath, filePath), isNull(learningResources.deletedAt)))
@@ -58,9 +59,9 @@ export namespace LearningResourceRepository {
     input: { displayName: string; filePath: string; uploadedByUserId: string; createdAt?: Date },
     tx?: DBTransaction
   ): Promise<LearningResourceRow> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     const now = new Date();
-    const [resource] = await queryDb
+    const [resource] = await q
       .insert(learningResources)
       .values({
         displayName: input.displayName,
@@ -81,7 +82,7 @@ export namespace LearningResourceRepository {
     pagination?: PaginationArgs | null,
     tx?: DBTransaction
   ): Promise<LearningResourceListResult> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
     const baseWhere = isNull(learningResources.deletedAt);
 
@@ -90,14 +91,14 @@ export namespace LearningResourceRepository {
       const offset = pagination.offset;
 
       const [rows, countResult] = await Promise.all([
-        queryDb
+        q
           .select(resourceSelectColumns)
           .from(learningResources)
           .where(baseWhere)
           .orderBy(desc(learningResources.createdAt))
           .limit(perPage)
           .offset(offset),
-        queryDb.select({ count: sql<number>`count(*)::int` }).from(learningResources).where(baseWhere),
+        q.select({ count: sql<number>`count(*)::int` }).from(learningResources).where(baseWhere),
       ]);
 
       const totalCount = countResult[0]?.count ?? 0;
@@ -105,14 +106,14 @@ export namespace LearningResourceRepository {
       return { rows, totalCount };
     }
 
-    const rowsQuery = queryDb
+    const rowsQuery = q
       .select(resourceSelectColumns)
       .from(learningResources)
       .where(baseWhere)
       .orderBy(desc(learningResources.createdAt))
       .limit(200);
 
-    const countQuery = queryDb.select({ count: sql<number>`count(*)::int` }).from(learningResources).where(baseWhere);
+    const countQuery = q.select({ count: sql<number>`count(*)::int` }).from(learningResources).where(baseWhere);
 
     const [rows, countResult] = await Promise.all([rowsQuery, countQuery]);
 
@@ -166,9 +167,9 @@ export namespace LearningResourceRepository {
   }
 
   export async function findById(resourceId: string, tx?: DBTransaction): Promise<LearningResourceRow | null> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
 
-    const results = await queryDb
+    const results = await q
       .select(resourceSelectColumns)
       .from(learningResources)
       .where(and(eq(learningResources.id, resourceId), isNull(learningResources.deletedAt)))

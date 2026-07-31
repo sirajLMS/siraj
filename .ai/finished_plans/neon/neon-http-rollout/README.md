@@ -15,10 +15,9 @@ Task 1.2 of the Neon plan implemented `backend/db/http-client.ts` exposing `getN
 integration-tested (`backend/db/test/neon-integration.test.ts:135-152`), but **zero production
 consumers exist** outside `backend/db/`.
 
-This plan rolls out the helpers to the **repository layer** — the actual migration seam per
-`backend/AGENTS.md` (services delegate to repositories; services never touch the DB directly). It also
-introduces a critical env-gating guard missing from the helper today, then migrates ~52 repository
-files' non-transactional read paths to the HTTP single-fetch client.
+This plan rolls out the HTTP single-fetch client to the **repository layer** via a provider-agnostic `queryDb(tx)` factory handle (re-exported from `backend/db/drizzleDb.ts`). This seam conforms to `backend/AGENTS.md` (services delegate to repositories; services never touch the DB directly).
+
+It introduces a provider-agnostic runtime guard (`getActiveHttpProvider()`), caches the resolved HTTP database singleton instance (`getStatelessHttpDb()`), and exposes `queryDb(tx)` so repository methods execute reads over zero-pool HTTP when eligible while seamlessly falling back to `tx` or `db` without vendor lock-in.
 
 ## Why It Supersedes the `neon_http` Draft
 
@@ -27,12 +26,10 @@ The prior draft (`.ai/plans/neon/neon_http/tasks_deepseek4pro.md`) targeted 8 **
 1. **No `spec.md`/`design.md`** — incomplete per the spec-driven-development skill (all 3 phases required).
 2. **No env-gating helper** — its blanket `db → httpDb` swap would break local dev (`neon(url)` HTTPS-POSTs
    to `https://<host>/sql`, a Neon-only endpoint that does not exist on plain Postgres → 404/TLS failure).
-3. **Wrong seam** — services delegate to repositories per `backend/AGENTS.md`; the migration point is the
-   repository's `tx ?? db` fallback, not the service's `db` import.
+3. **Wrong seam & hardcoded vendor logic** — services delegate to repositories per `backend/AGENTS.md`; the migration point is the repository's `tx ?? db` fallback, and hardcoding vendor-specific calls in 52 files creates lock-in.
 4. **Outcome dir empty** — no captured learnings.
 
-This plan corrects all four: it is repository-layer-only, gates on `isNeonHttpEligible()` inside the
-helpers, follows all three spec-driven-development phases, and captures outcomes per task.
+This plan corrects all four: it is repository-layer-only, introduces the provider-agnostic `queryDb(tx)` factory handle with singleton caching, follows all three spec-driven-development phases, and captures outcomes per task.
 
 ## Plan Documents
 
@@ -45,6 +42,7 @@ helpers, follows all three spec-driven-development phases, and captures outcomes
 
 ## Scope at a Glance
 
+- **Phase 1 Foundation & Early Integration Test:** Build `queryDb(tx)` factory + `getActiveHttpProvider()` gating, and immediately create live provider integration smoke `test/integration/db/query-db.integration.test.ts` (per `test/integration/AGENTS.md`) to verify live HTTP execution before any repo migrations.
 - **Pilot:** `backend/db/repo/users/user.repository.ts` (6 non-tx read methods — drives `me` query, FX-display, page titles).
 - **Batch:** ~52 repository files with clean non-tx single-read paths (full clean-repo batch — see `tasks.md` Phase 3 table).
 - **Out of scope (deferred):** session/auth path; multi-query pipelines; always-tx-wrapped reads; write methods; GraphQL resolver changes; service-layer changes.

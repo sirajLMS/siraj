@@ -1,4 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { studentStatusHistory } from "@/backend/db/schema/students/students";
@@ -16,8 +17,8 @@ export type CreateInitialStatusHistoryInput = {
 export namespace StudentStatusHistoryRepository {
   export async function findByStudentIds(studentIds: string[], tx?: DBTransaction): Promise<StudentStatusHistoryRow[]> {
     if (studentIds.length === 0) return [];
-    const executor = tx ?? db;
-    return executor.select().from(studentStatusHistory).where(inArray(studentStatusHistory.studentId, studentIds));
+    const q = queryDb(tx);
+    return q.select().from(studentStatusHistory).where(inArray(studentStatusHistory.studentId, studentIds));
   }
 
   export async function createManyIfMissing(
@@ -52,8 +53,8 @@ export namespace StudentStatusHistoryRepository {
     studentId: string,
     tx?: DBTransaction
   ): Promise<StudentStatusHistoryRow | null> {
-    const executor = tx ?? db;
-    const [row] = await executor
+    const q = queryDb(tx);
+    const [row] = await q
       .select()
       .from(studentStatusHistory)
       .where(eq(studentStatusHistory.studentId, studentId))

@@ -1,4 +1,5 @@
 import { and, eq } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -55,8 +56,8 @@ export namespace TeacherAvailabilityBootstrapRepository {
     dayOfWeek: DayOfWeek,
     tx?: DBTransaction
   ): Promise<TeacherAvailabilityWindowSelectType | null> {
-    const executor = tx ?? db;
-    const [row] = await executor
+    const q = queryDb(tx);
+    const [row] = await q
       .select()
       .from(teacherAvailabilityWindows)
       .where(
@@ -114,8 +115,8 @@ export namespace TeacherAvailabilityBootstrapRepository {
     dayOfWeek: DayOfWeek,
     tx?: DBTransaction
   ): Promise<TeacherRecurringUnavailabilitySelectType | null> {
-    const executor = tx ?? db;
-    const [row] = await executor
+    const q = queryDb(tx);
+    const [row] = await q
       .select()
       .from(teacherRecurringUnavailability)
       .where(
@@ -160,8 +161,8 @@ export namespace TeacherAvailabilityBootstrapRepository {
     teacherId: string,
     tx?: DBTransaction
   ): Promise<TeacherVacationRequestSelectType | null> {
-    const executor = tx ?? db;
-    const [row] = await executor
+    const q = queryDb(tx);
+    const [row] = await q
       .select()
       .from(teacherVacationRequests)
       .where(eq(teacherVacationRequests.teacherId, teacherId))

@@ -1,4 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { authRateLimits } from "@/backend/db/schema";
 
@@ -42,7 +43,8 @@ export namespace RateLimitRepository {
 
   export const isLocked = async (ipAddress: string, email: string): Promise<boolean> => {
     const safeIp = sanitizeIpAddress(ipAddress);
-    const results = await db
+    const q = queryDb();
+    const results = await q
       .select()
       .from(authRateLimits)
       .where(and(eq(authRateLimits.ipAddress, safeIp), eq(authRateLimits.email, email)));

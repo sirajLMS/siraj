@@ -1,4 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { leaveRequests } from "@/backend/db/schema/classes/scheduling";
@@ -23,7 +24,7 @@ export namespace LeaveRequestRepository {
     tx?: DBTransaction
   ): Promise<LeaveRequestRow[]> {
     if (classInstanceIds.length === 0) return [];
-    const executor = tx ?? db;
+    const executor = queryDb(tx);
     return executor.select().from(leaveRequests).where(inArray(leaveRequests.classInstanceId, classInstanceIds));
   }
 
@@ -57,7 +58,7 @@ export namespace LeaveRequestRepository {
     classInstanceId: string,
     tx?: DBTransaction
   ): Promise<LeaveRequestRow | null> {
-    const executor = tx ?? db;
+    const executor = queryDb(tx);
     const [row] = await executor
       .select()
       .from(leaveRequests)

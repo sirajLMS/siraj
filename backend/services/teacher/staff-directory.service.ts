@@ -2,6 +2,7 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { cachedRead, stableStringify } from "@/backend/services/cache";
 import type { PageInfo, PaginationArgs, TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
 import { getServerTranslations } from "@/shared/locale";
@@ -33,25 +34,36 @@ export namespace StaffDirectoryService {
     try {
       await assertDirectoryAccess(userId, locale);
 
-      const { rows: rawRows, totalCount } = await TeacherRepository.getTeacherDirectory(paginationArgs, search);
-      const metrics = await TeacherRepository.getTeacherDirectoryMetrics();
+      const context = await PermissionsService.getUserContext(userId);
+      const roleId = context?.role ?? "anonymous";
+      const cacheKey = `ec:teacher:dir:${roleId}:${stableStringify({ search, paginationArgs })}`;
 
-      const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, rawRows.length, totalCount);
+      return await cachedRead(
+        cacheKey,
+        30,
+        async () => {
+          const { rows: rawRows, totalCount } = await TeacherRepository.getTeacherDirectory(paginationArgs, search);
+          const metrics = await TeacherRepository.getTeacherDirectoryMetrics();
 
-      return {
-        id: `teacher-directory-${search ?? "all"}`,
-        metrics,
-        rows: rawRows.map(row => ({
-          id: row.id,
-          userId: row.userId,
-          name: row.name,
-          email: row.email,
-          avatarUrl: row.avatarUrl,
-          status: row.status,
-        })),
-        totalTeachers: totalCount,
-        pageInfo,
-      };
+          const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, rawRows.length, totalCount);
+
+          return {
+            id: `teacher-directory-${search ?? "all"}`,
+            metrics,
+            rows: rawRows.map(row => ({
+              id: row.id,
+              userId: row.userId,
+              name: row.name,
+              email: row.email,
+              avatarUrl: row.avatarUrl,
+              status: row.status,
+            })),
+            totalTeachers: totalCount,
+            pageInfo,
+          };
+        },
+        ["teacherDirectory"]
+      );
     } catch (error) {
       logger.error("Error fetching teacher directory", { userId, error });
       throw error;

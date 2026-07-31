@@ -1,55 +1,32 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig } from "@/backend/db/schema";
 import type { SessionConfigSelectType, SessionConfigUpsertInput } from "@/backend/types";
 
-const listAllPrepared = db.select().from(sessionConfig).prepare("session_config_list_all");
-
-const findByRoleNamePrepared = db
-  .select()
-  .from(sessionConfig)
-  .where(eq(sessionConfig.roleName, sql.placeholder("roleName")))
-  .limit(1)
-  .prepare("session_config_find_by_role_name");
-
-const findByIdPrepared = db
-  .select()
-  .from(sessionConfig)
-  .where(eq(sessionConfig.id, sql.placeholder("id")))
-  .limit(1)
-  .prepare("session_config_find_by_id");
-
 export namespace SessionConfigRepository {
   export async function listAll(tx?: DBTransaction): Promise<SessionConfigSelectType[]> {
-    if (!tx) {
-      return listAllPrepared.execute();
-    }
-    return tx.select().from(sessionConfig);
+    const q = queryDb(tx);
+    return q.select().from(sessionConfig);
   }
 
   export async function findByRoleName(roleName: string, tx?: DBTransaction): Promise<SessionConfigSelectType | null> {
-    if (!tx) {
-      const [row] = await findByRoleNamePrepared.execute({ roleName });
-      return row ?? null;
-    }
-    const [row] = await tx.select().from(sessionConfig).where(eq(sessionConfig.roleName, roleName)).limit(1);
+    const q = queryDb(tx);
+    const [row] = await q.select().from(sessionConfig).where(eq(sessionConfig.roleName, roleName)).limit(1);
     return row ?? null;
   }
 
   export async function findById(id: string, tx?: DBTransaction): Promise<SessionConfigSelectType | null> {
-    if (!tx) {
-      const [row] = await findByIdPrepared.execute({ id });
-      return row ?? null;
-    }
-    const [row] = await tx.select().from(sessionConfig).where(eq(sessionConfig.id, id)).limit(1);
+    const q = queryDb(tx);
+    const [row] = await q.select().from(sessionConfig).where(eq(sessionConfig.id, id)).limit(1);
     return row ?? null;
   }
 
   export async function listByRoleNames(roleNames: string[], tx?: DBTransaction): Promise<SessionConfigSelectType[]> {
     if (roleNames.length === 0) return [];
-    const queryDb = tx ?? db;
-    return queryDb.select().from(sessionConfig).where(inArray(sessionConfig.roleName, roleNames));
+    const q = queryDb(tx);
+    return q.select().from(sessionConfig).where(inArray(sessionConfig.roleName, roleNames));
   }
 
   export async function upsert(input: SessionConfigUpsertInput, tx?: DBTransaction): Promise<SessionConfigSelectType> {
