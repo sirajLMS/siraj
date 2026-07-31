@@ -60,6 +60,15 @@ export const lessonReports = pgTable(
     index("lesson_reports_status_idx").on(table.status),
     index("lesson_reports_teacher_id_idx").on(table.teacherId),
     index("lesson_reports_student_id_idx").on(table.studentId),
+    index("lesson_reports_submitted_by_user_id_idx").on(table.submittedByUserId),
+    index("lesson_reports_reviewed_by_user_id_idx").on(table.reviewedByUserId),
+    index("lesson_reports_submitted_at_idx").on(table.submittedAt),
+    index("lesson_reports_reviewed_at_idx").on(table.reviewedAt),
+    index("lesson_reports_lesson_date_idx").on(table.lessonDate),
+    index("lesson_reports_attendance_evaluation_idx").on(table.attendanceEvaluation),
+    index("lesson_reports_status_submitted_at_idx").on(table.status, table.submittedAt),
+    index("lesson_reports_teacher_id_status_idx").on(table.teacherId, table.status),
+    index("lesson_reports_student_id_status_idx").on(table.studentId, table.status),
     check(
       "lesson_reports_completion_percentage_chk",
       sql`${table.completionPercentage} >= 0 AND ${table.completionPercentage} <= 100`

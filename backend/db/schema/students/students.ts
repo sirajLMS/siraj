@@ -89,6 +89,10 @@ export const students = pgTable(
     index("idx_students_filter_mobile").on(table.status, table.primaryTeacherId, table.dateOfBirth),
     index("idx_students_parent_status").on(table.parentId, table.status),
     index("idx_students_status_created").on(table.status, table.createdAt),
+    index("students_language_idx").on(table.language),
+    index("students_date_of_birth_idx").on(table.dateOfBirth),
+    index("students_updated_at_idx").on(table.updatedAt),
+    index("students_primary_teacher_id_status_idx").on(table.primaryTeacherId, table.status),
   ]
 );
 
@@ -149,6 +153,8 @@ export const studentProgress = pgTable(
     index("student_progress_class_instance_id_idx").on(table.classInstanceId),
     index("student_progress_teacher_id_idx").on(table.teacherId),
     uniqueIndex("student_progress_student_class_uniq_idx").on(table.studentId, table.classInstanceId),
+    index("student_progress_parent_visible_idx").on(table.parentVisible),
+    index("student_progress_created_at_idx").on(table.createdAt),
   ]
 );
 
@@ -169,5 +175,7 @@ export const teacherAssignments = pgTable(
   table => [
     index("teacher_assignments_student_id_idx").on(table.studentId),
     index("teacher_assignments_teacher_id_idx").on(table.teacherId),
+    index("teacher_assignments_ended_at_idx").on(table.endedAt),
+    index("teacher_assignments_assigned_by_user_id_idx").on(table.assignedByUserId),
   ]
 );

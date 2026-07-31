@@ -10,5 +10,10 @@ export const books = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
-  table => [index("books_deleted_at_idx").on(table.deletedAt)]
+  table => [
+    index("books_deleted_at_idx").on(table.deletedAt),
+    index("books_availability_status_idx").on(table.availabilityStatus),
+    index("books_created_at_idx").on(table.createdAt),
+    index("books_name_idx").on(table.name),
+  ]
 );

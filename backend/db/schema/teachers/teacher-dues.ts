@@ -48,5 +48,10 @@ export const teacherDues = pgTable(
     index("teacher_dues_teacher_id_idx").on(table.teacherId),
     index("teacher_dues_status_idx").on(table.status),
     index("teacher_dues_approved_at_idx").on(table.approvedAt),
+    index("teacher_dues_student_id_idx").on(table.studentId),
+    index("teacher_dues_teacher_payment_id_idx").on(table.teacherPaymentId),
+    index("teacher_dues_approved_by_user_id_idx").on(table.approvedByUserId),
+    index("teacher_dues_currency_idx").on(table.currency),
+    index("teacher_dues_rate_source_idx").on(table.rateSource),
   ]
 );

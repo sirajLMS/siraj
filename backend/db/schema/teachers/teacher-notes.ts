@@ -20,5 +20,10 @@ export const teacherImportantNotes = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
-  table => [index("teacher_important_notes_teacher_id_idx").on(table.teacherId)]
+  table => [
+    index("teacher_important_notes_teacher_id_idx").on(table.teacherId),
+    index("teacher_important_notes_is_published_idx").on(table.isPublished),
+    index("teacher_important_notes_deleted_at_idx").on(table.deletedAt),
+    index("teacher_important_notes_created_by_user_id_idx").on(table.createdByUserId),
+  ]
 );

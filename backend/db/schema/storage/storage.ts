@@ -8,11 +8,15 @@ import { staffProfiles } from "@/backend/db/schema/teachers/staff";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
 
-export const storageFiles = pgTable("storage_file", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  path: text("path").notNull().unique(),
-  isProtected: boolean("is_protected").notNull().default(false),
-});
+export const storageFiles = pgTable(
+  "storage_file",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    path: text("path").notNull().unique(),
+    isProtected: boolean("is_protected").notNull().default(false),
+  },
+  table => [index("storage_files_is_protected_idx").on(table.isProtected)]
+);
 
 /**
  * Junction tables replacing the polymorphic file_usage table.
@@ -204,18 +208,25 @@ export const classInstanceFiles = pgTable(
   ]
 );
 
-export const storageDirectories = pgTable("storage_directory", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  path: varchar("path", { length: 1024 }).notNull().unique(),
-  allowUploads: boolean("allow_uploads").notNull().default(true),
-  allowDelete: boolean("allow_delete").notNull().default(true),
-  allowMove: boolean("allow_move").notNull().default(true),
-  allowCreateSubDirs: boolean("allow_create_sub_dirs").notNull().default(true),
-  allowDeleteFiles: boolean("allow_delete_files").notNull().default(true),
-  allowMoveFiles: boolean("allow_move_files").notNull().default(true),
-  isProtected: boolean("is_protected").notNull().default(false),
-  protectChildren: boolean("protect_children").notNull().default(false),
-});
+export const storageDirectories = pgTable(
+  "storage_directory",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    path: varchar("path", { length: 1024 }).notNull().unique(),
+    allowUploads: boolean("allow_uploads").notNull().default(true),
+    allowDelete: boolean("allow_delete").notNull().default(true),
+    allowMove: boolean("allow_move").notNull().default(true),
+    allowCreateSubDirs: boolean("allow_create_sub_dirs").notNull().default(true),
+    allowDeleteFiles: boolean("allow_delete_files").notNull().default(true),
+    allowMoveFiles: boolean("allow_move_files").notNull().default(true),
+    isProtected: boolean("is_protected").notNull().default(false),
+    protectChildren: boolean("protect_children").notNull().default(false),
+  },
+  table => [
+    index("storage_directories_is_protected_idx").on(table.isProtected),
+    index("storage_directories_allow_uploads_idx").on(table.allowUploads),
+  ]
+);
 
 export const signedUrls = pgTable(
   "signed_url",
@@ -232,5 +243,8 @@ export const signedUrls = pgTable(
   table => [
     index("signed_url_expires_at_idx").on(table.expiresAt),
     index("signed_url_used_expires_idx").on(table.used, table.expiresAt),
+    index("signed_url_created_at_idx").on(table.createdAt),
+    index("signed_url_file_path_idx").on(table.filePath),
+    index("signed_url_content_hash_idx").on(table.contentHash),
   ]
 );

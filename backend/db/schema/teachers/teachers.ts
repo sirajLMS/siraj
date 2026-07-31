@@ -29,5 +29,13 @@ export const teachers = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("teachers_user_id_idx").on(table.userId)]
+  table => [
+    index("teachers_user_id_idx").on(table.userId),
+    index("teachers_created_at_idx").on(table.createdAt),
+    index("teachers_updated_at_idx").on(table.updatedAt),
+    index("teachers_nationality_idx").on(table.nationality),
+    index("teachers_country_code_idx").on(table.countryCode),
+    index("teachers_gender_idx").on(table.gender),
+    index("teachers_rate_currency_idx").on(table.rateCurrency),
+  ]
 );

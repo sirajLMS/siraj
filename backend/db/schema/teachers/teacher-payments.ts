@@ -31,5 +31,8 @@ export const teacherPayments = pgTable(
   table => [
     index("teacher_payments_teacher_id_idx").on(table.teacherId),
     index("teacher_payments_user_payment_method_id_idx").on(table.userPaymentMethodId),
+    index("teacher_payments_payment_date_idx").on(table.paymentDate),
+    index("teacher_payments_payment_method_type_idx").on(table.paymentMethodType),
+    index("teacher_payments_is_test_payment_idx").on(table.isTestPayment),
   ]
 );

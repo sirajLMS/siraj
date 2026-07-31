@@ -85,5 +85,8 @@ export const teacherVacationRequests = pgTable(
     index("teacher_vacation_requests_teacher_id_idx").on(table.teacherId),
     index("teacher_vacation_requests_status_idx").on(table.status),
     index("teacher_vacation_requests_start_at_idx").on(table.startAt),
+    index("teacher_vacation_requests_end_at_idx").on(table.endAt),
+    index("teacher_vacation_requests_requested_by_user_id_idx").on(table.requestedByUserId),
+    index("teacher_vacation_requests_processed_by_user_id_idx").on(table.processedByUserId),
   ]
 );

@@ -49,6 +49,9 @@ export const userNotificationPreferences = pgTable(
   },
   table => [
     index("user_notification_preferences_user_id_idx").on(table.userId),
+    index("user_notification_preferences_channel_idx").on(table.channel),
+    index("user_notification_preferences_event_type_idx").on(table.eventType),
+    index("user_notification_preferences_enabled_idx").on(table.enabled),
     uniqueIndex("user_notification_preferences_unique_idx").on(table.userId, table.channel, table.eventType),
   ]
 );
@@ -79,6 +82,9 @@ export const userDeviceTokens = pgTable(
   },
   table => [
     index("user_device_tokens_user_id_idx").on(table.userId),
+    index("user_device_tokens_is_active_idx").on(table.isActive),
+    index("user_device_tokens_last_used_at_idx").on(table.lastUsedAt),
+    index("user_device_tokens_user_id_is_active_idx").on(table.userId, table.isActive),
     uniqueIndex("user_device_tokens_token_unique_idx").on(table.token),
   ]
 );
@@ -123,6 +129,13 @@ export const notificationDeliveries = pgTable(
     index("notification_deliveries_channel_idx").on(table.channel),
     index("notification_deliveries_created_at_idx").on(table.createdAt),
     index("notification_deliveries_provider_message_id_idx").on(table.providerMessageId),
+    index("notification_deliveries_device_token_id_idx").on(table.deviceTokenId),
+    index("notification_deliveries_sent_at_idx").on(table.sentAt),
+    index("notification_deliveries_delivered_at_idx").on(table.deliveredAt),
+    index("notification_deliveries_failed_at_idx").on(table.failedAt),
+    index("notification_deliveries_opened_at_idx").on(table.openedAt),
+    index("notification_deliveries_user_id_status_created_at_idx").on(table.userId, table.status, table.createdAt),
+    index("notification_deliveries_status_created_at_idx").on(table.status, table.createdAt),
   ]
 );
 
@@ -144,7 +157,14 @@ export const complaints = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
-  table => [index("complaints_status_idx").on(table.status), index("complaints_parent_id_idx").on(table.parentId)]
+  table => [
+    index("complaints_status_idx").on(table.status),
+    index("complaints_parent_id_idx").on(table.parentId),
+    index("complaints_student_id_idx").on(table.studentId),
+    index("complaints_category_idx").on(table.category),
+    index("complaints_created_at_idx").on(table.createdAt),
+    index("complaints_updated_at_idx").on(table.updatedAt),
+  ]
 );
 
 export const complaintResponses = pgTable(
@@ -159,7 +179,12 @@ export const complaintResponses = pgTable(
     emailSent: boolean("email_sent").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("complaint_responses_complaint_id_idx").on(table.complaintId)]
+  table => [
+    index("complaint_responses_complaint_id_idx").on(table.complaintId),
+    index("complaint_responses_responder_user_id_idx").on(table.responderUserId),
+    index("complaint_responses_created_at_idx").on(table.createdAt),
+    index("complaint_responses_email_sent_idx").on(table.emailSent),
+  ]
 );
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
@@ -194,6 +219,9 @@ export const suggestions = pgTable(
     index("suggestions_reviewed_by_user_id_idx").on(table.reviewedByUserId),
     index("suggestions_deleted_at_idx").on(table.deletedAt),
     index("suggestions_active_created_at_idx").on(table.createdAt).where(sql`${table.deletedAt} IS NULL`),
+    index("suggestions_created_at_idx").on(table.createdAt),
+    index("suggestions_reviewed_at_idx").on(table.reviewedAt),
+    index("suggestions_email_sent_at_idx").on(table.emailSentAt),
   ]
 );
 
@@ -212,5 +240,10 @@ export const learningResources = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
-  table => [index("learning_resources_deleted_at_idx").on(table.deletedAt)]
+  table => [
+    index("learning_resources_deleted_at_idx").on(table.deletedAt),
+    index("learning_resources_uploaded_by_user_id_idx").on(table.uploadedByUserId),
+    index("learning_resources_created_at_idx").on(table.createdAt),
+    index("learning_resources_display_name_idx").on(table.displayName),
+  ]
 );

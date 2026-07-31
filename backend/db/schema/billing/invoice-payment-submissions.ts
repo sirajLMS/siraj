@@ -34,5 +34,9 @@ export const invoicePaymentSubmissions = pgTable(
     index("invoice_payment_submissions_invoice_id_idx").on(table.invoiceId),
     index("invoice_payment_submissions_status_idx").on(table.status),
     index("invoice_payment_submissions_file_id_idx").on(table.fileId),
+    index("invoice_payment_submissions_submitted_by_user_id_idx").on(table.submittedByUserId),
+    index("invoice_payment_submissions_reviewed_by_user_id_idx").on(table.reviewedByUserId),
+    index("invoice_payment_submissions_submitted_at_idx").on(table.submittedAt),
+    index("invoice_payment_submissions_reviewed_at_idx").on(table.reviewedAt),
   ]
 );

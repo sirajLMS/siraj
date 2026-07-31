@@ -14,5 +14,10 @@ export const supportedCurrencies = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("supported_currencies_is_active_idx").on(table.isActive)]
+  table => [
+    index("supported_currencies_is_active_idx").on(table.isActive),
+    index("supported_currencies_country_code_idx").on(table.countryCode),
+    index("supported_currencies_sort_order_idx").on(table.sortOrder),
+    index("supported_currencies_created_at_idx").on(table.createdAt),
+  ]
 );

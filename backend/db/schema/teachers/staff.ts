@@ -21,5 +21,10 @@ export const staffProfiles = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("staff_profiles_user_id_idx").on(table.userId)]
+  table => [
+    index("staff_profiles_user_id_idx").on(table.userId),
+    index("staff_profiles_created_at_idx").on(table.createdAt),
+    index("staff_profiles_updated_at_idx").on(table.updatedAt),
+    index("staff_profiles_rate_currency_idx").on(table.rateCurrency),
+  ]
 );

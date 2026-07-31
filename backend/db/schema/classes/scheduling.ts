@@ -83,6 +83,13 @@ export const recurringSchedules = pgTable(
     index("recurring_schedules_teacher_id_idx").on(table.teacherId),
     index("recurring_schedules_timezone_id_idx").on(table.timezoneId),
     index("recurring_schedules_subject_id_idx").on(table.subjectId),
+    index("recurring_schedules_deleted_at_idx").on(table.deletedAt),
+    index("recurring_schedules_effective_from_idx").on(table.effectiveFrom),
+    index("recurring_schedules_effective_until_idx").on(table.effectiveUntil),
+    index("recurring_schedules_created_at_idx").on(table.createdAt),
+    index("recurring_schedules_updated_at_idx").on(table.updatedAt),
+    index("recurring_schedules_teacher_id_deleted_at_idx").on(table.teacherId, table.deletedAt),
+    index("recurring_schedules_student_id_deleted_at_idx").on(table.studentId, table.deletedAt),
     check("recurring_schedules_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
   ]
 );
@@ -104,7 +111,10 @@ export const recurringScheduleDays = pgTable(
     startTime: time("start_time").notNull(),
     isActive: boolean("is_active").notNull().default(true),
   },
-  table => [uniqueIndex("recurring_schedule_days_schedule_day_idx").on(table.recurringScheduleId, table.dayOfWeek)]
+  table => [
+    uniqueIndex("recurring_schedule_days_schedule_day_idx").on(table.recurringScheduleId, table.dayOfWeek),
+    index("recurring_schedule_days_recurring_schedule_id_idx").on(table.recurringScheduleId),
+  ]
 );
 
 /**
@@ -196,6 +206,25 @@ export const classInstances = pgTable(
     index("class_instances_execution_state_idx").on(table.executionState),
     index("class_instances_frozen_idx").on(table.isFrozen).where(sql`${table.isFrozen} = true`),
     index("class_instances_rescheduled_idx").on(table.isRescheduled).where(sql`${table.isRescheduled} = true`),
+    index("class_instances_recurring_schedule_id_idx").on(table.recurringScheduleId),
+    index("class_instances_user_meeting_config_id_idx").on(table.userMeetingConfigId),
+    index("class_instances_meeting_provider_id_idx").on(table.meetingProviderId),
+    index("class_instances_activated_by_user_id_idx").on(table.activatedByUserId),
+    index("class_instances_force_activated_by_user_id_idx").on(table.forceActivatedByUserId),
+    index("class_instances_booking_timezone_id_idx").on(table.bookingTimezoneId),
+    index("class_instances_created_at_idx").on(table.createdAt),
+    index("class_instances_updated_at_idx").on(table.updatedAt),
+    index("class_instances_actual_start_at_idx").on(table.actualStartAt),
+    index("class_instances_actual_end_at_idx").on(table.actualEndAt),
+    index("class_instances_activated_at_idx").on(table.activatedAt),
+    index("class_instances_quota_deducted_idx").on(table.quotaDeducted),
+    index("class_instances_payroll_credited_idx").on(table.payrollCredited),
+    index("class_instances_is_rate_overridden_idx").on(table.isRateOverridden),
+    index("class_instances_rate_source_idx").on(table.rateSource),
+    index("class_instances_deleted_at_idx").on(table.deletedAt),
+    index("class_instances_teacher_state_start_idx").on(table.teacherId, table.executionState, table.scheduledStartAt),
+    index("class_instances_student_state_start_idx").on(table.studentId, table.executionState, table.scheduledStartAt),
+    index("class_instances_state_start_idx").on(table.executionState, table.scheduledStartAt),
     uniqueIndex("class_instances_original_class_uniq_idx")
       .on(table.originalClassId)
       .where(sql`${table.originalClassId} IS NOT NULL AND ${table.deletedAt} IS NULL`),
@@ -241,6 +270,8 @@ export const classStatusEvents = pgTable(
   table => [
     index("class_status_events_class_instance_id_idx").on(table.classInstanceId),
     index("class_status_events_instance_created_idx").on(table.classInstanceId, table.createdAt),
+    index("class_status_events_event_type_idx").on(table.eventType),
+    index("class_status_events_actor_user_id_idx").on(table.actorUserId),
   ]
 );
 
@@ -261,7 +292,15 @@ export const leaveRequests = pgTable(
     processedAt: timestamp("processed_at", { withTimezone: true, precision: 3 }),
     processedByUserId: uuid("processed_by_user_id").references(() => users.id, { onDelete: "set null" }),
   },
-  table => [index("leave_requests_class_instance_id_idx").on(table.classInstanceId)]
+  table => [
+    index("leave_requests_class_instance_id_idx").on(table.classInstanceId),
+    index("leave_requests_requested_by_user_id_idx").on(table.requestedByUserId),
+    index("leave_requests_processed_by_user_id_idx").on(table.processedByUserId),
+    index("leave_requests_status_idx").on(table.status),
+    index("leave_requests_requester_type_idx").on(table.requesterType),
+    index("leave_requests_created_at_idx").on(table.createdAt),
+    index("leave_requests_processed_at_idx").on(table.processedAt),
+  ]
 );
 
 /**
@@ -291,6 +330,7 @@ export const leaveQuotaUsage = pgTable(
     uniqueIndex("leave_quota_student_period_idx")
       .on(table.studentId, table.periodYear, table.periodMonth)
       .where(sql`${table.studentId} IS NOT NULL`),
+    index("leave_quota_usage_period_year_period_month_idx").on(table.periodYear, table.periodMonth),
     check(
       "leave_quota_usage_teacher_student_xor_chk",
       sql`(${table.teacherId} IS NOT NULL AND ${table.studentId} IS NULL) OR (${table.teacherId} IS NULL AND ${table.studentId} IS NOT NULL)`
@@ -298,15 +338,19 @@ export const leaveQuotaUsage = pgTable(
   ]
 );
 
-export const dstMigrationRuns = pgTable("dst_migration_runs", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  runByUserId: uuid("run_by_user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  offsetMinutes: integer("offset_minutes").notNull(),
-  description: varchar("description", { length: 255 }),
-  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-});
+export const dstMigrationRuns = pgTable(
+  "dst_migration_runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    runByUserId: uuid("run_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    offsetMinutes: integer("offset_minutes").notNull(),
+    description: varchar("description", { length: 255 }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+  },
+  table => [index("dst_migration_runs_created_at_idx").on(table.createdAt)]
+);
 
 export const dstMigrationEntries = pgTable(
   "dst_migration_entries",
@@ -321,26 +365,37 @@ export const dstMigrationEntries = pgTable(
     result: dstMigrationResultEnum("result").notNull(),
     conflictDetail: text("conflict_detail"),
   },
-  table => [index("dst_migration_entries_run_id_idx").on(table.runId)]
+  table => [
+    index("dst_migration_entries_run_id_idx").on(table.runId),
+    index("dst_migration_entries_recurring_schedule_id_idx").on(table.recurringScheduleId),
+    index("dst_migration_entries_result_idx").on(table.result),
+  ]
 );
 
-export const classInstancePerformance = pgTable("class_instance_performance", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  classInstanceId: uuid("class_instance_id")
-    .notNull()
-    .unique()
-    .references(() => classInstances.id, { onDelete: "cascade" }),
-  engagementScore: integer("engagement_score"),
-  assessmentProgress: integer("assessment_progress"),
-  assessmentTotal: integer("assessment_total"),
-  focusLevel: varchar("focus_level", { length: 50 }),
-  sessionHealth: varchar("session_health", { length: 50 }),
-  heatmapData: jsonb("heatmap_data").$type<number[]>(),
-  latencyMs: integer("latency_ms"),
-  authorizationLabel: varchar("authorization_label", { length: 100 }),
-  attendanceRate: integer("attendance_rate"),
-  avgGrade: varchar("avg_grade", { length: 10 }),
-  lastClassDaysAgo: integer("last_class_days_ago"),
-  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-});
+export const classInstancePerformance = pgTable(
+  "class_instance_performance",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    classInstanceId: uuid("class_instance_id")
+      .notNull()
+      .unique()
+      .references(() => classInstances.id, { onDelete: "cascade" }),
+    engagementScore: integer("engagement_score"),
+    assessmentProgress: integer("assessment_progress"),
+    assessmentTotal: integer("assessment_total"),
+    focusLevel: varchar("focus_level", { length: 50 }),
+    sessionHealth: varchar("session_health", { length: 50 }),
+    heatmapData: jsonb("heatmap_data").$type<number[]>(),
+    latencyMs: integer("latency_ms"),
+    authorizationLabel: varchar("authorization_label", { length: 100 }),
+    attendanceRate: integer("attendance_rate"),
+    avgGrade: varchar("avg_grade", { length: 10 }),
+    lastClassDaysAgo: integer("last_class_days_ago"),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+  },
+  table => [
+    index("class_instance_performance_created_at_idx").on(table.createdAt),
+    index("class_instance_performance_updated_at_idx").on(table.updatedAt),
+  ]
+);

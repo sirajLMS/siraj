@@ -23,5 +23,9 @@ export const fxSyncRuns = pgTable(
     index("fx_sync_runs_status_idx").on(table.status),
     index("fx_sync_runs_provider_started_idx").on(table.provider, table.startedAt),
     index("fx_sync_runs_triggered_by_idx").on(table.triggeredByUserId),
+    index("fx_sync_runs_started_at_idx").on(table.startedAt),
+    index("fx_sync_runs_finished_at_idx").on(table.finishedAt),
+    index("fx_sync_runs_trigger_type_idx").on(table.triggerType),
+    index("fx_sync_runs_created_at_idx").on(table.createdAt),
   ]
 );

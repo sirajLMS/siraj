@@ -38,5 +38,6 @@ export const classSubjects = pgTable(
   table => [
     index("class_subjects_category_id_idx").on(table.categoryId),
     uniqueIndex("class_subjects_slug_idx").on(table.slug),
+    index("class_subjects_deleted_at_idx").on(table.deletedAt),
   ]
 );

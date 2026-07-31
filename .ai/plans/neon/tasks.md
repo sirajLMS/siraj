@@ -115,8 +115,8 @@
     - Update progress: Mark task 3.2 as `[x]` in `tasks.md`.
     - _Requirements: Spec 10, 11, 12, 13, 14, 15, 16, 17, 18, 19_
 
-- [ ] 4. **Schema Indexing Audit**
-  - [ ] 4.1 Schema Index Review
+- [x] 4. **Schema Indexing Audit**
+  - [x] 4.1 Schema Index Review
     - Read all existing files in `.ai/plans/neon/outcome/`.
     - Audit `backend/db/schema/` definitions for missing indexes on foreign key relationships and multi-tenant filter columns.
     - Run per-file quality verification on any edited schema files.

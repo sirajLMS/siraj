@@ -25,6 +25,11 @@ export const groupClasses = pgTable(
   table => [
     index("group_classes_class_instance_id_idx").on(table.classInstanceId),
     index("group_classes_status_idx").on(table.status),
+    index("group_classes_created_at_idx").on(table.createdAt),
+    index("group_classes_audit_logged_at_idx").on(table.auditLoggedAt),
+    index("group_classes_class_type_idx").on(table.classType),
+    index("group_classes_original_date_idx").on(table.originalDate),
+    index("group_classes_rescheduled_date_idx").on(table.rescheduledDate),
   ]
 );
 
@@ -47,6 +52,8 @@ export const groupClassEnrollments = pgTable(
     uniqueIndex("group_class_enrollments_unique_idx").on(table.groupClassId, table.studentId),
     index("group_class_enrollments_group_class_id_idx").on(table.groupClassId),
     index("group_class_enrollments_student_id_idx").on(table.studentId),
+    index("group_class_enrollments_attendance_status_idx").on(table.attendanceStatus),
+    index("group_class_enrollments_created_at_idx").on(table.createdAt),
   ]
 );
 
@@ -74,5 +81,11 @@ export const classCommunications = pgTable(
   table => [
     index("class_communications_group_class_id_idx").on(table.groupClassId),
     index("class_communications_type_idx").on(table.type),
+    index("class_communications_is_active_idx").on(table.isActive),
+    index("class_communications_is_delivered_idx").on(table.isDelivered),
+    index("class_communications_notification_delivery_id_idx").on(table.notificationDeliveryId),
+    index("class_communications_class_status_event_id_idx").on(table.classStatusEventId),
+    index("class_communications_timestamp_idx").on(table.timestamp),
+    index("class_communications_created_at_idx").on(table.createdAt),
   ]
 );

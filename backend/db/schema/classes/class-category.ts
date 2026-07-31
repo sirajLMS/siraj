@@ -13,5 +13,8 @@ export const classCategories = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
-  table => [index("class_categories_slug_idx").on(table.slug)]
+  table => [
+    index("class_categories_slug_idx").on(table.slug),
+    index("class_categories_deleted_at_idx").on(table.deletedAt),
+  ]
 );

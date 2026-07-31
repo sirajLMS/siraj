@@ -18,5 +18,9 @@ export const meetingProviders = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("meeting_providers_is_active_idx").on(table.isActive)]
+  table => [
+    index("meeting_providers_is_active_idx").on(table.isActive),
+    index("meeting_providers_created_at_idx").on(table.createdAt),
+    index("meeting_providers_updated_at_idx").on(table.updatedAt),
+  ]
 );
