@@ -162,7 +162,9 @@ export class SessionRedisService {
     }
 
     try {
-      const parsed = JSON.parse(value);
+      // Handles raw JSON string (standard Redis behavior) and fallback object if auto-deserialized.
+      // Avoids JSON.parse([object Object]) SyntaxError if value is already a parsed object.
+      const parsed = typeof value === "string" ? JSON.parse(value) : value;
       if (!this.validateSessionData(parsed, sessionId)) {
         logger.error(`Session data validation failed for ${sessionId} — data shape does not match RedisSessionData`);
         return null;
