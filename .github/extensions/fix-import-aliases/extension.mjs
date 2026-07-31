@@ -1,5 +1,31 @@
 import { joinSession } from "@github/copilot-sdk/extension";
 
+/**
+ * Read the lint queue port from the shared config file so the URL is never
+ * hardcoded here. Uses dynamic import because when running under Bun the
+ * config is a TypeScript file; when running under plain Node it would fail
+ * and we fall back to reading the raw file.
+ * @returns {Promise<number>} The lint queue server port.
+ */
+async function getLintQueuePort() {
+  // The lint queue config is the single source of truth for the port.
+  // Import it dynamically so this .mjs file doesn't need to know the
+  // file extension at parse time.
+  try {
+    const mod = await import("../../scripts/lint-queue-config.ts");
+    return mod.LINT_QUEUE_PORT;
+  } catch {
+    // Fallback: read the constant directly from the source file.
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const configPath = join(import.meta.dirname, "../../scripts/lint-queue-config.ts");
+    const content = readFileSync(configPath, "utf-8");
+    const match = content.match(/export const LINT_QUEUE_PORT = (\d+)/);
+    if (!match) throw new Error("LINT_QUEUE_PORT not found in config file");
+    return Number(match[1]);
+  }
+}
+
 async function fixImportAliases(args, invocation) {
   const { scope, customPath } = args;
   const { bash, edit, logger } = invocation.tools;
@@ -124,8 +150,9 @@ async function fixImportAliases(args, invocation) {
 
         // Verify with lint
         const relativeFilePath = filePath.replace(/^\/home\/ahmed\/Projects\/siraj\//, "");
+        const lintQueuePort = await getLintQueuePort();
         const lintCheck = await bash({
-          command: `curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" -d '{"id":"fix-imports","files":["${relativeFilePath}"]}'`,
+          command: `curl -s -X POST http://localhost:${lintQueuePort}/lint -H "Content-Type: application/json" -d '{"id":"fix-imports","files":["${relativeFilePath}"]}'`,
           description: "Run lint check on file",
         });
 

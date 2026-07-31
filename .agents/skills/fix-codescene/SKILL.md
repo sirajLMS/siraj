@@ -60,7 +60,7 @@ Orchestrator otherwise uses only: scan/curl shell output, template content, AskQ
 Before dispatching executors:
 
 ```bash
-curl -s http://localhost:4777/status
+curl -s http://localhost:${LINT_QUEUE_PORT}/status
 ```
 
 - **Not running** (`running: false` or connection failed): start in background without blocking:

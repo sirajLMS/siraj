@@ -124,7 +124,7 @@ Follow the project's **code quality rules** after making any code edits:
 2. **Lint Queue Client**:
    For file-scoped linting on modified files, send a request to the lint queue server:
    ```bash
-   curl -s -X POST http://localhost:4777/lint \
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
      -H "Content-Type: application/json" \
      -d '{"id":"fix-tests","files":["<modified-file-path>"]}'
    ```

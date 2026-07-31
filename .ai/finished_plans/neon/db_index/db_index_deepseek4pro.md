@@ -147,7 +147,7 @@ After each file edit, run:
 ```bash
 bun tsgo
 bun biome:check
-curl -s -X POST http://localhost:4777/lint \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"4.1-index","files":["<file-path>"]}'
 ```
