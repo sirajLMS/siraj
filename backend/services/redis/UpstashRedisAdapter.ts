@@ -21,6 +21,10 @@ export class UpstashRedisAdapter extends BaseRedisAdapter<Redis> {
     const client = new Redis({
       url,
       token,
+      // Disable Upstash automatic JSON deserialization to maintain parity with ioredis / LocalRedisAdapter
+      // and enforce the IRedisService contract (get() returns raw string | null).
+      // Prevents double-parsing downstream (e.g. JSON.parse on object resulting in "[object Object]" SyntaxError).
+      automaticDeserialization: false,
     });
 
     super(client);
