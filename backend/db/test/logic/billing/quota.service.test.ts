@@ -264,7 +264,7 @@ describe("QuotaService", () => {
     });
   });
 
-  test("race test — concurrent redeem attempts on a single remaining class succeed for exactly one", async () => {
+  test("race test — oversell prevention: second redeem on exhausted quota fails", async () => {
     await runInRollback(async tx => {
       const actor = await createTestUser(tx);
       const { student } = await setupStudent(tx);
@@ -279,8 +279,9 @@ describe("QuotaService", () => {
       const quota = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
       expect(quota.remaining).toBe(1);
 
-      // Simulate two concurrent redeem attempts sharing the same tx (serial within rollback).
+      // Sequential Redeems on a shared tx (serial within rollback, mirroring class_quota_race.test.ts).
       // The first redeem succeeds (remaining 1 → 0), the second must fail because remaining hits 0.
+      // True concurrency testing requires separate connections and is deferred — see class_quota_race.test.ts.
       const teacher1 = await setupTeacher(tx);
       const instance1 = await createMockClassInstance(tx, student.id, teacher1.teacher.id);
 

@@ -1,11 +1,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import {
-  QuotaKind,
-  type QuotaPeriodType,
-  type QuotaStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 import {
   createQuotaMutationDocument,
@@ -13,7 +9,6 @@ import {
   updateQuotaMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useQuotaStore } from "@/frontend/common/stores/quotaStore";
-import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
 
@@ -37,15 +32,15 @@ export function useQuotaFormViewModel(quotaId?: string) {
 
   useEffect(() => {
     if (isEditing && existingData?.quota) {
-      const q = existingData.quota as QuotaItem;
+      const q = existingData.quota;
       setFormData({
         studentId: q.studentId ?? "",
-        kind: (q.kind ?? QuotaKind.Package) as QuotaKind,
+        kind: q.kind ?? QuotaKind.Package,
         name: q.name ?? "",
         totalClasses: q.totalClasses ?? 0,
         validFrom: q.validFrom,
         validUntil: q.validUntil,
-        periodType: q.periodType as QuotaPeriodType | null,
+        periodType: q.periodType,
         periodDays: q.periodDays,
         priority: q.priority ?? 10,
       });
@@ -70,7 +65,7 @@ export function useQuotaFormViewModel(quotaId?: string) {
         // Refetch to get latest version before updating (avoids stale version conflict)
         const { data: latest } = await refetchQuota();
         if (!latest?.quota) return;
-        const q = latest.quota as QuotaItem;
+        const q = latest.quota;
         try {
           await updateQuotaMutation({
             variables: {
@@ -78,7 +73,7 @@ export function useQuotaFormViewModel(quotaId?: string) {
               input: {
                 name: formData.name,
                 validUntil: formData.validUntil,
-                status: q.status as QuotaStatus,
+                status: q.status,
                 priority: formData.priority,
                 version: q.version ?? 0,
               },
@@ -95,12 +90,12 @@ export function useQuotaFormViewModel(quotaId?: string) {
             variables: {
               input: {
                 studentId: formData.studentId,
-                kind: formData.kind as QuotaKind,
+                kind: formData.kind,
                 name: formData.name,
                 totalClasses: formData.totalClasses,
                 validFrom: formData.validFrom,
                 validUntil: formData.validUntil,
-                periodType: formData.periodType as QuotaPeriodType | null,
+                periodType: formData.periodType,
                 periodDays: formData.periodDays,
                 priority: formData.priority,
                 idempotencyKey: null,

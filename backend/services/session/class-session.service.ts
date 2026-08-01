@@ -325,12 +325,13 @@ export namespace ClassSessionService {
     instance: ClassInstanceEntity,
     userId: string,
     tErrors: ErrorsLabels,
-    tx: DBTransaction
+    tx: DBTransaction,
+    locale = "en"
   ): Promise<void> {
     if (instance.ondemandStatus === "PENDING_CREDIT") {
-      const openQuota = await QuotaService.selectQuotaForBooking(instance.studentId, tx, userId, "en");
+      const openQuota = await QuotaService.selectQuotaForBooking(instance.studentId, tx, userId, locale);
       if (openQuota) {
-        await QuotaService.redeemForInstance(instance.studentId, instance.id, openQuota.id, userId, tx, "en");
+        await QuotaService.redeemForInstance(instance.studentId, instance.id, openQuota.id, userId, tx, locale);
       } else {
         const idempotencyKey = `credit-deduction-ondemand:${instance.id}`;
         await CreditService.deductForBooking(instance.studentId, instance.id, userId, idempotencyKey, tx, tErrors);
@@ -374,24 +375,29 @@ export namespace ClassSessionService {
     return updated.length;
   }
 
-  export async function activate(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
+  export async function activate(userId: string, classInstanceId: string, tErrors: ErrorsLabels, locale = "en") {
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_CLASS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
     await SystemRulesService.assertActivationTimeWindow(instance);
     const result = await db.transaction(async tx => {
-      await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx);
+      await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx, locale);
       return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false }, tx, tErrors);
     });
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_ACTIVATED);
     return result;
   }
 
-  export async function activateOverride(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
+  export async function activateOverride(
+    userId: string,
+    classInstanceId: string,
+    tErrors: ErrorsLabels,
+    locale = "en"
+  ) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_OVERRIDE, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
     const result = await db.transaction(async tx => {
-      await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx);
+      await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx, locale);
       return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: true }, tx, tErrors);
     });
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_ACTIVATED, {
@@ -739,4 +745,9 @@ export namespace ClassSessionService {
   }
 }
 
-export type ClassActionFn<R> = (userId: string, classInstanceId: string, tErrors: ErrorsLabels) => Promise<R>;
+export type ClassActionFn<R> = (
+  userId: string,
+  classInstanceId: string,
+  tErrors: ErrorsLabels,
+  locale?: string
+) => Promise<R>;

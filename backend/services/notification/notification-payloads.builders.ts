@@ -271,6 +271,22 @@ function renderStudentLifecycle(
   }
 }
 
+// ─── Quota & on-demand event builder registry ─────────────────────────
+//
+// The quota/on-demand notification builders live in `quota-notification.builders.ts`
+// to keep the pure three-arg thousand-line file from growing further. They are
+// re-exported here so every notification builder shares a single import surface
+// (`notification-payloads.builders`) — resolving task 11.4 "register new builders".
+export {
+  buildOndemandInstancePendingCreditPayloads,
+  buildOndemandInstanceReminderT1Payloads,
+  buildOndemandInstanceReminderT3Payloads,
+  buildOndemandTeacherDailyDigestPayloads,
+  buildQuotaExpiredPayloads,
+  buildQuotaExpiringSoonPayloads,
+  buildQuotaLowBalancePayloads,
+} from "@/backend/services/notification/quota-notification.builders";
+
 // ─── Invoice event builders ───────────────────────────────────────────
 
 /**

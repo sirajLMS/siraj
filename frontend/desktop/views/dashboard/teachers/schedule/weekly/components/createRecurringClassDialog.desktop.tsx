@@ -119,7 +119,7 @@ function DurationTimeFields({
   readonly t: TeacherCreateRecurringClassLabels;
 }) {
   return (
-    <Stack direction="row" spacing={2}>
+    <Stack sx={{ flexDirection: "row", gap: 2 }}>
       <TextField
         fullWidth
         label={t.fields.duration}
@@ -162,7 +162,7 @@ function TimezoneClassTypeFields({
 }) {
   const classTypeLabels = buildClassTypeLabels(t);
   return (
-    <Stack direction="row" spacing={2}>
+    <Stack sx={{ flexDirection: "row", gap: 2 }}>
       <Box sx={{ flex: 1 }}>
         <TimezoneSelect
           value={toGraphqlIanaTimezone(timezone)}
@@ -223,7 +223,7 @@ function SchedulingFields({
   readonly mutationLoading: boolean;
 }) {
   return (
-    <Stack spacing={2}>
+    <Stack sx={{ gap: 2 }}>
       <FormControl fullWidth>
         <InputLabel id="scheduling-mode-label" shrink>
           Scheduling Mode
@@ -335,7 +335,7 @@ function DayScheduleItem({
         label={dayLabels[d.day.toLowerCase()]}
       />
       {d.enabled && (
-        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+        <Stack sx={{ flexDirection: "row", gap: 2, alignItems: "center" }}>
           <FormControlLabel
             control={
               <Checkbox
@@ -386,7 +386,7 @@ function DayScheduleList({
       <Typography variant="subtitle1" gutterBottom>
         {t.fields.days}
       </Typography>
-      <Stack spacing={1}>
+      <Stack sx={{ gap: 1 }}>
         {days.map(d => (
           <DayScheduleItem
             key={d.day}
@@ -436,7 +436,7 @@ function DialogFormContent({
 }) {
   return (
     <DialogContent>
-      <Stack spacing={3}>
+      <Stack sx={{ gap: 3 }}>
         {meetingConfigWarning ? (
           <MeetingConfigWarningAlert
             createdClassInstanceId={createdClassInstanceId}

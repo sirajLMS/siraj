@@ -264,7 +264,10 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: effectiveIdempotencyKey,
         }),
-      adjustStudentClasses: () => StudentRepository.deductClasses(studentId, tErrors, 1, undefined, tx),
+      adjustStudentClasses: async () => {
+        await StudentRepository.deductClasses(studentId, tErrors, 1, undefined, tx);
+        await QuotaService.refreshStudentOndemandInstances(studentId, tx);
+      },
     });
   }
 

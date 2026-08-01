@@ -337,7 +337,7 @@ function DayScheduleItem({
         label={dayLabels[d.day.toLowerCase()]}
       />
       {d.enabled && (
-        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+        <Stack sx={{ flexDirection: "row", gap: 2, alignItems: "center" }}>
           <FormControlLabel
             control={
               <Checkbox
@@ -388,7 +388,7 @@ function DayScheduleList({
       <Typography variant="subtitle1" gutterBottom>
         {t.fields.days}
       </Typography>
-      <Stack spacing={1}>
+      <Stack sx={{ gap: 1 }}>
         {days.map(d => (
           <DayScheduleItem
             key={d.day}
@@ -438,7 +438,7 @@ function DialogFormContent({
 }) {
   return (
     <DialogContent>
-      <Stack spacing={3}>
+      <Stack sx={{ gap: 3 }}>
         {meetingConfigWarning ? (
           <MeetingConfigWarningAlert
             createdClassInstanceId={createdClassInstanceId}

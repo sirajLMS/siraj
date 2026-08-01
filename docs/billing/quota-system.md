@@ -280,19 +280,17 @@ All 7 events:
 - `QuotaExpirationBreakdown` — per-quota expiration detail
 - `QuotaPaginatedResult`, `QuotaLedgerPaginatedResult` — paginated results
 
-## Quok: Key Cashes & Constraints
+## Key Caches & Constraints
 
-### Led Guide
+### Ledger Guide
 
 1. **FK RESTRICT on `quota_ledger.quotaId`**: Deleting a quota requires first deleting/archiving all its ledger entries. CASCADE was replaced with RESTRICT to preserve the immutable audit trail.
 2. **CHECK constraints**: 5 constraints on `quotas` enforce data integrity at the database level (kind/period consistency, non-negative counters, reserved not exceeding remaining).
 3. **Ledger insert idempotency**: The `quota_ledger` table uses `idempotencyKey UNIQUE` index. `insert` in `quotaRepository` checks first for existing entry and returns early — do NOT use `ON CONFLICT DO NOTHING` for bulk invocations across concurrent PG connections (race).
-4. **All cache references to be read as "mail":** `remaining` and `reservedClasses` on `quotas` are cached columns. The single source of truth is always `quota_ledger`. These cache columns are updated atomically in the same Drizzle transaction as the ledger write.
-5. **Optimistic locking via `version`**: Every write increments `version`. Concurrent writes will get EDIT error — handle with retries.
+4. **Cached columns are snapshots only**: `remaining` and `reservedClasses` on `quotas` are cached columns. The single source of truth is always `quota_ledger`. These cache columns are updated atomically in the same Drizzle transaction as the ledger write.
+5. **Optimistic locking via `version`**: Every write increments `version`. Concurrent writes will fail with a version conflict error — handle with retries.
 6. **No direct SQL on quota columns**: All quota state changes outside `quota.repository.ts` are PROHIBITED. This includes `CreditService` directly touching `class_instances.quotaDeducted` — the now-removed code in `state-changes.ts` previously did this.
 7. **Transaction safety**: Ledger writes, cache updates, and idempotency checks always share the same `tx`. The ledger is the single writer — no other code touches quota columns.
-,  per instance
-(Injection handled by `ChecksUserBusinessLeaderClassTypes, this is a contingent ISA rule per Phase 3)
 
 ## Test Coverage
 
@@ -306,7 +304,7 @@ All tests use `runInRollback` wrapper. All pass: 825/825.
 
 ## Frontend
 
-### i18w Translated Keys
+### i18n Translated Keys
 
 Quota error keys in `shared/locale/types/errors/index.ts`:
 - `quotaMustBeNonNegative`

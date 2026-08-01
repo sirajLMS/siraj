@@ -81,7 +81,7 @@ All keys follow the pattern `"quota-{operation}:{unique-segment}:..."` hashed wi
 - `deriveReleaseEarmarkIdempotencyKey(scheduleId, instanceId, quotaId)`
 - `deriveExpireIdempotencyKey(quotaId, periodString)`
 
-### FiF Object Selection
+### FIFO Object Selection
 
 `selectQuotaForBookingFIFO(studentId, tx?)`: filters ACTIVE quotas, sorts by priority DESC → validUntil ASC, returns the first with `remaining > 0`.
 

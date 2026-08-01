@@ -163,6 +163,8 @@ const QuotaExpirationBreakdownRef = gqlSchemaBuilder.objectRef<QuotaExpirationBr
 export const QuotaExpirationBreakdownPothosObject = QuotaExpirationBreakdownRef.implement({
   description: "Per-quota breakdown of remaining classes by expiration date",
   fields: t => ({
+    // Expose quotaId as id for Apollo cache normalization
+    id: t.exposeString("quotaId"),
     quotaId: t.exposeString("quotaId"),
     quotaName: t.exposeString("quotaName"),
     validUntil: t.expose("validUntil", { type: "DateTime", nullable: true }),

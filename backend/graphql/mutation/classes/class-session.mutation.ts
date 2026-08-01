@@ -13,7 +13,7 @@ async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, a
   const userId = await requireAuth(ctx);
   const tErrors = ctx.t().errorsTranslations;
   const tSession = ctx.t().sessionTranslations;
-  await action(userId, classInstanceId, tErrors);
+  await action(userId, classInstanceId, tErrors, ctx.locale);
   return ClassSessionService.getClassInstanceDetail(userId, classInstanceId, tSession, tErrors);
 }
 

@@ -49,7 +49,7 @@ export function useQuotaViewModel() {
 
   const quotas: QuotaItem[] = useMemo(() => {
     if (!data?.quotas?.rows) return [];
-    return data.quotas.rows as QuotaItem[];
+    return data.quotas.rows;
   }, [data]);
 
   const totalCount = data?.quotas?.totalCount ?? 0;
