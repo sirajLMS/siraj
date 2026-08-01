@@ -240,7 +240,7 @@ describe("Class Quota System Constraints & Triggers", () => {
         idempotencyKey: randomUUID(),
       });
 
-      // TODO: True concurrency testing requires separate database transactions
+      // True concurrency testing requires separate database transactions
       // (each with its own connection from the pool) so that advisory locks
       // actually contend. The current test framework (runInRollback) provides
       // a single shared transaction, so both createClassInstance calls execute
@@ -269,7 +269,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       // The first call claims the single remaining class; the second should fail the
       // CHECK constraint (`reservedClasses + remaining <= totalClasses`). This verifies
       // the guard logic serially; true multi-transaction concurrency testing would
-      // require separate connections (see TODO above).
+      // require separate connections (see the note above).
       const successes = results.filter(r => r.status === "fulfilled");
       // With a shared tx, Promise.allSettled resolves sequentially: the first call
       // consumes the single quota, the second hits the CHECK constraint and rejects.

@@ -17,6 +17,8 @@ import {
 import {
   mapQuotaLedgerToReturnType,
   mapQuotaToReturnType,
+  type QuotaBalanceReturnType,
+  type QuotaExpirationBreakdown,
   type QuotaLedgerPaginatedResult,
   type QuotaPaginatedFilter,
   type QuotaReturnType,
@@ -217,18 +219,7 @@ export namespace QuotaService {
     tx?: ReadExecutor,
     actorUserId?: string | null,
     locale = "en"
-  ): Promise<{
-    studentId: string;
-    totalActiveClasses: number;
-    totalRemaining: number;
-    totalReserved: number;
-    breakdownByExpiration: {
-      quotaId: string;
-      quotaName: string;
-      validUntil: Date | null;
-      remaining: number;
-    }[];
-  }> => {
+  ): Promise<QuotaBalanceReturnType> => {
     await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
     // V3-035: IDOR scoping — ensure the caller is associated with this student
     // or holds QUOTAS_MANAGE before returning their balance.
@@ -239,12 +230,7 @@ export namespace QuotaService {
     let totalActiveClasses = 0;
     let totalRemaining = 0;
     let totalReserved = 0;
-    const breakdownByExpiration: {
-      quotaId: string;
-      quotaName: string;
-      validUntil: Date | null;
-      remaining: number;
-    }[] = [];
+    const breakdownByExpiration: QuotaExpirationBreakdown[] = [];
 
     for (const q of activeQuotas) {
       totalActiveClasses += q.totalClasses;

@@ -11,14 +11,6 @@ interface StudentQuotaViewProps {
 export function StudentQuotaAudienceView({ t }: Readonly<StudentQuotaViewProps>) {
   return (
     <QuotaAudienceCard title={t.audience.studentTitle}>
-      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
-        <Typography variant="labelMd" sx={{ mb: 1 }}>
-          {t.audience.activeQuotas}
-        </Typography>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {t.audience.noData}
-        </Typography>
-      </Paper>
       <Paper sx={{ p: 3 }} elevation={4} variant="outlined">
         <Typography variant="labelMd" sx={{ mb: 1 }}>
           {t.audience.remainingCredits}
@@ -27,7 +19,15 @@ export function StudentQuotaAudienceView({ t }: Readonly<StudentQuotaViewProps>)
           {t.audience.noData}
         </Typography>
       </Paper>
-      <Paper sx={{ p: 3 }} elevation={4} variant="outlined">
+      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
+        <Typography variant="labelMd" sx={{ mb: 1 }}>
+          {t.audience.activeQuotas}
+        </Typography>
+        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+          {t.audience.noData}
+        </Typography>
+      </Paper>
+      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
         <Typography variant="labelMd" sx={{ mb: 1 }}>
           {t.audience.onDemandPending}
         </Typography>

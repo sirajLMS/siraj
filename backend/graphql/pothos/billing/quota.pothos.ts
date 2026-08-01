@@ -7,6 +7,8 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   AvailableClassSlotReturnType,
+  QuotaBalanceReturnType,
+  QuotaExpirationBreakdown,
   QuotaLedgerPaginatedResult,
   QuotaLedgerReturnType,
   QuotaPaginatedFilter,
@@ -153,5 +155,34 @@ export const AvailableClassSlotPothosObject = AvailableClassSlotRef.implement({
     startAt: t.expose("startAt", { type: "DateTime" }),
     endAt: t.expose("endAt", { type: "DateTime" }),
     available: t.exposeBoolean("available"),
+  }),
+});
+
+const QuotaExpirationBreakdownRef = gqlSchemaBuilder.objectRef<QuotaExpirationBreakdown>("QuotaExpirationBreakdown");
+
+export const QuotaExpirationBreakdownPothosObject = QuotaExpirationBreakdownRef.implement({
+  description: "Per-quota breakdown of remaining classes by expiration date",
+  fields: t => ({
+    quotaId: t.exposeString("quotaId"),
+    quotaName: t.exposeString("quotaName"),
+    validUntil: t.expose("validUntil", { type: "DateTime", nullable: true }),
+    remaining: t.exposeInt("remaining"),
+  }),
+});
+
+const QuotaBalanceRef = gqlSchemaBuilder.objectRef<QuotaBalanceReturnType>("QuotaBalance");
+
+export const QuotaBalancePothosObject = QuotaBalanceRef.implement({
+  description: "Aggregated quota balance summary for a student",
+  fields: t => ({
+    id: t.exposeString("studentId"),
+    studentId: t.exposeString("studentId"),
+    totalActiveClasses: t.exposeInt("totalActiveClasses"),
+    totalRemaining: t.exposeInt("totalRemaining"),
+    totalReserved: t.exposeInt("totalReserved"),
+    breakdownByExpiration: t.field({
+      type: [QuotaExpirationBreakdownPothosObject],
+      resolve: parent => parent.breakdownByExpiration,
+    }),
   }),
 });

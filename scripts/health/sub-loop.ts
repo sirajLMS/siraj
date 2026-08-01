@@ -33,7 +33,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
-import { BASE_URL as LINT_QUEUE_URL } from "../lint-queue-config";
+import { BASE_URL as LINT_QUEUE_URL } from "@/scripts/lint-queue-config";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 

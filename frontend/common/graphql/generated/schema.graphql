@@ -3362,6 +3362,9 @@ type Query {
   """Get a specific quota by ID"""
   quota(id: ID!): Quota
 
+  """Get aggregated quota balance summary for a student"""
+  quotaBalance(studentId: ID!): QuotaBalance
+
   """Get paginated audit ledger history for a quota"""
   quotaLedger(pagination: PaginationArgs, quotaId: ID!): QuotaLedgerPaginatedResult
 
@@ -3538,6 +3541,24 @@ type Quota {
   validFrom: DateTime
   validUntil: DateTime
   version: Int
+}
+
+"""Aggregated quota balance summary for a student"""
+type QuotaBalance {
+  breakdownByExpiration: [QuotaExpirationBreakdown!]
+  id: String
+  studentId: String
+  totalActiveClasses: Int
+  totalRemaining: Int
+  totalReserved: Int
+}
+
+"""Per-quota breakdown of remaining classes by expiration date"""
+type QuotaExpirationBreakdown {
+  quotaId: String
+  quotaName: String
+  remaining: Int
+  validUntil: DateTime
 }
 
 enum QuotaKind {

@@ -63,13 +63,30 @@ export type QuotaSubmitInput = Omit<
   priority?: number | null;
   idempotencyKey?: string | null;
   rolloverPolicy?: QuotaRolloverPolicy | null;
+  periodType?: QuotaPeriodType | null;
+  periodDays?: number | null;
 };
 
 export type QuotaUpdateType = Omit<
   Partial<
     Omit<
       QuotaInsertType,
-      "id" | "createdAt" | "updatedAt" | "deletedAt" | "version" | "idempotencyKey" | "usedThisPeriod" | "periodAnchor"
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "deletedAt"
+      | "version"
+      | "idempotencyKey"
+      | "usedThisPeriod"
+      | "periodAnchor"
+      | "remaining"
+      | "reservedClasses"
+      | "totalClasses"
+      | "studentId"
+      | "kind"
+      | "periodType"
+      | "periodDays"
+      | "rolloverPolicy"
     >
   >,
   "validUntil" | "validFrom"
@@ -86,6 +103,21 @@ export interface QuotaPaginatedFilter {
   status?: QuotaStatus | null;
   kind?: QuotaKind | null;
   search?: string | null;
+}
+
+export interface QuotaExpirationBreakdown {
+  quotaId: string;
+  quotaName: string;
+  validUntil: Date | null;
+  remaining: number;
+}
+
+export interface QuotaBalanceReturnType {
+  studentId: string;
+  totalActiveClasses: number;
+  totalRemaining: number;
+  totalReserved: number;
+  breakdownByExpiration: QuotaExpirationBreakdown[];
 }
 
 export interface QuotaPaginatedResult {

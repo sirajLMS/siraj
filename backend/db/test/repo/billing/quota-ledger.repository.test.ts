@@ -43,6 +43,40 @@ describe("QuotaLedgerRepository", () => {
     });
   });
 
+  test("idempotent insert — same key returns same row without duplicate", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Idempotent Quota",
+        totalClasses: 10,
+        idempotencyKey: `quota-test-${randomUUID()}`,
+      };
+      const quota = await QuotaRepository.create(tx, quotaInput);
+
+      const sharedKey = `ledger-idempotent-${randomUUID()}`;
+      const ledgerInput: QuotaLedgerInsertInput = {
+        quotaId: quota.id,
+        studentId: student.id,
+        delta: 5,
+        reason: QuotaLedgerReason.GRANT,
+        idempotencyKey: sharedKey,
+      };
+
+      const first = await QuotaLedgerRepository.insert(tx, ledgerInput);
+      const second = await QuotaLedgerRepository.insert(tx, ledgerInput);
+
+      expect(second.id).toBe(first.id);
+      expect(second.delta).toBe(first.delta);
+
+      const entries = await QuotaLedgerRepository.findByQuotaId(tx, quota.id);
+      const grants = entries.filter(e => e.reason === QuotaLedgerReason.GRANT && e.delta === 5);
+      expect(grants).toHaveLength(1);
+    });
+  });
+
   test("computeBalance from ledger entries", async () => {
     await runInRollback(async tx => {
       const { student } = await setupStudent(tx);

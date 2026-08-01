@@ -1,6 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AvailableClassSlotPothosObject,
+  QuotaBalancePothosObject,
   QuotaLedgerPaginatedResultPothosObject,
   QuotaPaginatedFilterPothosRef,
   QuotaPaginatedResultPothosObject,
@@ -88,6 +89,21 @@ gqlSchemaBuilder.queryField("studentOpenQuotas", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       return QuotaService.listStudentOpenQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("quotaBalance", t =>
+  t.field({
+    type: QuotaBalancePothosObject,
+    description: "Get aggregated quota balance summary for a student",
+    authScopes: { loggedIn: true },
+    args: {
+      studentId: t.arg.id({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return QuotaService.getStudentQuotaBalance(String(args.studentId), undefined, actorUserId, ctx.locale);
     },
   })
 );

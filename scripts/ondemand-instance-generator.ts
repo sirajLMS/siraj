@@ -7,6 +7,7 @@ import { ClassExecutionState, ClassType, DayOfWeek, OnDemandStatus, SchedulingMo
 
 import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { ClassInstanceInsertInput } from "@/backend/types";
 
 /** Maximum number of recurring schedules to process per batch (unbounded SELECT guard — RP2-8). */
@@ -140,29 +141,33 @@ async function tryGenerateSlotDay(
   matchingDay: typeof recurringScheduleDays.$inferSelect,
   remainingBalance: number,
   existingConflicts: Set<string>,
-  scheduleDaysMap: Map<string, boolean> | null,
   pendingInstances: PendingInstance[]
 ): Promise<{ generated: boolean; remaining: number }> {
   const [startHour, startMin] = matchingDay.startTime.split(":").map(Number);
   // RC2-1: Compute start time in the schedule's IANA timezone, not server-local.
   const scheduledStartAt = computeStartAtInTimezone(currentDate, startHour, startMin, schedule.timezone);
 
+  const scheduledEndAt = new Date(scheduledStartAt.getTime() + schedule.durationMinutes * 60 * 1000);
+
+  // Check if this exact slot already has a conflicting instance (quick in-memory reject)
   const tsIso = scheduledStartAt.toISOString();
   const slotKey = `${schedule.id}-${tsIso}`;
+  let isAvailable = !existingConflicts.has(slotKey);
 
-  // Check if this exact slot already has a conflicting instance for either student or teacher
-  let isAvailable = true;
-  if (existingConflicts.has(slotKey)) {
-    isAvailable = false;
-  } else if (scheduleDaysMap) {
-    // Check teacher availability windows by day of week
-    // V3-009: Resolve DOW in schedule's IANA timezone, not server-local.
-    const dayFmt = new Intl.DateTimeFormat("en-US", { timeZone: schedule.timezone, weekday: "short" });
-    const dow = SHORT_WEEKDAY_TO_ENUM[dayFmt.format(currentDate)];
-    isAvailable = dow ? scheduleDaysMap.get(dow) === true : false;
+  // Use AvailabilityService for teacher availability + conflict checks (Task 14 requirement).
+  // Falls back to the service which validates teacher availability windows, vacations, and
+  // overlapping instances via SchedulingRepository + TeacherAvailabilityRepository.
+  if (isAvailable) {
+    isAvailable = await AvailabilityService.isSlotAvailable(
+      schedule.studentId,
+      schedule.teacherId,
+      scheduledStartAt,
+      scheduledEndAt,
+      [],
+      undefined,
+      "en"
+    );
   }
-
-  const scheduledEndAt = new Date(scheduledStartAt.getTime() + schedule.durationMinutes * 60 * 1000);
 
   const { executionState, ondemandStatus } = determineExecutionState(isAvailable, remainingBalance > 0);
 
@@ -194,10 +199,13 @@ async function tryGenerateSlotDay(
   return { generated: true, remaining: newRemaining };
 }
 
-async function generateInstancesForSchedule(
-  schedule: typeof recurringSchedules.$inferSelect,
-  now: Date
-): Promise<number> {
+interface ScheduleDateRange {
+  startDate: Date;
+  scheduleEndDate: Date;
+}
+
+/** Computes the effective date range for instance generation based on schedule metadata. */
+function computeScheduleDateRange(schedule: typeof recurringSchedules.$inferSelect, now: Date): ScheduleDateRange {
   const horizonWeeks = schedule.generationHorizonWeeks ?? 2;
   const effectiveFromDate = schedule.effectiveFrom ? new Date(schedule.effectiveFrom) : now;
   const startDate = effectiveFromDate > now ? effectiveFromDate : now;
@@ -205,6 +213,148 @@ async function generateInstancesForSchedule(
   const effectiveUntilDate = schedule.effectiveUntil ? new Date(schedule.effectiveUntil) : null;
   const scheduleEndDate =
     effectiveUntilDate && effectiveUntilDate < horizonEndDate ? effectiveUntilDate : horizonEndDate;
+  return { startDate, scheduleEndDate };
+}
+
+/** Queries for any existing class instances that overlap with the generation window. */
+function buildOverlappingInstancesQuery(
+  schedule: typeof recurringSchedules.$inferSelect,
+  startDate: Date,
+  scheduleEndDate: Date
+) {
+  return db
+    .select({
+      id: classInstances.id,
+      scheduledStartAt: classInstances.scheduledStartAt,
+      studentId: classInstances.studentId,
+      teacherId: classInstances.teacherId,
+    })
+    .from(classInstances)
+    .where(
+      and(
+        isNull(classInstances.deletedAt),
+        sql`${classInstances.scheduledStartAt} < ${scheduleEndDate}`,
+        sql`${classInstances.scheduledEndAt} > ${startDate}`,
+        sql`(${classInstances.studentId} = ${schedule.studentId} OR ${classInstances.teacherId} = ${schedule.teacherId})`
+      )
+    );
+}
+
+/** Builds a Set of timestamp-based slot keys that are already taken by existing instances. */
+function buildExistingConflictSet(scheduleId: string, overlappingInstances: { scheduledStartAt: Date }[]): Set<string> {
+  const existingConflicts = new Set<string>();
+  for (const inst of overlappingInstances) {
+    existingConflicts.add(`${scheduleId}-${inst.scheduledStartAt.toISOString()}`);
+  }
+  return existingConflicts;
+}
+
+/** Resolves the IANA-timezone-aware day-of-week for the current iteration date. */
+function resolveScheduleDOW(currentDate: Date, timezone: string): DayOfWeek | undefined {
+  const fmt = new Intl.DateTimeFormat("en-US", { timeZone: timezone, weekday: "short" });
+  const weekdayShort = fmt.format(currentDate);
+  return SHORT_WEEKDAY_TO_ENUM[weekdayShort];
+}
+
+/** Iterates through the date range, generating pending instances for each matching schedule day. */
+async function generatePendingInstancesForRange(
+  schedule: typeof recurringSchedules.$inferSelect,
+  scheduleDays: (typeof recurringScheduleDays.$inferSelect)[],
+  startDate: Date,
+  scheduleEndDate: Date,
+  remainingBalance: number,
+  existingConflicts: Set<string>
+): Promise<{ pendingInstances: PendingInstance[]; finalBalance: number }> {
+  const pendingInstances: PendingInstance[] = [];
+  let currentBalance = remainingBalance;
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= scheduleEndDate) {
+    const scheduleDOW = resolveScheduleDOW(currentDate, schedule.timezone);
+    const matchingDay = scheduleDOW ? scheduleDays.find(d => d.dayOfWeek === scheduleDOW) : undefined;
+
+    if (matchingDay) {
+      const result = await tryGenerateSlotDay(
+        schedule,
+        currentDate,
+        matchingDay,
+        currentBalance,
+        existingConflicts,
+        pendingInstances
+      );
+      if (result.generated) {
+        currentBalance = result.remaining;
+      }
+    }
+
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return { pendingInstances, finalBalance: currentBalance };
+}
+
+/** Maps a PendingInstance to the insert shape expected by the classInstances table. */
+function toClassInstanceInsertInput(p: PendingInstance): ClassInstanceInsertInput {
+  return {
+    recurringScheduleId: p.recurringScheduleId,
+    studentId: p.studentId,
+    teacherId: p.teacherId,
+    subjectId: p.subjectId,
+    durationMinutes: p.durationMinutes,
+    classType: ClassType.REGULAR,
+    bookingTimezone: p.bookingTimezone,
+    scheduledStartAt: p.scheduledStartAt,
+    scheduledEndAt: p.scheduledEndAt,
+    executionState: p.executionState,
+    ondemandStatus: p.ondemandStatus,
+    schedulingMode: p.schedulingMode,
+    quotaDeducted: false,
+    idempotencyKey: p.idempotencyKey,
+  } as ClassInstanceInsertInput;
+}
+
+/**
+ * RBL2-3: Batch-inserts pending instances inside a single transaction with
+ * SELECT FOR UPDATE on the student's on-demand instances so concurrent
+ * generator invocations cannot oversell. Returns the number of rows inserted.
+ */
+async function insertPendingInstances(
+  schedule: typeof recurringSchedules.$inferSelect,
+  pendingInstances: PendingInstance[]
+): Promise<number> {
+  if (pendingInstances.length === 0) return 0;
+
+  return db.transaction(async tx => {
+    // Lock the student's existing on-demand instances for the duration of
+    // this tx so concurrent runs cannot both read the same balance and
+    // double-insert based on stale `availableBalance`.
+    await tx
+      .select({ id: classInstances.id })
+      .from(classInstances)
+      .where(
+        and(
+          eq(classInstances.studentId, schedule.studentId),
+          eq(classInstances.schedulingMode, SchedulingMode.ON_DEMAND),
+          isNull(classInstances.deletedAt)
+        )
+      )
+      .for("update");
+
+    const inserted = await tx
+      .insert(classInstances)
+      .values(pendingInstances.map(toClassInstanceInsertInput))
+      .onConflictDoNothing()
+      .returning({ id: classInstances.id });
+
+    return inserted.length;
+  });
+}
+
+async function generateInstancesForSchedule(
+  schedule: typeof recurringSchedules.$inferSelect,
+  now: Date
+): Promise<number> {
+  const { startDate, scheduleEndDate } = computeScheduleDateRange(schedule, now);
 
   // RP2-1: Parallelise 3 independent reads (schedule days, credit balance,
   // overlapping instances) that were previously sequential awaits.
@@ -219,22 +369,7 @@ async function generateInstancesForSchedule(
       .from(recurringScheduleDays)
       .where(and(eq(recurringScheduleDays.recurringScheduleId, schedule.id), eq(recurringScheduleDays.isActive, true))),
     CreditRepository.getBalance(db, schedule.studentId),
-    db
-      .select({
-        id: classInstances.id,
-        scheduledStartAt: classInstances.scheduledStartAt,
-        studentId: classInstances.studentId,
-        teacherId: classInstances.teacherId,
-      })
-      .from(classInstances)
-      .where(
-        and(
-          isNull(classInstances.deletedAt),
-          sql`${classInstances.scheduledStartAt} < ${scheduleEndDate}`,
-          sql`${classInstances.scheduledEndAt} > ${startDate}`,
-          sql`(${classInstances.studentId} = ${schedule.studentId} OR ${classInstances.teacherId} = ${schedule.teacherId})`
-        )
-      ),
+    buildOverlappingInstancesQuery(schedule, startDate, scheduleEndDate),
   ]);
 
   if (scheduleDays.length === 0) return 0;
@@ -255,109 +390,24 @@ async function generateInstancesForSchedule(
     return 0;
   }
 
-  // Build a Set of timestamp-based slot keys that are already taken.
-  // Using the full ISO timestamp (not just date) avoids false conflicts
-  // when the same schedule has instances at different times on the same day.
-  const existingConflicts = new Set<string>();
-  for (const inst of overlappingInstances) {
-    const tsKey = inst.scheduledStartAt.toISOString();
-    const slotKey = `${schedule.id}-${tsKey}`;
-    existingConflicts.add(slotKey);
-  }
+  const existingConflicts = buildExistingConflictSet(schedule.id, overlappingInstances);
 
-  let remainingBalance = availableBalance;
-  const currentDate = new Date(startDate);
-  const pendingInstances: PendingInstance[] = [];
-  while (currentDate <= scheduleEndDate) {
-    // V3-009: Resolve day-of-week using the schedule's IANA timezone rather than
-    // server-local time so DST transitions in the student's timezone don't
-    // shift the weekday boundary and cause missed/extra generations.
-    const fmt = new Intl.DateTimeFormat("en-US", {
-      timeZone: schedule.timezone,
-      weekday: "short",
-    });
-    const weekdayShort = fmt.format(currentDate);
-    const scheduleDOW = SHORT_WEEKDAY_TO_ENUM[weekdayShort];
+  const { pendingInstances } = await generatePendingInstancesForRange(
+    schedule,
+    scheduleDays,
+    startDate,
+    scheduleEndDate,
+    availableBalance,
+    existingConflicts
+  );
 
-    const matchingDay = scheduleDOW ? scheduleDays.find(d => d.dayOfWeek === scheduleDOW) : undefined;
+  const generated = await insertPendingInstances(schedule, pendingInstances);
 
-    if (matchingDay) {
-      const result = await tryGenerateSlotDay(
-        schedule,
-        currentDate,
-        matchingDay,
-        remainingBalance,
-        existingConflicts,
-        null,
-        pendingInstances
-      );
-      if (result.generated) {
-        remainingBalance = result.remaining;
-      }
-    }
-
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  // RBL2-3: Batch-insert inside a single transaction with SELECT FOR UPDATE
-  // on the student's on-demand instances so concurrent generator invocations
-  // cannot oversell — the transaction serialises the balance read + insertion.
-  // The idempotencyKey unique constraint + ON CONFLICT DO NOTHING absorbs
-  // any remaining races without raising errors.
-  const generated = await db.transaction(async tx => {
-    if (pendingInstances.length === 0) return 0;
-
-    // Lock the student's existing on-demand instances for the duration of
-    // this tx so concurrent runs cannot both read the same balance and
-    // double-insert based on stale `availableBalance`.
-    await tx
-      .select({ id: classInstances.id })
-      .from(classInstances)
-      .where(
-        and(
-          eq(classInstances.studentId, schedule.studentId),
-          eq(classInstances.schedulingMode, SchedulingMode.ON_DEMAND),
-          isNull(classInstances.deletedAt)
-        )
-      )
-      .for("update");
-
-    const inserted = await tx
-      .insert(classInstances)
-      .values(
-        pendingInstances.map(
-          p =>
-            ({
-              recurringScheduleId: p.recurringScheduleId,
-              studentId: p.studentId,
-              teacherId: p.teacherId,
-              subjectId: p.subjectId,
-              durationMinutes: p.durationMinutes,
-              classType: ClassType.REGULAR,
-              bookingTimezone: p.bookingTimezone,
-              scheduledStartAt: p.scheduledStartAt,
-              scheduledEndAt: p.scheduledEndAt,
-              executionState: p.executionState,
-              ondemandStatus: p.ondemandStatus,
-              schedulingMode: p.schedulingMode,
-              quotaDeducted: false,
-              idempotencyKey: p.idempotencyKey,
-            }) as ClassInstanceInsertInput
-        )
-      )
-      .onConflictDoNothing()
-      .returning({ id: classInstances.id });
-
-    return inserted.length;
-  });
-
-  const inserted = generated > 0;
-
-  if (inserted) {
+  if (generated > 0) {
     await QuotaService.refreshStudentOndemandInstances(schedule.studentId);
   }
 
-  return inserted ? generated : 0;
+  return generated;
 }
 
 if (import.meta.main) {

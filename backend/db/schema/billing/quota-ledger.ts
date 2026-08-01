@@ -27,11 +27,11 @@ export const quotaLedger = pgTable(
     /**
      * Deterministic SHA-256 idempotency key.
      *
-     * Pattern: `sha256(quotaId|reason|classInstanceId|recurringScheduleId|ts)` → hex digest.
+     * Pattern: `sha256(quotaId|reason|classInstanceId|recurringScheduleId)` → hex digest.
      * The pipe-delimited segments are concatenated (null segments rendered as empty
      * strings) and hashed with SHA-256 to produce a 64-character hex string. This
-     * guarantees that every ledger entry for the same quota + reason + context +
-     * timestamp is deduplicated via the unique index below.
+     * guarantees that every ledger entry for the same quota + reason + context is
+     * deduplicated via the unique index below.
      */
     idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
     actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),

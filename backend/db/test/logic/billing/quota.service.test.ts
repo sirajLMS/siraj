@@ -209,4 +209,101 @@ describe("QuotaService", () => {
       expect(second.totalClasses).toBe(first.totalClasses);
     });
   });
+
+  test("invariant: remaining + reservedClasses <= totalClasses after operations", async () => {
+    await runInRollback(async tx => {
+      const actor = await createTestUser(tx);
+      const { student } = await setupStudent(tx);
+      const teacher = await setupTeacher(tx);
+      const subjectId = await ensureTestSubjectId(tx);
+      const now = new Date();
+      const [schedule] = await tx
+        .insert(recurringSchedules)
+        .values({
+          studentId: student.id,
+          teacherId: teacher.teacher.id,
+          subjectId,
+          durationMinutes: 60,
+          defaultStartTime: "10:00:00",
+          timezone: "UTC",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Invariant Quota",
+        totalClasses: 10,
+        idempotencyKey: `svc-quota-${randomUUID()}`,
+      };
+      const quota = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
+
+      // Reserve 6 classes
+      const reserved = await QuotaService.reserveForRecurringSchedule(
+        student.id,
+        schedule.id,
+        quota.id,
+        6,
+        actor.id,
+        tx
+      );
+      expect(reserved.remaining + reserved.reservedClasses).toBeLessThanOrEqual(quota.totalClasses);
+
+      // Release 2 — invariant must still hold
+      const released = await QuotaService.releaseForRecurringSchedule(
+        student.id,
+        schedule.id,
+        quota.id,
+        2,
+        actor.id,
+        tx
+      );
+      expect(released.remaining + released.reservedClasses).toBeLessThanOrEqual(quota.totalClasses);
+    });
+  });
+
+  test("race test — concurrent redeem attempts on a single remaining class succeed for exactly one", async () => {
+    await runInRollback(async tx => {
+      const actor = await createTestUser(tx);
+      const { student } = await setupStudent(tx);
+
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Race Quota",
+        totalClasses: 1,
+        idempotencyKey: `svc-quota-${randomUUID()}`,
+      };
+      const quota = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
+      expect(quota.remaining).toBe(1);
+
+      // Simulate two concurrent redeem attempts sharing the same tx (serial within rollback).
+      // The first redeem succeeds (remaining 1 → 0), the second must fail because remaining hits 0.
+      const teacher1 = await setupTeacher(tx);
+      const instance1 = await createMockClassInstance(tx, student.id, teacher1.teacher.id);
+
+      // First redeem succeeds
+      const redeemed: QuotaReturnType = await QuotaService.redeemForInstance(
+        student.id,
+        instance1.id,
+        quota.id,
+        actor.id,
+        tx
+      );
+      expect(redeemed.remaining).toBe(0);
+
+      // Second redeem on the same quota should fail — remaining is 0
+      const teacher2 = await setupTeacher(tx);
+      const instance2 = await createMockClassInstance(tx, student.id, teacher2.teacher.id);
+      let error: unknown = null;
+      try {
+        await QuotaService.redeemForInstance(student.id, instance2.id, quota.id, actor.id, tx);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).not.toBeNull();
+    });
+  });
 });

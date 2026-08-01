@@ -15,6 +15,168 @@ import { QuotaNotificationService } from "@/backend/services/billing/quota-notif
 /** Maximum number of pending instances to process per digest run (unbounded SELECT guard). */
 const MAX_DIGEST_INSTANCES_PER_RUN = 500;
 
+interface TeacherDigestInfo {
+  count: number;
+  timezone: string;
+  scheduleTimezone: string | null;
+}
+
+/** Reads the configured digest hour from system_settings, defaulting to 9 AM. */
+async function resolveDigestHour(settingRow: { value: string }[]): Promise<number | null> {
+  const targetHour = settingRow.length > 0 ? Number.parseInt(settingRow[0].value, 10) : 9;
+  if (Number.isNaN(targetHour)) {
+    logger.warn("[OnDemandTeacherDigestCron] Invalid hour setting, skipping");
+    return null;
+  }
+  return targetHour;
+}
+
+/** Builds a set of pending on-demand instances joined with their schedules. */
+async function fetchPendingInstances() {
+  return db
+    .select({
+      instance: classInstances,
+      schedule: recurringSchedules,
+    })
+    .from(classInstances)
+    .innerJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
+    .where(
+      and(
+        eq(recurringSchedules.schedulingMode, SchedulingMode.ON_DEMAND),
+        eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT),
+        isNull(classInstances.deletedAt)
+      )
+    )
+    .limit(MAX_DIGEST_INSTANCES_PER_RUN);
+}
+
+/** Groups pending instances by teacher, tracking count and schedule timezone. */
+function groupInstancesByTeacher(
+  pendingInstances: { instance: typeof classInstances.$inferSelect; schedule: typeof recurringSchedules.$inferSelect }[]
+): Map<string, TeacherDigestInfo> {
+  const teacherMap = new Map<string, TeacherDigestInfo>();
+
+  for (const { instance, schedule } of pendingInstances) {
+    const teacherId = instance.teacherId;
+    const scheduleTz = schedule.timezone ?? null;
+
+    const existing = teacherMap.get(teacherId);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      teacherMap.set(teacherId, { count: 1, timezone: scheduleTz ?? "UTC", scheduleTimezone: scheduleTz });
+    }
+  }
+
+  return teacherMap;
+}
+
+/**
+ * V3-Verify-6: Batch-fetches teacher_availability_windows timezones so we can
+ * fall back to them when the schedule has no timezone. Fallback chain:
+ * schedule.timezone → teacher_availability_windows.timezone → "UTC".
+ */
+async function resolveMissingTimezones(teacherMap: Map<string, TeacherDigestInfo>): Promise<void> {
+  const teacherIdsWithMissingTz = [...teacherMap.entries()]
+    .filter(([, info]) => info.scheduleTimezone === null)
+    .map(([teacherId]) => teacherId);
+
+  if (teacherIdsWithMissingTz.length === 0) return;
+
+  const availWindows = await db
+    .select({
+      teacherId: teacherAvailabilityWindows.teacherId,
+      timezone: teacherAvailabilityWindows.timezone,
+    })
+    .from(teacherAvailabilityWindows)
+    .where(inArray(teacherAvailabilityWindows.teacherId, teacherIdsWithMissingTz));
+
+  // First window per teacher is sufficient as a timezone source.
+  const teacherAvailTzMap = new Map<string, string>();
+  for (const w of availWindows) {
+    if (!teacherAvailTzMap.has(w.teacherId)) {
+      teacherAvailTzMap.set(w.teacherId, w.timezone);
+    }
+  }
+
+  for (const teacherId of teacherIdsWithMissingTz) {
+    const info = teacherMap.get(teacherId);
+    if (!info) continue;
+    info.timezone = teacherAvailTzMap.get(teacherId) ?? "UTC";
+  }
+}
+
+/** Batch-fetches teacher user records and returns a name lookup map. */
+async function buildTeacherNameMap(teacherIds: string[]): Promise<Map<string, string>> {
+  const teacherUsers = await db.select().from(users).where(inArray(users.id, teacherIds));
+  return new Map(teacherUsers.map(u => [u.id, u.name]));
+}
+
+/** Resolves the current local hour in the teacher's timezone. */
+function resolveLocalHour(nowUtc: Date, timezone: string): number {
+  const localHourStr = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    hour12: false,
+    timeZone: timezone,
+  }).format(nowUtc);
+  return Number.parseInt(localHourStr, 10) % 24;
+}
+
+/**
+ * Per-teacher idempotency marker: atomic conditional insert with RETURNING
+ * eliminates the TOCTOU race. If the INSERT returns a row, this invocation
+ * won the race and should send the digest. If it returns nothing, a
+ * concurrent invocation already sent it.
+ */
+async function tryInsertIdempotencyMarker(dateHourStr: string, teacherId: string, nowUtc: Date): Promise<boolean> {
+  const teacherIdempotencyKey = `ondemand_teacher_digest_sent_${dateHourStr}_${teacherId}`;
+  const inserted = await db
+    .insert(systemSettings)
+    .values({
+      key: teacherIdempotencyKey,
+      value: nowUtc.toISOString(),
+      dataType: SystemSettingDataType.String,
+      description: "On-demand teacher digest sent marker (auto-generated)",
+      category: SystemSettingCategory.Scheduling,
+      updatedAt: nowUtc,
+    })
+    .onConflictDoNothing()
+    .returning();
+  return inserted.length > 0;
+}
+
+/** Sends the digest to a teacher if their local hour matches the target hour and they haven't been sent to yet. */
+async function maybeSendTeacherDigest(
+  teacherId: string,
+  info: TeacherDigestInfo,
+  targetHour: number,
+  dateHourStr: string,
+  nowUtc: Date,
+  teacherNameMap: Map<string, string>
+): Promise<boolean> {
+  try {
+    const currentLocalHour = resolveLocalHour(nowUtc, info.timezone);
+
+    if (currentLocalHour !== targetHour) return false;
+
+    const wonRace = await tryInsertIdempotencyMarker(dateHourStr, teacherId, nowUtc);
+    if (!wonRace) return false;
+
+    const teacherName = teacherNameMap.get(teacherId) ?? "Teacher";
+
+    await QuotaNotificationService.sendOndemandTeacherDailyDigest({
+      affectedUserIds: [teacherId],
+      teacherName,
+      pendingCount: info.count,
+    });
+
+    return true;
+  } catch (err) {
+    logger.warn(`[OnDemandTeacherDigestCron] Timezone check failed for timezone: ${info.timezone}`, { err });
+    return false;
+  }
+}
+
 export async function runOndemandTeacherDigestCron(): Promise<void> {
   logger.info("[OnDemandTeacherDigestCron] Starting teacher daily digest check...");
 
@@ -26,11 +188,9 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
       .where(eq(systemSettings.key, "ondemand_teacher_digest_hour"))
       .limit(1);
 
-    const targetHour = settingRow.length > 0 ? Number.parseInt(settingRow[0].value, 10) : 9;
-    if (Number.isNaN(targetHour)) {
-      logger.warn("[OnDemandTeacherDigestCron] Invalid hour setting, skipping");
-      return;
-    }
+    const targetHour = await resolveDigestHour(settingRow);
+    if (targetHour === null) return;
+
     const nowUtc = new Date();
 
     // 1b. Idempotency check: per-teacher markers prevent re-sending to the
@@ -43,127 +203,24 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
     const dateHourStr = `${nowUtc.toISOString().slice(0, 10)}_${targetHour}`;
 
     // 2. Fetch pending instances grouped by teacher
-    const pendingInstances = await db
-      .select({
-        instance: classInstances,
-        schedule: recurringSchedules,
-      })
-      .from(classInstances)
-      .innerJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
-      .where(
-        and(
-          eq(recurringSchedules.schedulingMode, SchedulingMode.ON_DEMAND),
-          eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT),
-          isNull(classInstances.deletedAt)
-        )
-      )
-      .limit(MAX_DIGEST_INSTANCES_PER_RUN);
+    const pendingInstances = await fetchPendingInstances();
 
     if (pendingInstances.length === 0) {
       logger.info("[OnDemandTeacherDigestCron] No pending on-demand instances found.");
       return;
     }
 
-    // Group by teacher
-    const teacherMap = new Map<string, { count: number; timezone: string; scheduleTimezone: string | null }>();
-
-    for (const { instance, schedule } of pendingInstances) {
-      const teacherId = instance.teacherId;
-      const scheduleTz = schedule.timezone ?? null;
-
-      const existing = teacherMap.get(teacherId);
-      if (existing) {
-        existing.count += 1;
-      } else {
-        teacherMap.set(teacherId, { count: 1, timezone: scheduleTz ?? "UTC", scheduleTimezone: scheduleTz });
-      }
-    }
-
-    // V3-Verify-6: Batch-fetch teacher_availability_windows timezones so we can
-    // fall back to them when the schedule has no timezone. Fallback chain:
-    // schedule.timezone → teacher_availability_windows.timezone → "UTC".
-    const teacherIdsWithMissingTz = [...teacherMap.entries()]
-      .filter(([, info]) => info.scheduleTimezone === null)
-      .map(([teacherId]) => teacherId);
-
-    if (teacherIdsWithMissingTz.length > 0) {
-      const availWindows = await db
-        .select({
-          teacherId: teacherAvailabilityWindows.teacherId,
-          timezone: teacherAvailabilityWindows.timezone,
-        })
-        .from(teacherAvailabilityWindows)
-        .where(inArray(teacherAvailabilityWindows.teacherId, teacherIdsWithMissingTz));
-
-      // First window per teacher is sufficient as a timezone source.
-      const teacherAvailTzMap = new Map<string, string>();
-      for (const w of availWindows) {
-        if (!teacherAvailTzMap.has(w.teacherId)) {
-          teacherAvailTzMap.set(w.teacherId, w.timezone);
-        }
-      }
-
-      for (const teacherId of teacherIdsWithMissingTz) {
-        const info = teacherMap.get(teacherId);
-        if (!info) continue;
-        const availTz = teacherAvailTzMap.get(teacherId);
-        info.timezone = availTz ?? "UTC";
-      }
-    }
+    const teacherMap = groupInstancesByTeacher(pendingInstances);
+    await resolveMissingTimezones(teacherMap);
 
     // Batch-fetch all teacher user records
-    const teacherIds = [...teacherMap.keys()];
-    const teacherUsers = await db.select().from(users).where(inArray(users.id, teacherIds));
-    const teacherNameMap = new Map(teacherUsers.map(u => [u.id, u.name]));
+    const teacherNameMap = await buildTeacherNameMap([...teacherMap.keys()]);
 
     let sentCount = 0;
 
-    for (const [teacherId, { count, timezone }] of teacherMap.entries()) {
-      // Check current local hour in teacher's timezone
-      try {
-        const localHourStr = new Intl.DateTimeFormat("en-US", {
-          hour: "numeric",
-          hour12: false,
-          timeZone: timezone,
-        }).format(nowUtc);
-
-        const currentLocalHour = Number.parseInt(localHourStr, 10) % 24;
-
-        if (currentLocalHour === targetHour) {
-          // Per-teacher idempotency marker: atomic conditional insert with
-          // RETURNING eliminates the TOCTOU race. If the INSERT returns a
-          // row, this invocation won the race and should send the digest.
-          // If it returns nothing, a concurrent invocation already sent it.
-          // NOTE: Idempotency markers accumulate in system_settings — add TTL cleanup job if table grows large.
-          const teacherIdempotencyKey = `ondemand_teacher_digest_sent_${dateHourStr}_${teacherId}`;
-          const inserted = await db
-            .insert(systemSettings)
-            .values({
-              key: teacherIdempotencyKey,
-              value: nowUtc.toISOString(),
-              dataType: SystemSettingDataType.String,
-              description: "On-demand teacher digest sent marker (auto-generated)",
-              category: SystemSettingCategory.Scheduling,
-              updatedAt: nowUtc,
-            })
-            .onConflictDoNothing()
-            .returning();
-
-          if (inserted.length === 0) continue;
-
-          const teacherName = teacherNameMap.get(teacherId) ?? "Teacher";
-
-          await QuotaNotificationService.sendOndemandTeacherDailyDigest({
-            affectedUserIds: [teacherId],
-            teacherName,
-            pendingCount: count,
-          });
-
-          sentCount++;
-        }
-      } catch (err) {
-        logger.warn(`[OnDemandTeacherDigestCron] Timezone check failed for timezone: ${timezone}`, { err });
-      }
+    for (const [teacherId, info] of teacherMap.entries()) {
+      const sent = await maybeSendTeacherDigest(teacherId, info, targetHour, dateHourStr, nowUtc, teacherNameMap);
+      if (sent) sentCount++;
     }
 
     logger.info(`[OnDemandTeacherDigestCron] Sent ${sentCount} digests.`);

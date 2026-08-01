@@ -282,7 +282,7 @@ export namespace QuotaRepository {
   };
 
   // NOTE(DUP-1): reserveClasses, releaseForRecurringSchedule, redeemForInstance, and
-  // releaseForInstance share the same UPDATE-version-bump + WHERE-guard + ledger-insert
+  // releaseForInstance share the same ledger-first + UPDATE-version-bump + WHERE-guard
   // structure (~10 occurrences below). A shared `applyQuotaMutation` helper accepting
   // the SET-clause, WHERE-guard, and ledger-row factory could consolidate the pattern.
   // Not refactored here because each method's WHERE-guard and SET-clause differ subtly
@@ -299,6 +299,41 @@ export namespace QuotaRepository {
       idempotencyKey: string;
     }
   ): Promise<QuotaSelectType> => {
+    // Ledger-first pattern: Insert the ledger row BEFORE updating the balance.
+    // If the idempotency key already exists (duplicate on retry), the insert affects 0 rows
+    // and we return early — the operation was already applied, preventing double deduction.
+    // AUDIT: ledger entry required for RESERVE tracking and balance reconstruction
+    const ledgerResult = await tx
+      .insert(quotaLedger)
+      .values({
+        quotaId: input.quotaId,
+        studentId: input.studentId,
+        recurringScheduleId: input.recurringScheduleId,
+        delta: -input.count,
+        reason: QuotaLedgerReason.RESERVE,
+        reasonNote: `Reserved ${input.count} classes for recurring schedule`,
+        actorUserId: input.actorUserId ?? null,
+        idempotencyKey: input.idempotencyKey,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoNothing({ target: quotaLedger.idempotencyKey });
+
+    if (ledgerResult.rowCount === 0) {
+      // Duplicate idempotency key — operation already applied on a previous call
+      logger.info(
+        `reserveClasses: duplicate idempotency key, skipping (quota ${input.quotaId}, schedule ${input.recurringScheduleId})`
+      );
+      const [existing] = await tx
+        .select()
+        .from(quotas)
+        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId), isNull(quotas.deletedAt)))
+        .limit(1);
+      if (!existing) throw new QuotaNotFoundError("Quota not found");
+      return existing;
+    }
+
+    // Only update balance after successful ledger insert
     const now = new Date();
     const [updated] = await tx
       .update(quotas)
@@ -321,18 +356,6 @@ export namespace QuotaRepository {
 
     if (!updated) throw new Error("Failed to update quota reservations: quota may be insufficient or inactive");
 
-    // AUDIT: ledger entry required for RESERVE tracking and balance reconstruction
-    await QuotaLedgerRepository.insert(tx, {
-      quotaId: input.quotaId,
-      studentId: input.studentId,
-      recurringScheduleId: input.recurringScheduleId,
-      delta: -input.count,
-      reason: QuotaLedgerReason.RESERVE,
-      reasonNote: `Reserved ${input.count} classes for recurring schedule`,
-      actorUserId: input.actorUserId ?? null,
-      idempotencyKey: input.idempotencyKey,
-    });
-
     return updated;
   };
 
@@ -348,6 +371,41 @@ export namespace QuotaRepository {
       idempotencyKey: string;
     }
   ): Promise<QuotaSelectType> => {
+    // Ledger-first pattern: Insert the ledger row BEFORE updating the balance.
+    // If the idempotency key already exists (duplicate on retry), the insert affects 0 rows
+    // and we return early — the operation was already applied, preventing double credit.
+    // AUDIT: ledger entry required for RELEASE tracking and balance reconstruction
+    const ledgerResult = await tx
+      .insert(quotaLedger)
+      .values({
+        quotaId: input.quotaId,
+        studentId: input.studentId,
+        recurringScheduleId: input.recurringScheduleId,
+        delta: input.count,
+        reason: QuotaLedgerReason.RELEASE,
+        reasonNote: `Released ${input.count} reserved classes for recurring schedule`,
+        actorUserId: input.actorUserId ?? null,
+        idempotencyKey: input.idempotencyKey,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoNothing({ target: quotaLedger.idempotencyKey });
+
+    if (ledgerResult.rowCount === 0) {
+      // Duplicate idempotency key — operation already applied on a previous call
+      logger.info(
+        `releaseForRecurringSchedule: duplicate idempotency key, skipping (quota ${input.quotaId}, schedule ${input.recurringScheduleId})`
+      );
+      const [existing] = await tx
+        .select()
+        .from(quotas)
+        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId), isNull(quotas.deletedAt)))
+        .limit(1);
+      if (!existing) throw new QuotaNotFoundError("Quota not found");
+      return existing;
+    }
+
+    // Only update balance after successful ledger insert
     const now = new Date();
 
     const [updated] = await tx
@@ -370,18 +428,6 @@ export namespace QuotaRepository {
       .returning();
 
     if (!updated) throw new Error("Failed to release quota reservation: insufficient reserved classes");
-
-    // AUDIT: ledger entry required for RELEASE tracking and balance reconstruction
-    await QuotaLedgerRepository.insert(tx, {
-      quotaId: input.quotaId,
-      studentId: input.studentId,
-      recurringScheduleId: input.recurringScheduleId,
-      delta: input.count,
-      reason: QuotaLedgerReason.RELEASE,
-      reasonNote: `Released ${input.count} reserved classes for recurring schedule`,
-      actorUserId: input.actorUserId ?? null,
-      idempotencyKey: input.idempotencyKey,
-    });
 
     return updated;
   };

@@ -41,7 +41,7 @@ export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurrin
     quotaId: data.quotaId ?? null,
     earmarkedClasses: data.earmarkedClasses ?? null,
     schedulingMode: (data.schedulingMode as SchedulingMode | null) ?? null,
-    generationHorizonWeeks: null,
+    generationHorizonWeeks: data.generationHorizonWeeks ?? null,
     ondemandNoCreditsOutcome: (data.ondemandNoCreditsOutcome as OnDemandNoCreditsOutcome | null) ?? null,
   };
 }
@@ -66,6 +66,7 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
     schedulingMode: data.schedulingMode ?? undefined,
     quotaId: data.quotaId ?? undefined,
     earmarkedClasses: data.earmarkedClasses ?? undefined,
+    generationHorizonWeeks: data.generationHorizonWeeks ?? undefined,
     ondemandNoCreditsOutcome: data.ondemandNoCreditsOutcome ?? undefined,
   };
 }

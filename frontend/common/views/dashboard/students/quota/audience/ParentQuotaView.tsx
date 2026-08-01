@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Paper, Typography } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
+import { QuotaAudienceCard } from "@/frontend/common/views/dashboard/students/quota/audience/QuotaAudienceCard";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 interface ParentQuotaViewProps {
@@ -9,15 +10,31 @@ interface ParentQuotaViewProps {
 
 export function ParentQuotaView({ t }: Readonly<ParentQuotaViewProps>) {
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="titleLg" sx={{ mb: 2 }}>
-        {t.audience.parentTitle}
-      </Typography>
-      <Paper sx={{ p: 4, textAlign: "center" }} elevation={0} variant="outlined">
+    <QuotaAudienceCard title={t.audience.parentTitle}>
+      <Paper sx={{ p: 3 }} elevation={4} variant="outlined">
+        <Typography variant="labelMd" sx={{ mb: 1 }}>
+          {t.audience.remainingCredits}
+        </Typography>
         <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
           {t.audience.noChildren}
         </Typography>
       </Paper>
-    </Box>
+      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
+        <Typography variant="labelMd" sx={{ mb: 1 }}>
+          {t.audience.activeQuotas}
+        </Typography>
+        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+          {t.audience.noChildren}
+        </Typography>
+      </Paper>
+      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
+        <Typography variant="labelMd" sx={{ mb: 1 }}>
+          {t.audience.onDemandPending}
+        </Typography>
+        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+          {t.audience.noChildren}
+        </Typography>
+      </Paper>
+    </QuotaAudienceCard>
   );
 }

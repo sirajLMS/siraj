@@ -44,9 +44,11 @@ export async function seedOrGet() {
     },
     {
       studentId: DEMO_STUDENT_ID,
-      kind: QuotaKind.PACKAGE,
+      kind: QuotaKind.PERIODIC,
       name: "Demo Custom 90-Day Quota",
       totalClasses: 50,
+      periodType: QuotaPeriodType.CUSTOM,
+      periodDays: 90,
       validFrom: now,
       validUntil: ninetyDays,
       priority: 30,

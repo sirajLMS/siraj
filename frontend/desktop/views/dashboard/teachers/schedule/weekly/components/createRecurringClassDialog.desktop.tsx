@@ -293,6 +293,7 @@ function SchedulingFields({
           </MenuItem>
           <MenuItem value={OnDemandNoCreditsOutcome.AutoCancel}>Skip</MenuItem>
           <MenuItem value={OnDemandNoCreditsOutcome.AutoAbsentNoCredits}>Generate Anyway</MenuItem>
+          <MenuItem value={OnDemandNoCreditsOutcome.RemindOnly}>Remind Only</MenuItem>
         </Select>
       </FormControl>
     </Stack>

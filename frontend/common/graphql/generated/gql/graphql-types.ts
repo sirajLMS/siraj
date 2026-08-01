@@ -4236,6 +4236,8 @@ export type Query = {
   profileByUserId: Maybe<UnifiedProfile>;
   /** Get a specific quota by ID */
   quota: Maybe<Quota>;
+  /** Get aggregated quota balance summary for a student */
+  quotaBalance: Maybe<QuotaBalance>;
   /** Get paginated audit ledger history for a quota */
   quotaLedger: Maybe<QuotaLedgerPaginatedResult>;
   /** List quotas with optional filters and pagination */
@@ -4588,6 +4590,11 @@ export type QueryQuotaArgs = {
 };
 
 
+export type QueryQuotaBalanceArgs = {
+  studentId: Scalars['ID']['input'];
+};
+
+
 export type QueryQuotaLedgerArgs = {
   pagination: InputMaybe<PaginationArgs>;
   quotaId: Scalars['ID']['input'];
@@ -4921,6 +4928,26 @@ export type Quota = {
   validFrom: Maybe<Scalars['DateTime']['output']>;
   validUntil: Maybe<Scalars['DateTime']['output']>;
   version: Maybe<Scalars['Int']['output']>;
+};
+
+/** Aggregated quota balance summary for a student */
+export type QuotaBalance = {
+  __typename?: 'QuotaBalance';
+  breakdownByExpiration: Maybe<Array<QuotaExpirationBreakdown>>;
+  id: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  totalActiveClasses: Maybe<Scalars['Int']['output']>;
+  totalRemaining: Maybe<Scalars['Int']['output']>;
+  totalReserved: Maybe<Scalars['Int']['output']>;
+};
+
+/** Per-quota breakdown of remaining classes by expiration date */
+export type QuotaExpirationBreakdown = {
+  __typename?: 'QuotaExpirationBreakdown';
+  quotaId: Maybe<Scalars['String']['output']>;
+  quotaName: Maybe<Scalars['String']['output']>;
+  remaining: Maybe<Scalars['Int']['output']>;
+  validUntil: Maybe<Scalars['DateTime']['output']>;
 };
 
 export enum QuotaKind {

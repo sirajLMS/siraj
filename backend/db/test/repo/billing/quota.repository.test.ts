@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { QuotaKind, QuotaStatus } from "@/backend/enum";
+import { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
 import type { QuotaSubmitInput, QuotaUpdateType } from "@/backend/types";
 
 describe("QuotaRepository", () => {
@@ -109,6 +109,97 @@ describe("QuotaRepository", () => {
 
       const found = await QuotaRepository.findById(tx, created.id);
       expect(found).toBeNull();
+    });
+  });
+
+  test("selectQuotaForBookingFIFO returns highest-priority soonest-expiring quota", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+
+      // Lower-priority quota with later expiry
+      await QuotaRepository.create(tx, {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Low Priority Quota",
+        totalClasses: 5,
+        priority: 1,
+        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        idempotencyKey: `quota-test-${randomUUID()}`,
+      });
+
+      // Higher-priority quota with sooner expiry — should be selected first
+      const highPriority = await QuotaRepository.create(tx, {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "High Priority Quota",
+        totalClasses: 5,
+        priority: 10,
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+        idempotencyKey: `quota-test-${randomUUID()}`,
+      });
+
+      const selected = await QuotaRepository.selectQuotaForBookingFIFO(tx, student.id);
+      expect(selected).not.toBeNull();
+      expect(selected?.id).toBe(highPriority.id);
+    });
+  });
+
+  test("selectQuotaForBookingFIFO returns null when no active quotas", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+
+      // No quotas created for this student
+      const selected = await QuotaRepository.selectQuotaForBookingFIFO(tx, student.id);
+      expect(selected).toBeNull();
+    });
+  });
+
+  test("expireOverdue sets status to EXPIRED for past-due quotas", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Past Due Quota",
+        totalClasses: 5,
+        validUntil: yesterday,
+        idempotencyKey: `quota-test-${randomUUID()}`,
+      };
+      const created = await QuotaRepository.create(tx, quotaInput);
+      expect(created.status).toBe(QuotaStatus.ACTIVE);
+
+      // Use explicit asOfDate to ensure deterministic behaviour regardless of clock precision
+      const expired = await QuotaRepository.expireOverdue(tx, new Date());
+      expect(expired.some(q => q.id === created.id)).toBe(true);
+
+      const updated = await QuotaRepository.findById(tx, created.id);
+      expect(updated?.status).toBe(QuotaStatus.EXPIRED);
+    });
+  });
+
+  test("refreshPeriodic resets remaining for a periodic quota", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PERIODIC,
+        name: "Monthly Quota",
+        totalClasses: 8,
+        periodType: QuotaPeriodType.MONTHLY,
+        periodDays: 30,
+        idempotencyKey: `quota-test-${randomUUID()}`,
+      };
+      const created = await QuotaRepository.create(tx, quotaInput);
+      expect(created.remaining).toBe(8);
+
+      const refreshed = await QuotaRepository.refreshPeriodic(tx, created.id, null);
+      expect(refreshed.id).toBe(created.id);
+      expect(refreshed.version).toBe(created.version + 1);
+      expect(refreshed.reservedClasses).toBe(0);
     });
   });
 });

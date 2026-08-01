@@ -39,10 +39,10 @@ export const quotas = pgTable(
     /**
      * Deterministic SHA-256 idempotency key.
      *
-     * Pattern: `sha256(quotaId|reason|classInstanceId|recurringScheduleId|ts)` → hex digest.
-     * The pipe-delimited segments are concatenated (null segments rendered as empty
-     * strings) and hashed with SHA-256 to produce a 64-character hex string. This
-     * guarantees that every quota created for the same student + kind + period is
+     * Pattern: `sha256(studentId|kind|name|validFrom|validUntil)` → hex digest.
+     * The pipe-delimited segments are concatenated and hashed with SHA-256 to
+     * produce a 64-character hex string. This guarantees that duplicate quota
+     * creation attempts for the same student + kind + name + validity window are
      * deduplicated via the unique index below.
      */
     idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
@@ -67,10 +67,7 @@ export const quotas = pgTable(
       `
     ),
     check("quotas_remaining_non_negative_chk", sql`${table.remaining} >= 0`),
-    check(
-      "quotas_reserved_plus_remaining_chk",
-      sql`${table.reservedClasses} + ${table.remaining} <= ${table.totalClasses}`
-    ),
+    check("quotas_reserved_not_exceed_remaining_chk", sql`${table.reservedClasses} <= ${table.remaining}`),
     check("quotas_used_this_period_non_negative_chk", sql`${table.usedThisPeriod} >= 0`),
     check(
       "quotas_rollover_policy_valid_chk",
