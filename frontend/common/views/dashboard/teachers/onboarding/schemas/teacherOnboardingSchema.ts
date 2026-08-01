@@ -10,6 +10,7 @@ export const teacherOnboardingSchema = (validationLabels: {
   readonly passwordRequired: string;
   readonly nationalIdRequired: string;
   readonly phoneRequired: string;
+  readonly phoneMaxLength: string;
   readonly genderRequired: string;
   readonly countryRequired: string;
   readonly timezoneRequired: string;
@@ -25,7 +26,7 @@ export const teacherOnboardingSchema = (validationLabels: {
       avatarUrl: z.string().optional(),
       nationality: z.string().optional(),
       nationalId: z.string().optional(),
-      phone: z.string().optional(),
+      phone: z.string().max(50, validationLabels.phoneMaxLength).optional(),
       dateOfBirth: z.string().optional(),
       gender: z.custom<Gender>(
         val => typeof val === "string" && (Object.values(Gender) as readonly string[]).includes(val),
