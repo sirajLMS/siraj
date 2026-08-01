@@ -9,9 +9,31 @@ import {
   buildQuotaExpiringSoonPayloads,
   buildQuotaLowBalancePayloads,
 } from "@/backend/services/notification/quota-notification.builders";
+import type { CommunicationPayload } from "@/backend/types";
 
 export namespace QuotaNotificationService {
   // NOTE: Transient notification failures are logged but not retried — consider a durable outbox for production
+
+  /**
+   * Single parameterized dispatch method shared by all seven public `send*`
+   * wrappers. Builds payloads via `builder`, dispatches via
+   * `dispatchWithPreferences`, and logs transient failures with `errorLabel`.
+   */
+  async function dispatch<I extends { affectedUserIds: string[]; locale?: string }>(
+    builder: (input: I) => CommunicationPayload[],
+    input: I,
+    errorLabel: string
+  ): Promise<void> {
+    try {
+      const payloads = builder(input);
+      if (payloads.length > 0) {
+        await dispatchWithPreferences(payloads, input.affectedUserIds, input.locale);
+      }
+    } catch (err) {
+      logger.error(errorLabel, { err, input });
+    }
+  }
+
   export const sendQuotaExpiringSoon = async (input: {
     affectedUserIds: string[];
     quotaName: string;
@@ -19,14 +41,7 @@ export namespace QuotaNotificationService {
     remaining: number;
     locale?: string;
   }): Promise<void> => {
-    try {
-      const payloads = buildQuotaExpiringSoonPayloads(input);
-      if (payloads.length > 0) {
-        await dispatchWithPreferences(payloads, input.affectedUserIds, input.locale);
-      }
-    } catch (err) {
-      logger.error("Quota expiring soon notification dispatch failed", { err, input });
-    }
+    await dispatch(buildQuotaExpiringSoonPayloads, input, "Quota expiring soon notification dispatch failed");
   };
 
   export const sendQuotaExpired = async (input: {
@@ -34,14 +49,7 @@ export namespace QuotaNotificationService {
     quotaName: string;
     locale?: string;
   }): Promise<void> => {
-    try {
-      const payloads = buildQuotaExpiredPayloads(input);
-      if (payloads.length > 0) {
-        await dispatchWithPreferences(payloads, input.affectedUserIds, input.locale);
-      }
-    } catch (err) {
-      logger.error("Quota expired notification dispatch failed", { err, input });
-    }
+    await dispatch(buildQuotaExpiredPayloads, input, "Quota expired notification dispatch failed");
   };
 
   export const sendQuotaLowBalance = async (input: {
@@ -51,14 +59,7 @@ export namespace QuotaNotificationService {
     totalClasses: number;
     locale?: string;
   }): Promise<void> => {
-    try {
-      const payloads = buildQuotaLowBalancePayloads(input);
-      if (payloads.length > 0) {
-        await dispatchWithPreferences(payloads, input.affectedUserIds, input.locale);
-      }
-    } catch (err) {
-      logger.error("Quota low balance notification dispatch failed", { err, input });
-    }
+    await dispatch(buildQuotaLowBalancePayloads, input, "Quota low balance notification dispatch failed");
   };
 
   export const sendOndemandInstancePendingCredit = async (input: {
@@ -67,14 +68,11 @@ export namespace QuotaNotificationService {
     scheduledStartAt: string;
     locale?: string;
   }): Promise<void> => {
-    try {
-      const payloads = buildOndemandInstancePendingCreditPayloads(input);
-      if (payloads.length > 0) {
-        await dispatchWithPreferences(payloads, input.affectedUserIds, input.locale);
-      }
-    } catch (err) {
-      logger.error("On-demand pending credit notification dispatch failed", { err, input });
-    }
+    await dispatch(
+      buildOndemandInstancePendingCreditPayloads,
+      input,
+      "On-demand pending credit notification dispatch failed"
+    );
   };
 
   export const sendOndemandInstanceReminderT3 = async (input: {
@@ -83,14 +81,11 @@ export namespace QuotaNotificationService {
     scheduledStartAt: string;
     locale?: string;
   }): Promise<void> => {
-    try {
-      const payloads = buildOndemandInstanceReminderT3Payloads(input);
-      if (payloads.length > 0) {
-        await dispatchWithPreferences(payloads, input.affectedUserIds, input.locale);
-      }
-    } catch (err) {
-      logger.error("On-demand T-3 reminder notification dispatch failed", { err, input });
-    }
+    await dispatch(
+      buildOndemandInstanceReminderT3Payloads,
+      input,
+      "On-demand T-3 reminder notification dispatch failed"
+    );
   };
 
   export const sendOndemandInstanceReminderT1 = async (input: {
@@ -99,14 +94,11 @@ export namespace QuotaNotificationService {
     scheduledStartAt: string;
     locale?: string;
   }): Promise<void> => {
-    try {
-      const payloads = buildOndemandInstanceReminderT1Payloads(input);
-      if (payloads.length > 0) {
-        await dispatchWithPreferences(payloads, input.affectedUserIds, input.locale);
-      }
-    } catch (err) {
-      logger.error("On-demand T-1 reminder notification dispatch failed", { err, input });
-    }
+    await dispatch(
+      buildOndemandInstanceReminderT1Payloads,
+      input,
+      "On-demand T-1 reminder notification dispatch failed"
+    );
   };
 
   export const sendOndemandTeacherDailyDigest = async (input: {
@@ -115,13 +107,10 @@ export namespace QuotaNotificationService {
     pendingCount: number;
     locale?: string;
   }): Promise<void> => {
-    try {
-      const payloads = buildOndemandTeacherDailyDigestPayloads(input);
-      if (payloads.length > 0) {
-        await dispatchWithPreferences(payloads, input.affectedUserIds, input.locale);
-      }
-    } catch (err) {
-      logger.error("On-demand teacher daily digest notification dispatch failed", { err, input });
-    }
+    await dispatch(
+      buildOndemandTeacherDailyDigestPayloads,
+      input,
+      "On-demand teacher daily digest notification dispatch failed"
+    );
   };
 }

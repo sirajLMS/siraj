@@ -34,8 +34,11 @@ export async function runOndemandNoCreditsResolver(): Promise<void> {
         .limit(1);
 
       const leadMinutes = settingRow.length > 0 ? Number.parseInt(settingRow[0].value, 10) : 240;
+      // RC2-3: Guard against invalid setting values — if parseInt yields NaN,
+      // fall back to the default 240 minutes instead of propagating an Invalid Date.
+      const effectiveLeadMinutes = Number.isNaN(leadMinutes) ? 240 : leadMinutes;
       const now = new Date();
-      const cutoffTime = new Date(now.getTime() + leadMinutes * 60 * 1000);
+      const cutoffTime = new Date(now.getTime() + effectiveLeadMinutes * 60 * 1000);
 
       // Find pending credit instances scheduled to start before cutoffTime.
       // FOR UPDATE prevents concurrent resolvers from double-processing
@@ -127,17 +130,26 @@ export async function runOndemandNoCreditsResolver(): Promise<void> {
       logger.info(
         `[OnDemandNoCreditsResolver] Resolved ${cancelledCount + absentCount} instances (${cancelledCount} cancelled, ${absentCount} absent, ${remindInstances.length} remind-only).`
       );
+      if (leadMinutes !== effectiveLeadMinutes) {
+        logger.warn(
+          `[OnDemandNoCreditsResolver] Invalid lead_minutes setting "${settingRow[0]?.value}" — fell back to 240 minutes.`
+        );
+      }
     });
 
     // Dispatch notifications AFTER the transaction commits so we don't
     // hold the DB transaction open during external notification calls.
-    // NOTE: Per-instance fan-out — consider batching/rate-limiting for large instance counts.
-    for (const pn of pendingNotifications) {
-      await QuotaNotificationService.sendOndemandInstancePendingCredit({
-        affectedUserIds: [pn.studentId],
-        studentName: pn.studentName,
-        scheduledStartAt: pn.scheduledStartAt,
-      });
+    // RP2-2: Fan-out notifications in parallel instead of sequential await per instance.
+    if (pendingNotifications.length > 0) {
+      await Promise.all(
+        pendingNotifications.map(pn =>
+          QuotaNotificationService.sendOndemandInstancePendingCredit({
+            affectedUserIds: [pn.studentId],
+            studentName: pn.studentName,
+            scheduledStartAt: pn.scheduledStartAt,
+          })
+        )
+      );
     }
   } catch (error) {
     logger.error("[OnDemandNoCreditsResolver] Error running on-demand no-credits resolver:", { error });

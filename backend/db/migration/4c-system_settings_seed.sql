@@ -26,5 +26,9 @@ VALUES
 -- ON CONFLICT DO NOTHING preserves production-customized values;
 -- re-running this migration will NOT overwrite settings that have been
 -- changed post-install (timezone, auth_max_attempts, sms_rate_limit, etc.).
+-- This is INTENTIONAL: production databases may have operator-customized
+-- settings that must not be silently reset by a re-applied migration.
+-- If a setting must be force-updated, issue a separate targeted UPDATE
+-- migration for that specific key.
 ON CONFLICT (key) DO NOTHING;
 

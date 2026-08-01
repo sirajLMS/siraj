@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 import {
@@ -52,51 +52,69 @@ export function useQuotaFormViewModel(quotaId?: string) {
 
   const [updateQuotaMutation, { loading: updating }] = useMutation(updateQuotaMutationDocument);
 
-  const handleSubmit = useCallback(async () => {
-    if (isEditing && quotaId) {
-      // Refetch to get latest version before updating (avoids stale version conflict)
-      const { data: latest } = await refetchQuota();
-      if (!latest?.quota) return;
-      const q = latest.quota as unknown as QuotaItem;
-      try {
-        await updateQuotaMutation({
-          variables: {
-            id: quotaId,
-            input: {
-              name: formData.name,
-              validUntil: formData.validUntil,
-              status: q.status as QuotaStatus,
-              priority: formData.priority,
-              version: q.version,
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbarOpen(false);
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (event: React.SyntheticEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (isEditing && quotaId) {
+        // Refetch to get latest version before updating (avoids stale version conflict)
+        const { data: latest } = await refetchQuota();
+        if (!latest?.quota) return;
+        const q = latest.quota as unknown as QuotaItem;
+        try {
+          await updateQuotaMutation({
+            variables: {
+              id: quotaId,
+              input: {
+                name: formData.name,
+                validUntil: formData.validUntil,
+                status: q.status as QuotaStatus,
+                priority: formData.priority,
+                version: q.version,
+              },
             },
-          },
-        });
-      } catch {
-        // Version conflict or network error — user can retry
-        return;
+          });
+        } catch {
+          setSnackbarMessage(t.errors.updateFailed);
+          setSnackbarOpen(true);
+          return;
+        }
+      } else {
+        try {
+          await createQuotaMutation({
+            variables: {
+              input: {
+                studentId: formData.studentId,
+                kind: formData.kind as QuotaKind,
+                name: formData.name,
+                totalClasses: formData.totalClasses,
+                validFrom: formData.validFrom,
+                validUntil: formData.validUntil,
+                periodType: formData.periodType as QuotaPeriodType | null,
+                periodDays: formData.periodDays,
+                priority: formData.priority,
+                idempotencyKey: null,
+                rolloverPolicy: null,
+              },
+            },
+          });
+        } catch {
+          setSnackbarMessage(t.errors.createFailed);
+          setSnackbarOpen(true);
+          return;
+        }
       }
-    } else {
-      await createQuotaMutation({
-        variables: {
-          input: {
-            studentId: formData.studentId,
-            kind: formData.kind as QuotaKind,
-            name: formData.name,
-            totalClasses: formData.totalClasses,
-            validFrom: formData.validFrom,
-            validUntil: formData.validUntil,
-            periodType: formData.periodType as QuotaPeriodType | null,
-            periodDays: formData.periodDays,
-            priority: formData.priority,
-            idempotencyKey: null,
-            rolloverPolicy: null,
-          },
-        },
-      });
-    }
-    resetFormData();
-    router.push("/quotas");
-  }, [isEditing, quotaId, refetchQuota, formData, createQuotaMutation, updateQuotaMutation, resetFormData, router]);
+      resetFormData();
+      router.push("/quotas");
+    },
+    [isEditing, quotaId, refetchQuota, formData, createQuotaMutation, updateQuotaMutation, resetFormData, router, t]
+  );
 
   return {
     t,
@@ -105,5 +123,8 @@ export function useQuotaFormViewModel(quotaId?: string) {
     setFormData,
     handleSubmit,
     loading: creating || updating || loadingExisting,
+    snackbarOpen,
+    snackbarMessage,
+    handleSnackbarClose,
   };
 }

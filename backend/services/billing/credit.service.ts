@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { CreditRepository, ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
+import { CreditRepository, StudentRepository } from "@/backend/db/repo";
 import { AppPermission, CreditReason } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
+import { resolveAssociatedViewer } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type {
   CreditBalanceReturnType,
@@ -44,19 +45,6 @@ async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Pr
   if (!existing) {
     throw new Error(tErrors.studentNotFound(studentId));
   }
-}
-
-async function resolveAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
-  const profile = await StudentRepository.findProfileById(studentId);
-  if (!profile) return false;
-
-  const parent = await ParentRepository.findByUserId(actorUserId);
-  if (parent?.id === profile?.parentId) return true;
-
-  const teacher = await TeacherRepository.findByUserId(actorUserId);
-  if (teacher?.id === profile?.primaryTeacherId) return true;
-
-  return false;
 }
 
 function mapToReturnType(row: CreditTransactionSelectType): CreditTransactionReturnType {
@@ -396,10 +384,14 @@ export namespace CreditService {
 
     // ONE addClasses call per unique student (amount = count for that student).
     // ONE refreshStudentOndemandInstances call per unique student.
-    for (const [studentId, count] of byStudent) {
-      await StudentRepository.addClasses(studentId, tErrors, count, undefined, tx);
-      await QuotaService.refreshStudentOndemandInstances(studentId, tx);
-    }
+    // Each student's addClasses → refresh is kept sequential (same student, same tx),
+    // but independent students are processed in parallel via Promise.all.
+    await Promise.all(
+      [...byStudent].map(async ([studentId, count]) => {
+        await StudentRepository.addClasses(studentId, tErrors, count, undefined, tx);
+        await QuotaService.refreshStudentOndemandInstances(studentId, tx);
+      })
+    );
 
     logger.info("Batch credit refund completed", {
       totalRequested: refunds.length,

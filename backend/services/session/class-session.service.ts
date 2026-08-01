@@ -206,21 +206,35 @@ export namespace ClassSessionService {
 
   /**
    * Release quota for a quota-deducted class instance. The quotaId is resolved
-   * from the class instance's parent recurring schedule. If no quota is found,
-   * the call is a no-op (the instance may have been credit-backed).
+   * from the class instance's parent recurring schedule.
    *
-   * @returns `quotaReleased` is `true` when the quota pool was successfully
-   *   released OR when no quota was bound to the instance (credit-backed case,
-   *   caller should fall through to a credit refund). `quotaId` carries the
-   *   resolved quota when a release actually happened, so callers that need to
-   *   re-deduct against the same quota (e.g. `reschedule`) can do so.
+   * @returns `quotaReleased` is `true` only when the quota pool was
+   *   successfully released. Returns `false` when the instance is not
+   *   quota-deducted, when `recurringScheduleId` is missing (the holder
+   *   can't be resolved and the instance should NOT fall through to a
+   *   spurious credit refund), or when the release itself failed.
+   *   `quotaId` carries the resolved quota when a release actually
+   *   happened, so callers that need to re-deduct against the same quota
+   *   (e.g. `reschedule`) can do so.
+   *   `isQuotaBacked` is `true` when the schedule had a real `quotaId`
+   *   and an actual release was attempted. Callers that handle the
+   *   credit-backed fallback should gate on `!isQuotaBacked` so a genuine
+   *   quota-release failure (where `quotaReleased: false` AND
+   *   `isQuotaBacked: true`) does NOT trigger a phantom credit refund.
    */
   async function releaseQuotaIfDeducted(
     instance: Pick<ClassInstanceEntity, "id" | "studentId" | "quotaDeducted" | "recurringScheduleId">,
     actorUserId: string,
     tx: DBTransaction
-  ): Promise<{ quotaReleased: boolean; quotaId: string | null }> {
-    if (!instance.quotaDeducted || !instance.recurringScheduleId) return { quotaReleased: true, quotaId: null };
+  ): Promise<{ quotaReleased: boolean; quotaId: string | null; isQuotaBacked: boolean }> {
+    if (!instance.quotaDeducted) return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
+    if (!instance.recurringScheduleId) {
+      logger.warn("Quota-deducted instance has no recurringScheduleId — cannot resolve quota", {
+        classInstanceId: instance.id,
+        studentId: instance.studentId,
+      });
+      return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
+    }
 
     // Resolve quotaId from the parent recurring schedule
     const q = queryDb(tx);
@@ -230,7 +244,7 @@ export namespace ClassSessionService {
       .where(eq(recurringSchedules.id, instance.recurringScheduleId))
       .limit(1);
 
-    if (!schedule?.quotaId) return { quotaReleased: true, quotaId: null };
+    if (!schedule?.quotaId) return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
 
     const result = await QuotaService.tryReleaseForInstance(
       instance.studentId,
@@ -240,7 +254,7 @@ export namespace ClassSessionService {
       tx,
       "en"
     );
-    return { quotaReleased: result.ok, quotaId: result.ok ? schedule.quotaId : null };
+    return { quotaReleased: result.ok, quotaId: result.ok ? schedule.quotaId : null, isQuotaBacked: true };
   }
 
   /**
@@ -570,11 +584,13 @@ export namespace ClassSessionService {
       // class: the original is refunded, but the successor is inserted with
       // `quotaDeducted: false` and never charged again.
       if (existing.quotaDeducted && existing.deletedAt === null) {
-        const { quotaReleased, quotaId } = await releaseQuotaIfDeducted(existing, userId, tx);
-        // Only refund credit if quota was NOT released (instance was credit-backed).
-        // Calling both would cause a phantom credit refund + quota leak.
+        const { quotaId, isQuotaBacked } = await releaseQuotaIfDeducted(existing, userId, tx);
+        // Only refund credit when the instance is NOT quota-backed (credit-backed
+        // fallback). When quota release genuinely failed on a quota-backed
+        // instance, do NOT also refund credit — a phantom credit refund masks a
+        // quota leak (RBL2-5).
         const creditRefunded =
-          !quotaReleased &&
+          !isQuotaBacked &&
           (await refundCreditIfDeducted(existing, userId, getServerTranslations("ar").errorsTranslations, tx));
 
         // Mirror the deduction against the newly created successor instance.

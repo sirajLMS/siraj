@@ -13,11 +13,9 @@ export interface QuotaLabels {
     readonly totalClasses: string;
     readonly remaining: string;
     readonly reservedClasses: string;
-    readonly validFrom: string;
     readonly validUntil: string;
     readonly status: string;
     readonly periodType: string;
-    readonly periodDays: string;
     readonly priority: string;
     readonly all: string;
     readonly studentIdPlaceholder: string;
@@ -44,13 +42,15 @@ export interface QuotaLabels {
     readonly cancel: string;
     readonly viewLedger: string;
   };
+  readonly errors: {
+    readonly createFailed: string;
+    readonly updateFailed: string;
+  };
   readonly ledger: {
     readonly title: string;
-    readonly noEntries: string;
     readonly reason: string;
     readonly delta: string;
     readonly note: string;
-    readonly actor: string;
     readonly date: string;
   };
   readonly insightsTitle: string;

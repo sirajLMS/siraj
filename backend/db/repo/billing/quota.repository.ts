@@ -6,7 +6,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import type { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
-import { classInstances, quotas } from "@/backend/db/schema";
+import { classInstances, quotaLedger, quotas } from "@/backend/db/schema";
 import { QuotaLedgerReason, QuotaStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
@@ -510,11 +510,34 @@ export namespace QuotaRepository {
       return { redeemedCount: 0, quota: null };
     }
 
-    const count = input.instanceIds.length;
     const now = new Date();
 
-    // Guard: ensure quota is active and has enough remaining BEFORE inserting ledger rows.
-    // We check here without deducting — the actual deduction uses inserted.length below.
+    // Determine which instances are not yet redeemed by checking existing ledger entries
+    // with the same per-instance idempotency keys. This prevents the guard from counting
+    // already-redeemed instances against the remaining quota (RB2-5).
+    const expectedKeys = input.instanceIds.map(instId => deriveRedeemIdempotencyKey(instId, input.quotaId));
+    const alreadyRedeemed = await tx
+      .select({ idempotencyKey: quotaLedger.idempotencyKey })
+      .from(quotaLedger)
+      .where(inArray(quotaLedger.idempotencyKey, expectedKeys));
+    const redeemedKeySet = new Set(alreadyRedeemed.map(r => r.idempotencyKey));
+    const newInstanceIds = input.instanceIds.filter(
+      instId => !redeemedKeySet.has(deriveRedeemIdempotencyKey(instId, input.quotaId))
+    );
+
+    if (newInstanceIds.length === 0) {
+      // All instances were already redeemed; no deduction needed
+      const [existingQuota] = await tx
+        .select()
+        .from(quotas)
+        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId)))
+        .limit(1);
+      return { redeemedCount: 0, quota: existingQuota ?? null };
+    }
+
+    const newCount = newInstanceIds.length;
+
+    // Guard: ensure quota is active and has enough remaining for the not-yet-redeemed instances.
     const [guardRow] = await tx
       .select()
       .from(quotas)
@@ -523,7 +546,7 @@ export namespace QuotaRepository {
           eq(quotas.id, input.quotaId),
           eq(quotas.studentId, input.studentId),
           eq(quotas.status, QuotaStatus.ACTIVE),
-          gte(quotas.remaining, count),
+          gte(quotas.remaining, newCount),
           isNull(quotas.deletedAt)
         )
       )
@@ -533,8 +556,8 @@ export namespace QuotaRepository {
       return { redeemedCount: 0, quota: null };
     }
 
-    // Build one ledger row per instance using the same idempotency-key derivation as redeemForInstance
-    const ledgerRows = input.instanceIds.map(instId => ({
+    // Build one ledger row per NEW instance using the same idempotency-key derivation as redeemForInstance
+    const ledgerRows = newInstanceIds.map(instId => ({
       quotaId: input.quotaId,
       studentId: input.studentId,
       recurringScheduleId: input.recurringScheduleId ?? null,
@@ -861,6 +884,7 @@ export namespace QuotaRepository {
       .update(quotas)
       .set({
         remaining: newRemaining,
+        reservedClasses: 0,
         usedThisPeriod: 0,
         periodAnchor: newAnchor,
         version: target.version + 1,
@@ -934,7 +958,8 @@ export namespace QuotaRepository {
     let remainingToDeduct = input.count;
     let deducted = 0;
 
-    for (const quota of activeQuotas) {
+    for (let i = 0; i < activeQuotas.length; i++) {
+      const quota = activeQuotas[i];
       if (remainingToDeduct <= 0) break;
       const toTake = Math.min(remainingToDeduct, quota.remaining);
       const now = new Date();
@@ -958,9 +983,11 @@ export namespace QuotaRepository {
         .returning();
 
       if (updated) {
-        // Deterministic idempotency key based on quota ID and period (RB-10/BL-10).
-        // Uses the quota's current periodAnchor as the period key so retries are idempotent
-        // within the same period while avoiding the non-deterministic now.toISOString().
+        // Deterministic idempotency key based on quota ID, period, and deduction sequence
+        // index so each levy within a call produces a unique key (RBL2-6).
+        // Using the quota's current periodAnchor as the period key avoids the non-deterministic
+        // now.toISOString(), while the index suffix differentiates per-quota deductions within
+        // the same refresh cycle, preventing ON CONFLICT DO NOTHING from swallowing audit rows.
         const periodKey = (quota.periodAnchor ?? quota.createdAt).toISOString().slice(0, 10);
         await QuotaLedgerRepository.insert(tx, {
           quotaId: quota.id,
@@ -969,7 +996,7 @@ export namespace QuotaRepository {
           reason: QuotaLedgerReason.ADJUST,
           reasonNote: `Deducted ${toTake} for on-demand refresh`,
           actorUserId: input.actorUserId ?? null,
-          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey),
+          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey, String(i)),
         });
 
         deducted += toTake;

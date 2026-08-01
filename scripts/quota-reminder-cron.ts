@@ -60,29 +60,33 @@ export async function runQuotaReminderCron(): Promise<void> {
     let t3Sent = 0;
     let t1Sent = 0;
 
-    for (const candidate of t3Candidates) {
-      const alreadySent = await checkAndMarkReminderSent(candidate.reminderKey);
-      if (alreadySent) continue;
+    // RBL2-2: Mark idempotency AFTER successful dispatch so delivery errors
+    // don't permanently skip the reminder on subsequent runs.
+    // RP2-3: Collect all successfully-dispatched candidate keys and insert
+    // their idempotency markers in a single multi-row INSERT.
+    const t3DispatchedKeys: string[] = [];
+    const t1DispatchedKeys: string[] = [];
 
+    for (const candidate of t3Candidates) {
       if (candidate.affectedUserIds.length === 0) {
         logger.warn(
           `[QuotaReminderCron] Skipping instance ${candidate.instanceId} — no resolvable parent/guardian userId.`
         );
         continue;
       }
+
+      if (await isReminderAlreadySent(candidate.reminderKey)) continue;
 
       await QuotaNotificationService.sendOndemandInstanceReminderT3({
         affectedUserIds: candidate.affectedUserIds,
         studentName: candidate.studentName,
         scheduledStartAt: candidate.scheduledStartAt,
       });
+      t3DispatchedKeys.push(candidate.reminderKey);
       t3Sent++;
     }
 
     for (const candidate of t1Candidates) {
-      const alreadySent = await checkAndMarkReminderSent(candidate.reminderKey);
-      if (alreadySent) continue;
-
       if (candidate.affectedUserIds.length === 0) {
         logger.warn(
           `[QuotaReminderCron] Skipping instance ${candidate.instanceId} — no resolvable parent/guardian userId.`
@@ -90,12 +94,34 @@ export async function runQuotaReminderCron(): Promise<void> {
         continue;
       }
 
+      if (await isReminderAlreadySent(candidate.reminderKey)) continue;
+
       await QuotaNotificationService.sendOndemandInstanceReminderT1({
         affectedUserIds: candidate.affectedUserIds,
         studentName: candidate.studentName,
         scheduledStartAt: candidate.scheduledStartAt,
       });
+      t1DispatchedKeys.push(candidate.reminderKey);
       t1Sent++;
+    }
+
+    // RP2-3: Single multi-row INSERT for all dispatched reminder markers.
+    const allDispatchedKeys = [...t3DispatchedKeys, ...t1DispatchedKeys];
+    if (allDispatchedKeys.length > 0) {
+      const nowIso = new Date();
+      await db
+        .insert(systemSettings)
+        .values(
+          allDispatchedKeys.map(key => ({
+            key,
+            value: nowIso.toISOString(),
+            dataType: SystemSettingDataType.String,
+            description: "On-demand reminder sent marker (auto-generated)",
+            category: SystemSettingCategory.Scheduling,
+            updatedAt: nowIso,
+          }))
+        )
+        .onConflictDoNothing();
     }
 
     logger.info(`[QuotaReminderCron] Sent ${t3Sent} T-3 and ${t1Sent} T-1 reminders.`);
@@ -187,29 +213,17 @@ async function fetchReminderCandidates(
 }
 
 /**
- * Atomically claims a reminder slot via an idempotency marker stored in
- * `systemSettings`. Returns `true` if a marker already existed (already sent),
- * `false` if this invocation claimed the slot.
- *
- * Uses `ON CONFLICT DO NOTHING` + `RETURNING` to eliminate the TOCTOU race —
- * if the insert returns no rows, a concurrent invocation already sent it.
+ * Checks whether a reminder has already been sent for the given key (read-only).
+ * The idempotency marker is written AFTER successful dispatch via the multi-row
+ * INSERT (RP2-3) so delivery errors don't permanently skip the reminder (RBL2-2).
  */
-async function checkAndMarkReminderSent(reminderKey: string): Promise<boolean> {
-  const nowIso = new Date();
-  const inserted = await db
-    .insert(systemSettings)
-    .values({
-      key: reminderKey,
-      value: nowIso.toISOString(),
-      dataType: SystemSettingDataType.String,
-      description: "On-demand reminder sent marker (auto-generated)",
-      category: SystemSettingCategory.Scheduling,
-      updatedAt: nowIso,
-    })
-    .onConflictDoNothing()
-    .returning();
-
-  return inserted.length === 0;
+async function isReminderAlreadySent(reminderKey: string): Promise<boolean> {
+  const rows = await db
+    .select({ key: systemSettings.key })
+    .from(systemSettings)
+    .where(eq(systemSettings.key, reminderKey))
+    .limit(1);
+  return rows.length > 0;
 }
 
 if (import.meta.main) {

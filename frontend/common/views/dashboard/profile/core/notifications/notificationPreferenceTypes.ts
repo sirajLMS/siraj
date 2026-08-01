@@ -75,10 +75,16 @@ export interface CategoryRow {
 }
 
 /**
- * Groups event types by category and computes per-category toggle state.
- * Categories are ordered: urgent → reminder → info → digest.
+ * Groups event types by category and computes per-category toggle state from
+ * actual preference data. Categories are ordered: urgent → reminder → info → digest.
+ *
+ * `anyEnabled` — true if at least one event type in the category has any channel enabled.
+ * `allEnabled` — true if every event type in the category has all channels enabled.
  */
-export function buildCategoryRows(eventTypes: readonly NotificationEventType[]): CategoryRow[] {
+export function buildCategoryRows(
+  eventTypes: readonly NotificationEventType[],
+  preferenceMap: ReadonlyMap<string, NotificationPrefRow>
+): CategoryRow[] {
   const categoryOrder: NotificationEventCategory[] = ["urgent", "reminder", "info", "digest"];
   const groups = new Map<NotificationEventCategory, NotificationEventType[]>();
 
@@ -92,7 +98,21 @@ export function buildCategoryRows(eventTypes: readonly NotificationEventType[]):
     .filter(cat => groups.has(cat))
     .map(cat => {
       const ets = groups.get(cat) ?? [];
-      return { id: `cat-${cat}`, category: cat, anyEnabled: true, allEnabled: true, eventTypes: ets };
+      let anyEnabled = false;
+      let allEnabled = true;
+      for (const et of ets) {
+        let eventTypeAnyEnabled = false;
+        let eventTypeAllEnabled = true;
+        for (const channel of NOTIFICATION_CHANNELS) {
+          const pref = preferenceMap.get(preferenceKey(channel, et));
+          const enabled = pref?.enabled ?? true;
+          if (enabled) eventTypeAnyEnabled = true;
+          else eventTypeAllEnabled = false;
+        }
+        if (eventTypeAnyEnabled) anyEnabled = true;
+        if (!eventTypeAllEnabled) allEnabled = false;
+      }
+      return { id: `cat-${cat}`, category: cat, anyEnabled, allEnabled, eventTypes: ets };
     });
 }
 

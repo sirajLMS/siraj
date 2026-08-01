@@ -111,6 +111,7 @@ export namespace QuotaLedgerRepository {
           updatedAt: now,
         }))
       )
+      .onConflictDoNothing({ target: quotaLedger.idempotencyKey })
       .returning();
 
     return inserted;

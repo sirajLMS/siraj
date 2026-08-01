@@ -128,47 +128,42 @@ export namespace ScheduleDeletionService {
     // future live instances.
     const preAffected = await SchedulingRepository.getClassInstanceAffectedUsersForTeacher(teacherId);
 
-    let quotaReleaseFailed = false;
     const result = await db.transaction(async tx => {
       const cleared = await SchedulingRepository.clearWeeklySchedule(teacherId, tx);
       if (!cleared) return false;
 
-      // Credit refunds and quota reservations are independent datasets
-      // (different schedules, no shared state), so parallelize them instead
-      // of running two sequential in-tx loops (PERF-8).
-      await Promise.all([
-        // Per-instance credit refunds (credit-backed classes)
-        ...cleared.refundedInstances.map(async instance => {
-          const idempotencyKey = `credit-refund:${instance.id}`;
-          await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
-        }),
-        // Per-schedule quota releases (quota-backed classes).
-        // Quota release failures are logged + flagged so the transaction
-        // still commits (class deletion succeeds) while callers see that a
-        // manual quota-balance retry is needed.
-        ...cleared.quotaSchedules.map(async schedule => {
-          try {
-            await QuotaService.releaseForRecurringSchedule(
-              schedule.studentId,
-              schedule.id,
-              schedule.quotaId,
-              schedule.earmarkedClasses,
-              actorUserId,
-              tx
-            );
-          } catch (error) {
-            quotaReleaseFailed = true;
-            logger.warn("Quota release failed on weekly schedule clear — manual retry required", {
-              recurringScheduleId: schedule.id,
-              quotaId: schedule.quotaId,
-              studentId: schedule.studentId,
-              actorUserId,
-              error: error instanceof Error ? error.message : String(error),
-              action: "manual_retry_needed",
-            });
-          }
-        }),
-      ]);
+      // Sequential per-instance credit refunds (credit-backed classes).
+      // Running these in parallel would issue concurrent async DB ops on the
+      // same shared single-connection transaction, which is not safe.
+      for (const instance of cleared.refundedInstances) {
+        const idempotencyKey = `credit-refund:${instance.id}`;
+        await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
+      }
+
+      // Sequential per-schedule quota releases (quota-backed classes).
+      // Quota release failures abort the transaction (rethrown) so class
+      // deletion and quota release are atomic — no silent over-decrement.
+      for (const schedule of cleared.quotaSchedules) {
+        try {
+          await QuotaService.releaseForRecurringSchedule(
+            schedule.studentId,
+            schedule.id,
+            schedule.quotaId,
+            schedule.earmarkedClasses,
+            actorUserId,
+            tx
+          );
+        } catch (error) {
+          logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
+            recurringScheduleId: schedule.id,
+            quotaId: schedule.quotaId,
+            studentId: schedule.studentId,
+            actorUserId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          throw error;
+        }
+      }
 
       return true;
     });
@@ -186,9 +181,6 @@ export namespace ScheduleDeletionService {
       }
     }
 
-    // Return false when at least one quota release failed so the caller knows
-    // the clear succeeded but some quota balances are still over-decremented
-    // and need a manual retry.
-    return result && !quotaReleaseFailed;
+    return result;
   }
 }

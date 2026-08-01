@@ -1,7 +1,7 @@
-import { inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
+import { StudentRepository } from "@/backend/db/repo";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
@@ -10,6 +10,7 @@ import { classInstances } from "@/backend/db/schema";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { resolveAssociatedStudentIds, resolveAssociatedViewer } from "@/backend/services/billing/permission-utils";
 import {
   mapQuotaLedgerToReturnType,
   mapQuotaToReturnType,
@@ -18,6 +19,7 @@ import {
   type QuotaLedgerPaginatedResult,
   type QuotaPaginatedFilter,
   type QuotaReturnType,
+  type QuotaSelectType,
   type QuotaSubmitInput,
   type QuotaUpdateInput,
 } from "@/backend/types/billing/quota.types";
@@ -51,25 +53,6 @@ export namespace QuotaService {
     }
   }
 
-  /**
-   * Resolves whether the calling user is associated with the given student as
-   * the student's parent or primary teacher. Used to scope IDOR-vulnerable
-   * reads so a caller with QUOTAS_VIEW can only access their own students'
-   * data; admins/teachers with QUOTAS_MANAGE bypass via the permission check.
-   */
-  async function resolveAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
-    const profile = await StudentRepository.findProfileById(studentId);
-    if (!profile) return false;
-
-    const parent = await ParentRepository.findByUserId(actorUserId);
-    if (parent?.id === profile?.parentId) return true;
-
-    const teacher = await TeacherRepository.findByUserId(actorUserId);
-    if (teacher?.id === profile?.primaryTeacherId) return true;
-
-    return false;
-  }
-
   export const createQuota = async (
     input: QuotaSubmitInput,
     actorUserId?: string | null,
@@ -96,6 +79,19 @@ export namespace QuotaService {
       const tErrors = getServerTranslations(locale).errorsTranslations;
       throw new Error(tErrors.notFound);
     }
+
+    // IDOR scoping: after the QUOTAS_VIEW gate, verify that the caller is
+    // either associated with the quota's student (parent or primary teacher)
+    // or holds QUOTAS_MANAGE (admin/teacher override). This prevents a user
+    // with QUOTAS_VIEW from reading any quota by id alone.
+    const uid = actorUserId ?? "";
+    const isAssociated = await resolveAssociatedViewer(uid, quota.studentId);
+    const hasManage = await PermissionsService.hasPermission(uid, AppPermission.QUOTAS_MANAGE);
+    if (!isAssociated && !hasManage) {
+      const tErrors = getServerTranslations(locale).errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
+    }
+
     return mapQuotaToReturnType(quota);
   };
 
@@ -150,10 +146,51 @@ export namespace QuotaService {
     locale = "en"
   ) => {
     await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
+
+    // IDOR scoping: if the caller holds QUOTAS_MANAGE, return all quotas
+    // (admin override). Otherwise, scope results to students the caller is
+    // associated with (parent or primary teacher). This prevents a user with
+    // QUOTAS_VIEW from listing all quotas via the GraphQL query.
+    const uid = actorUserId ?? "";
+    const hasManage = await PermissionsService.hasPermission(uid, AppPermission.QUOTAS_MANAGE);
+    if (hasManage) {
+      const res = await QuotaRepository.listAllPaginated(tx, filter, pagination);
+      return {
+        ...res,
+        rows: res.rows.map(mapQuotaToReturnType),
+      };
+    }
+
+    const associatedStudentIds = await resolveAssociatedStudentIds(uid);
+    if (associatedStudentIds.length === 0) {
+      return { rows: [], totalCount: 0 };
+    }
+
+    // If the filter already specifies a studentId, ensure it belongs to the
+    // caller's associated students; otherwise deny.
+    if (filter?.studentId) {
+      const allowed = await resolveAssociatedViewer(uid, filter.studentId);
+      if (!allowed) {
+        return { rows: [], totalCount: 0 };
+      }
+    } else if (associatedStudentIds.length === 1) {
+      // Single associated student — scope the filter directly for efficiency.
+      filter = { ...filter, studentId: associatedStudentIds[0] };
+    }
+
     const res = await QuotaRepository.listAllPaginated(tx, filter, pagination);
+    let rows = res.rows;
+
+    // For multiple associated students without a single-studentId filter,
+    // filter in-memory by the associated set.
+    if (associatedStudentIds.length > 1 && !filter?.studentId) {
+      const idSet = new Set(associatedStudentIds);
+      rows = rows.filter(q => idSet.has(q.studentId));
+    }
+
     return {
-      ...res,
-      rows: res.rows.map(mapQuotaToReturnType),
+      rows: rows.map(mapQuotaToReturnType),
+      totalCount: rows.length,
     };
   };
 
@@ -487,6 +524,11 @@ export namespace QuotaService {
 
       // Single batched UPDATE for all pending instances instead of N sequential writes.
       // All instances get the same set of values, so one inArray UPDATE suffices.
+      // The WHERE clause also guards on ondemandStatus = PENDING_CREDIT to
+      // prevent a TOCTOU race: between the SELECT and UPDATE, a concurrent
+      // transaction (e.g. session start) may have flipped an instance to
+      // AVAILABLE. Without the guard, we'd overwrite it back to AVAILABLE and
+      // over-count the flip, causing a credit leak.
       if (pendingInstances.length > 0) {
         const instanceIds = pendingInstances.map(inst => inst.id);
         await t
@@ -496,7 +538,12 @@ export namespace QuotaService {
             ondemandStatus: OnDemandStatus.AVAILABLE,
             updatedAt: now,
           })
-          .where(inArray(classInstances.id, instanceIds));
+          .where(
+            and(
+              inArray(classInstances.id, instanceIds),
+              eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT)
+            )
+          );
 
         flippedCount = pendingInstances.length;
       }
@@ -524,5 +571,34 @@ export namespace QuotaService {
     };
 
     return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  /**
+   * Seed-only bootstrap method: atomically checks if any quotas already exist
+   * and creates a demo quota if none are found, all within a single transaction.
+   * This eliminates the race condition in the seeder's check-then-create pattern.
+   * Permission checks are intentionally omitted — this runs in trusted seed context.
+   */
+  export const seedOrGetQuota = async (input: QuotaSubmitInput): Promise<QuotaReturnType[]> => {
+    return db.transaction(async t => {
+      const res = await QuotaRepository.listAllPaginated(t, null, null);
+      if (res.rows.length > 0) {
+        return res.rows.map(mapQuotaToReturnType);
+      }
+      const created = await QuotaRepository.create(t, { ...input });
+      return [mapQuotaToReturnType(created)];
+    });
+  };
+
+  export const listPeriodicForRollover = async (tx: DBTransaction): Promise<QuotaSelectType[]> => {
+    return QuotaRepository.listPeriodicForRollover(tx);
+  };
+
+  export const refreshPeriodic = async (
+    tx: DBTransaction,
+    quotaId: string,
+    actorUserId?: string | null
+  ): Promise<QuotaSelectType> => {
+    return QuotaRepository.refreshPeriodic(tx, quotaId, actorUserId ?? null);
   };
 }

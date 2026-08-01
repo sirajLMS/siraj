@@ -253,8 +253,16 @@ describe("Class Quota System Constraints & Triggers", () => {
         ),
       ]);
 
+      // NOTE: Both calls share the same rollback transaction (`tx`), so they execute
+      // serially within the test process rather than in true concurrent transactions.
+      // The first call claims the single remaining class; the second should fail the
+      // CHECK constraint (`reservedClasses + remaining <= totalClasses`). This verifies
+      // the guard logic serially; true multi-transaction concurrency testing would
+      // require separate connections and is deferred.
       const successes = results.filter(r => r.status === "fulfilled");
-      expect(successes.length).toBeGreaterThanOrEqual(1);
+      // With a shared tx, Promise.allSettled resolves sequentially: the first call
+      // consumes the single quota, the second hits the CHECK constraint and rejects.
+      expect(successes).toHaveLength(1);
 
       testLogger.info("Race condition test passed with rollback isolation.");
     });

@@ -25,6 +25,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
@@ -49,30 +50,30 @@ function buildPurchasesOverTime(quotas: ReturnType<typeof useQuotaViewModel>["qu
     .map(([month, data]) => ({ month, purchases: data.purchases, classes: data.classes }));
 }
 
-function buildRedemptionByType(quotas: ReturnType<typeof useQuotaViewModel>["quotas"]) {
+function buildRedemptionByType(quotas: ReturnType<typeof useQuotaViewModel>["quotas"], labels: QuotaLabels) {
   let pkg = 0;
   let periodic = 0;
   let onDemand = 0;
   for (const q of quotas) {
     const redeemed = q.totalClasses - q.remaining;
-    if (q.kind === "PACKAGE") pkg += redeemed;
-    else if (q.kind === "PERIODIC") periodic += redeemed;
+    if (q.kind === QuotaKind.Package) pkg += redeemed;
+    else if (q.kind === QuotaKind.Periodic) periodic += redeemed;
     else onDemand += redeemed;
   }
   const total = pkg + periodic + onDemand;
   if (total === 0) return [];
   return [
-    { name: "PACKAGE", value: pkg, pct: Math.round((pkg / total) * 100) },
-    { name: "PERIODIC", value: periodic, pct: Math.round((periodic / total) * 100) },
-    { name: "ON_DEMAND", value: onDemand, pct: Math.round((onDemand / total) * 100) },
+    { name: labels.charts.packageType, value: pkg, pct: Math.round((pkg / total) * 100) },
+    { name: labels.charts.periodicType, value: periodic, pct: Math.round((periodic / total) * 100) },
+    { name: labels.charts.onDemandType, value: onDemand, pct: Math.round((onDemand / total) * 100) },
   ].filter(d => d.value > 0);
 }
 
 // NOTE: Uses PACKAGE kind as proxy for on-demand — no ON_DEMAND kind exists in schema yet
 function buildDeliveryRate(quotas: ReturnType<typeof useQuotaViewModel>["quotas"], labels: QuotaLabels) {
-  const onDemandQuotas = quotas.filter(q => q.kind === "PACKAGE");
-  const committed = onDemandQuotas.filter(q => q.status === "ACTIVE").length;
-  const cancelled = onDemandQuotas.filter(q => q.status !== "ACTIVE").length;
+  const onDemandQuotas = quotas.filter(q => q.kind === QuotaKind.Package);
+  const committed = onDemandQuotas.filter(q => q.status === QuotaStatus.Active).length;
+  const cancelled = onDemandQuotas.filter(q => q.status !== QuotaStatus.Active).length;
   return [
     { name: labels.charts.committed, count: committed },
     { name: labels.charts.cancelled, count: cancelled },
@@ -86,10 +87,10 @@ function buildExpiredSlippage(quotas: ReturnType<typeof useQuotaViewModel>["quot
     const d = new Date(q.validUntil);
     const key = getMonthLabel(d);
     const existing = monthMap.get(key) ?? { expired: 0, redeemed: 0 };
-    if (q.status === "EXPIRED") {
+    if (q.status === QuotaStatus.Expired) {
       existing.expired += q.remaining;
     }
-    if (q.status === "ACTIVE") {
+    if (q.status === QuotaStatus.Active) {
       existing.redeemed += q.totalClasses - q.remaining;
     }
     monthMap.set(key, existing);
@@ -118,13 +119,13 @@ export function QuotaInsightsContainer() {
   // NOTE: Query duplication — should use shared quota store or server-side aggregates
 
   const purchasesOverTime = useMemo(() => buildPurchasesOverTime(quotas), [quotas]);
-  const redemptionByType = useMemo(() => buildRedemptionByType(quotas), [quotas]);
+  const redemptionByType = useMemo(() => buildRedemptionByType(quotas, t), [quotas, t]);
   const deliveryRate = useMemo(() => buildDeliveryRate(quotas, t), [quotas, t]);
   const expiredSlippage = useMemo(() => buildExpiredSlippage(quotas), [quotas]);
 
   // NOTE: Aggregates over first paginated page only — should fetch server-side aggregates
   const { activeQuotasCount, totalClassesRemaining, expiringThisWeekCount, pendingBacklogCount } = useMemo(() => {
-    const activeQuotasCount = quotas.filter(q => q.status === "ACTIVE").length;
+    const activeQuotasCount = quotas.filter(q => q.status === QuotaStatus.Active).length;
     const totalClassesRemaining = quotas.reduce((sum, q) => sum + q.remaining, 0);
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);

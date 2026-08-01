@@ -24,7 +24,7 @@ export function useQuotaDetailViewModel(quotaId: string) {
     skip: !quotaId,
   });
 
-  const quota: QuotaItem | null = (quotaData?.quota as unknown as QuotaItem) ?? null;
+  const quota: QuotaItem | null = useMemo(() => (quotaData?.quota as unknown as QuotaItem) ?? null, [quotaData]);
   const ledgerEntries: QuotaLedgerItem[] = useMemo(
     () => (ledgerData?.quotaLedger?.rows as unknown as QuotaLedgerItem[]) ?? [],
     [ledgerData]

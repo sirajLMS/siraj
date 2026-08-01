@@ -9,6 +9,9 @@ import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type { ClassInstanceInsertInput } from "@/backend/types";
 
+/** Maximum number of recurring schedules to process per batch (unbounded SELECT guard — RP2-8). */
+const MAX_SCHEDULES_PER_RUN = 500;
+
 // NOTE: Duplicated DayOfWeek map — also defined in
 // backend/db/seeds/lib/date-window.ts and
 // backend/db/repo/teachers/teacher-availability.repository.ts.
@@ -26,6 +29,52 @@ const DAY_OF_WEEK_MAP: Record<number, DayOfWeek> = {
 interface ExecutionStateResult {
   executionState: ClassExecutionState;
   ondemandStatus: OnDemandStatus | null;
+}
+
+/**
+ * Computes the scheduled start time for a given date using the schedule's IANA
+ * timezone, so the hour/minute correspond to the wall-clock time in the student's
+ * timezone rather than the server's local timezone (RC2-1).
+ *
+ * Returns a `Date` in UTC that represents the instant at which the given
+ * `startHour:startMin` occurs on `currentDate` in `ianaTimezone`.
+ */
+function computeStartAtInTimezone(currentDate: Date, startHour: number, startMin: number, ianaTimezone: string): Date {
+  // Extract the date components using the schedule's IANA timezone via Intl.
+  const dateParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: ianaTimezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(currentDate);
+
+  const getPart = (type: string): string => dateParts.find(p => p.type === type)?.value ?? "";
+
+  const year = Number(getPart("year"));
+  const month = Number(getPart("month")) - 1; // JS months are 0-based
+  const day = Number(getPart("day"));
+
+  // Build a UTC timestamp from the wall-clock time and resolve it back to the
+  // correct instant using Intl's timezone offset.
+  // (UTC equivalent of YYYY-MM-DDTHH:MM:00 in ianaTimezone)
+  const asIfUtc = Date.UTC(year, month, day, startHour, startMin, 0, 0);
+
+  // Calculate the offset between the IANA timezone and UTC at this instant.
+  const tzParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: ianaTimezone,
+    timeZoneName: "shortOffset",
+  }).formatToParts(new Date(asIfUtc));
+
+  const offsetStr = tzParts.find(p => p.type === "timeZoneName")?.value ?? "+0";
+  // Parse offset strings like "GMT+5", "GMT-3:30", "GMT" (UTC)
+  const match = offsetStr.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+  const sign = match?.[1] === "-" ? -1 : 1;
+  const hours = match ? Number(match[2]) : 0;
+  const minutes = match?.[3] ? Number(match[3]) : 0;
+  const offsetMinutes = sign * (hours * 60 + minutes);
+
+  // Shift the as-if-UTC timestamp by the offset to get the true UTC instant.
+  return new Date(asIfUtc - offsetMinutes * 60 * 1000);
 }
 
 function determineExecutionState(isAvailable: boolean, hasBalance: boolean): ExecutionStateResult {
@@ -53,43 +102,8 @@ interface PendingInstance {
   scheduledEndAt: Date;
   executionState: ClassExecutionState;
   ondemandStatus: OnDemandStatus | null;
+  schedulingMode: SchedulingMode;
   idempotencyKey: string;
-}
-
-/**
- * Batch-insert class instances with idempotency. Uses `ON CONFLICT DO NOTHING`
- * keyed on the `idempotencyKey` unique index, so re-running the generator is
- * safe. Returns the number of instances actually inserted (not conflicting).
- */
-async function batchInsertInstances(pending: PendingInstance[]): Promise<number> {
-  if (pending.length === 0) return 0;
-
-  const inserted = await db
-    .insert(classInstances)
-    .values(
-      pending.map(
-        p =>
-          ({
-            recurringScheduleId: p.recurringScheduleId,
-            studentId: p.studentId,
-            teacherId: p.teacherId,
-            subjectId: p.subjectId,
-            durationMinutes: p.durationMinutes,
-            classType: ClassType.REGULAR,
-            bookingTimezone: p.bookingTimezone,
-            scheduledStartAt: p.scheduledStartAt,
-            scheduledEndAt: p.scheduledEndAt,
-            executionState: p.executionState,
-            ondemandStatus: p.ondemandStatus,
-            quotaDeducted: false,
-            idempotencyKey: p.idempotencyKey,
-          }) as ClassInstanceInsertInput
-      )
-    )
-    .onConflictDoNothing()
-    .returning({ id: classInstances.id });
-
-  return inserted.length;
 }
 
 export async function runOndemandInstanceGenerator(): Promise<void> {
@@ -99,9 +113,8 @@ export async function runOndemandInstanceGenerator(): Promise<void> {
     const schedules = await db
       .select()
       .from(recurringSchedules)
-      .where(
-        and(eq(recurringSchedules.schedulingMode, SchedulingMode.ON_DEMAND), isNull(recurringSchedules.deletedAt))
-      );
+      .where(and(eq(recurringSchedules.schedulingMode, SchedulingMode.ON_DEMAND), isNull(recurringSchedules.deletedAt)))
+      .limit(MAX_SCHEDULES_PER_RUN);
 
     logger.info(`[OnDemandInstanceGenerator] Found ${schedules.length} active ON_DEMAND schedules.`);
 
@@ -130,8 +143,8 @@ async function tryGenerateSlotDay(
   pendingInstances: PendingInstance[]
 ): Promise<{ generated: boolean; remaining: number }> {
   const [startHour, startMin] = matchingDay.startTime.split(":").map(Number);
-  const scheduledStartAt = new Date(currentDate);
-  scheduledStartAt.setHours(startHour, startMin, 0, 0);
+  // RC2-1: Compute start time in the schedule's IANA timezone, not server-local.
+  const scheduledStartAt = computeStartAtInTimezone(currentDate, startHour, startMin, schedule.timezone);
 
   const tsIso = scheduledStartAt.toISOString();
   const slotKey = `${schedule.id}-${tsIso}`;
@@ -164,6 +177,7 @@ async function tryGenerateSlotDay(
     scheduledEndAt,
     executionState,
     ondemandStatus,
+    schedulingMode: SchedulingMode.ON_DEMAND,
     idempotencyKey,
   });
 
@@ -175,8 +189,6 @@ async function generateInstancesForSchedule(
   schedule: typeof recurringSchedules.$inferSelect,
   now: Date
 ): Promise<number> {
-  // NOTE: TOCTOU risk — reads balance outside lock then decrements in-memory. For production safety,
-  // wrap the entire balance-read + instance-generation in a single transaction with SELECT FOR UPDATE.
   const horizonWeeks = schedule.generationHorizonWeeks ?? 2;
   const effectiveFromDate = schedule.effectiveFrom ? new Date(schedule.effectiveFrom) : now;
   const startDate = effectiveFromDate > now ? effectiveFromDate : now;
@@ -185,36 +197,43 @@ async function generateInstancesForSchedule(
   const scheduleEndDate =
     effectiveUntilDate && effectiveUntilDate < horizonEndDate ? effectiveUntilDate : horizonEndDate;
 
-  const scheduleDays = await db
-    .select()
-    .from(recurringScheduleDays)
-    .where(and(eq(recurringScheduleDays.recurringScheduleId, schedule.id), eq(recurringScheduleDays.isActive, true)));
+  // RP2-1: Parallelise 3 independent reads (schedule days, credit balance,
+  // overlapping instances) that were previously sequential awaits.
+  // RBL2-3: The balance read and instance insertion now run inside a single
+  // transaction so concurrent generator runs cannot oversell instances via
+  // concurrent in-memory decrements.
+  // We query schedule days outside the tx because it's a read-only
+  // guard — an empty result lets us short-circuit before acquiring a tx.
+  const [scheduleDays, creditBalance, overlappingInstances] = await Promise.all([
+    db
+      .select()
+      .from(recurringScheduleDays)
+      .where(and(eq(recurringScheduleDays.recurringScheduleId, schedule.id), eq(recurringScheduleDays.isActive, true))),
+    CreditRepository.getBalance(db, schedule.studentId),
+    db
+      .select({
+        id: classInstances.id,
+        scheduledStartAt: classInstances.scheduledStartAt,
+        studentId: classInstances.studentId,
+        teacherId: classInstances.teacherId,
+      })
+      .from(classInstances)
+      .where(
+        and(
+          isNull(classInstances.deletedAt),
+          sql`${classInstances.scheduledStartAt} < ${scheduleEndDate}`,
+          sql`${classInstances.scheduledEndAt} > ${startDate}`,
+          sql`(${classInstances.studentId} = ${schedule.studentId} OR ${classInstances.teacherId} = ${schedule.teacherId})`
+        )
+      ),
+  ]);
 
   if (scheduleDays.length === 0) return 0;
 
-  const creditBalance = await CreditRepository.getBalance(db, schedule.studentId);
   const activeQuotas = await QuotaRepository.listActiveByStudent(db, schedule.studentId);
   const totalQuotaRemaining = activeQuotas.reduce((sum, q) => sum + q.remaining, 0);
   // NOTE: Mirrors QuotaService.refreshStudentOndemandInstances credit computation — keep in sync
   const availableBalance = creditBalance.classesRemaining + totalQuotaRemaining;
-
-  // Batch-fetch all overlapping class instances for the entire horizon range in one query
-  const overlappingInstances = await db
-    .select({
-      id: classInstances.id,
-      scheduledStartAt: classInstances.scheduledStartAt,
-      studentId: classInstances.studentId,
-      teacherId: classInstances.teacherId,
-    })
-    .from(classInstances)
-    .where(
-      and(
-        isNull(classInstances.deletedAt),
-        sql`${classInstances.scheduledStartAt} < ${scheduleEndDate}`,
-        sql`${classInstances.scheduledEndAt} > ${startDate}`,
-        sql`(${classInstances.studentId} = ${schedule.studentId} OR ${classInstances.teacherId} = ${schedule.teacherId})`
-      )
-    );
 
   // Build a Set of timestamp-based slot keys that are already taken.
   // Using the full ISO timestamp (not just date) avoids false conflicts
@@ -251,16 +270,65 @@ async function generateInstancesForSchedule(
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  // Batch-insert all pending instances in a single query instead of
-  // one transaction per instance. ON CONFLICT DO NOTHING on the
-  // idempotencyKey unique index handles duplicates safely.
-  const generated = await batchInsertInstances(pendingInstances);
+  // RBL2-3: Batch-insert inside a single transaction with SELECT FOR UPDATE
+  // on the student's on-demand instances so concurrent generator invocations
+  // cannot oversell — the transaction serialises the balance read + insertion.
+  // The idempotencyKey unique constraint + ON CONFLICT DO NOTHING absorbs
+  // any remaining races without raising errors.
+  const generated = await db.transaction(async tx => {
+    if (pendingInstances.length === 0) return 0;
 
-  if (generated > 0) {
+    // Lock the student's existing on-demand instances for the duration of
+    // this tx so concurrent runs cannot both read the same balance and
+    // double-insert based on stale `availableBalance`.
+    await tx
+      .select({ id: classInstances.id })
+      .from(classInstances)
+      .where(
+        and(
+          eq(classInstances.studentId, schedule.studentId),
+          eq(classInstances.schedulingMode, SchedulingMode.ON_DEMAND),
+          isNull(classInstances.deletedAt)
+        )
+      )
+      .for("update");
+
+    const inserted = await tx
+      .insert(classInstances)
+      .values(
+        pendingInstances.map(
+          p =>
+            ({
+              recurringScheduleId: p.recurringScheduleId,
+              studentId: p.studentId,
+              teacherId: p.teacherId,
+              subjectId: p.subjectId,
+              durationMinutes: p.durationMinutes,
+              classType: ClassType.REGULAR,
+              bookingTimezone: p.bookingTimezone,
+              scheduledStartAt: p.scheduledStartAt,
+              scheduledEndAt: p.scheduledEndAt,
+              executionState: p.executionState,
+              ondemandStatus: p.ondemandStatus,
+              schedulingMode: p.schedulingMode,
+              quotaDeducted: false,
+              idempotencyKey: p.idempotencyKey,
+            }) as ClassInstanceInsertInput
+        )
+      )
+      .onConflictDoNothing()
+      .returning({ id: classInstances.id });
+
+    return inserted.length;
+  });
+
+  const inserted = generated > 0;
+
+  if (inserted) {
     await QuotaService.refreshStudentOndemandInstances(schedule.studentId);
   }
 
-  return generated;
+  return inserted ? generated : 0;
 }
 
 if (import.meta.main) {

@@ -1,6 +1,5 @@
 import type { quotaLedger, quotas } from "@/backend/db/schema";
 import type { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type QuotaSelectType = typeof quotas.$inferSelect;
 
@@ -91,8 +90,6 @@ export interface QuotaPaginatedResult {
 }
 
 export interface QuotaLedgerPaginatedResult {
-  id?: string;
   rows: QuotaLedgerReturnType[];
   totalCount: number;
-  pageInfo?: PageInfo | null;
 }

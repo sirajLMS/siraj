@@ -40,7 +40,7 @@ export function useQuotaViewModel() {
     fetchPolicy: "cache-and-network",
   });
 
-  const [deleteQuotaMutation, { loading: deleting }] = useMutation(deleteQuotaMutationDocument, {
+  const [deleteQuotaMutation] = useMutation(deleteQuotaMutationDocument, {
     onCompleted: () => {
       refetch();
     },
@@ -65,7 +65,6 @@ export function useQuotaViewModel() {
     quotas,
     totalCount,
     loading,
-    deleting,
     page,
     pageSize,
     setPage,
@@ -77,6 +76,5 @@ export function useQuotaViewModel() {
     setFilterKind,
     setSearchQuery,
     handleDelete,
-    refetch,
   };
 }

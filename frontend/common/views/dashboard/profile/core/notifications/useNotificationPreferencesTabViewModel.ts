@@ -64,7 +64,7 @@ function usePreferenceSync(
 function useDerivedState(localPreferences: NotificationPrefRow[], eventTypes: readonly NotificationEventType[]) {
   const preferenceMap = useMemo(() => buildPreferenceMap(localPreferences), [localPreferences]);
   const matrixRows = useMemo(() => buildPreferenceMatrixRows(preferenceMap, eventTypes), [preferenceMap, eventTypes]);
-  const categoryRows = useMemo(() => buildCategoryRows(eventTypes), [eventTypes]);
+  const categoryRows = useMemo(() => buildCategoryRows(eventTypes, preferenceMap), [eventTypes, preferenceMap]);
   return { preferenceMap, matrixRows, categoryRows };
 }
 

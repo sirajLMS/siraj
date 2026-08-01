@@ -59,7 +59,7 @@ export const SettingsTimezonesResultPothosObject = SettingsTimezonesResultRef.im
 gqlSchemaBuilder.queryField("settingsTimezones", t =>
   t.field({
     type: SettingsTimezonesResultPothosObject,
-    authScopes: { permission: AppPermission.SCHEDULE_VIEW_TIMEZONES },
+    authScopes: { permission: AppPermission.SETTINGS_TIMEZONES_VIEW },
 
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),

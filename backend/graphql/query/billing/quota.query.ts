@@ -22,18 +22,7 @@ gqlSchemaBuilder.queryField("quotaLedger", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      let pagination: PaginationArgs | null = null;
-      if (args.pagination) {
-        pagination = new PaginationArgs({
-          first: args.pagination.first ?? null,
-          skip: args.pagination.skip ?? null,
-          after: args.pagination.after ?? null,
-          before: args.pagination.before ?? null,
-          last: args.pagination.last ?? null,
-          page: args.pagination.page ?? null,
-          maxCount: args.pagination.maxCount ?? null,
-        });
-      }
+      const pagination = PaginationArgs.fromArgs(args.pagination);
       return QuotaService.getQuotaLedger(String(args.quotaId), pagination, actorUserId, ctx.locale);
     },
   })
@@ -65,18 +54,7 @@ gqlSchemaBuilder.queryField("quotas", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      let pagination: PaginationArgs | null = null;
-      if (args.pagination) {
-        pagination = new PaginationArgs({
-          first: args.pagination.first ?? null,
-          skip: args.pagination.skip ?? null,
-          after: args.pagination.after ?? null,
-          before: args.pagination.before ?? null,
-          last: args.pagination.last ?? null,
-          page: args.pagination.page ?? null,
-          maxCount: args.pagination.maxCount ?? null,
-        });
-      }
+      const pagination = PaginationArgs.fromArgs(args.pagination);
       return QuotaService.listQuotas(args.filter ?? null, pagination, undefined, actorUserId, ctx.locale);
     },
   })

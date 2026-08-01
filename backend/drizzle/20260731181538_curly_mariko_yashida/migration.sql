@@ -151,6 +151,14 @@ ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE text;--> statement-br
 -- applied first, the USING cast will raise "invalid input value for enum"
 -- for any row whose key is not a valid app_permission label.
 -- Ensure 7c-quota_permissions_enum runs before this Drizzle migration.
+-- SAFETY: Delete any permission rows whose key is not a valid app_permission
+-- enum value BEFORE the cast, so the ALTER TYPE does not fail on orphaned keys.
+DELETE FROM "permissions" WHERE "key" NOT IN (
+    SELECT e.enumlabel
+    FROM pg_enum e
+    JOIN pg_type t ON t.oid = e.enumtypid
+    WHERE t.typname = 'app_permission'
+);--> statement-breakpoint
 -- NOTE: This re-cast assumes all existing permission keys are in app_permission enum — verify before deploying to production.
 ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE "app_permission" USING "key"::"app_permission";--> statement-breakpoint
 CREATE UNIQUE INDEX "quota_ledger_idempotency_key_unique_idx" ON "quota_ledger" ("idempotency_key");--> statement-breakpoint
@@ -174,7 +182,8 @@ ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_quota_id_q
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_ondemand_status_scheduling_mode_chk" CHECK (
         ("ondemand_status" IS NULL AND "scheduling_mode" != 'ON_DEMAND') OR
         ("ondemand_status" IS NOT NULL AND "scheduling_mode" = 'ON_DEMAND')
-      );--> statement-breakpoint
+      ) NOT VALID;--> statement-breakpoint
+ALTER TABLE "class_instances" VALIDATE CONSTRAINT "class_instances_ondemand_status_scheduling_mode_chk";--> statement-breakpoint
 ALTER TABLE "class_instances" DROP CONSTRAINT "class_instances_state_machine_chk", ADD CONSTRAINT "class_instances_state_machine_chk" CHECK (
         ("execution_state" != 'COMPLETED' OR "outcome" != 'PENDING') AND
         ("execution_state" != 'NOT_ACTIVATED' OR "actual_start_at" IS NULL) AND

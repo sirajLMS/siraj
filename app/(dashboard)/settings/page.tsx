@@ -29,7 +29,7 @@ export default async function SettingsPage() {
       AppPermission.SETTINGS_EDIT_SESSION,
       AppPermission.SETTINGS_AUDIT_VIEW,
       AppPermission.SETTINGS_SITE_CONTENT_MANAGE,
-      AppPermission.SCHEDULE_VIEW_TIMEZONES,
+      AppPermission.SETTINGS_TIMEZONES_VIEW,
     ],
     locale,
     context
