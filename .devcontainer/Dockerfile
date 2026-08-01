@@ -6,6 +6,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   curl \
   wget \
   git \
+  zsh \
+  sudo \
   ca-certificates \
   unzip \
   fzf \
