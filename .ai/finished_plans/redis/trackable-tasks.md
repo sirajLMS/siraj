@@ -404,7 +404,7 @@
     - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
   - [x] 4.4 Run unit tests + tsgo + biome for Phase 4 files
     - `bun tsgo` and `bun biome:check` on the three new/modified files.
-    - Run lint queue client on each: `curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" -d '{"id":"phase4","files":["backend/lib/auth/cached-user.ts","backend/lib/auth/cached-teacher-by-user-id.ts","backend/lib/auth/cached-parent-by-user-id.ts"]}'`.
+    - Run lint queue client on each: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"phase4","files":["backend/lib/auth/cached-user.ts","backend/lib/auth/cached-teacher-by-user-id.ts","backend/lib/auth/cached-parent-by-user-id.ts"]}'`.
     - _Requirements: 1.1_
   - [x] 4.4.QL **Quality Loop**: Per-file verification on all Phase 4 files
     - Run: `bun tsgo`
@@ -554,7 +554,7 @@
     - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`, `/home/ahmed/Projects/siraj/backend/AGENTS.md`
     - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
   - [x] 7.6 Per-file verification loop on Phase 7 mutation-wired files
-    - For each mutated service file: `bun tsgo` + `bun biome:check` + `curl -s -X POST http://localhost:4777/lint -d '{"id":"phase7","files":["<path>"]}'`.
+    - For each mutated service file: `bun tsgo` + `bun biome:check` + `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -d '{"id":"phase7","files":["<path>"]}'`.
     - _Requirements: 2.4_
   - [x] 7.6.QL **Quality Loop**: Per-file verification on all Phase 7 files
     - Run: `bun tsgo`
@@ -683,7 +683,7 @@
 
 - [x] 11. Run `bun quality-gate` to verify the whole change passes tsgo + biome + lint + codescene + sonar stages
   - [x] 11.1 Start the lint queue server if not running: `~/.bun/bin/bun run scripts/lint-queue-server.ts`
-    - Verify health: `curl -s http://localhost:4777/status` returns `{ running: true, ... }`.
+    - Verify health: `curl -s http://localhost:${LINT_QUEUE_PORT}/status` returns `{ running: true, ... }`.
     - _Requirements: 11 (gate)_
   - [x] 11.2 Run `bun quality-gate`
     - Follow up on any failing stage using root `AGENTS.md` guidance: if CODESCENE fails run `bun run codescene --file <path>`; if SONAR_RESULTS fails use `bun scripts/sonar-manager.ts`; re-run `bun quality-gate` to resume from last failed stage.
@@ -776,7 +776,7 @@
 ## Notes for Executors
 
 - The sequence of Phases 1-11 is the single recommended rollout order — each Phase's verification gates into the next.
-- Sub-agents working in parallel on Phase 5/6/7 tasks MUST follow the lint-queue-server pattern from root `AGENTS.md` (`curl -s -X POST http://localhost:4777/lint ...`) — never run raw eslint directly.
+- Sub-agents working in parallel on Phase 5/6/7 tasks MUST follow the lint-queue-server pattern from root `AGENTS.md` (`curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint ...`) — never run raw eslint directly.
 - SonarQube scan is orchestrator-only — subagents must NEVER run `bun sonar-scan` or `bun scripts/sonar-manager.ts`.
 - PG integration tests (`Phase 8`, `cache_tag_invalidation.test.ts`) MUST use `runInRollback` and the `bun run scripts/run-test/run-test.ts` runner.
 - Redis provider smokes (`Phase 8.5`, `test/integration/redis/`) MUST use `bun run test:integration` — one smoke per provider file, no live provider tests under `backend/db/test/` or `backend/services/`.

@@ -174,7 +174,7 @@ After implementing the fix:
 2. Run full GraphQL test suite: `~/.bun/bin/bun run test:graphql` (expect 249/249 pass)
 3. Run `tsgo` type check
 4. Run `biome:check`
-5. Lint via queue server: `Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body '{"id":"inet-fix","files":["backend/graphql/gqlContextFactory.ts","backend/db/repo/ratelimit.repository.ts"]}'`
+5. Lint via queue server: `Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/lint -Method POST -ContentType 'application/json' -Body '{"id":"inet-fix","files":["backend/graphql/gqlContextFactory.ts","backend/db/repo/ratelimit.repository.ts"]}'`
 6. Commit scoped changes
 
 ---
@@ -200,8 +200,8 @@ After implementing the fix:
 | Bun path | `~/.bun/bin/bun` |
 | Test runner | `~/.bun/bin/bun run scripts/run-test/run-test.ts <test-path>` |
 | Test runner (last results) | `--last` flag; `--last --focus "<pattern>"` for filtering |
-| Lint queue server | `~/.bun/bin/bun run scripts/lint-queue-server.ts` (port 4777) |
-| Lint via queue | `Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body '{"id":"x","files":["f1"]}'` |
+| Lint queue server | `~/.bun/bin/bun run scripts/lint-queue-server.ts` (port defined in `scripts/lint-queue-config.ts`) |
+| Lint via queue | `Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/lint -Method POST -ContentType 'application/json' -Body '{"id":"x","files":["f1"]}'` |
 | Type check | `~/.bun/bin/bun run tsgo` |
 | Format check | `~/.bun/bin/bun run biome:check` |
 | Quality gate | `~/.bun/bin/bun quality-gate` |

@@ -33,7 +33,7 @@ Fix formatting and lint issues. `biome:check` is safe to run concurrently.
 First, check if the lint queue server is running:
 
 ```powershell
-Invoke-RestMethod -Uri http://localhost:4777/status
+Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/status
 ```
 
 If the server is NOT running, start it first:
@@ -48,12 +48,12 @@ Then submit via the queue:
 ```powershell
 $files = @("file1.ts","file2.ts")
 $body = @{ id = "quality-loop"; files = $files } | ConvertTo-Json
-Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/lint -Method POST -ContentType 'application/json' -Body $body
 ```
 
 **Bash / curl:**
 ```bash
-curl -s -X POST http://localhost:4777/lint \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"quality-loop","files":["file1.ts","file2.ts"]}'
 ```
