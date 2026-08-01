@@ -18,12 +18,19 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
       .limit(1);
 
     const targetHour = settingRow.length > 0 ? Number.parseInt(settingRow[0].value, 10) : 9;
+    if (Number.isNaN(targetHour)) {
+      logger.warn("[OnDemandTeacherDigestCron] Invalid hour setting, skipping");
+      return;
+    }
     const nowUtc = new Date();
 
     // 1b. Idempotency check: per-teacher markers prevent re-sending to the
     // same teacher within the same UTC date + target hour. The read-then-write
     // race is resolved by using ON CONFLICT DO NOTHING on the unique key column,
     // making each insert atomic and idempotent.
+    // PERF-10: N+1 systemSettings reads — could be cached as a single inArray query.
+    // Currently one systemSettings query per run (above) plus per-teacher idempotency
+    // inserts below accumulate rows; consider caching the digest-hour setting.
     const dateHourStr = `${nowUtc.toISOString().slice(0, 10)}_${targetHour}`;
 
     // 2. Fetch pending instances grouped by teacher
@@ -82,6 +89,7 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
           // RETURNING eliminates the TOCTOU race. If the INSERT returns a
           // row, this invocation won the race and should send the digest.
           // If it returns nothing, a concurrent invocation already sent it.
+          // NOTE: Idempotency markers accumulate in system_settings — add TTL cleanup job if table grows large.
           const teacherIdempotencyKey = `ondemand_teacher_digest_sent_${dateHourStr}_${teacherId}`;
           const inserted = await db
             .insert(systemSettings)

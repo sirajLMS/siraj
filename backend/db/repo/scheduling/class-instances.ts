@@ -27,6 +27,67 @@ import { getServerTranslations } from "@/shared/locale";
 
 export { resolveStudentTimezone } from "@/backend/db/repo/scheduling/shared";
 
+/**
+ * Batch lookup for multiple class instances by ID — eliminates N+1 queries
+ * when dispatching notifications for every instance in a recurring schedule.
+ * Returns a Map keyed by instance ID. Entries not found are omitted from the
+ * map (caller should use `.get(id) ?? null`).
+ */
+export const getClassInstancesByIds = async (
+  ids: readonly string[],
+  tx?: DBTransaction
+): Promise<Map<string, Awaited<ReturnType<typeof getClassInstanceById>>>> => {
+  if (ids.length === 0) return new Map();
+  const q = queryDb(tx);
+  const rows = await q
+    .select()
+    .from(classInstances)
+    .where(inArray(classInstances.id, [...ids]));
+  if (rows.length === 0) return new Map();
+
+  const studentIds = [...new Set(rows.map(r => r.studentId))];
+  const teacherIds = [...new Set(rows.map(r => r.teacherId))];
+  const subjectIds = [...new Set(rows.map(r => r.subjectId).filter((s): s is string => s !== null))];
+  const recurringScheduleIds = [
+    ...new Set(rows.map(r => r.recurringScheduleId).filter((s): s is string => s !== null)),
+  ];
+
+  const [studentsData, teachersData, subjectsData, recurringData] = await Promise.all([
+    q.select().from(students).where(inArray(students.id, studentIds)),
+    q
+      .select({ teacher: teachers, user: users })
+      .from(teachers)
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(inArray(teachers.id, teacherIds)),
+    subjectIds.length > 0
+      ? q.select().from(classSubjects).where(inArray(classSubjects.id, subjectIds))
+      : Promise.resolve([]),
+    recurringScheduleIds.length > 0
+      ? q.select().from(recurringSchedules).where(inArray(recurringSchedules.id, recurringScheduleIds))
+      : Promise.resolve([]),
+  ]);
+
+  const studentMap = new Map(studentsData.map(s => [s.id, s]));
+  const teacherMap = new Map(teachersData.map(tc => [tc.teacher.id, { ...tc.teacher, user: tc.user }]));
+  const subjectMap = new Map(subjectsData.map(s => [s.id, s]));
+  const recurringMap = new Map(recurringData.map(r => [r.id, r]));
+
+  const result = new Map<string, Awaited<ReturnType<typeof getClassInstanceById>>>();
+  for (const row of rows) {
+    const subject = row.subjectId ? subjectMap.get(row.subjectId) : undefined;
+    const recurring = row.recurringScheduleId ? recurringMap.get(row.recurringScheduleId) : undefined;
+    result.set(row.id, {
+      ...row,
+      subject,
+      recurring,
+      avatarUrl: resolveClassAvatarUrl(recurring?.avatarUrl, subject?.avatarUrl),
+      student: studentMap.get(row.studentId),
+      teacher: teacherMap.get(row.teacherId),
+    });
+  }
+  return result;
+};
+
 export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
   const q = queryDb(tx);
   const [row] = await q.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);

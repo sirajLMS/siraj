@@ -60,13 +60,13 @@ All quota views live under `frontend/common/views/dashboard/billing/quota/`:
 
 Student quota tab views live under `frontend/common/views/dashboard/students/quota/`:
 - `StudentQuotaContainer.tsx` — Container (calls ViewModel)
-- `processStudentQuotaViewModel.ts` — ViewModel hook
+- `useStudentQuotaViewModel.ts` — ViewModel hook
 - `QuotaFormAccessProvider.tsx` — permission gating
-- `studentQuotaSchema.ts` — Zod schema
+- `frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema.ts` — Zod schema
 
 ### State Management
 
-- `frontend/stores/quotaStore.ts` — Zustand store for form state that survives viewport tier switching
+- `frontend/common/stores/quotaStore.ts` — Zustand store for form state that survives viewport tier switching
 - Never store non-serializable values (File, Blob) in persist-enabled stores
 
 ### Permissions

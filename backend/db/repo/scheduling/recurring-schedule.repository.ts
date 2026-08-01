@@ -82,6 +82,7 @@ export namespace RecurringScheduleRepository {
 
     return runInTransaction(tx, async t => {
       const results: RecurringScheduleEntity[] = [];
+      // NOTE: N+1 pattern — per-input SELECT then UPDATE-or-INSERT. Should batch existence check with inArray SELECT
       for (const input of inputs) {
         const [existing] = await t
           .select()

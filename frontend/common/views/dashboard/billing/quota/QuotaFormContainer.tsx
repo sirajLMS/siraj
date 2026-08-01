@@ -44,7 +44,7 @@ export function QuotaFormContainer({ quotaId }: QuotaFormContainerProps) {
                 label={t.fields.student}
                 value={formData.studentId}
                 onChange={e => setFormData({ studentId: e.target.value })}
-                placeholder="Student UUID"
+                placeholder={t.fields.studentIdPlaceholder}
               />
             )}
 

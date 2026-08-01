@@ -19,6 +19,8 @@ export interface QuotaLabels {
     readonly periodType: string;
     readonly periodDays: string;
     readonly priority: string;
+    readonly all: string;
+    readonly studentIdPlaceholder: string;
   };
   readonly kinds: {
     readonly PACKAGE: string;
@@ -52,9 +54,9 @@ export interface QuotaLabels {
     readonly date: string;
   };
   readonly insightsTitle: string;
-  readonly activeQuotasCount: string;
-  readonly totalClassesRemaining: string;
-  readonly expiringThisWeekCount: string;
+  readonly activeQuotasCount: (count: number) => string;
+  readonly totalClassesRemaining: (count: number) => string;
+  readonly expiringThisWeekCount: (count: number) => string;
   readonly charts: {
     readonly quotaPurchasesOverTime: string;
     readonly redemptionRateByType: string;

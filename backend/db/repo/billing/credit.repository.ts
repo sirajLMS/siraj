@@ -8,6 +8,7 @@ import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
 import type { CreditInsertInput, CreditTransactionSelectType, PaginationArgs } from "@/backend/types";
 
+// NOTE: Overload-by-type-discrimination — tx parameter is polymorphic: string (studentId) or Transaction instance. Callers must be aware that getBalance(tx, undefined) silently targets the wrong studentId.
 type ReadExecutor = DBTransaction | typeof db;
 
 export namespace CreditRepository {
@@ -214,11 +215,17 @@ export namespace CreditRepository {
     };
   };
 
-  export const generateIdempotencyKey = (input: { studentId: string; hours: number; notes?: string }): string => {
+  export const generateIdempotencyKey = (input: {
+    studentId: string;
+    hours: number;
+    notes?: string;
+    sourcePaymentId?: string | null;
+  }): string => {
     const content = JSON.stringify({
       studentId: input.studentId,
       hours: input.hours,
       notes: input.notes ?? "",
+      sourcePaymentId: input.sourcePaymentId ?? "none",
     });
     // Deterministic prefix: sha256 of the source content. Using a random UUID
     // prefix would break idempotency (two calls with identical inputs would

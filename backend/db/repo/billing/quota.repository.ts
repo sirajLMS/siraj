@@ -8,6 +8,7 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { classInstances, quotas } from "@/backend/db/schema";
 import { QuotaLedgerReason, QuotaStatus } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import type {
   QuotaPaginatedFilter,
   QuotaSelectType,
@@ -18,45 +19,45 @@ import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
 
 type ReadExecutor = DBTransaction | typeof db;
 
+/**
+ * Shared idempotency-key derivation helper.
+ * Builds a SHA-256 hash from `"quota-{prefix}:{...parts}"`.
+ * All quota-operation idempotency keys go through this single function
+ * to avoid copy-paste drift (DUP-5).
+ */
+const deriveIdempotencyKey = (prefix: string, ...parts: string[]): string => {
+  const payload = `quota-${prefix}:${parts.join(":")}`;
+  return createHash("sha256").update(payload).digest("hex");
+};
+
 export namespace QuotaRepository {
-  export const deriveGrantIdempotencyKey = (quotaId: string): string => {
-    return createHash("sha256").update(`quota-grant:${quotaId}`).digest("hex");
-  };
+  export const deriveGrantIdempotencyKey = (quotaId: string): string => deriveIdempotencyKey("grant", quotaId);
 
-  export const deriveRedeemIdempotencyKey = (classInstanceId: string, quotaId: string): string => {
-    return createHash("sha256").update(`quota-redeem:${classInstanceId}:${quotaId}`).digest("hex");
-  };
+  export const deriveRedeemIdempotencyKey = (classInstanceId: string, quotaId: string): string =>
+    deriveIdempotencyKey("redeem", classInstanceId, quotaId);
 
-  export const deriveReserveIdempotencyKey = (recurringScheduleId: string, quotaId: string): string => {
-    return createHash("sha256").update(`quota-reserve:${recurringScheduleId}:${quotaId}`).digest("hex");
-  };
+  export const deriveReserveIdempotencyKey = (recurringScheduleId: string, quotaId: string): string =>
+    deriveIdempotencyKey("reserve", recurringScheduleId, quotaId);
 
-  export const deriveReleasePoolIdempotencyKey = (classInstanceId: string, quotaId: string): string => {
-    return createHash("sha256").update(`quota-release:${classInstanceId}:${quotaId}`).digest("hex");
-  };
+  export const deriveReleasePoolIdempotencyKey = (classInstanceId: string, quotaId: string): string =>
+    deriveIdempotencyKey("release", classInstanceId, quotaId);
 
   export const deriveReleaseEarmarkIdempotencyKey = (
     recurringScheduleId: string,
     classInstanceId: string,
     quotaId: string
-  ): string => {
-    return createHash("sha256")
-      .update(`quota-release:${recurringScheduleId}:${classInstanceId}:${quotaId}`)
-      .digest("hex");
-  };
+  ): string => deriveIdempotencyKey("release", recurringScheduleId, classInstanceId, quotaId);
 
-  export const deriveExpireIdempotencyKey = (quotaId: string, periodStr: string): string => {
-    return createHash("sha256").update(`quota-expire:${quotaId}:${periodStr}`).digest("hex");
-  };
+  export const deriveExpireIdempotencyKey = (quotaId: string, periodStr: string): string =>
+    deriveIdempotencyKey("expire", quotaId, periodStr);
 
   /**
    * Idempotency key for a per-period GRANT issued by `refreshPeriodic`.
    * Distinct from {@link deriveGrantIdempotencyKey} (the one-time creation grant)
    * so that rollover grants for different periods never collide.
    */
-  export const derivePeriodicGrantIdempotencyKey = (quotaId: string, periodStr: string): string => {
-    return createHash("sha256").update(`quota-grant:periodic:${quotaId}:${periodStr}`).digest("hex");
-  };
+  export const derivePeriodicGrantIdempotencyKey = (quotaId: string, periodStr: string): string =>
+    deriveIdempotencyKey("grant:periodic", quotaId, periodStr);
 
   /**
    * Type guard for the rich JSONB rollover policy shape enforced by
@@ -102,9 +103,7 @@ export namespace QuotaRepository {
         version: 1,
         idempotencyKey:
           input.idempotencyKey ??
-          createHash("sha256")
-            .update(`quota-create:${input.studentId}:${input.kind}:${input.name}:${input.totalClasses}`)
-            .digest("hex"),
+          deriveIdempotencyKey("create", input.studentId, input.kind, input.name, String(input.totalClasses)),
         createdAt: now,
         updatedAt: now,
       })
@@ -166,7 +165,8 @@ export namespace QuotaRepository {
           isNull(quotas.deletedAt)
         )
       )
-      .orderBy(desc(quotas.priority), quotas.validUntil, quotas.createdAt);
+      .orderBy(desc(quotas.priority), quotas.validUntil, quotas.createdAt)
+      .limit(100); // Capped at 100 to prevent unbounded results
   };
 
   export const listAllPaginated = async (
@@ -284,6 +284,7 @@ export namespace QuotaRepository {
   // the SET-clause, WHERE-guard, and ledger-row factory could consolidate the pattern.
   // Not refactored here because each method's WHERE-guard and SET-clause differ subtly
   // (remaining vs reservedClasses vs usedThisPeriod) and a refactor risks behavior change.
+  // Atomic conditional UPDATE — surfaces as 500 under contention but prevents oversell
   export const reserveClasses = async (
     tx: DBTransaction,
     input: {
@@ -331,6 +332,7 @@ export namespace QuotaRepository {
     return updated;
   };
 
+  // Atomic conditional UPDATE — surfaces as 500 under contention but prevents oversell
   export const releaseForRecurringSchedule = async (
     tx: DBTransaction,
     input: {
@@ -675,6 +677,7 @@ export namespace QuotaRepository {
     const checkDateStr = (asOfDate ?? new Date()).toISOString().slice(0, 10);
     const now = new Date();
 
+    // Note: First cron run mass-expires all back-dated quotas — ensure scheduled after initial migration deployment
     // SELECT ... FOR UPDATE to lock rows and capture pre-expiry remaining/reserved.
     // We cannot use UPDATE ... RETURNING because the SET clause zeros remaining,
     // so RETURNING would yield post-update (zeroed) values, not the true balances
@@ -701,19 +704,50 @@ export namespace QuotaRepository {
       })
       .where(and(inArray(quotas.id, expiredIds), eq(quotas.status, QuotaStatus.ACTIVE)));
 
-    // Insert EXPIRE ledger entries using the pre-expiry snapshot values.
+    // Collect all ledger entries (EXPIRE + RELEASE-ORPHAN) and insert in a single batch (PERF-4).
+    const ledgerRows: {
+      quotaId: string;
+      studentId: string;
+      recurringScheduleId?: string | null;
+      classInstanceId?: string | null;
+      delta: number;
+      reason: QuotaLedgerReason;
+      reasonNote?: string | null;
+      actorUserId?: string | null;
+      idempotencyKey: string;
+    }[] = [];
+
     for (const qRow of expiredQuotas) {
+      // BL-5: Before zeroing reservedClasses, release earmarked reservations so the
+      // ledger reflects the orphaned reserved classes being returned.
+      if (qRow.reservedClasses > 0) {
+        logger.info(
+          `expireOverdue: quota ${qRow.id} has ${qRow.reservedClasses} reserved classes being released as EXPIRE_ORPHAN`
+        );
+        ledgerRows.push({
+          quotaId: qRow.id,
+          studentId: qRow.studentId,
+          delta: qRow.reservedClasses,
+          reason: QuotaLedgerReason.RELEASE,
+          reasonNote: `Expired ${qRow.reservedClasses} orphaned reserved classes`,
+          idempotencyKey: deriveIdempotencyKey("expire-orphan", qRow.id, checkDateStr),
+        });
+      }
+
       if (qRow.remaining > 0) {
-        const key = deriveExpireIdempotencyKey(qRow.id, checkDateStr);
-        await QuotaLedgerRepository.insert(tx, {
+        ledgerRows.push({
           quotaId: qRow.id,
           studentId: qRow.studentId,
           delta: -qRow.remaining,
           reason: QuotaLedgerReason.EXPIRE,
           reasonNote: `Expired ${qRow.remaining} unredeemed classes`,
-          idempotencyKey: key,
+          idempotencyKey: deriveExpireIdempotencyKey(qRow.id, checkDateStr),
         });
       }
+    }
+
+    if (ledgerRows.length > 0) {
+      await QuotaLedgerRepository.insertBatch(tx, ledgerRows);
     }
 
     // Re-select to return the updated rows.
@@ -743,7 +777,8 @@ export namespace QuotaRepository {
           sql`${quotas.rolloverPolicy} IS NOT NULL`,
           sql`${periodEndExpr} < ${nowTs}`
         )
-      );
+      )
+      .limit(500); // Capped at 500 per cron tick
   };
 
   /**
@@ -776,7 +811,13 @@ export namespace QuotaRepository {
     quotaId: string,
     actorUserId?: string | null
   ): Promise<QuotaSelectType> => {
-    const target = await findById(tx, quotaId);
+    // Lock the quota row for the duration of this transaction to prevent TOCTOU races (RB-11).
+    const [target] = await tx
+      .select()
+      .from(quotas)
+      .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)))
+      .for("update")
+      .limit(1);
     if (!target) throw new Error("Quota not found");
     if (target.kind !== "PERIODIC") throw new Error("Cannot refresh non-periodic quota");
     if (!target.periodDays || target.periodDays <= 0) throw new Error("Quota has no valid period days configured");
@@ -813,6 +854,24 @@ export namespace QuotaRepository {
       newAnchor = new Date(newAnchor.getTime() + target.periodDays * 24 * 60 * 60 * 1000);
     }
 
+    // Version-checked UPDATE first. Ledger INSERTs are deferred to AFTER the UPDATE
+    // succeeds so that a conflict (concurrent write) rolls back cleanly without
+    // orphaning ledger entries (RB-11).
+    const [updated] = await tx
+      .update(quotas)
+      .set({
+        remaining: newRemaining,
+        usedThisPeriod: 0,
+        periodAnchor: newAnchor,
+        version: target.version + 1,
+        updatedAt: now,
+      })
+      .where(and(eq(quotas.id, quotaId), eq(quotas.version, target.version)))
+      .returning();
+
+    if (!updated) throw new Error("Failed to refresh periodic quota due to concurrent write");
+
+    // After UPDATE succeeds: insert deferred ledger entries.
     // EXPIRE the unused classes that did not roll over from the just-ended period
     if (expiredAmount > 0) {
       const expireKey = deriveExpireIdempotencyKey(quotaId, periodStr);
@@ -840,20 +899,6 @@ export namespace QuotaRepository {
       idempotencyKey: grantKey,
     });
 
-    const [updated] = await tx
-      .update(quotas)
-      .set({
-        remaining: newRemaining,
-        usedThisPeriod: 0,
-        periodAnchor: newAnchor,
-        version: target.version + 1,
-        updatedAt: now,
-      })
-      .where(and(eq(quotas.id, quotaId), eq(quotas.version, target.version)))
-      .returning();
-
-    if (!updated) throw new Error("Failed to refresh periodic quota due to concurrent write");
-
     return updated;
   };
 
@@ -870,6 +915,7 @@ export namespace QuotaRepository {
       actorUserId?: string | null;
     }
   ): Promise<number> => {
+    // Lock quota rows for the duration of this transaction to prevent TOCTOU races (RB-10).
     const activeQuotas = await tx
       .select()
       .from(quotas)
@@ -882,7 +928,8 @@ export namespace QuotaRepository {
         )
       )
       .orderBy(desc(quotas.priority))
-      .limit(input.count);
+      .limit(input.count)
+      .for("update");
 
     let remainingToDeduct = input.count;
     let deducted = 0;
@@ -911,6 +958,10 @@ export namespace QuotaRepository {
         .returning();
 
       if (updated) {
+        // Deterministic idempotency key based on quota ID and period (RB-10/BL-10).
+        // Uses the quota's current periodAnchor as the period key so retries are idempotent
+        // within the same period while avoiding the non-deterministic now.toISOString().
+        const periodKey = (quota.periodAnchor ?? quota.createdAt).toISOString().slice(0, 10);
         await QuotaLedgerRepository.insert(tx, {
           quotaId: quota.id,
           studentId: input.studentId,
@@ -918,9 +969,7 @@ export namespace QuotaRepository {
           reason: QuotaLedgerReason.ADJUST,
           reasonNote: `Deducted ${toTake} for on-demand refresh`,
           actorUserId: input.actorUserId ?? null,
-          idempotencyKey: createHash("sha256")
-            .update(`quota-refresh-deduct:${quota.id}:${now.toISOString()}:${toTake}`)
-            .digest("hex"),
+          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey),
         });
 
         deducted += toTake;

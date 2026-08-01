@@ -1,4 +1,4 @@
-import { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 export function formatQuotaStatus(
@@ -33,25 +33,8 @@ export function formatQuotaKind(kind: QuotaKind | string, t: QuotaLabels): strin
   }
 }
 
-export function formatPeriodType(periodType: QuotaPeriodType | string | null, t: QuotaLabels): string {
-  if (!periodType) return "-";
-  switch (periodType) {
-    case QuotaPeriodType.Weekly:
-    case "WEEKLY":
-      return t.periodTypes.WEEKLY;
-    case QuotaPeriodType.Monthly:
-    case "MONTHLY":
-      return t.periodTypes.MONTHLY;
-    case QuotaPeriodType.Custom:
-    case "CUSTOM":
-      return t.periodTypes.CUSTOM;
-    default:
-      return String(periodType);
-  }
-}
-
-export function formatQuotaDate(dateStr: string | null): string {
-  if (!dateStr) return "N/A";
+export function formatQuotaDate(dateStr: string | null, fallback = "—"): string {
+  if (!dateStr) return fallback;
   try {
     const d = new Date(dateStr);
     return d.toLocaleDateString();

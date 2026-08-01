@@ -16,6 +16,7 @@ export async function seedOrGet() {
   const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
   // Create a sample package quota for demo
+  // NOTE: Uses synthetic student UUID — demo data only, will fail silently (catches FK violation) on fresh prod runs.
   try {
     const q1 = await QuotaService.createQuota({
       studentId: "00000000-0000-0000-0000-000000000001",

@@ -290,17 +290,7 @@ export const errorsAr: ErrorsLabels = {
   currencyInUse:
     "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
 
-  // ─── Quota system errors (flat proxies for backward compatibility) ──
-  insufficientRemaining: (requested: number, available: number) => `المتبقي ${available} حصة فقط — طُلب ${requested}`,
-  exceedsCreditBalance: (requested: number, available: number) =>
-    `رصيد غير كافٍ. المتاح: ${available}، المطلوب: ${requested}`,
-  periodicRefreshFailed: (quotaName: string, reason: string) => `فشل تحديث الحصة الدورية ${quotaName}: ${reason}`,
-  invalidPeriod: (quotaName: string) => `الحصة ${quotaName} منتهية الصلاحية أو فترتها غير صالحة`,
-  alreadyExpired: (quotaName: string) => `الحصة ${quotaName} منتهية الصلاحية بالفعل`,
-  earmarkExceedsRemaining: (requested: number, available: number) =>
-    `حجز ${requested} يتجاوز الحصة المتبقية (${available})`,
-  slotConflict: (startTime: string, endTime: string) => `الفترة الزمنية ${startTime}–${endTime} تتعارض مع حجز قائم`,
-  onDemandNoCredits: (studentName: string) => `لا توجد أرصدة كافية للحجز الفوري لـ ${studentName}`,
+  // Quota errors accessible via quota.* — see QuotaErrors
 
   // ─── Offline resolver / notification fallbacks ──────────────────────
   studentNameFallback: "طالب",

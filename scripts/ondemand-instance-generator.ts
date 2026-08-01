@@ -9,6 +9,10 @@ import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type { ClassInstanceInsertInput } from "@/backend/types";
 
+// NOTE: Duplicated DayOfWeek map — also defined in
+// backend/db/seeds/lib/date-window.ts and
+// backend/db/repo/teachers/teacher-availability.repository.ts.
+// Kept local because scripts/ should not depend on backend internal libs.
 const DAY_OF_WEEK_MAP: Record<number, DayOfWeek> = {
   0: DayOfWeek.SUNDAY,
   1: DayOfWeek.MONDAY,
@@ -171,6 +175,8 @@ async function generateInstancesForSchedule(
   schedule: typeof recurringSchedules.$inferSelect,
   now: Date
 ): Promise<number> {
+  // NOTE: TOCTOU risk — reads balance outside lock then decrements in-memory. For production safety,
+  // wrap the entire balance-read + instance-generation in a single transaction with SELECT FOR UPDATE.
   const horizonWeeks = schedule.generationHorizonWeeks ?? 2;
   const effectiveFromDate = schedule.effectiveFrom ? new Date(schedule.effectiveFrom) : now;
   const startDate = effectiveFromDate > now ? effectiveFromDate : now;
@@ -189,6 +195,7 @@ async function generateInstancesForSchedule(
   const creditBalance = await CreditRepository.getBalance(db, schedule.studentId);
   const activeQuotas = await QuotaRepository.listActiveByStudent(db, schedule.studentId);
   const totalQuotaRemaining = activeQuotas.reduce((sum, q) => sum + q.remaining, 0);
+  // NOTE: Mirrors QuotaService.refreshStudentOndemandInstances credit computation — keep in sync
   const availableBalance = creditBalance.classesRemaining + totalQuotaRemaining;
 
   // Batch-fetch all overlapping class instances for the entire horizon range in one query

@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
 import type {
-  PaginationArgs,
   QuotaKind,
   QuotaPaginatedFilterInput,
   QuotaStatus,
@@ -9,6 +8,7 @@ import type {
 import { deleteQuotaMutationDocument, quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useQuotaStore } from "@/frontend/common/stores/quotaStore";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
+import { buildPaginationVars } from "@/frontend/common/views/dashboard/billing/quota/utils/buildPaginationVars";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
 
@@ -35,10 +35,7 @@ export function useQuotaViewModel() {
   const { data, loading, refetch } = useQuery(quotasQueryDocument, {
     variables: {
       filter: Object.keys(filter).length > 0 ? (filter as unknown as QuotaPaginatedFilterInput) : null,
-      pagination: {
-        skip: page * pageSize,
-        first: pageSize,
-      } as unknown as PaginationArgs,
+      pagination: buildPaginationVars(page, pageSize),
     },
     fetchPolicy: "cache-and-network",
   });

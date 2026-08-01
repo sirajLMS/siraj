@@ -21,6 +21,8 @@ export const quotaEn: QuotaLabels = {
     periodType: "Period Type",
     periodDays: "Period Days",
     priority: "Priority",
+    all: "All",
+    studentIdPlaceholder: "Student UUID",
   },
   kinds: {
     PACKAGE: "Package",
@@ -54,9 +56,10 @@ export const quotaEn: QuotaLabels = {
     date: "Date",
   },
   insightsTitle: "Quota System Overview",
-  activeQuotasCount: "Active Quotas",
-  totalClassesRemaining: "Total Remaining Classes",
-  expiringThisWeekCount: "Expiring This Week",
+  activeQuotasCount: count => (count === 1 ? "1 Active Quota" : `${count} Active Quotas`),
+  totalClassesRemaining: count => (count === 1 ? "1 Class Remaining" : `${count} Classes Remaining`),
+  expiringThisWeekCount: count => (count === 1 ? "1 Expiring This Week" : `${count} Expiring This Week`),
+  // @internal used by locale type contract
   charts: {
     quotaPurchasesOverTime: "Quota Purchases Over Time",
     redemptionRateByType: "Redemption Rate by Type",

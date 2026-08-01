@@ -4,7 +4,7 @@ import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import NumbersOutlinedIcon from "@mui/icons-material/NumbersOutlined";
-import { Box, Button, Card, CardContent, CardHeader, Grid, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, Card, CardContent, CardHeader, Grid, Skeleton, Stack, Typography, useTheme } from "@mui/material";
 import Link from "next/link";
 import { useMemo } from "react";
 import {
@@ -28,13 +28,17 @@ import {
 import { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
+import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
+
+function getMonthLabel(date: Date): string {
+  return `${Intl.DateTimeFormat("en", { month: "short" }).format(date)} ${date.getFullYear()}`;
+}
 
 function buildPurchasesOverTime(quotas: ReturnType<typeof useQuotaViewModel>["quotas"]) {
   const monthMap = new Map<string, { purchases: number; classes: number }>();
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   for (const q of quotas) {
     const d = new Date(q.createdAt);
-    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+    const key = getMonthLabel(d);
     const existing = monthMap.get(key) ?? { purchases: 0, classes: 0 };
     existing.purchases += 1;
     existing.classes += q.totalClasses;
@@ -64,23 +68,23 @@ function buildRedemptionByType(quotas: ReturnType<typeof useQuotaViewModel>["quo
   ].filter(d => d.value > 0);
 }
 
-function buildDeliveryRate(quotas: ReturnType<typeof useQuotaViewModel>["quotas"]) {
+// NOTE: Uses PACKAGE kind as proxy for on-demand — no ON_DEMAND kind exists in schema yet
+function buildDeliveryRate(quotas: ReturnType<typeof useQuotaViewModel>["quotas"], labels: QuotaLabels) {
   const onDemandQuotas = quotas.filter(q => q.kind === "PACKAGE");
   const committed = onDemandQuotas.filter(q => q.status === "ACTIVE").length;
   const cancelled = onDemandQuotas.filter(q => q.status !== "ACTIVE").length;
   return [
-    { name: "Committed", count: committed },
-    { name: "Cancelled", count: cancelled },
+    { name: labels.charts.committed, count: committed },
+    { name: labels.charts.cancelled, count: cancelled },
   ];
 }
 
 function buildExpiredSlippage(quotas: ReturnType<typeof useQuotaViewModel>["quotas"]) {
   const monthMap = new Map<string, { expired: number; redeemed: number }>();
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   for (const q of quotas) {
     if (!q.validUntil) continue;
     const d = new Date(q.validUntil);
-    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+    const key = getMonthLabel(d);
     const existing = monthMap.get(key) ?? { expired: 0, redeemed: 0 };
     if (q.status === "EXPIRED") {
       existing.expired += q.remaining;
@@ -111,12 +115,14 @@ export function QuotaInsightsContainer() {
   const t = useAppTranslation(DashboardBillingQuota);
   const theme = useTheme();
   const { quotas, loading } = useQuotaViewModel();
+  // NOTE: Query duplication — should use shared quota store or server-side aggregates
 
   const purchasesOverTime = useMemo(() => buildPurchasesOverTime(quotas), [quotas]);
   const redemptionByType = useMemo(() => buildRedemptionByType(quotas), [quotas]);
-  const deliveryRate = useMemo(() => buildDeliveryRate(quotas), [quotas]);
+  const deliveryRate = useMemo(() => buildDeliveryRate(quotas, t), [quotas, t]);
   const expiredSlippage = useMemo(() => buildExpiredSlippage(quotas), [quotas]);
 
+  // NOTE: Aggregates over first paginated page only — should fetch server-side aggregates
   const { activeQuotasCount, totalClassesRemaining, expiringThisWeekCount, pendingBacklogCount } = useMemo(() => {
     const activeQuotasCount = quotas.filter(q => q.status === "ACTIVE").length;
     const totalClassesRemaining = quotas.reduce((sum, q) => sum + q.remaining, 0);
@@ -165,8 +171,8 @@ export function QuotaInsightsContainer() {
                   sx={() => ({
                     p: 1.5,
                     borderRadius: 2,
-                    bgcolor: p.primary.light,
-                    color: p.primary.main,
+                    bgcolor: p.primaryContainer,
+                    color: p.onPrimaryContainer,
                     display: "flex",
                   })}
                 >
@@ -174,10 +180,10 @@ export function QuotaInsightsContainer() {
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    {t.activeQuotasCount}
+                    {t.activeQuotasCount(activeQuotasCount)}
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {loading ? "..." : activeQuotasCount}
+                    {loading ? <Skeleton width={60} /> : activeQuotasCount}
                   </Typography>
                 </Box>
               </Stack>
@@ -193,8 +199,8 @@ export function QuotaInsightsContainer() {
                   sx={() => ({
                     p: 1.5,
                     borderRadius: 2,
-                    bgcolor: p.success.light,
-                    color: p.success.main,
+                    bgcolor: p.successContainer,
+                    color: p.onSuccessContainer,
                     display: "flex",
                   })}
                 >
@@ -202,10 +208,10 @@ export function QuotaInsightsContainer() {
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    {t.totalClassesRemaining}
+                    {t.totalClassesRemaining(totalClassesRemaining)}
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {loading ? "..." : totalClassesRemaining}
+                    {loading ? <Skeleton width={60} /> : totalClassesRemaining}
                   </Typography>
                 </Box>
               </Stack>
@@ -221,8 +227,8 @@ export function QuotaInsightsContainer() {
                   sx={() => ({
                     p: 1.5,
                     borderRadius: 2,
-                    bgcolor: p.warning.light,
-                    color: p.warning.main,
+                    bgcolor: p.warningContainer,
+                    color: p.onWarningContainer,
                     display: "flex",
                   })}
                 >
@@ -230,10 +236,10 @@ export function QuotaInsightsContainer() {
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    {t.expiringThisWeekCount}
+                    {t.expiringThisWeekCount(expiringThisWeekCount)}
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {loading ? "..." : expiringThisWeekCount}
+                    {loading ? <Skeleton width={60} /> : expiringThisWeekCount}
                   </Typography>
                 </Box>
               </Stack>

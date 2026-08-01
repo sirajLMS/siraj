@@ -170,4 +170,61 @@ describe("QuotaService", () => {
       expect(balance.breakdownByExpiration).toHaveLength(1);
     });
   });
+
+  test("redeemForInstance fails when quota does not exist", async () => {
+    await runInRollback(async tx => {
+      const actor = await createTestUser(tx);
+      const { student } = await setupStudent(tx);
+      const teacher = await setupTeacher(tx);
+      const instance = await createMockClassInstance(tx, student.id, teacher.teacher.id);
+      const nonExistentQuotaId = "00000000-0000-0000-0000-000000000000";
+
+      let error: unknown = null;
+      try {
+        await QuotaService.redeemForInstance(student.id, instance.id, nonExistentQuotaId, actor.id, tx);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).not.toBeNull();
+      expect((error as Error).message).toContain("not found");
+    });
+  });
+
+  test("createQuota is idempotent — re-submission with same key returns same result", async () => {
+    await runInRollback(async tx => {
+      const actor = await createTestUser(tx);
+      const { student } = await setupStudent(tx);
+      const idempotencyKey = `svc-quota-idempotent-${randomUUID()}`;
+
+      const first = await QuotaService.createQuota(
+        {
+          studentId: student.id,
+          kind: QuotaKind.PACKAGE,
+          name: "Idempotent Quota",
+          totalClasses: 8,
+          idempotencyKey,
+        },
+        actor.id,
+        "en",
+        tx
+      );
+
+      const second = await QuotaService.createQuota(
+        {
+          studentId: student.id,
+          kind: QuotaKind.PACKAGE,
+          name: "Idempotent Quota",
+          totalClasses: 8,
+          idempotencyKey,
+        },
+        actor.id,
+        "en",
+        tx
+      );
+
+      expect(second.id).toBe(first.id);
+      expect(second.remaining).toBe(first.remaining);
+      expect(second.totalClasses).toBe(first.totalClasses);
+    });
+  });
 });

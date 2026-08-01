@@ -14,6 +14,9 @@
  * `@/backend/enum` — but to keep `shared/` free of `@/backend/**` imports, the
  * event-type keys are reproduced as plain string-literal unions and validated by
  * the consuming layer (specs.md §1 forbids `@/backend/**` in `shared/`).
+ *
+ * NOTE: Notification event types are also defined in backend/enum/notifications/ and
+ * shared/constants/ — keep in sync.
  */
 
 // ─── Invoice event keys ────────────────────────────────────────────────

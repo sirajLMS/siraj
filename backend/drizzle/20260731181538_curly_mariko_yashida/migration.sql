@@ -151,6 +151,7 @@ ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE text;--> statement-br
 -- applied first, the USING cast will raise "invalid input value for enum"
 -- for any row whose key is not a valid app_permission label.
 -- Ensure 7c-quota_permissions_enum runs before this Drizzle migration.
+-- NOTE: This re-cast assumes all existing permission keys are in app_permission enum — verify before deploying to production.
 ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE "app_permission" USING "key"::"app_permission";--> statement-breakpoint
 CREATE UNIQUE INDEX "quota_ledger_idempotency_key_unique_idx" ON "quota_ledger" ("idempotency_key");--> statement-breakpoint
 CREATE INDEX "quota_ledger_quota_id_created_at_idx" ON "quota_ledger" ("quota_id","created_at");--> statement-breakpoint

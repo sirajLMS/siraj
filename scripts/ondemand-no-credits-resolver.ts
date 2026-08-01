@@ -40,6 +40,10 @@ export async function runOndemandNoCreditsResolver(): Promise<void> {
       // Find pending credit instances scheduled to start before cutoffTime.
       // FOR UPDATE prevents concurrent resolvers from double-processing
       // the same instances.
+      // NOTE: Should additionally filter by schedulingMode=ON_DEMAND — the
+      // classInstances.schedulingMode column exists and would prevent selecting
+      // NUMBER_OF_CLASSES rows that happen to share PENDING_CREDIT ondemandStatus.
+      // Currently safe because PENDING_CREDIT is only ever set on ON_DEMAND rows.
       const pendingInstances = await tx
         .select({
           instance: classInstances,
@@ -127,6 +131,7 @@ export async function runOndemandNoCreditsResolver(): Promise<void> {
 
     // Dispatch notifications AFTER the transaction commits so we don't
     // hold the DB transaction open during external notification calls.
+    // NOTE: Per-instance fan-out — consider batching/rate-limiting for large instance counts.
     for (const pn of pendingNotifications) {
       await QuotaNotificationService.sendOndemandInstancePendingCredit({
         affectedUserIds: [pn.studentId],

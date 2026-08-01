@@ -1,5 +1,6 @@
 "use client";
 
+import { Box, CircularProgress } from "@mui/material";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -27,13 +28,21 @@ export function StudentQuotaView(props: Readonly<UseStudentQuotaViewModelProps>)
   // Dashboard overview mode (no specific studentId) — render per-audience view
   if (!props.studentId) {
     if (viewModel.loadingState === "loading") {
-      return null;
+      return (
+        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+          <CircularProgress />
+        </Box>
+      );
     }
     return <QuotaAudienceView t={viewModel.t} />;
   }
 
   if (viewModel.loadingState === "loading") {
-    return null; // The mobile/desktop views will handle loading state
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (viewModel.loadingState === "missing") {

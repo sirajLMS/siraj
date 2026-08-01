@@ -293,20 +293,7 @@ export const errorsEn: ErrorsLabels = {
   currencyInUse:
     "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
 
-  // ─── Quota system errors (flat proxies for backward compatibility) ──
-  insufficientRemaining: (requested: number, available: number) =>
-    `Only ${available} quota remaining — requested ${requested}`,
-  exceedsCreditBalance: (requested: number, available: number) =>
-    `Insufficient credit balance. Available: ${available}, needed: ${requested}`,
-  periodicRefreshFailed: (quotaName: string, reason: string) =>
-    `Failed to refresh periodic quota ${quotaName}: ${reason}`,
-  invalidPeriod: (quotaName: string) => `Quota ${quotaName} has expired or its period is invalid`,
-  alreadyExpired: (quotaName: string) => `Quota ${quotaName} has already expired`,
-  earmarkExceedsRemaining: (requested: number, available: number) =>
-    `Earmark of ${requested} exceeds remaining quota (${available})`,
-  slotConflict: (startTime: string, endTime: string) =>
-    `Time slot ${startTime}–${endTime} conflicts with existing booking`,
-  onDemandNoCredits: (studentName: string) => `Not enough credits for on-demand booking for ${studentName}`,
+  // Quota errors accessible via quota.* — see QuotaErrors
 
   // ─── Offline resolver / notification fallbacks ──────────────────────
   studentNameFallback: "Student",

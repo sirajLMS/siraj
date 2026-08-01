@@ -34,18 +34,6 @@ export interface QuotaLedgerItem {
   reason: QuotaLedgerReason;
   reasonNote: string | null;
   actorUserId: string | null;
+  idempotencyKey?: string | null;
   createdAt: string;
-}
-
-export interface QuotaBalanceSummary {
-  studentId: string;
-  totalActiveClasses: number;
-  totalRemaining: number;
-  totalReserved: number;
-  breakdownByExpiration: Array<{
-    quotaId: string;
-    quotaName: string;
-    validUntil: string | null;
-    remaining: number;
-  }>;
 }

@@ -11,6 +11,7 @@ import {
 } from "@/backend/services/notification/quota-notification.builders";
 
 export namespace QuotaNotificationService {
+  // NOTE: Transient notification failures are logged but not retried — consider a durable outbox for production
   export const sendQuotaExpiringSoon = async (input: {
     affectedUserIds: string[];
     quotaName: string;

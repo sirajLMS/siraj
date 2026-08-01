@@ -107,7 +107,7 @@ export function QuotaListDesktop(props: ReturnType<typeof useQuotaViewModel>) {
               label={t.fields.status}
               onChange={e => setFilterStatus((e.target.value as QuotaStatus) || null)}
             >
-              <MenuItem value="">All</MenuItem>
+              <MenuItem value="">{t.fields.all}</MenuItem>
               <MenuItem value={QuotaStatus.Active}>{t.statuses.ACTIVE}</MenuItem>
               <MenuItem value={QuotaStatus.Expired}>{t.statuses.EXPIRED}</MenuItem>
               <MenuItem value={QuotaStatus.Archived}>{t.statuses.ARCHIVED}</MenuItem>
@@ -121,7 +121,7 @@ export function QuotaListDesktop(props: ReturnType<typeof useQuotaViewModel>) {
               label={t.fields.kind}
               onChange={e => setFilterKind((e.target.value as QuotaKind) || null)}
             >
-              <MenuItem value="">All</MenuItem>
+              <MenuItem value="">{t.fields.all}</MenuItem>
               <MenuItem value={QuotaKind.Package}>{t.kinds.PACKAGE}</MenuItem>
               <MenuItem value={QuotaKind.Periodic}>{t.kinds.PERIODIC}</MenuItem>
             </Select>

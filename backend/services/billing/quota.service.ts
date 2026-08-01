@@ -265,12 +265,14 @@ export namespace QuotaService {
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
     const runner = async (t: DBTransaction) => {
-      // Deterministic operation identifier: hashing recurringScheduleId + quotaId
-      // + count produces a stable key across retries of the same release. This
-      // prevents double-release if the caller crashes after the DB write commits
-      // but before it sees the result. If the same schedule is cancelled and
-      // re-created, the new schedule will have a different recurringScheduleId.
-      const operationId = `${recurringScheduleId}:${quotaId}:${count}`;
+      // Deterministic operation identifier: hashing recurringScheduleId +
+      // quotaId (NOT count) produces a stable key across retries of the same
+      // release. Count is intentionally excluded because a partial release
+      // with a different count would produce a *different* key, allowing a
+      // second ledger RELEASE row → quota released twice. If the same schedule
+      // is cancelled and re-created, the new schedule will have a different
+      // recurringScheduleId so the keys won't collide.
+      const operationId = `${recurringScheduleId}:${quotaId}`;
       const idempotencyKey = QuotaRepository.deriveReleaseEarmarkIdempotencyKey(
         recurringScheduleId,
         operationId,

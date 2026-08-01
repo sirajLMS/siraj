@@ -42,6 +42,7 @@ export const quotas = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
   table => [
+    // NOTE: Unique index on idempotency_key requires all inserts to supply a globally unique value — NOT NULL with no default.
     uniqueIndex("quotas_idempotency_key_unique_idx").on(table.idempotencyKey),
     index("quotas_student_id_idx").on(table.studentId),
     index("quotas_student_status_remaining_idx")

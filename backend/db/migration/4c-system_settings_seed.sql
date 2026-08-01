@@ -19,6 +19,7 @@ VALUES
   ('sms_rate_limit_per_hour', '3', 'integer', 'Maximum SMS messages per parent per hour', 'communication', NOW()),
   ('default_ondemand_horizon_weeks', '2', 'integer', 'Default rolling horizon in weeks for on-demand instance generation', 'scheduling', NOW()),
   ('default_ondemand_no_credits_outcome', 'AUTO_CANCEL', 'string', 'Default action when on-demand instance has no credits at session time: AUTO_CANCEL, AUTO_ABSENT_NO_CREDITS, REMIND_ONLY', 'scheduling', NOW()),
+  -- NOTE: AUTO_CANCEL default — behavior-changing, no down migration exists.
   ('ondemand_teacher_digest_hour', '9', 'integer', 'Local hour (0-23) for daily teacher digest of on-demand classes with no credits', 'scheduling', NOW()),
   ('ondemand_no_credits_resolution_lead_minutes', '240', 'integer', 'Minutes before session start to resolve on-demand instances with no credits', 'scheduling', NOW()),
   ('quota_low_balance_threshold_percent', '20', 'integer', 'Percentage of totalClasses at which quota low-balance notification fires', 'billing', NOW())

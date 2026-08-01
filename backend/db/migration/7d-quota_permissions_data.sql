@@ -42,6 +42,7 @@ EXCEPTION WHEN OTHERS THEN
   RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
 END $$;
 
+-- NOTE: quotas.manage grants delete permission — verify staff/supervisor should have delete capability.
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p

@@ -65,18 +65,14 @@ export interface StudentQuotaLabels {
     readonly activeQuotas: string;
     readonly remainingCredits: string;
     readonly onDemandPending: string;
-    readonly childrenQuotas: string;
     readonly noChildren: string;
     readonly quotaSummary: string;
-    readonly totalClassesEnrolled: string;
-    readonly classesRemaining: string;
     readonly classQuotaUsage: string;
     readonly onDemandPendingQueue: string;
     readonly classAnalytics: string;
     readonly lowBalanceAlerts: string;
     readonly conflictHeld: string;
     readonly analyticsOverview: string;
-    readonly pendingCreditCount: string;
     readonly noData: string;
   };
 }

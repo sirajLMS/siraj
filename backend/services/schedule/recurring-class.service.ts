@@ -105,9 +105,14 @@ export namespace RecurringClassService {
 
     const affectedUserIds = classLifecycleAffectedUserIds(affected);
 
+    // Batch-fetch all instances in a single query to eliminate N+1 DB reads
+    // (RB-15). Without this, each iteration called `getClassInstanceById`
+    // separately, producing one query per instance inside the loop.
+    const instanceMap = await SchedulingRepository.getClassInstancesByIds([...classInstanceIds]);
+
     for (const instanceId of classInstanceIds) {
       try {
-        const instance = await SchedulingRepository.getClassInstanceById(instanceId);
+        const instance = instanceMap.get(instanceId);
         if (!instance) continue;
 
         const payloads = buildClassLifecyclePayloads(

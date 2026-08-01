@@ -4,6 +4,7 @@ import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type QuotaSelectType = typeof quotas.$inferSelect;
 
+// NOTE: QuotaReturnType mirrors frontend QuotaItem — keep in sync to prevent drift
 export type QuotaReturnType = Omit<QuotaSelectType, "kind" | "status" | "periodType"> & {
   kind: QuotaKind;
   status: QuotaStatus;
@@ -32,7 +33,7 @@ export function mapQuotaLedgerToReturnType(row: QuotaLedgerSelectType): QuotaLed
   };
 }
 
-export type DateOrString = string | Date;
+type DateOrString = string | Date;
 
 export type QuotaRolloverPolicy = {
   maxRolloverPercent?: number | null;
@@ -85,10 +86,8 @@ export interface QuotaPaginatedFilter {
 }
 
 export interface QuotaPaginatedResult {
-  id?: string;
   rows: QuotaReturnType[];
   totalCount: number;
-  pageInfo?: PageInfo | null;
 }
 
 export interface QuotaLedgerPaginatedResult {

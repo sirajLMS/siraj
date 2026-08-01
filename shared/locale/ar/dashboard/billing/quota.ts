@@ -21,6 +21,8 @@ export const quotaAr: QuotaLabels = {
     periodType: "نوع الفترة",
     periodDays: "أيام الفترة",
     priority: "الأولوية",
+    all: "الكل",
+    studentIdPlaceholder: "معرف الطالب",
   },
   kinds: {
     PACKAGE: "باقة",
@@ -54,9 +56,9 @@ export const quotaAr: QuotaLabels = {
     date: "التاريخ",
   },
   insightsTitle: "نظرة عامة على نظام الحصص",
-  activeQuotasCount: "الحصص النشطة",
-  totalClassesRemaining: "إجمالي الحصص المتبقية",
-  expiringThisWeekCount: "تنتهي هذا الأسبوع",
+  activeQuotasCount: count => (count === 1 ? "حصة نشطة واحدة" : `${count} حصص نشطة`),
+  totalClassesRemaining: count => (count === 1 ? "حصة متبقية واحدة" : `${count} حصص متبقية`),
+  expiringThisWeekCount: count => (count === 1 ? "حصة واحدة تنتهي هذا الأسبوع" : `${count} حصص تنتهي هذا الأسبوع`),
   charts: {
     quotaPurchasesOverTime: "مشتريات الحصص عبر الزمن",
     redemptionRateByType: "معدل الاسترداد حسب النوع",

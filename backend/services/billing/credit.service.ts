@@ -24,6 +24,14 @@ function deriveBookingIdempotencyKey(input: {
   return createHash("sha256").update(parts.join(":")).digest("hex");
 }
 
+/** Detects a Postgres unique-constraint violation (SQLSTATE 23505). */
+function isUniqueViolation(error: unknown): boolean {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    return (error as { code: string }).code === "23505";
+  }
+  return false;
+}
+
 async function requirePermission(actorUserId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {
   const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
   if (!hasPermission) {
@@ -130,6 +138,7 @@ export namespace CreditService {
       studentId: input.studentId,
       hours: input.hours,
       notes: input.notes,
+      sourcePaymentId: input.sourcePaymentId,
     });
 
     try {
@@ -164,6 +173,13 @@ export namespace CreditService {
 
       return mapToReturnType(created);
     } catch (error) {
+      // Catch raw Postgres unique-violation (23505) from a concurrent purchase
+      // with the same idempotency key that slipped between the pre-check and
+      // the insert (TOCTOU). Surface as a friendly duplicatePurchase error so
+      // callers see a domain error instead of the raw Postgres constraint name.
+      if (isUniqueViolation(error)) {
+        throw new Error(tErrors.credit.duplicatePurchase, { cause: error });
+      }
       logger.error("Failed to record credit purchase", {
         actorUserId,
         studentId: input.studentId,

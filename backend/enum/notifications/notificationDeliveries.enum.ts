@@ -13,6 +13,7 @@ export enum NotificationDeliveryStatus {
   FAILED = "FAILED",
 }
 
+// NOTE: Uses lowercase values for DB compatibility — other notification enums use SCREAMING_SNAKE_CASE
 export enum NotificationEventCategory {
   INFO = "info",
   REMINDER = "reminder",

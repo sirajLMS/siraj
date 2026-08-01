@@ -38,6 +38,7 @@ export enum OnDemandNoCreditsOutcome {
 export enum OnDemandStatus {
   PENDING_CREDIT = "PENDING_CREDIT",
   AVAILABLE = "AVAILABLE",
+  // NOTE: CONVERTED status is defined but not yet implemented
   CONVERTED = "CONVERTED",
   NO_CREDITS_CANCELLED = "NO_CREDITS_CANCELLED",
   NO_CREDITS_ABSENT = "NO_CREDITS_ABSENT",

@@ -324,15 +324,7 @@ export interface ErrorsLabels {
   readonly resourceNotFound: string;
   readonly currencyInUse: string;
 
-  // ─── Quota system errors (flat proxies for backward compatibility) ──
-  readonly insufficientRemaining: (requested: number, available: number) => string;
-  readonly exceedsCreditBalance: (requested: number, available: number) => string;
-  readonly periodicRefreshFailed: (quotaName: string, reason: string) => string;
-  readonly invalidPeriod: (quotaName: string) => string;
-  readonly alreadyExpired: (quotaName: string) => string;
-  readonly earmarkExceedsRemaining: (requested: number, available: number) => string;
-  readonly slotConflict: (startTime: string, endTime: string) => string;
-  readonly onDemandNoCredits: (studentName: string) => string;
+  // Quota errors accessible via quota.* — see QuotaErrors
 
   // ─── Offline resolver / notification fallbacks ──────────────────────
   readonly studentNameFallback: string;
