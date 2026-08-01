@@ -33,7 +33,7 @@ export type CreateTeacherPaymentInput = {
   readonly isTestPayment?: boolean;
 };
 
-export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "createdAt"> & {
+export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "createdAt" | "phone" | "gender"> & {
   readonly status: AccountStatus;
   readonly timezone: IanaTimezone;
 };

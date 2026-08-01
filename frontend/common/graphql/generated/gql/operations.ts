@@ -5364,7 +5364,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 
 export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
 
-export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
 
@@ -5540,7 +5540,7 @@ export type DeleteTeacherImportantNoteMutationVariables = Exact<{
 
 export type DeleteTeacherImportantNoteMutation = DeleteTeacherImportantNoteMutation_Mutation;
 
-export type CreateTeacherMutation_createTeacher_TeacherOnboarding = { userId: string | null, id: string | null, name: string | null, email: string | null, status: string | null, gender: Types.Gender | null, timezoneDisplay: string | null };
+export type CreateTeacherMutation_createTeacher_TeacherOnboarding = { userId: string | null, id: string | null, name: string | null, email: string | null, phone: string | null, status: string | null, gender: Types.Gender | null, timezoneDisplay: string | null };
 
 export type CreateTeacherMutation_Mutation = { createTeacher: CreateTeacherMutation_createTeacher_TeacherOnboarding | null };
 

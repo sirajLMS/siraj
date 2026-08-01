@@ -4628,6 +4628,9 @@ type TeacherOnboarding {
   """Resolved teacher display name"""
   name: String
 
+  """Teacher phone number"""
+  phone: String
+
   """Current teacher account status"""
   status: String
 
@@ -4723,6 +4726,7 @@ type TeacherPayment {
   amount: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
   isTestPayment: Boolean
   paymentDate: DateTime
