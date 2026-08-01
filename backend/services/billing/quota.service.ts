@@ -1,16 +1,21 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
+import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances } from "@/backend/db/schema";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
+  mapQuotaLedgerToReturnType,
   mapQuotaToReturnType,
   type QuotaBalanceReturnType,
   type QuotaExpirationBreakdown,
+  type QuotaLedgerPaginatedResult,
   type QuotaPaginatedFilter,
   type QuotaReturnType,
   type QuotaSubmitInput,
@@ -22,29 +27,47 @@ import { getServerTranslations } from "@/shared/locale/server-graphql";
 type ReadExecutor = DBTransaction | typeof db;
 
 export namespace QuotaService {
-  // Permission check helper functions
-  async function requireManagePermission(actorUserId: string | null | undefined, locale: string): Promise<void> {
+  /**
+   * Unified permission guard. Checks that `actorUserId` is present and holds
+   * the given `AppPermission`. Throws a localized error on failure.
+   *
+   * This is the single canonical permission guard for the quota service. It
+   * replaces the previous duplicated `requireManagePermission` /
+   * `requireViewPermission` helpers.
+   */
+  async function requirePermission(
+    actorUserId: string | null | undefined,
+    locale: string,
+    permission: AppPermission
+  ): Promise<void> {
     if (!actorUserId) {
       const tErrors = getServerTranslations(locale).errorsTranslations;
       throw new Error(tErrors.unauthorizedAction);
     }
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.QUOTAS_MANAGE);
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
     if (!hasPermission) {
       const tErrors = getServerTranslations(locale).errorsTranslations;
       throw new Error(tErrors.insufficientPermissions);
     }
   }
 
-  async function requireViewPermission(actorUserId: string | null | undefined, locale: string): Promise<void> {
-    if (!actorUserId) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.unauthorizedAction);
-    }
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.QUOTAS_VIEW);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+  /**
+   * Resolves whether the calling user is associated with the given student as
+   * the student's parent or primary teacher. Used to scope IDOR-vulnerable
+   * reads so a caller with QUOTAS_VIEW can only access their own students'
+   * data; admins/teachers with QUOTAS_MANAGE bypass via the permission check.
+   */
+  async function resolveAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
+    const profile = await StudentRepository.findProfileById(studentId);
+    if (!profile) return false;
+
+    const parent = await ParentRepository.findByUserId(actorUserId);
+    if (parent?.id === profile?.parentId) return true;
+
+    const teacher = await TeacherRepository.findByUserId(actorUserId);
+    if (teacher?.id === profile?.primaryTeacherId) return true;
+
+    return false;
   }
 
   export const createQuota = async (
@@ -53,7 +76,7 @@ export namespace QuotaService {
     _locale = "en",
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
-    await requireManagePermission(actorUserId, _locale);
+    await requirePermission(actorUserId, _locale, AppPermission.QUOTAS_MANAGE);
     const runner = async (t: DBTransaction) => {
       const created = await QuotaRepository.create(t, { ...input, actorUserId });
       return mapQuotaToReturnType(created);
@@ -67,13 +90,56 @@ export namespace QuotaService {
     tx?: ReadExecutor,
     actorUserId?: string | null
   ): Promise<QuotaReturnType> => {
-    await requireViewPermission(actorUserId, locale);
+    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
     const quota = await QuotaRepository.findById(tx, id);
     if (!quota) {
       const tErrors = getServerTranslations(locale).errorsTranslations;
       throw new Error(tErrors.notFound);
     }
     return mapQuotaToReturnType(quota);
+  };
+
+  /**
+   * Fetches the paginated ledger entries for a quota, with IDOR scoping.
+   * After the QUOTAS_VIEW permission gate, the calling user must either:
+   *  - be associated with the quota's student via {@link resolveAssociatedViewer}
+   *    (i.e. the student's parent or primary teacher), OR
+   *  - hold `QUOTAS_MANAGE`, which acts as an admin/teacher override.
+   * This prevents a user with QUOTAS_VIEW from reading any quota's ledger
+   * by id alone, closing the insecure-direct-object-reference gap on the
+   * `quotaLedger` GraphQL query.
+   */
+  export const getQuotaLedger = async (
+    quotaId: string,
+    pagination: PaginationArgs | null,
+    actorUserId: string,
+    locale = "en",
+    tx?: ReadExecutor
+  ): Promise<QuotaLedgerPaginatedResult> => {
+    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
+
+    const quota = await QuotaRepository.findById(tx, quotaId);
+    if (!quota) {
+      const tErrors = getServerTranslations(locale).errorsTranslations;
+      throw new Error(tErrors.notFound);
+    }
+
+    const isAssociated = await resolveAssociatedViewer(actorUserId, quota.studentId);
+    const hasManage = await PermissionsService.hasPermission(actorUserId, AppPermission.QUOTAS_MANAGE);
+    if (!isAssociated && !hasManage) {
+      const tErrors = getServerTranslations(locale).errorsTranslations;
+      throw new Error(tErrors.insufficientPermissions);
+    }
+
+    const [rawRows, totalCount] = await Promise.all([
+      QuotaLedgerRepository.findByQuotaId(tx, quotaId, pagination),
+      QuotaLedgerRepository.countByQuotaId(tx, quotaId),
+    ]);
+
+    return {
+      rows: rawRows.map(mapQuotaLedgerToReturnType),
+      totalCount,
+    };
   };
 
   export const listQuotas = async (
@@ -83,7 +149,7 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale = "en"
   ) => {
-    await requireViewPermission(actorUserId, locale);
+    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
     const res = await QuotaRepository.listAllPaginated(tx, filter, pagination);
     return {
       ...res,
@@ -97,7 +163,7 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale = "en"
   ): Promise<QuotaReturnType[]> => {
-    await requireViewPermission(actorUserId, locale);
+    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
     const rows = await QuotaRepository.listActiveByStudent(tx, studentId);
     return rows.map(mapQuotaToReturnType);
   };
@@ -108,7 +174,7 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale = "en"
   ): Promise<QuotaBalanceReturnType> => {
-    await requireViewPermission(actorUserId, locale);
+    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
     const activeQuotas = await QuotaRepository.listActiveByStudent(tx, studentId);
 
     let totalActiveClasses = 0;
@@ -145,7 +211,7 @@ export namespace QuotaService {
     _locale = "en",
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
-    await requireManagePermission(actorUserId, _locale);
+    await requirePermission(actorUserId, _locale, AppPermission.QUOTAS_MANAGE);
     const runner = async (t: DBTransaction) => {
       const updated = await QuotaRepository.update(t, id, { ...input, actorUserId });
       return mapQuotaToReturnType(updated);
@@ -159,7 +225,7 @@ export namespace QuotaService {
     _locale = "en",
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
-    await requireManagePermission(_actorUserId, _locale);
+    await requirePermission(_actorUserId, _locale, AppPermission.QUOTAS_MANAGE);
     const runner = async (t: DBTransaction) => {
       const deleted = await QuotaRepository.softDelete(t, id);
       return mapQuotaToReturnType(deleted);
@@ -394,14 +460,6 @@ export namespace QuotaService {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
-  export const refreshPeriodicQuotas = async (tx?: DBTransaction): Promise<void> => {
-    const runner = async (t: DBTransaction) => {
-      await QuotaRepository.expireOverdue(t);
-      // Sweeper handles periodic grants
-    };
-    return tx ? runner(tx) : db.transaction(runner);
-  };
-
   export const refreshStudentOndemandInstances = async (
     studentId: string,
     tx?: DBTransaction,
@@ -420,18 +478,7 @@ export namespace QuotaService {
       const availableCredits = creditBalance.classesRemaining + totalQuotaRemaining;
       if (availableCredits <= 0) return 0;
 
-      const pendingInstances = await t
-        .select()
-        .from(classInstances)
-        .where(
-          and(
-            eq(classInstances.studentId, studentId),
-            isNull(classInstances.deletedAt),
-            eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT)
-          )
-        )
-        .orderBy(classInstances.scheduledStartAt)
-        .limit(availableCredits);
+      const pendingInstances = await SchedulingRepository.getOndemandPendingInstances(t, studentId, availableCredits);
 
       let flippedCount = 0;
       const now = new Date();
@@ -452,13 +499,22 @@ export namespace QuotaService {
         flippedCount = pendingInstances.length;
       }
 
-      // Deduct from quota for flipped instances to prevent double-counting on refresh
+      // Deduct from quota for flipped instances to prevent double-counting on refresh.
+      // `deductPendingRefresh` returns the number of classes it actually deducted from
+      // quota. The remainder must come from the student's credit balance — otherwise
+      // credit-only students get free classes (credit leak CR-1).
       if (flippedCount > 0) {
-        await QuotaRepository.deductPendingRefresh(t, {
+        const quotaDeducted = await QuotaRepository.deductPendingRefresh(t, {
           studentId,
           count: flippedCount,
           actorUserId: _actorUserId ?? null,
         });
+
+        const creditPortion = flippedCount - quotaDeducted;
+        if (creditPortion > 0) {
+          const tErrors = getServerTranslations(_locale).errorsTranslations;
+          await StudentRepository.deductClasses(studentId, tErrors, creditPortion, undefined, t);
+        }
       }
 
       logger.info({ studentId, flippedCount }, "Refreshed student on-demand instances");

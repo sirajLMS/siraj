@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import type { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
@@ -101,35 +101,6 @@ async function createBaseTestData(
 async function expectStudentQuota(executor: DBTransaction | typeof db, studentId: string, expectedRemaining: number) {
   const [s] = await executor.select().from(students).where(eq(students.id, studentId)).limit(1);
   expect(s.classesRemaining).toBe(expectedRemaining);
-}
-
-async function cleanupRaceTestData(data: {
-  studentId: string;
-  parentUserId: string;
-  teacherUserId: string;
-  studentUserId: string;
-  parentId: string;
-  teacherId: string;
-}) {
-  // 1. Soft delete class instances first (set deleted_at), then hard delete
-  //    This is required because of the soft_delete_row_trigger_fn trigger
-  await db.execute(sql`UPDATE class_instances SET deleted_at = NOW() WHERE student_id = ${data.studentId}`);
-  await db.execute(sql`DELETE FROM class_instances WHERE student_id = ${data.studentId}`);
-
-  // 2. Delete teacher assignments
-  await db.delete(teacherAssignments).where(eq(teacherAssignments.studentId, data.studentId));
-
-  // 3. Delete the student
-  await db.delete(students).where(eq(students.id, data.studentId));
-
-  // 4. Delete teacher and parent
-  await db.delete(teachers).where(eq(teachers.id, data.teacherId));
-  await db.delete(parents).where(eq(parents.id, data.parentId));
-
-  // 5. Delete users
-  await db.delete(users).where(eq(users.id, data.parentUserId));
-  await db.delete(users).where(eq(users.id, data.teacherUserId));
-  await db.delete(users).where(eq(users.id, data.studentUserId));
 }
 
 describe("Class Quota System Constraints & Triggers", () => {
@@ -239,67 +210,53 @@ describe("Class Quota System Constraints & Triggers", () => {
   test("Prevents concurrent race conditions via Advisory Locks", async () => {
     testLogger.info("Testing concurrent race condition prevention...");
 
-    // Generate unique identifiers to prevent conflicts across parallel test runs
-    const uniqueSuffix = randomUUID();
-    const parentEmail = `parent-race-${uniqueSuffix}@example.com`;
-    const teacherEmail = `teacher-race-${uniqueSuffix}@example.com`;
+    await runInRollback(async tx => {
+      const uniqueSuffix = randomUUID();
 
-    const { student, teacher, parentUser, teacherUser, parent, studentUser } = await createBaseTestData(db, {
-      parentEmail,
-      teacherEmail,
-      studentName: `Race Student ${uniqueSuffix}`,
-      classesRemaining: 1,
-    });
+      const { student, teacher } = await createBaseTestData(tx, {
+        parentEmail: `parent-race-${uniqueSuffix}@example.com`,
+        teacherEmail: `teacher-race-${uniqueSuffix}@example.com`,
+        studentName: `Race Student ${uniqueSuffix}`,
+        classesRemaining: 1,
+      });
 
-    try {
-      const subjectId = await ensureTestSubjectId(db);
-      // Execute two concurrent insertions targeting the same student
-      const resultPromises = Promise.allSettled([
-        SchedulingRepository.createClassInstance({
-          studentId: student.id,
-          teacherId: teacher.id,
-          subjectId,
-          scheduledStartAt: new Date("2026-06-15T15:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T16:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          quotaDeducted: true,
-          idempotencyKey: randomUUID(),
-        }),
-        SchedulingRepository.createClassInstance({
-          studentId: student.id,
-          teacherId: teacher.id,
-          subjectId,
-          scheduledStartAt: new Date("2026-06-15T16:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T17:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          quotaDeducted: true,
-          idempotencyKey: randomUUID(),
-        }),
+      const subjectId = await ensureTestSubjectId(tx);
+
+      const results = await Promise.allSettled([
+        SchedulingRepository.createClassInstance(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            subjectId,
+            scheduledStartAt: new Date("2026-06-15T15:00:00Z"),
+            scheduledEndAt: new Date("2026-06-15T16:00:00Z"),
+            durationMinutes: 60,
+            classType: "REGULAR",
+            quotaDeducted: true,
+            idempotencyKey: randomUUID(),
+          },
+          tx
+        ),
+        SchedulingRepository.createClassInstance(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            subjectId,
+            scheduledStartAt: new Date("2026-06-15T16:00:00Z"),
+            scheduledEndAt: new Date("2026-06-15T17:00:00Z"),
+            durationMinutes: 60,
+            classType: "REGULAR",
+            quotaDeducted: true,
+            idempotencyKey: randomUUID(),
+          },
+          tx
+        ),
       ]);
-
-      const results = await resultPromises;
 
       const successes = results.filter(r => r.status === "fulfilled");
       expect(successes.length).toBeGreaterThanOrEqual(1);
 
-      testLogger.info("Race condition test passed with unique data isolation.");
-    } finally {
-      // Always clean up created records to prevent interference with other tests
-      try {
-        await cleanupRaceTestData({
-          studentId: student.id,
-          parentUserId: parentUser.id,
-          teacherUserId: teacherUser.id,
-          studentUserId: studentUser.id,
-          parentId: parent.id,
-          teacherId: teacher.id,
-        });
-      } catch (cleanupError) {
-        testLogger.error("Cleanup failed:", cleanupError);
-        // Don't throw here as it would mask the original test result
-      }
-    }
+      testLogger.info("Race condition test passed with rollback isolation.");
+    });
   });
 });

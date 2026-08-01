@@ -9,6 +9,7 @@ import { seedOrGet as seedOrGetInvoiceCoverageMonths } from "@/backend/db/seeds/
 import { seedOrGet as seedOrGetInvoicePaymentSubmissions } from "@/backend/db/seeds/billing/seed-invoice-payment-submissions";
 import { seedOrGet as seedOrGetInvoices } from "@/backend/db/seeds/billing/seed-invoices";
 import { seedOrGet as seedOrGetPayments } from "@/backend/db/seeds/billing/seed-payments";
+import { seedOrGet as seedOrGetQuotas } from "@/backend/db/seeds/billing/seed-quotas";
 import { seedOrGet as seedOrGetSupportedMobileWallets } from "@/backend/db/seeds/billing/seed-supported-mobile-wallets";
 import { seedOrGet as seedOrGetSupportedOnlineAccounts } from "@/backend/db/seeds/billing/seed-supported-online-accounts";
 import { seedOrGet as seedOrGetSupportedPaymentLinks } from "@/backend/db/seeds/billing/seed-supported-payment-links";
@@ -395,6 +396,7 @@ async function runBillingSeeds(context: SeedContext, step: RunStep, config: Seed
     seedOrGetInvoicePaymentSubmissions(context.invoices ?? [], context.parents ?? [], context.users ?? [], config)
   );
   await step("payments", () => seedOrGetPayments(context.invoices ?? [], config));
+  await step("quotas", () => seedOrGetQuotas());
 }
 
 async function runCommunicationsSeeds(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {

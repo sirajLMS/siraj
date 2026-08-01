@@ -22,10 +22,8 @@ VALUES
   ('ondemand_teacher_digest_hour', '9', 'integer', 'Local hour (0-23) for daily teacher digest of on-demand classes with no credits', 'scheduling', NOW()),
   ('ondemand_no_credits_resolution_lead_minutes', '240', 'integer', 'Minutes before session start to resolve on-demand instances with no credits', 'scheduling', NOW()),
   ('quota_low_balance_threshold_percent', '20', 'integer', 'Percentage of totalClasses at which quota low-balance notification fires', 'billing', NOW())
-ON CONFLICT (key) DO UPDATE SET
-  value = EXCLUDED.value,
-  data_type = EXCLUDED.data_type,
-  description = EXCLUDED.description,
-  category = EXCLUDED.category,
-  updated_at = NOW();
+-- ON CONFLICT DO NOTHING preserves production-customized values;
+-- re-running this migration will NOT overwrite settings that have been
+-- changed post-install (timezone, auth_max_attempts, sms_rate_limit, etc.).
+ON CONFLICT (key) DO NOTHING;
 

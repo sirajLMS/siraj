@@ -466,14 +466,6 @@ export enum AvailabilityStatus {
   OutOfStock = 'OUT_OF_STOCK'
 }
 
-/** A time slot with availability status */
-export type AvailableSlot = {
-  __typename?: 'AvailableSlot';
-  endAt: Maybe<Scalars['DateTime']['output']>;
-  isAvailable: Maybe<Scalars['Boolean']['output']>;
-  startAt: Maybe<Scalars['DateTime']['output']>;
-};
-
 export type BillingCurrencyTotal = {
   __typename?: 'BillingCurrencyTotal';
   amount: Maybe<Scalars['String']['output']>;
@@ -4155,8 +4147,6 @@ export type Query = {
   adminInvoices: Maybe<AdminInvoiceHistoryResult>;
   /** Returns the paginated admin suggestion list with metrics. */
   adminSuggestions: Maybe<AdminSuggestionResult>;
-  /** Find available time slots between student and teacher for a given date range and duration */
-  availableClassSlots: Maybe<Array<AvailableSlot>>;
   /** Lists all books and bags available to the academy. */
   booksAndBags: Maybe<Array<Book>>;
   classCategories: Maybe<Array<ClassCategory>>;
@@ -4235,8 +4225,6 @@ export type Query = {
   profileByUserId: Maybe<UnifiedProfile>;
   /** Get a specific quota by ID */
   quota: Maybe<Quota>;
-  /** Get the aggregated quota balance summary and expiration breakdown for a student */
-  quotaBalance: Maybe<QuotaBalance>;
   /** Get paginated audit ledger history for a quota */
   quotaLedger: Maybe<QuotaLedgerPaginatedResult>;
   /** List quotas with optional filters and pagination */
@@ -4280,11 +4268,7 @@ export type Query = {
   studentDirectory: Maybe<StudentDirectoryPayload>;
   /** Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity. */
   studentMonthlyReport: Maybe<StudentMonthlyReport>;
-  /** List open active quotas for a student in FIFO priority order */
-  studentOpenQuotas: Maybe<Array<Quota>>;
   studentProfile: Maybe<StudentProfile>;
-  /** List all quotas for a specific student */
-  studentQuotas: Maybe<Array<Quota>>;
   /** Paginated lesson reports for the logged-in student (student portal dashboard) */
   studentRecentLessonReports: Maybe<PendingLessonReportsPayload>;
   studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
@@ -4352,15 +4336,6 @@ export type QueryAdminInvoicesArgs = {
 
 export type QueryAdminSuggestionsArgs = {
   filter: SuggestionFilter;
-};
-
-
-export type QueryAvailableClassSlotsArgs = {
-  durationMinutes: Scalars['Int']['input'];
-  endDate: Scalars['DateTime']['input'];
-  startDate: Scalars['DateTime']['input'];
-  studentId: Scalars['ID']['input'];
-  teacherId: Scalars['ID']['input'];
 };
 
 
@@ -4590,11 +4565,6 @@ export type QueryQuotaArgs = {
 };
 
 
-export type QueryQuotaBalanceArgs = {
-  studentId: Scalars['ID']['input'];
-};
-
-
 export type QueryQuotaLedgerArgs = {
   pagination: InputMaybe<PaginationArgs>;
   quotaId: Scalars['ID']['input'];
@@ -4734,21 +4704,11 @@ export type QueryStudentMonthlyReportArgs = {
 };
 
 
-export type QueryStudentOpenQuotasArgs = {
-  studentId: Scalars['ID']['input'];
-};
-
-
 export type QueryStudentProfileArgs = {
   includeUpcomingClasses: InputMaybe<Scalars['Boolean']['input']>;
   month: InputMaybe<Scalars['Int']['input']>;
   studentId: InputMaybe<Scalars['String']['input']>;
   year: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QueryStudentQuotasArgs = {
-  studentId: Scalars['ID']['input'];
 };
 
 
@@ -5007,6 +4967,12 @@ export enum QuotaPeriodType {
   Weekly = 'WEEKLY'
 }
 
+/** Rollover policy configuration for periodic quotas */
+export type QuotaRolloverPolicyInput = {
+  accumulationCap: InputMaybe<Scalars['Int']['input']>;
+  maxRolloverPercent: InputMaybe<Scalars['Float']['input']>;
+};
+
 export enum QuotaStatus {
   Active = 'ACTIVE',
   Archived = 'ARCHIVED',
@@ -5015,11 +4981,13 @@ export enum QuotaStatus {
 
 /** Input for creating a new student quota */
 export type QuotaSubmitInput = {
+  idempotencyKey: InputMaybe<Scalars['String']['input']>;
   kind: QuotaKind;
   name: Scalars['String']['input'];
   periodDays: InputMaybe<Scalars['Int']['input']>;
   periodType: InputMaybe<QuotaPeriodType>;
   priority: InputMaybe<Scalars['Int']['input']>;
+  rolloverPolicy: InputMaybe<QuotaRolloverPolicyInput>;
   studentId: Scalars['String']['input'];
   totalClasses: Scalars['Int']['input'];
   validFrom: InputMaybe<Scalars['DateTime']['input']>;

@@ -37,50 +37,55 @@ function determineExecutionState(isAvailable: boolean, hasBalance: boolean): Exe
   return { executionState: ClassExecutionState.ON_DEMAND_CONFLICT_HELD, ondemandStatus: null };
 }
 
-async function insertInstanceIfMissing(
-  schedule: typeof recurringSchedules.$inferSelect,
-  currentDate: Date,
-  scheduledStartAt: Date,
-  scheduledEndAt: Date,
-  executionState: ClassExecutionState,
-  ondemandStatus: OnDemandStatus | null
-): Promise<boolean> {
-  const dateIso = scheduledStartAt.toISOString().split("T")[0];
-  const idempotencyKey = `recurring-${schedule.id}-${currentDate.getDay()}-${dateIso}`;
+/** A class instance prepared for batch insertion. */
+interface PendingInstance {
+  recurringScheduleId: string;
+  studentId: string;
+  teacherId: string;
+  subjectId: string | null;
+  durationMinutes: number | null;
+  bookingTimezone: string | null;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  executionState: ClassExecutionState;
+  ondemandStatus: OnDemandStatus | null;
+  idempotencyKey: string;
+}
 
-  return db.transaction(async tx => {
-    const existing = await tx
-      .select()
-      .from(classInstances)
-      .where(
-        and(
-          eq(classInstances.recurringScheduleId, schedule.id),
-          eq(classInstances.scheduledStartAt, scheduledStartAt),
-          isNull(classInstances.deletedAt)
-        )
+/**
+ * Batch-insert class instances with idempotency. Uses `ON CONFLICT DO NOTHING`
+ * keyed on the `idempotencyKey` unique index, so re-running the generator is
+ * safe. Returns the number of instances actually inserted (not conflicting).
+ */
+async function batchInsertInstances(pending: PendingInstance[]): Promise<number> {
+  if (pending.length === 0) return 0;
+
+  const inserted = await db
+    .insert(classInstances)
+    .values(
+      pending.map(
+        p =>
+          ({
+            recurringScheduleId: p.recurringScheduleId,
+            studentId: p.studentId,
+            teacherId: p.teacherId,
+            subjectId: p.subjectId,
+            durationMinutes: p.durationMinutes,
+            classType: ClassType.REGULAR,
+            bookingTimezone: p.bookingTimezone,
+            scheduledStartAt: p.scheduledStartAt,
+            scheduledEndAt: p.scheduledEndAt,
+            executionState: p.executionState,
+            ondemandStatus: p.ondemandStatus,
+            quotaDeducted: false,
+            idempotencyKey: p.idempotencyKey,
+          }) as ClassInstanceInsertInput
       )
-      .limit(1);
+    )
+    .onConflictDoNothing()
+    .returning({ id: classInstances.id });
 
-    if (existing.length > 0) return false;
-
-    await tx.insert(classInstances).values({
-      recurringScheduleId: schedule.id,
-      studentId: schedule.studentId,
-      teacherId: schedule.teacherId,
-      subjectId: schedule.subjectId,
-      durationMinutes: schedule.durationMinutes,
-      classType: ClassType.REGULAR,
-      bookingTimezone: schedule.timezone,
-      scheduledStartAt,
-      scheduledEndAt,
-      executionState,
-      ondemandStatus,
-      quotaDeducted: false,
-      idempotencyKey,
-    } as ClassInstanceInsertInput);
-
-    return true;
-  });
+  return inserted.length;
 }
 
 export async function runOndemandInstanceGenerator(): Promise<void> {
@@ -117,7 +122,8 @@ async function tryGenerateSlotDay(
   matchingDay: typeof recurringScheduleDays.$inferSelect,
   remainingBalance: number,
   existingConflicts: Set<string>,
-  scheduleDaysMap: Map<string, boolean> | null
+  scheduleDaysMap: Map<string, boolean> | null,
+  pendingInstances: PendingInstance[]
 ): Promise<{ generated: boolean; remaining: number }> {
   const [startHour, startMin] = matchingDay.startTime.split(":").map(Number);
   const scheduledStartAt = new Date(currentDate);
@@ -139,15 +145,23 @@ async function tryGenerateSlotDay(
   const scheduledEndAt = new Date(scheduledStartAt.getTime() + schedule.durationMinutes * 60 * 1000);
 
   const { executionState, ondemandStatus } = determineExecutionState(isAvailable, remainingBalance > 0);
-  const inserted = await insertInstanceIfMissing(
-    schedule,
-    new Date(currentDate),
+
+  const dateIso = scheduledStartAt.toISOString().split("T")[0];
+  const idempotencyKey = `recurring-${schedule.id}-${currentDate.getDay()}-${dateIso}`;
+
+  pendingInstances.push({
+    recurringScheduleId: schedule.id,
+    studentId: schedule.studentId,
+    teacherId: schedule.teacherId,
+    subjectId: schedule.subjectId,
+    durationMinutes: schedule.durationMinutes,
+    bookingTimezone: schedule.timezone,
     scheduledStartAt,
     scheduledEndAt,
     executionState,
-    ondemandStatus
-  );
-  if (!inserted) return { generated: false, remaining: remainingBalance };
+    ondemandStatus,
+    idempotencyKey,
+  });
 
   const newRemaining = executionState === ClassExecutionState.NOT_ACTIVATED ? remainingBalance - 1 : remainingBalance;
   return { generated: true, remaining: newRemaining };
@@ -205,9 +219,9 @@ async function generateInstancesForSchedule(
     existingConflicts.add(slotKey);
   }
 
-  let generated = 0;
   let remainingBalance = availableBalance;
   const currentDate = new Date(startDate);
+  const pendingInstances: PendingInstance[] = [];
   while (currentDate <= scheduleEndDate) {
     const dayOfWeekEnum = DAY_OF_WEEK_MAP[currentDate.getDay()];
     const matchingDay = scheduleDays.find(d => d.dayOfWeek === dayOfWeekEnum);
@@ -219,16 +233,21 @@ async function generateInstancesForSchedule(
         matchingDay,
         remainingBalance,
         existingConflicts,
-        null
+        null,
+        pendingInstances
       );
       if (result.generated) {
-        generated++;
         remainingBalance = result.remaining;
       }
     }
 
     currentDate.setDate(currentDate.getDate() + 1);
   }
+
+  // Batch-insert all pending instances in a single query instead of
+  // one transaction per instance. ON CONFLICT DO NOTHING on the
+  // idempotencyKey unique index handles duplicates safely.
+  const generated = await batchInsertInstances(pendingInstances);
 
   if (generated > 0) {
     await QuotaService.refreshStudentOndemandInstances(schedule.studentId);

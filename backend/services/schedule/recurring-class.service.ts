@@ -395,14 +395,19 @@ export namespace RecurringClassService {
       }
     }
 
-    // Pool mode: release per-instance quota for instances that were redeemed
-    const quotaInstances = upcomingInstances.filter(i => i.quotaDeducted);
-    if (quotaInstances.length === 0) return false;
+    // Pool mode: release quota for ALL upcoming instances under this schedule.
+    // We do NOT filter by `quotaDeducted` — pool-mode instances created before
+    // the root-cause fix in `redeemForInstanceBatch` have `quotaDeducted=false`
+    // even though their quota was redeemed at the schedule level. The release
+    // ledger insert is idempotent per instance (keyed by
+    // `deriveReleasePoolIdempotencyKey`), so already-released instances are
+    // deduped.
+    if (upcomingInstances.length === 0) return false;
 
     try {
       const result = await QuotaService.releaseForInstances(
         schedule.studentId,
-        quotaInstances.map(i => i.id),
+        upcomingInstances.map(i => i.id),
         schedule.quotaId,
         recurringScheduleId,
         userId,
@@ -534,8 +539,9 @@ export namespace RecurringClassService {
     }
 
     if (schedule.quotaId) {
-      const quotaInstances = upcomingInstances.filter(i => i.quotaDeducted);
-      const refunded = await releasePerInstance(quotaInstances, schedule.quotaId, recurringScheduleId, userId, t);
+      // Pool mode: release quota for ALL upcoming instances, not just those
+      // with `quotaDeducted=true`. See `releaseQuotaOnCancel` for rationale.
+      const refunded = await releasePerInstance(upcomingInstances, schedule.quotaId, recurringScheduleId, userId, t);
       return { quotaReleased: false, creditsRefunded: refunded };
     }
 

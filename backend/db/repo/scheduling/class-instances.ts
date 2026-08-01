@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -18,6 +18,7 @@ import { updateInstanceState } from "@/backend/db/repo/scheduling/state-changes"
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
+import { OnDemandStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
@@ -246,4 +247,30 @@ export async function upsertManyForSeed(
   options?: ClassInstanceUpsertManyOptions
 ): Promise<Types.ClassInstanceEntity[]> {
   return runClassInstanceUpsertMany(instances, upsertSeedClassInstance, options);
+}
+
+/**
+ * Returns up to `limit` pending-credit on-demand class instances for a
+ * student, ordered by scheduled start time (oldest first). Used by
+ * `QuotaService.refreshStudentOndemandInstances` to flip PENDING_CREDIT
+ * instances to AVAILABLE after credits/quota are replenished.
+ */
+export async function getOndemandPendingInstances(
+  tx: DBTransaction,
+  studentId: string,
+  limit: number
+): Promise<Types.ClassInstanceEntity[]> {
+  if (limit <= 0) return [];
+  return tx
+    .select()
+    .from(classInstances)
+    .where(
+      and(
+        eq(classInstances.studentId, studentId),
+        isNull(classInstances.deletedAt),
+        eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT)
+      )
+    )
+    .orderBy(classInstances.scheduledStartAt)
+    .limit(limit);
 }

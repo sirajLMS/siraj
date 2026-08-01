@@ -436,13 +436,6 @@ enum AvailabilityStatus {
   OUT_OF_STOCK
 }
 
-"""A time slot with availability status"""
-type AvailableSlot {
-  endAt: DateTime
-  isAvailable: Boolean
-  startAt: DateTime
-}
-
 type BillingCurrencyTotal {
   amount: String
   currency: CurrencyCode
@@ -3247,11 +3240,6 @@ type Query {
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
 
-  """
-  Find available time slots between student and teacher for a given date range and duration
-  """
-  availableClassSlots(durationMinutes: Int!, endDate: DateTime!, startDate: DateTime!, studentId: ID!, teacherId: ID!): [AvailableSlot!]
-
   """Lists all books and bags available to the academy."""
   booksAndBags: [Book!]
   classCategories: [ClassCategory!]
@@ -3363,11 +3351,6 @@ type Query {
   """Get a specific quota by ID"""
   quota(id: ID!): Quota
 
-  """
-  Get the aggregated quota balance summary and expiration breakdown for a student
-  """
-  quotaBalance(studentId: ID!): QuotaBalance
-
   """Get paginated audit ledger history for a quota"""
   quotaLedger(pagination: PaginationArgs, quotaId: ID!): QuotaLedgerPaginatedResult
 
@@ -3449,13 +3432,7 @@ type Query {
   Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
   """
   studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
-
-  """List open active quotas for a student in FIFO priority order"""
-  studentOpenQuotas(studentId: ID!): [Quota!]
   studentProfile(includeUpcomingClasses: Boolean, month: Int, studentId: String, year: Int): StudentProfile
-
-  """List all quotas for a specific student"""
-  studentQuotas(studentId: ID!): [Quota!]
 
   """
   Paginated lesson reports for the logged-in student (student portal dashboard)
@@ -3618,6 +3595,12 @@ enum QuotaPeriodType {
   WEEKLY
 }
 
+"""Rollover policy configuration for periodic quotas"""
+input QuotaRolloverPolicyInput {
+  accumulationCap: Int
+  maxRolloverPercent: Float
+}
+
 enum QuotaStatus {
   ACTIVE
   ARCHIVED
@@ -3626,11 +3609,13 @@ enum QuotaStatus {
 
 """Input for creating a new student quota"""
 input QuotaSubmitInput {
+  idempotencyKey: String
   kind: QuotaKind!
   name: String!
   periodDays: Int
   periodType: QuotaPeriodType
   priority: Int
+  rolloverPolicy: QuotaRolloverPolicyInput
   studentId: String!
   totalClasses: Int!
   validFrom: DateTime

@@ -1556,6 +1556,12 @@ export type QuotaPeriodType =
   | 'MONTHLY'
   | 'WEEKLY';
 
+/** Rollover policy configuration for periodic quotas */
+export type QuotaRolloverPolicyInput = {
+  accumulationCap: number | null | undefined;
+  maxRolloverPercent: number | null | undefined;
+};
+
 export type QuotaStatus =
   | 'ACTIVE'
   | 'ARCHIVED'
@@ -1563,11 +1569,13 @@ export type QuotaStatus =
 
 /** Input for creating a new student quota */
 export type QuotaSubmitInput = {
+  idempotencyKey: string | null | undefined;
   kind: QuotaKind;
   name: string;
   periodDays: number | null | undefined;
   periodType: QuotaPeriodType | null | undefined;
   priority: number | null | undefined;
+  rolloverPolicy: QuotaRolloverPolicyInput | null | undefined;
   studentId: string;
   totalClasses: number;
   validFrom: string | null | undefined;
@@ -2960,44 +2968,6 @@ export type QuotasQueryVariables = Exact<{
 
 
 export type QuotasQuery = QuotasQuery_Query;
-
-export type StudentQuotasQuery_studentQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
-
-export type StudentQuotasQuery_Query = { studentQuotas: Array<StudentQuotasQuery_studentQuotas_Quota> | null };
-
-
-export type StudentQuotasQueryVariables = Exact<{
-  studentId: string | number;
-}>;
-
-
-export type StudentQuotasQuery = StudentQuotasQuery_Query;
-
-export type StudentOpenQuotasQuery_studentOpenQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
-
-export type StudentOpenQuotasQuery_Query = { studentOpenQuotas: Array<StudentOpenQuotasQuery_studentOpenQuotas_Quota> | null };
-
-
-export type StudentOpenQuotasQueryVariables = Exact<{
-  studentId: string | number;
-}>;
-
-
-export type StudentOpenQuotasQuery = StudentOpenQuotasQuery_Query;
-
-export type QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown = { quotaId: string | null, quotaName: string | null, validUntil: string | null, remaining: number | null };
-
-export type QuotaBalanceQuery_quotaBalance_QuotaBalance = { studentId: string | null, totalActiveClasses: number | null, totalRemaining: number | null, totalReserved: number | null, breakdownByExpiration: Array<QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown> | null };
-
-export type QuotaBalanceQuery_Query = { quotaBalance: QuotaBalanceQuery_quotaBalance_QuotaBalance | null };
-
-
-export type QuotaBalanceQueryVariables = Exact<{
-  studentId: string | number;
-}>;
-
-
-export type QuotaBalanceQuery = QuotaBalanceQuery_Query;
 
 export type QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult_rows_QuotaLedger = { id: string | null, quotaId: string | null, studentId: string | null, recurringScheduleId: string | null, classInstanceId: string | null, delta: number | null, reason: Types.QuotaLedgerReason | null, reasonNote: string | null, actorUserId: string | null, createdAt: string | null };
 
@@ -4439,22 +4409,6 @@ export type SearchTeacherAvailabilityQueryVariables = Exact<{
 
 
 export type SearchTeacherAvailabilityQuery = SearchTeacherAvailabilityQuery_Query;
-
-export type AvailableClassSlotsQuery_availableClassSlots_AvailableSlot = { startAt: string | null, endAt: string | null, isAvailable: boolean | null };
-
-export type AvailableClassSlotsQuery_Query = { availableClassSlots: Array<AvailableClassSlotsQuery_availableClassSlots_AvailableSlot> | null };
-
-
-export type AvailableClassSlotsQueryVariables = Exact<{
-  studentId: string | number;
-  teacherId: string | number;
-  startDate: string;
-  endDate: string;
-  durationMinutes: number;
-}>;
-
-
-export type AvailableClassSlotsQuery = AvailableClassSlotsQuery_Query;
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
 

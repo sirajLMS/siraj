@@ -137,127 +137,6 @@ function computeScheduledStartForDay(
   return new Date(guess.getTime() - offsetMs);
 }
 
-async function validateRecurringScheduleAvailability(
-  t: DBTransaction,
-  studentId: string,
-  teacherId: string,
-  scheduledStartAt: Date,
-  scheduledEndAt: Date,
-  tErrors?: ErrorsLabels
-): Promise<void> {
-  const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
-  await acquireLocks(t, teacherId, studentId);
-  await validateTeacherAssignment(t, studentId, teacherId, scheduledStartAt, tFuncErrors);
-  await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, scheduledStartAt, scheduledEndAt, t, "ar");
-  await checkOverlaps(
-    t,
-    {
-      studentId,
-      teacherId,
-      startTime: scheduledStartAt,
-      endTime: scheduledEndAt,
-    },
-    tFuncErrors
-  );
-}
-
-async function createSingleRecurringInstance(params: {
-  t: DBTransaction;
-  recurringScheduleId: string;
-  day: { dayOfWeek: string; startTime: string; isActive: boolean };
-  weekOffset: number;
-  effectiveStartDate: Date;
-  input: CreateRecurringScheduleInput;
-  utcOffsetSnapshot: number | null;
-  now: Date;
-  rateSnapshot: { rateAmount: string; rateCurrency: CurrencyCode; rateSource: RateSource };
-  tErrors?: ErrorsLabels;
-}): Promise<string> {
-  const {
-    t,
-    recurringScheduleId,
-    day,
-    weekOffset,
-    effectiveStartDate,
-    input,
-    utcOffsetSnapshot,
-    now,
-    rateSnapshot,
-    tErrors,
-  } = params;
-  const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
-  const scheduledStartAt = computeScheduledStartForDay(
-    day.dayOfWeek,
-    day.startTime,
-    effectiveStartDate,
-    weekOffset,
-    input.timezone
-  );
-  const scheduledEndAt = new Date(scheduledStartAt.getTime() + input.durationMinutes * 60000);
-
-  await validateRecurringScheduleAvailability(
-    t,
-    input.studentId,
-    input.teacherId,
-    scheduledStartAt,
-    scheduledEndAt,
-    tFuncErrors
-  );
-
-  const effectiveMeeting = await EffectiveMeetingService.resolveForRecurringSchedule(
-    recurringScheduleId,
-    input.teacherId,
-    tFuncErrors,
-    t
-  );
-
-  await checkOverlaps(
-    t,
-    {
-      studentId: input.studentId,
-      teacherId: input.teacherId,
-      startTime: scheduledStartAt,
-      endTime: scheduledEndAt,
-      meetingJoinUrl: effectiveMeeting.joinUrl,
-    },
-    tFuncErrors
-  );
-
-  // Quota deduction handled by QuotaService + quota_ledger at service layer
-
-  const idempotencyKey = `recurring-${recurringScheduleId}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
-
-  const [classInstance] = await t
-    .insert(classInstances)
-    .values({
-      studentId: input.studentId,
-      teacherId: input.teacherId,
-      subjectId: input.subjectId,
-      recurringScheduleId,
-      scheduledStartAt,
-      scheduledEndAt,
-      bookingTimezone: input.timezone,
-      bookingUtcOffset: utcOffsetSnapshot,
-      bookingTimezoneId: input.timezoneId ?? null,
-      durationMinutes: input.durationMinutes,
-      classType: input.classType ?? "REGULAR",
-      executionState: "NOT_ACTIVATED",
-      outcome: "PENDING",
-      quotaDeducted: !!input.quotaDeducted,
-      // Rate snapshot captured at booking time (rate-resolver cascade).
-      rateAmount: rateSnapshot.rateAmount,
-      rateCurrency: rateSnapshot.rateCurrency,
-      isRateOverridden: false,
-      rateSource: rateSnapshot.rateSource,
-      idempotencyKey,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-
-  return classInstance.id;
-}
-
 export async function deleteRecurringClass(
   classInstanceId: string,
   tx?: DBTransaction
@@ -405,6 +284,7 @@ export const createRecurringScheduleWithInstances = async (
 ): Promise<{ recurringScheduleId: string; classInstanceIds: string[] }> => {
   const runner = async (t: DBTransaction) => {
     const now = new Date();
+    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
 
     const getOffsetMinutes = (ianaTimezone: string, d: Date) => {
       try {
@@ -459,33 +339,129 @@ export const createRecurringScheduleWithInstances = async (
       )
       .returning();
 
-    const classInstanceIds: string[] = [];
     const weeksToGenerate = input.generateInstancesForWeeks ?? 1;
     const effectiveStartDate = input.effectiveFrom ? new Date(input.effectiveFrom) : now;
+
+    // Acquire the teacher+student advisory locks once for the whole batch
+    // (pg_advisory_xact_lock is reentrant within the same transaction).
+    await acquireLocks(t, input.teacherId, input.studentId);
+
+    // Resolve the effective meeting once — same teacher + recurring schedule
+    // means the resolved meeting URL is identical for every generated instance.
+    const effectiveMeeting = await EffectiveMeetingService.resolveForRecurringSchedule(
+      recurringSchedule.id,
+      input.teacherId,
+      tFuncErrors,
+      t
+    );
+
+    // Compute all instance rows up front (no DB hits in the loop), then run
+    // availability + overlap validations once per batch, and batch-insert.
+    const instanceRows: {
+      scheduledStartAt: Date;
+      scheduledEndAt: Date;
+      dayOfWeek: string;
+      idempotencyKey: string;
+    }[] = [];
 
     for (let weekOffset = 0; weekOffset < weeksToGenerate; weekOffset++) {
       for (const day of insertedDays) {
         if (!day.isActive) continue;
 
-        const instanceId = await createSingleRecurringInstance({
-          t,
-          recurringScheduleId: recurringSchedule.id,
-          day,
-          weekOffset,
+        const scheduledStartAt = computeScheduledStartForDay(
+          day.dayOfWeek,
+          day.startTime,
           effectiveStartDate,
-          input,
-          utcOffsetSnapshot,
-          now,
-          rateSnapshot,
-          tErrors,
-        });
-        classInstanceIds.push(instanceId);
+          weekOffset,
+          input.timezone
+        );
+        const scheduledEndAt = new Date(scheduledStartAt.getTime() + input.durationMinutes * 60000);
+        const idempotencyKey = `recurring-${recurringSchedule.id}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
+
+        instanceRows.push({ scheduledStartAt, scheduledEndAt, dayOfWeek: day.dayOfWeek, idempotencyKey });
       }
     }
 
+    if (instanceRows.length === 0) {
+      return {
+        recurringScheduleId: recurringSchedule.id,
+        classInstanceIds: [],
+      };
+    }
+
+    // Validate teacher assignment once with the earliest start date — if the
+    // assignment covers the earliest occurrence, it covers all later ones too.
+    await validateTeacherAssignment(
+      t,
+      input.studentId,
+      input.teacherId,
+      instanceRows.reduce(
+        (min, r) => (r.scheduledStartAt < min ? r.scheduledStartAt : min),
+        instanceRows[0].scheduledStartAt
+      ),
+      tFuncErrors
+    );
+
+    // Batched availability check: 3 queries total instead of 3 per instance.
+    await TeacherAvailabilityRepository.validateBookingAvailabilityBatch(
+      input.teacherId,
+      instanceRows.map(r => ({ startTime: r.scheduledStartAt, endTime: r.scheduledEndAt })),
+      t,
+      "ar"
+    );
+
+    // Per-slot overlap checks against pre-existing committed instances. These
+    // run BEFORE any of our batched inserts, so they correctly exclude each
+    // other (new in-transaction rows are not visible to the snapshot read).
+    // Within the batch, no two slots overlap because each (day, weekOffset)
+    // pair maps to a distinct UTC start time.
+    for (const row of instanceRows) {
+      await checkOverlaps(
+        t,
+        {
+          studentId: input.studentId,
+          teacherId: input.teacherId,
+          startTime: row.scheduledStartAt,
+          endTime: row.scheduledEndAt,
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+        },
+        tFuncErrors
+      );
+    }
+
+    // Batch-insert all instance rows in a single query.
+    const insertedInstances = await t
+      .insert(classInstances)
+      .values(
+        instanceRows.map(row => ({
+          studentId: input.studentId,
+          teacherId: input.teacherId,
+          subjectId: input.subjectId,
+          recurringScheduleId: recurringSchedule.id,
+          scheduledStartAt: row.scheduledStartAt,
+          scheduledEndAt: row.scheduledEndAt,
+          bookingTimezone: input.timezone,
+          bookingUtcOffset: utcOffsetSnapshot,
+          bookingTimezoneId: input.timezoneId ?? null,
+          durationMinutes: input.durationMinutes,
+          classType: input.classType ?? "REGULAR",
+          executionState: "NOT_ACTIVATED",
+          outcome: "PENDING",
+          quotaDeducted: !!input.quotaDeducted,
+          rateAmount: rateSnapshot.rateAmount,
+          rateCurrency: rateSnapshot.rateCurrency,
+          isRateOverridden: false,
+          rateSource: rateSnapshot.rateSource,
+          idempotencyKey: row.idempotencyKey,
+          createdAt: now,
+          updatedAt: now,
+        }))
+      )
+      .returning({ id: classInstances.id });
+
     return {
       recurringScheduleId: recurringSchedule.id,
-      classInstanceIds,
+      classInstanceIds: insertedInstances.map(i => i.id),
     };
   };
 

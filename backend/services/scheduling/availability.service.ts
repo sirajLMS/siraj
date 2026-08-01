@@ -17,12 +17,6 @@ export interface SlotAvailabilityInput {
   locale?: string;
 }
 
-export interface AvailableSlot {
-  startAt: Date;
-  endAt: Date;
-  isAvailable: boolean;
-}
-
 export namespace AvailabilityService {
   export const isSlotAvailable = async (
     studentId: string,
@@ -145,80 +139,6 @@ export namespace AvailabilityService {
       const tErrors = getServerTranslations(locale).errorsTranslations;
       throw new Error(tErrors.invalidInput);
     }
-  };
-
-  export const findAvailableSlots = async (
-    studentId: string,
-    teacherId: string,
-    dateRange: { from: Date; to: Date },
-    durationMinutes: number,
-    tx?: ReadExecutor,
-    locale?: string
-  ): Promise<AvailableSlot[]> => {
-    const slots: AvailableSlot[] = [];
-
-    // Pre-fetch all overlapping class instances for the entire range in one query
-    const q = queryDb(tx);
-    const overlappingInstances = await q
-      .select({
-        scheduledStartAt: classInstances.scheduledStartAt,
-        scheduledEndAt: classInstances.scheduledEndAt,
-      })
-      .from(classInstances)
-      .where(
-        and(
-          isNull(classInstances.deletedAt),
-          sql`${classInstances.scheduledStartAt} < ${dateRange.to}`,
-          sql`${classInstances.scheduledEndAt} > ${dateRange.from}`,
-          sql`(${classInstances.studentId} = ${studentId} OR ${classInstances.teacherId} = ${teacherId})`
-        )
-      );
-
-    const curr = new Date(dateRange.from);
-    const candidateSlots: { startTime: Date; endTime: Date }[] = [];
-
-    while (curr < dateRange.to) {
-      const slotEnd = new Date(curr.getTime() + durationMinutes * 60 * 1000);
-      if (slotEnd > dateRange.to) break;
-
-      // Check conflict against pre-fetched instances (in-memory)
-      const hasConflict = overlappingInstances.some(
-        inst => inst.scheduledStartAt < slotEnd && inst.scheduledEndAt > curr
-      );
-
-      if (!hasConflict) {
-        candidateSlots.push({ startTime: new Date(curr), endTime: slotEnd });
-      }
-
-      curr.setTime(curr.getTime() + 30 * 60 * 1000); // 30-minute steps
-    }
-
-    // Batch-validate teacher availability for all candidate slots in a single DB round-trip
-    const availableSet = new Set<string>();
-    if (candidateSlots.length > 0) {
-      const batchResults = await TeacherAvailabilityRepository.checkBookingAvailabilityBatch(
-        teacherId,
-        candidateSlots,
-        tx as DBTransaction | undefined,
-        locale ?? "en"
-      );
-      for (let i = 0; i < candidateSlots.length; i++) {
-        if (batchResults[i]) {
-          availableSet.add(`${candidateSlots[i]?.startTime.getTime()}`);
-        }
-      }
-    }
-
-    // Build final slots list interleaving available and unavailable candidates
-    for (const candidate of candidateSlots) {
-      slots.push({
-        startAt: candidate.startTime,
-        endAt: candidate.endTime,
-        isAvailable: availableSet.has(`${candidate.startTime.getTime()}`),
-      });
-    }
-
-    return slots;
   };
 }
 

@@ -115,7 +115,7 @@ The expiry sweeper handles PERIODIC quotas:
 1. Calculate `rolloverAmount = Math.floor(remaining * maxRolloverPercent / 100)`, capped at `accumulationCap`
 2. Write EXPIRE ledger entry for consumed portion
 3. Write GRANT ledger entry for rollover amount
-4. Call `resetUsedThisPeriod` to zero out the new period counter
+4. `refreshPeriodic` zeros out `usedThisPeriod` and replenishes `remaining` inline (no separate `resetUsedThisPeriod` call)
 
 ### On-Demand Flow
 

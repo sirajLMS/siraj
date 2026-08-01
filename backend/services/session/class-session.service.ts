@@ -208,13 +208,19 @@ export namespace ClassSessionService {
    * Release quota for a quota-deducted class instance. The quotaId is resolved
    * from the class instance's parent recurring schedule. If no quota is found,
    * the call is a no-op (the instance may have been credit-backed).
+   *
+   * @returns `quotaReleased` is `true` when the quota pool was successfully
+   *   released OR when no quota was bound to the instance (credit-backed case,
+   *   caller should fall through to a credit refund). `quotaId` carries the
+   *   resolved quota when a release actually happened, so callers that need to
+   *   re-deduct against the same quota (e.g. `reschedule`) can do so.
    */
   async function releaseQuotaIfDeducted(
     instance: Pick<ClassInstanceEntity, "id" | "studentId" | "quotaDeducted" | "recurringScheduleId">,
     actorUserId: string,
     tx: DBTransaction
-  ): Promise<boolean> {
-    if (!instance.quotaDeducted || !instance.recurringScheduleId) return true;
+  ): Promise<{ quotaReleased: boolean; quotaId: string | null }> {
+    if (!instance.quotaDeducted || !instance.recurringScheduleId) return { quotaReleased: true, quotaId: null };
 
     // Resolve quotaId from the parent recurring schedule
     const q = queryDb(tx);
@@ -224,7 +230,7 @@ export namespace ClassSessionService {
       .where(eq(recurringSchedules.id, instance.recurringScheduleId))
       .limit(1);
 
-    if (!schedule?.quotaId) return true;
+    if (!schedule?.quotaId) return { quotaReleased: true, quotaId: null };
 
     const result = await QuotaService.tryReleaseForInstance(
       instance.studentId,
@@ -234,7 +240,7 @@ export namespace ClassSessionService {
       tx,
       "en"
     );
-    return result.ok;
+    return { quotaReleased: result.ok, quotaId: result.ok ? schedule.quotaId : null };
   }
 
   /**
@@ -402,7 +408,7 @@ export namespace ClassSessionService {
 
       const wasDeducted = instance.quotaDeducted && instance.deletedAt === null;
       if (wasDeducted) {
-        const quotaReleased = await releaseQuotaIfDeducted(instance, userId, tx);
+        const { quotaReleased } = await releaseQuotaIfDeducted(instance, userId, tx);
         if (!quotaReleased) {
           await refundCreditIfDeducted(instance, userId, tErrors, tx);
         }
@@ -459,7 +465,7 @@ export namespace ClassSessionService {
     const result = await db.transaction(async tx => {
       const processed = await SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, tx);
       if (instance.quotaDeducted) {
-        const quotaReleased = await releaseQuotaIfDeducted(instance, userId, tx);
+        const { quotaReleased } = await releaseQuotaIfDeducted(instance, userId, tx);
         if (!quotaReleased) {
           await refundCreditIfDeducted(instance, userId, tErrors, tx);
         }
@@ -559,13 +565,33 @@ export namespace ClassSessionService {
       const insertPayload = buildRescheduleInsert(classInstanceId, existing, input, finalRemarks);
       const newInstance = await SchedulingRepository.rescheduleClassInstance(classInstanceId, insertPayload, tx);
 
+      // Re-deduct the quota/credit against the successor that was refunded from
+      // the original instance. Without this step the reschedule leaks a free
+      // class: the original is refunded, but the successor is inserted with
+      // `quotaDeducted: false` and never charged again.
       if (existing.quotaDeducted && existing.deletedAt === null) {
-        const quotaReleased = await releaseQuotaIfDeducted(existing, userId, tx);
+        const { quotaReleased, quotaId } = await releaseQuotaIfDeducted(existing, userId, tx);
         // Only refund credit if quota was NOT released (instance was credit-backed).
         // Calling both would cause a phantom credit refund + quota leak.
-        if (!quotaReleased) {
-          const tErrorsLocal = getServerTranslations("ar").errorsTranslations;
-          await refundCreditIfDeducted(existing, userId, tErrorsLocal, tx);
+        const creditRefunded =
+          !quotaReleased &&
+          (await refundCreditIfDeducted(existing, userId, getServerTranslations("ar").errorsTranslations, tx));
+
+        // Mirror the deduction against the newly created successor instance.
+        if (quotaId) {
+          await QuotaService.redeemForInstance(newInstance.studentId, newInstance.id, quotaId, userId, tx, "en");
+          await SchedulingRepository.updateClassInstance(newInstance.id, { quotaDeducted: true }, tx);
+        } else if (creditRefunded) {
+          const deductIdempotencyKey = `credit-deduction:${newInstance.id}`;
+          await CreditService.deductForBooking(
+            newInstance.studentId,
+            newInstance.id,
+            userId,
+            deductIdempotencyKey,
+            tx,
+            tErrors
+          );
+          await SchedulingRepository.updateClassInstance(newInstance.id, { quotaDeducted: true }, tx);
         }
       }
 
@@ -598,7 +624,7 @@ export namespace ClassSessionService {
         throw new Error(tErrors.notFound);
       }
       if (instance.quotaDeducted) {
-        const quotaReleased = await releaseQuotaIfDeducted(instance, userId, tx);
+        const { quotaReleased } = await releaseQuotaIfDeducted(instance, userId, tx);
         if (!quotaReleased) {
           await refundCreditIfDeducted(instance, userId, tErrors, tx);
         }

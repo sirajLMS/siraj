@@ -143,10 +143,14 @@ ALTER TABLE "recurring_schedules" ADD COLUMN "scheduling_mode" "scheduling_mode"
 ALTER TABLE "recurring_schedules" ADD COLUMN "generation_horizon_weeks" integer;--> statement-breakpoint
 ALTER TABLE "recurring_schedules" ADD COLUMN "ondemand_no_credits_outcome" "ondemand_no_credits_outcome";--> statement-breakpoint
 ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE text;--> statement-breakpoint
--- app_permission enum values 'quotas.view' and 'quotas.manage' are added
--- via ALTER TYPE ADD VALUE in migration 7c-quota_permissions_enum.
--- The destructive DROP TYPE / CREATE TYPE that was here has been removed
--- to avoid losing existing enum values on production databases.
+-- DEPENDENCY: The next statement casts "permissions"."key" from text → app_permission.
+-- This cast can ONLY succeed if the app_permission enum already contains the
+-- values 'quotas.view' and 'quotas.manage' (and all other values present in the
+-- permissions.key column). These enum values are added by manual migration
+-- 7c-quota_permissions_enum.sql (ALTER TYPE ADD VALUE). If 7c has NOT been
+-- applied first, the USING cast will raise "invalid input value for enum"
+-- for any row whose key is not a valid app_permission label.
+-- Ensure 7c-quota_permissions_enum runs before this Drizzle migration.
 ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE "app_permission" USING "key"::"app_permission";--> statement-breakpoint
 CREATE UNIQUE INDEX "quota_ledger_idempotency_key_unique_idx" ON "quota_ledger" ("idempotency_key");--> statement-breakpoint
 CREATE INDEX "quota_ledger_quota_id_created_at_idx" ON "quota_ledger" ("quota_id","created_at");--> statement-breakpoint

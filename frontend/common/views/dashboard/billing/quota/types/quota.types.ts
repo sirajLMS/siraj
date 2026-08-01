@@ -1,4 +1,9 @@
-import type { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  QuotaKind,
+  QuotaLedgerReason,
+  QuotaPeriodType,
+  QuotaStatus,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface QuotaItem {
   id: string;
@@ -26,7 +31,7 @@ export interface QuotaLedgerItem {
   recurringScheduleId: string | null;
   classInstanceId: string | null;
   delta: number;
-  reason: string;
+  reason: QuotaLedgerReason;
   reasonNote: string | null;
   actorUserId: string | null;
   createdAt: string;

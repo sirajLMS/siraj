@@ -25,18 +25,12 @@ export namespace QuotaLedgerRepository {
       idempotencyKey: string;
     }
   ): Promise<QuotaLedgerSelectType> => {
-    // Check for existing idempotency key first to avoid unique constraint violations
-    // that would roll back the parent transaction (including the atomic quota update)
-    const [existing] = await tx
-      .select()
-      .from(quotaLedger)
-      .where(eq(quotaLedger.idempotencyKey, input.idempotencyKey))
-      .limit(1);
-
-    if (existing) return existing;
-
+    // Atomic idempotency: INSERT ... ON CONFLICT (idempotency_key) DO NOTHING
+    // If the row already exists (conflict), the insert returns no rows and we
+    // fetch the existing record. This eliminates the TOCTOU race between the
+    // separate SELECT and INSERT that was present in the previous implementation.
     const now = new Date();
-    const [row] = await tx
+    const [inserted] = await tx
       .insert(quotaLedger)
       .values({
         quotaId: input.quotaId,
@@ -51,9 +45,20 @@ export namespace QuotaLedgerRepository {
         createdAt: now,
         updatedAt: now,
       })
+      .onConflictDoNothing({ target: quotaLedger.idempotencyKey })
       .returning();
-    if (!row) throw new Error("Quota ledger insert returned no rows");
-    return row;
+
+    if (inserted) return inserted;
+
+    // Conflict — a row with this idempotency key already exists; fetch it.
+    const [existing] = await tx
+      .select()
+      .from(quotaLedger)
+      .where(eq(quotaLedger.idempotencyKey, input.idempotencyKey))
+      .limit(1);
+
+    if (!existing) throw new Error("Quota ledger insert returned no rows and no existing row found");
+    return existing;
   };
 
   export const insertBatch = async (
@@ -135,36 +140,6 @@ export namespace QuotaLedgerRepository {
       .from(quotaLedger)
       .where(eq(quotaLedger.quotaId, quotaId));
     return Number(row?.value ?? 0);
-  };
-
-  export const findByClassInstanceId = async (
-    tx: ReadExecutor,
-    classInstanceId: string
-  ): Promise<QuotaLedgerSelectType[]> => {
-    const q = queryDb(tx);
-    return q
-      .select()
-      .from(quotaLedger)
-      .where(eq(quotaLedger.classInstanceId, classInstanceId))
-      .orderBy(desc(quotaLedger.createdAt));
-  };
-
-  export const findByRecurringScheduleId = async (
-    tx: ReadExecutor,
-    recurringScheduleId: string
-  ): Promise<QuotaLedgerSelectType[]> => {
-    const q = queryDb(tx);
-    return q
-      .select()
-      .from(quotaLedger)
-      .where(eq(quotaLedger.recurringScheduleId, recurringScheduleId))
-      .orderBy(desc(quotaLedger.createdAt));
-  };
-
-  export const findByIdempotencyKey = async (tx: ReadExecutor, key: string): Promise<QuotaLedgerSelectType | null> => {
-    const q = queryDb(tx);
-    const [row] = await q.select().from(quotaLedger).where(eq(quotaLedger.idempotencyKey, key)).limit(1);
-    return row ?? null;
   };
 
   export const computeBalance = async (

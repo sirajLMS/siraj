@@ -16,7 +16,9 @@ import { DashboardBillingQuota } from "@/shared/locale/namespaces";
 export function useQuotaFormViewModel(quotaId?: string) {
   const t = useAppTranslation(DashboardBillingQuota);
   const router = useRouter();
-  const { formData, setFormData, resetFormData } = useQuotaStore();
+  const formData = useQuotaStore(s => s.formData);
+  const setFormData = useQuotaStore(s => s.setFormData);
+  const resetFormData = useQuotaStore(s => s.resetFormData);
 
   const isEditing = Boolean(quotaId);
 
@@ -86,6 +88,8 @@ export function useQuotaFormViewModel(quotaId?: string) {
             periodType: formData.periodType as QuotaPeriodType | null,
             periodDays: formData.periodDays,
             priority: formData.priority,
+            idempotencyKey: null,
+            rolloverPolicy: null,
           },
         },
       });

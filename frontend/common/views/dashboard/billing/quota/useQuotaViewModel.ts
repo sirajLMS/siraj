@@ -14,7 +14,12 @@ import { DashboardBillingQuota } from "@/shared/locale/namespaces";
 
 export function useQuotaViewModel() {
   const t = useAppTranslation(DashboardBillingQuota);
-  const { filterStatus, filterKind, searchQuery, setFilterStatus, setFilterKind, setSearchQuery } = useQuotaStore();
+  const filterStatus = useQuotaStore(s => s.filterStatus);
+  const filterKind = useQuotaStore(s => s.filterKind);
+  const searchQuery = useQuotaStore(s => s.searchQuery);
+  const setFilterStatus = useQuotaStore(s => s.setFilterStatus);
+  const setFilterKind = useQuotaStore(s => s.setFilterKind);
+  const setSearchQuery = useQuotaStore(s => s.setSearchQuery);
 
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);

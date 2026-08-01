@@ -67,17 +67,6 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
     let sentCount = 0;
 
     for (const [teacherId, { count, timezone }] of teacherMap.entries()) {
-      // Per-teacher idempotency marker: atomic conditional insert prevents
-      // duplicate sends even under concurrent cron invocations.
-      const teacherIdempotencyKey = `ondemand_teacher_digest_sent_${dateHourStr}_${teacherId}`;
-      const alreadySent = await db
-        .select()
-        .from(systemSettings)
-        .where(eq(systemSettings.key, teacherIdempotencyKey))
-        .limit(1);
-
-      if (alreadySent.length > 0) continue;
-
       // Check current local hour in teacher's timezone
       try {
         const localHourStr = new Intl.DateTimeFormat("en-US", {
@@ -89,16 +78,12 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
         const currentLocalHour = Number.parseInt(localHourStr, 10) % 24;
 
         if (currentLocalHour === targetHour) {
-          const teacherName = teacherNameMap.get(teacherId) ?? "Teacher";
-
-          await QuotaNotificationService.sendOndemandTeacherDailyDigest({
-            affectedUserIds: [teacherId],
-            teacherName,
-            pendingCount: count,
-          });
-
-          // Write per-teacher idempotency marker atomically.
-          await db
+          // Per-teacher idempotency marker: atomic conditional insert with
+          // RETURNING eliminates the TOCTOU race. If the INSERT returns a
+          // row, this invocation won the race and should send the digest.
+          // If it returns nothing, a concurrent invocation already sent it.
+          const teacherIdempotencyKey = `ondemand_teacher_digest_sent_${dateHourStr}_${teacherId}`;
+          const inserted = await db
             .insert(systemSettings)
             .values({
               key: teacherIdempotencyKey,
@@ -108,7 +93,18 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
               category: SystemSettingCategory.Scheduling,
               updatedAt: nowUtc,
             })
-            .onConflictDoNothing();
+            .onConflictDoNothing()
+            .returning();
+
+          if (inserted.length === 0) continue;
+
+          const teacherName = teacherNameMap.get(teacherId) ?? "Teacher";
+
+          await QuotaNotificationService.sendOndemandTeacherDailyDigest({
+            affectedUserIds: [teacherId],
+            teacherName,
+            pendingCount: count,
+          });
 
           sentCount++;
         }

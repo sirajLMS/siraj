@@ -6,7 +6,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import type { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
-import { quotas } from "@/backend/db/schema";
+import { classInstances, quotas } from "@/backend/db/schema";
 import { QuotaLedgerReason, QuotaStatus } from "@/backend/enum";
 import type {
   QuotaPaginatedFilter,
@@ -278,6 +278,12 @@ export namespace QuotaRepository {
     return quotaRow ?? null;
   };
 
+  // NOTE(DUP-1): reserveClasses, releaseForRecurringSchedule, redeemForInstance, and
+  // releaseForInstance share the same UPDATE-version-bump + WHERE-guard + ledger-insert
+  // structure (~10 occurrences below). A shared `applyQuotaMutation` helper accepting
+  // the SET-clause, WHERE-guard, and ledger-row factory could consolidate the pattern.
+  // Not refactored here because each method's WHERE-guard and SET-clause differ subtly
+  // (remaining vs reservedClasses vs usedThisPeriod) and a refactor risks behavior change.
   export const reserveClasses = async (
     tx: DBTransaction,
     input: {
@@ -384,6 +390,25 @@ export namespace QuotaRepository {
       idempotencyKey: string;
     }
   ): Promise<QuotaSelectType> => {
+    // Lock the quota row for the duration of this transaction to prevent TOCTOU
+    // races between the balance check and the deduction UPDATE below.
+    const [locked] = await tx
+      .select()
+      .from(quotas)
+      .where(
+        and(
+          eq(quotas.id, input.quotaId),
+          eq(quotas.studentId, input.studentId),
+          eq(quotas.status, QuotaStatus.ACTIVE),
+          gt(quotas.remaining, 0),
+          isNull(quotas.deletedAt)
+        )
+      )
+      .for("update")
+      .limit(1);
+
+    if (!locked) throw new Error("Failed to redeem quota class: quota may be depleted or inactive");
+
     const now = new Date();
     const [updated] = await tx
       .update(quotas)
@@ -555,6 +580,22 @@ export namespace QuotaRepository {
       throw new Error("Quota redemption failed: insufficient remaining after concurrent deduction");
     }
 
+    // Mark the redeemed instances as quota-deducted. This is the root-cause fix for CR-2/CR-4:
+    // without it, clearWeeklySchedule (recurring.ts) skips pool-mode instances when deciding
+    // which to refund (because it filters by instance.quotaDeducted), leaking quota; and
+    // refreshPeriodic resets reservedClasses based on these flags, so missing flags cause
+    // reservedClasses to never be decremented, triggering a CHECK-constraint violation
+    // (reservedClasses + remaining > totalClasses).
+    if (redeemedCount > 0) {
+      const insertedInstanceIds = inserted.map(row => row.classInstanceId).filter((id): id is string => id !== null);
+      if (insertedInstanceIds.length > 0) {
+        await tx
+          .update(classInstances)
+          .set({ quotaDeducted: true, updatedAt: now })
+          .where(inArray(classInstances.id, insertedInstanceIds));
+      }
+    }
+
     return { redeemedCount, quota: updated };
   };
 
@@ -703,13 +744,6 @@ export namespace QuotaRepository {
           sql`${periodEndExpr} < ${nowTs}`
         )
       );
-  };
-
-  /**
-   * Reset the usedThisPeriod counter for a quota (called at the start of a new rollover period).
-   */
-  export const resetUsedThisPeriod = async (tx: DBTransaction, quotaId: string): Promise<void> => {
-    await tx.update(quotas).set({ usedThisPeriod: 0, updatedAt: new Date() }).where(eq(quotas.id, quotaId));
   };
 
   /**

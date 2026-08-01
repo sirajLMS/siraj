@@ -3,7 +3,6 @@ import type { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from 
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type QuotaSelectType = typeof quotas.$inferSelect;
-export type QuotaInsertType = typeof quotas.$inferInsert;
 
 export type QuotaReturnType = Omit<QuotaSelectType, "kind" | "status" | "periodType"> & {
   kind: QuotaKind;
@@ -12,7 +11,6 @@ export type QuotaReturnType = Omit<QuotaSelectType, "kind" | "status" | "periodT
 };
 
 export type QuotaLedgerSelectType = typeof quotaLedger.$inferSelect;
-export type QuotaLedgerInsertType = typeof quotaLedger.$inferInsert;
 
 export type QuotaLedgerReturnType = Omit<QuotaLedgerSelectType, "reason"> & {
   reason: QuotaLedgerReason;
@@ -36,6 +34,11 @@ export function mapQuotaLedgerToReturnType(row: QuotaLedgerSelectType): QuotaLed
 
 export type DateOrString = string | Date;
 
+export type QuotaRolloverPolicy = {
+  maxRolloverPercent?: number | null;
+  accumulationCap?: number | null;
+};
+
 export interface QuotaSubmitInput {
   studentId: string;
   kind: QuotaKind;
@@ -46,10 +49,7 @@ export interface QuotaSubmitInput {
   validFrom?: DateOrString | null;
   validUntil?: DateOrString | null;
   priority?: number | null;
-  rolloverPolicy?: {
-    maxRolloverPercent?: number | null;
-    accumulationCap?: number | null;
-  } | null;
+  rolloverPolicy?: QuotaRolloverPolicy | null;
 
   idempotencyKey?: string | null;
 }

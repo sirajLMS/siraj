@@ -5,7 +5,6 @@ import {
   QuotaPeriodTypePothosEnum,
   QuotaStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type { AvailableSlot } from "@/backend/services/scheduling/availability.service";
 import type {
   QuotaBalanceReturnType,
   QuotaExpirationBreakdown,
@@ -14,6 +13,7 @@ import type {
   QuotaPaginatedFilter,
   QuotaPaginatedResult,
   QuotaReturnType,
+  QuotaRolloverPolicy,
   QuotaSubmitInput,
   QuotaUpdateInput,
 } from "@/backend/types";
@@ -116,14 +116,13 @@ export const QuotaLedgerPaginatedResultPothosObject = QuotaLedgerPaginatedResult
   }),
 });
 
-const AvailableSlotRef = gqlSchemaBuilder.objectRef<AvailableSlot>("AvailableSlot");
+const QuotaRolloverPolicyInputPothosRef = gqlSchemaBuilder.inputRef<QuotaRolloverPolicy>("QuotaRolloverPolicyInput");
 
-export const AvailableSlotPothosObject = AvailableSlotRef.implement({
-  description: "A time slot with availability status",
+export const QuotaRolloverPolicyInputPothosObject = QuotaRolloverPolicyInputPothosRef.implement({
+  description: "Rollover policy configuration for periodic quotas",
   fields: t => ({
-    startAt: t.expose("startAt", { type: "DateTime" }),
-    endAt: t.expose("endAt", { type: "DateTime" }),
-    isAvailable: t.exposeBoolean("isAvailable"),
+    maxRolloverPercent: t.field({ type: "Float", required: false }),
+    accumulationCap: t.field({ type: "Int", required: false }),
   }),
 });
 
@@ -139,6 +138,8 @@ export const QuotaSubmitInputPothosRef = gqlSchemaBuilder.inputRef<QuotaSubmitIn
     periodType: t.field({ type: QuotaPeriodTypePothosEnum, required: false }),
     periodDays: t.int({ required: false }),
     priority: t.int({ required: false }),
+    rolloverPolicy: t.field({ type: QuotaRolloverPolicyInputPothosRef, required: false }),
+    idempotencyKey: t.string({ required: false }),
   }),
 });
 
