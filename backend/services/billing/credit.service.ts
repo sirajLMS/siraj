@@ -4,8 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository, StudentRepository } from "@/backend/db/repo";
 import { AppPermission, CreditReason } from "@/backend/enum";
 import { logger } from "@/backend/lib";
-import { PermissionsService } from "@/backend/services";
-import { resolveAssociatedViewer } from "@/backend/services/billing/permission-utils";
+import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type {
   CreditBalanceReturnType,
@@ -31,13 +30,6 @@ function isUniqueViolation(error: unknown): boolean {
     return (error as { code: string }).code === "23505";
   }
   return false;
-}
-
-async function requirePermission(actorUserId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {
-  const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
-  if (!hasPermission) {
-    throw new Error(tErrors.insufficientPermissions);
-  }
 }
 
 async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Promise<void> {
@@ -184,11 +176,8 @@ export namespace CreditService {
   ): Promise<CreditBalanceReturnType> {
     await assertStudentExists(studentId, tErrors);
 
-    const isAssociated = await resolveAssociatedViewer(actorUserId, studentId);
-    const hasCreditsPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.CREDITS_MANAGE);
-    if (!isAssociated && !hasCreditsPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    // V3-013: Use shared IDOR-scoping helper
+    await assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.CREDITS_MANAGE);
 
     const balance = await CreditRepository.getBalance(db, studentId);
     return {
@@ -206,11 +195,8 @@ export namespace CreditService {
   ): Promise<{ rows: CreditTransactionReturnType[]; totalCount: number }> {
     await assertStudentExists(studentId, tErrors);
 
-    const isAssociated = await resolveAssociatedViewer(actorUserId, studentId);
-    const hasCreditsPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.CREDITS_MANAGE);
-    if (!isAssociated && !hasCreditsPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    // V3-013: Use shared IDOR-scoping helper
+    await assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.CREDITS_MANAGE);
 
     const [rows, totalCount] = await Promise.all([
       CreditRepository.getTransactions(db, studentId, paginationArgs),

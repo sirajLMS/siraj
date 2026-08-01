@@ -1,21 +1,14 @@
 import { create } from "zustand";
 import {
   QuotaKind,
-  type QuotaPeriodType,
   type QuotaStatus,
+  type QuotaSubmitInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
-export interface QuotaFormState {
-  studentId: string;
-  kind: QuotaKind;
-  name: string;
-  totalClasses: number;
-  validFrom: string | null;
-  validUntil: string | null;
-  periodType: QuotaPeriodType | null;
-  periodDays: number | null;
-  priority: number;
-}
+export type QuotaFormState = Pick<
+  QuotaSubmitInput,
+  "studentId" | "kind" | "name" | "totalClasses" | "validFrom" | "validUntil" | "periodType" | "periodDays" | "priority"
+>;
 
 const initialFormState: QuotaFormState = {
   studentId: "",

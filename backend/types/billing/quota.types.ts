@@ -2,17 +2,21 @@ import type { quotaLedger, quotas } from "@/backend/db/schema";
 import type { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
 
 export type QuotaSelectType = typeof quotas.$inferSelect;
+export type QuotaInsertType = typeof quotas.$inferInsert;
 
-// NOTE: QuotaReturnType mirrors frontend QuotaItem — keep in sync to prevent drift
-export type QuotaReturnType = Omit<QuotaSelectType, "kind" | "status" | "periodType"> & {
+export type QuotaReturnType = Omit<
+  QuotaSelectType,
+  "kind" | "status" | "periodType" | "deletedAt" | "idempotencyKey" | "usedThisPeriod" | "periodAnchor"
+> & {
   kind: QuotaKind;
   status: QuotaStatus;
   periodType: QuotaPeriodType | null;
 };
 
 export type QuotaLedgerSelectType = typeof quotaLedger.$inferSelect;
+export type QuotaLedgerInsertType = typeof quotaLedger.$inferInsert;
 
-export type QuotaLedgerReturnType = Omit<QuotaLedgerSelectType, "reason"> & {
+export type QuotaLedgerReturnType = Omit<QuotaLedgerSelectType, "reason" | "updatedAt"> & {
   reason: QuotaLedgerReason;
 };
 
@@ -39,43 +43,39 @@ export type QuotaRolloverPolicy = {
   accumulationCap?: number | null;
 };
 
-export interface QuotaSubmitInput {
-  studentId: string;
-  kind: QuotaKind;
-  name: string;
-  totalClasses: number;
-  periodType?: QuotaPeriodType | null;
-  periodDays?: number | null;
-  validFrom?: DateOrString | null;
-  validUntil?: DateOrString | null;
+export type QuotaSubmitInput = Omit<
+  QuotaInsertType,
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "deletedAt"
+  | "version"
+  | "remaining"
+  | "usedThisPeriod"
+  | "reservedClasses"
+  | "periodAnchor"
+  | "status"
+  | "validFrom"
+  | "validUntil"
+  | "priority"
+  | "idempotencyKey"
+> & {
+  validFrom?: string | Date | null;
+  validUntil?: string | Date | null;
   priority?: number | null;
-  rolloverPolicy?: QuotaRolloverPolicy | null;
-
   idempotencyKey?: string | null;
-}
+  rolloverPolicy?: QuotaRolloverPolicy | null;
+};
 
-export interface QuotaUpdateInput {
+export type QuotaUpdateType = {
   name?: string | null;
   priority?: number | null;
   status?: QuotaStatus | null;
   validUntil?: DateOrString | null;
   version: number;
-}
+};
 
-export interface QuotaExpirationBreakdown {
-  quotaId: string;
-  quotaName: string;
-  validUntil: Date | null;
-  remaining: number;
-}
-
-export interface QuotaBalanceReturnType {
-  studentId: string;
-  totalActiveClasses: number;
-  totalRemaining: number;
-  totalReserved: number;
-  breakdownByExpiration: QuotaExpirationBreakdown[];
-}
+export type QuotaLedgerInsertInput = Omit<QuotaLedgerInsertType, "createdAt" | "updatedAt">;
 
 export interface QuotaPaginatedFilter {
   studentId?: string | null;

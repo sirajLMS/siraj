@@ -24,7 +24,7 @@ export function QuotaContainer() {
     <ResponsiveViewSwitch
       mobile={lazyViews.mobile}
       desktop={lazyViews.desktop}
-      props={viewModel as unknown as ComponentProps<typeof QuotaListDesktop>}
+      props={viewModel as ComponentProps<typeof QuotaListDesktop>}
     />
   );
 }

@@ -1,7 +1,11 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import type { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  QuotaKind,
+  type QuotaPeriodType,
+  type QuotaStatus,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 import {
   createQuotaMutationDocument,
@@ -33,17 +37,17 @@ export function useQuotaFormViewModel(quotaId?: string) {
 
   useEffect(() => {
     if (isEditing && existingData?.quota) {
-      const q = existingData.quota as unknown as QuotaItem;
+      const q = existingData.quota as QuotaItem;
       setFormData({
-        studentId: q.studentId,
-        kind: q.kind as QuotaKind,
-        name: q.name,
-        totalClasses: q.totalClasses,
+        studentId: q.studentId ?? "",
+        kind: (q.kind ?? QuotaKind.Package) as QuotaKind,
+        name: q.name ?? "",
+        totalClasses: q.totalClasses ?? 0,
         validFrom: q.validFrom,
         validUntil: q.validUntil,
         periodType: q.periodType as QuotaPeriodType | null,
         periodDays: q.periodDays,
-        priority: q.priority,
+        priority: q.priority ?? 10,
       });
     }
   }, [isEditing, existingData, setFormData]);

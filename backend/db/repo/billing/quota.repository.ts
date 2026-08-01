@@ -13,7 +13,7 @@ import type {
   QuotaPaginatedFilter,
   QuotaSelectType,
   QuotaSubmitInput,
-  QuotaUpdateInput,
+  QuotaUpdateType,
 } from "@/backend/types/billing/quota.types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
 
@@ -208,7 +208,7 @@ export namespace QuotaRepository {
   export const update = async (
     tx: DBTransaction,
     id: string,
-    input: QuotaUpdateInput & { actorUserId?: string | null }
+    input: QuotaUpdateType & { actorUserId?: string | null }
   ): Promise<QuotaSelectType> => {
     const now = new Date();
     const existing = await findById(tx, id);

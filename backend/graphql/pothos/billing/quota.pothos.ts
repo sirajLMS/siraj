@@ -6,8 +6,6 @@ import {
   QuotaStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
-  QuotaBalanceReturnType,
-  QuotaExpirationBreakdown,
   QuotaLedgerPaginatedResult,
   QuotaLedgerReturnType,
   QuotaPaginatedFilter,
@@ -15,7 +13,7 @@ import type {
   QuotaReturnType,
   QuotaRolloverPolicy,
   QuotaSubmitInput,
-  QuotaUpdateInput,
+  QuotaUpdateType,
 } from "@/backend/types";
 
 const QuotaRef = gqlSchemaBuilder.objectRef<QuotaReturnType>("Quota");
@@ -54,38 +52,9 @@ export const QuotaLedgerPothosObject = QuotaLedgerRef.implement({
     reason: t.expose("reason", { type: QuotaLedgerReasonPothosEnum }),
     classInstanceId: t.exposeString("classInstanceId", { nullable: true }),
     recurringScheduleId: t.exposeString("recurringScheduleId", { nullable: true }),
-    idempotencyKey: t.exposeString("idempotencyKey"),
     actorUserId: t.exposeString("actorUserId", { nullable: true }),
     reasonNote: t.exposeString("reasonNote", { nullable: true }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
-  }),
-});
-
-const QuotaExpirationBreakdownRef = gqlSchemaBuilder.objectRef<QuotaExpirationBreakdown>("QuotaExpirationBreakdown");
-
-export const QuotaExpirationBreakdownPothosObject = QuotaExpirationBreakdownRef.implement({
-  description: "Breakdown of an individual active quota contributing to a student's balance",
-  fields: t => ({
-    quotaId: t.exposeString("quotaId"),
-    quotaName: t.exposeString("quotaName"),
-    validUntil: t.expose("validUntil", { type: "DateTime", nullable: true }),
-    remaining: t.exposeInt("remaining"),
-  }),
-});
-
-const QuotaBalanceRef = gqlSchemaBuilder.objectRef<QuotaBalanceReturnType>("QuotaBalance");
-
-export const QuotaBalancePothosObject = QuotaBalanceRef.implement({
-  description: "Aggregated quota balance summary for a student",
-  fields: t => ({
-    studentId: t.exposeString("studentId"),
-    totalActiveClasses: t.exposeInt("totalActiveClasses"),
-    totalRemaining: t.exposeInt("totalRemaining"),
-    totalReserved: t.exposeInt("totalReserved"),
-    breakdownByExpiration: t.field({
-      type: [QuotaExpirationBreakdownPothosObject],
-      resolve: parent => parent.breakdownByExpiration,
-    }),
   }),
 });
 
@@ -132,18 +101,24 @@ export const QuotaSubmitInputPothosRef = gqlSchemaBuilder.inputRef<QuotaSubmitIn
     studentId: t.string({ required: true }),
     kind: t.field({ type: QuotaKindPothosEnum, required: true }),
     name: t.string({ required: true }),
+    // V3-073: No min/max validation in the GraphQL layer — the DB CHECK
+    // constraint on quotas.total_classes enforces >= 0. Adding Pothos
+    // validation would duplicate the DB-level guard.
     totalClasses: t.int({ required: true }),
     validFrom: t.field({ type: "DateTime", required: false }),
     validUntil: t.field({ type: "DateTime", required: false }),
     periodType: t.field({ type: QuotaPeriodTypePothosEnum, required: false }),
     periodDays: t.int({ required: false }),
+    // V3-073: No min/max validation — priority defaults to NULL in the DB
+    // and is validated at the application layer. Lower values = higher
+    // priority (FIFO selection). The DB constraints enforce valid ranges.
     priority: t.int({ required: false }),
     rolloverPolicy: t.field({ type: QuotaRolloverPolicyInputPothosRef, required: false }),
     idempotencyKey: t.string({ required: false }),
   }),
 });
 
-export const QuotaUpdateInputPothosRef = gqlSchemaBuilder.inputRef<QuotaUpdateInput>("QuotaUpdateInput").implement({
+export const QuotaUpdateInputPothosRef = gqlSchemaBuilder.inputRef<QuotaUpdateType>("QuotaUpdateInput").implement({
   description: "Input for updating an existing quota",
   fields: t => ({
     name: t.string({ required: false }),

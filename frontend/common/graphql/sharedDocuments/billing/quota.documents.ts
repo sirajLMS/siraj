@@ -2,49 +2,42 @@ import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
+const QuotaFieldsFragment = gql`
+  fragment QuotaFields on Quota {
+    id
+    studentId
+    name
+    kind
+    totalClasses
+    remaining
+    reservedClasses
+    validFrom
+    validUntil
+    status
+    periodType
+    periodDays
+    priority
+    version
+    createdAt
+    updatedAt
+  }
+`;
+
 export const quotaQueryDocument: TypedDocumentNode<Operations.QuotaQuery, Types.QueryQuotaArgs> = gql`
+  ${QuotaFieldsFragment}
   query Quota($id: ID!) {
     quota(id: $id) {
-      id
-      studentId
-      name
-      kind
-      totalClasses
-      remaining
-      reservedClasses
-      validFrom
-      validUntil
-      status
-      periodType
-      periodDays
-      priority
-      version
-      createdAt
-      updatedAt
+      ...QuotaFields
     }
   }
 `;
 
 export const quotasQueryDocument: TypedDocumentNode<Operations.QuotasQuery, Types.QueryQuotasArgs> = gql`
+  ${QuotaFieldsFragment}
   query Quotas($filter: QuotaPaginatedFilterInput, $pagination: PaginationArgs) {
     quotas(filter: $filter, pagination: $pagination) {
       rows {
-        id
-        studentId
-        name
-        kind
-        totalClasses
-        remaining
-        reservedClasses
-        validFrom
-        validUntil
-        status
-        periodType
-        periodDays
-        priority
-        version
-        createdAt
-        updatedAt
+        ...QuotaFields
       }
       totalCount
     }
@@ -75,24 +68,10 @@ export const createQuotaMutationDocument: TypedDocumentNode<
   Operations.CreateQuotaMutation,
   Types.MutationCreateQuotaArgs
 > = gql`
+  ${QuotaFieldsFragment}
   mutation CreateQuota($input: QuotaSubmitInput!) {
     createQuota(input: $input) {
-      id
-      studentId
-      name
-      kind
-      totalClasses
-      remaining
-      reservedClasses
-      validFrom
-      validUntil
-      status
-      periodType
-      periodDays
-      priority
-      version
-      createdAt
-      updatedAt
+      ...QuotaFields
     }
   }
 `;
@@ -101,24 +80,10 @@ export const updateQuotaMutationDocument: TypedDocumentNode<
   Operations.UpdateQuotaMutation,
   Types.MutationUpdateQuotaArgs
 > = gql`
+  ${QuotaFieldsFragment}
   mutation UpdateQuota($id: ID!, $input: QuotaUpdateInput!) {
     updateQuota(id: $id, input: $input) {
-      id
-      studentId
-      name
-      kind
-      totalClasses
-      remaining
-      reservedClasses
-      validFrom
-      validUntil
-      status
-      periodType
-      periodDays
-      priority
-      version
-      createdAt
-      updatedAt
+      ...QuotaFields
     }
   }
 `;

@@ -732,4 +732,45 @@ export namespace StudentRepository {
 
     return mapStudentProfileRow(results[0]);
   };
+
+  /**
+   * V3-023: Resolve student IDs for a parent and/or teacher without
+   * the caller needing to touch the DB directly. Returns students
+   * whose `parentId` matches, whose `primaryTeacherId` matches, or
+   * who have an active `teacher_assignments` row for the teacher.
+   */
+  export const findIdsByParentOrTeacher = async (
+    parentId: string | null,
+    teacherId: string | null,
+    tx?: DBTransaction
+  ): Promise<string[]> => {
+    if (!parentId && !teacherId) return [];
+    const queryDb = tx ?? db;
+    const orConditions: ReturnType<typeof eq>[] = [];
+    if (parentId) {
+      orConditions.push(eq(students.parentId, parentId));
+    }
+    if (teacherId) {
+      orConditions.push(eq(students.primaryTeacherId, teacherId));
+    }
+
+    const rows = await queryDb
+      .select({ id: students.id })
+      .from(students)
+      .where(or(...orConditions));
+
+    const studentIds = new Set(rows.map(r => r.id));
+
+    if (teacherId) {
+      const assignedRows = await queryDb
+        .select({ studentId: teacherAssignments.studentId })
+        .from(teacherAssignments)
+        .where(and(eq(teacherAssignments.teacherId, teacherId), isNull(teacherAssignments.endedAt)));
+      for (const r of assignedRows) {
+        studentIds.add(r.studentId);
+      }
+    }
+
+    return [...studentIds];
+  };
 }

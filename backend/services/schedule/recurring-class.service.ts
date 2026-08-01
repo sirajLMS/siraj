@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, isNull } from "drizzle-orm";
+import { and, eq, gte, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo";
@@ -11,7 +11,8 @@ import {
   type RecurringScheduleUpsertInput,
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
-import { classInstances, recurringSchedules, students } from "@/backend/db/schema";
+import { StudentRepository } from "@/backend/db/repo/students/student.repository";
+import { classInstances } from "@/backend/db/schema";
 import {
   AppPermission,
   type CurrencyCode,
@@ -66,8 +67,9 @@ export namespace RecurringClassService {
    * schedule is fetched once here and threaded into every dispatch.
    */
   async function resolveStudentName(studentId: string): Promise<string> {
-    const [row] = await db.select({ name: students.name }).from(students).where(eq(students.id, studentId)).limit(1);
-    return row?.name ?? "—";
+    // V3-022: Use StudentRepository instead of direct DB query
+    const student = await StudentRepository.findById(studentId);
+    return student?.name ?? "—";
   }
 
   /**
@@ -454,11 +456,8 @@ export namespace RecurringClassService {
 
       const now = new Date();
 
-      // 1. Soft-delete the schedule
-      await t
-        .update(recurringSchedules)
-        .set({ deletedAt: now, updatedAt: now })
-        .where(eq(recurringSchedules.id, recurringScheduleId));
+      // 1. Soft-delete the schedule (V3-021: delegated to repository)
+      await RecurringScheduleRepository.softDelete(recurringScheduleId, t);
 
       // 2. Soft-delete all non-deleted upcoming instances
       const upcomingInstances = await t
@@ -479,10 +478,8 @@ export namespace RecurringClassService {
       const cancelledInstanceIds: string[] = [];
       if (upcomingInstances.length > 0) {
         const instanceIds = upcomingInstances.map(i => i.id);
-        await t
-          .update(classInstances)
-          .set({ deletedAt: now, updatedAt: now })
-          .where(inArray(classInstances.id, instanceIds));
+        // V3-021: delegated to repository
+        await SchedulingRepository.softDeleteBatch(instanceIds, t);
         cancelledInstanceIds.push(...instanceIds);
       }
 
@@ -620,14 +617,11 @@ export namespace RecurringClassService {
           )
         );
 
-      // 2. Soft-delete all upcoming instances
+      // 2. Soft-delete all upcoming instances (V3-021: delegated to repository)
       const archivedInstanceIds: string[] = [];
       if (upcomingInstances.length > 0) {
         const instanceIds = upcomingInstances.map(i => i.id);
-        await t
-          .update(classInstances)
-          .set({ deletedAt: now, updatedAt: now })
-          .where(inArray(classInstances.id, instanceIds));
+        await SchedulingRepository.softDeleteBatch(instanceIds, t);
         archivedInstanceIds.push(...instanceIds);
       }
 
@@ -641,11 +635,8 @@ export namespace RecurringClassService {
         t
       );
 
-      // 4. Update the schedule mode
-      await t
-        .update(recurringSchedules)
-        .set({ schedulingMode: newMode, updatedAt: now })
-        .where(eq(recurringSchedules.id, recurringScheduleId));
+      // 4. Update the schedule mode (V3-021: delegated to repository)
+      await RecurringScheduleRepository.updateSchedulingMode(recurringScheduleId, newMode, t);
 
       return { archivedInstanceIds, quotaReleased, creditsRefunded };
     };

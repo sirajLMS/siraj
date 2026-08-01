@@ -190,4 +190,25 @@ export namespace RecurringScheduleRepository {
       return results;
     });
   }
+
+  /**
+   * V3-021: Soft-delete a recurring schedule by setting `deletedAt` and `updatedAt`.
+   */
+  export async function softDelete(id: string, tx?: DBTransaction): Promise<void> {
+    const now = new Date();
+    const q = queryDb(tx);
+    await q.update(recurringSchedules).set({ deletedAt: now, updatedAt: now }).where(eq(recurringSchedules.id, id));
+  }
+
+  /**
+   * V3-021: Update the scheduling mode of a recurring schedule.
+   */
+  export async function updateSchedulingMode(id: string, mode: string, tx?: DBTransaction): Promise<void> {
+    const now = new Date();
+    const q = queryDb(tx);
+    await q
+      .update(recurringSchedules)
+      .set({ schedulingMode: mode, updatedAt: now })
+      .where(eq(recurringSchedules.id, id));
+  }
 }

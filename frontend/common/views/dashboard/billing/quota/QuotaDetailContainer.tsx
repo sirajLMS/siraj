@@ -2,7 +2,7 @@
 
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import { Box, Button, Chip, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Grid, Paper, Skeleton, Stack, type Theme, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -14,6 +14,10 @@ import {
   formatQuotaKind,
   formatQuotaStatus,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
+
+const getDeltaColor = (value: number) => (theme: Theme) => ({
+  color: value > 0 ? theme.palette.success.main : value < 0 ? theme.palette.error.main : theme.palette.text.primary,
+});
 
 interface QuotaDetailContainerProps {
   quotaId: string;
@@ -48,13 +52,7 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
         flex: 0.8,
         minWidth: 100,
         renderCell: params => (
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 700,
-              color: params.value > 0 ? "success.main" : params.value < 0 ? "error.main" : "text.primary",
-            }}
-          >
+          <Typography variant="body2" sx={[{ fontWeight: 700 }, getDeltaColor(params.value)]}>
             {params.value > 0 ? `+${params.value}` : params.value}
           </Typography>
         ),
@@ -77,7 +75,11 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
     [t]
   );
 
-  if (loadingQuota || !quota) {
+  if (loadingQuota) {
+    return <Skeleton variant="rectangular" height={400} />;
+  }
+
+  if (!quota) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
         <Typography>{t.noQuotas}</Typography>
@@ -85,7 +87,7 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
     );
   }
 
-  const { label, color } = formatQuotaStatus(quota.status, t);
+  const { label, color } = formatQuotaStatus(quota.status ?? "", t);
 
   return (
     <Stack spacing={3} sx={{ py: 3 }}>
@@ -112,7 +114,7 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
               {t.fields.kind}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
-              {formatQuotaKind(quota.kind, t)}
+              {formatQuotaKind(quota.kind ?? "", t)}
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>

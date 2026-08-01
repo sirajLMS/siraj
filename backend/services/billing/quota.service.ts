@@ -10,18 +10,20 @@ import { classInstances } from "@/backend/db/schema";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { resolveAssociatedStudentIds, resolveAssociatedViewer } from "@/backend/services/billing/permission-utils";
+import {
+  assertAssociatedOrManage,
+  resolveAssociatedStudentIds,
+  resolveAssociatedViewer,
+  requirePermission as sharedRequirePermission,
+} from "@/backend/services/billing/permission-utils";
 import {
   mapQuotaLedgerToReturnType,
   mapQuotaToReturnType,
-  type QuotaBalanceReturnType,
-  type QuotaExpirationBreakdown,
   type QuotaLedgerPaginatedResult,
   type QuotaPaginatedFilter,
   type QuotaReturnType,
-  type QuotaSelectType,
   type QuotaSubmitInput,
-  type QuotaUpdateInput,
+  type QuotaUpdateType,
 } from "@/backend/types/billing/quota.types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
@@ -30,12 +32,10 @@ type ReadExecutor = DBTransaction | typeof db;
 
 export namespace QuotaService {
   /**
-   * Unified permission guard. Checks that `actorUserId` is present and holds
-   * the given `AppPermission`. Throws a localized error on failure.
-   *
-   * This is the single canonical permission guard for the quota service. It
-   * replaces the previous duplicated `requireManagePermission` /
-   * `requireViewPermission` helpers.
+   * V3-011: Thin wrapper around the shared `requirePermission` from
+   * `permission-utils.ts`. Resolves `tErrors` from the locale and
+   * delegates to the shared helper to avoid duplicating the permission
+   * check logic across services.
    */
   async function requirePermission(
     actorUserId: string | null | undefined,
@@ -46,11 +46,8 @@ export namespace QuotaService {
       const tErrors = getServerTranslations(locale).errorsTranslations;
       throw new Error(tErrors.unauthorizedAction);
     }
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    const tErrors = getServerTranslations(locale).errorsTranslations;
+    await sharedRequirePermission(actorUserId, permission, tErrors);
   }
 
   export const createQuota = async (
@@ -80,17 +77,10 @@ export namespace QuotaService {
       throw new Error(tErrors.notFound);
     }
 
-    // IDOR scoping: after the QUOTAS_VIEW gate, verify that the caller is
-    // either associated with the quota's student (parent or primary teacher)
-    // or holds QUOTAS_MANAGE (admin/teacher override). This prevents a user
-    // with QUOTAS_VIEW from reading any quota by id alone.
+    // V3-013: IDOR scoping — verify the caller is either associated with
+    // the quota's student or holds QUOTAS_MANAGE (admin/teacher override).
     const uid = actorUserId ?? "";
-    const isAssociated = await resolveAssociatedViewer(uid, quota.studentId);
-    const hasManage = await PermissionsService.hasPermission(uid, AppPermission.QUOTAS_MANAGE);
-    if (!isAssociated && !hasManage) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertAssociatedOrManage(uid, quota.studentId, getServerTranslations(locale).errorsTranslations);
 
     return mapQuotaToReturnType(quota);
   };
@@ -120,12 +110,8 @@ export namespace QuotaService {
       throw new Error(tErrors.notFound);
     }
 
-    const isAssociated = await resolveAssociatedViewer(actorUserId, quota.studentId);
-    const hasManage = await PermissionsService.hasPermission(actorUserId, AppPermission.QUOTAS_MANAGE);
-    if (!isAssociated && !hasManage) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    // V3-013: IDOR scoping — shared helper
+    await assertAssociatedOrManage(actorUserId, quota.studentId, getServerTranslations(locale).errorsTranslations);
 
     const [rawRows, totalCount] = await Promise.all([
       QuotaLedgerRepository.findByQuotaId(tx, quotaId, pagination),
@@ -190,6 +176,10 @@ export namespace QuotaService {
 
     return {
       rows: rows.map(mapQuotaToReturnType),
+      // V3-075: In-memory count for the multi-student branch. The DB query
+      // returns all matching rows which are then filtered in-memory by the
+      // associated-student set, so `rows.length` is the accurate count here.
+      // A dedicated COUNT query would add latency without improving accuracy.
       totalCount: rows.length,
     };
   };
@@ -201,6 +191,10 @@ export namespace QuotaService {
     locale = "en"
   ): Promise<QuotaReturnType[]> => {
     await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
+    // V3-036: IDOR scoping — ensure the caller is associated with this student
+    // or holds QUOTAS_MANAGE before returning their open quotas.
+    const uid = actorUserId ?? "";
+    await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
     const rows = await QuotaRepository.listActiveByStudent(tx, studentId);
     return rows.map(mapQuotaToReturnType);
   };
@@ -210,14 +204,34 @@ export namespace QuotaService {
     tx?: ReadExecutor,
     actorUserId?: string | null,
     locale = "en"
-  ): Promise<QuotaBalanceReturnType> => {
+  ): Promise<{
+    studentId: string;
+    totalActiveClasses: number;
+    totalRemaining: number;
+    totalReserved: number;
+    breakdownByExpiration: {
+      quotaId: string;
+      quotaName: string;
+      validUntil: Date | null;
+      remaining: number;
+    }[];
+  }> => {
     await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
+    // V3-035: IDOR scoping — ensure the caller is associated with this student
+    // or holds QUOTAS_MANAGE before returning their balance.
+    const uid = actorUserId ?? "";
+    await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
     const activeQuotas = await QuotaRepository.listActiveByStudent(tx, studentId);
 
     let totalActiveClasses = 0;
     let totalRemaining = 0;
     let totalReserved = 0;
-    const breakdownByExpiration: QuotaExpirationBreakdown[] = [];
+    const breakdownByExpiration: {
+      quotaId: string;
+      quotaName: string;
+      validUntil: Date | null;
+      remaining: number;
+    }[] = [];
 
     for (const q of activeQuotas) {
       totalActiveClasses += q.totalClasses;
@@ -243,7 +257,7 @@ export namespace QuotaService {
 
   export const updateQuota = async (
     id: string,
-    input: QuotaUpdateInput,
+    input: QuotaUpdateType,
     actorUserId?: string | null,
     _locale = "en",
     tx?: DBTransaction
@@ -590,15 +604,21 @@ export namespace QuotaService {
     });
   };
 
-  export const listPeriodicForRollover = async (tx: DBTransaction): Promise<QuotaSelectType[]> => {
-    return QuotaRepository.listPeriodicForRollover(tx);
+  // V3-028: Returns QuotaReturnType[] for type-safety at the service boundary.
+  // The repo returns raw QuotaSelectType rows; mapping here ensures callers
+  // don't accidentally access internal DB columns.
+  export const listPeriodicForRollover = async (tx: DBTransaction): Promise<QuotaReturnType[]> => {
+    const rows = await QuotaRepository.listPeriodicForRollover(tx);
+    return rows.map(mapQuotaToReturnType);
   };
 
+  // V3-029: Returns QuotaReturnType for type-safety at the service boundary.
   export const refreshPeriodic = async (
     tx: DBTransaction,
     quotaId: string,
     actorUserId?: string | null
-  ): Promise<QuotaSelectType> => {
-    return QuotaRepository.refreshPeriodic(tx, quotaId, actorUserId ?? null);
+  ): Promise<QuotaReturnType> => {
+    const row = await QuotaRepository.refreshPeriodic(tx, quotaId, actorUserId ?? null);
+    return mapQuotaToReturnType(row);
   };
 }

@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import {
@@ -7,10 +7,14 @@ import {
   performRescheduleValidations,
 } from "@/backend/db/repo/scheduling/shared";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
-import { classInstances, classStatusEvents, leaveRequests, parents, students, teachers } from "@/backend/db/schema";
-import { AppPermission, type CurrencyCode, RateSource } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { classInstances, classStatusEvents, leaveRequests, parents, teachers } from "@/backend/db/schema";
+import { type CurrencyCode, RateSource } from "@/backend/enum";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import {
+  checkStateChangeAuth,
+  validateRescheduleState,
+  validateStateTransition,
+} from "@/backend/services/scheduling/state-change-validation.service";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
@@ -48,70 +52,6 @@ export async function updateInstanceState(
     });
   }
   return updated;
-}
-
-async function checkStateChangeAuth(
-  t: DBTransaction,
-  existing: Types.ClassInstanceEntity,
-  actorUserId: string,
-  tErrors: ErrorsLabels
-) {
-  const isPrivilegedActor = await PermissionsService.hasAnyPermission(actorUserId, [
-    AppPermission.SESSION_OVERRIDE_ACTIONS,
-    AppPermission.SESSION_ACTIVATE_OVERRIDE,
-    AppPermission.SESSION_RESET,
-  ]);
-
-  if (isPrivilegedActor) {
-    return;
-  }
-
-  const [teacher] = await t.select({ id: teachers.id }).from(teachers).where(eq(teachers.userId, actorUserId)).limit(1);
-
-  const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
-
-  let isParentOfStudent = false;
-  if (parent) {
-    const [studentLink] = await t
-      .select({ id: students.id })
-      .from(students)
-      .where(and(eq(students.id, existing.studentId), eq(students.parentId, parent.id)))
-      .limit(1);
-    if (studentLink) {
-      isParentOfStudent = true;
-    }
-  }
-
-  const isTeacherOfClass = existing.teacherId === teacher?.id;
-
-  if (!isTeacherOfClass && !isParentOfStudent) {
-    throw new Error(tErrors.unauthorizedAction);
-  }
-}
-
-async function validateStateTransition(
-  existing: Types.ClassInstanceEntity,
-  state: Partial<Types.ClassInstanceInsertInput>,
-  tErrors: ErrorsLabels
-) {
-  if (state.executionState === "ACTIVATED") {
-    if (existing.executionState !== "NOT_ACTIVATED") {
-      throw new Error(tErrors.invalidTransition);
-    }
-  } else if (state.executionState === "RUNNING") {
-    if (existing.executionState !== "ACTIVATED") {
-      throw new Error(tErrors.invalidTransition);
-    }
-  } else if (state.executionState === "COMPLETED") {
-    const isValidStandard = existing.executionState === "RUNNING";
-    const isValidEarly =
-      existing.executionState === "ACTIVATED" && (state.outcome === "ABSENT" || state.outcome === "LEAVE");
-    const isValidAutomatedLeave = existing.executionState === "NOT_ACTIVATED" && state.outcome === "LEAVE";
-    const isValidAutomatedAbsent = existing.executionState === "NOT_ACTIVATED" && state.outcome === "ABSENT";
-    if (!isValidStandard && !isValidEarly && !isValidAutomatedLeave && !isValidAutomatedAbsent) {
-      throw new Error(tErrors.invalidTransition);
-    }
-  }
 }
 
 async function runStateChange(
@@ -294,22 +234,6 @@ async function executeProcessClassLeave(
   }
 
   return { originalId, successorId: successor.id };
-}
-
-async function validateRescheduleState(
-  original: Types.ClassInstanceEntity,
-  input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
-  tErrors: ErrorsLabels
-) {
-  if (original.id === input.id) {
-    throw new Error(tErrors.cannotRescheduleToSelf);
-  }
-  if (original.executionState === "COMPLETED" || original.outcome === "TAKEN") {
-    throw new Error(tErrors.cannotRescheduleCompleted);
-  }
-  if (original.isRescheduled) {
-    throw new Error(tErrors.cannotRescheduleAlreadyRescheduled);
-  }
 }
 
 export const activateClassInstance = async (

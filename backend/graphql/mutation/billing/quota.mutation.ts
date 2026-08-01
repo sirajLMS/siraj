@@ -1,4 +1,3 @@
-import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   QuotaPothosObject,
@@ -6,7 +5,6 @@ import {
   QuotaUpdateInputPothosRef,
 } from "@/backend/graphql/pothos/billing/quota.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 
 gqlSchemaBuilder.mutationField("createQuota", t =>
@@ -19,10 +17,8 @@ gqlSchemaBuilder.mutationField("createQuota", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.QUOTAS_MANAGE);
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
+      // V3-012: Permission check is enforced by QuotaService.createQuota
+      // (see requirePermission in quota.service.ts). No duplicate check here.
       return QuotaService.createQuota(args.input, actorUserId, ctx.locale);
     },
   })
@@ -39,10 +35,7 @@ gqlSchemaBuilder.mutationField("updateQuota", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.QUOTAS_MANAGE);
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
+      // V3-012: Permission check is enforced by QuotaService.updateQuota.
       return QuotaService.updateQuota(String(args.id), args.input, actorUserId, ctx.locale);
     },
   })
@@ -58,10 +51,7 @@ gqlSchemaBuilder.mutationField("deleteQuota", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.QUOTAS_MANAGE);
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
+      // V3-012: Permission check is enforced by QuotaService.deleteQuota.
       return QuotaService.deleteQuota(String(args.id), actorUserId, ctx.locale);
     },
   })

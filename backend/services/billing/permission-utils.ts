@@ -1,7 +1,45 @@
-import { eq, or } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
-import { students, teacherAssignments } from "@/backend/db/schema";
+import { AppPermission } from "@/backend/enum";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { ErrorsLabels } from "@/shared/locale";
+
+/**
+ * V3-011: Shared permission guard extracted from the duplicated
+ * `requirePermission` functions in `quota.service.ts` and `credit.service.ts`.
+ * Checks that `actorUserId` is present and holds the given `AppPermission`.
+ * Throws a localized error on failure.
+ */
+export async function requirePermission(
+  actorUserId: string,
+  permission: AppPermission,
+  tErrors: ErrorsLabels
+): Promise<void> {
+  const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
+  if (!hasPermission) {
+    throw new Error(tErrors.insufficientPermissions);
+  }
+}
+
+/**
+ * V3-013: Shared IDOR-scoping check extracted from the duplicated
+ * blocks in `quota.service.ts` and `credit.service.ts`. Verifies that
+ * the caller is either associated with the student (parent or primary
+ * teacher) or holds the given manage permission (default `QUOTAS_MANAGE`,
+ * callers can pass `CREDITS_MANAGE` for credit endpoints). Throws a
+ * localized error on failure.
+ */
+export async function assertAssociatedOrManage(
+  uid: string,
+  studentId: string,
+  tErrors: ErrorsLabels,
+  managePermission: AppPermission = AppPermission.QUOTAS_MANAGE
+): Promise<void> {
+  const isAssociated = await resolveAssociatedViewer(uid, studentId);
+  const hasManage = await PermissionsService.hasPermission(uid, managePermission);
+  if (!isAssociated && !hasManage) {
+    throw new Error(tErrors.insufficientPermissions);
+  }
+}
 
 /**
  * Resolves whether the calling user is associated with the given student as
@@ -34,6 +72,10 @@ export async function resolveAssociatedViewer(actorUserId: string, studentId: st
  * to scope IDOR-vulnerable list queries so a `QUOTAS_VIEW` caller only
  * sees their own students' quotas.
  *
+ * V3-023: Delegates to `StudentRepository.findIdsByParentOrTeacher`
+ * instead of running raw `db.select()` queries against the `students`
+ * and `teacher_assignments` tables.
+ *
  * Returns an empty array if the user is neither a parent nor a teacher.
  */
 export async function resolveAssociatedStudentIds(actorUserId: string): Promise<string[]> {
@@ -44,30 +86,5 @@ export async function resolveAssociatedStudentIds(actorUserId: string): Promise<
 
   if (!parent && !teacher) return [];
 
-  const orConditions: ReturnType<typeof eq>[] = [];
-  if (parent) {
-    orConditions.push(eq(students.parentId, parent.id));
-  }
-  if (teacher) {
-    orConditions.push(eq(students.primaryTeacherId, teacher.id));
-  }
-
-  const rows = await db
-    .select({ id: students.id })
-    .from(students)
-    .where(or(...orConditions));
-
-  const studentIds = new Set(rows.map(r => r.id));
-
-  if (teacher) {
-    const assignedRows = await db
-      .select({ studentId: teacherAssignments.studentId })
-      .from(teacherAssignments)
-      .where(eq(teacherAssignments.teacherId, teacher.id));
-    for (const r of assignedRows) {
-      studentIds.add(r.studentId);
-    }
-  }
-
-  return [...studentIds];
+  return StudentRepository.findIdsByParentOrTeacher(parent?.id ?? null, teacher?.id ?? null);
 }

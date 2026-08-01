@@ -4,6 +4,7 @@ import { requirePermissionForPage } from "@/backend/lib/auth/require-permission"
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { QuotaInsightsContainer } from "@/frontend/common/views/dashboard/billing/quota/QuotaInsightsContainer";
+import { QuotaInsightsData } from "@/frontend/common/views/dashboard/billing/quota/QuotaInsightsData";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
@@ -21,5 +22,9 @@ export default async function QuotaInsightsPage() {
     return;
   }
   await requirePermissionForPage(userId, [AppPermission.QUOTAS_VIEW], locale, context);
-  return <QuotaInsightsContainer />;
+  return (
+    <QuotaInsightsData>
+      {(quotas, loading) => <QuotaInsightsContainer quotas={quotas} loading={loading} />}
+    </QuotaInsightsData>
+  );
 }

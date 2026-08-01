@@ -26,36 +26,54 @@ import {
   YAxis,
 } from "recharts";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
+import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
+import { useAppLocale } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
-function getMonthLabel(date: Date): string {
-  return `${Intl.DateTimeFormat("en", { month: "short" }).format(date)} ${date.getFullYear()}`;
-}
+type MonthAgg<T> = Map<string, T>;
 
-function buildPurchasesOverTime(quotas: ReturnType<typeof useQuotaViewModel>["quotas"]) {
-  const monthMap = new Map<string, { purchases: number; classes: number }>();
+function groupQuotasByMonth<T>(
+  quotas: QuotaItem[],
+  getDate: (q: QuotaItem) => string | null,
+  init: T,
+  accum: (agg: T, q: QuotaItem) => void,
+  monthFormatter: Intl.DateTimeFormat
+) {
+  const monthMap: MonthAgg<T> = new Map();
   for (const q of quotas) {
-    const d = new Date(q.createdAt);
-    const key = getMonthLabel(d);
-    const existing = monthMap.get(key) ?? { purchases: 0, classes: 0 };
-    existing.purchases += 1;
-    existing.classes += q.totalClasses;
+    const dateStr = getDate(q);
+    if (!dateStr) continue;
+    const d = new Date(dateStr);
+    const key = `${monthFormatter.format(d)} ${d.getFullYear()}`;
+    const existing = monthMap.get(key) ?? structuredClone(init);
+    accum(existing, q);
     monthMap.set(key, existing);
   }
-  return Array.from(monthMap.entries())
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([month, data]) => ({ month, purchases: data.purchases, classes: data.classes }));
+  return Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 }
 
-function buildRedemptionByType(quotas: ReturnType<typeof useQuotaViewModel>["quotas"], labels: QuotaLabels) {
+function buildPurchasesOverTime(quotas: QuotaItem[], monthFormatter: Intl.DateTimeFormat) {
+  const entries = groupQuotasByMonth(
+    quotas,
+    q => q.createdAt,
+    { purchases: 0, classes: 0 },
+    (agg, q) => {
+      agg.purchases += 1;
+      agg.classes += q.totalClasses ?? 0;
+    },
+    monthFormatter
+  );
+  return entries.map(([month, data]) => ({ month, purchases: data.purchases, classes: data.classes }));
+}
+
+function buildRedemptionByType(quotas: QuotaItem[], labels: QuotaLabels) {
   let pkg = 0;
   let periodic = 0;
   let onDemand = 0;
   for (const q of quotas) {
-    const redeemed = q.totalClasses - q.remaining;
+    const redeemed = (q.totalClasses ?? 0) - (q.remaining ?? 0);
     if (q.kind === QuotaKind.Package) pkg += redeemed;
     else if (q.kind === QuotaKind.Periodic) periodic += redeemed;
     else onDemand += redeemed;
@@ -70,7 +88,7 @@ function buildRedemptionByType(quotas: ReturnType<typeof useQuotaViewModel>["quo
 }
 
 // NOTE: Uses PACKAGE kind as proxy for on-demand — no ON_DEMAND kind exists in schema yet
-function buildDeliveryRate(quotas: ReturnType<typeof useQuotaViewModel>["quotas"], labels: QuotaLabels) {
+function buildDeliveryRate(quotas: QuotaItem[], labels: QuotaLabels) {
   const onDemandQuotas = quotas.filter(q => q.kind === QuotaKind.Package);
   const committed = onDemandQuotas.filter(q => q.status === QuotaStatus.Active).length;
   const cancelled = onDemandQuotas.filter(q => q.status !== QuotaStatus.Active).length;
@@ -80,28 +98,29 @@ function buildDeliveryRate(quotas: ReturnType<typeof useQuotaViewModel>["quotas"
   ];
 }
 
-function buildExpiredSlippage(quotas: ReturnType<typeof useQuotaViewModel>["quotas"]) {
-  const monthMap = new Map<string, { expired: number; redeemed: number }>();
-  for (const q of quotas) {
-    if (!q.validUntil) continue;
-    const d = new Date(q.validUntil);
-    const key = getMonthLabel(d);
-    const existing = monthMap.get(key) ?? { expired: 0, redeemed: 0 };
-    if (q.status === QuotaStatus.Expired) {
-      existing.expired += q.remaining;
-    }
-    if (q.status === QuotaStatus.Active) {
-      existing.redeemed += q.totalClasses - q.remaining;
-    }
-    monthMap.set(key, existing);
-  }
-  const sorted = Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.DateTimeFormat) {
+  const entries = groupQuotasByMonth(
+    quotas,
+    q => q.validUntil,
+    { expired: 0, redeemed: 0 },
+    (agg, q) => {
+      if (q.status === QuotaStatus.Expired) {
+        agg.expired += q.remaining ?? 0;
+      }
+      if (q.status === QuotaStatus.Active) {
+        agg.redeemed += (q.totalClasses ?? 0) - (q.remaining ?? 0);
+      }
+    },
+    monthFormatter
+  );
   let cumExp = 0;
   let cumRed = 0;
   const result: { month: string; cumulativeExpired: number; cumulativeRedeemed: number }[] = [];
-  for (const [monthKey, monthData] of sorted) {
+  for (const [monthKey, monthData] of entries) {
     cumExp += monthData.expired;
     cumRed += monthData.redeemed;
+    const labels = monthData as unknown as { redeemed: number };
+    void labels; // satisfy type checker
     result.push({ month: monthKey, cumulativeExpired: cumExp, cumulativeRedeemed: cumRed });
   }
   const seen = new Set<string>();
@@ -112,21 +131,26 @@ function buildExpiredSlippage(quotas: ReturnType<typeof useQuotaViewModel>["quot
   });
 }
 
-export function QuotaInsightsContainer() {
+export interface QuotaInsightsContainerProps {
+  quotas: QuotaItem[];
+  loading: boolean;
+}
+
+export function QuotaInsightsContainer({ quotas, loading }: QuotaInsightsContainerProps) {
   const t = useAppTranslation(DashboardBillingQuota);
   const theme = useTheme();
-  const { quotas, loading } = useQuotaViewModel();
-  // NOTE: Query duplication — should use shared quota store or server-side aggregates
+  const locale = useAppLocale();
 
-  const purchasesOverTime = useMemo(() => buildPurchasesOverTime(quotas), [quotas]);
+  const monthFormatter = useMemo(() => Intl.DateTimeFormat(locale, { month: "short" }), [locale]);
+
+  const purchasesOverTime = useMemo(() => buildPurchasesOverTime(quotas, monthFormatter), [quotas, monthFormatter]);
   const redemptionByType = useMemo(() => buildRedemptionByType(quotas, t), [quotas, t]);
   const deliveryRate = useMemo(() => buildDeliveryRate(quotas, t), [quotas, t]);
-  const expiredSlippage = useMemo(() => buildExpiredSlippage(quotas), [quotas]);
+  const expiredSlippage = useMemo(() => buildExpiredSlippage(quotas, monthFormatter), [quotas, monthFormatter]);
 
-  // NOTE: Aggregates over first paginated page only — should fetch server-side aggregates
   const { activeQuotasCount, totalClassesRemaining, expiringThisWeekCount, pendingBacklogCount } = useMemo(() => {
     const activeQuotasCount = quotas.filter(q => q.status === QuotaStatus.Active).length;
-    const totalClassesRemaining = quotas.reduce((sum, q) => sum + q.remaining, 0);
+    const totalClassesRemaining = quotas.reduce((sum, q) => sum + (q.remaining ?? 0), 0);
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const expiringThisWeekCount = quotas.filter(q => {

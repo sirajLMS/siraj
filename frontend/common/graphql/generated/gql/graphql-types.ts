@@ -3628,15 +3628,6 @@ export enum OnDemandNoCreditsOutcome {
   RemindOnly = 'REMIND_ONLY'
 }
 
-export enum OnDemandStatus {
-  Available = 'AVAILABLE',
-  Cancelled = 'CANCELLED',
-  Converted = 'CONVERTED',
-  NoCreditsAbsent = 'NO_CREDITS_ABSENT',
-  NoCreditsCancelled = 'NO_CREDITS_CANCELLED',
-  PendingCredit = 'PENDING_CREDIT'
-}
-
 /** Summary metrics for the staff onboarding process */
 export type OnboardingMetrics = {
   __typename?: 'OnboardingMetrics';
@@ -4890,25 +4881,6 @@ export type Quota = {
   version: Maybe<Scalars['Int']['output']>;
 };
 
-/** Aggregated quota balance summary for a student */
-export type QuotaBalance = {
-  __typename?: 'QuotaBalance';
-  breakdownByExpiration: Maybe<Array<QuotaExpirationBreakdown>>;
-  studentId: Maybe<Scalars['String']['output']>;
-  totalActiveClasses: Maybe<Scalars['Int']['output']>;
-  totalRemaining: Maybe<Scalars['Int']['output']>;
-  totalReserved: Maybe<Scalars['Int']['output']>;
-};
-
-/** Breakdown of an individual active quota contributing to a student's balance */
-export type QuotaExpirationBreakdown = {
-  __typename?: 'QuotaExpirationBreakdown';
-  quotaId: Maybe<Scalars['String']['output']>;
-  quotaName: Maybe<Scalars['String']['output']>;
-  remaining: Maybe<Scalars['Int']['output']>;
-  validUntil: Maybe<Scalars['DateTime']['output']>;
-};
-
 export enum QuotaKind {
   Package = 'PACKAGE',
   Periodic = 'PERIODIC'
@@ -4922,7 +4894,6 @@ export type QuotaLedger = {
   createdAt: Maybe<Scalars['DateTime']['output']>;
   delta: Maybe<Scalars['Int']['output']>;
   id: Maybe<Scalars['String']['output']>;
-  idempotencyKey: Maybe<Scalars['String']['output']>;
   quotaId: Maybe<Scalars['String']['output']>;
   reason: Maybe<QuotaLedgerReason>;
   reasonNote: Maybe<Scalars['String']['output']>;

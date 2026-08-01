@@ -2749,15 +2749,6 @@ enum OnDemandNoCreditsOutcome {
   REMIND_ONLY
 }
 
-enum OnDemandStatus {
-  AVAILABLE
-  CANCELLED
-  CONVERTED
-  NO_CREDITS_ABSENT
-  NO_CREDITS_CANCELLED
-  PENDING_CREDIT
-}
-
 """Summary metrics for the staff onboarding process"""
 type OnboardingMetrics {
   activeStaff: Int
@@ -3521,25 +3512,6 @@ type Quota {
   version: Int
 }
 
-"""Aggregated quota balance summary for a student"""
-type QuotaBalance {
-  breakdownByExpiration: [QuotaExpirationBreakdown!]
-  studentId: String
-  totalActiveClasses: Int
-  totalRemaining: Int
-  totalReserved: Int
-}
-
-"""
-Breakdown of an individual active quota contributing to a student's balance
-"""
-type QuotaExpirationBreakdown {
-  quotaId: String
-  quotaName: String
-  remaining: Int
-  validUntil: DateTime
-}
-
 enum QuotaKind {
   PACKAGE
   PERIODIC
@@ -3552,7 +3524,6 @@ type QuotaLedger {
   createdAt: DateTime
   delta: Int
   id: String
-  idempotencyKey: String
   quotaId: String
   reason: QuotaLedgerReason
   reasonNote: String

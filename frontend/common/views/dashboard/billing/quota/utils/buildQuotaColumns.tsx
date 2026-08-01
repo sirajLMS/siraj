@@ -26,7 +26,7 @@ export function buildQuotaColumns(t: QuotaLabels): GridColDef<QuotaItem>[] {
       headerName: t.fields.kind,
       flex: 1,
       minWidth: 120,
-      renderCell: params => <Chip label={formatQuotaKind(params.value, t)} size="small" variant="outlined" />,
+      renderCell: params => <Chip label={formatQuotaKind(params.value ?? "", t)} size="small" variant="outlined" />,
     },
     {
       field: "status",
@@ -34,7 +34,7 @@ export function buildQuotaColumns(t: QuotaLabels): GridColDef<QuotaItem>[] {
       flex: 1,
       minWidth: 120,
       renderCell: params => {
-        const { label, color } = formatQuotaStatus(params.value, t);
+        const { label, color } = formatQuotaStatus(params.value ?? "", t);
         return <Chip label={label} size="small" color={color} />;
       },
     },

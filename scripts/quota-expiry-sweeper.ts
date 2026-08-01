@@ -5,7 +5,7 @@ import { QuotaStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
-import type { QuotaSelectType } from "@/backend/types/billing/quota.types";
+import type { QuotaReturnType, QuotaSelectType } from "@/backend/types/billing/quota.types";
 
 /** Quotas with validUntil within this many days are considered "expiring soon". */
 const EXPIRY_NOTICE_DAYS = 7;
@@ -31,7 +31,7 @@ interface QuotaNotificationTarget {
  * back to the student's own userId so the notification still reaches a user.
  */
 async function resolveQuotaNotificationTargets(
-  quotaRows: QuotaSelectType[]
+  quotaRows: QuotaReturnType[] | QuotaSelectType[]
 ): Promise<Map<string, QuotaNotificationTarget>> {
   if (quotaRows.length === 0) return new Map();
 

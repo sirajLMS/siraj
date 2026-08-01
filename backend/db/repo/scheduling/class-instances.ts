@@ -335,3 +335,13 @@ export async function getOndemandPendingInstances(
     .orderBy(classInstances.scheduledStartAt)
     .limit(limit);
 }
+
+/**
+ * V3-021: Soft-delete multiple class instances in a single batch UPDATE.
+ */
+export const softDeleteBatch = async (ids: string[], tx?: DBTransaction): Promise<void> => {
+  if (ids.length === 0) return;
+  const now = new Date();
+  const q = queryDb(tx);
+  await q.update(classInstances).set({ deletedAt: now, updatedAt: now }).where(inArray(classInstances.id, ids));
+};
