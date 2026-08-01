@@ -202,7 +202,7 @@ describe("Teacher Onboarding GraphQL API", () => {
     // the test environment. This test documents the current behavior: the 51-char
     // phone is accepted. When the constraint directive is properly enforced, this
     // test should be updated to assert the mutation fails.
-    expect(result.error).toBeNull();
+    expect(result.error).toBeUndefined();
     expect(result.data?.createTeacher).toBeTruthy();
     expect(result.data?.createTeacher?.phone).toBe(tooLongPhone);
   });
