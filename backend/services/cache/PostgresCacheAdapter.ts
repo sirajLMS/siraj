@@ -144,6 +144,14 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   private async executePipelineCommand(cmd: { command: string; args: (string | number)[] }): Promise<unknown> {
     switch (cmd.command) {
+      case "del": {
+        const keys = cmd.args as string[];
+        for (const key of keys) {
+          await CacheDbRepository.del(key);
+        }
+        return keys.length;
+      }
+
       case "zremrangebyscore": {
         // For rate limiting: remove old entries outside the sliding window
         // Redis: ZREMRANGEBYSCORE key min max — removes members with score between min and max
