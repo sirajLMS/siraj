@@ -20,6 +20,9 @@ const T1_DAYS = 1;
 /** Half-day window (hours) — matches twice-daily cron cadence so we don't miss/double-send. */
 const WINDOW_HOURS = 12;
 
+/** Maximum number of reminder candidates to fetch per window (unbounded SELECT guard). */
+const MAX_REMINDER_CANDIDATES_PER_WINDOW = 500;
+
 interface ReminderCandidate {
   instanceId: string;
   studentId: string;
@@ -174,7 +177,8 @@ async function fetchReminderCandidates(
         sql`${classInstances.scheduledStartAt} >= ${windowStart.toISOString()}`,
         sql`${classInstances.scheduledStartAt} <= ${windowEnd.toISOString()}`
       )
-    );
+    )
+    .limit(MAX_REMINDER_CANDIDATES_PER_WINDOW);
 
   if (instances.length === 0) return [];
 

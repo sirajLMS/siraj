@@ -123,8 +123,11 @@ CREATE TABLE "quotas" (
         ("kind" = 'PACKAGE' AND "period_type" IS NULL AND "period_days" IS NULL AND "period_anchor" IS NULL) OR
         ("kind" = 'PERIODIC' AND "period_type" IS NOT NULL AND "period_days" IS NOT NULL)
       ),
+	CONSTRAINT "quotas_total_classes_positive_chk" CHECK ("total_classes" > 0),
+	CONSTRAINT "quotas_priority_non_negative_chk" CHECK ("priority" >= 0),
 	CONSTRAINT "quotas_remaining_non_negative_chk" CHECK ("remaining" >= 0),
-	CONSTRAINT "quotas_reserved_plus_remaining_chk" CHECK ("reserved_classes" + "remaining" <= "total_classes"),
+	CONSTRAINT "quotas_reserved_classes_non_negative_chk" CHECK ("reserved_classes" >= 0),
+	CONSTRAINT "quotas_reserved_not_exceed_remaining_chk" CHECK ("reserved_classes" <= "remaining"),
 	CONSTRAINT "quotas_used_this_period_non_negative_chk" CHECK ("used_this_period" >= 0),
 	CONSTRAINT "quotas_rollover_policy_valid_chk" CHECK (
         "rollover_policy" IS NULL OR (
@@ -173,6 +176,7 @@ CREATE UNIQUE INDEX "quotas_idempotency_key_unique_idx" ON "quotas" ("idempotenc
 CREATE INDEX "quotas_student_id_idx" ON "quotas" ("student_id");--> statement-breakpoint
 CREATE INDEX "quotas_student_status_remaining_idx" ON "quotas" ("student_id","status","remaining") WHERE deleted_at IS NULL AND status = 'ACTIVE' AND remaining > 0;--> statement-breakpoint
 CREATE INDEX "quotas_valid_until_idx" ON "quotas" ("valid_until") WHERE deleted_at IS NULL AND status = 'ACTIVE';--> statement-breakpoint
+CREATE INDEX "quotas_admin_list_idx" ON "quotas" ("student_id","status","deleted_at");--> statement-breakpoint
 CREATE INDEX "class_instances_ondemand_status_idx" ON "class_instances" ("ondemand_status");--> statement-breakpoint
 CREATE INDEX "recurring_schedules_quota_id_idx" ON "recurring_schedules" ("quota_id");--> statement-breakpoint
 ALTER TABLE "quota_ledger" ADD CONSTRAINT "quota_ledger_quota_id_quotas_id_fkey" FOREIGN KEY ("quota_id") REFERENCES "quotas"("id") ON DELETE RESTRICT;--> statement-breakpoint
@@ -225,6 +229,7 @@ ALTER TABLE "class_instances" DROP CONSTRAINT "class_instances_state_machine_chk
 --    DROP INDEX IF EXISTS "quotas_idempotency_key_unique_idx";
 --    DROP INDEX IF EXISTS "quotas_student_id_idx";
 --    DROP INDEX IF EXISTS "quotas_student_status_remaining_idx";
+--    DROP INDEX IF EXISTS "quotas_admin_list_idx";
 --    DROP INDEX IF EXISTS "quotas_valid_until_idx";
 --    DROP INDEX IF EXISTS "class_instances_ondemand_status_idx";
 --    DROP INDEX IF EXISTS "recurring_schedules_quota_id_idx";

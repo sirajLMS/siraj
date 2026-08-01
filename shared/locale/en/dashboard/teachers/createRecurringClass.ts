@@ -35,6 +35,24 @@ export const dashboardTeacherCreateRecurringClassEn: TeacherCreateRecurringClass
     removeOverride: "Remove Override",
     label: day => `Custom Time for ${day}`,
   },
+  scheduling: {
+    mode: "Scheduling Mode",
+    quotaId: "Quota ID",
+    earmarkedClasses: "Earmarked Classes",
+    generationHorizon: "Generation Horizon (weeks)",
+    ondemandNoCreditsOutcome: "On-Demand No Credits Outcome",
+    noMode: "None",
+    ondemandNoCredits: {
+      AutoCancel: "Skip",
+      AutoAbsentNoCredits: "Generate Anyway",
+      RemindOnly: "Remind Only",
+    },
+    modes: {
+      NumberOfClasses: "Fixed Schedule",
+      OnDemand: "On-Demand",
+      Quota: "Quota",
+    },
+  },
   actions: {
     create: "Create",
     cancel: "Cancel",

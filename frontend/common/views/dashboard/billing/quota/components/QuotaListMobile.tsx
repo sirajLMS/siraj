@@ -58,7 +58,7 @@ export function QuotaListMobile(props: ReturnType<typeof useQuotaViewModel>) {
 
                   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                     <Chip label={formatQuotaKind(quota.kind ?? "", t)} size="small" variant="outlined" />
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
                       {t.fields.validUntil}: {formatQuotaDate(quota.validUntil)}
                     </Typography>
                   </Stack>
@@ -67,7 +67,7 @@ export function QuotaListMobile(props: ReturnType<typeof useQuotaViewModel>) {
                     <Typography variant="body2">
                       {t.fields.remaining}: <strong>{quota.remaining ?? 0}</strong> / {quota.totalClasses ?? 0}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
                       {t.fields.reservedClasses}: {quota.reservedClasses ?? 0}
                     </Typography>
                   </Stack>

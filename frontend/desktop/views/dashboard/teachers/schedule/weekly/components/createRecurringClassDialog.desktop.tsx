@@ -209,6 +209,7 @@ function SchedulingFields({
   ondemandNoCreditsOutcome,
   setOndemandNoCreditsOutcome,
   mutationLoading,
+  t,
 }: {
   readonly schedulingMode: SchedulingMode | null;
   readonly setSchedulingMode: (value: SchedulingMode | null) => void;
@@ -221,40 +222,41 @@ function SchedulingFields({
   readonly ondemandNoCreditsOutcome: OnDemandNoCreditsOutcome | null;
   readonly setOndemandNoCreditsOutcome: (value: OnDemandNoCreditsOutcome | null) => void;
   readonly mutationLoading: boolean;
+  readonly t: TeacherCreateRecurringClassLabels;
 }) {
   return (
     <Stack sx={{ gap: 2 }}>
       <FormControl fullWidth>
         <InputLabel id="scheduling-mode-label" shrink>
-          Scheduling Mode
+          {t.scheduling.mode}
         </InputLabel>
         <Select
           labelId="scheduling-mode-label"
           id="scheduling-mode-select"
           value={schedulingMode ?? ""}
-          label="Scheduling Mode"
+          label={t.scheduling.mode}
           onChange={e => setSchedulingMode((e.target.value || null) as SchedulingMode | null)}
           disabled={mutationLoading}
           displayEmpty
         >
           <MenuItem value="">
-            <em>None</em>
+            <em>{t.scheduling.noMode}</em>
           </MenuItem>
-          <MenuItem value={SchedulingMode.NumberOfClasses}>Fixed Schedule</MenuItem>
-          <MenuItem value={SchedulingMode.OnDemand}>On-Demand</MenuItem>
-          <MenuItem value={SchedulingMode.Quota}>Quota</MenuItem>
+          <MenuItem value={SchedulingMode.NumberOfClasses}>{t.scheduling.modes.NumberOfClasses}</MenuItem>
+          <MenuItem value={SchedulingMode.OnDemand}>{t.scheduling.modes.OnDemand}</MenuItem>
+          <MenuItem value={SchedulingMode.Quota}>{t.scheduling.modes.Quota}</MenuItem>
         </Select>
       </FormControl>
       <TextField
         fullWidth
-        label="Quota ID"
+        label={t.scheduling.quotaId}
         value={quotaId ?? ""}
         onChange={e => setQuotaId(e.target.value || null)}
         disabled={mutationLoading}
       />
       <TextField
         fullWidth
-        label="Earmarked Classes"
+        label={t.scheduling.earmarkedClasses}
         type="number"
         value={earmarkedClasses ?? ""}
         onChange={e => {
@@ -265,7 +267,7 @@ function SchedulingFields({
       />
       <TextField
         fullWidth
-        label="Generation Horizon (weeks)"
+        label={t.scheduling.generationHorizon}
         type="number"
         slotProps={{ htmlInput: { min: 1, max: 52 } }}
         value={generationHorizonWeeks ?? ""}
@@ -277,23 +279,25 @@ function SchedulingFields({
       />
       <FormControl fullWidth>
         <InputLabel id="ondemand-no-credits-outcome-label" shrink>
-          On-Demand No Credits Outcome
+          {t.scheduling.ondemandNoCreditsOutcome}
         </InputLabel>
         <Select
           labelId="ondemand-no-credits-outcome-label"
           id="ondemand-no-credits-outcome-select"
           value={ondemandNoCreditsOutcome ?? ""}
-          label="On-Demand No Credits Outcome"
+          label={t.scheduling.ondemandNoCreditsOutcome}
           onChange={e => setOndemandNoCreditsOutcome((e.target.value || null) as OnDemandNoCreditsOutcome | null)}
           disabled={mutationLoading}
           displayEmpty
         >
           <MenuItem value="">
-            <em>None</em>
+            <em>{t.scheduling.noMode}</em>
           </MenuItem>
-          <MenuItem value={OnDemandNoCreditsOutcome.AutoCancel}>Skip</MenuItem>
-          <MenuItem value={OnDemandNoCreditsOutcome.AutoAbsentNoCredits}>Generate Anyway</MenuItem>
-          <MenuItem value={OnDemandNoCreditsOutcome.RemindOnly}>Remind Only</MenuItem>
+          <MenuItem value={OnDemandNoCreditsOutcome.AutoCancel}>{t.scheduling.ondemandNoCredits.AutoCancel}</MenuItem>
+          <MenuItem value={OnDemandNoCreditsOutcome.AutoAbsentNoCredits}>
+            {t.scheduling.ondemandNoCredits.AutoAbsentNoCredits}
+          </MenuItem>
+          <MenuItem value={OnDemandNoCreditsOutcome.RemindOnly}>{t.scheduling.ondemandNoCredits.RemindOnly}</MenuItem>
         </Select>
       </FormControl>
     </Stack>
@@ -488,6 +492,7 @@ function DialogFormContent({
           ondemandNoCreditsOutcome={state.ondemandNoCreditsOutcome}
           setOndemandNoCreditsOutcome={state.setOndemandNoCreditsOutcome}
           mutationLoading={mutationLoading}
+          t={t}
         />
         <DayScheduleList
           days={days}

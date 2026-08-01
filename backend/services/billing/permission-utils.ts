@@ -23,10 +23,10 @@ export async function requirePermission(
 /**
  * V3-013: Shared IDOR-scoping check extracted from the duplicated
  * blocks in `quota.service.ts` and `credit.service.ts`. Verifies that
- * the caller is either associated with the student (parent or primary
- * teacher) or holds the given manage permission (default `QUOTAS_MANAGE`,
- * callers can pass `CREDITS_MANAGE` for credit endpoints). Throws a
- * localized error on failure.
+ * the caller is the student themselves, the student's parent, the
+ * student's primary teacher, or holds the given manage permission
+ * (default `QUOTAS_MANAGE`; callers can pass `CREDITS_MANAGE` for
+ * credit endpoints). Throws a localized error on failure.
  */
 export async function assertAssociatedOrManage(
   uid: string,
@@ -42,49 +42,68 @@ export async function assertAssociatedOrManage(
 }
 
 /**
- * Resolves whether the calling user is associated with the given student as
- * the student's parent or primary teacher. Used to scope IDOR-vulnerable
- * reads so a caller with QUOTAS_VIEW can only access their own students'
- * data; admins/teachers with QUOTAS_MANAGE bypass via the permission check.
+ * Resolves whether the calling user is associated with the given student —
+ * as the student themselves, the student's parent, or the student's primary
+ * teacher. Used to scope IDOR-vulnerable reads so a caller with QUOTAS_VIEW
+ * can only access their own students' data; admins/teachers with
+ * QUOTAS_MANAGE bypass via the permission check.
  *
  * The parent and teacher lookups are independent of each other, so they run
- * in parallel via `Promise.all` to reduce sequential query latency.
+ * in parallel via `Promise.all` to reduce sequential query latency. The
+ * student-self check uses the profile already fetched before those lookups.
  */
 export async function resolveAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
   const profile = await StudentRepository.findProfileById(studentId);
   if (!profile) return false;
+
+  // (b) The user IS the student themselves
+  if (profile.userId === actorUserId) return true;
 
   const [parent, teacher] = await Promise.all([
     ParentRepository.findByUserId(actorUserId),
     TeacherRepository.findByUserId(actorUserId),
   ]);
 
-  if (parent?.id === profile?.parentId) return true;
-  if (teacher?.id === profile?.primaryTeacherId) return true;
+  // (a) The user is the student's parent
+  if (parent?.id === profile.parentId) return true;
+  // The user is the student's primary teacher
+  if (teacher?.id === profile.primaryTeacherId) return true;
 
   return false;
 }
 
 /**
  * Resolves the student IDs associated with the calling user — students
- * for whom they are the parent, the primary teacher, or an assigned
- * teacher (via `teacher_assignments`). Used by `QuotaService.listQuotas`
- * to scope IDOR-vulnerable list queries so a `QUOTAS_VIEW` caller only
- * sees their own students' quotas.
+ * for whom they are the student themselves, the parent, the primary
+ * teacher, or an assigned teacher (via `teacher_assignments`). Used by
+ * `QuotaService.listQuotas` to scope IDOR-vulnerable list queries so a
+ * `QUOTAS_VIEW` caller only sees their own students' quotas.
  *
  * V3-023: Delegates to `StudentRepository.findIdsByParentOrTeacher`
  * instead of running raw `db.select()` queries against the `students`
  * and `teacher_assignments` tables.
  *
- * Returns an empty array if the user is neither a parent nor a teacher.
+ * Returns an empty array if the user is neither a student, a parent,
+ * nor a teacher.
  */
 export async function resolveAssociatedStudentIds(actorUserId: string): Promise<string[]> {
-  const [parent, teacher] = await Promise.all([
+  const [parent, teacher, ownStudentId] = await Promise.all([
     ParentRepository.findByUserId(actorUserId),
     TeacherRepository.findByUserId(actorUserId),
+    StudentRepository.getStudentIdByUserId(actorUserId),
   ]);
 
-  if (!parent && !teacher) return [];
+  const studentIds: string[] = [];
 
-  return StudentRepository.findIdsByParentOrTeacher(parent?.id ?? null, teacher?.id ?? null);
+  // (b) The user IS a student — include their own student ID
+  if (ownStudentId) {
+    studentIds.push(ownStudentId);
+  }
+
+  if (!parent && !teacher && studentIds.length === 0) return [];
+
+  const associatedIds = await StudentRepository.findIdsByParentOrTeacher(parent?.id ?? null, teacher?.id ?? null);
+  const merged = new Set([...studentIds, ...associatedIds]);
+
+  return [...merged];
 }

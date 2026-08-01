@@ -1,4 +1,4 @@
-import { NotificationEventType } from "@/backend/enum";
+import { NotificationEventCategory, NotificationEventType } from "@/backend/enum";
 import { fanOutToUsers } from "@/backend/services/notification/notification-payloads.builders";
 import type { CommunicationPayload } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
@@ -24,7 +24,7 @@ function buildQuotaPayloads<L extends { readonly title: string; readonly body: (
   labels: (translations: NotificationsLabels) => L,
   bodyParams: B,
   eventType: NotificationEventType,
-  category: string,
+  category: NotificationEventCategory,
   input: { affectedUserIds: string[]; locale?: string }
 ): CommunicationPayload[] {
   if (input.affectedUserIds.length === 0) return [];
@@ -49,7 +49,7 @@ export function buildQuotaExpiringSoonPayloads(input: {
     t => t.quotaExpiringSoon,
     { quotaName: input.quotaName, validUntil: input.validUntil, remaining: input.remaining },
     NotificationEventType.QUOTA_EXPIRING_SOON,
-    "reminder",
+    NotificationEventCategory.REMINDER,
     input
   );
 }
@@ -63,7 +63,7 @@ export function buildQuotaExpiredPayloads(input: {
     t => t.quotaExpired,
     { quotaName: input.quotaName },
     NotificationEventType.QUOTA_EXPIRED,
-    "info",
+    NotificationEventCategory.INFO,
     input
   );
 }
@@ -79,7 +79,7 @@ export function buildQuotaLowBalancePayloads(input: {
     t => t.quotaLowBalance,
     { studentName: input.studentName, remaining: input.remaining, totalClasses: input.totalClasses },
     NotificationEventType.QUOTA_LOW_BALANCE,
-    "reminder",
+    NotificationEventCategory.REMINDER,
     input
   );
 }
@@ -94,7 +94,7 @@ export function buildOndemandInstancePendingCreditPayloads(input: {
     t => t.onDemandInstancePendingCredit,
     { studentName: input.studentName, scheduledStartAt: input.scheduledStartAt },
     NotificationEventType.ON_DEMAND_INSTANCE_PENDING_CREDIT,
-    "urgent",
+    NotificationEventCategory.URGENT,
     input
   );
 }
@@ -109,7 +109,7 @@ export function buildOndemandInstanceReminderT3Payloads(input: {
     t => t.onDemandInstanceReminderT3,
     { studentName: input.studentName, scheduledStartAt: input.scheduledStartAt },
     NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T3,
-    "reminder",
+    NotificationEventCategory.REMINDER,
     input
   );
 }
@@ -124,7 +124,7 @@ export function buildOndemandInstanceReminderT1Payloads(input: {
     t => t.onDemandInstanceReminderT1,
     { studentName: input.studentName, scheduledStartAt: input.scheduledStartAt },
     NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T1,
-    "urgent",
+    NotificationEventCategory.URGENT,
     input
   );
 }
@@ -139,7 +139,7 @@ export function buildOndemandTeacherDailyDigestPayloads(input: {
     t => t.onDemandTeacherDailyDigest,
     { teacherName: input.teacherName, pendingCount: input.pendingCount },
     NotificationEventType.ON_DEMAND_TEACHER_DAILY_DIGEST,
-    "digest",
+    NotificationEventCategory.DIGEST,
     input
   );
 }

@@ -202,7 +202,7 @@ export function QuotaInsightsContainer({ quotas, loading }: QuotaInsightsContain
                   <Inventory2OutlinedIcon />
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
                     {t.activeQuotasCount(activeQuotasCount)}
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
@@ -230,7 +230,7 @@ export function QuotaInsightsContainer({ quotas, loading }: QuotaInsightsContain
                   <NumbersOutlinedIcon />
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
                     {t.totalClassesRemaining(totalClassesRemaining)}
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>
@@ -258,7 +258,7 @@ export function QuotaInsightsContainer({ quotas, loading }: QuotaInsightsContain
                   <EventBusyOutlinedIcon />
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
                     {t.expiringThisWeekCount(expiringThisWeekCount)}
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 700 }}>

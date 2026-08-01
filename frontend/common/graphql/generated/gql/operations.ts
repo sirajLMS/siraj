@@ -3023,6 +3023,44 @@ export type DeleteQuotaMutationVariables = Exact<{
 
 export type DeleteQuotaMutation = DeleteQuotaMutation_Mutation;
 
+export type StudentQuotasQuery_studentQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentQuotasQuery_Query = { studentQuotas: Array<StudentQuotasQuery_studentQuotas_Quota> | null };
+
+
+export type StudentQuotasQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentQuotasQuery = StudentQuotasQuery_Query;
+
+export type StudentOpenQuotasQuery_studentOpenQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentOpenQuotasQuery_Query = { studentOpenQuotas: Array<StudentOpenQuotasQuery_studentOpenQuotas_Quota> | null };
+
+
+export type StudentOpenQuotasQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentOpenQuotasQuery = StudentOpenQuotasQuery_Query;
+
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown = { quotaId: string | null, quotaName: string | null, remaining: number | null, validUntil: string | null };
+
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance = { id: string | null, studentId: string | null, totalActiveClasses: number | null, totalRemaining: number | null, totalReserved: number | null, breakdownByExpiration: Array<QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown> | null };
+
+export type QuotaBalanceQuery_Query = { quotaBalance: QuotaBalanceQuery_quotaBalance_QuotaBalance | null };
+
+
+export type QuotaBalanceQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type QuotaBalanceQuery = QuotaBalanceQuery_Query;
+
 export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_nextUnpaidInvoice_NextUnpaidInvoiceSummary = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, dueDate: string | null, studentName: string | null };
 
 export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_outstandingByCurrency_BillingCurrencyTotal_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };

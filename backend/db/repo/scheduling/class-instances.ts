@@ -441,18 +441,22 @@ export async function findOverlappingInstancesForRange(
 /**
  * Batch-updates the execution state and on-demand status of multiple class
  * instances in a single UPDATE. Used by `QuotaService.refreshStudentOndemandInstances`
- * to flip PENDING_CREDIT instances to AVAILABLE. The WHERE clause guards on
- * `ondemandStatus = PENDING_CREDIT` to prevent TOCTOU races (a concurrent
- * transaction may have already flipped an instance to AVAILABLE).
+ * to flip PENDING_CREDIT instances to AVAILABLE, and by
+ * `ClassSessionService.markNoCreditsBatch` for no-credits resolution. The WHERE
+ * clause guards on `ondemandStatus = guardOndemandStatus` AND
+ * `deletedAt IS NULL` to prevent TOCTOU races (a concurrent transaction may
+ * have already flipped an instance or soft-deleted it).
+ *
+ * @returns Count of rows actually updated.
  */
 export async function updateOndemandStatusBatch(
   instanceIds: string[],
   updates: { executionState: string; ondemandStatus: string; updatedAt: Date },
   guardOndemandStatus: string,
   tx: DBTransaction
-): Promise<void> {
-  if (instanceIds.length === 0) return;
-  await t_updateOndemandStatusBatch(tx, instanceIds, updates, guardOndemandStatus);
+): Promise<number> {
+  if (instanceIds.length === 0) return 0;
+  return t_updateOndemandStatusBatch(tx, instanceIds, updates, guardOndemandStatus);
 }
 
 // Inline helper to keep the exported function signature clean
@@ -461,8 +465,8 @@ async function t_updateOndemandStatusBatch(
   instanceIds: string[],
   updates: { executionState: string; ondemandStatus: string; updatedAt: Date },
   guardOndemandStatus: string
-): Promise<void> {
-  await tx
+): Promise<number> {
+  const updated = await tx
     .update(classInstances)
     .set({
       executionState: updates.executionState,
@@ -472,7 +476,10 @@ async function t_updateOndemandStatusBatch(
     .where(
       and(
         inArray(classInstances.id, instanceIds),
-        eq(classInstances.ondemandStatus, guardOndemandStatus as OnDemandStatus)
+        eq(classInstances.ondemandStatus, guardOndemandStatus as OnDemandStatus),
+        isNull(classInstances.deletedAt)
       )
-    );
+    )
+    .returning({ id: classInstances.id });
+  return updated.length;
 }

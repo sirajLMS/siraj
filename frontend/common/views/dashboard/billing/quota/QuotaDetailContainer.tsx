@@ -15,9 +15,13 @@ import {
   formatQuotaStatus,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
 
-const getDeltaColor = (value: number) => (theme: Theme) => ({
-  color: value > 0 ? theme.palette.success.main : value < 0 ? theme.palette.error.main : theme.palette.text.primary,
-});
+function getDeltaColor(value: number) {
+  return (theme: Theme) => {
+    if (value > 0) return { color: theme.palette.success.main };
+    if (value < 0) return { color: theme.palette.error.main };
+    return { color: theme.palette.text.primary };
+  };
+}
 
 interface QuotaDetailContainerProps {
   quotaId: string;
@@ -110,7 +114,7 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
       <Paper variant="outlined" sx={{ p: 3 }}>
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {t.fields.kind}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
@@ -118,7 +122,7 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {t.fields.remaining} / {t.fields.totalClasses}
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -126,7 +130,7 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {t.fields.reservedClasses}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
@@ -134,13 +138,13 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {t.fields.validUntil}
             </Typography>
             <Typography variant="body1">{formatQuotaDate(quota.validUntil)}</Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {t.fields.priority}
             </Typography>
             <Typography variant="body1">{quota.priority}</Typography>

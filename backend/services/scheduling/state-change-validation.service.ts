@@ -1,6 +1,6 @@
-import { and, eq } from "drizzle-orm";
+import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import type { DBTransaction } from "@/backend/db/repo/scheduling/shared";
-import { parents, students, teachers } from "@/backend/db/schema";
+import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
@@ -36,20 +36,13 @@ export async function checkStateChangeAuth(
     return;
   }
 
-  const [teacher] = await t.select({ id: teachers.id }).from(teachers).where(eq(teachers.userId, actorUserId)).limit(1);
-
-  const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
+  const teacher = await TeacherRepository.findByUserId(actorUserId, t);
+  const parent = await ParentRepository.findByUserId(actorUserId, t);
 
   let isParentOfStudent = false;
   if (parent) {
-    const [studentLink] = await t
-      .select({ id: students.id })
-      .from(students)
-      .where(and(eq(students.id, existing.studentId), eq(students.parentId, parent.id)))
-      .limit(1);
-    if (studentLink) {
-      isParentOfStudent = true;
-    }
+    const associatedStudents = await ParentRepository.getAssociatedStudents(parent.id, t);
+    isParentOfStudent = associatedStudents.some(s => s.id === existing.studentId);
   }
 
   const isTeacherOfClass = existing.teacherId === teacher?.id;

@@ -1,9 +1,8 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
-import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
-import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
-import { ClassExecutionState, ClassType, DayOfWeek, OnDemandStatus, SchedulingMode } from "@/backend/enum";
+import { classInstances, quotas, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
+import { ClassExecutionState, ClassType, DayOfWeek, OnDemandStatus, QuotaStatus, SchedulingMode } from "@/backend/enum";
 
 import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";
@@ -12,6 +11,15 @@ import type { ClassInstanceInsertInput } from "@/backend/types";
 
 /** Maximum number of recurring schedules to process per batch (unbounded SELECT guard — RP2-8). */
 const MAX_SCHEDULES_PER_RUN = 500;
+
+/**
+ * Maximum overlapping existing instances to load per schedule window (unbounded
+ * SELECT guard — the query scans a slab of classInstances by date range +
+ * student/teacher equality). The 2-week horizon bounds cardinality in
+ * practice, but cap defensively to avoid unbounded growth for high-volume
+ * teachers.
+ */
+const MAX_OVERLAPPING_INSTANCES_PER_SCHEDULE = 1000;
 
 /**
  * Maps the short weekday name returned by `Intl.DateTimeFormat("en-US", { weekday: "short" })`
@@ -237,7 +245,8 @@ function buildOverlappingInstancesQuery(
         sql`${classInstances.scheduledEndAt} > ${startDate}`,
         sql`(${classInstances.studentId} = ${schedule.studentId} OR ${classInstances.teacherId} = ${schedule.teacherId})`
       )
-    );
+    )
+    .limit(MAX_OVERLAPPING_INSTANCES_PER_SCHEDULE);
 }
 
 /** Builds a Set of timestamp-based slot keys that are already taken by existing instances. */
@@ -313,18 +322,72 @@ function toClassInstanceInsertInput(p: PendingInstance): ClassInstanceInsertInpu
   } as ClassInstanceInsertInput;
 }
 
-/**
- * RBL2-3: Batch-inserts pending instances inside a single transaction with
- * SELECT FOR UPDATE on the student's on-demand instances so concurrent
- * generator invocations cannot oversell. Returns the number of rows inserted.
- */
-async function insertPendingInstances(
+async function generateInstancesForSchedule(
   schedule: typeof recurringSchedules.$inferSelect,
-  pendingInstances: PendingInstance[]
+  now: Date
 ): Promise<number> {
-  if (pendingInstances.length === 0) return 0;
+  const { startDate, scheduleEndDate } = computeScheduleDateRange(schedule, now);
 
-  return db.transaction(async tx => {
+  // RP2-1: Parallelise 2 independent read-only guards (schedule days,
+  // overlapping instances) that were previously sequential awaits.
+  // We query these outside the tx because they are read-only guards — an
+  // empty schedule-days result lets us short-circuit before acquiring a tx.
+  const [scheduleDays, overlappingInstances] = await Promise.all([
+    db
+      .select()
+      .from(recurringScheduleDays)
+      .where(and(eq(recurringScheduleDays.recurringScheduleId, schedule.id), eq(recurringScheduleDays.isActive, true))),
+    buildOverlappingInstancesQuery(schedule, startDate, scheduleEndDate),
+  ]);
+
+  if (scheduleDays.length === 0) return 0;
+
+  // RBL2-3: Balance read + decrement + instance insert run inside a single
+  // transaction with SELECT FOR UPDATE on the student's active quotas so
+  // concurrent generator runs cannot oversell instances via concurrent
+  // in-memory decrements.
+  const generated = await db.transaction(async tx => {
+    const [creditBalance, activeQuotas] = await Promise.all([
+      CreditRepository.getBalance(tx, schedule.studentId),
+      tx
+        .select()
+        .from(quotas)
+        .where(
+          and(eq(quotas.studentId, schedule.studentId), eq(quotas.status, QuotaStatus.ACTIVE), isNull(quotas.deletedAt))
+        )
+        .for("update"),
+    ]);
+
+    const totalQuotaRemaining = activeQuotas.reduce((sum, q) => sum + q.remaining, 0);
+    // NOTE: Mirrors QuotaService.refreshStudentOndemandInstances credit computation — keep in sync
+    const availableBalance = creditBalance.classesRemaining + totalQuotaRemaining;
+
+    // Verify-6: Only generate instances when the student has credit classes
+    // remaining. If classesRemaining is 0, skip instance generation entirely —
+    // quota-only balance should not produce AVAILABLE instances since the
+    // student has no purchased classes to attend.
+    if (creditBalance.classesRemaining <= 0) {
+      logger.debug(
+        `[OnDemandInstanceGenerator] Skipping schedule ${schedule.id} for student ${schedule.studentId} — classesRemaining is 0.`
+      );
+      return 0;
+    }
+
+    const existingConflicts = buildExistingConflictSet(schedule.id, overlappingInstances);
+
+    const { pendingInstances } = await generatePendingInstancesForRange(
+      schedule,
+      scheduleDays,
+      startDate,
+      scheduleEndDate,
+      availableBalance,
+      existingConflicts
+    );
+
+    // Insert pending instances inside the same transaction and lock the
+    // student's existing on-demand instances so concurrent runs serialize.
+    if (pendingInstances.length === 0) return 0;
+
     // Lock the student's existing on-demand instances for the duration of
     // this tx so concurrent runs cannot both read the same balance and
     // double-insert based on stale `availableBalance`.
@@ -348,60 +411,6 @@ async function insertPendingInstances(
 
     return inserted.length;
   });
-}
-
-async function generateInstancesForSchedule(
-  schedule: typeof recurringSchedules.$inferSelect,
-  now: Date
-): Promise<number> {
-  const { startDate, scheduleEndDate } = computeScheduleDateRange(schedule, now);
-
-  // RP2-1: Parallelise 3 independent reads (schedule days, credit balance,
-  // overlapping instances) that were previously sequential awaits.
-  // RBL2-3: The balance read and instance insertion now run inside a single
-  // transaction so concurrent generator runs cannot oversell instances via
-  // concurrent in-memory decrements.
-  // We query schedule days outside the tx because it's a read-only
-  // guard — an empty result lets us short-circuit before acquiring a tx.
-  const [scheduleDays, creditBalance, overlappingInstances] = await Promise.all([
-    db
-      .select()
-      .from(recurringScheduleDays)
-      .where(and(eq(recurringScheduleDays.recurringScheduleId, schedule.id), eq(recurringScheduleDays.isActive, true))),
-    CreditRepository.getBalance(db, schedule.studentId),
-    buildOverlappingInstancesQuery(schedule, startDate, scheduleEndDate),
-  ]);
-
-  if (scheduleDays.length === 0) return 0;
-
-  const activeQuotas = await QuotaRepository.listActiveByStudent(db, schedule.studentId);
-  const totalQuotaRemaining = activeQuotas.reduce((sum, q) => sum + q.remaining, 0);
-  // NOTE: Mirrors QuotaService.refreshStudentOndemandInstances credit computation — keep in sync
-  const availableBalance = creditBalance.classesRemaining + totalQuotaRemaining;
-
-  // Verify-6: Only generate instances when the student has credit classes
-  // remaining. If classesRemaining is 0, skip instance generation entirely —
-  // quota-only balance should not produce AVAILABLE instances since the
-  // student has no purchased classes to attend.
-  if (creditBalance.classesRemaining <= 0) {
-    logger.debug(
-      `[OnDemandInstanceGenerator] Skipping schedule ${schedule.id} for student ${schedule.studentId} — classesRemaining is 0.`
-    );
-    return 0;
-  }
-
-  const existingConflicts = buildExistingConflictSet(schedule.id, overlappingInstances);
-
-  const { pendingInstances } = await generatePendingInstancesForRange(
-    schedule,
-    scheduleDays,
-    startDate,
-    scheduleEndDate,
-    availableBalance,
-    existingConflicts
-  );
-
-  const generated = await insertPendingInstances(schedule, pendingInstances);
 
   if (generated > 0) {
     await QuotaService.refreshStudentOndemandInstances(schedule.studentId);

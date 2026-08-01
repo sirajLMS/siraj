@@ -9,6 +9,9 @@ import { QuotaNotificationService } from "@/backend/services/billing/quota-notif
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
+/** Maximum number of pending instances to process per resolver run (unbounded SELECT guard). */
+const MAX_PENDING_INSTANCES_PER_RUN = 500;
+
 interface PendingNotification {
   studentId: string;
   studentName: string;
@@ -61,9 +64,12 @@ export async function runOndemandNoCreditsResolver(): Promise<void> {
             isNull(classInstances.deletedAt)
           )
         )
+        .limit(MAX_PENDING_INSTANCES_PER_RUN)
         .for("update");
 
-      logger.info(`Found ${pendingInstances.length} pending instances within ${leadMinutes}m lead time.`);
+      logger.info(
+        `[OnDemandNoCreditsResolver] Found ${pendingInstances.length} pending instances within ${leadMinutes}m lead time.`
+      );
 
       if (pendingInstances.length === 0) {
         logger.info("[OnDemandNoCreditsResolver] No pending instances to resolve.");

@@ -66,7 +66,10 @@ export const quotas = pgTable(
         (${table.kind} = 'PERIODIC' AND ${table.periodType} IS NOT NULL AND ${table.periodDays} IS NOT NULL)
       `
     ),
+    check("quotas_total_classes_positive_chk", sql`${table.totalClasses} > 0`),
+    check("quotas_priority_non_negative_chk", sql`${table.priority} >= 0`),
     check("quotas_remaining_non_negative_chk", sql`${table.remaining} >= 0`),
+    check("quotas_reserved_classes_non_negative_chk", sql`${table.reservedClasses} >= 0`),
     check("quotas_reserved_not_exceed_remaining_chk", sql`${table.reservedClasses} <= ${table.remaining}`),
     check("quotas_used_this_period_non_negative_chk", sql`${table.usedThisPeriod} >= 0`),
     check(

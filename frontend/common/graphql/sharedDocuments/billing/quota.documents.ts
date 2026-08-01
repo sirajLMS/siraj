@@ -102,3 +102,46 @@ export const deleteQuotaMutationDocument: TypedDocumentNode<
     }
   }
 `;
+
+export const studentQuotasQueryDocument: TypedDocumentNode<
+  Operations.StudentQuotasQuery,
+  Types.QueryStudentQuotasArgs
+> = gql`
+  ${QuotaFieldsFragment}
+  query StudentQuotas($studentId: ID!) {
+    studentQuotas(studentId: $studentId) {
+      ...QuotaFields
+    }
+  }
+`;
+
+export const studentOpenQuotasQueryDocument: TypedDocumentNode<
+  Operations.StudentOpenQuotasQuery,
+  Types.QueryStudentOpenQuotasArgs
+> = gql`
+  ${QuotaFieldsFragment}
+  query StudentOpenQuotas($studentId: ID!) {
+    studentOpenQuotas(studentId: $studentId) {
+      ...QuotaFields
+    }
+  }
+`;
+
+export const quotaBalanceQueryDocument: TypedDocumentNode<Operations.QuotaBalanceQuery, Types.QueryQuotaBalanceArgs> =
+  gql`
+  query QuotaBalance($studentId: ID!) {
+    quotaBalance(studentId: $studentId) {
+      id
+      studentId
+      totalActiveClasses
+      totalRemaining
+      totalReserved
+      breakdownByExpiration {
+        quotaId
+        quotaName
+        remaining
+        validUntil
+      }
+    }
+  }
+`;

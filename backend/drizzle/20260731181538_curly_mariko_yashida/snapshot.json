@@ -14105,6 +14105,41 @@
       "nameExplicit": true,
       "columns": [
         {
+          "value": "student_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "status",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "deleted_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "quotas_admin_list_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "quotas"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
           "value": "country_code",
           "isExpression": false,
           "asc": true,
@@ -24650,6 +24685,20 @@
       "table": "quotas"
     },
     {
+      "value": "\"total_classes\" > 0",
+      "name": "quotas_total_classes_positive_chk",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "quotas"
+    },
+    {
+      "value": "\"priority\" >= 0",
+      "name": "quotas_priority_non_negative_chk",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "quotas"
+    },
+    {
       "value": "\"remaining\" >= 0",
       "name": "quotas_remaining_non_negative_chk",
       "entityType": "checks",
@@ -24657,8 +24706,15 @@
       "table": "quotas"
     },
     {
-      "value": "\"reserved_classes\" + \"remaining\" <= \"total_classes\"",
-      "name": "quotas_reserved_plus_remaining_chk",
+      "value": "\"reserved_classes\" >= 0",
+      "name": "quotas_reserved_classes_non_negative_chk",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "quotas"
+    },
+    {
+      "value": "\"reserved_classes\" <= \"remaining\"",
+      "name": "quotas_reserved_not_exceed_remaining_chk",
       "entityType": "checks",
       "schema": "public",
       "table": "quotas"

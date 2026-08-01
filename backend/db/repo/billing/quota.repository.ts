@@ -12,10 +12,12 @@ import { QuotaAlreadyDeletedError, QuotaLedgerError, QuotaNotFoundError } from "
 import { logger } from "@/backend/lib/logger";
 import type {
   QuotaPaginatedFilter,
+  QuotaReturnType,
   QuotaSelectType,
   QuotaSubmitInput,
   QuotaUpdateType,
 } from "@/backend/types/billing/quota.types";
+import { mapQuotaToReturnType } from "@/backend/types/billing/quota.types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
 
 type ReadExecutor = DBTransaction | typeof db;
@@ -60,6 +62,9 @@ export namespace QuotaRepository {
   export const derivePeriodicGrantIdempotencyKey = (quotaId: string, periodStr: string): string =>
     deriveIdempotencyKey("grant:periodic", quotaId, periodStr);
 
+  /** Maximum number of overdue quotas to expire per cron tick (unbounded SELECT guard). */
+  const MAX_EXPIRING_QUOTAS_PER_RUN = 500;
+
   /**
    * Type guard for the rich JSONB rollover policy shape enforced by
    * `quotas_rollover_policy_valid_chk` (`maxRolloverPercent` + `accumulationCap`).
@@ -83,6 +88,16 @@ export namespace QuotaRepository {
     const validFromStr = validFromDate ? validFromDate.toISOString().slice(0, 10) : null;
     const validUntilStr = validUntilDate ? validUntilDate.toISOString().slice(0, 10) : null;
 
+    const idempotencyKey =
+      input.idempotencyKey ??
+      deriveIdempotencyKey("create", input.studentId, input.kind, input.name, String(input.totalClasses));
+
+    // Idempotent insert: ON CONFLICT (idempotency_key) DO NOTHING. If a row with
+    // this key already exists (a duplicate creation attempt / retry), the insert
+    // returns no rows and we fetch the existing record instead of throwing a
+    // unique-constraint violation. This makes createQuota safely retriable and
+    // deduplicates concurrent duplicate submission attempts (mirrors the
+    // ledger repository's idempotency pattern).
     const [newQuota] = await tx
       .insert(quotas)
       .values({
@@ -102,29 +117,36 @@ export namespace QuotaRepository {
         priority: input.priority ?? 0,
         rolloverPolicy: input.rolloverPolicy ?? null,
         version: 1,
-        idempotencyKey:
-          input.idempotencyKey ??
-          deriveIdempotencyKey("create", input.studentId, input.kind, input.name, String(input.totalClasses)),
+        idempotencyKey,
         createdAt: now,
         updatedAt: now,
       })
+      .onConflictDoNothing({ target: quotas.idempotencyKey })
       .returning();
 
-    if (!newQuota) throw new QuotaLedgerError("Failed to insert quota");
+    if (newQuota) {
+      const grantKey = deriveGrantIdempotencyKey(newQuota.id);
+      // AUDIT: ledger entry required for initial GRANT tracking and balance reconstruction.
+      // The grant insert is itself idempotent (ON CONFLICT DO NOTHING on its own key),
+      // so a conflict here would simply return the existing ledger row.
+      await QuotaLedgerRepository.insert(tx, {
+        quotaId: newQuota.id,
+        studentId: newQuota.studentId,
+        delta: input.totalClasses,
+        reason: QuotaLedgerReason.GRANT,
+        reasonNote: `Initial quota grant: ${input.name}`,
+        actorUserId: input.actorUserId ?? null,
+        idempotencyKey: grantKey,
+      });
 
-    const grantKey = deriveGrantIdempotencyKey(newQuota.id);
-    // AUDIT: ledger entry required for initial GRANT tracking and balance reconstruction
-    await QuotaLedgerRepository.insert(tx, {
-      quotaId: newQuota.id,
-      studentId: newQuota.studentId,
-      delta: input.totalClasses,
-      reason: QuotaLedgerReason.GRANT,
-      reasonNote: `Initial quota grant: ${input.name}`,
-      actorUserId: input.actorUserId ?? null,
-      idempotencyKey: grantKey,
-    });
+      return newQuota;
+    }
 
-    return newQuota;
+    // Conflict — a quota with this idempotency key already exists; fetch and return it.
+    const [existing] = await tx.select().from(quotas).where(eq(quotas.idempotencyKey, idempotencyKey)).limit(1);
+
+    if (!existing) throw new QuotaLedgerError("Quota insert returned no rows and no existing row found");
+    return existing;
   };
 
   export const findById = async (tx?: ReadExecutor, id?: string): Promise<QuotaSelectType | null> => {
@@ -171,6 +193,29 @@ export namespace QuotaRepository {
       .limit(100); // Capped at 100 to prevent unbounded results
   };
 
+  /**
+   * Returns a paginated list of non-deleted quotas with optional filtering
+   * and the total count of matching rows.
+   *
+   * `totalCount` is computed via a **separate COUNT query** (`SELECT count(*)
+   * FROM quotas WHERE …`) that runs in parallel with the paginated data query
+   * via `Promise.all`. The two queries share the same `WHERE` clause but are
+   * independent — the COUNT is always the full matching set regardless of
+   * page offset/limit, so the caller gets an accurate total for pagination UI.
+   *
+   * **Pagination limitation**: The `queryWithPagination` helper applies
+   * offset/limit to the data query only. The COUNT query is unbounded — it
+   * scans all matching rows on every request. For very large datasets this
+   * adds a second full-scan per page load. Approximate counts or cached
+   * totals could mitigate this but are not currently implemented.
+   *
+   * **In-memory filtering caveat**: The caller (`QuotaService.listQuotas`)
+   * may further filter `rows` in memory for the multi-student IDOR-scoped
+   * branch. In that case the returned `totalCount` from this method will NOT
+   * match the filtered row count. Callers that need the post-filter count
+   * should use the service-layer return value, not this method's
+   * `totalCount`. See `QuotaService.listQuotas` (V3-075 comment) for details.
+   */
   export const listAllPaginated = async (
     tx?: ReadExecutor,
     filter?: QuotaPaginatedFilter | null,
@@ -257,6 +302,29 @@ export namespace QuotaRepository {
     return row;
   };
 
+  /**
+   * Internal-only: selects the best quota to book against using FIFO ordering.
+   *
+   * **Do NOT call directly from services or GraphQL resolvers.** This method
+   * is intended to be used exclusively by {@link QuotaService.selectQuotaForBooking}
+   * which performs permission gating and orchestration around it.
+   *
+   * Uses `FOR UPDATE` row locking (`SELECT ... FOR UPDATE`) to prevent
+   * concurrent reads from selecting the same quota, avoiding oversell under
+   * contention.
+   *
+   * FIFO selection ordering:
+   * 1. `priority` DESC — higher-priority quotas are consumed first.
+   * 2. `validUntil` ASC — quotas expiring sooner are consumed first.
+   * 3. `createdAt` ASC — older quotas are consumed first as a tiebreaker.
+   *
+   * Only filters ACTIVE quotas with `remaining > 0`, no soft-delete, and
+   * either no expiry (`validUntil IS NULL`) or not yet expired.
+   *
+   * **Must be called within a transaction** (`tx`) — the `FOR UPDATE` lock
+   * is only meaningful inside a transaction and the returned quota row is
+   * expected to be mutated (redeem/reserve) within the same transaction.
+   */
   export const selectQuotaForBookingFIFO = async (
     tx: DBTransaction,
     studentId: string
@@ -819,10 +887,14 @@ export namespace QuotaRepository {
     // We cannot use UPDATE ... RETURNING because the SET clause zeros remaining,
     // so RETURNING would yield post-update (zeroed) values, not the true balances
     // needed for accurate EXPIRE ledger entries.
+    // Defensive LIMIT: caps the number of rows locked per cron tick to avoid
+    // unbounded row locking. Remaining overdue quotas are picked up on the next
+    // tick (sweeper runs on a recurring schedule).
     const expiredQuotas = await tx
       .select()
       .from(quotas)
       .where(and(eq(quotas.status, QuotaStatus.ACTIVE), lt(quotas.validUntil, checkDateStr), isNull(quotas.deletedAt)))
+      .limit(MAX_EXPIRING_QUOTAS_PER_RUN)
       .for("update");
 
     if (expiredQuotas.length === 0) return [];
@@ -898,12 +970,12 @@ export namespace QuotaRepository {
    * Lists ACTIVE, non-deleted PERIODIC quotas that have a rolloverPolicy and have passed
    * their current period end — ready for sweeper to perform rollover.
    */
-  export const listPeriodicForRollover = async (tx: DBTransaction): Promise<QuotaSelectType[]> => {
+  export const listPeriodicForRollover = async (tx: DBTransaction): Promise<QuotaReturnType[]> => {
     const now = new Date();
     const nowTs = now.toISOString();
     // Period end = periodAnchor + periodDays. We want quotas where "now > periodEnd".
     const periodEndExpr = sql<Date>`${quotas.periodAnchor} + make_interval(days => ${quotas.periodDays})`;
-    return tx
+    const rows = await tx
       .select()
       .from(quotas)
       .where(
@@ -916,6 +988,7 @@ export namespace QuotaRepository {
         )
       )
       .limit(500); // Capped at 500 per cron tick
+    return rows.map(mapQuotaToReturnType);
   };
 
   /**
@@ -947,7 +1020,7 @@ export namespace QuotaRepository {
     tx: DBTransaction,
     quotaId: string,
     actorUserId?: string | null
-  ): Promise<QuotaSelectType> => {
+  ): Promise<QuotaReturnType> => {
     // Lock the quota row for the duration of this transaction to prevent TOCTOU races (RB-11).
     const [target] = await tx
       .select()
@@ -964,7 +1037,7 @@ export namespace QuotaRepository {
     const periodEnd = new Date(periodAnchor.getTime() + target.periodDays * 24 * 60 * 60 * 1000);
 
     // Only refresh if the current period has expired
-    if (now <= periodEnd) return target;
+    if (now <= periodEnd) return mapQuotaToReturnType(target);
 
     const periodStr = periodEnd.toISOString().slice(0, 10);
     const unused = target.remaining > 0 ? target.remaining : 0;
@@ -1039,7 +1112,7 @@ export namespace QuotaRepository {
       idempotencyKey: grantKey,
     });
 
-    return updated;
+    return mapQuotaToReturnType(updated);
   };
 
   /**
@@ -1122,5 +1195,54 @@ export namespace QuotaRepository {
     }
 
     return deducted;
+  };
+
+  /**
+   * Resets `usedThisPeriod` to 0 for a single quota. Used by the sweeper
+   * script to clear per-period usage counters independently of the full
+   * `refreshPeriodic` rollover flow.
+   *
+   * Uses optimistic concurrency via `version`. Inserts an `ADJUST`
+   * ledger entry (delta=0) for audit-trail completeness. Idempotent via
+   * a deterministic SHA-256 key scoped to the quota + period string.
+   */
+  export const resetUsedThisPeriod = async (
+    tx: DBTransaction,
+    quotaId: string,
+    periodStr: string,
+    actorUserId?: string | null
+  ): Promise<QuotaSelectType> => {
+    const [existing] = await tx
+      .select()
+      .from(quotas)
+      .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)))
+      .for("update")
+      .limit(1);
+    if (!existing) throw new QuotaNotFoundError("Quota not found");
+
+    const [updated] = await tx
+      .update(quotas)
+      .set({
+        usedThisPeriod: 0,
+        version: sql<number>`${quotas.version} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(quotas.id, quotaId), eq(quotas.version, existing.version)))
+      .returning();
+
+    if (!updated) throw new Error("Failed to reset usedThisPeriod due to concurrent modification");
+
+    // AUDIT: ledger entry required for ADJUST tracking and balance reconstruction
+    await QuotaLedgerRepository.insert(tx, {
+      quotaId,
+      studentId: existing.studentId,
+      delta: 0,
+      reason: QuotaLedgerReason.ADJUST,
+      reasonNote: `Reset usedThisPeriod for period ${periodStr}`,
+      actorUserId: actorUserId ?? null,
+      idempotencyKey: deriveIdempotencyKey("reset-used", quotaId, periodStr),
+    });
+
+    return updated;
   };
 }

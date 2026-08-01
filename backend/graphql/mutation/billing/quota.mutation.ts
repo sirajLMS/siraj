@@ -1,3 +1,5 @@
+import { GraphQLError } from "graphql";
+
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   QuotaPothosObject,
@@ -20,7 +22,14 @@ gqlSchemaBuilder.mutationField("createQuota", t =>
       const actorUserId = await requireAuth(ctx);
       // V3-012: Permission check is enforced by QuotaService.createQuota
       // (see requirePermission in quota.service.ts). No duplicate check here.
-      return QuotaService.createQuota(args.input, actorUserId, ctx.locale);
+      // V3-070: Wrap service-layer plain Error in GraphQLError with proper codes.
+      try {
+        return await QuotaService.createQuota(args.input, actorUserId, ctx.locale);
+      } catch (error) {
+        throw new GraphQLError(error instanceof Error ? error.message : "Unknown error", {
+          extensions: { code: "FORBIDDEN" },
+        });
+      }
     },
   })
 );
@@ -37,7 +46,14 @@ gqlSchemaBuilder.mutationField("updateQuota", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       // V3-012: Permission check is enforced by QuotaService.updateQuota.
-      return QuotaService.updateQuota(String(args.id), args.input as QuotaUpdateType, actorUserId, ctx.locale);
+      // V3-070: Wrap service-layer plain Error in GraphQLError with proper codes.
+      try {
+        return await QuotaService.updateQuota(String(args.id), args.input as QuotaUpdateType, actorUserId, ctx.locale);
+      } catch (error) {
+        throw new GraphQLError(error instanceof Error ? error.message : "Unknown error", {
+          extensions: { code: "FORBIDDEN" },
+        });
+      }
     },
   })
 );
@@ -53,7 +69,14 @@ gqlSchemaBuilder.mutationField("deleteQuota", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       // V3-012: Permission check is enforced by QuotaService.deleteQuota.
-      return QuotaService.deleteQuota(String(args.id), actorUserId, ctx.locale);
+      // V3-070: Wrap service-layer plain Error in GraphQLError with proper codes.
+      try {
+        return await QuotaService.deleteQuota(String(args.id), actorUserId, ctx.locale);
+      } catch (error) {
+        throw new GraphQLError(error instanceof Error ? error.message : "Unknown error", {
+          extensions: { code: "FORBIDDEN" },
+        });
+      }
     },
   })
 );

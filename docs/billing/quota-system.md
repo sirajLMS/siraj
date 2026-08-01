@@ -39,7 +39,7 @@ The Quota System replaces per-instance credit deductions with a centralized quot
 | `createdAt` / `updatedAt` / `deletedAt` | timestamp | Soft-delete support |
 
 **CHECK constraints:**
-1. `quotas_kind_consistency`: PACKAGE quotas must have NULL period fields; PERIODIC must have periodType + periodDays NOT NULL
+1. `quotas_kind_period_consistency_chk`: PACKAGE quotas must have NULL period fields; PERIODIC must have periodType + periodDays NOT NULL
 2. `remaining >= 0`
 3. `reservedClasses <= remaining`
 4. `usedThisPeriod >= 0`
@@ -77,15 +77,15 @@ The Quota System replaces per-instance credit deductions with a centralized quot
 On `recurring_schedules`:
 - `quotaId` — links to quota
 - `earmarkedClasses` — classes reserved upfront
-- `schedulingMode` — `SCHEDULED`, `ON_DEMAND`
+- `schedulingMode` — `NUMBER_OF_CLASSES`, `ON_DEMAND`, `QUOTA`
 - `generationHorizonWeeks` — how far ahead to generate instances
 - `ondemandNoCreditsOutcome` — what to do when credits run dry
 
 On `class_instances`:
 - `quotaDeducted` — already exists, extended with ON_DEMAND CHECK constraints
-- `ondemandStatus` — `PENDING_CREDIT`, `CREDIT_RESERVED`, `CONFLICT_HELD`, `NO_CREDITS_CANCELLED`, `NO_CREDITS_ABSENT`
-- `state_machine_chk` — updated to include ON_DEMAND_PENDING_CREDITS, ON_DEMAND_CONFLICT_HELD, ON_DEMAND_NO_CREDITS_CANCELLED, ON_DEMAND_NO_CREDITS_ABSENT
-- `ondemand_status_scheduling_mode_chk` — ensures on demand status consistency
+- `ondemandStatus` — `PENDING_CREDIT`, `AVAILABLE`, `CONVERTED`, `NO_CREDITS_CANCELLED`, `NO_CREDITS_ABSENT`, `CANCELLED`
+- `class_instances_state_machine_chk` — updated to include ON_DEMAND_PENDING_CREDITS, ON_DEMAND_CONFLICT_HELD, ON_DEMAND_NO_CREDITS_CANCELLED, ON_DEMAND_NO_CREDITS_ABSENT
+- `class_instances_ondemand_status_scheduling_mode_chk` — ensures on demand status consistency
 
 ## Business Logic
 
@@ -122,15 +122,15 @@ The expiry sweeper handles PERIODIC quotas:
 1. Cron job (`scripts/ondemand-instance-generator.ts`) runs daily, fetches active ON_DEMAND recurring schedules
 2. For each eligible student with `classesRemaining > 0`, validates slot availability via `AvailabilityService`
 3. Generates `classInstances` with `ondemandStatus = PENDING_CREDIT`
-4. At session-start time, `ClassSessionService.activateClassInstance` calls `QuotaService.redeemForInstance` to consume a credit (see `ResitationPolicy` credit deduction is WITHOUT CREDIT)
+4. At session-start time, `ClassSessionService.activate` calls `QuotaService.redeemForInstance` to consume a credit (note: when no quota is linked, it falls back to `CreditService.deductForBooking` — see Integration Points below)
 
-### Reservation Flow (Scheduling) Flow
+### Reservation Flow (Scheduling)
 
-1. When creating a new recurring schedule with `schedulingMode = SCHEDULED` and a `quotaId`:
+1. When creating a new recurring schedule with `schedulingMode = NUMBER_OF_CLASSES` and a `quotaId`:
    - Pool mode: `QuotaService.redeemForInstance` per generated instance
    - Earmark mode: `QuotaService.reserveForRecurringSchedule` reserves the count upfront
 2. When canceling a schedule: `cancelSchedule` releases reserved quota slots
-3. When switching scheduling modes: `dispatchMaintenanceReleases` adjusts reservations
+3. When switching scheduling modes: `RecurringClassService.switchSchedulingMode` archives upcoming instances and refunds/releases quota via `refundOrReleaseForInstances` (NUMBER_OF_CLASSES → ON_DEMAND frees up quota; ON_DEMAND → NUMBER_OF_CLASSES reverts to instance-based deductions)
 
 ## Integration Points
 
@@ -143,7 +143,7 @@ The expiry sweeper handles PERIODIC quotas:
 
 `backend/services/schedule/recurring-class.service.ts`:
 - `cancelSchedule(userId, recurringScheduleId)` — releases quota reservations, refunds credits, archives untaken instances
-- `switchSchedulingMode(userId, recurringScheduleId, newMode)` — adjusts reservations based on mode transition (e.g., SCHEDULED → ON_DEMAND frees up quota; ON_DEMAND → SCHEDULED reverts to instance-based deductions)
+- `switchSchedulingMode(userId, recurringScheduleId, newMode)` — adjusts reservations based on mode transition (e.g., NUMBER_OF_CLASSES → ON_DEMAND frees up quota; ON_DEMAND → NUMBER_OF_CLASSES reverts to instance-based deductions)
 
 ### CreditService
 
@@ -153,7 +153,7 @@ The expiry sweeper handles PERIODIC quotas:
 ### ClassSessionService
 
 `backend/services/session/class-session.service.ts`:
-- At session-start (`activateClassInstance` / `startSession`): if `ondemandStatus='PENDING_CREDIT'` and `quotaId` is set, calls `QuotaService.redeemForInstance`. If no quota, falls back to `CreditService.deductForBooking`.
+- At session-start (`activate`): if `ondemandStatus='PENDING_CREDIT'` and `quotaId` is set, calls `QuotaService.redeemForInstance`. If no quota, falls back to `CreditService.deductForBooking`.
 
 ### TeacherDashboardService
 
@@ -173,7 +173,7 @@ All state machine changes removed from `backend/db/repo/scheduling/state-changes
 | `QUOTAS_VIEW` | `"quotas.view"` | Read-only access to quotas, balances, ledger |
 | `QUOTAS_MANAGE` | `"quotas.manage"` | Create, update, delete quotas + manage reservations |
 
-Both are applied on every `QuotaService` method. The `SuperLeader` and `STAFF` roles get `QUOTAS_VIEW` seeded by default; `QUOTAS_MANAGE` is for admins.
+Both are applied on every `QuotaService` method. The `super_admin`, `academy_admin`, `staff_default`, and `supervisor_default` groups get `QUOTAS_VIEW` seeded by default; `QUOTAS_MANAGE` is granted to `super_admin` and `academy_admin` only.
 
 ## Frontend
 
@@ -181,26 +181,26 @@ Both are applied on every `QuotaService` method. The `SuperLeader` and `STAFF` r
 
 Located at `frontend/common/views/dashboard/billing/quota/`:
 - `QuotaInsightsContainer.tsx` — tier-neutral container
-- `useQuotaInsightsViewModel.ts` — ViewModel with data fetching
+- `QuotaInsightsData.tsx` — data-fetching + composition for the insights view
 - Rendered at `/quotas/insights`
 
 ### Student Quota Tab
 
 Located at `frontend/common/views/dashboard/students/quota/`:
 - `StudentQuotaContainer.tsx` — Container
-- `processStudentQuotaViewModel.ts` — ViewModel
+- `useStudentQuotaViewModel.ts` — ViewModel
 - `QuotaFormAccessProvider.tsx` — Permissions gate
-- `studentQuotaSchema.ts` — Zod schema
+- `schemas/studentQuotaSchema.ts` — Zod schema
 
 Tier renderers:
 - Desktop: `frontend/desktop/views/dashboard/students/quota/studentQuota.desktop.tsx` + 4 components (contextualHelperCards, courseDetailsSection, sectionHeader, studentInformationSection)
 - Mobile: `frontend/mobile/views/dashboard/students/quota/studentQuota.mobile.tsx` + same 4 sub-components
-- Tab registered in `studentsProfileTabs.ts` under `QUOTA_TAB_GROUPS`
+- Tab registered in `studentProfileTabs.ts` under `QUOTA_TAB_GROUPS`
 - Per-audience rendering: student/parent see PENDING_CREDIT prominently; teacher sees CONFLICT_HELD at top
 
 ### Quota Model (Zustand)
 
-Located at `frontend/stores/quotaStore.ts` — form state survives viewport tier switch.
+Located at `frontend/common/stores/quotaStore.ts` — form state survives viewport tier switch.
 
 ### Navigation
 
@@ -212,12 +212,14 @@ Located at `frontend/stores/quotaStore.ts` — form state survives viewport tier
 | Script | Frequency | Description |
 |---|---|---|
 | `quota-expiry-sweeper.ts` | Daily | Expires overdue non-periodic quotas + periodic rollover with GRANT/EXPIRE ledger entries |
+| `quota-reminder-cron.ts` | Twice-daily | Sends T-3 and T-1 reminder notifications for upcoming on-demand class instances |
 | `ondemand-instance-generator.ts` | Daily | Generate class instances for active ON_DEMAND recurring schedules (only students with `classesRemaining > 0`) |
 | `ondemand-no-credits-resolver.ts` | Hourly | Resolves PENDING_CREDIT instances within `leadMinutes` of start time |
 | `ondemand-teacher-digest-cron.ts` | Daily at `default` hour | Per-teacher daily digest of pending ON_DEMAND instances |
 
 npm scripts registered in `package.json`:
 - `"quota:expire"`
+- `"quota:reminder"`
 - `"ondemand:generate"`
 - `"ondemand:resolve"`
 - `"ondemand:teacher-digest"`
@@ -226,8 +228,8 @@ npm scripts registered in `package.json`:
 
 | Key | Default | Description |
 |---|---|---|
-| `default_ondemand_horizon_weeks` | 4 | How far ahead to generate ON_DEMAND instances |
-| `default_ondemand_no_credits_outcome` | `NO_CREDITS_CANCELLED` | Default outcome when no credits available |
+| `default_ondemand_horizon_weeks` | 2 | How far ahead to generate ON_DEMAND instances |
+| `default_ondemand_no_credits_outcome` | `AUTO_CANCEL` | Default outcome when no credits available (`AUTO_CANCEL`, `AUTO_ABSENT_NO_CREDITS`, or `REMIND_ONLY`) |
 | `ondemand_teacher_digest_hour` | 9 UTC | Hour to send teacher digests |
 | `ondemand_no_credits_resolution_lead_minutes` | 240 | Minutes before start to handle credit issues |
 | `quota_low_balance_threshold_percent` | 20 | Percent remaining to trigger low-balance notification |
@@ -268,9 +270,10 @@ All 7 events:
 |---|---|---|
 | `quota(id)` | `QUOTAS_VIEW` | `QuotaService.getQuota` |
 | `quotas(filter?, pagination?)` | `QUOTAS_VIEW` | `QuotaService.listQuotas` |
-| `studentQuotas(studentId)` | `QUOTAS_VIEW` | `QuotaService.listStudentOpenQuota` |
-| `studentQuotaBalance(studentId)` | `QUOTAS_VIEW` | `QuotaService.getStudentQuotaBalance` |
-| `quotaLedger(quotaId, pagination?)` | `QUOTAS_VIEW` | `QuotaLedgerRepository` |
+| `studentQuotas(studentId)` | `QUOTAS_VIEW` | `QuotaService.listStudentQuotas` |
+| `studentOpenQuotas(studentId)` | `QUOTAS_VIEW` | `QuotaService.listStudentOpenQuotas` |
+| `quotaBalance(studentId)` | `QUOTAS_VIEW` | `QuotaService.getStudentQuotaBalance` |
+| `quotaLedger(quotaId, pagination?)` | `QUOTAS_VIEW` | `QuotaService.getQuotaLedger` |
 
 ### Object Types
 
@@ -296,9 +299,9 @@ All 7 events:
 
 | Test Category | Files | Coverage |
 |---|---|---|
-| Repository unit tests | `quota.repository.test.ts`, `quota-ledger.repository.test.ts` | CRUD, optimistic lock, FIFO, idempotency, balance computation |
-| Service logic tests | `quota.service.test.ts`, `quota-expiry-sweeper.test.ts` | reserve/release invariants, sweeper with GRANT/EXPIRE rows |
-| **NOT DONE**: Race condition test | `quota.service.test.ts` | Concurrent quota modification scenarios NOT implemented |
+| Repository unit tests | `backend/db/test/repo/billing/quota.repository.test.ts`, `backend/db/test/repo/billing/quota-ledger.repository.test.ts` | CRUD, optimistic lock, FIFO, idempotency, balance computation |
+| Service logic tests | `backend/db/test/logic/billing/quota.service.test.ts`, `backend/db/test/logic/billing/quota-expiry-sweeper.test.ts` | reserve/release invariants, sweeper with GRANT/EXPIRE rows |
+| **NOT DONE**: Race condition test | `backend/db/test/logic/billing/quota.service.test.ts` | Concurrent quota modification scenarios NOT implemented |
 
 All tests use `runInRollback` wrapper. All pass: 825/825.
 
@@ -323,11 +326,9 @@ Quota label keys in `shared/locale/types/dashboard/billing/quota.ts` + en and ar
 
 ## Integration Rollout Summary
 
-The core infrastructure (quotas + ledger + service + permissions) plus notification events, cron scripts, and the full frontend pages (quota list/create/detail/edit/insights + student quota tab + recurring class form extensions) are all COMPLETED. Outstanding:
+The core infrastructure (quotas + ledger + service + permissions) plus notification events, cron scripts, the full frontend pages (quota list/create/detail/edit/insights + student quota tab + recurring class form extensions), the optional seed data (`backend/db/seeds/billing/seed-quotas.ts`), and the global health check (`bun tsgo && bun biome:check`) are all COMPLETED. Outstanding:
 
 1. **Race condition tests** for quota reservation/redemption are not yet added
-2. **Optional seed data** (sample quotas in seed)
-3. **Global health check** — needs final `bun tsgo && bun biome:check && bun run lint` run
 
 ## Related Files
 

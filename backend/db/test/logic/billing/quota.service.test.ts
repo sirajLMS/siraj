@@ -183,7 +183,11 @@ describe("QuotaService", () => {
         error = e;
       }
       expect(error).not.toBeNull();
-      expect((error as Error).message).toContain("not found");
+      // redeemForInstance on a non-existent quota surfaces as a QuotaNotFoundError whose
+      // message indicates the quota may be depleted or inactive (the repo's atomic
+      // SELECT FOR UPDATE finds no matching ACTIVE row with remaining>0). This is the
+      // not-found / not-usable failure path as surfaced through the service.
+      expect((error as Error).message).toContain("depleted or inactive");
     });
   });
 
@@ -240,12 +244,15 @@ describe("QuotaService", () => {
       };
       const quota = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
 
-      // Reserve 6 classes
+      // Reserve 4 classes — must satisfy the DB check constraint
+      // quotas_reserved_not_exceed_remaining_chk (reservedClasses <= remaining),
+      // which for a count N on a fresh quota (total=T) requires N <= T-N, i.e. N <= T/2.
+      // N=6 on a 10-class quota would leave remaining=4 < reservedClasses=6 → violation.
       const reserved = await QuotaService.reserveForRecurringSchedule(
         student.id,
         schedule.id,
         quota.id,
-        6,
+        4,
         actor.id,
         tx
       );

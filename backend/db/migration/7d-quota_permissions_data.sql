@@ -47,17 +47,17 @@ INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
 WHERE
-  g.slug IN ('super_admin', 'staff', 'supervisor', 'admin', 'manager')
+  g.slug IN ('super_admin', 'academy_admin', 'staff_default', 'supervisor_default')
   AND p.key = 'quotas.view'
 ON CONFLICT DO NOTHING;
 
 -- Grant quotas.manage only to groups that should have full create/update/delete
--- capability (super_admin, admin, manager). Staff and supervisor are intentionally
+-- capability (super_admin, academy_admin). Staff and supervisor are intentionally
 -- excluded from quotas.manage to prevent privilege expansion of delete capability.
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
 WHERE
-  g.slug IN ('super_admin', 'admin', 'manager')
+  g.slug IN ('super_admin', 'academy_admin')
   AND p.key = 'quotas.manage'
 ON CONFLICT DO NOTHING;

@@ -1,17 +1,15 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import {
   type ClassInstanceAffectedUsers,
   classLifecycleAffectedUserIds,
+  RecurringScheduleRepository,
   SchedulingRepository,
 } from "@/backend/db/repo/scheduling";
 import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
-import { classInstances, recurringSchedules } from "@/backend/db/schema";
 import { AppPermission, type CurrencyCode, NotificationEventType, OnDemandStatus } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { logger } from "@/backend/lib/logger";
@@ -225,7 +223,8 @@ export namespace ClassSessionService {
   async function releaseQuotaIfDeducted(
     instance: Pick<ClassInstanceEntity, "id" | "studentId" | "quotaDeducted" | "recurringScheduleId">,
     actorUserId: string,
-    tx: DBTransaction
+    tx: DBTransaction,
+    locale = "en"
   ): Promise<{ quotaReleased: boolean; quotaId: string | null; isQuotaBacked: boolean }> {
     if (!instance.quotaDeducted) return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
     if (!instance.recurringScheduleId) {
@@ -236,25 +235,21 @@ export namespace ClassSessionService {
       return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
     }
 
-    // Resolve quotaId from the parent recurring schedule
-    const q = queryDb(tx);
-    const [schedule] = await q
-      .select({ quotaId: recurringSchedules.quotaId })
-      .from(recurringSchedules)
-      .where(eq(recurringSchedules.id, instance.recurringScheduleId))
-      .limit(1);
+    // Resolve quotaId from the parent recurring schedule via repository
+    const scheduleRow = await RecurringScheduleRepository.findById(instance.recurringScheduleId, tx);
+    const quotaId = scheduleRow?.schedule.quotaId ?? null;
 
-    if (!schedule?.quotaId) return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
+    if (!quotaId) return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
 
     const result = await QuotaService.tryReleaseForInstance(
       instance.studentId,
       instance.id,
-      schedule.quotaId,
+      quotaId,
       actorUserId,
       tx,
-      "en"
+      locale
     );
-    return { quotaReleased: result.ok, quotaId: result.ok ? schedule.quotaId : null, isQuotaBacked: true };
+    return { quotaReleased: result.ok, quotaId: result.ok ? quotaId : null, isQuotaBacked: true };
   }
 
   /**
@@ -357,22 +352,16 @@ export namespace ClassSessionService {
   ): Promise<number> {
     if (instanceIds.length === 0) return 0;
     const now = new Date();
-    const updated = await tx
-      .update(classInstances)
-      .set({
+    return SchedulingRepository.updateOndemandStatusBatch(
+      instanceIds,
+      {
         executionState,
         ondemandStatus: newStatus,
         updatedAt: now,
-      })
-      .where(
-        and(
-          inArray(classInstances.id, instanceIds),
-          eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT),
-          isNull(classInstances.deletedAt)
-        )
-      )
-      .returning({ id: classInstances.id });
-    return updated.length;
+      },
+      OnDemandStatus.PENDING_CREDIT,
+      tx
+    );
   }
 
   export async function activate(userId: string, classInstanceId: string, tErrors: ErrorsLabels, locale = "en") {
@@ -592,7 +581,7 @@ export namespace ClassSessionService {
         // class: the original is refunded, but the successor is inserted with
         // `quotaDeducted: false` and never charged again.
         if (existing.quotaDeducted && existing.deletedAt === null) {
-          const { quotaId, isQuotaBacked } = await releaseQuotaIfDeducted(existing, userId, tx);
+          const { quotaId, isQuotaBacked } = await releaseQuotaIfDeducted(existing, userId, tx, locale);
           // Only refund credit when the instance is NOT quota-backed (credit-backed
           // fallback). When quota release genuinely failed on a quota-backed
           // instance, do NOT also refund credit — a phantom credit refund masks a

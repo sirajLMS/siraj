@@ -1,9 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
+import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
+import { quotas } from "@/backend/db/schema";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
+import { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
 import type { QuotaSubmitInput, QuotaUpdateType } from "@/backend/types";
 
 describe("QuotaRepository", () => {
@@ -184,6 +187,8 @@ describe("QuotaRepository", () => {
     await runInRollback(async tx => {
       const { student } = await setupStudent(tx);
 
+      // Use "EXPIRE" rollover policy so unused classes are discarded (not rolled over).
+      // This produces both EXPIRE and GRANT ledger entries during the refresh.
       const quotaInput: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PERIODIC,
@@ -191,15 +196,70 @@ describe("QuotaRepository", () => {
         totalClasses: 8,
         periodType: QuotaPeriodType.MONTHLY,
         periodDays: 30,
+        rolloverPolicy: { maxRolloverPercent: 0, accumulationCap: 0 },
         idempotencyKey: `quota-test-${randomUUID()}`,
       };
       const created = await QuotaRepository.create(tx, quotaInput);
       expect(created.remaining).toBe(8);
 
+      // Backdate the period anchor so the 30-day period has expired and a refresh is triggered.
+      // Without this, refreshPeriodic is a no-op (returns the unchanged row) and the version
+      // would not bump — see the guard at the top of refreshPeriodic in the repository.
+      await tx
+        .update(quotas)
+        .set({
+          periodAnchor: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(),
+        })
+        .where(eq(quotas.id, created.id));
+
       const refreshed = await QuotaRepository.refreshPeriodic(tx, created.id, null);
       expect(refreshed.id).toBe(created.id);
       expect(refreshed.version).toBe(created.version + 1);
       expect(refreshed.reservedClasses).toBe(0);
+      // With 0% rollover, unused 8 classes are expired and 8 new classes are granted: 0 + 8 = 8.
+      expect(refreshed.remaining).toBe(8);
+
+      // Ledger should contain: initial GRANT (from create) + EXPIRE (unused) + GRANT (new period).
+      const entries = await QuotaLedgerRepository.findByQuotaId(tx, created.id);
+      const expireRows = entries.filter(e => e.reason === QuotaLedgerReason.EXPIRE);
+      expect(expireRows).toHaveLength(1);
+      expect(expireRows[0].delta).toBe(-8);
+      const grantRows = entries.filter(e => e.reason === QuotaLedgerReason.GRANT);
+      expect(grantRows).toHaveLength(2);
+      expect(grantRows.some(e => e.delta === 8)).toBe(true);
+    });
+  });
+
+  test("resetUsedThisPeriod clears usedThisPeriod, bumps version, and inserts ADJUST ledger row", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PERIODIC,
+        name: "Reset Period Quota",
+        totalClasses: 8,
+        periodType: QuotaPeriodType.MONTHLY,
+        periodDays: 30,
+        idempotencyKey: `quota-test-${randomUUID()}`,
+      };
+      const created = await QuotaRepository.create(tx, quotaInput);
+      expect(created.usedThisPeriod).toBe(0);
+
+      // Simulate usage during the period
+      await tx.update(quotas).set({ usedThisPeriod: 3 }).where(eq(quotas.id, created.id));
+
+      const reset = await QuotaRepository.resetUsedThisPeriod(tx, created.id, "2026-08-01");
+      expect(reset.id).toBe(created.id);
+      expect(reset.usedThisPeriod).toBe(0);
+      expect(reset.version).toBe(created.version + 1);
+
+      // An ADJUST (delta=0) ledger row should be inserted for audit-trail completeness
+      const entries = await QuotaLedgerRepository.findByQuotaId(tx, created.id);
+      const adjustRows = entries.filter(e => e.reason === QuotaLedgerReason.ADJUST && e.delta === 0);
+      expect(adjustRows).toHaveLength(1);
+      expect(adjustRows[0].reasonNote).toContain("2026-08-01");
     });
   });
 });

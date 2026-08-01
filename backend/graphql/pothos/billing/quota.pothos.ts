@@ -104,18 +104,14 @@ export const QuotaSubmitInputPothosRef = gqlSchemaBuilder.inputRef<QuotaSubmitIn
     studentId: t.string({ required: true }),
     kind: t.field({ type: QuotaKindPothosEnum, required: true }),
     name: t.string({ required: true }),
-    // V3-073: No min/max validation in the GraphQL layer — the DB CHECK
-    // constraint on quotas.total_classes enforces >= 0. Adding Pothos
-    // validation would duplicate the DB-level guard.
-    totalClasses: t.int({ required: true }),
+    // V3-073: GraphQL-level validation on totalClasses (min 1, max 10000).
+    totalClasses: t.int({ required: true, directives: { constraint: { min: 1, max: 10000 } } }),
     validFrom: t.field({ type: "DateTime", required: false }),
     validUntil: t.field({ type: "DateTime", required: false }),
     periodType: t.field({ type: QuotaPeriodTypePothosEnum, required: false }),
     periodDays: t.int({ required: false }),
-    // V3-073: No min/max validation — priority defaults to NULL in the DB
-    // and is validated at the application layer. Lower values = higher
-    // priority (FIFO selection). The DB constraints enforce valid ranges.
-    priority: t.int({ required: false }),
+    // V3-073: GraphQL-level validation on priority (min 0, max 100).
+    priority: t.int({ required: false, directives: { constraint: { min: 0, max: 100 } } }),
     rolloverPolicy: t.field({ type: QuotaRolloverPolicyInputPothosRef, required: false }),
     idempotencyKey: t.string({ required: false }),
   }),
@@ -127,7 +123,8 @@ export const QuotaUpdateInputPothosRef = gqlSchemaBuilder.inputRef<QuotaUpdateTy
     name: t.string({ required: false }),
     validUntil: t.field({ type: "DateTime", required: false }),
     status: t.field({ type: QuotaStatusPothosEnum, required: false }),
-    priority: t.int({ required: false }),
+    // V3-073: GraphQL-level validation on priority (min 0, max 100).
+    priority: t.int({ required: false, directives: { constraint: { min: 0, max: 100 } } }),
     version: t.int({ required: true }),
   }),
 });

@@ -254,6 +254,28 @@ export namespace QuotaService {
     };
   };
 
+  /**
+   * Recompute a single quota's live balance directly from the immutable
+   * `quota_ledger` rows (the single source of truth for quota mutations).
+   * Delegates to {@link QuotaLedgerRepository.computeBalance} so the service
+   * layer never reads ledger rows directly — keeping the ledger repo the
+   * sole reader of its own schema (mirrors the single-writer invariant).
+   *
+   * Permission check is intentionally shared with `getStudentQuotaBalance`
+   * via the caller; this low-level computation is invoked from internal flows
+   * (sweepers, reconcilers) that already hold an admin context, so it does not
+   * re-run `requirePermission`. Callers exposing this to end users must scope
+   * the result by `assertAssociatedOrManage` first.
+   *
+   * @returns The ledger-derived `{ remaining, reservedClasses }` for the quota.
+   */
+  export const computeBalance = async (
+    quotaId: string,
+    tx?: ReadExecutor
+  ): Promise<{ remaining: number; reservedClasses: number }> => {
+    return QuotaLedgerRepository.computeBalance(tx ?? db, quotaId);
+  };
+
   export const updateQuota = async (
     id: string,
     input: QuotaUpdateType,
@@ -621,21 +643,19 @@ export namespace QuotaService {
     });
   };
 
-  // V3-028: Returns QuotaReturnType[] for type-safety at the service boundary.
-  // The repo returns raw QuotaSelectType rows; mapping here ensures callers
-  // don't accidentally access internal DB columns.
+  // V3-028: Repository already returns QuotaReturnType[] (mapped from raw
+  // QuotaSelectType), so the service boundary is type-safe without re-mapping.
   export const listPeriodicForRollover = async (tx: DBTransaction): Promise<QuotaReturnType[]> => {
-    const rows = await QuotaRepository.listPeriodicForRollover(tx);
-    return rows.map(mapQuotaToReturnType);
+    return QuotaRepository.listPeriodicForRollover(tx);
   };
 
-  // V3-029: Returns QuotaReturnType for type-safety at the service boundary.
+  // V3-029: Repository already returns QuotaReturnType (mapped from raw
+  // QuotaSelectType), so the service boundary is type-safe without re-mapping.
   export const refreshPeriodic = async (
     tx: DBTransaction,
     quotaId: string,
     actorUserId?: string | null
   ): Promise<QuotaReturnType> => {
-    const row = await QuotaRepository.refreshPeriodic(tx, quotaId, actorUserId ?? null);
-    return mapQuotaToReturnType(row);
+    return QuotaRepository.refreshPeriodic(tx, quotaId, actorUserId ?? null);
   };
 }
