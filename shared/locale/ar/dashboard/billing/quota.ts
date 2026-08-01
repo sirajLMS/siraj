@@ -67,7 +67,6 @@ export const quotaAr: QuotaLabels = {
     expiredSlippage: "انزلاق الحصص المنتهية",
     months: "الأشهر",
     classes: "حصص",
-    redemptionPercentage: "% الاسترداد",
     packageType: "باقة",
     periodicType: "دورية",
     onDemandType: "فورية",
@@ -77,6 +76,5 @@ export const quotaAr: QuotaLabels = {
     pendingCredits: "الرصيد المعلق",
     expiredClasses: "منتهية",
     redeemedClasses: "مستردة",
-    cumulative: "تراكمي",
   },
 };

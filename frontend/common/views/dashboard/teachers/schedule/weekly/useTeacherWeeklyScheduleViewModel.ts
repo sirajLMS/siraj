@@ -330,6 +330,11 @@ function useHandleSubmit(args: {
           timezone: formState.timezone,
           classType: formState.classType,
           days,
+          schedulingMode: formState.schedulingMode,
+          quotaId: formState.quotaId,
+          earmarkedClasses: formState.earmarkedClasses,
+          generationHorizonWeeks: formState.generationHorizonWeeks,
+          ondemandNoCreditsOutcome: formState.ondemandNoCreditsOutcome,
         });
 
         const { data } = await createClassMutation({ variables: { input } });
@@ -351,6 +356,11 @@ function useHandleSubmit(args: {
       formState.defaultStartTime,
       formState.timezone,
       formState.classType,
+      formState.schedulingMode,
+      formState.quotaId,
+      formState.earmarkedClasses,
+      formState.generationHorizonWeeks,
+      formState.ondemandNoCreditsOutcome,
       teacherId,
       days,
       createClassMutation,

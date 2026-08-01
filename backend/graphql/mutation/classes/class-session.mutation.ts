@@ -120,7 +120,8 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
           durationMinutes: args.input.durationMinutes,
         },
         tSession,
-        tErrors
+        tErrors,
+        ctx.locale
       );
       return ClassSessionService.getClassInstanceDetail(userId, newInstance.id, tSession, tErrors);
     },

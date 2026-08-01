@@ -2,7 +2,12 @@ import type { PaginationArgs } from "@/frontend/common/graphql/generated/gql/gra
 
 export function buildPaginationVars(page: number, pageSize: number): PaginationArgs {
   return {
-    skip: page * pageSize,
+    after: null,
+    before: null,
     first: pageSize,
-  } as unknown as PaginationArgs;
+    last: null,
+    maxCount: null,
+    page: null,
+    skip: page * pageSize,
+  };
 }

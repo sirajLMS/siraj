@@ -36,6 +36,15 @@ export const quotas = pgTable(
     priority: integer("priority").notNull().default(0),
     rolloverPolicy: jsonb("rollover_policy"),
     version: integer("version").notNull().default(1),
+    /**
+     * Deterministic SHA-256 idempotency key.
+     *
+     * Pattern: `sha256(quotaId|reason|classInstanceId|recurringScheduleId|ts)` → hex digest.
+     * The pipe-delimited segments are concatenated (null segments rendered as empty
+     * strings) and hashed with SHA-256 to produce a 64-character hex string. This
+     * guarantees that every quota created for the same student + kind + period is
+     * deduplicated via the unique index below.
+     */
     idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
@@ -49,6 +58,7 @@ export const quotas = pgTable(
       .on(table.studentId, table.status, table.remaining)
       .where(sql`deleted_at IS NULL AND status = 'ACTIVE' AND remaining > 0`),
     index("quotas_valid_until_idx").on(table.validUntil).where(sql`deleted_at IS NULL AND status = 'ACTIVE'`),
+    index("quotas_admin_list_idx").on(table.studentId, table.status, table.deletedAt),
     check(
       "quotas_kind_period_consistency_chk",
       sql`

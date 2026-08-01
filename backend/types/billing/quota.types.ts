@@ -36,8 +36,6 @@ export function mapQuotaLedgerToReturnType(row: QuotaLedgerSelectType): QuotaLed
   };
 }
 
-type DateOrString = string | Date;
-
 export type QuotaRolloverPolicy = {
   maxRolloverPercent?: number | null;
   accumulationCap?: number | null;
@@ -67,11 +65,17 @@ export type QuotaSubmitInput = Omit<
   rolloverPolicy?: QuotaRolloverPolicy | null;
 };
 
-export type QuotaUpdateType = {
-  name?: string | null;
-  priority?: number | null;
-  status?: QuotaStatus | null;
-  validUntil?: DateOrString | null;
+export type QuotaUpdateType = Omit<
+  Partial<
+    Omit<
+      QuotaInsertType,
+      "id" | "createdAt" | "updatedAt" | "deletedAt" | "version" | "idempotencyKey" | "usedThisPeriod" | "periodAnchor"
+    >
+  >,
+  "validUntil" | "validFrom"
+> & {
+  validUntil?: Date | null;
+  validFrom?: Date | null;
   version: number;
 };
 

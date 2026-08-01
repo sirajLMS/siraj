@@ -4,19 +4,21 @@ import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { QuotaKind, QuotaStatus } from "@/backend/enum";
+import type { QuotaSubmitInput, QuotaUpdateType } from "@/backend/types";
 
 describe("QuotaRepository", () => {
   test("create & findById", async () => {
     await runInRollback(async tx => {
       const { student } = await setupStudent(tx);
 
-      const created = await QuotaRepository.create(tx, {
+      const quotaInput: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PACKAGE,
         name: "Test Package",
         totalClasses: 10,
         idempotencyKey: `quota-test-${randomUUID()}`,
-      });
+      };
+      const created = await QuotaRepository.create(tx, quotaInput);
 
       expect(created.id).toBeDefined();
       expect(created.name).toBe("Test Package");
@@ -33,25 +35,28 @@ describe("QuotaRepository", () => {
     await runInRollback(async tx => {
       const { student } = await setupStudent(tx);
 
-      await QuotaRepository.create(tx, {
+      const quotaInput1: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PACKAGE,
         name: "Package 1",
         totalClasses: 5,
         idempotencyKey: `quota-test-${randomUUID()}`,
-      });
+      };
+      await QuotaRepository.create(tx, quotaInput1);
 
-      const q2 = await QuotaRepository.create(tx, {
+      const quotaInput2: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PACKAGE,
         name: "Package 2",
         totalClasses: 10,
         idempotencyKey: `quota-test-${randomUUID()}`,
-      });
-      await QuotaRepository.update(tx, q2.id, {
+      };
+      const q2 = await QuotaRepository.create(tx, quotaInput2);
+      const updatePayload: QuotaUpdateType = {
         status: QuotaStatus.EXPIRED,
         version: q2.version,
-      });
+      };
+      await QuotaRepository.update(tx, q2.id, updatePayload);
 
       const allQuotas = await QuotaRepository.listByStudent(tx, student.id);
       expect(allQuotas).toHaveLength(2);
@@ -66,18 +71,20 @@ describe("QuotaRepository", () => {
     await runInRollback(async tx => {
       const { student } = await setupStudent(tx);
 
-      const created = await QuotaRepository.create(tx, {
+      const quotaInput: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PACKAGE,
         name: "Initial Name",
         totalClasses: 10,
         idempotencyKey: `quota-test-${randomUUID()}`,
-      });
+      };
+      const created = await QuotaRepository.create(tx, quotaInput);
 
-      const updated = await QuotaRepository.update(tx, created.id, {
+      const updatePayload: QuotaUpdateType = {
         name: "Updated Name",
         version: created.version,
-      });
+      };
+      const updated = await QuotaRepository.update(tx, created.id, updatePayload);
 
       expect(updated.name).toBe("Updated Name");
       expect(updated.version).toBe(created.version + 1);
@@ -88,13 +95,14 @@ describe("QuotaRepository", () => {
     await runInRollback(async tx => {
       const { student } = await setupStudent(tx);
 
-      const created = await QuotaRepository.create(tx, {
+      const quotaInput: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PACKAGE,
         name: "To Delete",
         totalClasses: 10,
         idempotencyKey: `quota-test-${randomUUID()}`,
-      });
+      };
+      const created = await QuotaRepository.create(tx, quotaInput);
 
       const deleted = await QuotaRepository.softDelete(tx, created.id);
       expect(deleted.deletedAt).not.toBeNull();

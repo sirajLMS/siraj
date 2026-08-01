@@ -65,7 +65,6 @@ export interface QuotaLabels {
     readonly expiredSlippage: string;
     readonly months: string;
     readonly classes: string;
-    readonly redemptionPercentage: string;
     readonly packageType: string;
     readonly periodicType: string;
     readonly onDemandType: string;
@@ -75,6 +74,5 @@ export interface QuotaLabels {
     readonly pendingCredits: string;
     readonly expiredClasses: string;
     readonly redeemedClasses: string;
-    readonly cumulative: string;
   };
 }

@@ -119,8 +119,6 @@ function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.DateTime
   for (const [monthKey, monthData] of entries) {
     cumExp += monthData.expired;
     cumRed += monthData.redeemed;
-    const labels = monthData as unknown as { redeemed: number };
-    void labels; // satisfy type checker
     result.push({ month: monthKey, cumulativeExpired: cumExp, cumulativeRedeemed: cumRed });
   }
   const seen = new Set<string>();

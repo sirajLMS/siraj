@@ -5,6 +5,7 @@ import type { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { quotaLedger } from "@/backend/db/schema";
 import type { QuotaLedgerReason } from "@/backend/enum";
+import { QuotaLedgerError } from "@/backend/lib/errors";
 import type { QuotaLedgerSelectType } from "@/backend/types/billing/quota.types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
 
@@ -29,6 +30,7 @@ export namespace QuotaLedgerRepository {
     // If the row already exists (conflict), the insert returns no rows and we
     // fetch the existing record. This eliminates the TOCTOU race between the
     // separate SELECT and INSERT that was present in the previous implementation.
+    // AUDIT: ledger entry required for tracking and balance reconstruction
     const now = new Date();
     const [inserted] = await tx
       .insert(quotaLedger)
@@ -57,7 +59,7 @@ export namespace QuotaLedgerRepository {
       .where(eq(quotaLedger.idempotencyKey, input.idempotencyKey))
       .limit(1);
 
-    if (!existing) throw new Error("Quota ledger insert returned no rows and no existing row found");
+    if (!existing) throw new QuotaLedgerError("Quota ledger insert returned no rows and no existing row found");
     return existing;
   };
 
@@ -91,6 +93,7 @@ export namespace QuotaLedgerRepository {
     const unseenRows = rows.filter(r => !existingSet.has(r.idempotencyKey));
 
     // ONE multi-row INSERT for all unseen rows
+    // AUDIT: ledger entries required for batch tracking and balance reconstruction
     if (unseenRows.length === 0) return [];
 
     const now = new Date();

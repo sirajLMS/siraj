@@ -6,6 +6,7 @@ import {
   QuotaStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
+  AvailableClassSlotReturnType,
   QuotaLedgerPaginatedResult,
   QuotaLedgerReturnType,
   QuotaPaginatedFilter,
@@ -140,3 +141,17 @@ export const QuotaPaginatedFilterPothosRef = gqlSchemaBuilder
       search: t.string({ required: false }),
     }),
   });
+
+const AvailableClassSlotRef = gqlSchemaBuilder.objectRef<AvailableClassSlotReturnType>("AvailableClassSlot");
+
+export const AvailableClassSlotPothosObject = AvailableClassSlotRef.implement({
+  description: "An available class slot for a student on a given date",
+  fields: t => ({
+    // Composite key for Apollo cache normalization
+    id: t.exposeString("teacherId"),
+    teacherId: t.exposeString("teacherId"),
+    startAt: t.expose("startAt", { type: "DateTime" }),
+    endAt: t.expose("endAt", { type: "DateTime" }),
+    available: t.exposeBoolean("available"),
+  }),
+});

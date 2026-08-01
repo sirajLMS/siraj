@@ -1,4 +1,3 @@
-import { and, eq, gte, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo";
@@ -12,7 +11,6 @@ import {
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
-import { classInstances } from "@/backend/db/schema";
 import {
   AppPermission,
   type CurrencyCode,
@@ -459,21 +457,12 @@ export namespace RecurringClassService {
       // 1. Soft-delete the schedule (V3-021: delegated to repository)
       await RecurringScheduleRepository.softDelete(recurringScheduleId, t);
 
-      // 2. Soft-delete all non-deleted upcoming instances
-      const upcomingInstances = await t
-        .select({
-          id: classInstances.id,
-          studentId: classInstances.studentId,
-          quotaDeducted: classInstances.quotaDeducted,
-        })
-        .from(classInstances)
-        .where(
-          and(
-            eq(classInstances.recurringScheduleId, recurringScheduleId),
-            isNull(classInstances.deletedAt),
-            gte(classInstances.scheduledStartAt, now)
-          )
-        );
+      // 2. Soft-delete all non-deleted upcoming instances (via repository)
+      const upcomingInstances = await SchedulingRepository.findUpcomingInstancesByScheduleId(
+        recurringScheduleId,
+        now,
+        t
+      );
 
       const cancelledInstanceIds: string[] = [];
       if (upcomingInstances.length > 0) {
@@ -601,21 +590,12 @@ export namespace RecurringClassService {
 
       const now = new Date();
 
-      // 1. Find all non-deleted, upcoming instances
-      const upcomingInstances = await t
-        .select({
-          id: classInstances.id,
-          studentId: classInstances.studentId,
-          quotaDeducted: classInstances.quotaDeducted,
-        })
-        .from(classInstances)
-        .where(
-          and(
-            eq(classInstances.recurringScheduleId, recurringScheduleId),
-            isNull(classInstances.deletedAt),
-            gte(classInstances.scheduledStartAt, now)
-          )
-        );
+      // 1. Find all non-deleted, upcoming instances (via repository)
+      const upcomingInstances = await SchedulingRepository.findUpcomingInstancesByScheduleId(
+        recurringScheduleId,
+        now,
+        t
+      );
 
       // 2. Soft-delete all upcoming instances (V3-021: delegated to repository)
       const archivedInstanceIds: string[] = [];

@@ -1,5 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  AvailableClassSlotPothosObject,
   QuotaLedgerPaginatedResultPothosObject,
   QuotaPaginatedFilterPothosRef,
   QuotaPaginatedResultPothosObject,
@@ -8,6 +9,7 @@ import {
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import { PaginationArgs } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("quotaLedger", t =>
@@ -56,6 +58,61 @@ gqlSchemaBuilder.queryField("quotas", t =>
       const actorUserId = await requireAuth(ctx);
       const pagination = PaginationArgs.fromArgs(args.pagination);
       return QuotaService.listQuotas(args.filter ?? null, pagination, undefined, actorUserId, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("studentQuotas", t =>
+  t.field({
+    type: [QuotaPothosObject],
+    description: "List all quotas for a student",
+    authScopes: { loggedIn: true },
+    args: {
+      studentId: t.arg.id({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return QuotaService.listStudentQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("studentOpenQuotas", t =>
+  t.field({
+    type: [QuotaPothosObject],
+    description: "List only active/open quotas (status ACTIVE, remaining > 0) for a student",
+    authScopes: { loggedIn: true },
+    args: {
+      studentId: t.arg.id({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return QuotaService.listStudentOpenQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("availableClassSlots", t =>
+  t.field({
+    type: [AvailableClassSlotPothosObject],
+    description: "Find available class slots for a student on a given date",
+    authScopes: { loggedIn: true },
+    args: {
+      studentId: t.arg.id({ required: true }),
+      date: t.arg({ type: "DateTime", required: true }),
+      teacherId: t.arg.id({ required: false }),
+      durationMinutes: t.arg.int({ required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      await requireAuth(ctx);
+      return AvailabilityService.findAvailableSlots(
+        String(args.studentId),
+        args.date,
+        args.teacherId ? String(args.teacherId) : null,
+        args.durationMinutes ?? 60,
+        undefined,
+        ctx.locale
+      );
     },
   })
 );

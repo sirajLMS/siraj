@@ -5,28 +5,32 @@ import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.re
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { QuotaKind, QuotaLedgerReason } from "@/backend/enum";
+import type { QuotaSubmitInput, QuotaLedgerInsertInput as RawQuotaLedgerInsertInput } from "@/backend/types";
+
+type QuotaLedgerInsertInput = Omit<RawQuotaLedgerInsertInput, "reason"> & { reason: QuotaLedgerReason };
 
 describe("QuotaLedgerRepository", () => {
   test("insert & listByQuota", async () => {
     await runInRollback(async tx => {
       const { student } = await setupStudent(tx);
 
-      const quota = await QuotaRepository.create(tx, {
+      const quotaInput: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PACKAGE,
         name: "Ledger Test Quota",
         totalClasses: 10,
-
         idempotencyKey: `quota-test-${randomUUID()}`,
-      });
+      };
+      const quota = await QuotaRepository.create(tx, quotaInput);
 
-      const entry = await QuotaLedgerRepository.insert(tx, {
+      const ledgerInput: QuotaLedgerInsertInput = {
         quotaId: quota.id,
         studentId: student.id,
         delta: 10,
         reason: QuotaLedgerReason.GRANT,
         idempotencyKey: `ledger-test-${randomUUID()}`,
-      });
+      };
+      const entry = await QuotaLedgerRepository.insert(tx, ledgerInput);
 
       expect(entry.id).toBeDefined();
       expect(entry.delta).toBe(10);
@@ -43,30 +47,32 @@ describe("QuotaLedgerRepository", () => {
     await runInRollback(async tx => {
       const { student } = await setupStudent(tx);
 
-      const quota = await QuotaRepository.create(tx, {
+      const quotaInput: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PACKAGE,
         name: "Compute Balance Quota",
         totalClasses: 10,
-
         idempotencyKey: `quota-test-${randomUUID()}`,
-      });
+      };
+      const quota = await QuotaRepository.create(tx, quotaInput);
 
-      await QuotaLedgerRepository.insert(tx, {
+      const grantInput: QuotaLedgerInsertInput = {
         quotaId: quota.id,
         studentId: student.id,
         delta: 10,
         reason: QuotaLedgerReason.GRANT,
         idempotencyKey: `ledger-test-${randomUUID()}`,
-      });
+      };
+      await QuotaLedgerRepository.insert(tx, grantInput);
 
-      await QuotaLedgerRepository.insert(tx, {
+      const redeemInput: QuotaLedgerInsertInput = {
         quotaId: quota.id,
         studentId: student.id,
         delta: -1,
         reason: QuotaLedgerReason.REDEEM,
         idempotencyKey: `ledger-test-${randomUUID()}`,
-      });
+      };
+      await QuotaLedgerRepository.insert(tx, redeemInput);
 
       const balance = await QuotaLedgerRepository.computeBalance(tx, quota.id);
       // QuotaRepository.create automatically inserts a GRANT ledger row of delta=totalClasses (10).

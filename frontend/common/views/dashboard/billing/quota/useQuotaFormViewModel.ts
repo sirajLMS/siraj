@@ -70,7 +70,7 @@ export function useQuotaFormViewModel(quotaId?: string) {
         // Refetch to get latest version before updating (avoids stale version conflict)
         const { data: latest } = await refetchQuota();
         if (!latest?.quota) return;
-        const q = latest.quota as unknown as QuotaItem;
+        const q = latest.quota as QuotaItem;
         try {
           await updateQuotaMutation({
             variables: {
@@ -80,7 +80,7 @@ export function useQuotaFormViewModel(quotaId?: string) {
                 validUntil: formData.validUntil,
                 status: q.status as QuotaStatus,
                 priority: formData.priority,
-                version: q.version,
+                version: q.version ?? 0,
               },
             },
           });

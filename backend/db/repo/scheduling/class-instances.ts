@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, notInArray, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -345,3 +345,134 @@ export const softDeleteBatch = async (ids: string[], tx?: DBTransaction): Promis
   const q = queryDb(tx);
   await q.update(classInstances).set({ deletedAt: now, updatedAt: now }).where(inArray(classInstances.id, ids));
 };
+
+/**
+ * Returns non-deleted upcoming class instances (`scheduledStartAt >= now`)
+ * for a given recurring schedule ID. Selects only the fields needed by
+ * `RecurringClassService.cancelSchedule` and `switchSchedulingMode` to
+ * release/refund quota — `id`, `studentId`, and `quotaDeducted`.
+ */
+export async function findUpcomingInstancesByScheduleId(
+  recurringScheduleId: string,
+  now: Date,
+  tx?: DBTransaction
+): Promise<{ id: string; studentId: string; quotaDeducted: boolean }[]> {
+  const q = queryDb(tx);
+  return q
+    .select({
+      id: classInstances.id,
+      studentId: classInstances.studentId,
+      quotaDeducted: classInstances.quotaDeducted,
+    })
+    .from(classInstances)
+    .where(
+      and(
+        eq(classInstances.recurringScheduleId, recurringScheduleId),
+        isNull(classInstances.deletedAt),
+        gte(classInstances.scheduledStartAt, now)
+      )
+    );
+}
+
+/**
+ * Point-checks whether any non-deleted class instance overlaps the given
+ * time range for `studentId` or `teacherId`. Returns `true` if a conflict
+ * exists (slot NOT available), `false` otherwise.
+ */
+export async function hasOverlappingInstance(
+  studentId: string,
+  teacherId: string,
+  startAt: Date,
+  endAt: Date,
+  ignoreInstanceIds: string[] = [],
+  tx?: DBTransaction
+): Promise<boolean> {
+  const q = queryDb(tx);
+  const conditions = [
+    isNull(classInstances.deletedAt),
+    sql`${classInstances.scheduledStartAt} < ${endAt}`,
+    sql`${classInstances.scheduledEndAt} > ${startAt}`,
+    sql`(${classInstances.studentId} = ${studentId} OR ${classInstances.teacherId} = ${teacherId})`,
+  ];
+  if (ignoreInstanceIds.length > 0) {
+    conditions.push(notInArray(classInstances.id, ignoreInstanceIds));
+  }
+  const conflicts = await q
+    .select({ id: classInstances.id })
+    .from(classInstances)
+    .where(and(...conditions))
+    .limit(1);
+  return conflicts.length > 0;
+}
+
+/**
+ * Returns the `scheduledStartAt` and `scheduledEndAt` of all non-deleted class
+ * instances that overlap the given `[rangeStart, rangeEnd]` window for
+ * `studentId` or `teacherId`. Used by `AvailabilityService.assertSchedulePatternAvailable`
+ * to pre-fetch overlapping instances in a single query.
+ */
+export async function findOverlappingInstancesForRange(
+  studentId: string,
+  teacherId: string,
+  rangeStart: Date,
+  rangeEnd: Date,
+  ignoreInstanceIds: string[] = [],
+  tx?: DBTransaction
+): Promise<{ scheduledStartAt: Date; scheduledEndAt: Date }[]> {
+  const q = queryDb(tx);
+  const conditions = [
+    isNull(classInstances.deletedAt),
+    sql`${classInstances.scheduledStartAt} < ${rangeEnd}`,
+    sql`${classInstances.scheduledEndAt} > ${rangeStart}`,
+    sql`(${classInstances.studentId} = ${studentId} OR ${classInstances.teacherId} = ${teacherId})`,
+  ];
+  if (ignoreInstanceIds.length > 0) {
+    conditions.push(notInArray(classInstances.id, ignoreInstanceIds));
+  }
+  return q
+    .select({
+      scheduledStartAt: classInstances.scheduledStartAt,
+      scheduledEndAt: classInstances.scheduledEndAt,
+    })
+    .from(classInstances)
+    .where(and(...conditions));
+}
+
+/**
+ * Batch-updates the execution state and on-demand status of multiple class
+ * instances in a single UPDATE. Used by `QuotaService.refreshStudentOndemandInstances`
+ * to flip PENDING_CREDIT instances to AVAILABLE. The WHERE clause guards on
+ * `ondemandStatus = PENDING_CREDIT` to prevent TOCTOU races (a concurrent
+ * transaction may have already flipped an instance to AVAILABLE).
+ */
+export async function updateOndemandStatusBatch(
+  instanceIds: string[],
+  updates: { executionState: string; ondemandStatus: string; updatedAt: Date },
+  guardOndemandStatus: string,
+  tx: DBTransaction
+): Promise<void> {
+  if (instanceIds.length === 0) return;
+  await t_updateOndemandStatusBatch(tx, instanceIds, updates, guardOndemandStatus);
+}
+
+// Inline helper to keep the exported function signature clean
+async function t_updateOndemandStatusBatch(
+  tx: DBTransaction,
+  instanceIds: string[],
+  updates: { executionState: string; ondemandStatus: string; updatedAt: Date },
+  guardOndemandStatus: string
+): Promise<void> {
+  await tx
+    .update(classInstances)
+    .set({
+      executionState: updates.executionState,
+      ondemandStatus: updates.ondemandStatus as OnDemandStatus,
+      updatedAt: updates.updatedAt,
+    })
+    .where(
+      and(
+        inArray(classInstances.id, instanceIds),
+        eq(classInstances.ondemandStatus, guardOndemandStatus as OnDemandStatus)
+      )
+    );
+}

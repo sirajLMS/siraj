@@ -1,10 +1,6 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
-import type {
-  QuotaKind,
-  QuotaPaginatedFilterInput,
-  QuotaStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { QuotaPaginatedFilterInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { deleteQuotaMutationDocument, quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useQuotaStore } from "@/frontend/common/stores/quotaStore";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
@@ -24,8 +20,13 @@ export function useQuotaViewModel() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const filter = useMemo(() => {
-    const f: { status?: QuotaStatus; kind?: QuotaKind; search?: string } = {};
+  const filter = useMemo<QuotaPaginatedFilterInput>(() => {
+    const f: QuotaPaginatedFilterInput = {
+      kind: null,
+      search: null,
+      status: null,
+      studentId: null,
+    };
     if (filterStatus) f.status = filterStatus;
     if (filterKind) f.kind = filterKind;
     if (searchQuery.trim()) f.search = searchQuery.trim();
@@ -34,7 +35,7 @@ export function useQuotaViewModel() {
 
   const { data, loading, refetch } = useQuery(quotasQueryDocument, {
     variables: {
-      filter: Object.keys(filter).length > 0 ? (filter as unknown as QuotaPaginatedFilterInput) : null,
+      filter: (filter.kind ?? filter.search ?? filter.status ?? filter.studentId) !== null ? filter : null,
       pagination: buildPaginationVars(page, pageSize),
     },
     fetchPolicy: "cache-and-network",

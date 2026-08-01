@@ -154,9 +154,9 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
         </Typography>
 
         <Box sx={{ width: "100%", height: 400 }}>
-          <AppDataGrid
+          <AppDataGrid<QuotaLedgerItem>
             rows={ledgerEntries}
-            columns={ledgerColumns as unknown as Parameters<typeof AppDataGrid>[0]["columns"]}
+            columns={ledgerColumns}
             loading={loadingLedger}
             paginationOptions={{
               mode: "server",

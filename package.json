@@ -58,6 +58,7 @@
     "validate:seed-assets": "bun run scripts/validate-seed-assets.ts",
     "generate:icons": "bun scripts/generate-icons.ts",
     "quota:expire": "bun run scripts/quota-expiry-sweeper.ts",
+    "quota:reminder": "bun run scripts/quota-reminder-cron.ts",
     "ondemand:generate": "bun run scripts/ondemand-instance-generator.ts",
     "ondemand:resolve": "bun run scripts/ondemand-no-credits-resolver.ts",
     "ondemand:teacher-digest": "bun run scripts/ondemand-teacher-digest-cron.ts"

@@ -13,6 +13,7 @@ import { QuotaService } from "@/backend/services/billing/quota.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherDashboardService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
@@ -22,14 +23,14 @@ export namespace TeacherDashboardService {
     }
   }
 
-  export async function getDashboard(userId: string, date: string, pagination?: PaginationArgs | null) {
-    const tErrors = { unauthorized: "You must be logged in first." } as ErrorsLabels;
+  export async function getDashboard(userId: string, date: string, pagination: PaginationArgs | null, locale: string) {
+    const { errorsTranslations: tErrors } = getServerTranslations(locale);
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
     await assertPermission(userId, AppPermission.SCHEDULE_VIEW_ASSIGNED, tErrors);
 
     const teacher = await TeacherRepository.findByUserId(userId);
     if (!teacher) {
-      throw new Error("Teacher profile not found");
+      throw new Error(tErrors.teacher.teacherNotFound(userId));
     }
 
     const user = await UserRepository.findById(userId);

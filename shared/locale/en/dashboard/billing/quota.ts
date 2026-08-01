@@ -59,7 +59,6 @@ export const quotaEn: QuotaLabels = {
   activeQuotasCount: count => (count === 1 ? "1 Active Quota" : `${count} Active Quotas`),
   totalClassesRemaining: count => (count === 1 ? "1 Class Remaining" : `${count} Classes Remaining`),
   expiringThisWeekCount: count => (count === 1 ? "1 Expiring This Week" : `${count} Expiring This Week`),
-  // @internal used by locale type contract
   charts: {
     quotaPurchasesOverTime: "Quota Purchases Over Time",
     redemptionRateByType: "Redemption Rate by Type",
@@ -68,7 +67,6 @@ export const quotaEn: QuotaLabels = {
     expiredSlippage: "Expired Slippage",
     months: "Months",
     classes: "Classes",
-    redemptionPercentage: "Redemption %",
     packageType: "Package",
     periodicType: "Periodic",
     onDemandType: "On-Demand",
@@ -78,6 +76,5 @@ export const quotaEn: QuotaLabels = {
     pendingCredits: "Pending Credits",
     expiredClasses: "Expired",
     redeemedClasses: "Redeemed",
-    cumulative: "Cumulative",
   },
 };

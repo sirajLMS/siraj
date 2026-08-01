@@ -6,6 +6,7 @@ import {
 } from "@/backend/graphql/pothos/billing/quota.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import type { QuotaUpdateType } from "@/backend/types";
 
 gqlSchemaBuilder.mutationField("createQuota", t =>
   t.field({
@@ -36,7 +37,7 @@ gqlSchemaBuilder.mutationField("updateQuota", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       // V3-012: Permission check is enforced by QuotaService.updateQuota.
-      return QuotaService.updateQuota(String(args.id), args.input, actorUserId, ctx.locale);
+      return QuotaService.updateQuota(String(args.id), args.input as QuotaUpdateType, actorUserId, ctx.locale);
     },
   })
 );

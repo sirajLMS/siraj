@@ -18,7 +18,7 @@ async function resolveTeacherDashboard(
     throw new Error(tErrors.unauthorized);
   }
   const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
-  const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, pagination);
+  const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, pagination, ctx.locale);
   const tErrors = ctx.t().errorsTranslations;
 
   const effectiveMeetings = await Promise.all(

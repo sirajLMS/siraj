@@ -12,6 +12,7 @@ import { runInRollback } from "@/backend/db/test/test-utils";
 import { type AppPermission, QuotaKind } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import type { QuotaReturnType, QuotaSubmitInput } from "@/backend/types";
 
 describe("QuotaService", () => {
   const originalHasPermission = PermissionsService.hasPermission;
@@ -29,25 +30,21 @@ describe("QuotaService", () => {
       const actor = await createTestUser(tx);
       const { student } = await setupStudent(tx);
 
-      const created = await QuotaService.createQuota(
-        {
-          studentId: student.id,
-          kind: QuotaKind.PACKAGE,
-          name: "Service Test Quota",
-          totalClasses: 12,
-          idempotencyKey: `svc-quota-${randomUUID()}`,
-        },
-        actor.id,
-        "en",
-        tx
-      );
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Service Test Quota",
+        totalClasses: 12,
+        idempotencyKey: `svc-quota-${randomUUID()}`,
+      };
+      const created = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
 
       expect(created.id).toBeDefined();
       expect(created.name).toBe("Service Test Quota");
       expect(created.totalClasses).toBe(12);
       expect(created.remaining).toBe(12);
 
-      const fetched = await QuotaService.getQuota(created.id, "en", tx, actor.id);
+      const fetched: QuotaReturnType | null = await QuotaService.getQuota(created.id, "en", tx, actor.id);
       expect(fetched).not.toBeNull();
       expect(fetched?.id).toBe(created.id);
     });
@@ -58,18 +55,14 @@ describe("QuotaService", () => {
       const actor = await createTestUser(tx);
       const { student } = await setupStudent(tx);
 
-      const quota = await QuotaService.createQuota(
-        {
-          studentId: student.id,
-          kind: QuotaKind.PACKAGE,
-          name: "Earmark Test Quota",
-          totalClasses: 10,
-          idempotencyKey: `svc-quota-${randomUUID()}`,
-        },
-        actor.id,
-        "en",
-        tx
-      );
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Earmark Test Quota",
+        totalClasses: 10,
+        idempotencyKey: `svc-quota-${randomUUID()}`,
+      };
+      const quota = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
 
       const teacher = await setupTeacher(tx);
 
@@ -89,7 +82,7 @@ describe("QuotaService", () => {
         })
         .returning();
 
-      const reserved = await QuotaService.reserveForRecurringSchedule(
+      const reserved: QuotaReturnType = await QuotaService.reserveForRecurringSchedule(
         student.id,
         schedule.id,
         quota.id,
@@ -101,7 +94,7 @@ describe("QuotaService", () => {
       expect(reserved.remaining).toBe(6);
       expect(reserved.reservedClasses).toBe(4);
 
-      const released = await QuotaService.releaseForRecurringSchedule(
+      const released: QuotaReturnType = await QuotaService.releaseForRecurringSchedule(
         student.id,
         schedule.id,
         quota.id,
@@ -122,24 +115,32 @@ describe("QuotaService", () => {
       const teacher = await setupTeacher(tx);
       const instance = await createMockClassInstance(tx, student.id, teacher.teacher.id);
 
-      const quota = await QuotaService.createQuota(
-        {
-          studentId: student.id,
-          kind: QuotaKind.PACKAGE,
-          name: "Redeem Test Quota",
-          totalClasses: 5,
-          idempotencyKey: `svc-quota-${randomUUID()}`,
-        },
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Redeem Test Quota",
+        totalClasses: 5,
+        idempotencyKey: `svc-quota-${randomUUID()}`,
+      };
+      const quota = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
+
+      const redeemed: QuotaReturnType = await QuotaService.redeemForInstance(
+        student.id,
+        instance.id,
+        quota.id,
         actor.id,
-        "en",
         tx
       );
 
-      const redeemed = await QuotaService.redeemForInstance(student.id, instance.id, quota.id, actor.id, tx);
-
       expect(redeemed.remaining).toBe(4);
 
-      const released = await QuotaService.releaseForInstance(student.id, instance.id, quota.id, actor.id, tx);
+      const released: QuotaReturnType = await QuotaService.releaseForInstance(
+        student.id,
+        instance.id,
+        quota.id,
+        actor.id,
+        tx
+      );
 
       expect(released.remaining).toBe(5);
     });
@@ -150,18 +151,14 @@ describe("QuotaService", () => {
       const actor = await createTestUser(tx);
       const { student } = await setupStudent(tx);
 
-      await QuotaService.createQuota(
-        {
-          studentId: student.id,
-          kind: QuotaKind.PACKAGE,
-          name: "Balance Quota 1",
-          totalClasses: 10,
-          idempotencyKey: `svc-quota-${randomUUID()}`,
-        },
-        actor.id,
-        "en",
-        tx
-      );
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Balance Quota 1",
+        totalClasses: 10,
+        idempotencyKey: `svc-quota-${randomUUID()}`,
+      };
+      await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
 
       const balance = await QuotaService.getStudentQuotaBalance(student.id, tx, actor.id);
       expect(balance.studentId).toBe(student.id);
@@ -195,32 +192,17 @@ describe("QuotaService", () => {
       const actor = await createTestUser(tx);
       const { student } = await setupStudent(tx);
       const idempotencyKey = `svc-quota-idempotent-${randomUUID()}`;
+      const quotaInput: QuotaSubmitInput = {
+        studentId: student.id,
+        kind: QuotaKind.PACKAGE,
+        name: "Idempotent Quota",
+        totalClasses: 8,
+        idempotencyKey,
+      };
 
-      const first = await QuotaService.createQuota(
-        {
-          studentId: student.id,
-          kind: QuotaKind.PACKAGE,
-          name: "Idempotent Quota",
-          totalClasses: 8,
-          idempotencyKey,
-        },
-        actor.id,
-        "en",
-        tx
-      );
+      const first: QuotaReturnType = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
 
-      const second = await QuotaService.createQuota(
-        {
-          studentId: student.id,
-          kind: QuotaKind.PACKAGE,
-          name: "Idempotent Quota",
-          totalClasses: 8,
-          idempotencyKey,
-        },
-        actor.id,
-        "en",
-        tx
-      );
+      const second: QuotaReturnType = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
 
       expect(second.id).toBe(first.id);
       expect(second.remaining).toBe(first.remaining);

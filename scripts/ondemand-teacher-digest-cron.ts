@@ -1,10 +1,19 @@
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/backend/db";
-import { classInstances, recurringSchedules, systemSettings, users } from "@/backend/db/schema";
+import {
+  classInstances,
+  recurringSchedules,
+  systemSettings,
+  teacherAvailabilityWindows,
+  users,
+} from "@/backend/db/schema";
 
 import { OnDemandStatus, SchedulingMode, SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
+
+/** Maximum number of pending instances to process per digest run (unbounded SELECT guard). */
+const MAX_DIGEST_INSTANCES_PER_RUN = 500;
 
 export async function runOndemandTeacherDigestCron(): Promise<void> {
   logger.info("[OnDemandTeacherDigestCron] Starting teacher daily digest check...");
@@ -47,7 +56,8 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
           eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT),
           isNull(classInstances.deletedAt)
         )
-      );
+      )
+      .limit(MAX_DIGEST_INSTANCES_PER_RUN);
 
     if (pendingInstances.length === 0) {
       logger.info("[OnDemandTeacherDigestCron] No pending on-demand instances found.");
@@ -55,15 +65,50 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
     }
 
     // Group by teacher
-    const teacherMap = new Map<string, { count: number; timezone: string }>();
+    const teacherMap = new Map<string, { count: number; timezone: string; scheduleTimezone: string | null }>();
 
     for (const { instance, schedule } of pendingInstances) {
       const teacherId = instance.teacherId;
-      const tz = schedule.timezone || "UTC";
+      const scheduleTz = schedule.timezone ?? null;
 
-      const existing = teacherMap.get(teacherId) ?? { count: 0, timezone: tz };
-      existing.count += 1;
-      teacherMap.set(teacherId, existing);
+      const existing = teacherMap.get(teacherId);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        teacherMap.set(teacherId, { count: 1, timezone: scheduleTz ?? "UTC", scheduleTimezone: scheduleTz });
+      }
+    }
+
+    // V3-Verify-6: Batch-fetch teacher_availability_windows timezones so we can
+    // fall back to them when the schedule has no timezone. Fallback chain:
+    // schedule.timezone → teacher_availability_windows.timezone → "UTC".
+    const teacherIdsWithMissingTz = [...teacherMap.entries()]
+      .filter(([, info]) => info.scheduleTimezone === null)
+      .map(([teacherId]) => teacherId);
+
+    if (teacherIdsWithMissingTz.length > 0) {
+      const availWindows = await db
+        .select({
+          teacherId: teacherAvailabilityWindows.teacherId,
+          timezone: teacherAvailabilityWindows.timezone,
+        })
+        .from(teacherAvailabilityWindows)
+        .where(inArray(teacherAvailabilityWindows.teacherId, teacherIdsWithMissingTz));
+
+      // First window per teacher is sufficient as a timezone source.
+      const teacherAvailTzMap = new Map<string, string>();
+      for (const w of availWindows) {
+        if (!teacherAvailTzMap.has(w.teacherId)) {
+          teacherAvailTzMap.set(w.teacherId, w.timezone);
+        }
+      }
+
+      for (const teacherId of teacherIdsWithMissingTz) {
+        const info = teacherMap.get(teacherId);
+        if (!info) continue;
+        const availTz = teacherAvailTzMap.get(teacherId);
+        info.timezone = availTz ?? "UTC";
+      }
     }
 
     // Batch-fetch all teacher user records

@@ -26,3 +26,24 @@ export class ForbiddenError extends DomainError {
     super("FORBIDDEN", message, options);
   }
 }
+
+export class QuotaNotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "QuotaNotFoundError";
+  }
+}
+
+export class QuotaAlreadyDeletedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "QuotaAlreadyDeletedError";
+  }
+}
+
+export class QuotaLedgerError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "QuotaLedgerError";
+  }
+}

@@ -40,6 +40,8 @@ export interface DashboardNavigationLabels {
   readonly billingAdmin: string;
   readonly quotas: string;
   readonly quotasCreate: string;
+  readonly quotasView: string;
+  readonly quotasEdit: string;
   readonly quotasInsights: string;
   readonly exchangeRates: string;
 

@@ -39,7 +39,7 @@ DO $$
 BEGIN
   ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
 EXCEPTION WHEN OTHERS THEN
-  RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
+  RAISE NOTICE 'Could not re-enable trigger trg_protect_system_permissions on permissions table: %', SQLERRM;
 END $$;
 
 -- Grant quotas.view to all groups that need read access.

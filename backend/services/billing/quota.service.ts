@@ -1,4 +1,3 @@
-import { and, eq, inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { StudentRepository } from "@/backend/db/repo";
@@ -6,7 +5,6 @@ import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { classInstances } from "@/backend/db/schema";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -196,6 +194,21 @@ export namespace QuotaService {
     const uid = actorUserId ?? "";
     await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
     const rows = await QuotaRepository.listActiveByStudent(tx, studentId);
+    return rows.map(mapQuotaToReturnType);
+  };
+
+  export const listStudentQuotas = async (
+    studentId: string,
+    tx?: ReadExecutor,
+    actorUserId?: string | null,
+    locale = "en"
+  ): Promise<QuotaReturnType[]> => {
+    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
+    // IDOR scoping — ensure the caller is associated with this student
+    // or holds QUOTAS_MANAGE before returning their quotas.
+    const uid = actorUserId ?? "";
+    await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
+    const rows = await QuotaRepository.listByStudent(tx, studentId);
     return rows.map(mapQuotaToReturnType);
   };
 
@@ -536,8 +549,7 @@ export namespace QuotaService {
       let flippedCount = 0;
       const now = new Date();
 
-      // Single batched UPDATE for all pending instances instead of N sequential writes.
-      // All instances get the same set of values, so one inArray UPDATE suffices.
+      // Single batched UPDATE for all pending instances (via repository).
       // The WHERE clause also guards on ondemandStatus = PENDING_CREDIT to
       // prevent a TOCTOU race: between the SELECT and UPDATE, a concurrent
       // transaction (e.g. session start) may have flipped an instance to
@@ -545,19 +557,16 @@ export namespace QuotaService {
       // over-count the flip, causing a credit leak.
       if (pendingInstances.length > 0) {
         const instanceIds = pendingInstances.map(inst => inst.id);
-        await t
-          .update(classInstances)
-          .set({
+        await SchedulingRepository.updateOndemandStatusBatch(
+          instanceIds,
+          {
             executionState: "NOT_ACTIVATED",
             ondemandStatus: OnDemandStatus.AVAILABLE,
             updatedAt: now,
-          })
-          .where(
-            and(
-              inArray(classInstances.id, instanceIds),
-              eq(classInstances.ondemandStatus, OnDemandStatus.PENDING_CREDIT)
-            )
-          );
+          },
+          OnDemandStatus.PENDING_CREDIT,
+          t
+        );
 
         flippedCount = pendingInstances.length;
       }
@@ -601,6 +610,28 @@ export namespace QuotaService {
       }
       const created = await QuotaRepository.create(t, { ...input });
       return [mapQuotaToReturnType(created)];
+    });
+  };
+
+  /**
+   * Seed-only bootstrap method: atomically checks if any quotas already exist
+   * (returning all existing rows if so) and creates ALL provided inputs in batch
+   * if none are found, all within a single transaction. Permission checks are
+   * intentionally omitted — this runs in trusted seed context.
+   */
+  export const seedOrGetQuotaBatch = async (inputs: readonly QuotaSubmitInput[]): Promise<QuotaReturnType[]> => {
+    if (inputs.length === 0) return [];
+    return db.transaction(async t => {
+      const res = await QuotaRepository.listAllPaginated(t, null, null);
+      if (res.rows.length > 0) {
+        return res.rows.map(mapQuotaToReturnType);
+      }
+      const created: QuotaReturnType[] = [];
+      for (const input of inputs) {
+        const row = await QuotaRepository.create(t, { ...input });
+        created.push(mapQuotaToReturnType(row));
+      }
+      return created;
     });
   };
 

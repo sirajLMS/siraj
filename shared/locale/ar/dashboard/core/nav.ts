@@ -37,6 +37,8 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   billingAdmin: "الفواتير",
   quotas: "الحصص والمحفظات",
   quotasCreate: "إنشاء حصة جديدة",
+  quotasView: "عرض الحصة",
+  quotasEdit: "تعديل الحصة",
   quotasInsights: "تحليلات الحصص",
   exchangeRates: "أسعار الصرف",
 

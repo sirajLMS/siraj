@@ -466,6 +466,16 @@ export enum AvailabilityStatus {
   OutOfStock = 'OUT_OF_STOCK'
 }
 
+/** An available class slot for a student on a given date */
+export type AvailableClassSlot = {
+  __typename?: 'AvailableClassSlot';
+  available: Maybe<Scalars['Boolean']['output']>;
+  endAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  startAt: Maybe<Scalars['DateTime']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+};
+
 export type BillingCurrencyTotal = {
   __typename?: 'BillingCurrencyTotal';
   amount: Maybe<Scalars['String']['output']>;
@@ -3628,6 +3638,14 @@ export enum OnDemandNoCreditsOutcome {
   RemindOnly = 'REMIND_ONLY'
 }
 
+export enum OnDemandStatus {
+  Available = 'AVAILABLE',
+  Cancelled = 'CANCELLED',
+  NoCreditsAbsent = 'NO_CREDITS_ABSENT',
+  NoCreditsCancelled = 'NO_CREDITS_CANCELLED',
+  PendingCredit = 'PENDING_CREDIT'
+}
+
 /** Summary metrics for the staff onboarding process */
 export type OnboardingMetrics = {
   __typename?: 'OnboardingMetrics';
@@ -4138,6 +4156,8 @@ export type Query = {
   adminInvoices: Maybe<AdminInvoiceHistoryResult>;
   /** Returns the paginated admin suggestion list with metrics. */
   adminSuggestions: Maybe<AdminSuggestionResult>;
+  /** Find available class slots for a student on a given date */
+  availableClassSlots: Maybe<Array<AvailableClassSlot>>;
   /** Lists all books and bags available to the academy. */
   booksAndBags: Maybe<Array<Book>>;
   classCategories: Maybe<Array<ClassCategory>>;
@@ -4259,7 +4279,11 @@ export type Query = {
   studentDirectory: Maybe<StudentDirectoryPayload>;
   /** Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity. */
   studentMonthlyReport: Maybe<StudentMonthlyReport>;
+  /** List only active/open quotas (status ACTIVE, remaining > 0) for a student */
+  studentOpenQuotas: Maybe<Array<Quota>>;
   studentProfile: Maybe<StudentProfile>;
+  /** List all quotas for a student */
+  studentQuotas: Maybe<Array<Quota>>;
   /** Paginated lesson reports for the logged-in student (student portal dashboard) */
   studentRecentLessonReports: Maybe<PendingLessonReportsPayload>;
   studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
@@ -4327,6 +4351,14 @@ export type QueryAdminInvoicesArgs = {
 
 export type QueryAdminSuggestionsArgs = {
   filter: SuggestionFilter;
+};
+
+
+export type QueryAvailableClassSlotsArgs = {
+  date: Scalars['DateTime']['input'];
+  durationMinutes: InputMaybe<Scalars['Int']['input']>;
+  studentId: Scalars['ID']['input'];
+  teacherId: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -4695,11 +4727,21 @@ export type QueryStudentMonthlyReportArgs = {
 };
 
 
+export type QueryStudentOpenQuotasArgs = {
+  studentId: Scalars['ID']['input'];
+};
+
+
 export type QueryStudentProfileArgs = {
   includeUpcomingClasses: InputMaybe<Scalars['Boolean']['input']>;
   month: InputMaybe<Scalars['Int']['input']>;
   studentId: InputMaybe<Scalars['String']['input']>;
   year: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryStudentQuotasArgs = {
+  studentId: Scalars['ID']['input'];
 };
 
 

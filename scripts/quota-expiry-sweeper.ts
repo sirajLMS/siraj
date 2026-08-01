@@ -1,11 +1,12 @@
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { parents, quotas, students } from "@/backend/db/schema";
+import { quotas } from "@/backend/db/schema";
 import { QuotaStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
 import type { QuotaReturnType, QuotaSelectType } from "@/backend/types/billing/quota.types";
+import { resolveStudentNotificationRecipients } from "@/scripts/lib/resolve-notification-recipients";
 
 /** Quotas with validUntil within this many days are considered "expiring soon". */
 const EXPIRY_NOTICE_DAYS = 7;
@@ -19,6 +20,10 @@ const LOW_BALANCE_ABSOLUTE_FLOOR = 3;
 /** Maximum number of expiring quotas to process per sweeper run (unbounded SELECT guard — RP2-9). */
 const MAX_EXPIRING_QUOTAS_PER_RUN = 500;
 
+/**
+ * Notification target for a single quota: the affected user IDs (parent or
+ * student), the quota's display name, and the student's display name.
+ */
 interface QuotaNotificationTarget {
   affectedUserIds: string[];
   quotaName: string;
@@ -26,9 +31,11 @@ interface QuotaNotificationTarget {
 }
 
 /**
- * Resolves the parent userId(s) for each quota's studentId, plus the student's
- * display name. Returns a Map keyed by quotaId. When no parent is linked, falls
- * back to the student's own userId so the notification still reaches a user.
+ * Resolves the notification targets for each quota's studentId using the
+ * shared resolveStudentNotificationRecipients utility, which batches
+ * the student + parent lookups. Returns a Map keyed by quotaId. When no
+ * parent is linked, falls back to the student's own userId so the
+ * notification still reaches a user.
  */
 async function resolveQuotaNotificationTargets(
   quotaRows: QuotaReturnType[] | QuotaSelectType[]
@@ -37,45 +44,19 @@ async function resolveQuotaNotificationTargets(
 
   const studentIds = [...new Set(quotaRows.map(q => q.studentId))];
 
-  const studentRows = await db
-    .select({
-      studentId: students.id,
-      studentUserId: students.userId,
-      parentId: students.parentId,
-      studentName: students.name,
-    })
-    .from(students)
-    .where(inArray(students.id, studentIds));
-
-  let parentUserMap = new Map<string, string>();
-  const validParents = studentRows.filter(s => s.parentId !== null);
-  if (validParents.length > 0) {
-    const parentIds = [...new Set(validParents.map(s => s.parentId as string))];
-    const parentRows = await db
-      .select({
-        parentId: parents.id,
-        userId: parents.userId,
-      })
-      .from(parents)
-      .where(inArray(parents.id, parentIds));
-    parentUserMap = new Map(parentRows.map(p => [p.parentId, p.userId]));
-  }
+  // Delegate to the shared utility which performs batch lookups and
+  // notification preference resolution.
+  const recipientMap = await resolveStudentNotificationRecipients(studentIds);
 
   const result = new Map<string, QuotaNotificationTarget>();
   for (const q of quotaRows) {
-    const studentRow = studentRows.find(s => s.studentId === q.studentId);
-    if (!studentRow) continue;
-
-    // Prefer the parent's userId as the notification recipient.
-    const parentUserId = studentRow.parentId ? (parentUserMap.get(studentRow.parentId) ?? null) : null;
-    const affectedUserIds: string[] = [];
-    if (parentUserId) affectedUserIds.push(parentUserId);
-    else if (studentRow.studentUserId) affectedUserIds.push(studentRow.studentUserId);
+    const recipient = recipientMap.get(q.studentId);
+    if (!recipient) continue;
 
     result.set(q.id, {
-      affectedUserIds,
+      affectedUserIds: recipient.affectedUserIds,
       quotaName: q.name,
-      studentName: studentRow.studentName,
+      studentName: recipient.studentName,
     });
   }
 
@@ -90,10 +71,14 @@ export async function runQuotaExpirySweeper(): Promise<void> {
     logger.info(`[QuotaExpirySweeper] Expired ${expiredQuotas.length} overdue quotas.`);
 
     // ── 2. Query quotas approaching expiry (validUntil within N days) ──────
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() + EXPIRY_NOTICE_DAYS);
-    const cutoffStr = cutoffDate.toISOString().slice(0, 10);
+    // V3-047: Use UTC date arithmetic to avoid server-local timezone skew.
+    const nowUtc = new Date();
+    const todayStr = nowUtc.toISOString().slice(0, 10);
+
+    const cutoffUtc = new Date(
+      Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth(), nowUtc.getUTCDate() + EXPIRY_NOTICE_DAYS)
+    );
+    const cutoffStr = cutoffUtc.toISOString().slice(0, 10);
 
     const expiringSoonQuotas: QuotaSelectType[] = await db
       .select()
@@ -125,25 +110,28 @@ export async function runQuotaExpirySweeper(): Promise<void> {
       // of QuotaRepository.listPeriodicForRollover directly — the service is the
       // canonical entry point per the single-writer principle.
       const periodicQuotas = await QuotaService.listPeriodicForRollover(tx);
-      for (const quota of periodicQuotas) {
-        // QuotaService.refreshPeriodic atomically: reads the target, computes
-        // the rollover amount from the rich JSONB policy
-        // (maxRolloverPercent / accumulationCap), inserts EXPIRE + per-period GRANT
-        // ledger entries with idempotency keys, advances periodAnchor past `now`,
-        // and updates `remaining` / `usedThisPeriod` with an optimistic-concurrency
-        // version check. It no-ops when the current period has not ended, so
-        // re-running the sweeper is safe and `listPeriodicForRollover` will not
-        // re-select the same quota every cron tick.
-        const refreshed = await QuotaService.refreshPeriodic(tx, quota.id, null);
 
-        const threshold = Math.max(
-          Math.floor(refreshed.totalClasses * LOW_BALANCE_THRESHOLD_FRACTION),
-          LOW_BALANCE_ABSOLUTE_FLOOR
-        );
-        if (refreshed.remaining > 0 && refreshed.remaining <= threshold) {
-          lowBalanceQuotas.push(refreshed as QuotaSelectType);
+      // Verify-6: Process periodic refresh in parallel chunks of 10 to avoid
+      // sequential await overhead while staying within transaction limits.
+      const CHUNK_SIZE = 10;
+      const lowBalanceResults: QuotaSelectType[] = [];
+
+      for (let i = 0; i < periodicQuotas.length; i += CHUNK_SIZE) {
+        const chunk = periodicQuotas.slice(i, i + CHUNK_SIZE);
+        const refreshedQuotas = await Promise.all(chunk.map(quota => QuotaService.refreshPeriodic(tx, quota.id, null)));
+
+        for (const refreshed of refreshedQuotas) {
+          const threshold = Math.max(
+            Math.floor(refreshed.totalClasses * LOW_BALANCE_THRESHOLD_FRACTION),
+            LOW_BALANCE_ABSOLUTE_FLOOR
+          );
+          if (refreshed.remaining > 0 && refreshed.remaining <= threshold) {
+            lowBalanceResults.push(refreshed as QuotaSelectType);
+          }
         }
       }
+
+      lowBalanceQuotas.push(...lowBalanceResults);
     });
 
     const lowBalanceTargets = await resolveQuotaNotificationTargets(lowBalanceQuotas);

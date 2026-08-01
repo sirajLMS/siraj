@@ -53,6 +53,7 @@ export const createRecurringClassSchema = (messages: {
       quotaId: z.string().optional(),
       earmarkedClasses: z.number().min(1).optional(),
       ondemandNoCreditsOutcome: z.enum(["AUTO_CANCEL", "AUTO_ABSENT_NO_CREDITS", "REMIND_ONLY"]).optional(),
+      generationHorizonWeeks: z.number().int().min(1).max(52).optional(),
       days: z.array(dayScheduleSchema),
     })
     .refine(data => data.days.some(day => day.enabled), {

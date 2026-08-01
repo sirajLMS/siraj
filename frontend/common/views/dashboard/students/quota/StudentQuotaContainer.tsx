@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -50,7 +50,7 @@ export function StudentQuotaView(props: Readonly<UseStudentQuotaViewModelProps>)
   }
 
   if (viewModel.loadingState === "error") {
-    return <div>{viewModel.errorMessage}</div>;
+    return <Typography sx={{ color: "error.main", p: 2 }}>{viewModel.errorMessage}</Typography>;
   }
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;

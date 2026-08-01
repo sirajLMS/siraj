@@ -22,6 +22,7 @@ import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import type { ClassType, DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { OnDemandNoCreditsOutcome, SchedulingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
@@ -192,6 +193,108 @@ function TimezoneClassTypeFields({
               {classTypeLabels[opt]}
             </MenuItem>
           ))}
+        </Select>
+      </FormControl>
+    </Stack>
+  );
+}
+
+function SchedulingFields({
+  schedulingMode,
+  setSchedulingMode,
+  quotaId,
+  setQuotaId,
+  earmarkedClasses,
+  setEarmarkedClasses,
+  generationHorizonWeeks,
+  setGenerationHorizonWeeks,
+  ondemandNoCreditsOutcome,
+  setOndemandNoCreditsOutcome,
+  mutationLoading,
+}: {
+  readonly schedulingMode: SchedulingMode | null;
+  readonly setSchedulingMode: (value: SchedulingMode | null) => void;
+  readonly quotaId: string | null;
+  readonly setQuotaId: (value: string | null) => void;
+  readonly earmarkedClasses: number | null;
+  readonly setEarmarkedClasses: (value: number | null) => void;
+  readonly generationHorizonWeeks: number | null;
+  readonly setGenerationHorizonWeeks: (value: number | null) => void;
+  readonly ondemandNoCreditsOutcome: OnDemandNoCreditsOutcome | null;
+  readonly setOndemandNoCreditsOutcome: (value: OnDemandNoCreditsOutcome | null) => void;
+  readonly mutationLoading: boolean;
+}) {
+  return (
+    <Stack sx={{ flexDirection: "column", gap: 2 }}>
+      <FormControl fullWidth>
+        <InputLabel id="scheduling-mode-label" shrink>
+          Scheduling Mode
+        </InputLabel>
+        <Select
+          labelId="scheduling-mode-label"
+          id="scheduling-mode-select"
+          value={schedulingMode ?? ""}
+          label="Scheduling Mode"
+          onChange={e => setSchedulingMode((e.target.value || null) as SchedulingMode | null)}
+          disabled={mutationLoading}
+          displayEmpty
+        >
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          <MenuItem value={SchedulingMode.NumberOfClasses}>Fixed Schedule</MenuItem>
+          <MenuItem value={SchedulingMode.OnDemand}>On-Demand</MenuItem>
+          <MenuItem value={SchedulingMode.Quota}>Quota</MenuItem>
+        </Select>
+      </FormControl>
+      <TextField
+        fullWidth
+        label="Quota ID"
+        value={quotaId ?? ""}
+        onChange={e => setQuotaId(e.target.value || null)}
+        disabled={mutationLoading}
+      />
+      <TextField
+        fullWidth
+        label="Earmarked Classes"
+        type="number"
+        value={earmarkedClasses ?? ""}
+        onChange={e => {
+          const val = e.target.value;
+          setEarmarkedClasses(val === "" ? null : Number(val));
+        }}
+        disabled={mutationLoading}
+      />
+      <TextField
+        fullWidth
+        label="Generation Horizon (weeks)"
+        type="number"
+        slotProps={{ htmlInput: { min: 1, max: 52 } }}
+        value={generationHorizonWeeks ?? ""}
+        onChange={e => {
+          const val = e.target.value;
+          setGenerationHorizonWeeks(val === "" ? null : Number(val));
+        }}
+        disabled={mutationLoading}
+      />
+      <FormControl fullWidth>
+        <InputLabel id="ondemand-no-credits-outcome-label" shrink>
+          On-Demand No Credits Outcome
+        </InputLabel>
+        <Select
+          labelId="ondemand-no-credits-outcome-label"
+          id="ondemand-no-credits-outcome-select"
+          value={ondemandNoCreditsOutcome ?? ""}
+          label="On-Demand No Credits Outcome"
+          onChange={e => setOndemandNoCreditsOutcome((e.target.value || null) as OnDemandNoCreditsOutcome | null)}
+          disabled={mutationLoading}
+          displayEmpty
+        >
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          <MenuItem value={OnDemandNoCreditsOutcome.AutoCancel}>Skip</MenuItem>
+          <MenuItem value={OnDemandNoCreditsOutcome.AutoAbsentNoCredits}>Generate Anyway</MenuItem>
         </Select>
       </FormControl>
     </Stack>
@@ -373,6 +476,19 @@ function DialogFormContent({
           setClassType={value => state.setClassType(value as ClassType)}
           mutationLoading={mutationLoading}
           t={t}
+        />
+        <SchedulingFields
+          schedulingMode={state.schedulingMode}
+          setSchedulingMode={state.setSchedulingMode}
+          quotaId={state.quotaId}
+          setQuotaId={state.setQuotaId}
+          earmarkedClasses={state.earmarkedClasses}
+          setEarmarkedClasses={state.setEarmarkedClasses}
+          generationHorizonWeeks={state.generationHorizonWeeks}
+          setGenerationHorizonWeeks={state.setGenerationHorizonWeeks}
+          ondemandNoCreditsOutcome={state.ondemandNoCreditsOutcome}
+          setOndemandNoCreditsOutcome={state.setOndemandNoCreditsOutcome}
+          mutationLoading={mutationLoading}
         />
         <DayScheduleList
           days={days}

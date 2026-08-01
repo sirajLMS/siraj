@@ -179,3 +179,10 @@ export type StatusTrackingScheduleRow = {
   meetingJoinUrl?: string | null;
   effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
 };
+
+export type AvailableClassSlotReturnType = {
+  teacherId: string;
+  startAt: Date;
+  endAt: Date;
+  available: boolean;
+};

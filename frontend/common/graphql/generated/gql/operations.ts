@@ -2942,6 +2942,8 @@ export type DeactivateSupportedOnlineAccountMutationVariables = Exact<{
 
 export type DeactivateSupportedOnlineAccountMutation = DeactivateSupportedOnlineAccountMutation_Mutation;
 
+export type QuotaFieldsFragment = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+
 export type QuotaQuery_quota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
 
 export type QuotaQuery_Query = { quota: QuotaQuery_quota_Quota | null };
@@ -4409,6 +4411,21 @@ export type SearchTeacherAvailabilityQueryVariables = Exact<{
 
 
 export type SearchTeacherAvailabilityQuery = SearchTeacherAvailabilityQuery_Query;
+
+export type AvailableClassSlotsQuery_availableClassSlots_AvailableClassSlot = { id: string | null, teacherId: string | null, startAt: string | null, endAt: string | null, available: boolean | null };
+
+export type AvailableClassSlotsQuery_Query = { availableClassSlots: Array<AvailableClassSlotsQuery_availableClassSlots_AvailableClassSlot> | null };
+
+
+export type AvailableClassSlotsQueryVariables = Exact<{
+  studentId: string | number;
+  date: string;
+  teacherId: string | number | null | undefined;
+  durationMinutes: number | null | undefined;
+}>;
+
+
+export type AvailableClassSlotsQuery = AvailableClassSlotsQuery_Query;
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
 

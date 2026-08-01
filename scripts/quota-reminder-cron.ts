@@ -1,6 +1,6 @@
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
-import { classInstances, parents, recurringSchedules, students, systemSettings } from "@/backend/db/schema";
+import { classInstances, recurringSchedules, systemSettings } from "@/backend/db/schema";
 import {
   ClassExecutionState,
   OnDemandStatus,
@@ -10,6 +10,7 @@ import {
 } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
+import { resolveStudentNotificationRecipients } from "@/scripts/lib/resolve-notification-recipients";
 
 /** Days before a scheduled on-demand class to send the T-3 reminder. */
 const T3_DAYS = 3;
@@ -57,6 +58,21 @@ export async function runQuotaReminderCron(): Promise<void> {
       `[QuotaReminderCron] Found ${t3Candidates.length} T-3 and ${t1Candidates.length} T-1 reminder candidates.`
     );
 
+    // V3-007: Batch-check idempotency for all candidate keys in a single query
+    // instead of per-candidate round-trips.
+    const allCandidateKeys = [...t3Candidates, ...t1Candidates].map(c => c.reminderKey);
+    const alreadySentKeys = new Set<string>();
+
+    if (allCandidateKeys.length > 0) {
+      const sentRows = await db
+        .select({ key: systemSettings.key })
+        .from(systemSettings)
+        .where(inArray(systemSettings.key, allCandidateKeys));
+      for (const row of sentRows) {
+        alreadySentKeys.add(row.key);
+      }
+    }
+
     let t3Sent = 0;
     let t1Sent = 0;
 
@@ -67,43 +83,42 @@ export async function runQuotaReminderCron(): Promise<void> {
     const t3DispatchedKeys: string[] = [];
     const t1DispatchedKeys: string[] = [];
 
-    for (const candidate of t3Candidates) {
-      if (candidate.affectedUserIds.length === 0) {
-        logger.warn(
-          `[QuotaReminderCron] Skipping instance ${candidate.instanceId} — no resolvable parent/guardian userId.`
-        );
-        continue;
-      }
-
-      if (await isReminderAlreadySent(candidate.reminderKey)) continue;
-
-      await QuotaNotificationService.sendOndemandInstanceReminderT3({
-        affectedUserIds: candidate.affectedUserIds,
-        studentName: candidate.studentName,
-        scheduledStartAt: candidate.scheduledStartAt,
-      });
-      t3DispatchedKeys.push(candidate.reminderKey);
-      t3Sent++;
+    // V3-007: Filter out already-sent candidates, then send in parallel.
+    const t3ToDispatch = t3Candidates.filter(c => !alreadySentKeys.has(c.reminderKey) && c.affectedUserIds.length > 0);
+    const t3Skipped = t3Candidates.filter(c => c.affectedUserIds.length === 0);
+    for (const s of t3Skipped) {
+      logger.warn(`[QuotaReminderCron] Skipping instance ${s.instanceId} — no resolvable parent/guardian userId.`);
     }
 
-    for (const candidate of t1Candidates) {
-      if (candidate.affectedUserIds.length === 0) {
-        logger.warn(
-          `[QuotaReminderCron] Skipping instance ${candidate.instanceId} — no resolvable parent/guardian userId.`
-        );
-        continue;
-      }
+    await Promise.all(
+      t3ToDispatch.map(async candidate => {
+        await QuotaNotificationService.sendOndemandInstanceReminderT3({
+          affectedUserIds: candidate.affectedUserIds,
+          studentName: candidate.studentName,
+          scheduledStartAt: candidate.scheduledStartAt,
+        });
+        t3DispatchedKeys.push(candidate.reminderKey);
+        t3Sent++;
+      })
+    );
 
-      if (await isReminderAlreadySent(candidate.reminderKey)) continue;
-
-      await QuotaNotificationService.sendOndemandInstanceReminderT1({
-        affectedUserIds: candidate.affectedUserIds,
-        studentName: candidate.studentName,
-        scheduledStartAt: candidate.scheduledStartAt,
-      });
-      t1DispatchedKeys.push(candidate.reminderKey);
-      t1Sent++;
+    const t1ToDispatch = t1Candidates.filter(c => !alreadySentKeys.has(c.reminderKey) && c.affectedUserIds.length > 0);
+    const t1Skipped = t1Candidates.filter(c => c.affectedUserIds.length === 0);
+    for (const s of t1Skipped) {
+      logger.warn(`[QuotaReminderCron] Skipping instance ${s.instanceId} — no resolvable parent/guardian userId.`);
     }
+
+    await Promise.all(
+      t1ToDispatch.map(async candidate => {
+        await QuotaNotificationService.sendOndemandInstanceReminderT1({
+          affectedUserIds: candidate.affectedUserIds,
+          studentName: candidate.studentName,
+          scheduledStartAt: candidate.scheduledStartAt,
+        });
+        t1DispatchedKeys.push(candidate.reminderKey);
+        t1Sent++;
+      })
+    );
 
     // RP2-3: Single multi-row INSERT for all dispatched reminder markers.
     const allDispatchedKeys = [...t3DispatchedKeys, ...t1DispatchedKeys];
@@ -133,7 +148,8 @@ export async function runQuotaReminderCron(): Promise<void> {
 
 /**
  * Queries for on-demand class instances scheduled within the given time window,
- * then resolves the student's name and parent's userId for notification dispatch.
+ * then resolves the student's name and parent's userId for notification dispatch
+ * via the shared resolveStudentNotificationRecipients utility.
  * Only instances in `NOT_ACTIVATED` execution state with `AVAILABLE` on-demand
  * status are considered — `PENDING_CREDIT` instances have no class to remind about.
  */
@@ -162,68 +178,41 @@ async function fetchReminderCandidates(
 
   if (instances.length === 0) return [];
 
-  // 2. Resolve student → parent userId for notification recipients.
+  // 2. Resolve recipients via the shared utility (batch student + parent lookup).
   const studentIds = [...new Set(instances.map(r => r.instance.studentId))];
-
-  const studentRows = await db
-    .select({
-      studentId: students.id,
-      studentName: students.name,
-      parentId: students.parentId,
-      studentUserId: students.userId,
-    })
-    .from(students)
-    .where(inArray(students.id, studentIds));
-
-  let parentUserMap = new Map<string, string>();
-  const validParents = studentRows.filter(s => s.parentId !== null);
-  if (validParents.length > 0) {
-    const parentIds = [...new Set(validParents.map(s => s.parentId as string))];
-    const parentRows = await db
-      .select({ parentId: parents.id, userId: parents.userId })
-      .from(parents)
-      .where(inArray(parents.id, parentIds));
-    parentUserMap = new Map(parentRows.map(p => [p.parentId, p.userId]));
-  }
+  const recipientMap = await resolveStudentNotificationRecipients(studentIds);
 
   // 3. Build candidates with idempotency keys keyed by tier + date + instance.
-  const dateStr = new Date().toISOString().slice(0, 10);
+  // V3-007: Use DST-safe calendar-day construction via Intl.DateTimeFormat so
+  // the date string is resolved in UTC (not server-local time), avoiding
+  // DST boundaries that could shift the calendar day.
+  const dateStr = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+    .format(windowStart)
+    .replace(/\//g, "-");
+
   // Key format: odr_{tier}_{date}_{instanceId} — stays well under 100 chars.
   const reminderKeyPrefix = `odr_${tier}_${dateStr}`;
 
   return instances
     .map(({ instance }) => {
-      const studentRow = studentRows.find(s => s.studentId === instance.studentId);
-      if (!studentRow) return null;
-
-      // Prefer parent's userId; fall back to student's own userId (self-funded).
-      const parentUserId = studentRow.parentId ? (parentUserMap.get(studentRow.parentId) ?? null) : null;
-      const affectedUserIds: string[] = parentUserId ? [parentUserId] : [studentRow.studentUserId];
+      const recipient = recipientMap.get(instance.studentId);
+      if (!recipient) return null;
 
       return {
         instanceId: instance.id,
         studentId: instance.studentId,
-        studentName: studentRow.studentName,
-        affectedUserIds,
+        studentName: recipient.studentName,
+        affectedUserIds: recipient.affectedUserIds,
         scheduledStartAt: instance.scheduledStartAt.toISOString(),
         reminderKey: `${reminderKeyPrefix}_${instance.id}`,
       } satisfies ReminderCandidate;
     })
     .filter((c): c is ReminderCandidate => c !== null);
-}
-
-/**
- * Checks whether a reminder has already been sent for the given key (read-only).
- * The idempotency marker is written AFTER successful dispatch via the multi-row
- * INSERT (RP2-3) so delivery errors don't permanently skip the reminder (RBL2-2).
- */
-async function isReminderAlreadySent(reminderKey: string): Promise<boolean> {
-  const rows = await db
-    .select({ key: systemSettings.key })
-    .from(systemSettings)
-    .where(eq(systemSettings.key, reminderKey))
-    .limit(1);
-  return rows.length > 0;
 }
 
 if (import.meta.main) {

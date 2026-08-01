@@ -19,10 +19,12 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
+import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import { buildQuotaColumns } from "@/frontend/common/views/dashboard/billing/quota/utils/buildQuotaColumns";
 
@@ -45,7 +47,7 @@ export function QuotaListDesktop(props: ReturnType<typeof useQuotaViewModel>) {
     handleDelete,
   } = props;
 
-  const columns = useMemo(() => {
+  const columns = useMemo<GridColDef<QuotaItem>[]>(() => {
     const baseCols = buildQuotaColumns(t);
     baseCols.push({
       field: "actions",
@@ -65,7 +67,7 @@ export function QuotaListDesktop(props: ReturnType<typeof useQuotaViewModel>) {
             </IconButton>
           </Tooltip>
           <Tooltip title={t.actions.delete}>
-            <IconButton size="small" color="error" onClick={() => handleDelete(params.row.id)}>
+            <IconButton size="small" color="error" onClick={() => handleDelete(params.row.id ?? "")}>
               <DeleteOutlinedIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -139,9 +141,9 @@ export function QuotaListDesktop(props: ReturnType<typeof useQuotaViewModel>) {
       </Stack>
 
       <Box sx={{ width: "100%", height: 600 }}>
-        <AppDataGrid
+        <AppDataGrid<QuotaItem>
           rows={quotas}
-          columns={columns as unknown as Parameters<typeof AppDataGrid>[0]["columns"]}
+          columns={columns}
           loading={loading}
           paginationOptions={{
             mode: "server",

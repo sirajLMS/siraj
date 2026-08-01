@@ -153,12 +153,15 @@ ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE text;--> statement-br
 -- Ensure 7c-quota_permissions_enum runs before this Drizzle migration.
 -- SAFETY: Delete any permission rows whose key is not a valid app_permission
 -- enum value BEFORE the cast, so the ALTER TYPE does not fail on orphaned keys.
+BEGIN;
 DELETE FROM "permissions" WHERE "key" NOT IN (
     SELECT e.enumlabel
     FROM pg_enum e
     JOIN pg_type t ON t.oid = e.enumtypid
     WHERE t.typname = 'app_permission'
-);--> statement-breakpoint
+);
+COMMIT;
+--> statement-breakpoint
 -- NOTE: This re-cast assumes all existing permission keys are in app_permission enum — verify before deploying to production.
 ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE "app_permission" USING "key"::"app_permission";--> statement-breakpoint
 CREATE UNIQUE INDEX "quota_ledger_idempotency_key_unique_idx" ON "quota_ledger" ("idempotency_key");--> statement-breakpoint
@@ -179,6 +182,13 @@ ALTER TABLE "quota_ledger" ADD CONSTRAINT "quota_ledger_class_instance_id_class_
 ALTER TABLE "quota_ledger" ADD CONSTRAINT "quota_ledger_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "quotas" ADD CONSTRAINT "quotas_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_quota_id_quotas_id_fkey" FOREIGN KEY ("quota_id") REFERENCES "quotas"("id") ON DELETE SET NULL;--> statement-breakpoint
+-- VALIDATE PATTERN: Using NOT VALID + separate VALIDATE to avoid long table-rewrite
+-- locks on existing data. Adding a CHECK constraint with NOT VALID skips the scan
+-- of existing rows during ALTER TABLE (only new/updated rows are validated). The
+-- subsequent VALIDATE CONSTRAINT acquires only a SHARE UPDATE EXCLUSIVE lock
+-- (concurrent reads/writes are allowed) and verifies existing data in a separate,
+-- non-blocking pass. This is the recommended PostgreSQL pattern for adding
+-- constraints to large tables in production.
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_ondemand_status_scheduling_mode_chk" CHECK (
         ("ondemand_status" IS NULL AND "scheduling_mode" != 'ON_DEMAND') OR
         ("ondemand_status" IS NOT NULL AND "scheduling_mode" = 'ON_DEMAND')
@@ -192,3 +202,57 @@ ALTER TABLE "class_instances" DROP CONSTRAINT "class_instances_state_machine_chk
         ("is_rate_overridden" = false OR "rate_amount" IS NOT NULL) AND
         ("execution_state" NOT IN ('ON_DEMAND_PENDING_CREDITS', 'ON_DEMAND_CONFLICT_HELD', 'ON_DEMAND_NO_CREDITS_CANCELLED', 'ON_DEMAND_NO_CREDITS_ABSENT') OR "scheduling_mode" = 'ON_DEMAND')
       );
+
+-- DOWN MIGRATION
+-- ===============
+-- To reverse this migration, apply the following steps in order:
+--
+-- 1. Re-insert the deleted permission rows:
+--    The DELETE FROM "permissions" statement removed rows whose key was not a valid
+--    app_permission enum value. To restore them, re-run the seed data from
+--    backend/db/migration/7d-quota_permissions_data.sql (the source of truth for
+--    quotas.view and quotas.manage permissions) against the permissions table.
+--    Before re-inserting, revert the permissions.key column back to text:
+--      ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE text USING "key"::text;
+--    Then run 7d-quota_permissions_data.sql to re-insert the rows.
+--
+-- 2. Drop the quotas and quota_ledger tables:
+--    DROP INDEX IF EXISTS "quota_ledger_idempotency_key_unique_idx";
+--    DROP INDEX IF EXISTS "quota_ledger_quota_id_created_at_idx";
+--    DROP INDEX IF EXISTS "quota_ledger_student_id_idx";
+--    DROP INDEX IF EXISTS "quota_ledger_class_instance_id_idx";
+--    DROP INDEX IF EXISTS "quota_ledger_recurring_schedule_id_idx";
+--    DROP INDEX IF EXISTS "quotas_idempotency_key_unique_idx";
+--    DROP INDEX IF EXISTS "quotas_student_id_idx";
+--    DROP INDEX IF EXISTS "quotas_student_status_remaining_idx";
+--    DROP INDEX IF EXISTS "quotas_valid_until_idx";
+--    DROP INDEX IF EXISTS "class_instances_ondemand_status_idx";
+--    DROP INDEX IF EXISTS "recurring_schedules_quota_id_idx";
+--    ALTER TABLE "class_instances" DROP CONSTRAINT "class_instances_ondemand_status_scheduling_mode_chk";
+--    DROP TABLE IF EXISTS "quota_ledger";
+--    DROP TABLE IF EXISTS "quotas";
+--
+-- 3. Drop the new enum types:
+--    DROP TYPE IF EXISTS "ondemand_no_credits_outcome";
+--    DROP TYPE IF EXISTS "ondemand_status";
+--    DROP TYPE IF EXISTS "quota_kind";
+--    DROP TYPE IF EXISTS "quota_ledger_reason";
+--    DROP TYPE IF EXISTS "quota_period_type";
+--    DROP TYPE IF EXISTS "quota_status";
+--    DROP TYPE IF EXISTS "scheduling_mode";
+--
+-- 4. Revert column changes on class_instances and recurring_schedules:
+--    ALTER TABLE "class_instances" DROP COLUMN "ondemand_status";
+--    ALTER TABLE "class_instances" ALTER COLUMN "scheduling_mode" DROP DEFAULT;
+--    ALTER TABLE "class_instances" DROP COLUMN "scheduling_mode";
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "quota_id";
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "earmarked_classes";
+--    ALTER TABLE "recurring_schedules" ALTER COLUMN "scheduling_mode" DROP DEFAULT;
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "scheduling_mode";
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "generation_horizon_weeks";
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "ondemand_no_credits_outcome";
+--
+-- 5. Revert the extension enum values (class_execution_state, notification_event_type):
+--    These ALTER TYPE ADD VALUE statements cannot be reversed in PostgreSQL —
+--    enum values cannot be removed once added. A full rollback would require
+--    recreating the enum types without the added values.

@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository, StudentRepository } from "@/backend/db/repo";
 import { AppPermission, CreditReason } from "@/backend/enum";
-import { logger } from "@/backend/lib";
+import { DomainError, logger } from "@/backend/lib";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type {
@@ -14,6 +14,7 @@ import type {
   PaginationArgs,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 function deriveBookingIdempotencyKey(input: {
   studentId: string;
@@ -67,36 +68,53 @@ export namespace CreditService {
       throw new Error(tErrors.credit.invalidInput);
     }
 
-    const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
-    if (existing.length > 0) {
-      const existingRow = existing[0];
-      if (existingRow) return mapToReturnType(existingRow);
-    }
+    // V3-078: Idempotency check is INSIDE the transaction to eliminate the
+    // TOCTOU race — a concurrent purchase with the same key could insert
+    // between a pre-tx check and the tx insert, producing a duplicate.
+    try {
+      const created = await db.transaction(async tx => {
+        await assertStudentExists(input.studentId, tErrors);
 
-    const created = await db.transaction(async tx => {
-      await assertStudentExists(input.studentId, tErrors);
-      const ledgerRow = await CreditRepository.createPurchase(tx, {
+        const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey], tx);
+        if (existing.length > 0) {
+          const existingRow = existing[0];
+          if (existingRow) return mapToReturnType(existingRow);
+          return null;
+        }
+
+        const ledgerRow = await CreditRepository.createPurchase(tx, {
+          studentId: input.studentId,
+          changeAmount: input.hours,
+          sourcePaymentId: input.sourcePaymentId ?? null,
+          notes: input.notes ?? null,
+          creditedByUserId: actorUserId,
+          idempotencyKey,
+        });
+
+        await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
+        await QuotaService.refreshStudentOndemandInstances(input.studentId, tx);
+        return mapToReturnType(ledgerRow);
+      });
+
+      logger.info("Credit purchase seeded", {
+        actorUserId,
         studentId: input.studentId,
-        changeAmount: input.hours,
-        sourcePaymentId: input.sourcePaymentId ?? null,
-        notes: input.notes ?? null,
-        creditedByUserId: actorUserId,
+        hours: input.hours,
         idempotencyKey,
       });
 
-      await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
-      await QuotaService.refreshStudentOndemandInstances(input.studentId, tx);
-      return ledgerRow;
-    });
-
-    logger.info("Credit purchase seeded", {
-      actorUserId,
-      studentId: input.studentId,
-      hours: input.hours,
-      idempotencyKey,
-    });
-
-    return mapToReturnType(created);
+      return created;
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        const resolved = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
+        if (resolved.length > 0) {
+          const row = resolved[0];
+          if (row) return mapToReturnType(row);
+        }
+        return null;
+      }
+      throw error;
+    }
   }
 
   export async function recordPurchase(
@@ -215,12 +233,15 @@ export namespace CreditService {
     creditedByUserId: string,
     idempotencyKey: string,
     tx: DBTransaction,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    locale = "en"
   ): Promise<void> {
     const balance = await CreditRepository.getBalance(tx, studentId);
     if (balance.classesRemaining <= 0) {
-      throw new Error(
-        tErrors.credit.insufficientBalance({
+      const { errorsTranslations } = getServerTranslations(locale);
+      throw new DomainError(
+        "INSUFFICIENT_CLASSES",
+        errorsTranslations.credit.insufficientBalance({
           studentId,
           remaining: balance.classesRemaining,
         })

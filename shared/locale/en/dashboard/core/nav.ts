@@ -37,6 +37,8 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   billingAdmin: "Billing",
   quotas: "Quotas & Allocations",
   quotasCreate: "Create Quota",
+  quotasView: "View Quota",
+  quotasEdit: "Edit Quota",
   quotasInsights: "Quota Insights",
   exchangeRates: "Exchange Rates",
 

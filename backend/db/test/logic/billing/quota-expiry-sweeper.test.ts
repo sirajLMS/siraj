@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
+import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { QuotaKind, QuotaStatus } from "@/backend/enum";
+import { QuotaKind, QuotaLedgerReason, QuotaStatus } from "@/backend/enum";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import type { QuotaSelectType, QuotaSubmitInput } from "@/backend/types";
 
 describe("Quota Expiry Sweeper Logic", () => {
   test("expireOverdueQuotas marks expired quotas", async () => {
@@ -14,15 +16,15 @@ describe("Quota Expiry Sweeper Logic", () => {
       // Past date (yesterday)
       const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-      const quota = await QuotaRepository.create(tx, {
+      const quotaInput: QuotaSubmitInput = {
         studentId: student.id,
         kind: QuotaKind.PACKAGE,
         name: "Expiring Quota",
         totalClasses: 5,
         validUntil: yesterday,
-
         idempotencyKey: `quota-test-${randomUUID()}`,
-      });
+      };
+      const quota: QuotaSelectType = await QuotaRepository.create(tx, quotaInput);
 
       expect(quota.status).toBe(QuotaStatus.ACTIVE);
 
@@ -31,6 +33,13 @@ describe("Quota Expiry Sweeper Logic", () => {
 
       const updatedQuota = await QuotaRepository.findById(tx, quota.id);
       expect(updatedQuota?.status).toBe(QuotaStatus.EXPIRED);
+
+      // Verify ledger entries: EXPIRE row from sweeper + GRANT row from initial creation
+      const ledgerEntries = await QuotaLedgerRepository.findByQuotaId(tx, quota.id);
+      const hasExpireRow = ledgerEntries.some(entry => entry.reason === QuotaLedgerReason.EXPIRE);
+      const hasGrantRow = ledgerEntries.some(entry => entry.reason === QuotaLedgerReason.GRANT);
+      expect(hasExpireRow).toBe(true);
+      expect(hasGrantRow).toBe(true);
     });
   });
 });

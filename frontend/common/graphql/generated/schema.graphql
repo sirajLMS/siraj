@@ -436,6 +436,15 @@ enum AvailabilityStatus {
   OUT_OF_STOCK
 }
 
+"""An available class slot for a student on a given date"""
+type AvailableClassSlot {
+  available: Boolean
+  endAt: DateTime
+  id: String
+  startAt: DateTime
+  teacherId: String
+}
+
 type BillingCurrencyTotal {
   amount: String
   currency: CurrencyCode
@@ -2749,6 +2758,14 @@ enum OnDemandNoCreditsOutcome {
   REMIND_ONLY
 }
 
+enum OnDemandStatus {
+  AVAILABLE
+  CANCELLED
+  NO_CREDITS_ABSENT
+  NO_CREDITS_CANCELLED
+  PENDING_CREDIT
+}
+
 """Summary metrics for the staff onboarding process"""
 type OnboardingMetrics {
   activeStaff: Int
@@ -3231,6 +3248,9 @@ type Query {
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
 
+  """Find available class slots for a student on a given date"""
+  availableClassSlots(date: DateTime!, durationMinutes: Int, studentId: ID!, teacherId: ID): [AvailableClassSlot!]
+
   """Lists all books and bags available to the academy."""
   booksAndBags: [Book!]
   classCategories: [ClassCategory!]
@@ -3423,7 +3443,15 @@ type Query {
   Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
   """
   studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
+
+  """
+  List only active/open quotas (status ACTIVE, remaining > 0) for a student
+  """
+  studentOpenQuotas(studentId: ID!): [Quota!]
   studentProfile(includeUpcomingClasses: Boolean, month: Int, studentId: String, year: Int): StudentProfile
+
+  """List all quotas for a student"""
+  studentQuotas(studentId: ID!): [Quota!]
 
   """
   Paginated lesson reports for the logged-in student (student portal dashboard)

@@ -28,6 +28,7 @@ import {
   NotificationChannel,
   NotificationEventType,
   OnDemandNoCreditsOutcome,
+  OnDemandStatus,
   OrderSortDirection,
   OverrideState,
   ParentStatus,
@@ -281,4 +282,8 @@ export const SchedulingModePothosEnum = gqlSchemaBuilder.enumType(SchedulingMode
 
 export const OnDemandNoCreditsOutcomePothosEnum = gqlSchemaBuilder.enumType(OnDemandNoCreditsOutcome, {
   name: "OnDemandNoCreditsOutcome",
+});
+
+export const OnDemandStatusPothosEnum = gqlSchemaBuilder.enumType(OnDemandStatus, {
+  name: "OnDemandStatus",
 });

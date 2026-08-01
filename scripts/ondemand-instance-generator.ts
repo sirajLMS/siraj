@@ -12,18 +12,19 @@ import type { ClassInstanceInsertInput } from "@/backend/types";
 /** Maximum number of recurring schedules to process per batch (unbounded SELECT guard — RP2-8). */
 const MAX_SCHEDULES_PER_RUN = 500;
 
-// NOTE: Duplicated DayOfWeek map — also defined in
-// backend/db/seeds/lib/date-window.ts and
-// backend/db/repo/teachers/teacher-availability.repository.ts.
-// Kept local because scripts/ should not depend on backend internal libs.
-const DAY_OF_WEEK_MAP: Record<number, DayOfWeek> = {
-  0: DayOfWeek.SUNDAY,
-  1: DayOfWeek.MONDAY,
-  2: DayOfWeek.TUESDAY,
-  3: DayOfWeek.WEDNESDAY,
-  4: DayOfWeek.THURSDAY,
-  5: DayOfWeek.FRIDAY,
-  6: DayOfWeek.SATURDAY,
+/**
+ * Maps the short weekday name returned by `Intl.DateTimeFormat("en-US", { weekday: "short" })`
+ * to the canonical DayOfWeek enum value. Used for IANA timezone-aware DOW matching
+ * (V3-009) so the weekday is resolved in the schedule's timezone, not server-local time.
+ */
+const SHORT_WEEKDAY_TO_ENUM: Record<string, DayOfWeek> = {
+  Sun: DayOfWeek.SUNDAY,
+  Mon: DayOfWeek.MONDAY,
+  Tue: DayOfWeek.TUESDAY,
+  Wed: DayOfWeek.WEDNESDAY,
+  Thu: DayOfWeek.THURSDAY,
+  Fri: DayOfWeek.FRIDAY,
+  Sat: DayOfWeek.SATURDAY,
 };
 
 interface ExecutionStateResult {
@@ -155,8 +156,10 @@ async function tryGenerateSlotDay(
     isAvailable = false;
   } else if (scheduleDaysMap) {
     // Check teacher availability windows by day of week
-    const dayOfWeek = DAY_OF_WEEK_MAP[currentDate.getDay()];
-    isAvailable = scheduleDaysMap.get(dayOfWeek) === true;
+    // V3-009: Resolve DOW in schedule's IANA timezone, not server-local.
+    const dayFmt = new Intl.DateTimeFormat("en-US", { timeZone: schedule.timezone, weekday: "short" });
+    const dow = SHORT_WEEKDAY_TO_ENUM[dayFmt.format(currentDate)];
+    isAvailable = dow ? scheduleDaysMap.get(dow) === true : false;
   }
 
   const scheduledEndAt = new Date(scheduledStartAt.getTime() + schedule.durationMinutes * 60 * 1000);
@@ -164,7 +167,13 @@ async function tryGenerateSlotDay(
   const { executionState, ondemandStatus } = determineExecutionState(isAvailable, remainingBalance > 0);
 
   const dateIso = scheduledStartAt.toISOString().split("T")[0];
-  const idempotencyKey = `recurring-${schedule.id}-${currentDate.getDay()}-${dateIso}`;
+  // V3-009: Use IANA-aware day-of-week for the idempotency key so DST
+  // transitions in the timezone don't cause key collisions/misses.
+  const idempotencyDow = (() => {
+    const df = new Intl.DateTimeFormat("en-US", { timeZone: schedule.timezone, weekday: "short" });
+    return SHORT_WEEKDAY_TO_ENUM[df.format(currentDate)] ?? currentDate.getDay();
+  })();
+  const idempotencyKey = `recurring-${schedule.id}-${idempotencyDow}-${dateIso}`;
 
   pendingInstances.push({
     recurringScheduleId: schedule.id,
@@ -235,6 +244,17 @@ async function generateInstancesForSchedule(
   // NOTE: Mirrors QuotaService.refreshStudentOndemandInstances credit computation — keep in sync
   const availableBalance = creditBalance.classesRemaining + totalQuotaRemaining;
 
+  // Verify-6: Only generate instances when the student has credit classes
+  // remaining. If classesRemaining is 0, skip instance generation entirely —
+  // quota-only balance should not produce AVAILABLE instances since the
+  // student has no purchased classes to attend.
+  if (creditBalance.classesRemaining <= 0) {
+    logger.debug(
+      `[OnDemandInstanceGenerator] Skipping schedule ${schedule.id} for student ${schedule.studentId} — classesRemaining is 0.`
+    );
+    return 0;
+  }
+
   // Build a Set of timestamp-based slot keys that are already taken.
   // Using the full ISO timestamp (not just date) avoids false conflicts
   // when the same schedule has instances at different times on the same day.
@@ -249,8 +269,17 @@ async function generateInstancesForSchedule(
   const currentDate = new Date(startDate);
   const pendingInstances: PendingInstance[] = [];
   while (currentDate <= scheduleEndDate) {
-    const dayOfWeekEnum = DAY_OF_WEEK_MAP[currentDate.getDay()];
-    const matchingDay = scheduleDays.find(d => d.dayOfWeek === dayOfWeekEnum);
+    // V3-009: Resolve day-of-week using the schedule's IANA timezone rather than
+    // server-local time so DST transitions in the student's timezone don't
+    // shift the weekday boundary and cause missed/extra generations.
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: schedule.timezone,
+      weekday: "short",
+    });
+    const weekdayShort = fmt.format(currentDate);
+    const scheduleDOW = SHORT_WEEKDAY_TO_ENUM[weekdayShort];
+
+    const matchingDay = scheduleDOW ? scheduleDays.find(d => d.dayOfWeek === scheduleDOW) : undefined;
 
     if (matchingDay) {
       const result = await tryGenerateSlotDay(

@@ -26,7 +26,8 @@ export function QuotaListMobile(props: ReturnType<typeof useQuotaViewModel>) {
       </Stack>
 
       {loading ? (
-        Array.from({ length: 5 }).map((_, i) => (
+        Array.from({ length: 5 }).map((_item, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list, order never changes
           <Card key={`skeleton-${i}`} variant="outlined">
             <CardContent>
               <Skeleton variant="text" width="60%" />

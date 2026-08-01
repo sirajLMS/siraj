@@ -34,4 +34,5 @@ export type NavIconKey =
   | "shield"
   | "timeline"
   | "update"
-  | "videocam";
+  | "videocam"
+  | "visibility";
