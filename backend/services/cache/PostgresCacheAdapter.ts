@@ -120,10 +120,22 @@ export class PostgresCacheAdapter implements ICacheService {
 
   /**
    * Execute a pipeline of commands (for atomic operations)
-   * Uses database transactions for atomicity
+   * Uses database transactions for atomicity when needed.
+   * For del-only pipelines, skips the transaction to avoid deadlocks between
+   * the transaction connection and the global db connection used by CacheDbRepository.
    */
   async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
     try {
+      // del commands don't need transaction atomicity — execute directly
+      const isDelOnly = commands.every(cmd => cmd.command === "del");
+      if (isDelOnly) {
+        const results: unknown[] = [];
+        for (const cmd of commands) {
+          results.push(await this.executePipelineCommand(cmd));
+        }
+        return results;
+      }
+
       return await db.transaction(async () => {
         const results: unknown[] = [];
 
