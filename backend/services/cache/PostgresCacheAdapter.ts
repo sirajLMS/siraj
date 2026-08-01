@@ -126,9 +126,10 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
     try {
-      // del commands don't need transaction atomicity — execute directly
-      const isDelOnly = commands.every(cmd => cmd.command === "del");
-      if (isDelOnly) {
+      // del and set(NX) commands use CacheDbRepository which uses the global db
+      // connection — skip transaction to avoid deadlocks
+      const isDelOrSetOnly = commands.every(cmd => cmd.command === "del" || cmd.command === "set");
+      if (isDelOrSetOnly) {
         const results: unknown[] = [];
         for (const cmd of commands) {
           results.push(await this.executePipelineCommand(cmd));
@@ -162,6 +163,17 @@ export class PostgresCacheAdapter implements ICacheService {
           await CacheDbRepository.del(key);
         }
         return keys.length;
+      }
+
+      case "set": {
+        const [setKey, setValue, , , flag] = cmd.args as [string, string, string, number, string];
+        if (flag === "NX") {
+          const expiresAt = new Date(Date.now() + (cmd.args[3] as number) * 1000);
+          return await CacheDbRepository.insertIfNotExists(setKey, setValue, expiresAt);
+        }
+        const expiresAt = new Date(Date.now() + (cmd.args[3] as number) * 1000);
+        await CacheDbRepository.set(setKey, setValue, expiresAt);
+        return "OK";
       }
 
       case "zremrangebyscore": {
