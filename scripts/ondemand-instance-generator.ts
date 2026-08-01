@@ -25,8 +25,8 @@ interface ExecutionStateResult {
 }
 
 function determineExecutionState(isAvailable: boolean, hasBalance: boolean): ExecutionStateResult {
-  if (!isAvailable) {
-    return { executionState: ClassExecutionState.ON_DEMAND_CONFLICT_HELD, ondemandStatus: null };
+  if (isAvailable && hasBalance) {
+    return { executionState: ClassExecutionState.NOT_ACTIVATED, ondemandStatus: OnDemandStatus.AVAILABLE };
   }
   if (!hasBalance) {
     return {
@@ -34,7 +34,7 @@ function determineExecutionState(isAvailable: boolean, hasBalance: boolean): Exe
       ondemandStatus: OnDemandStatus.PENDING_CREDIT,
     };
   }
-  return { executionState: ClassExecutionState.NOT_ACTIVATED, ondemandStatus: OnDemandStatus.AVAILABLE };
+  return { executionState: ClassExecutionState.ON_DEMAND_CONFLICT_HELD, ondemandStatus: null };
 }
 
 async function insertInstanceIfMissing(
@@ -123,8 +123,8 @@ async function tryGenerateSlotDay(
   const scheduledStartAt = new Date(currentDate);
   scheduledStartAt.setHours(startHour, startMin, 0, 0);
 
-  const dateIso = scheduledStartAt.toISOString().split("T")[0];
-  const slotKey = `${schedule.id}-${dateIso}`;
+  const tsIso = scheduledStartAt.toISOString();
+  const slotKey = `${schedule.id}-${tsIso}`;
 
   // Check if this exact slot already has a conflicting instance for either student or teacher
   let isAvailable = true;
@@ -195,11 +195,13 @@ async function generateInstancesForSchedule(
       )
     );
 
-  // Build a Set of date-based slot keys that are already taken
+  // Build a Set of timestamp-based slot keys that are already taken.
+  // Using the full ISO timestamp (not just date) avoids false conflicts
+  // when the same schedule has instances at different times on the same day.
   const existingConflicts = new Set<string>();
   for (const inst of overlappingInstances) {
-    const dateKey = inst.scheduledStartAt.toISOString().split("T")[0];
-    const slotKey = `${schedule.id}-${dateKey}`;
+    const tsKey = inst.scheduledStartAt.toISOString();
+    const slotKey = `${schedule.id}-${tsKey}`;
     existingConflicts.add(slotKey);
   }
 

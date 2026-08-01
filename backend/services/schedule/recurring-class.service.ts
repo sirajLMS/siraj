@@ -133,7 +133,7 @@ export namespace RecurringClassService {
     if (input.quotaId) {
       const quota = await QuotaRepository.findById(db, input.quotaId);
       if (!quota || quota.remaining <= 0) {
-        throw new Error(tErrors.outOfQuota ?? "Insufficient quota remaining");
+        throw new Error(tErrors.outOfQuota);
       }
     } else {
       const balance = await CreditRepository.getBalance(db, input.studentId);
@@ -190,7 +190,10 @@ export namespace RecurringClassService {
       startDate,
       endDate,
       [],
-      input.locale
+      input.locale,
+      undefined,
+      input.durationMinutes,
+      input.timezone
     );
 
     await validateBalanceOrQuota(input, tErrors);
@@ -351,6 +354,71 @@ export namespace RecurringClassService {
     };
   }
 
+  type ScheduledInstanceInfo = {
+    id: string;
+    studentId: string;
+    quotaDeducted: boolean;
+  };
+
+  /**
+   * Release quota (earmark or pool mode) when a recurring schedule is cancelled.
+   * Returns true if any quota was released.
+   */
+  async function releaseQuotaOnCancel(
+    schedule: { quotaId?: string | null; earmarkedClasses?: number | null; studentId: string },
+    upcomingInstances: ScheduledInstanceInfo[],
+    recurringScheduleId: string,
+    userId: string,
+    t: DBTransaction
+  ): Promise<boolean> {
+    if (!schedule.quotaId) return false;
+
+    // Earmark mode: release the earmarked reservation
+    if (schedule.earmarkedClasses && schedule.earmarkedClasses > 0) {
+      try {
+        await QuotaService.releaseForRecurringSchedule(
+          schedule.studentId,
+          recurringScheduleId,
+          schedule.quotaId,
+          schedule.earmarkedClasses,
+          userId,
+          t
+        );
+        return true;
+      } catch (error) {
+        logger.error("Failed to release quota on schedule cancel", {
+          recurringScheduleId,
+          quotaId: schedule.quotaId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        return false;
+      }
+    }
+
+    // Pool mode: release per-instance quota for instances that were redeemed
+    const quotaInstances = upcomingInstances.filter(i => i.quotaDeducted);
+    if (quotaInstances.length === 0) return false;
+
+    try {
+      const result = await QuotaService.releaseForInstances(
+        schedule.studentId,
+        quotaInstances.map(i => i.id),
+        schedule.quotaId,
+        recurringScheduleId,
+        userId,
+        t
+      );
+      return (result?.releasedCount ?? 0) > 0;
+    } catch (error) {
+      logger.error("Failed to release pool-mode quota on schedule cancel", {
+        recurringScheduleId,
+        quotaId: schedule.quotaId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
+  }
+
   /**
    * Cancel an existing recurring schedule: soft-deletes the schedule, its days,
    * and all upcoming (not yet taken) class instances. Releases any quota that
@@ -409,38 +477,13 @@ export namespace RecurringClassService {
       }
 
       // 3. Release quota if applicable
-      let quotaReleased = false;
-      if (schedule.quotaId && schedule.earmarkedClasses && schedule.earmarkedClasses > 0) {
-        try {
-          await QuotaService.releaseForRecurringSchedule(
-            schedule.studentId,
-            recurringScheduleId,
-            schedule.quotaId,
-            schedule.earmarkedClasses,
-            userId,
-            t
-          );
-          quotaReleased = true;
-        } catch (error) {
-          logger.error("Failed to release quota on schedule cancel", {
-            recurringScheduleId,
-            quotaId: schedule.quotaId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+      const quotaReleased = await releaseQuotaOnCancel(schedule, upcomingInstances, recurringScheduleId, userId, t);
 
       return { cancelledInstanceIds, quotaReleased };
     };
 
     return tx ? runner(tx) : db.transaction(runner);
   }
-
-  type ScheduledInstanceInfo = {
-    id: string;
-    studentId: string;
-    quotaDeducted: boolean;
-  };
 
   async function releasePerInstance(
     instances: ScheduledInstanceInfo[],

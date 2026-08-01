@@ -5,17 +5,83 @@ CREATE TYPE "quota_ledger_reason" AS ENUM('GRANT', 'RESERVE', 'REDEEM', 'RELEASE
 CREATE TYPE "quota_period_type" AS ENUM('WEEKLY', 'MONTHLY', 'CUSTOM');--> statement-breakpoint
 CREATE TYPE "quota_status" AS ENUM('ACTIVE', 'EXPIRED', 'ARCHIVED');--> statement-breakpoint
 CREATE TYPE "scheduling_mode" AS ENUM('NUMBER_OF_CLASSES', 'ON_DEMAND', 'QUOTA');--> statement-breakpoint
-ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_PENDING_CREDITS';--> statement-breakpoint
-ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_CONFLICT_HELD';--> statement-breakpoint
-ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_NO_CREDITS_CANCELLED';--> statement-breakpoint
-ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_NO_CREDITS_ABSENT';--> statement-breakpoint
-ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_EXPIRING_SOON';--> statement-breakpoint
-ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_EXPIRED';--> statement-breakpoint
-ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_LOW_BALANCE';--> statement-breakpoint
-ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_PENDING_CREDIT';--> statement-breakpoint
-ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_REMINDER_T3';--> statement-breakpoint
-ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_REMINDER_T1';--> statement-breakpoint
-ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_TEACHER_DAILY_DIGEST';--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_PENDING_CREDITS'
+    ) THEN
+        ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_PENDING_CREDITS';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_CONFLICT_HELD'
+    ) THEN
+        ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_CONFLICT_HELD';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_NO_CREDITS_CANCELLED'
+    ) THEN
+        ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_NO_CREDITS_CANCELLED';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_NO_CREDITS_ABSENT'
+    ) THEN
+        ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_NO_CREDITS_ABSENT';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_EXPIRING_SOON'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_EXPIRING_SOON';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_EXPIRED'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_EXPIRED';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_LOW_BALANCE'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_LOW_BALANCE';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_PENDING_CREDIT'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_PENDING_CREDIT';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_REMINDER_T3'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_REMINDER_T3';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_REMINDER_T1'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_REMINDER_T1';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_TEACHER_DAILY_DIGEST'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_TEACHER_DAILY_DIGEST';
+    END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE "quota_ledger" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"quota_id" uuid NOT NULL,
@@ -58,7 +124,7 @@ CREATE TABLE "quotas" (
         ("kind" = 'PERIODIC' AND "period_type" IS NOT NULL AND "period_days" IS NOT NULL)
       ),
 	CONSTRAINT "quotas_remaining_non_negative_chk" CHECK ("remaining" >= 0),
-	CONSTRAINT "quotas_reserved_not_exceed_remaining_chk" CHECK ("reserved_classes" <= "remaining"),
+	CONSTRAINT "quotas_reserved_plus_remaining_chk" CHECK ("reserved_classes" + "remaining" <= "total_classes"),
 	CONSTRAINT "quotas_used_this_period_non_negative_chk" CHECK ("used_this_period" >= 0),
 	CONSTRAINT "quotas_rollover_policy_valid_chk" CHECK (
         "rollover_policy" IS NULL OR (
@@ -77,8 +143,10 @@ ALTER TABLE "recurring_schedules" ADD COLUMN "scheduling_mode" "scheduling_mode"
 ALTER TABLE "recurring_schedules" ADD COLUMN "generation_horizon_weeks" integer;--> statement-breakpoint
 ALTER TABLE "recurring_schedules" ADD COLUMN "ondemand_no_credits_outcome" "ondemand_no_credits_outcome";--> statement-breakpoint
 ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE text;--> statement-breakpoint
-DROP TYPE "app_permission";--> statement-breakpoint
-CREATE TYPE "app_permission" AS ENUM('auth.login', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'settings.timezones_view', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'teacher.view_students', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.create', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'schedule.delete_class', 'schedule.clear_weekly', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_students', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.submit_payment_proof', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'subjects.list', 'subjects.create', 'subjects.update', 'subjects.delete', 'subjects.view_resources', 'subjects.manage_resources', 'categories.list', 'categories.create', 'categories.update', 'categories.delete', 'notes.list', 'notes.create', 'notes.update', 'notes.delete', 'test.system_only', 'test.custom_only', 'test.custom_alt', 'storage.manage', 'billing.view_exchange_rates', 'billing.refresh_exchange_rates', 'billing.manage_fx_provider', 'billing.override_exchange_rates', 'billing.manage_currency_hedges', 'billing.manage_currencies', 'payment_methods.manage_catalogs', 'payment_methods.verify_bank_transfer', 'meeting_providers.manage_catalog', 'meeting_configs.manage_own', 'meeting_configs.manage_other', 'meeting_configs.manage_class', 'profile.core_identity.view_own', 'profile.core_identity.view_other', 'profile.core_identity.edit_own', 'profile.core_identity.edit_other', 'profile.core_contact.view_own', 'profile.core_contact.view_other', 'profile.core_contact.edit_own', 'profile.core_contact.edit_other', 'profile.teacher_professional.view_own', 'profile.teacher_professional.view_other', 'profile.teacher_professional.edit_own', 'profile.teacher_professional.edit_other', 'profile.teacher_identity.view_own', 'profile.teacher_identity.view_other', 'profile.teacher_identity.edit_own', 'profile.teacher_identity.edit_other', 'profile.parent_social.view_own', 'profile.parent_social.view_other', 'profile.parent_social.edit_own', 'profile.parent_social.edit_other', 'profile.parent_identity.view_own', 'profile.parent_identity.view_other', 'profile.parent_identity.edit_own', 'profile.parent_identity.edit_other', 'profile.parent_billing.view_own', 'profile.parent_billing.view_other', 'profile.parent_billing.edit_own', 'profile.parent_billing.edit_other', 'profile.parent_account.view_own', 'profile.parent_account.view_other', 'profile.parent_account.edit_own', 'profile.parent_account.edit_other', 'profile.parent_students.view_own', 'profile.parent_students.view_other', 'profile.parent_students.edit_own', 'profile.parent_students.edit_other', 'profile.teacher_students.view_own', 'profile.teacher_students.view_other', 'profile.teacher_students.edit_own', 'profile.teacher_students.edit_other', 'profile.staff_role.view_own', 'profile.staff_role.view_other', 'profile.staff_role.edit_own', 'profile.staff_role.edit_other', 'profile.staff_permissions.view_own', 'profile.staff_permissions.view_other', 'profile.staff_permissions.edit_own', 'profile.staff_permissions.edit_other', 'profile.payment_methods.view_own', 'profile.payment_methods.view_other', 'profile.payment_methods.edit_own', 'profile.payment_methods.edit_other', 'profile.meeting_configs.view_own', 'profile.meeting_configs.view_other', 'profile.meeting_configs.edit_own', 'profile.meeting_configs.edit_other', 'student.student_identity.view_own', 'student.student_identity.view_other', 'student.student_identity.edit_own', 'student.student_identity.edit_other', 'student.student_academic.view_own', 'student.student_academic.view_other', 'student.student_academic.edit_own', 'student.student_academic.edit_other', 'student.student_teacher.view_own', 'student.student_teacher.view_other', 'student.student_teacher.edit_own', 'student.student_teacher.edit_other', 'student.student_parent.view_own', 'student.student_parent.view_other', 'student.student_parent.edit_own', 'student.student_parent.edit_other', 'student.student_schedule.view_own', 'student.student_schedule.view_other', 'student.student_schedule.edit_own', 'student.student_schedule.edit_other', 'student.student_history.view_own', 'student.student_history.view_other', 'student.student_history.edit_own', 'student.student_history.edit_other', 'student.student_quota_edit.view_own', 'student.student_quota_edit.view_other', 'student.student_quota_edit.edit_own', 'student.student_quota_edit.edit_other', 'lesson_reports.submit', 'lesson_reports.review', 'lesson_reports.approve', 'lesson_reports.reject', 'supervisor.view_dashboard', 'student.view_own_dashboard', 'credits.manage', 'teacher_dues.view', 'teacher_dues.mark_paid', 'monthly_reports.view', 'settings.view', 'settings.edit_general', 'settings.edit_env', 'settings.edit_session', 'settings.audit_view', 'settings.site_content_manage', 'quotas.view', 'quotas.manage');--> statement-breakpoint
+-- app_permission enum values 'quotas.view' and 'quotas.manage' are added
+-- via ALTER TYPE ADD VALUE in migration 7c-quota_permissions_enum.
+-- The destructive DROP TYPE / CREATE TYPE that was here has been removed
+-- to avoid losing existing enum values on production databases.
 ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE "app_permission" USING "key"::"app_permission";--> statement-breakpoint
 CREATE UNIQUE INDEX "quota_ledger_idempotency_key_unique_idx" ON "quota_ledger" ("idempotency_key");--> statement-breakpoint
 CREATE INDEX "quota_ledger_quota_id_created_at_idx" ON "quota_ledger" ("quota_id","created_at");--> statement-breakpoint

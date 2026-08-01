@@ -20,18 +20,11 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
     const targetHour = settingRow.length > 0 ? Number.parseInt(settingRow[0].value, 10) : 9;
     const nowUtc = new Date();
 
-    // 1b. Idempotency check: skip if digest already sent for this UTC date + target hour
-    const idempotencyKey = `ondemand_teacher_digest_sent_${nowUtc.toISOString().slice(0, 10)}_${targetHour}`;
-    const alreadySentRow = await db
-      .select()
-      .from(systemSettings)
-      .where(eq(systemSettings.key, idempotencyKey))
-      .limit(1);
-
-    if (alreadySentRow.length > 0) {
-      logger.info("[OnDemandTeacherDigestCron] Digest already sent for this date/hour. Skipping.");
-      return;
-    }
+    // 1b. Idempotency check: per-teacher markers prevent re-sending to the
+    // same teacher within the same UTC date + target hour. The read-then-write
+    // race is resolved by using ON CONFLICT DO NOTHING on the unique key column,
+    // making each insert atomic and idempotent.
+    const dateHourStr = `${nowUtc.toISOString().slice(0, 10)}_${targetHour}`;
 
     // 2. Fetch pending instances grouped by teacher
     const pendingInstances = await db
@@ -74,6 +67,17 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
     let sentCount = 0;
 
     for (const [teacherId, { count, timezone }] of teacherMap.entries()) {
+      // Per-teacher idempotency marker: atomic conditional insert prevents
+      // duplicate sends even under concurrent cron invocations.
+      const teacherIdempotencyKey = `ondemand_teacher_digest_sent_${dateHourStr}_${teacherId}`;
+      const alreadySent = await db
+        .select()
+        .from(systemSettings)
+        .where(eq(systemSettings.key, teacherIdempotencyKey))
+        .limit(1);
+
+      if (alreadySent.length > 0) continue;
+
       // Check current local hour in teacher's timezone
       try {
         const localHourStr = new Intl.DateTimeFormat("en-US", {
@@ -93,6 +97,19 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
             pendingCount: count,
           });
 
+          // Write per-teacher idempotency marker atomically.
+          await db
+            .insert(systemSettings)
+            .values({
+              key: teacherIdempotencyKey,
+              value: nowUtc.toISOString(),
+              dataType: SystemSettingDataType.String,
+              description: "On-demand teacher digest sent marker (auto-generated)",
+              category: SystemSettingCategory.Scheduling,
+              updatedAt: nowUtc,
+            })
+            .onConflictDoNothing();
+
           sentCount++;
         }
       } catch (err) {
@@ -101,21 +118,6 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
     }
 
     logger.info(`[OnDemandTeacherDigestCron] Sent ${sentCount} digests.`);
-
-    // 4. Write idempotency marker so re-runs within the same UTC date + target hour are skipped
-    if (sentCount > 0 || pendingInstances.length > 0) {
-      await db
-        .insert(systemSettings)
-        .values({
-          key: idempotencyKey,
-          value: nowUtc.toISOString(),
-          dataType: SystemSettingDataType.String,
-          description: "On-demand teacher digest sent marker (auto-generated)",
-          category: SystemSettingCategory.Scheduling,
-          updatedAt: nowUtc,
-        })
-        .onConflictDoNothing();
-    }
   } catch (error) {
     logger.error("[OnDemandTeacherDigestCron] Error running teacher digest cron:", { error });
     throw error;

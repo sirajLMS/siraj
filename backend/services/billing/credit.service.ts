@@ -300,8 +300,7 @@ export namespace CreditService {
    *
    * Returns the number of refunds actually inserted (idempotency-filtered).
    *
-   * On any error the whole batch is swallowed (returns 0) to match the
-   * per-instance catch-and-continue semantics of the legacy loop.
+   * Errors bubble up to the caller so the shared transaction is rolled back.
    */
   export async function refundOnCancelBatch(
     tx: DBTransaction,
@@ -315,92 +314,84 @@ export namespace CreditService {
   ): Promise<number> {
     if (refunds.length === 0) return 0;
 
-    try {
-      // Build the full set of ledger keys + caller keys for all refunds.
-      const allKeys: string[] = [];
-      const ledgerKeyByRefund = new Map<number, string>();
+    // Build the full set of ledger keys + caller keys for all refunds.
+    const allKeys: string[] = [];
+    const ledgerKeyByRefund = new Map<number, string>();
 
-      refunds.forEach((refund, idx) => {
-        const ledgerKey = deriveBookingIdempotencyKey({
+    refunds.forEach((refund, idx) => {
+      const ledgerKey = deriveBookingIdempotencyKey({
+        studentId: refund.studentId,
+        classInstanceId: refund.classInstanceId,
+        operation: "refund",
+      });
+      ledgerKeyByRefund.set(idx, ledgerKey);
+      allKeys.push(ledgerKey, refund.idempotencyKey);
+    });
+
+    // ONE SELECT to find all existing rows for any of the keys.
+    const existing = await CreditRepository.findByIdempotencyKeys([...new Set(allKeys)].sort(), tx);
+    const existingKeys = new Set(existing.map(r => r.idempotencyKey));
+
+    // Filter unseen refunds — a refund is unseen if BOTH its ledger key
+    // and its caller key are absent.
+    const toInsert: Array<{
+      studentId: string;
+      classInstanceId: string;
+      creditedByUserId: string;
+      idempotencyKey: string;
+    }> = [];
+
+    refunds.forEach((refund, idx) => {
+      const ledgerKey = ledgerKeyByRefund.get(idx);
+      if (ledgerKey !== undefined && !existingKeys.has(ledgerKey) && !existingKeys.has(refund.idempotencyKey)) {
+        // For the batch insert we use the deterministic ledger key as the
+        // idempotencyKey (same as the single-instance path uses via
+        // runIdempotentBookingLedgerOp.applyLedgerChange).
+        toInsert.push({
           studentId: refund.studentId,
           classInstanceId: refund.classInstanceId,
-          operation: "refund",
+          creditedByUserId: refund.creditedByUserId,
+          idempotencyKey: ledgerKey,
         });
-        ledgerKeyByRefund.set(idx, ledgerKey);
-        allKeys.push(ledgerKey, refund.idempotencyKey);
-      });
-
-      // ONE SELECT to find all existing rows for any of the keys.
-      const existing = await CreditRepository.findByIdempotencyKeys([...new Set(allKeys)].sort(), tx);
-      const existingKeys = new Set(existing.map(r => r.idempotencyKey));
-
-      // Filter unseen refunds — a refund is unseen if BOTH its ledger key
-      // and its caller key are absent.
-      const toInsert: Array<{
-        studentId: string;
-        classInstanceId: string;
-        creditedByUserId: string;
-        idempotencyKey: string;
-      }> = [];
-
-      refunds.forEach((refund, idx) => {
-        const ledgerKey = ledgerKeyByRefund.get(idx);
-        if (ledgerKey !== undefined && !existingKeys.has(ledgerKey) && !existingKeys.has(refund.idempotencyKey)) {
-          // For the batch insert we use the deterministic ledger key as the
-          // idempotencyKey (same as the single-instance path uses via
-          // runIdempotentBookingLedgerOp.applyLedgerChange).
-          toInsert.push({
-            studentId: refund.studentId,
-            classInstanceId: refund.classInstanceId,
-            creditedByUserId: refund.creditedByUserId,
-            idempotencyKey: ledgerKey,
-          });
-        }
-      });
-
-      if (toInsert.length === 0) return 0;
-
-      // ONE multi-row INSERT.
-      const insertRows = toInsert.map(r => ({
-        studentId: r.studentId,
-        changeAmount: 1,
-        reason: CreditReason.REFUND,
-        sourcePaymentId: null,
-        classInstanceId: r.classInstanceId,
-        notes: null,
-        creditedByUserId: r.creditedByUserId,
-        idempotencyKey: r.idempotencyKey,
-      }));
-
-      await CreditRepository.insertBatch(tx, insertRows);
-
-      // Group inserted refunds by studentId for batch student updates.
-      const byStudent = new Map<string, number>();
-      for (const r of toInsert) {
-        byStudent.set(r.studentId, (byStudent.get(r.studentId) ?? 0) + 1);
       }
+    });
 
-      // ONE addClasses call per unique student (amount = count for that student).
-      // ONE refreshStudentOndemandInstances call per unique student.
-      for (const [studentId, count] of byStudent) {
-        await StudentRepository.addClasses(studentId, tErrors, count, undefined, tx);
-        await QuotaService.refreshStudentOndemandInstances(studentId, tx);
-      }
+    if (toInsert.length === 0) return 0;
 
-      logger.info("Batch credit refund completed", {
-        totalRequested: refunds.length,
-        totalInserted: toInsert.length,
-        uniqueStudents: byStudent.size,
-      });
+    // ONE multi-row INSERT.
+    const insertRows = toInsert.map(r => ({
+      studentId: r.studentId,
+      changeAmount: 1,
+      reason: CreditReason.REFUND,
+      sourcePaymentId: null,
+      classInstanceId: r.classInstanceId,
+      notes: null,
+      creditedByUserId: r.creditedByUserId,
+      idempotencyKey: r.idempotencyKey,
+    }));
 
-      return toInsert.length;
-    } catch (error) {
-      logger.error("Failed to perform batch credit refund", {
-        refundCount: refunds.length,
-        error,
-      });
-      return 0;
+    await CreditRepository.insertBatch(tx, insertRows);
+
+    // Group inserted refunds by studentId for batch student updates.
+    const byStudent = new Map<string, number>();
+    for (const r of toInsert) {
+      byStudent.set(r.studentId, (byStudent.get(r.studentId) ?? 0) + 1);
     }
+
+    // ONE addClasses call per unique student (amount = count for that student).
+    // ONE refreshStudentOndemandInstances call per unique student.
+    for (const [studentId, count] of byStudent) {
+      await StudentRepository.addClasses(studentId, tErrors, count, undefined, tx);
+      await QuotaService.refreshStudentOndemandInstances(studentId, tx);
+    }
+
+    logger.info("Batch credit refund completed", {
+      totalRequested: refunds.length,
+      totalInserted: toInsert.length,
+      uniqueStudents: byStudent.size,
+    });
+
+    return toInsert.length;
   }
 }
 

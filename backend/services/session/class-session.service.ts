@@ -197,10 +197,11 @@ export namespace ClassSessionService {
     actorUserId: string,
     tErrors: ErrorsLabels,
     tx: DBTransaction
-  ): Promise<void> {
-    if (!instance.quotaDeducted) return;
+  ): Promise<boolean> {
+    if (!instance.quotaDeducted) return false;
     const idempotencyKey = `credit-refund:${instance.id}`;
     await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
+    return true;
   }
 
   /**
@@ -401,7 +402,10 @@ export namespace ClassSessionService {
 
       const wasDeducted = instance.quotaDeducted && instance.deletedAt === null;
       if (wasDeducted) {
-        await refundCreditIfDeducted(instance, userId, tErrors, tx);
+        const quotaReleased = await releaseQuotaIfDeducted(instance, userId, tx);
+        if (!quotaReleased) {
+          await refundCreditIfDeducted(instance, userId, tErrors, tx);
+        }
       }
       return true;
     });
@@ -455,7 +459,10 @@ export namespace ClassSessionService {
     const result = await db.transaction(async tx => {
       const processed = await SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, tx);
       if (instance.quotaDeducted) {
-        await refundCreditIfDeducted(instance, userId, tErrors, tx);
+        const quotaReleased = await releaseQuotaIfDeducted(instance, userId, tx);
+        if (!quotaReleased) {
+          await refundCreditIfDeducted(instance, userId, tErrors, tx);
+        }
       }
       return processed;
     });
@@ -553,9 +560,13 @@ export namespace ClassSessionService {
       const newInstance = await SchedulingRepository.rescheduleClassInstance(classInstanceId, insertPayload, tx);
 
       if (existing.quotaDeducted && existing.deletedAt === null) {
-        await releaseQuotaIfDeducted(existing, userId, tx);
-        const tErrorsLocal = getServerTranslations("ar").errorsTranslations;
-        await refundCreditIfDeducted(existing, userId, tErrorsLocal, tx);
+        const quotaReleased = await releaseQuotaIfDeducted(existing, userId, tx);
+        // Only refund credit if quota was NOT released (instance was credit-backed).
+        // Calling both would cause a phantom credit refund + quota leak.
+        if (!quotaReleased) {
+          const tErrorsLocal = getServerTranslations("ar").errorsTranslations;
+          await refundCreditIfDeducted(existing, userId, tErrorsLocal, tx);
+        }
       }
 
       return newInstance;
@@ -587,8 +598,10 @@ export namespace ClassSessionService {
         throw new Error(tErrors.notFound);
       }
       if (instance.quotaDeducted) {
-        await releaseQuotaIfDeducted(instance, userId, tx);
-        await refundCreditIfDeducted(instance, userId, tErrors, tx);
+        const quotaReleased = await releaseQuotaIfDeducted(instance, userId, tx);
+        if (!quotaReleased) {
+          await refundCreditIfDeducted(instance, userId, tErrors, tx);
+        }
       }
       return resetResult;
     });

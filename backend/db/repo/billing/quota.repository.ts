@@ -166,7 +166,7 @@ export namespace QuotaRepository {
           isNull(quotas.deletedAt)
         )
       )
-      .orderBy(quotas.priority, quotas.validUntil, quotas.createdAt);
+      .orderBy(desc(quotas.priority), quotas.validUntil, quotas.createdAt);
   };
 
   export const listAllPaginated = async (
@@ -272,7 +272,7 @@ export namespace QuotaRepository {
           or(isNull(quotas.validUntil), gte(quotas.validUntil, todayStr))
         )
       )
-      .orderBy(quotas.priority, quotas.validUntil, quotas.createdAt)
+      .orderBy(desc(quotas.priority), quotas.validUntil, quotas.createdAt)
       .limit(1);
 
     return quotaRow ?? null;
@@ -350,6 +350,7 @@ export namespace QuotaRepository {
         and(
           eq(quotas.id, input.quotaId),
           eq(quotas.studentId, input.studentId),
+          eq(quotas.status, QuotaStatus.ACTIVE),
           gte(quotas.reservedClasses, input.count),
           isNull(quotas.deletedAt)
         )
@@ -632,19 +633,23 @@ export namespace QuotaRepository {
   export const expireOverdue = async (tx: DBTransaction, asOfDate?: Date): Promise<QuotaSelectType[]> => {
     const checkDateStr = (asOfDate ?? new Date()).toISOString().slice(0, 10);
     const now = new Date();
+
+    // SELECT ... FOR UPDATE to lock rows and capture pre-expiry remaining/reserved.
+    // We cannot use UPDATE ... RETURNING because the SET clause zeros remaining,
+    // so RETURNING would yield post-update (zeroed) values, not the true balances
+    // needed for accurate EXPIRE ledger entries.
     const expiredQuotas = await tx
       .select()
       .from(quotas)
-      .where(and(eq(quotas.status, QuotaStatus.ACTIVE), lt(quotas.validUntil, checkDateStr), isNull(quotas.deletedAt)));
+      .where(and(eq(quotas.status, QuotaStatus.ACTIVE), lt(quotas.validUntil, checkDateStr), isNull(quotas.deletedAt)))
+      .for("update");
 
     if (expiredQuotas.length === 0) return [];
 
-    // Bulk-update all expired quotas in a single query.
-    // Use RETURNING to capture the actual remaining/reservedClasses values that were
-    // zeroed, so ledger entries reflect the true pre-expiry state rather than the
-    // stale snapshot read above.
     const expiredIds = expiredQuotas.map(q => q.id);
-    const updatedRows = await tx
+
+    // Zero out remaining + reserved, set status EXPIRED.
+    await tx
       .update(quotas)
       .set({
         status: QuotaStatus.EXPIRED,
@@ -653,17 +658,10 @@ export namespace QuotaRepository {
         version: sql<number>`${quotas.version} + 1`,
         updatedAt: now,
       })
-      .where(and(inArray(quotas.id, expiredIds), eq(quotas.status, QuotaStatus.ACTIVE)))
-      .returning({
-        id: quotas.id,
-        studentId: quotas.studentId,
-        remaining: quotas.remaining,
-        reservedClasses: quotas.reservedClasses,
-      });
+      .where(and(inArray(quotas.id, expiredIds), eq(quotas.status, QuotaStatus.ACTIVE)));
 
-    // Insert ledger entries for quotas that had remaining balance, using the
-    // values captured from RETURNING (not the stale pre-read snapshot)
-    for (const qRow of updatedRows) {
+    // Insert EXPIRE ledger entries using the pre-expiry snapshot values.
+    for (const qRow of expiredQuotas) {
       if (qRow.remaining > 0) {
         const key = deriveExpireIdempotencyKey(qRow.id, checkDateStr);
         await QuotaLedgerRepository.insert(tx, {
@@ -677,13 +675,11 @@ export namespace QuotaRepository {
       }
     }
 
-    const updatedIds = updatedRows.map(r => r.id);
-
-    // Re-select to get the actually updated rows
+    // Re-select to return the updated rows.
     return tx
       .select()
       .from(quotas)
-      .where(and(inArray(quotas.id, updatedIds), eq(quotas.status, QuotaStatus.EXPIRED)));
+      .where(and(inArray(quotas.id, expiredIds), eq(quotas.status, QuotaStatus.EXPIRED)));
   };
 
   /**

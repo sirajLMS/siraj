@@ -9,11 +9,21 @@ import { QuotaNotificationService } from "@/backend/services/billing/quota-notif
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
+interface PendingNotification {
+  studentId: string;
+  studentName: string;
+  scheduledStartAt: string;
+}
+
 export async function runOndemandNoCreditsResolver(): Promise<void> {
   logger.info("[OnDemandNoCreditsResolver] Starting hourly on-demand no-credits resolution...");
 
   try {
     const tErrors = getServerTranslations("en").errorsTranslations;
+
+    // Collect notification payloads inside the tx, dispatch after commit
+    // to avoid holding the transaction open during external notification calls.
+    let pendingNotifications: PendingNotification[] = [];
 
     await db.transaction(async tx => {
       // Read lead minutes setting (default 240)
@@ -27,7 +37,9 @@ export async function runOndemandNoCreditsResolver(): Promise<void> {
       const now = new Date();
       const cutoffTime = new Date(now.getTime() + leadMinutes * 60 * 1000);
 
-      // Find pending credit instances scheduled to start before cutoffTime
+      // Find pending credit instances scheduled to start before cutoffTime.
+      // FOR UPDATE prevents concurrent resolvers from double-processing
+      // the same instances.
       const pendingInstances = await tx
         .select({
           instance: classInstances,
@@ -41,7 +53,8 @@ export async function runOndemandNoCreditsResolver(): Promise<void> {
             lte(classInstances.scheduledStartAt, cutoffTime),
             isNull(classInstances.deletedAt)
           )
-        );
+        )
+        .for("update");
 
       logger.info(`Found ${pendingInstances.length} pending instances within ${leadMinutes}m lead time.`);
 
@@ -94,26 +107,33 @@ export async function runOndemandNoCreditsResolver(): Promise<void> {
             )
           : 0;
 
-      // Dispatch pending credit notifications for REMIND_ONLY instances
+      // Collect notification payloads for REMIND_ONLY instances (dispatched after tx commits)
       if (remindInstances.length > 0) {
         const remindStudentIds = [...new Set(remindInstances.map(r => r.studentId))];
         const remindUsers = await tx.select().from(users).where(inArray(users.id, remindStudentIds));
         const nameMap = new Map(remindUsers.map(u => [u.id, u.name]));
 
-        for (const ri of remindInstances) {
-          const studentName = nameMap.get(ri.studentId) ?? tErrors.studentNameFallback;
-          await QuotaNotificationService.sendOndemandInstancePendingCredit({
-            affectedUserIds: [ri.studentId],
-            studentName,
-            scheduledStartAt: ri.scheduledStartAt,
-          });
-        }
+        pendingNotifications = remindInstances.map(ri => ({
+          studentId: ri.studentId,
+          studentName: nameMap.get(ri.studentId) ?? tErrors.studentNameFallback,
+          scheduledStartAt: ri.scheduledStartAt,
+        }));
       }
 
       logger.info(
-        `[OnDemandNoCreditsResolver] Resolved ${cancelledCount + absentCount} instances (${cancelledCount} cancelled, ${absentCount} absent, ${remindInstances.length} remind-only notified).`
+        `[OnDemandNoCreditsResolver] Resolved ${cancelledCount + absentCount} instances (${cancelledCount} cancelled, ${absentCount} absent, ${remindInstances.length} remind-only).`
       );
     });
+
+    // Dispatch notifications AFTER the transaction commits so we don't
+    // hold the DB transaction open during external notification calls.
+    for (const pn of pendingNotifications) {
+      await QuotaNotificationService.sendOndemandInstancePendingCredit({
+        affectedUserIds: [pn.studentId],
+        studentName: pn.studentName,
+        scheduledStartAt: pn.scheduledStartAt,
+      });
+    }
   } catch (error) {
     logger.error("[OnDemandNoCreditsResolver] Error running on-demand no-credits resolver:", { error });
     throw error;

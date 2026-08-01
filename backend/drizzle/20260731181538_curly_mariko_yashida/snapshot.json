@@ -24657,8 +24657,8 @@
       "table": "quotas"
     },
     {
-      "value": "\"reserved_classes\" <= \"remaining\"",
-      "name": "quotas_reserved_not_exceed_remaining_chk",
+      "value": "\"reserved_classes\" + \"remaining\" <= \"total_classes\"",
+      "name": "quotas_reserved_plus_remaining_chk",
       "entityType": "checks",
       "schema": "public",
       "table": "quotas"

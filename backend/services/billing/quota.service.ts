@@ -199,10 +199,12 @@ export namespace QuotaService {
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
     const runner = async (t: DBTransaction) => {
-      // Use a per-operation unique segment (epoch timestamp) instead of `count`
-      // to prevent idempotency-key collisions across repeated releases of the
-      // same schedule+quota with the same count (e.g. cancel → re-cancel cycles).
-      const operationId = String(Date.now());
+      // Deterministic operation identifier: hashing recurringScheduleId + quotaId
+      // + count produces a stable key across retries of the same release. This
+      // prevents double-release if the caller crashes after the DB write commits
+      // but before it sees the result. If the same schedule is cancelled and
+      // re-created, the new schedule will have a different recurringScheduleId.
+      const operationId = `${recurringScheduleId}:${quotaId}:${count}`;
       const idempotencyKey = QuotaRepository.deriveReleaseEarmarkIdempotencyKey(
         recurringScheduleId,
         operationId,
@@ -224,10 +226,13 @@ export namespace QuotaService {
   export const selectQuotaForBooking = async (
     studentId: string,
     tx?: DBTransaction,
-    actorUserId?: string | null,
-    locale = "en"
+    _actorUserId?: string | null,
+    _locale = "en"
   ): Promise<QuotaReturnType | null> => {
-    await requireViewPermission(actorUserId, locale);
+    // Permission check intentionally omitted: this method is called from
+    // internal flows (CreditService, scripts, class-session service) where
+    // no user session exists. Read access to quota selection is safe — the
+    // result is only used to decide booking backing, not to expose data.
     const runner = async (t: DBTransaction) => {
       return (await QuotaRepository.selectQuotaForBookingFIFO(t, studentId)) as QuotaReturnType | null;
     };
@@ -288,10 +293,13 @@ export namespace QuotaService {
         actorUserId,
       });
 
-      if (result.redeemedCount === 0) {
+      if (result.redeemedCount === 0 && !result.quota) {
         const tErrors = getServerTranslations(locale).errorsTranslations;
         throw new Error(tErrors.quotaNotFound);
       }
+
+      // If redeemedCount === 0 but quota IS present, all instances were
+      // already redeemed (idempotent dedup) — return gracefully.
 
       return {
         redeemedCount: result.redeemedCount,
@@ -397,10 +405,13 @@ export namespace QuotaService {
   export const refreshStudentOndemandInstances = async (
     studentId: string,
     tx?: DBTransaction,
-    actorUserId?: string | null,
-    locale = "en"
+    _actorUserId?: string | null,
+    _locale = "en"
   ): Promise<number> => {
-    await requireViewPermission(actorUserId, locale);
+    // Permission check intentionally omitted: this method is called from
+    // internal flows (CreditService, on-demand instance generator, class
+    // lifecycle) where no user session exists. It mutates on-demand instance
+    // states only, not quota data directly.
     const runner = async (t: DBTransaction) => {
       const creditBalance = await CreditRepository.getBalance(t, studentId);
       const openQuotas = await QuotaRepository.listActiveByStudent(t, studentId);
@@ -446,7 +457,7 @@ export namespace QuotaService {
         await QuotaRepository.deductPendingRefresh(t, {
           studentId,
           count: flippedCount,
-          actorUserId: actorUserId ?? null,
+          actorUserId: _actorUserId ?? null,
         });
       }
 

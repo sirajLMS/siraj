@@ -56,7 +56,10 @@ export const quotas = pgTable(
       `
     ),
     check("quotas_remaining_non_negative_chk", sql`${table.remaining} >= 0`),
-    check("quotas_reserved_not_exceed_remaining_chk", sql`${table.reservedClasses} <= ${table.remaining}`),
+    check(
+      "quotas_reserved_plus_remaining_chk",
+      sql`${table.reservedClasses} + ${table.remaining} <= ${table.totalClasses}`
+    ),
     check("quotas_used_this_period_non_negative_chk", sql`${table.usedThisPeriod} >= 0`),
     check(
       "quotas_rollover_policy_valid_chk",

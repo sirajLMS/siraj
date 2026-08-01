@@ -94,39 +94,11 @@ export namespace AvailabilityService {
     endDate: Date,
     ignoreInstanceIds: string[] = [],
     locale = "en",
-    tx?: ReadExecutor
+    tx?: ReadExecutor,
+    durationMinutes = 60,
+    timezone: string = "UTC"
   ): Promise<void> => {
-    // For each day in pattern within [startDate, endDate], check slot availability
-    const occurrences: { start: Date; end: Date }[] = [];
-    const curr = new Date(startDate);
-    const dayMap: Record<string, number> = {
-      SUNDAY: 0,
-      MONDAY: 1,
-      TUESDAY: 2,
-      WEDNESDAY: 3,
-      THURSDAY: 4,
-      FRIDAY: 5,
-      SATURDAY: 6,
-    };
-
-    while (curr <= endDate) {
-      const dayOfWeekNum = curr.getUTCDay();
-      for (const d of days) {
-        const targetDayNum = dayMap[d.dayOfWeek.toUpperCase()];
-        if (targetDayNum === dayOfWeekNum) {
-          const [hoursStr, minutesStr] = d.startTime.split(":");
-          const hours = Number.parseInt(hoursStr ?? "0", 10);
-          const minutes = Number.parseInt(minutesStr ?? "0", 10);
-
-          const slotStart = new Date(curr);
-          slotStart.setUTCHours(hours, minutes, 0, 0);
-          const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000); // 1 hour default if not specified
-
-          occurrences.push({ start: slotStart, end: slotEnd });
-        }
-      }
-      curr.setUTCDate(curr.getUTCDate() + 1);
-    }
+    const occurrences = buildPatternOccurrences(days, startDate, endDate, durationMinutes, timezone);
 
     if (occurrences.length === 0) return;
 
@@ -248,4 +220,92 @@ export namespace AvailabilityService {
 
     return slots;
   };
+}
+
+/**
+ * Returns the timezone offset in milliseconds for the given IANA timezone
+ * at the given point in time. Positive = ahead of UTC, negative = behind.
+ * Uses Intl.DateTimeFormat to avoid depending on a full timezone library.
+ */
+function getTzOffsetMs(timezone: string, date: Date): number {
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const parts = dtf.formatToParts(date);
+  const map = new Map(parts.map(p => [p.type, p.value]));
+  const asUtc = Date.UTC(
+    Number(map.get("year")),
+    Number(map.get("month")) - 1,
+    Number(map.get("day")),
+    Number(map.get("hour")) === 24 ? 0 : Number(map.get("hour")),
+    Number(map.get("minute")),
+    Number(map.get("second"))
+  );
+  return asUtc - date.getTime();
+}
+
+const DAY_MAP: Record<string, number> = {
+  SUNDAY: 0,
+  MONDAY: 1,
+  TUESDAY: 2,
+  WEDNESDAY: 3,
+  THURSDAY: 4,
+  FRIDAY: 5,
+  SATURDAY: 6,
+};
+
+const TZ_DAY_MAP: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+/**
+ * Builds a list of { start, end } occurrences for each matching day-of-week
+ * and start-time within [startDate, endDate], interpreting times in the
+ * given timezone.
+ */
+function buildPatternOccurrences(
+  days: { dayOfWeek: string; startTime: string }[],
+  startDate: Date,
+  endDate: Date,
+  durationMinutes: number,
+  timezone: string
+): { start: Date; end: Date }[] {
+  const occurrences: { start: Date; end: Date }[] = [];
+  const curr = new Date(startDate);
+
+  while (curr <= endDate) {
+    const currMs = curr.getTime();
+    const tzDay = new Date(currMs).toLocaleString("en-US", { weekday: "short", timeZone: timezone });
+    const dayOfWeekNum = TZ_DAY_MAP[tzDay] ?? curr.getUTCDay();
+
+    for (const d of days) {
+      const targetDayNum = DAY_MAP[d.dayOfWeek.toUpperCase()];
+      if (targetDayNum !== dayOfWeekNum) continue;
+
+      const [hoursStr, minutesStr] = d.startTime.split(":");
+      const hours = Number.parseInt(hoursStr ?? "0", 10);
+      const minutes = Number.parseInt(minutesStr ?? "0", 10);
+
+      const dateStr = curr.toISOString().split("T")[0];
+      const localStr = `${dateStr}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
+      const slotStart = new Date(localStr + "Z");
+      try {
+        const offsetMs = getTzOffsetMs(timezone, slotStart);
+        slotStart.setTime(slotStart.getTime() - offsetMs);
+      } catch {
+        // Fallback: treat as UTC (original behavior)
+      }
+
+      const slotEnd = new Date(slotStart.getTime() + durationMinutes * 60 * 1000);
+      occurrences.push({ start: slotStart, end: slotEnd });
+    }
+    curr.setUTCDate(curr.getUTCDate() + 1);
+  }
+
+  return occurrences;
 }
