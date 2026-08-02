@@ -58,8 +58,7 @@ RUN chmod +x /tmp/install_ohmyzsh.sh && \
     rm /tmp/install_ohmyzsh.sh
 
 # Set zsh as default shell
-ENV SHELL=/usr/bin/zsh
-SHELL ["/usr/bin/zsh", "-c"]
+ENV SHELL=/bin/zsh
 
 # Copy and run Node.js installation script
 COPY scripts/instalNode.sh /tmp/instalNode.sh
