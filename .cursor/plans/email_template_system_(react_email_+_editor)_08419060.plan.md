@@ -778,230 +778,6 @@ Files to create:
 - Per-template `allowedEditorGroups` enforcement belongs in the **service layer** (Pattern A — the service refuses the edit if the caller's permission group is not in `template.allowedEditorGroups`). The service performs the actual fine-grained permission check; GraphQL just gates the surface to super-admin actors who then act on behalf of editors.
 - Pattern verified against the repo's existing `NotificationPreferencePothosObject` and `@pothos/core@^4.13.1` + `@pothos/plugin-scope-auth@^4.1.7`.
 
-### Frontend (UI/UX Specification)
-
-> **SWE Review v6 (UI/UX completeness):** expanded from ~60 lines to a complete UI/UX specification per research synthesis at [.ai/plans/email-templates/glm_swe/ui-research/00-synthesis.md](.ai/plans/email-templates/glm_swe/ui-research/00-synthesis.md). All existing v1-v5 technical decisions preserved; UI/UX gaps closed: navigation entry, page layouts, list view, editor view interactions, preview tab, send-test dialog, animations w/ prefers-reduced-motion a11y guard, forms/validation, theming/dark mode, a11y, storybook stories, tests, StatusBadge extension, feature-flag visual cue, complete i18n key catalogue.
-
-Follow the tier-neutral ViewModel + switcher + Container pattern per [frontend/common/views/AGENTS.md](frontend/common/views/AGENTS.md) and [frontend/NEW_PAGE_WORKFLOW.md](frontend/NEW_PAGE_WORKFLOW.md). **`frontend/views/dashboard/` is DEPRECATED** — all new code goes under `frontend/common/views/dashboard/<domain>/` + tier files in `frontend/mobile/views/` and `frontend/desktop/views/`.
-
-**Common layer** (`frontend/common/views/dashboard/email-templates/`):
-- `useEmailTemplatesListViewModel.ts` — list/filter/pagination logic (viewport-agnostic)
-- `EmailTemplatesListView.tsx` — switcher (`createLazyView` + `ResponsiveViewSwitch`)
-- `EmailTemplatesListContainer.tsx` — calls hook, wraps in `<RequirePermission>`
-- `useEmailTemplateEditorViewModel.ts` — editor save/preview/send-test logic
-- `EmailTemplateEditorView.tsx` — switcher
-- `EmailTemplateEditorContainer.tsx` — calls hook, wraps in `<RequirePermission>`
-- `EmailEditorWrapper.tsx` — browser-only dynamic import (see "Editor wrapper requirements" below)
-- `types/` — label slices (`Pick` from `@/shared/locale/types/...` per Rule 7)
-
-**Mobile tier** (`frontend/mobile/views/dashboard/email-templates/`):
-- `emailTemplatesList.mobile.tsx` — pure presentation (no business logic, no `useMediaQuery`/`useViewport`)
-- `emailTemplateEditor.mobile.tsx` — mounts `EmailEditor` from `EmailEditorWrapper` (not directly from `@react-email/editor`)
-
-**Desktop tier** (`frontend/desktop/views/dashboard/email-templates/`):
-- `emailTemplatesList.desktop.tsx` — DataGrid + filter toolbar + Create action
-- `emailTemplateEditor.desktop.tsx` — split-pane: left editor viewport, right Inspector; `<Dialog>` for send-test; `<Drawer>` for history
-
-**Editor wrapper requirements** (verified — see [research file 10](.ai/plans/email-templates/reserch/10-editor-mui-nextjs-interop.md)):
-  - SWE review v3: Create a dedicated `EmailEditorWrapper.tsx` in the **common layer** (`frontend/common/views/dashboard/email-templates/EmailEditorWrapper.tsx`) that encapsulates all browser-only concerns:
-    ```tsx
-    // frontend/common/views/dashboard/email-templates/EmailEditorWrapper.tsx
-    'use client';
-    import dynamic from 'next/dynamic';
-    // Single dynamic import — ssr:false prevents TipTap's window access during SSR
-    const EmailEditor = dynamic(() => import('@react-email/editor').then(m => m.EmailEditor), { ssr: false });
-    export { EmailEditor };
-    ```
-    Both mobile and desktop tier views import `EmailEditor` from this wrapper (not directly from `@react-email/editor`). This centralizes the `next/dynamic` + `ssr: false` pattern in one file, preventing accidental SSR imports in tier views.
-    - SWE review v5 (V5-5): `next/dynamic({ ssr: false })` has ZERO precedent in the codebase — existing `createLazyView` defaults to `ssr: true` and no file in the repo passes `ssr: false`. This `EmailEditorWrapper.tsx` is an intentional deviation because TipTap touches `window` at module load. The `next/dynamic({ ssr: false })` import lives ONLY in this wrapper file — tier view files must NOT add their own `next/dynamic` imports for the editor; they import `EmailEditor` from `EmailEditorWrapper.tsx`.
-  - Add `'use client'` directive on the **tier view file** that mounts the editor (e.g. `emailTemplateEditor.desktop.tsx`) — TipTap is browser-only and touches `window` at module load.
-  - SWE review v5 (V5-5): ~~Wrap `EmailEditor` import via `next/dynamic` at module top level in the tier view file~~ REMOVED — the dynamic import lives in `EmailEditorWrapper.tsx` only (see above). Tier views are pure presentation that import `EmailEditor` from the wrapper. Do NOT add a second `next/dynamic` in tier view files.
-  - Save flow: hold a `ref<EmailEditorRef>`; on save call `ref.current?.getJSON()` for `designJson` (synchronous — returns JSONContent directly, no Promise) and `await ref.current?.getEmail()` (async — returns Promise<{html, text}>) for compiled output. **SWE review v2:** File objects (attachments, inline images) must be held in `useRef`, NOT in the Zustand store — `File` and `Blob` objects are not serializable and will break Zustand's devtools + persistence middleware. The Zustand store should only hold serializable state (isDirty, selectedScope, locale, etc.).
-  - Wrap the editor in MUI v9's `ScopedCssBaseline` (not the global `CssBaseline`) — the global `CssBaseline` reset breaks TipTap's prose styling (`ScopedCssBaseline` is net-new in the repo — only the global `CssBaseline` is used today). Import editor CSS **after** MUI global CSS to avoid the MUI reset overriding ProseMirror styling: e.g. `import '@mui/material/styles'; /* then */ import '@react-email/editor/themes/default.css'`.
-  - Two theming layers, verified by name:
-    - **Layer A (editor chrome)** — `--re-bg`, `--re-text`, `--re-text-muted`, `--re-border`, `--re-hover`, `--re-active`, `--re-radius`, `--re-radius-sm` (CSS custom properties control bubble menu / slash command / Inspector visuals). Bind these to `useColorScheme()` mode (light vs dark) via inline `style` on the `<EmailEditor>` host element.
-    - **Layer B (emailed HTML output)** — JS `EmailTheming.configure({ theme })` API. `--re-*` CSS vars **do NOT** affect the emailed HTML — only the in-editor chrome. The emailed HTML output inherits theme tokens from the `EmailTheming` plugin. **SWE review v2:** `EmailTheming` is NOT built-in to `@react-email/editor` — it must be passed as an `extensions` prop to `<EmailEditor extensions={[EmailTheming.configure({ theme })]} />`. Without explicitly passing it, the emailed HTML output will not include theme tokens. **SWE review v4 (V4-7):** `EmailTheming` is exported from the **`/plugins` subpath** — `import { EmailTheming, extendTheme } from '@react-email/editor/plugins'`. Importing from the package root (`@react-email/editor`) will fail with `Module does not export EmailTheming`. See research file `10-editor-mui-nextjs-interop.md:336`.
-  - Known Turbopack dev-compile slowdown with Prism.js grammars bundled by the editor; budget the editor page for slower initial dev compile.
-
-#### A. Routing & Navigation
-
-- **Admin routes** — follow existing `(dashboard)` group pattern (locale from `getLocale()` cookie, NOT a `[locale]` URL segment per [app/AGENTS.md](app/AGENTS.md) and [research file 01](.ai/plans/email-templates/glm_swe/ui-research/01-dashboard-inventory.md)):
-  - `app/(dashboard)/email-templates/page.tsx` — list page
-  - `app/(dashboard)/email-templates/[id]/page.tsx` — editor page (route param `id`; for new templates, navigate to `/email-templates/new` which the page handler treats as "blank editor with scope picker" when no real row exists)
-- **Breadcrumbs** — use existing `usePageBreadcrumbs({ currentTitle, overrides })` (`frontend/common/views/dashboard/lib/usePageBreadcrumbs.ts`).
-  - List page: "Email Templates" (single segment).
-  - Editor page: "Email Templates / {template.displayName}" with the first segment auto-linking back to `/email-templates`.
-- **Sidebar nav entry** — add `emailTemplates: string` to `DashboardNavigationLabels` (`shared/locale/types/dashboard/core/nav.ts`) and a `NavItem` to `SIDEBAR_NAV_ITEMS` under the Admin group. Recommended icon: `<EmailOutlined />` (justify: matches the email domain; `NotificationsActiveOutlined` is reserved for the broader notifications surface which already has its own nav).
-- **Permission gate (two-layer defense-in-depth)** — mirror [`app/(dashboard)/payment-catalogs/page.tsx`](app/(dashboard)/payment-catalogs/page.tsx):
-  - Server: `requirePermissionForPage(userId, [AppPermission.EMAIL_TEMPLATES_MANAGE], locale, context)` in each `page.tsx`.
-  - Client: `<RequirePermission permissions={["EMAIL_TEMPLATES_MANAGE"]} fallback={null}>` in the Container.
-  - **New enum value**: add `EMAIL_TEMPLATES_MANAGE = "EMAIL_TEMPLATES_MANAGE"` to `AppPermission`. Add a `PAGE_PERMISSIONS.emailTemplates` entry to the registry.
-  - GraphQL mutations additionally gate via `authScopes: { superAdmin: true, notImpersonating: true }` (KEEP from plan L836).
-- **Deep-linking & middle-click** — editor URL `/email-templates/{id}` is shareable; MUI DataGrid default supports middle-click → new tab.
-
-#### B. Page Layouts
-
-- **List page wrapper** — `<DesktopPageContainer>` / `<MobilePageContainer>` (`frontend/common/components/ui/container/page/`) — tier-split. Each wraps `<DesktopPageHeader>` / `<MobilePageHeader>` (shared `BasePageHeaderProps` at `frontend/common/components/ui/container/page/types/pageHeader.types.ts:11-17`) with:
-  - Title: i18n `dashboard.emailTemplates.pageTitle`
-  - Subtitle: i18n `dashboard.emailTemplates.pageSubtitle`
-  - Actions slot: primary "Create" button (`<Button variant="contained" color="primary" size="medium" startIcon={<AddOutlined />} />`).
-- **Editor page wrapper** — split-tier:
-  - Desktop: `<DesktopPageContainer>` + tier header (title = template displayName, with a back `<IconButton>` to the list). Body = two-pane layout via CSS Grid: left = editor viewport (flex-grow), right = Inspector panel (fixed `360px` width, `borderLeft`, scrollable). Use `sx` (NOT style props).
-  - Mobile: stacked — editor viewport full-width, Inspector lives in a bottom-anchored `<Drawer>` opened via a `<TuneOutlined />` IconButton in the mobile header.
-- **Shared `SectionPanel`** (`frontend/common/components/ui/container/SectionPanel.tsx`) wraps the Inspector sections (Scope, Locale, Version, Editor Groups, Subject, Attachments) — title + actions slot pattern.
-- **Loading skeletons** — NEW files, mirroring `DashboardRoleSkeleton.tsx` reference structure:
-  - `EmailTemplatesListSkeleton.tsx` (DataGrid shimmer rows + header bar shimmer).
-  - `EmailEditorSkeleton.tsx` (editor frame block shimmer + Inspector panel shimmer). Used as `<Suspense fallback={<EmailEditorSkeleton />} />` for the editor route.
-- **Empty state** — reuse shared `<EmptyState>` (`frontend/common/components/ui/state/`): illustration + i18n `dashboard.emailTemplates.emptyState` + "Create" CTA button (only if `EMAIL_TEMPLATES_MANAGE`). Empty grid subtitle: `dashboard.emailTemplates.emptyStateHelp`.
-- **Error state** — reuse shared `<ErrorState>` (`frontend/common/components/ui/state/`) with a "Retry" `<Button>` wired to Apollo `refetch`.
-
-#### C. List View Components & Interactions
-
-- **DataGrid** — `AppDataGrid` (`frontend/common/components/ui/dataGrid/AppDataGrid.tsx`; wraps MUI X DataGrid v9). Reference usage: `frontend/desktop/views/dashboard/permissions/components/permissionGroupsDataGrid.desktop.tsx:80-189`.
-  - Required props: `paginationOptions: ListPaginationOptions` (`frontend/common/components/ui/filter/listPaginationOptions.ts`), `emptyMessage`, `loading`, `getRowId={(row) => row.id}`. **Do NOT override `slots.pagination`** (research file 01 confirms it is non-overridable).
-  - Columns:
-    1. **Status badge** (renderer calls shared `<StatusBadge>` with the new `emailTemplate` category — see §N). Width ~110px. Renders first (left-most).
-    2. **Name** (displayName). Clickable row click → navigate to editor route (research file 01 confirms row-click-to-edit is the established DataGrid convention).
-    3. **Scope** (EnumDisplay `<StatusBadge category="emailTemplate" value={row.scope} />` or a typed `<Chip variant="outlined">` — but inline `<Chip>` is forbidden per `COMPONENT_PATTERNS.md:170`; use the enum's localized label as plain `<Typography>` text).
-    4. **Locale** (`twoLetterCode` + flag emoji if available; default to plain `<Typography>`).
-    5. **Version** (e.g. `v3` from `version` integer; tooltip: i18n `dashboard.emailTemplates.versionTooltip` + lastEdited timestamp).
-    6. **Last edited** (relative time, e.g. "2h ago" — format via `date-fns` `formatDistanceToNow` already in repo).
-    7. **Allowed editor groups** (comma-joined display of `EmailEditorPermission` labels — short summary only; full list in Inspector).
-  - **Row actions menu** — use `useRowMenuAnchor` (reference: `permissionGroupsDataGrid.desktop.tsx`). Menu items (visibility rules in parentheses):
-    - "Edit" (always for `EMAIL_TEMPLATES_MANAGE`) → navigate to editor.
-    - "Preview" (always) → opens preview dialog.
-    - "Duplicate" (`EMAIL_TEMPLATES_MANAGE`) → copies designJson to a new DRAFT.
-    - "Archive" (status = PUBLISHED only; `EMAIL_TEMPLATES_MANAGE`) → confirm dialog → archive.
-    - "Restore" (status = ARCHIVED only; `EMAIL_TEMPLATES_MANAGE`) → confirm dialog → restores to DRAFT (does NOT auto-publish).
-- **Search bar** — in the page header actions slot (right side, before "Create"):
-  - `<OutlinedInput size="small" placeholder={t("searchPlaceholder")} startAdornment={<InputAdornment position="start"><SearchOutlined fontSize="small" /></InputAdornment>} />`.
-  - Debounced 300ms via `useDebouncedCallback` (`use-debounce` already in repo). Filters by displayName ILIKE.
-- **Filter chips row** — below header, inside `<SectionPanel actions={...}>`. There is NO shared `FilterToolbar` in the repo (research file 01) — compose inline. Filters:
-  - **Scope** — `<Autocomplete multiple options={EmailScope values} />` rendering localized labels. Active filter shows as a `<Chip>` row.
-  - **Status** — `<ToggleButtonGroup exclusive>` of three options: Draft / Published / Archived. Active item highlighted.
-  - **Locale** — `<Autocomplete single>`.
-  - **Segmented view control** — `<ToggleButtonGroup exclusive>` of three view modes: "Active" (default — Draft + Published), "Archived", "All". Default: Active.
-  - **Clear filters** — text button appears when any filter is active; clears all + resets segmented control to "Active".
-  - **Active filter count badge** — small `<Chip size="small" color="primary" label="3" />` shown in the page header alongside the search icon when filters > 0.
-- **Pagination** — `ListPaginationOptions` (10 / 25 / 50 rows per page; default 25). Stored in the Zustand store so it survives viewport switching.
-- **Bulk actions** — Phase 2 (not Phase 1): select rows via DataGrid checkboxes → bulk Archive button appears in the header actions slot. Note: MUI X v9 checkbox column is the supported pattern.
-- **Sort** — sortable columns: name (asc/desc), lastEdited (desc — DEFAULT). Scope + status are NOT sortable (display-only). State persisted in store.
-- **Toast on action** — reuse `@toolpad/core/useNotifications` (`const notifications = useNotifications(); notifications.show(t("toast.archived"), { severity: "success" })`). There is NO Notistack (research file 01). Use `FormErrorSnackbar` for persistent failure feedback (e.g., server permission error).
-
-#### D. Editor View Components & Interactions
-
-- **Three-tab layout** — in-page tabs (NOT nested routes), mirrors `paymentCatalogAdmin.desktop.tsx:36-68` simple inline `<Tabs value={...} onChange>` + per-tab conditional render:
-  1. **Design** — visual `@react-email/editor` mounted via `EmailEditor`.
-  2. **Preview** — live compiled HTML in a sandboxed iframe (see §E).
-  3. **Code** — raw JSON view of `designJson`, syntax-highlighted via Prism.js lazy-loaded in this tab (the editor bundle already ships Prism grammars — do NOT add a separate highlighter dep).
-  - **Tab transitions** — reuse the `<Slide>` tab idiom from `preferencesChannelTabs.mobile.tsx:140`:
-    ```tsx
-    <Slide direction={slideDirection} in appear mountOnEnter unmountOnExit timeout={220}>
-      <Box>{tabContent}</Box>
-    </Slide>
-    ```
-    where `slideDirection` is computed from `newTabIndex > oldTabIndex ? "left" : "right"`. **Wrap with `usePrefersReducedMotion()` (see §G)**: when true, render the tab content directly without `<Slide>` (instant swap).
-- **Inspector panel (right, desktop)** — `<SectionPanel>`-based vertical stack:
-  - **Scope** — `<Autocomplete>` listing `EmailScope` enum values (localized labels via `dashboard.emailTemplates`). Once a template is PUBLISHED, the scope becomes LOCKED: `disabled` + tooltip (`scopeTooltip` text) — re-publishing with a new scope requires first archiving + creating a new template.
-  - **Locale** — `<Autocomplete>` of supported locales (`ar`, `en`).fieldNameRequired.
-  - **Version** — read-only `<Chip>` (e.g. `v3`) + lastEdited tooltip. Non-editable.
-  - **Allowed editor groups** — `<TagInput>` chip selector (reuse `CatalogEditDialog.tsx:302` pattern; `@/frontend/components/ui/TagInput` if present, or MUI `<Autocomplete multiple freeSolo>`). Options from `EmailEditorPermission` enum (`ADMIN`, `STAFF`, `SUPERVISOR`). Selected chips rendered with the localized label.
-  - **Subject template** — `<TextField fullWidth>` + merge-tag insertion button (`<EmailOutlined>` popover opens `VariableMentionPicker`, see §D Merge-tag). Example placeholder: `Order {{orderNumber}} confirmed`.
-  - **Attachment rules** — small key-value list: each row = pattern + max size. Use a `<List>` + `<ListItem>` with an "Add rule" `<IconButton>` and per-row `<DeleteOutlined>` delete.
-- **Mobile inspector** — bottom-anchored `<Drawer anchor="bottom">`, opened from the mobile header `<TuneOutlined />`. Same fields, compact stack.
-- **Merge-tag / variable insertion (NEW `VariableMentionPicker`)**:
-  - New component in `frontend/common/components/ui/autocomplete/` reusing the `useAudienceAutocomplete*` hook family pattern.
-  - List the scope's `Props` keys (from `EmailPropsByScope`) as lawful insert tokens. Insert at cursor as `{{fieldName}}` (handle/string interpolation, no leading `@`).
-  - Future: TipTap `extension-mention` is **transitively available** via `@react-email/editor` for inline `@mention`-style body UX — wire into the visual editor's `extensions` prop as Phase 2. RECOMMENDED approach: phase 1 = standalone Autocomplete in the Inspector (subject + a tooltip "click an item to insert"); phase 2 = TipTap inline mention.
-- **Save actions** — sticky bottom of Inspector (`EntityFormDialogActions` slot):
-  - **Save Draft** — primary `<Button variant="contained">`, keyboard shortcut Ctrl/Cmd+S (preventDefault + dispatch submit).
-  - **Publish** — secondary `<Button variant="outlined" color="success">`, only enabled when status = DRAFT or when there is a published version to replace. Ctrl/Cmd+Enter shortcut. Confirmation dialog: "Publishing will archive the currently published version for {scope}/{locale}. Continue?" Title uses i18n `dialog.publishConfirmTitle(displayName)`.
-  - **Send Test** — tertiary `<Button color="secondary" startIcon={<SendOutlined />}>`. Opens the dialog in §F.
-  - **Discard** — text button; if `isDirty`, asks for `<Dialog>` confirmation (`unsavedChangesTitle`/`unsavedChangesBody`).
-- **Draft → Publish confirm dialog** — reuse `EntityFormDialogActions`; actions: Cancel / Publish ( mbox.confirm before submit).
-- **History drawer** — `<Drawer anchor="right">` listing prior versions by `version integer` + status (Draft/Published/Archived). Each row: version chip, status badge, lastEdited, "Restore" button (only if `EMAIL_TEMPLATES_MANAGE`). Restore copies designJson onto a new DRAFT — confirm dialog clarifies "This creates a new draft from v{N}. The published version is unchanged. Continue?". Empty state when no revisions exist: `dashboard.emailTemplates.emptyRevisions` + `emptyRevisionsHelp`. Drawer trigger: small `<History />` IconButton in the page header.
-- **Unsaved-changes protection** — `isDirty` tracked in the Zustand store (`emailTemplateEditorStore.ts`). NEW pattern in the repo (research file 03 — no `beforeunload` precedent today). Two layers:
-  1. `beforeunload` window event listener → `event.preventDefault(); event.returnValue = ''` so the browser prompts on tab close.
-  2. In-app navigation: intercept `next/navigation`'s `useRouter().push` is not directly interruptible; instead, render a small `<Dialog>` "Discard changes?" confirm on any in-app nav when `isDirty`, by wiring the Confirm dialog into the back-link `<IconButton onClick>` + intercepting tab clicks when dirty. Phase 1 covers the back-link; in-app nav interception across the whole app is out of scope.
-- **Keyboard shortcuts** — Ctrl/Cmd+S → Save Draft (preventDefault + dispatch). Ctrl/Cmd+Enter → Publish (with confirm). ESC → close Drawer/Dialog (MUI default — no work). Register handlers via a `useEffect` keydown listener in the editor ViewModel, scoped to the editor route only.
-- **Editor CSS layering** — KEEP verbatim from v5 (line above): wrap editor in `ScopedCssBaseline`; import `@mui/material/styles` **before** `@react-email/editor/themes/default.css`.
-- **Editor `EmailTheming`** — KEEP verbatim from v5 (line above): import from `/plugins` subpath; pass as `extensions` prop.
-
-#### E. Preview Tab
-
-- **Sandboxed iframe** — `<iframe sandbox="" srcDoc={compiledHtml} />` with CSP via `srcDoc` meta or response headers from the preview query:
-  - `default-src 'none'` (zero remote scripts/connections)
-  - `style-src 'unsafe-inline'` (inline styles for the template)
-  - `img-src 'self' data:` (allow inline `data:` URIs; NOT `*` per V5-3 — prevents tracker-pixel IP/UA leaks)
-  - **Do NOT use `sandbox="allow-same-origin"`** — pure HTML preview needs no same-origin access; `sandbox=""` creates a unique opaque origin with no script, no forms, no storage.
-- Server side: `previewEmailTemplate` GraphQL resolver MUST DOMPurify-sanitize the compiled HTML before serving (defense-in-depth with the iframe sandbox — V5-3 KEEP).
-- **Variable preview** — `<Autocomplete>` to load a sample entity for the scope (LookupResultType sample). GraphQL `previewEmailTemplate` query accepts `sampleProps` JSON. Default props pre-filled from the registry (or a small `sampleProps.json` per scope).
-- **Desktop viewport selector** — small `<ToggleButtonGroup>` of three options: Desktop (1024) / Tablet (768) / Mobile (375). On mobile tier: iframe is full-width (selector hidden). No existing reusable selector — note as a tiny new in-tab SurfaceSelect component, single-file in `frontend/common/components/ui/toggle/`.
-- **"Copy HTML" button** — below iframe, `<Button startIcon={<ContentCopyOutlined />} onClick={copyEmailHtml}>`. Uses `navigator.clipboard.writeText(compiledHtml)`; on success toast `dashboard.emailTemplates.toast.copyHtmlCopied()`.
-- **"Open in new tab"** — DISABLED (per security — no raw HTML endpoint exposed). Tooltip: `previewTooltip`.
-
-#### F. Send Test Dialog
-
-- **Dialog** — MUI `<Dialog>` + `EntityFormDialogActions` for actions bar. Title: i18n `dashboard.emailTemplates.dialog.sendTestTitle`.
-- **To: input** — `<OutlinedInput type="email">` with zod `z.string().email()` validation. Helper error text on invalid.
-- **Sample props** — collapsible `<TextareaAutosize>` (or MUI `<TextField multiline>`) pre-filled with scope-specific default JSON. Editable for advanced test cases.
-- **Rate-limit notice** — `<Typography variant="caption" color="text.secondary">` text "Max 5 test emails per minute per user" (from plan todo 12). If the mutation returns `RATE_LIMITED` error, render inline error text: `toast.sendTestRateLimited(limit)`.
-- **"Send to my own email" quick button** (Phase 2) — small `<Button>` that pre-fills the To field with the current user's email (from auth store).
-- **Submit** — `sendTestEmail` mutation. On success: `notifications.show(t("toast.testSent", { to }), { severity: "success" })` + optionally trigger the `SuccessCheckMark` animation (see §G) BEFORE closing the dialog. On failure: inline error in dialog body.
-- **Close behavior** — on close, prompt "Discard sample props changes?" if the sample JSON was modified and the email was not sent.
-
-#### G. Animations & Micro-interactions
-
-- **Libraries** — reuse only what's installed today: `framer-motion@^12.43.0` (used in exactly 3 sibling `MetricCard` files), `@dnd-kit/core@^6.3.1` + `@dnd-kit/sortable@^10.0.0` (installed but UNUSED in any source file — the email plan is the first consumer). DO NOT add Motion / GSAP / auto-animate / lottie / confetti.
-- **Tab transitions** — reuse `<Slide>` idiom from `preferencesChannelTabs.mobile.tsx:140` (`direction` computed from index delta, `timeout={220}`). When `usePrefersReducedMotion()` returns true, render directly without slide.
-- **List entrance stagger** — mirror `MetricCard.tsx:84-88` framer-motion entrance: `initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: animationIndex * 0.04, ease: [0.25, 0.46, 0.45, 0.94] }}`. Apply to each DataGrid row wrapper (only if DataGrid supports slot rendering; otherwise apply to the named-row container). Cap `delay` so all rows animate in ≤400ms.
-- **Success animation** — NEW small component `SuccessCheckMark` in `frontend/common/components/ui/feedback/`. framer-motion SVG `<path>` with `pathLength` 0 → 1, ~600ms one-shot. Used in the Send Test success state + Publish confirmation. No confetti.
-- **Drag-and-drop reorder animation** — `@dnd-kit/sortable` `useSortable` ships CSS `transform` + `transition` built-in. Use `<DragOverlay dropAnimation>` for the lift/settle. The plan establishes the repo's first dnd-kit **usage convention**: helper components live in `frontend/common/components/ui/dnd/` (`SortableItem`, `SortableList`). **Install missing deps**: `@dnd-kit/utilities` + `@dnd-kit/modifiers` (`@dnd-kit/core` + `sortable` are already installed; utilities + modifiers are NOT). Do NOT add `react-dnd` or `@hello-pangea/dnd`.
-- **Loading spinner** — standard `<CircularProgress size={20} color="inherit">` inside buttons (existing repo convention).
-- **Skeletons** — MUI `<Skeleton>` for `EmailEditorSkeleton` and `EmailTemplatesListSkeleton` (see §B).
-- **Drawer/Dialog motion** — MUI defaults: `Drawer` uses `Slide`, `Dialog` uses `Fade`. **Do NOT override `TransitionComponent`** on the 56 existing dialogs / 11 existing drawers — keep parity (research file 03).
-- **Micro-interactions** — button ripple (MUI built-in). Card hover: subtle elevation change via `sx={{ transition: theme => theme.transitions.create('box-shadow'), '&:hover': { boxShadow: 2 } }}`. No `whileHover` / `whileTap` (avoid framer-motion micro-interactions — keep the repo idiomatic with CSS transitions).
-- **Reduced-motion a11y guard (NEW)** — NEW `usePrefersReducedMotion()` hook in `frontend/common/lib/`:
-  ```ts
-  // frontend/common/lib/use-prefers-reduced-motion.ts
-  'use client';
-  import { useState, useEffect } from 'react';
-  export function usePrefersReducedMotion(): boolean {
-    const [reduced, setReduced] = useState(false);
-    useEffect(() => {
-      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-      setReduced(mq.matches);
-      const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
-      mq.addEventListener('change', handler);
-      return () => mq.removeEventListener('change', handler);
-    }, []);
-    return reduced;
-  }
-  ```
-  Wrap EVERY custom animation (stagger, success-check, tab slide, drag-settle): when true, skip the animation (instant state change). **This closes a production-readiness gap** — today the codebase respects `prefers-reduced-motion` NOWHERE (research file 03). MUI Dialog/Drawer/Snackbar/Tooltip already honor the media query internally; only our custom animations need the guard. The hook is Tier-shared (lives in common, runs in both mobile and desktop tier views).
-- **No global NProgress or route-level `AnimatePresence`** — loading is Suspense + per-route skeleton (`DashboardRoleSkeleton.tsx` reference). Do NOT add NProgress or AnimatePresence in layout.tsx (no precedent today).
-
-#### H. Forms & Validation
-
-- **Form library** — `react-hook-form` + `Controller` + `useWatch` + separate Zustand UI store. Mirror the `useManualInvoiceViewModel` architectural pattern (research file 02 confirms this is the closest precedented form pattern). **DO NOT use `useFieldArray`** — codebase-wide grep returns zero usages (research file 02); nested arrays are managed via `useWatch` + manual `setValue`.
-- **Validation** — `zod` schema for editor-inspector fields (`@hookform/resolvers/zod` already installed):
-  - `displayName`: min length 1, max 120.
-  - `slug`: regex `^[a-z0-9-]+$`, max 64, unique per scope+locale (async check via `previewEmailTemplate` query — Phase 2).
-  - `defaultFromEmail`: email format, optional.
-  - `defaultSubject`: nonempty string.
-  - `allowedEditorGroups`: non-empty array.
-  - `attachmentRules`: each row `pattern` (regex string) + `maxSizeMb` (number, max 25).
-- **Field error display** — MUI `<FormHelperText error>` + red border on `<OutlinedInput>` (`error` prop). V5-2-style: do not silently swallow validation errors.
-- **Submit gate** — invalid form: focus first errored field (mirror `CatalogEditDialog` pattern). Valid form: dispatch mutate.
-- **Confirmation dialogs** — reuse `EntityFormDialogActions` for actions bar (shared `frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions.tsx`).
-
-#### I. Theming & Dark Mode
-
-- **No hardcoded colors** — all colors via theme palette (`sx={(theme) => ({ color: theme.palette.primary.main })}`). No hex literals anywhere (per `frontend/AGENTS.md` + research file 01).
-- **Dark mode** — MUI v9 `useColorScheme()` mode drives the editor chrome `--re-*` CSS vars (light vs dark) via inline `style={{ '--re-bg': theme.palette.background.paper, ... }}` on the `<EmailEditor>` host. Wired to `ThemeSwitcher` (existing component — no work).
-- **Status colors** — extend palette (small addition to `frontend/THEME_PALETTE.md`): Draft → `theme.palette.warning.main` / `warning.contrastText`, Published → `theme.palette.success.main` / `success.contrastText`, Archived → `theme.palette.action.disabled` / `text.disabled`. These reuse existing palette slots — no new tokens strictly required (research file 03 confirms MUI v9 exposes them).
-- **Hover/active transitions** — `theme.transitions.create('box-shadow')` for elevation changes (see §G).
-
 #### J. Accessibility (a11y)
 
 - **Semantic HTML** — every interactive element has an aria-label via i18n (e.g. `aria-label={t("action.create")}`).
@@ -1013,6 +789,19 @@ Follow the tier-neutral ViewModel + switcher + Container pattern per [frontend/c
 - **Color contrast** — WCAG AA minimum (4.5:1 text / 3:1 large text). Status badge colors must meet 4.5:1 against the row background. The Grid row default background is `theme.palette.background.paper` — verify each status palette slot.
 - **Reduced-motion** — `usePrefersReducedMotion()` guard (§G) — closes an existing gap.
 - **addon-a11y** — `@storybook/addon-a11y` is registered (todo only — warnings do not fail CI; visual a11y review is manual per story). Research file 05 confirms no `@axe-core/playwright` or `jest-axe` is installed — Phase 2 may add `@axe-core/playwright` for E2E assertions.
+
+
+#### M. GraphQL Documents (KEEP verbatim from v5)
+
+**GraphQL documents** — new sub-dir [`frontend/common/graphql/sharedDocuments/email/`](frontend/common/graphql/sharedDocuments/email/):
+- `documents.ts` — `EmailTemplateQueryDocument`, `EmailTemplatesQueryDocument`, `EmailTemplateUpsertMutationDocument`, `PublishEmailTemplateMutationDocument`, `SendTestEmailMutationDocument`, `PreviewEmailTemplateQueryDocument`
+- `index.ts` — `export * from "./documents";`
+- Add `export * from "./email";` to [`frontend/common/graphql/sharedDocuments/index.ts`](frontend/common/graphql/sharedDocuments/index.ts)
+- **Every selection set MUST include `id`** on every named object type (Apollo cache normalization per [frontend/common/graphql/sharedDocuments/AGENTS.md](frontend/common/graphql/sharedDocuments/AGENTS.md))
+- **Then run** `bun run generate:gqlSchema && bun codegen`
+
+**Apollo hooks** (`useQuery` from `@apollo/client/react`, **no** `useLazyQuery` per [frontend/AGENTS.md](frontend/AGENTS.md))
+
 
 #### K. Storybook Stories (required file list, mirrors [research file 05](.ai/plans/email-templates/glm_swe/ui-research/05-storybook-tests.md) lines 282-298)
 
@@ -1038,10 +827,11 @@ Story pattern = CSF3 explicit `Meta<typeof C>` + `StoryObj<T>` type alias (`tags
 
 Each story provides default / empty / loading / error / RTL variants. RTL variant renders with `dir="rtl"` (StoryWrapper handles `stylis-plugin-rtl` cache swap).
 
+
 #### L. Component / E2E Tests (mirrors [research file 05](.ai/plans/email-templates/glm_swe/ui-research/05-storybook-tests.md))
 
 - **Runner** — `bun:test` + Happy DOM preload (`test/ui/components/happydom-preload.ts`). Vitest is reserved for the Storybook `@storybook/addon-vitest` project only. **No frontend 100%-coverage rule** (the 100% rule is for `backend/db/repo/` only).
-- **Tier-split testing convention** (`frontend/common/components/ui/AGENTS.md:227-235`): test both mobile + desktop tier variants separately; unit-test the ViewModel hook in isolation; test the switcher with mocked `useViewport`; assert via rendered output (NOT implementation details); Storybook story = visual baseline.
+- **Tier-split testing convention** (`frontend/common/components/ui/AGENTS.md:227-235`): test both mobile + desktop tier variants separately; unit-test the ViewModel hook in isolation; test the switcher with mocked `useViewport`; assert via rendered output (NOT implementation details); Storybook story = visual baseline (see §K for story files).
 - **Apollo mock** — `renderWithWrapper(ui, { mocks })` → `TestWrapper` builds ApolloClient with `MockLink` (`test/ui/components/TestWrapper.tsx:61-80`). i18n through `LocaleProvider`; tests set locale via `renderWithWrapper({ locale })`.
 - **Required test files**:
 
@@ -1064,16 +854,6 @@ Each story provides default / empty / loading / error / RTL variants. RTL varian
 - **Single E2E file** — `test/ui/e2e/email-templates.test.ts` covering the admin happy path: login (loginAsDemoUser) → navigate to `/email-templates` → list renders → click "Create" → editor opens → save mutation → publish → preview iframe assertion. Mirrors `test/ui/e2e/admin-dashboard.test.ts` pattern (`setupBrowserLifecycle`, `gotoAppRoute`, `closeE2eSession`) — no page-object layer. Requires `bun run build:test` first.
 - **Bundle size verification** — KEEP from plan todo 20b: `NEXT_BUNDLE_ANALYZER=enabled bun run build` confirms the editor route's JS chunk is code-split from the main bundle (TipTap + Prism.js don't bloat the main bundle).
 
-#### M. GraphQL Documents (KEEP verbatim from v5)
-
-**GraphQL documents** — new sub-dir [`frontend/common/graphql/sharedDocuments/email/`](frontend/common/graphql/sharedDocuments/email/):
-- `documents.ts` — `EmailTemplateQueryDocument`, `EmailTemplatesQueryDocument`, `EmailTemplateUpsertMutationDocument`, `PublishEmailTemplateMutationDocument`, `SendTestEmailMutationDocument`, `PreviewEmailTemplateQueryDocument`
-- `index.ts` — `export * from "./documents";`
-- Add `export * from "./email";` to [`frontend/common/graphql/sharedDocuments/index.ts`](frontend/common/graphql/sharedDocuments/index.ts)
-- **Every selection set MUST include `id`** on every named object type (Apollo cache normalization per [frontend/common/graphql/sharedDocuments/AGENTS.md](frontend/common/graphql/sharedDocuments/AGENTS.md))
-- **Then run** `bun run generate:gqlSchema && bun codegen`
-
-**Apollo hooks** (`useQuery` from `@apollo/client/react`, **no** `useLazyQuery` per [frontend/AGENTS.md](frontend/AGENTS.md))
 
 #### N. StatusBadge Extension (NEW)
 
@@ -1081,6 +861,7 @@ Each story provides default / empty / loading / error / RTL variants. RTL varian
 - **Add a new `emailTemplate` category** so list+history use the standard status badge (inline `<Chip>` is FORBIDDEN per `COMPONENT_PATTERNS.md:170`).
 - Map: `EmailTemplateStatus.DRAFT → theme.palette.warning`, `PUBLISHED → theme.palette.success`, `ARCHIVED → theme.palette.action.disabled / text.disabled`. Localized label per status via `dashboard.emailTemplates.status.*`.
 - Mirror the existing category implementation (the component switches on `category` to render the right palette slot) — add the new branch + tests.
+
 
 #### O. Feature Flag Visual Cue
 
@@ -1090,9 +871,293 @@ Each story provides default / empty / loading / error / RTL variants. RTL varian
   - **All "Send Test" + "Publish" actions** in the editor are **disabled** with the same tooltip + lock icon. The send mutation returns `EMAIL_TEMPLATES_DISABLED` GraphQL error code (mapped to a user-visible toast `toast.featureDisabled`).
 - This is a small, additive visual cue — does not change the page-routing logic.
 
+
 #### Zustand Store (KEEP from v5)
 
 [`frontend/common/stores/emailTemplateEditorStore.ts`](frontend/common/stores/emailTemplateEditorStore.ts) — mutable editor state (filters, dialog open, locale/version selector, segmented control, sort, dirty flag, sampleProps). **Serialization rule**: do NOT store `File`/`Blob`/`FormData`/`Promise` in `persist`-enabled stores; keep non-serializable editor refs in `useRef` inside the ViewModel hook. There is NO separate `__mocks__` Storybook convention (research file 05 confirms) — use inline `create()` for the store; Storybook stories render containers with `args: {}` and no store override.
+
+
+#### P. State Transitions & Edge Cases
+
+**P1. Loading States (beyond skeletons)**  
+- Inspector panel: dedicated `InspectorSkeleton` (rectangular shimmers for scope, locale, version, editor groups, subject, attachments) shown while template query `loading=true`.  
+- Mutation buttons (Save Draft, Publish, Send Test): Apollo `loading` from each mutation → `<Button loading={isSaving}>` with `<CircularProgress size={20} color="inherit" />` (existing convention per §G).  
+- History drawer: `HistorySkeleton` while versions query loads; `ErrorState` embedded with `onRetry={refetchHistory}` on failure.  
+- Merge-tag picker: `Autocomplete` `loading` prop while `EmailPropsByScope` introspection fetches (if async); `emptyText` when scope has no variables.
+
+**P2. Save/Publish Optimistic Transitions**  
+- **Save Draft**: on mutation start → `isDirty=false` (optimistic), `lastSavedContentRef.current = designJson`, button `loading=true` + label `"Saving…"`. On success → button label `"Saved ✓"` (2s auto-revert to `"Save Draft"`); toast `dashboard.emailTemplates.toast.saved()`. On error → `isDirty=true`, restore `designJson` from ref, button `loading=false`, toast `saveFailed`.  
+- **Publish**: same optimistic pattern + `isPublishing` button state. Confirm dialog → mutation → success toast `published()` + navigate to list OR stay with updated status badge.  
+- **Conflict detection**: server returns `VERSION_MISMATCH { expected, actual }` → `<Dialog>` `"Template was edited by another admin (v{actual}). Overwrite or reload?"` Actions: `Overwrite` (force with current version) / `Reload` (fetch latest, re-apply local edits).  
+- **Disable editor while save in flight**: `isSaving || isPublishing` → overlay `<Box sx={{ position: "absolute", inset: 0, bgcolor: "background.paper", opacity: 0.5, pointerEvents: "auto" }}>` with `<CircularProgress />`.
+
+**P3. Send Test Flow States**  
+- **To field**: RHF + Zod `z.string().email()` → `<FormHelperText error>` on blur/submit.  
+- **Sample props**: RHF + custom `validate: (val) => { try { JSON.parse(val); return true } catch { return "Invalid JSON" } }`.  
+- **Submit button**: `disabled` until both fields valid + `!isSendingTest`.  
+- **Rate-limit**: static notice `"Max 5 test emails/min"`. On `RATE_LIMITED { retryAfter }` error → inline `<Alert severity="warning">` with live countdown; disable Submit.  
+- **In-flight**: `isSendingTest` → button `loading=true`.  
+- **Success**: `SuccessCheckMark` animation (600ms) in dialog → `notifications.show(t("toast.testSent", { to }), { severity: "success" })` → close after 800ms.  
+- **Error**: inline `<Alert severity="error">{providerErrorMessage}</Alert>` from GraphQL error `extensions.message`.  
+- **Close with unsent changes**: confirm dialog `"Discard sample props changes?"` before closing.
+
+**P4. List View Edge Cases**  
+- **Empty search**: `DataGrid emptyMessage={hasFilters ? t("empty.noSearchResults") : t("empty.emptyState")}`. Create CTA only when `!hasFilters`.  
+- **Server error**: `ErrorState` or `<Alert severity="error">` with `onRetry` button; `<Button onClick={refetch}>Retry</Button>`.  
+- **Stale data**: `fetchPolicy: "cache-and-network"` → list re-renders silently after background refetch.  
+- **Bulk archive**: confirm dialog → optimistic row removal → undo via toast for 4 seconds (same pattern as Toolpad `useNotifications` `action: { label: "Undo", onClick } }`).  
+- **Row-level loading**: `Archiving…` spinner on selected rows only; others stay interactive.
+
+**P5. History Drawer States**  
+- **Empty history**: display `"No previous versions — this is the current version."` — NOT an error state.  
+- **Loading list**: `HistorySkeleton`.  
+- **Error loading list**: `ErrorState` with `onRetry={refetchVersions}`.  
+- **Restore in-flight**: restore entry → `loading={restoringVersion === id}` row spinner.  
+- **Restore conflict**: `VERSION_RESTORE_CONFLICT` → dialog `"Another admin edited this template while you were restoring. Reload to see latest version."` → `Reload` button.  
+- **Preview older version**: inline `<Preview>OldVersionPreview</Preview>` in `renderedHtml`.
+
+**P6. Preview Tab States**  
+- **Preview empty**: (empty template body) → `"No content — edit the template to see preview."`  
+- **Preview loading**: `<Skeleton />`.  
+- **Preview error**: `"Failed to compile HTML. Check your template for missing tags or invalid markup."`  
+- **Unsaved draft**: `"Preview reflects current unsaved changes"` in a warning `Alert severity="info"` (closeable).
+
+**P7. Connectivity & Sync Guard**  
+- **Offline banner**: `isConnected` via `navigator.onLine` (or Apollo `networkError`) — `<TopBanner severity="warning">` at top of page: `"You are offline. Changes are saved locally. They will sync when reconnected."`  
+- **Session expiry**: if any mutation returns `SESSION_EXPIRED`, show toast + redirect to /login after 2s — save draft JSON to `sessionStorage.setItem('draft', JSON.stringify(designRef.current))`.  
+- **Stale tab**: `window.addEventListener("focus", checkVersion)` fires a light poll query — if version on server > local ref, show snackbar `"This template was edited on another tab. Reload to see latest version."` + Reload button.
+
+**P8. Form/Dialog Edge Cases**  
+- **Draft + tab close**: `beforeunload` (plan §D).  
+- **Draft + navigate away**: in-app nav guard (§D).  
+- **Draft + logout**: `beforeunload`, but `logout` clears `sessionStorage` — save draft just-in-case on logout path.  
+- **Draft + idle timeout**: timer (10min inactivity) fires dialog: `"Would you like to keep your unsaved changes?"` — Save Draft, Discard, or Restart timer.  
+- **Send Test form dismiss**: `"Discard sample props changes?"` (above).  
+- **Merge-tag mismatch**: `{scope: "order", variable: "user.name"}` where `user.name` is not a field of `OrderPropsScan` — inline `<FormHelperText>` in help text of merge-tag picker.
+
+**P9. State Lifecycle Summary Table**
+
+| Surface | Initial Load | Loading | Success | Error | Empty/Warning |
+|-----------|-------------|---------|--------|-------|---------------|
+| List View | AppDataTable base state | `<EmailTemplatesListSkeleton />` | Fade in results | `<ErrorState onRetry={refetch} />` | `"No templates yet"`, CTA for new template |
+| Editor | Skeleton | `InspectorSkeleton` + `IframePreviewSkeleton` | Fade in Inspector + Preview | `"Failed to load template"` + Retry | — |
+| History | Button `"History"` | `HistorySkeleton` | Fade in list | `"Can't load versions"` | `"No previous versions"` |
+| Save | Button idle | Button `loading` + label `"Saving…"` | `"Saved ✓"` (2s) → reset | `"Save failed"` toast | — |
+| Send Test | Dialog | Submit `loading` | `SuccessCheckMark` (600ms) + toast → close | Rate-limit dialog + countdown | — |
+| Archive | Menu item | `loading` on row | Row disappears + toast with undo | `"Archive failed"` toast | — |
+| Restore | Select version | `loading` on entry | Fade new content + toast | `"Restore failed"` | — |
+| Publish | Button | Button `"Publishing…"` | toast → status badge update | `"Publish failed"` toast | — |
+
+> **Guideline**: Every async action defined elsewhere in this plan (§A–§O) MUST have an explicit entry in this table or be covered by one of the state patterns above. See research file [01-state-transitions.md](.ai/plans/email-templates/glm_swe/ui-research-round2/01-state-transitions.md) for full 32-gap analysis with codebase precedents.
+
+
+#### Q. Data Flow, Apollo Cache & Optimistic Patterns
+
+**Q1. Apollo Cache TypePolicies** (add to `createApolloCache()` in `frontend/common/graphql/apolloCache.ts`):
+
+```typescript
+typePolicies: {
+  EmailTemplate: {
+    keyArgs: ["id"],
+    fields: {
+      designJson: { merge: false },
+      compiledHtml: { merge: false },
+      version: { merge: false },
+    },
+  },
+  EmailTemplates: {
+    keyArgs: ["scope", "locale", "status", "search"],
+    fields: {
+      rows: {
+        merge(existing, incoming, { args }) {
+          if (!args?.paginationArgs?.page || args.paginationArgs.page === 1) {
+            return incoming; // page 1 → replace
+          }
+          return [...(existing || []), ...incoming]; // subsequent pages → append
+        },
+      },
+      totalCount: { merge: false },
+      pageInfo: { merge: false },
+    },
+  },
+}
+```
+
+**Q2. Fetch Policies (per query)**
+
+| Query Document | `fetchPolicy` | Rationale |
+|----------------|--------------|-----------|
+| `EmailTemplatesQueryDocument` (list) | `"cache-and-network"` | Show cached list immediately, refetch in background |
+| `EmailTemplateQueryDocument` (detail) | `"cache-and-network"` | Same — avoid content flash |
+| `PreviewEmailTemplateQueryDocument` | `"network-only"` | Always get fresh rendered HTML for preview |
+| `EmailTemplateVersionsQueryDocument` (history) | `"cache-first"` | Immutable version history — no refetch needed after load |
+
+**Q3. Cache Redirect (List→Detail)**  
+After upsert, `cache.modify` on root to update the detail and invalidate `EmailTemplates.list({ scope, locale, status })` to trigger refetch of relevant list queries.
+
+**Q4. Optimistic Response Definitions**  
+
+| Mutation | Optimistic Pattern | Rollback on Error |
+|----------|-------------------|-------------------|
+| `EmailTemplateUpsertMutationDocument` (Save Draft) | `optimisticResponse` inserts `designJson`, `version+1`, `status="DRAFT"` | Restore `designJson` from `useRef`; button to idle; toast error |
+| `EmailTemplatePublishMutationDocument` | Flip `status="DRAFT"` → `"PUBLISHED"` in cache | Flip back to DRAFT |
+| `EmailTemplateArchiveMutationDocument` | Remove from Active list; insert into Archived list | Restore both lists from pre-mutation cache snapshot |
+| `SendTestEmailMutationDocument` | **NO optimistic** — wait for server confirm, only toast | N/A |
+
+All optimistic responses use `update` callback with `cache.modify`. This is the first use of optimistic responses in the codebase — follow Apollo Client v3 docs.
+
+**Q5. Pagination Format**  
+- **Strategy**: offset-limit (`page`, `pageSize` in Zustand).  
+- **Filter change** → reset to page 1 in `listStore.setPage(1)`.  
+- **Total count**: `totalCount` field in `EmailTemplatesPaging`.  
+- **Load More**: NOT used in desktop; mobile uses "Show More" button per §R.
+
+**Q6. Refetch After Mutation**  
+- Save → cache update (Q4 optimistic); `refetchQueries` only if version stale.  
+- Publish → refetch list (status changed).  
+- Archive → refetch active + archived lists.  
+- Restore history → refetch editor + history.  
+- **Focus refetch** uses existing `frontend/common/hooks/use-connection-events.ts` pattern.  
+- **Background refetch** via `cache-and-network` ensures live cache invalidation.
+
+**Q7. Error & Retry Policies**  
+
+Add `RetryLink` to Apollo link chain:
+
+```typescript
+import { RetryLink } from "@apollo/client/link/retry";
+
+export const retryLink = new RetryLink({
+  delay: { initial: 500, max: 5000, jitter: true },
+  attempts: { max: 3, retryIf: (error) => error.statusCode >= 500 },
+});
+```
+
+- 4xx errors → **NO retry** (show error message).  
+- 5xx errors → retry 3× with backoff (500ms → 1000ms → 2000ms).  
+- All mutations carry `idempotencyKey` header (see §G).  
+- User-facing: `"Failed to load. Retry"` button on `ErrorState`.
+
+**Q8. Send Test Sample Props Location**  
+Sample props live in **Zustand UI store** (`emailTemplateEditorStore.sampleProps: Record<string, Record<string, string>>`) — NOT Apollo cache. Reset on navigate away.
+
+**Q9. Merge-Tag Introspection**  
+- **Source**: Static list per scope (`reactEmailPropSchemas`).  
+- **Cache key**: `["mergeTagByScope", scope]` — store in Apollo as `MergeTagSet`.  
+- **Policy**: `network-only` on scope change; `cache-and-network` after first load.
+
+**Q10. Store/Cache Delineation**  
+
+| Data | Location | Reason |
+|------|----------|--------|
+| Template (`designJson`, subject, status) | **Apollo cache** | Lifecycle managed by Apollo; optimistic updates |
+| UI: pagination, filters, active view | **Zustand** (`useEmailListStore`) | Session-only; not persisted to server |
+| UI: tabs, Inspector, history, isDirty, toast visits | **Zustand** (`useEmailTemplateStore`) | Session-only |
+| Sample props for Send Test | **Zustand** (`emailTemplateEditorStore.sampleProps`) | Test data only |
+| File/Blob (attachments) | **useRef()** | V5-8 serialization rule |
+
+**Q11. Real-time & Subscription**  
+- `subscribeToMore`: **out of scope** for Phase 1-2. Plan for Phase 4+ with WebSocket. Use `window.focus` polling until then (see Q6).  
+- `pollInterval`: **out of scope** (caching sufficient).  
+- **Version conflict check**: lightweight poll on `focus` reads only `version` field via `EmailVersionQueryDocument { id version }` with `fetchPolicy: "network-only"`.
+
+
+#### R. Responsive & Mobile Specification
+
+This section explicitly defines responsive behavior, touch interactions, and mobile-specific patterns for every surface in §A–§Q.
+
+**R1. Breakpoints & Tier**  
+
+- **Mobile**: `<600px` (`theme.breakpoints.down("sm")`) — `isMobile=true`  
+- **Tablet**: `600–900px` — `isTablet=true`, `isMobile=true` (per ViewportProvider)  
+- **Desktop**: `>=900px` (`theme.breakpoints.up("md")`) — `isDesktop=true`  
+
+Tier detection from `useViewport().isMobile` (mobile+tablet) vs `isDesktop`. All views use same route for all tiers.
+
+**R2. List View — Responsive Columns**  
+
+| Column | xs (<600) | sm (600-900) | md (900-1200) | lg+ (>=1200) |
+|--------|-----------|--------------|---------------|--------------|
+| Status | ✅ Visible | ✅ Visible | ✅ Visible | ✅ Visible |
+| Name | ✅ Visible | ✅ Visible | ✅ Visible | ✅ Visible |
+| Scope | ❌ Hidden | ✅ Visible | ✅ Visible | ✅ Visible |
+| Locale | ❌ Hidden | ❌ Hidden | ✅ Visible | ✅ Visible |
+| Version | ❌ Hidden | ❌ Hidden | ✅ Visible | ✅ Visible |
+| Last Edited | ❌ Hidden | ✅ Visible | ✅ Visible | ✅ Visible |
+| Editor Groups | ❌ Hidden | ❌ Hidden | ❌ Hidden | ✅ Visible |
+
+Implement via `useResponsiveColumnModel(useViewport().isMobile, useViewport().isDesktopLevel)` → model passed to AppDataGrid `columnVisibilityModel`.
+
+**R3. List — Mobile‑Specific**  
+- **Row actions**: Swipe left → Action row (Archive, Edit, Preview) using `@dnd-kit` `TouchSensor` with activation distance 12.  
+- **Search**: Icon button → tap reveals full-width `SearchInput` with close icon.  
+- **Filter chips**: `<MobileHorizontalScroll>` for scope/status/locale. Count badge next to search icon.  
+- **Pagination**: Numbered pages on desktop → mobile uses **"Show More"** button (load 25 rows). `<AppDataGrid variant="loadMore" />` on mobile.  
+
+**R4. Editor Inspector Drawer (Mobile)**  
+- `Drawer anchor="bottom"`, `maxHeight: "85vh"` (same pattern as `filterExport.mobile.tsx`).  
+- **Keyboard**: `visualViewport.height - visualViewport.offsetTop - 16` on resize to keep above keyboard.  
+- **Swipe dismiss**: `swipeArea="anchor"` (MUI support).  
+- **Trigger**: `TuneOutlined` iconButton with `aria-expanded` and `aria-controls="inspector-drawer"`.
+
+**R5. Editor Chrome Bottom Action Bar**  
+- Fixed sticky at bottom (zIndex appBar+1), `paddingBottom: env(safe-area-inset-bottom)`.  
+- Holds: primary (Save Draft), secondary (Publish), tertiary (Send Test).  
+- **Always visible** outside Inspector Drawer.  
+- Keyboard shortcut shown on desktop only: `sx={{ display: { xs: "none", md: "inline" }}}`.
+
+**R6. Three Tabs (Design/Preview/Code) Mobile**  
+
+- `Tabs variant="scrollable"` with `scrollButtons="auto"` on mobile (xs, sm).  
+- Icon-only on xs; text + icon on sm+.  
+- `<Slide direction>` computed from `touchstart`/`touchend` delta (swipe left → right direction).  
+
+**R7. VariableMentionPicker Mobile**  
+
+Full-screen bottom sheet, drawer anchor bottom with border radius → auto-focus search field, results grouped by scope; tap item → insert at cursor in Subject, close drawer, return focus to Subject.
+
+**R8. TipTap (Mobile)**  
+
+- Bubble menu → fixed bottom toolbar (Bold/Italic/Link/Merge-tag/Block Type/Undo/Redo) on selection.  
+- Slash command → bottom sheet.  
+- **DO NOT auto-focus** on mobile (keyboard takes 50% of view).  
+- `@dnd-kit` sensors: `PointerSensor + TouchSensor(distance:8) + KeyboardSensor` in `SortableListWrapper`.
+
+**R9. Preview Tab Mobile Viewport**  
+- Remove viewport selector on mobile.  
+- Single button: `"Preview on PC"` → opens new tab at `/email-templates/[id]?viewport=desktop`.
+
+**R10. Send Test Dialog Mobile**  
+- Dialog → bottom-sheet `Drawer` for mobile.  
+- Sample props: single column stack (text inputs above labels).  
+- Rate-limit inline as `<Typography variant="caption" color="error">`.
+
+**R11. History Drawer Mobile**  
+Same as Inspector — `anchor="bottom" maxHeight="90vh"`. Restore confirmation: `Dialog fullScreen={true}` (mobile) vs centered (desktop).
+
+**R12. Dialogs vs Drawers on Mobile**  
+
+| Component | Desktop | Mobile |
+|-----------|---------|--------|
+| Send Test | `<Dialog>` centered | `Drawer bottom` |
+| Save/Publish Confirm | `<Dialog>` centered | `<Dialog fullScreen={true} />` |
+| Archive Confirm | `<Dialog>` centered | `Drawer bottom` |
+| Feature Flag Lock Tooltip | `<Tooltip>` | `<Tooltip>` |
+| History Restore Confirm | `<Dialog>` centered | `<Dialog fullScreen={true} />` |
+
+**R13. Touch Gesture Reference**  
+
+| Gesture | Pattern | Reference |
+|---------|---------|-----------|
+| Block reorder in editor | `@dnd-kit` `<SortableList>` with `TouchSensor(distance:8)` | `email-template-sortable.tsx` |
+| Delete blocks | Swipe left → action row | `swipeable-row.ts` |
+| Long press | 500ms for context menu (fallback) | ... |
+
+**R14. Editor Mobile – Storage & Sync**  
+- On mobile, draft saved to `sessionStorage` before `unload` with `JSON.stringify(designJson)`.  
+- On return: `sessionStorage.getItem('emailTemplateDraft' + id)`; if present and `isDirty`, show restore dialog: `"You had unsaved changes. Restore them?"`
+
+> **Interoperability note**: All R1–R14 are defined on the **view model layer** (`useEmailTemplateViewModel`, `useEmailListViewModel`) — intentionally tier-neutral. Combine with §A's Mobile/Desktop/Common tier file lists and `createLazyView`. Data-tier layout in `frontend/mobile/views/dashboard/email-templates/` and `frontend/desktop/views/dashboard/email-templates/`.
 
 ### i18n (complete key catalogue)
 
@@ -1171,7 +1236,7 @@ All new admin UI surfaces need a brand-new `dashboard.emailTemplates` namespace.
 **Send-test dialog (`dashboard.emailTemplates.sendTest.*`)**
 - `recipientLabel`, `recipientPlaceholder`, `sampleProps`, `submit`, `success: (to: string) => string`, `rateLimited: (limit: number) => string`
 
-**Misc reusable** — `loading`, `cancel`, `save`, `confirm`, `delete`, `close` — **reuse `common` namespace** (`shared/locale/en/common/index.ts:29-33`). DO NOT duplicate these in `dashboard.emailTemplates`.
+**Misc reusable** — `loading`, `cancel`, `save` — **reuse `common` namespace** (`shared/locale/en/common/index.ts:29-33`). `confirm`, `delete`, `close` are **NOT in common** — add them to `dashboard.emailTemplates`.
 
 **LOCKSTEP rule (V4-3 applies same as `emails`)**: `dashboardEmailTemplates{En,Ar}` MUST be added atomically — the type interface in `shared/locale/types/dashboard/emailTemplates/main.ts` plus en + ar impls + namespace registration must all land in the same commit. Note: each new namespace (especially with functions taking typed args) demonstrates V4-3-style lockstep discipline.
 
@@ -1330,9 +1395,559 @@ Note `.ai/plans/whatsapp/implementation.md` exists. The provider-registry patter
 - V5-8 (Low/P3): Documented no separate Storybook mock-store pattern — use inline `create()` + container-with-args approach. See todo 16 note.
 - V5-9 (Low/P3): Added `@next/bundle-analyzer` installation step (not installed today). See todo 20b.
 
-**v6 (UI/UX completeness, 2026-08-02):** Expanded the thin "### Frontend" (~60 lines) + "### i18n" (~30 lines) sections into a complete production-ready UI/UX specification, now ~410 lines covering: routing & navigation (exact admin routes, sidebar entry, breadcrumbs, two-layer permission gate + new `EMAIL_TEMPLATES_MANAGE` enum value); page layouts (DesktopPageContainer/MobilePageContainer + DesktopPageHeader + SectionPanel + new EmailTemplatesListSkeleton/EmailEditorSkeleton + shared EmptyState/ErrorState); list view (AppDataGrid columns + row-actions menu via useRowMenuAnchor + search bar + filter chips + segmented Active/Archived/All view + pagination in Zustand store); editor view (three-tab Design/Preview/Code layout with Slide tab transitions; right-pane Inspector via SectionPanel — scope lock, locale, version, allowed-editor-groups TagInput, subject template with merge-tag insertion; Save Draft + Publish + Send Test actions with keyboard shortcuts; History restore drawer; isDirty beforeunload + in-app nav guard; all v1-v5 locked decisions preserved verbatim — EmailEditorWrapper + ssr:false, ScopedCssBaseline, EmailTheming /plugins import, atomic save flow); preview tab (sandbox='' iframe + CSP default-src 'none' / style-src 'unsafe-inline' / img-src 'self' data: + DOMPurify server-side sanitize + viewport selector + Copy HTML); send-test dialog (To input + sample props + rate-limit notice + success animation); animations & micro-interactions (reuse framer-motion stagger from MetricCard + new SuccessCheckMark + @dnd-kit/sortable built-ins for block reorder + NEW usePrefersReducedMotion hook closing a production-readiness gap — today the codebase respects reduced-motion nowhere); forms & validation (react-hook-form + Controller + zod + useWatch — NO useFieldArray per repo precedent); theming & dark mode (theme palette only + useColorScheme drives --re-* CSS vars); accessibility (aria-labels, focus trap, WCAG AA color contrast, prefers-reduced-motion); storybook stories (full per-component table of 15 rows from research file 05); component + E2E tests (15-row table + mock.module-stub for @react-email/editor + single test/ui/e2e/email-templates.test.ts happy path); GraphQL documents (KEEP verbatim from v5); StatusBadge extension (new `emailTemplate` category — Draft=warning, Published=success, Archived=disabled; inline `<Chip>` forbidden per COMPONENT_PATTERNS.md:170); feature-flag visual cue (`<LockOutlined>` on sidebar entry + disabled Send Test/Publish buttons when EMAIL_TEMPLATES_ENABLED=false); Zustand store (KEEP from v5, no separate Storybook mock-store convention). The i18n section was expanded with a new `dashboard.emailTemplates` UI namespace — complete key catalogue grouped by surface (nav labels, page titles, table headers, status chip labels, button labels, dialog titles, form fields/help text, tooltips, toast messages, error messages, empty states, search/filter, editor labels, send-test dialog labels) reusing the existing `common` namespace for generic verbs (loading/cancel/save/confirm/delete/close — do NOT duplicate); 7-file atomic changeset listed for the new namespace (V4-3 lockstep rule echoes for `dashboardEmailTemplates{En,Ar}`). Research synthesis at `.ai/plans/email-templates/glm_swe/ui-research/00-synthesis.md`; five deep research files at `.ai/plans/email-templates/glm_swe/ui-research/01-05-*.md` (dashboard inventory, template editor, animations, i18n, storybook+tests).
 
-**Post-v5 package install (2026-08-02):** Installed 3 missing plan-required packages and verified their APIs against `node_modules` + Bun smoke tests. `isomorphic-dompurify@3.21.0` + `@aws-sdk/client-sesv2@3.1101.0` (runtime), `@next/bundle-analyzer@16.2.12` (dev). **Phase 0 GO/NO-GO gate (V4-6) is now GREEN** — `isomorphic-dompurify.sanitize()` under Bun 1.3.14 strips `<script>` and `onerror` vectors correctly, `isSupported: true`. jsdom fallback NOT required. See `.ai/plans/email-templates/reserch_node/15-newly-installed-packages-verification.md`.
+---
+
+### S. Error Handling & Resilience (v8 — Round 3 Audit)
+
+**Source:** 8 parallel audit reports at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.md` (168KB total, 1405 lines).
+
+#### S1. Editor Error Boundary (P0)
+`EmailEditorWrapper` embeds a third-party runtime (`@react-email/editor` / TipTap 3.17) via `next/dynamic({ ssr:false })`. A TipTap schema-extension throw, corrupted `designJson` → `getJSON()`, or React Email render failure would bubble to the nearest boundary — **none exists**.
+- **Add:** `EmailEditorErrorBoundary` wrapping `EmailEditorWrapper`, mirroring `ViewSwitchErrorBoundary` (`frontend/common/components/ui/container/ResponsiveViewSwitch.tsx:20-79`). Fallback: "Editor failed to load" + Reload button. Place at `frontend/views/dashboard/admin/email-templates/editor/EmailEditorErrorBoundary.tsx`.
+- **Plan convention:** class component with `static getDerivedStateFromError(error)` + `componentDidCatch(error, info)` → `logger.error("EmailEditor crashed", { error, info })` + `<Suspense>` fallback UI inside the boundary.
+
+#### S2. Optimistic Lock Round-Trip End-to-End (P0)
+The schema has `version` integer + `WHERE version = $1` comment, and §P2 UI handles `VERSION_MISMATCH { expected, actual }` — but the middle layer is unwired.
+- **Repo:** `update(id, expectedVersion, patch)` → 0-rows-affected → throw `VersionMismatchError({ expected: expectedVersion, actual: undefined })`. First query the current row to fill `actual` version before throwing.
+- **Service:** catch `VersionMismatchError` → re-throw with `extensions: { code: "VERSION_MISMATCH", expected, actual }`.
+- **GraphQL:** Pothos mutation throws with `extensions.code` (matching the existing pattern at `auth.mutation.ts` — `extensions: { code: "UPPER_SNAKE" }`).
+- **Frontend:** extend `getGraphQLErrorMessage` usage with `getGraphQLErrorCode(error): string | undefined` helper (new — reads `extensions.code`). UI in §P2 already consumes this.
+- **Collapse VERSION_RESTORE_CONFLICT into VERSION_MISMATCH.** Restore uses the same `WHERE version = $1` check — one code is sufficient.
+- **Add `forceVersion` mutation variant** for the "Overwrite" UI action (§P2). `updateEmailTemplate(id, patch, expectedVersion?, force?: boolean)` — when `force: true`, skip version check.
+
+#### S3. Outbound Send Retry with Backoff + DLQ (P0)
+`ResendEmailAdapter` has zero retry — 429/5xx/network failures surface as one-shot `success:false` and the email is lost. The idempotency key would then *block* a legitimate retry (same key → deduped).
+- **Add `EmailSendRetryPolicy`** applied in the dispatch path (NOT frontend): retry 429/5xx/network up to 3× with exponential backoff (1s→4s→16s), respect `Retry-After` header for provider rate limits.
+- **Record `RETRYING` delivery status** between attempts; on final failure set `notificationDeliveries.status = 'PERMANENTLY_FAILED'` + alert.
+- **Idempotency key MUST NOT block retries** of the same logical send when failure was transient — key should only dedup *successful* sends, not attempts. Change: `findByIdempotencyKey` check happens AFTER successful send, not before retry.
+- **Circuit breaker:** after 5 consecutive PERMANENTLY_FAILED sends to the same provider, mark the provider as degraded in `EmailProviderRegistry` → skip to fallback provider (if configured) or return `success: false, error: "PROVIDER_DEGRADED"`.
+
+#### S4. Align SESSION_EXPIRED to Existing UNAUTHENTICATED Recovery (P0→P1)
+§P7 invents `SESSION_EXPIRED` — this code does NOT exist. The actual recovery (`apollo/utils.ts:205-296`) is: `UNAUTHENTICATED` → `handleAuthError` → `getNewAccessToken()` (deduped via `inFlightRefresh`) → on success `reFetch()` (stay-on-page, no draft loss) → on failure, save draft to `sessionStorage` then `buildLoginHref` redirect.
+- **Replace §P7:** Mutation returns `UNAUTHENTICATED` → existing `handleAuthError` attempts `refreshToken` → on success `reFetch()` (stay-on-page, no draft loss) → on failure, save draft to `sessionStorage` then `buildLoginHref` redirect. Do NOT invent a new code or a 2s-delay redirect that skips the refresh attempt — that regresses the production bug the recovery was built to fix.
+- **Remove** all references to `SESSION_EXPIRED` in the plan — replace with `UNAUTHENTICATED`.
+
+#### S5. safeRender Degraded-Mode Signal (P1)
+`safeRender` catches render throw → returns `"<p>renderFailed(scope)</p>"` HTML. This fallback is **sent as a real email** with `success: true` — the recipient gets a placeholder, no `FAILED` delivery row, no alerting.
+- **Change return type:** `safeRender` returns `{ html, text, degraded: boolean, error?: Error }`.
+- **Dispatcher:** when `degraded: true`, mark the delivery row as `FAILED` with `failureReason: "render_degraded"` rather than `SENT`. Log `logger.warn("Email render degraded — fallback HTML sent", { scope })` (not `logger.error` — to avoid a false critical alert for a user-visible-but-recoverable state).
+- **Wrap dispatcher's `EmailTemplateService.renderForSend`** in try/catch returning `{ success: false, error: "RENDER_FAILED" }` — today an unhandled rejection in the notification job occurs if `renderForSend` throws before `safeRender` (e.g., DB read of `designJson` fails).
+- **Extend safeRender try** to cover the async `attachments` resolver and a subject-render fallback. If the subject-component throws, fall back to `<subject>` text interpolation with merge-tag values (no-ops if missing key).
+
+#### S6. Repository Constraint Violation Mapping (P0)
+No existing convention for mapping Postgres `23505` (unique violation) / `40P01` (deadlock) in any repo. Plan's two unique indexes surface as raw `QueryError` → GraphQL throws raw messages to admins.
+- **Add to `email-template.repository.ts`:** `catch (e: QueryError)` → `if (e.code === '23505')` → match constraint name from `e.constraint_name` → throw typed `DuplicateScopeLocaleError` / `DuplicateSlugError`.
+- **Service:** catch → re-throw with `extensions: { code: "DUPLICATE_SCOPE_LOCALE" | "DUPLICATE_SLUG" }`.
+- **UI:** existing i18n keys `duplicateScopeLocale` / `duplicateSlug` bind to `extensions.code` via the new `getGraphQLErrorCode` helper (S2). Field-level `<FormHelperText error>` displays under the relevant form field (not a form-level snackbar), matching the RHF convention.
+- **Deadlock retry:** `40P01` → retry the transaction once (Drizzle already wraps in `db.transaction`).
+
+#### S7. GraphQL Error Code Registry (P1)
+The plan references `VERSION_MISMATCH`, `RATE_LIMITED`, `DUPLICATE_SCOPE_LOCALE`, `DUPLICATE_SLUG` in UI flows but never defines them as Pothos mutation throws. The codebase precedent (`auth.mutation.ts`) is `extensions: { code: "UPPER_SNAKE" }` literally — no typed union.
+- **Add `EmailTemplateErrorCode` enum** in `backend/types/email-template.types.ts`: `VERSION_MISMATCH | RATE_LIMITED | DUPLICATE_SCOPE_LOCALE | DUPLICATE_SLUG | NOT_FOUND | RENDER_FAILED | PROVIDER_DEGRADED | EMAIL_TEMPLATES_DISABLED`.
+- **Frontend helper:** `getGraphQLErrorCode(error): EmailTemplateErrorCode | undefined` at `frontend/common/graphql/utils/errorCodes.ts` — reads `error.graphQLErrors[0]?.extensions?.code`.
+- **All email-template mutations** throw with `extensions: { code }` matching this enum.
+
+#### S8. Toast/Notification Convention Alignment (P1)
+Plan uses `notifications.show(t(...), { severity: "success" })` throughout §P — but `@toolpad/core` `useNotifications().show()` in the existing codebase (`useApolloConnectivity.ts:104`) is **severity-less**. `severity` may not be a supported arg.
+- **Verification step:** check `@toolpad/core` version — if `show()` accepts a `severity` option, keep the plan. If NOT, replace all `notifications.show(msg, { severity })` with `notifications.show(msg)` and use `<Alert severity>` inside `<Snackbar>` for severity-coded messages (matching `FormErrorSnackbar` pattern).
+- **Consolidate:** one toast system for email-template route — use toolpad `notifications.show()` for transient success/info messages; `<Snackbar>` + `<Alert>` for errors/warnings. Document this in a `§S8 Toast Convention` block.
+
+#### S9. Network/Offline — Reuse Existing Infrastructure (P1)
+§P7 offline banner via `navigator.onLine` duplicates the existing `createConnectivityLink` (`utils.ts:51-100`) which emits a synthetic `NETWORK_ERROR` and renders `<InitializingUI error>`.
+- **Reuse** module-level `isConnected` state from `apolloLinkState` — do NOT introduce a parallel `navigator.onLine` check.
+- **RetryLink interaction:** §Q7 `RetryLink` (5xx only) is positioned AFTER `createConnectivityLink` which short-circuits offline → `NETWORK_ERROR` (statusCode undefined). `retryIf: error.statusCode >= 500` silently drops `NETWORK_ERROR`. **Fix:** position RetryLink BEFORE connectivityLink, OR add `retryIf: error.networkError || error.statusCode >= 500`.
+- **Add HttpLink timeout:** existing `HttpLink({ uri, credentials })` has no timeout → a hung request never retries. Add `timeout: 30000` via `ApolloLink.timeout` or a custom `concat` terminator.
+
+---
+
+### T. Performance Optimization (v8 — Round 3 Audit)
+
+#### T1. Memoization Discipline (P0)
+Zero occurrences of `React.memo` / `useMemo` / `useCallback` in the 1421-line plan. Editor re-renders on every keystroke.
+- **Add `§T1 Memoization` subsection** compelling:
+  - `React.memo` on every `EmailTemplateRow` component, `StatusBadge`, `InspectorPanel` sub-components.
+  - `useMemo` for derived `compiledHtml` strings, filtered/sorted list rows.
+  - `useCallback` for stable handlers passed to descendants (save, publish, archive, restore, sendTest).
+- **TipTap editor state isolation:** TipTap editor state lives on the editor instance (`EmailEditorRef.editor`), NOT in React Zustand store. Commit to React state only on a debounced tick (300ms via `useDebouncedCallback`). This prevents keystroke→React state mutation→full editor chrome re-render.
+- **`useEffect(() => () => editorRef.current?.editor?.destroy(), [])`** cleanup on unmount — TipTap editors must be `.destroy()`ed to release DOM + ProseMirror state. Codebase has zero precedent (no TipTap yet) but the pattern matches `useImageUpload.ts:169` (`URL.revokeObjectURL` cleanup).
+- **React Compiler caveat:** `babel-plugin-react-compiler@1.0.0` is in devDeps. If Next.js propagates RC into the editor subtree, manual `useMemo`/`useCallback` may be redundant — but RC does NOT handle `React.memo` on components. Add a verification step (todo): confirm RC optimization of the editor route via `bun run build` + bundle analyzer.
+
+#### T2. Preview Debounce + Render Cache Reuse (P0)
+Preview `network-only` fetchPolicy ignores the stored `compiledHtml` — re-renders server-side on every preview-tab visit. No debounce means a server round-trip per keystroke.
+- **Switch preview fetchPolicy** from `network-only` to `cache-first` keyed on `(id, version, isDirty)`. When `isDirty: false`, serve the stored `compiledHtml` from DB (avoid server render). When `isDirty: true`, re-render server-side.
+- **Add `useDebouncedCallback(300ms)`** for preview re-render on `designJson` change — reuse `use-debounce@10.1.1` (already installed). The codebase precedent is `useAudienceAutocomplete.ts:22,53,64` (`debouncedSearch` pattern).
+
+#### T3. Lazy-Load Heavy Editor Dependencies (P0)
+`next/dynamic` lazy-import only specified for `EmailEditorWrapper`. `@dnd-kit/sortable` (heavy), `framer-motion`, `react-color`, `react-dropzone`, Prism grammars, `recharts` are loaded unconditionally in the editor route.
+- **Lazy-load via `next/dynamic`** each heavy dependency inside the editor route component:
+  - `@dnd-kit/sortable` → dynamic import in `SortableListWrapper` (only renders when block-reorder mode is active).
+  - `framer-motion` → dynamic import in `SuccessCheckMark` and `Slide` tab transition (only renders after send-test or tab switch).
+  - `react-color` → dynamic import in `VariableMentionPicker` color controls (only renders when color merge-tag is selected).
+  - Prism grammars → `next/dynamic` import with `ssr: false` in code-tab view (todo 16 already notes this).
+  - `recharts` → verify if actually needed in editor route; if yes, dynamic import.
+- **Add to `next.config.ts` `experimental.optimizePackageImports`:** `@react-email/editor`, `react-email`, `@tiptap/core`, `@tiptap/starter-kit`, `@dnd-kit/core`, `@dnd-kit/sortable`, `framer-motion`, `react-color`, `recharts`.
+
+#### T4. Database Indexes for List Query (P0)
+List view filter axes (`status`, `locale`, `updatedAt`, `scope` alone, `search`) have NO supporting indexes — will sequential-scan.
+- **Add indexes** to `emailTemplates` schema:
+  - `idx_email_templates_status` on `(status)` — for "Show Archived" filter.
+  - `idx_email_templates_scope_status` on `(scope, status)` — composite for scope+status filter.
+  - `idx_email_templates_updated_at` on `(updatedAt DESC)` — for "Last Edited" sort.
+  - `idx_email_templates_created_at` on `(createdAt DESC)` — for "Newest" sort.
+- **Search filter (P0):** `search` appears in `keyArgs` (§Q1) but NOT in the GraphQL schema signature (`emailTemplates(scope?, status?, pagination)` — line 772). **Schema/contract mismatch.** Either add `search` to the query signature or remove from keyArgs. If kept, add `pg_trgm` extension + GIN index on `name` + `slug` for `ILIKE '%term%'` performance.
+
+#### T5. N+1 Query Batching (P1)
+`EmailTemplateReturnType` joins editor name + last revision (line 507) but batching (`findByScopeIds`, `resolveTemplatesByScopes`) is keyed by scope — not by template id. For a list of N rows, the N editor-name joins + N last-revision joins become N+1 queries.
+- **DataLoader batching at Pothos layer:** add `@pothos/plugin-dataloader` `loadable(...)` field declarations on `EmailTemplatePothosObject` for `createdBy` and `lastRevision` fields. This batches per-request (critical for Neon HTTP driver where each repo call is a separate HTTP round-trip — verified `@neondatabase/serverless` at `next.config.ts:61`).
+- **Repo method:** add `getRevisionsByTemplateIds(ids: string[], tx?)` Map-returning batch method. The existing `@pothos/plugin-dataloader` is wired at `gqlSchemaBuilder.ts:3` but no `loadable` field is shown in the plan.
+
+#### T6. Bundle Analyzer Wiring (P1)
+`@next/bundle-analyzer@16.2.12` IS installed (`package.json:185`) but NOT wired in `next.config.ts` (no `withBundleAnalyzer` wrapper). Todo 20b's `NEXT_BUNDLE_ANALYZER=enabled bun run build` cannot run.
+- **Add `withBundleAnalyzer` wrapper** to `next.config.ts`:
+  ```ts
+  const withBundleAnalyzer = require("@next/bundle-analyzer")({ enabled: process.env.NEXT_BUNDLE_ANALYZER === "enabled" });
+  module.exports = withBundleAnalyzer(nextConfig);
+  ```
+
+#### T7. Zustand Selector Discipline (P1)
+Plan says "Zustand store" generically. The codebase precedent (`adminComplaintsStore.ts:34`, consumed at `useAdminComplaintsViewModel.ts:68-73`) is per-field selectors: `useAdminComplaintsStore(state => state.searchQuery)`. Without this discipline, the editor's React tree re-renders on every Zustand change.
+- **Specify per-field selectors** in `useEmailTemplateEditorViewModel`:
+  ```ts
+  const designJson = useEmailTemplateEditorStore(state => state.designJson);
+  const isDirty = useEmailTemplateEditorStore(state => state.isDirty);
+  const isSaving = useEmailTemplateEditorStore(state => state.isSaving);
+  // NEVER: const { designJson, isDirty, isSaving } = useEmailTemplateEditorStore();
+  ```
+
+#### T8. URL.revokeObjectURL Cleanup (P1)
+`File/Blob (attachments)` → `useRef()` (Q10) but no `URL.revokeObjectURL` cleanup specified. Blob URLs leak memory until route unmount.
+- **Add cleanup pattern** matching `useImageUpload.ts:169,183`:
+  ```ts
+  useEffect(() => () => {
+    if (attachmentUrlRef.current) URL.revokeObjectURL(attachmentUrlRef.current);
+    editorRef.current?.editor?.destroy();
+  }, []);
+  ```
+
+#### T9. Apollo Cache Eviction (P2)
+§Q6 says "refetch lists" after mutation but does NOT specify `cache.evict` for hard delete/archive/restore. Existing precedent: `cache.evict({ id: 'ROOT_QUERY', fieldName: 'managerDirectory' }); cache.gc()` (`useCreateManagerOnboarding.ts:35-36`).
+- **Add `cache.evict` + `cache.gc()`** after Archive/Restore/Delete mutations — evict `ROOT_QUERY` `emailTemplates` field, then `cache.gc()` to purge orphaned detail objects.
+- **Invalidate `cache-first` history** after Restore: `client.cache.evict({ id: 'EmailTemplateVersions:' + id })` — stale `cache-first` history (Q2) is NOT auto-invalidated when DB rows change.
+
+#### T10. Render Timeout (P1)
+`safeRender` has try/catch but no timeout — a slow/hanging React Email render blocks the send path indefinitely. No `Promise.race` / `AbortController` anywhere in plan.
+- **Add render deadline:** `Promise.race([render(<template/>), timeout(5000)])` — 5s render budget. If exceeded, return degraded fallback with `error: RenderTimeoutError`. Reuse `safeRender` degraded-mode signal (S5).
+
+---
+
+### U. Security Hardening (v8 — Round 3 Audit)
+
+#### U1. Env Key Registration (P0)
+`EMAIL_TEMPLATES_ENABLED` env flag is NOT registered in `backend/lib/env-config-keys.ts` — plan todo V4-9 is unexecuted. Without registration, the V5-2 truthy-string bug fires: `resolveEnvConfig('EMAIL_TEMPLATES_ENABLED')` returns `'false'` which is truthy → dispatcher routes through new pipeline even when admin intends off.
+- **Add to `env-config-keys.ts`:** entry with `excludeFromDb: true, serverOnly: true` (matching `IS_DEMO` at line 510). Verify `getBooleanEnv("EMAIL_TEMPLATES_ENABLED")` returns `false` for unset env var (env.ts:70-71 confirms: `process.env[name]?.toLowerCase() === "true"` → unset = `false`).
+- **Do NOT expose via `environment-config.pothos.ts`** — filter out `EMAIL_TEMPLATES_ENABLED` from the client-facing env config query.
+
+#### U2. Server-Side Input Validation for Send-Test (P0)
+`sampleProps` validated only client-side (`JSON.parse`); bypassable via direct GraphQL mutation. `to` recipient validated only client-side `z.string().email()`.
+- **Server-side zod schema** for `sendTestEmail` mutation input:
+  - `to`: use the existing `Email` scalar (`backend/graphql/scalars/emailScalar.ts` — wired into Pothos) instead of plain `String`. ENSURES CRLF stripping.
+  - `sampleProps`: zod schema mirroring `EmailPropsByScope[scope]` (compile-time type-safe; runtime validation).
+  - `templateId`: `z.string().uuid()`.
+- **Reject** if `sampleProps` fails zod validation → `extensions: { code: "INVALID_SAMPLE_PROPS" }`.
+- **Size limit:** `sampleProps` max 50KB JSON string → prevents render DoS.
+
+#### U3. Preview Query Authorization (P0)
+`previewEmailTemplate(templateId, sampleProps)` is listed (line 774) but plan **does not confirm authScope** is applied to the preview query. If accidentally unauthenticated, any logged-in user could read any template's rendered HTML.
+- **Add `authScope: { superAdmin, notImpersonating }`** explicitly on the `previewEmailTemplate` query field (Pothos). Verify in todo 14 spec.
+- **Rate limit:** `previewEmailTemplate` does server-side React Email render per call with caller-supplied `sampleProps` → CPU DoS vector. Add per-user rate limit (30/min) via `RateLimiter` — use `limitSimple` (atomic) not `limit` (non-atomic pipeline).
+
+#### U4. CSP for Preview Iframe (P1)
+Plan sets `default-src 'none'` + `style-src 'unsafe-inline'` but omits `script-src 'none'` explicitly and `frame-ancestors`. CSP is specified as a header on "the preview route" but the preview is a **GraphQL query returning a string**, not an HTML route — CSP on `/api/graphql` would break the whole endpoint.
+- **CSP injection via iframe `srcdoc`:** the preview client injects a `<meta http-equiv="Content-Security-Policy">` tag inside the iframe's `srcdoc` attribute (NOT a route header). This is the correct place — CSP applies to the iframe document, not the parent.
+- **Full CSP:** `default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'`.
+- **`frame-ancestors 'self'`** allows the parent app to embed the iframe; `base-uri 'none'` + `form-action 'none'` block CSS exfil redirects.
+
+#### U5. DOMPurify + Re-Sanitize on Read (P1)
+`compiledHtml` cached in DB post-sanitize means a future DOMPurify config change (new CVE) does NOT re-sanitize cached rows until re-save.
+- **Add "re-sanitize on read" pass:** `safeRender` runs DOMPurify at RENDER time (both save-compile and send) — the stored `compiledHtml` is a cache, NOT the source of truth. Always re-sanitize the `compiledHtml` from DB before sending: `DOMPurify.sanitize(storedCompiledHtml, { ...config })`.
+- **Add `<iframe>`, `<object>`, `data:` URLs** to the DOMPurify test vectors (SWE v3 test #4 currently only covers `<script>`, `onclick`, `javascript:`). These are known DOMPurify bypass vectors relevant to the preview iframe.
+- **Add `FORBID_TAGS: ['style']`** to DOMPurify config — inline `<style>` tags enable CSS exfil. Allowed: inline `style` attribute on allowed tags (via `ALLOWED_ATTR: ["style"]`), but NOT `<style>` blocks.
+
+#### U6. SMTP Header Injection Prevention (P1)
+`subject` / `to` / `defaultFromEmail` pass through to raw SMTP header construction in nodemailer — CRLF injection (`\r\n`) can inject headers.
+- **Add `sanitizeHeader(str)` helper** in `SmtpEmailAdapter`: strip `[\r\n]` from all envelope/header fields before `nodemailer.sendMail()`. Apply to `from`, `to`, `cc`, `bcc`, `subject`, `replyTo`.
+- **Enforce `Email` scalar** on all email-address GraphQL inputs (U2) — catches CRLF at the schema layer.
+- **Subject merge-tag injection:** no maxlength, no forbidden-variable allowlist. If `subject` template is `"Order {{user.secret}}"` and `user.secret` resolves to internal data, it leaks via the subject line. Add validation: merge-tag keys must be in `EmailPropsByScope[scope]` — reject unknown keys at subject-template save time.
+
+#### U7. Rate Limit Atomicity (P1)
+Existing `RateLimiter.limit()` uses `cacheService.pipeline` with 4 commands that are **not atomic** (no MULTI/EXEC). Concurrent sends can exceed the 5/min limit.
+- **Use `limitSimple`** (serial, atomic `incr` + `expire`) for send-test rate limiting — not `limit` (non-atomic pipeline). Or implement a Lua atomic script for Redis backends.
+- **Preview query rate limit:** 30/min per user — use `limitSimple`.
+
+---
+
+### V. Accessibility & RTL Depth (v8 — Round 3 Audit)
+
+#### V1. Dangling §G Cross-Reference (P0)
+`§G` is referenced 3× (lines 790, 884, 1038) as the authoritative source for reduced-motion + button loading + idempotencyKey, **but §G does not exist** as a section. Headers jump §A–§J (§F, §G, §H, §I entirely absent). Dangling cross-reference breaks spec closure.
+- **Create §G Accessibility & Interaction Patterns** containing:
+  - `usePrefersReducedMotion()` hook spec (V2 below).
+  - Button loading state convention (`<Button loading>` + `aria-busy`).
+  - idempotencyKey pattern.
+  - Keyboard shortcuts (V5 below).
+
+#### V2. usePrefersReducedMotion Implementation (P0)
+The `usePrefersReducedMotion()` hook is not implemented anywhere in the codebase and the plan only says "guard (§G)". No specification of which animations it governs.
+- **Implement at `frontend/common/hooks/usePrefersReducedMotion.ts`** — match `@mui/material` `useMediaQuery` pattern:
+  ```ts
+  usePrefersReducedMotion(): boolean  // true if `(prefers-reduced-motion: reduce)`
+  ```
+- **Govern animations:** stagger (`MetricCard`), `SuccessCheckMark`, `@dnd-kit` `dropAnimation`, `<Slide>` tab transition, autosave toast. When reduced: disable stagger, instant fade for SuccessCheckMark, `dropAnimation={null}` in dnd-kit, `<Slide>` becomes instant opacity transition, autosave toast skips entrance animation.
+
+#### V3. Screen Reader Live Regions (P0)
+Plan defines explicit error/loading/toast UI (§P) but specifies **no `aria-live` region**. Repo has 0 `aria-live` usages in `frontend/`.
+- **Add `aria-live="polite"`** to save-success toast container, status-badge update region (§P "status badge update" — line 949).
+- **Add `aria-live="assertive"`** to error snackbar region (`FormErrorSnackbar`), version-mismatch conflict dialog.
+- **Add `role="status"`** to status-badge cell in AppDataGrid so screen readers announce changes.
+- **Implementation:** add `<div aria-live="polite" role="status" sx={{ srOnly: true }}>` region near the toast/snackbar mount point in the editor route. Route toasts to this region via `useNotifications` + a `useEffect` that writes `notifications.show` text to the `aria-live` div's textContent.
+
+#### V4. Arabic Pluralization Rules (P0)
+All 9 pluralizable toast/error keys use `(count: number) => string` — repo convention just interpolates the raw count. `rateLimited: (limit: number)` and `versionMismatch: (expected, got)` produce grammatically wrong Arabic for n=0, n=2, n=11.
+- **Add Arabic plural rules** to the `dashboard.emailTemplates` namespace: define a `pluralize(count: number, forms: { zero, one, two, few, many, other })` helper in `shared/locale/ar/dashboard/emailTemplates.ts`. Each pluralizable key becomes:
+  ```ts
+  saved: (count: number) => pluralizeAr(count, {
+    zero: "لم يتم الحفظ",
+    one: `تم حفظ ${count} قالب`,
+    two: `تم حفظ ${count} قالبين`,
+    few: `تم حفظ ${count} قوالب`,
+    many: `تم حفظ ${count} قالبًا`,
+    other: `تم حفظ ${count} قالب`,
+  }),
+  ```
+- **English side:** keep simple `count === 1 ? "Saved 1 template" : `Saved ${count} templates`` — English has only one/other.
+- **`rateLimited`, `versionMismatch`**: same pattern — wrap numeric args in `pluralizeAr` when locale=ar. For `versionMismatch(expected, got)`, both `expected` and `got` need pluralization (they are integers).
+
+#### V5. Keyboard Shortcuts (P1)
+v6 changelog advertises "Save Draft + Publish + Send Test actions with keyboard shortcuts" — but the plan body never lists the shortcut bindings. Desktop action bar only *displays* shortcut text (`sx={{display:{xs:"none",md:"inline"}}}` line 1107) but no shortcut wiring.
+- **Add to §G:** keyboard shortcut table:
+  | Shortcut | Action | Scope |
+  |---|---|---|
+  | `Ctrl+S` / `Cmd+S` | Save Draft | Editor (preventDefault browser save) |
+  | `Ctrl+P` / `Cmd+P` | Publish | Editor (preventDefault browser print) |
+  | `Ctrl+Shift+T` / `Cmd+Shift+T` | Send Test | Editor |
+  | `Esc` | Close active dialog/drawer | Any (MUI default, but explicit) |
+- **Implementation:** `useHotkey` hook at `frontend/common/hooks/useHotkey.ts` — listens via `useEffect` + `document.addEventListener('keydown', ...)` with `preventDefault`. Guard: skip when focus is in a text input (except `Esc`).
+
+#### V6. Focus Restoration After Dialog/Drawer Close (P1)
+Drawer/Dialog focus trap is delegated to "MUI default — no work" (line 788), but **focus restoration after close** is unspecified. For history drawer, "Restore" in flight, and send-test close-after-success this matters.
+- **Add `onClose` handler** that calls `restoreFocus_prevRef.current?.focus()` — MUI Dialog/Drawer supports this via the `onClose` + internal focus management. Explicitly capture the previously-focused element in `onOpen` → `prevFocusRef.current = document.activeElement`.
+
+#### V7. Drag-and-Drop Screen Reader Announcements (P1)
+`@dnd-kit/sortable` block reorder (R8/R13) specifies sensors + `KeyboardSensor` but **no ScreenReader / `LiveAnnouncer` script**. dnd-kit has built-in `useSortableAnnouncements` not mentioned.
+- **Add `Accessibility.DragAnnouncements`** to `DndContext` config:
+  ```ts
+  <DndContext accessibility={{
+    announcements: {
+      onDragStart: ({ active }) => `Reordering ${active.id}`,
+      onDragOver: ({ active, over }) => over ? `Over ${over.id}` : "",
+      onDragEnd: ({ active, over }) => `Dropped on ${over?.id ?? "empty"}`,
+    },
+  }}>
+  ```
+
+#### V8. ARIA Roles on Merge-Tag Picker & Sortable List (P1)
+`VariableMentionPicker` and `SortableList` — neither has `role="listbox"`/`role="option"`/`role="application"`.
+- **VariableMentionPicker:** `role="combobox"` on trigger button, `role="listbox"` on dropdown, `role="option"` on each merge-tag item. `aria-expanded`, `aria-controls`, `aria-activedescendant` for keyboard nav.
+- **SortableList:** `role="list"` on container, `role="listitem"` on each block. `aria-roledescription="draggable item"` on sortable items (dnd-kit convention).
+- **`aria-busy`**: add to `<Button loading>` states (isSaving, isSendingTest). `<Button loading aria-busy="true">`.
+- **`aria-invalid` + `aria-describedby`**: form validation uses `<FormHelperText error>` but no `aria-invalid` and no `aria-describedby` linkage. Add to RHF `Controller`: `aria-invalid={!!fieldState.error}` `aria-describedby={`${field.name}-helper-text`}`.
+
+---
+
+### W. Testing Depth (v8 — Round 3 Audit)
+
+#### W1. GraphQL Integration Test Directory (P0)
+Plan lists **zero** test files under `frontend/common/graphql/test/email/`. AGENTS.md mandates per-domain organization.
+- **Add directory `frontend/common/graphql/test/email/`** with:
+  - `emailTemplates.query.test.ts` — list query with filters (scope, status, locale, search, pagination).
+  - `emailTemplates.mutation.test.ts` — create, update (with version mismatch), setActive, delete.
+  - `previewEmailTemplate.query.test.ts` — preview render with sampleProps (success + render failure).
+  - `sendTestEmail.mutation.test.ts` — send-test with rate-limit + Zod validation.
+- Use `testClient` (NOT raw fetch) per `frontend/common/graphql/AGENTS.md`.
+
+#### W2. Apollo Mock Factory Pattern (P0)
+No shared mock factory for email-template GraphQL ops. Codebase precedent: `SearchScheduleContainer.test.tsx`'s `createSearchMock()`.
+- **Add `frontend/common/graphql/test/email/mocks/`** directory with mock factories:
+  - `createEmailTemplatesListMock(vars, result)` — returns `MockedResponse<EmailTemplatesQueryDocument>[]`.
+  - `createEmailTemplateDetailMock(id, result)` — detail query mock.
+  - `createSaveEmailTemplateMock(vars, result)` — mutation mock.
+  - `createPublishEmailTemplateMock(vars, result)` — mutation mock.
+  - `createPreviewEmailTemplateMock(vars, html)` — preview query mock.
+  - `createSendTestEmailMock(vars, result)` — send-test mutation mock.
+  - `createVersionMismatchMock(vars)` — error-response mock with `extensions.code: "VERSION_MISMATCH"`.
+
+#### W3. Test Data Fixture Factory (P0)
+No email-template fixture. `test/ui/components/fixtures/` has only `adminDashboardFixtures.ts`.
+- **Add `test/ui/components/fixtures/emailTemplateFixtures.ts`:**
+  ```ts
+  createEmailTemplateFixture(overrides?: Partial<EmailTemplateReturnType>): EmailTemplateReturnType
+  createEmailTemplateRevisionFixture(overrides?: Partial<EmailTemplateRevisionReturnType>): EmailTemplateRevisionReturnType
+  ```
+- Default: `{ id: "tpl-001", scope: "INVOICE_GENERATED", locale: "en", status: "PUBLISHED", version: 1, ... }`.
+
+#### W4. ViewModel Hook Tests (P0)
+Plan §L lists `useEmailTemplatesListViewModel.test.ts` + `useEmailTemplateEditorViewModel.test.ts` but specifies no test patterns. Codebase has zero `renderHook` precedent.
+- **Use `@testing-library/react` `renderHook` + `act` + `waitFor`**:
+  ```ts
+  const { result } = renderHook(() => useEmailTemplateEditorViewModel({ id: "tpl-001" }), {
+    wrapper: ({ children }) => <MockedProvider mocks={[createEmailTemplateDetailMock("tpl-001", fixture)]}>{children}</MockedProvider>,
+  });
+  await waitFor(() => expect(result.current.isLoaded).toBe(true));
+  ```
+- Add to `test/ui/components/` — 10+ scenario matrix per surface (loading/error/empty/access-denied/dirty/clean/saving/publish/send-test/restore).
+
+#### W5. Concurrent Publish (Optimistic Lock) Test (P0)
+SWE v3 test #7 says "two parallel publish() calls on same scope should only succeed once" — but codebase has no advisory-lock precedent.
+- **Use partial unique index trick** (already in schema: `email_templates_scope_locale_active_uq` where `isActive = true`). First `setActive(scope, locale, templateId)` succeeds; second throws `DuplicateScopeLocaleError` via the constraint. Test in `runInRollback` wrapper.
+
+#### W6. Merge-Tag Substitution Tests (P1)
+React Email `<Mail>{{user.name}}</Mail>` substitution path is core to rendering, but no test verifies merge-tag substitution with sample props.
+- **Test cases:**
+  - Standard substitution: `{ user: { name: "Ahmed" } }` → `<p>Ahmed</p>`.
+  - Missing key: `{ user: {} }` → empty string (no throw).
+  - Nested object: `{ order: { items: [...] } }` → rendered list.
+  - Date formatting: `{ date: new Date("2026-01-01") }` → locale-formatted date.
+
+#### W7. Attachment + Inline-CID Tests (P1)
+`EmailPayload.attachments` + inline-CID is brand-new. No test that adapter encodes Buffer correctly per provider.
+- **Test cases per adapter:**
+  - Resend: `attachments: [{ filename, content: Buffer }]` → JSON API.
+  - SESv2: base64-encoded attachment in `Content` field.
+  - Postmark: base64-only.
+  - Mailgun: multipart form-data with `inline` top-level.
+  - Nodemailer/SMTP: Buffer attachment + `cid:` reference.
+
+#### W8. Error-State Test Matrix (P1)
+Plan §P1/P4/P5/P6 describe rich error states, but no test file maps to them. Precedent: `SearchScheduleContainer.test.tsx` (`shows error message when query fails`).
+- **Add test cases** per state: `shows loading skeleton on mount`, `shows error state on query failure`, `shows empty state when no templates`, `shows access denied when not admin`, `shows version mismatch UI on concurrent edit`, `shows preview error on render failure`, `shows send-test rate limit on 6th call`.
+
+#### W9. RTL + Responsive Component Tests (P1)
+§K stories cover RTL, but §L component tests do not specify an RTL test case.
+- **Add `dir="rtl"` test cases** to `emailTemplatesList.test.tsx` and `emailEditor.test.tsx`: mount with `<ThemeProvider dir="rtl">` + assert `dir="rtl"` on DOM containers + i18n key fallback.
+- **Add responsive breakpoint tests:** mount with `viewport: "mobile"` (mock `useViewport`) → assert hidden columns, bottom action bar visible, Inspector drawer anchored bottom.
+
+#### W10. Optimistic Update Rollback Tests (P1)
+§Q4 has optimistic response table for Save/Publish/Archive, but no test for rollback (`optimisticResponse` + error → cache snapshot restore).
+- **Test:** mock mutation returns error → assert Apollo cache reverts to pre-optimistic state. Use `MockedProvider` with `errorMessage: "VERSION_MISMATCH"` → assert `result.current.designJson` matches pre-save snapshot.
+
+#### W11. DOMPurify Extended Test Vectors (P2)
+SWE v3 test #4 covers script/onclick/javascript: vectors but omits `<iframe>`, `<object>`, `data:` URLs.
+- **Add test vectors:** `<iframe src="javascript:...">`, `<object data="...">`, `<img src="data:text/html,...">`. Assert all stripped by DOMPurify config.
+
+---
+
+### X. Developer Experience & Onboarding (v8 — Round 3 Audit)
+
+#### X1. Single-Command Email System Bring-Up (P0)
+No `bun run email:setup` that combines: seed default templates → start admin UI → mount standalone `react-email dev` preview. A new dev must manually sequence `bun db seed` + `bun dev`.
+- **Add `scripts/email-setup.ts`** — orchestrates:
+  1. `bun run db seed` (idempotent re-run).
+  2. Start `bun run dev` on port 3000.
+  3. Open `/en/admin/email-templates` in browser.
+- Document in `docs/email/quickstart.md`.
+
+#### X2. GraphQL Schema Descriptions (P1)
+No todo requires `description` strings on the new `EmailTemplatePothosObject`, enums, queries, mutations. GraphQL introspection yields empty descriptions → Apollo Playground shows unannotated schema.
+- **Add `description` to every Pothos object/enum/field** in `backend/graphql/pothos/email-templates/`:
+  ```ts
+  t.field("emailTemplates", {
+    type: [EmailTemplateType],
+    description: "List all email templates with optional filters by scope, status, and locale.",
+    args: { ... },
+  });
+  ```
+
+#### X3. Merge-Tag System Usage Guide (P1)
+The merge-tag picker is referenced (§P1, §P8) but the system itself (how `{scope, variable}` is resolved, how `EmailPropsByScope` is introspected, allowed variables per scope) is never documented. This is a primary admin-user-facing feature.
+- **Add `docs/email/merge-tags.md`:**
+  - How merge-tags map to `EmailPropsByScope[scope]` props.
+  - Per-scope variable list (e.g., `INVOICE_GENERATED` → `{ user, invoice, items, total }`).
+  - How to insert via the picker UI.
+  - How to troubleshoot "merge-tag mismatch" (§P8).
+
+#### X4. Mock Email Adapter for Local Dev (P1)
+No `MockEmailAdapter` — a local dev without Resend keys must set `EMAIL_PROVIDER=resend` and mock at the test layer.
+- **Add `backend/services/communication/adapters/MockEmailAdapter.ts`:** logs HTML to `logger.info` + writes to `/tmp/email-mock-{timestamp}.html` instead of sending. Registered in `EmailProviderRegistry` when `EMAIL_PROVIDER=mock`.
+- **Default in `.env.example`:** `EMAIL_PROVIDER=mock` (safer than `resend` for first run).
+
+#### X5. Adapter Authoring Guide (P2)
+Each adapter's gotchas (Postmark base64-only, Mailgun `inline` top-level, SESv2 10MB cap) live only in the plan — a future adapter author has to re-read the plan.
+- **Add `docs/email/adapters.md`:** per-provider checklist, gotchas, env keys, validateConfig pattern, retry 적용 point, delivery-row convention.
+
+#### X6. Visual Diff / Visual Regression (P2)
+No automated visual diff despite 15 Storybook stories. No Chromatic. No `@axe-core/playwright`.
+- **Install `@axe-core/playwright`** (devDep). Add `test/ui/e2e/email-templates.a11y.test.ts` that runs axe on the admin email-templates page.
+- **Chromatic:** deferred to post-launch — but specify as a Phase 5 todo.
+
+#### X7. Storybook addon-a11y CI Gate (P3)
+`.storybook/preview.tsx:81` sets `a11y.test = "todo"` (warnings only, no CI gate). Plan §J confirms "warnings do not fail CI".
+- **Phase 5 todo:** flip `a11y.test = "error"` after all email-template stories pass axe. Requires: (a) all stories clean, (b) `@storybook/addon-vitest` wired.
+
+---
+
+### Y. Migration & Rollback Runbook (v8 — Round 3 Audit)
+
+#### Y1. Forward-Only DB Migration Acknowledgment (P0)
+No DB `down`-migration mechanism exists — `drizzle-kit@1.0.0-rc.4` generates forward-only `migration.sql`. A failed Phase 2 DB migration is NOT reversible via the toolchain.
+- **Document:** "DB migrations are forward-only. Rollback = manual `DROP TABLE email_templates; DROP TYPE email_scope_enum; ...`." Add to `docs/email/migration-runbook.md`.
+- **Pre-deploy verification:** `bun run db generate` (create migration) → review migration SQL → `bun run db migrate` (apply) → verify seed data via `bun run db studio`.
+
+#### Y2. Phase 3 Rollback Procedure (P0)
+Plan only says "flip flag false." Missing: order, who runs it, how to reconcile templates created during the rolled-back window.
+- **Add `docs/email/rollback-runbook.md`:**
+  1. Set `EMAIL_TEMPLATES_ENABLED=false` in Vercel env → redeploy.
+  2. Verify legacy `emailChannel.send({ html: payload.body ?? "" })` resumes.
+  3. Drain queued sends (wait for `notificationDeliveries` in `RETRYING` state to complete or fail).
+  4. Do NOT delete `email_templates` rows — they remain for audit. Flag=false disables read path but rows persist.
+  5. If re-enabling later, re-run `bun db seed` (idempotent) to refresh default templates.
+
+#### Y3. Seed Phase Correction (P1)
+Todo 19 note says "seeds should be Phase 1" but seeds persist via `EmailTemplateService` which requires the `email_templates` table (Phase 2 schema). **Contradiction.**
+- **Move seeds to Phase 2** — after DB schema migration, run `bun run db seed` as a Phase 2 deploy step. Phase 1 ships the registry + `safeRender` + `mapEventTypeToEmailScope` without seeds (no DB dependency).
+- **OR** Phase 1 includes the DB schema — but this breaks the "Phase 1 = no DB" invariant. Choose: seeds in Phase 2 (cleaner).
+
+#### Y4. Seed Idempotency Verification (P1)
+`seedOrGet` naming implies idempotent, but the upsert target is the `scope+slug` unique index, NOT the `scope+locale+active_uq` partial index. A re-seed that flips `isActive` could violate the partial unique constraint.
+- **Seed logic:** `upsertManyEmailTemplates` uses `onConflictDoUpdate` on `(scope, slug)`. For the partial unique `(scope, locale) where isActive=true`: the seed must set `isActive: true` only for the first seed, and `isActive: false` for re-runs' old rows. OR: seed inserts with `isActive: false` by default; admin activates via UI.
+- **Test:** add seed-idempotency test to `backend/db/seeds/test/` — run seed twice, assert no constraint violation.
+
+#### Y5. Post-Migration Data Validation (P1)
+No prod post-deploy assertion that (a) every `EmailScope` has an active template per locale, (b) `compiled_html` is non-null, (c) partial unique index has exactly one active row per scope+locale.
+- **Add `scripts/email-post-deploy-check.ts`:** runs after Phase 3 deploy → queries DB → asserts all 13 EmailScopes × locales have active templates → logs failures → alerts via `logger.error`.
+- **Wire into CI:** add as a Vercel post-build script or a manual `bun run email:post-deploy-check`.
+
+#### Y6. Per-Scope Canary Opt-in (P1)
+Single global flag flips all 24 event mappings simultaneously. No gradual per-event opt-in. `Readonly<Record<NotificationEventType, EmailScope | null>>` makes missing keys a compile error — all-or-nothing.
+- **Add `EMAIL_TEMPLATE_SCOPES_ENABLED`** env var as a comma-separated allowlist of EmailScope values. Dispatcher checks `getEnvArray("EMAIL_TEMPLATE_SCOPES_ENABLED")` — if set, only dispatches templates for scopes in the list. If unset or `*`, dispatches all.
+- **Canary flow:** `EMAIL_TEMPLATE_SCOPES_ENABLED=INVOICE_GENERATED` → verify one scope for 24h → add more scopes → `*` for full rollout.
+
+#### Y7. Monitoring & Alerting Strategy (P1)
+Bounce/complaint webhooks (todo 20a) populate `NotificationDeliveryStatus` but there is no alerting threshold.
+- **Alerting thresholds:**
+  - Send-success rate < 95% → `logger.error` + Slack webhook alert.
+  - Render-degraded rate > 5% → `logger.warn` + alert.
+  - Provider 429 rate > 10/min → `logger.warn` + alert.
+  - PERMANENTLY_FAILED count > 50 in 1h → `logger.error` + alert.
+- **Dashboard:** `docs/email/metrics-dashboard.md` with queries against `notificationDeliveries` table grouped by scope, provider, status, hour.
+
+#### Y8. Deployment Order Invariant (P1)
+Phase 3 dispatcher reads `templateProps` (Phase 1 payload change) AND requires seed rows (Phase 2). Hard ordering. No `requires:` field.
+- **Add explicit deployment order:**
+  1. Phase 0 (deps) — NO behavioral change.
+  2. Phase 1 (registry + safeRender + mapEventTypeToEmailScope + i18n) — NO DB, NO seeds, NO UI. Existing notifications unaffected.
+  3. Phase 2 (DB schema + seeds + repo + GraphQL + admin UI) — flag=false, dispatcher still legacy.
+  4. Phase 3 (dispatcher migration) — set flag=true in Vercel env → redeploy.
+  5. Phase 4 (bundle analysis + auth/account emails) — after Phase 3 stable for 7 days.
+- **Document:** "Phase 3 CANNOT ship until Phase 1 AND Phase 2 are deployed and verified."
+
+---
+
+### Z. Implementation Patterns Clarification (v8 — Round 3 Audit)
+
+#### Z1. Per-Scope EmailLabels Field Lists (P0)
+~11 missing EmailScopes never specify their `*EmailLabels` interface field lists. V4-3 atomic en/ar lockstep CANNOT land without them.
+- **Add per-scope EmailLabels interfaces** in `backend/types/email-template.types.ts` — one per EmailScope:
+  ```ts
+  interface InvoiceGeneratedEmailLabels {
+    subject: (params: { invoiceNumber: string; studentName: string }) => string;
+    preview: (studentName: string) => string;
+    body: (invoice: InvoiceProps) => string; // or per-section
+  }
+  ```
+- Each scope MUST have `subject`, `preview`, `body` signatures matching the merge-tags in `EmailPropsByScope[scope]`.
+
+#### Z2. EmailTemplateReturnType Omit List (P0)
+`EmailTemplateReturnType` never specifies which internal fields to Omit nor how JSONB columns get narrowed.
+- **Specify:** `Omit<EmailTemplateSelect, 'compiledHtml' | 'compiledText'>` if admin should not see raw compiled HTML. Or `EmailTemplateSelect` in full if admin can view compiled HTML in the Code tab.
+- **JSONB narrowing:** `designJson: string` (not jsonb) — plan must specify whether the admin UI receives raw JSON string or a parsed object.
+
+#### Z3. ComplaintReturnType.title Mismatch (P0)
+Registry `subject: (p) => \`Re: ${p.complaint.title}\`` depends on `ComplaintReturnType.title` — but `complaints` table has `body`, NOT `title`.
+- **Fix:** either (a) add `title` column to `complaints` table (schema change), or (b) change subject template to use `complaint.subject` if it exists, or (c) derive a title from `body` (first 50 chars).
+
+#### Z4. EmailPayload.encoding Enum (P1)
+`EmailPayload.encoding?: "base64" | "buffer"` is inline text union — violates plan's own rule "no text unions, only enums".
+- **Add `EmailAttachmentEncoding` enum** to `backend/enum/` + `backend/db/schema/enums.ts`:
+  ```ts
+  export const EmailAttachmentEncoding = pgEnum("email_attachment_encoding", ["base64", "buffer"]);
+  ```
+- Replace inline union with `EmailAttachmentEncoding` type.
+
+#### Z5. findByIdempotencyKey Convention (P1)
+`findByIdempotencyKey(key: string)` is WRONG convention — existing pattern is plural batch `findByIdempotencyKeys(keys: string[], tx?)`.
+- **Change to `findByIdempotencyKeys(keys: string[], tx?)`** — match `credit.repository.ts:135`. Idempotency check can batch-multiple keys (for multi-recipient sends).
+
+#### Z6. queryFields Registration (P2)
+`queryFields(t => ({...}))` registration idiom never specified in the plan.
+- **Add to §GraphQL surface:**
+  ```ts
+  queryFields: (t) => ({
+    emailTemplates: t.field({ ... }),
+    previewEmailTemplate: t.field({ ... }),
+  }),
+  mutationFields: (t) => ({
+    createEmailTemplate: t.field({ ... }),
+    updateEmailTemplate: t.field({ ... }),
+    // ...
+  }),
+  ```
+
+#### Z7. Backend .tsx ESLint/Biome Override (P1)
+Zero `.tsx` files in backend today. ESLint/Biome may not have overrides for React Email `.tsx` components in `backend/services/communication/templates/components/`.
+- **Verify** `eslint.config.js` + `biome.json` handle `.tsx` in `backend/` — check for override blocks. If missing, add override:
+  ```json
+  { "include": ["backend/services/communication/templates/components/**/*.tsx"], "rules": { ... } }
+  ```
+
+#### Z8. DashboardTranslations Aggregator Import (P2)
+`DashboardTranslations` aggregator in `message.ts` has ~100 alphabetical imports. Adding `dashboardEmailTemplates{En,Ar}` requires adding an import line in sorted order.
+- **Add to todo 16:** "Add `import { dashboardEmailTemplatesEn } from "./emailTemplates"` and `import { dashboardEmailTemplatesAr } from "./emailTemplates"` to `shared/locale/en/dashboard/message.ts` and `shared/locale/ar/dashboard/message.ts` respectively, in alphabetical order."
+
+#### Z9. Barrel Export for Communications Schema (P2)
+`backend/db/schema/communications/index.ts` barrel export micro-edit missing — new `emailTemplates.ts` schema file needs to be re-exported.
+- **Add to todo 9:** "Add `export * from "./emailTemplates";` to `backend/db/schema/communications/index.ts`."
+
+#### Z10. codegen.ts Glob Entry for Email Documents (P1)
+`codegen.ts` config entry for new `email` sharedDocuments glob never scheduled. New GraphQL documents in `frontend/common/graphql/sharedDocuments/email.documents.ts` won't be picked up by codegen unless the glob matches.
+- **Add to todo 15:** "Verify `codegen.ts` glob includes `frontend/common/graphql/sharedDocuments/email.documents.ts`. If the existing glob is `frontend/common/graphql/sharedDocuments/*.documents.ts` (wildcard), it already matches. If per-file, add the email entry explicitly."
+
+#### Z11. Two Unnamed Zustand Stores (P2)
+Plan only files ONE store (`emailTemplateEditorStore.ts`) but there are two stores — the list view store and the editor store are separate.
+- **Add `emailTemplatesListStore.ts`** for list view state (search, scopeFilter, statusFilter, pagination, segmented Active/Archived selection). Separate from `emailTemplateEditorStore.ts` (designJson, isDirty, isSaving, activeTab, history drawer options).
+
+---
+
+**v8 (Round 3 Audit — 8-Domain Deep Closure, 2026-08-02):** Round 3 launched 8 parallel audit subagents covering: implementation patterns (28 gaps), error handling (20 gaps), performance (20 gaps), security (23 gaps), testing depth (33 gaps), a11y/RTL (28 gaps), migration strategy (20 gaps), DX/docs (34 gaps). Total **206 gaps** identified across 8 audit reports (168KB, 1405 lines at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.md`). Applied enhancements organized into new sections §S–§Z (Error Handling, Performance, Security, A11y/RTL, Testing, DX, Migration, Implementation Patterns) addressing all P0/P1 gaps: editor error boundary, optimistic lock round-trip wiring, outbound send retry + DLQ, safeRender degraded-mode signal, server-side input validation, env key registration, preview query authScope, CSP iframe injection, Arabic pluralization rules, screen reader live regions, keyboard shortcuts, GraphQL integration test directory, Apollo mock factories, test fixtures, single-command bring-up, mock email adapter, rollback runbook, per-scope canary opt-in, monitoring alerts, per-scope EmailLabels field lists, ComplaintReturnType.title fix, enum for EmailPayload.encoding, barrel export + codegen glob + two Zustand stores. All 12 v1-v5 locked decisions preserved verbatim.
+
+Research files at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.md` (8 reports, 168KB total). All 12 v1-v7 locked decisions preserved verbatim.
+
+**v7 (Round 2 Audit — State/Responsive/Data-flow closure, 2026-08-02):** Round 2 parallel subagent audits (state transitions, Apollo data flow, responsive/mobile tiers, i18n+RTL+a11y depth, cross-section consistency) identified **103 gaps** across all dimensions. Applied surgical fixes:
+- Added **§P State Transitions & Edge Cases** (9 sub-sections, lifecycle table covering every async action in §A–§O).
+- Added **§Q Data Flow, Apollo Cache & Optimistic Patterns** (11 sub-sections: typePolicies, fetchPolicy per query, optimistic responses for Save/Publish/Archive, RetryLink config, store/cache delineation table, merge-tag introspection, subscription roadmap).
+- Added **§R Responsive & Mobile Specification** (14 sub-sections: breakpoint table, responsive column visibility, mobile row actions (swipe), Inspector drawer, bottom action bar, tabs variant, VariableMentionPicker bottom sheet, TipTap mobile toolbar, preview viewport selector replacement, Send Test bottom sheet, history drawer mobile, dialog↔drawer mapping, touch gestures, sessionStorage draft sync).
+- **Reordered §M GraphQL Documents before §K/§L** (upstream dependency).
+- **Fixed i18n catalogue**: removed false "common.confirm/delete/close" claim; added 14 missing keys (dialog bodies, toast pluralization, preview viewport labels, send-test extras, form field errors, help-text interpolation).
+- **Cross-refs added**: §D→§M, §D→§H, §F→§H, §L→§K, i18n §B→Frontend sub-sections mapping.
+- **Consistency fixes**: inline `<Chip>` rule consolidated to §N with xref; `next/dynamic` block consolidated; CSP `img-src` canonical at §E; typo `mbox.confirm` → `confirm dialog`.
+- **Todo alignment**: 4 new Phase 2 todos (skeletons, usePrefersReducedMotion hook, StatusBadge emailTemplate, dashboard.emailTemplates namespace, 15 Storybook stories).
+- **Phase alignment**: `dashboard.emailTemplates` i18n namespace moved to Phase 2.
+
+Research files at `.ai/plans/email-templates/glm_swe/ui-research-round2/01-05-*.md` (5 reports, 118KB total). All 12 v1-v5 locked decisions preserved verbatim.
+
+**v6 (UI/UX completeness, 2026-08-02):** Expanded the thin "### Frontend" (~60 lines) + "### i18n" (~30 lines) sections into a complete production-ready UI/UX specification, now ~410 lines covering: routing & navigation (exact admin routes, sidebar entry, breadcrumbs, two-layer permission gate + new `EMAIL_TEMPLATES_MANAGE` enum value); page layouts (DesktopPageContainer/MobilePageContainer + DesktopPageHeader + SectionPanel + new EmailTemplatesListSkeleton/EmailEditorSkeleton + shared EmptyState/ErrorState); list view (AppDataGrid columns + row-actions menu via useRowMenuAnchor + search bar + filter chips + segmented Active/Archived/All view + pagination in Zustand store); editor view (three-tab Design/Preview/Code layout with Slide tab transitions; right-pane Inspector via SectionPanel — scope lock, locale, version, allowed-editor-groups TagInput, subject template with merge-tag insertion (validation schema in §H); Save Draft + Publish + Send Test actions with keyboard shortcuts (mutation documents in §M); History restore drawer; isDirty beforeunload + in-app nav guard; all v1-v5 locked decisions preserved verbatim — EmailEditorWrapper + ssr:false, ScopedCssBaseline, EmailTheming /plugins import, atomic save flow); preview tab (sandbox='' iframe + CSP default-src 'none' / style-src 'unsafe-inline' / img-src 'self' data: + DOMPurify server-side sanitize + viewport selector + Copy HTML); send-test dialog (To input + sample props + rate-limit notice + success animation (zod schema in §H)); animations & micro-interactions (reuse framer-motion stagger from MetricCard + new SuccessCheckMark + @dnd-kit/sortable built-ins for block reorder + NEW usePrefersReducedMotion hook closing a production-readiness gap — today the codebase respects reduced-motion nowhere); forms & validation (react-hook-form + Controller + zod + useWatch — NO useFieldArray per repo precedent); theming & dark mode (theme palette only + useColorScheme drives --re-* CSS vars); accessibility (aria-labels, focus trap, WCAG AA color contrast, prefers-reduced-motion); storybook stories (full per-component table of 15 rows from research file 05); component + E2E tests (15-row table + mock.module-stub for @react-email/editor + single test/ui/e2e/email-templates.test.ts happy path); GraphQL documents (KEEP verbatim from v5); StatusBadge extension (new `emailTemplate` category — Draft=warning, Published=success, Archived=disabled; inline `<Chip>` forbidden per COMPONENT_PATTERNS.md:170); feature-flag visual cue (`<LockOutlined>` on sidebar entry + disabled Send Test/Publish buttons when EMAIL_TEMPLATES_ENABLED=false); Zustand store (KEEP from v5, no separate Storybook mock-store convention). The i18n section was expanded with a new `dashboard.emailTemplates` UI namespace — complete key catalogue grouped by surface (nav labels, page titles, table headers, status chip labels, button labels, dialog titles, form fields/help text, tooltips, toast messages, error messages, empty states, search/filter, editor labels, send-test dialog labels) reusing the existing `common` namespace for generic verbs (loading/cancel/save — do NOT duplicate; confirm/delete/close are NOT in common — add to dashboard.emailTemplates); 7-file atomic changeset listed for the new namespace (V4-3 lockstep rule echoes for `dashboardEmailTemplates{En,Ar}`). Research synthesis at `.ai/plans/email-templates/glm_swe/ui-research/00-synthesis.md`; five deep research files at `.ai/plans/email-templates/glm_swe/ui-research/01-05-*.md` (dashboard inventory, template editor, animations, i18n, storybook+tests).
+
+**Post-v5 package install (2026-08-02):** Installed 3 missing plan-required packages and verified their APIs against `node_modules` + Bun smoke tests. `isomorphic-dompurify@3.21.0` + `@aws-sdk/client-sesv2@3.1101.0` (runtime), `@next/bundle-analyzer@16.2.12` (dev). **Phase 0 GO/NO-GO gate (V4-6) is now GREEN — added `@dnd-kit/utilities@^2.2.0` + `@dnd-kit/modifiers@^9.0.0` (Phase 0 dependencies)** — `isomorphic-dompurify.sanitize()` under Bun 1.3.14 strips `<script>` and `onerror` vectors correctly, `isSupported: true`. jsdom fallback NOT required. See `.ai/plans/email-templates/reserch_node/15-newly-installed-packages-verification.md`.
 - **V5-post-SMTP (2026-08-02):** SMTP production restriction LIFTED. Prior "dev/test only" caveat was driven solely by Bun #10329 (nodemailer TLS socket flakiness under Bun). Confirmed deployment target is **Vercel + Node.js** (next.config.ts `serverExternalPackages` includes `@vercel/functions`), where `nodemailer` is the industry-standard SMTP library with zero caveats. SMTP is now a first-class production provider alongside Resend/SES/Postmark/Mailgun. Production warning log + "dev/test only" deployment-doc note removed. Local dev can still run on Bun for dev-loop speed; `SmtpEmailAdapter` is production-safe when run under Node. See todos 4, 6, adapter specs section.
 
 Phase 0 — GO/NO-GO gate: install dependencies (todo 1) and verify isomorphic-dompurify Bun compatibility (todo 21b). ✅ Phase 0 is GREEN (2026-08-02): packages installed + isomorphic-dompurify Bun smoke test PASSED (`sanitize()` strips `<script>` + `onerror`, `isSupported: true`). Proceed safely with isomorphic-dompurify; jsdom fallback not required. **Todos 1, 21b.**
