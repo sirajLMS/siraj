@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances } from "@/backend/db/schema";
-import type { ClassInstanceEntity, ClassInstanceInsertInput } from "@/backend/types";
+import type { ClassInstanceInsertType, ClassInstanceSelectType } from "@/backend/types";
 
 export type ClassInstanceUpsertManyOptions = {
   chunkSize?: number;
@@ -10,18 +10,18 @@ export type ClassInstanceUpsertManyOptions = {
   tx?: DBTransaction;
 };
 
-type ClassInstanceState = Pick<ClassInstanceEntity, "executionState" | "outcome">;
+type ClassInstanceState = Pick<ClassInstanceSelectType, "executionState" | "outcome">;
 
-function statesMatch(existing: ClassInstanceState, desired: ClassInstanceInsertInput): boolean {
+function statesMatch(existing: ClassInstanceState, desired: ClassInstanceInsertType): boolean {
   return existing.executionState === desired.executionState && existing.outcome === desired.outcome;
 }
 
 async function updateSchedulingOnly(
   t: DBTransaction,
   id: string,
-  instance: ClassInstanceInsertInput,
+  instance: ClassInstanceInsertType,
   updatedAt: Date
-): Promise<ClassInstanceEntity> {
+): Promise<ClassInstanceSelectType> {
   const [row] = await t
     .update(classInstances)
     .set({
@@ -42,7 +42,7 @@ async function updateSchedulingOnly(
 async function promoteSeedShellToTakenCompleted(
   t: DBTransaction,
   id: string,
-  instance: ClassInstanceInsertInput,
+  instance: ClassInstanceInsertType,
   updatedAt: Date
 ): Promise<void> {
   await t
@@ -82,7 +82,7 @@ async function promoteSeedShellToTakenCompleted(
 async function promoteSeedShellToRunning(
   t: DBTransaction,
   id: string,
-  instance: ClassInstanceInsertInput,
+  instance: ClassInstanceInsertType,
   updatedAt: Date
 ): Promise<void> {
   await t
@@ -110,8 +110,8 @@ async function promoteSeedShellToRunning(
 
 async function applyDesiredSeedState(
   t: DBTransaction,
-  existing: ClassInstanceEntity,
-  instance: ClassInstanceInsertInput,
+  existing: ClassInstanceSelectType,
+  instance: ClassInstanceInsertType,
   updatedAt: Date
 ): Promise<void> {
   if (existing.executionState !== "NOT_ACTIVATED" || existing.outcome !== "PENDING") {
@@ -146,17 +146,17 @@ async function applyDesiredSeedState(
  * Shared chunking + transaction wrapper for class instance bulk upserts.
  */
 export async function runClassInstanceUpsertMany(
-  instances: ClassInstanceInsertInput[],
-  upsertRow: (t: DBTransaction, instance: ClassInstanceInsertInput, updatedAt: Date) => Promise<ClassInstanceEntity>,
+  instances: ClassInstanceInsertType[],
+  upsertRow: (t: DBTransaction, instance: ClassInstanceInsertType, updatedAt: Date) => Promise<ClassInstanceSelectType>,
   options?: ClassInstanceUpsertManyOptions
-): Promise<ClassInstanceEntity[]> {
+): Promise<ClassInstanceSelectType[]> {
   if (instances.length === 0) return [];
 
   const chunkSize = options?.chunkSize ?? 100;
   const updatedAt = options?.updatedAt ?? new Date();
 
-  const runner = async (t: DBTransaction): Promise<ClassInstanceEntity[]> => {
-    const results: ClassInstanceEntity[] = [];
+  const runner = async (t: DBTransaction): Promise<ClassInstanceSelectType[]> => {
+    const results: ClassInstanceSelectType[] = [];
     for (let i = 0; i < instances.length; i += chunkSize) {
       const chunk = instances.slice(i, i + chunkSize);
       for (const instance of chunk) {
@@ -172,9 +172,9 @@ export async function runClassInstanceUpsertMany(
 /** Production upsert: may update execution state directly on idempotency-key conflict. */
 export async function upsertProductionClassInstance(
   t: DBTransaction,
-  instance: ClassInstanceInsertInput,
+  instance: ClassInstanceInsertType,
   updatedAt: Date
-): Promise<ClassInstanceEntity> {
+): Promise<ClassInstanceSelectType> {
   const [inserted] = await t
     .insert(classInstances)
     .values(instance)
@@ -200,9 +200,9 @@ export async function upsertProductionClassInstance(
  */
 export async function upsertSeedClassInstance(
   t: DBTransaction,
-  instance: ClassInstanceInsertInput,
+  instance: ClassInstanceInsertType,
   updatedAt: Date
-): Promise<ClassInstanceEntity> {
+): Promise<ClassInstanceSelectType> {
   const [inserted] = await t
     .insert(classInstances)
     .values(instance)

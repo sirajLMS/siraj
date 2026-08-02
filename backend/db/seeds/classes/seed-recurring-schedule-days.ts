@@ -6,16 +6,16 @@ import {
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
-import type { RecurringScheduleDayInsertInput, RecurringScheduleEntity } from "@/backend/types";
+import type { RecurringScheduleDayInsertType, RecurringScheduleSelectType } from "@/backend/types";
 
 type ScheduleDaySpec = {
   recurringScheduleId: string;
-  dayOfWeek: RecurringScheduleDayInsertInput["dayOfWeek"];
+  dayOfWeek: RecurringScheduleDayInsertType["dayOfWeek"];
   startTime: string;
   isActive: boolean;
 };
 
-export async function seedOrGet(classesList: RecurringScheduleEntity[], config?: SeedConfig) {
+export async function seedOrGet(classesList: RecurringScheduleSelectType[], config?: SeedConfig) {
   logger.info("Seeding recurring schedule days...");
   const seedConfig = config ?? loadSeedConfig();
 

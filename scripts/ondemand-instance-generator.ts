@@ -7,7 +7,7 @@ import { ClassExecutionState, ClassType, DayOfWeek, OnDemandStatus, QuotaStatus,
 import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
-import type { ClassInstanceInsertInput } from "@/backend/types";
+import type { ClassInstanceInsertType } from "@/backend/types";
 
 /** Maximum number of recurring schedules to process per batch (unbounded SELECT guard — RP2-8). */
 const MAX_SCHEDULES_PER_RUN = 500;
@@ -303,7 +303,7 @@ async function generatePendingInstancesForRange(
 }
 
 /** Maps a PendingInstance to the insert shape expected by the classInstances table. */
-function toClassInstanceInsertInput(p: PendingInstance): ClassInstanceInsertInput {
+function toClassInstanceInsertType(p: PendingInstance): ClassInstanceInsertType {
   return {
     recurringScheduleId: p.recurringScheduleId,
     studentId: p.studentId,
@@ -319,7 +319,7 @@ function toClassInstanceInsertInput(p: PendingInstance): ClassInstanceInsertInpu
     schedulingMode: p.schedulingMode,
     quotaDeducted: false,
     idempotencyKey: p.idempotencyKey,
-  } as ClassInstanceInsertInput;
+  } as ClassInstanceInsertType;
 }
 
 async function generateInstancesForSchedule(
@@ -405,7 +405,7 @@ async function generateInstancesForSchedule(
 
     const inserted = await tx
       .insert(classInstances)
-      .values(pendingInstances.map(toClassInstanceInsertInput))
+      .values(pendingInstances.map(toClassInstanceInsertType))
       .onConflictDoNothing()
       .returning({ id: classInstances.id });
 

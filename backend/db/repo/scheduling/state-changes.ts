@@ -23,13 +23,13 @@ export async function updateInstanceState(
   t: DBTransaction,
   id: string,
   actorUserId: string | null,
-  state: Partial<Types.ClassInstanceInsertInput>,
+  state: Partial<Types.ClassInstanceInsertType>,
   event: {
     fromState: Record<string, unknown>;
     toState: Record<string, unknown>;
     description: string;
   }
-): Promise<Types.ClassInstanceEntity | null> {
+): Promise<Types.ClassInstanceSelectType | null> {
   const now = new Date();
   const [updated] = await t
     .update(classInstances)
@@ -59,9 +59,9 @@ async function runStateChange(
   actorUserId: string,
   logic: (
     t: DBTransaction,
-    existing: Types.ClassInstanceEntity
+    existing: Types.ClassInstanceSelectType
   ) => Promise<{
-    state: Partial<Types.ClassInstanceInsertInput>;
+    state: Partial<Types.ClassInstanceInsertType>;
     event: {
       fromState: Record<string, unknown>;
       toState: Record<string, unknown>;
@@ -70,7 +70,7 @@ async function runStateChange(
   }>,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity | null> {
+): Promise<Types.ClassInstanceSelectType | null> {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
@@ -133,7 +133,7 @@ async function getRequesterTypeForUser(t: DBTransaction, actorUserId: string): P
 }
 
 async function buildLeaveStateChangePayload(
-  existing: Types.ClassInstanceEntity,
+  existing: Types.ClassInstanceSelectType,
   successorId: string,
   reason: string | null
 ) {
@@ -335,7 +335,7 @@ export const markClassMissedBySystem = async (
   id: string,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity | null> => {
+): Promise<Types.ClassInstanceSelectType | null> => {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) {
@@ -430,10 +430,10 @@ export const resetClassInstance = async (
 };
 
 export function buildRescheduledClassInput(
-  original: Types.ClassInstanceEntity,
-  input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+  original: Types.ClassInstanceSelectType,
+  input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
   originalClassId: string
-): Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt"> {
+): Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt"> {
   return {
     ...input,
     subjectId: input.subjectId ?? original.subjectId,
@@ -473,7 +473,7 @@ export async function overrideClassInstanceRate(
   rateAmount: string | null,
   rateCurrency: CurrencyCode | null,
   tx?: DBTransaction
-): Promise<Types.ClassInstanceEntity | null> {
+): Promise<Types.ClassInstanceSelectType | null> {
   const executor = tx ?? db;
   const isOverridden = rateAmount != null && rateAmount !== "";
   const [updated] = await executor
@@ -492,10 +492,10 @@ export async function overrideClassInstanceRate(
 
 export const rescheduleClassInstance = async (
   originalClassId: string,
-  input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+  input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity> => {
+): Promise<Types.ClassInstanceSelectType> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const results = await t.select().from(classInstances).where(eq(classInstances.id, originalClassId)).limit(1);

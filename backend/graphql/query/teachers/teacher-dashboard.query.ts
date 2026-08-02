@@ -5,6 +5,7 @@ import {
   TeacherDashboardPothosObject,
   TeacherHandbookUrlPothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
+import { UnauthorizedError } from "@/backend/lib/errors";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 import { PaginationArgs } from "@/backend/types";
@@ -15,7 +16,7 @@ async function resolveTeacherDashboard(
 ) {
   if (!ctx.user) {
     const tErrors = ctx.t().errorsTranslations;
-    throw new Error(tErrors.unauthorized);
+    throw new UnauthorizedError(tErrors.unauthorized);
   }
   const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
   const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, pagination, ctx.locale);
@@ -66,7 +67,7 @@ gqlSchemaBuilder.queryField("teacherHandbookUrl", t =>
     resolve: async (_parent, _args, ctx) => {
       if (!ctx.user) {
         const tErrors = ctx.t().errorsTranslations;
-        throw new Error(tErrors.unauthorized);
+        throw new UnauthorizedError(tErrors.unauthorized);
       }
       const tErrors = ctx.t().errorsTranslations;
       const url = await TeacherDashboardService.getHandbookDownloadUrl(ctx.user.id, tErrors);

@@ -7,7 +7,7 @@ import { classInstances, parents, students, teacherAssignments, teachers, users 
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode, Gender } from "@/backend/enum";
-import type { ClassInstanceInsertInput } from "@/backend/types";
+import type { ClassInstanceInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function createTestUser(tx: DBTransaction, name: string, email: string, now: Date) {
@@ -57,7 +57,7 @@ async function createTestClass(
   tx: DBTransaction,
   studentId: string,
   teacherId: string,
-  overrides: Partial<Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt">> = {}
+  overrides: Partial<Omit<ClassInstanceInsertType, "createdAt" | "updatedAt">> = {}
 ) {
   const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
   return SchedulingRepository.createClassInstance(
@@ -89,7 +89,7 @@ async function rescheduleTestClass(
   originalId: string,
   studentId: string,
   teacherId: string,
-  overrides: Partial<Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt">> = {}
+  overrides: Partial<Omit<ClassInstanceInsertType, "createdAt" | "updatedAt">> = {}
 ) {
   const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
   return SchedulingRepository.rescheduleClassInstance(
@@ -109,7 +109,7 @@ async function rescheduleTestClass(
   );
 }
 
-async function insertClassInstance(tx: DBTransaction, values: Partial<ClassInstanceInsertInput>) {
+async function insertClassInstance(tx: DBTransaction, values: Partial<ClassInstanceInsertType>) {
   const now = new Date();
   const [instance] = await tx
     .insert(classInstances)
@@ -123,7 +123,7 @@ async function insertClassInstance(tx: DBTransaction, values: Partial<ClassInsta
       idempotencyKey: randomUUID(),
       ...values,
       subjectId: values.subjectId ?? (await ensureTestSubjectId(tx)),
-    } as ClassInstanceInsertInput)
+    } as ClassInstanceInsertType)
     .returning();
   return instance;
 }
@@ -132,7 +132,7 @@ async function insertRescheduledInstance(
   tx: DBTransaction,
   studentId: string,
   teacherId: string,
-  overrides: Partial<ClassInstanceInsertInput> = {}
+  overrides: Partial<ClassInstanceInsertType> = {}
 ) {
   return insertClassInstance(tx, {
     studentId,

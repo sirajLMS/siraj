@@ -5,7 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, students, users } from "@/backend/db/schema";
 import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
-import type { ParentEntity, StudentEntity } from "@/backend/types";
+import type { ParentEntity, StudentSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 /**
@@ -46,7 +46,7 @@ async function createStudentForParent(tx: DBTransaction, parentId: string, name:
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [StudentEntity];
+    .returning()) as [StudentSelectType];
   return student;
 }
 

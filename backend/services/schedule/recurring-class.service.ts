@@ -12,13 +12,14 @@ import {
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, type CurrencyCode, NotificationEventType, SchedulingMode } from "@/backend/enum";
+import { DomainError, NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
-import type { RecurringScheduleDayEntity, RecurringScheduleEntity } from "@/backend/types";
+import type { RecurringScheduleDaySelectType, RecurringScheduleSelectType } from "@/backend/types";
 import type { CreateRecurringClassInput } from "@/backend/types/scheduling/scheduling.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -103,12 +104,13 @@ export namespace RecurringClassService {
     if (input.quotaId) {
       const quota = await QuotaRepository.findById(db, input.quotaId);
       if (!quota || quota.remaining <= 0) {
-        throw new Error(tErrors.outOfQuota);
+        throw new ValidationError(tErrors.outOfQuota);
       }
     } else {
       const balance = await CreditRepository.getBalance(db, input.studentId);
       if (balance.classesRemaining <= 0) {
-        throw new Error(
+        throw new DomainError(
+          "INSUFFICIENT_BALANCE",
           tErrors.credit.insufficientBalance({
             studentId: input.studentId,
             remaining: balance.classesRemaining,
@@ -126,26 +128,26 @@ export namespace RecurringClassService {
   async function validateCreateRecurringClass(userId: string, input: CreateRecurringClassInput, tErrors: ErrorsLabels) {
     const hasCreateAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
     if (!hasCreateAccess) {
-      throw new Error(tErrors.unauthorizedAction);
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
 
     if (!input.days || input.days.length === 0 || input.durationMinutes <= 0 || !input.subjectId) {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
 
     let subject: Awaited<ReturnType<typeof ClassSubjectRepository.getSubjectById>>;
     try {
       subject = await ClassSubjectRepository.getSubjectById(input.subjectId);
     } catch {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
     if (!subject.isActive) {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
 
     const activeDays = input.days.filter(d => d.isActive);
     if (activeDays.length === 0) {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
 
     const startDate = input.effectiveFrom ? new Date(input.effectiveFrom) : new Date();
@@ -268,28 +270,28 @@ export namespace RecurringClassService {
   export async function listRecurringSchedulesByStudentIds(
     studentIds: readonly string[],
     tx?: DBTransaction
-  ): Promise<RecurringScheduleEntity[]> {
+  ): Promise<RecurringScheduleSelectType[]> {
     return RecurringScheduleRepository.listByStudentIds(studentIds, tx);
   }
 
   export async function upsertManyRecurringSchedules(
     inputs: readonly RecurringScheduleUpsertInput[],
     tx?: DBTransaction
-  ): Promise<RecurringScheduleEntity[]> {
+  ): Promise<RecurringScheduleSelectType[]> {
     return RecurringScheduleRepository.upsertMany(inputs, tx);
   }
 
   export async function findScheduleDaysByKeys(
     keys: readonly { recurringScheduleId: string; dayOfWeek: RecurringScheduleDayUpsertInput["dayOfWeek"] }[],
     tx?: DBTransaction
-  ): Promise<Map<ScheduleDayKey, RecurringScheduleDayEntity>> {
+  ): Promise<Map<ScheduleDayKey, RecurringScheduleDaySelectType>> {
     return RecurringScheduleRepository.findDaysByKeys(keys, tx);
   }
 
   export async function upsertManyScheduleDays(
     inputs: readonly RecurringScheduleDayUpsertInput[],
     tx?: DBTransaction
-  ): Promise<RecurringScheduleDayEntity[]> {
+  ): Promise<RecurringScheduleDaySelectType[]> {
     return RecurringScheduleRepository.upsertManyDays(inputs, tx);
   }
 
@@ -306,7 +308,7 @@ export namespace RecurringClassService {
   ): Promise<{ recurringScheduleId: string; hourlyRate: string | null; rateCurrency: CurrencyCode | null }> {
     const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
     if (!hasManageAccess) {
-      throw new Error(tErrors.unauthorizedAction);
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
 
     const updated = await RecurringScheduleRepository.updateRate(
@@ -315,7 +317,7 @@ export namespace RecurringClassService {
       input.rateCurrency
     );
     if (!updated) {
-      throw new Error(tErrors.notFound);
+      throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
     }
     return {
       recurringScheduleId: updated.id,
@@ -407,13 +409,13 @@ export namespace RecurringClassService {
   ): Promise<{ cancelledInstanceIds: string[]; quotaReleased: boolean }> {
     const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
     if (!hasManageAccess) {
-      throw new Error(tErrors.unauthorizedAction);
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
 
     const runner = async (t: DBTransaction) => {
       const row = await RecurringScheduleRepository.findById(recurringScheduleId, t);
       if (!row) {
-        throw new Error(tErrors.notFound);
+        throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
       }
       const schedule = row.schedule;
 
@@ -543,13 +545,13 @@ export namespace RecurringClassService {
   }> {
     const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
     if (!hasManageAccess) {
-      throw new Error(tErrors.unauthorizedAction);
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
 
     const runner = async (t: DBTransaction) => {
       const row = await RecurringScheduleRepository.findById(recurringScheduleId, t);
       if (!row) {
-        throw new Error(tErrors.notFound);
+        throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
       }
       const schedule = row.schedule;
 

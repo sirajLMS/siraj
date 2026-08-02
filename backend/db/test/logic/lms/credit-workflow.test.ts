@@ -13,7 +13,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason } from "@/backend/enum";
-import type { ClassInstanceEntity } from "@/backend/types";
+import type { ClassInstanceSelectType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -22,7 +22,7 @@ beforeAll(() => {
   tErrors = getServerTranslations("en").errorsTranslations;
 });
 
-function requireInstance(instance: ClassInstanceEntity | null): ClassInstanceEntity {
+function requireInstance(instance: ClassInstanceSelectType | null): ClassInstanceSelectType {
   if (!instance) {
     throw new Error("setupTestEntities returned a null instance — pass skipInstance:false");
   }

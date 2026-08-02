@@ -174,19 +174,24 @@ export namespace AvailabilityService {
       locale
     );
 
-    // Filter to slots where teacher is available, then check class conflicts
+    // Batch-fetch all overlapping instances for the entire candidate range in one query
+    const overlappingInstances = await SchedulingRepository.findOverlappingInstancesForRange(
+      studentId,
+      teacherId,
+      candidates[0]?.startTime,
+      candidates[candidates.length - 1]?.endTime,
+      [],
+      txParam(tx)
+    );
+
+    // Filter to slots where teacher is available, then check class conflicts in memory
     const result: AvailableClassSlotReturnType[] = [];
     for (let i = 0; i < candidates.length; i++) {
       const slot = candidates[i];
       if (!slot || !teacherAvailable[i]) continue;
 
-      const hasConflict = await SchedulingRepository.hasOverlappingInstance(
-        studentId,
-        teacherId,
-        slot.startTime,
-        slot.endTime,
-        [],
-        txParam(tx)
+      const hasConflict = overlappingInstances.some(
+        inst => inst.scheduledStartAt < slot.endTime && inst.scheduledEndAt > slot.startTime
       );
 
       result.push({

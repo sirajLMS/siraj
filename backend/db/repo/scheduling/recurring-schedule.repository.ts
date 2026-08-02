@@ -6,20 +6,20 @@ import { teachers, users } from "@/backend/db/schema";
 import { recurringScheduleDays, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import { students } from "@/backend/db/schema/students/students";
 import type {
-  RecurringScheduleDayEntity,
-  RecurringScheduleDayInsertInput,
-  RecurringScheduleEntity,
-  RecurringScheduleInsertInput,
+  RecurringScheduleDayInsertType,
+  RecurringScheduleDaySelectType,
+  RecurringScheduleInsertType,
+  RecurringScheduleSelectType,
 } from "@/backend/types";
 
 export type RecurringScheduleUpsertInput = Omit<
-  RecurringScheduleInsertInput,
+  RecurringScheduleInsertType,
   "id" | "createdAt" | "updatedAt" | "deletedAt"
 > & { studentId: string };
 
 export type RecurringScheduleDayUpsertInput = {
   recurringScheduleId: string;
-  dayOfWeek: RecurringScheduleDayInsertInput["dayOfWeek"];
+  dayOfWeek: RecurringScheduleDayInsertType["dayOfWeek"];
   startTime: string;
   isActive: boolean;
 };
@@ -64,7 +64,7 @@ export namespace RecurringScheduleRepository {
   export async function listByStudentIds(
     studentIds: readonly string[],
     tx?: DBTransaction
-  ): Promise<RecurringScheduleEntity[]> {
+  ): Promise<RecurringScheduleSelectType[]> {
     if (studentIds.length === 0) return [];
     const q = queryDb(tx);
     return q
@@ -76,12 +76,12 @@ export namespace RecurringScheduleRepository {
   export async function upsertMany(
     inputs: readonly RecurringScheduleUpsertInput[],
     tx?: DBTransaction
-  ): Promise<RecurringScheduleEntity[]> {
+  ): Promise<RecurringScheduleSelectType[]> {
     if (inputs.length === 0) return [];
     const now = new Date();
 
     return runInTransaction(tx, async t => {
-      const results: RecurringScheduleEntity[] = [];
+      const results: RecurringScheduleSelectType[] = [];
       // NOTE: N+1 pattern — per-input SELECT then UPDATE-or-INSERT. Should batch existence check with inArray SELECT
       for (const input of inputs) {
         const [existing] = await t
@@ -128,9 +128,9 @@ export namespace RecurringScheduleRepository {
   export async function updateRate(
     recurringScheduleId: string,
     hourlyRate: string | null,
-    rateCurrency: RecurringScheduleEntity["rateCurrency"],
+    rateCurrency: RecurringScheduleSelectType["rateCurrency"],
     tx?: DBTransaction
-  ): Promise<RecurringScheduleEntity | null> {
+  ): Promise<RecurringScheduleSelectType | null> {
     const q = queryDb(tx);
     const now = new Date();
     const [updated] = await q
@@ -142,10 +142,10 @@ export namespace RecurringScheduleRepository {
   }
 
   export async function findDaysByKeys(
-    keys: readonly { recurringScheduleId: string; dayOfWeek: RecurringScheduleDayInsertInput["dayOfWeek"] }[],
+    keys: readonly { recurringScheduleId: string; dayOfWeek: RecurringScheduleDayInsertType["dayOfWeek"] }[],
     tx?: DBTransaction
-  ): Promise<Map<ScheduleDayKey, RecurringScheduleDayEntity>> {
-    const map = new Map<ScheduleDayKey, RecurringScheduleDayEntity>();
+  ): Promise<Map<ScheduleDayKey, RecurringScheduleDaySelectType>> {
+    const map = new Map<ScheduleDayKey, RecurringScheduleDaySelectType>();
     if (keys.length === 0) return map;
 
     const scheduleIds = [...new Set(keys.map(key => key.recurringScheduleId))];
@@ -168,11 +168,11 @@ export namespace RecurringScheduleRepository {
   export async function upsertManyDays(
     inputs: readonly RecurringScheduleDayUpsertInput[],
     tx?: DBTransaction
-  ): Promise<RecurringScheduleDayEntity[]> {
+  ): Promise<RecurringScheduleDaySelectType[]> {
     if (inputs.length === 0) return [];
 
     return runInTransaction(tx, async t => {
-      const results: RecurringScheduleDayEntity[] = [];
+      const results: RecurringScheduleDaySelectType[] = [];
       for (const input of inputs) {
         const [row] = await t
           .insert(recurringScheduleDays)

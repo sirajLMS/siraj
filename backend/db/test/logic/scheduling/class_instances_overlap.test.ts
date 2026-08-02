@@ -6,7 +6,7 @@ import { students, teacherAssignments, teachers, users } from "@/backend/db/sche
 import { createTestParent, createTestUser, ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
-import type { StudentEntity, TeacherEntity } from "@/backend/types";
+import type { StudentSelectType, TeacherSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function setupTestParent(tx: DBTransaction) {
@@ -23,7 +23,7 @@ async function createTestTeachers(tx: DBTransaction, now: Date) {
     { name: "Overlap Teacher 2", email: `teacher2-${randomUUID()}@example.com` },
   ];
 
-  const createdTeachers: TeacherEntity[] = [];
+  const createdTeachers: TeacherSelectType[] = [];
   for (const data of teachersData) {
     const [user] = await tx
       .insert(users)
@@ -43,7 +43,7 @@ async function createTestTeachers(tx: DBTransaction, now: Date) {
         createdAt: now,
         updatedAt: now,
       })
-      .returning()) as [TeacherEntity];
+      .returning()) as [TeacherSelectType];
     createdTeachers.push(teacher);
   }
   return createdTeachers;
@@ -55,7 +55,7 @@ async function createTestStudents(tx: DBTransaction, parentId: string, now: Date
     { name: "Overlap Student 2", gender: Gender.FEMALE },
   ];
 
-  const createdStudents: StudentEntity[] = [];
+  const createdStudents: StudentSelectType[] = [];
   for (const data of studentsData) {
     const studentUser = await createTestUser(tx, {
       name: `${data.name} User`,
@@ -74,7 +74,7 @@ async function createTestStudents(tx: DBTransaction, parentId: string, now: Date
         updatedAt: now,
         idempotencyKey: randomUUID(),
       })
-      .returning()) as [StudentEntity];
+      .returning()) as [StudentSelectType];
     createdStudents.push(student);
   }
   return createdStudents;

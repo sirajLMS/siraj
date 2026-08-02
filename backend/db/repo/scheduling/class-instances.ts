@@ -125,10 +125,10 @@ export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
 };
 
 export const createClassInstance = async (
-  input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+  input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity> => {
+): Promise<Types.ClassInstanceSelectType> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     await acquireLocks(t, input.teacherId, input.studentId);
@@ -181,10 +181,10 @@ export const createClassInstance = async (
 
 export const updateClassInstance = async (
   id: string,
-  input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
+  input: Partial<Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">>,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity> => {
+): Promise<Types.ClassInstanceSelectType> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const existing = await getClassInstanceByIdOrThrow(t, id, tFuncErrors);
@@ -236,7 +236,7 @@ export const deleteClassInstance = async (
   id: string,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity> => {
+): Promise<Types.ClassInstanceSelectType> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
@@ -281,8 +281,8 @@ export const softDeleteClassInstance = async (id: string, actorUserId: string, t
 export async function listByIdempotencyKeys(
   keys: readonly string[],
   tx?: DBTransaction
-): Promise<Map<string, Types.ClassInstanceEntity>> {
-  const map = new Map<string, Types.ClassInstanceEntity>();
+): Promise<Map<string, Types.ClassInstanceSelectType>> {
+  const map = new Map<string, Types.ClassInstanceSelectType>();
   if (keys.length === 0) return map;
 
   const q = queryDb(tx);
@@ -297,16 +297,16 @@ export async function listByIdempotencyKeys(
 }
 
 export async function upsertMany(
-  instances: Types.ClassInstanceInsertInput[],
+  instances: Types.ClassInstanceInsertType[],
   options?: ClassInstanceUpsertManyOptions
-): Promise<Types.ClassInstanceEntity[]> {
+): Promise<Types.ClassInstanceSelectType[]> {
   return runClassInstanceUpsertMany(instances, upsertProductionClassInstance, options);
 }
 
 export async function upsertManyForSeed(
-  instances: Types.ClassInstanceInsertInput[],
+  instances: Types.ClassInstanceInsertType[],
   options?: ClassInstanceUpsertManyOptions
-): Promise<Types.ClassInstanceEntity[]> {
+): Promise<Types.ClassInstanceSelectType[]> {
   return runClassInstanceUpsertMany(instances, upsertSeedClassInstance, options);
 }
 
@@ -320,7 +320,7 @@ export async function getOndemandPendingInstances(
   tx: DBTransaction,
   studentId: string,
   limit: number
-): Promise<Types.ClassInstanceEntity[]> {
+): Promise<Types.ClassInstanceSelectType[]> {
   if (limit <= 0) return [];
   return tx
     .select()

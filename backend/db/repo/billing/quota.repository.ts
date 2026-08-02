@@ -8,17 +8,24 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { classInstances, quotaLedger, quotas } from "@/backend/db/schema";
 import { QuotaLedgerReason, QuotaStatus } from "@/backend/enum";
-import { DomainError, QuotaAlreadyDeletedError, QuotaLedgerError, QuotaNotFoundError } from "@/backend/lib/errors";
+import {
+  ConflictError,
+  DomainError,
+  QuotaAlreadyDeletedError,
+  QuotaLedgerError,
+  QuotaNotFoundError,
+  ValidationError,
+} from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import type {
+  PaginationArgs,
   QuotaPaginatedFilter,
   QuotaReturnType,
   QuotaSelectType,
   QuotaSubmitInput,
   QuotaUpdateInput,
-} from "@/backend/types/billing/quota.types";
-import { mapQuotaToReturnType } from "@/backend/types/billing/quota.types";
-import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
+} from "@/backend/types";
+import { mapQuotaToReturnType } from "@/backend/types";
 
 type ReadExecutor = DBTransaction | typeof db;
 
@@ -495,7 +502,7 @@ export namespace QuotaRepository {
       )
       .returning();
 
-    if (!updated) throw new Error("Failed to release quota reservation: insufficient reserved classes");
+    if (!updated) throw new ConflictError("Failed to release quota reservation: insufficient reserved classes");
 
     return updated;
   };
@@ -783,7 +790,7 @@ export namespace QuotaRepository {
       // Concurrent transaction depleted remaining between guard SELECT and this UPDATE.
       // Throwing forces tx rollback, discarding the already-inserted ledger rows and
       // preventing ledger/aggregate drift.
-      throw new Error("Quota redemption failed: insufficient remaining after concurrent deduction");
+      throw new QuotaLedgerError("Quota redemption failed: insufficient remaining after concurrent deduction");
     }
 
     // Mark the redeemed instances as quota-deducted. This is the root-cause fix for CR-2/CR-4:
@@ -872,7 +879,7 @@ export namespace QuotaRepository {
       // Concurrent transaction archived/deleted the quota between ledger insert and this UPDATE.
       // Throwing forces tx rollback, discarding the already-inserted ledger rows and
       // preventing ledger/aggregate drift.
-      throw new Error("Quota release failed: quota no longer active after concurrent modification");
+      throw new ConflictError("Quota release failed: quota no longer active after concurrent modification");
     }
 
     return { releasedCount, quota: updated };
@@ -1029,8 +1036,9 @@ export namespace QuotaRepository {
       .for("update")
       .limit(1);
     if (!target) throw new QuotaNotFoundError("Quota not found");
-    if (target.kind !== "PERIODIC") throw new Error("Cannot refresh non-periodic quota");
-    if (!target.periodDays || target.periodDays <= 0) throw new Error("Quota has no valid period days configured");
+    if (target.kind !== "PERIODIC") throw new ValidationError("Cannot refresh non-periodic quota");
+    if (!target.periodDays || target.periodDays <= 0)
+      throw new ValidationError("Quota has no valid period days configured");
 
     const now = new Date();
     const periodAnchor = target.periodAnchor ?? target.createdAt;
@@ -1080,7 +1088,7 @@ export namespace QuotaRepository {
       .where(and(eq(quotas.id, quotaId), eq(quotas.version, target.version)))
       .returning();
 
-    if (!updated) throw new Error("Failed to refresh periodic quota due to concurrent write");
+    if (!updated) throw new ConflictError("Failed to refresh periodic quota due to concurrent write");
 
     // After UPDATE succeeds: insert deferred ledger entries.
     // EXPIRE the unused classes that did not roll over from the just-ended period
@@ -1229,7 +1237,7 @@ export namespace QuotaRepository {
       .where(and(eq(quotas.id, quotaId), eq(quotas.version, existing.version)))
       .returning();
 
-    if (!updated) throw new Error("Failed to reset usedThisPeriod due to concurrent modification");
+    if (!updated) throw new ConflictError("Failed to reset usedThisPeriod due to concurrent modification");
 
     // AUDIT: ledger entry required for ADJUST tracking and balance reconstruction
     await QuotaLedgerRepository.insert(tx, {

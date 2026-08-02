@@ -5,9 +5,9 @@ import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.re
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { QuotaKind, QuotaLedgerReason } from "@/backend/enum";
-import type { QuotaSubmitInput, QuotaLedgerInsertInput as RawQuotaLedgerInsertInput } from "@/backend/types";
+import type { QuotaSubmitInput, QuotaLedgerSubmitInput as RawQuotaLedgerSubmitInput } from "@/backend/types";
 
-type QuotaLedgerInsertInput = Omit<RawQuotaLedgerInsertInput, "reason"> & { reason: QuotaLedgerReason };
+type QuotaLedgerSubmitInput = Omit<RawQuotaLedgerSubmitInput, "reason"> & { reason: QuotaLedgerReason };
 
 describe("QuotaLedgerRepository", () => {
   test("insert & listByQuota", async () => {
@@ -23,7 +23,7 @@ describe("QuotaLedgerRepository", () => {
       };
       const quota = await QuotaRepository.create(tx, quotaInput);
 
-      const ledgerInput: QuotaLedgerInsertInput = {
+      const ledgerInput: QuotaLedgerSubmitInput = {
         quotaId: quota.id,
         studentId: student.id,
         delta: 10,
@@ -57,7 +57,7 @@ describe("QuotaLedgerRepository", () => {
       const quota = await QuotaRepository.create(tx, quotaInput);
 
       const sharedKey = `ledger-idempotent-${randomUUID()}`;
-      const ledgerInput: QuotaLedgerInsertInput = {
+      const ledgerInput: QuotaLedgerSubmitInput = {
         quotaId: quota.id,
         studentId: student.id,
         delta: 5,
@@ -90,7 +90,7 @@ describe("QuotaLedgerRepository", () => {
       };
       const quota = await QuotaRepository.create(tx, quotaInput);
 
-      const grantInput: QuotaLedgerInsertInput = {
+      const grantInput: QuotaLedgerSubmitInput = {
         quotaId: quota.id,
         studentId: student.id,
         delta: 10,
@@ -99,7 +99,7 @@ describe("QuotaLedgerRepository", () => {
       };
       await QuotaLedgerRepository.insert(tx, grantInput);
 
-      const redeemInput: QuotaLedgerInsertInput = {
+      const redeemInput: QuotaLedgerSubmitInput = {
         quotaId: quota.id,
         studentId: student.id,
         delta: -1,

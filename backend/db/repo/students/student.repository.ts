@@ -56,7 +56,7 @@ const _processStudentQuery = async (
     processedQuery = queryWithPagination(processedQuery, paginationArgs);
   }
 
-  const results = await (processedQuery as unknown as Promise<{ student: Types.StudentEntity; total: number }[]>);
+  const results = await (processedQuery as unknown as Promise<{ student: Types.StudentSelectType; total: number }[]>);
 
   const total = results[0]?.total ?? 0;
   const items: Types.Student[] = results
@@ -87,7 +87,7 @@ export namespace StudentRepository {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_' || ${studentId}::text))`);
   }
 
-  export const findById = async (id: string): Promise<Types.StudentEntity | null | undefined> => {
+  export const findById = async (id: string): Promise<Types.StudentSelectType | null | undefined> => {
     const q = queryDb();
     return await q.query.students.findFirst({
       where: { id: id },
@@ -104,11 +104,11 @@ export namespace StudentRepository {
     input: Types.StudentCreateInput,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const err = await StudentUtils.validateName(input.name);
     if (err) throw new Error(err);
 
-    const insertInput: Types.StudentEntityInput = {
+    const insertInput: Types.StudentInsertType = {
       parentId: input.parentId,
       userId: input.userId,
       primaryTeacherId: input.primaryTeacherId ?? null,
@@ -153,14 +153,14 @@ export namespace StudentRepository {
   export const createList = async (
     input: Types.StudentCreateInput[],
     tErrors: ErrorsLabels
-  ): Promise<Types.StudentEntity[]> => {
+  ): Promise<Types.StudentSelectType[]> => {
     if (input.length === 0) return [];
     try {
       for (const item of input) {
         const nameErr = await StudentUtils.validateName(item.name);
         if (nameErr) throw new Error(nameErr);
       }
-      const values: Types.StudentEntityInput[] = input.map(item => ({
+      const values: Types.StudentInsertType[] = input.map(item => ({
         parentId: item.parentId,
         userId: item.userId,
         primaryTeacherId: item.primaryTeacherId ?? null,
@@ -210,7 +210,7 @@ export namespace StudentRepository {
     return await q.$count(students);
   };
 
-  export const deleteById = async (id: string, tErrors: ErrorsLabels): Promise<Types.StudentEntity> => {
+  export const deleteById = async (id: string, tErrors: ErrorsLabels): Promise<Types.StudentSelectType> => {
     const existingStudent = await findById(id);
     if (!existingStudent) {
       throw new Error(tErrors.studentNotFound(id));
@@ -225,7 +225,7 @@ export namespace StudentRepository {
     input: Types.PartialStudentUpdateInput,
     tErrors: ErrorsLabels,
     locale?: string
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const existingStudent = await findById(input.id);
     if (!existingStudent) {
       throw new Error(tErrors.studentNotFound(input.id));
@@ -236,7 +236,7 @@ export namespace StudentRepository {
       if (nameErr) throw new Error(nameErr);
     }
 
-    const updateInput: Types.StudentEntityInput = {
+    const updateInput: Types.StudentInsertType = {
       id: input.id,
       parentId: input.parentId ?? existingStudent.parentId,
       userId: existingStudent.userId,
@@ -284,10 +284,10 @@ export namespace StudentRepository {
   async function adjustClassesQuota(
     t: DBTransaction,
     studentId: string,
-    updateFn: (current: Types.StudentEntity) => Record<string, unknown> | Promise<Record<string, unknown>>,
+    updateFn: (current: Types.StudentSelectType) => Record<string, unknown> | Promise<Record<string, unknown>>,
     tErrors: ErrorsLabels,
     expectedVersion?: number
-  ): Promise<Types.StudentEntity> {
+  ): Promise<Types.StudentSelectType> {
     await acquireStudentLock(t, studentId);
 
     const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
@@ -319,7 +319,7 @@ export namespace StudentRepository {
     amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
         t,
@@ -345,7 +345,7 @@ export namespace StudentRepository {
     amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
         t,
@@ -363,11 +363,11 @@ export namespace StudentRepository {
 
   function runStudentUpdate(
     studentId: string,
-    updates: () => Partial<Types.StudentEntity>,
+    updates: () => Partial<Types.StudentSelectType>,
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> {
+  ): Promise<Types.StudentSelectType> {
     const runner = async (t: DBTransaction) => adjustClassesQuota(t, studentId, updates, tErrors, expectedVersion);
     return tx ? runner(tx) : db.transaction(runner);
   }
@@ -378,7 +378,7 @@ export namespace StudentRepository {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> =>
+  ): Promise<Types.StudentSelectType> =>
     runStudentUpdate(studentId, () => ({ classesRemaining: newClassesRemaining }), tErrors, expectedVersion, tx);
 
   export const reassignTeacher = async (
@@ -387,7 +387,7 @@ export namespace StudentRepository {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> =>
+  ): Promise<Types.StudentSelectType> =>
     runStudentUpdate(studentId, () => ({ primaryTeacherId: newTeacherId }), tErrors, expectedVersion, tx);
 
   export const changeStatus = async (
@@ -396,7 +396,7 @@ export namespace StudentRepository {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
         t,
@@ -535,7 +535,10 @@ export namespace StudentRepository {
       totalCount: rows.length,
     };
   };
-  export const findByIdempotencyKeys = async (keys: string[], tx?: DBTransaction): Promise<Types.StudentEntity[]> => {
+  export const findByIdempotencyKeys = async (
+    keys: string[],
+    tx?: DBTransaction
+  ): Promise<Types.StudentSelectType[]> => {
     if (keys.length === 0) return [];
     const executor = tx ?? db;
     return executor.select().from(students).where(inArray(students.idempotencyKey, keys));
@@ -555,7 +558,7 @@ export namespace StudentRepository {
       idempotencyKey: string;
     },
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const executor = tx ?? db;
     const now = new Date();
     const [row] = await executor

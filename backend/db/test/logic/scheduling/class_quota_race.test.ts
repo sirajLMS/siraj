@@ -7,7 +7,7 @@ import { parents, students, teacherAssignments, teachers, users } from "@/backen
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
-import type { ClassInstanceInsertInput, StudentEntity, UserSelectType } from "@/backend/types";
+import type { ClassInstanceInsertType, StudentSelectType, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 type WriteExecutor = DBTransaction;
@@ -26,7 +26,7 @@ async function createBaseTestData(
   parent: typeof parents.$inferSelect;
   teacherUser: UserSelectType;
   teacher: typeof teachers.$inferSelect;
-  student: StudentEntity;
+  student: StudentSelectType;
   studentUser: UserSelectType;
 }> {
   const now = new Date();
@@ -124,7 +124,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       });
 
       // 1. Insert class with quota_deducted = true
-      const input1: Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
+      const input1: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
         studentId: student.id,
         teacherId: teacher.id,
         subjectId: await ensureTestSubjectId(tx),
@@ -141,7 +141,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       await expectStudentQuota(tx, student.id, 5);
 
       // 2. Insert class with quota_deducted = false
-      const input2: Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
+      const input2: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
         studentId: student.id,
         teacherId: teacher.id,
         subjectId: await ensureTestSubjectId(tx),
@@ -188,7 +188,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       });
 
       try {
-        const zeroQuotaInput: Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
+        const zeroQuotaInput: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
           studentId: student.id,
           teacherId: teacher.id,
           subjectId: await ensureTestSubjectId(tx),
@@ -228,7 +228,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       const makeClassInput = (
         start: string,
         end: string
-      ): Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt"> => ({
+      ): Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> => ({
         studentId: student.id,
         teacherId: teacher.id,
         subjectId,

@@ -15,7 +15,7 @@ import { ParentRepository, TeacherRepository, UserRepository } from "@/backend/d
 import type { AccountStatus, CurrencyCode } from "@/backend/enum";
 import type { ParentStatus } from "@/backend/enum/parents/parent.enum";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
-import type { ParentEntity, TeacherEntity } from "@/backend/types";
+import type { ParentEntity, TeacherSelectType } from "@/backend/types";
 
 export type SeedTeacherProfileInput = {
   userId: string;
@@ -33,7 +33,10 @@ export type SeedParentProfileInput = {
 
 export namespace PersonaSeedService {
   /** Idempotently upsert a teacher profile for a demo user. */
-  export async function seedTeacherProfile(input: SeedTeacherProfileInput, tx?: DBTransaction): Promise<TeacherEntity> {
+  export async function seedTeacherProfile(
+    input: SeedTeacherProfileInput,
+    tx?: DBTransaction
+  ): Promise<TeacherSelectType> {
     assertSeedWriteAllowed("Persona seed writes");
     if (input.status) {
       await UserRepository.updateStatus(input.userId, input.status, tx);
@@ -56,8 +59,8 @@ export namespace PersonaSeedService {
   }
 
   /** Read helper for seed / test-helper scripts. */
-  export async function listTeachersByUserIds(userIds: string[], tx?: DBTransaction): Promise<TeacherEntity[]> {
-    const results: TeacherEntity[] = [];
+  export async function listTeachersByUserIds(userIds: string[], tx?: DBTransaction): Promise<TeacherSelectType[]> {
+    const results: TeacherSelectType[] = [];
     for (const userId of userIds) {
       const teacher = await TeacherRepository.findByUserId(userId, tx);
       if (teacher) results.push(teacher);

@@ -158,27 +158,10 @@ export type AdminDashboardScheduleReturnType = {
   pageInfo: import("@/backend/types/shared/pagination.types").PageInfo | null;
 };
 
-export type StatusTrackingScheduleRow = {
-  id: string;
-  studentId: string;
-  studentName: string;
-  studentInitials: string;
-  studentAvatarUrl?: string | null;
-  studentStatus: import("@/backend/enum").StudentStatus;
-  teacherId: string;
-  teacherName: string;
-  teacherAvatarUrl?: string | null;
-  courseName?: string | null;
-  avatarUrl?: string | null;
-  scheduledStartAt: Date;
-  scheduledEndAt: Date;
-  durationMinutes: number;
-  executionState: ClassExecutionState;
-  outcome: ClassOutcome;
-  isFrozen: boolean;
-  meetingJoinUrl?: string | null;
-  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
-};
+// Canonical definition lives in ./scheduling.types.ts as StatusTrackingRow.
+// This alias preserves the GraphQL-facing name (StatusTrackingScheduleRow)
+// used by the Pothos layer and frontend codegen without duplicating fields.
+export type StatusTrackingScheduleRow = import("./scheduling.types").StatusTrackingRow;
 
 export type AvailableClassSlotReturnType = {
   teacherId: string;

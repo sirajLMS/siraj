@@ -1,10 +1,4 @@
-import type {
-  classInstances,
-  leaveQuotaUsage,
-  recurringScheduleDays,
-  recurringSchedules,
-  timezones,
-} from "@/backend/db/schema";
+import type { leaveQuotaUsage, recurringScheduleDays, recurringSchedules, timezones } from "@/backend/db/schema";
 import type {
   ClassExecutionState,
   ClassOutcome,
@@ -19,25 +13,23 @@ import type {
 } from "@/backend/enum";
 
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import type { PageInfo, PaginationArgs } from "@/backend/types/shared/pagination.types";
-import type { StudentEntity } from "@/backend/types/students/student.types";
-import type { TeacherEntity } from "@/backend/types/teachers/teacher.types";
+import type { StudentSelectType } from "@/backend/types/students/student.types";
+import type { TeacherSelectType } from "@/backend/types/teachers/teacher.types";
 import type { UserSelectType } from "@/backend/types/users/user.types";
 import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
-export type RecurringScheduleEntity = typeof recurringSchedules.$inferSelect;
-export type RecurringScheduleInsertInput = typeof recurringSchedules.$inferInsert;
+export type RecurringScheduleSelectType = typeof recurringSchedules.$inferSelect;
+export type RecurringScheduleInsertType = typeof recurringSchedules.$inferInsert;
 
-export type RecurringScheduleDayEntity = typeof recurringScheduleDays.$inferSelect;
-export type RecurringScheduleDayInsertInput = typeof recurringScheduleDays.$inferInsert;
+export type RecurringScheduleDaySelectType = typeof recurringScheduleDays.$inferSelect;
+export type RecurringScheduleDayInsertType = typeof recurringScheduleDays.$inferInsert;
 
-export type ClassInstanceEntity = typeof classInstances.$inferSelect;
-export type ClassInstanceInsertInput = typeof classInstances.$inferInsert;
+export type DailyScheduleTeacher = TeacherSelectType & { user: UserSelectType };
 
-export type DailyScheduleTeacher = TeacherEntity & { user: UserSelectType };
-
-export type DailyScheduleResult = Omit<ClassInstanceEntity, "deletedAt" | "createdAt" | "updatedAt"> & {
+export type DailyScheduleResult = Omit<ClassInstanceSelectType, "deletedAt" | "createdAt" | "updatedAt"> & {
   courseName: string | null;
   avatarUrl?: string | null;
   instanceId: string;
@@ -45,13 +37,13 @@ export type DailyScheduleResult = Omit<ClassInstanceEntity, "deletedAt" | "creat
   startTime: string;
   endTime: string;
   durationMinutes: number;
-  status: ClassInstanceEntity["executionState"];
+  status: ClassInstanceSelectType["executionState"];
   remarks: string | null;
   hasTimezoneMismatch: boolean;
   studentTimezone: IanaTimezone | null;
   teacherTimezone: IanaTimezone | null;
   performance: ClassInstancePerformanceSelectType | null;
-  student?: StudentEntity;
+  student?: StudentSelectType;
   teacher?: DailyScheduleTeacher;
   yourTimeFormatted?: string;
 };
@@ -73,21 +65,21 @@ export type AdminDashboardScheduleResult = {
   pageInfo: PageInfo | null;
 };
 
-export type LeaveQuotaUsageEntity = typeof leaveQuotaUsage.$inferSelect;
-export type LeaveQuotaUsageInsertInput = typeof leaveQuotaUsage.$inferInsert;
+export type LeaveQuotaUsageSelectType = typeof leaveQuotaUsage.$inferSelect;
+export type LeaveQuotaUsageInsertType = typeof leaveQuotaUsage.$inferInsert;
 
-export type TimezoneEntity = typeof timezones.$inferSelect;
+export type TimezoneSelectType = typeof timezones.$inferSelect;
 
 export type TimezoneUpsertInput = {
   ianaId: string;
   baseOffsetMinutes: number;
   isDstSupported?: boolean;
 };
-export type TimezoneInsertInput = typeof timezones.$inferInsert;
+export type TimezoneInsertType = typeof timezones.$inferInsert;
 
 export type SettingsTimezonesPaginatedResult = {
   readonly id: string;
-  readonly rows: TimezoneEntity[];
+  readonly rows: TimezoneSelectType[];
   readonly totalCount: number;
   readonly pageInfo: PageInfo | null;
 };

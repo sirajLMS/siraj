@@ -6,12 +6,13 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
+import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
-import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
+import type { ClassInstanceInsertType, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -19,7 +20,7 @@ export namespace TeacherDashboardService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, permission);
     if (!isAuthorized) {
-      throw new Error(tErrors.unauthorized);
+      throw new UnauthorizedError(tErrors.unauthorized);
     }
   }
 
@@ -30,7 +31,7 @@ export namespace TeacherDashboardService {
 
     const teacher = await TeacherRepository.findByUserId(userId);
     if (!teacher) {
-      throw new Error(tErrors.teacher.teacherNotFound(userId));
+      throw new NotFoundError("TEACHER", tErrors.teacher.teacherNotFound(userId));
     }
 
     const user = await UserRepository.findById(userId);
@@ -80,12 +81,12 @@ export namespace TeacherDashboardService {
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
 
     if (!input.subjectId) {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
 
     const balance = await CreditRepository.getBalance(db, input.studentId);
     if (balance.classesRemaining <= 0) {
-      throw new Error(
+      throw new ValidationError(
         tErrors.credit.insufficientBalance?.({
           studentId: input.studentId,
           remaining: balance.classesRemaining,
@@ -94,7 +95,7 @@ export namespace TeacherDashboardService {
     }
 
     const idempotencyKey = `manual-${userId}-${Date.now()}`;
-    const entry: Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
+    const entry: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
       studentId: input.studentId,
       teacherId: input.teacherId,
       subjectId: input.subjectId,

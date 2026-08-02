@@ -14,17 +14,17 @@ import {
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason, CurrencyCode, PaymentMethodType } from "@/backend/enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import type { ClassInstanceEntity, InvoiceInsertType, PaymentInsertType } from "@/backend/types";
+import type { ClassInstanceSelectType, InvoiceInsertType, PaymentInsertType } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 
 /**
  * Resolves the nullable `instance` returned from `setupTestEntities` to a
- * concrete `ClassInstanceEntity`. Tests pass `{ skipInstance: false }` so an
+ * concrete `ClassInstanceSelectType`. Tests pass `{ skipInstance: false }` so an
  * instance is always created; this helper keeps the call sites concise while
  * satisfying TypeScript's strict null checks.
  */
-function requireInstance(instance: ClassInstanceEntity | null): ClassInstanceEntity {
+function requireInstance(instance: ClassInstanceSelectType | null): ClassInstanceSelectType {
   if (!instance) {
     throw new Error("setupTestEntities returned a null instance — pass skipInstance:false");
   }

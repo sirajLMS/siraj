@@ -11,17 +11,17 @@ import type {
   TeacherCreateResult,
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
-  TeacherEntity,
-  TeacherEntityInput,
+  TeacherInsertType,
   TeacherProfileReturnType,
   TeacherProfileUpdateInputType,
+  TeacherSelectType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherRepository {
   export async function create(
-    input: TeacherEntityInput,
+    input: TeacherInsertType,
     tx?: DBTransaction,
     locale?: string
   ): Promise<TeacherCreateResult> {
@@ -322,7 +322,7 @@ export namespace TeacherRepository {
     userId: string,
     extraValues?: { hourlyRate?: string | null; rateCurrency?: CurrencyCode | null },
     tx?: DBTransaction
-  ): Promise<TeacherEntity> => {
+  ): Promise<TeacherSelectType> => {
     const queryDb = tx ?? db;
     const now = new Date();
     const [row] = await queryDb

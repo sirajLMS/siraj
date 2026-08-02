@@ -103,7 +103,7 @@ export type QuotaUpdateInput = Omit<
   version: number;
 };
 
-export type QuotaLedgerInsertInput = Omit<QuotaLedgerInsertType, "createdAt" | "updatedAt">;
+export type QuotaLedgerSubmitInput = Omit<QuotaLedgerInsertType, "createdAt" | "updatedAt">;
 
 export interface QuotaPaginatedFilter {
   studentId?: string | null;

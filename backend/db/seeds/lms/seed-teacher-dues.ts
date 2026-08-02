@@ -3,15 +3,15 @@ import { ClassExecutionState, CurrencyCode, LessonReportStatus, RateSource, Teac
 import logger from "@/backend/lib/logger";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type {
-  ClassInstanceEntity,
+  ClassInstanceSelectType,
   LessonReportReturnType,
   TeacherDueReturnType,
-  TeacherEntity,
+  TeacherSelectType,
   UserSelectType,
 } from "@/backend/types";
 
 type SeededDueSpec = {
-  classInstance: ClassInstanceEntity;
+  classInstance: ClassInstanceSelectType;
   teacherId: string;
   studentId: string;
   hours: number;
@@ -24,8 +24,8 @@ type SeededDueSpec = {
 
 function buildSpecs(
   approvedReports: LessonReportReturnType[],
-  classInstanceById: Map<string, ClassInstanceEntity>,
-  teacherById: Map<string, TeacherEntity>
+  classInstanceById: Map<string, ClassInstanceSelectType>,
+  teacherById: Map<string, TeacherSelectType>
 ): SeededDueSpec[] {
   const specs: SeededDueSpec[] = [];
 
@@ -71,8 +71,8 @@ function buildSpecs(
 
 export async function seedOrGet(
   lessonReports: LessonReportReturnType[],
-  classInstancesList: ClassInstanceEntity[],
-  teachersList: TeacherEntity[],
+  classInstancesList: ClassInstanceSelectType[],
+  teachersList: TeacherSelectType[],
   users: UserSelectType[],
   _config?: SeedConfig
 ): Promise<TeacherDueReturnType[]> {

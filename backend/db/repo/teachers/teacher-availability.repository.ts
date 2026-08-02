@@ -12,6 +12,7 @@ import {
 import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { parseGender, parseIanaTimezone } from "@/backend/lib/enum";
+import { NotFoundError, ValidationError } from "@/backend/lib/errors";
 import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
@@ -380,7 +381,7 @@ export namespace TeacherAvailabilityRepository {
   async function assertValidTimeRange(startTime: string, endTime: string, locale?: string): Promise<void> {
     if (timeToMinutes(startTime) >= timeToMinutes(endTime)) {
       const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(`${errorsTranslations.invalidInput}; Start time must be before end time`);
+      throw new ValidationError(`${errorsTranslations.invalidInput}; Start time must be before end time`);
     }
   }
 
@@ -459,7 +460,7 @@ export namespace TeacherAvailabilityRepository {
     const runner = async (t: DBTransaction) => {
       if (input.startAt >= input.endAt) {
         const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(`${errorsTranslations.invalidInput}; Vacation start date must be before end date`);
+        throw new ValidationError(`${errorsTranslations.invalidInput}; Vacation start date must be before end date`);
       }
 
       await acquireAvailabilityLock(t, teacherId);
@@ -517,7 +518,7 @@ export namespace TeacherAvailabilityRepository {
       .limit(1);
 
     if (results.length === 0) {
-      throw new Error(`Vacation request ${vacationRequestId} not found`);
+      throw new NotFoundError("VACATION_REQUEST", `Vacation request ${vacationRequestId} not found`);
     }
 
     return results[0];
@@ -532,7 +533,7 @@ export namespace TeacherAvailabilityRepository {
   ): Promise<void> {
     if (shouldFail(current.status as VacationRequestStatus)) {
       const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(
+      throw new ValidationError(
         errorKey === "vacationRequestNotPending"
           ? `Vacation request ${vacationRequestId} is not in pending status. ${errorsTranslations.invalidInput}`
           : `Vacation request ${vacationRequestId} is already cancelled. ${errorsTranslations.invalidInput}`
@@ -639,7 +640,7 @@ export namespace TeacherAvailabilityRepository {
 
     if (approvedVacations.length > 0) {
       const { teacherOnVacation } = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(teacherOnVacation);
+      throw new ValidationError(teacherOnVacation);
     }
   }
 
@@ -667,7 +668,7 @@ export namespace TeacherAvailabilityRepository {
 
     if (checkUnavailabilityConflict(bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes, patterns)) {
       const { teacherUnavailabilityConflict } = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(teacherUnavailabilityConflict);
+      throw new ValidationError(teacherUnavailabilityConflict);
     }
   }
 
@@ -690,7 +691,7 @@ export namespace TeacherAvailabilityRepository {
 
     if (!checkWindowsMatch(bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes, windows)) {
       const { outsideAvailability } = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(outsideAvailability);
+      throw new ValidationError(outsideAvailability);
     }
   }
 
@@ -750,19 +751,19 @@ export namespace TeacherAvailabilityRepository {
 
     if (checkVacationOverlap(slot.startTime, slot.endTime, vacationsRows)) {
       const { teacherOnVacation } = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(teacherOnVacation);
+      throw new ValidationError(teacherOnVacation);
     }
 
     if (
       checkUnavailabilityConflict(bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes, unavailabilityRows)
     ) {
       const { teacherUnavailabilityConflict } = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(teacherUnavailabilityConflict);
+      throw new ValidationError(teacherUnavailabilityConflict);
     }
 
     if (!checkWindowsMatch(bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes, windowRows)) {
       const { outsideAvailability } = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(outsideAvailability);
+      throw new ValidationError(outsideAvailability);
     }
   };
 
@@ -1110,7 +1111,7 @@ export namespace TeacherAvailabilityRepository {
 
     if (fromMinutes >= toMinutes) {
       const { invalidInput } = getServerTranslations("en").errorsTranslations;
-      throw new Error(`${invalidInput}; Start time must be before end time`);
+      throw new ValidationError(`${invalidInput}; Start time must be before end time`);
     }
 
     const fromDate = input.fromDate ?? getUtcDateString(new Date());
@@ -1118,7 +1119,7 @@ export namespace TeacherAvailabilityRepository {
 
     if (fromDate > toDate) {
       const { invalidInput } = getServerTranslations("en").errorsTranslations;
-      throw new Error(`${invalidInput}; Vacation start date must be before end date`);
+      throw new ValidationError(`${invalidInput}; Vacation start date must be before end date`);
     }
 
     const calendarDates = expandDateRange(fromDate, toDate);

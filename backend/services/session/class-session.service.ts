@@ -22,8 +22,8 @@ import { ClassPerformanceService } from "@/backend/services/performance/class-pe
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
 import type {
   ClassInstanceDetailReturnType,
-  ClassInstanceEntity,
-  ClassInstanceInsertInput,
+  ClassInstanceInsertType,
+  ClassInstanceSelectType,
   ClassStatusEventReturnType,
 } from "@/backend/types";
 import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
@@ -221,7 +221,7 @@ export namespace ClassSessionService {
    *   `isQuotaBacked: true`) does NOT trigger a phantom credit refund.
    */
   async function releaseQuotaIfDeducted(
-    instance: Pick<ClassInstanceEntity, "id" | "studentId" | "quotaDeducted" | "recurringScheduleId">,
+    instance: Pick<ClassInstanceSelectType, "id" | "studentId" | "quotaDeducted" | "recurringScheduleId">,
     actorUserId: string,
     tx: DBTransaction,
     locale = "en"
@@ -317,7 +317,7 @@ export namespace ClassSessionService {
   }
 
   async function handleOndemandSessionStartCreditDeduction(
-    instance: ClassInstanceEntity,
+    instance: ClassInstanceSelectType,
     userId: string,
     tErrors: ErrorsLabels,
     tx: DBTransaction,
@@ -433,7 +433,7 @@ export namespace ClassSessionService {
     return result;
   }
 
-  export const updateStatusStart: ClassActionFn<ClassInstanceEntity> = async (userId, classInstanceId, tErrors) => {
+  export const updateStatusStart: ClassActionFn<ClassInstanceSelectType> = async (userId, classInstanceId, tErrors) => {
     const result = await runActivatedClassAction(
       userId,
       classInstanceId,
@@ -445,7 +445,11 @@ export namespace ClassSessionService {
     return result;
   };
 
-  export const updateStatusAbsent: ClassActionFn<ClassInstanceEntity> = async (userId, classInstanceId, tErrors) => {
+  export const updateStatusAbsent: ClassActionFn<ClassInstanceSelectType> = async (
+    userId,
+    classInstanceId,
+    tErrors
+  ) => {
     const result = await runActivatedClassAction(
       userId,
       classInstanceId,
@@ -664,21 +668,21 @@ export namespace ClassSessionService {
   export async function listClassInstancesByIdempotencyKeys(
     keys: readonly string[],
     tx?: DBTransaction
-  ): Promise<Map<string, ClassInstanceEntity>> {
+  ): Promise<Map<string, ClassInstanceSelectType>> {
     return SchedulingRepository.listByIdempotencyKeys(keys, tx);
   }
 
   export async function upsertManyClassInstances(
-    instances: ClassInstanceInsertInput[],
+    instances: ClassInstanceInsertType[],
     options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
-  ): Promise<ClassInstanceEntity[]> {
+  ): Promise<ClassInstanceSelectType[]> {
     return SchedulingRepository.upsertMany(instances, options);
   }
 
   export async function upsertManyClassInstancesForSeed(
-    instances: ClassInstanceInsertInput[],
+    instances: ClassInstanceInsertType[],
     options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
-  ): Promise<ClassInstanceEntity[]> {
+  ): Promise<ClassInstanceSelectType[]> {
     return SchedulingRepository.upsertManyForSeed(instances, options);
   }
 

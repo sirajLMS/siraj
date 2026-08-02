@@ -14,8 +14,8 @@ import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.ty
 import type { ClassSessionMetrics } from "@/backend/types/scheduling/schedule.types";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
-export type TeacherEntity = typeof teachers.$inferSelect;
-export type TeacherEntityInput = typeof teachers.$inferInsert;
+export type TeacherSelectType = typeof teachers.$inferSelect;
+export type TeacherInsertType = typeof teachers.$inferInsert;
 
 export type TeacherPaymentSelectType = typeof teacherPayments.$inferSelect;
 export type TeacherPaymentInsertInput = typeof teacherPayments.$inferInsert;
@@ -33,7 +33,7 @@ export type CreateTeacherPaymentInput = {
   readonly isTestPayment?: boolean;
 };
 
-export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "createdAt"> & {
+export type TeacherCreateResult = Pick<TeacherSelectType, "id" | "userId" | "createdAt"> & {
   readonly status: AccountStatus;
   readonly timezone: IanaTimezone;
 };
@@ -72,7 +72,7 @@ export type TeacherDashboardPaginatedResult = {
 };
 
 export type TeacherProfileReturnType = Omit<
-  TeacherEntity,
+  TeacherSelectType,
   | "userId"
   | "status"
   | "gender"
@@ -100,7 +100,7 @@ export type TeacherProfileReturnType = Omit<
 };
 
 export type TeacherProfileUpdateInputType = Partial<
-  Omit<TeacherEntityInput, "id" | "userId" | "createdAt" | "updatedAt" | "gender" | "paymentMethod">
+  Omit<TeacherInsertType, "id" | "userId" | "createdAt" | "updatedAt" | "gender" | "paymentMethod">
 > & {
   readonly status?: AccountStatus | null;
   readonly gender?: Gender | null;
