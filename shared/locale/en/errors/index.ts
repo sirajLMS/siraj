@@ -274,4 +274,7 @@ export const errorsEn: ErrorsLabels = {
   resourceNotFound: "Learning resource not found.",
   currencyInUse:
     "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
+
+  // ─── Cron errors ──────────────────────────────────────────────────
+  invalidRunStatus: (status: string, runId: string) => `Cannot retry a run with status ${status} (runId: ${runId}).`,
 };

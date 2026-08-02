@@ -24,24 +24,28 @@ function cacheComponent<TProps>(key: string, component: React.ComponentType<TPro
 async function preloadViews() {
   try {
     // Import mobile views
-    const [mobileScheduleOverview, mobilePendingReviews, mobileSearchSchedule] = await Promise.all([
+    const [mobileScheduleOverview, mobilePendingReviews, mobileSearchSchedule, mobileCron] = await Promise.all([
       import("@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/scheduleOverview.mobile"),
       import("@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/pendingReviews.mobile"),
       import("@/frontend/mobile/views/dashboard/search-schedule/searchSchedule.mobile"),
+      import("@/frontend/mobile/views/dashboard/cron/cronView.mobile"),
     ]);
     cacheComponent("mobile-scheduleOverview", mobileScheduleOverview.ScheduleOverviewMobileView);
     cacheComponent("mobile-pendingReviews", mobilePendingReviews.PendingReviewsMobileView);
     cacheComponent("mobile-searchSchedule", mobileSearchSchedule.SearchScheduleMobileView);
+    cacheComponent("mobile-cron", mobileCron.CronMobileView);
 
     // Import desktop views
-    const [desktopScheduleOverview, desktopPendingReviews, desktopSearchSchedule] = await Promise.all([
+    const [desktopScheduleOverview, desktopPendingReviews, desktopSearchSchedule, desktopCron] = await Promise.all([
       import("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop"),
       import("@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/pendingReviews.desktop"),
       import("@/frontend/desktop/views/dashboard/search-schedule/searchSchedule.desktop"),
+      import("@/frontend/desktop/views/dashboard/cron/cronView.desktop"),
     ]);
     cacheComponent("desktop-scheduleOverview", desktopScheduleOverview.ScheduleOverviewDesktopView);
     cacheComponent("desktop-pendingReviews", desktopPendingReviews.PendingReviewsDesktopView);
     cacheComponent("desktop-searchSchedule", desktopSearchSchedule.SearchScheduleDesktopView);
+    cacheComponent("desktop-cron", desktopCron.CronDesktopView);
   } catch (err) {
     globalThis.console.error("Failed to preload views:", err);
   }
@@ -71,6 +75,10 @@ mock.module("next/dynamic", () => {
       cacheKey = "mobile-searchSchedule";
     } else if (importerStr.includes("searchSchedule.desktop")) {
       cacheKey = "desktop-searchSchedule";
+    } else if (importerStr.includes("cronView.mobile")) {
+      cacheKey = "mobile-cron";
+    } else if (importerStr.includes("cronView.desktop")) {
+      cacheKey = "desktop-cron";
     } else {
       // For any other dynamic imports, use the function string as key
       cacheKey = importerStr;

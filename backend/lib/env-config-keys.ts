@@ -36,7 +36,8 @@ export type EnvConfigCategory =
   | "app"
   | "meeting"
   | "billing"
-  | "general";
+  | "general"
+  | "cron";
 
 /**
  * How the UI should render the value in the Settings → Environment Config table.
@@ -482,7 +483,55 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
       ar: "سرّ مشترك مطلوب لاستدعاء نقاط النهاية المخصّصة لـ cron فقط.",
     },
     isSecret: true,
+    excludeFromDb: true,
+  },
+  {
+    key: "CRON_QUEUE_BACKEND",
+    category: "cron",
+    displayStrategy: "plain",
+    description: {
+      en: "Queue backend for cron job execution (PG_BOSS, BULLMQ_POSTGRES, BULLMQ_REDIS, CUSTOM_SQL).",
+      ar: "خلفية قائمة الانتظار لتنفيذ مهام cron (PG_BOSS, BULLMQ_POSTGRES, BULLMQ_REDIS, CUSTOM_SQL).",
+    },
+    isSecret: false,
     excludeFromDb: false,
+    defaultValue: "PG_BOSS",
+  },
+  {
+    key: "CRON_QUEUE_MAX_BATCH",
+    category: "cron",
+    displayStrategy: "plain",
+    description: {
+      en: "Maximum number of cron runs the ticker claims per invocation.",
+      ar: "الحد الأقصى لعدد عمليات تشغيل cron التي يطالب بها المؤشّر لكل استدعاء.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+    defaultValue: "25",
+  },
+  {
+    key: "CRON_QUEUE_WORKER_CONCURRENCY",
+    category: "cron",
+    displayStrategy: "plain",
+    description: {
+      en: "Number of concurrent jobs the in-process worker can execute.",
+      ar: "عدد المهام المتزامنة التي يمكن للعامل داخل العملية تنفيذها.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+    defaultValue: "1",
+  },
+  {
+    key: "CRON_QUEUE_WORKER_TIMEOUT",
+    category: "cron",
+    displayStrategy: "plain",
+    description: {
+      en: "Maximum duration in milliseconds for the standalone cron worker before it exits (default: 270000 = 4.5 minutes).",
+      ar: "الحد الأقصى لمدة عامل cron المستقل بالميلي ثانية قبل أن يخرج (الافتراضي: 270000 = 4.5 دقيقة).",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+    defaultValue: "270000",
   },
   {
     key: "ENABLE_LOGGING",

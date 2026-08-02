@@ -24,6 +24,7 @@ import { DashboardCoreParentDashboard } from "@/shared/locale/namespaces/dashboa
 import { DashboardCoreScheduleAlerts } from "@/shared/locale/namespaces/dashboard/core/scheduleAlerts.namespace";
 import { DashboardCoreSearchSchedule } from "@/shared/locale/namespaces/dashboard/core/searchSchedule.namespace";
 import { DashboardCoreStatusTracking } from "@/shared/locale/namespaces/dashboard/core/statusTracking.namespace";
+import { DashboardCron } from "@/shared/locale/namespaces/dashboard/cron/main.namespace";
 import { DashboardFeedbackManageParent } from "@/shared/locale/namespaces/dashboard/feedback/main.namespace";
 import { DashboardLmsCredit } from "@/shared/locale/namespaces/dashboard/lms/credit.namespace";
 import { DashboardLmsLessonReports } from "@/shared/locale/namespaces/dashboard/lms/lessonReports.namespace";
@@ -150,6 +151,7 @@ export const Translation = {
     CoreStatusTracking: DashboardCoreStatusTracking,
     CoreScheduleAlerts: DashboardCoreScheduleAlerts,
     CoreParentDashboard: DashboardCoreParentDashboard,
+    Cron: DashboardCron,
     CreateRecurringClass: DashboardCreateRecurringClass,
     FeedbackManageParent: DashboardFeedbackManageParent,
     LmsCredit: DashboardLmsCredit,

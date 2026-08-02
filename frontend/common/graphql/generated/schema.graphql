@@ -79,6 +79,7 @@ enum AppPermission {
   COMPLAINTS_LIST
   COMPLAINTS_RESPOND
   CREDITS_MANAGE
+  CRON_MANAGE
   DASHBOARD_FILTER_METRICS
   DASHBOARD_METRICS_VIEW_ALL
   DASHBOARD_SEARCH
@@ -1134,6 +1135,153 @@ type CreditTransaction {
   sourcePaymentId: String
   studentId: String
   updatedAt: DateTime
+}
+
+enum CronConcurrencyPolicy {
+  ALLOW
+  REPLACE
+  SKIP
+}
+
+enum CronJobKind {
+  NOOP
+}
+
+type CronPaginatedRuns {
+  rows: [CronRun!]
+  totalCount: Int
+}
+
+type CronPaginatedSchedules {
+  rows: [CronSchedule!]
+  totalCount: Int
+}
+
+type CronQueueStats {
+  backend: String
+  byJobKind: JSON
+  failed: Int
+  id: String
+  inFlight: Int
+  pending: Int
+}
+
+type CronRun {
+  attempt: Int
+  completedAt: DateTime
+  createdAt: DateTime
+  durationMs: Int
+  errorMessage: String
+  id: String
+  jobKind: CronJobKind
+  payload: JSON
+  scheduleId: String
+  startedAt: DateTime
+  status: CronRunStatus
+  triggerSource: CronTriggerSource
+  updatedAt: DateTime
+  workerId: String
+}
+
+input CronRunListInput {
+  from: DateTime
+  limit: Int
+  offset: Int
+  scheduleId: String
+  status: CronRunStatus
+  to: DateTime
+}
+
+input CronRunRetryInput {
+  attempt: Int
+  runId: String!
+}
+
+enum CronRunStatus {
+  CANCELLED
+  COMPLETED
+  FAILED
+  PENDING
+  RETRYING
+  RUNNING
+  TIMEOUT
+}
+
+input CronRunTriggerInput {
+  id: String!
+  payload: JSON
+}
+
+type CronSchedule {
+  concurrencyPolicy: CronConcurrencyPolicy
+  createdAt: DateTime
+  cronExpression: String
+  description: String
+  id: String
+  jobKind: CronJobKind
+  lastRunAt: DateTime
+  maxRetries: Int
+  name: String
+  nextRunAt: DateTime
+  payload: JSON
+  retryBackoffSeconds: Int
+  status: CronScheduleStatus
+  timeoutSeconds: Int
+  timezone: String
+  updatedAt: DateTime
+}
+
+input CronScheduleDeleteInput {
+  hard: Boolean
+  id: String!
+}
+
+input CronScheduleListInput {
+  jobKind: CronJobKind
+  limit: Int
+  name: String
+  offset: Int
+  status: CronScheduleStatus
+}
+
+enum CronScheduleStatus {
+  ACTIVE
+  DISABLED
+  PAUSED
+}
+
+input CronScheduleSubmitInput {
+  concurrencyPolicy: CronConcurrencyPolicy
+  cronExpression: String!
+  description: String
+  jobKind: CronJobKind!
+  maxRetries: Int
+  name: String!
+  payload: JSON
+  retryBackoffSeconds: Int
+  timeoutSeconds: Int
+  timezone: String
+}
+
+input CronScheduleUpdateInput {
+  concurrencyPolicy: CronConcurrencyPolicy
+  cronExpression: String
+  description: String
+  jobKind: CronJobKind
+  maxRetries: Int
+  name: String
+  payload: JSON
+  retryBackoffSeconds: Int
+  timeoutSeconds: Int
+  timezone: String
+}
+
+enum CronTriggerSource {
+  EXTERNAL
+  MANUAL
+  VERCEL_EXPLICIT
+  VERCEL_TICKER
+  WORKER_RETRY
 }
 
 enum CurrencyCode {
@@ -2483,6 +2631,27 @@ type Mutation {
   createTestSuperAdmin(prefix: String!): TestSuperAdmin
   createUserMeetingConfig(input: UserMeetingConfigCreateInput!): UserMeetingConfig
   createUserPaymentMethod(input: UserPaymentMethodCreateInput!): UserPaymentMethod
+
+  """Retry a failed cron run."""
+  cronRunRetry(input: CronRunRetryInput!): CronRun
+
+  """Manually trigger a cron schedule to run immediately."""
+  cronRunTrigger(input: CronRunTriggerInput!): CronRun
+
+  """Create a new cron schedule."""
+  cronScheduleCreate(input: CronScheduleSubmitInput!): CronSchedule
+
+  """Delete a cron schedule (soft by default, hard if specified)."""
+  cronScheduleDelete(input: CronScheduleDeleteInput!): Boolean
+
+  """Pause a cron schedule."""
+  cronSchedulePause(id: String!): CronSchedule
+
+  """Resume a paused cron schedule."""
+  cronScheduleResume(id: String!): CronSchedule
+
+  """Update an existing cron schedule."""
+  cronScheduleUpdate(id: String!, input: CronScheduleUpdateInput!): CronSchedule
   deactivateParent(parentId: String!): DeactivateParentResult
   deactivateSupportedCurrency(code: CurrencyCode!): Boolean
   deactivateSupportedMobileWallet(id: ID!): SupportedMobileWallet
@@ -3211,6 +3380,21 @@ type Query {
   Returns file attachments for a specific complaint. Accessible by the owning parent or admins.
   """
   complaintFiles(complaintId: String!): [ComplaintFile!]
+
+  """Get queue statistics for the active queue backend."""
+  cronQueueStats: CronQueueStats
+
+  """Fetch a single cron run by ID."""
+  cronRun(id: ID!): CronRun
+
+  """List cron runs with optional filters."""
+  cronRuns(input: CronRunListInput): CronPaginatedRuns
+
+  """Fetch a single cron schedule by ID."""
+  cronSchedule(id: ID!): CronSchedule
+
+  """List cron schedules with optional filters."""
+  cronSchedules(input: CronScheduleListInput): CronPaginatedSchedules
   currencyHedges: [CurrencyHedge!]
   dailyScheduleList(date: String!, metricFilter: String, search: String, teacherId: String): [DailyScheduleList!]
   dailyScheduleMetrics(date: String!, teacherId: String): DailyScheduleMetrics
@@ -4723,6 +4907,7 @@ type TeacherPayment {
   amount: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
   isTestPayment: Boolean
   paymentDate: DateTime

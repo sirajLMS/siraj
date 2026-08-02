@@ -304,4 +304,7 @@ export interface ErrorsLabels {
   readonly teacherOnVacation: string;
   readonly resourceNotFound: string;
   readonly currencyInUse: string;
+
+  // ─── Cron errors ──────────────────────────────────────────────────
+  readonly invalidRunStatus: (status: string, runId: string) => string;
 }

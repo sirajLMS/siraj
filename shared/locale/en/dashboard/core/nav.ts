@@ -61,6 +61,7 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   invoices: "Invoices",
   parentRules: "Rules",
   socialMedia: "Social Media",
+  cron: "Cron Jobs",
   permissions: "Permissions",
   settings: "Settings",
   booksAndBags: "Books & Bags",

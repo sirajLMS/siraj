@@ -610,4 +610,34 @@ export const relations = defineRelations(schema, r => ({
       to: r.teacherPayments.userPaymentMethodId,
     }),
   },
+  cronSchedules: {
+    createdBy: r.one.users({
+      from: r.cronSchedules.createdByUserId,
+      to: r.users.id,
+    }),
+    updatedBy: r.one.users({
+      from: r.cronSchedules.updatedByUserId,
+      to: r.users.id,
+    }),
+    runs: r.many.cronRuns({
+      from: r.cronSchedules.id,
+      to: r.cronRuns.scheduleId,
+    }),
+  },
+  cronRuns: {
+    schedule: r.one.cronSchedules({
+      from: r.cronRuns.scheduleId,
+      to: r.cronSchedules.id,
+    }),
+    heartbeats: r.many.cronHeartbeats({
+      from: r.cronRuns.id,
+      to: r.cronHeartbeats.runId,
+    }),
+  },
+  cronHeartbeats: {
+    run: r.one.cronRuns({
+      from: r.cronHeartbeats.runId,
+      to: r.cronRuns.id,
+    }),
+  },
 }));

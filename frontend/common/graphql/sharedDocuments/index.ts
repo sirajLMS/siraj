@@ -2,6 +2,7 @@ export * from "./auth";
 export * from "./billing";
 export * from "./classes";
 export * from "./complaints";
+export * from "./cron";
 export * from "./meeting";
 export * from "./notifications";
 export * from "./parents";

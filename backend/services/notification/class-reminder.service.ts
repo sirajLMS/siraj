@@ -2,6 +2,7 @@ import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
 import { classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling";
 import { NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
+import { formatError } from "@/backend/services/cron/cron-utils";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import { buildClassLifecyclePayloads } from "@/backend/services/notification/notification-payloads.builders";
 import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
@@ -68,7 +69,7 @@ export namespace ClassReminderService {
           // One instance's failure must NOT halt the cron run.
           logger.error("ClassReminderService: per-instance dispatch failed", {
             instanceId: instance.id,
-            err: err instanceof Error ? err.message : String(err),
+            err: formatError(err),
           });
         }
       }
@@ -82,7 +83,7 @@ export namespace ClassReminderService {
       return { success: true, instancesProcessed: upcoming.length, deliveriesDispatched };
     } catch (error) {
       logger.error("ClassReminderService.dispatchDailyReminders failed", {
-        error: error instanceof Error ? error.message : String(error),
+        error: formatError(error),
       });
       return { success: false, instancesProcessed: 0, deliveriesDispatched: 0 };
     }

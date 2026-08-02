@@ -416,3 +416,4 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/graphql/dataloader-batching.md` - Pothos DataLoader batching pattern reference
 - `docs/services/entity-cache-service.md` - Entity Cache Service pattern reference
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
+- `docs/services/cron-service.md` - Cron service pattern reference

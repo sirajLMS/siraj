@@ -92,6 +92,7 @@ export const PAGE_PERMISSIONS = {
   suggestionsManage: [AppPermission.SuggestionsList] as PagePermissions,
   complaintsSubmit: [AppPermission.SupportSubmitComplaint] as PagePermissions,
   dstMigration: [AppPermission.SystemBulkUpdateDst] as PagePermissions,
+  cronManagement: [AppPermission.CronManage] as PagePermissions,
   permissions: [AppPermission.PermissionGroupsManage] as PagePermissions,
   studentSelfDashboard: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
   studentCredits: [AppPermission.StudentViewOwnDashboard] as PagePermissions,

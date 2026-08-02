@@ -24,6 +24,7 @@ import { dashboardCoreParentDashboardAr } from "@/shared/locale/ar/dashboard/cor
 import { dashboardCoreScheduleAlertsAr } from "@/shared/locale/ar/dashboard/core/scheduleAlerts.ts";
 import { dashboardCoreSearchScheduleAr } from "@/shared/locale/ar/dashboard/core/searchSchedule.ts";
 import { dashboardCoreStatusTrackingAr } from "@/shared/locale/ar/dashboard/core/statusTracking.ts";
+import { dashboardCronAr } from "@/shared/locale/ar/dashboard/cron/main";
 import { dashboardFeedbackManageParentAr } from "@/shared/locale/ar/dashboard/feedback/main.ts";
 import { dashboardLmsCreditAr } from "@/shared/locale/ar/dashboard/lms/credit.ts";
 import { dashboardLmsLessonReportsAr } from "@/shared/locale/ar/dashboard/lms/lessonReports.ts";
@@ -162,6 +163,7 @@ export const arMessages: Translations = {
   dashboardTranslations: {
     admin: dashboardAdminAr,
     adminView: dashboardAdminViewAr,
+    cron: dashboardCronAr,
     dstMigration: dashboardDstMigrationAr,
     billing: dashboardBillingAr,
     billingManual: dashboardBillingManualAr,

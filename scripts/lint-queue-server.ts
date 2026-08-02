@@ -55,7 +55,7 @@
  */
 
 import { createServer } from "node:http";
-import { PORT } from "./lint-queue-config";
+import { PORT } from "@/scripts/lint-queue-config";
 
 /**
  * eslint --concurrency value. Capped to 4 by default to avoid memory/CPU

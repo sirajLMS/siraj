@@ -152,3 +152,13 @@ applyTo: "backend/**/*.ts"
 ### Code Style
 
 - No nested ternary operators - extract into if/else or separate functions (SonarJS code smell)
+
+### Cron Service Conventions
+
+- **Queue Adapter Factory Pattern**: The cron service uses a factory (`backend/services/cron/queue-adapter.factory.ts`) that selects the queue backend at runtime via `CRON_QUEUE_BACKEND` env var. Adapters implement `CronQueueAdapter` interface from `@/backend/types/cron/cron.types`. Use `getQueueAdapter()` (lazy singleton) — never instantiate adapters directly.
+- **Lazy Import Exception**: The queue-adapter factory uses dynamic `await import(...)` for adapter modules. This is the ONLY exception to the "no dynamic imports" rule in backend code — it prevents loading unnecessary adapter dependencies (e.g., pg-boss, bullmq) when they're not configured.
+- **Scope-Auth on Cron Mutations**: All cron GraphQL mutations use `authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true }` — admin-only, no impersonation.
+- **Concurrency Policy Handling**: The `claimNextRun` repository method atomically handles `ALLOW`, `SKIP`, and `REPLACE` concurrency policies via `FOR UPDATE SKIP LOCKED` + advisory locks. The service layer delegates concurrency enforcement to the repository — do NOT add concurrency checks in the service.
+- **Run Lifecycle Methods**: `setRunRunning`, `completeRun`, `failRun`, `retryRun` are called by the worker runtime (`backend/services/cron/cron-worker.runtime.ts`), NOT by GraphQL resolvers. They use status-guard patterns (only transition from expected prior statuses).
+- **Cron Worker Entry Point**: `scripts/cron-worker.ts` is the standalone worker process entry point. It runs an infinite loop with `Bun.sleep(1000)` between iterations and handles SIGINT/SIGTERM for graceful shutdown.
+- **Typed Errors**: Cron adapter errors use typed error classes (`CronQueueAdapterError`, `CronQueueAdapterNotAvailableError`) from `@/backend/types/cron/cron.types` — never throw plain `Error` in adapter code.

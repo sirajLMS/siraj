@@ -61,6 +61,7 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   invoices: "الفواتير",
   parentRules: "القواعد",
   socialMedia: "وسائل التواصل",
+  cron: "وظائف مجدولة",
   permissions: "الصلاحيات",
   settings: "الإعدادات",
   booksAndBags: "الكتب والحقائب",

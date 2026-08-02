@@ -274,4 +274,8 @@ export const errorsAr: ErrorsLabels = {
   resourceNotFound: "مورد التعلم غير موجود.",
   currencyInUse:
     "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
+
+  // ─── Cron errors ──────────────────────────────────────────────────
+  invalidRunStatus: (status: string, runId: string) =>
+    `لا يمكن إعادة محاولة تشغيل بحالة ${status} (معرف التشغيل: ${runId}).`,
 };

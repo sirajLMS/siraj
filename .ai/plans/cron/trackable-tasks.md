@@ -43,54 +43,54 @@
 
 ## Phase 1: Foundation (Enums / Types / Schema)
 
-- [ ] 1. **Enums + types** (REQ-12)
-- [ ] 1.1 Create `backend/enum/cron/cron.enums.ts`
+- [x] 1. **Enums + types** (REQ-12)
+- [x] 1.1 Create `backend/enum/cron/cron.enums.ts`
   - Add `CronQueueBackend`, `CronScheduleStatus`, `CronRunStatus`, `CronJobKind`, `CronTriggerSource`, `CronConcurrencyPolicy` per [specs.md REQ-12](./specs.md#req-12-enums--types)
   - Add `export *` to `backend/enum/cron/index.ts` and re-export `./cron` from `backend/enum/index.ts`
   - Add `CRON_MANAGE = "cron.manage"` to `backend/enum/permissions/permission.enum.ts` (existing camelCase pattern)
   - **Quality Loop**: `bun tsgo` + `bun biome:check` + lint queue for `backend/enum/cron/cron.enums.ts`, `backend/enum/permissions/permission.enum.ts`, and the two `index.ts` barrels
   - **Instruction Verification**: `backend/enum/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-12_
-- [ ] 1.2 Create `backend/types/cron/cron.types.ts`
+- [x] 1.2 Create `backend/types/cron/cron.types.ts`
   - `CronScheduleSelectType`, `CronScheduleInsertType`, `CronRunSelectType`, `CronRunInsertType` (from `$inferSelect`/`$inferInsert` after REQ-11 ships; for now define them as forward-references that resolve once the schema exists)
   - `CronScheduleReturnType`, `CronScheduleSubmitInput`, `CronScheduleUpdateInput`, `CronRunReturnType`, `CronRunListInput`, `CronTriggerNowInput`, `CronQueueStats`
   - Add barrel `backend/types/cron/index.ts` and re-export from `backend/types/index.ts`
   - **Quality Loop**: per-file on the three files
   - **Instruction Verification**: `backend/types/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-12_
-- [ ] 1.3 Register env config keys (REQ-4 AC1)
+- [x] 1.3 Register env config keys (REQ-4 AC1)
   - Add `CRON_QUEUE_BACKEND` (default `PG_BOSS`), `CRON_QUEUE_MAX_BATCH` (default 25), `CRON_QUEUE_WORKER_CONCURRENCY` (default 1) to `backend/lib/env-config-keys.ts` — `excludeFromDb: false`, category `cron`
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/index/AGENTS.md` if present (backend), `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-4 AC1_
 
-- [ ] 2. **DB schema** (REQ-11)
-- [ ] 2.1 Create `backend/db/schema/cron/cron.ts`
+- [x] 2. **DB schema** (REQ-11)
+- [x] 2.1 Create `backend/db/schema/cron/cron.ts`
   - 3 tables: `cron_schedules`, `cron_runs`, `cron_heartbeats` per [implementation.md Component 7](./implementation.md#entity-1-cron_schedules) and REQ-11 AC1
   - Add indexes per REQ-11 AC5
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/db/schema/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-11_
-- [ ] 2.2 Register enums in `backend/db/schema/enums.ts`
+- [x] 2.2 Register enums in `backend/db/schema/enums.ts`
   - `cronQueueBackendEnum`, `cronScheduleStatusEnum`, `cronRunStatusEnum`, `cronJobKindEnum`, `cronTriggerSourceEnum`, `cronConcurrencyEnum` via `createPgEnumFromEnum`
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/db/schema/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-11 AC2_
-- [ ] 2.3 Add barrels + push schema
+- [x] 2.3 Add barrels + push schema
   - Add `export * from "./cron";` to `backend/db/schema/index.ts`; barrel in `backend/db/schema/cron/index.ts`
   - Run `bun run db push` (NOT migrate)
   - Run `bun run generate:gqlSchema` to confirm schema is parseable
   - **Quality Loop**: full repo (db push is a state change — run `bun tsgo` after)
   - **Instruction Verification**: `backend/db/schema/AGENTS.md`, `backend/AGENTS.md`
   - _Requirements: REQ-11 AC3-4_
-- [ ] 2.4 Seed `CRON_MANAGE` permission
+- [x] 2.4 Seed `CRON_MANAGE` permission
   - Locate the permission-group seed (likely `backend/db/seeds/permissions.seed.ts` — verify at impl time) and grant `CRON_MANAGE` to `super_admin` and `academy_admin` groups (matches the existing pattern)
   - **Quality Loop**: per-file on the seed
   - **Instruction Verification**: `backend/db/seeds/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-12 AC4, REQ-10 AC8_
 
-- [ ] 3. **Repository layer** (REQ-13)
-- [ ] 3.1 Create `backend/db/repo/cron/cron.repository.ts`
+- [x] 3. **Repository layer** (REQ-13)
+- [x] 3.1 Create `backend/db/repo/cron/cron.repository.ts`
   - Implement all methods per REQ-13 AC1
   - `claimNextRun` is the critical atomic path: tx + advisory lock + recompute `nextRunAt` + insert `cron_runs` PENDING; returns `null` if another worker already claimed (REQ-13 AC4)
   - All non-transactional reads use `queryDb(tx)` per the Neon HTTP Client rule (REQ-13 AC3)
@@ -98,7 +98,7 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/db/repo/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-13_
-- [ ] 3.2 Barrel + repository unit test
+- [x] 3.2 Barrel + repository unit test
   - Add `export *` to `backend/db/repo/cron/index.ts` and re-export from `backend/db/repo/index.ts`
   - Create `backend/db/test/repo/cron.repository.test.ts` using `runInRollback` (NEVER `expect().rejects.toThrow()` inside rollback per AGENTS.md); in-house test entities only
   - Run via `bun run scripts/run-test/run-test.ts backend/db/test/repo/cron.repository.test.ts` (log capture mandatory)
@@ -110,12 +110,12 @@
 
 ## Phase 2: Core Service & Engine
 
-- [ ] 4. **Cron scheduler engine** (REQ-6)
-- [ ] 4.1 Add `cron-parser` dependency
+- [x] 4. **Cron scheduler engine** (REQ-6)
+- [x] 4.1 Add `cron-parser` dependency
   - `~/.bun/bin/bun add cron-parser` (v5+, latest)
   - **Quality Loop**: post-install `bun tsgo` (verify no peer dep issues)
   - _Requirements: REQ-6 AC3_
-- [ ] 4.2 Create `backend/services/cron/cron-scheduler.engine.ts`
+- [x] 4.2 Create `backend/services/cron/cron-scheduler.engine.ts`
   - Pure functions: `validateCronExpression(expr): boolean`, `nextRunAt(expr, from, tz?): Date`, `nextRuns(expr, from, count, tz?): Date[]`
   - Use `CronExpressionParser.parse(expr, options)` per cron-parser v5 README (verified 2026-07-31): returns `CronExpression`; call `.next()` for the next firing; `.take(n)` for the next N — `CronDate` returned extends native Date semantics (call `.toString()` or use `new Date(cronDate.getTime())` to coerce)
   - Pass `tz?: string` (IANA, e.g. `"UTC"`) — cron-parser uses luxon internally for DST-aware iteration
@@ -123,20 +123,20 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/services/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-6_
-- [ ] 4.3 Create `backend/services/cron/test/cron-scheduler.engine.test.ts`
+- [x] 4.3 Create `backend/services/cron/test/cron-scheduler.engine.test.ts`
   - Pure unit tests — common expressions, invalid expressions throw, timezone handling, `nextRuns` is monotonic
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/AGENTS.md`, `.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-6_
 
-- [ ] 5. **Queue adapter contract + factory** (REQ-4, REQ-5)
-- [ ] 5.1 Create `backend/services/cron/queue-adapters/queue-adapter.types.ts`
+- [x] 5. **Queue adapter contract + factory** (REQ-4, REQ-5)
+- [x] 5.1 Create `backend/services/cron/queue-adapters/queue-adapter.types.ts`
   - `CronQueueAdapter` interface per [implementation.md Component 2](./implementation.md#component-2-queue-adapterfactory) and REQ-5 AC1-6
   - `CronQueueBackendUnknown` and `CronQueueBackendNotAvailable` typed errors
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/services/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-5_
-- [ ] 5.2 Create `backend/services/cron/queue-adapters/queue-adapter.factory.ts`
+- [x] 5.2 Create `backend/services/cron/queue-adapters/queue-adapter.factory.ts`
   - Resolution order: `resolveEnvConfig("CRON_QUEUE_BACKEND")` → `process.env.CRON_QUEUE_BACKEND` → `PG_BOSS` (REQ-4 AC1)
   - `await import(...)` lazily with STATIC import paths (REQ-4 AC5)
   - Memoize singleton adapter in module-scoped `let activeAdapter` (REQ-4 AC7)
@@ -145,25 +145,25 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 5.1
   - _Requirements: REQ-4_
-- [ ] 5.3 Create `backend/services/cron/queue-adapters/noop-stub.adapter.ts`
+- [x] 5.3 Create `backend/services/cron/queue-adapters/noop-stub.adapter.ts`
   - Shared stub used by BullMQ-Postgres, BullMQ-Redis, custom-SQL adapters until task 15 fully implements them
   - Throws `CronQueueBackendNotAvailable` with a message naming the missing library
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 5.1
   - _Requirements: REQ-4 AC3_
-- [ ] 5.4 Create `backend/services/cron/test/queue-adapter.factory.test.ts`
+- [x] 5.4 Create `backend/services/cron/test/queue-adapter.factory.test.ts`
   - Verify backend selection order (env / `resolveEnvConfig` mock → `process.env` → default)
   - Verify `CronQueueBackendUnknown` for unknown; `CronQueueBackendNotAvailable` for missing lib
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`, `.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-4 AC6_
 
-- [ ] 6. **pg-boss adapter** (REQ-4, REQ-5)
-- [ ] 6.1 Add `pg-boss` dependency
+- [x] 6. **pg-boss adapter** (REQ-4, REQ-5)
+- [x] 6.1 Add `pg-boss` dependency
   - `~/.bun/bin/bun add pg-boss` (v12.26+, latest)
   - **Quality Loop**: post-install `bun tsgo`
   - _Requirements: REQ-4 AC2_
-- [ ] 6.2 Create `backend/services/cron/queue-adapters/pgboss.adapter.ts`
+- [x] 6.2 Create `backend/services/cron/queue-adapters/pgboss.adapter.ts`
   - Implement `CronQueueAdapter` interface against pg-boss v12.26 API (verified 2026-07-31 against the official docs at `timgit.github.io/pg-boss`)
   - **Connection**: pass a raw `pg.Pool` from the project's existing `createPool()` (`@/backend/db`'s `createPool` exported from `backend/db/factory.ts`) — NOT the Drizzle `db` instance, NOT the Neon HTTP `neon()` client. pg-boss requires persistent TCP connections for `LISTEN/NOTIFY` + `pg_advisory_xact_lock` session features (both broken by Neon HTTP mode AND by Neon PgBouncer `-pooler` hostname — verified against Neon connection-pooling docs)
   - **Detect Neon PgBouncer**: if `createPool()` returns `@neondatabase/serverless` `Pool` (the `neon-serverless` strategy — used when `DB_PROVIDER=neon` AND `DB_CONNECTION_MODE != pg`) AND the `DATABASE_URL` hostname contains `-pooler`, the adapter MUST pass `useListenNotify: false` to `new PgBoss(...)` (poller-only mode) AND log a warning recommending `DB_CONNECTION_MODE=pg` for cron-heavy deploys. With `DB_CONNECTION_MODE=pg`, `createPgPool()` returns a TCP `pg.Pool` and `useListenNotify: true` works — this is the **recommended** deployment mode
@@ -180,14 +180,14 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/services/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-5_
-- [ ] 6.3 Create `backend/services/cron/test/pgboss.adapter.test.ts`
+- [x] 6.3 Create `backend/services/cron/test/pgboss.adapter.test.ts`
   - Mock pg-boss instance; verify each method maps correctly; verify lazy `start()` on first call
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 5.4
   - _Requirements: REQ-5_
 
-- [ ] 7. **CronService** (REQ-2, REQ-3, REQ-10)
-- [ ] 7.1 Create `backend/services/cron/cron.service.ts`
+- [x] 7. **CronService** (REQ-2, REQ-3, REQ-10)
+- [x] 7.1 Create `backend/services/cron/cron.service.ts`
   - `CronService` namespace with all methods per [implementation.md Component 1](./implementation.md#component-1-cronservice-orchestration)
   - `dispatchDueSchedules({ now, source })` — lists due → claimNextRun → adapter.send (REQ-3 AC1, REQ-8 AC1-2)
   - `dispatchScheduleById(id, { source, payload })` — applies `concurrencyPolicy`:
@@ -200,38 +200,38 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/services/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-2, REQ-3, REQ-10_
-- [ ] 7.2 Create `backend/services/cron/test/cron.service.test.ts`
+- [x] 7.2 Create `backend/services/cron/test/cron.service.test.ts`
   - Mocked repo + mocked adapter
   - Cover: dispatch due happy path; manual trigger with all three concurrency policies; `reconcileStuckRuns` timeout detection; retry path (`attempt < maxRetries` → RETRYING); final failure path
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`, `.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-2, REQ-3_
-- [ ] 7.3 Create `backend/services/cron/index.ts` barrel + register in any service index if present
+- [x] 7.3 Create `backend/services/cron/index.ts` barrel + register in any service index if present
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 7.1
   - _Requirements: REQ-2_
 
-- [ ] 8. **Job handler registry + NOOP** (REQ-7)
-- [ ] 8.1 Create `backend/services/cron/job-handlers/job-handler.registry.ts`
+- [x] 8. **Job handler registry + NOOP** (REQ-7)
+- [x] 8.1 Create `backend/services/cron/job-handlers/job-handler.registry.ts`
   - `JobHandlerRegistry` singleton — `register(kind, handler)`, `getHandler(kind) → handler | undefined`
   - Auto-register `CronJobKind.NOOP` → `noop.handler` on first access
   - Top-of-file comment block documenting **idempotency contract** (REQ-7 AC4)
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/services/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-7_
-- [ ] 8.2 Create `backend/services/cron/job-handlers/noop.handler.ts`
+- [x] 8.2 Create `backend/services/cron/job-handlers/noop.handler.ts`
   - `async (job) => { kind: "noop"; ok: true }` — resolves immediately
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 8.1
   - _Requirements: REQ-7 AC1_
-- [ ] 8.3 Create `backend/services/cron/test/job-handler.registry.test.ts`
+- [x] 8.3 Create `backend/services/cron/test/job-handler.registry.test.ts`
   - Cover: register / lookup / missing handler returns undefined (worker then marks run FAILED with `errorMessage = "No handler registered for jobKind=<X>"` per REQ-7 AC2 — verify the worker-side behavior in the worker test, not here)
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/AGENTS.md`, `.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-7_
 
-- [ ] 9. **Worker runtime** (REQ-8)
-- [ ] 9.1 Create `backend/services/cron/worker/cron-worker.runtime.ts`
+- [x] 9. **Worker runtime** (REQ-8)
+- [x] 9.1 Create `backend/services/cron/worker/cron-worker.runtime.ts`
   - `runDrainLoop({ maxDurationMs, batchSize })` per [implementation.md Component 5](./implementation.md#component-5-cron-workerruntime)
   - Loop: `fetch(batch)` → set runs `RUNNING` → write heartbeats periodically → invoke handler via registry → `complete`/`fail` (`CronService.completeRun`/`failRun`)
   - Catch all handler errors — no unhandled rejection escapes (REQ-8 + REQ-7 AC3)
@@ -240,13 +240,13 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/services/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-8_
-- [ ] 9.2 Create `backend/services/cron/test/cron-worker.runtime.test.ts`
+- [x] 9.2 Create `backend/services/cron/test/cron-worker.runtime.test.ts`
   - Mocked adapter (controllable job batches) + mocked handler registry + mocked `CronService.completeRun/failRun/recordHeartbeat`
   - Cover: happy path; handler throws → failRun → RETRYING then FAILED after maxRetries; heartbeat writes on expected cadence; deadline stop leaves remaining jobs in queue
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`, `.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-7, REQ-8_
-- [ ] 9.3 Scaffold `scripts/cron-worker.ts` (standalone worker entry)
+- [x] 9.3 Scaffold `scripts/cron-worker.ts` (standalone worker entry)
   - Minimal entry that imports the same `runDrainLoop` and calls it in an infinite loop with `Bun.sleep` between drains
   - Mark this as v2-polish in the file header comment (this phase ships the scaffolder; full hardening is v2)
   - **Quality Loop**: per-file
@@ -257,40 +257,40 @@
 
 ## Phase 3: API Routes & GraphQL
 
-- [ ] 10. **API routes** (REQ-9)
-- [ ] 10.1 Create `app/api/cron/ticker/route.ts`
+- [x] 10. **API routes** (REQ-9)
+- [x] 10.1 Create `app/api/cron/ticker/route.ts`
   - `export async function GET(request)` gated by `verifyCronSecretAuth` (REQ-9 AC1, AC3, AC4)
   - `export const maxDuration = 300;` (Next.js 16 — NO `export const dynamic` per the cache-components migration; mirror the existing `class-reminders/route.ts`)
   - Body: `verifyCronSecretAuth` → `CronService.dispatchDueSchedules({ now, source: CRON_TRIGGER_SOURCE.VERCEL_TICKER })` → `runDrainLoop(...)` → reconcile stuck runs before drain → return JSON shape per REQ-9 AC5
   - **Quality Loop**: per-file
   - **Instruction Verification**: `app/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
   - _Requirements: REQ-9 AC1, AC5_
-- [ ] 10.2 Create `app/api/cron/ticker/route.test.ts`
+- [x] 10.2 Create `app/api/cron/ticker/route.test.ts`
   - Auth failure (401, 405, 500); happy path with a `NOOP` schedule; idempotency under 2 concurrent invocations (mock `CronService.dispatchDueSchedules` and verify single claim)
   - Mirror `app/api/cron/class-reminders/route.test.ts` patterns
   - **Quality Loop**: per-file
   - **Instruction Verification**: `app/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-9 AC1_
-- [ ] 10.3 Create `app/api/cron/execute/route.ts`
+- [x] 10.3 Create `app/api/cron/execute/route.ts`
   - Same auth + maxDuration shape; accepts `?scheduleId=<uuid>` (REQ-9 AC2)
   - Calls `CronService.dispatchScheduleById(id, { source: CRON_TRIGGER_SOURCE.VERCEL_EXPLICIT })`
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 10.1
   - _Requirements: REQ-9 AC2_
-- [ ] 10.4 Create `app/api/cron/execute/route.test.ts`
+- [x] 10.4 Create `app/api/cron/execute/route.test.ts`
   - Cover: happy path, missing `scheduleId` → 400, bad uuid → 400, not found → 404
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 10.2
   - _Requirements: REQ-9 AC2_
-- [ ] 10.5 Update `vercel.json`
+- [x] 10.5 Update `vercel.json`
   - Add `{"path":"/api/cron/ticker","schedule":"*/1 * * * *"}` — keep existing 2 crons unchanged (REQ-9 AC6)
   - Document in the file comment that Hobby caps at 1/day and the ticker still works there
   - **Quality Loop**: lint queue on `vercel.json` (no tsgo on JSON)
   - **Instruction Verification**: `app/AGENTS.md`
   - _Requirements: REQ-9 AC6_
 
-- [ ] 11. **GraphQL (Pothos)** (REQ-10, REQ-12)
-- [ ] 11.1 Create `backend/graphql/pothos/cron/cron.pothos.ts`
+- [x] 11. **GraphQL (Pothos)** (REQ-10, REQ-12)
+- [x] 11.1 Create `backend/graphql/pothos/cron/cron.pothos.ts`
   - All types + queries + mutations per [implementation.md API Design](./implementation.md#graphql-pothos)
   - Every resolver gated by `AppPermission.CRON_MANAGE` via scope-auth (REQ-10 AC8)
   - `cronRunTrigger` implements `concurrencyPolicy` (REQ-10 AC7)
@@ -300,11 +300,11 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `backend/graphql/AGENTS.md`, `backend/graphql/pothos/AGENTS.md` if present, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-10, REQ-12_
-- [ ] 11.2 Register cron Pothos in the top-level Pothos index + register the `CRON_MANAGE` enum value in `backend/graphql/pothos/shared/enum.pothos.ts` (so it shows up after codegen)
+- [x] 11.2 Register cron Pothos in the top-level Pothos index + register the `CRON_MANAGE` enum value in `backend/graphql/pothos/shared/enum.pothos.ts` (so it shows up after codegen)
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 11.1
   - _Requirements: REQ-10 AC9_
-- [ ] 11.3 Run codegen
+- [x] 11.3 Run codegen
   - `bun run generate:gqlSchema && bun codegen`
   - Verify `AppPermission.CRON_MANAGE` appears in `frontend/common/graphql/generated/gql/graphql-types.ts` (REQ-10 AC9)
   - **Quality Loop**: full repo tsgo + biome:check
@@ -315,26 +315,26 @@
 
 ## Phase 4: i18n & Frontend
 
-- [ ] 12. **i18n namespace** (REQ-14)
-- [ ] 12.1 Create `shared/locale/types/cron/index.ts`
+- [x] 12. **i18n namespace** (REQ-14)
+- [x] 12.1 Create `shared/locale/types/cron/index.ts`
   - All keys per [specs.md REQ-14 AC2](./specs.md#req-14-i18n-namespace), including `runsCount(count: number)` pluralizer
   - **Quality Loop**: per-file
   - **Instruction Verification**: `shared/AGENTS.md`
   - _Requirements: REQ-14_
-- [ ] 12.2 Create `shared/locale/en/cron/index.ts` + `shared/locale/ar/cron/index.ts`
+- [x] 12.2 Create `shared/locale/en/cron/index.ts` + `shared/locale/ar/cron/index.ts`
   - Implement all keys; AR translation parity with EN (use proper Arabic — flag any uncertain term in the outcome file)
   - Pluralization: `(count: number) => string` per the i18n system rules
   - **Quality Loop**: per-file
   - **Instruction Verification**: `shared/AGENTS.md`
   - _Requirements: REQ-14_
-- [ ] 12.3 Register barrels
+- [x] 12.3 Register barrels
   - `export * from "./cron";` in `shared/locale/en/index.ts`, `shared/locale/ar/index.ts`, `shared/locale/types/index.ts`
   - **Quality Loop**: per-file
   - **Instruction Verification**: `shared/AGENTS.md`
   - _Requirements: REQ-14 AC3_
 
-- [ ] 13. **Frontend GraphQL documents** (REQ-15)
-- [ ] 13.1 Create `frontend/common/graphql/sharedDocuments/cron/cron.documents.ts`
+- [x] 13. **Frontend GraphQL documents** (REQ-15)
+- [x] 13.1 Create `frontend/common/graphql/sharedDocuments/cron/cron.documents.ts`
   - All queries + mutations per [implementation.md GraphQL Pothos](./implementation.md#graphql-pothos)
   - Naming: `CronSchedulesQueryDocument`, `CronRunsQueryDocument`, `CronQueueStatsQueryDocument`, `CronScheduleCreateMutationDocument`, etc.
   - Each object type MUST select `id` for Apollo cache normalization (per AGENTS.md)
@@ -342,15 +342,15 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `frontend/common/graphql/sharedDocuments/AGENTS.md` if present, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
   - _Requirements: REQ-15_
-- [ ] 13.2 Add the barrel `frontend/common/graphql/sharedDocuments/cron/index.ts` and re-export from `frontend/common/graphql/sharedDocuments/index.ts`
-- [ ] 13.3 Regenerate types
+- [x] 13.2 Add the barrel `frontend/common/graphql/sharedDocuments/cron/index.ts` and re-export from `frontend/common/graphql/sharedDocuments/index.ts`
+- [x] 13.3 Regenerate types
   - `bun codegen` — verify generated `CronSchedule`, `CronRun`, etc. types appear in `frontend/common/graphql/generated/gql/`
   - **Quality Loop**: full repo tsgo + biome:check
   - **Instruction Verification**: `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md`
   - _Requirements: REQ-15_
 
-- [ ] 14. **Admin UI** (REQ-15)
-- [ ] 14.1 Add nav config entries
+- [x] 14. **Admin UI** (REQ-15)
+- [x] 14.1 Add nav config entries
   - In `frontend/common/views/dashboard/config/navigationConfig.ts`:
     - Add `cron` item to `SIDEBAR_NAV_ITEMS` between `dst-migration` and `permissions` with `groupId: "grp_admin"`, `permission: PAGE_PERMISSIONS.cronManagement`, label/icon (iconKey: "schedule" — verify against existing icon catalog)
   - In `frontend/common/types/page-permissions.types.ts`:
@@ -360,7 +360,7 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `frontend/common/views/AGENTS.md`, `frontend/common/types/` (no AGENTS.md), `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
   - _Requirements: REQ-15 AC8, AC9_
-- [ ] 14.2 Create `frontend/common/views/dashboard/admin/cron/` shared components
+- [x] 14.2 Create `frontend/common/views/dashboard/admin/cron/` shared components
   - `CronManagementView.tsx` (switcher — calls `createLazyView` + `<ResponsiveViewSwitch>` per `frontend/common/views/AGENTS.md`)
   - `useCronManagementViewModel.ts` — flat handlers + `labelsBySection: { shell, columns, dialogs, actions, queueStats }` per Rule 7
   - `types/cronManagement.types.ts` — View-shaped types (Pick/compose from `@/shared/locale/types/cron`)
@@ -370,26 +370,26 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: `frontend/common/views/AGENTS.md`, `frontend/common/components/ui/AGENTS.md` if used, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
   - _Requirements: REQ-15 AC1-AC5_
-- [ ] 14.3 Create `frontend/desktop/views/dashboard/admin/cron/cronManagement.desktop.tsx`
+- [x] 14.3 Create `frontend/desktop/views/dashboard/admin/cron/cronManagement.desktop.tsx`
   - Uses `AppDataGrid` / `DesktopAppDataGrid` with required `paginationOptions`
   - Grid layout: `QueueStatsCard` above the `SchedulesDataGrid`
   - **Quality Loop**: per-file
   - **Instruction Verification**: `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
   - _Requirements: REQ-15 AC6_
-- [ ] 14.4 Create `frontend/mobile/views/dashboard/admin/cron/cronManagement.mobile.tsx`
+- [x] 14.4 Create `frontend/mobile/views/dashboard/admin/cron/cronManagement.mobile.tsx`
   - Uses `MobileCardList` + `MobileCardListItem` with server-side `paginationOptions` (no `AppDataGrid`)
   - Stack layout: `QueueStatsCard` above the card list
   - **Quality Loop**: per-file
   - **Instruction Verification**: `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
   - _Requirements: REQ-15 AC6_
-- [ ] 14.5 Create `app/(dashboard)/cron/page.tsx`
+- [x] 14.5 Create `app/(dashboard)/cron/page.tsx`
   - Server Component; `getServerUserContext()` → `requirePermissionForPage([AppPermission.CRON_MANAGE])` → render `<CronManagementView />`
   - Mirror `app/(dashboard)/settings/page.tsx` exactly (auth flow + `generateMetadata`)
   - Add `generateMetadata` returning a `cron.title` localized title
   - **Quality Loop**: per-file
   - **Instruction Verification**: `app/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
   - _Requirements: REQ-15 AC7, AC10_
-- [ ] 14.6 Component tests (Happy DOM)
+- [x] 14.6 Component tests (Happy DOM)
   - `test/ui/components/cron/` — mock Apollo `NoopSimuatedClient`; cover: data grid renders rows, create dialog form submission, manual trigger confirms queue, run dialog opens with runs
   - Run via `bun run test:ui:components`
   - **Quality Loop**: per-file + post-test
@@ -400,8 +400,8 @@
 
 ## Phase 5: Optional Adapters & Polish
 
-- [ ] 15. **Optional queue adapters full implementation** (REQ-4 AC3-4)
-- [ ] 15.1 Add optional deps: `~/.bun/bin/bun add bullmq` (latest) + `ioredis` is already installed as a dep of the codebase — verify at impl time, do not add if present
+- [-] 15. **Optional queue adapters full implementation** (REQ-4 AC3-4)
+- [x] 15.1 Add optional deps: `~/.bun/bin/bun add bullmq` (latest) + `ioredis` is already installed as a dep of the codebase — verify at impl time, do not add if present
 - [ ] 15.2 Implement `backend/services/cron/queue-adapters/bullmq-postgres.adapter.ts`
   - Replace the `noop-stub.adapter` import with the real implementation using BullMQ's v6 `createPostgresBackend` API: `new Queue(name, opts, createPostgresBackend)`, `new Worker(name, processor, opts, createPostgresBackend)`, `new QueueEvents(name, opts, createPostgresBackend)`, `new FlowProducer(opts, createPostgresBackend)` — pass as the LAST constructor argument per `docs.bullmq.io/guide/postgresql` (verified)
   - For repeatable schedules, use `queue.upsertJobScheduler(id, { pattern: cronExpr, tz: 'UTC' })` — the legacy `repeat` option on `Queue.add` was REMOVED in v6 (deprecated in v5.16). Do NOT use the legacy `Queue.add`/`getRepeatableJobs` APIs
@@ -417,19 +417,19 @@
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 15.2
   - _Requirements: REQ-4 AC3_
-- [ ] 15.4 Implement `backend/services/cron/queue-adapters/custom-sql.adapter.ts`
+- [x] 15.4 Implement `backend/services/cron/queue-adapters/custom-sql.adapter.ts`
   - Pure `SELECT … FOR UPDATE SKIP LOCKED` on the existing Postgres — use a dedicated `cron_queue` table (added via a single schema push in task 2 schema update OR via the repo's own `cron_queue` table in `backend/db/schema/cron/cron-queue.sql.ts` — DO NOT add a `bun db migrate` migration file)
   - Implement all methods; tests validate race safety with two simulated workers
   - **Quality Loop**: per-file
   - **Instruction Verification**: same as 15.2
   - _Requirements: REQ-4 AC4_
-- [ ] 15.5 Replace `noop-stub.adapter.ts` references in the factory with the real adapters (keep `noop-stub` deleted or repurpose as a throw-on-lib-missing wrapper for unknown-future adapters)
+- [x] 15.5 Replace `noop-stub.adapter.ts` references in the factory with the real adapters (keep `noop-stub` deleted or repurpose as a throw-on-lib-missing wrapper for unknown-future adapters)
 
 ---
 
 ## Phase 6: Knowledge Propagation (MANDATORY Final Task)
 
-- [ ] 16. **Knowledge Propagation & Documentation**
+- [x] 16. **Knowledge Propagation & Documentation**
   - Read all outcome files in `.ai/plans/cron/outcome/` to synthesize all learnings
   - Create canonical reference doc `docs/services/cron-service.md` consolidating: queue-adapter factory pattern, idempotent claim pattern, hybrid trigger model, cron expression engine usage, manual-trigger concurrency policy, mobile/desktop tier-isolated admin UI pattern
   - Update `backend/services/AGENTS.md` — add a "Cron Service" section with key rules + a reference: `See docs/services/cron-service.md for the complete pattern reference.`

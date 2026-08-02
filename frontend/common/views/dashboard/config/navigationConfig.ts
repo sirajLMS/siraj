@@ -118,7 +118,12 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     labelKey: "navGroupAdmin",
     iconKey: "security",
     section: "main",
-    permission: [AppPermission.PermissionGroupsManage, AppPermission.SettingsView, AppPermission.SystemBulkUpdateDst],
+    permission: [
+      AppPermission.PermissionGroupsManage,
+      AppPermission.SettingsView,
+      AppPermission.SystemBulkUpdateDst,
+      AppPermission.CronManage,
+    ],
     separator: true,
   },
 ] as const;
@@ -478,6 +483,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/tools/dst-migration",
     section: "main",
     permission: PAGE_PERMISSIONS.dstMigration,
+    groupId: "grp_admin",
+  },
+  {
+    key: "cron",
+    labelKey: "cron",
+    iconKey: "eventRepeat",
+    href: "/cron",
+    section: "main",
+    permission: PAGE_PERMISSIONS.cronManagement,
     groupId: "grp_admin",
   },
   {
@@ -997,6 +1011,7 @@ export function applySupervisorNavOverrides(
     "payment-catalogs",
     "feedback-manage",
     "dst-migration",
+    "cron",
     "permissions",
     "settings",
   ]);

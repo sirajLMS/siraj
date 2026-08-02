@@ -11,6 +11,7 @@ export * from "./billing";
 export * from "./books";
 export * from "./classes";
 export * from "./communications";
+export * from "./cron";
 export * from "./custom-types";
 export * from "./enums";
 export * from "./meeting";

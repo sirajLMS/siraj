@@ -43,6 +43,7 @@ export type AppPermission =
   | 'COMPLAINTS_LIST'
   | 'COMPLAINTS_RESPOND'
   | 'CREDITS_MANAGE'
+  | 'CRON_MANAGE'
   | 'DASHBOARD_FILTER_METRICS'
   | 'DASHBOARD_METRICS_VIEW_ALL'
   | 'DASHBOARD_SEARCH'
@@ -722,6 +723,93 @@ export type CreditReason =
   | 'DEDUCTION'
   | 'PURCHASE'
   | 'REFUND';
+
+export type CronConcurrencyPolicy =
+  | 'ALLOW'
+  | 'REPLACE'
+  | 'SKIP';
+
+export type CronJobKind =
+  | 'NOOP';
+
+export type CronRunListInput = {
+  from: string | null | undefined;
+  limit: number | null | undefined;
+  offset: number | null | undefined;
+  scheduleId: string | null | undefined;
+  status: CronRunStatus | null | undefined;
+  to: string | null | undefined;
+};
+
+export type CronRunRetryInput = {
+  attempt: number | null | undefined;
+  runId: string;
+};
+
+export type CronRunStatus =
+  | 'CANCELLED'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'PENDING'
+  | 'RETRYING'
+  | 'RUNNING'
+  | 'TIMEOUT';
+
+export type CronRunTriggerInput = {
+  id: string;
+  payload: unknown;
+};
+
+export type CronScheduleDeleteInput = {
+  hard: boolean | null | undefined;
+  id: string;
+};
+
+export type CronScheduleListInput = {
+  jobKind: CronJobKind | null | undefined;
+  limit: number | null | undefined;
+  name: string | null | undefined;
+  offset: number | null | undefined;
+  status: CronScheduleStatus | null | undefined;
+};
+
+export type CronScheduleStatus =
+  | 'ACTIVE'
+  | 'DISABLED'
+  | 'PAUSED';
+
+export type CronScheduleSubmitInput = {
+  concurrencyPolicy: CronConcurrencyPolicy | null | undefined;
+  cronExpression: string;
+  description: string | null | undefined;
+  jobKind: CronJobKind;
+  maxRetries: number | null | undefined;
+  name: string;
+  payload: unknown;
+  retryBackoffSeconds: number | null | undefined;
+  timeoutSeconds: number | null | undefined;
+  timezone: string | null | undefined;
+};
+
+export type CronScheduleUpdateInput = {
+  concurrencyPolicy: CronConcurrencyPolicy | null | undefined;
+  cronExpression: string | null | undefined;
+  description: string | null | undefined;
+  jobKind: CronJobKind | null | undefined;
+  maxRetries: number | null | undefined;
+  name: string | null | undefined;
+  payload: unknown;
+  retryBackoffSeconds: number | null | undefined;
+  timeoutSeconds: number | null | undefined;
+  timezone: string | null | undefined;
+};
+
+export type CronTriggerSource =
+  | 'EXTERNAL'
+  | 'MANUAL'
+  | 'VERCEL_EXPLICIT'
+  | 'VERCEL_TICKER'
+  | 'WORKER_RETRY';
 
 export type CurrencyCode =
   | 'AED'
@@ -3294,6 +3382,133 @@ export type DeleteComplaintMutationVariables = Exact<{
 
 
 export type DeleteComplaintMutation = DeleteComplaintMutation_Mutation;
+
+export type CronScheduleFieldsFragment = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronRunFieldsFragment = { id: string | null, scheduleId: string | null, jobKind: Types.CronJobKind | null, status: Types.CronRunStatus | null, triggerSource: Types.CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronQueueStatsFieldsFragment = { id: string | null, backend: string | null, pending: number | null, inFlight: number | null, failed: number | null, byJobKind: unknown };
+
+export type CronSchedulesQuery_cronSchedules_CronPaginatedSchedules_rows_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronSchedulesQuery_cronSchedules_CronPaginatedSchedules = { totalCount: number | null, rows: Array<CronSchedulesQuery_cronSchedules_CronPaginatedSchedules_rows_CronSchedule> | null };
+
+export type CronSchedulesQuery_Query = { cronSchedules: CronSchedulesQuery_cronSchedules_CronPaginatedSchedules | null };
+
+
+export type CronSchedulesQueryVariables = Exact<{
+  input: Types.CronScheduleListInput | null | undefined;
+}>;
+
+
+export type CronSchedulesQuery = CronSchedulesQuery_Query;
+
+export type CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun = { id: string | null, scheduleId: string | null, jobKind: Types.CronJobKind | null, status: Types.CronRunStatus | null, triggerSource: Types.CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronRunsQuery_cronRuns_CronPaginatedRuns = { totalCount: number | null, rows: Array<CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun> | null };
+
+export type CronRunsQuery_Query = { cronRuns: CronRunsQuery_cronRuns_CronPaginatedRuns | null };
+
+
+export type CronRunsQueryVariables = Exact<{
+  input: Types.CronRunListInput | null | undefined;
+}>;
+
+
+export type CronRunsQuery = CronRunsQuery_Query;
+
+export type CronQueueStatsQuery_cronQueueStats_CronQueueStats = { id: string | null, backend: string | null, pending: number | null, inFlight: number | null, failed: number | null, byJobKind: unknown };
+
+export type CronQueueStatsQuery_Query = { cronQueueStats: CronQueueStatsQuery_cronQueueStats_CronQueueStats | null };
+
+
+export type CronQueueStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CronQueueStatsQuery = CronQueueStatsQuery_Query;
+
+export type CronScheduleCreateMutation_cronScheduleCreate_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronScheduleCreateMutation_Mutation = { cronScheduleCreate: CronScheduleCreateMutation_cronScheduleCreate_CronSchedule | null };
+
+
+export type CronScheduleCreateMutationVariables = Exact<{
+  input: Types.CronScheduleSubmitInput;
+}>;
+
+
+export type CronScheduleCreateMutation = CronScheduleCreateMutation_Mutation;
+
+export type CronScheduleUpdateMutation_cronScheduleUpdate_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronScheduleUpdateMutation_Mutation = { cronScheduleUpdate: CronScheduleUpdateMutation_cronScheduleUpdate_CronSchedule | null };
+
+
+export type CronScheduleUpdateMutationVariables = Exact<{
+  id: string;
+  input: Types.CronScheduleUpdateInput;
+}>;
+
+
+export type CronScheduleUpdateMutation = CronScheduleUpdateMutation_Mutation;
+
+export type CronSchedulePauseMutation_cronSchedulePause_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronSchedulePauseMutation_Mutation = { cronSchedulePause: CronSchedulePauseMutation_cronSchedulePause_CronSchedule | null };
+
+
+export type CronSchedulePauseMutationVariables = Exact<{
+  id: string;
+}>;
+
+
+export type CronSchedulePauseMutation = CronSchedulePauseMutation_Mutation;
+
+export type CronScheduleResumeMutation_cronScheduleResume_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronScheduleResumeMutation_Mutation = { cronScheduleResume: CronScheduleResumeMutation_cronScheduleResume_CronSchedule | null };
+
+
+export type CronScheduleResumeMutationVariables = Exact<{
+  id: string;
+}>;
+
+
+export type CronScheduleResumeMutation = CronScheduleResumeMutation_Mutation;
+
+export type CronScheduleDeleteMutation_Mutation = { cronScheduleDelete: boolean | null };
+
+
+export type CronScheduleDeleteMutationVariables = Exact<{
+  input: Types.CronScheduleDeleteInput;
+}>;
+
+
+export type CronScheduleDeleteMutation = CronScheduleDeleteMutation_Mutation;
+
+export type CronRunTriggerMutation_cronRunTrigger_CronRun = { id: string | null, scheduleId: string | null, jobKind: Types.CronJobKind | null, status: Types.CronRunStatus | null, triggerSource: Types.CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronRunTriggerMutation_Mutation = { cronRunTrigger: CronRunTriggerMutation_cronRunTrigger_CronRun | null };
+
+
+export type CronRunTriggerMutationVariables = Exact<{
+  input: Types.CronRunTriggerInput;
+}>;
+
+
+export type CronRunTriggerMutation = CronRunTriggerMutation_Mutation;
+
+export type CronRunRetryMutation_cronRunRetry_CronRun = { id: string | null, scheduleId: string | null, jobKind: Types.CronJobKind | null, status: Types.CronRunStatus | null, triggerSource: Types.CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronRunRetryMutation_Mutation = { cronRunRetry: CronRunRetryMutation_cronRunRetry_CronRun | null };
+
+
+export type CronRunRetryMutationVariables = Exact<{
+  input: Types.CronRunRetryInput;
+}>;
+
+
+export type CronRunRetryMutation = CronRunRetryMutation_Mutation;
 
 export type MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema = { requiresMeetingUrl: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null };
 
