@@ -52,16 +52,16 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 COPY scripts/install_ohmyzsh.sh /tmp/install_ohmyzsh.sh
 COPY scripts/.p10k.zsh /tmp/.p10k.zsh
 
-# Install Oh My Zsh, Powerlevel10k, and plugins
+# Install Oh My Zsh, Powerlevel10k, and plugins for vscode user
 RUN chmod +x /tmp/install_ohmyzsh.sh && \
-    /tmp/install_ohmyzsh.sh && \
-    rm /tmp/install_ohmyzsh.sh
+    su vscode -c "/tmp/install_ohmyzsh.sh" && \
+    rm -f /tmp/install_ohmyzsh.sh
 
 # Set zsh as default shell
 ENV SHELL=/bin/zsh
 
-# Copy and run Node.js installation script
+# Copy and run Node.js installation script for vscode user
 COPY scripts/instalNode.sh /tmp/instalNode.sh
 RUN chmod +x /tmp/instalNode.sh && \
-    /tmp/instalNode.sh && \
-    rm /tmp/instalNode.sh
+    su vscode -c "/tmp/instalNode.sh" && \
+    rm -f /tmp/instalNode.sh
