@@ -449,16 +449,82 @@ R12:  0 █ (feature-specific; all 17 were pre-existing)
 
 ---
 
-## 7. Conclusion
+## 7. UI Spec Plan — Round 2 Plan Review + Translation Pattern Updates (Post-Implementation)
+
+After the WhatsApp Cloud API integration was complete, a separate **UI spec plan** was created under `.ai/plans/whatsapp/ui-spec/` using the spec-driven-development skill to design the complete UI/UX for WhatsApp settings (navigation, views, components, actions, interactions, animations). This plan was **not implemented** — it was created for future implementation.
+
+### 7.1 Round 2 Plan Review (25 Findings, All Fixed)
+
+A comprehensive Round 2 plan review was conducted using 9 parallel explore subagents across 9 compliance dimensions:
+
+| Dimension | Agent Focus | Findings |
+|-----------|-------------|----------|
+| 1. Architecture & Layer Separation | Cross-layer imports, service boundaries | 0 |
+| 2. Type Definition Compliance | Canonical types, imports from `@/backend/types` | 1 (types placement) |
+| 3. i18n & Translation Patterns | Compile-time TS i18n, namespace registration | 4 (missing keys: tier100K, tier250K, tier1M, qualityOrange) |
+| 4. MUI v9 & React 19 Compliance | sx prop usage, FormEvent deprecation, icon naming | 1 (Pattern A mislabel) |
+| 5. GraphQL Document Conventions | Naming, camelCase exports, id fields, useQuery | 1 (GraphQL file conflict) |
+| 6. Test Conventions | runInRollback, tx propagation, bun:test, renderWithWrapper | 3 (test conventions) |
+| 7. AGENTS.md Completeness & Accuracy | Per-layer rules, path mappings, logging, permissions | 3 (permission=→permissions=, camelCase exports, AGENTS.md completeness) |
+| 8. Code Patterns & Implementation Feasibility | Existing structures, ViewModel, lazy loading, components | 6 (DeleteConfirmDialog exists → repair not create; creatingId→creating; relative imports; etc.) |
+| 9. Spec/Task/Implementation Consistency | Cross-doc references, phase alignment, task numbering | 3 (camelCase exports, Permission vs Permissions, i18n key count) |
+
+**Total: 25 findings (2 HIGH, 11 MEDIUM, 12 LOW) — All fixed via 4 parallel fix subagents**
+
+### 7.2 Critical Fixes Applied
+
+| Finding | Fix Applied |
+|---------|-------------|
+| `permission=` (singular) used everywhere | Changed to `permissions=` (plural array) per `RequirePermission` component |
+| `whatsappTemplates.documents.ts` marked as NEW | Changed to MODIFY existing `whatsapp.documents.ts` |
+| `DeleteConfirmDialog` marked as CREATE | Changed to REPAIR (exists at `NumbersTab.desktop.tsx:48-85` but buggy — ignores `state` prop) |
+| `creatingId` variable | Changed to `creating` |
+| Relative imports | Changed to `@/` path aliases |
+| Missing i18n keys | Added 4 keys: `tier100K`, `tier250K`, `tier1M`, `qualityOrange` (not in current locale files) |
+| GraphQL camelCase exports | Documented convention: `whatsappAccountsQueryDocument` (not PascalCase) |
+
+### 7.3 Translation Pattern Updates (Compile-Time TypeScript i18n)
+
+**User Request:** "our translation usage is like for example useAppTranslation(Translation.Dashboard.ParentLifecycle);, check shared/locale/namespaces/translation.ts, so you must upate all plan files please"
+
+**Action:** Updated all 4 plan files to use the codebase's compile-time TypeScript i18n **property access** pattern instead of legacy function call pattern:
+
+| File | Before | After |
+|------|--------|-------|
+| `specs.md` | `t('qualityGreen')` | `t.qualityGreen` |
+| `trackable-tasks.md` | `t(getQualityLabelKey(quality))` | `t.qualityGreen` |
+| `trackable-tasks.md` | `t(getTierLabelKey(tier))` | `t.tier1K` |
+| `trackable-tasks.md` | `t(getTemplateStatusLabelKey(template.status))` | `t.templateStatusApproved` |
+| `outcome/research-i18n-translation.md` | `t('qualityGreen')` | `t.qualityGreen` |
+| `outcome/research-i18n-translation.md` | `t('tier1K')` | `t.tier1K` |
+| `outcome/research-i18n-translation.md` | `t('templateStatusApproved')` | `t.templateStatusApproved` |
+| `outcome/research-app-router.md` | `t("errorGenericTitle")` | `t.errorGenericTitle` |
+| `outcome/research-app-router.md` | `t("errorGeneric")` | `t.errorGeneric` |
+| `outcome/research-app-router.md` | `t("retry")` | `t.retry` |
+
+**Verification:** All plan files grep clean — zero remaining `t("...")` or `t('...')` patterns.
+
+### 7.4 Commits
+
+| Commit | Description |
+|--------|-------------|
+| `bd6382f1f` | PostgresCacheAdapter pipeline fix + WhatsApp UI spec plan (Round 2 review) |
+| `da45686c9` | Translation pattern updates in UI spec plan files to compile-time i18n property access |
+
+---
+
+## 8. Conclusion (Updated)
 
 The spec-driven-development skill provided an excellent structural foundation:
 - The 3-phase workflow (Requirements → Design → Tasks) caught design issues upfront
-- The outcome knowledge base protocol preserved context across 30 tasks
+- The outcome knowledge base protocol preserved context across 30 tasks + UI spec plan
 - The per-file verification loop caught mechanical issues consistently
 - The knowledge propagation task captured learnings for future agents
 
-However, the skill's quality gates are tuned to **"does it compile/lint?"** — not **"does it work correctly under concurrency?"** or **"does it match its own spec's security contract?"** The 12-review-round cycle was a symptom of this gap. By the time the comprehensive review ran (R3), 23 findings including 2 HIGH-severity TOCTOU races had accumulated across 9 tasks that all reported "quality gate ✅."
+However, the skill's quality gates are tuned to **"does it compile/lint?"** — not **"does it work correctly under concurrency?"** or **"does it match its own spec's security contract?"** The 12-review-round cycle for the implementation was a symptom of this gap. By the time the comprehensive review ran (R3), 23 findings including 2 HIGH-severity TOCTOU races had accumulated across 9 tasks that all reported "quality gate ✅."
+
+**The UI spec plan's Round 2 review** demonstrated that the plan-review skill works effectively when applied *before* implementation — 25 findings caught and fixed in the plan phase, avoiding runtime bugs entirely. This is the ideal model: plan → review → fix → implement.
 
 The improvements proposed in Section 5 — particularly the expanded per-task semantic checklist, the deferred-items ledger, interleaved tests, the mid-point review gate, and the race-condition/dead-code detection steps — would fold the review skills' detection capabilities into the per-task loop, reducing the need for extensive end-of-plan review cycles and catching issues before they propagate to dependent tasks.
 
-The journey from R1 (13 findings) to R12 (zero feature-specific findings) demonstrates that the review-fix cycle *works* — but it's expensive, taking 12 rounds. With the proposed improvements, the goal is to reach "zero feature-specific findings" after 2–3 rounds, not 12.
+The journey from R1 (13 findings) to R12 (zero feature-specific findings) for the implementation, and the clean Round 2 plan review for the UI spec, demonstrate that the review-fix cycle *works* — but it's expensive, taking 12 rounds for implementation. With the proposed improvements, the goal is to reach "zero feature-specific findings" after 2–3 rounds, not 12.
