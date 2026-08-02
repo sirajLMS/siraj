@@ -44,6 +44,8 @@ export type UsePhoneInputResult = {
   readonly handleNationalSelect: (event: React.SyntheticEvent<HTMLInputElement>) => void;
   readonly resetPrefixDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
   readonly resetNationalDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  readonly onNationalInput: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  readonly handleNationalChange: (filledValue: string) => void;
   readonly prefixInputRef: React.RefObject<HTMLInputElement | null>;
   readonly nationalInputRef: React.RefObject<HTMLInputElement | null>;
   readonly maxPrefixDisplayLength: number;
@@ -375,6 +377,8 @@ type PhoneInputHandlers = {
   readonly handleNationalSelect: (event: React.SyntheticEvent<HTMLInputElement>) => void;
   readonly resetPrefixDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
   readonly resetNationalDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  readonly onNationalInput: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  readonly handleNationalChange: (filledValue: string) => void;
 };
 
 function usePhoneInputHandlers(
@@ -417,6 +421,50 @@ function usePhoneInputHandlers(
   const handleNationalSelect = useNationalSelect(nationalDisplay);
   const { resetPrefixDisplay, resetNationalDisplay } = useResetHandlers(prefixDigits, nationalDisplay);
 
+  const handleNationalChange = useCallback(
+    (filledValue: string) => {
+      const trimmed = filledValue.trim();
+      if (!trimmed) {
+        state.setPrefixDigits("");
+        state.setNationalDigits("");
+        state.setRegion(defaultRegion);
+        emitChange("", "");
+        return;
+      }
+      const parts = splitPhoneValueToParts(trimmed, defaultRegion);
+      state.setPrefixDigits(parts.prefixDigits);
+      state.setNationalDigits(parts.nationalDigits);
+      if (parts.region) {
+        state.setRegion(parts.region);
+      }
+      emitChange(parts.prefixDigits, parts.nationalDigits);
+    },
+    [defaultRegion, emitChange, state]
+  );
+
+  const onNationalInput = useCallback(
+    (event: React.SyntheticEvent<HTMLInputElement>) => {
+      const target = event.currentTarget;
+      const newValue = target.value;
+      const inputEvent = event.nativeEvent as InputEvent;
+      const inputType = inputEvent?.inputType;
+
+      // Detect programmatic fill (Playwright .fill()) vs normal keystroke.
+      // A single keystroke changes length by at most 1 and uses insertText.
+      // A fill inserts multiple chars and has no inputType (or insertFromPaste).
+      const isProgrammaticFill =
+        Math.abs(newValue.length - nationalDisplay.length) > 1 || inputType === "insertFromPaste";
+
+      if (isProgrammaticFill && newValue !== nationalDisplay) {
+        handleNationalChange(newValue);
+        return;
+      }
+
+      resetNationalDisplay(event);
+    },
+    [handleNationalChange, nationalDisplay, resetNationalDisplay]
+  );
+
   return {
     selectCountry,
     handlePrefixKeyDown,
@@ -424,6 +472,8 @@ function usePhoneInputHandlers(
     handleNationalSelect,
     resetPrefixDisplay,
     resetNationalDisplay,
+    onNationalInput,
+    handleNationalChange,
   };
 }
 

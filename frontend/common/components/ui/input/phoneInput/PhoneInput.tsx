@@ -221,7 +221,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     handleNationalKeyDown,
     handleNationalSelect,
     resetPrefixDisplay,
-    resetNationalDisplay,
+    onNationalInput,
     prefixInputRef,
     nationalInputRef,
     maxPrefixDisplayLength,
@@ -243,10 +243,13 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     if (showRequiredError) {
       return t.required;
     }
+    if (helperText) {
+      return helperText;
+    }
     if (phoneInvalid) {
       return t.invalidPhone;
     }
-    return helperText;
+    return undefined;
   };
 
   const resolvedHelperText = getHelperText();
@@ -293,7 +296,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
                 closeCountryPicker();
                 setActiveSlot("national");
               }}
-              onNationalInput={resetNationalDisplay}
+              onNationalInput={onNationalInput}
               onNationalSelect={handleNationalSelect}
               startAdornment={startAdornment}
             />

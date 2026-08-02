@@ -1,0 +1,1567 @@
+{
+  "login": {
+    "file": "frontend/common/graphql/sharedDocuments/auth/auth.documents.ts",
+    "variables": {
+      "input": {
+        "type": "LoginInput",
+        "required": true
+      }
+    }
+  },
+  "demoLogin": {
+    "file": "frontend/common/graphql/sharedDocuments/auth/auth.documents.ts",
+    "variables": {
+      "input": {
+        "type": "DemoLoginInput",
+        "required": true
+      }
+    }
+  },
+  "startImpersonation": {
+    "file": "frontend/common/graphql/sharedDocuments/auth/auth.documents.ts",
+    "variables": {
+      "targetUserId": {
+        "type": "String",
+        "required": true
+      },
+      "reason": {
+        "type": "String",
+        "required": false
+      }
+    }
+  },
+  "startPermissionGroupSimulation": {
+    "file": "frontend/common/graphql/sharedDocuments/auth/auth.documents.ts",
+    "variables": {
+      "groupSlug": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "changePassword": {
+    "file": "frontend/common/graphql/sharedDocuments/auth/auth.documents.ts",
+    "variables": {
+      "input": {
+        "type": "ChangePasswordInput",
+        "required": true
+      }
+    }
+  },
+  "CreateManualInvoice": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-management.documents.ts",
+    "variables": {
+      "parentId": {
+        "type": "String",
+        "required": true
+      },
+      "studentId": {
+        "type": "String",
+        "required": false
+      },
+      "amount": {
+        "type": "String",
+        "required": true
+      },
+      "currency": {
+        "type": "CurrencyCode",
+        "required": true
+      },
+      "invoiceType": {
+        "type": "InvoiceType",
+        "required": true
+      },
+      "issueDate": {
+        "type": "String",
+        "required": true
+      },
+      "dueDate": {
+        "type": "String",
+        "required": true
+      },
+      "exchangeRateSnapshot": {
+        "type": "String",
+        "required": false
+      },
+      "exchangeRateSource": {
+        "type": "String",
+        "required": false
+      },
+      "billingMonths": {
+        "type": "[BillingMonthInput!]",
+        "required": false
+      },
+      "sendEmail": {
+        "type": "Boolean",
+        "required": false
+      }
+    }
+  },
+  "MarkInvoicePaid": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-management.documents.ts",
+    "variables": {
+      "invoiceId": {
+        "type": "String",
+        "required": true
+      },
+      "proofFileId": {
+        "type": "ID",
+        "required": true
+      },
+      "expectedVersion": {
+        "type": "Int",
+        "required": false
+      }
+    }
+  },
+  "SubmitPaymentProof": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-management.documents.ts",
+    "variables": {
+      "invoiceId": {
+        "type": "String",
+        "required": true
+      },
+      "proofFileId": {
+        "type": "ID",
+        "required": true
+      },
+      "expectedVersion": {
+        "type": "Int",
+        "required": false
+      }
+    }
+  },
+  "ApprovePaymentProof": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-management.documents.ts",
+    "variables": {
+      "invoiceId": {
+        "type": "String",
+        "required": true
+      },
+      "expectedVersion": {
+        "type": "Int",
+        "required": false
+      }
+    }
+  },
+  "RejectPaymentProof": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-management.documents.ts",
+    "variables": {
+      "invoiceId": {
+        "type": "String",
+        "required": true
+      },
+      "rejectionReason": {
+        "type": "String",
+        "required": false
+      },
+      "expectedVersion": {
+        "type": "Int",
+        "required": false
+      }
+    }
+  },
+  "DeleteInvoice": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-management.documents.ts",
+    "variables": {
+      "invoiceId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "SendPaymentReminder": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-management.documents.ts",
+    "variables": {
+      "studentId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "RecordPayment": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-payments.documents.ts",
+    "variables": {
+      "invoiceId": {
+        "type": "ID",
+        "required": true
+      },
+      "amount": {
+        "type": "String",
+        "required": true
+      },
+      "currency": {
+        "type": "CurrencyCode",
+        "required": true
+      },
+      "userPaymentMethodId": {
+        "type": "ID",
+        "required": true
+      },
+      "transactionId": {
+        "type": "String",
+        "required": false
+      }
+    }
+  },
+  "CreateTeacherPayment": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/billing-payments.documents.ts",
+    "variables": {
+      "teacherId": {
+        "type": "ID",
+        "required": true
+      },
+      "amount": {
+        "type": "String",
+        "required": true
+      },
+      "currency": {
+        "type": "CurrencyCode",
+        "required": true
+      },
+      "userPaymentMethodId": {
+        "type": "ID",
+        "required": true
+      },
+      "paymentDate": {
+        "type": "String",
+        "required": false
+      },
+      "isTestPayment": {
+        "type": "Boolean",
+        "required": false
+      }
+    }
+  },
+  "RecordCreditPurchase": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/credit-lms.documents.ts",
+    "variables": {
+      "studentId": {
+        "type": "ID",
+        "required": true
+      },
+      "hours": {
+        "type": "Int",
+        "required": true
+      },
+      "notes": {
+        "type": "String",
+        "required": false
+      }
+    }
+  },
+  "ActivateSupportedCurrency": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/currency-catalog.documents.ts",
+    "variables": {
+      "input": {
+        "type": "SupportedCurrencyUpsertInput",
+        "required": true
+      }
+    }
+  },
+  "DeactivateSupportedCurrency": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/currency-catalog.documents.ts",
+    "variables": {
+      "code": {
+        "type": "CurrencyCode",
+        "required": true
+      }
+    }
+  },
+  "RefreshExchangeRates": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents.ts",
+    "variables": {
+      "force": {
+        "type": "Boolean",
+        "required": false
+      }
+    }
+  },
+  "UpdateFxProvider": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents.ts",
+    "variables": {
+      "provider": {
+        "type": "FxProvider",
+        "required": true
+      }
+    }
+  },
+  "UpsertManualExchangeRate": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents.ts",
+    "variables": {
+      "fromCurrency": {
+        "type": "CurrencyCode",
+        "required": true
+      },
+      "toCurrency": {
+        "type": "CurrencyCode",
+        "required": true
+      },
+      "rate": {
+        "type": "String",
+        "required": true
+      },
+      "effectiveDate": {
+        "type": "DateTime",
+        "required": false
+      }
+    }
+  },
+  "CreateCurrencyHedge": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents.ts",
+    "variables": {
+      "currency": {
+        "type": "CurrencyCode",
+        "required": true
+      },
+      "amount": {
+        "type": "String",
+        "required": true
+      },
+      "hedgeType": {
+        "type": "String",
+        "required": true
+      },
+      "notes": {
+        "type": "String",
+        "required": false
+      }
+    }
+  },
+  "UpdateCurrencyHedge": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents.ts",
+    "variables": {
+      "id": {
+        "type": "String",
+        "required": true
+      },
+      "currency": {
+        "type": "CurrencyCode",
+        "required": false
+      },
+      "amount": {
+        "type": "String",
+        "required": false
+      },
+      "hedgeType": {
+        "type": "String",
+        "required": false
+      },
+      "notes": {
+        "type": "String",
+        "required": false
+      }
+    }
+  },
+  "DeleteCurrencyHedge": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents.ts",
+    "variables": {
+      "id": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "createUserPaymentMethod": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "input": {
+        "type": "UserPaymentMethodCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateUserPaymentMethod": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "UserPaymentMethodUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deleteUserPaymentMethod": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "setDefaultUserPaymentMethod": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "verifyBankTransferPaymentMethod": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createSupportedMobileWallet": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "input": {
+        "type": "SupportedMobileWalletCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateSupportedMobileWallet": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "SupportedMobileWalletUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deactivateSupportedMobileWallet": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createSupportedPaymentLink": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "input": {
+        "type": "SupportedPaymentLinkCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateSupportedPaymentLink": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "SupportedPaymentLinkUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deactivateSupportedPaymentLink": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createSupportedOnlineAccount": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "input": {
+        "type": "SupportedOnlineAccountCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateSupportedOnlineAccount": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "SupportedOnlineAccountUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deactivateSupportedOnlineAccount": {
+    "file": "frontend/common/graphql/sharedDocuments/billing/payment-method.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createClassCategory": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/class-category.documents.ts",
+    "variables": {
+      "input": {
+        "type": "ClassCategoryCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateClassCategory": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/class-category.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "ClassCategoryUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deleteClassCategory": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/class-category.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createClassSubject": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/class-subject.documents.ts",
+    "variables": {
+      "input": {
+        "type": "ClassSubjectCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateClassSubject": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/class-subject.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "ClassSubjectUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deleteClassSubject": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/class-subject.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "attachSubjectResource": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/class-subject.documents.ts",
+    "variables": {
+      "input": {
+        "type": "AttachSubjectResourceInput",
+        "required": true
+      }
+    }
+  },
+  "detachSubjectResource": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/class-subject.documents.ts",
+    "variables": {
+      "subjectId": {
+        "type": "ID",
+        "required": true
+      },
+      "learningResourceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "updateClassAdminNote": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/group-class.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "String",
+        "required": true
+      },
+      "content": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "resendClassNotifications": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/group-class.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "SubmitLessonReport": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/lesson-report.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "LessonReportSubmitInput",
+        "required": true
+      }
+    }
+  },
+  "ApproveLessonReport": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/lesson-report.documents.ts",
+    "variables": {
+      "reportId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "RejectLessonReport": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/lesson-report.documents.ts",
+    "variables": {
+      "reportId": {
+        "type": "ID",
+        "required": true
+      },
+      "rejectionReason": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "SubmitStudentLessonReportReflection": {
+    "file": "frontend/common/graphql/sharedDocuments/classes/lesson-report.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      },
+      "studentNotes": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "SubmitComplaint": {
+    "file": "frontend/common/graphql/sharedDocuments/complaints/complaint.documents.ts",
+    "variables": {
+      "input": {
+        "type": "ComplaintSubmitInput",
+        "required": true
+      }
+    }
+  },
+  "RespondToComplaint": {
+    "file": "frontend/common/graphql/sharedDocuments/complaints/complaint.documents.ts",
+    "variables": {
+      "input": {
+        "type": "RespondToComplaintInput",
+        "required": true
+      }
+    }
+  },
+  "DeleteComplaint": {
+    "file": "frontend/common/graphql/sharedDocuments/complaints/complaint.documents.ts",
+    "variables": {
+      "complaintId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "createMeetingProvider": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "input": {
+        "type": "MeetingProviderCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateMeetingProvider": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "MeetingProviderUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deleteMeetingProvider": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createUserMeetingConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "input": {
+        "type": "UserMeetingConfigCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateUserMeetingConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "UserMeetingConfigUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deleteUserMeetingConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "setDefaultMeetingConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createClassMeetingConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "input": {
+        "type": "ClassMeetingConfigCreateInput",
+        "required": true
+      }
+    }
+  },
+  "updateClassMeetingConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "ClassMeetingConfigUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "deleteClassMeetingConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "setDefaultClassMeetingConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "MarkNotificationRead": {
+    "file": "frontend/common/graphql/sharedDocuments/notifications/notification-alerts.documents.ts",
+    "variables": {
+      "deliveryId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "UpdateNotificationPreferences": {
+    "file": "frontend/common/graphql/sharedDocuments/notifications/notification-preferences.documents.ts",
+    "variables": {
+      "input": {
+        "type": "[NotificationPreferenceInput!]",
+        "required": true
+      }
+    }
+  },
+  "LinkDocumentToParent": {
+    "file": "frontend/common/graphql/sharedDocuments/parents/parent-documents.documents.ts",
+    "variables": {
+      "parentId": {
+        "type": "String",
+        "required": true
+      },
+      "fileId": {
+        "type": "String",
+        "required": true
+      },
+      "usageType": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "ChangeParentLifecycleStatus": {
+    "file": "frontend/common/graphql/sharedDocuments/parents/parent-lifecycle.documents.ts",
+    "variables": {
+      "parentId": {
+        "type": "String",
+        "required": true
+      },
+      "newStatus": {
+        "type": "ParentStatus",
+        "required": true
+      }
+    }
+  },
+  "createParent": {
+    "file": "frontend/common/graphql/sharedDocuments/parents/parent-onboarding.documents.ts",
+    "variables": {
+      "input": {
+        "type": "ParentOnboardingInput",
+        "required": true
+      }
+    }
+  },
+  "DeactivateParent": {
+    "file": "frontend/common/graphql/sharedDocuments/parents/parent-profile.documents.ts",
+    "variables": {
+      "parentId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "ReactivateParent": {
+    "file": "frontend/common/graphql/sharedDocuments/parents/parent-profile.documents.ts",
+    "variables": {
+      "parentId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "UpdateStudentQuota": {
+    "file": "frontend/common/graphql/sharedDocuments/parents/parent-profile.documents.ts",
+    "variables": {
+      "studentId": {
+        "type": "String",
+        "required": true
+      },
+      "newClassesRemaining": {
+        "type": "Int",
+        "required": true
+      },
+      "expectedVersion": {
+        "type": "Int",
+        "required": false
+      }
+    }
+  },
+  "createPermissionGroup": {
+    "file": "frontend/common/graphql/sharedDocuments/permissions/permission-management.documents.ts",
+    "variables": {
+      "input": {
+        "type": "CreatePermissionGroupInput",
+        "required": true
+      }
+    }
+  },
+  "updatePermissionGroup": {
+    "file": "frontend/common/graphql/sharedDocuments/permissions/permission-management.documents.ts",
+    "variables": {
+      "input": {
+        "type": "UpdatePermissionGroupInput",
+        "required": true
+      }
+    }
+  },
+  "deletePermissionGroup": {
+    "file": "frontend/common/graphql/sharedDocuments/permissions/permission-management.documents.ts",
+    "variables": {
+      "groupId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "assignPermissionGroupToUser": {
+    "file": "frontend/common/graphql/sharedDocuments/permissions/permission-management.documents.ts",
+    "variables": {
+      "input": {
+        "type": "AssignPermissionGroupToUserInput",
+        "required": true
+      }
+    }
+  },
+  "revokePermissionGroupFromUser": {
+    "file": "frontend/common/graphql/sharedDocuments/permissions/permission-management.documents.ts",
+    "variables": {
+      "input": {
+        "type": "RevokePermissionGroupFromUserInput",
+        "required": true
+      }
+    }
+  },
+  "bulkAssignUsersToGroup": {
+    "file": "frontend/common/graphql/sharedDocuments/permissions/permission-management.documents.ts",
+    "variables": {
+      "groupId": {
+        "type": "String",
+        "required": true
+      },
+      "userIds": {
+        "type": "[String!]",
+        "required": true
+      }
+    }
+  },
+  "bulkRevokeUsersFromGroup": {
+    "file": "frontend/common/graphql/sharedDocuments/permissions/permission-management.documents.ts",
+    "variables": {
+      "groupId": {
+        "type": "String",
+        "required": true
+      },
+      "userIds": {
+        "type": "[String!]",
+        "required": true
+      }
+    }
+  },
+  "updateUserOverrides": {
+    "file": "frontend/common/graphql/sharedDocuments/permissions/permission-management.documents.ts",
+    "variables": {
+      "userId": {
+        "type": "String",
+        "required": true
+      },
+      "overrides": {
+        "type": "[UserOverrideInput!]",
+        "required": true
+      }
+    }
+  },
+  "UpdateOwnProfile": {
+    "file": "frontend/common/graphql/sharedDocuments/profile/profile.documents.ts",
+    "variables": {
+      "input": {
+        "type": "UpdateOwnProfileInput",
+        "required": true
+      }
+    }
+  },
+  "UpdateUserProfile": {
+    "file": "frontend/common/graphql/sharedDocuments/profile/profile.documents.ts",
+    "variables": {
+      "userId": {
+        "type": "String",
+        "required": true
+      },
+      "input": {
+        "type": "UpdateUserProfileInput",
+        "required": true
+      }
+    }
+  },
+  "DeleteBookMutation": {
+    "file": "frontend/common/graphql/sharedDocuments/resources/books-and-bags.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "uploadLearningResource": {
+    "file": "frontend/common/graphql/sharedDocuments/resources/learning-resource.documents.ts",
+    "variables": {
+      "input": {
+        "type": "ResourceUploadInput",
+        "required": true
+      }
+    }
+  },
+  "prepareUpload": {
+    "file": "frontend/common/graphql/sharedDocuments/resources/learning-resource.documents.ts",
+    "variables": {
+      "input": {
+        "type": "UploadPreparationInput",
+        "required": true
+      }
+    }
+  },
+  "DeleteLearningResource": {
+    "file": "frontend/common/graphql/sharedDocuments/resources/learning-resource.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "activateClass": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "activateOverrideClass": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "resetClass": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "updateSessionStatusStart": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "updateSessionStatusAbsent": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "updateSessionStatusLeave": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      },
+      "leaveReason": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "stopClass": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "rescheduleClass": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "RescheduleClassInput",
+        "required": true
+      }
+    }
+  },
+  "deleteClassInstance": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "overrideClassInstanceRate": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/class-session.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      },
+      "rateAmount": {
+        "type": "String",
+        "required": false
+      },
+      "rateCurrency": {
+        "type": "CurrencyCode",
+        "required": false
+      }
+    }
+  },
+  "executeDstBulkUpdate": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/dst-migration.documents.ts",
+    "variables": {
+      "offsetMinutes": {
+        "type": "Int",
+        "required": true
+      },
+      "description": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "createRecurringClass": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents.ts",
+    "variables": {
+      "input": {
+        "type": "CreateRecurringClassInput",
+        "required": true
+      }
+    }
+  },
+  "updateRecurringClassRate": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents.ts",
+    "variables": {
+      "input": {
+        "type": "UpdateRecurringClassRateInput",
+        "required": true
+      }
+    }
+  },
+  "deleteRecurringClass": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/schedule-deletion.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "clearWeeklySchedule": {
+    "file": "frontend/common/graphql/sharedDocuments/scheduling/schedule-deletion.documents.ts",
+    "variables": {
+      "teacherId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "upsertEnvConfigEntry": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/environment-config.documents.ts",
+    "variables": {
+      "input": {
+        "type": "EnvConfigUpsertInput",
+        "required": true
+      }
+    }
+  },
+  "deleteEnvConfigEntry": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/environment-config.documents.ts",
+    "variables": {
+      "key": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "upsertSystemSetting": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/general-settings.documents.ts",
+    "variables": {
+      "input": {
+        "type": "SystemSettingUpsertInput",
+        "required": true
+      }
+    }
+  },
+  "deleteSystemSetting": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/general-settings.documents.ts",
+    "variables": {
+      "key": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "upsertSessionConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/session-config.documents.ts",
+    "variables": {
+      "input": {
+        "type": "SessionConfigUpsertInput",
+        "required": true
+      }
+    }
+  },
+  "deleteSessionConfig": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/session-config.documents.ts",
+    "variables": {
+      "roleName": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "upsertSiteContent": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/site-content-settings.documents.ts",
+    "variables": {
+      "input": {
+        "type": "SiteContentUpsertInput",
+        "required": true
+      }
+    }
+  },
+  "updateSiteContentPublishState": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/site-content-settings.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "isPublished": {
+        "type": "Boolean",
+        "required": true
+      }
+    }
+  },
+  "deleteSiteContent": {
+    "file": "frontend/common/graphql/sharedDocuments/settings/site-content-settings.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createTestEntities": {
+    "file": "frontend/common/graphql/sharedDocuments/shared/test-helper.documents.ts",
+    "variables": {
+      "prefix": {
+        "type": "String",
+        "required": true
+      },
+      "classesRemaining": {
+        "type": "Int",
+        "required": false
+      }
+    }
+  },
+  "cleanupTestEntities": {
+    "file": "frontend/common/graphql/sharedDocuments/shared/test-helper.documents.ts",
+    "variables": {
+      "studentUserId": {
+        "type": "String",
+        "required": true
+      },
+      "teacherUserId": {
+        "type": "String",
+        "required": true
+      },
+      "parentUserId": {
+        "type": "String",
+        "required": true
+      },
+      "studentId": {
+        "type": "String",
+        "required": true
+      },
+      "teacherId": {
+        "type": "String",
+        "required": true
+      },
+      "parentId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "createTestGroupClass": {
+    "file": "frontend/common/graphql/sharedDocuments/shared/test-helper.documents.ts",
+    "variables": {
+      "classInstanceId": {
+        "type": "String",
+        "required": true
+      },
+      "teacherName": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "cleanupTestGroupClass": {
+    "file": "frontend/common/graphql/sharedDocuments/shared/test-helper.documents.ts",
+    "variables": {
+      "groupClassId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "cleanupTestManager": {
+    "file": "frontend/common/graphql/sharedDocuments/shared/test-helper.documents.ts",
+    "variables": {
+      "userId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "createTestSuperAdmin": {
+    "file": "frontend/common/graphql/sharedDocuments/shared/test-helper.documents.ts",
+    "variables": {
+      "prefix": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "cleanupTestSuperAdmin": {
+    "file": "frontend/common/graphql/sharedDocuments/shared/test-helper.documents.ts",
+    "variables": {
+      "userId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "ReassignStudentTeacher": {
+    "file": "frontend/common/graphql/sharedDocuments/students/student-lifecycle.documents.ts",
+    "variables": {
+      "studentId": {
+        "type": "String",
+        "required": true
+      },
+      "newTeacherId": {
+        "type": "String",
+        "required": true
+      },
+      "expectedVersion": {
+        "type": "Int",
+        "required": false
+      }
+    }
+  },
+  "ChangeStudentStatus": {
+    "file": "frontend/common/graphql/sharedDocuments/students/student-lifecycle.documents.ts",
+    "variables": {
+      "studentId": {
+        "type": "String",
+        "required": true
+      },
+      "newStatus": {
+        "type": "StudentStatus",
+        "required": true
+      },
+      "expectedVersion": {
+        "type": "Int",
+        "required": false
+      }
+    }
+  },
+  "createStudent": {
+    "file": "frontend/common/graphql/sharedDocuments/students/student-onboarding.documents.ts",
+    "variables": {
+      "input": {
+        "type": "StudentOnboardingInput",
+        "required": true
+      }
+    }
+  },
+  "RecordStudentProfileEdit": {
+    "file": "frontend/common/graphql/sharedDocuments/students/student-profile.documents.ts",
+    "variables": {
+      "input": {
+        "type": "StudentProfileEditInput",
+        "required": true
+      }
+    }
+  },
+  "SubmitSuggestion": {
+    "file": "frontend/common/graphql/sharedDocuments/suggestions/suggestion.documents.ts",
+    "variables": {
+      "input": {
+        "type": "SubmitSuggestionInput",
+        "required": true
+      }
+    }
+  },
+  "MarkSuggestionReviewed": {
+    "file": "frontend/common/graphql/sharedDocuments/suggestions/suggestion.documents.ts",
+    "variables": {
+      "suggestionId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "RespondToSuggestion": {
+    "file": "frontend/common/graphql/sharedDocuments/suggestions/suggestion.documents.ts",
+    "variables": {
+      "input": {
+        "type": "RespondToSuggestionInput",
+        "required": true
+      }
+    }
+  },
+  "MarkSuggestionDuplicate": {
+    "file": "frontend/common/graphql/sharedDocuments/suggestions/suggestion.documents.ts",
+    "variables": {
+      "input": {
+        "type": "MarkSuggestionDuplicateInput",
+        "required": true
+      }
+    }
+  },
+  "DeleteSuggestion": {
+    "file": "frontend/common/graphql/sharedDocuments/suggestions/suggestion.documents.ts",
+    "variables": {
+      "suggestionId": {
+        "type": "String",
+        "required": true
+      }
+    }
+  },
+  "updateManagerProfile": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents.ts",
+    "variables": {
+      "staffProfileId": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "UpdateManagerProfileInput",
+        "required": true
+      }
+    }
+  },
+  "createManager": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents.ts",
+    "variables": {
+      "input": {
+        "type": "ManagerOnboardingInput",
+        "required": true
+      }
+    }
+  },
+  "updateTeacherProfile": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/staff-profile.documents.ts",
+    "variables": {
+      "teacherId": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "TeacherProfileUpdateInput",
+        "required": true
+      }
+    }
+  },
+  "createTeacherManualClassEntry": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents.ts",
+    "variables": {
+      "input": {
+        "type": "CreateManualClassEntryInput",
+        "required": true
+      }
+    }
+  },
+  "logTeacherSupportRequest": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents.ts",
+    "variables": {
+      "input": {
+        "type": "LogSupportRequestInput",
+        "required": true
+      }
+    }
+  },
+  "MarkTeacherDuesPaid": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/teacher-dues.documents.ts",
+    "variables": {
+      "dueIds": {
+        "type": "[ID!]",
+        "required": true
+      },
+      "teacherPaymentId": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createTeacherImportantNote": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/teacher-notes.documents.ts",
+    "variables": {
+      "input": {
+        "type": "CreateTeacherNoteInput",
+        "required": true
+      }
+    }
+  },
+  "updateTeacherImportantNote": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/teacher-notes.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      },
+      "input": {
+        "type": "UpdateTeacherNoteInput",
+        "required": true
+      }
+    }
+  },
+  "deleteTeacherImportantNote": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/teacher-notes.documents.ts",
+    "variables": {
+      "id": {
+        "type": "ID",
+        "required": true
+      }
+    }
+  },
+  "createTeacher": {
+    "file": "frontend/common/graphql/sharedDocuments/teachers/teacher-onboarding.documents.ts",
+    "variables": {
+      "input": {
+        "type": "TeacherOnboardingInput",
+        "required": true
+      }
+    }
+  }
+}

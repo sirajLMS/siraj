@@ -110,7 +110,9 @@ function pipeStreamLogs(proc: ReturnType<typeof spawn>) {
 async function warmUpDevServerRoutes(): Promise<void> {
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
   const base = `http://localhost:${getTestPort()}`;
-  const routes = ["/", "/login"];
+  // Only warm up the root route — heavier routes (login, dashboard) compile
+  // on demand during tests and can cause memory pressure during warmup.
+  const routes = ["/"];
   const routeTimeoutMs = 60_000;
 
   testLogger.info("Warming up Next.js dev server routes...");
@@ -125,6 +127,13 @@ async function warmUpDevServerRoutes(): Promise<void> {
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  // Wait for the server to stabilize after warmup (Turbopack may still be
+  // recompiling or the server may restart after a compilation crash).
+  const stabilizing = await waitForServerReady(30_000);
+  if (!stabilizing) {
+    testLogger.warn("Server did not stabilize after warmup");
   }
 }
 
