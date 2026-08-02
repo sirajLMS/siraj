@@ -64,8 +64,10 @@ function successResult(channel: CommunicationPayload["channel"]): ChannelDispatc
 // ─── Spies ─────────────────────────────────────────────────────────────
 
 let getByUserIdSpy: ReturnType<typeof spyOn>;
+let getByUserIdsSpy: ReturnType<typeof spyOn>;
 let dispatchMultiSpy: ReturnType<typeof spyOn>;
 let findSafeByIdSpy: ReturnType<typeof spyOn>;
+let findSafeByIdsSpy: ReturnType<typeof spyOn>;
 
 /** Minimal user row shape consumed by `stampRecipientAddress` (email/phone). */
 function mockUser(overrides?: Partial<Pick<UserSelectType, "email" | "phone">>): UserSelectType {
@@ -79,6 +81,8 @@ function mockUser(overrides?: Partial<Pick<UserSelectType, "email" | "phone">>):
 beforeEach(() => {
   // Default: user has NO stored prefs → helper treats them as "all enabled".
   getByUserIdSpy = spyOn(NotificationPreferencesRepository, "getByUserId").mockResolvedValue([]);
+  // Batch variant: returns empty map (all users absent → all-enabled).
+  getByUserIdsSpy = spyOn(NotificationPreferencesRepository, "getByUserIds").mockResolvedValue(new Map());
   // Default: dispatchMulti returns one success per payload (mirrors the real
   // CommunicationService.dispatchMulti fan-out map).
   dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockImplementation(
@@ -87,12 +91,24 @@ beforeEach(() => {
   );
   // Default: user has both email and phone — recipient resolution stamps `to`.
   findSafeByIdSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue(mockUser());
+  // Batch variant: returns map with all requested users set to mockUser().
+  findSafeByIdsSpy = spyOn(UserRepository, "findSafeByIds").mockImplementation(
+    async (ids: string[]): Promise<Map<string, UserSelectType | null>> => {
+      const map = new Map<string, UserSelectType | null>();
+      for (const id of ids) {
+        map.set(id, mockUser());
+      }
+      return map;
+    }
+  );
 });
 
 afterEach(() => {
   getByUserIdSpy.mockRestore();
+  getByUserIdsSpy.mockRestore();
   dispatchMultiSpy.mockRestore();
   findSafeByIdSpy.mockRestore();
+  findSafeByIdsSpy.mockRestore();
 });
 
 // ─── Tests ─────────────────────────────────────────────────────────────

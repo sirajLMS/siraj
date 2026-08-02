@@ -118,6 +118,7 @@ import { uiPhoneInputAr } from "@/shared/locale/ar/ui/phone-input.ts";
 import { uiTagInputAr } from "@/shared/locale/ar/ui/tag-input.ts";
 import { uiTimezoneSelectAr } from "@/shared/locale/ar/ui/timezone-select.ts";
 import { uiUserSelectAr } from "@/shared/locale/ar/ui/user-select.ts";
+import { whatsappAr } from "@/shared/locale/ar/whatsapp";
 import type { Translations } from "@/shared/locale/types/message";
 
 export const arMessages: Translations = {
@@ -246,4 +247,5 @@ export const arMessages: Translations = {
     notifications: profileNotificationsAr,
   },
   notificationsTranslations: notificationsAr,
+  whatsappTranslations: whatsappAr,
 };

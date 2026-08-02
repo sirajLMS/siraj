@@ -92,7 +92,6 @@ import type {
 } from "@/shared/locale/types/profile";
 import type { SessionLabels } from "@/shared/locale/types/session";
 import type { SmsLabels } from "@/shared/locale/types/sms";
-
 // ─── ui/leaf interfaces (collected into UiTranslations) ──────────────────
 import type {
   CatalogImageUploadLabels,
@@ -126,6 +125,7 @@ import type {
   TimezoneSelectLabels,
   UserSelectLabels,
 } from "@/shared/locale/types/ui";
+import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 export type { AppLocale };
 
@@ -264,4 +264,5 @@ export type Translations = {
   dashboardTranslations: DashboardTranslations;
   profileTranslations: ProfileTranslations;
   notificationsTranslations: NotificationsLabels;
+  whatsappTranslations: WhatsappLabels;
 };

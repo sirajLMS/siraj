@@ -295,5 +295,35 @@
   "teacherUnavailabilityConflict": "Booking blocked by recurring unavailability pattern.",
   "teacherOnVacation": "Booking blocked by approved vacation period.",
   "resourceNotFound": "Learning resource not found.",
-  "currencyInUse": "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles."
+  "currencyInUse": "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
+  "complaintNotFound": "Complaint not found.",
+  "suggestionNotFound": "Suggestion not found.",
+  "complaintTooManyFiles": {
+    "__fn": "(maxFiles) => `You can upload a maximum of ${maxFiles} files per complaint.`"
+  },
+  "complaintFileTooLarge": {
+    "__fn": "(maxSizeMb) => `File size must not exceed ${maxSizeMb} MB.`"
+  },
+  "suggestionCannotMarkSelfAsDuplicate": "A suggestion cannot be marked as a duplicate of itself.",
+  "suggestionCircularDuplicate": "Cannot create a circular duplicate chain.",
+  "suggestionTargetIsAlreadyDuplicate": "The target suggestion is already marked as a duplicate of another suggestion.",
+  "unknownCommunicationChannel": {
+    "__fn": "(channel) => `Unknown communication channel: ${channel}`"
+  },
+  "unknownError": "An unknown error occurred.",
+  "unknownDispatchError": "An unknown dispatch error occurred.",
+  "whatsappTemplateMissing": "WhatsApp template configuration is missing for this notification.",
+  "whatsappAccountNotFound": {
+    "__fn": "(id) => `WhatsApp account not found: ${id}`"
+  },
+  "whatsappAccessTokenNotConfigured": "WhatsApp access token is not configured.",
+  "whatsappWabaIdNotConfigured": "WhatsApp Business Account ID is not configured.",
+  "emailChannelLabel": "Email",
+  "smsChannelLabel": "SMS",
+  "pushChannelLabel": "Push notification",
+  "whatsappChannelLabel": "WhatsApp",
+  "onAppChannelLabel": "In-app",
+  "deliveryFailed": {
+    "__fn": "(channelLabel) => `${channelLabel} delivery failed. Please try again later.`"
+  }
 }

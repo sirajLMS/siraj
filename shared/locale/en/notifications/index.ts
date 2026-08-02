@@ -162,4 +162,6 @@ export const notificationsEn: NotificationsLabels = {
     if (count === 1) return "1 unread notification";
     return `${count} unread notifications`;
   },
+  whatsappDeliveryFailed: "WhatsApp message delivery failed",
+  whatsappDeliveryFailedWithReason: (reason: string) => `WhatsApp message delivery failed: ${reason}`,
 };

@@ -229,4 +229,6 @@ export interface NotificationsLabels {
   readonly rejectInvoice: string;
   readonly noNotifications: string;
   readonly unreadCount: (count: number) => string;
+  readonly whatsappDeliveryFailed: string;
+  readonly whatsappDeliveryFailedWithReason: (reason: string) => string;
 }

@@ -288,6 +288,12 @@ export const errorsAr: ErrorsLabels = {
   unknownCommunicationChannel: (channel: string) => `قناة تواصل غير معروفة: ${channel}`,
   unknownError: "حدث خطأ غير معروف.",
   unknownDispatchError: "حدث خطأ غير معروف أثناء الإرسال.",
+  whatsappTemplateMissing: "تكوين قالب واتساب مفقود لهذا الإشعار.",
+
+  // ─── WhatsApp account management errors ─────────────────────────────────
+  whatsappAccountNotFound: (id: string) => `حساب واتساب غير موجود: ${id}`,
+  whatsappAccessTokenNotConfigured: "رمز الوصول لواتساب غير مُهيأ.",
+  whatsappWabaIdNotConfigured: "معرف حساب واتساب التجاري غير مُهيأ.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "البريد الإلكتروني",

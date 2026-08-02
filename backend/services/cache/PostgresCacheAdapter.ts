@@ -58,7 +58,6 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
     try {
-      // Default to 1 hour TTL when no TTL is provided — prevents unbounded cache growth
       const ttlSeconds = resolveTtlSeconds(options);
       const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
 
@@ -66,6 +65,22 @@ export class PostgresCacheAdapter implements ICacheService {
     } catch (error) {
       logger.error("Postgres cache set error:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Atomically set a value only if the key does NOT exist, with a TTL in ms.
+   * Returns `"OK"` if the key was inserted (first caller), `null` if it
+   * already existed.
+   */
+  async setNx(key: string, value: string, pxMs: number): Promise<string | null> {
+    try {
+      const expiresAt = new Date(Date.now() + pxMs);
+      const inserted = await CacheDbRepository.insertIfNotExists(key, value, expiresAt);
+      return inserted ? "OK" : null;
+    } catch (error) {
+      logger.error("Postgres cache setNx error:", error);
+      return null;
     }
   }
 
@@ -125,12 +140,7 @@ export class PostgresCacheAdapter implements ICacheService {
   async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
     try {
       return await db.transaction(async () => {
-        const results: unknown[] = [];
-
-        for (const cmd of commands) {
-          results.push(await this.executePipelineCommand(cmd));
-        }
-
+        const results = await Promise.all(commands.map(cmd => this.executePipelineCommand(cmd)));
         return results;
       });
     } catch (error) {
@@ -144,6 +154,8 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   private async executePipelineCommand(cmd: { command: string; args: (string | number)[] }): Promise<unknown> {
     switch (cmd.command) {
+      // PERF: These 4 pipeline commands (zremrangebyscore + zadd + zcard + expire) could be combined
+      // into a single SQL CTE for the rate-limit pattern. Current implementation issues 4 separate queries.
       case "zremrangebyscore": {
         // For rate limiting: remove old entries outside the sliding window
         // Redis: ZREMRANGEBYSCORE key min max — removes members with score between min and max
@@ -159,7 +171,9 @@ export class PostgresCacheAdapter implements ICacheService {
         const [key, , member] = cmd.args as [string, number, string];
         const compositeKey = `${key}:${member}`;
         const now = Date.now();
-        const expiresAt = new Date(now + 3600000); // 1 hour from now
+        // Initial TTL is generous; the pipeline's "expire" command immediately
+        // updates all prefix-matching entries to the actual rate-limit window.
+        const expiresAt = new Date(now + 3600000);
         await CacheDbRepository.set(compositeKey, String(now), expiresAt);
         return 1;
       }
@@ -177,6 +191,17 @@ export class PostgresCacheAdapter implements ICacheService {
         const [expKey, expSeconds] = cmd.args as [string, number];
         await CacheDbRepository.updateExpiryByPrefix(expKey, expSeconds);
         return 1;
+      }
+
+      case "del": {
+        // Cache invalidation: delete one or more keys by exact match
+        const args = cmd.args as string[];
+        if (args && args.length > 0) {
+          for (const key of args) {
+            await CacheDbRepository.del(key);
+          }
+        }
+        return null;
       }
 
       default:
@@ -241,14 +266,12 @@ export class PostgresCacheAdapter implements ICacheService {
    * Start periodic cleanup of expired entries
    */
   private startCleanup(): void {
-    // Run cleanup every 5 minutes
-    this.cleanupInterval = setInterval(
-      () => {
-        CacheDbRepository.deleteExpired().catch((error: unknown) => {
-          logger.error("Cache cleanup error:", error);
-        });
-      },
-      5 * 60 * 1000
-    );
+    // Run cleanup every 60 seconds to match the shortest expected TTL
+    // (rate-limit windows can be as short as 60s)
+    this.cleanupInterval = setInterval(() => {
+      CacheDbRepository.deleteExpired().catch((error: unknown) => {
+        logger.error("Cache cleanup error:", error);
+      });
+    }, 60 * 1000);
   }
 }

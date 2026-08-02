@@ -310,7 +310,10 @@ export enum AppPermission {
   TeacherViewStudents = 'TEACHER_VIEW_STUDENTS',
   TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
-  TestSystemOnly = 'TEST_SYSTEM_ONLY'
+  TestSystemOnly = 'TEST_SYSTEM_ONLY',
+  WhatsappConfigManage = 'WHATSAPP_CONFIG_MANAGE',
+  WhatsappTemplatesManage = 'WHATSAPP_TEMPLATES_MANAGE',
+  WhatsappView = 'WHATSAPP_VIEW'
 }
 
 export type AssignPermissionGroupToUserInput = {
@@ -2558,6 +2561,8 @@ export type Mutation = {
   createTestSuperAdmin: Maybe<TestSuperAdmin>;
   createUserMeetingConfig: Maybe<UserMeetingConfig>;
   createUserPaymentMethod: Maybe<UserPaymentMethod>;
+  /** Create a new WhatsApp business account record. */
+  createWhatsappAccount: Maybe<WhatsappAccount>;
   deactivateParent: Maybe<DeactivateParentResult>;
   deactivateSupportedCurrency: Maybe<Scalars['Boolean']['output']>;
   deactivateSupportedMobileWallet: Maybe<SupportedMobileWallet>;
@@ -2592,6 +2597,8 @@ export type Mutation = {
   deleteTeacherImportantNote: Maybe<Scalars['Boolean']['output']>;
   deleteUserMeetingConfig: Maybe<Scalars['Boolean']['output']>;
   deleteUserPaymentMethod: Maybe<Scalars['Boolean']['output']>;
+  /** Deactivate a WhatsApp account. Calls resetWhatsappChannel() on success (S4). */
+  deleteWhatsappAccount: Maybe<WhatsappAccount>;
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
   demoLogin: Maybe<LoginResponse>;
   detachSubjectResource: Maybe<Scalars['Boolean']['output']>;
@@ -2641,6 +2648,12 @@ export type Mutation = {
   setDefaultMeetingConfig: Maybe<UserMeetingConfig>;
   setDefaultUserPaymentMethod: Maybe<UserPaymentMethod>;
   setStorageItemProtection: Maybe<FileOperationResult>;
+  /** Enable or disable WhatsApp notification opt-in for a user (REQ-10/BL1). */
+  setUserWhatsappOptIn: Maybe<WhatsappAccount>;
+  /** Set the access token for a WhatsApp account. Calls resetWhatsappChannel() on success (S4). */
+  setWhatsappAccessToken: Maybe<WhatsappAccount>;
+  /** Set the two-step verification PIN for a WhatsApp account. Calls resetWhatsappChannel() on success (S4). */
+  setWhatsappTwoStepPin: Maybe<WhatsappAccount>;
   startImpersonation: Maybe<StartImpersonationResponse>;
   startPermissionGroupSimulation: Maybe<StartPermissionGroupSimulationResponse>;
   stopClass: Maybe<ClassInstanceDetail>;
@@ -2653,6 +2666,8 @@ export type Mutation = {
   submitStudentLessonReportReflection: Maybe<LessonReport>;
   /** Submits a new suggestion from the authenticated parent. */
   submitSuggestion: Maybe<Suggestion>;
+  /** Sync WhatsApp phone numbers and message templates from Meta Graph API (BL3: includes template snapshot). */
+  syncWhatsappAccountsFromMeta: Maybe<WhatsappSyncFromMetaResult>;
   updateClassAdminNote: Maybe<GroupClassAudit>;
   updateClassCategory: Maybe<ClassCategory>;
   updateClassMeetingConfig: Maybe<ClassMeetingConfig>;
@@ -2682,6 +2697,8 @@ export type Mutation = {
   updateUserOverrides: Maybe<Scalars['Boolean']['output']>;
   updateUserPaymentMethod: Maybe<UserPaymentMethod>;
   updateUserProfile: Maybe<UnifiedProfile>;
+  /** Update an existing WhatsApp account. Calls resetWhatsappChannel() on success (S4). */
+  updateWhatsappAccount: Maybe<WhatsappAccount>;
   /** Uploads a new learning resource to the academy library. */
   uploadLearningResource: Maybe<LearningResourceRow>;
   upsertEnvConfigEntry: Maybe<EnvConfigUpsertResult>;
@@ -2941,6 +2958,11 @@ export type MutationCreateUserPaymentMethodArgs = {
 };
 
 
+export type MutationCreateWhatsappAccountArgs = {
+  input: WhatsappAccountCreateInput;
+};
+
+
 export type MutationDeactivateParentArgs = {
   parentId: Scalars['String']['input'];
 };
@@ -3078,6 +3100,11 @@ export type MutationDeleteUserMeetingConfigArgs = {
 
 export type MutationDeleteUserPaymentMethodArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteWhatsappAccountArgs = {
+  id: Scalars['String']['input'];
 };
 
 
@@ -3274,6 +3301,25 @@ export type MutationSetDefaultUserPaymentMethodArgs = {
 
 export type MutationSetStorageItemProtectionArgs = {
   input: StorageItemProtectionUpdateInput;
+};
+
+
+export type MutationSetUserWhatsappOptInArgs = {
+  enabled: Scalars['Boolean']['input'];
+  source: InputMaybe<Scalars['String']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+
+export type MutationSetWhatsappAccessTokenArgs = {
+  accessToken: Scalars['String']['input'];
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationSetWhatsappTwoStepPinArgs = {
+  id: Scalars['String']['input'];
+  twoStepPin: Scalars['String']['input'];
 };
 
 
@@ -3477,6 +3523,12 @@ export type MutationUpdateUserPaymentMethodArgs = {
 export type MutationUpdateUserProfileArgs = {
   input: UpdateUserProfileInput;
   userId: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateWhatsappAccountArgs = {
+  id: Scalars['String']['input'];
+  input: WhatsappAccountUpdateInput;
 };
 
 
@@ -4122,6 +4174,8 @@ export type Query = {
   impersonationStatus: Maybe<ImpersonationStatus>;
   invoicePaymentSubmission: Maybe<InvoicePaymentSubmission>;
   invoicePayments: Maybe<Array<Payment>>;
+  /** Check if a user has opted in to WhatsApp notifications (REQ-10/BL1). */
+  isUserWhatsappOptIn: Scalars['Boolean']['output'];
   latestExchangeRates: Maybe<Array<ExchangeRate>>;
   latestFxSyncRun: Maybe<FxSyncRun>;
   /** Lists all learning resources available to the academy. */
@@ -4254,6 +4308,8 @@ export type Query = {
   userPermissionGroups: Maybe<Array<Scalars['String']['output']>>;
   users: Maybe<Array<User>>;
   welcomeMessage: Maybe<Scalars['String']['output']>;
+  /** List all active WhatsApp business accounts. */
+  whatsappAccounts: Maybe<Array<WhatsappAccount>>;
 };
 
 
@@ -4373,6 +4429,11 @@ export type QueryInvoicePaymentSubmissionArgs = {
 
 export type QueryInvoicePaymentsArgs = {
   invoiceId: Scalars['ID']['input'];
+};
+
+
+export type QueryIsUserWhatsappOptInArgs = {
+  userId: Scalars['String']['input'];
 };
 
 
@@ -6482,6 +6543,96 @@ export type WeeklyWorkloadMetrics = {
   totalMinutes: Maybe<Scalars['Int']['output']>;
   weeklyHoursWorked: Maybe<Scalars['String']['output']>;
 };
+
+export type WhatsappAccount = {
+  __typename?: 'WhatsappAccount';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  displayName: Maybe<Scalars['LocalizedString']['output']>;
+  displayPhoneNumber: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  lastWebhookAt: Maybe<Scalars['DateTime']['output']>;
+  maxPhoneNumbersPerBusiness: Maybe<Scalars['String']['output']>;
+  phoneNumberId: Maybe<Scalars['String']['output']>;
+  portfolioMessagingLimitTier: Maybe<WhatsappLimitTier>;
+  qualityRating: Maybe<WhatsappQualityRating>;
+  throughputLevel: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  wabaId: Maybe<Scalars['String']['output']>;
+};
+
+export type WhatsappAccountCreateInput = {
+  displayName: InputMaybe<Scalars['LocalizedString']['input']>;
+  /** Display phone number (max 32 chars) */
+  displayPhoneNumber: InputMaybe<Scalars['String']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  /** Phone number ID (max 64 chars) */
+  phoneNumberId: Scalars['String']['input'];
+  portfolioMessagingLimitTier: InputMaybe<WhatsappLimitTier>;
+  qualityRating: InputMaybe<WhatsappQualityRating>;
+  throughputLevel: InputMaybe<Scalars['String']['input']>;
+  /** WhatsApp Business Account ID (max 64 chars) */
+  wabaId: Scalars['String']['input'];
+};
+
+export type WhatsappAccountUpdateInput = {
+  displayName: InputMaybe<Scalars['LocalizedString']['input']>;
+  displayPhoneNumber: InputMaybe<Scalars['String']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  portfolioMessagingLimitTier: InputMaybe<WhatsappLimitTier>;
+  qualityRating: InputMaybe<WhatsappQualityRating>;
+  throughputLevel: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum WhatsappLimitTier {
+  Tier_1K = 'TIER_1K',
+  Tier_10K = 'TIER_10K',
+  Tier_50 = 'TIER_50',
+  Tier_100K = 'TIER_100K',
+  Tier_250 = 'TIER_250',
+  TierNotSet = 'TIER_NOT_SET',
+  TierUnlimited = 'TIER_UNLIMITED',
+  Untiered = 'UNTIERED'
+}
+
+export enum WhatsappQualityRating {
+  Green = 'GREEN',
+  Red = 'RED',
+  Unknown = 'UNKNOWN',
+  Yellow = 'YELLOW'
+}
+
+export type WhatsappSyncFromMetaResult = {
+  __typename?: 'WhatsappSyncFromMetaResult';
+  accounts: Maybe<Array<WhatsappAccount>>;
+  id: Maybe<Scalars['String']['output']>;
+  templates: Maybe<Array<WhatsappTemplateSnapshot>>;
+};
+
+export enum WhatsappTemplateCategory {
+  Authentication = 'AUTHENTICATION',
+  Marketing = 'MARKETING',
+  Utility = 'UTILITY'
+}
+
+export type WhatsappTemplateSnapshot = {
+  __typename?: 'WhatsappTemplateSnapshot';
+  category: Maybe<WhatsappTemplateCategory>;
+  id: Maybe<Scalars['String']['output']>;
+  language: Maybe<Scalars['String']['output']>;
+  lastSyncedAt: Maybe<Scalars['DateTime']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  status: Maybe<WhatsappTemplateStatus>;
+};
+
+export enum WhatsappTemplateStatus {
+  Approved = 'APPROVED',
+  Disabled = 'DISABLED',
+  Paused = 'PAUSED',
+  Pending = 'PENDING',
+  PendingDeletion = 'PENDING_DELETION',
+  Rejected = 'REJECTED'
+}
 
 export type WorkshopPromo = {
   __typename?: 'WorkshopPromo';

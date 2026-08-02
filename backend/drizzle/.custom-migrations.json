@@ -1,5 +1,5 @@
 {
-  "manifestHash": "2f060dc4f1651f9c5e3d86b9f7e200da2964cdb469e0ae3004c17cec9bfe38c4",
+  "manifestHash": "0fa905321c321b4fd0b62831da488232af8e77dccd12c0da6d0b38708cb10962",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -88,6 +88,14 @@
     {
       "file": "8a-system-setting-enums.sql",
       "sha256": "7d1f38de7fa1d10f430abc571c02f8138f761586a20606ea57b3c508411071b5"
+    },
+    {
+      "file": "8a-whatsapp-permissions-enum.sql",
+      "sha256": "e0d2105462e3bb4fb13d667d481d545cb7249ebcb7811625fd18b22f48ed2a9f"
+    },
+    {
+      "file": "8b-whatsapp-permissions-data.sql",
+      "sha256": "2e7934a26883711bd45844b6227f45e229157c97dc09f9c2cc4a81fe109667d2"
     },
     {
       "file": "add_test_custom_alt_permission.sql",
@@ -201,6 +209,8 @@
     "20260729150220_custom_3-system_permissions_and_groups",
     "20260729152150_custom_6d-profile-fine-grained-only",
     "20260729153127_custom_6d-profile-fine-grained-only",
-    "20260729155331_custom_6d-profile-fine-grained-only"
+    "20260729155331_custom_6d-profile-fine-grained-only",
+    "20260731224523_custom_8a-whatsapp-permissions-enum",
+    "20260731224524_custom_8b-whatsapp-permissions-data"
   ]
 }

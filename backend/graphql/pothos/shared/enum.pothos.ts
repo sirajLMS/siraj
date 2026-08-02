@@ -41,6 +41,10 @@ import {
   TeacherDueStatus,
   TeacherProgressFeedEventKind,
   UserRole,
+  WhatsappLimitTier,
+  WhatsappQualityRating,
+  WhatsappTemplateCategory,
+  WhatsappTemplateStatus,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -250,4 +254,20 @@ export const FxProviderConfigSourcePothosEnum = gqlSchemaBuilder.enumType(FxProv
 
 export const TeacherProgressFeedEventKindPothosEnum = gqlSchemaBuilder.enumType(TeacherProgressFeedEventKind, {
   name: "TeacherProgressFeedEventKind",
+});
+
+export const WhatsappQualityRatingPothosEnum = gqlSchemaBuilder.enumType(WhatsappQualityRating, {
+  name: "WhatsappQualityRating",
+});
+
+export const WhatsappLimitTierPothosEnum = gqlSchemaBuilder.enumType(WhatsappLimitTier, {
+  name: "WhatsappLimitTier",
+});
+
+export const WhatsappTemplateStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappTemplateStatus, {
+  name: "WhatsappTemplateStatus",
+});
+
+export const WhatsappTemplateCategoryPothosEnum = gqlSchemaBuilder.enumType(WhatsappTemplateCategory, {
+  name: "WhatsappTemplateCategory",
 });

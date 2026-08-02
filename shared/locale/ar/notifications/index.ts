@@ -153,4 +153,6 @@ export const notificationsAr: NotificationsLabels = {
     if (count >= 3 && count <= 10) return `${count} إشعارات غير مقروءة`;
     return `${count} إشعاراً غير مقروءاً`;
   },
+  whatsappDeliveryFailed: "فشل تسليم رسالة واتساب",
+  whatsappDeliveryFailedWithReason: (reason: string) => `فشل تسليم رسالة واتساب: ${reason}`,
 };

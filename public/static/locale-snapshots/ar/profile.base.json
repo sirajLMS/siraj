@@ -18,7 +18,7 @@
   "editAvatarTitle": "تعديل صورة الملف الشخصي",
   "avatar": "الصورة الشخصية",
   "notSet": "غير محدد",
-  "adminEditHint": "Use the staff profile tools for full administrative editing.",
+  "adminEditHint": "استخدم أدوات الملف الشخصي للموظفين للتعديل الإداري الكامل.",
   "role": {
     "teacher": "معلم",
     "parent": "ولي أمر",
@@ -34,8 +34,8 @@
     "saveError": "فشل حفظ الملف الشخصي."
   },
   "errors": {
-    "failedToLoad": "Failed to load profile.",
-    "notFound": "Profile not found."
+    "failedToLoad": "تعذر تحميل الملف الشخصي.",
+    "notFound": "لم يتم العثور على الملف الشخصي."
   },
   "convertedAmount": {
     "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
@@ -130,8 +130,8 @@
       "saveError": "فشل حفظ الملف الشخصي."
     },
     "errors": {
-      "failedToLoad": "Failed to load profile.",
-      "notFound": "Profile not found."
+      "failedToLoad": "تعذر تحميل الملف الشخصي.",
+      "notFound": "لم يتم العثور على الملف الشخصي."
     }
   },
   "parent": {
@@ -143,8 +143,8 @@
     },
     "sections": {
       "account": "الحساب",
-      "contact": "Contact Information",
-      "social": "Social & Communication",
+      "contact": "معلومات الاتصال",
+      "social": "التواصل الاجتماعي",
       "identity": "الهوية",
       "billing": "الفوترة",
       "students": "الطلاب المرتبطون"
@@ -152,10 +152,10 @@
     "fields": {
       "fullName": "الاسم الكامل",
       "primaryEmail": "البريد الإلكتروني الأساسي",
-      "phone": "Phone",
-      "whatsapp": "WhatsApp",
-      "facebook": "Facebook",
-      "twitter": "Twitter",
+      "phone": "الهاتف",
+      "whatsapp": "واتساب",
+      "facebook": "فيسبوك",
+      "twitter": "تويتر",
       "nationality": "الجنسية",
       "address": "العنوان السكني",
       "invoiceType": "نوع الفاتورة",
@@ -267,33 +267,33 @@
     }
   },
   "banking": {
-    "title": "Banking & Payment Details",
-    "adminOnly": "Admin Only",
-    "encryptedNotice": "This information is encrypted and only visible to authorized administrators.",
+    "title": "تفاصيل البنك والمدفوعات",
+    "adminOnly": "للمسؤولين فقط",
+    "encryptedNotice": "هذه المعلومات مشفرة ومرئية فقط للمسؤولين المصرح لهم.",
     "sections": {
-      "banking": "Primary Account Information",
-      "verification": "Verification"
+      "banking": "معلومات الحساب الرئيسية",
+      "verification": "التحقق"
     },
     "fields": {
-      "beneficiaryName": "Beneficiary Name",
-      "bankName": "Bank Name",
-      "accountNumber": "Account Number",
-      "routingNumber": "Routing Number",
-      "swiftBic": "SWIFT/BIC",
-      "iban": "IBAN",
-      "verifiedAt": "Verified At",
-      "verifiedBy": "Verified By"
+      "beneficiaryName": "اسم المستفيد",
+      "bankName": "اسم البنك",
+      "accountNumber": "رقم الحساب",
+      "routingNumber": "رقم التوجيه",
+      "swiftBic": "سويفت/بي آي سي",
+      "iban": "آيبان",
+      "verifiedAt": "تاريخ التحقق",
+      "verifiedBy": "تم التحقق بواسطة"
     },
-    "verified": "Verified",
-    "notVerified": "Pending verification",
-    "notProvided": "Not provided",
+    "verified": "تم التحقق",
+    "notVerified": "بانتظار التحقق",
+    "notProvided": "غير متوفر",
     "empty": {
-      "title": "No banking details on file",
-      "description": "This teacher has not submitted banking information yet."
+      "title": "لا توجد تفاصيل بنكية مسجلة",
+      "description": "لم يقم هذا المعلم بتقديم معلوماته البنكية بعد."
     },
     "actions": {
-      "manage": "Manage Banking Details",
-      "editHint": "Banking updates require closing the current record and submitting new details through staff tools."
+      "manage": "إدارة تفاصيل البنك",
+      "editHint": "تتطلب تحديثات البنك إغلاق السجل الحالي وتقديم تفاصيل جديدة عبر أدوات الموظفين."
     }
   },
   "students": {
@@ -334,7 +334,8 @@
       "EMAIL": "البريد الإلكتروني",
       "SMS": "رسائل SMS",
       "PUSH": "إشعارات الدفع",
-      "ON_APP": "داخل التطبيق"
+      "ON_APP": "داخل التطبيق",
+      "WHATSAPP": "واتساب"
     },
     "events": {
       "CLASS_REMINDER": "تذكيرات الحصص",

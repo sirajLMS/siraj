@@ -288,6 +288,12 @@ export const errorsEn: ErrorsLabels = {
   unknownCommunicationChannel: (channel: string) => `Unknown communication channel: ${channel}`,
   unknownError: "An unknown error occurred.",
   unknownDispatchError: "An unknown dispatch error occurred.",
+  whatsappTemplateMissing: "WhatsApp template configuration is missing for this notification.",
+
+  // ─── WhatsApp account management errors ─────────────────────────────────
+  whatsappAccountNotFound: (id: string) => `WhatsApp account not found: ${id}`,
+  whatsappAccessTokenNotConfigured: "WhatsApp access token is not configured.",
+  whatsappWabaIdNotConfigured: "WhatsApp Business Account ID is not configured.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "Email",

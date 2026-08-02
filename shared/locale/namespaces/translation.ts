@@ -107,6 +107,7 @@ import { UiPhoneInput } from "@/shared/locale/namespaces/ui/phoneInput.namespace
 import { UiTagInput } from "@/shared/locale/namespaces/ui/tagInput.namespace";
 import { UiTimezoneSelect } from "@/shared/locale/namespaces/ui/timezoneSelect.namespace";
 import { UiUserSelect } from "@/shared/locale/namespaces/ui/userSelect.namespace";
+import { Whatsapp } from "@/shared/locale/namespaces/whatsapp/whatsapp.namespace";
 export const Translation = {
   Auth: {
     Login: AuthLogin,
@@ -119,6 +120,7 @@ export const Translation = {
   Session,
   Sms,
   Notifications,
+  Whatsapp,
   Onboarding: {
     UserEntity: OnboardingUserEntity,
   },

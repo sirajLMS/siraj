@@ -318,6 +318,12 @@ export interface ErrorsLabels {
   readonly unknownCommunicationChannel: (channel: string) => string;
   readonly unknownError: string;
   readonly unknownDispatchError: string;
+  readonly whatsappTemplateMissing: string;
+
+  // ─── WhatsApp account management errors ─────────────────────────────────
+  readonly whatsappAccountNotFound: (id: string) => string;
+  readonly whatsappAccessTokenNotConfigured: string;
+  readonly whatsappWabaIdNotConfigured: string;
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   readonly emailChannelLabel: string;

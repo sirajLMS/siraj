@@ -66,6 +66,7 @@ export interface DashboardNavigationLabels {
   readonly socialMedia: string;
   readonly permissions: string;
   readonly settings: string;
+  readonly whatsappSettings: string;
   readonly booksAndBags: string;
   readonly studentTodayClasses: string;
   readonly studentSchedule: string;
@@ -96,6 +97,7 @@ export interface DashboardNavigationLabels {
   readonly navGroupFeedback: string;
   readonly navGroupReports: string;
   readonly navGroupAdmin: string;
+  readonly navGroupIntegrations: string;
   readonly navGroupResources: string;
   readonly navGroupClasses: string;
   readonly navGroupAccount: string;

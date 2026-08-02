@@ -33,6 +33,7 @@ export const SIDEBAR_END_NAV_ITEM_KEYS = new Set(["teacher-rules", "parent-rules
  * grp_feedback              | complaints-manage, suggestions-manage | ComplaintsRespond|ComplaintsList / SuggestionsList
  * grp_reports               | reports, monthly-reports, teacher-dues, lesson-reports | per-item
  * grp_admin                 | permissions, settings, dst-migration, user-profile | PermissionGroupsManage / SettingsView* / SystemBulkUpdateDst
+ * grp_integrations          | whatsapp-settings                   | WhatsappView / WhatsappConfigManage
  * grp_resources             | resources, books-and-bags, subjects   | ResourcesList / SubjectsList
  * grp_classes               | (Phase 2) new teacher-class-details   | ClassViewDetails
  * footer_account            | own-profile, logout                   | AuthViewOwnProfile / —
@@ -119,6 +120,14 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     iconKey: "security",
     section: "main",
     permission: [AppPermission.PermissionGroupsManage, AppPermission.SettingsView, AppPermission.SystemBulkUpdateDst],
+    separator: true,
+  },
+  {
+    id: "grp_integrations",
+    labelKey: "navGroupIntegrations",
+    iconKey: "hub",
+    section: "main",
+    permission: [AppPermission.WhatsappView, AppPermission.WhatsappConfigManage],
     separator: true,
   },
 ] as const;
@@ -497,6 +506,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.settings,
     groupId: "grp_admin",
+  },
+  {
+    key: "whatsapp-settings",
+    labelKey: "whatsappSettings",
+    iconKey: "hub",
+    href: "/settings/whatsapp",
+    section: "main",
+    permission: PAGE_PERMISSIONS.whatsappSettings,
+    groupId: "grp_integrations",
   },
 ] as const;
 
@@ -922,6 +940,7 @@ export function applyParentNavOverrides(items: readonly NavItem[], permissions: 
     "billing-admin",
     "suggestions-submit",
     "schedule",
+    "whatsapp-settings",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
@@ -938,7 +957,7 @@ export function applyTeacherNavOverrides(items: readonly NavItem[], permissions:
     return [...items];
   }
 
-  const hiddenKeys = new Set(["home", "books-and-bags"]);
+  const hiddenKeys = new Set(["home", "books-and-bags", "whatsapp-settings"]);
   // Hide the admin grouped "classes" item only when the teacher-portal
   // "teacher-class-details" entry is also available (same /classes route).
   if (items.some(item => item.key === "teacher-class-details")) {
@@ -959,7 +978,7 @@ export function applyStudentNavOverrides(items: readonly NavItem[], permissions:
     return [...items];
   }
   // Student portal: hide admin-focused items
-  const hiddenKeys = new Set(["home", "search-schedule", "schedule-tracking", "own-profile"]);
+  const hiddenKeys = new Set(["home", "search-schedule", "schedule-tracking", "own-profile", "whatsapp-settings"]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
 
@@ -999,6 +1018,7 @@ export function applySupervisorNavOverrides(
     "dst-migration",
     "permissions",
     "settings",
+    "whatsapp-settings",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }

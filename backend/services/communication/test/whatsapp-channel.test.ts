@@ -1,0 +1,224 @@
+import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
+import { invalidateEnvConfigCache } from "@/backend/lib/env-config-resolver";
+import {
+  getWhatsappChannel,
+  resetWhatsappChannel,
+  whatsappChannel,
+} from "@/backend/services/communication/channels/whatsapp";
+import { redisService } from "@/backend/services/redis";
+import type { NotificationDeliverySelectType } from "@/backend/types";
+
+const MOCK_USER_ID = "user-uuid-wa-0001";
+const MOCK_DELIVERY_ID = "delivery-uuid-wa-0001";
+
+function sendParams() {
+  return {
+    to: "1234567890",
+    eventType: NotificationEventType.COMPLAINT_RESPONSE,
+    userId: MOCK_USER_ID,
+    template: { name: "test_template", languageCode: "en" },
+  } as const;
+}
+
+const mockDelivery: NotificationDeliverySelectType = {
+  id: MOCK_DELIVERY_ID,
+  userId: MOCK_USER_ID,
+  deviceTokenId: null,
+  channel: NotificationChannel.WHATSAPP,
+  eventType: NotificationEventType.COMPLAINT_RESPONSE,
+  status: NotificationDeliveryStatus.PENDING,
+  title: null,
+  body: null,
+  providerMessageId: null,
+  failureReason: null,
+  webhookPayload: null,
+  metadata: null,
+  sentAt: null,
+  deliveredAt: null,
+  openedAt: null,
+  failedAt: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+describe("WhatsApp Channel Factory", () => {
+  let createDeliverySpy: ReturnType<typeof spyOn>;
+  let updateDeliveryStatusSpy: ReturnType<typeof spyOn>;
+
+  beforeEach(async () => {
+    await resetWhatsappChannel();
+    invalidateEnvConfigCache();
+    process.env.WHATSAPP_ACCESS_TOKEN = "test-token-abc123";
+    process.env.WHATSAPP_PHONE_NUMBER_ID = "phone-id-123";
+    createDeliverySpy = spyOn(NotificationRepository, "createDelivery").mockResolvedValue(mockDelivery);
+    updateDeliveryStatusSpy = spyOn(NotificationRepository, "updateDeliveryStatus").mockResolvedValue(mockDelivery);
+  });
+
+  afterEach(async () => {
+    createDeliverySpy.mockRestore();
+    updateDeliveryStatusSpy.mockRestore();
+    await resetWhatsappChannel();
+    invalidateEnvConfigCache();
+    delete process.env.WHATSAPP_ACCESS_TOKEN;
+    delete process.env.WHATSAPP_PHONE_NUMBER_ID;
+  });
+
+  describe("S4: resetWhatsappChannel — singleton lifecycle", () => {
+    test("resetWhatsappChannel drops the singleton instance so next init creates a fresh adapter", async () => {
+      // Initialize the singleton by calling validateConfig via the proxy
+      await whatsappChannel.validateConfig();
+      // Grab the underlying adapter instance created by the factory
+      const adapter1 = await getWhatsappChannel();
+
+      await resetWhatsappChannel();
+
+      // After reset, a new call to getWhatsappChannel must create a DIFFERENT
+      // adapter object — proving the singleton reference was actually dropped.
+      const adapter2 = await getWhatsappChannel();
+      expect(adapter2).not.toBe(adapter1);
+
+      expect(createDeliverySpy).not.toHaveBeenCalled();
+    });
+
+    test("resetWhatsappChannel is idempotent when no instance exists", async () => {
+      await expect(resetWhatsappChannel()).resolves.toBeUndefined();
+    });
+  });
+
+  describe("validateConfig", () => {
+    test("returns true when WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID are present", async () => {
+      const result = await whatsappChannel.validateConfig();
+      expect(result).toBe(true);
+    });
+
+    test("returns false when WHATSAPP_ACCESS_TOKEN is missing", async () => {
+      delete process.env.WHATSAPP_ACCESS_TOKEN;
+      invalidateEnvConfigCache("WHATSAPP_ACCESS_TOKEN");
+      invalidateEnvConfigCache("WHATSAPP_PHONE_NUMBER_ID");
+      const result = await whatsappChannel.validateConfig();
+      expect(result).toBe(false);
+    });
+
+    test("returns false when WHATSAPP_PHONE_NUMBER_ID is missing", async () => {
+      delete process.env.WHATSAPP_PHONE_NUMBER_ID;
+      invalidateEnvConfigCache("WHATSAPP_ACCESS_TOKEN");
+      invalidateEnvConfigCache("WHATSAPP_PHONE_NUMBER_ID");
+      const result = await whatsappChannel.validateConfig();
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("send — empty recipient guard", () => {
+    test("returns failure when `to` is empty — delivery created with FAILURE + failureReason", async () => {
+      const result = await whatsappChannel.send({ ...sendParams(), to: "" });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBeTruthy();
+      expect(createDeliverySpy).toHaveBeenCalled();
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: NotificationDeliveryStatus.FAILED,
+          failureReason: "empty recipient address",
+        })
+      );
+    });
+
+    test("returns failure when `to` is whitespace-only", async () => {
+      const result = await whatsappChannel.send({ ...sendParams(), to: "   " });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBeTruthy();
+    });
+  });
+
+  describe("send — Graph API paths", () => {
+    let setNxSpy: ReturnType<typeof spyOn>;
+    let getSpy: ReturnType<typeof spyOn>;
+    let setSpy: ReturnType<typeof spyOn>;
+    let fetchSpy: ReturnType<typeof spyOn>;
+
+    beforeEach(() => {
+      setNxSpy = spyOn(redisService, "setNx").mockResolvedValue("OK");
+      getSpy = spyOn(redisService, "get").mockResolvedValue(null);
+      setSpy = spyOn(redisService, "set").mockResolvedValue(undefined as never);
+    });
+
+    afterEach(() => {
+      setNxSpy.mockRestore();
+      getSpy.mockRestore();
+      setSpy.mockRestore();
+      fetchSpy?.mockRestore();
+    });
+
+    test("returns success when fetch responds 200 with a message id", async () => {
+      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ messages: [{ id: "wamid.test.001" }], messaging_product: "whatsapp" }), {
+          status: 200,
+        })
+      );
+
+      const result = await whatsappChannel.send(sendParams());
+
+      expect(result.success).toBe(true);
+      expect(result.providerMessageId).toBe("wamid.test.001");
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: NotificationDeliveryStatus.SENT,
+        })
+      );
+    });
+
+    test("returns failure when fetch responds non-2xx (500)", async () => {
+      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ error: { message: "Internal server error", code: 500 } }), { status: 500 })
+      );
+
+      const result = await whatsappChannel.send(sendParams());
+
+      expect(result.success).toBe(false);
+      expect(result.sendAttempted).toBe(true);
+      expect(result.rateLimited).not.toBe(true);
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: NotificationDeliveryStatus.FAILED,
+        })
+      );
+    });
+
+    test("returns rate-limited result when Meta error code 131056 is received", async () => {
+      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ error: { message: "Rate limit hit", code: 131056 } }), { status: 429 })
+      );
+
+      const result = await whatsappChannel.send(sendParams());
+
+      expect(result.success).toBe(false);
+      expect(result.sendAttempted).toBe(true);
+      expect(result.rateLimited).toBe(true);
+      // B2: Meta 131056 must NOT mark delivery as FAILED — caller should deferred-retry
+      expect(updateDeliveryStatusSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: NotificationDeliveryStatus.FAILED,
+        })
+      );
+    });
+
+    test("returns failure with sendAttempted=false when credentials are missing", async () => {
+      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 200 }));
+
+      delete process.env.WHATSAPP_ACCESS_TOKEN;
+      delete process.env.WHATSAPP_PHONE_NUMBER_ID;
+      invalidateEnvConfigCache("WHATSAPP_ACCESS_TOKEN");
+      invalidateEnvConfigCache("WHATSAPP_PHONE_NUMBER_ID");
+
+      const result = await whatsappChannel.send(sendParams());
+
+      expect(result.success).toBe(false);
+      expect(result.sendAttempted).toBe(false);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+  });
+});
