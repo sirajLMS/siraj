@@ -81,8 +81,8 @@ Elapsed: 306s, 18 tool calls
 - `help`: "Help" — help link/button
 
 ### Raw Enum Values Leaked to Users
-1. **NumberCard.tsx**: Renders raw enum values directly (e.g., `{account.qualityRating}`, `{account.portfolioMessagingLimitTier}`) without i18n translation — should use `t('qualityGreen')`, `t('tier1K')`, etc.
-2. **TemplatesTabContent.tsx**: Renders raw `template.status` enum value directly (e.g., `{template.status}`) without i18n translation — should use `t('templateStatusApproved')`, etc.
+1. **NumberCard.tsx**: Renders raw enum values directly (e.g., `{account.qualityRating}`, `{account.portfolioMessagingLimitTier}`) without i18n translation — should use `t.qualityGreen`, `t.tier1K`, etc.
+2. **TemplatesTabContent.tsx**: Renders raw `template.status` enum value directly (e.g., `{template.status}`) without i18n translation — should use `t.templateStatusApproved`, etc.
 
 ### TIER_100K Missing i18n Key
 - Enum value in code: `WhatsappLimitTier.TIER_100K` (underscore-separated)
@@ -94,9 +94,9 @@ Elapsed: 306s, 18 tool calls
 ### Recommendations
 
 1. **Wire orphaned keys** (exact count requires audit — prior estimate of 31 was unreliable) to their proper UI locations:
-   - Quality labels → NumberCard.tsx (replace raw enum with t() call)
-   - Tier labels → NumberCard.tsx (replace raw enum with t() call)
-   - Template status labels → TemplatesTabContent.tsx (replace raw enum with t() call)
+   - Quality labels → NumberCard.tsx (replace raw enum with `t.qualityGreen` property access)
+   - Tier labels → NumberCard.tsx (replace raw enum with `t.tier1K` property access)
+   - Template status labels → TemplatesTabContent.tsx (replace raw enum with `t.templateStatusApproved` property access)
    - Coexistence/unverified warnings → NumberCard.tsx (conditional rendering)
    - Delivery failure keys → notification error display
    - Warning labels → NumberCard.tsx (conditional warning chips)

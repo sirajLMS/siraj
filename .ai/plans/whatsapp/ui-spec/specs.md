@@ -98,7 +98,7 @@ A production-ready WhatsApp settings page where admins can manage accounts, cred
 **User Story:** As a user in either English or Arabic locale, I want all visible text to be localized, so that I never see raw enum values like "GREEN", "TIER_1K", or "STANDARD" in the UI.
 
 #### Acceptance Criteria
-1. WHEN a phone number's quality rating is GREEN THEN system SHALL display the localized "High Quality" label from `t('qualityGreen')`.
+2. WHEN a phone number's quality rating is GREEN THEN system SHALL display the localized "High Quality" label from `t.qualityGreen`.
 2. WHEN a phone number's quality rating is YELLOW/RED/ORANGE/unknown THEN system SHALL display the corresponding localized label.
 3. WHEN a phone number's tier is TIER_1K/TIER_10K/TIER_100K/TIER_250K/TIER_1M/unknown THEN system SHALL display the corresponding localized label.
 4. WHEN a template's status is APPROVED/PENDING/REJECTED/PAUSED/PENDING_DELETION/DISABLED THEN system SHALL display the corresponding localized label.

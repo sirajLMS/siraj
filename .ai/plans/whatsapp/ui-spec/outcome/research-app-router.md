@@ -127,9 +127,9 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
   return (
     <PageContainer>
       <Stack spacing={2} alignItems="center" sx={{ py: 4 }}>
-        <Typography variant="h6" color="error">{t("errorGenericTitle")}</Typography>
-        <Typography variant="body2" color="text.secondary">{t("errorGeneric")}</Typography>
-        <Button variant="outlined" onClick={reset}>{t("retry")}</Button>
+        <Typography variant="h6" color="error">{t.errorGenericTitle}</Typography>
+        <Typography variant="body2" color="text.secondary">{t.errorGeneric}</Typography>
+        <Button variant="outlined" onClick={reset}>{t.retry}</Button>
       </Stack>
     </PageContainer>
   );

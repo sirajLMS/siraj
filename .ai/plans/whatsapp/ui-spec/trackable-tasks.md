@@ -170,7 +170,7 @@
   - Replace inline `Chip` + `statusChipColor` in `tabs/shared/NumberCard.tsx` with `StatusBadge` + `whatsappStatusBadge` config
   - Replace inline `Chip` + `statusChipColor` in `tabs/shared/TemplatesTabContent.tsx` with `StatusBadge`
   - Update `tabs/shared/statusChipColor.ts` to add PAUSED, PENDING_DELETION, DISABLED cases (currently only handles template statuses: APPROVED/PENDING/REJECTED — these additional statuses are also template-level) (or deprecate in favor of whatsappStatusBadge config)
-  - Note: Label wiring (replacing raw enum values with `t()` calls) happens in Task 11 (Phase 3). Until then, Badge components will render with raw enum values — this is a known transient state between Phase 2 and Phase 3.
+  - Note: Label wiring (replacing raw enum values with `t` property access) happens in Task 11 (Phase 3). Until then, Badge components will render with raw enum values — this is a known transient state between Phase 2 and Phase 3.
   - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/common/components/ui/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
@@ -224,9 +224,9 @@
 
 - [ ] 11. **i18n Enum Localization (Wire All 31 Orphaned Keys)**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
-  - Modify `tabs/shared/NumberCard.tsx`: Replace raw enum interpolation of `quality` with `t(getQualityLabelKey(quality))` helper (current code renders `{account.qualityRating}` directly — no toUpperCase, just raw enum value)
-  - Modify `tabs/shared/NumberCard.tsx`: Replace raw enum interpolation of `tier` with `t(getTierLabelKey(tier))` helper (current code renders `{account.portfolioMessagingLimitTier}` directly)
-  - Modify `tabs/shared/TemplatesTabContent.tsx`: Replace raw enum interpolation of `template.status` with `t(getTemplateStatusLabelKey(template.status))` helper (same pattern — raw value, not toUpperCase)
+  - Modify `tabs/shared/NumberCard.tsx`: Replace raw enum interpolation of `quality` with `t.qualityGreen` helper (current code renders `{account.qualityRating}` directly — no toUpperCase, just raw enum value)
+  - Modify `tabs/shared/NumberCard.tsx`: Replace raw enum interpolation of `tier` with `t.tier1K` helper (current code renders `{account.portfolioMessagingLimitTier}` directly)
+  - Modify `tabs/shared/TemplatesTabContent.tsx`: Replace raw enum interpolation of `template.status` with `t.templateStatusApproved` helper (same pattern — raw value, not toUpperCase)
   - Add conditional rendering for warning labels (verify `coexistenceWarning` and `unverifiedWarning` keys exist in locale — if not, add them as new keys) in `tabs/shared/NumberCard.tsx` (when `verified=false` or coexistence mode)
   - Add conditional rendering for `warningTierExceeded` and `warningCoexistence` labels
   - Wire `throughput24h` label as throughput metric label
