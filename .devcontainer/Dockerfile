@@ -60,5 +60,5 @@ RUN chmod +x /tmp/instalNode.sh && \
     /tmp/instalNode.sh || true
 RUN rm -f /tmp/instalNode.sh
 
-USER root
+USER vscode
 ENV SHELL=/bin/zsh
