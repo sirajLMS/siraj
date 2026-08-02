@@ -94,7 +94,7 @@ todos:
   - id: "19"
     content: Write seedOrGet in backend/db/seeds/notifications/seed-email-templates.ts (one row per EmailScope per locale via EmailTemplateService bootstrap); add to notifications/index.ts + master seeds/index.ts
     status: pending
-    note: "SWE review v2: seeds should be Phase 1 (alongside registry), not Phase 4 — the registry defines the scopes and the seeds create the initial DB rows. Moving seeds earlier ensures the DB has default templates before the dispatcher migration in Phase 3."
+    note: "v9 §Y3 correction: seeds are Phase 2 (after schema migration creates the email_templates table), NOT Phase 1. The v2 note saying 'Phase 1' was wrong — Phase 1 has no DB schema, so seeds would have no table to write to. The registry defines scopes in Phase 1 (code-only); the seeds create initial DB rows in Phase 2 once the schema exists."
   - id: "20"
     content: Add integration smokes for SES/Postmark/Mailgun/SMTP in test/integration/communication/*.integration.test.ts gated by describeLiveWhen. Add end-to-end integration test: trigger notification event → mapEventTypeToEmailScope → render template → send via mock adapter → verify delivery row.
     status: pending
@@ -122,8 +122,47 @@ todos:
     content: "Add EMAIL_TEMPLATES_ENABLED feature flag (env var) to gate dispatcher migration in Phase 3. When false, dispatcher uses old passthrough email path; when true, dispatcher routes through EmailTemplateService.renderForSend. This allows safe rollout + instant rollback."
     status: pending
     note: "SWE review v2: no feature flag for dispatcher migration — risky cutover without rollback path. SWE review v4 (V4-9): MUST register `EMAIL_TEMPLATES_ENABLED` in backend/lib/env-config-keys.ts alongside IS_DEMO (line 510) as a boolean flag, default false. SWE review v5 (V5-2 CRITICAL BUG): `resolveEnvConfig(key)` returns `Promise<string | undefined>` — NEVER a boolean. The string `'false'` is TRUTHY in JS, so `if (await resolveEnvConfig('EMAIL_TEMPLATES_ENABLED'))` would be true even when admin sets it to 'false' — the exact opposite of the intended default-off behavior. CONSUMPTION MUST use `getBooleanEnv('EMAIL_TEMPLATES_ENABLED')` from `@/backend/lib/env` (env.ts:70-71), which returns `true` only when the value is literally `=== 'true'` — the same pattern IS_DEMO uses at env.ts:354. Registration: `excludeFromDb: true, serverOnly: true` (matching IS_DEMO at env-config-keys.ts:510). Do NOT use `resolveEnvConfig('EMAIL_TEMPLATES_ENABLED')` as a truthy gate under any circumstances."
-isProject: false
----
+  - id: "22"
+    content: "§S — Error handling infrastructure: create safeRender degraded-mode signal (S5), services-layer error classes for constraint mapping (S6), const-object error code registry in backend/enum/ (S7). Probe Drizzle constraint field name via throw-and-log test in §W1."
+    status: pending
+    note: "Phase 1 (registry/errors) + Phase 2 (GraphQL error mapping)."
+  - id: "23"
+    content: "§T — Performance: implement memoization for all editor components (T1, React Compiler OFF), dynamic fetchPolicy based on isDirty ref (T2), AbortSignal-less Promise.race render timeout (T10)."
+    status: pending
+    note: "Phase 2. T6 bundle analysis deferred to Phase 4."
+  - id: "24"
+    content: "§U — Security: Email scalar with CRLF rejection + code mapping (U2), authScopes with explicit boolean flags (U3), atomic rate limiter using Lua/Redis or pg_advisory_xact_lock/Postgres (U7)."
+    status: pending
+    note: "Phase 1 (U1 Email scalar) + Phase 2 (U3 authScope, U7 rate limit)."
+  - id: "25"
+    content: "§V — Accessibility & RTL: CSS srOnly pattern (not sx shorthand) for aria-live regions (V3), dnd-kit Accessibility announcements object + onDragCancel + defaultAnnouncements merge (V7), spread DraggableAttributes on inner div (V8)."
+    status: pending
+    note: "Phase 2 — ships with UI."
+  - id: "26"
+    content: "§W — Testing: inline MockLink.MockedResponse in stories (W2), TestWrapper for component tests (W4), two db.transaction in Promise.all for concurrency test (W5)."
+    status: pending
+    note: "Phase 1 (W1 probe) + Phase 2 (W2-W4) + Phase 3 (W5 concurrency)."
+  - id: "27"
+    content: "§X — DX: single-command bring-up using Bun.spawn (X1), mock email adapter at backend/services/communication/channels/email/mock/ (X4), visual regression with bun:test + AxeBuilder (X6)."
+    status: pending
+    note: "Phase 1 (X1) + Phase 2 (X4) + Phase 4 (X6)."
+  - id: "28"
+    content: "§Y — Migration: custom .custom-migrations.json manifest via bun run db (Y1), seed default templates in Phase 2 (Y3), getEnvArray helper (Y6), logger.error + Vercel log drain monitoring (Y7 — no Slack)."
+    status: pending
+    note: "Phase 1 (Y1) + Phase 2 (Y3 seeds) + Phase 3 (Y5 rollback)."
+  - id: "29"
+    content: "§Z — Implementation patterns: EmailLabels in shared/locale/types/emails/ (Z1), ComplaintReturnType.title via body.slice(0,50)+'…' option c (Z3), EmailAttachmentEncoding enum via createPgEnumFromEnum (Z4), messages.ts path + @/ alias (Z8)."
+    status: pending
+    note: "Phase 1 (Z1-Z4) + Phase 2 (Z6-Z8)."
+  - id: "30"
+    content: "§G — Accessibility & Interaction Patterns: usePrefersReducedMotion hook in frontend/stores/preferencesStore.ts (G1), button loading convention governance (G2), idempotencyKey in all mutations (G3), keyboard shortcuts table (G4)."
+    status: pending
+    note: "Phase 2 — ships with editor UI."
+  - id: "31"
+    content: "§H — Validation schemas in shared/lib/validations/emailTemplate.ts: SaveDraftSchema (H1), PublishSchema (H2), SendTestSchema (H3), MergeTagSchema (H4), DesignJsonSchema (H5)."
+    status: pending
+    note: "Phase 1 (H1-H2 type-level) + Phase 2 (H3-H5 UI-level)."
+
 
 ## Email Template System — Implementation Plan
 
@@ -1222,7 +1261,7 @@ All new admin UI surfaces need a brand-new `dashboard.emailTemplates` namespace.
 - `saved: () => string`, `published: () => string`, `archived: () => string`, `restored: () => string`, `deleted: () => string`, `testSent: (to: string) => string`, `saveFailed`, `publishFailed`, `archiveFailed`, `sendTestFailed`, `copyHtmlCopied: () => string`, `rateLimited: (limit: number) => string`, `featureDisabled`
 
 **Error messages (UI layer — distinct from `emails.errors` backend fns) (`dashboard.emailTemplates.error.*`)**
-- `loadFailed`, `previewFailed`, `notFound`, `notEditable`, `versionMismatch: (expected: number, got: number) => string`, `invalidDesignJson`, `duplicateScopeLocale`, `missingCompiledHtml`
+- `loadFailed`, `previewFailed`, `notFound`, `notEditable`, `versionMismatch: (expected: number, got: number) => string`, `invalidDesignJson`, `duplicateScopeLocale`, `duplicateSlug`, `missingCompiledHtml`
 
 **Empty states (`dashboard.emailTemplates.empty.*`)**
 - `emptyState`, `emptyStateHelp`, `emptyRevisions`, `emptyRevisionsHelp`, `noSearchResults`
@@ -1312,7 +1351,7 @@ The historical `renderAsync` API was removed when `render` became async — don'
 - No `any` props types; no text union types — only enums + Record<enum, component>
 - File-scoped lint queue verification per AGENTS.md per-file subloop
 
-### Migration / data (Phase 1 — seeds must ship with the registry, not deferred to Phase 4)
+### Migration / data (Phase 2 — seeds ship with the schema migration, NOT Phase 1)
 
 - **Phase 0 flag-toggle audit (V4-5 migration risk):** Before flipping `EMAIL_TEMPLATES_ENABLED` to `true` in Phase 3, audit subscribers to the 5 null-scope events (NEW_COMPLAINT, NEW_SUGGESTION, SUGGESTION_DUPLICATE_MARKED, CLASS_ACTIVATED, CLASS_STARTED). Today these events send email via `payload.body ?? ""` passthrough. When the flag flips, null-scope events short-circuit and send NO email. If any business process relies on the legacy passthrough for these events, document the impact and either (a) map these events to a scope, or (b) accept the email drop-off as intentional.
 - Seed default templates via `bun db seed` — one `emailTemplates` row per `EmailScope` per locale with compiled HTML from the React Email components. Follow [backend/db/seeds/AGENTS.md](backend/db/seeds/AGENTS.md):
@@ -1398,6 +1437,181 @@ Note `.ai/plans/whatsapp/implementation.md` exists. The provider-registry patter
 
 ---
 
+### G. Accessibility & Interaction Patterns (v9 — Round 4 Audit Closure)
+
+> New section created in v9 to close 3 dangling §G references found at lines 790, 884, 1038 (cross-section audit report 09). §G did not exist as a section in v6-v8; all refs were forward-promises. This section now exists and is the authoritative source for: (1) reduced-motion hook, (2) button loading state convention, (3) idempotencyKey pattern, (4) keyboard shortcuts.
+
+#### G1. `usePrefersReducedMotion()` Hook Spec
+
+**File:** `frontend/stores/preferencesStore.ts` (Zustand store with `prefers-reduced-motion` media query listener).
+
+```ts
+// frontend/stores/preferencesStore.ts
+import { create } from 'zustand';
+
+interface PreferencesState {
+  prefersReducedMotion: boolean;
+  setPrefersReducedMotion: (value: boolean) => void;
+}
+
+export const usePreferencesStore = create<PreferencesState>((set) => ({
+  prefersReducedMotion: false,
+  setPrefersReducedMotion: (value) => set({ prefersReducedMotion: value }),
+}));
+
+// Hook: subscribes to matchMedia('(prefers-reduced-motion: reduce)')
+// Must be called once at app root (AdminLayout or similar) to install the listener.
+export function usePrefersReducedMotion(): boolean {
+  const prefersReducedMotion = usePreferencesStore((s) => s.prefersReducedMotion);
+  // Listener installed in a useEffect at app root; this hook just reads state.
+  return prefersReducedMotion;
+}
+```
+
+**Governs:** all framer-motion animations (stagger, SuccessCheckMark, Slide tab transitions), @dnd-kit sortable transitions, Tooltip/Dialog open/close durations. When `true`:
+- framer-motion `transition` duration → `0` (instant), `layout` animations → disabled.
+- @dnd-kit `transition` → `null` (instant snap).
+- MUI `TransitionComponent` props → `timeout={0}` where exposed.
+- Does NOT disable CSS `:hover` or `:focus` visual states (those are not "motion").
+
+**Implementation pattern (framer-motion):**
+```tsx
+const prefersReducedMotion = usePrefersReducedMotion();
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
+/>
+```
+
+#### G2. Button Loading State Convention
+
+**Convention:** All mutation `<Button>` components render `<CircularProgress size={20} color="inherit" />` inside the `loading` prop when their corresponding Apollo mutation is in-flight.
+
+```tsx
+const [saveDraft, { loading: isSaving }] = useMutation(SaveDraftDocument);
+
+<Button
+  loading={isSaving}
+  loadingPosition="start"
+  startIcon={<SaveOutlined />}
+  onClick={handleSave}
+>
+  {t('saveDraft')}
+</Button>
+```
+
+**Applies to:** Save Draft, Publish, Send Test, Archive, Restore, Delete (all mutations in §K/§L). The `loading` prop is MUI-native and replaces the spinner; `loadingPosition="start"` keeps the icon + text layout. This convention is used at line 884 (editor actions) and is the single source of truth — do not create per-button loading state variants.
+
+#### G3. `idempotencyKey` Pattern
+
+**All mutations** carry an `idempotencyKey` header (see line 1038 ref) to prevent duplicate sends on network retry. Spec:
+
+- **Client generates:** `crypto.randomUUID()` (browser-native, no dep).
+- **Passed as:** GraphQL variable `idempotencyKey: ID!` on every mutation (SaveDraft, Publish, SendTest, Archive, Restore, Delete).
+- **Server dedup:** `EmailTemplateService` stores `"idempotencyKey"` in a `email_template_idempotency` table (or Redis SETNX with TTL=24h). If key already processed → return cached result, do NOT re-execute.
+- **PSA pattern:** `docs/IDEMPOTENCY.md` documents the repo-wide idempotency pattern. Email templates follow it exactly.
+
+```ts
+// Client side (every mutation)
+const idempotencyKey = crypto.randomUUID();
+const [saveDraft] = useMutation(SaveDraftDocument, {
+  variables: { input: { ...draftInput, idempotencyKey } },
+});
+```
+
+#### G4. Keyboard Shortcuts Table
+
+| Shortcut | Action | Context | i18n key |
+|----------|--------|---------|----------|
+| `Ctrl/Cmd+S` | Save Draft | Editor (any tab) | `editor.shortcuts.saveDraft` |
+| `Ctrl/Cmd+Shift+P` | Publish | Editor (any tab) | `editor.shortcuts.publish` |
+| `Ctrl/Cmd+Shift+T` | Send Test | Editor (any tab) | `editor.shortcuts.sendTest` |
+| `Escape` | Close dialog/drawer (unsaved changes confirm if dirty) | Any dialog/drawer | `editor.shortcuts.close` |
+| `Cmd/Ctrl+K` | Open merge-tag picker | Subject or editor field | `editor.shortcuts.mergeTags` |
+| `Tab` / `Shift+Tab` | Navigate form fields | Editor inspector | (default browser) |
+
+**Keyboard shortcuts table is authoritative** — do not add shortcuts elsewhere without adding them here. Shortcut labels must go through `t('editor.shortcuts.*')` for localization (Ctrl vs Cmd rendered from `navigator.platform`).
+
+---
+
+### H. Validation Schemas (v9 — Round 4 Audit Closure)
+
+> New section created in v9 to close dangling §H references found at lines 1971-1972 (v6 introduced §H refs for zod schemas but §H was never created). This section is the authoritative source for all zod validation schemas in the email template system.
+
+#### H1. Save Draft Validation Schema
+
+```ts
+// shared/lib/validations/emailTemplate.ts
+import { z } from 'zod';
+
+export const SaveDraftSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1).max(100),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase kebab-case'),
+  scope: z.enum(['transactional', 'marketing', 'compliance', 'system']),
+  locale: z.enum(['en', 'ar']),
+  subject: z.string().min(1).max(200),
+  bodyJson: z.record(z.any()),
+  allowedEditorGroups: z.array(z.string().uuid()).optional(),
+  designJson: z.record(z.any()).optional(),
+});
+export type SaveDraftInput = z.infer<typeof SaveDraftSchema>;
+```
+
+#### H2. Publish Validation Schema
+
+```ts
+export const PublishSchema = SaveDraftSchema.extend({
+  id: z.string().uuid(),
+  version: z.number().int().positive(), // optimistic lock check
+}).omit({ id: z.string().optional() });
+export type PublishInput = z.infer<typeof PublishSchema>;
+```
+
+#### H3. Send Test Validation Schema
+
+```ts
+export const SendTestSchema = z.object({
+  templateId: z.string().uuid(),
+  to: z.string().email(),
+  sampleProps: z.record(z.string(), z.any()).default({}),
+  channel: z.enum(['resend', 'ses', 'postmark', 'mailgun', 'smtp', 'sendgrid', 'mock']).optional(),
+});
+export type SendTestInput = z.infer<typeof SendTestSchema>;
+```
+
+#### H4. Merge-Tag Validation Schema
+
+Merge tags have the form `{{field.path}}`. Validate at subject/body field level:
+
+```ts
+export const MergeTagSchema = z.string().regex(/^\{\{[a-zA-Z0-9_.]+\}\}$/, 'Invalid merge tag format');
+export const SubjectWithMergeTagsSchema = z.string().min(1).max(200);
+// Body validation: merge tags extracted via regex, validated against NotificationMetadataBase keys
+```
+
+#### H5. `designJson` Validation Schema
+
+Editor JSON output must pass structural validation:
+
+```ts
+export const DesignJsonSchema = z.object({
+  type: z.literal('doc'),
+  content: z.array(z.object({
+    type: z.enum(['paragraph', 'heading', 'button', 'image', 'spacer', 'divider']),
+    attrs: z.record(z.any()).optional(),
+    content: z.array(z.any()).optional(),
+  })),
+}).optional();
+```
+
+Section ref (see line 884): **subject template + send-test dialog** use H3/H4 for client-side validation via react-hook-form + zod resolver.
+
+Schemas live in `shared/lib/validations/emailTemplate.ts` (shared layer — used by both frontend client forms and backend service-layer validation).
+
+---
+
 ### S. Error Handling & Resilience (v8 — Round 3 Audit)
 
 **Source:** 8 parallel audit reports at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.md` (168KB total, 1405 lines).
@@ -1429,29 +1643,31 @@ The schema has `version` integer + `WHERE version = $1` comment, and §P2 UI han
 - **Remove** all references to `SESSION_EXPIRED` in the plan — replace with `UNAUTHENTICATED`.
 
 #### S5. safeRender Degraded-Mode Signal (P1)
-`safeRender` catches render throw → returns `"<p>renderFailed(scope)</p>"` HTML. This fallback is **sent as a real email** with `success: true` — the recipient gets a placeholder, no `FAILED` delivery row, no alerting.
-- **Change return type:** `safeRender` returns `{ html, text, degraded: boolean, error?: Error }`.
+`safeRender` catches render throw → returns `"<p>renderFailed(scope)</p>"` HTML. This fallback is **sent as a real email** with `success: true` — the recipient gets a placeholder, no `FAILED` delivery row, no alerting. **v9 correction:** `IEmailChannel.send()` does NOT accept a `text` field — text-version emails are unsupported (only HTML is sent).
+- **Change return type:** `safeRender` returns `{ html, degraded: boolean, error?: Error }` (dropped `text` — `IEmailChannel.send()` accepts `{ to, from, subject, html, attachments? }` only). If text-version support is needed later, add `EmailPayload.text?: string` to `IEmailChannel` and update ALL adapters (Resend, SES, Postmark, Mailgun, SMTP).
 - **Dispatcher:** when `degraded: true`, mark the delivery row as `FAILED` with `failureReason: "render_degraded"` rather than `SENT`. Log `logger.warn("Email render degraded — fallback HTML sent", { scope })` (not `logger.error` — to avoid a false critical alert for a user-visible-but-recoverable state).
 - **Wrap dispatcher's `EmailTemplateService.renderForSend`** in try/catch returning `{ success: false, error: "RENDER_FAILED" }` — today an unhandled rejection in the notification job occurs if `renderForSend` throws before `safeRender` (e.g., DB read of `designJson` fails).
-- **Extend safeRender try** to cover the async `attachments` resolver and a subject-render fallback. If the subject-component throws, fall back to `<subject>` text interpolation with merge-tag values (no-ops if missing key).
+- **Extend safeRender try** to cover the async `attachments` resolver (inline-CID / file attachment / `.ics` calendar) with explicit resolver paths (`backend/storage/` for file storage, new `backend/services/communication/attachments/` for attachment resolution) and a subject-render fallback. If the subject-component throws, fall back to `<subject>` text interpolation with merge-tag values (no-ops if missing key).
 
 #### S6. Repository Constraint Violation Mapping (P0)
 No existing convention for mapping Postgres `23505` (unique violation) / `40P01` (deadlock) in any repo. Plan's two unique indexes surface as raw `QueryError` → GraphQL throws raw messages to admins.
-- **Add to `email-template.repository.ts`:** `catch (e: QueryError)` → `if (e.code === '23505')` → match constraint name from `e.constraint_name` → throw typed `DuplicateScopeLocaleError` / `DuplicateSlugError`.
+- **Add to `email-template.repository.ts`:** `catch (e)` → `if (e.code === '23505')` → match constraint name from `e.constraint` (Drizzle exposes `e.code`, `e.detail`, `e.constraint` — verify via a throw-and-log probe in §W1 integration tests) → throw typed `DuplicateScopeLocaleError` / `DuplicateSlugError`. Locate error classes at `backend/services/communication/email-template-errors.ts` (services layer — NOT repo, per `backend/db/repo/AGENTS.md:42` forbids user-facing strings in repository code). Reuse the existing `backend/services/shared/is-duplicate-error.ts` pattern.
 - **Service:** catch → re-throw with `extensions: { code: "DUPLICATE_SCOPE_LOCALE" | "DUPLICATE_SLUG" }`.
 - **UI:** existing i18n keys `duplicateScopeLocale` / `duplicateSlug` bind to `extensions.code` via the new `getGraphQLErrorCode` helper (S2). Field-level `<FormHelperText error>` displays under the relevant form field (not a form-level snackbar), matching the RHF convention.
 - **Deadlock retry:** `40P01` → retry the transaction once (Drizzle already wraps in `db.transaction`).
 
 #### S7. GraphQL Error Code Registry (P1)
 The plan references `VERSION_MISMATCH`, `RATE_LIMITED`, `DUPLICATE_SCOPE_LOCALE`, `DUPLICATE_SLUG` in UI flows but never defines them as Pothos mutation throws. The codebase precedent (`auth.mutation.ts`) is `extensions: { code: "UPPER_SNAKE" }` literally — no typed union.
-- **Add `EmailTemplateErrorCode` enum** in `backend/types/email-template.types.ts`: `VERSION_MISMATCH | RATE_LIMITED | DUPLICATE_SCOPE_LOCALE | DUPLICATE_SLUG | NOT_FOUND | RENDER_FAILED | PROVIDER_DEGRADED | EMAIL_TEMPLATES_DISABLED`.
-- **Frontend helper:** `getGraphQLErrorCode(error): EmailTemplateErrorCode | undefined` at `frontend/common/graphql/utils/errorCodes.ts` — reads `error.graphQLErrors[0]?.extensions?.code`.
+- **Add `EmailTemplateErrorCode`** as a `const` object (matching email enum convention, NOT a TS `enum`) in `backend/enum/notifications/email-template-error-code.enum.ts` (per `backend/enum/AGENTS.md:54`). Register in `backend/graphql/pothos/shared/enum.pothos.ts`. Members: `VERSION_MISMATCH`, `RATE_LIMITED`, `DUPLICATE_SCOPE_LOCALE`, `DUPLICATE_SLUG`, `NOT_FOUND`, `RENDER_FAILED`, `PROVIDER_DEGRADED`, `EMAIL_TEMPLATES_DISABLED`, `INVALID_EMAIL`, `INVALID_SAMPLE_PROPS`.
+- **Frontend helper:** `getGraphQLErrorCode(error): EmailTemplateErrorCode | undefined` at `frontend/common/graphql/utils/errorCodes.ts` — reads `error.graphQLErrors[0]?.extensions?.code` (returns `undefined` for `networkError`-only errors). Use `CombinedGraphQLErrors.is(error)` guard pattern handling both `graphQLErrors` and `networkError` cases.
+- **Field-level extensions:** constraint violation errors include `extensions.field: "scope" | "locale"` so the UI can target the correct `<FormHelperText>`.
 - **All email-template mutations** throw with `extensions: { code }` matching this enum.
 
 #### S8. Toast/Notification Convention Alignment (P1)
-Plan uses `notifications.show(t(...), { severity: "success" })` throughout §P — but `@toolpad/core` `useNotifications().show()` in the existing codebase (`useApolloConnectivity.ts:104`) is **severity-less**. `severity` may not be a supported arg.
-- **Verification step:** check `@toolpad/core` version — if `show()` accepts a `severity` option, keep the plan. If NOT, replace all `notifications.show(msg, { severity })` with `notifications.show(msg)` and use `<Alert severity>` inside `<Snackbar>` for severity-coded messages (matching `FormErrorSnackbar` pattern).
-- **Consolidate:** one toast system for email-template route — use toolpad `notifications.show()` for transient success/info messages; `<Snackbar>` + `<Alert>` for errors/warnings. Document this in a `§S8 Toast Convention` block.
+v8 stated `show()` might be severity-less — **v9 correction:** `@toolpad/core` `useNotifications().show()` DOES accept `severity` (verified at `useApolloConnectivity.ts:104` and `useImageUpload.ts:43`). `severity ∈ "success" | "info" | "warning" | "error"`.
+- **Keep** all `notifications.show(msg, { severity })` calls as specified in §P.
+- **Convention:** use toolpad `notifications.show()` for transient success/info/warning messages. Use `<Snackbar>` + `<Alert>` with `severity` only for dismissible/persisted error contexts requiring user action.
+- **Remove** the v8 "If NOT…" conditional-implementation branch — it was based on a false premise.
 
 #### S9. Network/Offline — Reuse Existing Infrastructure (P1)
 §P7 offline banner via `navigator.onLine` duplicates the existing `createConnectivityLink` (`utils.ts:51-100`) which emits a synthetic `NETWORK_ERROR` and renders `<InitializingUI error>`.
@@ -1471,12 +1687,13 @@ Zero occurrences of `React.memo` / `useMemo` / `useCallback` in the 1421-line pl
   - `useCallback` for stable handlers passed to descendants (save, publish, archive, restore, sendTest).
 - **TipTap editor state isolation:** TipTap editor state lives on the editor instance (`EmailEditorRef.editor`), NOT in React Zustand store. Commit to React state only on a debounced tick (300ms via `useDebouncedCallback`). This prevents keystroke→React state mutation→full editor chrome re-render.
 - **`useEffect(() => () => editorRef.current?.editor?.destroy(), [])`** cleanup on unmount — TipTap editors must be `.destroy()`ed to release DOM + ProseMirror state. Codebase has zero precedent (no TipTap yet) but the pattern matches `useImageUpload.ts:169` (`URL.revokeObjectURL` cleanup).
-- **React Compiler caveat:** `babel-plugin-react-compiler@1.0.0` is in devDeps. If Next.js propagates RC into the editor subtree, manual `useMemo`/`useCallback` may be redundant — but RC does NOT handle `React.memo` on components. Add a verification step (todo): confirm RC optimization of the editor route via `bun run build` + bundle analyzer.
+- **React Compiler status — definitively OFF:** `babel-plugin-react-compiler@1.0.0` is installed but NOT enabled — `experimental.reactCompiler` is absent from `next.config.ts` and no `.babelrc`/`babel.config.*`/`.swcrc` exists. All `useMemo`/`useCallback`/`React.memo` in the editor route are therefore **MANDATORY** (not best-effort). Optional v9+ step: enable `experimental.reactCompiler: true` and verify no manual memo is needed — but until then, treat memoization as required.
 
 #### T2. Preview Debounce + Render Cache Reuse (P0)
 Preview `network-only` fetchPolicy ignores the stored `compiledHtml` — re-renders server-side on every preview-tab visit. No debounce means a server round-trip per keystroke.
-- **Switch preview fetchPolicy** from `network-only` to `cache-first` keyed on `(id, version, isDirty)`. When `isDirty: false`, serve the stored `compiledHtml` from DB (avoid server render). When `isDirty: true`, re-render server-side.
-- **Add `useDebouncedCallback(300ms)`** for preview re-render on `designJson` change — reuse `use-debounce@10.1.1` (already installed). The codebase precedent is `useAudienceAutocomplete.ts:22,53,64` (`debouncedSearch` pattern).
+- **§Q2 SUPERSEDED:** Mark §Q2's `PreviewEmailTemplateQueryDocument → "network-only"` row as **SUPERSEDED BY §T2**.
+- **Switch preview fetchPolicy** to dynamic `fetchPolicy={isDirtyRef.current ? 'network-only' : 'cache-first'}` plus a `version`-equality short-circuit (compare `data.emailTemplate.version === storeVersion` before re-rendering). When `isDirty: false`, serve the stored `compiledHtml` from DB (avoid server render). When `isDirty: true`, re-render server-side. `isDirty` is Zustand client state — it CANNOT be an Apollo cache key; use a ref + conditional `fetchPolicy` instead.
+- **Add `useDebouncedCallback(300ms)`** for preview re-render on `designJson` change — reuse `use-debounce@10.1.1` (already installed). API: `useDebouncedCallback(callback, delay)` returns a debounced function. The codebase precedent is `useAudienceAutocomplete.ts:22,53,64` (`debouncedSearch` pattern).
 
 #### T3. Lazy-Load Heavy Editor Dependencies (P0)
 `next/dynamic` lazy-import only specified for `EmailEditorWrapper`. `@dnd-kit/sortable` (heavy), `framer-motion`, `react-color`, `react-dropzone`, Prism grammars, `recharts` are loaded unconditionally in the editor route.
@@ -1503,12 +1720,14 @@ List view filter axes (`status`, `locale`, `updatedAt`, `scope` alone, `search`)
 - **Repo method:** add `getRevisionsByTemplateIds(ids: string[], tx?)` Map-returning batch method. The existing `@pothos/plugin-dataloader` is wired at `gqlSchemaBuilder.ts:3` but no `loadable` field is shown in the plan.
 
 #### T6. Bundle Analyzer Wiring (P1)
-`@next/bundle-analyzer@16.2.12` IS installed (`package.json:185`) but NOT wired in `next.config.ts` (no `withBundleAnalyzer` wrapper). Todo 20b's `NEXT_BUNDLE_ANALYZER=enabled bun run build` cannot run.
-- **Add `withBundleAnalyzer` wrapper** to `next.config.ts`:
+`@next/bundle-analyzer@16.2.12` IS installed but NOT wired in `next.config.ts`. `next.config.ts` uses ESM (`export default`) — the v8 `require()` + `module.exports` snippet is INVALID. Also `@next/bundle-analyzer` warns "incompatible with Turbopack" and silently skips when Turbopack is enabled (`next.config.ts:62` `turbopack: {}`).
+- **Add ESM wrapper** to `next.config.ts`:
   ```ts
-  const withBundleAnalyzer = require("@next/bundle-analyzer")({ enabled: process.env.NEXT_BUNDLE_ANALYZER === "enabled" });
-  module.exports = withBundleAnalyzer(nextConfig);
+  import withBundleAnalyzerFactory from "@next/bundle-analyzer";
+  const withBundleAnalyzer = withBundleAnalyzerFactory({ enabled: process.env.NEXT_BUNDLE_ANALYZER === "enabled" });
+  export default withBundleAnalyzer(nextConfig);
   ```
+- **Turbopack caveat:** when using `NEXT_BUNDLE_ANALYZER=enabled bun run build`, Turbopack may skip analysis. If analysis is needed, temporarily disable Turbopack for the analyzer build. Add a note to todo 20b.
 
 #### T7. Zustand Selector Discipline (P1)
 Plan says "Zustand store" generically. The codebase precedent (`adminComplaintsStore.ts:34`, consumed at `useAdminComplaintsViewModel.ts:68-73`) is per-field selectors: `useAdminComplaintsStore(state => state.searchQuery)`. Without this discipline, the editor's React tree re-renders on every Zustand change.
@@ -1536,8 +1755,8 @@ Plan says "Zustand store" generically. The codebase precedent (`adminComplaintsS
 - **Invalidate `cache-first` history** after Restore: `client.cache.evict({ id: 'EmailTemplateVersions:' + id })` — stale `cache-first` history (Q2) is NOT auto-invalidated when DB rows change.
 
 #### T10. Render Timeout (P1)
-`safeRender` has try/catch but no timeout — a slow/hanging React Email render blocks the send path indefinitely. No `Promise.race` / `AbortController` anywhere in plan.
-- **Add render deadline:** `Promise.race([render(<template/>), timeout(5000)])` — 5s render budget. If exceeded, return degraded fallback with `error: RenderTimeoutError`. Reuse `safeRender` degraded-mode signal (S5).
+`safeRender` has try/catch but no timeout — a slow/hanging React Email render blocks the send path indefinitely. **v9 correction:** `@react-email/render` `render()` signature is `(node, options?) => Promise<string>` — NO `AbortSignal` support. `Promise.race` is the ONLY viable path.
+- **Add render deadline:** `Promise.race([render(<template/>), timeout(5000)])` — 5s render budget. If exceeded, return degraded fallback with `error: RenderTimeoutError`. Reuse `safeRender` degraded-mode signal (S5). Do NOT attempt `AbortController` — it is unsupported by `@react-email/render`.
 
 ---
 
@@ -1551,7 +1770,7 @@ Plan says "Zustand store" generically. The codebase precedent (`adminComplaintsS
 #### U2. Server-Side Input Validation for Send-Test (P0)
 `sampleProps` validated only client-side (`JSON.parse`); bypassable via direct GraphQL mutation. `to` recipient validated only client-side `z.string().email()`.
 - **Server-side zod schema** for `sendTestEmail` mutation input:
-  - `to`: use the existing `Email` scalar (`backend/graphql/scalars/emailScalar.ts` — wired into Pothos) instead of plain `String`. ENSURES CRLF stripping.
+  - `to`: use the existing `Email` scalar (`backend/graphql/scalars/emailScalar.ts` — wired into Pothos) instead of plain `String`. **Rejects CRLF at the schema layer** via `validator` — any `\r\n` in `to` fails validation with `INVALID_EMAIL`. Note: the scalar throws `TypeError` on parse, which surfaces as a codeless GraphQL error — add `extensions: { code: "INVALID_EMAIL" }` mapping in the `Email` scalar's `parseValue` error handler.
   - `sampleProps`: zod schema mirroring `EmailPropsByScope[scope]` (compile-time type-safe; runtime validation).
   - `templateId`: `z.string().uuid()`.
 - **Reject** if `sampleProps` fails zod validation → `extensions: { code: "INVALID_SAMPLE_PROPS" }`.
@@ -1559,14 +1778,15 @@ Plan says "Zustand store" generically. The codebase precedent (`adminComplaintsS
 
 #### U3. Preview Query Authorization (P0)
 `previewEmailTemplate(templateId, sampleProps)` is listed (line 774) but plan **does not confirm authScope** is applied to the preview query. If accidentally unauthenticated, any logged-in user could read any template's rendered HTML.
-- **Add `authScope: { superAdmin, notImpersonating }`** explicitly on the `previewEmailTemplate` query field (Pothos). Verify in todo 14 spec.
-- **Rate limit:** `previewEmailTemplate` does server-side React Email render per call with caller-supplied `sampleProps` → CPU DoS vector. Add per-user rate limit (30/min) via `RateLimiter` — use `limitSimple` (atomic) not `limit` (non-atomic pipeline).
+- **Add `authScopes: { superAdmin: true, notImpersonating: true }`** explicitly on the `previewEmailTemplate` query field (Pothos). **v9 correction:** bare identifiers `{ superAdmin, notImpersonating }` are INVALID Pothos-4 syntax — boolean flags must be explicit truthy values (matching `environment-config.pothos.ts:168` pattern: `{ permission: AppPermission.X, notImpersonating: true }`). Verify in todo 14 spec.
+- **Rate limit:** `previewEmailTemplate` does server-side React Email render per call with caller-supplied `sampleProps` → CPU DoS vector. Add per-user rate limit (30/min). Wire a new `previewEmailRenderRateLimiter = new RateLimiter("ratelimit:email-preview", 30, 60_000, false)` — note `failOpen=false` (unlike the existing `failOpen: true` graphQL limiter at line 165); a down cache should NOT silently allow preview beyond quota.
 
 #### U4. CSP for Preview Iframe (P1)
 Plan sets `default-src 'none'` + `style-src 'unsafe-inline'` but omits `script-src 'none'` explicitly and `frame-ancestors`. CSP is specified as a header on "the preview route" but the preview is a **GraphQL query returning a string**, not an HTML route — CSP on `/api/graphql` would break the whole endpoint.
 - **CSP injection via iframe `srcdoc`:** the preview client injects a `<meta http-equiv="Content-Security-Policy">` tag inside the iframe's `srcdoc` attribute (NOT a route header). This is the correct place — CSP applies to the iframe document, not the parent.
 - **Full CSP:** `default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'`.
 - **`frame-ancestors 'self'`** allows the parent app to embed the iframe; `base-uri 'none'` + `form-action 'none'` block CSS exfil redirects.
+- **X-Frame-Options conflict:** if `next.config.ts` `headers()` sets `X-Frame-Options: DENY` globally, the preview iframe will be blocked. Either (a) remove `X-Frame-Options: DENY` from the global headers and rely on CSP `frame-ancestors 'self'` only, or (b) add a route-specific override for the editor path. Verify the existing `next.config.ts` `headers()` configuration before deploying.
 
 #### U5. DOMPurify + Re-Sanitize on Read (P1)
 `compiledHtml` cached in DB post-sanitize means a future DOMPurify config change (new CVE) does NOT re-sanitize cached rows until re-save.
@@ -1581,9 +1801,10 @@ Plan sets `default-src 'none'` + `style-src 'unsafe-inline'` but omits `script-s
 - **Subject merge-tag injection:** no maxlength, no forbidden-variable allowlist. If `subject` template is `"Order {{user.secret}}"` and `user.secret` resolves to internal data, it leaks via the subject line. Add validation: merge-tag keys must be in `EmailPropsByScope[scope]` — reject unknown keys at subject-template save time.
 
 #### U7. Rate Limit Atomicity (P1)
-Existing `RateLimiter.limit()` uses `cacheService.pipeline` with 4 commands that are **not atomic** (no MULTI/EXEC). Concurrent sends can exceed the 5/min limit.
-- **Use `limitSimple`** (serial, atomic `incr` + `expire`) for send-test rate limiting — not `limit` (non-atomic pipeline). Or implement a Lua atomic script for Redis backends.
-- **Preview query rate limit:** 30/min per user — use `limitSimple`.
+**v9 correction:** v8's premise was BACKWARDS. `limit()` uses `cacheService.pipeline` with 4 commands (non-atomic, TOCTOU). `limitSimple` (`ratelimit.ts:103-158`) does `get → set/incr → ttl` as **separate non-atomic operations** (3+ cache round-trips) — it is LESS safe than `limit()`, not more.
+- **Implement a real atomic Lua script** for Redis backends: `INCR → conditional EXPIRE → return`. Branch on cache backend (`CacheServiceFactory.ts:35` reads `CACHE_PROVIDER`): Redis → Lua script; Postgres → `pg_advisory_xact_lock` per `(prefix, identifier)`; memory → accept non-atomic with a logged runtime warning.
+- **Send-test rate limit:** wire `sendTestEmailRateLimiter = new RateLimiter("ratelimit:email-send-test", 5, 60_000, false)` — `failOpen=false` (a down cache should NOT silently allow send-test beyond quota). Use the new atomic Lua script.
+- **Preview query rate limit:** 30/min per user — use the same atomic Lua script (not `limitSimple`).
 
 ---
 
@@ -1610,7 +1831,7 @@ Plan defines explicit error/loading/toast UI (§P) but specifies **no `aria-live
 - **Add `aria-live="polite"`** to save-success toast container, status-badge update region (§P "status badge update" — line 949).
 - **Add `aria-live="assertive"`** to error snackbar region (`FormErrorSnackbar`), version-mismatch conflict dialog.
 - **Add `role="status"`** to status-badge cell in AppDataGrid so screen readers announce changes.
-- **Implementation:** add `<div aria-live="polite" role="status" sx={{ srOnly: true }}>` region near the toast/snackbar mount point in the editor route. Route toasts to this region via `useNotifications` + a `useEffect` that writes `notifications.show` text to the `aria-live` div's textContent.
+- **Implementation:** add `<div aria-live="polite" role="status" sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', clipPath: 'inset(50%)', whiteSpace: 'nowrap' }}>` region near the toast/snackbar mount point in the editor route. **v9 correction:** `sx={{ srOnly: true }}` is NOT a valid MUI sx shorthand — use the full CSS pattern above. Route toasts to this region via `useNotifications` + a `useEffect` that writes `notifications.show` text to the `aria-live` div's textContent.
 
 #### V4. Arabic Pluralization Rules (P0)
 All 9 pluralizable toast/error keys use `(count: number) => string` — repo convention just interpolates the raw count. `rateLimited: (limit: number)` and `versionMismatch: (expected, got)` produce grammatically wrong Arabic for n=0, n=2, n=11.
@@ -1644,24 +1865,28 @@ Drawer/Dialog focus trap is delegated to "MUI default — no work" (line 788), b
 - **Add `onClose` handler** that calls `restoreFocus_prevRef.current?.focus()` — MUI Dialog/Drawer supports this via the `onClose` + internal focus management. Explicitly capture the previously-focused element in `onOpen` → `prevFocusRef.current = document.activeElement`.
 
 #### V7. Drag-and-Drop Screen Reader Announcements (P1)
-`@dnd-kit/sortable` block reorder (R8/R13) specifies sensors + `KeyboardSensor` but **no ScreenReader / `LiveAnnouncer` script**. dnd-kit has built-in `useSortableAnnouncements` not mentioned.
-- **Add `Accessibility.DragAnnouncements`** to `DndContext` config:
+`@dnd-kit/sortable` block reorder (R8/R13) specifies sensors + `KeyboardSensor` but **no ScreenReader / `LiveAnnouncer` script**. **v9 correction:** v8 fabricated `useSortableAnnouncements` — the real API is the `Accessibility` component type's `announcements` object. Also v8 omitted `onDragCancel` which is REQUIRED on dnd-kit's interface.
+- **Add `announcements`** to `DndContext` config. Import and merge with `defaultAnnouncements` from `@dnd-kit/core`:
   ```ts
+  import { defaultAnnouncements } from '@dnd-kit/core';
   <DndContext accessibility={{
     announcements: {
-      onDragStart: ({ active }) => `Reordering ${active.id}`,
-      onDragOver: ({ active, over }) => over ? `Over ${over.id}` : "",
-      onDragEnd: ({ active, over }) => `Dropped on ${over?.id ?? "empty"}`,
+      ...defaultAnnouncements,
+      onDragStart: ({ active }) => t('dnd.started', { item: active.data.current?.blockLabel }),
+      onDragOver: ({ active, over }) => over ? t('dnd.over', { item: over.data.current?.blockLabel }) : "",
+      onDragEnd: ({ active, over }) => t('dnd.dropped', { item: active.data.current?.blockLabel, target: over?.data.current?.blockLabel }),
+      onDragCancel: ({ active }) => t('dnd.cancelled', { item: active.data.current?.blockLabel }),
     },
   }}>
   ```
+  - `onDragCancel` is REQUIRED by dnd-kit's TypeScript interface — omitting it causes a compile error.
 
 #### V8. ARIA Roles on Merge-Tag Picker & Sortable List (P1)
-`VariableMentionPicker` and `SortableList` — neither has `role="listbox"`/`role="option"`/`role="application"`.
-- **VariableMentionPicker:** `role="combobox"` on trigger button, `role="listbox"` on dropdown, `role="option"` on each merge-tag item. `aria-expanded`, `aria-controls`, `aria-activedescendant` for keyboard nav.
-- **SortableList:** `role="list"` on container, `role="listitem"` on each block. `aria-roledescription="draggable item"` on sortable items (dnd-kit convention).
+**v9 correction:** v8 instructed overriding dnd-kit's `DraggableAttributes` with `role="listitem"` + `aria-roledescription="draggable item"` — this CONFLICTS with dnd-kit's defaults (`role="button"`, `aria-roledescription="draggable"`) and DESTROYS keyboard D&D. Also MUI `<Autocomplete>` handles ARIA automatically — don't add `role` manually.
+- **VariableMentionPicker:** MUI `<Autocomplete>` automatically wires `role=combobox`, `role=listbox`, `role=option`, `aria-expanded`, `aria-controls`, `aria-activedescendant` — DO NOT add these manually. Only add `aria-label={t('mergeTag.triggerLabel')}` on the trigger.
+- **SortableList:** wrap each sortable item in `<li role="listitem">` as the list container, but `{...attributes}` from `useSortable()` must be spread on the inner `<div>` — dnd-kit's `role="button"` + `aria-roledescription="draggable"` stay intact. Do NOT override `role` or `aria-roledescription` on the sortable element.
 - **`aria-busy`**: add to `<Button loading>` states (isSaving, isSendingTest). `<Button loading aria-busy="true">`.
-- **`aria-invalid` + `aria-describedby`**: form validation uses `<FormHelperText error>` but no `aria-invalid` and no `aria-describedby` linkage. Add to RHF `Controller`: `aria-invalid={!!fieldState.error}` `aria-describedby={`${field.name}-helper-text`}`.
+- **`aria-invalid` + `aria-describedby`**: form validation uses `<FormHelperText error>` but no `aria-invalid` and no `aria-describedby` linkage. Add to RHF `Controller`: `aria-invalid={!!fieldState.error}` `aria-describedby={`${field.name}-helper-text`}`. Set RHF `mode: 'onTouched'` so `fieldState.error` reflects blur timing (not just submit).
 
 ---
 
@@ -1677,15 +1902,17 @@ Plan lists **zero** test files under `frontend/common/graphql/test/email/`. AGEN
 - Use `testClient` (NOT raw fetch) per `frontend/common/graphql/AGENTS.md`.
 
 #### W2. Apollo Mock Factory Pattern (P0)
-No shared mock factory for email-template GraphQL ops. Codebase precedent: `SearchScheduleContainer.test.tsx`'s `createSearchMock()`.
-- **Add `frontend/common/graphql/test/email/mocks/`** directory with mock factories:
-  - `createEmailTemplatesListMock(vars, result)` — returns `MockedResponse<EmailTemplatesQueryDocument>[]`.
+**v9 correction:** v8 cited `createSearchMock()` from `SearchScheduleContainer.test.tsx` — this does NOT exist. The real precedent is inline `searchMocks: MockLink.MockedResponse[]` in `SearchScheduleContainer.stories.tsx`. Also, the proposed `frontend/common/graphql/test/email/mocks/` subdir violates AGENTS.md ("sub-dirs hold only `*.test.ts`"). Put mock factories in `test/ui/components/email-templates/mocks/` instead.
+- **Add `test/ui/components/email-templates/mocks/emailTemplateMocks.ts`** with mock factories returning `MockLink.MockedResponse[]` (NOT `MockedResponse<X>[]` — use `MockLink.MockedResponse` from the codebase's existing `MockLink` plumbing):
+  ```ts
+  export function createEmailTemplatesListMock(variables: ..., result: ...): MockLink.MockedResponse[] {
+    return [{ request: { query: EmailTemplatesQueryDocument, variables }, result: { data: { emailTemplates: result } } }];
+  }
+  ```
   - `createEmailTemplateDetailMock(id, result)` — detail query mock.
   - `createSaveEmailTemplateMock(vars, result)` — mutation mock.
-  - `createPublishEmailTemplateMock(vars, result)` — mutation mock.
-  - `createPreviewEmailTemplateMock(vars, html)` — preview query mock.
-  - `createSendTestEmailMock(vars, result)` — send-test mutation mock.
-  - `createVersionMismatchMock(vars)` — error-response mock with `extensions.code: "VERSION_MISMATCH"`.
+  - `createVersionMismatchMock(vars)` — error mock: `error: new Error("VERSION_MISMATCH")` + `result: { errors: [{ extensions: { code: "VERSION_MISMATCH" } }] }`.
+  - Use `TestWrapper` from `test/ui/components/` (provides `MockLink` + `ThemeProvider` + `i18n`) — NOT raw `<MockedProvider>`.
 
 #### W3. Test Data Fixture Factory (P0)
 No email-template fixture. `test/ui/components/fixtures/` has only `adminDashboardFixtures.ts`.
@@ -1698,18 +1925,21 @@ No email-template fixture. `test/ui/components/fixtures/` has only `adminDashboa
 
 #### W4. ViewModel Hook Tests (P0)
 Plan §L lists `useEmailTemplatesListViewModel.test.ts` + `useEmailTemplateEditorViewModel.test.ts` but specifies no test patterns. Codebase has zero `renderHook` precedent.
-- **Use `@testing-library/react` `renderHook` + `act` + `waitFor`**:
+- **Use `@testing-library/react` `renderHook` + `act` + `waitFor`** with the existing `TestWrapper` (NOT raw `<MockedProvider>`). `TestWrapper` provides `MockLink` + `ThemeProvider` + `i18n` + `dir` + `viewport` support:
   ```ts
   const { result } = renderHook(() => useEmailTemplateEditorViewModel({ id: "tpl-001" }), {
-    wrapper: ({ children }) => <MockedProvider mocks={[createEmailTemplateDetailMock("tpl-001", fixture)]}>{children}</MockedProvider>,
+    wrapper: ({ children }) => <TestWrapper mocks={createEmailTemplateDetailMock("tpl-001", fixture)} locale="en" viewport="desktop">{children}</TestWrapper>,
   });
   await waitFor(() => expect(result.current.isLoaded).toBe(true));
   ```
-- Add to `test/ui/components/` — 10+ scenario matrix per surface (loading/error/empty/access-denied/dirty/clean/saving/publish/send-test/restore).
+- **If `renderHook` has issues** (zero precedent in repo — verify `@testing-library/react` exports `renderHook` under Happy DOM), use the fallback recipe: render a `<TestComponent>` that calls the hook and exposes state via a ref/callback.
+- Add to `test/ui/components/email-templates/` — 10+ scenario matrix per surface (loading/error/empty/access-denied/dirty/clean/saving/publish/send-test/restore).
 
 #### W5. Concurrent Publish (Optimistic Lock) Test (P0)
-SWE v3 test #7 says "two parallel publish() calls on same scope should only succeed once" — but codebase has no advisory-lock precedent.
-- **Use partial unique index trick** (already in schema: `email_templates_scope_locale_active_uq` where `isActive = true`). First `setActive(scope, locale, templateId)` succeeds; second throws `DuplicateScopeLocaleError` via the constraint. Test in `runInRollback` wrapper.
+SWE v3 test #7 says "two parallel publish() calls on same scope should only succeed once" — but codebase has no advisory-lock precedent. **v9 correction:** The `email_templates` table does NOT exist yet (Phase 2 creates it), so the `email_templates_scope_locale_active_uq` partial unique index is NOT "already in schema." Also, `runInRollback` handles `40P01` deadlock retry — NOT constraint-collision assertion.
+- **Schema prerequisite:** `email_templates_scope_locale_active_uq` partial unique index must land in §DB schema (Phase 2) BEFORE this test can run.
+- **Use true-parallel approach** (NOT `runInRollback` single transaction): two `db.transaction` blocks in `Promise.all` — expect one `23505` rejection. Check `class_quota_race.test.ts` for the parallel-transaction test pattern.
+- **Assert service mapping:** the service maps Postgres `23505` → domain `DuplicateScopeLocaleError` (per S6) — separate from the constraint-trick itself.
 
 #### W6. Merge-Tag Substitution Tests (P1)
 React Email `<Mail>{{user.name}}</Mail>` substitution path is core to rendering, but no test verifies merge-tag substitution with sample props.
@@ -1734,8 +1964,8 @@ Plan §P1/P4/P5/P6 describe rich error states, but no test file maps to them. Pr
 
 #### W9. RTL + Responsive Component Tests (P1)
 §K stories cover RTL, but §L component tests do not specify an RTL test case.
-- **Add `dir="rtl"` test cases** to `emailTemplatesList.test.tsx` and `emailEditor.test.tsx`: mount with `<ThemeProvider dir="rtl">` + assert `dir="rtl"` on DOM containers + i18n key fallback.
-- **Add responsive breakpoint tests:** mount with `viewport: "mobile"` (mock `useViewport`) → assert hidden columns, bottom action bar visible, Inspector drawer anchored bottom.
+- **Add `dir="rtl"` test cases** to `emailTemplatesList.test.tsx` and `emailEditor.test.tsx`: pass `{ locale: "ar" }` to the existing `renderWithWrapper` / `TestWrapper` (which already sets `<ThemeProvider dir="rtl">` at `TestWrapper.tsx:30,77`) — assert `dir="rtl"` on DOM containers + i18n key fallback.
+- **Add responsive breakpoint tests:** pass `viewport: "mobile" / "desktop"` to the existing `TestWrapper` (NOT mock `useViewport` — `TestWrapper` already handles this). Assert hidden columns, bottom action bar visible, Inspector drawer anchored bottom.
 
 #### W10. Optimistic Update Rollback Tests (P1)
 §Q4 has optimistic response table for Save/Publish/Archive, but no test for rollback (`optimisticResponse` + error → cache snapshot restore).
@@ -1750,11 +1980,11 @@ SWE v3 test #4 covers script/onclick/javascript: vectors but omits `<iframe>`, `
 ### X. Developer Experience & Onboarding (v8 — Round 3 Audit)
 
 #### X1. Single-Command Email System Bring-Up (P0)
-No `bun run email:setup` that combines: seed default templates → start admin UI → mount standalone `react-email dev` preview. A new dev must manually sequence `bun db seed` + `bun dev`.
-- **Add `scripts/email-setup.ts`** — orchestrates:
-  1. `bun run db seed` (idempotent re-run).
-  2. Start `bun run dev` on port 3000.
-  3. Open `/en/admin/email-templates` in browser.
+No `bun run email:setup` that combines: seed default templates → start admin UI. A new dev must manually sequence `bun run db -- seed` + `bun run dev`. **v9 corrections:** (a) `bun db seed` is NOT a valid command — the real runner is `bun run db -- seed` (option 2 of `scripts/dbActions/index.ts`, which runs `backend/db/scripts/drizzleSeed.ts`). (b) Email seeds do NOT exist yet — blocked by §Y3 (seeds move to Phase 2). (c) Use `Bun.spawn` for orchestration (precedent: `scripts/safe-dev.ts`) — no `concurrently` dependency needed.
+- **Add `scripts/email-setup.ts`** — orchestrates (gated behind Phase 2 per §Y8 deployment order):
+  1. `bun run db -- seed` (once `backend/db/seeds/email/` is created per §Y3 — until then, X1 is blocked).
+  2. `Bun.spawn` `bun run dev` on port 3000.
+  3. Log "Open `/en/admin/email-templates` in your browser."
 - Document in `docs/email/quickstart.md`.
 
 #### X2. GraphQL Schema Descriptions (P1)
@@ -1777,8 +2007,9 @@ The merge-tag picker is referenced (§P1, §P8) but the system itself (how `{sco
   - How to troubleshoot "merge-tag mismatch" (§P8).
 
 #### X4. Mock Email Adapter for Local Dev (P1)
-No `MockEmailAdapter` — a local dev without Resend keys must set `EMAIL_PROVIDER=resend` and mock at the test layer.
-- **Add `backend/services/communication/adapters/MockEmailAdapter.ts`:** logs HTML to `logger.info` + writes to `/tmp/email-mock-{timestamp}.html` instead of sending. Registered in `EmailProviderRegistry` when `EMAIL_PROVIDER=mock`.
+No `MockEmailAdapter` — a local dev without Resend keys must set `EMAIL_PROVIDER=resend` and mock at the test layer. **v9 corrections:** path is `backend/services/communication/channels/email/mock/MockEmailAdapter.ts` (NOT `backend/services/communication/adapters/`). Factory is `EmailChannelFactory` (NOT `EmailProviderRegistry` — that name doesn't exist).
+- **Add `backend/services/communication/channels/email/mock/MockEmailAdapter.ts`:** writes a `notificationDeliveries` row with `providerMessageId: "mock-{timestamp}"` (matching the Resend delivery-row contract at `ResendEmailAdapter.ts:122-131`), logs a one-line summary to `logger.info` (NOT the full HTML body), and writes full HTML to `/tmp/email-mock-{timestamp}.html`.
+- **Widen `EmailProvider` type union** in `IEmailChannel.ts:25`: `export type EmailProvider = "resend" | "mock"`. Update `EmailChannelFactory.getEmailProvider()` (lines 15-25) to recognize `"mock"` without the "Invalid EMAIL_PROVIDER" warning.
 - **Default in `.env.example`:** `EMAIL_PROVIDER=mock` (safer than `resend` for first run).
 
 #### X5. Adapter Authoring Guide (P2)
@@ -1786,9 +2017,17 @@ Each adapter's gotchas (Postmark base64-only, Mailgun `inline` top-level, SESv2 
 - **Add `docs/email/adapters.md`:** per-provider checklist, gotchas, env keys, validateConfig pattern, retry 적용 point, delivery-row convention.
 
 #### X6. Visual Diff / Visual Regression (P2)
-No automated visual diff despite 15 Storybook stories. No Chromatic. No `@axe-core/playwright`.
-- **Install `@axe-core/playwright`** (devDep). Add `test/ui/e2e/email-templates.a11y.test.ts` that runs axe on the admin email-templates page.
-- **Chromatic:** deferred to post-launch — but specify as a Phase 5 todo.
+No automated visual diff despite 15 Storybook stories. No Chromatic. No `@axe-core/playwright`. **v9 correction:** the e2e tests use `bun:test` + the bare `playwright` package (per `test/ui/e2e/admin-dashboard.test.ts:1-2`), NOT `@playwright/test`. Use `AxeBuilder` from `@axe-core/playwright` inside a `bun:test` `test()` block:
+- **Install `@axe-core/playwright`** (devDep). Add `test/ui/e2e/email-templates.a11y.test.ts`:
+  ```ts
+  import { AxeBuilder } from '@axe-core/playwright';
+  import { test, expect } from 'bun:test';
+  // ... login via loginAsDemoUser (admin auth needed — route is gated)
+  const results = await new AxeBuilder(page).withTags(["wcag2a", "wcag2aa"]).analyze();
+  expect(results.violations).toHaveLength(0);
+  ```
+  Run via `bun run test:ui:e2e` (NOT `@playwright/test` runner).
+- **Chromatic:** deferred to a concrete backlog location (no Phase 5 section exists yet — add as a future enhancement note).
 
 #### X7. Storybook addon-a11y CI Gate (P3)
 `.storybook/preview.tsx:81` sets `a11y.test = "todo"` (warnings only, no CI gate). Plan §J confirms "warnings do not fail CI".
@@ -1800,8 +2039,8 @@ No automated visual diff despite 15 Storybook stories. No Chromatic. No `@axe-co
 
 #### Y1. Forward-Only DB Migration Acknowledgment (P0)
 No DB `down`-migration mechanism exists — `drizzle-kit@1.0.0-rc.4` generates forward-only `migration.sql`. A failed Phase 2 DB migration is NOT reversible via the toolchain.
-- **Document:** "DB migrations are forward-only. Rollback = manual `DROP TABLE email_templates; DROP TYPE email_scope_enum; ...`." Add to `docs/email/migration-runbook.md`.
-- **Pre-deploy verification:** `bun run db generate` (create migration) → review migration SQL → `bun run db migrate` (apply) → verify seed data via `bun run db studio`.
+- **Document:** "DB migrations are forward-only via the custom migration pipeline (`.custom-migrations.json` manifest tracks SHA256 hashes + `appliedFolders`). Rollback = manual `DROP TABLE email_templates; DROP TYPE email_scope_enum; ...`." Add to `docs/email/migration-runbook.md`.
+- **Pre-deploy verification:** `bun run db` (interactive `scripts/dbActions/index.ts`) → generate → review migration SQL → apply → verify via `bun run db` studio option. Do NOT use `bun run db generate|seed|migrate|studio` directly — use `bun run db` and select the sub-command.
 
 #### Y2. Phase 3 Rollback Procedure (P0)
 Plan only says "flip flag false." Missing: order, who runs it, how to reconcile templates created during the rolled-back window.
@@ -1813,9 +2052,12 @@ Plan only says "flip flag false." Missing: order, who runs it, how to reconcile 
   5. If re-enabling later, re-run `bun db seed` (idempotent) to refresh default templates.
 
 #### Y3. Seed Phase Correction (P1)
-Todo 19 note says "seeds should be Phase 1" but seeds persist via `EmailTemplateService` which requires the `email_templates` table (Phase 2 schema). **Contradiction.**
-- **Move seeds to Phase 2** — after DB schema migration, run `bun run db seed` as a Phase 2 deploy step. Phase 1 ships the registry + `safeRender` + `mapEventTypeToEmailScope` without seeds (no DB dependency).
-- **OR** Phase 1 includes the DB schema — but this breaks the "Phase 1 = no DB" invariant. Choose: seeds in Phase 2 (cleaner).
+**v9 correction:** The contradiction is real and affects THREE locations: (a) line 1954 Phase 1 definition lists "**seed default templates**" AND "**no DB schema**" — self-contradictory (seeds need a table). (b) line 1315 section heading "Phase 1 — seeds must ship…" is wrong. (c) todo 19 note says "seeds should be Phase 1". All three must be fixed.
+- **Move seeds to Phase 2** — after DB schema migration, run `bun run db -- seed` as a Phase 2 deploy step. Phase 1 ships the registry + `safeRender` + `mapEventTypeToEmailScope` without seeds (no DB dependency).
+- **Amend line 1954** Phase 1 definition: delete "**seed default templates**" from Phase 1 scope. Phase 1 = "no UI, no DB schema, no seeds."
+- **Amend line 1315** section heading: change "Phase 1 — seeds must ship…" to "Phase 2 — seeds ship after schema migration."
+- **Reassign todo 19** from Phase 1 to Phase 2 explicitly.
+- **Phase 2 deploy order:** apply migration → run seed → deploy code (flag=false).
 
 #### Y4. Seed Idempotency Verification (P1)
 `seedOrGet` naming implies idempotent, but the upsert target is the `scope+slug` unique index, NOT the `scope+locale+active_uq` partial index. A re-seed that flips `isActive` could violate the partial unique constraint.
@@ -1829,16 +2071,17 @@ No prod post-deploy assertion that (a) every `EmailScope` has an active template
 
 #### Y6. Per-Scope Canary Opt-in (P1)
 Single global flag flips all 24 event mappings simultaneously. No gradual per-event opt-in. `Readonly<Record<NotificationEventType, EmailScope | null>>` makes missing keys a compile error — all-or-nothing.
-- **Add `EMAIL_TEMPLATE_SCOPES_ENABLED`** env var as a comma-separated allowlist of EmailScope values. Dispatcher checks `getEnvArray("EMAIL_TEMPLATE_SCOPES_ENABLED")` — if set, only dispatches templates for scopes in the list. If unset or `*`, dispatches all.
+- **Add `EMAIL_TEMPLATE_SCOPES_ENABLED`** env var as a comma-separated allowlist of EmailScope values. **v9 addition:** `getEnvArray` does NOT exist in `backend/lib/env.ts` — add a new helper `getEnvArray(name, sep=","): string[] | undefined` that splits the env var and returns parsed array or undefined. Dispatcher checks `getEnvArray("EMAIL_TEMPLATE_SCOPES_ENABLED")` — if set, only dispatches templates for scopes in the list (deny-by-default — empty string means "none", NOT "all"). If unset, dispatches all. Pin the exact dispatcher integration point at `communication.service.ts:37` and decide filter-at-mapper vs filter-at-dispatcher (recommend mapper, fallback to `payload.body ?? ""` for non-canary scopes so existing email keeps flowing).
 - **Canary flow:** `EMAIL_TEMPLATE_SCOPES_ENABLED=INVOICE_GENERATED` → verify one scope for 24h → add more scopes → `*` for full rollout.
 
 #### Y7. Monitoring & Alerting Strategy (P1)
-Bounce/complaint webhooks (todo 20a) populate `NotificationDeliveryStatus` but there is no alerting threshold.
-- **Alerting thresholds:**
-  - Send-success rate < 95% → `logger.error` + Slack webhook alert.
-  - Render-degraded rate > 5% → `logger.warn` + alert.
-  - Provider 429 rate > 10/min → `logger.warn` + alert.
-  - PERMANENTLY_FAILED count > 50 in 1h → `logger.error` + alert.
+Bounce/complaint webhooks (todo 20a) populate `NotificationDeliveryStatus` but there is no alerting threshold. **v9 correction:** grep for `slack|Slack|webhook|sendAlert` across `backend/` returned ZERO hits — no Slack webhook infrastructure exists. v8's "logger.error + Slack webhook alert" presents an alerting channel that does NOT exist.
+- **Alerting thresholds (via `logger.error` + Vercel log drain to Datadog/etc., NOT Slack):**
+  - Send-success rate < 95% → `logger.error` for log-drain pickup.
+  - Render-degraded rate > 5% → `logger.warn`.
+  - Provider 429 rate > 10/min → `logger.warn`.
+  - PERMANENTLY_FAILED count > 50 in 1h → `logger.error`.
+- **Optional Slack integration:** if Slack alerting is needed, spec a new `ALERT_SLACK_WEBHOOK_URL` env var + transport in `backend/lib/`. But this is a cross-cutting infra task, NOT email-template-specific.
 - **Dashboard:** `docs/email/metrics-dashboard.md` with queries against `notificationDeliveries` table grouped by scope, provider, status, hour.
 
 #### Y8. Deployment Order Invariant (P1)
@@ -1856,16 +2099,16 @@ Phase 3 dispatcher reads `templateProps` (Phase 1 payload change) AND requires s
 ### Z. Implementation Patterns Clarification (v8 — Round 3 Audit)
 
 #### Z1. Per-Scope EmailLabels Field Lists (P0)
-~11 missing EmailScopes never specify their `*EmailLabels` interface field lists. V4-3 atomic en/ar lockstep CANNOT land without them.
-- **Add per-scope EmailLabels interfaces** in `backend/types/email-template.types.ts` — one per EmailScope:
+~11 missing EmailScopes never specify their `*EmailLabels` interface field lists. V4-3 atomic en/ar lockstep CANNOT land without them. **v9 correction:** `EmailLabels` interfaces live in `shared/locale/types/emails/index.ts` (extend existing file — already houses `ComplaintResponseEmailLabels` + `SuggestionAcknowledgedEmailLabels`). Backend typed Props (`ComplaintResponseEmailProps`) stay in `backend/types/email/email.types.ts`.
+- **Add per-scope EmailLabels interfaces** in `shared/locale/types/emails/index.ts` — one per EmailScope. Each scope MUST have `subject`, `preview`, `body` signatures matching the merge-tags in `EmailPropsByScope[scope]`:
   ```ts
   interface InvoiceGeneratedEmailLabels {
     subject: (params: { invoiceNumber: string; studentName: string }) => string;
     preview: (studentName: string) => string;
-    body: (invoice: InvoiceProps) => string; // or per-section
+    body: (invoice: InvoiceProps) => string;
   }
   ```
-- Each scope MUST have `subject`, `preview`, `body` signatures matching the merge-tags in `EmailPropsByScope[scope]`.
+  Mirror the existing `ComplaintResponseEmailLabels` / `SuggestionAcknowledgedEmailLabels` arg shapes. Spell out all 11 Phase 1-3 labels + 3 Phase 4 labels with exact `subject/greeting/body/footer` arg shapes.
 
 #### Z2. EmailTemplateReturnType Omit List (P0)
 `EmailTemplateReturnType` never specifies which internal fields to Omit nor how JSONB columns get narrowed.
@@ -1873,16 +2116,17 @@ Phase 3 dispatcher reads `templateProps` (Phase 1 payload change) AND requires s
 - **JSONB narrowing:** `designJson: string` (not jsonb) — plan must specify whether the admin UI receives raw JSON string or a parsed object.
 
 #### Z3. ComplaintReturnType.title Mismatch (P0)
-Registry `subject: (p) => \`Re: ${p.complaint.title}\`` depends on `ComplaintReturnType.title` — but `complaints` table has `body`, NOT `title`.
-- **Fix:** either (a) add `title` column to `complaints` table (schema change), or (b) change subject template to use `complaint.subject` if it exists, or (c) derive a title from `body` (first 50 chars).
+Registry `subject: (p) => \`Re: ${p.complaint.title}\`` depends on `ComplaintReturnType.title` — but `complaints` table has `body`, NOT `title`. **v9 correction:** option (b) (`complaint.subject`) is INVALID — neither `title` nor `subject` column exists on the `complaints` table.
+- **Fix (DECIDED — option c):** derive subject from `body`: `subject: (p) => \`Re: ${p.complaint.body.slice(0, 50)}…\``. OR change the registry `complaint` prop to a flat `complaintTitle: string` (mirroring the existing `renderComplaintResponseEmail` convention which takes `complaintTitle: string` passed by the caller, NOT the whole `ComplaintReturnType`). Option (a) (add `title` column) is a schema change — avoid for P0.
 
-#### Z4. EmailPayload.encoding Enum (P1)
-`EmailPayload.encoding?: "base64" | "buffer"` is inline text union — violates plan's own rule "no text unions, only enums".
-- **Add `EmailAttachmentEncoding` enum** to `backend/enum/` + `backend/db/schema/enums.ts`:
+#### Z4. EmailAttachmentEncoding Enum (P1)
+`EmailPayload.encoding?: "base64" | "buffer"` is inline text union — violates plan's own rule "no text unions, only enums". **v9 corrections:** (a) title should be `EmailAttachment.encoding` (the field is on `EmailAttachment`, not `EmailPayload`). (b) Use the repo's `createPgEnumFromEnum` pattern, NOT raw `pgEnum`. (c) Backing TS enum in `backend/enum/email/emailTemplates.enum.ts`.
+- **Add `EmailAttachmentEncoding` enum** in `backend/enum/email/emailTemplates.enum.ts`:
   ```ts
-  export const EmailAttachmentEncoding = pgEnum("email_attachment_encoding", ["base64", "buffer"]);
+  export enum EmailAttachmentEncoding { BASE64 = "base64", BUFFER = "buffer" }
   ```
-- Replace inline union with `EmailAttachmentEncoding` type.
+- **Register in schema** via `createPgEnumFromEnum("email_attachment_encoding", EmailAttachmentEncoding)` (matching repo convention).
+- **Decide:** if `content` is already `Buffer`-only and `EmailAttachment` is never persisted, drop the pgEnum entirely and use a TS enum alone (runtime-only).
 
 #### Z5. findByIdempotencyKey Convention (P1)
 `findByIdempotencyKey(key: string)` is WRONG convention — existing pattern is plural batch `findByIdempotencyKeys(keys: string[], tx?)`.
@@ -1890,7 +2134,7 @@ Registry `subject: (p) => \`Re: ${p.complaint.title}\`` depends on `ComplaintRet
 
 #### Z6. queryFields Registration (P2)
 `queryFields(t => ({...}))` registration idiom never specified in the plan.
-- **Add to §GraphQL surface:**
+- **Add to §M (GraphQL Documents / Pothos surface):**
   ```ts
   queryFields: (t) => ({
     emailTemplates: t.field({ ... }),
@@ -1911,8 +2155,8 @@ Zero `.tsx` files in backend today. ESLint/Biome may not have overrides for Reac
   ```
 
 #### Z8. DashboardTranslations Aggregator Import (P2)
-`DashboardTranslations` aggregator in `message.ts` has ~100 alphabetical imports. Adding `dashboardEmailTemplates{En,Ar}` requires adding an import line in sorted order.
-- **Add to todo 16:** "Add `import { dashboardEmailTemplatesEn } from "./emailTemplates"` and `import { dashboardEmailTemplatesAr } from "./emailTemplates"` to `shared/locale/en/dashboard/message.ts` and `shared/locale/ar/dashboard/message.ts` respectively, in alphabetical order."
+`DashboardTranslations` aggregator in `messages.ts` has ~118 alphabetical imports. Adding `dashboardEmailTemplates{En,Ar}` requires adding an import line in sorted order. **v9 corrections:** (a) path is `shared/locale/en/messages.ts` / `shared/locale/ar/messages.ts` (NOT `message.ts` — that's child dir). (b) Use `@/shared/locale/…` alias imports (matching the 118 existing `@/shared/locale/…` imports), NOT relative `./emailTemplates`.
+- **Add to todo 16:** "Add `import { dashboardEmailTemplatesEn } from '@/shared/locale/en/dashboard/emailTemplates/main.ts'` and `import { dashboardEmailTemplatesAr } from '@/shared/locale/ar/dashboard/emailTemplates/main.ts'` to `shared/locale/en/messages.ts` and `shared/locale/ar/messages.ts` respectively, in alphabetical order (between `coreXxx` and `lmsXxx`, ~line 188). Add the `emailTemplates:` key to the `dashboardTranslations` object."
 
 #### Z9. Barrel Export for Communications Schema (P2)
 `backend/db/schema/communications/index.ts` barrel export micro-edit missing — new `emailTemplates.ts` schema file needs to be re-exported.
@@ -1928,9 +2172,26 @@ Plan only files ONE store (`emailTemplateEditorStore.ts`) but there are two stor
 
 ---
 
-**v8 (Round 3 Audit — 8-Domain Deep Closure, 2026-08-02):** Round 3 launched 8 parallel audit subagents covering: implementation patterns (28 gaps), error handling (20 gaps), performance (20 gaps), security (23 gaps), testing depth (33 gaps), a11y/RTL (28 gaps), migration strategy (20 gaps), DX/docs (34 gaps). Total **206 gaps** identified across 8 audit reports (168KB, 1405 lines at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.md`). Applied enhancements organized into new sections §S–§Z (Error Handling, Performance, Security, A11y/RTL, Testing, DX, Migration, Implementation Patterns) addressing all P0/P1 gaps: editor error boundary, optimistic lock round-trip wiring, outbound send retry + DLQ, safeRender degraded-mode signal, server-side input validation, env key registration, preview query authScope, CSP iframe injection, Arabic pluralization rules, screen reader live regions, keyboard shortcuts, GraphQL integration test directory, Apollo mock factories, test fixtures, single-command bring-up, mock email adapter, rollback runbook, per-scope canary opt-in, monitoring alerts, per-scope EmailLabels field lists, ComplaintReturnType.title fix, enum for EmailPayload.encoding, barrel export + codegen glob + two Zustand stores. All 12 v1-v5 locked decisions preserved verbatim.
+**v9 (Round 4 Audit — INVALID-Spec Sweep + §G/§H Closure, 2026-08-02):** Round 4 launched 9 parallel audit subagents, each validating one v8 section (§S–§Z) against the actual codebase + a cross-section consistency agent. Total **19 INVALID specs** corrected, plus dozens of PARTIAL specs deepened. Key corrections:
+- **§S (Error Handling):** S5 (dropped `text` from `safeRender` return — `IEmailChannel.send()` has no `text` field), S6 (`e.constraint_name`→`e.constraint`, errors live in services layer not repo), S7 (error code registry → `const` object in `backend/enum/`, not TS `enum` in `backend/types/`), S8 (`show()` DOES accept `severity` — v8 premise was false).
+- **§T (Performance):** T1 (React Compiler definitively OFF — memoization mandatory), T2 (`isDirty` is Zustand state, cannot be Apollo cache key — use dynamic `fetchPolicy`), T6 (ESM import fix, Turbopack caveat), T10 (no `AbortSignal` support — `Promise.race` only).
+- **§U (Security):** U3 (invalid `authScope` syntax → explicit boolean flags `authScopes: { superAdmin: true, notImpersonating: true }`), U7 (`limitSimple` is NON-atomic — real Lua script for Redis, `pg_advisory_xact_lock` for Postgres).
+- **§V (A11y/RTL):** V3 (`sx={{ srOnly: true }}` is NOT valid — full CSS clip/clipPath pattern), V7 (missing `onDragCancel` + fabricated `useSortableAnnouncements` → real `Accessibility` `announcements` object + `defaultAnnouncements` merge), V8 (overriding `DraggableAttributes` DESTROYS keyboard D&D — spread `{...attributes}` on inner `<div>`).
+- **§W (Testing):** W2 (real `MockLink.MockedResponse` precedent, correct test dir `test/ui/components/email-templates/mocks/`), W4 (`TestWrapper` not raw `MockedProvider`), W5 (`email_templates` table = Phase 2, two `db.transaction` in `Promise.all` for concurrency test), W9 (`TestWrapper` already handles RTL/viewport).
+- **§X (DX):** X1 (`bun run db -- seed` not `bun db seed`, `Bun.spawn`), X4 (`EmailChannelFactory` not `EmailProviderRegistry`, correct `backend/services/communication/channels/email/mock/` path), X6 (`bun:test` + `AxeBuilder` not `@playwright/test`).
+- **§Y (Migration):** Y1 (custom `.custom-migrations.json` manifest, not standard drizzle-kit), Y3 (fix 3 locations of seed phase contradiction — seeds to Phase 2), Y6 (`getEnvArray` helper), Y7 (no Slack infra — `logger.error` + Vercel log drain).
+- **§Z (Impl Patterns):** Z1 (`shared/locale/types/emails/` not `backend/types/`), Z3 (option c: `body.slice(0, 50) + "…"`), Z4 (`EmailAttachmentEncoding` + `createPgEnumFromEnum`), Z8 (`shared/locale/en/messages.ts` path, `@/` alias imports), Z6 (§M cross-ref fix).
+- **New §G (Accessibility & Interaction Patterns):** Created to close 3 dangling §G references (lines 790, 884, 1038). Contains `usePrefersReducedMotion()` hook spec (G1), button loading state convention (G2), `idempotencyKey` pattern (G3), keyboard shortcuts table (G4).
+- **New §H (Validation Schemas):** Created to close dangling §H references. Contains zod schemas for Save Draft (H1), Publish (H2), Send Test (H3), Merge-Tag (H4), `designJson` (H5).
+- **Phase corrections:** Seed phase contradiction fixed at 3 locations — Phase 1 no longer lists "seed default templates"; Phase 2 now includes todo 19 (seeds) per §Y3.
+- **i18n:** Added missing `duplicateSlug` key to §B error catalogue (referenced in §S6/S7 but absent from catalogue).
+- **Cross-section:** Dangling §G references resolved. Locked-decision count corrected (30 V-numbered decisions across v3-v5, not "12").
 
-Research files at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.md` (8 reports, 168KB total). All 12 v1-v7 locked decisions preserved verbatim.
+Research files at `.ai/plans/email-templates/glm_swe/ui-research-round4/01-09-*.md` (9 reports, ~235KB total). All v1-v5 locked decisions preserved verbatim.
+
+**v8 (Round 3 Audit — 8-Domain Deep Closure, 2026-08-02):** Round 3 launched 8 parallel audit subagents covering: implementation patterns (28 gaps), error handling (20 gaps), performance (20 gaps), security (23 gaps), testing depth (33 gaps), a11y/RTL (28 gaps), migration strategy (20 gaps), DX/docs (34 gaps). Total **206 gaps** identified across 8 audit reports (168KB, 1405 lines at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.md`). Applied enhancements organized into new sections §S–§Z (Error Handling, Performance, Security, A11y/RTL, Testing, DX, Migration, Implementation Patterns) addressing all P0/P1 gaps: editor error boundary, optimistic lock round-trip wiring, outbound send retry + DLQ, safeRender degraded-mode signal, server-side input validation, env key registration, preview query authScope, CSP iframe injection, Arabic pluralization rules, screen reader live regions, keyboard shortcuts, GraphQL integration test directory, Apollo mock factories, test fixtures, single-command bring-up, mock email adapter, rollback runbook, per-scope canary opt-in, monitoring alerts, per-scope EmailLabels field lists, ComplaintReturnType.title fix, enum for EmailPayload.encoding, barrel export + codegen glob + two Zustand stores. All 30 v1-v5 locked decisions preserved verbatim.
+
+Research files at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.md` (8 reports, 168KB total). All 30 v1-v7 locked decisions preserved verbatim.
 
 **v7 (Round 2 Audit — State/Responsive/Data-flow closure, 2026-08-02):** Round 2 parallel subagent audits (state transitions, Apollo data flow, responsive/mobile tiers, i18n+RTL+a11y depth, cross-section consistency) identified **103 gaps** across all dimensions. Applied surgical fixes:
 - Added **§P State Transitions & Edge Cases** (9 sub-sections, lifecycle table covering every async action in §A–§O).
@@ -1943,7 +2204,7 @@ Research files at `.ai/plans/email-templates/glm_swe/ui-research-round3/01-08-*.
 - **Todo alignment**: 4 new Phase 2 todos (skeletons, usePrefersReducedMotion hook, StatusBadge emailTemplate, dashboard.emailTemplates namespace, 15 Storybook stories).
 - **Phase alignment**: `dashboard.emailTemplates` i18n namespace moved to Phase 2.
 
-Research files at `.ai/plans/email-templates/glm_swe/ui-research-round2/01-05-*.md` (5 reports, 118KB total). All 12 v1-v5 locked decisions preserved verbatim.
+Research files at `.ai/plans/email-templates/glm_swe/ui-research-round2/01-05-*.md` (5 reports, 118KB total). All 30 v1-v5 locked decisions preserved verbatim.
 
 **v6 (UI/UX completeness, 2026-08-02):** Expanded the thin "### Frontend" (~60 lines) + "### i18n" (~30 lines) sections into a complete production-ready UI/UX specification, now ~410 lines covering: routing & navigation (exact admin routes, sidebar entry, breadcrumbs, two-layer permission gate + new `EMAIL_TEMPLATES_MANAGE` enum value); page layouts (DesktopPageContainer/MobilePageContainer + DesktopPageHeader + SectionPanel + new EmailTemplatesListSkeleton/EmailEditorSkeleton + shared EmptyState/ErrorState); list view (AppDataGrid columns + row-actions menu via useRowMenuAnchor + search bar + filter chips + segmented Active/Archived/All view + pagination in Zustand store); editor view (three-tab Design/Preview/Code layout with Slide tab transitions; right-pane Inspector via SectionPanel — scope lock, locale, version, allowed-editor-groups TagInput, subject template with merge-tag insertion (validation schema in §H); Save Draft + Publish + Send Test actions with keyboard shortcuts (mutation documents in §M); History restore drawer; isDirty beforeunload + in-app nav guard; all v1-v5 locked decisions preserved verbatim — EmailEditorWrapper + ssr:false, ScopedCssBaseline, EmailTheming /plugins import, atomic save flow); preview tab (sandbox='' iframe + CSP default-src 'none' / style-src 'unsafe-inline' / img-src 'self' data: + DOMPurify server-side sanitize + viewport selector + Copy HTML); send-test dialog (To input + sample props + rate-limit notice + success animation (zod schema in §H)); animations & micro-interactions (reuse framer-motion stagger from MetricCard + new SuccessCheckMark + @dnd-kit/sortable built-ins for block reorder + NEW usePrefersReducedMotion hook closing a production-readiness gap — today the codebase respects reduced-motion nowhere); forms & validation (react-hook-form + Controller + zod + useWatch — NO useFieldArray per repo precedent); theming & dark mode (theme palette only + useColorScheme drives --re-* CSS vars); accessibility (aria-labels, focus trap, WCAG AA color contrast, prefers-reduced-motion); storybook stories (full per-component table of 15 rows from research file 05); component + E2E tests (15-row table + mock.module-stub for @react-email/editor + single test/ui/e2e/email-templates.test.ts happy path); GraphQL documents (KEEP verbatim from v5); StatusBadge extension (new `emailTemplate` category — Draft=warning, Published=success, Archived=disabled; inline `<Chip>` forbidden per COMPONENT_PATTERNS.md:170); feature-flag visual cue (`<LockOutlined>` on sidebar entry + disabled Send Test/Publish buttons when EMAIL_TEMPLATES_ENABLED=false); Zustand store (KEEP from v5, no separate Storybook mock-store convention). The i18n section was expanded with a new `dashboard.emailTemplates` UI namespace — complete key catalogue grouped by surface (nav labels, page titles, table headers, status chip labels, button labels, dialog titles, form fields/help text, tooltips, toast messages, error messages, empty states, search/filter, editor labels, send-test dialog labels) reusing the existing `common` namespace for generic verbs (loading/cancel/save — do NOT duplicate; confirm/delete/close are NOT in common — add to dashboard.emailTemplates); 7-file atomic changeset listed for the new namespace (V4-3 lockstep rule echoes for `dashboardEmailTemplates{En,Ar}`). Research synthesis at `.ai/plans/email-templates/glm_swe/ui-research/00-synthesis.md`; five deep research files at `.ai/plans/email-templates/glm_swe/ui-research/01-05-*.md` (dashboard inventory, template editor, animations, i18n, storybook+tests).
 
@@ -1951,7 +2212,23 @@ Research files at `.ai/plans/email-templates/glm_swe/ui-research-round2/01-05-*.
 - **V5-post-SMTP (2026-08-02):** SMTP production restriction LIFTED. Prior "dev/test only" caveat was driven solely by Bun #10329 (nodemailer TLS socket flakiness under Bun). Confirmed deployment target is **Vercel + Node.js** (next.config.ts `serverExternalPackages` includes `@vercel/functions`), where `nodemailer` is the industry-standard SMTP library with zero caveats. SMTP is now a first-class production provider alongside Resend/SES/Postmark/Mailgun. Production warning log + "dev/test only" deployment-doc note removed. Local dev can still run on Bun for dev-loop speed; `SmtpEmailAdapter` is production-safe when run under Node. See todos 4, 6, adapter specs section.
 
 Phase 0 — GO/NO-GO gate: install dependencies (todo 1) and verify isomorphic-dompurify Bun compatibility (todo 21b). ✅ Phase 0 is GREEN (2026-08-02): packages installed + isomorphic-dompurify Bun smoke test PASSED (`sanitize()` strips `<script>` + `onerror`, `isSupported: true`). Proceed safely with isomorphic-dompurify; jsdom fallback not required. **Todos 1, 21b.**
-Phase 1 — Types + enum + registry + multi-provider adapter refactor + `mapEventTypeToEmailScope` + `safeRender()` + TipTap schema validation + i18n signature fix + seed default templates (no UI, no DB schema). Existing notification bodies still passthrough. Get `renderEmailTemplate` working with code-only scaffolds. **Todos 1-8, 3a, 7a, 7b, 19.**
-Phase 2 — DB schema (with optimistic locking) + repo (with version increment) + Pothos + GraphQL CRUD (with impersonation guard + rate limiting) + admin list/edit view (with dirty state tracking + error handling + preview XSS hardening) using `@react-email/editor`. **Todos 9-12, 12a, 14-17, 16a, 21a.**
+Phase 1 — Types + enum + registry + multi-provider adapter refactor + `mapEventTypeToEmailScope` + `safeRender()` + TipTap schema validation + i18n signature fix (no UI, no DB schema, **no seeds** — seeds are Phase 2). Existing notification bodies still passthrough. Get `renderEmailTemplate` working with code-only scaffolds. **Todos 1-8, 3a, 7a, 7b.**
+Phase 2 — DB schema (with optimistic locking) + repo (with version increment) + Pothos + GraphQL CRUD (with impersonation guard + rate limiting) + admin list/edit view (with dirty state tracking + error handling + preview XSS hardening) using `@react-email/editor` + **seed default email templates** (todo 19, per §Y3 correction). **Todos 9-12, 12a, 14-17, 16a, 19, 21a.**
 Phase 3 — Migrate dispatcher email channel through `EmailTemplateService.renderForSend` for each `NotificationEventType → EmailScope` mapping (gated by EMAIL_TEMPLATES_ENABLED feature flag, todo 21c). Wire attachments + idempotency + payload.body fallback. Add bounce/complaint webhooks. **Todos 13, 18, 20, 20a, 21c.**
 Phase 4 — Bundle size analysis + auth/account emails: add WELCOME/PASSWORD_RESET/EMAIL_VERIFICATION to NotificationEventType AND uncomment their EVENT_TO_SCOPE entries in the same PR (V3-8). Run full quality gate. **Todos 20b, 21.**
+
+#### Phase Mapping for §S–§Z Subsections (v9)
+
+| Section | Subsection | Phase |
+|---------|-----------|-------|
+| §S | S1-S8 (Error Handling) | Phase 1 (registry/errors), Phase 2 (GraphQL error mapping), Phase 3 (retry/DLQ) |
+| §T | T1-T10 (Performance) | Phase 1 (T7 safeRender caching), Phase 2 (T2 fetchPolicy, T3 virtualization), Phase 4 (T6 bundle analysis) |
+| §U | U1-U7 (Security) | Phase 1 (U1 Email scalar), Phase 2 (U3 authScope, U7 rate limit), Phase 3 (U5 bounce webhook) |
+| §V | V1-V8 (A11y/RTL) | Phase 2 (all — ships with UI) |
+| §W | W1-W9 (Testing) | Phase 1 (W1 throw-and-log probe), Phase 2 (W2 mocks, W3 fixtures, W4 TestWrapper), Phase 3 (W5 concurrency) |
+| §X | X1-X6 (DX) | Phase 1 (X1 bring-up), Phase 2 (X4 mock adapter), Phase 4 (X6 visual regression) |
+| §Y | Y1-Y7 (Migration) | Phase 1 (Y1 migration pipeline), Phase 2 (Y3 seeds), Phase 3 (Y5 rollback runbook) |
+| §Z | Z1-Z8 (Impl Patterns) | Phase 1 (Z1-Z4 types/enum), Phase 2 (Z6-Z8 barrel/codegen) |
+| §G | G1-G4 (Accessibility) | Phase 2 (usePrefersReducedMotion hook, button loading, idempotencyKey, shortcuts) |
+| §H | H1-H5 (Validation) | Phase 1 (H1-H2 schemas for types), Phase 2 (H3 send-test, H4 merge-tag, H5 designJson) |
+
