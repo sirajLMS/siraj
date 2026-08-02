@@ -139,31 +139,10 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
     try {
-      // Separate "del" commands from transactional commands.
-      // "del" uses CacheDbRepository.del which calls raw db (not tx),
-      // so running it inside db.transaction() causes deadlocks on CI Postgres.
-      const delCommands = commands.filter(c => c.command === "del");
-      const txCommands = commands.filter(c => c.command !== "del");
-
-      const txResults =
-        txCommands.length > 0
-          ? await db.transaction(async () => Promise.all(txCommands.map(cmd => this.executePipelineCommand(cmd))))
-          : [];
-
-      const delResults = await Promise.all(delCommands.map(cmd => this.executePipelineCommand(cmd)));
-
-      // Preserve original order
-      const resultMap = new Map<number, unknown>();
-      let txIdx = 0;
-      let delIdx = 0;
-      for (let i = 0; i < commands.length; i++) {
-        if (commands[i].command === "del") {
-          resultMap.set(i, delResults[delIdx++]);
-        } else {
-          resultMap.set(i, txResults[txIdx++]);
-        }
-      }
-      return commands.map((_, i) => resultMap.get(i));
+      return await db.transaction(async () => {
+        const results = await Promise.all(commands.map(cmd => this.executePipelineCommand(cmd)));
+        return results;
+      });
     } catch (error) {
       logger.error("Postgres cache pipeline error:", error);
       throw error;
@@ -215,11 +194,12 @@ export class PostgresCacheAdapter implements ICacheService {
       }
 
       case "del": {
-        // Cache invalidation: delete one or more keys by exact match.
-        // Runs outside db.transaction to avoid deadlock (CacheDbRepository.del uses raw db).
+        // Cache invalidation: delete one or more keys by exact match
         const args = cmd.args as string[];
         if (args && args.length > 0) {
-          await Promise.all(args.map(key => CacheDbRepository.del(key)));
+          for (const key of args) {
+            await CacheDbRepository.del(key);
+          }
         }
         return null;
       }
