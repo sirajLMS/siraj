@@ -1,8 +1,9 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 
-# Install additional system dependencies (non-interactive)
+# Install openssh-server and system dependencies (non-interactive)
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   && apt-get -y install --no-install-recommends \
+  openssh-server \
   postgresql-client \
   fzf \
   xxd \
@@ -16,12 +17,12 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   libxrandr2 \
   libgbm1 \
   libxss1 \
-  libasound2t64 \
-  libcups2t64 \
+  libasound2 \
+  libcups2 \
   libxkbcommon0 \
-  libgtk-3-0t64 \
+  libgtk-3-0 \
   libpangocairo-1.0-0 \
-  libatk1.0-0t64 \
+  libatk1.0-0 \
   libcairo-gobject2 \
   libgdk-pixbuf-2.0-0 \
   libxext6 \
@@ -34,6 +35,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   libpulse0 \
   libwebpdemux2 \
   fonts-noto-cjk \
+  && mkdir -p /var/run/sshd \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
