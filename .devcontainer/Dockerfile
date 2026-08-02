@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 
 # Install system dependencies (non-interactive)
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
