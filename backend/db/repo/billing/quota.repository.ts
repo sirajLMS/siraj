@@ -8,14 +8,14 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { classInstances, quotaLedger, quotas } from "@/backend/db/schema";
 import { QuotaLedgerReason, QuotaStatus } from "@/backend/enum";
-import { QuotaAlreadyDeletedError, QuotaLedgerError, QuotaNotFoundError } from "@/backend/lib/errors";
+import { DomainError, QuotaAlreadyDeletedError, QuotaLedgerError, QuotaNotFoundError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import type {
   QuotaPaginatedFilter,
   QuotaReturnType,
   QuotaSelectType,
   QuotaSubmitInput,
-  QuotaUpdateType,
+  QuotaUpdateInput,
 } from "@/backend/types/billing/quota.types";
 import { mapQuotaToReturnType } from "@/backend/types/billing/quota.types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
@@ -255,13 +255,13 @@ export namespace QuotaRepository {
   export const update = async (
     tx: DBTransaction,
     id: string,
-    input: QuotaUpdateType & { actorUserId?: string | null }
+    input: QuotaUpdateInput & { actorUserId?: string | null }
   ): Promise<QuotaSelectType> => {
     const now = new Date();
     const existing = await findById(tx, id);
     if (!existing) throw new QuotaNotFoundError("Quota not found");
     if (existing.version !== input.version) {
-      throw new Error("Concurrency conflict: quota version mismatch");
+      throw new DomainError("CONCURRENCY_CONFLICT", "Quota version mismatch — please retry");
     }
 
     const updateData: Partial<QuotaSelectType> = {
@@ -422,7 +422,7 @@ export namespace QuotaRepository {
       )
       .returning();
 
-    if (!updated) throw new Error("Failed to update quota reservations: quota may be insufficient or inactive");
+    if (!updated) throw new QuotaLedgerError("Failed to update quota reservations");
 
     return updated;
   };
@@ -1197,10 +1197,9 @@ export namespace QuotaRepository {
     return deducted;
   };
 
-  /**
-   * Resets `usedThisPeriod` to 0 for a single quota. Used by the sweeper
-   * script to clear per-period usage counters independently of the full
-   * `refreshPeriodic` rollover flow.
+  /** @internal — Used by tests for per-period reset assertions. Production rollover uses refreshPeriodic.
+   *
+   * Resets `usedThisPeriod` to 0 for a single quota.
    *
    * Uses optimistic concurrency via `version`. Inserts an `ADJUST`
    * ledger entry (delta=0) for audit-trail completeness. Idempotent via

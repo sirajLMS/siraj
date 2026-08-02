@@ -9,6 +9,7 @@ import {
 } from "@/backend/graphql/pothos/billing/quota.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { assertAssociatedOrManage } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import { PaginationArgs } from "@/backend/types";
@@ -120,7 +121,9 @@ gqlSchemaBuilder.queryField("availableClassSlots", t =>
       durationMinutes: t.arg.int({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
-      await requireAuth(ctx);
+      const actorUserId = await requireAuth(ctx);
+      const tErrors = ctx.t().errorsTranslations;
+      await assertAssociatedOrManage(actorUserId, String(args.studentId), tErrors);
       return AvailabilityService.findAvailableSlots(
         String(args.studentId),
         args.date,

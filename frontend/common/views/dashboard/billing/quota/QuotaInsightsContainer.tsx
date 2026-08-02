@@ -32,8 +32,6 @@ import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
-type MonthAgg<T> = Map<string, T>;
-
 function groupQuotasByMonth<T>(
   quotas: QuotaItem[],
   getDate: (q: QuotaItem) => string | null,
@@ -41,7 +39,7 @@ function groupQuotasByMonth<T>(
   accum: (agg: T, q: QuotaItem) => void,
   monthFormatter: Intl.DateTimeFormat
 ) {
-  const monthMap: MonthAgg<T> = new Map();
+  const monthMap: Map<string, T> = new Map();
   for (const q of quotas) {
     const dateStr = getDate(q);
     if (!dateStr) continue;

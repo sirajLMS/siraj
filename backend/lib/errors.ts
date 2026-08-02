@@ -27,23 +27,20 @@ export class ForbiddenError extends DomainError {
   }
 }
 
-export class QuotaNotFoundError extends Error {
+export class QuotaNotFoundError extends NotFoundError {
   constructor(message: string) {
-    super(message);
-    this.name = "QuotaNotFoundError";
+    super("QUOTA", message);
   }
 }
 
-export class QuotaAlreadyDeletedError extends Error {
+export class QuotaAlreadyDeletedError extends DomainError {
   constructor(message: string) {
-    super(message);
-    this.name = "QuotaAlreadyDeletedError";
+    super("QUOTA_ALREADY_DELETED", message);
   }
 }
 
-export class QuotaLedgerError extends Error {
+export class QuotaLedgerError extends DomainError {
   constructor(message: string) {
-    super(message);
-    this.name = "QuotaLedgerError";
+    super("QUOTA_LEDGER_ERROR", message);
   }
 }

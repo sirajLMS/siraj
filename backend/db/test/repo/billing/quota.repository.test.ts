@@ -7,7 +7,7 @@ import { quotas } from "@/backend/db/schema";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
-import type { QuotaSubmitInput, QuotaUpdateType } from "@/backend/types";
+import type { QuotaSubmitInput, QuotaUpdateInput } from "@/backend/types";
 
 describe("QuotaRepository", () => {
   test("create & findById", async () => {
@@ -55,7 +55,7 @@ describe("QuotaRepository", () => {
         idempotencyKey: `quota-test-${randomUUID()}`,
       };
       const q2 = await QuotaRepository.create(tx, quotaInput2);
-      const updatePayload: QuotaUpdateType = {
+      const updatePayload: QuotaUpdateInput = {
         status: QuotaStatus.EXPIRED,
         version: q2.version,
       };
@@ -83,7 +83,7 @@ describe("QuotaRepository", () => {
       };
       const created = await QuotaRepository.create(tx, quotaInput);
 
-      const updatePayload: QuotaUpdateType = {
+      const updatePayload: QuotaUpdateInput = {
         name: "Updated Name",
         version: created.version,
       };

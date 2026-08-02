@@ -160,7 +160,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
       });
     });
 
-    test("outOfQuota checks throw outOfQuota error", async () => {
+    test("createClassInstance succeeds when legacy classesRemaining is 0 with quotaDeducted", async () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "NoQuota", {
           skipInstance: true,

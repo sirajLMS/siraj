@@ -6,7 +6,14 @@ export type QuotaInsertType = typeof quotas.$inferInsert;
 
 export type QuotaReturnType = Omit<
   QuotaSelectType,
-  "kind" | "status" | "periodType" | "deletedAt" | "idempotencyKey" | "usedThisPeriod" | "periodAnchor"
+  | "kind"
+  | "status"
+  | "periodType"
+  | "deletedAt"
+  | "idempotencyKey"
+  | "usedThisPeriod"
+  | "periodAnchor"
+  | "rolloverPolicy"
 > & {
   kind: QuotaKind;
   status: QuotaStatus;
@@ -16,7 +23,7 @@ export type QuotaReturnType = Omit<
 export type QuotaLedgerSelectType = typeof quotaLedger.$inferSelect;
 export type QuotaLedgerInsertType = typeof quotaLedger.$inferInsert;
 
-export type QuotaLedgerReturnType = Omit<QuotaLedgerSelectType, "reason" | "updatedAt"> & {
+export type QuotaLedgerReturnType = Omit<QuotaLedgerSelectType, "reason" | "updatedAt" | "idempotencyKey"> & {
   reason: QuotaLedgerReason;
 };
 
@@ -67,7 +74,7 @@ export type QuotaSubmitInput = Omit<
   periodDays?: number | null;
 };
 
-export type QuotaUpdateType = Omit<
+export type QuotaUpdateInput = Omit<
   Partial<
     Omit<
       QuotaInsertType,

@@ -67,6 +67,8 @@ export namespace AvailabilityService {
   ): Promise<void> => {
     const available = await isSlotAvailable(studentId, teacherId, startAt, endAt, ignoreInstanceIds, tx, locale);
     if (!available) {
+      // TODO: No dedicated slotUnavailable translation key exists in the errors namespace.
+      // Reusing invalidInput as the closest match. Add a slotUnavailable key if user-facing clarity is needed.
       const tErrors = getServerTranslations(locale).errorsTranslations;
       throw new Error(tErrors.invalidInput);
     }

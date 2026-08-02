@@ -210,7 +210,7 @@ describe("Class Quota System Constraints & Triggers", () => {
     testLogger.info("Block booking on zero quota passed.");
   });
 
-  test("Prevents concurrent race conditions via Advisory Locks", async () => {
+  test("Serial booking on shared tx fails second call via CHECK when 1 class remains", async () => {
     testLogger.info("Testing concurrent race condition prevention...");
 
     await runInRollback(async tx => {

@@ -6,6 +6,7 @@ import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
+import { QuotaNotFoundError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -23,7 +24,7 @@ import {
   type QuotaPaginatedFilter,
   type QuotaReturnType,
   type QuotaSubmitInput,
-  type QuotaUpdateType,
+  type QuotaUpdateInput,
 } from "@/backend/types/billing/quota.types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
@@ -74,7 +75,7 @@ export namespace QuotaService {
     const quota = await QuotaRepository.findById(tx, id);
     if (!quota) {
       const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.notFound);
+      throw new QuotaNotFoundError(tErrors.notFound);
     }
 
     // V3-013: IDOR scoping — verify the caller is either associated with
@@ -107,7 +108,7 @@ export namespace QuotaService {
     const quota = await QuotaRepository.findById(tx, quotaId);
     if (!quota) {
       const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.notFound);
+      throw new QuotaNotFoundError(tErrors.notFound);
     }
 
     // V3-013: IDOR scoping — shared helper
@@ -278,7 +279,7 @@ export namespace QuotaService {
 
   export const updateQuota = async (
     id: string,
-    input: QuotaUpdateType,
+    input: QuotaUpdateInput,
     actorUserId?: string | null,
     _locale = "en",
     tx?: DBTransaction
@@ -393,7 +394,7 @@ export namespace QuotaService {
         const fifoQuota = await QuotaRepository.selectQuotaForBookingFIFO(t, studentId);
         if (!fifoQuota) {
           const tErrors = getServerTranslations(locale).errorsTranslations;
-          throw new Error(tErrors.quotaNotFound);
+          throw new QuotaNotFoundError(tErrors.quotaNotFound);
         }
         targetQuotaId = fifoQuota.id;
       }
@@ -435,7 +436,7 @@ export namespace QuotaService {
 
       if (result.redeemedCount === 0 && !result.quota) {
         const tErrors = getServerTranslations(locale).errorsTranslations;
-        throw new Error(tErrors.quotaNotFound);
+        throw new QuotaNotFoundError(tErrors.quotaNotFound);
       }
 
       // If redeemedCount === 0 but quota IS present, all instances were

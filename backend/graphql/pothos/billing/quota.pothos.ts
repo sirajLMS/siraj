@@ -16,7 +16,7 @@ import type {
   QuotaReturnType,
   QuotaRolloverPolicy,
   QuotaSubmitInput,
-  QuotaUpdateType,
+  QuotaUpdateInput,
 } from "@/backend/types";
 
 const QuotaRef = gqlSchemaBuilder.objectRef<QuotaReturnType>("Quota");
@@ -117,7 +117,7 @@ export const QuotaSubmitInputPothosRef = gqlSchemaBuilder.inputRef<QuotaSubmitIn
   }),
 });
 
-export const QuotaUpdateInputPothosRef = gqlSchemaBuilder.inputRef<QuotaUpdateType>("QuotaUpdateInput").implement({
+export const QuotaUpdateInputPothosRef = gqlSchemaBuilder.inputRef<QuotaUpdateInput>("QuotaUpdateInput").implement({
   description: "Input for updating an existing quota",
   fields: t => ({
     name: t.string({ required: false }),
