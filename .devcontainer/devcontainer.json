@@ -1,21 +1,15 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/marcosgomesneto/bun-devcontainers/tree/main/src/bun-postgresql
+// For format details, see https://aka.ms/devcontainer.json.
 {
-  "name": "Bun & PostgreSQL",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
+  "name": "Ubuntu 24.04 (Noble)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "features": {},
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // This can be used to network with other containers or with the host.
+  "features": {
+    "ghcr.io/devcontainers/features/postgres:1": {}
+  },
   "forwardPorts": [3000, 5432],
-
-  // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "bun install || true"
-
-  // Configure tool-specific properties.
-  // "customizations": {},
-
-  "remoteUser": "vscode",
-  "containerUser": "vscode"
+  "postCreateCommand": "bun install || true",
+  "remoteUser": "vscode"
 }
