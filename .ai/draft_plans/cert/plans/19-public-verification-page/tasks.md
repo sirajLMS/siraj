@@ -1,0 +1,2437 @@
+# Plan 19 — Public Verification Page: Task Breakdown
+
+## Document Info
+
+| Field | Value |
+|-------|-------|
+| **Plan** | 19 — Public Verification Page |
+| **Dependencies** | Plan 5 (GraphQL API) — provides `verifyCertificate(code)` public query + `verifyForMetadata(code)`; Plan 18 — verification timeline/log with `source` field; Supplementary tasks also depend on `verifyCertificateService` (Plan 5 service layer) for the REST API route (Task 17), `html5-qrcode` npm package (Task 14), `qrcode.react` npm package (Task 16), and Upstash Redis (optional, for multi-instance rate limiting — Task 17) |
+| **Tasks** | 23 tasks (11 original + 12 supplementary) |
+| **Total Estimated Effort** | ~80 hours (~12 working days) — ~29h original + ~51h supplementary |
+
+---
+
+## Dependency Graph
+
+```
+Task 1 (i18n namespace)
+  │
+  ├─► Task 2 (verify route + layout)
+  │      │
+  │      ├─► Task 3 (verification container + GraphQL)
+  │      │      │
+  │      │      ├─► Task 4 (result display + state components)
+  │      │      │      │
+  │      │      │      ├─► Task 5 (loading & error states)
+  │      │      │      │
+  │      │      │      └─► Task 6 (share + print + watermarks)
+  │      │      │             │
+  │      │      │             ├─► Task 7 (SEO meta + OG + JSON-LD + ISR)
+  │      │      │             │
+  │      │      │             └─► Task 9 (analytics integration)
+  │      │      │
+  │      │      └─► Task 8 (language toggle)
+  │      │
+  │      └─► Task 10 (manual code entry page)
+  │
+  └─► Task 11 (knowledge propagation) [FINAL]
+```
+
+### Execution Order
+
+1. **Task 1**: i18n namespace (foundation — all components need labels)
+2. **Task 2**: Verify route + public layout (App Router structure)
+3. **Task 3**: Verification container + GraphQL document (data layer)
+4. **Task 4** + **Task 5**: Result display + state components + loading/error states (can partly parallel)
+5. **Task 6**: Share + print + watermarks
+6. **Task 7**: SEO meta tags + OG image + JSON-LD + ISR cache headers
+7. **Task 8**: Language toggle (parallel with Tasks 4-7 — only depends on Tasks 1+2)
+8. **Task 9**: Analytics integration (depends on Task 3 — can run parallel with Tasks 4-8)
+9. **Task 10**: Manual code entry page (depends on Tasks 1+2+8 — parallel with Tasks 4-7)
+10. **Task 11**: Knowledge propagation (final — requires all prior tasks complete)
+
+---
+
+## AGENTS.md & Instruction File References
+
+For every file created/modified in this plan, read the applicable AGENTS.md and instruction files BEFORE writing code.
+
+| File Pattern | AGENTS.md Files | Instruction Files |
+|--------------|-----------------|-------------------|
+| `app/verify/**/*.tsx` | `AGENTS.md`, `app/AGENTS.md` | `frontend.instructions.md` |
+| `app/verify/[code]/opengraph-image.tsx` | `AGENTS.md`, `app/AGENTS.md` | `frontend.instructions.md` |
+| `shared/locale/**` | `AGENTS.md`, `shared/AGENTS.md` | — |
+| `frontend/common/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
+| `frontend/desktop/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
+| `frontend/mobile/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
+| `frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | `frontend.instructions.md` |
+| `test/ui/components/verify/**` | `AGENTS.md`, `test/ui/AGENTS.md` | `tests.instructions.md` |
+
+### Quality Loop (Per File)
+
+After creating or modifying each file, run the per-file verification loop BEFORE moving to the next task:
+
+1. **tsgo**: `bun tsgo` — type checking (safe to run concurrently)
+2. **biome**: `bun biome:check` — formatting + lint (safe to run concurrently)
+3. **lint** (via queue client): Submit file to lint queue for ESLint check
+
+```bash
+# Start lint queue server (background) — once at start of plan
+~/.bun/bin/bun run scripts/lint-queue-server.ts &
+
+# Per-file lint (example)
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"task1-verify","files":["shared/locale/types/certificates/verification.ts"]}'
+```
+
+### Per-File Quality Gate Commands Reference
+
+For each file created/modified, run these commands in order (sub-loop verification):
+
+```bash
+# Type check (tsgo)
+bun tsgo
+
+# Biome check (format + lint)
+bun biome:check
+
+# Lint via queue client (replace FILES array with actual files)
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"<task-id>","files":["<file1>","<file2>"]}'
+
+# After all files pass, run full quality gate
+bun quality-gate
+```
+
+### Instruction Verification Steps (Per File)
+
+For EVERY file created/modified, read these instruction files BEFORE writing code:
+
+| File Pattern | AGENTS.md Files (READ ALL) | Instruction Files (READ ALL) |
+|--------------|---------------------------|-----------------------------|
+| `shared/locale/**` | `AGENTS.md`, `shared/AGENTS.md` | — |
+| `app/verify/**/*.tsx` | `AGENTS.md`, `app/AGENTS.md` | `frontend.instructions.md` |
+| `app/verify/[code]/opengraph-image.tsx` | `AGENTS.md`, `app/AGENTS.md` | `frontend.instructions.md` |
+| `frontend/common/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
+| `frontend/desktop/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
+| `frontend/mobile/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
+| `frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | `frontend.instructions.md` |
+| `test/ui/components/verify/**` | `AGENTS.md`, `test/ui/AGENTS.md` | `tests.instructions.md` |
+
+**Cross-file rule**: If a change requires modifying another file not in your task, report as CROSS-FILE DEPENDENCY — do NOT modify it yourself.
+
+### Testing Tasks (Per Layer)
+
+After implementing components, create corresponding test files:
+
+| Component Layer | Test Type | Test File Pattern | Command |
+|-----------------|-----------|-------------------|---------|
+| `shared/locale/**` | Unit (types + translations) | `shared/locale/**/*.test.ts` | `bun test shared/locale/certificates/verification.test.ts` |
+| `app/verify/**` | E2E (page rendering) | `test/ui/e2e/verify/**/*.spec.ts` | `bun run test:ui:e2e -- test/ui/e2e/verify` |
+| `frontend/common/views/verify/**` | Unit + Integration | `test/ui/components/verify/**/*.test.tsx` | `bun run test:ui:components -- test/ui/components/verify` |
+| `frontend/desktop/views/verify/**` | Unit + Integration | `test/ui/components/verify/desktop/**/*.test.tsx` | `bun run test:ui:components -- test/ui/components/verify/desktop` |
+| `frontend/mobile/views/verify/**` | Unit + Integration | `test/ui/components/verify/mobile/**/*.test.tsx` | `bun run test:ui:components -- test/ui/components/verify/mobile` |
+| `frontend/common/graphql/...` | GraphQL Integration | `frontend/common/graphql/test/verify/**/*.test.ts` | `bun run test:graphql` |
+
+**Test coverage requirements**:
+- Unit tests: 100% coverage for `shared/locale/types/**` and pure utility functions
+- Component tests: Render with all statuses (valid, revoked, expired, notFound, loading, error), test interactions (share, print, download, language toggle), verify RTL layout
+- E2E tests: Full verification flow from `/verify` → enter code → redirect → result display → share/print
+
+### AC Mapping Verification
+
+At the end of EACH task, verify ALL Acceptance Criteria from requirements.md are addressed:
+
+```bash
+# Check FR requirements mapping
+grep -n "FR-V" requirements.md | head -30
+
+# Check NFR requirements mapping  
+grep -n "NFR-V" requirements.md | head -20
+
+# For each requirement, trace to:
+# - Which subtask implements it
+# - Which file(s) contain the implementation
+# - Which test validates it
+```
+
+Document AC mapping in a task completion note (chat response, not a file).
+
+---
+
+## Task 1: Create i18n Verification Namespace
+
+**Estimated time**: 3-4 hours
+**Dependencies**: None
+**Requirements**: FR-V11 (i18n section in requirements.md)
+**AC Mapping**: FR-V11.1, FR-V11.2, FR-V11.3, FR-V11.4, FR-V11.5
+
+### Subtasks
+
+#### 1.1 Create VerificationLabels type interface
+
+**File to create**: `shared/locale/types/certificates/verification.ts`
+**Dependencies**: None
+**Estimated time**: 1.5 hours
+**Refs**: requirements.md i18n table (page.*, status.*, result.*, fields.*, loading.*, error.*, share.*, print.*, seo.*, a11y.*), shared/AGENTS.md (i18n namespace pattern)
+
+**Content**: Define the `VerificationLabels` TypeScript interface with all key groups from the requirements.md i18n section:
+- `page` group (title, subtitle, verifyProof, verifiedBy, manualEntry*)
+- `status` group (valid, revoked, expired, notFound, invalidFormat, rateLimited)
+- `result` group (valid.*, revoked.*, expired.*, notFound.*, invalidFormat.*)
+- `fields` group (recipientName, certificateTitle, issueDate, issuingAcademy, certificateId, verificationDate, status)
+- `loading` group (verifying, description)
+- `error` group (network.*, server.*, rateLimited.*, retry, enterDifferentCode)
+- `share` group (title, copyLink, copied, whatsapp, twitter, linkedin, facebook, telegram, nativeShare)
+- `print` group (button, proofHeader, verifiedBy)
+- `seo` group (title.valid, description.valid, title.generic, description.generic)
+- `a11y` group (statusPrefix, loading, verified, rateLimitCountdown, previewAlt, logoAlt, toggleToEnglish, toggleToArabic, share.*, print, download)
+
+**Key type details** (See requirements.md i18n table for exact types):
+- `page.verifiedBy` → `(academyName: string, date: string) => string`
+- `error.rateLimited.retryInSeconds` → `(count: number) => string` (pluralized)
+- `seo.title.valid` → `(recipientName: string, certificateTitle: string) => string`
+- `print.verifiedBy` → `(academyName: string, date: string) => string`
+- All other keys → `string`
+
+**Instruction files to read**: `shared/AGENTS.md` (i18n namespace pattern, layer isolation rules)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.1","files":["shared/locale/types/certificates/verification.ts"]}'
+```
+
+**Testing**: Create `shared/locale/types/certificates/verification.test.ts` — verify type compilation and export
+
+#### 1.2 Create Arabic translation implementation
+
+**File to create**: `shared/locale/ar/certificates/verification.ts`
+**Dependencies**: 1.1 (VerificationLabels interface)
+**Estimated time**: 0.75 hours
+**Refs**: requirements.md i18n table (Arabic column), design.md i18n key tables (Arabic values)
+
+**Content**: Implement `verificationAr` object matching `VerificationLabels` interface with all Arabic strings from the requirements.md i18n table. Implement Arabic pluralization for `error.rateLimited.retryInSeconds` (zero/one/two/few/many rules).
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.2","files":["shared/locale/ar/certificates/verification.ts"]}'
+```
+
+**Testing**: Create `shared/locale/ar/certificates/verification.test.ts` — verify all keys present, pluralization works
+
+#### 1.3 Create English translation implementation
+
+**File to create**: `shared/locale/en/certificates/verification.ts`
+**Dependencies**: 1.1 (VerificationLabels interface)
+**Estimated time**: 0.75 hours
+**Refs**: requirements.md i18n table (English column), design.md i18n key tables (English values)
+
+**Content**: Implement `verificationEn` object matching `VerificationLabels` interface with all English strings. Implement English pluralization for `error.rateLimited.retryInSeconds` (one/other rules).
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.3","files":["shared/locale/en/certificates/verification.ts"]}'
+```
+
+**Testing**: Create `shared/locale/en/certificates/verification.test.ts` — verify all keys present, pluralization works
+
+#### 1.4 Create namespace registration file
+
+**File to create**: `shared/locale/namespaces/certificates/verification.namespace.ts`
+**Dependencies**: 1.2, 1.3
+**Estimated time**: 0.25 hours
+**Refs**: shared/AGENTS.md (namespace registration pattern), `shared/locale/namespaces/errors/errors.namespace.ts` (exact pattern to follow)
+
+**Content**: Call `defineNamespace("certificates.verification", { load: { en, ar } })` with dynamic imports for the en/ar implementations. Follow the exact pattern from `shared/locale/namespaces/errors/errors.namespace.ts`.
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.4","files":["shared/locale/namespaces/certificates/verification.namespace.ts"]}'
+```
+
+#### 1.5 Register namespace in Translation registry
+
+**File to edit**: `shared/locale/namespaces/translation.ts`
+**Dependencies**: 1.4
+**Estimated time**: 0.15 hours
+**Refs**: shared/AGENTS.md (translation registry pattern)
+
+**Changes**:
+- Import `CertificatesVerification` from the new namespace file
+- Add `Certificates: { Verification: CertificatesVerification }` to the exported `Translation` object
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.5","files":["shared/locale/namespaces/translation.ts"]}'
+```
+
+#### 1.6 Add to MessageSchema type
+
+**File to edit**: `shared/locale/types/message.ts`
+**Dependencies**: 1.1 (VerificationLabels interface)
+**Estimated time**: 0.15 hours
+**Refs**: shared/AGENTS.md (MessageSchema extension pattern)
+
+**Changes**:
+- Import `VerificationLabels` from the new types file
+- Add `Certificates: { Verification: VerificationLabels }` to the `MessageSchema` type
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.6","files":["shared/locale/types/message.ts"]}'
+```
+
+#### 1.7 Verify package
+
+**Action**: Run `bun tsgo` to verify the entire i18n namespace compiles correctly and all type references resolve.
+
+**Quality loop**: 
+```bash
+bun tsgo
+```
+
+**Testing**: Run `bun test shared/locale/certificates/verification.test.ts` (all locale test files)
+
+**AGENTS.md files to read for this task**:
+- `shared/AGENTS.md` (i18n namespace registration steps, layer isolation)
+- `AGENTS.md` (root — path aliases, no console.log)
+
+---
+
+## Task 2: Create Verify Route + Public Layout
+
+**Estimated time**: 2-3 hours
+**Dependencies**: Task 1 (i18n namespace)
+**Requirements**: FR-V1
+**AC Mapping**: FR-V1.1, FR-V1.2, FR-V1.3, FR-V1.4, FR-V1.5, FR-V1.6, FR-V1.7
+
+### Subtasks
+
+#### 2.1 Create verify layout
+
+**File to create**: `app/verify/layout.tsx`
+**Dependencies**: Task 1 (i18n namespace)
+**Estimated time**: 1 hour
+**Refs**: AGENTS.md (root — path aliases, no console.log), app/AGENTS.md (server components, locale handling), frontend.instructions.md
+
+**Content**: Minimal server component layout:
+- `<main>` wrapper with constrained max-width (800px center)
+- Minimal header with academy brand/name (small, top-center)
+- Minimal footer with "Powered by Siraj"
+- Uses `getLocale()` for locale
+- Uses `getTranslations(locale)` for header/footer string
+- Does NOT call any auth guard
+- Does NOT include sidebar, navigation, dashboard shell
+
+**Instruction files to read**: `frontend.instructions.md`
+**AGENTS.md files**: `AGENTS.md`, `app/AGENTS.md` (server component rules, locale handling)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task2.1","files":["app/verify/layout.tsx"]}'
+```
+
+**Testing**: Create `test/ui/e2e/verify/layout.spec.ts` — verify layout renders without auth, correct locale
+
+#### 2.2 Create verify [code] page
+
+**File to create**: `app/verify/[code]/page.tsx`
+**Dependencies**: Task 1 (i18n namespace), Task 2.1 (layout)
+**Estimated time**: 1 hour
+**Refs**: AGENTS.md (root — path aliases), app/AGENTS.md (server components, Next.js 16 async params), frontend.instructions.md
+
+**Content**: Server component page:
+- Extract `code` from `params` (async in Next.js 16: `const { code } = await params`)
+- Call `getLocale()` for locale
+- Call `getTranslations(locale).certificates.verification` for labels
+- Pass `code` and `locale` as props to `<VerificationContainer>`
+- Export `generateMetadata` function (implemented in Task 7 — stub for now with generic metadata)
+- Do NOT call `getServerUserContext()` or any auth guard
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task2.2","files":["app/verify/[code]/page.tsx"]}'
+```
+
+**Testing**: Create `test/ui/e2e/verify/page.spec.ts` — verify page loads, passes code to container
+
+#### 2.3 Verify route renders
+
+**Action**: Run `bun run dev` and navigate to `/verify/TEST-CODE` — verify that the page loads (will show container skeleton/error since container isn't built yet, but layout should render).
+
+**Quality loop**: Manual verification
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — logging, path aliases)
+- `app/AGENTS.md` (server components, locale handling, no auth guard for public pages)
+
+---
+
+## Task 3: Create Verification Container + GraphQL Document
+
+**Estimated time**: 3-4 hours
+**Dependencies**: Task 1 (i18n), Task 2 (route), Plan 5 (GraphQL API)
+**Requirements**: FR-V2, FR-V4, FR-V5 (client-side handling)
+**AC Mapping**: FR-V2.1, FR-V2.2, FR-V2.3, FR-V2.4, FR-V2.5, FR-V4.1, FR-V4.2, FR-V4.3, FR-V5.1, FR-V5.2, FR-V5.3
+
+### Subtasks
+
+#### 3.1 Create GraphQL verification document
+
+**File to create**: `frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts`
+**Dependencies**: Task 1 (i18n for labels reference), Plan 5 (GraphQL API schema)
+**Estimated time**: 1.5 hours
+**Refs**: frontend/common/graphql/AGENTS.md (document conventions, useQuery rules), frontend/common/graphql/sharedDocuments/AGENTS.md (file naming, organization), INTER_PLAN_CONTRACTS.md §6 (revocationReason stripping)
+
+**Content**: Define `VerifyCertificateQueryDocument` — a GraphQL query document requesting the `verifyCertificate(code: String!)` query with fields: `status`, `verificationId`, and nested `certificate { id, verificationCode, recipientName, certificateTitle, issueDate, expiryDate, issuingAcademyName, academyLogoUrl, academyContactEmail, allowPublicDownload, status, revocationDate, expirationDate, verificationDate, templatePreview { backgroundColor, title, orientation, width, height } }`
+
+**NOTE**: `revocationReason` is NOT included in the query — per INTER_PLAN_CONTRACTS §6, `revocationReason` is stripped from the public response (contains PII / internal notes). The query document must NOT request this field.
+
+**Conventions** (from `frontend/common/graphql/AGENTS.md`):
+- Include `id` field on all object types for Apollo cache normalization
+- Use `useQuery` (not `useLazyQuery`)
+- Naming: `VerifyCertificateQueryDocument`
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task3.1","files":["frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts"]}'
+```
+
+**Testing**: Create `frontend/common/graphql/test/verify/certificates.verification.documents.test.ts` — verify query structure, field selection
+
+#### 3.2 Run GraphQL codegen
+
+**Action**: Run `bun codegen` to generate TypeScript types from the GraphQL schema. This requires Plan 5's `verifyCertificate` query to be defined in the schema. Verify that `VerifyCertificateQuery` and `VerifyCertificateQueryVariables` types are generated.
+
+**Quality loop**: 
+```bash
+bun codegen
+bun tsgo
+```
+
+**Testing**: Verify generated types in `frontend/common/graphql/generated/` resolve correctly
+
+#### 3.3 Create VerificationContainer
+
+**File to create**: `frontend/common/views/verify/VerificationContainer.tsx`
+**Dependencies**: Task 3.1 (GraphQL document), Task 3.2 (codegen types), Task 1 (i18n labels)
+**Estimated time**: 1.5 hours
+**Refs**: frontend/instructions.md, AGENTS.md (root — path aliases, logging, Apollo conventions), frontend/AGENTS.md (MUI v9 rules, React 19 changes), frontend/views/AGENTS.md (Container/View pattern, props conventions), frontend/common/graphql/AGENTS.md (document conventions, useQuery rules)
+
+**Content**:
+- Client component (`"use client"`)
+- Props: `code: string`, `locale: AppLocale`, `labels` (VerificationLabels)
+- State: `status` (union type: loading, valid, revoked, expired, notFound, networkError, serverError, rateLimited, invalidFormat), `rateLimitRetryAfter: number | null`
+- Internal logic:
+  - Validate code format client-side (regex for UUID v14 format or alphanumeric + hyphens, length range)
+  - If invalid format → set status to `invalidFormat`, skip query
+  - Call `useQuery(VerifyCertificateQueryDocument, { variables: { code }, skip: !codeFormatValid })`
+  - Parse Apollo errors:
+    - `networkError` → status: `networkError`
+    - `graphQLErrors` with `extensions.code === 'RATE_LIMITED'` → extract `retryAfter`, status: `rateLimited`
+    - Other `graphQLErrors` → status: `serverError`
+  - On success → map `data.verifyCertificate.status` to internal status:
+    - `VALID` → valid, `REVOKED` → revoked, `EXPIRED` → expired, `NOT_FOUND` → notFound
+  - **Rate-limit note**: Rate limiting is enforced at the SERVICE layer (Plan 5), NOT the client. The client only parses `RATE_LIMITED` error extensions for display. The service collapses rate-limited responses to `not_found` for opaque responses (see INTER_PLAN_CONTRACTS §13). The `RATE_LIMITED` GraphQL error is returned only when the resolver can distinguish (same GraphQL path), but for metadata-path the service returns `not_found` shape — the client should treat both `notFound` and opaque errors gracefully.
+  - Rate-limit countdown: `setInterval` to decrement `rateLimitRetryAfter` every 1 second, auto-refire query at 0
+- Render `<VerificationView>` with status, data, labels, locale
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task3.3","files":["frontend/common/views/verify/VerificationContainer.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/VerificationContainer.test.tsx` — test all status mappings, rate limit countdown, error parsing
+
+#### 3.4 Create VerificationView (responsive switch)
+
+**File to create**: `frontend/common/views/verify/VerificationView.tsx`
+**Dependencies**: Task 3.3 (Container), Task 3.5 (types)
+**Estimated time**: 0.5 hours
+**Refs**: frontend/instructions.md, AGENTS.md, frontend/AGENTS.md, frontend/views/AGENTS.md
+
+**Content**:
+- Client component
+- Props: `labels`, `result`, `status`, `rateLimitRetryAfter`
+- Use MUI `useMediaQuery` to detect mobile/desktop
+- Delegate to desktop/mobile view variants based on screen size
+- For now, create a single-view component that renders the appropriate sub-component based on status (Task 4 will add the result components)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task3.4","files":["frontend/common/views/verify/VerificationView.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test responsive delegate, status rendering
+
+#### 3.5 Create types file for verify views
+
+**File to create**: `frontend/common/views/verify/types.ts`
+**Dependencies**: Task 3.2 (codegen types)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — type definition patterns)
+
+**Content**: Define `VerificationViewStatus` union type, `VerificationContainerProps`, `VerificationViewProps`, and any other shared types for the verify view layer.
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task3.5","files":["frontend/common/views/verify/types.ts"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/types.test.ts` — verify type exports
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — path aliases, logging, Apollo conventions)
+- `frontend/AGENTS.md` (MUI v9 rules, React 19 changes)
+- `frontend/views/AGENTS.md` (Container/View pattern, props conventions)
+- `frontend/common/graphql/AGENTS.md` (document conventions, useQuery rules)
+- `frontend/common/graphql/sharedDocuments/AGENTS.md` (file naming, organization)
+
+---
+
+## Task 4: Create Result Display Components
+
+**Estimated time**: 4-5 hours
+**Dependencies**: Task 3 (container + view)
+**Requirements**: FR-V2, FR-V3, FR-V7 (partial — share buttons created in Task 6)
+**AC Mapping**: FR-V2.6, FR-V2.7, FR-V3.1, FR-V3.2, FR-V3.3, FR-V3.4, FR-V3.5, FR-V7.1, FR-V7.2
+
+### Subtasks
+
+#### 4.1 Create VerificationStatusBadge component
+
+**File to create**: `frontend/common/views/verify/VerificationStatusBadge.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — MUI v9 rules, theme palette, no hardcoded colors), frontend/AGENTS.md (component patterns, sx prop usage), frontend/views/AGENTS.md
+
+**Content**: MUI Chip component with:
+- `status` prop: `valid | revoked | expired`
+- `label` prop: string (localized status text from `status.*` i18n keys)
+- Color from theme palette: `success` (valid), `error` (revoked), `warning` (expired)
+- Icon: CheckCircle (valid), Cancel (revoked), Warning (expired) — MUI outlined icons
+- `aria-label` prefix for screen readers (e.g., "Status: Valid")
+- `size` prop: `small | medium` (responsive — small on mobile, medium on desktop)
+- Sized appropriately for both mobile and desktop
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.1","files":["frontend/common/views/verify/VerificationStatusBadge.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/VerificationStatusBadge.test.tsx` — test all three statuses, icons, aria-labels, responsive sizing
+
+#### 4.2 Create CertificateMetadataPanel component (desktop)
+
+**File to create**: `frontend/desktop/views/verify/CertificateMetadataPanel.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.75 hours
+**Refs**: AGENTS.md (root — MUI v9, theme palette), frontend/AGENTS.md, frontend/views/AGENTS.md (desktop/mobile split, view props conventions)
+
+**Content**:
+- Props: `labels` (field labels from `fields.*` i18n keys), `certificate` (VerificationCertificate type), `locale`
+- Renders certificate detail rows in a grid layout:
+  - `fields.certificateId` → certificate verification code
+  - `fields.recipientName` → recipient name
+  - `fields.certificateTitle` → template/certificate title
+  - `fields.issueDate` → issue date (formatted per locale via `Intl.DateTimeFormat`)
+  - `fields.expiryDate` → expiry date (formatted per locale, if present)
+  - `fields.issuingAcademy` → academy name
+  - `fields.verificationDate` → verification timestamp
+  - `fields.status` → status text
+- Each row: label (localized, muted color) + value (primary color)
+- RTL-aware (flexDirection changes for Arabic)
+- Uses MUI Card, Box, Typography with `sx` prop (NO style props per MUI v9 rules)
+- Dates formatted per locale using `Intl.DateTimeFormat`
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.2","files":["frontend/desktop/views/verify/CertificateMetadataPanel.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/desktop/CertificateMetadataPanel.test.tsx` — test all fields, RTL, date formatting, locale handling
+
+#### 4.3 Create CertificateMetadataPanel component (mobile)
+
+**File to create**: `frontend/mobile/views/verify/CertificateMetadataPanel.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.75 hours
+**Refs**: AGENTS.md (root — MUI v9), frontend/AGENTS.md, frontend/views/AGENTS.md (mobile-specific patterns)
+
+**Content**:
+- Same props as desktop
+- Stacked row layout (full-width)
+- Larger touch targets and font sizes
+- Simplified layout for small screens (320px+)
+- Expandable accordion for less-critical fields (verificationDate, status) if screen is narrow
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.3","files":["frontend/mobile/views/verify/CertificateMetadataPanel.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/mobile/CertificateMetadataPanel.test.tsx` — test stacked layout, accordion, touch targets, RTL
+
+#### 4.4 Create CertificatePreview component
+
+**File to create**: `frontend/common/views/verify/CertificatePreview.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels), NFR-V7 (certificate preview rendering)
+**Estimated time**: 1 hour
+**Refs**: AGENTS.md (root — MUI v9, theme palette), frontend/AGENTS.md (component patterns), frontend/views/AGENTS.md
+
+**Content**:
+- Props: `template` (TemplatePreview type), `recipientName`, `issueDate`
+- Renders a visual card mimicking the certificate:
+  - Background color from `template.backgroundColor`
+  - Template title centered
+  - Recipient name in prominent position
+  - Issue date formatted per locale
+  - Aspect ratio based on `template.width` / `template.height`
+- NOT an iframe or PDF embed — pure React + MUI components
+- Responsive: full-width on mobile, aspect-ratio-constrained on desktop
+- Only rendered for valid (issued) certificates — container controls this
+- **Watermark support** (NFR-V7.6): Show "VERIFIED" watermark on preview for valid certificates (faint, diagonal)
+- **Right-click disable** (NFR-V7.7): Add `onContextMenu={e => e.preventDefault()}` to preview container
+- **High-DPI** (NFR-V7.8): Use CSS `image-rendering: crisp-edges` for any embedded images
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.4","files":["frontend/common/views/verify/CertificatePreview.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/CertificatePreview.test.tsx` — test visual rendering, responsive, watermark, right-click disable, aspect ratio
+
+#### 4.5 Wire result components into VerificationView
+
+**File to edit**: `frontend/common/views/verify/VerificationView.tsx`
+**Dependencies**: Task 4.1-4.4, 4.6-4.11 (result components)
+**Estimated time**: 0.5 hours
+**Refs**: frontend/views/AGENTS.md
+
+**Changes**:
+- For `valid` status: render `<VerificationStatusBadge>`, `<CertificateMetadataPanel>`, `<CertificatePreview>`, `<AcademyBranding>` (Task 4.7), `<ShareButtons>` (Task 6), `<DownloadButton>` (Task 4.8), `<PrintButton>` (Task 6)
+- For `revoked` status: render `<VerificationStatusBadge>`, `<CertificateMetadataPanel>`, `<RevokedState>` (Task 4.9), `<AcademyBranding>`, `<ShareButtons>`, `<PrintButton>`
+- For `expired` status: render `<VerificationStatusBadge>`, `<CertificateMetadataPanel>`, `<ExpiredState>` (Task 4.10), `<AcademyBranding>`, `<ShareButtons>`, `<PrintButton>`
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.5","files":["frontend/common/views/verify/VerificationView.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test all status flows, component composition
+
+#### 4.6 Create RevocationInfo and ExpirationInfo components
+
+**File to create**: `frontend/common/views/verify/RevocationInfo.tsx`
+**File to create**: `frontend/common/views/verify/ExpirationInfo.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — MUI v9, theme palette), frontend/AGENTS.md, INTER_PLAN_CONTRACTS.md §6 (revocationReason stripping)
+
+**Content**:
+- `RevocationInfo`: Displays revocation date (formatted per locale) and a generic "revoked" message — does NOT display `revocationReason` (per INTER_PLAN_CONTRACTS §6). Uses MUI Alert with `error` severity color from theme palette.
+- `ExpirationInfo`: Displays expiration date (formatted per locale) and a message explaining "The certificate was valid from [issueDate] to [expiryDate]". Uses MUI Alert with `warning` severity color from theme palette.
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.6","files":["frontend/common/views/verify/RevocationInfo.tsx","frontend/common/views/verify/ExpirationInfo.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/RevocationInfo.test.tsx` and `ExpirationInfo.test.tsx` — test no revocationReason, locale date formatting, theme colors
+
+#### 4.7 Create AcademyBranding component
+
+**File to create**: `frontend/common/views/verify/AcademyBranding.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — no academy theme override, security), frontend/AGENTS.md, frontend/views/AGENTS.md
+
+**Content**:
+- Props: `academyName: string`, `academyLogoUrl?: string`, `academyContactEmail?: string`, `labels` (from `academy.*` i18n keys)
+- Renders in a horizontal MUI Stack:
+  - Academy logo: MUI `Avatar` with `src={academyLogoUrl}`, fallback to initials (first letter of academy name) if logo URL is missing or fails to load
+  - Academy name: MUI `Typography` with `variant="subtitle1"`
+  - Contact email: `mailto:` link if `academyContactEmail` is present (Typography with Link)
+  - Trust signal: `academy.verifiedBy` string with `{academyName}` interpolation — e.g., "Verified by [Academy Name]"
+- Uses Siraj theme palette only — NO academy-specific theme/color override (security: public page must not load untrusted academy theme)
+- RTL-aware (flexDirection row-reverse for Arabic)
+- Hidden in print CSS (handled in Task 6 print styles — `sx={{ '@media print': { display: 'none' } }}`)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.7","files":["frontend/common/views/verify/AcademyBranding.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/AcademyBranding.test.tsx` — test logo fallback, RTL, trust signal, print hidden, no theme override
+
+#### 4.8 Create DownloadButton component
+
+**File to create**: `frontend/common/views/verify/DownloadButton.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — MUI v9), frontend/AGENTS.md, frontend/views/AGENTS.md
+
+**Content**:
+- Props: `certificateId: string`, `labels` (from `download.*` i18n keys), `locale`
+- Client component (`"use client"`)
+- Visible only when `allowPublicDownload` is `true` on the certificate (container controls rendering — this component is only mounted when download is allowed)
+- On click: triggers download flow — either:
+  - Opens a download link in a new tab (if academy has configured a public download URL)
+  - OR calls a public GraphQL mutation/query for download (if supported by Plan 5)
+- MUI Button with Download icon, `variant="outlined"`, `size` responsive
+- Tooltip: `download.tooltip` i18n key
+- Hidden in print CSS (`sx={{ '@media print': { display: 'none' } }}`)
+- If download fails: shows error state inline (MUI Alert)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.8","files":["frontend/common/views/verify/DownloadButton.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/DownloadButton.test.tsx` — test conditional render, click handler, print hidden, error state
+
+#### 4.9 Create RevokedState component
+
+**File to create**: `frontend/common/views/verify/RevokedState.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — MUI v9, theme palette, no hardcoded colors), frontend/AGENTS.md, INTER_PLAN_CONTRACTS.md §6 (no revocationReason)
+
+**Content**:
+- Props: `labels` (from `result.revoked.*` i18n keys), `revocationDate: string | null`, `locale`
+- Renders a distinct visual state for revoked certificates:
+  - Red `Cancel` icon (MUI outlined) in a circular MUI Box with `error` color from theme
+  - Title: `result.revoked.title` ("This certificate has been revoked")
+  - Description: `result.revoked.description` (generic, no PII)
+  - Revocation date display: `result.revoked.revocationDate` formatted per locale
+  - Does NOT display revocation reason (INTER_PLAN_CONTRACTS §6)
+- `role="status"`, `aria-live="polite"`
+- MUI theme colors only — no hardcoded red
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.9","files":["frontend/common/views/verify/RevokedState.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/RevokedState.test.tsx` — test no revocationReason, date formatting, aria-live, theme colors
+
+#### 4.10 Create ExpiredState component
+
+**File to create**: `frontend/common/views/verify/ExpiredState.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — MUI v9, theme palette), frontend/AGENTS.md
+
+**Content**:
+- Props: `labels` (from `result.expired.*` i18n keys), `expiryDate: string | null`, `issueDate: string | null`, `locale`
+- Renders a distinct visual state for expired certificates:
+  - Warning `Warning` icon (MUI outlined) in a circular MUI Box with `warning` color from theme
+  - Title: `result.expired.title` ("This certificate has expired")
+  - Description: `result.expired.description` (generic)
+  - Validity period: `result.expired.validityPeriod(issueDate, expiryDate)` — "The certificate was valid from [issueDate] to [expiryDate]"
+  - Expiry date formatted per locale via `Intl.DateTimeFormat`
+- `role="status"`, `aria-live="polite"`
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.10","files":["frontend/common/views/verify/ExpiredState.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/ExpiredState.test.tsx` — test validity period interpolation, date formatting, aria-live
+
+#### 4.11 Create NotFoundState component
+
+**File to create**: `frontend/common/views/verify/NotFoundState.tsx`
+**Dependencies**: Task 3.5 (types), Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — MUI v9), frontend/AGENTS.md, INTER_PLAN_CONTRACTS.md §13 (rate limit collapsed to not_found)
+
+**Content**:
+- Props: `labels` (from `result.notFound.*` i18n keys)
+- Renders a distinct visual state when verification code doesn't match any certificate:
+  - Search/off icon in a circular MUI Box with `warning` or `info` color from theme
+  - Title: `result.notFound.title` ("This verification code does not match any certificate")
+  - Description: `result.notFound.description` (guidance on checking the code)
+  - Link to `/verify` for manual code entry: `result.notFound.tryManualEntry`
+- `role="status"`, `aria-live="polite"`
+- This is the same visual used for rate-limit-collapsed responses (per INTER_PLAN_CONTRACTS §13, rate-limited requests return `not_found` shape — the client cannot distinguish, so both render as NotFoundState)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.11","files":["frontend/common/views/verify/NotFoundState.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/NotFoundState.test.tsx` — test manual entry link, aria-live, rate-limit collapsed usage
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — MUI v9 rules, theme palette, no hardcoded colors)
+- `frontend/AGENTS.md` (component patterns, sx prop usage)
+- `frontend/views/AGENTS.md` (desktop/mobile split, view props conventions)
+
+---
+
+## Task 5: Create Loading and Error States
+
+**Estimated time**: 2-3 hours
+**Dependencies**: Task 4 (wire into view)
+**Requirements**: FR-V8, FR-V9
+**AC Mapping**: FR-V8.1, FR-V8.2, FR-V8.3, FR-V9.1, FR-V9.2, FR-V9.3
+
+### Subtasks
+
+#### 5.1 Create VerificationLoading component
+
+**File to create**: `frontend/common/views/verify/VerificationLoading.tsx`
+**Dependencies**: Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — accessibility, MUI v9), frontend/AGENTS.md (component patterns, sx prop, aria attributes), frontend/views/AGENTS.md
+
+**Content**:
+- MUI `CircularProgress` or pulse animation
+- Skeleton card with placeholder rows (MUI `Skeleton` component)
+- `aria-busy="true"` on container
+- `aria-live="polite"` for status announcements
+- Server-rendered skeleton (for initial SSR before client hydration)
+- "Verifying..." message (localized)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task5.1","files":["frontend/common/views/verify/VerificationLoading.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/VerificationLoading.test.tsx` — test skeleton render, aria-busy, aria-live
+
+#### 5.2 Create ErrorState component
+
+**File to create**: `frontend/common/views/verify/ErrorState.tsx`
+**Dependencies**: Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — accessibility, MUI v9), frontend/AGENTS.md
+
+**Content**:
+- Props: `title`, `description` (localized strings), `showRetry` (boolean), `showEnterDifferentCode` (boolean), `onRetry` callback
+- MUI Alert or Card with error/warning color from theme
+- `role="alert"` on container
+- `aria-live="assertive"` for dynamic content
+- Retry button (MUI Button) when `showRetry` is true
+- "Enter a different code" link when `showEnterDifferentCode` is true (links to `/verify`)
+- Used for: network error, server error, not found, invalid format
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task5.2","files":["frontend/common/views/verify/ErrorState.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/ErrorState.test.tsx` — test all props, role=alert, aria-live, retry callback
+
+#### 5.3 Create RateLimitError component
+
+**File to create**: `frontend/common/views/verify/RateLimitError.tsx`
+**Dependencies**: Task 1 (i18n labels - rateLimited keys)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — accessibility, MUI v9), frontend/AGENTS.md, INTER_PLAN_CONTRACTS.md §13 (rate limit extensions)
+
+**Content**:
+- Props: `retryAfter` (seconds), `labels` (rate limit labels)
+- Displays title + description + countdown timer
+- `setInterval` to decrement `retryAfter` every second
+- Uses `error.rateLimited.retryInSeconds(count)` for pluralized countdown text
+- `role="alert"` and `aria-live="assertive"`
+- When countdown reaches 0, calls `onRetry` callback (auto-retries the query)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task5.3","files":["frontend/common/views/verify/RateLimitError.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/RateLimitError.test.tsx` — test countdown, pluralization, auto-retry, aria-live
+
+#### 5.4 Wire states into VerificationView
+
+**File to edit**: `frontend/common/views/verify/VerificationView.tsx`
+**Dependencies**: Task 5.1-5.3, Task 4.11 (NotFoundState)
+**Estimated time**: 0.5 hours
+**Refs**: frontend/views/AGENTS.md
+
+**Changes**:
+- For `loading` status → render `<VerificationLoading>`
+- For `notFound` status → render `<NotFoundState>` (from Task 4.11) — this also covers rate-limit-collapsed responses where the service returns `not_found` shape
+- For `networkError` status → render `<ErrorState>` with network error labels + retry
+- For `serverError` status → render `<ErrorState>` with server error labels + retry
+- For `rateLimited` status → render `<RateLimitError>` with countdown (only when GraphQL error explicitly returns `RATE_LIMITED` extension)
+- For `invalidFormat` status → render `<ErrorState>` with invalid format labels + enter different code
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task5.4","files":["frontend/common/views/verify/VerificationView.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test all status state rendering
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — accessibility, MUI v9)
+- `frontend/AGENTS.md` (component patterns, sx prop, aria attributes)
+
+---
+
+## Task 6: Create Share and Print Functionality
+
+**Estimated time**: 3-4 hours
+**Dependencies**: Task 4 (result components)
+**Requirements**: FR-V7, FR-V10
+**AC Mapping**: FR-V7.1, FR-V7.2, FR-V7.3, FR-V7.4, FR-V7.5, FR-V10.1, FR-V10.2, FR-V10.3, FR-V10.4, FR-V10.5, FR-V10.6, FR-V10.7
+
+### Subtasks
+
+#### 6.1 Create ShareButtons component
+
+**File to create**: `frontend/common/views/verify/ShareButtons.tsx`
+**Dependencies**: Task 1 (i18n labels), Task 3.5 (types)
+**Estimated time**: 1 hour
+**Refs**: AGENTS.md (root — MUI v9, theme palette), frontend/AGENTS.md (component patterns, responsive design), frontend/views/AGENTS.md
+
+**Content**:
+- Props: `url` (string), `labels` (share labels)
+- Detects Web Share API availability (`navigator.share`)
+- If available: render a primary "Share" button that calls `navigator.share({ url, title })`
+- Also render individual social buttons (WhatsApp, X, LinkedIn, Facebook, Telegram) as secondary
+- Copy link button: uses `navigator.clipboard.writeText(url)`, displays snackbar/toast on success
+- Each social button opens platform share URL in `_blank` target
+- Platform share URLs:
+  - WhatsApp: `https://wa.me/?text=<URL>`
+  - X/Twitter: `https://twitter.com/intent/tweet?url=<URL>`
+  - LinkedIn: `https://www.linkedin.com/sharing/share-offsite/?url=<URL>`
+  - Facebook: `https://www.facebook.com/sharer/sharer.php?u=<URL>`
+  - Telegram: `https://t.me/share/url?url=<URL>`
+- RTL-aware: button order reversed for Arabic
+- Uses MUI Button + Icon components
+- Only visible when result is displayed (container controls rendering)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.1","files":["frontend/common/views/verify/ShareButtons.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/ShareButtons.test.tsx` — test Web Share API fallback, social URLs, copy to clipboard, RTL
+
+#### 6.2 Create PrintButton component
+
+**File to create**: `frontend/common/views/verify/PrintButton.tsx`
+**Dependencies**: Task 1 (i18n labels)
+**Estimated time**: 0.25 hours
+**Refs**: AGENTS.md (root — MUI v9), frontend/AGENTS.md
+
+**Content**:
+- Props: `labels` (print labels)
+- MUI Button with print icon
+- On click: calls `window.print()`
+- Hidden in print CSS (`sx={{ '@media print': { display: 'none' } }}`)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.2","files":["frontend/common/views/verify/PrintButton.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/PrintButton.test.tsx` — test print call, print hidden
+
+#### 6.3 Create print CSS for verification page
+
+**File to create**: `frontend/common/views/verify/verifyPrintStyles.ts`
+**Dependencies**: Task 1 (i18n labels - print.* keys)
+**Estimated time**: 1 hour
+**Refs**: AGENTS.md (root — MUI v9, @media print in sx), frontend/AGENTS.md, NFR-V8 (print requirements), NFR-V10.5 (watermarks)
+
+**Content**: A style object/function (NOT a CSS file) that returns MUI `sx` overrides for print mode:
+- Hide: ShareButtons, PrintButton, DownloadButton, LanguageToggle, AcademyBranding, manual entry form, header/footer chrome
+- Show: CertificateMetadataPanel, certificate details, VerificationStatusBadge (as text)
+- Add: "Verification Proof" header text
+- Add: "Verified by [academy] on [date]" seal text
+- **Print watermarks** (per FR-V10.5):
+  - For VALID: print "VERIFIED" watermark (large, faint, centered, `@media print` only via PrintHeader)
+  - For REVOKED: print "REVOKED" watermark (large, faint, centered, red text)
+  - For EXPIRED: print "EXPIRED" watermark (large, faint, centered, warning text)
+  - For NOT_FOUND: do NOT render a print page at all — disable print button for not-found state (no print-worthy content)
+- Use `@media print` media query in sx props
+- Print-friendly typography: serif fonts, black text on white background
+- **Fraud prevention** (NFR-V8.6): Revoked/Expired print output clearly marks status, no "VERIFIED" watermark
+
+**Approach**: Each component that should be print-hidden applies `sx={{ '@media print': { display: 'none' } }}`. The page-level layout adds a print-only header component (PrintHeader) visible only in `@media print`. The watermark is rendered inside PrintHeader with status-specific text.
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.3","files":["frontend/common/views/verify/verifyPrintStyles.ts"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/verifyPrintStyles.test.ts` — test print-only classes, watermark logic per status
+
+#### 6.4 Create PrintHeader component (print-only)
+
+**File to create**: `frontend/common/views/verify/PrintHeader.tsx`
+**Dependencies**: Task 1 (i18n labels - page.verifyProof, page.verifiedBy, print.verifiedWatermark, print.revokedWatermark, print.expiredWatermark)
+**Estimated time**: 0.75 hours
+**Refs**: AGENTS.md (root — MUI v9, @media print), frontend/AGENTS.md, NFR-V8, NFR-V10.5
+
+**Content**:
+- Only visible in print (`sx={{ display: 'none', '@media print': { display: 'block' } }}`)
+- Renders "Verification Proof" heading + academy name + verification date
+- Uses `page.verifyProof` and `page.verifiedBy` i18n keys
+- **Watermark**: Renders status-specific watermark text based on `status` prop:
+  - `valid` → `print.verifiedWatermark` text ("VERIFIED") — large, faint, centered
+  - `revoked` → `print.revokedWatermark` text ("REVOKED") — large, faint, centered, error color
+  - `expired` → `print.expiredWatermark` text ("EXPIRED") — large, faint, centered, warning color
+  - `notFound` → NOT rendered (no print page for not-found)
+- Uses `position: absolute` or repeated via CSS `background-image` watermark pattern
+- **Fraud prevention** (NFR-V8.6): Revoked/Expired watermarks clearly indicate invalid status, cannot be confused with valid
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.4","files":["frontend/common/views/verify/PrintHeader.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/PrintHeader.test.tsx` — test print-only render, watermark per status, notFound exclusion
+
+#### 6.5 Wire share and print into VerificationView
+
+**File to edit**: `frontend/common/views/verify/VerificationView.tsx`
+**Dependencies**: Task 6.1-6.4
+**Estimated time**: 0.25 hours
+**Refs**: frontend/views/AGENTS.md
+
+**Changes**: Add `<ShareButtons>` and `<PrintButton>` to valid/revoked/expired result flows. Add `<PrintHeader>` at the top of the print layout.
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.5","files":["frontend/common/views/verify/VerificationView.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test share/print buttons present in valid/revoked/expired, absent in notFound
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — MUI v9, theme palette)
+- `frontend/AGENTS.md` (component patterns, responsive design)
+
+---
+
+## Task 7: Implement SEO Meta Tags
+
+**Estimated time**: 3-4 hours
+**Dependencies**: Task 2 (page), Task 4 (result components), Plan 4 (verification service)
+**Requirements**: FR-V6
+**AC Mapping**: FR-V6.1, FR-V6.2, FR-V6.3, FR-V6.4, FR-V6.5, FR-V6.6, FR-V6.7, FR-V6.8
+
+### Subtasks
+
+#### 7.1 Implement generateMetadata for /verify/[code]
+
+**File to edit**: `app/verify/[code]/page.tsx`
+**Dependencies**: Task 2.2 (page), Task 1 (i18n labels), Plan 4 (CertificateVerificationService)
+**Estimated time**: 1.5 hours
+**Refs**: AGENTS.md (root — path aliases, logging), app/AGENTS.md (server components, generateMetadata pattern, locale handling), frontend.instructions.md, INTER_PLAN_CONTRACTS.md §13 (rate limit for metadata path)
+
+**Changes**: Implement the exported `generateMetadata` function:
+- Accepts `{ params }` — extracts `code` (async in Next.js 16: `const { code } = await params`)
+- Calls `getLocale()` for locale
+- Calls `getTranslations(locale).certificates.verification.seo` for SEO labels
+- Calls `CertificateVerificationService.verifyForMetadata(code)` — a lightweight server-side fetch returning only the fields needed for SEO (status + recipientName + certificateTitle if valid). This is a SEPARATE entry point from the full `verifySafe()` — it has its own rate limit ceiling (120 req/min per IP, see INTER_PLAN_CONTRACTS §13) and returns minimal data.
+- If certificate is VALID:
+  - `title`: `seo.title.valid(recipientName, certificateTitle)`
+  - `description`: `seo.description.valid`
+  - `openGraph`: { title, description, type: 'website', url: canonical, images: [{ url: OG_IMAGE_URL, width: 1200, height: 630 }] }
+  - `twitter`: { card: 'summary_large_image', title, description, images: [OG_IMAGE_URL] }
+- If NOT_FOUND or error:
+  - `title`: `seo.title.generic`
+  - `description`: `seo.description.generic`
+  - `openGraph`: generic tags with static fallback OG image
+  - `twitter`: generic card with static fallback
+- **Canonical URL**: Add `<link rel="canonical">` pointing to `/verify/[code]` WITHOUT `?lang=` query param (strips the language toggle query to dedup SEO — see FR-V6.7)
+- **Robots**: `robots: { index: false, follow: true }` — `noindex, follow` directive (certificates are private per-recipient; we don't want search engines indexing individual verification pages — see FR-V6.8)
+- Uses `NEXT_PUBLIC_BASE_URL` from `@/backend/lib/server` for canonical URL base
+
+**Key constraint**: `generateMetadata` is a server-side function and can call backend services directly (Server Component convention). It does NOT use Apollo — calls the service directly.
+
+**Instruction files**: `frontend.instructions.md`
+**AGENTS.md files**: `AGENTS.md`, `app/AGENTS.md` (server components can call services)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.1","files":["app/verify/[code]/page.tsx"]}'
+```
+
+**Testing**: Create `test/ui/e2e/verify/seo.spec.ts` — verify meta tags, canonical URL, robots directive, OG tags
+
+#### 7.2 Implement generateMetadata for /verify (manual entry)
+
+**File to edit**: `app/verify/page.tsx`
+**Dependencies**: Task 1 (i18n labels)
+**Estimated time**: 0.5 hours
+**Refs**: app/AGENTS.md, AGENTS.md
+
+**Changes**: Export `generateMetadata` with generic meta tags (no code to verify):
+- `title`: `seo.title.generic`
+- `description`: `seo.description.generic`
+- Standard OG/Twitter tags with static fallback image
+- `robots`: `noindex, follow` (same as [code] page — not for search indexing)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.2","files":["app/verify/page.tsx"]}'
+```
+
+**Testing**: Create `test/ui/e2e/verify/manual-entry-seo.spec.ts` — verify generic meta tags
+
+#### 7.3 Add ISR cache headers to verify route
+
+**File to edit**: `app/verify/[code]/page.tsx`
+**Dependencies**: Task 7.1 (generateMetadata)
+**Estimated time**: 0.5 hours
+**Refs**: AGENTS.md (root — path aliases), app/AGENTS.md (ISR, route segment config), NFR-V1.4, INTER_PLAN_CONTRACTS.md §13
+
+**Changes**: Add Next.js route segment config for CDN caching/ISR:
+- `export const revalidate = 3600` — revalidate every hour (1 hour ISR)
+- Suitable for VALID/REVOKED/EXPIRED responses (certificate state changes infrequently)
+- For NOT_FOUND responses, the page should set `Cache-Control: no-store` via `headers()` export or inline response header
+- Rationale: Public verification pages benefit from CDN caching for fast global access. NOT_FOUND must not be cached (could become valid later). See NFR-V1.4, INTER_PLAN_CONTRACTS §13.
+
+**Also add `headers()` export** (if supported by route segment config):
+- For VALID/REVOKED/EXPIRED: `Cache-Control: s-maxage=3600, stale-while-revalidate=600`
+- For NOT_FOUND: `Cache-Control: no-store` (handled dynamically — see design.md DD-14)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.3","files":["app/verify/[code]/page.tsx"]}'
+```
+
+**Testing**: Create `test/ui/e2e/verify/isr.spec.ts` — verify cache headers, ISR behavior
+
+#### 7.4 Create OG image generation/fallback
+
+**Files to create**: OG image infrastructure for the verification page.
+**Dependencies**: Task 1 (i18n), Plan 4 (verifyForMetadata)
+**Estimated time**: 1 hour
+**Refs**: AGENTS.md (root — path aliases), app/AGENTS.md (Next.js 16 opengraph-image), frontend.instructions.md
+
+**Content**:
+- For VALID certificates: OG image is the certificate render (1200×630 px) — generated server-side from `templatePreview` data (same visual as `<CertificatePreview>` component but sized for OG). This can use:
+  - Next.js `opengraph-image.ts` route handler in `app/verify/[code]/opengraph-image.tsx` (Next.js 16 OG image generation)
+  - OR a static fallback OG image stored in `public/og/verification-fallback.png` (1200×630) for non-valid states
+- The OG image route handler should:
+  - Fetch certificate metadata via `verifyForMetadata(code)`
+  - Render a simplified certificate visual with recipientName + certificateTitle
+  - If not found or error: serve the static fallback image
+- This integrates with the `generateMetadata` `openGraph.images` field from subtask 7.1
+
+**File to create**: `app/verify/[code]/opengraph-image.tsx` — Next.js 16 OG image route
+**File to create**: `public/og/verification-fallback.png` — static fallback (1200×630)
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.4","files":["app/verify/[code]/opengraph-image.tsx"]}'
+```
+
+**Testing**: Create `test/ui/e2e/verify/og-image.spec.ts` — verify OG image generation, fallback
+
+#### 7.5 Add JSON-LD structured data for valid certificates
+
+**File to create**: `frontend/common/views/verify/StructuredData.tsx`
+**Dependencies**: Task 4 (valid status), Task 1 (i18n)
+**Estimated time**: 0.75 hours
+**Refs**: AGENTS.md (root — path aliases), frontend/AGENTS.md (dangerouslySetInnerHTML pattern), frontend/views/AGENTS.md
+
+**Content**:
+- Client component that injects a `<script type="application/ld+json">` tag into the DOM
+- Props: `certificate` (VerificationCertificate type for valid certs), `locale`
+- Generates JSON-LD `EducationalOccupationalCredential` schema:
+  - `@type`: "EducationalOccupationalCredential"
+  - `name`: certificate title
+  - `credentialStatus`: "Active" (valid)
+  - `recognizedBy`: { `@type`: "Organization", `name`: academy name }
+  - `dateCreated`: issue date (ISO 8601)
+  - `expiryDate`: expiry date (ISO 8601, if present)
+  - `url`: canonical verification URL
+- Only rendered for VALID certificates (REVOKED/EXPIRED/NOT_FOUND do not get JSON-LD — they shouldn't appear in search/social structured data)
+- Uses `dangerouslySetInnerHTML` for the script content (Next.js pattern for JSON-LD)
+
+**Wire into VerificationView**: Add `<StructuredData>` to the `valid` status render path in subtask 4.5.
+
+**Quality loop**: 
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.5","files":["frontend/common/views/verify/StructuredData.tsx"]}'
+```
+
+**Testing**: Create `test/ui/components/verify/StructuredData.test.tsx` — test JSON-LD schema, only for valid, ISO dates
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — path aliases, logging)
+- `app/AGENTS.md` (server components, generateMetadata pattern, locale handling)
+
+---
+
+## Task 8: Create LanguageToggle Component
+
+**Estimated time**: 2 hours
+**Dependencies**: Task 2 (route), Task 1 (i18n)
+**Requirements**: FR-V14
+
+### Subtasks
+
+#### 8.1 Create LanguageToggle component
+
+**File to create**: `frontend/common/views/verify/LanguageToggle.tsx`
+
+**Content**:
+- Client component (`"use client"`)
+- Props: `currentLocale: AppLocale`, `code: string` (verification code — for maintaining URL context), `labels` (from `language.*` i18n keys)
+- Renders a compact EN/AR toggle:
+  - MUI `ToggleButtonGroup` with two `ToggleButton`s: "EN" and "AR"
+  - `size="small"`, `exclusive`
+  - `aria-label`: `language.toggleToArabic` when current is en (and vice versa)
+- On locale change:
+  - Calls `router.replace('/verify/${code}?lang=${newLocale}')` — uses `next/navigation` `useRouter().replace()` (no full page reload)
+  - The RSC re-renders with the new locale by reading `?lang=` query param (see subtask 2.2 update)
+  - Also sets `NEXT_LOCALE` cookie via the existing cookie-set mechanism in the RSC (so subsequent navigation uses the right locale)
+- The `?lang=` param is stripped from canonical URL (handled in Task 7 `generateMetadata` — see FR-V6.7)
+- RTL-aware: the toggle order and icon direction respects current locale
+
+**Instruction files**: `frontend.instructions.md`
+**AGENTS.md files**: `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 8.2 Wire LanguageToggle into VerificationView
+
+**File to edit**: `frontend/common/views/verify/VerificationView.tsx`
+
+**Changes**:
+- Add `<LanguageToggle>` to the top-right of the verification page header area
+- Visible in all states (valid, revoked, expired, notFound, loading, error) — user can always switch language
+- Hidden in print CSS (`sx={{ '@media print': { display: 'none' } }}`)
+- Passed `currentLocale`, `code`, and `labels.language.*`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 8.3 Update [code] page to read `?lang` query param
+
+**File to edit**: `app/verify/[code]/page.tsx`
+
+**Changes**:
+- In the RSC, read the `?lang=` query param from `searchParams` (async in Next.js 16: `const { lang } = await searchParams`)
+- If `lang` is `en` or `ar`, set `NEXT_LOCALE` cookie and use that locale for rendering
+- Otherwise, fall back to `getLocale()` (which reads from cookie or Accept-Language)
+- Pass the resolved locale to `<VerificationContainer>`
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — i18n locale detection)
+- `frontend/AGENTS.md` (client component patterns, RTL)
+- `app/AGENTS.md` (server component searchParams)
+
+---
+
+## Task 9: Implement Analytics Integration
+
+**Estimated time**: 2-3 hours
+**Dependencies**: Task 3 (container), Plan 5 (GraphQL API), Plan 18 (verification logging)
+**Requirements**: FR-V4.3 (analytics source detection), NFR-V4.3
+
+### Subtasks
+
+#### 9.1 Add analytics source detection to verification query
+
+**Cross-plan dependency**: Plan 5 (GraphQL API) must add a `source` argument to the `verifyCertificate` query, OR the client sends a custom header. Plan 18 (timeline/log) must accept the `source` field in verification log entries.
+
+**Content**: The Analytics integration tracks verification views for academy dashboards. Source detection is server-side (no client-side tracking scripts):
+- `qr_scan`: No `Referer` header or `Referer` is empty — user scanned QR code (direct access)
+- `link_click`: `Referer` header is present and external (not from same domain)
+- `manual_entry`: Request comes from the `/verify` page (Referer is same-domain `/verify`)
+- The source is passed to the verification service which logs it in the verification timeline
+
+**File to edit**: `frontend/common/views/verify/VerificationContainer.tsx`
+
+**Changes**:
+- Pass `source` via Apollo query context (custom header `X-Verification-Source`) OR via query variable if Plan 5 supports `source` argument
+- The server-side `verifySafe()` reads the `Referer` header and determines the source — the client does NOT self-report (untrusted)
+- Metadata path (`verifyForMetadata`) does NOT send analytics (metadata is for SEO, not user-facing verification)
+
+**Quality loop**: tsgo + biome + lint
+
+#### 9.2 Verify analytics logging in Plan 18
+
+**Cross-plan dependency**: Plan 18 verification timeline/log must accept `source` field.
+
+**Action**: Confirm with Plan 18 design that verification log entries include:
+- `verificationCode`
+- `source` (`qr_scan` | `link_click` | `manual_entry`)
+- `timestamp`
+- `ipHash` (hashed IP for rate limiting/analytics — not raw IP)
+- `status` (the verification result)
+
+If Plan 18 does not yet support this, add a cross-plan note in `INTER_PLAN_CONTRACTS.md`.
+
+**Quality loop**: N/A (cross-plan coordination — no file to lint in this plan)
+
+#### 9.3 Add rate-limit note for analytics path
+
+**Note**: Rate-limited requests do NOT create verification log rows (per FR-V5 acceptance criteria — a rate-limited "not_found" response does not log). Only successful verifications (valid/revoked/expired) and genuine not-found results create log entries. This prevents log flooding by brute-force attempts.
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — logging, cross-plan contracts)
+- `frontend/AGENTS.md` (Apollo context, headers)
+- `frontend/common/graphql/AGENTS.md` (query context conventions)
+
+---
+
+## Task 10: Create Manual Code Entry Page
+
+**Estimated time**: 2-3 hours
+**Dependencies**: Task 2 (verify route), Task 1 (i18n)
+**Requirements**: FR-V12
+
+### Subtasks
+
+#### 10.1 Create ManualCodeForm component
+
+**File to create**: `frontend/common/views/verify/ManualCodeForm.tsx`
+
+**Content**:
+- Client component (`"use client"`)
+- Props: `labels` (manual entry labels from `page.manualEntry*` i18n keys)
+- Uses MUI TextField + Button
+- State: `codeInput` (string), `validationError` (string | null)
+- On submit:
+  - Validate: non-empty, matches code format regex (UUID v14 format or alphanumeric + hyphens)
+  - If invalid: display validation error message (`status.invalidFormat.*` labels)
+  - If valid: normalize code (uppercase, trim), call `router.push('/verify/${normalizedCode}')`
+- Submit via Enter key (form `onSubmit`) or button click
+- React 19: use `React.SyntheticEvent<HTMLFormElement>` for onSubmit (NOT `FormEvent`)
+- `<label>` association on TextField (MUI `InputLabel` + `htmlFor`)
+- Accessible: `aria-invalid` on input when validation fails
+- Include a `<LanguageToggle>` (from Task 8) at the top of the form
+
+**Quality loop**: tsgo + biome + lint
+
+#### 10.2 Create /verify page
+
+**File to create**: `app/verify/page.tsx`
+
+**Content**:
+- Server component
+- Calls `getLocale()` for locale (also reads `?lang=` from `searchParams` — same logic as [code] page)
+- Calls `getTranslations(locale).certificates.verification.page` for labels
+- Renders `<ManualCodeForm>` with labels
+- Exports `generateMetadata` with generic meta tags + `noindex, follow` (from Task 7.2)
+
+**Quality loop**: tsgo + biome + lint
+
+#### 10.3 Test manual entry flow
+
+**Action**: Run `bun run dev`, navigate to `/verify`, enter a code, submit — verify redirect to `/verify/[code]`. Test empty input and invalid format validation. Test language toggle on the manual entry page.
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — path aliases, React 19 form event changes)
+- `app/AGENTS.md` (server components)
+- `frontend/AGENTS.md` (MUI v9, React 19 changes — FormData casting)
+
+---
+
+## Task 11: Knowledge Propagation (Final)
+
+**Estimated time**: 1-2 hours
+**Dependencies**: All tasks 1-10 complete
+**Requirements**: Plan 21 alignment
+
+### Subtasks
+
+#### 11.1 Update NEW_PAGE_WORKFLOW.md with public page pattern
+
+**File to edit**: `frontend/NEW_PAGE_WORKFLOW.md`
+
+**Content**: Add a section documenting the **public page creation workflow** (distinct from the dashboard page workflow):
+- Public routes live outside `(dashboard)` and `(auth)` route groups
+- No `getServerUserContext()`, `requirePermissionForPage()`, or `<RequirePermission>` guards
+- No auth middleware — verify route is explicitly excluded from any future auth middleware (FR-V1.7)
+- Uses `getLocale()` for locale (same as dashboard) — also reads `?lang=` query param for public language toggle
+- Uses `getTranslations(locale)` for server-side i18n (same as dashboard)
+- Layout is minimal (no sidebar, no dashboard shell)
+- Apollo queries are used as usual for client-side data fetching
+- `generateMetadata` can call services directly for SEO meta tags
+- `export const revalidate = 3600` for ISR caching on public pages
+- `noindex, follow` robots directive for private/per-recipient pages
+
+#### 11.2 Record SEO metadata pattern
+
+**File to edit**: `frontend/IMPLEMENTATION_LEARNINGS.md`
+
+**Content**: Document the pattern for `generateMetadata` with server-side service fetches (NOT Apollo) for dynamic OG/Twitter card meta tags. Note:
+- `verifyForMetadata(code)` is a separate lightweight service entry point with its own rate limit ceiling (120 req/min)
+- The double-fetch tradeoff (server fetch in generateMetadata + client Apollo query) and why it's acceptable for public pages
+- `noindex, follow` robots directive — certificates are per-recipient, not for search indexing
+- Canonical URL strips `?lang=` query param to dedup SEO across language variants
+- OG image generation via Next.js `opengraph-image.tsx` route handler (1200×630)
+
+#### 11.3 Document rate-limit and security patterns
+
+**File to edit**: `frontend/IMPLEMENTATION_LEARNINGS.md`
+
+**Content**: Document:
+- How to parse GraphQL `RATE_LIMITED` errors from Apollo and display a countdown timer
+- The error extension shape (`extensions.code`, `extensions.retryAfter`) and the `setInterval` countdown + auto-retry approach
+- Service-level two-tier rate limiting (per-IP 30/5min + per-code 10/24h) — see INTER_PLAN_CONTRACTS §13
+- Rate-limited responses collapse to `not_found` shape (no enumeration oracle) — the client cannot distinguish rate-limited from genuine not-found
+- `revocationReason` is NOT exposed publicly (INTER_PLAN_CONTRACTS §6 — constant-shape response, PII protection)
+- Analytics source detection is server-side (Referer header) — no client-side tracking scripts
+
+#### 11.4 Add patterns to COMPONENT_PATTERNS.md
+
+**File to edit**: `frontend/COMPONENT_PATTERNS.md`
+
+**Content**: Add patterns for:
+- Public verification page layout (minimal, centered, no chrome)
+- Certificate preview card (visual representation, not PDF)
+- Share button row (Web Share API + social fallback)
+- Print-friendly CSS (`@media print` sx prop usage) with status-specific watermarks
+- Language toggle for public pages (`router.replace` with `?lang=` query param, no full reload)
+- Academy branding component (trust signals, no theme override)
+
+#### 11.5 Final quality gate
+
+**Action**: Run `bun quality-gate` to verify all files pass tsgo + biome + lint + codescene. Fix any issues reported.
+
+**AGENTS.md files to read for this task**:
+- `AGENTS.md` (root — quality gate workflow, lint queue server)
+
+---
+
+## Summary
+
+| Task | Description | Files Created | Files Edited | Est. Time |
+|------|-------------|----------------|--------------|-----------|
+| 1 | i18n verification namespace | 4 | 2 | 3-4h |
+| 2 | Verify route + public layout | 2 | 0 | 2-3h |
+| 3 | Verification container + GraphQL | 3 | 0 | 3-4h |
+| 4 | Result display + state components | 9 | 1 | 4-5h |
+| 5 | Loading + error states | 3 | 1 | 2-3h |
+| 6 | Share + print + watermarks | 4 | 1 | 3-4h |
+| 7 | SEO meta + OG image + JSON-LD + ISR | 2 | 2 | 3-4h |
+| 8 | Language toggle | 1 | 2 | 2h |
+| 9 | Analytics integration | 0 | 1 | 2-3h |
+| 10 | Manual code entry page | 1 | 1 | 2-3h |
+| 11 | Knowledge propagation | 0 | 4 | 1-2h |
+| **Total** | | **29 files** | **15 edits** | **~29h** |
+
+### Execution Parallelism
+
+Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 can have partial overlap (4 and 5 both edit VerificationView, so coordinate). Task 8 (language toggle) depends only on Tasks 1+2 and can run parallel with Tasks 4-7. Task 9 (analytics) depends on Task 3 and can run parallel with Tasks 4-8. Task 10 (manual entry) depends on Tasks 1+2+8 and can run parallel with Tasks 4-7. Final task 11 requires all prior tasks complete.
+
+---
+
+## Supplementary Tasks (Public Verification Page Components)
+
+The following tasks add the public-facing verification page components, REST API route, Zustand store, SEO meta, and tests. These are ADDITIVE — no existing files are removed. All new components live under `frontend/views/public/verify/`.
+
+### Task 12: PublicVerificationPage (3 States)
+
+**Estimated time**: 4-5 hours
+**Dependencies**: Task 1 (i18n), Task 2 (verify route)
+**Requirements**: FR-V1, FR-V2, FR-V3
+
+#### 12.1 Create PublicVerificationPage component
+
+**File to create**: `frontend/views/public/verify/PublicVerificationPage.tsx`
+
+**Content**:
+- Client component (`"use client"`)
+- Uses `useVerificationStore` (Task 19) for state: `result`, `status`, `shareDialogOpen`
+- Three render branches based on `status`:
+  - `loading`: `<CircularProgress />` + "Verifying certificate..." text — see design §A loading state
+  - `valid`: `<PublicCertificateCard showActions />` + verification details card + actions
+  - `invalid` (revoked): `<Alert severity="error">` with revocation reason + date + contact academy — see design §A invalid/revoked state
+  - `not_found`: `<Alert severity="info">` with not-found message + search field to re-enter certificate number — see design §A not-found state
+- Uses MUI `Container` with `maxWidth="sm"`, centered full-screen layout
+- Header: academy logo + name + status icon (CheckCircleOutlined / CancelOutlined / InfoOutlined)
+- Valid state renders `<ShareCertificateDialog>` (Task 15) when `shareDialogOpen` is true
+- All text from i18n: `useAppTranslation("certificates.verification.page")`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 12.2 Create app/[locale]/verify/[certificateNumber]/page.tsx
+
+**File to create**: `app/[locale]/verify/[certificateNumber]/page.tsx`
+
+**Content**:
+- Server component
+- Calls `getLocale()` for locale detection
+- Renders `<PublicVerificationPage certificateNumber={params.certificateNumber} locale={locale} />`
+- Exports `generateMetadata` (see Task 18 — SEO meta)
+- NO auth check — public route (FR-V1.7)
+- `export const revalidate = 300` — ISR at 5-minute cache for the page
+
+**Quality loop**: tsgo + biome + lint
+
+#### 12.3 Test loading state
+
+**File to create**: `test/ui/components/verify/PublicVerificationPage.test.tsx`
+- Renders with `status="loading"` — verifies CircularProgress and "Verifying certificate..." text appear
+- No certificate card shown in loading state
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — path aliases, i18n client)
+- `frontend/AGENTS.md` (MUI v9, client component patterns)
+- `frontend/views/AGENTS.md` (if exists — view patterns)
+
+---
+
+### Task 13: VerificationSearchPage (Landing Page)
+
+**Estimated time**: 3-4 hours
+**Dependencies**: Task 1 (i18n), Task 14 (QrScanner)
+
+#### 13.1 Create VerificationSearchPage component
+
+**File to create**: `frontend/views/public/verify/VerificationSearchPage.tsx`
+
+**Content**:
+- Client component (`"use client"`)
+- Hero section: academy logo + "Verify a Certificate" heading (via i18n)
+- Search form:
+  - `TextField` for certificate number (large, centered, placeholder from i18n)
+  - `LoadingButton` for "Verify" (size="large", fullWidth)
+- Recent verifications: reads `recentSearches` from `useVerificationStore` (persisted in localStorage), renders as `Chip` list, click to re-verify
+- "How verification works" `Accordion` with 3 steps (i18n translated)
+- QR code scanner button (opens `<QrScanner>` — Task 14)
+- On submit: calls `router.push('/${locale}/verify/${certificateNumber}')` + `addRecentSearch(certificateNumber)`
+- Uses `useVerificationStore` for `certificateNumber`, `scannerOpen`, `recentSearches`
+- React 19: form onSubmit uses `React.SyntheticEvent<HTMLFormElement>` (NOT FormEvent)
+- Accessible: `TextField` has `InputLabel` with `htmlFor` association, `aria-label`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 13.2 Create app/[locale]/verify/page.tsx
+
+**File to create**: `app/[locale]/verify/page.tsx`
+
+**Content**:
+- Server component
+- Calls `getLocale()` for locale detection
+- Renders `<VerificationSearchPage locale={locale} />`
+- Exports `generateMetadata` with generic "Verify a Certificate" title (no index — this is a search page)
+- NO auth check — public route
+
+**Quality loop**: tsgo + biome + lint
+
+#### 13.3 Test search form submit
+
+**File to create** (append to existing or new): `test/ui/components/verify/VerificationSearchPage.test.tsx`
+- Verifies typing a certificate number + submit calls `router.push`
+- Verifies recent searches chips render from store state
+- Verifies invalid/empty input does not navigate
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — React 19 form events, path aliases)
+- `frontend/AGENTS.md` (MUI v9, LoadingButton)
+- `frontend/stores/AGENTS.md` (Zustand store usage)
+
+---
+
+### Task 14: QrScanner Component
+
+**Estimated time**: 3-4 hours
+**Dependencies**: Task 1 (i18n)
+
+#### 14.1 Install html5-qrcode
+
+**Action**: `bun add html5-qrcode`
+
+**AGENTS.md note**: Install only after confirming the package is not already present in `package.json`.
+
+#### 14.2 Create QrScanner component
+
+**File to create**: `frontend/views/public/verify/QrScanner.tsx`
+
+**Content**:
+- Client component (`"use client"`)
+- Uses `html5-qrcode` (`Html5Qrcode`, `Html5QrcodeScannerState`)
+- Props: `open: boolean`, `onClose: () => void`, `onScan: (certificateNumber: string) => void`
+- MUI `Dialog` with `fullScreen` on mobile (via `useMediaQuery`)
+- **Camera mode** (default):
+  - Initializes `Html5Qrcode` with `facingMode: 'environment'` (back camera)
+  - Camera toggle button (front/back) — uses `Html5Qrcode.prototype.switchCamera` or re-init with new facingMode
+  - Scan area overlay with 4 L-shaped corner indicators (Box with borders)
+  - Torch toggle if available (`applyVideoConstraints({ advanced: [{ torch: true }] })`)
+- **Desktop / no-camera mode**:
+  - "Upload QR Image" button opens file picker (`<input type="file" accept="image/*">`)
+  - Drag-drop Box with `onDrop` handler — reads dropped image, calls `Html5Qrcode.scanFile(file, false)`
+- **On scan success**:
+  - Parses `result` as URL, extracts `certificateNumber` from pathname (last segment)
+  - Calls `onScan(certificateNumber)` → parent handles redirect
+  - Calls `html5Qrcode.stop()` + `clear()` (cleanup — prevents memory leak)
+- **Error handling**:
+  - Camera permission denied: `Alert severity="error"` + manual entry fallback link
+  - No camera: `Alert severity="error"` + file upload button (desktop fallback)
+  - Generic scan error: `Alert severity="error"` with message
+- **Manual entry fallback**: Link "Enter certificate number manually" → `onClose()` + focuses parent search input
+- **Cleanup**: `useEffect` cleanup function calls `html5Qrcode.stop()` + `.clear()` on unmount or dialog close
+- All error messages from i18n: `useAppTranslation("certificates.verification.scanner")`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 14.3 Test scanner dialog open/close
+
+**File to create**: `test/ui/components/verify/QrScanner.test.tsx`
+- Mocks `html5-qrcode` module
+- Verifies dialog opens when `open=true`
+- Verifies `onClose` called when dialog close button clicked
+- Verifies manual entry fallback link calls `onClose`
+- Verifies error alert renders when camera permission is denied (mock throws)
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — package installs, path aliases)
+- `frontend/AGENTS.md` (MUI Dialog, useMediaQuery)
+
+---
+
+### Task 15: PublicCertificateCard Component
+
+**Estimated time**: 2-3 hours
+**Dependencies**: Task 12 (PublicVerificationPage — uses the card)
+
+#### 15.1 Create PublicCertificateCard component
+
+**File to create**: `frontend/views/public/verify/PublicCertificateCard.tsx`
+
+**Content**:
+- Client component (`"use client"`)
+- Props: `certificate: PublicCertificate`, `showActions: boolean`
+- MUI `Card` with `sx={{ maxWidth: 600, mx: 'auto' }}`
+- `CardHeader` with template name (title), category badge (subheader as Chip), academy logo (avatar as Avatar)
+- `CardMedia` component="img" for preview image (from `certificate.previewUrl`)
+- `CardContent`:
+  - Recipient name (Typography variant="h5", sx={{ fontWeight: 600 }})
+  - Certificate number (Typography, mono font, color=primary via sx with theme)
+  - Grid (3 columns): Issue Date | Expiry Date | Template — each with caption label + body2 value
+  - Status badge (Chip): valid=success/CheckCircleOutlined, revoked=error/CancelOutlined, expired=warning/WarningAmberOutlined
+- `CardActions` (if `showActions`):
+  - Download PDF button (conditional on `certificate.downloadEnabled`)
+  - Print button (window.print())
+  - Share button (opens ShareCertificateDialog via store action `openShareDialog`)
+- Responsive: stacks vertically on mobile (<600px) via `useMediaQuery`
+- All text from i18n: `useAppTranslation("certificates.verification.card")`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 15.2 Test card rendering
+
+**File to create**: `test/ui/components/verify/PublicCertificateCard.test.tsx`
+- Renders with valid certificate — verifies recipient name, template name, certificate number appear
+- Renders with showActions=true — verifies download/print/share buttons appear
+- Renders with showActions=false — verifies no action buttons
+- Renders with expired status — verifies warning badge
+- Responsive: does not crash on mobile viewport
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — MUI v9 sx prop, no style props)
+- `frontend/AGENTS.md` (MUI Card patterns, theme palette access)
+
+---
+
+### Task 16: ShareCertificateDialog Component
+
+**Estimated time**: 3 hours
+**Dependencies**: Task 15 (PublicCertificateCard — opens the dialog)
+
+#### 16.1 Create ShareCertificateDialog component
+
+**File to create**: `frontend/views/public/verify/ShareCertificateDialog.tsx`
+
+**Content**:
+- Client component (`"use client"`)
+- Props: `open: boolean`, `certificate: PublicCertificate | null`, `onClose: () => void`
+- MUI `Dialog` with `DialogTitle`, `DialogContent`, `DialogActions`
+- Verification URL TextField (readonly, with copy IconButton at end adornment) — calls `navigator.clipboard.writeText`
+- Social share buttons (Stack, direction="row"):
+  - WhatsApp: `href={`https://wa.me/?text=${encodeURIComponent('Verify certificate ' + certNumber + ' at ' + url)}`}`
+  - Telegram: `href={`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Verify certificate ' + certNumber)}`}`
+  - Email: `href={`mailto:?subject=${encodeURIComponent('Certificate Verification')}&body=${encodeURIComponent('Verify at ' + url)}`}`
+  - Copy Link: copies url to clipboard + Snackbar confirmation
+- QR code: `qrcode.react` `QRCodeSVG` with `value={verificationUrl}`, `size={200}`
+- "Download QR" button: renders QRCodeSVG to canvas, triggers PNG download
+- Web Share API: if `navigator.share` exists, renders primary Share button that calls `navigator.share({ title, text, url })` — else falls back to social buttons
+- "Scan this QR code to verify the certificate" caption text below QR
+- Uses `useAppTranslation("certificates.verification.share")` for all labels
+
+**Install**: `bun add qrcode.react` (if not already in package.json)
+
+**Quality loop**: tsgo + biome + lint
+
+#### 16.2 Test share dialog
+
+**File to create**: `test/ui/components/verify/ShareCertificateDialog.test.tsx`
+- Renders when open=true — verifies verification URL TextField, social buttons, QR code appear
+- Verifies copy button calls navigator.clipboard.writeText (mocked)
+- Verifies WhatsApp link href contains wa.me and the certificate number
+- Verifies Telegram link href contains t.me/share/url
+- Verifies Email link href starts with mailto:
+- Verifies dialog closes when onClose called
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — path aliases)
+- `frontend/AGENTS.md` (MUI Dialog, TextField, IconButton patterns)
+
+---
+
+### Task 17: Verification API Route Handler
+
+**Estimated time**: 4 hours
+**Dependencies**: Plan 5 (verifyCertificateService — cross-plan), Task 19 (rate limiter for store)
+
+#### 17.1 Create rate limiting middleware
+
+**File to create**: `backend/lib/rate-limiter.ts`
+
+**Content**:
+- In-memory rate limiter (Map of key → { count, resetTime }) OR Upstash Redis if env `UPSTASH_RESTORE_REDIS_REST_URL` is set
+- Export `rateLimiter.check(key: string, limit: number, windowSeconds: number)` → `{ allowed: boolean, retryAfter: number }`
+- Key format: `verify:${ip}` for IP-based rate limiting
+- Sliding window algorithm (or fixed window with TTL)
+- Thread-safe for Bun single-threaded runtime (no race conditions expected)
+
+**Quality loop**: tsgo + biome + lint
+
+#### 17.2 Create route handler
+
+**File to create**: `app/api/certificates/verify/[certificateNumber]/route.ts`
+
+**Content**:
+- `export async function GET(request, { params })` — see design §F for full implementation
+- Imports `verifyCertificateService` from `@/backend/services/certificates/verification-service` (Plan 5 — cross-plan dependency)
+- Imports `rateLimiter` from `@/backend/lib/rate-limiter`
+- Rate limit: 30 req/min per IP → returns 429 with `Retry-After` header
+- Calls `verifyCertificateService(certificateNumber)`:
+  - `not_found` → 404 with `{ valid: false, status: "not_found" }`
+  - `revoked` → 200 with `{ valid: false, status: "revoked", revocationReason, revokedAt }`
+  - `issued` (valid) → 200 with `{ valid: true, status: "issued", certificate, verificationId, verifiedAt }`
+- `Cache-Control: public, max-age=300` for valid, `max-age=60` for not-found/revoked
+- Error handler: try/catch, logs via `logger.error`, returns 500 with generic error message
+- Uses `logger` from `@/backend/lib/logger` (NEVER console.*)
+- No auth check — public endpoint
+
+**Quality loop**: tsgo + biome + lint
+
+#### 17.3 Test route handler
+
+**File to create** (append to existing test or new): `test/api/certificates/verify/route.test.ts`
+- Mocks `verifyCertificateService`
+- Verifies valid certificate returns 200 with correct JSON shape + Cache-Control header
+- Verifies not-found returns 404 with `{ valid: false, status: "not_found" }`
+- Verifies revoked returns 200 with revocation details
+- Verifies rate limit returns 429 after 30 requests (mock IP)
+- Verifies rate-limited response does NOT call verifyCertificateService (short-circuits)
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — backend logging, rate limiting, no console.*)
+- `app/AGENTS.md` (route handlers — if exists)
+- `backend/AGENTS.md` (if exists)
+
+---
+
+### Task 18: SEO/Social Meta Tags (Server Component)
+
+**Estimated time**: 3-4 hours
+**Dependencies**: Plan 5 (verifyForMetadata — cross-plan), Task 12 (page route)
+
+#### 18.1 Add generateMetadata to app/[locale]/verify/[certificateNumber]/page.tsx
+
+**File to edit**: `app/[locale]/verify/[certificateNumber]/page.tsx` (created in Task 12.2)
+
+**Content**:
+- `export async function generateMetadata({ params })` — see design §H for full implementation
+- Calls `verifyForMetadata(certificateNumber)` (lightweight, cached — Plan 5 cross-plan dependency)
+- For valid certificates:
+  - title: `"Certificate Verification - [academyName]"`
+  - description: `"Verify certificate #[number] issued by [academyName]"`
+  - openGraph: image (1200×630 from `getOgImageForCertificate(code)` or static fallback), title, description
+  - twitter: `summary_large_image` card
+  - canonical: `/${locale}/verify/${certificateNumber}` (strips `?lang=`)
+  - robots: `{ index: false, follow: true }` (noindex, follow)
+- For non-valid: generic title/description, static OG fallback, same canonical/robots
+- Imports: `import type { Metadata } from 'next'`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 18.2 Add JSON-LD structured data to page
+
+**File to edit**: `app/[locale]/verify/[certificateNumber]/page.tsx`
+
+**Content**:
+- In the page component body (Server Component), builds JSON-LD object for valid certificates only:
+```typescript
+const jsonLd = result.valid ? {
+  "@context": "https://schema.org",
+  "@type": "EducationalOccupationalCertificate",
+  "name": `Certificate #${certificateNumber}`,
+  "description": `Certificate issued by ${result.certificate.academyName}`,
+  "datePublished": result.certificate.issueDate,
+  "creator": { "@type": "EducationalOrganization", "name": result.certificate.academyName }
+} : null;
+```
+- Renders via `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />` (only when `jsonLd` is not null)
+- Omitted for revoked/not-found (no certificate metadata leaked to search engines)
+
+**Quality loop**: tsgo + biome + lint
+
+#### 18.3 Update robots.txt
+
+**File to edit**: `app/robots.ts` (or `public/robots.txt` — whichever exists)
+
+**Content** (additive):
+- `Allow: /verify` (landing/search page indexable)
+- `Disallow: /api/certificates/verify` (API endpoint not indexed)
+- Individual `/verify/[certificateNumber]` pages already `noindex` via generateMetadata robots tag
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — i18n server translations, metadata)
+- `app/AGENTS.md` (server components, generateMetadata, robots.txt conventions)
+
+---
+
+### Task 19: useVerificationStore (Zustand Store)
+
+**Estimated time**: 3 hours
+**Dependencies**: Task 17 (API route — store fetches from it)
+
+#### 19.1 Create useVerificationStore
+
+**File to create**: `frontend/stores/verificationStore.ts`
+
+**Content**:
+- Zustand store with `persist` middleware (localStorage) — see design §G for full implementation
+- State: `certificateNumber`, `result`, `status`, `error`, `shareDialogOpen`, `scannerOpen`, `recentSearches`
+- Actions: `setCertificateNumber`, `verify` (async — fetches from `/api/certificates/verify/[code]`), `reset`, `openShareDialog`, `closeShareDialog`, `openScanner`, `closeScanner`, `handleScanResult`, `addRecentSearch`
+- `verify` action:
+  - Sets `status="loading"`
+  - Fetches `GET /api/certificates/verify/${certificateNumber}`
+  - Maps response: 404 → status="not_found", valid → "valid", revoked → "invalid", else → "error"
+  - Sets `result` and `error` appropriately
+- `persist` partialize: only persists `recentSearches` (not transient UI/API state)
+- `addRecentSearch`: prepends certificate number, dedupes, caps at 5
+- Uses `create` from `zustand` + `persist` from `zustand/middleware`
+- Store name: `siraj-verification-store`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 19.2 Test store
+
+**File to create**: `test/ui/stores/verificationStore.test.ts`
+- Tests `verify` action with mocked fetch:
+  - Valid response → status="valid", result.certificate populated
+  - 404 → status="not_found"
+  - Revoked → status="invalid", result.revocationReason populated
+  - Network error → status="error", error.message populated
+- Tests `addRecentSearch`: adds to front, dedupes, caps at 5
+- Tests `openShareDialog`/`closeShareDialog` toggle `shareDialogOpen`
+- Tests `reset` clears all state
+- Tests `openScanner`/`closeScanner` toggle `scannerOpen`
+- Tests `handleScanResult` sets certificateNumber + closes scanner
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — Zustand stores, path aliases)
+- `frontend/stores/AGENTS.md` (store patterns, persist middleware conventions)
+
+---
+
+### Task 20: Component Tests (5 Test Files)
+
+**Estimated time**: 4-5 hours
+**Dependencies**: Tasks 12-16 (components to test), Task 19 (store)
+
+This task creates 5 component test files for the public verification components. All tests use Happy DOM + mocked Apollo/fetch (no real server). Follows the pattern in existing `test/ui/components/verify/` tests.
+
+#### 20.1 PublicVerificationPage.test.tsx
+
+**File to create**: `test/ui/components/verify/PublicVerificationPage.test.tsx`
+
+**Tests**:
+- Loading state: renders CircularProgress + "Verifying certificate..." text
+- Valid state: renders PublicCertificateCard + verification details + action buttons
+- Revoked state: renders Alert severity=error + revocation reason + date + "Contact the academy" + no download/print
+- Not found state: renders Alert severity=info + "does not exist" + search field
+- Error state: renders error message + retry button
+- Mocks: `useVerificationStore` (via `zustand/testing` or by overriding the store)
+
+**Quality loop**: tsgo + biome + lint
+
+#### 20.2 VerificationSearchPage.test.tsx
+
+**File to create**: `test/ui/components/verify/VerificationSearchPage.test.tsx`
+
+**Tests**:
+- Renders hero + search form + accordion
+- Typing certificate number + submit calls `router.push` with correct path
+- Empty input does not navigate (validation)
+- Recent searches chips render from store state
+- Clicking a recent search chip re-verifies (calls router.push)
+- QR scanner button opens QrScanner dialog
+- Accordion expand/collapse works
+
+**Quality loop**: tsgo + biome + lint
+
+#### 20.3 QrScanner.test.tsx
+
+**File to create**: `test/ui/components/verify/QrScanner.test.tsx`
+
+**Tests**:
+- Dialog opens when `open=true`
+- Dialog closes when close button or backdrop clicked (calls `onClose`)
+- Camera permission denied: renders error Alert + manual entry link
+- No camera: renders file upload fallback button
+- Manual entry link calls `onClose`
+- Mocks `html5-qrcode` module with `vi.mock('html5-qrcode')`
+
+**Quality loop**: tsgo + biome + lint
+
+#### 20.4 PublicCertificateCard.test.tsx
+
+**File to create**: `test/ui/components/verify/PublicCertificateCard.test.tsx`
+
+**Tests**:
+- Renders recipient name, certificate number (mono font), template name, issue/expiry dates
+- Valid status: renders success Chip
+- Revoked status: renders error Chip
+- Expired status: renders warning Chip
+- showActions=true: renders download (if downloadEnabled), print, share buttons
+- showActions=false: no action buttons
+- Academy logo Avatar renders with correct src
+- Expiry date null: renders "N/A"
+
+**Quality loop**: tsgo + biome + lint
+
+#### 20.5 ShareCertificateDialog.test.tsx
+
+**File to create**: `test/ui/components/verify/ShareCertificateDialog.test.tsx`
+
+**Tests**:
+- open=true renders dialog with URL TextField, social buttons, QR code
+- open=false renders nothing
+- Copy button calls `navigator.clipboard.writeText` (mocked)
+- WhatsApp href contains `wa.me` + encoded certificate number
+- Telegram href contains `t.me/share/url`
+- Email href starts with `mailto:`
+- onClose called when dialog closed
+- QR code QRCodeSVG renders with correct URL value
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — test runner, run-test script)
+- `test/ui/AGENTS.md` (component test patterns, Happy DOM, mocking)
+- `frontend/AGENTS.md` (component patterns)
+
+---
+
+### Task 21: E2E Tests (5 Tests)
+
+**Estimated time**: 5-6 hours
+**Dependencies**: Tasks 12-19 (all components + store + API), `bun run build:test` (production server)
+
+#### 21.1 Build production server
+
+**Action**: `bun run build:test` (required before E2E — see AGENTS.md)
+
+#### 21.2 E2E: Verify valid certificate
+
+**File to create**: `test/ui/e2e/verify/verify-valid.spec.ts`
+
+**Test**:
+- Navigate to `/${locale}/verify/${validCertNumber}` (use a seeded test certificate)
+- Verifies loading spinner appears briefly
+- Verifies "Certificate Verified" + CheckCircleOutlined icon (green)
+- Verifies recipient name, certificate number, template name, issue date appear
+- Verifies download/print/share buttons visible
+- Verifies verification details card with timestamp + verification ID
+- Verifies QR code renders (img with src containing QR)
+
+**Quality loop**: tsgo + biome + lint
+
+#### 21.3 E2E: Verify revoked certificate
+
+**File to create**: `test/ui/e2e/verify/verify-revoked.spec.ts`
+
+**Test**:
+- Navigate to `/${locale}/verify/${revokedCertNumber}`
+- Verifies Alert severity=error with "revoked" text
+- Verifies revocation reason + date appear
+- Verifies "Contact the academy" text
+- Verifies NO download/print buttons
+- Verifies red theme (error color)
+
+**Quality loop**: tsgo + biome + lint
+
+#### 21.4 E2E: Verify not found certificate
+
+**File to create**: `test/ui/e2e/verify/verify-not-found.spec.ts`
+
+**Test**:
+- Navigate to `/${locale}/verify/INVALID-CODE-12345`
+- Verifies Alert severity=info with "not found" text
+- Verifies "does not exist in our system" text with the entered code
+- Verifies search field appears to re-enter certificate number
+- Verifies typing a new code + submit navigates to the new verify page
+
+**Quality loop**: tsgo + biome + lint
+
+#### 21.5 E2E: QR scan flow
+
+**File to create**: `test/ui/e2e/verify/qr-scan.spec.ts`
+
+**Test**:
+- Navigate to `/${locale}/verify` (search page)
+- Click QR scanner button
+- Verifies scanner dialog opens
+- Mocks camera scan result (or file upload with test QR image) — on scan, extracts certificate number
+- Verifies redirect to `/${locale}/verify/${scannedCertNumber}`
+- Verifies valid certificate page renders (for a valid scanned cert)
+- Desktop fallback: upload a QR image file, verifies decode + redirect
+
+**Quality loop**: tsgo + biome + lint
+
+#### 21.6 E2E: Share dialog flow
+
+**File to create**: `test/ui/e2e/verify/share-dialog.spec.ts`
+
+**Test**:
+- Navigate to a valid certificate verify page
+- Click Share button
+- Verifies ShareCertificateDialog opens
+- Verifies verification URL TextField contains the correct URL
+- Click copy button → verifies clipboard write (or at least button click does not crash)
+- Verifies WhatsApp link has correct href with `wa.me`
+- Verifies Telegram link has correct href with `t.me`
+- Verifies QR code image renders
+- Close dialog → verifies it disappears
+
+**Quality loop**: tsgo + biome + lint
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — E2E test commands, build:test prerequisite)
+- `test/ui/AGENTS.md` (E2E patterns, Playwright, production server)
+
+---
+
+### Task 22: Quality Loop Per File
+
+**Estimated time**: 2-3 hours
+**Dependencies**: All tasks 12-21 complete
+
+#### 22.1 Run quality gate
+
+**Action**: Run `bun quality-gate` for all files created in Tasks 12-21.
+
+**Files to verify** (all new files):
+- `frontend/views/public/verify/PublicVerificationPage.tsx`
+- `frontend/views/public/verify/VerificationSearchPage.tsx`
+- `frontend/views/public/verify/QrScanner.tsx`
+- `frontend/views/public/verify/PublicCertificateCard.tsx`
+- `frontend/views/public/verify/ShareCertificateDialog.tsx`
+- `frontend/stores/verificationStore.ts`
+- `backend/lib/rate-limiter.ts`
+- `app/api/certificates/verify/[certificateNumber]/route.ts`
+- `app/[locale]/verify/[certificateNumber]/page.tsx`
+- `app/[locale]/verify/page.tsx`
+- All test files (Tasks 20-21)
+
+**Per-file verification loop** (before running full quality-gate):
+1. For each new file, run `bun tsgo` (type check)
+2. Run `bun biome:check` on the file
+3. Run lint via queue client:
+   ```bash
+   LINT_QUEUE_PORT=$(grep -oP 'LINT_QUEUE_PORT = \K\d+' scripts/lint-queue-config.ts)
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+     -H "Content-Type: application/json" \
+     -d '{"id":"verify-task22","files":["frontend/views/public/verify/PublicVerificationPage.tsx"]}'
+   ```
+4. Fix any issues (tsgo errors first, then biome, then lint)
+5. Re-run until file passes all three checks
+
+#### 22.2 Run final quality gate
+
+**Action**: `bun quality-gate:fresh` (clean-slate verification across all new files + existing repo)
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — quality gate workflow, lint queue server, verification loop)
+
+---
+
+### Task 23: Knowledge Propagation
+
+**Estimated time**: 1-2 hours
+**Dependencies**: All tasks 12-22 complete
+
+#### 23.1 Update NEW_PAGE_WORKFLOW.md with public REST endpoint pattern
+
+**File to edit**: `frontend/NEW_PAGE_WORKFLOW.md`
+
+**Content** (additive — do not remove existing content): Add a section "Public Page with REST API Route" documenting:
+- Public pages can use a REST route handler (`app/api/.../route.ts`) alongside or instead of GraphQL for public endpoints
+- REST endpoints are easier to cache (Cache-Control headers), rate-limit (IP-based), and SSR than GraphQL queries for public-facing pages
+- The `Cache-Control` header strategy: `public, max-age=300` for valid, `max-age=60` for not-found/revoked
+- Rate limiting at the route handler level (30 req/min per IP) — separate from GraphQL service-level rate limiting
+- No `[locale]` URL segment for the API route (locale is a client/page concern, not API)
+
+#### 23.2 Record QR scanner pattern
+
+**File to edit**: `frontend/IMPLEMENTATION_LEARNINGS.md`
+
+**Content**: Document:
+- `html5-qrcode` library usage for camera + file-based QR scanning
+- Cleanup pattern: `html5Qrcode.stop()` + `.clear()` in useEffect cleanup (prevents memory leak + camera stays on)
+- Camera permission denial handling (Alert + manual entry fallback)
+- Desktop fallback: `scanFile()` from uploaded/dropped image
+- URL parsing: extract `certificateNumber` from scanned URL via `new URL(result).pathname.split('/').pop()`
+
+#### 23.3 Document Zustand persist pattern for public stores
+
+**File to edit**: `frontend/stores/AGENTS.md` or relevant AGENTS.md
+
+**Content**: Document:
+- Public page stores use `zustand/middleware` `persist` with `localStorage`
+- `partialize` persists only `recentSearches` (non-sensitive data) — NOT transient API results or status
+- Store name prefix: `siraj-` to avoid collision with other apps on the same domain
+- The store is created once at module load — all public verify components share the same instance
+
+#### 23.4 Document SEO + JSON-LD pattern for public certificate pages
+
+**File to edit**: `frontend/IMPLEMENTATION_LEARNINGS.md`
+
+**Content**: Document:
+- `generateMetadata` with `verifyForMetadata` (lightweight, cached service call) for dynamic OG/Twitter
+- `noindex, follow` for per-certificate pages (not search destinations, prevents SERP pollution)
+- Canonical URL strips `?lang=` to dedup across language variants
+- JSON-LD `EducationalOccupationalCertificate` schema for valid certificates only (omitted for revoked/not-found to avoid leaking non-valid metadata)
+- OG image: 1200×630 certificate render for valid, static fallback for others
+- `robots.txt`: Allow `/verify`, Disallow `/api/certificates/verify`
+
+#### 23.5 Document rate limiter pattern
+
+**File to edit**: `frontend/IMPLEMENTATION_LEARNINGS.md`
+
+**Content**: Document:
+- In-memory rate limiter for single-instance deployments (Map-based, sliding window)
+- Upstash Redis rate limiter for multi-instance / serverless (env `UPSTASH_REDIS_REST_URL`)
+- Key format: `verify:${ip}` using `x-forwarded-for` header
+- Rate-limited requests short-circuit BEFORE the service call (no DB lookup → no log flooding)
+- Response: HTTP 429 with `Retry-After` header (seconds until retry)
+- 30 req/min for public verify endpoint (vs 120 req/min for metadata path — separate ceilings)
+
+#### 23.6 Final quality gate
+
+**Action**: Run `bun quality-gate` one final time to verify all doc + code changes pass tsgo + biome + lint.
+
+**AGENTS.md files to read**:
+- `AGENTS.md` (root — quality gate workflow, no markdown summary files)
+
+---
+
+## Summary (Updated with Supplementary Tasks)
+
+| Task | Description | Files Created | Files Edited | Est. Time |
+|------|-------------|----------------|--------------|-----------|
+| 1 | i18n verification namespace | 4 | 2 | 3-4h |
+| 2 | Verify route + public layout | 2 | 0 | 2-3h |
+| 3 | Verification container + GraphQL | 3 | 0 | 3-4h |
+| 4 | Result display + state components | 9 | 1 | 4-5h |
+| 5 | Loading + error states | 3 | 1 | 2-3h |
+| 6 | Share + print + watermarks | 4 | 1 | 3-4h |
+| 7 | SEO meta + OG image + JSON-LD + ISR | 2 | 2 | 3-4h |
+| 8 | Language toggle | 1 | 2 | 2h |
+| 9 | Analytics integration | 0 | 1 | 2-3h |
+| 10 | Manual code entry page | 1 | 1 | 2-3h |
+| 11 | Knowledge propagation | 0 | 4 | 1-2h |
+| 12 | PublicVerificationPage (3 states) | 3 | 0 | 4-5h |
+| 13 | VerificationSearchPage (landing) | 3 | 0 | 3-4h |
+| 14 | QrScanner (camera + file) | 3 | 0 | 3-4h |
+| 15 | PublicCertificateCard | 2 | 0 | 2-3h |
+| 16 | ShareCertificateDialog | 2 | 0 | 3h |
+| 17 | Verification API route handler | 3 | 0 | 4h |
+| 18 | SEO/Social meta tags | 0 | 2 | 3-4h |
+| 19 | useVerificationStore (Zustand) | 2 | 0 | 3h |
+| 20 | Component tests (5 files) | 5 | 0 | 4-5h |
+| 21 | E2E tests (5 tests) | 5 | 0 | 5-6h |
+| 22 | Quality loop per file | 0 | 0 | 2-3h |
+| 23 | Knowledge propagation (supplementary) | 0 | 4 | 1-2h |
+| **Total** | | **~58 files** | **~21 edits** | **~80h** |
+
+### Execution Parallelism (Updated with Supplementary Tasks)
+
+Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 can have partial overlap. Task 8 depends on Tasks 1+2. Task 9 depends on Task 3. Task 10 depends on Tasks 1+2+8. Task 11 (knowledge propagation) requires all tasks 1-10 complete.
+
+**Supplementary tasks (12-23)**:
+- Task 12 (PublicVerificationPage) depends on Tasks 1+2 (i18n, route).
+- Task 13 (VerificationSearchPage) depends on Tasks 1+14 (QrScanner).
+- Task 14 (QrScanner) depends on Task 1 (i18n) — can run parallel with Tasks 4-10.
+- Task 15 (PublicCertificateCard) depends on Task 12.
+- Task 16 (ShareCertificateDialog) depends on Task 15.
+- Task 17 (API route handler) depends on Plan 5 (cross-plan) + Task 19 (rate limiter).
+- Task 18 (SEO meta) depends on Task 12 (page route) + Plan 5 (verifyForMetadata).
+- Task 19 (Zustand store) depends on Task 17 (API route — store fetches from it).
+- Task 20 (component tests) depends on Tasks 12-16 + Task 19 — all components + store must exist.
+- Task 21 (E2E tests) depends on Tasks 12-19 + `bun run build:test` — all components + API + store must work.
+- Task 22 (quality loop) depends on all Tasks 12-21 complete.
+- Task 23 (knowledge propagation) depends on all Tasks 12-22 complete.
+
+**Parallelism groups**:
+- Group A (i18n + route): Tasks 1-2 (sequential) → enables 12, 13, 18
+- Group B (QR scanner): Task 14 (independent after 1) → enables 13
+- Group C (API + store): Tasks 17, 19 (sequential — store fetches from API) → enables 12, 20
+- Group D (components): Tasks 12, 15, 16 (sequential — page → card → dialog) → enables 20
+- Group E (tests): Tasks 20, 21 (after all components + store)
+- Group F (quality + propagation): Tasks 22, 23 (last)
+
+## Round 4 Enhancement Tasks
+
+### R4-T1: CAPTCHA Integration
+- [ ] Create `app/[locale]/verify/components/CaptchaWidget.tsx`
+  - reCAPTCHA v3: invisible captcha with score-based threshold (0.5)
+  - Fallback hCaptcha for privacy-conscious deployments
+  - Captcha token: sent with verification request to backend
+  - Backend validation: `POST /api/verify` validates captcha token server-side
+  - Failure handling: show captcha challenge modal on low score
+  - Rate limit with captcha: after 3 failed attempts, require explicit captcha
+  - **Quality loop**: tsgo + biome + lint queue client
+
+### R4-T2: Rate Limiting & Abuse Prevention
+- [ ] Update `backend/services/certificate-verification-service.ts`
+  - IP-based rate limit: 30 verifications per IP per hour
+  - Global rate limit: 1000 verifications per hour total
+  - 429 response with Retry-After header
+  - Client-side: exponential backoff on 429 (1s, 2s, 4s, 8s)
+  - Ban system: 5 rate limit violations → 24h ban with locked page
+  - Rate limit display: "Too many attempts. Try again in X minutes"
+  - Admin dashboard: show rate limit statistics and ban list
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T3: Share & Embed Widget
+- [ ] Create `frontend/views/dashboard/certificates/verification/ShareWidget.tsx`
+  - Shareable URL: `https://domain.com/verify/CERT-XXXX-XXXX` with copy button
+  - QR code generation: client-side with `qrcode` npm package
+  - QR code download: save as PNG with academy logo
+  - Embed code: iframe HTML `<iframe src="..." width="600" height="400">` with copy
+  - Social media share buttons: Twitter, Facebook, LinkedIn, WhatsApp
+  - Email share: `mailto:` link with pre-filled subject and body
+  - Custom share text: editable message template with certificate link
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T4: SEO & Social Media Meta Tags
+- [ ] Update `app/[locale]/verify/[certificateId]/page.tsx`
+  - Dynamic title: "Certificate Verification - {Recipient Name} - {Academy Name}"
+  - Open Graph tags: `og:title`, `og:description`, `og:image` (certificate thumbnail)
+  - Twitter Card: `twitter:card="summary_large_image"` with certificate preview
+  - Canonical URL: `<link rel="canonical" href="...">`
+  - Schema.org structured data: `EducationalOccupationalCredential` JSON-LD
+  - Meta description: "Verify the authenticity of {Recipient Name}'s certificate from {Academy Name}"
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T5: CDN Caching Strategy
+- [ ] Update `backend/services/certificate-verification-service.ts`
+  - Cache headers: `Cache-Control: public, max-age=300` (5 min) for verified certs
+  - Cache invalidation: on certificate revoke/modify
+  - Edge cache: Vercel KV or Cloudflare Cache for verified certificate data
+  - Stale-while-revalidate: `Cache-Control: stale-while-revalidate=3600`
+  - Cache key: `verify:${certificateId}` with locale suffix
+  - Cache metrics: hit rate, miss rate logged via `logger.debug`
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T6: Accessibility
+- [ ] Update `app/[locale]/verify/[certificateId]/page.tsx`
+  - Verification form: `aria-label="Certificate verification form"`
+  - Certificate ID input: `aria-label="Certificate ID"`, `aria-describedby="help-text"`
+  - Result status: `role="status"`, `aria-live="polite"` for verification result
+  - Error messages: `role="alert"`, `aria-live="assertive"`
+  - Certificate details: semantic `<dl>` (definition list) for key-value pairs
+  - Keyboard navigation: Tab through form + details, Enter to submit
+  - Screen reader: announce "Verification successful" or "Verification failed"
+  - Color contrast: WCAG 2.1 AA compliance (4.5:1 for text, 3:1 for large text)
+  - Focus management: trap focus in share dialog, restore on close
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T7: Multi-Language Verification
+- [ ] Update `app/[locale]/verify/[certificateId]/page.tsx`
+  - Locale-aware rendering: `verify/en/[id]` and `verify/ar/[id]`
+  - RTL support: full RTL layout for Arabic (`dir="rtl"`)
+  - Certificate details labels: translated via `getTranslations(locale, 'certificate')`
+  - Verification status messages: "Valid" / "صالح", "Revoked" / "مبطول"
+  - Date formatting: locale-aware date display (`Intl.DateTimeFormat`)
+  - Number formatting: locale-aware numbers (`Intl.NumberFormat`)
+  - Fallback locale: if certificate data not in requested locale, fall back to EN
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T8: Dark Mode Support
+- [ ] Update `app/[locale]/verify/[certificateId]/page.tsx`
+  - Theme detection: `prefers-color-scheme` media query + user toggle
+  - Dark mode palette: background `#121212`, surface `#1e1e1e`, primary `#90caf9`
+  - Light mode palette: standard MUI v9 light theme
+  - Theme toggle: IconButton (sun/moon icon) in header
+  - Theme persistence: localStorage key `verify-theme`
+  - Certificate preview: dark background with light certificate card
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T9: Error & Not Found States
+- [ ] Create `app/[locale]/verify/components/VerificationError.tsx`
+  - Invalid ID format: "Certificate ID format is invalid. Please check and try again."
+  - Not found: "Certificate not found. It may have been deleted or the ID is incorrect."
+  - Revoked: red banner "This certificate has been REVOKED" + revocation date + reason
+  - Expired: amber banner "This certificate has EXPIRED" + expiry date
+  - Server error: "Verification service is temporarily unavailable. Please try again later."
+  - Network error: "Unable to connect. Check your internet connection." + retry button
+  - Each state: dedicated illustration, helpful message, actionable CTA
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T10: Verification Analytics
+- [ ] Create `backend/services/verification-analytics-service.ts`
+  - Per-certificate verification count: total verifications, unique IPs
+  - Geographic data: country/city from IP (GeoIP lookup)
+  - Device breakdown: mobile vs desktop vs tablet
+  - Timestamp tracking: first verification, last verification, verification frequency
+  - API endpoint: `GET /api/certificates/:id/verification-stats` (admin only)
+  - Analytics dashboard: charts in certificate detail page (line chart of verifications over time)
+  - Privacy: IP addresses stored for 30 days then deleted, no PII
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T11: API Security Hardening
+- [ ] Update `backend/graphql/pothos/certificate-verification.ts`
+  - Input validation: certificate ID must match `^[A-Z]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$`
+  - Sanitization: strip all HTML/script tags from input
+  - Response limiting: no sensitive data (email, phone) in public verification response
+  - CORS: restrict to academy domains in production, permissive in dev
+  - CSP headers: `Content-Security-Policy: default-src 'self'`
+  - XSS prevention: all output escaped, no `dangerouslySetInnerHTML`
+  - **Quality loop**: tsgo + biome + lint
+
+### R4-T12: Component Tests
+- [ ] Create `test/ui/components/verification/CaptchaWidget.test.tsx`
+  - Test reCAPTCHA rendering
+  - Test token generation
+  - Test failure fallback
+- [ ] Create `test/ui/components/verification/ShareWidget.test.tsx`
+  - Test URL copy
+  - Test QR code generation
+  - Test embed code copy
+  - Test social media share links
+- [ ] Create `test/ui/components/verification/VerificationError.test.tsx`
+  - Test invalid ID format
+  - Test not found state
+  - Test revoked state
+  - Test expired state
+  - Test server error
+- [ ] Create `test/ui/components/verification/VerificationPage.test.tsx`
+  - Test successful verification
+  - Test multi-language rendering
+  - Test dark mode toggle
+  - Test keyboard navigation
+
+### R4-T13: E2E Tests
+- [ ] Create `test/ui/e2e/verification-flow.spec.ts`
+  - Test full verification flow: enter ID → see valid certificate
+  - Test revoked certificate flow: enter ID → see revoked banner
+  - Test expired certificate flow: enter ID → see expired banner
+  - Test invalid ID flow: enter ID → see not found
+  - Test share widget: click share → copy URL → verify URL works
+  - Test multi-language: switch to Arabic → verify RTL rendering
+  - Test dark mode: toggle theme → verify dark palette
+
+### R4-T14: Knowledge Propagation
+- [ ] Create `docs/frontend/public-verification-page-patterns.md`
+  - Update `frontend/AGENTS.md` with reference
+  - Update `app/AGENTS.md` with verification page patterns
+  - Run quality checks

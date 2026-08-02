@@ -1,0 +1,383 @@
+# Requirements — Plan 07: Storage & File Management
+
+> **Plan**: 07 — Storage & File Management
+> **Depends On**: Plan 4 (Services & Business Logic)
+> **Stakeholders**: Certificate admin, system admin, certificate recipient (student)
+> **Related Docs**: MASTER_ARCHITECTURE.md; cgvs_analysis/05-storage-system.md §6, §7, §8, §9, §14; siraj_analysis/07-storage-file-system.md §2-§9, §15; siraj_analysis/03-repository-patterns.md §9
+
+---
+
+## 1. Introduction
+
+### Overview
+
+The Storage & File Management plan defines how generated certificate PDFs and template background images are stored, tracked, accessed, and cleaned up within the Siraj storage subsystem. It extends the existing `storageFiles` / junction-table / `signedUrls` machinery with a `certificateFiles` junction table and certificate-domain-specific storage service methods, rather than building a parallel storage system.
+
+### Business Value
+
+- Generated certificate PDFs are stored with a predictable directory convention, content-addressable paths, and per-certificate ownership tracking
+- Template background images are uploaded through the existing `prepareUpload` → signed-URL → `PUT` flow and linked to template records via `certificateFiles` junction entries
+- Secure download of certificate PDFs is gated by ownership/permission checks, NOT by relying on the `public/` or `avatars/` auth-bypass prefix
+- Orphan file detection and expired signed-URL cleanup run on a schedule so storage does not grow unbounded
+- File usage tracking prevents accidental deletion of certificate PDFs that are still referenced by `certificates` rows
+
+### Scope
+
+| In Scope | Out of Scope |
+|----------|-------------|
+| `certificateFiles` junction table (schema extension to `storageFiles` domain) | Full storage provider adapters (local/GCP/Vercel — already implemented) |
+| Certificate PDF storage path convention (`certificates/{templateId}/{certificateId}.pdf`) | PDF rendering logic itself (Plan 6 — PDF Rendering Engine) |
+| Template background image upload storage path convention (`certificates/templates/{templateId}/background.{ext}`) | Template element image uploads (UI plans handle element assets) |
+| `ValidReferenceTable` union extension to include `"certificates"` | Storage browser UI (existing, unchanged) |
+| `performJunctionInsert` switch extension for `certificateFiles` | Admin storage management UI modifications |
+| `getFileUsages` / `isFileInUse` / `cleanupExpiredFiles` fan-out to include `certificateFiles` | Generic file manager refactoring |
+| Certificate storage service namespace (`CertificateStorageService`) with PDF save, download URL, background upload, revoke, cleanup | Certificate generation pipeline orchestration (Plan 4) |
+| Signed URL generation for certificate PDF download (time-limited, revocable) | File serving route rewrite (`app/api/storage/files/[[...path]]/route.ts` reused as-is) |
+| File cleanup cron endpoint for expired signed URLs + orphan `storageFiles` rows with certificate junctions | Cron scheduling infrastructure (Plan 22 — Cron Jobs & Cleanup) |
+| MIME type validation for certificate-domain uploads (PDF: `application/pdf`; background: `image/png`, `image/jpeg`, `image/webp`) | General-purpose MIME validation changes (existing `validateUpload` reused) |
+| File size limits for certificate-domain uploads (PDF: 50 MB max; background: 10 MB max) | Global `MAX_FILE_SIZE` changes (existing 100 MB cap retained globally) |
+| `checkUserAccessThroughEntity` extension to include `certificates` ownership (student/parent access to certificate PDF) | Full student-parent-teacher access matrix refactoring |
+| i18n keys for storage errors, upload progress, file labels, cleanup notifications | All general storage i18n (existing) |
+| Integration contract with Plan 6 (PDF Rendering) — where rendered PDFs are saved | Puppeteer/QR rendering internals |
+
+---
+
+## 2. Requirements
+
+### REQ-07-01: Certificate PDF Storage Path Convention
+
+**WHEN** the PDF rendering engine (Plan 6) produces a certificate PDF buffer, **THE SYSTEM SHALL** persist it at the path `certificates/{templateId}/{certificateId}.pdf` via the existing storage provider and register a `storageFiles` row.
+
+**Acceptance Criteria**:
+- Path format: `certificates/{templateId}/{certificateId}.pdf` — all segments use UUID values, no user-supplied filenames
+- The `CertificateStorageService.saveCertificatePdf(certificateId, templateId, buffer)` method writes the PDF via the active storage provider's `uploadFile`
+- After the file is written, `StorageService.createFileAndGet(filePath, false)` creates the DB pointer row (idempotent upsert on `path`)
+- The directory `certificates/{templateId}/` is auto-created by the provider (local FS `mkdir -p`, GCP auto-creates on first object write)
+- Re-rendering a certificate replaces the file at the same path (idempotent path means `onConflictDoUpdate` keeps the same `storageFiles` row)
+- PDFs are stored as NON-protected `storageFiles` rows (`isProtected = false`); access is gated by junction ownership, not the `isProtected` flag
+
+### REQ-07-02: Template Background Image Storage Path Convention
+
+**WHEN** an admin uploads a background image for a certificate template, **THE SYSTEM SHALL** persist it at `certificates/templates/{templateId}/background.{ext}` and link it to the template via a `certificateFiles` junction row.
+
+**Acceptance Criteria**:
+- Path format: `certificates/templates/{templateId}/background.{ext}` where `{ext}` is the original file extension (png, jpg, webp)
+- Upload uses the existing `prepareUpload` GraphQL mutation → `signedUrls` token → `PUT /api/storage/upload/{id}` flow (reused from existing storage, no new upload route)
+- After upload completes, `StorageService.linkFileToEntity({ referenceTable: "certificate_templates", referenceId: templateId, usageType: "template_background", filePath })` creates the junction row
+- Acceptable MIME types: `image/png`, `image/jpeg`, `image/webp` — validated by `CertificateStorageService.validateBackgroundImage` before `prepareUpload` is called
+- Maximum file size: 10 MB for background images — validated client-side before hash computation and server-side in `validateUpload`
+- If a template already has a background image, uploading a new one replaces the old file path in the template record and unregisters the old `certificateFiles` usage
+
+### REQ-07-03: `certificateFiles` Junction Table
+
+**WHEN** any certificate-domain file (PDF or background image) is linked to a certificate or template, **THE SYSTEM SHALL** create a row in the `certificateFiles` junction table with proper foreign keys and cascade delete.
+
+**Acceptance Criteria**:
+- Table definition mirrors existing junctions (e.g., `studentFiles`): columns `{ id, fileId, certificateId, usageType, createdAt }`
+- `fileId` is FK to `storageFiles.id` with `onDelete: "cascade"` — deleting the file row cascades to junction
+- `certificateId` is FK to `certificates.id` with `onDelete: "cascade"` — deleting the certificate cascades to junction
+- `usageType` is `varchar(100)` storing semantic roles: `"certificate_pdf"`, `"template_background"`
+- `createdAt` is `timestamptz` defaulting to `now()`
+- Unique constraint on `(fileId, usageType)` to prevent duplicate links for the same semantic role
+- The `ValidReferenceTable` union in `backend/types/storage/storage.types.ts` is extended to include `"certificates"` and `"certificate_templates"` as valid reference tables for file usage operations
+
+### REQ-07-04: Repository Layer Extension for `certificateFiles`
+
+**WHEN** the storage repository performs file usage fan-out (`getFileUsages`, `isFileInUse`, `cleanupExpiredFiles`), **THE SYSTEM SHALL** include the `certificateFiles` junction in all queries.
+
+**Acceptance Criteria**:
+- `getFileUsages(filePath)` — the parallel fan-out includes `fetchCertificateUsages(filePath)` which queries `certificateFiles` joined with `storageFiles` and maps to `FileUsageInfo { filePath, usageType, referenceId, referenceTable }`
+- `isFileInUse(filePath)` — the `UNION ALL` existence query includes a `SELECT 1 FROM certificate_files WHERE file_id = $fileId LIMIT 1` arm (the existing 10-arm UNION ALL keys on `file_id`, which is resolved from `storageFiles` by `filePath` first — junction tables have no `file_path` column)
+- `registerFileUsage(input)` — `performJunctionInsert` switch includes a `case "certificate_templates"` and `case "certificates"` branch that inserts into `certificateFiles` with the correct FK
+- `unregisterFileUsage(filePath, usageType, referenceId)` — `deleteUsagesFromAllTables` includes `DELETE FROM certificate_files WHERE ...` alongside all existing junctions
+- `cleanupExpiredFiles()` — the 12-way LEFT JOIN includes `certificateFiles` + `certificateTemplateFiles` (10 existing junctions + 2 new); rows with NULL across all junctions (including `certificateFiles`) are deleted
+- `linkFileToCertificate(certificateId, fileId, usageType, tx?)` — typed link helper accepting optional `tx` for atomicity with certificate row creation (same pattern as `linkFileToInvoice`)
+- `linkFileToTemplate(templateId, fileId, usageType, tx?)` — typed link helper for template background images
+- `getCertificateFiles(certificateId, usageType?, tx?)` — entity-scoped read joining `certificateFiles` ⨝ `storageFiles`, projecting `LinkedFileReturnType`
+- `getTemplateFiles(templateId, usageType?, tx?)` — same pattern for templates
+- All new methods follow `queryDb(tx)` for reads and `tx ?? db` for writes per `backend/db/repo/AGENTS.md`
+
+### REQ-07-05: Signed URL Generation for Certificate PDF Download
+
+**WHEN** an authorized user requests to download a certificate PDF, **THE SYSTEM SHALL** generate a time-limited signed URL and return it for client-side download.
+
+**Acceptance Criteria**:
+- `CertificateStorageService.generateDownloadUrl(certificateId, userId)` checks that the user has permission (is certificate admin, or is the student's parent/teacher, or is the student themselves)
+- After permission check, the service returns a download URL:
+  - **Local provider**: `${baseUrl}/api/storage/files/${filePath}` — auth is handled by the file serving route's `checkFileAccess` call (the `certificateFiles` junction row provides ownership)
+  - **GCP provider**: native v4 signed URL with 15-minute expiry from `bucket.file(filePath).getSignedUrl({ action: "read", expires: <timestamp> })`
+  - **Vercel provider**: `@vercel/blob` download URL (public or private based on config)
+- The download URL expires after the configured `SIGNED_URL_DURATION` (default 15 minutes; certificate download may use a configurable override `CERTIFICATE_DOWNLOAD_URL_DURATION` if longer-lived download links are needed)
+- For local provider, NO new signed-URL row is needed — the `signedUrls` table is for upload tokens, not download. Download access is controlled by the file serving route's existing `checkFileAccess` + auth gate
+- Revoked certificates: if `certificate.status === "revoked"`, the service throws a localized error `errors.certificates.storage.revokedCertificate` and does not return a URL
+
+### REQ-07-06: Storage Permission Checks
+
+**WHEN** a user attempts to upload a background image or download a certificate PDF, **THE SYSTEM SHALL** verify the user has the required permission for the operation.
+
+**Acceptance Criteria**:
+- Background image upload: caller must have `AppPermission.CERTIFICATES_TEMPLATES_MANAGE` — checked by `CertificateStorageService.requireTemplateManagePermission(userId, tErrors)` which delegates to the existing `StorageService.requireStorageManage` pattern
+- Certificate PDF upload (from rendering engine): the rendering engine calls the service from a trusted internal context (cron or admin-triggered generation); no per-user permission check is needed on the save path, but the generation pipeline (Plan 4) already enforces `CERTIFICATES_GENERATE`
+- Certificate PDF download: `checkUserAccessThroughEntity` is extended to include:
+  1. If user is super admin → allow
+  2. If `user_files` has a row with `userId` → allow (direct ownership)
+  3. If `certificateFiles` has a row and the user owns the student linked to that certificate → allow (parent/teacher of the student)
+  4. Otherwise → deny with `403 Forbidden`
+- Download of revoked certificate PDF: denied with localized error
+- Public verification page (Plan 19) does NOT download the PDF — it renders a verification result only; no storage access from public context
+
+### REQ-07-07: File Cleanup — Orphan Detection
+
+**WHEN** a certificate is deleted (hard delete, not soft delete) or a template's background image is replaced, **THE SYSTEM SHALL** detect orphaned `storageFiles` rows and remove them.
+
+**Acceptance Criteria**:
+- `StorageDbRepository.cleanupExpiredFiles()` — now includes `certificateFiles` + `certificateTemplateFiles` in the 12-way LEFT JOIN (10 existing junctions + 2 new); any `storageFiles` row with NULL FKs across all 12 junctions (including the two certificate junctions) is deleted from the DB (row only; bytes are handled separately by the provider)
+- `CertificateStorageService.cleanupOrphanedCertificateFiles()` — scans `storageFiles` rows under the `certificates/` path prefix where no `certificateFiles` junction row exists; deletes both the DB row and the physical file via `getStorageService().deleteFile(filePath)`
+- Cleanup is idempotent — running it twice produces the same result
+- Orphan detection does NOT delete files that are still referenced by `certificates` rows (the junction row prevents this)
+- Soft-deleted certificates (`deletedAt IS NOT NULL`) do NOT trigger file deletion — the junction row still exists and protects the file
+
+### REQ-07-08: File Cleanup — Expired Signed URLs
+
+**WHEN** the cleanup cron runs, **THE SYSTEM SHALL** delete expired `signedUrls` rows and optionally remove orphaned `storageFiles` rows.
+
+**Acceptance Criteria**:
+- `SignedUrlRepository.deleteExpired()` already exists and is reused — deletes rows where `expiresAt < now()`
+- A new cron endpoint `POST /api/cron/storage-cleanup` (guarded by `cronSecret` header) calls both:
+  1. `StorageService.cleanupExpiredSignedUrls()` — deletes expired upload tokens
+  2. `CertificateStorageService.cleanupOrphanedCertificateFiles()` — deletes orphaned certificate-domain file rows + bytes
+- The cron respects `CLEANUP_ENABLED` env flag — if `false`, the endpoint returns `200` without performing any cleanup
+- The cron respects `SIGNED_URL_CLEANUP_STRATEGY` env (`lazy` / `cron` / `both` / `disabled`) — `lazy` runs cleanup during each `prepareUpload` (already implemented); `cron` runs it via this endpoint; `both` does both; `disabled` skips
+- Returns `{ signedUrlsDeleted: number, orphanedFilesDeleted: number }` for logging/monitoring
+- Cron schedule configuration is handled by Plan 22 (Cron Jobs & Cleanup); this plan creates the endpoint and service methods only
+
+### REQ-07-09: File Size Limits & MIME Validation
+
+**WHEN** a certificate-domain file is uploaded or saved, **THE SYSTEM SHALL** validate the file size and MIME type against certificate-specific limits.
+
+**Acceptance Criteria**:
+- Certificate PDF (server-side save from rendering engine):
+  - MIME type: `application/pdf` — enforced by `CertificateStorageService.saveCertificatePdf` which constructs the buffer from Puppeteer output (always PDF)
+  - Max size: 50 MB — if the rendered PDF exceeds 50 MB, the service throws localized error `errors.certificates.storage.pdfTooLarge`
+  - No client-side upload; the buffer is passed directly to the storage provider
+- Template background image (client-side upload via `prepareUpload`):
+  - MIME types: `image/png`, `image/jpeg`, `image/webp` — validated client-side before `prepareUpload` and server-side in `CertificateStorageService.validateBackgroundImage`
+  - Max size: 10 MB — validated client-side (file input `accept` + size check) and server-side in `validateUpload` (existing 100 MB global cap; certificate-specific 10 MB is a narrower domain constraint checked in the service)
+- Validation errors use localized messages from the `certificates.storage` i18n sub-domain
+
+### REQ-07-10: Integration with Plan 6 (PDF Rendering Engine)
+
+**WHEN** Plan 6's rendering engine completes a certificate PDF render, **THE SYSTEM SHALL** accept the PDF buffer and store it via the certificate storage service.
+
+**Acceptance Criteria**:
+- `CertificateStorageService.saveCertificatePdf(certificateId, templateId, pdfBuffer)` is the single entry point from Plan 6
+- The method:
+  1. Validates the buffer is non-empty and starts with `%PDF` (basic PDF signature check)
+  2. Checks buffer size ≤ 50 MB
+  3. Constructs the path `certificates/{templateId}/{certificateId}.pdf`
+  4. Calls `getStorageService().uploadFile(filePath, pdfBuffer, "application/pdf")` — provider uploads bytes
+  5. Calls `StorageService.createFileAndGet(filePath, false)` — creates/updates the `storageFiles` DB row
+  6. Calls `StorageDbRepository.linkFileToCertificate({ fileId, certificateId, usageType: "certificate_pdf" })` — creates the junction row
+- The method accepts an optional `tx: DBTransaction` parameter for atomicity with the certificate row status update (the generation pipeline in Plan 4 may wrap the save + certificate status update in one transaction)
+- If the provider upload fails, the service throws a localized `errors.certificates.storage.uploadFailed` error and does NOT create any DB rows (atomic: no partial state)
+- If the provider upload succeeds but the DB row creation fails, the service calls `getStorageService().deleteFile(filePath)` to clean up the orphan bytes (compensating action)
+
+### REQ-07-11: Integration with Plan 4 (Services & Business Logic)
+
+**WHEN** Plan 4's certificate service triggers generation, revocation, or deletion, **THE SYSTEM SHALL** delegate file operations to `CertificateStorageService`.
+
+**Acceptance Criteria**:
+- Plan 4's `CertificateService.generateCertificate` calls `CertificateStorageService.saveCertificatePdf` after Plan 6 renders the PDF
+- Plan 4's `CertificateService.revokeCertificate` calls `CertificateStorageService.revokeCertificateFile(certificateId)` which does NOT delete the file but sets the certificate status to `"revoked"` — the file remains for audit trail; download is blocked by the status check in `generateDownloadUrl`
+- Plan 4's `CertificateService.deleteCertificate` (hard delete only) relies on the `certificateFiles` `onDelete: "cascade"` to remove junction rows; `cleanupExpiredFiles` or `cleanupOrphanedCertificateFiles` later removes the orphaned `storageFiles` row and bytes
+- Plan 4's template service `updateTemplate` calls `CertificateStorageService.linkTemplateBackground(templateId, filePath)` when a new background image is uploaded, and `CertificateStorageService.unlinkTemplateBackground(templateId, oldFilePath)` when the old image is replaced
+
+### REQ-07-12: Storage Quota Management (Basic)
+
+**WHEN** the certificate-domain storage grows, **THE SYSTEM SHALL** provide a storage statistics method that reports the total size and file count under the `certificates/` path prefix.
+
+**Acceptance Criteria**:
+- `CertificateStorageService.getCertificateStorageStats()` returns `{ totalFiles: number, totalSizeBytes: number, pdfCount: number, backgroundCount: number, orphanedCount: number }`
+- Uses the provider's `storageStatistics(path)` method with the `certificates/` prefix
+- `orphanedCount` is computed by querying `storageFiles` rows under `certificates/` prefix where no `certificateFiles` junction exists
+- This method is informational only (displayed in admin dashboard in a future UI plan); it does not enforce quotas
+- Quota enforcement is out of scope for this plan (noted in scope table)
+
+---
+
+## 3. Feature 6: Outcome Knowledge Base & Progress Tracking
+
+### Knowledge Base Updates
+
+- The `certificateFiles` junction table extension pattern (how to add a new entity to the existing 10-junction fan-out) should be documented as a reusable recipe in `docs/storage/adding-entity-to-storage.md`
+- The `checkUserAccessThroughEntity` extension pattern (adding certificate ownership checks for student/parent access) should be documented for future entity access-control additions
+- The storage cleanup cron endpoint pattern (guarded by `cronSecret`, supporting `CLEANUP_ENABLED` and `SIGNED_URL_CLEANUP_STRATEGY` env switches) should be documented as a reference for future cron endpoints
+
+### Progress Tracking
+
+- Track in session SQL: creation of `certificateFiles` schema, repository methods, storage service namespace, i18n keys, cron endpoint
+- Each task marks `done` in `todos` table when the file passes tsgo + biome + lint
+- Cross-file dependencies (e.g., `ValidReferenceTable` union extension affects `storage.types.ts`, `storage.repository.ts`, `storage.service.ts`) are tracked with dependency edges in `todo_deps`
+
+---
+
+## 4. i18n Requirements
+
+All translation keys are in the `certificates` i18n namespace, sub-domain `storage`.
+
+### 4.1 Namespace Handle
+
+- Namespace ID: `"dashboard.certificates.storage"`
+- Handle: `DashboardCertificatesStorage`
+- Type file: `shared/locale/types/dashboard/certificates/storage.ts`
+- Namespace file: `shared/locale/namespaces/dashboard/certificates/storage.namespace.ts`
+- AR file: `shared/locale/ar/dashboard/certificates/storage.ts` → export `dashboardCertificatesStorageAr`
+- EN file: `shared/locale/en/dashboard/certificates/storage.ts` → export `dashboardCertificatesStorageEn`
+- Registration in `Translation` tree: `Dashboard.Certificates.Storage`
+
+### 4.2 Translation Key Catalog
+
+| Key Path | Type | AR (illustrative) | EN (illustrative) |
+|----------|------|--------------------|--------------------|
+| `pageTitle` | `string` | إدارة تخزين الشهادات | Certificate Storage Management |
+| `uploadBackground.title` | `string` | رفع صورة الخلفية | Upload Background Image |
+| `uploadBackground.dropzone` | `string` | اسحب صورة هنا أو انقر للاختيار | Drag an image here or click to select |
+| `uploadBackground.types` | `string` | PNG, JPEG, أو WebP | PNG, JPEG, or WebP |
+| `uploadBackground.maxSize` | `(max: number) => string` | `الحد الأقصى ${max} ميجابايت` | `Maximum ${max} MB` |
+| `uploadBackground.progress` | `(percent: number) => string` | `جارٍ الرفع: ${percent}%` | `Uploading: ${percent}%` |
+| `uploadBackground.success` | `(fileName: string) => string` | `تم رفع "${fileName}" بنجاح` | `"${fileName}" uploaded successfully` |
+| `uploadBackground.replacing` | `string` | سيتم استبدال صورة الخلفية الحالية | The current background image will be replaced` |
+| `download.certificate` | `string` | تحميل الشهادة | Download Certificate |
+| `download.expired` | `string` | انتهت صلاحية رابط التحميل | Download link has expired |
+| `download.revoked` | `string` | هذه الشهادة ملغاة ولا يمكن تحميلها | This certificate is revoked and cannot be downloaded` |
+| `download.generating` | `string` | جارٍ توليد الشهادة... | Generating certificate... |
+| `fileLabels.certificatePdf` | `string` | ملف PDF (شهادة) | PDF File (Certificate) |
+| `fileLabels.templateBackground` | `string` | صورة خلفية القالب | Template Background Image |
+| `fileLabels.backgroundImageFor` | `(templateName: string) => string` | `صورة خلفية لـ "${templateName}"` | `Background image for "${templateName}"` |
+| `cleanup.running` | `string` | جارٍ تنظيف الملفات... | Cleaning up files... |
+| `cleanup.signedUrlsDeleted` | `(count: number) => string` | pluralized | pluralized (see below) |
+| `cleanup.orphanedFilesDeleted` | `(count: number) => string` | pluralized | pluralized (see below) |
+| `cleanup.completed` | `string` | اكتمل التنظيف | Cleanup completed |
+| `cleanup.disabled` | `string` | التنظيف التلقائي معطل | Automatic cleanup is disabled` |
+| `stats.totalFiles` | `(count: number) => string` | pluralized | pluralized |
+| `stats.totalSize` | `(size: string) => string` | `الحجم الإجمالي: ${size}` | `Total size: ${size}` |
+| `stats.pdfCount` | `(count: number) => string` | pluralized | pluralized |
+| `stats.backgroundCount` | `(count: number) => string` | pluralized | pluralized |
+| `stats.orphanedCount` | `(count: number) => string` | pluralized | pluralized |
+| `errors.uploadFailed` | `string` | فشل رفع الملف | Failed to upload file |
+| `errors.downloadFailed` | `string` | فشل تحميل الملف | Failed to download file |
+| `errors.permissionDenied` | `string` | لا تملك صلاحية الوصول إلى هذا الملف | You do not have permission to access this file |
+| `errors.fileNotFound` | `string` | الملف غير موجود | File not found |
+| `errors.pdfTooLarge` | `(max: number) => string` | `حجم ملف PDF يتجاوز الحد الأقصى (${max} ميجابايت)` | `PDF file size exceeds the maximum (${max} MB)` |
+| `errors.backgroundTooLarge` | `(max: number) => string` | `حجم الصورة يتجاوز الحد الأقصى (${max} ميجابايت)` | `Image size exceeds the maximum (${max} MB)` |
+| `errors.invalidMimeType` | `(expected: string) => string` | `نوع الملف غير صالح. المتوقع: ${expected}` | `Invalid file type. Expected: ${expected}` |
+| `errors.invalidPdfSignature` | `string` | الملف ليس PDF صالحاً | The file is not a valid PDF |
+| `errors.revokedCertificate` | `string` | لا يمكن تحميل شهادة ملغاة | Cannot download a revoked certificate |
+| `errors.templateNotFound` | `(id: string) => string` | `القالب غير موجود: ${id}` | `Template not found: ${id}` |
+| `errors.certificateNotFound` | `(id: string) => string` | `الشهادة غير موجودة: ${id}` | `Certificate not found: ${id}` |
+| `errors.storageProviderError` | `string` | خطأ في مزود التخزين | Storage provider error |
+| `errors.cleanupFailed` | `string` | فشل تنظيف الملفات | Failed to clean up files |
+
+### 4.3 Pluralization
+
+**Arabic (6-form: zero/one/two/few/many/other)**
+
+| Key | Locale | zero | one | two | few | many | other |
+|-----|--------|------|-----|-----|-----|------|-------|
+| `cleanup.signedUrlsDeleted` | ar | لا توجد روابط محذوفة | تم حذف رابط واحد | تم حذف رابطان | تم حذف ${count} روابط | تم حذف ${count} رابطاً | تم حذف ${count} رابط |
+| `cleanup.orphanedFilesDeleted` | ar | لا توجد ملفات محذوفة | تم حذف ملف واحد | تم حذف ملفان | تم حذف ${count} ملفات | تم حذف ${count} ملفاً | تم حذف ${count} ملف |
+| `stats.totalFiles` | ar | لا توجد ملفات | ملف واحد | ملفان | ${count} ملفات | ${count} ملفاً | ${count} ملف |
+| `stats.pdfCount` | ar | لا توجد ملفات PDF | ملف PDF واحد | ملفا PDF | ${count} ملفات PDF | ${count} ملفاً PDF | ${count} ملف PDF |
+| `stats.backgroundCount` | ar | لا توجد صور خلفية | صورة خلفية واحدة | صورتان خلفيتان | ${count} صور خلفية | ${count} صورة خلفية | ${count} صورة خلفية |
+| `stats.orphanedCount` | ar | لا توجد ملفات يتيمة | ملف يتيم واحد | ملفان يتيمان | ${count} ملفات يتيمة | ${count} ملفاً يتيماً | ${count} ملف يتيم |
+
+**English (2-form: one/other)**
+
+| Key | one | other |
+|-----|-----|-------|
+| `cleanup.signedUrlsDeleted` | 1 signed URL deleted | ${count} signed URLs deleted |
+| `cleanup.orphanedFilesDeleted` | 1 orphaned file deleted | ${count} orphaned files deleted |
+| `stats.totalFiles` | 1 file | ${count} files |
+| `stats.pdfCount` | 1 PDF file | ${count} PDF files |
+| `stats.backgroundCount` | 1 background image | ${count} background images |
+| `stats.orphanedCount` | 1 orphaned file | ${count} orphaned files |
+
+### 4.4 Interpolation Parameters
+
+| Key | Params | Type |
+|-----|--------|------|
+| `uploadBackground.maxSize` | `max` | `number` |
+| `uploadBackground.progress` | `percent` | `number` |
+| `uploadBackground.success` | `fileName` | `string` |
+| `fileLabels.backgroundImageFor` | `templateName` | `string` |
+| `cleanup.signedUrlsDeleted` | `count` | `number` |
+| `cleanup.orphanedFilesDeleted` | `count` | `number` |
+| `stats.totalFiles` | `count` | `number` |
+| `stats.totalSize` | `size` | `string` (pre-formatted by caller) |
+| `stats.pdfCount` | `count` | `number` |
+| `stats.backgroundCount` | `count` | `number` |
+| `stats.orphanedCount` | `count` | `number` |
+| `errors.pdfTooLarge` | `max` | `number` |
+| `errors.backgroundTooLarge` | `max` | `number` |
+| `errors.invalidMimeType` | `expected` | `string` |
+| `errors.templateNotFound` | `id` | `string` |
+| `errors.certificateNotFound` | `id` | `string` |
+
+### 4.5 Error Messages (GraphQL-resolver-side)
+
+Error translations consumed by resolvers via `ctx.t().errorsTranslations`. This plan's storage-specific errors are registered in the `errors` type under the `certificates.storage` sub-group:
+
+| Key | Type | AR | EN |
+|-----|------|----|----|
+| `errors.certificates.storage.uploadFailed` | `string` | فشل رفع الملف | Failed to upload file |
+| `errors.certificates.storage.downloadFailed` | `string` | فشل تحميل الملف | Failed to download file |
+| `errors.certificates.storage.permissionDenied` | `string` | لا تملك صلاحية الوصول إلى هذا الملف | You do not have permission to access this file |
+| `errors.certificates.storage.fileNotFound` | `string` | الملف غير موجود | File not found |
+| `errors.certificates.storage.pdfTooLarge` | `(max: number) => string` | `حجم ملف PDF يتجاوز ${max} ميجابايت` | `PDF file size exceeds ${max} MB` |
+| `errors.certificates.storage.backgroundTooLarge` | `(max: number) => string` | `حجم الصورة يتجاوز ${max} ميجابايت` | `Image size exceeds ${max} MB` |
+| `errors.certificates.storage.invalidMimeType` | `(expected: string) => string` | `نوع الملف غير صالح: ${expected}` | `Invalid file type: ${expected}` |
+| `errors.certificates.storage.invalidPdfSignature` | `string` | الملف ليس PDF صالحاً | The file is not a valid PDF |
+| `errors.certificates.storage.revokedCertificate` | `string` | لا يمكن تحميل شهادة ملغاة | Cannot download a revoked certificate |
+| `errors.certificates.storage.templateNotFound` | `(id: string) => string` | `القالب غير موجود: ${id}` | `Template not found: ${id}` |
+| `errors.certificates.storage.certificateNotFound` | `(id: string) => string` | `الشهادة غير موجودة: ${id}` | `Certificate not found: ${id}` |
+| `errors.certificates.storage.storageProviderError` | `string` | خطأ في مزود التخزين | Storage provider error |
+| `errors.certificates.storage.cleanupFailed` | `string` | فشل تنظيف الملفات | Failed to clean up files |
+
+### 4.6 Server-Side vs Client-Side Access
+
+| Surface | Access Pattern |
+|---------|---------------|
+| App Router page (if any, e.g., storage stats in admin) | `getTranslations(locale).dashboardTranslations.certificateStorage` |
+| Client components (upload progress, download button) | `useAppTranslation(Translation.Dashboard.CertificateStorage)` |
+| GraphQL resolvers (Plan 5 mutations for background upload) | `ctx.t().errorsTranslations.certificates.storage` |
+| API routes (cron storage-cleanup endpoint) | `getServerTranslations(locale, "dashboard.certificates.storage")` from `@/shared/locale/server-graphql` |
+| Services (CertificateStorageService) | `getServerTranslations(locale, "dashboard.certificates.storage")` |
+
+---
+
+## 5. Acceptance Criteria Summary
+
+| ID | Criterion | Verification |
+|----|-----------|-------------|
+| AC-01 | Certificate PDF saved at `certificates/{templateId}/{certificateId}.pdf` | Generate a certificate, verify file exists at expected path in storage |
+| AC-02 | `storageFiles` row created for every saved certificate PDF | Query `storageFiles` for the certificate path → row exists |
+| AC-03 | `certificateFiles` junction row created with `usageType: "certificate_pdf"` | Query `certificateFiles` for the certificate → row exists with correct usageType |
+| AC-04 | Template background image uploaded at `certificates/templates/{templateId}/background.{ext}` | Upload a background image, verify file exists at expected path |
+| AC-05 | Background image linked to template via `certificateFiles` with `usageType: "template_background"` | Query `certificateFiles` for the template → row exists |
+| AC-06 | `getFileUsages` returns certificate-domain usages | Call `getFileUsages` on a certificate PDF path → returns `FileUsageInfo` with `referenceTable: "certificates"` |
+| AC-07 | `isFileInUse` returns true for certificate PDF with junction row | Call `isFileInUse` on a linked certificate PDF → returns `true` |
+| AC-08 | `cleanupExpiredFiles` includes `certificateFiles` in LEFT JOIN | Create an orphan `storageFiles` row under `certificates/`, run cleanup, verify row is deleted |
+| AC-09 | Download URL generated only for authorized users | Request download as non-owner student → 403; as owner → URL returned |
+| AC-10 | Download URL denied for revoked certificates | Revoke certificate, request download → localized error `errors.certificates.storage.revokedCertificate` |
+| AC-11 | Background image MIME validation rejects non-image types | Upload a `.txt` file as background → rejected with `errors.certificates.storage.invalidMimeType` |
+| AC-12 | Background image 10 MB limit enforced | Upload an 11 MB image → rejected with `errors.certificates.storage.backgroundTooLarge` |
+| AC-13 | PDF 50 MB limit enforced | Attempt to save a 51 MB PDF buffer → rejected with `errors.certificates.storage.pdfTooLarge` |
+| AC-14 | Cron cleanup endpoint deletes expired signed URLs | Create an expired signed URL, call `/api/cron/storage-cleanup`, verify row is deleted |
+| AC-15 | Cron cleanup endpoint respects `CLEANUP_ENABLED = false` | Set `CLEANUP_ENABLED=false`, call cron endpoint → returns 200 without cleanup |
+| AC-16 | Cron endpoint guarded by `cronSecret` | Call without `Authorization` header → 401; with wrong secret → 401 |
+| AC-17 | `getCertificateStorageStats` returns correct counts | After generating certificates + uploading backgrounds, call stats → counts match |
+| AC-18 | Orphaned certificate files cleaned up | Create `storageFiles` row under `certificates/` with no junction, run `cleanupOrphanedCertificateFiles`, verify row + bytes deleted |
+| AC-19 | Template background replacement unregisters old file | Upload new background for same template → old `certificateFiles` row deleted, new one created |
+| AC-20 | `ValidReferenceTable` union includes `"certificates"` and `"certificate_templates"` | TypeScript compilation passes with the extended union; `registerFileUsage` accepts certificate reference tables |
+| AC-21 | All i18n keys present in AR + EN locale files | Run type check on locale files; all keys in catalog exist in both locales |
+| AC-22 | `checkUserAccessThroughEntity` grants download for certificate owner (student's parent/teacher) | As parent of the student on the certificate, request download → 200; as unrelated user → 403 |

@@ -1,0 +1,718 @@
+# Plan 08 — Template List & Navigation: Requirements
+
+## Plan Metadata
+
+| Field | Value |
+|---|---|
+| Plan # | 08 |
+| Title | Template List & Navigation |
+| Dependencies | Plan 5 (GraphQL API for Certificate Templates) |
+| Blocked By | Plan 05 must complete: `CertTemplate` GraphQL queries, mutations, and pagination support |
+| Blocks | Plan 09 (Categories), Plan 10 (Desktop Editor), Plan 11 (Mobile Editor), Plan 15 (Preview), Plan 17 (Generate from Template) |
+| Phase | Frontend — List & Navigation |
+| Status | Draft |
+
+---
+
+## 1. Purpose
+
+This plan defines the **entry point for all certificate template management UI** in the Siraj platform. It delivers the template list page (the landing page when a user navigates to the Certificates feature), the sidebar navigation structure for the entire Certificates module, and all list-level interactions: search, filter, pagination, card actions, bulk actions, and create flow.
+
+The template list page is the hub from which users discover, create, edit, duplicate, archive, and ultimately generate certificates. Every other certificate plan (editor, preview, categories, generation) is reachable from here.
+
+---
+
+## 2. Scope
+
+### In Scope
+
+| Area | Details |
+|---|---|
+| **Template List Page** | Responsive grid/table view of all certificate templates with card/row display |
+| **Search** | Debounced server-side search by template name (300ms delay) |
+| **Filters** | Status multi-select, Category hierarchical dropdown, combined AND logic |
+| **Pagination** | Cursor-based "Load More" button, 20 items per page |
+| **Card Actions** | Edit, Preview, Duplicate, Delete (soft), Generate from Template (for published) |
+| **Sidebar Navigation** | New "Certificates" sidebar group with 5 items linking to all cert sub-features |
+| **Create Template** | Dialog to capture initial fields (name, category, orientation, page size), then navigate to full editor |
+| **Bulk Actions** | Multi-select checkboxes, bulk archive, bulk delete, bulk change category |
+| **Responsive Layout** | Desktop: 3-column card grid or data table toggle; Tablet: 2-column; Mobile: 1-column |
+| **Loading/Error/Empty States** | Skeleton placeholders, error with retry, empty state illustration |
+| **i18n** | Full Arabic + English translations for all UI strings, Arabic pluralization for counts |
+
+### Out of Scope
+
+| Area | Reference |
+|---|---|
+| Template editor (canvas, drag-drop, element manipulation) | Plan 10 (Desktop), Plan 11 (Mobile) |
+| Category tree management (CRUD for categories) | Plan 09 |
+| Certificate generation from template | Plan 17 |
+| Recipient groups management | Plan 14 |
+| Verification log page | Plan 18 |
+| Template preview modal | Plan 15 (card action links to it, but preview UI itself is Plan 15) |
+
+---
+
+## 3. User Personas & Access
+
+### Role-Based Access Matrix
+
+| Role | List View | Create | Edit | Duplicate | Delete | Bulk Actions | Publish/Archive |
+|---|---|---|---|---|---|---|---|
+| **SUPER_ADMIN** | ✅ All | ✅ | ✅ All | ✅ | ✅ All | ✅ | ✅ |
+| **ACADEMY_ADMIN** | ✅ All (own academy) | ✅ | ✅ Own academy | ✅ | ✅ Own academy | ✅ | ✅ |
+| **SUPERVISOR** | ✅ All (own academy) | ✅ | ✅ Own academy | ✅ | ✅ Own academy | ✅ | ✅ |
+| **TEACHER** | ✅ Own + academy templates | ✅ Own | ✅ Own | ✅ Own | ✅ Own (draft only) | ❌ | ❌ |
+| **STAFF** | ✅ All (own academy) | ❌ | ✅ Own academy (view only) | ❌ | ❌ | ❌ | ❌ |
+| **PARENT** | ❌ No access | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **STUDENT** | ❌ No access | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+**Role Notes:**
+- **SUPERVISOR**: Equivalent to ACADEMY_ADMIN for template management within their academy — full create/edit/duplicate/delete/bulk/publish capabilities within academy scope
+- **STAFF**: Read-only access to all academy templates for reference purposes; can view but cannot create, edit, duplicate, delete, or perform bulk actions
+
+### Permission Constants
+
+| Permission Key | Grants Access To |
+|---|---|
+| `CERT_TEMPLATE_VIEW` | Template list page, card preview action |
+| `CERT_TEMPLATE_MANAGE` | Create, edit, duplicate, delete actions |
+| `CERT_TEMPLATE_PUBLISH` | Archive/unarchive, change status actions |
+| `CERT_TEMPLATE_BULK` | Bulk action bar, bulk archive/delete/category change |
+
+---
+
+## 4. Functional Requirements (EARS Format)
+
+### REQ-08-01: Template List Page Display
+
+**WHEN** the user navigates to the certificate templates list page
+**THEN** the system **SHALL** display all certificate templates the user has permission to view
+**AND** each template card/row **SHALL** display the following fields:
+
+| Field | Source | Display Format |
+|---|---|---|
+| Template name | `template.name` | Truncated to 1 line with ellipsis, full name in tooltip |
+| Thumbnail | `template.backgroundImage?.url` | 16:9 aspect ratio preview; icon placeholder if none |
+| Category | `template.category.name` | Category chip with category color |
+| Status badge | `template.status` | Colored badge: Draft (warning), Published (success), Archived (default) |
+| Last modified | `template.updatedAt` | Relative date ("2 hours ago"), tooltip with full date |
+| Element count | `template.elementCount` | Integer with icon |
+| Variable count | `template.variableCount` | Integer with icon |
+
+**AND** the default sort **SHALL** be `updatedAt` descending (most recently modified first)
+**AND** the list **SHALL** be responsive per REQ-08-09
+
+**Acceptance Criteria:**
+- AC-08-01a: List page renders at `/[locale]/(dashboard)/certificates/templates`
+- AC-08-01b: Each card displays all 7 fields with correct formatting
+- AC-08-01c: Default sort is `updatedAt DESC` on first load
+- AC-08-01d: Cards are clickable and navigate to editor on click (REQ-08-05)
+- AC-08-01e: Status badges use theme palette colors (no hardcoded colors)
+
+---
+
+### REQ-08-02: Template Search
+
+**WHEN** the user types text into the search field
+**THEN** the system **SHALL** filter templates by name using debounced server-side search
+**AND** the debounce delay **SHALL** be 300 milliseconds
+**AND** the search **SHALL** be case-insensitive
+**AND** the search **SHALL** query the GraphQL `certTemplates` query with a `search` argument
+**AND** when the search input is cleared (empty string)
+**THEN** the system **SHALL** reset to the full unfiltered list
+
+**Constraints:**
+- Search field placeholder: localized "Search templates..." / "ابحث عن القوالب..."
+- Minimum characters before search triggers: 1 (empty = no search)
+- Search resets pagination cursor to first page
+- Empty search input = no `search` argument sent (server returns all)
+
+**Acceptance Criteria:**
+- AC-08-02a: Typing triggers debounced search after 300ms of no input
+- AC-08-02b: Rapid typing (< 300ms between keystrokes) does not fire multiple queries
+- AC-08-02c: Clearing the search field immediately resets to full list
+- AC-08-02d: Search is case-insensitive ("Math" matches "mathematics", "MATH")
+- AC-08-02e: Search resets to page 1 (cursor = null)
+
+---
+
+### REQ-08-03: Template Filters
+
+**WHEN** the user applies one or more filters
+**THEN** the system **SHALL** narrow the displayed templates by the selected filter criteria
+
+#### Filter Types
+
+| Filter | Control Type | Options | Behavior |
+|---|---|---|---|
+| Status | Multi-select chips | All, Draft, Published, Archived | Multiple statuses selected = OR within status; combined with other filters = AND |
+| Category | Hierarchical dropdown | Tree structure from Plan 9 categories | Selecting a parent includes all descendants; single selection |
+
+#### Filter Logic
+
+- Status + Category = **AND** logic (template must match at least one selected status AND the selected category)
+- "All" status option = no status filter sent to server
+- Category "All" = no category filter sent to server
+- **"Clear all filters"** button: resets all filters to default (All status, All category), resets search, resets pagination
+
+**Constraints:**
+- Filters are persisted in URL search params (`?status=draft,published&category=uuid`)
+- Filter state survives page reload
+- Active filters show a count badge on the filter button: "Filters (2)"
+- Category dropdown fetches from Plan 9's category query (if Plan 9 not ready, category filter shows disabled state with tooltip "Categories coming soon")
+
+**Acceptance Criteria:**
+- AC-08-03a: Selecting multiple statuses filters by OR within status
+- AC-08-03b: Selecting a category filters templates to that category (including children)
+- AC-08-03c: Status + Category filters combine with AND logic
+- AC-08-03d: "Clear all filters" resets everything to default and reloads page 1
+- AC-08-03e: Filter state persists in URL and survives reload
+- AC-08-03f: Active filter count badge updates correctly
+
+---
+
+### REQ-08-04: Template Pagination
+
+**WHEN** the template list exceeds 20 results
+**THEN** the system **SHALL** display pages of 20 templates each
+**AND** pagination **SHALL** use cursor-based loading via a "Load More" button (not infinite scroll)
+**AND** each "Load More" click **SHALL** append the next 20 templates to the existing list
+**AND** the total count **SHALL** be displayed in the format:
+
+#### Count Display (Arabic Pluralization)
+
+| English | Arabic | Condition |
+|---|---|---|
+| "Showing {loaded} of {total} templates" | "عرض {loaded} من {total} قالب" | total = 1 |
+| "Showing {loaded} of {total} templates" | "عرض {loaded} من {total} قالبين" | total = 2 |
+| "Showing {loaded} of {total} templates" | "عرض {loaded} من {total} قوالب" | total = 3–10 |
+| "Showing {loaded} of {total} templates" | "عرض {loaded} من {total} قالباً" | total = 11–100 |
+| "Showing {loaded} of {total} templates" | "عرض {loaded} من {total} قالباً" | total = 100+ |
+
+**No results count** (when filters yield zero):
+| English | Arabic |
+|---|---|
+| "No templates found" | "لا توجد قوالب" |
+
+**Constraints:**
+- "Load More" button: hidden when `loaded >= total` or when no more results
+- "Load More" button: shows loading spinner while fetching next page
+- "Load More" button: disabled while loading
+- Cursor is the `endCursor` from the previous page's `pageInfo`
+- Changing search or filters resets pagination (clears cursor, returns to first page)
+
+**Acceptance Criteria:**
+- AC-08-04a: First load fetches 20 templates (or fewer if total < 20)
+- AC-08-04b: "Load More" button appends next 20 to existing list (no replacement)
+- AC-08-04c: "Load More" hidden when all templates are loaded
+- AC-08-04d: Count display uses correct Arabic pluralization form
+- AC-08-04e: Changing search/filters resets to page 1
+- AC-08-04f: "Load More" shows loading state while fetching
+
+---
+
+### REQ-08-05: Template Card Actions
+
+**WHEN** the user interacts with a template card
+**THEN** the system **SHALL** provide the following actions:
+
+#### Primary Action
+| Action | Trigger | Behavior | Permission |
+|---|---|---|---|
+| Open Editor | Click card (anywhere except menu) | Navigate to `/[locale]/(dashboard)/certificates/templates/{id}/editor` | `CERT_TEMPLATE_VIEW` |
+
+#### Card Dropdown Menu Actions
+| Action | Menu Label (EN/AR) | Behavior | Permission | Confirmation Required |
+|---|---|---|---|---|
+| Edit | "Edit" / "تعديل" | Navigate to editor | `CERT_TEMPLATE_MANAGE` | No |
+| Preview | "Preview" / "معاينة" | Open preview modal (Plan 15) | `CERT_TEMPLATE_VIEW` | No |
+| Duplicate | "Duplicate" / "نسخ" | Call `duplicateTemplate` mutation, show success toast, refetch list | `CERT_TEMPLATE_MANAGE` | No |
+| Delete | "Delete" / "حذف" | Soft delete via `deleteTemplate` mutation; shows confirmation dialog for non-draft templates | `CERT_TEMPLATE_MANAGE` | Yes (if status != draft) |
+| Generate from Template | "Generate from Template" / "إنشاء شهادة من القالب" | Navigate to generation wizard (Plan 17) | `CERT_TEMPLATE_VIEW` | No |
+
+#### Delete Confirmation Dialog
+- **Draft templates**: delete immediately without confirmation dialog (or with a simple "Are you sure?" inline)
+- **Published/Archived templates**: full confirmation dialog with warning text:
+  - EN: "This template is {status}. Deleting it will remove it from the active list. This action can be undone by an administrator."
+  - AR: "هذا القالب {status}. سيؤدي حذفه إلى إزالته من القائمة النشطة. يمكن للمسؤول التراجع عن هذا الإجراء."
+- Delete confirmation uses typed translation function with `{status}` interpolation parameter
+
+**Constraints:**
+- Menu items are hidden (not just disabled) when user lacks permission
+- "Generate from Template" only appears for published templates
+- After duplicate/delete, list refetches silently (no full page reload)
+- Success/error toast notifications are localized
+
+**Acceptance Criteria:**
+- AC-08-05a: Clicking card navigates to editor
+- AC-08-05b: Each menu action performs the correct behavior
+- AC-08-05c: Delete confirmation dialog shows for non-draft templates
+- AC-08-05d: Draft templates delete without confirmation dialog
+- AC-08-05e: "Generate from Template" only appears on published templates
+- AC-08-05f: Menu items respect permission-based visibility
+- AC-08-05g: Duplicate/delete trigger silent list refetch with toast notification
+
+---
+
+### REQ-08-06: Sidebar Navigation Integration
+
+**WHEN** the certificate feature is active (any cert route is visited)
+**THEN** the system **SHALL** add a new sidebar navigation group labeled "Certificates" / "الشهادات"
+**AND** the group **SHALL** contain the following items in order:
+
+| # | Item (EN) | Item (AR) | Icon (MUI Outlined) | Route | Plan |
+|---|---|---|---|---|---|
+| 1 | Templates | القوالب | `ArticleOutlined` | `/[locale]/(dashboard)/certificates/templates` | This plan |
+| 2 | Categories | التصنيفات | `CategoryOutlined` | `/[locale]/(dashboard)/certificates/categories` | Plan 09 |
+| 3 | Recipient Groups | مجموعات المستلمين | `GroupsOutlined` | `/[locale]/(dashboard)/certificates/recipient-groups` | Plan 14 |
+| 4 | Certificates | الشهادات | `WorkspacePremiumOutlined` | `/[locale]/(dashboard)/certificates` | Plan 16 |
+| 5 | Verification Log | سجل التحقق | `VerifiedOutlined` | `/[locale]/(dashboard)/certificates/verification` | Plan 18 |
+
+**AND** the "Templates" item **SHALL** be highlighted (active state) when the current route is the templates list or any templates sub-route (editor)
+**AND** the sidebar group **SHALL** be collapsible (expand/collapse toggle) with a default expanded state when on any cert route
+**AND** the sidebar group **SHALL** not appear if the user lacks `CERT_TEMPLATE_VIEW` permission
+
+**Acceptance Criteria:**
+- AC-08-06a: "Certificates" group appears in sidebar when on any cert route
+- AC-08-06b: All 5 items present with correct labels, icons, and routes
+- AC-08-06c: "Templates" item active when on templates list or sub-routes
+- AC-08-06d: Group collapsible, default expanded on cert routes
+- AC-08-06e: Group hidden for users without `CERT_TEMPLATE_VIEW` permission
+- AC-08-06f: Icons use MUI `*Outlined` naming (not `*Outline`)
+
+---
+
+### REQ-08-07: Create New Template
+
+**WHEN** the user clicks the "Create Template" button
+**THEN** the system **SHALL** open a dialog (modal) to capture initial template fields:
+
+| Field | Control | Required | Default |
+|---|---|---|---|
+| Template name | Text input | Yes | Empty |
+| Category | Dropdown (from Plan 9 categories) | No | "Uncategorized" |
+| Orientation | Radio: Portrait / Landscape | Yes | Portrait |
+| Page size | Radio: A4 / Letter / Custom | Yes | A4 |
+
+**AND** on submit:
+1. Call `createTemplate` mutation with the captured fields
+2. Show success toast: "Template created" / "تم إنشاء القالب"
+3. Navigate to `/[locale]/(dashboard)/certificates/templates/{newId}/editor` (Plan 10/11)
+
+**AND** on cancel:
+- Dialog closes, no mutation fired, list unchanged
+
+**Constraints:**
+- Name field: max 100 characters, validation error if empty on submit
+- Category dropdown: if Plan 9 not ready, shows only "Uncategorized" option with tooltip
+- Dialog uses MUI `Dialog` component with `sx` prop styling (no style props)
+- Loading state on submit button during mutation
+
+**Acceptance Criteria:**
+- AC-08-07a: "Create Template" button opens dialog
+- AC-08-07b: All 4 fields present and validated (name required)
+- AC-08-07c: Submit calls `createTemplate` mutation
+- AC-08-07d: Success toast shows, navigates to editor
+- AC-08-07e: Cancel closes dialog without side effects
+- AC-08-07f: Submit button shows loading state during mutation
+
+---
+
+### REQ-08-08: Bulk Actions
+
+**WHEN** the user selects one or more templates via checkbox
+**THEN** the system **SHALL** display a bulk action bar (sticky bottom or top) with:
+
+| Action | Label (EN/AR) | Behavior | Permission |
+|---|---|---|---|
+| Archive | "Archive Selected" / "أرشفة المحدد" | Call `bulkArchiveTemplates` with selected IDs | `CERT_TEMPLATE_PUBLISH` |
+| Delete | "Delete Selected" / "حذف المحدد" | Call `bulkDeleteTemplates` with confirmation dialog | `CERT_TEMPLATE_MANAGE` |
+| Change Category | "Change Category" / "تغيير التصنيف" | Open category selection dialog, then `bulkChangeCategory` | `CERT_TEMPLATE_MANAGE` |
+| Clear Selection | "Cancel" / "إلغاء" | Deselect all, hide bulk bar | — |
+
+**AND** the bulk action bar **SHALL** display the count of selected items: "{count} selected" / "تم تحديد {count}" (Arabic pluralized for count).
+
+**Constraints:**
+- Checkbox appears on each card/row when user hovers or when any item is already selected
+- "Select All" checkbox in toolbar selects all loaded templates (not total — only currently loaded)
+- Bulk bar appears only when 1+ items are selected
+- Bulk bar is sticky (position fixed) with shadow and theme palette background
+- Bulk mutations show loading state on the action button
+- After bulk action completes: refetch list, clear selection, show success toast
+
+**Acceptance Criteria:**
+- AC-08-08a: Selecting a template shows bulk action bar
+- AC-08-08b: "Select All" selects all loaded templates
+- AC-08-08c: Each bulk action calls correct mutation and shows loading state
+- AC-08-08d: Bulk bar shows selected count with Arabic pluralization
+- AC-08-08e: After bulk action: list refetches, selection clears, toast shows
+- AC-08-08f: "Cancel" clears selection and hides bulk bar
+- AC-08-08g: Bulk bar respects permission (hidden actions if user lacks permission)
+
+---
+
+### REQ-08-09: Responsive Layout
+
+**WHEN** the template list is displayed
+**THEN** the system **SHALL** adapt the layout per breakpoint:
+
+| Device | Breakpoint | Layout | Card Content |
+|---|---|---|---|
+| Desktop | `lg` and up (≥1200px) | 3-column card grid (default); toggle to data table view | Full card: thumbnail, all fields, menu |
+| Tablet | `md` (900–1199px) | 2-column card grid | Full card: thumbnail, all fields, menu |
+| Mobile | `sm` and below (<900px) | 1-column card list | Compact card: icon placeholder (no thumbnail), name + status + date only, truncated menu |
+
+#### View Mode Toggle (Desktop Only)
+| Mode | Description |
+|---|---|
+| Card Grid (default) | `MUI DataGrid`-style card grid using `Grid` component with `sx` breakpoints |
+| Data Table | `MUI DataTable` with columns: checkbox, name, category, status, elements, variables, last modified, actions |
+
+**Constraints:**
+- View mode toggle is a segmented control: "Grid" / "Table" icons
+- View mode persisted in Zustand store and survives page reload (not URL — user preference)
+- Mobile and tablet always use card grid (no toggle shown)
+- Template card thumbnail: 16:9 aspect ratio on desktop/tablet, icon placeholder on mobile
+- Touch targets on mobile: minimum 44px
+
+**Acceptance Criteria:**
+- AC-08-09a: Desktop shows 3 columns by default
+- AC-08-09b: Tablet shows 2 columns
+- AC-08-09c: Mobile shows 1 column with compact cards
+- AC-08-09d: Desktop view toggle switches between grid and table
+- AC-08-09e: View mode persists across reloads
+- AC-08-09f: Mobile cards use icon placeholder, not thumbnail
+
+---
+
+### REQ-08-10: Loading & Error & Empty States
+
+**WHEN** templates are loading (initial fetch or "Load More")
+**THEN** the system **SHALL** display skeleton card placeholders matching the current layout:
+
+| State | Trigger | Display |
+|---|---|---|
+| **Initial loading** | First page fetch | 6 skeleton cards (shimmer animation) in grid layout; no toolbar buttons active |
+| **Load More loading** | Subsequent page fetch | Existing cards remain + "Load More" button shows spinner; no new skeletons |
+| **Error** | Query returns error | Error alert banner with: icon, error message, "Retry" button |
+| **Empty (no templates at all)** | Query returns empty list, no filters active | Illustration (SVG) + "No templates yet" + "Create your first template" button |
+| **Empty (filters yield no results)** | Query returns empty list, filters active | Illustration + "No templates match your filters" + "Clear filters" button |
+
+#### Error State Details
+- Error message: localized, from Apollo `error.message` mapped to user-friendly translation key
+- "Retry" button: calls `refetch()` on the Apollo query
+- Error state replaces the card grid entirely
+
+#### Empty State Details
+- Illustration: theme-aware SVG (dark/light mode)
+- "Create your first template" button: opens CreateTemplateDialog (REQ-08-07)
+- "Clear filters" button: calls clearAllFilters() store action
+
+**Acceptance Criteria:**
+- AC-08-10a: Initial load shows 6 skeleton cards with shimmer
+- AC-08-10b: "Load More" shows spinner on button, no skeletons
+- AC-08-10c: Error state shows banner with Retry button
+- AC-08-10d: Empty (no templates) shows illustration + Create CTA
+- AC-08-10e: Empty (filtered) shows illustration + Clear Filters button
+- AC-08-10f: Retry button calls refetch
+- AC-08-10g: Skeleton cards match current layout (grid columns)
+
+---
+
+## 5. Non-Functional Requirements
+
+| ID | Category | Requirement |
+|---|---|---|
+| NFR-08-01 | Performance | Initial list render < 2 seconds (LCP) with 20-item page |
+| NFR-08-02 | Performance | Search debounce prevents > 1 query per 300ms window |
+| NFR-08-03 | Performance | "Load More" append does not re-render existing cards (React keys stable) |
+| NFR-08-04 | Accessibility | All interactive elements keyboard navigable, ARIA labels in Arabic |
+| NFR-08-05 | Accessibility | Status badges have `aria-label` with full status text |
+| NFR-08-06 | i18n | All UI strings use compile-time translation system (`shared/locale/`) |
+| NFR-08-07 | i18n | Arabic pluralization follows Arabic morphological rules (0/1/2/3-10/11-100/100+) |
+| NFR-08-08 | i18n | RTL layout fully mirrored (icons, text direction, card layout) |
+| NFR-08-09 | Performance | URL filter/pagination state survives reload (shareable links) |
+| NFR-08-10 | Security | All mutations check server-side permissions; UI hides actions user can't perform |
+
+### 5.1 Accessibility Requirements (WCAG 2.1 AA)
+
+| ID | WCAG Criterion | Requirement | Implementation |
+|----|----------------|-------------|----------------|
+| A11Y-08-01 | 2.1.1 Keyboard | All interactive elements reachable and operable via keyboard alone | Tab order follows visual order; focus visible on all buttons, links, inputs, menu items; `Tab`/`Shift+Tab` navigation; `Enter`/`Space` activation; `Escape` closes dialogs/panels |
+| A11Y-08-02 | 2.4.3 Focus Order | Focus order is logical and predictable | Focus moves: page header → search → filters → view toggle → create → cards/rows (left-to-right, top-to-bottom) → load more → count → bulk bar |
+| A11Y-08-03 | 2.4.7 Focus Visible | Focus indicator clearly visible on all interactive elements | MUI default focus ring (2px, theme palette primary); never suppressed via `outline: none`; custom focus styles only via `sx={{ '&:focus-visible': ... }}` |
+| A11Y-08-04 | 1.3.1 Info & Relationships | Semantic HTML structure conveys relationships | `<nav>` for sidebar; `<main>` for content; `<section>` with `<h2>` for list area; `<ul>`/`<li>` for card grid; `<table>` with `<thead>`/`<tbody>` for data table; `<header>` for page header |
+| A11Y-08-05 | 1.3.2 Meaningful Sequence | Reading order matches visual order | CSS grid order matches DOM order; `ResponsiveViewSwitch` does not reorder DOM; mobile bottom sheet appended to end of DOM |
+| A11Y-08-06 | 4.1.2 Name, Role, Value | All UI components have accessible name, role, state | Buttons: `aria-label` or visible text; Checkboxes: `<input type="checkbox">` with label; Menu items: `role="menuitem"`; Status badges: `aria-label` with full status text; Load More: `aria-label="Load more templates"` |
+| A11Y-08-07 | 1.4.3 Contrast (Minimum) | Text and UI elements meet 4.5:1 contrast ratio (3:1 for large text) | All text uses theme palette colors (`theme.palette.text.primary`, `theme.palette.text.secondary`); status badges use `on<Color>` variants for contrast; disabled states meet 3:1 |
+| A11Y-08-08 | 1.4.11 Non-text Contrast | UI components and graphical objects meet 3:1 contrast | Icon buttons, checkboxes, radio buttons, slider thumbs, card borders, focus rings all meet 3:1 against adjacent colors |
+| A11Y-08-09 | 2.5.3 Label in Name | Accessible name contains visible label text | All buttons with icons also have `aria-label` matching visible text or tooltip; filter chips include visible label in accessible name |
+| A11Y-08-10 | 3.2.1 On Focus | Focus does not trigger unexpected context changes | Opening filter panel does not move focus unexpectedly; focus trapped in dialogs (Create, Delete Confirm, Bulk Change Category) and bottom sheets |
+| A11Y-08-11 | 3.2.2 On Input | Input does not trigger unexpected context changes | Typing in search does not navigate; selecting filter does not auto-submit (requires explicit action) |
+| A11Y-08-12 | 2.4.4 Link Purpose | Link purpose clear from link text alone | Card click navigates to editor — `aria-label` on card includes template name; breadcrumbs use visible text |
+| A11Y-08-13 | 2.4.6 Headings & Labels | Headings and labels descriptive | Page title `h1`; section heading `h2`; filter panel sections `h3`; form labels associated with inputs via `htmlFor`/`id` |
+| A11Y-08-14 | 1.4.10 Reflow | Content reflows without horizontal scrolling at 320px CSS width | Mobile card list is single-column; no fixed-width tables on mobile; `ResponsiveViewSwitch` ensures mobile view at <900px |
+| A11Y-08-15 | 2.5.5 Target Size | Touch targets minimum 44×44 CSS pixels (mobile) | All mobile buttons, checkboxes, menu items, FAB, bottom sheet handles ≥44px; MUI `Button size="medium"` (40px) enhanced with `minHeight: 44` via `sx` |
+| A11Y-08-16 | 3.3.2 Labels or Instructions | Form fields have visible labels and instructions | Create template dialog: all fields have `<label>`; name field has helper text "Maximum 100 characters"; orientation/page size use `RadioGroup` with labels |
+| A11Y-08-17 | 3.3.3 Error Suggestion | Error messages suggest how to fix | Validation errors include specific guidance: "Name is required", "Name must be 100 characters or less"; server errors mapped to user-friendly messages |
+| A11Y-08-18 | 4.1.3 Status Messages | Status changes announced to screen readers | Toast/snackbar uses `aria-live="polite"`; "Load More" completion announced via `role="status"`; bulk action results announced |
+| A11Y-08-19 | 1.3.5 Identify Input Purpose | Input fields have `autocomplete` attributes where applicable | Search input: `autocomplete="off"` (search); name input: `autocomplete="name"` (optional) |
+| A11Y-08-20 | 2.5.1 Pointer Gestures | No multipoint or path-based gestures required | All actions via single tap/click; no swipe-to-delete (use menu); no pinch-to-zoom (browser handles) |
+
+---
+
+## 5.2 Mobile-Specific Requirements
+
+| ID | Category | Requirement |
+|----|----------|-------------|
+| MOB-08-01 | Touch Targets | All interactive elements minimum 44×44 CSS pixels (MUI `Button size="medium"` enhanced with `sx={{ minHeight: 44, minWidth: 44 }}`) |
+| MOB-08-02 | FAB Behavior | Floating Action Button for "Create Template" — positioned bottom-right, 16px from edge, hides when scrolling down, shows when scrolling up; `aria-label="Create template"` |
+| MOB-08-03 | Bottom Sheet Filter | Filter panel renders as bottom sheet (slides up from bottom) — not popover; dismissible by swipe down, tap outside, or "Done" button; `role="dialog"` with `aria-modal="true"`; focus trapped |
+| MOB-08-04 | Swipe Actions (Future) | Card swipe gestures reserved for future enhancement (not in this plan); current interaction: tap card to navigate, tap menu for actions |
+| MOB-08-05 | Pull-to-Refresh | Native browser pull-to-refresh enabled (no custom implementation); Apollo query refetches on page reload |
+| MOB-08-06 | Mobile Bulk Action Bar | Sticky bottom bar (position: fixed, bottom: 0) — full viewport width; shows selected count (Arabic pluralized); action buttons stacked vertically on narrow screens; "Cancel" always visible |
+| MOB-08-07 | Mobile Card Layout | Compact: 56px height; icon placeholder (24×24) left; name + status badge on one line; relative date right; truncated action menu (3 items + "More..."); checkbox visible when any item selected or on long-press |
+| MOB-08-08 | Mobile Search | Sticky top search bar (below header, above content); `TextField` with clear button (×) when non-empty; debounced 300ms; `Enter` submits search |
+| MOB-08-09 | Mobile Load More | Full-width button at bottom of list; shows loading spinner; minimum 44px height |
+| MOB-08-10 | Safe Area Insets | Bottom padding accounts for iOS home indicator / Android navigation bar (80px when bulk bar visible, 24px otherwise) via `env(safe-area-inset-bottom)` |
+| MOB-08-11 | RTL Mobile | All mobile layouts mirror horizontally in RTL: FAB moves to bottom-left; card icon right; action menu right; text direction RTL; bottom sheet content RTL |
+
+---
+
+## 5.3 Plan 17 (Generate from Template) Graceful Degradation
+
+| ID | Requirement |
+|----|-------------|
+| PLAN17-08-01 | The "Generate from Template" card action is only shown for published templates (existing rule) |
+| PLAN17-08-02 | If Plan 17 is not deployed, the route `/certificates/generate/{id}` will 404. The card action remains visible but navigation leads to a "Feature Coming Soon" page (handled by Plan 17's route) |
+| PLAN17-08-03 | Alternative: The card action can be feature-flagged via `AppConfig.CERT_GENERATE_ENABLED` (boolean). When `false`, the "Generate from Template" menu item is hidden entirely. Default: `true` (Plan 17 expected to be ready) |
+| PLAN17-08-04 | The feature flag is read from the server config at page load and passed to the ViewModel as `canGenerate: boolean` |
+| PLAN17-08-05 | No breaking changes to this plan if Plan 17 is delayed — the UI gracefully handles missing route |
+
+---
+
+## 5.4 Pagination Approach Reconciliation
+
+**Conflict Identified**: INTER_PLAN_CONTRACTS §8 mandates "page-number OFFSET pagination matching AppDataGrid" while this plan's DD-1 (cursor-based) and REQ-08-04 specify cursor-based "Load More" pagination.
+
+**Resolution**: Cursor-based pagination is the CORRECT choice for this plan (validated by SWE expert review 2026-08-02). Rationale:
+- Cursor pagination is stable for frequently changing data (new templates created between loads)
+- Relay-style connection with `hasNextPage`/`endCursor` is the Siraj standard (Plan 05 provides `CertTemplateConnection`)
+- Apollo `fetchMore` merges pages into cache, enabling smooth "Load More" without re-fetching existing items
+- Opaque cursor (base64-encoded `(updatedAt, id)`) is lexicographically sortable and stable
+- Existing cards do not re-render when new pages are appended (NFR-08-03) because Apollo cache keys are stable per template `id`
+
+The INTER_PLAN_CONTRACTS offset-based requirement applies to generic AppDataGrid usage; this plan's card grid + "Load More" UX pattern specifically benefits from cursor stability. The contract will be updated in a future coordination cycle.
+
+---
+
+## 5.5 Permission Key Naming Reconciliation
+
+**Conflict Identified**: This plan uses `CERT_TEMPLATE_*` underscore format (e.g., `CERT_TEMPLATE_VIEW`, `CERT_TEMPLATE_MANAGE`) while INTER_PLAN_CONTRACTS §3 specifies canonical dot-path format: `certificates.templates.view`, `certificates.templates.manage`.
+
+**Resolution**: The codebase's `AppPermission` enum (defined in `backend/enum/appPermission.ts`) uses the underscore format (`CERT_TEMPLATE_VIEW`). This is the runtime enforcement format. The dot-path format in INTER_PLAN_CONTRACTS is a documentation canonical form for cross-plan reference. Both refer to the same permissions. This plan uses the runtime enum format consistently. Future plans should align documentation with the runtime enum format.
+
+---
+
+## 6. i18n Requirements
+
+### Translation Namespaces
+
+| Namespace Prefix | Contains |
+|---|---|
+| `certificates.templates.list` | Page title, table/grid headers, search placeholder, buttons |
+| `certificates.templates.list.status` | Status badge labels: draft, published, archived |
+| `certificates.templates.list.filters` | Filter labels, "Clear all filters" button, filter count badge |
+| `certificates.templates.list.pagination` | "Load More" button label, count display (pluralized) |
+| `certificates.templates.list.actions` | Card menu labels, confirmation dialog texts, toasts |
+| `certificates.templates.list.empty` | Empty state titles, descriptions, CTA buttons |
+| `certificates.sidebar` | Sidebar group label, item labels |
+
+### Key Catalog (Partial — Full Set in design.md)
+
+#### `certificates.templates.list`
+| Key | Type | EN | AR |
+|---|---|---|---|
+| `title` | `string` | "Certificate Templates" | "قوالب الشهادات" |
+| `searchPlaceholder` | `string` | "Search templates..." | "ابحث عن القوالب..." |
+| `createButton` | `string` | "Create Template" | "إنشاء قالب" |
+| `viewGrid` | `string` | "Grid View" | "عرض شبكي" |
+| `viewTable` | `string` | "Table View" | "عرض جدولي" |
+| `selectAll` | `string` | "Select All" | "تحديد الكل" |
+| `elementCount` | `(count: number) => string` | pluralized | pluralized |
+| `variableCount` | `(count: number) => string` | pluralized | pluralized |
+
+#### `certificates.templates.list.status`
+| Key | Type | EN | AR |
+|---|---|---|---|
+| `draft` | `string` | "Draft" | "مسودة" |
+| `published` | `string` | "Published" | "منشور" |
+| `archived` | `string` | "Archived" | "مؤرشف" |
+
+#### `certificates.templates.list.pagination`
+| Key | Type | EN | AR Pattern |
+|---|---|---|---|
+| `loadMore` | `string` | "Load More" | "تحميل المزيد" |
+| `loading` | `string` | "Loading..." | "جارٍ التحميل..." |
+| `count` | `(loaded: number, total: number) => string` | "Showing {loaded} of {total} templates" | Pluralized by total |
+
+#### `certificates.sidebar`
+| Key | Type | EN | AR |
+|---|---|---|---|
+| `groupLabel` | `string` | "Certificates" | "الشهادات" |
+| `templates` | `string` | "Templates" | "القوالب" |
+| `categories` | `string` | "Categories" | "التصنيفات" |
+| `recipientGroups` | `string` | "Recipient Groups" | "مجموعات المستلمين" |
+| `certificates` | `string` | "Certificates" | "الشهادات" |
+| `verificationLog` | `string` | "Verification Log" | "سجل التحقق" |
+
+### Arabic Pluralization Rules
+
+The Arabic pluralization system follows these morphological categories:
+
+| Category | Range | Pattern Example (قالب = template) |
+|---|---|---|
+| Zero | count = 0 | "لا توجد قوالب" |
+| One | count = 1 | "قالب واحد" |
+| Two | count = 2 | "قالبان" |
+| Few | count = 3–10 | "{count} قوالب" |
+| Many | count = 11–100 | "{count} قالباً" |
+| Other | count = 100+ | "{count} قالباً" |
+
+These are implemented as typed `(count: number) => string` functions in the locale schema, with each locale file providing the correct morphological form.
+
+---
+
+## 7. Data Models (Reference — Defined in Plan 05)
+
+This plan consumes the following types from Plan 05's GraphQL schema:
+
+| Type | Source | Used For |
+|---|---|---|
+| `CertTemplate` | Plan 05 GraphQL object | Card/row display fields |
+| `CertTemplateConnection` | Plan 05 GraphQL relay connection | Cursor pagination (edges, pageInfo, totalCount) |
+| `TemplateStatus` | Plan 05 enum | Status filter, status badge |
+| `CertTemplateFilterInput` | Plan 05 input | Search + filter arguments to query |
+| `CertTemplateSortInput` | Plan 05 input | Sort field + direction |
+
+### Consumed Fields (CertTemplate — list view)
+
+| Field | Type | Used In |
+|---|---|---|
+| `id` | `ID` | Apollo cache key, card key, navigation |
+| `name` | `String` | Card title, search match |
+| `status` | `TemplateStatus` | Status badge, status filter |
+| `category` | `Category` (object) | Category chip, category filter |
+| `backgroundImage` | `Image?` (nullable) | Thumbnail preview |
+| `updatedAt` | `DateTime` | "Last modified" display, default sort |
+| `elementCount` | `Int` | Element count display |
+| `variableCount` | `Int` | Variable count display |
+
+### Consumed Mutations (from Plan 05)
+
+| Mutation | Input | Returns |
+|---|---|---|
+| `createTemplate` | `{ name, categoryId?, orientation, pageSize }` | `CertTemplate` |
+| `deleteTemplate` | `{ id }` | `Boolean` |
+| `duplicateTemplate` | `{ id }` | `CertTemplate` |
+| `bulkArchiveTemplates` | `{ ids: [ID] }` | `BatchResult` |
+| `bulkDeleteTemplates` | `{ ids: [ID] }` | `BatchResult` |
+| `bulkChangeCategory` | `{ ids: [ID], categoryId }` | `BatchResult` |
+
+---
+
+## 8. Constraints & Assumptions
+
+### Constraints
+- C-08-01: All frontend components use MUI v9 `sx` prop (no style props)
+- C-08-02: All imports use `@/` path alias (no relative paths)
+- C-08-03: Logger from `@/frontend/utils/logger` (never `console.*`)
+- C-08-04: Apollo `useQuery` only (no `useLazyQuery`)
+- C-08-05: Three-location frontend split (App Router → Container → Desktop/Mobile)
+- C-08-06: Compile-time i18n system (no `next-intl`, no hardcoded strings)
+- C-08-07: State via Zustand store persisted to URL search params
+- C-08-08: GraphQL documents in `frontend/common/graphql/sharedDocuments/`
+
+### Assumptions
+- A-08-01: Plan 05 GraphQL schema is deployed and the `certTemplates` query supports `first`, `after`, `search`, `statusFilter`, `categoryId`, and `sortBy` arguments
+- A-08-02: Plan 05 mutations (`createTemplate`, `deleteTemplate`, `duplicateTemplate`, bulk mutations) are deployed
+- A-08-03: The sidebar navigation system supports adding custom navigation groups via configuration (not hardcoded)
+- A-08-04: User permissions are available in the Apollo context / auth provider
+- A-08-05: Category query from Plan 09 may not be ready — category filter must degrade gracefully
+
+---
+
+## 9. Acceptance Criteria Summary
+
+| AC ID | Requirement | Description |
+|---|---|---|
+| AC-08-01a–e | REQ-08-01 | List page displays all template fields correctly |
+| AC-08-02a–e | REQ-08-02 | Debounced server-side search works correctly |
+| AC-08-03a–f | REQ-08-03 | Filters work with AND logic and URL persistence |
+| AC-08-04a–f | REQ-08-04 | Cursor pagination with Load More and Arabic pluralization |
+| AC-08-05a–g | REQ-08-05 | Card actions work with permission checks and confirmation |
+| AC-08-06a–f | REQ-08-06 | Sidebar navigation group with 5 items |
+| AC-08-07a–f | REQ-08-07 | Create template dialog works end-to-end |
+| AC-08-08a–g | REQ-08-08 | Bulk actions with permission and pluralization |
+| AC-08-09a–f | REQ-08-09 | Responsive layout across breakpoints |
+| AC-08-10a–g | REQ-08-10 | Loading, error, and empty states |
+| NFR-08-01–10 | Non-Functional | Performance, accessibility, i18n, security |
+
+### Additional Acceptance Criteria (Enhanced)
+
+#### Mobile/Desktop Variant ACs (REQ-08-09 enhanced)
+- AC-08-09g: Desktop view renders via `templates.desktop.tsx` using `PageContainer`, `PageHeader`, `SectionPanel` components from `@/frontend/common/components/ui/`
+- AC-08-09h: Mobile view renders via `templates.mobile.tsx` using `MobilePageContainer`, `MobilePageHeader`, `MobileCardList` components from `@/frontend/common/components/ui/`
+- AC-08-09i: The Container uses `createLazyView` + `ResponsiveViewSwitch` to select the tier — no `useMediaQuery` or viewport checks in tier views
+- AC-08-09j: Desktop uses `<AppDataGrid>` for the table view with 8 column definitions (checkbox, name, category, status, elementCount, variableCount, updatedAt, actions)
+- AC-08-09k: Mobile uses `<MobileCardList>` with `<MobileTemplateCard>` rendering 48×48 Avatar, name, StatusBadge, relative date, inline Checkbox, and CardActionMenu
+- AC-08-09l: Desktop view mode toggle (`ToggleButtonGroup`) switches between grid and table; mobile has no toggle (always card list)
+- AC-08-09m: Tier views receive `Readonly<TemplateListViewModel>` as props — ZERO business logic, ZERO hooks (except local UI state), ZERO store subscriptions inside tier views
+- AC-08-09n: Shared dialogs (CreateTemplateDialog, DeleteConfirmDialog, BulkChangeCategoryDialog) render at Container level outside `ResponsiveViewSwitch` — they survive tier switches
+
+#### Interaction State ACs (REQ-08-10 enhanced)
+- AC-08-10h: Initial loading shows `<SkeletonGrid>` (6 skeleton cards, 3-column) on desktop / `<SkeletonList>` (6 skeleton items, 1-column) on mobile
+- AC-08-10i: Mutation success shows `<Snackbar severity="success">` with auto-hide 3000ms, rendered at Container level (survives tier switches)
+- AC-08-10j: Mutation error shows `<Snackbar severity="error">` with auto-hide 4000ms; the Create/Delete dialog stays open on error (user can retry)
+- AC-08-10k: Partial bulk failure shows `<Snackbar severity="warning">` with "N succeeded, M failed" text using `BatchResult` fields
+- AC-08-10l: Disabled state: Create button greyed out with `disabled={!canManage}` when user lacks `CERT_TEMPLATE_MANAGE`
+- AC-08-10m: Permission-gated actions are hidden (not greyed) — CardActionMenu only renders actions the user has permission for, via `viewModel.availableActions(template)` filtering
+
+#### i18n ACs (REQ from §6 enhanced)
+- AC-08-i18n-a: ALL user-facing strings use the `TemplateListLabels` typed translation object from `useAppTranslation(Translation.Dashboard.CertificateTemplateList)` — no hardcoded strings anywhere in the code
+- AC-08-i18n-b: Arabic pluralization uses 6-form CLDR morphological categories (zero, one, two, few, many, other) for all count functions: `pagination.count`, `bulkActions.selectedCount`, `elementCount`, `variableCount`, `filters.activeCount`
+- AC-08-i18n-c: English pluralization uses one/other forms for the same count functions
+- AC-08-i18n-d: Interpolation functions (`actions.deleteConfirmWarning(status)`, `createDialog.nameTooLong(max)`, `pagination.count(loaded, total)`) are typed in the locale type schema and implemented in both EN and AR locale files
+- AC-08-i18n-e: `TemplateListLabels` interface is defined in `shared/locale/types/dashboard/certificates/templates/list.ts` and registered via `defineNamespace` in the namespace file
+- AC-08-i18n-f: Sidebar labels use a separate `certificates.sidebar` key group translated via the same i18n system (not hardcoded in navigationConfig)
+- AC-08-i18n-g: Status badge labels (`draft`, `published`, `archived`) are translated and passed to `<StatusBadge>` as a `labels` record (not hardcoded inside the component)
+
+---
+
+## 10. Open Questions
+
+| # | Question | Impact | Default Assumption |
+|---|---|---|---|
+| Q1 | Does the sidebar navigation system support dynamic group registration or is it config-based? | Sidebar integration approach | Config-based: add group to sidebar config file |
+| Q2 | Should "Load More" load 20 or 50 items per page? | Performance vs UX | 20 (from requirements) |
+| Q3 | Does Plan 05's `certTemplates` query support `elementCount` and `variableCount` as computed fields? | Card display | Yes — Plan 05 includes them |
+| Q4 | Should the data table view support column sorting (clicking headers)? | UX scope | Out of scope — sorting is default updatedAt DESC only |
+| Q5 | Can a TEACHER see templates created by other teachers in the same academy? | Permission model | Yes — TEACHER sees own academy's templates but can only edit own |
+
+---
+
+## 11. Traceability
+
+| Requirement | Source (MASTER_ARCHITECTURE.md) | AC IDs |
+|---|---|---|
+| REQ-08-01 | "List page" | AC-08-01a–e |
+| REQ-08-02 | "search" | AC-08-02a–e |
+| REQ-08-03 | "filters" | AC-08-03a–f |
+| REQ-08-04 | "pagination" | AC-08-04a–f |
+| REQ-08-05 | "card actions" | AC-08-05a–g |
+| REQ-08-06 | "sidebar nav group" | AC-08-06a–f |
+| REQ-08-07 | "Create New Template" | AC-08-07a–f |
+| REQ-08-08 | "Bulk Actions" | AC-08-08a–g |
+| REQ-08-09 | "Responsive Layout" | AC-08-09a–f |
+| REQ-08-10 | "Loading & Error States" | AC-08-10a–g |

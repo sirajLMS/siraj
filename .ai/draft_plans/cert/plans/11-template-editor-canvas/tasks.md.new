@@ -1,0 +1,282 @@
+# Plan 11 — Template Editor: Visual Canvas (Tasks)
+
+> **Plan #:** 11 · **Title:** Template Editor — Visual Canvas
+> **Dependencies:** Plan 5 (GraphQL), Plan 10 (Template Editor Basic)
+> **Dependents:** Plan 12 (Element Management), Plan 15 (Preview & Publishing)
+> **Scope:** Canvas rendering, selection, drag-move, resize, rotation, snap guides, zoom/pan (react-zoom-pan-pinch), rulers, keyboard shortcuts, undo/redo, 6 element types, per-type property panel, desktop + mobile views, optimistic-locking save, auto-save, i18n, permissions
+> **Target:** Desktop-primary with mobile support (tier-isolated architecture)
+
+---
+
+## Task Dependency Graph
+
+```
+T01: Canvas Types (CanvasElement, CanvasState, CanvasTool, InteractionState)
+  ├──> T02: i18n Namespace (types + en + ar)
+  └──> T03: Zustand Canvas Store (certCanvasStore)
+        ├──> T04: Canvas Surface + TransformWrapper (react-zoom-pan-pinch)
+        │      ├──> T05: Background Layer + Grid Overlay
+        │      └──> T06: ElementRenderer + SelectionFrame + ResizeHandles + RotationHandle
+        │            ├──> T07: Drag-to-Move + Snap-to-Grid + Alignment Guides
+        │            └──> T08: Element Property Panel (per-type layouts)
+        ├──> T09: Canvas Toolbar (desktop) + Context Menu
+        ├──> T10: Ruler + ZoomControls + Keyboard Shortcuts
+        ├──> T11: Mobile View (FAB, bottom sheet, touch gestures)
+        └──> T12: ViewModel + Container + App Router Page + GraphQL Documents
+T01..T12 ──> T13: Quality Gate (tsgo, biome, lint, codescene)
+T13 ──> T14: Knowledge Propagation & Documentation
+```
+
+---
+
+## Phase 1: Types, Store & i18n
+
+### T01: Canvas Type Definitions
+
+**Objective:** Create all TypeScript types for the canvas: the `CanvasElement` discriminated union, `CanvasState`, `CanvasTool` enum, `InteractionState` union, `GuideLine`, `CanvasViewport` metrics, and history snapshot types.
+
+**Subtasks:**
+- [ ] 1.1 Create `frontend/common/views/dashboard/cert-canvas/types/canvasElement.ts`:
+  - Define `CanvasElement` discriminated union with 6 member types (aligned with INTER_PLAN_CONTRACTS `CertificateElementType` enum):
+    - `CanvasTextElement` — `{ type: 'static_text'; id; x; y; width; height; rotation; zIndex; content; fontFamily; fontSize; fontWeight; fontStyle; color; textAlign; lineHeight; overflow }`
+    - `CanvasDataTextElement` — `{ type: 'data_text'; id; x; y; width; height; rotation; zIndex; variableId; fontFamily; fontSize; fontWeight; fontStyle; color; textAlign; lineHeight; overflow }`
+    - `CanvasDataDateElement` — `{ type: 'data_date'; id; x; y; width; height; rotation; zIndex; variableId; dateFormat; fontFamily; fontSize; fontWeight; fontStyle; color; textAlign; lineHeight }`
+    - `CanvasImageElement` — `{ type: 'image'; id; x; y; width; height; rotation; zIndex; src; objectFit; opacity; borderRadius }`
+    - `CanvasQrCodeElement` — `{ type: 'qr_code'; id; x; y; width; height; rotation; zIndex; contentVariable; errorCorrectionLevel }`
+    - `CanvasShapeElement` — `{ type: 'shape'; id; x; y; width; height; rotation; zIndex; shapeType; fillColor; strokeColor; strokeWidth; borderRadius }`
+  - All coordinate fields are `number` in template-pixels at 72 DPI
+  - `id` is `string` (UUID)
+  - `overflow` field: `'clip' | 'shrink'` (v1 always `clip`; `shrink` is v2)
+
+- [ ] 1.2 Create `frontend/common/views/dashboard/cert-canvas/types/canvasState.ts`:
+  - `CanvasTool` enum: `'select' | 'pan' | 'marquee'`
+  - `InteractionState` discriminated union:
+    - `{ type: 'idle' }`
+    - `{ type: 'dragging'; elementIds: string[]; startX: number; startY: number; originalPositions: Record<string, { x: number; y: number }> }`
+    - `{ type: 'resizing'; elementId: string; handle: ResizeHandlePosition; startX: number; startY: number; originalState: { x; y; width; height } }`
+    - `{ type: 'rotating'; elementId: string; centerX: number; centerY: number; startAngle: number; originalRotation: number }`
+    - `{ type: 'marquee'; startX: number; startY: number; currentX: number; currentY: number }`
+  - `ResizeHandlePosition` type: `'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'`
+  - `GuideLine` type: `{ id: string; orientation: 'horizontal' | 'vertical'; position: number }`
+  - `CanvasViewport` type: `{ scale: number; positionX: number; positionY: number }`
+  - `HistorySnapshot` type: `{ elements: CanvasElement[]; selectedIds: string[]; action: string }`
+
+- [ ] 1.3 Create `frontend/common/views/dashboard/cert-canvas/types/canvasUtils.ts`:
+  - `SnapResult` type: `{ snappedX: number; snappedY: number; guides: GuideLine[] }`
+  - `AlignmentGuide` type for computed guide data
+  - `CanvasMetrics` type: `{ widthPx: number; heightPx: number; widthMm: number; heightMm: number; dpi: number }`
+
+- [ ] 1.4 Create barrel export `frontend/common/views/dashboard/cert-canvas/types/index.ts`
+
+- [ ] 1.5 Write outcome file: `.ai/plans/cert-plan-11/outcome/T01-canvas-types-outcome.md`
+
+**Files to Create:**
+- `frontend/common/views/dashboard/cert-canvas/types/canvasElement.ts`
+- `frontend/common/views/dashboard/cert-canvas/types/canvasState.ts`
+- `frontend/common/views/dashboard/cert-canvas/types/canvasUtils.ts`
+- `frontend/common/views/dashboard/cert-canvas/types/index.ts`
+
+**Requirements References:** REQ-11-01, REQ-11-20 (element types and properties)
+
+**Quality Loop (per file):**
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"verify-11-T01","files":["frontend/common/views/dashboard/cert-canvas/types/canvasElement.ts"]}'
+```
+
+**Instruction Verification:**
+- Read `frontend/AGENTS.md`
+- Read `.github/instructions/frontend.instructions.md`
+- Verify: `@/` path aliases, no `console.*`, discriminated union pattern (inline type-specific props, NOT `props: Record<string, unknown>`)
+
+---
+
+### T02: i18n Translation Namespace
+
+**Objective:** Create the compile-time i18n type file and both English and Arabic translation implementations for the `Translation.Dashboard.CertificatesCanvas` namespace.
+
+**Subtasks:**
+- [ ] 2.1 Create type file `shared/locale/types/dashboard/certificates/canvas.ts`:
+  - Define `CertificatesCanvasTranslations` interface with all keys from design.md §12:
+    - `toolbar.*` — 18 keys (addElement, addText, addImage, addShape, addQrCode, addDate, undo, redo, save, saveSuccess, saveError, zoomIn, zoomOut, fitToScreen, resetZoom, toggleGrid, toggleSnap, toggleRulers)
+    - `contextMenu.*` — 10 keys (cut, copy, paste, duplicate, delete, bringToFront, sendToBack, reorderForward, reorderBackward, properties)
+    - `elementType.*` — 6 keys (staticText, dataText, dataDate, image, qrCode, shape)
+    - `shapeType.*` — 3 keys (rectangle, ellipse, line)
+    - `property.*` — 25+ keys (position, size, x, y, width, height, rotation, content, fontFamily, fontSize, fontWeight, fontStyle, color, textAlign, lineHeight, src, objectFit, opacity, borderRadius, shapeType, fillColor, strokeColor, strokeWidth, errorCorrectionLevel, variableId, dateFormat)
+    - `status.*` — 20+ keys (loading, saving, saved, autoSaving, autoSaved, loadError, saveError, versionConflict, readOnlyMode, readOnlyDescription, textOverflowWarning, noElementsSelected, emptyCanvas, etc.)
+    - `dialog.*` — 8 keys (discardChangesTitle, discardChangesMessage, versionConflictTitle, versionConflictMessage, versionConflictReload, versionConflictOverwrite, shortcutHelpTitle, shortcutHelpClose)
+    - `layerList.*` — 4 keys (title, element, locked, visible)
+    - `alignment.*` — 8 keys (alignLeft, alignCenter, alignRight, alignTop, alignMiddle, alignBottom, distributeHorizontal, distributeVertical)
+    - `shortcut.*` — 14 keys (undo, redo, save, copy, paste, duplicate, delete, bringToFront, sendToBack, selectAll, zoomIn, zoomOut, resetZoom, escape)
+    - `aria.*` — 6 keys with interpolation (canvasAriaLabel, elementSelectedAriaLabel, draggingAriaLabel, resizingAriaLabel, rotatingAriaLabel, clipboardPastedAriaLabel)
+  - Pluralization: `(count: number) => string` patterns where applicable (e.g., `elementsSelected: (count: number) => string`)
+  - Interpolation: `(param: string) => string` patterns for dynamic values
+
+- [ ] 2.2 Create English implementation `shared/locale/en/dashboard/certificates/canvas.ts`:
+  - Implement all keys from the type file
+  - Provide English values for all toolbar labels, context menu items, property labels, status messages, dialog text, layer list, alignment, shortcut tooltips, ARIA labels
+  - Implement pluralization: `elementsSelected: (count) => count === 1 ? "1 element selected" : \`${count} elements selected\``
+  - Implement interpolation: `aria.elementSelectedAriaLabel: (name) => \`${name} selected\``
+
+- [ ] 2.3 Create Arabic implementation `shared/locale/ar/dashboard/certificates/canvas.ts`:
+  - Implement all keys with Arabic translations
+  - Use correct Arabic pluralization rules (dual form for 2, plural for 3-10, singular for 11+)
+  - RTL-aware strings
+  - Interpolation with Arabic grammar
+
+- [ ] 2.4 Register namespace in translation system:
+  - Add `CertificatesCanvas` to `Translation.Dashboard` type (in `shared/locale/types/dashboard/index.ts` or equivalent)
+  - Add imports in `shared/locale/en/dashboard/index.ts`, `shared/locale/ar/dashboard/index.ts`
+
+- [ ] 2.5 Write outcome file: `.ai/plans/cert-plan-11/outcome/T02-i18n-outcome.md`
+
+**Files to Create:**
+- `shared/locale/types/dashboard/certificates/canvas.ts`
+- `shared/locale/en/dashboard/certificates/canvas.ts`
+- `shared/locale/ar/dashboard/certificates/canvas.ts`
+
+**Files to Modify:**
+- `shared/locale/types/dashboard/index.ts` (or the relevant registration file)
+- `shared/locale/en/dashboard/index.ts`
+- `shared/locale/ar/dashboard/index.ts`
+
+**Requirements References:** REQ-11-i18n (§3), design.md §12
+
+**Quality Loop (per file):**
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"verify-11-T02","files":["shared/locale/types/dashboard/certificates/canvas.ts","shared/locale/en/dashboard/certificates/canvas.ts","shared/locale/ar/dashboard/certificates/canvas.ts"]}'
+```
+
+**Instruction Verification:**
+- Read `shared/AGENTS.md` — critical: shared layer MUST NOT import from `@/frontend/**`, `@/backend/**`, or `@/app/**`
+- Read `.github/instructions/frontend.instructions.md`
+- Verify: nested TS object fields (NOT dot-nested strings), `@/shared/` imports only, compile-time type safety
+
+---
+
+### T03: Zustand Canvas Store
+
+**Objective:** Create the session-only Zustand store (`certCanvasStore.ts`) with all state fields, 26 actions, past/future history stacks with 500ms coalescing, clipboard, selection (string[] not Set), and save protocol with optimistic locking.
+
+**Subtasks:**
+- [ ] 3.1 Create `frontend/common/stores/certCanvasStore.ts` with the following state fields:
+  - `elements: CanvasElement[]` — live, unsaved element positions/sizes/rotation (sorted by zIndex)
+  - `savedElements: CanvasElement[]` — last saved snapshot for dirty comparison
+  - `savedVersion: number` — last saved version number for optimistic locking
+  - `selectedIds: string[]` — currently selected element IDs (NOT Set — Zustand immutable arrays)
+  - `interactionState: InteractionState` — discriminated union (idle | dragging | resizing | rotating | marquee)
+  - `activeTool: CanvasTool` — 'select' | 'pan' | 'marquee'
+  - `scale: number` — zoom scale (default 1.0, clamped 0.25–4.0)
+  - `positionX: number` — pan X offset
+  - `positionY: number` — pan Y offset
+  - `isGridEnabled: boolean` (default true)
+  - `gridSize: number` (default 10, in template pixels)
+  - `snapToGrid: boolean` (default true)
+  - `snapToElements: boolean` (default true)
+  - `showRulers: boolean` (default true)
+  - `showGuides: boolean` (default true)
+  - `activeGuides: GuideLine[]` — alignment guides during drag
+  - `past: HistorySnapshot[]` — undo stack (max 50)
+  - `future: HistorySnapshot[]` — redo stack (max 50)
+  - `clipboard: CanvasElement[]` — cut/copy buffer
+  - `isDirty: boolean` — derived: `JSON.stringify(elements) !== JSON.stringify(savedElements)`
+  - `isSaving: boolean` — save mutation in progress
+  - `isReadOnly: boolean` — user lacks `certificates.templates.manage` permission
+  - `canvasWidthMm: number` (default 210 for A4)
+  - `canvasHeightMm: number` (default 297 for A4)
+  - `lastActionTimestamp: number` — for coalescing
+  - `lastActionType: string` — for coalescing
+  - `lastActionElementId: string | null` — for coalescing
+
+- [ ] 3.2 Implement selection actions:
+  - `selectElement(id: string, additive: boolean)` — single/ctrl+click; if additive, toggle in selectedIds; else replace
+  - `selectMany(ids: string[])` — marquee select; replace selectedIds
+  - `selectAll()` — set selectedIds to all element IDs
+  - `deselectAll()` — set selectedIds to []
+  - `setTool(tool: CanvasTool)` — set activeTool
+
+- [ ] 3.3 Implement element CRUD actions (each pushes to `past` before mutation):
+  - `addElement(element: CanvasElement)` — add to elements array, push snapshot, clear future
+  - `updateElement(id: string, updates: Partial<CanvasElement>)` — live update (no history push — for drag/resize/rotate live)
+  - `commitElementChange(id: string, oldState: Partial<CanvasElement>, actionType: string)` — pointerup; push snapshot to past with old state, clear future, mark dirty
+  - `deleteElement(id: string)` — remove from elements, remove from selectedIds, push snapshot
+  - `deleteSelected()` — delete all selectedIds
+  - `duplicateElement(id: string)` — clone with new UUID, offset +20px, select the clone
+  - `duplicateSelected()` — duplicate all selectedIds
+
+- [ ] 3.4 Implement z-order actions (push to past, renormalize zIndex after):
+  - `bringToFront(ids: string[])` — set selected elements' zIndex to max+1, then renormalize all
+  - `sendToBack(ids: string[])` — set to 0, shift others up, renormalize
+  - `reorderElement(id: string, direction: 'forward' | 'backward')` — swap with neighbor in zIndex-sorted array, renormalize
+
+- [ ] 3.5 Implement clipboard actions:
+  - `copySelection()` — deep clone selectedIds elements to clipboard
+  - `cutSelection()` — copy + deleteSelected
+  - `paste()` — paste clipboard elements with new UUIDs, offset +20px from originals, select pasted
+
+- [ ] 3.6 Implement zoom/pan actions:
+  - `setScale(scale: number)` — clamp 0.25–4.0
+  - `setPan(x: number, y: number)` — set positionX, positionY
+  - `setViewport(scale: number, x: number, y: number)` — combined zoom+pan
+
+- [ ] 3.7 Implement grid/guide actions:
+  - `toggleGrid()` — flip isGridEnabled
+  - `toggleSnap()` — flip snapToGrid
+  - `toggleRulers()` — flip showRulers
+  - `setGridSize(size: number)` — set gridSize
+  - `setActiveGuides(guides: GuideLine[])` — set activeGuides
+  - `clearGuides()` — set activeGuides to []
+
+- [ ] 3.8 Implement interaction state:
+  - `setInteractionState(state: InteractionState)` — set interactionState
+
+- [ ] 3.9 Implement history system (past/future pattern — NOT Command array):
+  - `pushToPast(snapshot: HistorySnapshot)` — prepend to past, trim to 50, clear future
+  - `undo()` — pop from past (shift), push present to future, restore popped snapshot
+  - `redo()` — pop from future (shift), push present to past, restore popped snapshot
+  - Coalescing logic: if `lastActionType === newActionType && lastActionElementId === elementId && (Date.now() - lastActionTimestamp) < 500` → replace the top of `past` instead of pushing new entry (keep earliest old state)
+  - `canUndo` computed: `past.length > 0`
+  - `canRedo` computed: `future.length > 0`
+
+- [ ] 3.10 Implement save protocol:
+  - `setSaving(bool: boolean)` — set isSaving
+  - `markSaved(version: number)` — copy elements to savedElements, set savedVersion, isDirty false
+  - `resetToSaved()` — restore elements from savedElements (discard unsaved changes), clear past/future
+  - `setReadOnly(bool: boolean)` — set isReadOnly
+
+- [ ] 3.11 Write computed selectors (export as standalone functions that take state):
+  - `useSelectedElements(state)` — elements filtered by selectedIds
+  - `useIsDirty(state)` — compare elements vs savedElements
+  - `useCanUndo(state)` — `past.length > 0`
+  - `useCanRedo(state)` — `future.length > 0`
+
+- [ ] 3.12 Write outcome file: `.ai/plans/cert-plan-11/outcome/T03-canvas-store-outcome.md`
+
+**Files to Create:**
+- `frontend/common/stores/certCanvasStore.ts`
+
+**Requirements References:** REQ-11-01 (store shape), REQ-11-12 (undo/redo), REQ-11-15 (history), REQ-11-16 (save protocol), design.md §5
+
+**Quality Loop (per file):**
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"verify-11-T03","files":["frontend/common/stores/certCanvasStore.ts"]}'
+```
+
+**Instruction Verification:**
+- Read `frontend/common/stores/AGENTS.md`
+- Read `frontend/AGENTS.md`
+- Read `.github/instructions/frontend.instructions.md`
+- Verify: NO `Set` (use `string[]`), NO `persist` middleware (session-only), NO non-serializable values in state (use `useRef` for refs), `@/` path aliases, no `console.*`
+
+---
