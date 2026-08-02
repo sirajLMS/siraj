@@ -1,19 +1,12 @@
 FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
 
-# Install system dependencies (non-interactive)
+# Install additional system dependencies (non-interactive)
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   && apt-get -y install --no-install-recommends \
-  curl \
-  wget \
-  git \
-  zsh \
-  sudo \
-  ca-certificates \
-  unzip \
-  fzf \
-  openssl \
-  xxd \
   postgresql-client \
+  fzf \
+  xxd \
+  openssl \
   libglib2.0-0 \
   libnss3 \
   libatk-bridge2.0-0 \
@@ -43,22 +36,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   fonts-noto-cjk \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
-
-
-# Copy Oh My Zsh installation script and config
-COPY scripts/install_ohmyzsh.sh /tmp/install_ohmyzsh.sh
-COPY scripts/.p10k.zsh /tmp/.p10k.zsh
-
-USER vscode
-RUN chmod +x /tmp/install_ohmyzsh.sh && \
-    /tmp/install_ohmyzsh.sh || true
-RUN rm -f /tmp/install_ohmyzsh.sh
-
-# Copy and run Node.js installation script
-COPY scripts/instalNode.sh /tmp/instalNode.sh
-RUN chmod +x /tmp/instalNode.sh && \
-    /tmp/instalNode.sh || true
-RUN rm -f /tmp/instalNode.sh
 
 USER vscode
 ENV SHELL=/bin/zsh
