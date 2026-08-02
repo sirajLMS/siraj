@@ -70,6 +70,8 @@ export namespace TeacherRepository {
     return {
       id: created.id,
       userId: created.userId,
+      phone: created.phone,
+      gender: created.gender,
       status: parseAccountStatus(userRow?.status),
       timezone: parseIanaTimezone(userRow?.timezone),
       createdAt: created.createdAt,

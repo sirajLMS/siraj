@@ -7,11 +7,13 @@
 
 echo "🚀 Starting the ultimate Zsh setup..."
 
-# --- Step 1: Install Prerequisites ---
-echo "⚙️ Step 1/7: Installing prerequisites (zsh, git, curl, fontconfig)..."
-# The '-y' flag assumes 'yes' to all prompts from the package manager.
-sudo apt update
-sudo apt install -y zsh git curl fontconfig
+SUDO=""
+if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
+    SUDO="sudo"
+fi
+
+$SUDO apt update || apt update || true
+$SUDO apt install -y zsh git curl fontconfig || apt install -y zsh git curl fontconfig || true
 
 # --- Step 2: Install Oh My Zsh ---
 if [ -d "$HOME/.oh-my-zsh" ]; then
@@ -226,12 +228,17 @@ update_zshrc_config() {
     fi
 }
 
+if [ ! -f ~/.zshrc ]; then
+    echo "  📄 Creating default ~/.zshrc..."
+    echo 'export ZSH="$HOME/.oh-my-zsh"' > ~/.zshrc
+    echo 'ZSH_THEME="robbyrussell"' >> ~/.zshrc
+    echo 'plugins=(git)' >> ~/.zshrc
+    echo 'source $ZSH/oh-my-zsh.sh' >> ~/.zshrc
+fi
+
 # Check if ZSH_THEME line exists in the expected format
 if ! grep -q '^ZSH_THEME=' ~/.zshrc; then
-    echo "  ❌ ERROR: Could not find ZSH_THEME line in .zshrc"
-    echo "  💡 Expected format: ZSH_THEME=\"theme-name\""
-    echo "  📄 Please manually set ZSH_THEME=\"powerlevel10k/powerlevel10k\" in ~/.zshrc"
-    exit 1
+    echo 'ZSH_THEME="robbyrussell"' >> ~/.zshrc
 fi
 
 # Apply the configuration updates
@@ -324,7 +331,7 @@ fi
 # --- Step 7: Set Zsh as Default Shell ---
 echo "🐚 Step 7/7: Setting Zsh as the default shell..."
 # Try to change the default shell to zsh
-if sudo chsh -s $(which zsh) $(whoami) 2>/dev/null; then
+if $SUDO chsh -s $(which zsh) $(whoami) 2>/dev/null || chsh -s $(which zsh) 2>/dev/null; then
     echo "  ✅ Default shell changed to zsh"
 else
     echo "  ⚠️  Could not change default shell automatically"

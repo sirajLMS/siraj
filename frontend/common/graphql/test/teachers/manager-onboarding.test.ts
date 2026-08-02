@@ -1,8 +1,14 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { IanaTimezone, ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  CurrencyCode,
+  IanaTimezone,
+  ManagerAccountType,
+  type ManagerOnboardingInput,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
+  assertOperationDenied,
   authenticatedRequest,
   cleanupTestSuperAdmin,
   loginDemoUser,
@@ -11,21 +17,21 @@ import {
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 
-const createMinimalManagerInput = (
-  overrides?: Partial<{
+const buildManagerInput = (
+  overrides: Partial<ManagerOnboardingInput> & {
     name: string;
     email: string;
     accountType: ManagerAccountType;
-  }>
-) => ({
-  name: overrides?.name ?? "Test Manager",
-  email: overrides?.email ?? `test_manager_${Date.now()}@test.com`,
-  avatarUrl: null,
-  password: `Pwd_${randomUUID()}`,
-  accountType: overrides?.accountType ?? ManagerAccountType.Manager,
-  phone: null,
-  displayCurrency: null,
-  timezone: IanaTimezone.Utc,
+  }
+): ManagerOnboardingInput => ({
+  name: overrides.name,
+  email: overrides.email,
+  password: overrides.password ?? `Pwd_${randomUUID()}`,
+  accountType: overrides.accountType,
+  avatarUrl: overrides.avatarUrl ?? null,
+  displayCurrency: overrides.displayCurrency ?? null,
+  phone: overrides.phone ?? null,
+  timezone: overrides.timezone ?? null,
 });
 
 describe("Manager Onboarding GraphQL API", () => {
@@ -45,12 +51,16 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(superAdminUserId).toBeTruthy();
   });
 
-  test("Super Admin can create manager with admin type", async () => {
+  test("Super Admin can create manager with admin type (all optional fields provided)", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", createManagerMutationDocument, {
-      input: createMinimalManagerInput({
+      input: buildManagerInput({
         name: "GraphQL Test Admin",
         email: `graphql_admin_${Date.now()}@test.com`,
         accountType: ManagerAccountType.Admin,
+        avatarUrl: "https://example.com/avatar.png",
+        displayCurrency: CurrencyCode.Usd,
+        phone: "+201000000000",
+        timezone: IanaTimezone.AfricaCairo,
       }),
     });
 
@@ -60,11 +70,16 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(result.createManager.assignedGroupSlug).toBe("academy_admin");
   });
 
-  test("Super Admin can create manager with manager type", async () => {
+  test("Super Admin can create manager with manager type (optional fields as null)", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", createManagerMutationDocument, {
-      input: createMinimalManagerInput({
+      input: buildManagerInput({
         name: "GraphQL Test Manager",
         email: `graphql_manager_${Date.now()}@test.com`,
+        accountType: ManagerAccountType.Manager,
+        avatarUrl: null,
+        displayCurrency: null,
+        phone: null,
+        timezone: null,
       }),
     });
 
@@ -72,25 +87,33 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(result.createManager.assignedGroupSlug).toBe("staff_default");
   });
 
-  const assertManagerCreationDeniedForRole = async (role: string): Promise<boolean> => {
-    const token = await loginDemoUser(role);
-    const result = await testClient.mutate({
-      mutation: createManagerMutationDocument,
-      variables: { input: createMinimalManagerInput() },
-      context: { headers: { Authorization: `Bearer ${token}` } },
-      errorPolicy: "all",
-    });
-    expect(result.error).toBeDefined();
-    return true;
-  };
-
   test("Admin denied creating manager", async () => {
-    const denied = await assertManagerCreationDeniedForRole("academy_admin");
+    const denied = await assertOperationDenied("academy_admin", "mutate", createManagerMutationDocument, {
+      input: buildManagerInput({
+        name: "Denied Manager",
+        email: `denied_admin_${Date.now()}@test.com`,
+        accountType: ManagerAccountType.Manager,
+        avatarUrl: null,
+        displayCurrency: null,
+        phone: null,
+        timezone: null,
+      }),
+    });
     expect(denied).toBe(true);
   });
 
   test("Teacher denied creating manager", async () => {
-    const denied = await assertManagerCreationDeniedForRole("teacher_default");
+    const denied = await assertOperationDenied("teacher_default", "mutate", createManagerMutationDocument, {
+      input: buildManagerInput({
+        name: "Denied Manager",
+        email: `denied_teacher_${Date.now()}@test.com`,
+        accountType: ManagerAccountType.Manager,
+        avatarUrl: null,
+        displayCurrency: null,
+        phone: null,
+        timezone: null,
+      }),
+    });
     expect(denied).toBe(true);
   });
 
@@ -98,7 +121,15 @@ describe("Manager Onboarding GraphQL API", () => {
     const result = await testClient.mutate({
       mutation: createManagerMutationDocument,
       variables: {
-        input: createMinimalManagerInput(),
+        input: buildManagerInput({
+          name: "Unauthenticated Manager",
+          email: `unauth_manager_${Date.now()}@test.com`,
+          accountType: ManagerAccountType.Manager,
+          avatarUrl: null,
+          displayCurrency: null,
+          phone: null,
+          timezone: null,
+        }),
       },
       errorPolicy: "all",
     });
