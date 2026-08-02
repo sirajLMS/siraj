@@ -39,6 +39,9 @@ export const updateTeacherProfileMutationDocument: TypedDocumentNode<
       name
       email
       phone
+      nationalId
+      nationality
+      countryCode
       dateOfBirth
       gender
       address

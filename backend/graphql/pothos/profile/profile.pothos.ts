@@ -125,7 +125,7 @@ export const TeacherOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<TeacherOwnProfileUpdateInput>("TeacherOwnProfileUpdateInput")
   .implement({
     fields: t => ({
-      phone: t.string({ required: false }),
+      phone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
       nationality: t.string({ required: false }),
       countryCode: t.string({ required: false }),
       nationalId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),

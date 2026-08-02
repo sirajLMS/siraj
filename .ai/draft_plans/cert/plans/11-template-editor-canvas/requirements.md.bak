@@ -1,0 +1,725 @@
+# Requirements — Plan 11: Template Editor — Visual Canvas
+
+> **Plan**: 11 — Template Editor — Visual Canvas
+> **Depends On**: Plan 5 (GraphQL API), Plan 10 (Template Editor Basic Info & Dimensions)
+> **Stakeholders**: Certificate admin, template designer
+> **Related Docs**: MASTER_ARCHITECTURE.md; INTER_PLAN_CONTRACTS.md; cgvs_analysis/01-generation-logic.md §4 (Template Elements Positioning System); cgvs_analysis/04-template-ui.md §2, §8, §11; siraj_analysis/05-frontend-patterns.md §1-3, §9, §10
+
+---
+
+## 1. Introduction
+
+### Overview
+
+The Visual Canvas is the core interactive editing surface for the certificate template designer. It renders the template background (image or color) at the correct aspect ratio and allows the admin to visually position, resize, rotate, and arrange template elements (text, image, QR code, date, shapes) via direct manipulation. The canvas uses a relative coordinate system mapped to template dimensions (e.g., 794×1123 for A4 portrait at 96 DPI).
+
+Unlike the CGVS project which uses a form-based editor with no visual drag-and-drop (see cgvs_analysis/04-template-ui.md §2: "The CGVS template editor does not use drag-and-drop"), Siraj introduces a full visual canvas editor. This is a new capability not present in the original CGVS system.
+
+### Business Value
+
+- Visual template design reduces the learning curve vs. coordinate-based form editing
+- Real-time feedback (drag, resize, rotate) accelerates template creation
+- WYSIWYG canvas ensures the PDF output matches the on-screen design
+- Multi-select and alignment tools enable efficient layout of complex certificates
+
+### Scope
+
+| In Scope | Out of Scope |
+|----------|-------------|
+| Visual canvas rendering (background + positioned elements) | Element type-specific property CRUD operations (Plan 12) |
+| Drag-to-move with real-time x/y updates | Template variable management (Plan 13) |
+| Resize handles (8 handles: 4 corners + 4 edges; disabled when rotated) | Template preview & publishing (Plan 15) |
+| Rotation handle (rotate around element center) | PDF rendering engine (Plan 6) |
+| Snap-to-grid (configurable grid size, toggle) | Recipient group management (Plan 14) |
+| Snap-to-element alignment guides (smart guides) | Background image upload (Plan 10) |
+| Multi-select (Ctrl+click, marquee/rubber-band selection) — desktop only | Template dimensions/orientation form (Plan 10) |
+| Z-index management (bring to front, send to back, etc.) with renormalization | Group resize/rotate (v2 scope — v1 is single-element only) |
+| Canvas toolbar (add element, zoom, grid toggle, undo/redo, save) | |
+| Rulers (pixel rulers on top and left edges) — desktop only | |
+| Keyboard shortcuts (nudge, delete, duplicate, undo/redo, select all, copy/paste, save, zoom, z-order) — desktop only | |
+| Element selection state (selected, hovered, bounds) | |
+| Zustand canvas store (elements, selection, history, zoom, grid) — NOT persisted | |
+| Pointer Events API for cross-device interaction (mouse, touch, pen) | |
+| react-zoom-pan-pinch integration for zoom/pan (v4.0.3) | |
+| 6 element types: static_text, data_text, data_date, image, qr_code, shape | |
+| Per-type element rendering + property panel | |
+| Mobile canvas view (simplified: FAB, bottom sheet, touch gestures, no multi-select) | |
+| Desktop canvas view (full: toolbar, left panel, right panel, rulers, context menu) | |
+| Performance: memoized element rendering (`React.memo` per element) | |
+| i18n keys for canvas toolbar, element labels, context menu, properties, ARIA | |
+| Permission integration: `certificates.templates.manage` (edit), `certificates.templates.view` (read-only) | |
+| Optimistic locking on save (`expectedVersion`) | |
+| History: undo/redo with past/future stacks, 50-entry limit, 500ms coalescing | |
+| SR live announcements for drag coordinates, selection changes, element add/delete | |
+| Auto-save: 30s when idle + `isDirty` (no auto-save mid-interaction) | |
+| Unsaved-changes guard: `beforeunload` + in-app navigation confirm | |
+
+---
+
+## 2. Requirements
+
+### REQ-11-01: Canvas Rendering with Template Coordinate System
+
+**WHEN** the user navigates to `/certificates/templates/{templateId}/canvas`, **THE SYSTEM SHALL** fetch the template definition and all certificate template elements via GraphQL, render the template background (image or color) at the correct aspect ratio based on template dimensions and orientation from Plan 10, and display all existing template elements as absolutely positioned overlays within the canvas viewport.
+
+**AND WHEN** the user lacks the `certificates.templates.manage` permission but has `certificates.templates.view`, **THE SYSTEM SHALL** render the canvas in read-only mode (no selection, no drag, no editing controls).
+
+**Acceptance Criteria**:
+- Canvas route: `app/(dashboard)/certificates/templates/[templateId]/canvas/page.tsx` — Server Component with `certificates.templates.manage` permission guard
+- Canvas dimensions derived from `certificate_templates.width` and `certificate_templates.height` fields (e.g., 794×1123 for A4 portrait at 96 DPI, 1123×794 for A4 landscape)
+- 96 DPI convention pinned for all template coordinates (per INTER_PLAN_CONTRACTS §18 — aligned with Plan 6 Puppeteer renderer and Plan 10 presets)
+- Background image rendered at the canvas's full dimensions, maintaining aspect ratio
+- Each element positioned at its `(x, y)` within the template coordinate space
+- Element visual representation matches element type per §15.1 of design.md:
+  - `static_text`: `<div>` with text content, font styling, `overflow: hidden` + overflow warning badge
+  - `data_text`: same as static_text but displays bound variable value or placeholder
+  - `data_date`: formatted date string via `Intl.DateTimeFormat`, or placeholder
+  - `image`: `<img>` with `objectFit` mode, opacity, border radius
+  - `qr_code`: `QrCode2Outlined` icon placeholder (actual QR generation at export time by Plan 6)
+  - `shape`: `<div>` (rectangle), `<svg>` (ellipse, line) with fill/stroke
+- Canvas surface uses `react-zoom-pan-pinch` `TransformWrapper` + `TransformComponent` for zoom/pan
+- Empty template (no elements) shows background only with centered hint message
+- Read-only mode: all `ElementRenderer` instances get `pointer-events: none`; toolbar hides Add/Delete/Save; shows zoom + grid only; a read-only banner displays
+
+### REQ-11-02: Element Selection (Single)
+
+**WHEN** the user clicks on an element within the canvas, **THE SYSTEM SHALL** select that element, display a highlighted selection border with resize handles and a rotation handle, and update the selection state in the canvas store.
+
+**AND WHEN** the user clicks on empty canvas area, **THE SYSTEM SHALL** deselect all elements.
+
+**Acceptance Criteria**:
+- Click on element sets `selectedIds` to `[elementId]` in the Zustand store (using `string[]`, NOT `Set<string>`)
+- Selected element shows a 1-2px highlighted border in `theme.palette.primary.main`
+- 8 resize handles rendered at corners and edge midpoints of the element's bounding box
+- **v1 constraint**: Resize handles are disabled (not rendered) when `element.rotation !== 0` — resize-while-rotated is v2 scope
+- 1 rotation handle rendered above the element (connected by a thin line)
+- Hover state: hovering over an unselected element shows a subtle outline border
+- Selection state persists across zoom level changes and canvas re-renders
+- Selectors that return `selectedIds` arrays must produce new array references on change to trigger React re-renders (Zustand requirement — no in-place mutation)
+
+### REQ-11-03: Drag-to-Move Element
+
+**WHEN** the user presses pointer-down on a selected element and drags, **THE SYSTEM SHALL** update the element's `(xCoordinate, yCoordinate)` in real-time during the drag, and commit the final position on pointer-up.
+
+**Acceptance Criteria**:
+- Drag initiated via `pointerdown` event on element body (not on resize/rotation handles)
+- During drag: element position updates in the Zustand store on every `pointermove` event (throttled via `requestAnimationFrame`)
+- Coordinate space: screen pixels are converted to template coordinates using the current zoom factor
+- Element cannot be dragged outside canvas bounds (clamped to `[0, templateWidth]` and `[0, templateHeight]`)
+- On `pointerup`: final position committed to store; an undo/redo history entry is created
+- If snap-to-grid is enabled: position snaps to nearest grid intersection on pointer-up
+- If snap-to-element is enabled: alignment guides appear when the dragged element's edges align with other elements' edges
+- Cursor changes to `grabbing` during active drag
+
+### REQ-11-04: Resize Handles
+
+**WHEN** the user drags a resize handle, **THE SYSTEM SHALL** resize the element's bounding box in the direction of the dragged handle, updating width and/or height in real-time.
+
+**Acceptance Criteria**:
+- Corner handles (NW, NE, SW, SE) resize both width and height simultaneously
+- Edge handles (N, S, E, W) resize only one dimension
+- Minimum element size enforced (e.g., 20×20 template pixels for text, 10×10 for shapes)
+- Aspect ratio is NOT locked by default (no Shift constraint); future plan may add Shift-to-lock
+- Resize direction is relative to the opposite corner/edge (e.g., dragging SE handle keeps NW corner fixed)
+- During resize: real-time visual feedback; width/height update in store via `requestAnimationFrame` throttling
+- On pointer-up: final dimensions committed; undo/redo history entry created
+- If snap-to-grid is enabled: dimensions snap to grid increment
+- **v1 constraint**: Resize handles are NOT rendered when `element.rotation !== 0` — resize-while-rotated is forbidden in v1 (geometry complexity deferred to v2)
+- Rotation is NOT applied during resize (resize operates in element-local space)
+
+### REQ-11-05: Rotation Handle
+
+**WHEN** the user drags the rotation handle, **THE SYSTEM SHALL** rotate the element around its center point, updating the rotation angle in real-time.
+
+**Acceptance Criteria**:
+- Rotation handle positioned above the element's top edge, connected by a thin line
+- Dragging the handle computes the angle between the element center and the pointer position
+- Rotation angle stored in degrees (0-360, normalized)
+- If Shift is held: rotation snaps to 15-degree increments
+- Visual feedback: element transforms in real-time using CSS transform during drag
+- On pointer-up: final rotation committed to store; undo/redo history entry created
+- Minimum rotation step: 0.1 degrees (smooth rotation)
+- Reset rotation to 0 via context menu or properties panel numeric input
+- **v1 constraint**: When `element.rotation !== 0`, resize handles are disabled (not rendered) — the user must reset rotation to resize
+- **v1 constraint**: Group rotation is NOT supported — only single-element rotation
+- Upon reset rotation, a ResizeAvailable history entry is pushed to enable handles on next selection
+
+### REQ-11-06: Snap-to-Grid
+
+**WHEN** snap-to-grid is enabled and the user drags or resizes an element, **THE SYSTEM SHALL** snap the element's position and dimensions to the nearest grid intersection.
+
+**Acceptance Criteria**:
+- Grid toggle button in the canvas toolbar enables/disables snap
+- Grid size is configurable (e.g., 5px, 10px, 20px grid increments in template coordinates)
+- When enabled: grid lines are visually rendered on canvas (faint, behind elements)
+- During drag: element position snaps to nearest grid point on pointer-up (smooth drag, snap on release)
+- During resize: dimensions snap to nearest grid increment
+- Grid visual: dotted or dashed lines in a neutral theme color
+- Grid state (enabled, grid size) stored in Zustand canvas store
+- Grid does not render in the final PDF (canvas-only visual aid)
+
+### REQ-11-07: Snap-to-Element Alignment Guides
+
+**WHEN** the user drags or resizes an element near another element's edge or center, **THE SYSTEM SHALL** display alignment guide lines and snap the dragged element to align with the nearby element.
+
+**Acceptance Criteria**:
+- Alignment guides appear when the dragged element's edge or center is within a threshold (e.g., 5 template pixels) of another element's edge or center
+- Guide types: vertical center, vertical edge (left/right), horizontal center, horizontal edge (top/bottom)
+- Guides rendered as thin colored lines spanning the canvas, visible only during drag
+- When active, the dragged element snaps to the aligned position
+- Guide color: theme primary color (distinct from grid lines)
+- Performance: guide calculation only checks visible elements (no off-screen elements)
+- Guides disappear on pointer-up
+
+### REQ-11-08: Multi-Select (Ctrl+Click and Marquee)
+
+**WHEN** the user Ctrl+clicks elements or drags a marquee selection rectangle on the canvas, **THE SYSTEM SHALL** select multiple elements simultaneously and enable bulk operations.
+
+**Acceptance Criteria**:
+- Ctrl+click (or Cmd+click on macOS) adds/removes element ID from `selectedIds` array in store (using `string[]`, NOT `Set<string>`)
+- Shift+click on empty canvas initiates marquee selection (rubber-band rectangle)
+- Marquee rectangle rendered as a semi-transparent filled box during drag
+- On marquee pointer-up: all elements intersecting the rectangle are selected
+- Multiple selected elements show individual selection borders (shared color, no individual resize handles)
+- Dragging a multi-selected group moves all selected elements together
+- Relative positions between selected elements are preserved during group drag
+- Multi-select operations: group delete, group z-index change, group alignment, group duplicate
+
+### REQ-11-09: Canvas Toolbar
+
+**WHEN** the user is in the canvas editor, **THE SYSTEM SHALL** display a toolbar above the canvas with element creation, zoom, grid toggle, alignment, undo/redo, and save controls.
+
+**Acceptance Criteria**:
+- Toolbar is a horizontal bar rendered above the canvas area (desktop only — mobile uses FAB + floating toolbar)
+- Add element dropdown (MUI `SplitButton` or `Menu`): text (static_text), data text (data_text), date (data_date), image, QR code, shape (labeled with i18n `toolbar.add*` keys)
+- Zoom controls: zoom in (`ref.current.zoomIn(0.1)`), zoom out (`ref.current.zoomOut(0.1)`), fit-to-screen (`ref.current.centerView()`), 100% (`ref.current.resetTransform()`), zoom level display (interpolated `toolbar.zoomLevel`)
+- Grid toggle button: toggles snap-to-grid on/off (state in Zustand `showGrid`)
+- Snap toggle button: toggles snap-to-element alignment guides (state in `snapToGrid`)
+- Rulers toggle button: toggles ruler visibility (state in `showRulers`)
+- Undo button: disabled when `past` stack is empty (`canUndo() === false`)
+- Redo button: disabled when `future` stack is empty (`canRedo() === false`)
+- Save button: commits canvas state to server via GraphQL mutation
+- Save button shows loading spinner with `toolbar.saving` text during mutation; disabled when `!isDirty`
+- All toolbar buttons have translations from `Translation.Dashboard.CertificatesCanvas.toolbar.*` keys
+- Toolbar button tooltips use `title` attr (MUI `Tooltip`) + `aria-label` for accessibility
+
+### REQ-11-10: Zoom and Pan
+
+**WHEN** the user uses zoom controls or scrolls with Ctrl/Cmd held, **THE SYSTEM SHALL** zoom the canvas in/out while maintaining the center point of the viewport.
+
+**AND WHEN** the user holds Space and drags, or uses trackpad scroll, or uses middle mouse drag, **THE SYSTEM SHALL** pan the canvas within viewport bounds.
+
+**Acceptance Criteria**:
+- Zoom levels: 25% to 400% (0.25 to 4.0 zoom factor — enforced by react-zoom-pan-pinch `minScale={0.25}` / `maxScale={4}`)
+- Zoom implemented via `react-zoom-pan-pinch` v4.0.3 `TransformWrapper` (NOT manual CSS transform)
+- Toolbar zoom in/out: `ref.current.zoomIn(0.1)` / `ref.current.zoomOut(0.1)` — clamped by library
+- Fit-to-screen: `ref.current.centerView()` — calculates zoom factor to fit entire canvas within viewport
+- 100%: `ref.current.resetTransform()` — sets zoom factor to 1.0 (1:1 template pixels to screen pixels)
+- Wheel zoom: `Ctrl+wheel` natively handled by TransformWrapper `wheel: { step: 0.1 }`
+- Double-click zoom: `doubleClick: { mode: 'zoomIn', step: 0.7 }` (native TransformWrapper)
+- Zoom level synced to Zustand store via `onTransformed` callback (writes `scale` → `zoomLevel`)
+- Pan boundaries: `limitToBounds: true` — canvas cannot be dragged outside viewport
+- Pan via: Spacebar+drag (desktop), middle mouse, trackpad scroll, two-finger touch (mobile)
+- Zoom does not affect the element coordinate values (only the visual scale)
+
+### REQ-11-11: Rulers
+
+**WHEN** the canvas is displayed, **THE SYSTEM SHALL** show pixel rulers along the top and left edges of the canvas viewport, indicating coordinate positions in template pixels.
+
+**Acceptance Criteria**:
+- Horizontal ruler spans the full width of the canvas viewport (top edge)
+- Vertical ruler spans the full height of the canvas viewport (left edge)
+- Ruler markings update based on scroll position (pan offset)
+- Ruler markings reflect the current zoom level (labels in template coordinates, not screen pixels)
+- Ruler major ticks every 50 template pixels, minor ticks every 10 template pixels
+- Current cursor position indicator: a thin line on each ruler follows the pointer position
+- Ruler corner: the intersection of the two rulers (top-left) displays origin (0, 0)
+- Ruler visibility is always on for desktop canvas (no toggle needed)
+- Ruler thickness: compact (20-24px) to maximize canvas space
+
+### REQ-11-12: Keyboard Shortcuts
+
+**WHEN** the canvas is focused and the user presses keyboard shortcuts, **THE SYSTEM SHALL** perform the corresponding action.
+
+**AND WHEN** the focus is in a text input field within the canvas or property panel, **THE SYSTEM SHALL NOT** trigger any canvas shortcuts.
+
+**Acceptance Criteria**:
+- `←` / `↑` / `→` / `↓`: nudge selected element(s) by 1 template pixel
+- `Shift+Arrow`: nudge by 10 template pixels
+- `Delete` / `Backspace`: remove selected element(s) — creates DeleteElement history entry
+- `Ctrl+D` / `Cmd+D`: duplicate selected element(s) with offset (+20px, +20px) — creates DuplicateElement history entry
+- `Ctrl+Z` / `Cmd+Z`: undo last action (pops from `past` stack)
+- `Ctrl+Shift+Z` / `Cmd+Shift+Z`: redo (pops from `future` stack)
+- `Ctrl+A` / `Cmd+A`: select all elements
+- `Ctrl+C` / `Cmd+C`: copy selected element(s) to store clipboard
+- `Ctrl+V` / `Cmd+V`: paste from clipboard at offset (+20px, +20px) — creates PasteElements history entry
+- `Ctrl+S` / `Cmd+S`: save canvas — prevents default browser save dialog
+- `]`: bring selected element(s) to front — renormalizes zIndex sequentially (0, 1, 2, …)
+- `[`: send selected element(s) to back — renormalizes zIndex sequentially
+- `Escape`: deselect all + blur canvas container (returns focus to document Tab order)
+- `Ctrl+=`: zoom in (`ref.current.zoomIn(0.1)`)
+- `Ctrl+-`: zoom out (`ref.current.zoomOut(0.1)`)
+- `Ctrl+0`: reset zoom to 100% (`ref.current.resetTransform()`)
+- `Space` (hold): enable pan mode
+- Arrow key nudging creates a single undo entry (500ms debounce — sequential arrow presses merge into one undo step)
+- Keyboard shortcuts are registered on a single `window` keydown listener gated by `canvasFocus` state
+
+### REQ-11-13: Z-Index Management
+
+**WHEN** the user accesses the context menu or toolbar z-index controls for selected element(s), **THE SYSTEM SHALL** reorder the element's z-index layer among siblings.
+
+**Acceptance Criteria**:
+- Four z-index operations: bring to front, bring forward, send backward, send to back
+- Bring to front: moves element to end of array — zIndex renormalized (0, 1, 2, … after operation)
+- Bring forward: swaps with element one level higher — zIndex renormalized
+- Send backward: swaps with element one level lower — zIndex renormalized
+- Send to back: moves element to start of array — zIndex renormalized
+- **zIndex renormalization**: After ANY z-order operation, all elements' `zIndex` values are reset to sequential integers (0, 1, 2, …) based on array order — prevents integer overflow and keeps zIndex compact
+- Multi-select: all selected elements move together, preserving relative order
+- Z-index changes create undo/redo history entries
+- Z-index controls available via context menu (right-click) and keyboard shortcuts (`]` for bring forward, `[` for send backward)
+
+### REQ-11-14: Alignment Tools
+
+**WHEN** multiple elements are selected and the user triggers an alignment command, **THE SYSTEM SHALL** reposition all selected elements relative to the selection bounding box.
+
+**Acceptance Criteria**:
+- Six alignment commands: align left, align center (horizontal), align right, align top, align middle (vertical), align bottom
+- Alignment is relative to the bounding box of all selected elements (not individual element positions)
+- Distribute horizontally: equal horizontal spacing between selected elements based on their centers
+- Distribute vertically: equal vertical spacing between selected elements based on their centers
+- Distribute requires at least 3 selected elements
+- Alignment changes create undo/redo history entries
+- Alignment controls in a toolbar panel or context menu (not the main canvas toolbar)
+
+### REQ-11-15: Undo/Redo History
+
+**WHEN** the user performs undo or redo, **THE SYSTEM SHALL** revert to or re-apply the previous/next canvas state snapshot using the `past`/`future` stack pattern.
+
+**Acceptance Criteria**:
+- History implementation: `past[]`, `present`, `future[]` (NOT a single array — this is the Zustand standard pattern)
+- `undo()`: pops from `past`, pushes current `present` to `future`, sets `present` = popped state
+- `redo()`: pops from `future`, pushes current `present` to `past`, sets `present` = popped state
+- Any new action: pushes current `present` to `past`, clears `future`
+- Each history entry is a deep-clone snapshot of the entire `elements[]` array (not partial diffs — simpler, correct for ≤50 elements)
+- Each history entry records `actionType` ('addElement' | 'deleteElement' | 'moveElement' | 'resizeElement' | 'rotateElement' | 'duplicateElement' | 'pasteElements' | 'reorderElement' | 'alignElements') and `timestamp`
+- Undo limit: 50 entries in `past` (oldest discarded when exceeded — shift queue)
+- Fine-grained history entries (drag, resize, rotate) are coalesced: 500ms debounce timer groups rapid interactions into a single entry (e.g., 10 sequential arrow-key presses = 1 undo step)
+- Redo stack: cleared when a new action is performed after an undo
+- Undo/redo restores element positions, dimensions, rotation, zIndex, and element list
+- Zoom level, grid settings, rulers, pan position are NOT part of undo/redo (viewport state, not content state — stored outside history)
+- Programmatic API: `undo()`, `redo()`, `canUndo()`, `canRedo()`, `pushHistory(actionType)` on the canvas store
+- Toolbar buttons reflect availability (disabled state) based on `canUndo()` / `canRedo()`
+- Mobile: undo only (`undo()` — no redo button; `future` stack maintained but no UI affordance)
+
+### REQ-11-16: Save Canvas State
+
+**WHEN** the user clicks the Save button, presses Ctrl+S, or the auto-save timer fires, **THE SYSTEM SHALL** persist ONLY the changed elements via GraphQL mutation using optimistic locking.
+
+**AND WHEN** the server returns a version mismatch, **THE SYSTEM SHALL** refetch the template, show a conflict warning dialog, and call `resetToSaved()` to discard local changes.
+
+**Acceptance Criteria**:
+- Save via GraphQL mutation: `UpdateCanvasElementsInput` accepting `templateId`, `expectedVersion`, `changes` (diff-only payload of changed elements, not full array)
+- `expectedVersion`: The template version at the time of last fetch/check-out; used for optimistic locking
+- On success: localized success notification (snackbar), `isDirty` flag cleared, `savedVersion` updated to new server version
+- On version mismatch error (HTTP 409 equivalent): show `dialogs.versionConflict` dialog → user chooses "Keep my changes" or "Discard and refresh" → if discard, calls `resetToSaved()` with server's current state
+- On other failure: localized error notification, `isDirty` flag remains
+- Save is atomic — all changed elements saved in a single mutation or none
+- Save button shown disabled when `!isDirty` (dirty flag tracking: set when any element property changes, cleared on successful save)
+- Save button shows loading spinner with "Saving..." text during mutation
+- **Auto-save policy**: Auto-save triggers automatically after 30 seconds when `isDirty` is true AND no active interaction (not dragging, not resizing, not rotating, no property panel focus)
+- Unsaved changes warning when navigating away (`window.onbeforeunload` + in-app route change guard)
+
+### REQ-11-17: Element Context Menu
+
+**WHEN** the user right-clicks on an element or the canvas, **THE SYSTEM SHALL** display a context menu with element-specific and canvas-specific actions.
+
+**AND WHEN** the user long-presses an element on mobile, **THE SYSTEM SHALL** display the context menu (mobile equivalent of right-click).
+
+**Acceptance Criteria**:
+- Right-click on element: context menu with duplicate, delete, bring to front, bring forward, send backward, send to back, reset rotation, copy, paste (if clipboard non-empty)
+- Right-click on canvas (empty area): context menu with paste (if clipboard non-empty), select all, zoom to fit, toggle grid
+- Context menu items are keyboard accessible (arrow navigation, Enter, Escape to close)
+- Context menu uses MUI `Menu` component with localized labels from `contextMenu.*` i18n keys
+- Copy stores a serialized element clone array in the Zustand store clipboard (not OS clipboard — element templates are domain objects)
+- Context menu items that are unavailable (e.g., paste with empty clipboard) show as disabled with `aria-disabled="true"`
+- Mobile: long-press (500ms timeout) triggers context menu; not available when multiple elements selected
+
+### REQ-11-18: Performance — Memoized Element Rendering
+
+**WHEN** the canvas renders multiple elements, **THE SYSTEM SHALL** memoize individual element components to prevent unnecessary re-renders during drag operations.
+
+**Acceptance Criteria**:
+- Each element is rendered by a `React.memo`'d `ElementRenderer` component keyed by element ID
+- `ElementRenderer` props: `{ element: CanvasElement, isSelected: boolean, zoom: number, isReadOnly: boolean }` — stable references, primitive comparison
+- `ElementRenderer` re-renders ONLY when its own `element` object changes (position, size, rotation, content) or `isSelected` toggles
+- During drag of element A, element B does NOT re-render (Zustand selectors + `React.memo` prevent propagation)
+- Canvas background does NOT re-render during element drag (static unless `canvasSize` changes)
+- `SelectionFrame` overlay is a separate component layer rendered ONLY for selected elements (not part of `ElementRenderer`)
+- Alignment guide overlay is a separate component (renders only during active drag)
+- Typical template has 5-30 elements (max ~50) — NO virtual scrolling needed (bounded by domain)
+- Zustand store selectors use `useStore(selector)` with `shallow` equality to prevent unnecessary re-renders
+
+### REQ-11-19: Mobile Canvas View
+
+**WHEN** the user accesses the canvas on a mobile device, **THE SYSTEM SHALL** render a simplified mobile-optimized canvas with touch gestures, floating toolbar, FAB for adding elements, and a bottom sheet for properties.
+
+**Acceptance Criteria**:
+- Mobile route: same URL, served by `ResponsiveViewSwitch` which loads `CanvasMobileView` from `frontend/mobile/views/dashboard/cert-canvas/canvas.mobile.tsx`
+- Layout: canvas takes full screen; floating toolbar at top with zoom/undo; FAB at bottom-right for adding elements; collapsible bottom sheet for element properties
+- Touch interactions:
+  - Single tap: select element (same as click)
+  - Single touch drag: move selected element
+  - Long-press (500ms): open context menu for that element
+  - Pinch (two-finger): zoom via react-zoom-pan-pinch native pinch handling
+  - Two-finger drag: pan the canvas
+  - Double-tap: zoom in by 0.7x step
+- **Mobile constraints** (simplified vs desktop):
+  - NO multi-select (single selection only)
+  - NO keyboard shortcuts (no hardware keyboard)
+  - NO redo (undo only — mobile users rarely need redo)
+  - NO rulers (not enough screen space)
+  - NO marquee selection
+  - 4 corner resize handles only (not 8 — fingers too imprecise for edge handles)
+  - Rotation via numeric input in bottom sheet only (no rotation handle on canvas)
+  - NO alignment guides or snap-to-element (touch precision is low)
+  - Snap-to-grid retained (simpler, useful)
+- Bottom sheet: MUI `BottomSheet` (or `SwipeableDrawer` with `anchor="bottom"`); expands to ~60% screen height; collapses to a peek ~48px showing selected element name; swipe down to dismiss
+- FAB: `SpeedDial` component with element-type shortcuts (text, image, shape, QR code, data text, data date)
+- Mobile view uses the same Zustand store and ViewModel as desktop (shared state, different rendering tier)
+
+### REQ-11-20: Element Types and Properties
+
+**WHEN** the user adds an element to the canvas, **THE SYSTEM SHALL** create one of 6 element types, each with type-specific properties rendered in the PropertyPanel.
+
+**Acceptance Criteria**:
+- `static_text`: Content (string), fontFamily, fontSize (px), fontWeight, fontStyle, color, alignment (left/center/right/justify), lineHeight, textOverflow (clip + warning badge)
+- `data_text`: variableId (FK to template variables), fontFamily, fontSize, fontWeight, fontStyle, color, alignment, lineHeight, placeholderText (shown when variable unbound), textOverflow (clip + warning)
+- `data_date`: variableId, dateFormat (full/long/medium/short), fontFamily, fontSize, fontWeight, color, alignment, placeholderText
+- `image`: src (URL), objectFit (cover/contain/fill/none), opacity (0-1), borderRadius, alt
+- `qr_code`: variableId (the content to encode), errorCorrectionLevel (L/M/Q/H), size (inherited from width/height)
+- `shape`: shapeType (rectangle/ellipse/line), fillColor, strokeColor, strokeWidth, borderRadius (rectangle only)
+- Each element type has a distinct icon in toolbar and layer list: `TextFieldsOutlined`, `ImageOutlined`, `QrCode2Outlined`, `CalendarTodayOutlined`, `CategoryOutlined`
+- All elements share common properties: x, y, width, height, rotation, zIndex
+- PropertyPanel renders type-specific controls in addition to common section (see design.md §15.2)
+
+### REQ-11-21: Version Conflict and Read-Only Modes
+
+**WHEN** the save mutation returns a version mismatch, **THE SYSTEM SHALL** display a conflict dialog and offer resolution.
+
+**AND WHEN** the user has `certificates.templates.view` but not `certificates.templates.manage`, **THE SYSTEM SHALL** render the canvas in read-only mode.
+
+**Acceptance Criteria**:
+- Version conflict dialog (`dialogs.versionConflict`): message explains another user saved changes; buttons "Keep my changes" (continue editing, discard server state) or "Discard my changes" (refetch + `resetToSaved()`)
+- Read-only mode: toolbar shows only zoom controls and grid toggle; no add/delete/save/context-menu; ElementRenderer gets `pointer-events: none`; banner displays "Read-only — you do not have edit permission for this template"
+- Read-only mode uses `certificates.templates.view` permission; edit mode requires `certificates.templates.manage` (aligned with INTER_PLAN_CONTRACTS canonical permission keys)
+
+### REQ-11-22: Interaction States
+
+**WHEN** the canvas transitions between states, **THE SYSTEM SHALL** display appropriate loading, error, empty, and interaction feedback.
+
+**Acceptance Criteria**:
+- Loading: MUI `CircularProgress` centered over canvas area during initial element fetch
+- Error: MUI `Alert` with retry button if element fetch fails
+- Saving: Save button shows spinner + "Saving..." text; canvas remains interactive except Start/Exit/Close-Save moment
+- Empty canvas: centered hint text "No elements — use the toolbar to add text, images, and more" with no selection
+- Single element selected: PropertyPanel shows that element's properties; selection frame visible
+- Multi-select: PropertyPanel shows count + common properties only (position, size, z-order); no type-specific properties
+- Dragging: SR live region announces "Dragging element: x={x} y={y}" in real-time; other elements do NOT re-render
+- Resizing: SR live region announces "Resizing: width={w} height={h}"
+- Rotating: SR live region announces "Rotation: {angle}°"
+- No selection: PropertyPanel shows "No element selected" hint
+
+---
+
+## 3. i18n Requirements
+
+### Namespace
+
+All canvas i18n keys live in the `Translation.Dashboard.CertificatesCanvas` namespace using the Siraj compile-time TypeScript i18n system.
+
+### Translation Keys
+
+The keys are organized as nested TypeScript object fields (NOT dot-nested strings) in locale files.
+
+**Toolbar labels** (18 keys):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `toolbar.addElement` | "Add Element" | "إضافة عنصر" |
+| `toolbar.addText` | "Text" | "نص" |
+| `toolbar.addDataText` | "Data Text" | "نص بيانات" |
+| `toolbar.addDate` | "Date" | "تاريخ" |
+| `toolbar.addImage` | "Image" | "صورة" |
+| `toolbar.addQrCode` | "QR Code" | "رمز QR" |
+| `toolbar.addShape` | "Shape" | "شكل" |
+| `toolbar.zoomIn` | "Zoom In" | "تكبير" |
+| `toolbar.zoomOut` | "Zoom Out" | "تصغير" |
+| `toolbar.fitToScreen` | "Fit to Screen" | "ملاءمة الشاشة" |
+| `toolbar.actualSize` | "Actual Size (100%)" | "الحجم الفعلي (100%)" |
+| `toolbar.toggleGrid` | "Toggle Grid" | "تبديل الشبكة" |
+| `toolbar.toggleSnap` | "Toggle Snap" | "تبديل المحاذاة" |
+| `toolbar.toggleRulers` | "Toggle Rulers" | "تبديل المسطرة" |
+| `toolbar.undo` | "Undo" | "تراجع" |
+| `toolbar.redo` | "Redo" | "إعادة" |
+| `toolbar.save` | "Save" | "حفظ" |
+| `toolbar.saving` | "Saving..." | "جارٍ الحفظ..." |
+
+**Context menu labels** (10 keys):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `contextMenu.duplicate` | "Duplicate" | "تكرار" |
+| `contextMenu.delete` | "Delete" | "حذف" |
+| `contextMenu.bringToFront` | "Bring to Front" | "إحضار للأمام" |
+| `contextMenu.bringForward` | "Bring Forward" | "إحضار خطوة" |
+| `contextMenu.sendBackward` | "Send Backward" | "إرسال خطوة للخلف" |
+| `contextMenu.sendToBack` | "Send to Back" | "إرسال للخلف" |
+| `contextMenu.copy` | "Copy" | "نسخ" |
+| `contextMenu.paste` | "Paste" | "لصق" |
+| `contextMenu.selectAll` | "Select All" | "تحديد الكل" |
+| `contextMenu.resetRotation` | "Reset Rotation" | "إعادة ضبط الدوران" |
+
+**Element type labels** (6 keys):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `element.staticText` | "Text" | "نص" |
+| `element.dataText` | "Data Text" | "نص بيانات" |
+| `element.dataDate` | "Date" | "تاريخ" |
+| `element.image` | "Image" | "صورة" |
+| `element.qrCode` | "QR Code" | "رمز QR" |
+| `element.shape` | "Shape" | "شكل" |
+
+**Shape type labels** (3 keys):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `shape.rectangle` | "Rectangle" | "مستطيل" |
+| `shape.ellipse` | "Ellipse" | "بيضاوي" |
+| `shape.line` | "Line" | "خط" |
+
+**Property panel labels** (25+ keys):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `properties.title` | "Properties" | "الخصائص" |
+| `properties.noSelection` | "No element selected" | "لا يوجد عنصر محدد" |
+| `properties.position` | "Position" | "الموضع" |
+| `properties.size` | "Size" | "الحجم" |
+| `properties.rotation` | "Rotation" | "الدوران" |
+| `properties.x` | "X" | "س" |
+| `properties.y` | "Y" | "ص" |
+| `properties.width` | "Width" | "العرض" |
+| `properties.height` | "Height" | "الارتفاع" |
+| `properties.zIndex` | "Z-Index" | "الترتيب" |
+| `properties.content` | "Content" | "المحتوى" |
+| `properties.fontFamily` | "Font Family" | "نوع الخط" |
+| `properties.fontSize` | "Font Size" | "حجم الخط" |
+| `properties.fontWeight` | "Font Weight" | "وزن الخط" |
+| `properties.fontStyle` | "Font Style" | "نمط الخط" |
+| `properties.color` | "Color" | "اللون" |
+| `properties.alignment` | "Alignment" | "المحاذاة" |
+| `properties.lineHeight` | "Line Height" | "ارتفاع السطر" |
+| `properties.objectFit` | "Object Fit" | "الملاءمة" |
+| `properties.opacity` | "Opacity" | "الشفافية" |
+| `properties.borderRadius` | "Border Radius" | "نصف القطر" |
+| `properties.fillColor` | "Fill Color" | "لون التعبئة" |
+| `properties.strokeColor` | "Stroke Color" | "لون الحدود" |
+| `properties.strokeWidth` | "Stroke Width" | "سماكة الحدود" |
+| `properties.shapeType` | "Shape Type" | "نوع الشكل" |
+| `properties.variable` | "Variable" | "المتغير" |
+| `properties.placeholder` | "Placeholder" | "النص البديل" |
+| `properties.dateFormat` | "Date Format" | "صيغة التاريخ" |
+| `properties.errorCorrection` | "Error Correction" | "مستوى التصحيح" |
+
+**Status and dialog messages** (20+ keys):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `status.emptyHint` | "No elements — use the toolbar to add text, images, and more" | "لا توجد عناصر — استخدم الشريط لإضافة نصوص وصور والمزيد" |
+| `status.loadingElements` | "Loading canvas..." | "جارٍ تحميل اللوحة..." |
+| `status.fetchError` | "Failed to load canvas elements" | "فشل تحميل عناصر اللوحة" |
+| `status.readOnly` | "Read-only — you do not have edit permission for this template" | "قراءة فقط — ليس لديك صلاحية تعديل هذا القالب" |
+| `notification.saved` | "Canvas changes saved" | "تم حفظ تغييرات اللوحة" |
+| `notification.saveFailed` | "Failed to save canvas changes" | "فشل حفظ تغييرات اللوحة" |
+| `notification.elementAdded` | "{type} element added" | "تم إضافة عنصر {type}" |
+| `notification.elementDeleted` | "Element deleted" | "تم حذف العنصر" |
+| `notification.elementsCopied` | "{count} element(s) copied" | "تم نسخ {count} عنصر/عناصر" |
+| `notification.elementsPasted` | "{count} element(s) pasted" | "تم لصق {count} عنصر/عناصر" |
+| `notification.textOverflow` | "Text content overflows the element box — content will be clipped on export" | "تجاوز النص حدود العنصر — سيتم قص المحتوى عند التصدير" |
+| `dialogs.unsavedChanges` | "You have unsaved changes. Leave anyway?" | "لديك تغييرات غير محفوظة. هل تريد المغادرة؟" |
+| `dialogs.versionConflict` | "Another user has saved changes to this template. Discard your changes and reload?" | "قام مستخدم آخر بحفظ تغييرات على هذا القالب. هل تريد تجاهل تغييراتك وإعادة التحميل؟" |
+| `dialogs.discardButton` | "Discard and Reload" | "تجاهل وإعادة تحميل" |
+| `dialogs.keepButton` | "Keep My Changes" | "احتفظ بتغييراتي" |
+| `dialogs.confirmDelete` (one) | "Delete this element?" | "حذف هذا العنصر؟" |
+| `dialogs.confirmDelete` (many) | "Delete {count} elements?" | "حذف {count} عنصر/عناصر؟" |
+
+**Layer list labels** (4 keys):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `layers.title` | "Layers" | "الطبقات" |
+| `layers.show` | "Show" | "إظهار" |
+| `layers.hide` | "Hide" | "إخفاء" |
+| `layers.lock` | "Lock" | "قفل" |
+
+**Alignment tool labels** (8 keys):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `alignment.alignLeft` | "Align Left" | "محاذاة لليسار" |
+| `alignment.alignCenter` | "Align Center" | "محاذاة للوسط" |
+| `alignment.alignRight` | "Align Right" | "محاذاة لليمين" |
+| `alignment.alignTop` | "Align Top" | "محاذاة للأعلى" |
+| `alignment.alignMiddle` | "Align Middle" | "محاذاة للمنتصف" |
+| `alignment.alignBottom` | "Align Bottom" | "محاذاة للأسفل" |
+| `alignment.distributeHorizontal` | "Distribute Horizontally" | "توزيع أفقي" |
+| `alignment.distributeVertical` | "Distribute Vertically" | "توزيع عمودي" |
+
+**Shortcut tooltip labels** (14 keys — shown in desktop toolbar button tooltips):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `shortcuts.undo` | "Undo (Ctrl+Z)" | "تراجع (Ctrl+Z)" |
+| `shortcuts.redo` | "Redo (Ctrl+Shift+Z)" | "إعادة (Ctrl+Shift+Z)" |
+| `shortcuts.delete` | "Delete (Del)" | "حذف (Del)" |
+| `shortcuts.duplicate` | "Duplicate (Ctrl+D)" | "تكرار (Ctrl+D)" |
+| `shortcuts.copy` | "Copy (Ctrl+C)" | "نسخ (Ctrl+C)" |
+| `shortcuts.paste` | "Paste (Ctrl+V)" | "لصق (Ctrl+V)" |
+| `shortcuts.selectAll` | "Select All (Ctrl+A)" | "تحديد الكل (Ctrl+A)" |
+| `shortcuts.save` | "Save (Ctrl+S)" | "حفظ (Ctrl+S)" |
+| `shortcuts.bringForward` | "Bring Forward (])" | "إحضار خطوة (])" |
+| `shortcuts.sendBackward` | "Send Backward ([)" | "إرسال خطوة ([)" |
+| `shortcuts.zoomIn` | "Zoom In (Ctrl+=)" | "تكبير (Ctrl+=)" |
+| `shortcuts.zoomOut` | "Zoom Out (Ctrl+-)" | "تصغير (Ctrl+-)" |
+| `shortcuts.resetZoom` | "Reset Zoom (Ctrl+0)" | "إعادة التكبير (Ctrl+0)" |
+| `shortcuts.escape` | "Deselect (Esc)" | "إلغاء التحديد (Esc)" |
+
+**ARIA labels** (6 keys with interpolation):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `aria.canvasLabel` | "Certificate template canvas" | "لوحة قالب الشهادة" |
+| `aria.elementLabel` | (type: string, x: number, y: number) => `{type} element at position ${x}, ${y}` | (type: string, x: number, y: number) => `عنصر ${type} في الموضع ${x}، ${y}` |
+| `aria.elementSelected` | (count: number) => `${count} element selected` (see pluralization) | (count: number) => Arabic plural rules |
+| `aria.dragging` | (x: number, y: number) => `Dragging element: x=${x}, y=${y}` | (x: number, y: number) => `سحب العنصر: س=${x}، ص=${y}` |
+| `aria.resizing` | (w: number, h: number) => `Resizing: width=${w}, height=${h}` | (w: number, h: number) => `تغيير الحجم: العرض=${w}، الارتفاع=${h}` |
+| `aria.rotating` | (angle: number) => `Rotation: ${angle} degrees` | (angle: number) => `الدوران: ${angle} درجة` |
+
+**Zoom display** (interpolation):
+
+| Key Path | English (en) | Arabic (ar) |
+|----------|--------------|-------------|
+| `toolbar.zoomLevel` | (zoom: number) => `${zoom}%` | (zoom: number) => `${zoom}٪` |
+
+### Pluralization
+
+| Key Path | English (one/other) | Arabic (zero/one/two/few/many/other) |
+|----------|---------------------|--------------------------------------|
+| `selection.elementsSelected` | (count: number) => count === 1 ? `${count} element selected` : `${count} elements selected` | (count: number) => zero: `${count} عنصر محدد`, one: `${count} عنصر محدد`, two: `عنصران محددان`, few: `${count} عناصر محددة`, many: `${count} عنصراً محدداً`, other: `${count} عنصر محدد` |
+| `history.undoSteps` | (count: number) => count === 1 ? `${count} undo step` : `${count} undo steps` | (count: number) => one: `${count} خطوة تراجع`, few: `${count} خطوات تراجع`, many: `${count} خطوة تراجع`, other: `${count} خطوة تراجع` |
+
+### Interpolation Parameters
+
+| Key Path | Parameters | Types |
+|----------|-----------|-------|
+| `toolbar.zoomLevel` | `zoom: number` | number (zoom percentage, e.g. 75) |
+| `notification.elementAdded` | `type: string` | string (element type label) |
+| `notification.elementsCopied` | `count: number` | number (count of copied elements) |
+| `notification.elementsPasted` | `count: number` | number (count of pasted elements) |
+| `dialogs.confirmDelete` (many) | `count: number` | number (count of elements to delete) |
+| `aria.elementLabel` | `type: string, x: number, y: number` | string + numbers |
+| `aria.dragging` | `x: number, y: number` | numbers |
+| `aria.resizing` | `w: number, h: number` | numbers |
+| `aria.rotating` | `angle: number` | number (rotation degrees) |
+
+### Implementation Location
+
+- Type schema: `shared/locale/types/dashboard/certificates/canvas.ts`
+- EN locale: `shared/locale/en/dashboard/certificates/canvas.ts`
+- AR locale: `shared/locale/ar/dashboard/certificates/canvas.ts`
+- Registration: in the existing dashboard certificates translation barrel (following Siraj's compile-time i18n pattern)
+- Client components use `useAppTranslation(Translation.Dashboard.CertificatesCanvas)` from `@/shared/locale/client`
+- Server components use `getTranslations(locale).dashboardTranslations.certificatesCanvas` from `@/shared/locale/server`
+- GraphQL resolvers use `ctx.t(Translation.Dashboard.CertificatesCanvas)` from `@/shared/locale/server-graphql`
+
+---
+
+## 4. Accessibility Requirements
+
+### REQ-11-ACC-01: Keyboard Navigation
+
+**WHEN** a keyboard-only user interacts with the canvas, **THE SYSTEM SHALL** provide keyboard-accessible alternatives for all canvas operations.
+
+- Tab navigates between: toolbar buttons, canvas area, layer list (left sidebar)
+- When canvas is focused: arrow keys nudge, Delete deletes, Ctrl+Z undoes, Ctrl+A selects all
+- All toolbar buttons are reachable via Tab and actionable via Enter/Space
+- Context menu is openable via Shift+F10 or Menu key when an element is focused
+- ARIA live region announces selection changes (e.g., "Text element selected", "3 elements selected")
+- Focus indicator visible on all interactive elements (MUI default focus ring)
+- Keyboard shortcut help dialog accessible via `?` key (lists all shortcuts with i18n `shortcuts.*` labels)
+
+### REQ-11-ACC-02: Screen Reader Support
+
+- Canvas container has `role="application"` with `aria-label` from `aria.canvasLabel` key
+- Each element has `aria-label` with element type and position (interpolated `aria.elementLabel`: "Text element at position 100, 200")
+- Selection state change announced via `aria-live="polite"` region using `aria.elementSelected` pluralization
+- Drag announcements: `aria.dragging` interpolates real-time x/y coordinates via SR live region
+- Resize announcements: `aria.resizing` interpolates width/height via SR live region
+- Rotation announcements: `aria.rotating` interpolates angle via SR live region
+- Rulers have `aria-hidden="true"` (decorative, not meaningful as text)
+- Grid lines have `aria-hidden="true"`
+- Zoom level displayed in a `aria-live` region when changed
+- Unsaved changes warning is a `role="alert"` dialog
+- Version conflict dialog is a `role="alertdialog"` with focus trap
+
+### REQ-11-ACC-03: Color Contrast
+
+- Selection border: `theme.palette.primary.main` — NO hardcoded colors anywhere
+- Alignment guides: `theme.palette.primary.main` — visible against all background types
+- Grid lines: `theme.palette.divider` color — subtle but visible
+- Ruler markings: `theme.palette.text.secondary` on background
+- Read-only banner: `theme.palette.warning.main` background with `theme.palette.warning.contrastText`
+
+---
+
+## 5. Knowledge Base & Progress Tracking
+
+### REQ-11-KB-01: Canvas Implementation Documentation
+
+**WHEN** the canvas implementation is complete, **THE SYSTEM SHALL** document the canvas coordinate system, pointer-event flow, and snap logic in `docs/frontend/canvas-editor.md`.
+
+- Document coordinate conversion formula (screen ↔ template coordinates)
+- Document pointer event lifecycle (pointerdown → pointermove → pointerup) for each interaction type
+- Document undo/redo history strategy
+- Document snap-to-grid and snap-to-element threshold values
+
+### REQ-11-KB-02: AGENTS.md Update
+
+**WHEN** the canvas store and components are finalized, **THE plan's tasks SHALL** update `frontend/views/AGENTS.md` (or create a canvas-specific instruction file) with:
+- Canvas store conventions (no persistence, history stack with past/future, `string[]` for `selectedIds` NOT `Set`)
+- Element component memoization pattern (`React.memo` per element, keyed by element ID)
+- Pointer Events usage requirement (no HTML5 drag-and-drop)
+- Coordinate system reference (96 DPI, template-pixel coordinates)
+- react-zoom-pan-pinch integration (TransformWrapper ref, `onTransformed` → store sync)
+- Permission keys: `certificates.templates.manage` (edit), `certificates.templates.view` (read-only)
+- v1 constraints: no resize-while-rotated, no group resize/rotate, 6 element types only
+
+---
+
+## 6. Dependency Graph
+
+```
+Plan 5 (GraphQL API) ──────────────┐
+Plan 10 (Template Editor Basic) ───┤
+                                    ├─→ Plan 11 (Visual Canvas)
+                                    │
+Plan 1 (DB Schema) ─────────────────┤  (element table shape from Plan 1)
+Plan 4 (Services) ──────────────────┘  (element bulk update service from Plan 4)
+```
+
+### Downstream Dependencies
+
+- **Plan 12 (Element Management)** depends on Plan 11: element CRUD operations integrate with the canvas selection state and rendering
+- **Plan 15 (Preview & Publishing)** depends on Plan 11: preview renders the canvas state to PDF; publishing snapshots element positions

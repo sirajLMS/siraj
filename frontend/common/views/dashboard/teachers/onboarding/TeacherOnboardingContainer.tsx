@@ -1,8 +1,6 @@
 "use client";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type TeacherOnboardingViewModel,
   useTeacherOnboardingViewModel,
@@ -22,11 +20,7 @@ const lazyViews = createLazyView<TeacherOnboardingViewModel>(
 export function TeacherOnboardingContainer() {
   const viewModel = useTeacherOnboardingViewModel();
 
-  return (
-    <RequirePermission permissions={[AppPermission.TeachersCreate]}>
-      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
 export type { TeacherOnboardingViewModel };

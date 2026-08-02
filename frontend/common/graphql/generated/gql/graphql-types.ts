@@ -6277,6 +6277,8 @@ export type TeacherOnboarding = {
   id: Maybe<Scalars['String']['output']>;
   /** Resolved teacher display name */
   name: Maybe<Scalars['String']['output']>;
+  /** Teacher phone number */
+  phone: Maybe<Scalars['String']['output']>;
   /** Current teacher account status */
   status: Maybe<Scalars['String']['output']>;
   /** Formatted timezone display string */

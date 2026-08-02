@@ -1,6 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { TeacherRepository } from "@/backend/db/repo";
-import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, type Gender, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
@@ -39,6 +39,8 @@ export interface TeacherOnboardingResult {
   readonly name: string;
   readonly email: string;
   readonly status: string;
+  readonly phone?: string | null;
+  readonly gender?: Gender | null;
 }
 
 export namespace TeacherOnboardingService {
@@ -106,6 +108,8 @@ export namespace TeacherOnboardingService {
       teacherId: teacher.id,
       name: user.name,
       email: user.email,
+      phone: teacher.phone,
+      gender: teacher.gender as Gender | null,
       status: teacher.status,
     };
   }

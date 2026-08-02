@@ -12,6 +12,7 @@ export const createTeacherMutationDocument: TypedDocumentNode<
       id
       name
       email
+      phone
       status
       gender
       timezoneDisplay
