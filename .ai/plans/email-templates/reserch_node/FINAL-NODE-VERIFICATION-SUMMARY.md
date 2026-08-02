@@ -51,14 +51,23 @@
    - **i18n** — `getServerTranslations(locale)` single-arg + sync, `EmailsLabels` has no `errors` field today, zero `next-intl` source imports. All verified.
    - **Bun 1.3.14** — clean import of all six email packages (exit 0). `@smithy/fetch-http-handler@5.6.13` is a bundled direct dep of `@aws-sdk/client-ses`. Bun #26066 HTTPS-hang confirmed reproducible on 1.3.14 → fetch-handler mandate strengthened. Bun #10329 nodemailer SMTP issue still open → nodemailer caveat stands.
 
-## Recommendation
+---
 
-**Plan needs these specific edits** (then safe to commit):
+## Post-install verification (2026-08-02) — newly installed packages
 
-- **Plan lines 313-314 (SES adapter)** — choose one path:
-  - (a) Add `@aws-sdk/client-sesv2` to `bun add`, switch SES adapter to `SendEmailCommand` from `@aws-sdk/client-sesv2` with `Content.Simple.Attachments[]` (fields `RawContent: Uint8Array`/`FileName`/optional `ContentType`/`ContentDisposition`/`ContentId`), OR
-  - (b) Stay on `@aws-sdk/client-ses` and use `SendRawEmailCommand` with hand-built `multipart/mixed` MIME for ALL attachments regardless of size (`RawMessage.Data: Uint8Array`).
-  Also fix "40 MB" → "10 MB" (outbound SES cap).
+**Trigger:** v1-v5 SWE reviews flagged 3 plan-required packages as missing. Installed today via `bun add` (latest, no version pins) and verified against `node_modules` + Bun smoke tests. Full per-package report at [`15-newly-installed-packages-verification.md`](./15-newly-installed-packages-verification.md).
+
+| # | Package | Version | Type | Plan claim | Verdict |
+|---|---|---|---|---|---|
+| O | `isomorphic-dompurify` | `^3.21.0` | dep | `import DOMPurify from "isomorphic-dompurify"` → `sanitize(html, {ALLOWED_TAGS,ALLOWED_ATTR})` works under Bun; satisfies Phase 0 GO/NO-GO gate (V4-6) | ✅ **VERIFIED** — Bun smoke test PASSED: strips `<script>` + `onerror`, returns clean HTML. Default export is full `DOMPurify` interface (sanitize, addHook, isSupported, etc.). `isSupported: true` under Bun 1.3.14. jsdom fallback wiring (V4-6) NOT needed. |
+| P | `@aws-sdk/client-sesv2` | `^3.1101.0` | dep | SESv2 `SendEmailCommand` accepts `Content.Simple.Attachments[]`; `SESv2Client({requestHandler})` accepts `@smithy/fetch-http-handler` for Bun HTTPS-hang mitigation | ✅ **VERIFIED** — `SendEmailCommand` JSDoc confirms exact attachment shape (`RawContent: Uint8Array`/`FileName`/`ContentDisposition`/`ContentId`/`ContentType`/`ContentTransferEncoding`); `SESv2ClientConfig.requestHandler?: __HttpHandlerUserInput` confirmed. `@smithy/fetch-http-handler` lists it as direct SDK dep. Default credential chain ships in-box. Recommended path (a) of the prior SES fix is now viable end-to-end. |
+| Q | `@next/bundle-analyzer` | `^16.2.12` | dev | Wrap `NextConfig` to visualize code-splitting; verify TipTap/Prism.js stay out of main bundle | ✅ **VERIFIED** — `NextBundleAnalyzer({enabled?, openAnalyzer?, analyzerMode?, logLevel?})` returns `(NextConfig) => NextConfig`; CommonJS `export =`. Adds `webpack-bundle-analyzer@4.10.1` as dep. Wire per Appendix in file 15. |
+
+### Recommendation delta (supersedes the SES bullet above)
+
+- **Plan line 313-314 (SES adapter)** — path (a) is now the **only** recommended path. `@aws-sdk/client-sesv2` is installed; use `SendEmailCommand` from `@aws-sdk/client-sesv2` with `Content.Simple.Attachments[]`. Also fix "40 MB" → "10 MB" (outbound SES cap). Path (b) remains documented as fallback only if SESv2 quotas differ from expectations.
+- **Plan todo 21b (Phase 0 GO/NO-GO gate)** — mark as **PASS / GREEN**. `isomorphic-dompurify` works under Bun. The jsdom fallback proposed in V4-6 is NOT required (left as defensive-only documentation).
+- **Plan todo 20b (bundle analyzer install)** — mark as **DONE**. `@next/bundle-analyzer@16.2.12` is installed as devDep.
 - **Plan line 89 (Resend send signature)** — `Resend` is a NAMED export (not default); the param type is `CreateEmailOptions` (not `Emails.SendParams`); attachment field names are camelCase `contentType`/`contentId` (not snake_case). Inline-images are set by providing `contentId` on the attachment (no `inline` boolean). The existing `ResendEmailAdapter.ts` does NOT plumb attachments/text/cc/bcc/replyTo/headers today — note explicitly that the new adapters must add those.
 - **Plan line 316 (Mailgun adapter)** — replace `new Mailgun({ apiKey, url?, publicApiKey })` with the two-stage form: `new Mailgun(FormData)` (pass the form-data class) → `mg.client({ username: "api", key, url?, public_key? })`. Method is `mg.messages.create(domain, data)` only (no `.send()`). `mg.messages` is a typed property, not a function factory.
 - **Plan line 317 (Nodemailer `encoding` type)** — `@types/nodemailer@8.0.1` types `encoding` as bare `string`; if the adapter wants compile-time literal-union enforcement, declare it in the siraj type layer and cast before passing to nodemailer.
