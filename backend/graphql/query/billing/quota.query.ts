@@ -19,7 +19,6 @@ gqlSchemaBuilder.queryField("quotaLedger", t =>
   t.field({
     type: QuotaLedgerPaginatedResultPothosObject,
     description: "Get paginated audit ledger history for a quota",
-    // NOTE: Runs two sequential queries — could be optimized to a single paginated count query
     authScopes: { loggedIn: true },
     args: {
       quotaId: t.arg.id({ required: true }),

@@ -8,7 +8,7 @@ import { AccountStatus, type CurrencyCode, type Gender } from "@/backend/enum";
 import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/backend/lib/enum";
 import type {
   PaginationArgs,
-  TeacherCreateResult,
+  TeacherCreateReturnType,
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
   TeacherInsertType,
@@ -24,7 +24,7 @@ export namespace TeacherRepository {
     input: TeacherInsertType,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<TeacherCreateResult> {
+  ): Promise<TeacherCreateReturnType> {
     const queryDb = tx ?? db;
 
     const existingTeacher = await queryDb

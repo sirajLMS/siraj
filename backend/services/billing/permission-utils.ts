@@ -42,6 +42,12 @@ export async function assertAssociatedOrManage(
   }
 }
 
+// Cache for request-level memoization on resolveAssociatedViewer.
+// Key format: "actorUserId:studentId". Reduces repeated DB lookups for
+// the same (caller, student) pair within a single request scope and limits
+// the surface for student enumeration via brute-force calls.
+const viewerCache = new Map<string, boolean>();
+
 /**
  * Resolves whether the calling user is associated with the given student —
  * as the student themselves, the student's parent, or the student's primary
@@ -54,11 +60,23 @@ export async function assertAssociatedOrManage(
  * student-self check uses the profile already fetched before those lookups.
  */
 export async function resolveAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
+  const cacheKey = `${actorUserId}:${studentId}`;
+  const cached = viewerCache.get(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
+
   const profile = await StudentRepository.findProfileById(studentId);
-  if (!profile) return false;
+  if (!profile) {
+    viewerCache.set(cacheKey, false);
+    return false;
+  }
 
   // (b) The user IS the student themselves
-  if (profile.userId === actorUserId) return true;
+  if (profile.userId === actorUserId) {
+    viewerCache.set(cacheKey, true);
+    return true;
+  }
 
   const [parent, teacher] = await Promise.all([
     ParentRepository.findByUserId(actorUserId),
@@ -66,18 +84,30 @@ export async function resolveAssociatedViewer(actorUserId: string, studentId: st
   ]);
 
   // (a) The user is the student's parent
-  if (parent?.id === profile.parentId) return true;
+  if (parent?.id === profile.parentId) {
+    viewerCache.set(cacheKey, true);
+    return true;
+  }
   // The user is the student's primary teacher
-  if (teacher?.id === profile.primaryTeacherId) return true;
+  if (teacher?.id === profile.primaryTeacherId) {
+    viewerCache.set(cacheKey, true);
+    return true;
+  }
 
+  viewerCache.set(cacheKey, false);
   return false;
 }
+
+// Cache for request-level memoization on resolveAssociatedStudentIds.
+// Key: actorUserId. Avoids redundant parent/teacher/student-self lookups
+// for the same user within a single request scope.
+const studentIdsCache = new Map<string, string[]>();
 
 /**
  * Resolves the student IDs associated with the calling user — students
  * for whom they are the student themselves, the parent, the primary
  * teacher, or an assigned teacher (via `teacher_assignments`). Used by
- * `QuotaService.listQuotas` to scope IDOR-vulnerable list queries so a
+ * `QuotaService.listQuota` to scope IDOR-vulnerable list queries so a
  * `QUOTAS_VIEW` caller only sees their own students' quotas.
  *
  * V3-023: Delegates to `StudentRepository.findIdsByParentOrTeacher`
@@ -88,6 +118,11 @@ export async function resolveAssociatedViewer(actorUserId: string, studentId: st
  * nor a teacher.
  */
 export async function resolveAssociatedStudentIds(actorUserId: string): Promise<string[]> {
+  const cachedIds = studentIdsCache.get(actorUserId);
+  if (cachedIds !== undefined) {
+    return [...cachedIds];
+  }
+
   const [parent, teacher, ownStudentId] = await Promise.all([
     ParentRepository.findByUserId(actorUserId),
     TeacherRepository.findByUserId(actorUserId),
@@ -101,10 +136,14 @@ export async function resolveAssociatedStudentIds(actorUserId: string): Promise<
     studentIds.push(ownStudentId);
   }
 
-  if (!parent && !teacher && studentIds.length === 0) return [];
+  if (!parent && !teacher && studentIds.length === 0) {
+    studentIdsCache.set(actorUserId, []);
+    return [];
+  }
 
   const associatedIds = await StudentRepository.findIdsByParentOrTeacher(parent?.id ?? null, teacher?.id ?? null);
-  const merged = new Set([...studentIds, ...associatedIds]);
+  const merged = [...new Set([...studentIds, ...associatedIds])];
 
+  studentIdsCache.set(actorUserId, merged);
   return [...merged];
 }

@@ -29,7 +29,10 @@ export type RecurringScheduleDayInsertType = typeof recurringScheduleDays.$infer
 
 export type DailyScheduleTeacher = TeacherSelectType & { user: UserSelectType };
 
-export type DailyScheduleResult = Omit<ClassInstanceSelectType, "deletedAt" | "createdAt" | "updatedAt"> & {
+export type DailyScheduleResult = Omit<
+  ClassInstanceSelectType,
+  "deletedAt" | "createdAt" | "updatedAt" | "idempotencyKey"
+> & {
   courseName: string | null;
   avatarUrl?: string | null;
   instanceId: string;
@@ -37,7 +40,7 @@ export type DailyScheduleResult = Omit<ClassInstanceSelectType, "deletedAt" | "c
   startTime: string;
   endTime: string;
   durationMinutes: number;
-  status: ClassInstanceSelectType["executionState"];
+  status: ClassExecutionState;
   remarks: string | null;
   hasTimezoneMismatch: boolean;
   studentTimezone: IanaTimezone | null;
@@ -67,6 +70,13 @@ export type AdminDashboardScheduleResult = {
 
 export type LeaveQuotaUsageSelectType = typeof leaveQuotaUsage.$inferSelect;
 export type LeaveQuotaUsageInsertType = typeof leaveQuotaUsage.$inferInsert;
+
+export type UpsertStudentLeaveQuotaInput = {
+  studentId: string;
+  periodYear: number;
+  periodMonth: number;
+  usedCount: number;
+};
 
 export type TimezoneSelectType = typeof timezones.$inferSelect;
 
@@ -187,8 +197,8 @@ export type FutureClassRow = {
   subjectAvatarUrl?: string | null;
   recurringAvatarUrl?: string | null;
   meetingJoinUrl?: string | null;
-  executionState?: string | null;
-  outcome?: string | null;
+  executionState?: ClassExecutionState | null;
+  outcome?: ClassOutcome | null;
 };
 
 export type WeeklyScheduleGridRow = {
@@ -199,9 +209,9 @@ export type WeeklyScheduleGridRow = {
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  dayOfWeek: string;
-  executionState: string;
-  outcome: string;
+  dayOfWeek: DayOfWeek;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
   isFrozen: boolean;
   subjectId?: string | null;
   subjectName?: string | null;
@@ -247,8 +257,8 @@ export type UpcomingClassRow = {
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  executionState: string;
-  outcome: string;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
   isFrozen: boolean;
 };
 
@@ -258,7 +268,7 @@ export type TeacherAssignedClassRow = {
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  executionState: string;
-  outcome: string | null;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
   isFrozen: boolean;
 };

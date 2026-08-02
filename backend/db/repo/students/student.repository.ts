@@ -15,6 +15,39 @@ import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/uti
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 
+function decodeCursor(after: string): { createdAt: string; id: string } | null {
+  try {
+    const decoded = Buffer.from(after, "base64").toString("utf8");
+    const cursorObj = JSON.parse(decoded) as { createdAt?: string; id?: string };
+    if (cursorObj.createdAt && cursorObj.id) {
+      return { createdAt: cursorObj.createdAt, id: cursorObj.id };
+    }
+  } catch {
+    /* ignore invalid cursor */
+  }
+  return null;
+}
+
+function applyCursorCondition(
+  query: PgSelect,
+  cursor: { createdAt: string; id: string },
+  orderBy?: Types.StudentsOrderByClause[] | null
+): PgSelect {
+  const cursorDate = new Date(cursor.createdAt);
+  const cursorId = cursor.id;
+  const isDesc = orderBy?.some(
+    o => o.column === Types.StudentsOrderByColumn.CREATED_AT && o.order === OrderSortDirection.DESC
+  );
+  if (isDesc) {
+    return query.where(
+      or(lt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), lt(students.id, cursorId)))
+    );
+  }
+  return query.where(
+    or(gt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), gt(students.id, cursorId)))
+  );
+}
+
 const _processStudentQuery = async (
   query: PgSelect,
   paginationArgs?: Types.PaginationArgs | null,
@@ -25,29 +58,10 @@ const _processStudentQuery = async (
   processedQuery = StudentFilterUtils.applyFilters(processedQuery, filters);
   processedQuery = StudentFilterUtils.applyOrdering(processedQuery, orderBy);
 
-  if (paginationArgs?.after) {
-    try {
-      const decoded = Buffer.from(paginationArgs.after, "base64").toString("utf8");
-      const cursorObj = JSON.parse(decoded) as { createdAt?: string; id?: string };
-      if (cursorObj.createdAt && cursorObj.id) {
-        const cursorDate = new Date(cursorObj.createdAt);
-        const cursorId = cursorObj.id;
-        const isDesc = orderBy?.some(
-          o => o.column === Types.StudentsOrderByColumn.CREATED_AT && o.order === OrderSortDirection.DESC
-        );
-        if (isDesc) {
-          processedQuery = processedQuery.where(
-            or(lt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), lt(students.id, cursorId)))
-          );
-        } else {
-          processedQuery = processedQuery.where(
-            or(gt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), gt(students.id, cursorId)))
-          );
-        }
-      }
-    } catch {
-      /* ignore invalid cursor */
-    }
+  const cursor = paginationArgs?.after ? decodeCursor(paginationArgs.after) : null;
+
+  if (cursor) {
+    processedQuery = applyCursorCondition(processedQuery, cursor, orderBy);
   }
 
   if (paginationArgs?.after) {
@@ -59,21 +73,23 @@ const _processStudentQuery = async (
   const results = await (processedQuery as unknown as Promise<{ student: Types.StudentSelectType; total: number }[]>);
 
   const total = results[0]?.total ?? 0;
-  const items: Types.Student[] = results
+  const items: Types.StudentReturnType[] = results
     .map(r => StudentUtils.mapEntityToDto(r.student))
-    .filter((s): s is Types.Student => s !== null);
+    .filter((s): s is Types.StudentReturnType => s !== null);
 
   const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, items.length, total);
 
   if (items.length > 0) {
-    const firstItem = items[0];
-    const lastItem = items.at(-1);
-    pageInfo.startCursor = Buffer.from(
-      JSON.stringify({ createdAt: firstItem.createdAt.toISOString(), id: firstItem.id })
-    ).toString("base64");
-    pageInfo.endCursor = Buffer.from(
-      JSON.stringify({ createdAt: lastItem?.createdAt.toISOString(), id: lastItem?.id })
-    ).toString("base64");
+    const firstItem = results[0]?.student;
+    const lastItem = results.at(-1)?.student;
+    if (firstItem && lastItem) {
+      pageInfo.startCursor = Buffer.from(
+        JSON.stringify({ createdAt: firstItem.createdAt.toISOString(), id: firstItem.id })
+      ).toString("base64");
+      pageInfo.endCursor = Buffer.from(
+        JSON.stringify({ createdAt: lastItem.createdAt.toISOString(), id: lastItem.id })
+      ).toString("base64");
+    }
   }
 
   return { data: items, pageInfo };
@@ -183,7 +199,7 @@ export namespace StudentRepository {
     }
   };
 
-  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.Student | Error)[]> => {
+  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.StudentReturnType | Error)[]> => {
     if (ids.length === 0) return [];
     const q = queryDb();
     const foundStudents = await q.select().from(students).where(inArray(students.id, ids));
@@ -191,7 +207,7 @@ export namespace StudentRepository {
 
     return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
-      return s ? (StudentUtils.mapEntityToDto(s) as Types.Student) : new Error(studentNotFound(id));
+      return s ? (StudentUtils.mapEntityToDto(s) as Types.StudentReturnType) : new Error(studentNotFound(id));
     });
   };
 
@@ -430,6 +446,7 @@ export namespace StudentRepository {
     let baseQuery = queryDb
       .select({
         id: students.id,
+        userId: students.userId,
         name: students.name,
         email: sql<string>`COALESCE(${parentUsers.email}, '')`,
         avatarUrl: students.avatarUrl,
@@ -477,8 +494,9 @@ export namespace StudentRepository {
         r =>
           ({
             ...r,
+            status: r.status as StudentStatus,
             hoursPerWeek: r.hoursPerWeek ? Number.parseFloat(r.hoursPerWeek) : 0,
-          }) as Types.StudentDirectory
+          }) satisfies Types.StudentDirectory
       ),
       totalCount,
     };

@@ -1,6 +1,6 @@
 import { StudentStatus } from "@/backend/enum";
 import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
-import type { Student, StudentSelectType } from "@/backend/types";
+import type { StudentReturnType, StudentSelectType } from "@/backend/types";
 
 export namespace StudentUtils {
   export const validateName = async (name: string, _locale?: string): Promise<string | null> => {
@@ -10,7 +10,7 @@ export namespace StudentUtils {
     return null;
   };
 
-  export const mapEntityToDto = (entity: StudentSelectType | null | undefined): Student | null => {
+  export const mapEntityToDto = (entity: StudentSelectType | null | undefined): StudentReturnType | null => {
     if (!entity) {
       return null;
     }

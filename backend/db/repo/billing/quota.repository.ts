@@ -979,7 +979,6 @@ export namespace QuotaRepository {
    */
   export const listPeriodicForRollover = async (tx: DBTransaction): Promise<QuotaReturnType[]> => {
     const now = new Date();
-    const nowTs = now.toISOString();
     // Period end = periodAnchor + periodDays. We want quotas where "now > periodEnd".
     const periodEndExpr = sql<Date>`${quotas.periodAnchor} + make_interval(days => ${quotas.periodDays})`;
     const rows = await tx
@@ -991,7 +990,7 @@ export namespace QuotaRepository {
           eq(quotas.status, QuotaStatus.ACTIVE),
           isNull(quotas.deletedAt),
           sql`${quotas.rolloverPolicy} IS NOT NULL`,
-          sql`${periodEndExpr} < ${nowTs}`
+          sql`${periodEndExpr} < ${now}`
         )
       )
       .limit(500); // Capped at 500 per cron tick
@@ -1149,7 +1148,6 @@ export namespace QuotaRepository {
         )
       )
       .orderBy(desc(quotas.priority))
-      .limit(input.count)
       .for("update");
 
     let remainingToDeduct = input.count;

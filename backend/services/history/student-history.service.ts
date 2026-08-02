@@ -1,6 +1,6 @@
 import { StudentRepository } from "@/backend/db";
 import { StudentHistoryRepository } from "@/backend/db/repo/students/student-history.repository";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -52,9 +52,10 @@ export namespace StudentHistoryService {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id, tErrors);
         return {
           ...session,
+          status: session.status as ClassExecutionState,
+          outcome: (session.outcome as ClassOutcome | null) ?? null,
           meetingJoinUrl: effectiveMeeting.joinUrl,
           effectiveMeeting,
-          outcome: session.outcome ?? null,
         };
       })
     );
@@ -86,6 +87,8 @@ export namespace StudentHistoryService {
 
     return {
       ...detail,
+      executionState: detail.executionState as ClassExecutionState,
+      outcome: detail.outcome as ClassOutcome | null,
       meetingJoinUrl: effectiveMeeting.joinUrl,
       effectiveMeeting,
     };

@@ -1,14 +1,29 @@
 import type { students } from "@/backend/db/schema";
-import type { AppLanguage, Gender, OrderSortDirection, StudentStatus } from "@/backend/enum";
+import type {
+  AppLanguage,
+  ClassExecutionState,
+  ClassOutcome,
+  Gender,
+  OrderSortDirection,
+  StudentStatus,
+} from "@/backend/enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type StudentSelectType = typeof students.$inferSelect;
 export type StudentInsertType = typeof students.$inferInsert;
 
-export type Student = Omit<
+export type StudentReturnType = Omit<
   StudentSelectType,
   // enums
-  "status" | "gender" | "language" | "hoursPerWeek"
+  | "status"
+  | "gender"
+  | "language"
+  | "hoursPerWeek"
+  // forbidden fields
+  | "deletedAt"
+  | "idempotencyKey"
+  | "createdAt"
+  | "updatedAt"
 > & {
   gender: Gender | null;
   language: AppLanguage | null;
@@ -23,16 +38,19 @@ export type Student = Omit<
 };
 
 export type StudentDirectory = Omit<
-  Student,
+  StudentReturnType,
   | "dateOfBirth"
   | "parentId"
-  | " primaryTeacherId"
+  | "primaryTeacherId"
   | "idempotencyKey"
   | "version"
   | "language"
   | "timezoneOverride"
   | "gender"
->;
+> & {
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export interface StudentDirectoryResult {
   readonly id?: string;
@@ -92,7 +110,7 @@ export type PartialStudentUpdateInput = Partial<Omit<StudentCreateInput, "idempo
 };
 
 export type StudentsWithFiltersResponse = {
-  data: Student[];
+  data: StudentReturnType[];
   pageInfo: PageInfo;
 };
 
@@ -165,8 +183,8 @@ export type StudentHistorySession = {
   title: string;
   time: string;
   duration: number;
-  status: string;
-  outcome?: string | null;
+  status: ClassExecutionState;
+  outcome?: ClassOutcome | null;
   isFrozen: boolean;
   instructor: string;
   teacherId: string;
@@ -188,8 +206,8 @@ export type StudentClassHistory = {
 export type StudentSessionDetail = {
   id: string;
   durationMinutes: number;
-  executionState: string;
-  outcome: string | null;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
   remarks: string | null;
   meetingJoinUrl: string | null;
   effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
@@ -197,3 +215,10 @@ export type StudentSessionDetail = {
   scheduledStartAt: Date | string;
   scheduledEndAt: Date | string;
 };
+
+export interface EditQuotaResult {
+  readonly id: string;
+  readonly classesRemaining: number;
+  readonly classesTotal: number;
+  readonly version: number;
+}

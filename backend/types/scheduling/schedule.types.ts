@@ -60,8 +60,8 @@ export type FutureClassReturnType = {
   meetingJoinUrl?: string | null;
   effectiveMeeting?: EffectiveMeetingReturnType | null;
   avatarUrl?: string | null;
-  executionState?: string | null;
-  outcome?: string | null;
+  executionState?: ClassExecutionState | null;
+  outcome?: ClassOutcome | null;
 };
 
 export type TeacherFutureScheduleReturnType = {
@@ -163,7 +163,7 @@ export type AdminDashboardScheduleReturnType = {
 // used by the Pothos layer and frontend codegen without duplicating fields.
 export type StatusTrackingScheduleRow = import("./scheduling.types").StatusTrackingRow;
 
-export type AvailableClassSlotReturnType = {
+export type AvailableClassSlot = {
   teacherId: string;
   startAt: Date;
   endAt: Date;

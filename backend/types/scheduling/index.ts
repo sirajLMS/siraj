@@ -2,7 +2,7 @@ export * from "./dst-migration.types";
 export * from "./recurring-schedule-detail.types";
 export type {
   AdminDashboardScheduleReturnType,
-  AvailableClassSlotReturnType,
+  AvailableClassSlot,
   ClassSessionMetrics,
   DailyScheduleArgs,
   DailyScheduleListReturnType,

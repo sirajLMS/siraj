@@ -154,7 +154,7 @@ export namespace QuotaLedgerRepository {
     const [row] = await q
       .select({
         netSum: sql<number>`COALESCE(SUM(${quotaLedger.delta}), 0)::int`,
-        reservedSum: sql<number>`COALESCE(SUM(CASE WHEN ${quotaLedger.reason} = 'RESERVE' THEN ${quotaLedger.delta} WHEN ${quotaLedger.reason} = 'RELEASE' AND ${quotaLedger.recurringScheduleId} IS NOT NULL AND ${quotaLedger.classInstanceId} IS NULL THEN ${quotaLedger.delta} ELSE 0 END), 0)::int`,
+        reservedSum: sql<number>`COALESCE(SUM(CASE WHEN ${quotaLedger.reason} = 'RESERVE' THEN ${quotaLedger.delta} WHEN ${quotaLedger.reason} = 'RELEASE' AND ${quotaLedger.classInstanceId} IS NULL THEN ${quotaLedger.delta} ELSE 0 END), 0)::int`,
       })
       .from(quotaLedger)
       .where(eq(quotaLedger.quotaId, quotaId));

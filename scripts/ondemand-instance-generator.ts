@@ -362,13 +362,12 @@ async function generateInstancesForSchedule(
     // NOTE: Mirrors QuotaService.refreshStudentOndemandInstances credit computation — keep in sync
     const availableBalance = creditBalance.classesRemaining + totalQuotaRemaining;
 
-    // Verify-6: Only generate instances when the student has credit classes
-    // remaining. If classesRemaining is 0, skip instance generation entirely —
-    // quota-only balance should not produce AVAILABLE instances since the
-    // student has no purchased classes to attend.
-    if (creditBalance.classesRemaining <= 0) {
+    // Verify-6: Only generate instances when the student has combined available
+    // balance from credits and quotas. Quotas ARE purchased classes — students
+    // with only quota balance (no credit balance) must still get instances.
+    if (availableBalance <= 0) {
       logger.debug(
-        `[OnDemandInstanceGenerator] Skipping schedule ${schedule.id} for student ${schedule.studentId} — classesRemaining is 0.`
+        `[OnDemandInstanceGenerator] Skipping schedule ${schedule.id} for student ${schedule.studentId} — no available balance (classesRemaining=${creditBalance.classesRemaining}, quotaRemaining=${totalQuotaRemaining}).`
       );
       return 0;
     }
