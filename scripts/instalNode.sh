@@ -48,7 +48,7 @@ export NVM_DIR="$HOME/.nvm"
 
 # 3. Verify nvm installation
 echo "🔍 Verifying nvm installation..."
-command -v nvm
+command -v nvm || true
 
 # 4. Install the latest LTS version of Node.js
 echo "📦 Installing latest LTS version of Node.js..."

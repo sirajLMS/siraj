@@ -6019,6 +6019,8 @@ export type TeacherOnboarding = {
   id: Maybe<Scalars['String']['output']>;
   /** Resolved teacher display name */
   name: Maybe<Scalars['String']['output']>;
+  /** Teacher phone number */
+  phone: Maybe<Scalars['String']['output']>;
   /** Current teacher account status */
   status: Maybe<Scalars['String']['output']>;
   /** Formatted timezone display string */
@@ -6100,6 +6102,7 @@ export type TeacherPayment = {
   amount: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   id: Maybe<Scalars['String']['output']>;
   isTestPayment: Maybe<Scalars['Boolean']['output']>;
   paymentDate: Maybe<Scalars['DateTime']['output']>;

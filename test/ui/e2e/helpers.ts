@@ -2,12 +2,19 @@ import { expect } from "bun:test";
 import type { BrowserContext, Cookie, Page } from "playwright";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { getTestBaseUrl } from "@/frontend/common/graphql/test/testPort";
-import { academyAdmins, parents, staff, students, supervisors, teachers } from "@/shared/demo-users";
+import { isTestServerRunning, startTestServer } from "@/frontend/common/graphql/test/testServer";
+import { academyAdmins, parents, staff, students, superAdmins, supervisors, teachers } from "@/shared/demo-users";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 const PWD = "12345678";
 const REQUIRED_AUTH_COOKIES = ["session_id", "refresh_token", "access_token"] as const;
 
 export const DEMO_USERS = {
+  superAdmin: {
+    email: superAdmins[0].email,
+    password: PWD,
+    groupSlug: SystemPermissionGroupSlug.SUPER_ADMIN,
+  },
   academyAdmin: {
     email: academyAdmins[0].email,
     password: PWD,
@@ -117,24 +124,38 @@ export async function authenticateDemoUser(context: BrowserContext, groupSlug: s
   const baseUrl = getTestBaseUrl();
   const graphqlUrl = `${baseUrl}/api/graphql`;
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
-  const maxAttempts = 5;
+  const isDevMode = process.env.TEST_SERVER_MODE === "dev";
+  const maxAttempts = isDevMode ? 10 : 5;
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const response = await fetchFn(graphqlUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `
-          mutation demoLogin($input: DemoLoginInput!) {
-            demoLogin(input: $input) {
-              token
+    let response: Response;
+    try {
+      response = await fetchFn(graphqlUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+            mutation demoLogin($input: DemoLoginInput!) {
+              demoLogin(input: $input) {
+                token
+              }
             }
-          }
-        `,
-        variables: { input: { groupSlug } },
-      }),
-    });
+          `,
+          variables: { input: { groupSlug } },
+        }),
+      });
+    } catch (connErr) {
+      // Dev server may have crashed during page compilation and needs time
+      // to restart. Wait longer in dev mode.
+      lastError = connErr;
+      if (attempt < maxAttempts) {
+        const delay = isDevMode ? 10_000 * attempt : 1_000 * attempt;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw lastError;
+    }
 
     if (response.status === 429 && attempt < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 2_000 * attempt));
@@ -183,16 +204,20 @@ export async function waitForDashboardReady(page: Page): Promise<void> {
     throw new Error(`Login failed: redirected to ${page.url()}`);
   }
 
-  await page.locator("main, [role='main']").first().waitFor({ state: "visible", timeout: 30_000 });
+  const isDevMode = process.env.TEST_SERVER_MODE === "dev";
+  const timeout = isDevMode ? 180_000 : 30_000;
+  await page.locator("main, [role='main']").first().waitFor({ state: "visible", timeout });
 }
 
 async function gotoWithRetry(page: Page, path: string): Promise<void> {
   const maxAttempts = 3;
+  const isDevMode = process.env.TEST_SERVER_MODE === "dev";
+  const gotoTimeout = isDevMode ? 180_000 : 30_000;
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await page.goto(path, { waitUntil: "commit", timeout: 30_000 });
+      await page.goto(path, { waitUntil: "commit", timeout: gotoTimeout });
       return;
     } catch (error) {
       lastError = error;
@@ -225,6 +250,30 @@ export async function loginAsDemoUser(page: Page, context: BrowserContext, group
   }
 
   throw lastError;
+}
+
+/**
+ * Authenticate a demo user and navigate directly to a specific route,
+ * skipping the /dashboard warmup that can OOM in memory-constrained dev mode.
+ * In dev mode, restarts the test server if it crashed during a previous test.
+ */
+export async function loginAsDemoUserAtRoute(
+  page: Page,
+  context: BrowserContext,
+  groupSlug: string,
+  path: string
+): Promise<void> {
+  // In dev mode, the server may have crashed (OOM) during a previous test's
+  // page compilation. Check and restart if needed before authenticating.
+  if (process.env.TEST_SERVER_MODE === "dev") {
+    if (!(await isTestServerRunning())) {
+      testLogger.info("Dev server not running; restarting...");
+      await startTestServer();
+    }
+  }
+  await authenticateDemoUser(context, groupSlug);
+  // Use absolute URL with current port (server may have been restarted on a new port)
+  await gotoWithRetry(page, `${getTestBaseUrl()}${path}`);
 }
 
 export async function loginAsDemoUserAt(

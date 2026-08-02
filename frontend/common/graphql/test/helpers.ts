@@ -29,6 +29,7 @@ import {
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
+import { isTestServerRunning } from "@/frontend/common/graphql/test/testServer";
 
 /** Shared test password — all provisioned test users use this value. */
 // eslint-disable-next-line sonarjs/no-hardcoded-passwords
@@ -43,16 +44,32 @@ let demoUsersReadyPromise: Promise<void> | null = null;
 export async function ensureDemoUsersForTests(): Promise<void> {
   if (!demoUsersReadyPromise) {
     demoUsersReadyPromise = (async () => {
-      const result = await testClient.mutate({
-        mutation: ensureDemoUsersMutationDocument,
-      });
-      if (result.error) {
-        const messages = result.error.message ?? "unknown GraphQL error";
-        throw new Error(`ensureDemoUsers failed: ${messages}`);
+      const maxAttempts = 5;
+      let lastError: unknown;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const result = await testClient.mutate({
+          mutation: ensureDemoUsersMutationDocument,
+        });
+        if (result.error) {
+          lastError = new Error(`ensureDemoUsers failed: ${result.error.message ?? "unknown GraphQL error"}`);
+          if (attempt < maxAttempts) {
+            // Wait for the dev server to recover (it may have crashed during
+            // route compilation and needs time to restart).
+            for (let wait = 0; wait < 60; wait++) {
+              if (await isTestServerRunning()) break;
+              await new Promise(resolve => setTimeout(resolve, 3_000));
+            }
+            await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
+            continue;
+          }
+          throw lastError;
+        }
+        if (!result.data?.ensureDemoUsers) {
+          throw new Error("ensureDemoUsers returned false");
+        }
+        return;
       }
-      if (!result.data?.ensureDemoUsers) {
-        throw new Error("ensureDemoUsers returned false");
-      }
+      throw lastError ?? new Error("ensureDemoUsers failed after all retries");
     })();
   }
   await demoUsersReadyPromise;
