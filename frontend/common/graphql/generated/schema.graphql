@@ -1072,7 +1072,7 @@ input CreatePermissionGroupInput {
 }
 
 input CreateRecurringClassInput {
-  classType: String
+  classType: ClassType
   days: [RecurringClassDayInput!]!
   defaultStartTime: String!
   durationMinutes: Int!
@@ -2761,6 +2761,7 @@ enum OnDemandNoCreditsOutcome {
 enum OnDemandStatus {
   AVAILABLE
   CANCELLED
+  CONVERTED
   NO_CREDITS_ABSENT
   NO_CREDITS_CANCELLED
   PENDING_CREDIT
@@ -3540,7 +3541,6 @@ type Quota {
   updatedAt: DateTime
   validFrom: DateTime
   validUntil: DateTime
-  version: Int
 }
 
 """Aggregated quota balance summary for a student"""
@@ -3555,6 +3555,7 @@ type QuotaBalance {
 
 """Per-quota breakdown of remaining classes by expiration date"""
 type QuotaExpirationBreakdown {
+  id: String
   quotaId: String
   quotaName: String
   remaining: Int
@@ -3648,7 +3649,6 @@ input QuotaUpdateInput {
   priority: Int
   status: QuotaStatus
   validUntil: DateTime
-  version: Int!
 }
 
 enum RateSource {
@@ -3679,7 +3679,7 @@ input RecordPurchaseInput {
 }
 
 input RecurringClassDayInput {
-  dayOfWeek: String!
+  dayOfWeek: DayOfWeek!
   isActive: Boolean!
   startTime: String!
 }

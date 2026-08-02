@@ -14,6 +14,7 @@ export type QuotaReturnType = Omit<
   | "usedThisPeriod"
   | "periodAnchor"
   | "rolloverPolicy"
+  | "version"
 > & {
   kind: QuotaKind;
   status: QuotaStatus;
@@ -100,7 +101,7 @@ export type QuotaUpdateInput = Omit<
 > & {
   validUntil?: Date | null;
   validFrom?: Date | null;
-  version: number;
+  version?: number;
 };
 
 export type QuotaLedgerSubmitInput = Omit<QuotaLedgerInsertType, "createdAt" | "updatedAt">;

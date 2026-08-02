@@ -215,7 +215,8 @@ describe("QuotaRepository", () => {
 
       const refreshed = await QuotaRepository.refreshPeriodic(tx, created.id, null);
       expect(refreshed.id).toBe(created.id);
-      expect(refreshed.version).toBe(created.version + 1);
+      const refreshedRow = await tx.select().from(quotas).where(eq(quotas.id, created.id)).limit(1);
+      expect(refreshedRow[0].version).toBe(created.version + 1);
       expect(refreshed.reservedClasses).toBe(0);
       // With 0% rollover, unused 8 classes are expired and 8 new classes are granted: 0 + 8 = 8.
       expect(refreshed.remaining).toBe(8);

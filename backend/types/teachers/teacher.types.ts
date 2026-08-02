@@ -18,7 +18,7 @@ export type TeacherSelectType = typeof teachers.$inferSelect;
 export type TeacherInsertType = typeof teachers.$inferInsert;
 
 export type TeacherPaymentSelectType = typeof teacherPayments.$inferSelect;
-export type TeacherPaymentInsertInput = typeof teacherPayments.$inferInsert;
+export type TeacherPaymentInsertType = typeof teacherPayments.$inferInsert;
 
 export type TeacherPaymentReturnType = TeacherPaymentSelectType & {
   readonly displayAmount?: DisplayAmountReturnType | null;

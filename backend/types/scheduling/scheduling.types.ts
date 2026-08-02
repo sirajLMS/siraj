@@ -48,7 +48,7 @@ export type DailyScheduleResult = Omit<ClassInstanceSelectType, "deletedAt" | "c
   yourTimeFormatted?: string;
 };
 
-export type AdminDashboardScheduleInput = {
+export type AdminDashboardScheduleRepoInput = {
   date: Date;
   teacherId?: string;
   search?: string;

@@ -699,7 +699,7 @@ export type CreatePermissionGroupInput = {
 };
 
 export type CreateRecurringClassInput = {
-  classType: string | null | undefined;
+  classType: ClassType | null | undefined;
   days: Array<RecurringClassDayInput>;
   defaultStartTime: string;
   durationMinutes: number;
@@ -1588,7 +1588,6 @@ export type QuotaUpdateInput = {
   priority: number | null | undefined;
   status: QuotaStatus | null | undefined;
   validUntil: string | null | undefined;
-  version: number;
 };
 
 export type RateSource =
@@ -1598,7 +1597,7 @@ export type RateSource =
   | 'TEACHER';
 
 export type RecurringClassDayInput = {
-  dayOfWeek: string;
+  dayOfWeek: DayOfWeek;
   isActive: boolean;
   startTime: string;
 };
@@ -2942,9 +2941,9 @@ export type DeactivateSupportedOnlineAccountMutationVariables = Exact<{
 
 export type DeactivateSupportedOnlineAccountMutation = DeactivateSupportedOnlineAccountMutation_Mutation;
 
-export type QuotaFieldsFragment = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+export type QuotaFieldsFragment = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type QuotaQuery_quota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+export type QuotaQuery_quota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
 export type QuotaQuery_Query = { quota: QuotaQuery_quota_Quota | null };
 
@@ -2956,7 +2955,7 @@ export type QuotaQueryVariables = Exact<{
 
 export type QuotaQuery = QuotaQuery_Query;
 
-export type QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+export type QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
 export type QuotasQuery_quotas_QuotaPaginatedResult = { totalCount: number | null, rows: Array<QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota> | null };
 
@@ -2986,7 +2985,7 @@ export type QuotaLedgerQueryVariables = Exact<{
 
 export type QuotaLedgerQuery = QuotaLedgerQuery_Query;
 
-export type CreateQuotaMutation_createQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+export type CreateQuotaMutation_createQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
 export type CreateQuotaMutation_Mutation = { createQuota: CreateQuotaMutation_createQuota_Quota | null };
 
@@ -2998,7 +2997,7 @@ export type CreateQuotaMutationVariables = Exact<{
 
 export type CreateQuotaMutation = CreateQuotaMutation_Mutation;
 
-export type UpdateQuotaMutation_updateQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+export type UpdateQuotaMutation_updateQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
 export type UpdateQuotaMutation_Mutation = { updateQuota: UpdateQuotaMutation_updateQuota_Quota | null };
 
@@ -3023,7 +3022,7 @@ export type DeleteQuotaMutationVariables = Exact<{
 
 export type DeleteQuotaMutation = DeleteQuotaMutation_Mutation;
 
-export type StudentQuotasQuery_studentQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+export type StudentQuotasQuery_studentQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
 export type StudentQuotasQuery_Query = { studentQuotas: Array<StudentQuotasQuery_studentQuotas_Quota> | null };
 
@@ -3035,7 +3034,7 @@ export type StudentQuotasQueryVariables = Exact<{
 
 export type StudentQuotasQuery = StudentQuotasQuery_Query;
 
-export type StudentOpenQuotasQuery_studentOpenQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, version: number | null, createdAt: string | null, updatedAt: string | null };
+export type StudentOpenQuotasQuery_studentOpenQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
 export type StudentOpenQuotasQuery_Query = { studentOpenQuotas: Array<StudentOpenQuotasQuery_studentOpenQuotas_Quota> | null };
 

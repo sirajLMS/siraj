@@ -216,12 +216,12 @@ export namespace QuotaRepository {
    * adds a second full-scan per page load. Approximate counts or cached
    * totals could mitigate this but are not currently implemented.
    *
-   * **In-memory filtering caveat**: The caller (`QuotaService.listQuotas`)
-   * may further filter `rows` in memory for the multi-student IDOR-scoped
-   * branch. In that case the returned `totalCount` from this method will NOT
-   * match the filtered row count. Callers that need the post-filter count
-   * should use the service-layer return value, not this method's
-   * `totalCount`. See `QuotaService.listQuotas` (V3-075 comment) for details.
+   * **Pagination accuracy**: When `pagination` is `null`, this method
+   * returns all matching rows (no LIMIT/OFFSET) with the full count.
+   * The caller (`QuotaService.listQuotas`) uses this for the multi-student
+   * IDOR-scoped branch to fetch all rows, filter in-memory by associated
+   * student IDs, then slice for the requested page — ensuring correct
+   * pagination and totalCount on the scoped set.
    */
   export const listAllPaginated = async (
     tx?: ReadExecutor,

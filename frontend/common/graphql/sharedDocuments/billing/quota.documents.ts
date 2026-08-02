@@ -17,7 +17,6 @@ const QuotaFieldsFragment = gql`
     periodType
     periodDays
     priority
-    version
     createdAt
     updatedAt
   }

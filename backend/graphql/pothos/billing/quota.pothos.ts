@@ -37,7 +37,6 @@ export const QuotaPothosObject = QuotaRef.implement({
     periodType: t.expose("periodType", { type: QuotaPeriodTypePothosEnum, nullable: true }),
     periodDays: t.exposeInt("periodDays", { nullable: true }),
     priority: t.exposeInt("priority"),
-    version: t.exposeInt("version"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),
@@ -125,7 +124,6 @@ export const QuotaUpdateInputPothosRef = gqlSchemaBuilder.inputRef<QuotaUpdateIn
     status: t.field({ type: QuotaStatusPothosEnum, required: false }),
     // V3-073: GraphQL-level validation on priority (min 0, max 100).
     priority: t.int({ required: false, directives: { constraint: { min: 0, max: 100 } } }),
-    version: t.int({ required: true }),
   }),
 });
 

@@ -22,7 +22,6 @@ export type QuotaItem = Pick<
   | "periodType"
   | "periodDays"
   | "priority"
-  | "version"
   | "createdAt"
   | "updatedAt"
 >;

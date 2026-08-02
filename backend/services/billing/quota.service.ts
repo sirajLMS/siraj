@@ -165,23 +165,28 @@ export namespace QuotaService {
       filter = { ...filter, studentId: associatedStudentIds[0] };
     }
 
-    const res = await QuotaRepository.listAllPaginated(tx, filter, pagination);
-    let rows = res.rows;
-
     // For multiple associated students without a single-studentId filter,
-    // filter in-memory by the associated set.
+    // fetch all quotas (no pagination) then filter+paginate in-memory so that
+    // pagination operates on the scoped set rather than across all students.
     if (associatedStudentIds.length > 1 && !filter?.studentId) {
+      const allRes = await QuotaRepository.listAllPaginated(tx, filter, null);
       const idSet = new Set(associatedStudentIds);
-      rows = rows.filter(q => idSet.has(q.studentId));
+      const filteredRows = allRes.rows.filter(q => idSet.has(q.studentId));
+      const total = filteredRows.length;
+      const page = pagination
+        ? filteredRows.slice(pagination.offset, pagination.offset + pagination.perPage)
+        : filteredRows;
+      return {
+        rows: page.map(mapQuotaToReturnType),
+        totalCount: total,
+      };
     }
 
+    // Single student or no scoping — use DB pagination directly
+    const res = await QuotaRepository.listAllPaginated(tx, filter, pagination);
     return {
-      rows: rows.map(mapQuotaToReturnType),
-      // V3-075: In-memory count for the multi-student branch. The DB query
-      // returns all matching rows which are then filtered in-memory by the
-      // associated-student set, so `rows.length` is the accurate count here.
-      // A dedicated COUNT query would add latency without improving accuracy.
-      totalCount: rows.length,
+      rows: res.rows.map(mapQuotaToReturnType),
+      totalCount: res.totalCount,
     };
   };
 
@@ -566,7 +571,7 @@ export namespace QuotaService {
       // over-count the flip, causing a credit leak.
       if (pendingInstances.length > 0) {
         const instanceIds = pendingInstances.map(inst => inst.id);
-        await SchedulingRepository.updateOndemandStatusBatch(
+        flippedCount = await SchedulingRepository.updateOndemandStatusBatch(
           instanceIds,
           {
             executionState: "NOT_ACTIVATED",
@@ -576,8 +581,6 @@ export namespace QuotaService {
           OnDemandStatus.PENDING_CREDIT,
           t
         );
-
-        flippedCount = pendingInstances.length;
       }
 
       // Deduct from quota for flipped instances to prevent double-counting on refresh.

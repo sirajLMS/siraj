@@ -1125,7 +1125,7 @@ export type CreatePermissionGroupInput = {
 };
 
 export type CreateRecurringClassInput = {
-  classType: InputMaybe<Scalars['String']['input']>;
+  classType: InputMaybe<ClassType>;
   days: Array<RecurringClassDayInput>;
   defaultStartTime: Scalars['String']['input'];
   durationMinutes: Scalars['Int']['input'];
@@ -3641,6 +3641,7 @@ export enum OnDemandNoCreditsOutcome {
 export enum OnDemandStatus {
   Available = 'AVAILABLE',
   Cancelled = 'CANCELLED',
+  Converted = 'CONVERTED',
   NoCreditsAbsent = 'NO_CREDITS_ABSENT',
   NoCreditsCancelled = 'NO_CREDITS_CANCELLED',
   PendingCredit = 'PENDING_CREDIT'
@@ -4927,7 +4928,6 @@ export type Quota = {
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   validFrom: Maybe<Scalars['DateTime']['output']>;
   validUntil: Maybe<Scalars['DateTime']['output']>;
-  version: Maybe<Scalars['Int']['output']>;
 };
 
 /** Aggregated quota balance summary for a student */
@@ -4944,6 +4944,7 @@ export type QuotaBalance = {
 /** Per-quota breakdown of remaining classes by expiration date */
 export type QuotaExpirationBreakdown = {
   __typename?: 'QuotaExpirationBreakdown';
+  id: Maybe<Scalars['String']['output']>;
   quotaId: Maybe<Scalars['String']['output']>;
   quotaName: Maybe<Scalars['String']['output']>;
   remaining: Maybe<Scalars['Int']['output']>;
@@ -5040,7 +5041,6 @@ export type QuotaUpdateInput = {
   priority: InputMaybe<Scalars['Int']['input']>;
   status: InputMaybe<QuotaStatus>;
   validUntil: InputMaybe<Scalars['DateTime']['input']>;
-  version: Scalars['Int']['input'];
 };
 
 export enum RateSource {
@@ -5073,7 +5073,7 @@ export type RecordPurchaseInput = {
 };
 
 export type RecurringClassDayInput = {
-  dayOfWeek: Scalars['String']['input'];
+  dayOfWeek: DayOfWeek;
   isActive: Scalars['Boolean']['input'];
   startTime: Scalars['String']['input'];
 };
