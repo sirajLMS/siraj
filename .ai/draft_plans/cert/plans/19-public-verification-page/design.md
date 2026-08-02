@@ -1804,7 +1804,7 @@ This is the public-facing verification entry point that renders the full verific
 
 **Responsive**: Uses `useMediaQuery(theme.breakpoints.down('sm'))` to stack actions vertically on mobile, and adjusts typography sizes.
 
-**Translation keys**: Uses `useAppTranslation("certificates.verification.page")` from `@/shared/locale/client` for all text — consistent with the existing i18n namespace from Task 1.
+**Translation keys**: Uses `useAppTranslation(Translation.Dashboard.PublicVerification)` from `@/shared/locale/client` for all text — consistent with the existing i18n namespace from Task 1.
 
 ---
 
@@ -1836,7 +1836,7 @@ This is the landing page where users enter a certificate number or scan a QR cod
 
 **State**: Uses `useVerificationStore` for `certificateNumber`, `scannerOpen`, and `recentSearches`.
 
-**Translation keys**: Uses `useAppTranslation("certificates.verification.search")` for the hero, form, accordion, and recent searches text.
+**Translation keys**: Uses `useAppTranslation(Translation.Dashboard.PublicVerification)` for the hero, form, accordion, and recent searches text.
 
 ---
 
@@ -1873,7 +1873,7 @@ interface QrScannerProps {
 }
 ```
 
-**Translation keys**: Uses `useAppTranslation("certificates.verification.scanner")` for all error messages, toggle labels, and fallback text.
+**Translation keys**: Uses `useAppTranslation(Translation.Dashboard.PublicVerification)` for all error messages, toggle labels, and fallback text.
 
 ---
 
@@ -1929,7 +1929,7 @@ interface PublicCertificate {
 
 **Responsive**: Stacks vertically on mobile (`< 600px`) via `useMediaQuery(theme.breakpoints.down('sm'))` — the `Grid` switches to a single column, and `CardActions` switches to `Stack` with `direction="column"`.
 
-**Translation keys**: Uses `useAppTranslation("certificates.verification.card")` for all labels (issueDate, expiryDate, template, status badges, action buttons).
+**Translation keys**: Uses `useAppTranslation(Translation.Dashboard.PublicVerification)` for all labels (issueDate, expiryDate, template, status badges, action buttons).
 
 ---
 
@@ -1968,7 +1968,7 @@ interface ShareCertificateDialogProps {
 - Telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Verify certificate ' + certNumber)}`
 - Email: `mailto:?subject=${encodeURIComponent('Certificate Verification')}&body=${encodeURIComponent('Verify at ' + url)}`
 
-**Translation keys**: Uses `useAppTranslation("certificates.verification.share")` for dialog title, labels, and the QR code caption.
+**Translation keys**: Uses `useAppTranslation(Translation.Dashboard.PublicVerification)` for dialog title, labels, and the QR code caption.
 
 ---
 

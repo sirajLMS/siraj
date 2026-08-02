@@ -350,8 +350,8 @@ Error translations consumed by resolvers via `ctx.t().errorsTranslations`. This 
 | App Router page (if any, e.g., storage stats in admin) | `getTranslations(locale).dashboardTranslations.certificateStorage` |
 | Client components (upload progress, download button) | `useAppTranslation(Translation.Dashboard.CertificateStorage)` |
 | GraphQL resolvers (Plan 5 mutations for background upload) | `ctx.t().errorsTranslations.certificates.storage` |
-| API routes (cron storage-cleanup endpoint) | `getServerTranslations(locale, "dashboard.certificates.storage")` from `@/shared/locale/server-graphql` |
-| Services (CertificateStorageService) | `getServerTranslations(locale, "dashboard.certificates.storage")` |
+| API routes (cron storage-cleanup endpoint) | `getServerTranslations(locale).dashboardTranslations.certificateStorage` from `@/shared/locale/server-graphql` |
+| Services (CertificateStorageService) | `getServerTranslations(locale).dashboardTranslations.certificateStorage` |
 
 ---
 

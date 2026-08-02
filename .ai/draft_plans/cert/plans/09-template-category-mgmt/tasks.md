@@ -1206,7 +1206,7 @@ bun run lint                      # Full-repo lint via queue client (serialized 
    - Passes `locale` (from `getLocale()` server-side prop) and `canManage` to children.
    - Empty state when no category selected: translated placeholder card.
    - Imports `CategoryTree` (T22), `CategoryDetailPanel` (T23), and renders the Manage View Switcher per §4 tier isolation.
-   - All strings via `useAppTranslation("dashboard.certificates.categories")`. No `console.*`.
+   - All strings via `useAppTranslation(Translation.Dashboard.CertificateCategories)`. No `console.*`.
 
 ### Quality Loop
 
@@ -1248,7 +1248,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
    - Drag-and-drop via `@dnd-kit` nested `SortableContext` (per §5): reorder siblings, move subcategories between parents. Drop handlers compute `beforeId`/`afterId`/`newParentId` for the positional `reorderCategory` mutation (F-09-1).
    - Selected node applies theme `primary.main` tinted background and calls `useCategoryStore.selectCategory(id)`.
    - Keyboard navigation (arrows + `Shift+F10` for context menu) for accessibility.
-   - All strings via `useAppTranslation("dashboard.certificates.categories")`. Colors exclusively from theme + `shared/constants/certificate-category-colors.ts`. No `console.*`.
+   - All strings via `useAppTranslation(Translation.Dashboard.CertificateCategories)`. Colors exclusively from theme + `shared/constants/certificate-category-colors.ts`. No `console.*`.
 
 5. **Mobile equivalent** stays per §4/T15 (`CategoryList.mobile.tsx`) — no drag-and-drop on mobile per REQ-09-12.
 
@@ -1320,7 +1320,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
    - Fields per §12.4: Name (required, ≤50 chars, char counter), Description (multiline, ≤200 chars, counter), Parent Category (`Autocomplete` nullable, excludes self+descendants), `IconPicker` (15-20 icons from `shared/constants/certificate-category-icons.ts`), `ColorSwatchPicker` (8-10 presets from `shared/constants/certificate-category-colors.ts` + custom color), Display Order (number, non-negative), Active Switch (default on).
    - Validation: name required + unique within parent level (debounced `categorySearch`/client-side check against loaded tree), display order ≥ 0, no cycle on parent pick.
    - `onSave` dispatch on `createCategory`/`updateCategory` mutation; on success closes dialog and refreshes tree (Apollo cache update / refetch); on `CYCLE_DETECTED`/`DUPLICATE_NAME` displays translated field error (§10 i18n catalog).
-   - All strings via `useAppTranslation("dashboard.certificates.categories")`. No hardcoded colors. No `console.*`.
+   - All strings via `useAppTranslation(Translation.Dashboard.CertificateCategories)`. No hardcoded colors. No `console.*`.
 
 ### Quality Loop
 
@@ -1720,7 +1720,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templat
    - **Move mode**: `Autocomplete` of categories (excludes selected IDs + descendants) + confirm `Button` with `bulk.move.confirm` interpolation `Move {count} categories`
    - **Delete mode**: warning `List` with `WarningAmberOutlined` icons showing `bulk.delete.warning.subcategories(count)` + `bulk.delete.warning.templates(count)`, confirm `Button` color `error` with `bulk.delete.confirm` `Delete {count} Categories`
    - **Assign mode**: searchable `Autocomplete` of templates (multi-select, from `templateList` query — Plan 08) + assign button
-   - All labels via `useAppTranslation("dashboard.certificates.categories")`
+   - All labels via `useAppTranslation(Translation.Dashboard.CertificateCategories)`
    - Styles: `sx={{ minWidth: 400 }}` on `Dialog`, `List` items with `sx={{ display: 'flex', alignItems: 'center', gap: 1 }}`
 
 4. **Modify `CategoryTree.tsx`** to add per-node checkboxes (§13.2.1):

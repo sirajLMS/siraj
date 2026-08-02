@@ -1526,7 +1526,7 @@ The following tasks add the public-facing verification page components, REST API
 - Uses MUI `Container` with `maxWidth="sm"`, centered full-screen layout
 - Header: academy logo + name + status icon (CheckCircleOutlined / CancelOutlined / InfoOutlined)
 - Valid state renders `<ShareCertificateDialog>` (Task 15) when `shareDialogOpen` is true
-- All text from i18n: `useAppTranslation("certificates.verification.page")`
+- All text from i18n: `useAppTranslation(Translation.Dashboard.PublicVerification)`
 
 **Quality loop**: tsgo + biome + lint
 
@@ -1651,7 +1651,7 @@ The following tasks add the public-facing verification page components, REST API
   - Generic scan error: `Alert severity="error"` with message
 - **Manual entry fallback**: Link "Enter certificate number manually" → `onClose()` + focuses parent search input
 - **Cleanup**: `useEffect` cleanup function calls `html5Qrcode.stop()` + `.clear()` on unmount or dialog close
-- All error messages from i18n: `useAppTranslation("certificates.verification.scanner")`
+- All error messages from i18n: `useAppTranslation(Translation.Dashboard.PublicVerification)`
 
 **Quality loop**: tsgo + biome + lint
 
@@ -1697,7 +1697,7 @@ The following tasks add the public-facing verification page components, REST API
   - Print button (window.print())
   - Share button (opens ShareCertificateDialog via store action `openShareDialog`)
 - Responsive: stacks vertically on mobile (<600px) via `useMediaQuery`
-- All text from i18n: `useAppTranslation("certificates.verification.card")`
+- All text from i18n: `useAppTranslation(Translation.Dashboard.PublicVerification)`
 
 **Quality loop**: tsgo + biome + lint
 
@@ -1741,7 +1741,7 @@ The following tasks add the public-facing verification page components, REST API
 - "Download QR" button: renders QRCodeSVG to canvas, triggers PNG download
 - Web Share API: if `navigator.share` exists, renders primary Share button that calls `navigator.share({ title, text, url })` — else falls back to social buttons
 - "Scan this QR code to verify the certificate" caption text below QR
-- Uses `useAppTranslation("certificates.verification.share")` for all labels
+- Uses `useAppTranslation(Translation.Dashboard.PublicVerification)` for all labels
 
 **Install**: `bun add qrcode.react` (if not already in package.json)
 

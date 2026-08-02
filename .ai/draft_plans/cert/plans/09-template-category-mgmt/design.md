@@ -1277,7 +1277,7 @@ Both `ar/errors/` and `en/errors/` updated with implementations.
   - On mobile: collapses to a single stacked column (tree → detail) per the §4 mobile tier; tree becomes an expandable card list and detail panel appears below the selected node.
 - **Props**: `{ locale: string; canManage: boolean }` (locale from `getLocale()` server-side; `canManage` from `useHasPermission(AppPermission.CertificateCategoryManage)`).
 - **State**: Reads `useCategoryStore()` (§12.5) for `selectedCategoryId`, `editorOpen`, `loading`, `error`. Passes selected category id to `CategoryDetailPanel`.
-- **i18n**: Uses `useAppTranslation("dashboard.certificates.categories")` for all header, button, and empty-state strings. No hardcoded strings.
+- **i18n**: Uses `useAppTranslation(Translation.Dashboard.CertificateCategories)` for all header, button, and empty-state strings. No hardcoded strings.
 
 ### 12.2 CategoryTree
 
@@ -1316,7 +1316,7 @@ Both `ar/errors/` and `en/errors/` updated with implementations.
      - **"View All"** link routes to the Plan 08 template list filtered by this category: `useRouter().push(\`/dashboard/cert/templates?category=\${category.id}\`)` (cross-link to §12.6 category-based filtering).
 - **Empty State**: When `selectedId === null`, display a translated empty-state illustration card inviting the user to select a category from the tree.
 - **Props**: `{ category: Category | null; canManage: boolean; onFieldChange: (field: keyof Category, value: string | boolean) => void }`.
-- **i18n**: All labels, hints, and empty-state copy via `useAppTranslation("dashboard.certificates.categories")`.
+- **i18n**: All labels, hints, and empty-state copy via `useAppTranslation(Translation.Dashboard.CertificateCategories)`.
 
 ### 12.4 CategoryEditorDialog
 
@@ -1338,7 +1338,7 @@ Both `ar/errors/` and `en/errors/` updated with implementations.
   - Display order must be a non-negative integer.
   - Parent cannot form a cycle (enforced by excluding self + descendants per AC-08).
 - **Save action**: Calls `onSave` with the assembled `CategoryInput`. On success, the dialog closes and the `CategoryTree` refreshes (tree re-fetches affected siblings via Apollo cache update / `categoryList` refetch). On failure, server errors (`CYCLE_DETECTED`, `DUPLICATE_NAME`) map to translated field errors via the i18n error catalog (§10).
-- **i18n**: All field labels, helper texts, validation messages, dialog actions (Cancel/Save) via `useAppTranslation("dashboard.certificates.categories")`. Plural/interpolation helpers per §10.
+- **i18n**: All field labels, helper texts, validation messages, dialog actions (Cancel/Save) via `useAppTranslation(Translation.Dashboard.CertificateCategories)`. Plural/interpolation helpers per §10.
 
 ### 12.5 Zustand Category Store
 

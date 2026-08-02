@@ -2049,7 +2049,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - [ ] AR and EN files satisfy the `TemplateEditorLabels` interface — TypeScript will error if not.
 - [ ] Pluralization functions declared as `(count: number) => string` in the type and implemented in each locale.
 - [ ] Interpolation functions declared as `(param: string) => string` and implemented.
-- [ ] No hardcoded strings in components — all via the i18n system (`useAppTranslation("dashboard.certificateTemplateEditor")` for client components).
+- [ ] No hardcoded strings in components — all via the i18n system (`useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` for client components).
 - [ ] Namespace registration: the namespace is already registered (`dashboard.certificateTemplateEditor`); no new namespace needed — just expand the existing `TemplateEditorLabels` interface.
 
 ### Quality Loop

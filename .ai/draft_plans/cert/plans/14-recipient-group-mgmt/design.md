@@ -1704,9 +1704,9 @@ Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on 20
 ### Corrections made in this plan file
 - **Tier view paths**: `frontend/{desktop,mobile}/views/certificates/recipient-groups/` → `frontend/{desktop,mobile}/views/dashboard/certificates/recipient-groups/` (all desktop/mobile views live under a `dashboard` segment — verified `frontend/desktop/views/` and `frontend/mobile/views/` contain only a `dashboard/` child).
 - **i18n access signatures (Plan 14 design had hypothetical signatures)**:
-  - `getTranslations(locale, "certificates")` → `getTranslations(locale).certTranslations.recipientGroups.list.pageTitle` (synchronous; only `locale` arg).
-  - `useAppTranslation("certificates")` → `useAppTranslation(Translation.Certificates.RecipientGroups)` then `t.list.pageTitle` (handle is an object, not a string).
-  - `ctx.t("certificates")` → `ctx.t().certTranslations.recipientGroups.errors.groupNotFound(id)` (`ctx.t()` returns the full `Translations`, no namespace arg — verified `backend/graphql/gqlContext.ts:30,96` and `server-graphql.ts`).
+  - `getTranslations(locale).dashboardTranslations.certificate` → `getTranslations(locale).certTranslations.recipientGroups.list.pageTitle` (synchronous; only `locale` arg).
+  - `useAppTranslation(Translation.Dashboard.Certificate)` → `useAppTranslation(Translation.Certificates.RecipientGroups)` then `t.list.pageTitle` (handle is an object, not a string).
+  - `ctx.t().certTranslations` → `ctx.t().certTranslations.recipientGroups.errors.groupNotFound(id)` (`ctx.t()` returns the full `Translations`, no namespace arg — verified `backend/graphql/gqlContext.ts:30,96` and `server-graphql.ts`).
 - The Plan 14 **requirements.md** already used the correct signatures (`getTranslations(locale).certTranslations...`, `useAppTranslation(Translation.Certificates.RecipientGroups)`, `ctx.t().certTranslations...`); this design was brought into line with requirements.
 
 ### i18n convention reminder (cross-plan)

@@ -159,7 +159,7 @@ The `INDEX.md` file serves as the navigational entry point. It contains:
 | 2. Apollo Hooks | `useCertificateListQuery`, `useCertificateGenerateMutation`, naming conventions, cache update patterns, described in tables |
 | 3. Zustand Stores | Certificate list store (filters, pagination), generation dialog store, template editor store, described in tables |
 | 4. MUI v9 Components | DataGrid configuration for certificate lists, generation dialog composition, described in prose |
-| 5. i18n Usage | `useAppTranslation("certificates")` with sub-domain access, described in tables |
+| 5. i18n Usage | `useAppTranslation(Translation.Dashboard.Certificate)` with sub-domain access, described in tables |
 | 6. Cross-References | Links to `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md` |
 
 ### 2.8 STORAGE_PATTERNS.md Content
@@ -314,7 +314,7 @@ The `INDEX.md` file serves as the navigational entry point. It contains:
 | Certificate Apollo Hooks (new subsection) | Query and mutation hook naming, cache update patterns |
 | Certificate Zustand Stores (new subsection) | Store naming, composition, mock store for Storybook |
 | Certificate MUI Patterns (new subsection) | DataGrid for certificates, generation dialog, template editor canvas |
-| Certificate i18n (new subsection) | `useAppTranslation("certificates")` usage, sub-domain access |
+| Certificate i18n (new subsection) | `useAppTranslation(Translation.Dashboard.Certificate)` usage, sub-domain access |
 | Cross-Reference | Link to `docs/certificates/FRONTEND_PATTERNS.md` |
 
 ### 3.10 frontend/views/AGENTS.md
@@ -364,7 +364,7 @@ The `INDEX.md` file serves as the navigational entry point. It contains:
 | Certificate Zustand Stores | `certificate*Store` — naming, composition, selector pattern |
 | Certificate GraphQL Documents | `*CertificateQueryDocument`, `*CertificateMutationDocument` — file location, naming |
 | Certificate MUI Notes | DataGrid column config for certificates, template editor canvas rendering, generation dialog stepper |
-| Certificate i18n Notes | `useAppTranslation("certificates")`, sub-domain access pattern |
+| Certificate i18n Notes | `useAppTranslation(Translation.Dashboard.Certificate)`, sub-domain access pattern |
 | Certificate Gotchas | PDF preview rendering in DataGrid, QR code generation, template element drag-and-drop coordinate system, MUI v9 style prop avoidance |
 
 ### 4.2 backend.instructions.md
@@ -494,7 +494,7 @@ The `knowledge` sub-domain is added to the `certificates` namespace in `shared/l
 
 The i18n keys for the `knowledge` sub-domain are defined alongside all other certificate sub-domains. The type schema entry adds a `knowledge` object with the 12 keys listed above. Both English and Arabic implementations provide the translations. Since these are simple string keys (no interpolation, no pluralization), the implementation is straightforward — each key maps to a string literal.
 
-The keys are accessed via `getTranslations(locale, "certificates")` for server components and `useAppTranslation("certificates")` for client components, with the sub-domain accessed as a nested property: `t.certificates.knowledge.docsIndexTitle`.
+The keys are accessed via `getTranslations(locale).dashboardTranslations.certificate` for server components and `useAppTranslation(Translation.Dashboard.Certificate)` for client components, with the sub-domain accessed as a nested property: `t.certificates.knowledge.docsIndexTitle`.
 
 ---
 

@@ -520,8 +520,8 @@ Both English and Arabic implementations provide the translations. Arabic impleme
 
 | Context | Access Pattern | Example |
 |---------|---------------|---------|
-| Cron route (server-side) | `getServerTranslations(locale, "certificates")` then `t.certificates.cron.expiry.jobStarted()` | Default locale "en" for cron |
-| Service layer | `ctx.t("certificates")` or `getServerTranslations(locale, "certificates")` | Same as cron route |
+| Cron route (server-side) | `getServerTranslations(locale).dashboardTranslations.certificate` then `t.certificates.cron.expiry.jobStarted()` | Default locale "en" for cron |
+| Service layer | `ctx.t().certTranslations` or `getServerTranslations(locale).dashboardTranslations.certificate` | Same as cron route |
 | Notification dispatch | `getServerTranslations(holderLocale, "certificates")` | Use holder's preferred locale |
 
 Note: Cron jobs run unauthenticated — the locale defaults to "en". For notification dispatch, the certificate holder's preferred locale (if stored) is used; otherwise "en".

@@ -449,8 +449,8 @@ Translation
 
 | Context | Import | Function |
 |---------|--------|----------|
-| Service layer | `@/shared/locale/server-graphql` | `getServerTranslations(locale, "dashboard.certificates.storage")` |
-| Cron API route | `@/shared/locale/server-graphql` | `getServerTranslations(locale, "dashboard.certificates.storage")` |
+| Service layer | `@/shared/locale/server-graphql` | `getServerTranslations(locale).dashboardTranslations.certificateStorage` |
+| Cron API route | `@/shared/locale/server-graphql` | `getServerTranslations(locale).dashboardTranslations.certificateStorage` |
 | GraphQL resolvers (Plan 5) | `ctx.t()` | `ctx.t().errorsTranslations.certificates.storage` |
 
 ### Pluralization Implementation

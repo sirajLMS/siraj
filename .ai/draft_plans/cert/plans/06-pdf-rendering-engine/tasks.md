@@ -240,7 +240,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Implement DATE formatting (apply `dateFormat` pattern with locale-aware month names)
 - [ ] Implement SELECT formatting (resolve selected option's display label)
 - [ ] Implement missing required variable detection → throw `RenderError` with code `missing_required_variable`
-- [ ] Use `getServerTranslations(locale, "certificates.errors.render")` for error messages
+- [ ] Use `getServerTranslations(locale).errorsTranslations.certificate` for error messages
 - [ ] Create test: `backend/services/cert/render/__tests__/variableResolver.test.ts`
 
 **Files to Create/Modify:**
@@ -280,7 +280,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Construct verification URL: `{app_base_url}/verify/{certificate.verificationCode}`
 - [ ] Read `app_base_url` from environment variable `NEXT_PUBLIC_APP_URL` (or equivalent)
 - [ ] Handle QR library errors → throw `RenderError` with code `qr_generation_failed`
-- [ ] Use `getServerTranslations(locale, "certificates.errors.render")` for error message
+- [ ] Use `getServerTranslations(locale).errorsTranslations.certificate` for error message
 - [ ] Create test: `backend/services/cert/render/__tests__/qrCodeGenerator.test.ts`
 
 **Files to Create/Modify:**
@@ -319,7 +319,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Base64-encode the image bytes
 - [ ] Determine MIME type from file extension (jpeg, png, gif, webp)
 - [ ] Handle missing file → throw `RenderError` with code `background_not_found`
-- [ ] Use `getServerTranslations(locale, "certificates.errors.render")` for error message
+- [ ] Use `getServerTranslations(locale).errorsTranslations.certificate` for error message
 - [ ] Return null (no background) if `backgroundFileId` is null/undefined
 - [ ] Create test: `backend/services/cert/render/__tests__/backgroundImageLoader.test.ts`
 
@@ -360,7 +360,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Apply `font-family` to HTML elements with `languageConstraint = "ar"`
 - [ ] Implement fallback: if font file missing, log warning and use system fallback font
 - [ ] If no fallback available → throw `RenderError` with code `font_not_found`
-- [ ] Use `getServerTranslations(locale, "certificates.errors.render")` for error message
+- [ ] Use `getServerTranslations(locale).errorsTranslations.certificate` for error message
 - [ ] Create test: `backend/services/cert/render/__tests__/fontLoader.test.ts`
 
 **Files to Create/Modify:**
@@ -495,7 +495,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Implement error handling: catch each pipeline step, return typed `RenderError` with appropriate error code
 - [ ] Implement cleanup: ensure Puppeteer page is released in all paths (try/finally)
 - [ ] Use `logger` from `@/backend/lib/logger` for all logging
-- [ ] Use `getServerTranslations(locale, "certificates.errors.render")` for error messages
+- [ ] Use `getServerTranslations(locale).errorsTranslations.certificate` for error messages
 - [ ] Create test: `backend/services/cert/__tests__/renderService.test.ts`
 
 **Files to Create/Modify:**
@@ -538,8 +538,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Implement consecutive error counter with `maxErrors` threshold (default: 5)
 - [ ] When `maxErrors` reached: abort batch, return partial results with `batch_max_errors` error
 - [ ] Return `BatchRenderResult`: array of `{ certificateId, pdfPath, success, error? }`
-- [ ] Use `getServerTranslations(locale, "certificates.errors.render")` for `batch_max_errors` message
-- [ ] Use `getServerTranslations(locale, "certificates.generation")` for progress messages with Arabic pluralization
+- [ ] Use `getServerTranslations(locale).errorsTranslations.certificate` for `batch_max_errors` message
+- [ ] Use `getServerTranslations(locale).dashboardTranslations.certificateGeneration` for progress messages with Arabic pluralization
 - [ ] Use `logger` from `@/backend/lib/logger` for all logging
 - [ ] Create test: `backend/services/cert/batch/__tests__/batchRenderer.test.ts`
 

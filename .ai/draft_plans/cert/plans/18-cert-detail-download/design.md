@@ -1128,10 +1128,10 @@ The `eventCount` function is a typed pluralization function:
 
 | Context | Translation Source | Import |
 |---------|-------------------|--------|
-| Server Component (page metadata) | `getTranslations(locale, "dashboard.certificateDetail")` | `@/shared/locale/server` |
+| Server Component (page metadata) | `getTranslations(locale).dashboardTranslations.certificateDetail` | `@/shared/locale/server` |
 | Client Component (views, dialogs) | `useAppTranslation(Translation.Dashboard.CertificateDetail)` | `@/shared/locale/client` |
 | Client Component (audit namespace) | `useAppTranslation(Translation.Dashboard.CertificateAudit)` | `@/shared/locale/client` |
-| GraphQL error messages (server) | `ctx.t("dashboard.certificateDetail")` | Pothos context |
+| GraphQL error messages (server) | `ctx.t().dashboardTranslations.certificateDetail` | Pothos context |
 
 ### 9.7 Date Formatting (C.10 fix)
 
@@ -1478,7 +1478,7 @@ When `TriggerPdfRenderMutation` returns `success: false` and a `renderId` (rende
 
 2. **i18n: removed string-based namespaces — use typed handles**
    - Verified: the codebase uses **handle-based** `useAppTranslation(NamespaceHandle)` from `@/shared/locale/client` and `getTranslations(locale).dashboardTranslations.{handle}` from `@/shared/locale` (server). There is **NO** `useAppTranslation("string.namespace")` overload and `getTranslations` takes a **single** `locale` arg (not `(locale, namespace)`).
-   - Fixed: `useAppTranslation("certificates.detail")` → `useAppTranslation(Translation.Dashboard.CertificateDetail)`; `useAppTranslation("certificates.detail.audit")` → `useAppTranslation(Translation.Dashboard.CertificateAudit)`; `getTranslations(locale, "certificates.detail")` → `getTranslations(locale).dashboardTranslations.certificateDetail`; all `certificates.detail.*` namespace strings → flat `certificateDetail.*` / `certificateAudit` group references.
+   - Fixed: `useAppTranslation(Translation.Dashboard.CertificateDetail)` → `useAppTranslation(Translation.Dashboard.CertificateDetail)`; `useAppTranslation(Translation.Dashboard.CertificateDetail)` → `useAppTranslation(Translation.Dashboard.CertificateAudit)`; `getTranslations(locale).dashboardTranslations.certificateDetail` → `getTranslations(locale).dashboardTranslations.certificateDetail`; all `certificates.detail.*` namespace strings → flat `certificateDetail.*` / `certificateAudit` group references.
    - Namespace handles are **FLAT** under `Dashboard` (verified: `Translation.Dashboard.StaffDirectory`, etc., no nesting), so the detail namespace is `Translation.Dashboard.CertificateDetail`.
 
 3. **i18n file paths: root `certificates.ts` → domain-folder dashboard layout**
