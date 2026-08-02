@@ -204,7 +204,10 @@ return <h1>{t.pageTitle}</h1>;
 
 // Client component (frontend/**) — useAppTranslation + Translation handle
 import { Translation, useAppTranslation } from "@/shared/locale";
-const t = useAppTranslation(Translation.Dashboard.EmailTemplates);
+// For the BACKEND email namespace (existing):
+const t = useAppTranslation(Translation.Emails);
+// For the NEW admin UI namespace (to be created per plan §B):
+// const t = useAppTranslation(Translation.Dashboard.EmailTemplates);
 <input placeholder={t.emptyState} />;
 
 // GraphQL resolver — ctx.t() (no-arg, returns full Translations)

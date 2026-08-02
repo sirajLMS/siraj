@@ -317,8 +317,8 @@ All `page.tsx` paths confirmed via filesystem listing.
 - Server (in backend service): `backend/services/communication/templates/email-templates.ts:32` — `getServerTranslations(locale)` (the canonical reference the plan cites at `plan.md:843,878`).
 
 Two-path i18n wiring (plan.md:862-866, verified):
-1. Client path: `useAppTranslation("emails")` → `defineNamespace` registry at `shared/locale/namespaces/emails/emails.namespace.ts` (handle listed at `shared/locale/namespaces/translation.ts:86` per the plan's claim).
-2. Server path: `getServerTranslations("emails")` → `getTranslations(locale)` → `messagesByLocale[locale]` statically imports the same `emailsEn`/`emailsAr` leaf modules.
+1. Client path: `useAppTranslation(Translation.Emails)` → `defineNamespace` registry at `shared/locale/namespaces/emails/emails.namespace.ts` (handle listed at `shared/locale/namespaces/translation.ts:86,118` per the plan's claim).
+2. Server path: `getServerTranslations(locale).emailsTranslations` → `getTranslations(locale)` → `messagesByLocale[locale]` statically imports the same `emailsEn`/`emailsAr` leaf modules.
 
 ### What is missing for the email template plan
 - The plan already correctly identifies all i18n additions (`plan.md:842-870`): extend `shared/locale/types/emails/index.ts` with a new `errors` sub-namespace and per-scope `SubjectArgs`; update `emailsEn` + `emailsAr` atomically (`plan.md:860` Lockstep rule). The `shared/locale/namespaces/emails/emails.namespace.ts` handle must already exist since the namespace registry reference is at `translation.ts:86`.

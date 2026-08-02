@@ -175,7 +175,7 @@ Each row was verified by an `explore` subagent against the live codebase. A ❌ 
 - **Severity:** Low
 - **Plan lines affected:** lines 789-793 (V4-3 fix text)
 - **Why it matters:** The V4-3 fix documents the i18n two-path coupling:
-  > "Server path: `getServerTranslations("emails")` / `ctx.t("emails")` → the `Translations` nominal type at `shared/locale/types/message.ts:260` where `emailsTranslations: EmailsLabels`."
+  > "Server path: `getServerTranslations(locale).emailsTranslations` / `ctx.t().emailsTranslations` → the `Translations` nominal type at `shared/locale/types/message.ts:260` where `emailsTranslations: EmailsLabels`."
   
   This implies the server path consults the `Translations` type at runtime. In reality, `getServerTranslations` (`server-graphql.ts:1-6`) calls `getTranslations(locale)` from `server.ts:15-17`, which returns `messagesByLocale[locale]` — **pre-built static message objects** assembled at `en/messages.ts:81,127` and `ar/messages.ts:81,127` that import the SAME leaf modules (`emailsEn`/`emailsAr`) the `defineNamespace` loaders reference. The `Translations` type is **TypeScript-only** (compile-time type checking); the runtime path uses static imports of leaf modules. The net effect (two-path coupling, shared leaves) is correctly described — both paths consume the same `emailsEn`/`emailsAr` leaf modules — but the mechanism described ("consults the `Translations` type directly") is inaccurate. A contributor reading the v4 text may look for a type-driven runtime lookup that doesn't exist.
 - **Codebase evidence:**
@@ -183,7 +183,7 @@ Each row was verified by an `explore` subagent against the live codebase. A ❌ 
   - `shared/locale/server.ts:6-9,15-17` — `messagesByLocale` is statically assembled; `getTranslations` returns `messagesByLocale[locale]`
   - `shared/locale/en/messages.ts:81,127` — `enMessages` imports `emailsEn` (the same leaf module `defineNamespace` loads)
   - `shared/locale/types/message.ts:260` — `emailsTranslations: EmailsLabels` (TS-only nominal type; not consulted at runtime)
-- **Recommended fix:** Correct the v4-3 text to: "Server path: `getServerTranslations("emails")` → `getTranslations(locale)` → returns a pre-built message object (`messagesByLocale[locale]`) that statically imports the SAME leaf modules (`emailsEn`/`emailsAr`) the client `defineNamespace` loaders reference. The `Translations` type at `message.ts:260` is TS-only — it validates the shape at compile time but is not consulted at runtime."
+- **Recommended fix:** Correct the v4-3 text to: "Server path: `getServerTranslations(locale).emailsTranslations` → `getTranslations(locale)` → returns a pre-built message object (`messagesByLocale[locale]`) that statically imports the SAME leaf modules (`emailsEn`/`emailsAr`) the client `defineNamespace` loaders reference. The `Translations` type at `message.ts:260` is TS-only — it validates the shape at compile time but is not consulted at runtime."
 
 ---
 
