@@ -60,4 +60,33 @@ Each integration file gets **one** smoke test (single API call) to confirm the a
 - **Permission Checking**: Keep permission gating (e.g. `assertDirectoryAccess`, `hasPermission`) OUTSIDE `cachedRead` — authorization checks must execute before cache lookups so unauthorized users never receive cached payloads or execute cache queries.
 - **Tag Invalidation**: Use named helpers (`invalidateParentWrite`, `invalidateTeacherWrite`, `invalidateClassLifecycle`, `invalidateRoleChange`) in mutation write paths.
 
+## Quota System Integration
+
+The Quota System (`QuotaService`, `QuotaNotificationService`, `AvailabilityService`) is an append-only ledger-based class credit tracking system. See `docs/billing/quota-system.md` for the complete architecture reference. Key service-level rules:
+
+### QuotaService (`backend/services/billing/quota.service.ts`)
+
+- **All methods are permission-gated**: `QUOTAS_VIEW` for reads, `QUOTAS_MANAGE` for writes via `requireManagePermission` / `requireViewPermission`
+- **Single-writer principle**: QuotaService is the ONLY service authorized to call `QuotaRepository` write methods. Other services (CreditService, RecurringClassService, ClassSessionService) call QuotaService — never QuotaRepository directly.
+- **FIFO auto-selection**: `selectQuotaForBooking(studentId, tx?)` uses `QuotaRepository.selectQuotaForBookingFIFO` internally
+- **On-demand refresh**: `refreshStudentOndemandInstances(studentId, tx)` must be called by CreditService after ANY credit change
+
+### AvailabilityService (`backend/services/scheduling/availability.service.ts`)
+
+- Provides point-in-time slot availability checks using `class_instances` lookups + `TeacherAvailabilityRepository.validateBookingAvailability`
+- Used by: RecurringClassService (create/update schedule), on-demand instance generator script
+
+### QuotaNotificationService (`backend/services/billing/quota-notification.service.ts`)
+
+- 7 notification methods: `sendQuotaExpiringSoon`, `sendQuotaExpired`, `sendQuotaLowBalance`, `sendOndemandInstancePendingCredit`, `sendOndemandInstanceReminderT3`, `sendOndemandInstanceReminderT1`, `sendOndemandTeacherDailyDigest`
+- All dispatch via `dispatchWithPreferences`, not raw `CommunicationService.dispatch`
+- Each event has a `NotificationEventCategory` tag (info/reminder/urgent/digest)
+
+### Service Integration Rules
+
+- **CancelSchedule**: `RecurringClassService.cancelSchedule` releases quota reservations via `QuotaService.releaseForRecurringSchedule`
+- **Mode Switch**: `switchSchedulingMode` adjusts quota reservations based on mode transitions (SCHEDULED → ON_DEMAND releases; ON_DEMAND → SCHEDULED reverts)
+- **Session Start**: `ClassSessionService` calls `QuotaService.redeemForInstance` for ON_DEMAND PENDING_CREDIT instances
+- **Manual Entry**: `TeacherDashboardService.createManualEntry` delegates to `QuotaService.redeemForInstance` when quota-backed (prevents double deduction)
+
 

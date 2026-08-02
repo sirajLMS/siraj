@@ -11,26 +11,26 @@ import {
 import logger from "@/backend/lib/logger";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import type {
-  ClassInstanceEntity,
-  ClassInstanceInsertInput,
-  RecurringScheduleEntity,
-  StudentEntity,
-  TeacherEntity,
+  ClassInstanceInsertType,
+  ClassInstanceSelectType,
+  RecurringScheduleSelectType,
+  StudentSelectType,
+  TeacherSelectType,
 } from "@/backend/types";
 
 const CHUNK_SIZE = 100;
 
 function buildAllClassInstances(
-  classesList: RecurringScheduleEntity[],
-  teachersList: TeacherEntity[],
-  studentsList: StudentEntity[],
+  classesList: RecurringScheduleSelectType[],
+  teachersList: TeacherSelectType[],
+  studentsList: StudentSelectType[],
   seedConfig: SeedConfig,
   now: Date
-): ClassInstanceInsertInput[] {
+): ClassInstanceInsertType[] {
   const studentById = new Map(studentsList.map(s => [s.id, s]));
   const teacherById = new Map(teachersList.map(t => [t.id, t]));
   const demoStudent = studentsList[0];
-  const allInstances: ClassInstanceInsertInput[] = [];
+  const allInstances: ClassInstanceInsertType[] = [];
 
   for (let i = 0; i < classesList.length; i++) {
     const schedule = classesList[i];
@@ -63,10 +63,10 @@ function buildAllClassInstances(
 }
 
 async function insertClassInstances(
-  allInstances: ClassInstanceInsertInput[],
+  allInstances: ClassInstanceInsertType[],
   now: Date
-): Promise<ClassInstanceEntity[]> {
-  const results: ClassInstanceEntity[] = [];
+): Promise<ClassInstanceSelectType[]> {
+  const results: ClassInstanceSelectType[] = [];
   for (let i = 0; i < allInstances.length; i += CHUNK_SIZE) {
     const chunk = allInstances.slice(i, i + CHUNK_SIZE);
     const inserted = await ClassSessionService.upsertManyClassInstancesForSeed(chunk, {
@@ -79,7 +79,7 @@ async function insertClassInstances(
   return results;
 }
 
-async function seedClassInstanceFiles(results: ClassInstanceEntity[], seedConfig: SeedConfig): Promise<void> {
+async function seedClassInstanceFiles(results: ClassInstanceSelectType[], seedConfig: SeedConfig): Promise<void> {
   if (!shouldSeedExtendedFiles(seedConfig)) return;
 
   for (let i = 0; i < Math.min(results.length, 3); i++) {
@@ -102,9 +102,9 @@ async function seedClassInstanceFiles(results: ClassInstanceEntity[], seedConfig
 }
 
 export async function seedOrGet(
-  classesList: RecurringScheduleEntity[],
-  teachersList: TeacherEntity[],
-  studentsList: StudentEntity[],
+  classesList: RecurringScheduleSelectType[],
+  teachersList: TeacherSelectType[],
+  studentsList: StudentSelectType[],
   config?: SeedConfig
 ) {
   logger.info("Seeding system class instances...");

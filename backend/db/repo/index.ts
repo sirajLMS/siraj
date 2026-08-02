@@ -5,6 +5,8 @@ export {
   CreditRepository,
   CurrencyHedgeRepository,
   InvoicePaymentSubmissionRepository,
+  QuotaLedgerRepository,
+  QuotaRepository,
   SupportedCurrencyRepository,
   SupportedMobileWalletRepository,
   SupportedOnlineAccountRepository,

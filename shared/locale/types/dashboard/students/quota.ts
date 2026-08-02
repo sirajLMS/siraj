@@ -57,4 +57,22 @@ export interface StudentQuotaLabels {
   readonly errors: {
     readonly invalidId: string;
   };
+  readonly audience: {
+    readonly studentTitle: string;
+    readonly parentTitle: string;
+    readonly teacherTitle: string;
+    readonly supervisorTitle: string;
+    readonly activeQuotas: string;
+    readonly remainingCredits: string;
+    readonly onDemandPending: string;
+    readonly noChildren: string;
+    readonly quotaSummary: string;
+    readonly classQuotaUsage: string;
+    readonly onDemandPendingQueue: string;
+    readonly classAnalytics: string;
+    readonly lowBalanceAlerts: string;
+    readonly conflictHeld: string;
+    readonly analyticsOverview: string;
+    readonly noData: string;
+  };
 }

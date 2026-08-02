@@ -21,7 +21,7 @@ export async function getClassInstanceByIdOrThrow(
   t: DBTransaction,
   id: string,
   tErrors: ErrorsLabels
-): Promise<Types.ClassInstanceEntity> {
+): Promise<Types.ClassInstanceSelectType> {
   const results = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
   if (results.length === 0) {
     throw new Error(tErrors.classInstanceNotFound({ id }));
@@ -135,7 +135,7 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
 
 export async function performRescheduleValidations(
   t: DBTransaction,
-  input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+  input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
   tErrors: ErrorsLabels
 ) {
   await acquireLocks(t, input.teacherId, input.studentId);
@@ -162,11 +162,11 @@ export async function performRescheduleValidations(
 
 export async function createRescheduledSuccessor(
   t: DBTransaction,
-  existing: Types.ClassInstanceEntity,
+  existing: Types.ClassInstanceSelectType,
   offsetDays: number,
   remarks: string,
   tErrors: ErrorsLabels
-): Promise<Types.ClassInstanceEntity> {
+): Promise<Types.ClassInstanceSelectType> {
   const offsetMs = offsetDays * 24 * 60 * 60 * 1000;
   const newScheduledStartAt = new Date(existing.scheduledStartAt.getTime() + offsetMs);
   const newScheduledEndAt = new Date(existing.scheduledEndAt.getTime() + offsetMs);

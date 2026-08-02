@@ -2,7 +2,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { STATUS_URL as LINT_QUEUE_STATUS_URL } from "./lint-queue-config";
+import { STATUS_URL as LINT_QUEUE_STATUS_URL } from "@/scripts/lint-queue-config";
 
 type BunSubprocess = ReturnType<typeof Bun.spawn>;
 

@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { CreditRepository, ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
-import { AppPermission } from "@/backend/enum";
-import { logger } from "@/backend/lib";
-import { PermissionsService } from "@/backend/services";
+import { CreditRepository, StudentRepository } from "@/backend/db/repo";
+import { AppPermission, CreditReason } from "@/backend/enum";
+import { ConflictError, DomainError, logger, NotFoundError, ValidationError } from "@/backend/lib";
+import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
+import { QuotaService } from "@/backend/services/billing/quota.service";
 import type {
   CreditBalanceReturnType,
   CreditTransactionReturnType,
@@ -13,6 +14,7 @@ import type {
   PaginationArgs,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 function deriveBookingIdempotencyKey(input: {
   studentId: string;
@@ -23,31 +25,19 @@ function deriveBookingIdempotencyKey(input: {
   return createHash("sha256").update(parts.join(":")).digest("hex");
 }
 
-async function requirePermission(actorUserId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {
-  const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
-  if (!hasPermission) {
-    throw new Error(tErrors.insufficientPermissions);
+/** Detects a Postgres unique-constraint violation (SQLSTATE 23505). */
+function isUniqueViolation(error: unknown): boolean {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    return (error as { code: string }).code === "23505";
   }
+  return false;
 }
 
 async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Promise<void> {
   const existing = await StudentRepository.findById(studentId);
   if (!existing) {
-    throw new Error(tErrors.studentNotFound(studentId));
+    throw new NotFoundError("STUDENT", tErrors.studentNotFound(studentId));
   }
-}
-
-async function resolveAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
-  const profile = await StudentRepository.findProfileById(studentId);
-  if (!profile) return false;
-
-  const parent = await ParentRepository.findByUserId(actorUserId);
-  if (parent?.id === profile?.parentId) return true;
-
-  const teacher = await TeacherRepository.findByUserId(actorUserId);
-  if (teacher?.id === profile?.primaryTeacherId) return true;
-
-  return false;
 }
 
 function mapToReturnType(row: CreditTransactionSelectType): CreditTransactionReturnType {
@@ -71,72 +61,25 @@ export namespace CreditService {
     tErrors: ErrorsLabels
   ): Promise<CreditTransactionReturnType | null> {
     if (!input.studentId || input.studentId.trim().length === 0) {
-      throw new Error(tErrors.credit.invalidInput);
+      throw new ValidationError(tErrors.credit.invalidInput);
     }
 
     if (!Number.isFinite(input.hours) || input.hours <= 0) {
-      throw new Error(tErrors.credit.invalidInput);
+      throw new ValidationError(tErrors.credit.invalidInput);
     }
 
-    const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
-    if (existing.length > 0) {
-      const existingRow = existing[0];
-      if (existingRow) return mapToReturnType(existingRow);
-    }
-
-    const created = await db.transaction(async tx => {
-      await assertStudentExists(input.studentId, tErrors);
-      const ledgerRow = await CreditRepository.createPurchase(tx, {
-        studentId: input.studentId,
-        changeAmount: input.hours,
-        sourcePaymentId: input.sourcePaymentId ?? null,
-        notes: input.notes ?? null,
-        creditedByUserId: actorUserId,
-        idempotencyKey,
-      });
-
-      await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
-      return ledgerRow;
-    });
-
-    logger.info("Credit purchase seeded", {
-      actorUserId,
-      studentId: input.studentId,
-      hours: input.hours,
-      idempotencyKey,
-    });
-
-    return mapToReturnType(created);
-  }
-
-  export async function recordPurchase(
-    actorUserId: string,
-    input: CreditTransactionSubmitInput,
-    tErrors: ErrorsLabels
-  ): Promise<CreditTransactionReturnType> {
-    await requirePermission(actorUserId, AppPermission.CREDITS_MANAGE, tErrors);
-
-    if (!input.studentId || input.studentId.trim().length === 0) {
-      throw new Error(tErrors.credit.invalidInput);
-    }
-
-    if (!Number.isFinite(input.hours) || input.hours <= 0) {
-      throw new Error(tErrors.credit.invalidInput);
-    }
-
-    const idempotencyKey = CreditRepository.generateIdempotencyKey({
-      studentId: input.studentId,
-      hours: input.hours,
-      notes: input.notes,
-    });
-
+    // V3-078: Idempotency check is INSIDE the transaction to eliminate the
+    // TOCTOU race — a concurrent purchase with the same key could insert
+    // between a pre-tx check and the tx insert, producing a duplicate.
     try {
       const created = await db.transaction(async tx => {
         await assertStudentExists(input.studentId, tErrors);
 
         const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey], tx);
         if (existing.length > 0) {
-          throw new Error(tErrors.credit.duplicatePurchase);
+          const existingRow = existing[0];
+          if (existingRow) return mapToReturnType(existingRow);
+          return null;
         }
 
         const ledgerRow = await CreditRepository.createPurchase(tx, {
@@ -149,6 +92,73 @@ export namespace CreditService {
         });
 
         await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
+        await QuotaService.refreshStudentOndemandInstances(input.studentId, tx);
+        return mapToReturnType(ledgerRow);
+      });
+
+      logger.info("Credit purchase seeded", {
+        actorUserId,
+        studentId: input.studentId,
+        hours: input.hours,
+        idempotencyKey,
+      });
+
+      return created;
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        const resolved = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
+        if (resolved.length > 0) {
+          const row = resolved[0];
+          if (row) return mapToReturnType(row);
+        }
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  export async function recordPurchase(
+    actorUserId: string,
+    input: CreditTransactionSubmitInput,
+    tErrors: ErrorsLabels
+  ): Promise<CreditTransactionReturnType> {
+    await requirePermission(actorUserId, AppPermission.CREDITS_MANAGE, tErrors);
+
+    if (!input.studentId || input.studentId.trim().length === 0) {
+      throw new ValidationError(tErrors.credit.invalidInput);
+    }
+
+    if (!Number.isFinite(input.hours) || input.hours <= 0) {
+      throw new ValidationError(tErrors.credit.invalidInput);
+    }
+
+    const idempotencyKey = CreditRepository.generateIdempotencyKey({
+      studentId: input.studentId,
+      hours: input.hours,
+      notes: input.notes,
+      sourcePaymentId: input.sourcePaymentId,
+    });
+
+    try {
+      const created = await db.transaction(async tx => {
+        await assertStudentExists(input.studentId, tErrors);
+
+        const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey], tx);
+        if (existing.length > 0) {
+          throw new ConflictError(tErrors.credit.duplicatePurchase);
+        }
+
+        const ledgerRow = await CreditRepository.createPurchase(tx, {
+          studentId: input.studentId,
+          changeAmount: input.hours,
+          sourcePaymentId: input.sourcePaymentId ?? null,
+          notes: input.notes ?? null,
+          creditedByUserId: actorUserId,
+          idempotencyKey,
+        });
+
+        await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
+        await QuotaService.refreshStudentOndemandInstances(input.studentId, tx);
 
         return ledgerRow;
       });
@@ -161,6 +171,13 @@ export namespace CreditService {
 
       return mapToReturnType(created);
     } catch (error) {
+      // Catch raw Postgres unique-violation (23505) from a concurrent purchase
+      // with the same idempotency key that slipped between the pre-check and
+      // the insert (TOCTOU). Surface as a friendly duplicatePurchase error so
+      // callers see a domain error instead of the raw Postgres constraint name.
+      if (isUniqueViolation(error)) {
+        throw new ConflictError(tErrors.credit.duplicatePurchase, { cause: error });
+      }
       logger.error("Failed to record credit purchase", {
         actorUserId,
         studentId: input.studentId,
@@ -177,11 +194,8 @@ export namespace CreditService {
   ): Promise<CreditBalanceReturnType> {
     await assertStudentExists(studentId, tErrors);
 
-    const isAssociated = await resolveAssociatedViewer(actorUserId, studentId);
-    const hasCreditsPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.CREDITS_MANAGE);
-    if (!isAssociated && !hasCreditsPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    // V3-013: Use shared IDOR-scoping helper
+    await assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.CREDITS_MANAGE);
 
     const balance = await CreditRepository.getBalance(db, studentId);
     return {
@@ -199,11 +213,8 @@ export namespace CreditService {
   ): Promise<{ rows: CreditTransactionReturnType[]; totalCount: number }> {
     await assertStudentExists(studentId, tErrors);
 
-    const isAssociated = await resolveAssociatedViewer(actorUserId, studentId);
-    const hasCreditsPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.CREDITS_MANAGE);
-    if (!isAssociated && !hasCreditsPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    // V3-013: Use shared IDOR-scoping helper
+    await assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.CREDITS_MANAGE);
 
     const [rows, totalCount] = await Promise.all([
       CreditRepository.getTransactions(db, studentId, paginationArgs),
@@ -222,12 +233,15 @@ export namespace CreditService {
     creditedByUserId: string,
     idempotencyKey: string,
     tx: DBTransaction,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    locale = "en"
   ): Promise<void> {
     const balance = await CreditRepository.getBalance(tx, studentId);
     if (balance.classesRemaining <= 0) {
-      throw new Error(
-        tErrors.credit.insufficientBalance({
+      const { errorsTranslations } = getServerTranslations(locale);
+      throw new DomainError(
+        "INSUFFICIENT_CLASSES",
+        errorsTranslations.credit.insufficientBalance({
           studentId,
           remaining: balance.classesRemaining,
         })
@@ -250,7 +264,10 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: effectiveIdempotencyKey,
         }),
-      adjustStudentClasses: () => StudentRepository.deductClasses(studentId, tErrors, 1, undefined, tx),
+      adjustStudentClasses: async () => {
+        await StudentRepository.deductClasses(studentId, tErrors, 1, undefined, tx);
+        await QuotaService.refreshStudentOndemandInstances(studentId, tx);
+      },
     });
   }
 
@@ -278,8 +295,121 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: effectiveIdempotencyKey,
         }),
-      adjustStudentClasses: () => StudentRepository.addClasses(studentId, tErrors, 1, undefined, tx),
+      adjustStudentClasses: async () => {
+        await StudentRepository.addClasses(studentId, tErrors, 1, undefined, tx);
+        await QuotaService.refreshStudentOndemandInstances(studentId, tx);
+      },
     });
+  }
+
+  /**
+   * Batch version of `refundOnCancel` that refunds credits for multiple
+   * instances in a single transaction. Groups refunds by `studentId` so
+   * `StudentRepository.addClasses` and `QuotaService.refreshStudentOndemandInstances`
+   * are each called at most once per student instead of once per instance.
+   *
+   * Each refund in `refunds` produces a ledger insert with:
+   *   changeAmount=1, reason=REFUND, classInstanceId=refund.classInstanceId
+   * — identical to the single-instance `refundOnCancel` path.
+   *
+   * Returns the number of refunds actually inserted (idempotency-filtered).
+   *
+   * Errors bubble up to the caller so the shared transaction is rolled back.
+   */
+  export async function refundOnCancelBatch(
+    tx: DBTransaction,
+    refunds: Array<{
+      studentId: string;
+      classInstanceId: string;
+      creditedByUserId: string;
+      idempotencyKey: string;
+    }>,
+    tErrors: ErrorsLabels
+  ): Promise<number> {
+    if (refunds.length === 0) return 0;
+
+    // Build the full set of ledger keys + caller keys for all refunds.
+    const allKeys: string[] = [];
+    const ledgerKeyByRefund = new Map<number, string>();
+
+    refunds.forEach((refund, idx) => {
+      const ledgerKey = deriveBookingIdempotencyKey({
+        studentId: refund.studentId,
+        classInstanceId: refund.classInstanceId,
+        operation: "refund",
+      });
+      ledgerKeyByRefund.set(idx, ledgerKey);
+      allKeys.push(ledgerKey, refund.idempotencyKey);
+    });
+
+    // ONE SELECT to find all existing rows for any of the keys.
+    const existing = await CreditRepository.findByIdempotencyKeys([...new Set(allKeys)].sort(), tx);
+    const existingKeys = new Set(existing.map(r => r.idempotencyKey));
+
+    // Filter unseen refunds — a refund is unseen if BOTH its ledger key
+    // and its caller key are absent.
+    const toInsert: Array<{
+      studentId: string;
+      classInstanceId: string;
+      creditedByUserId: string;
+      idempotencyKey: string;
+    }> = [];
+
+    refunds.forEach((refund, idx) => {
+      const ledgerKey = ledgerKeyByRefund.get(idx);
+      if (ledgerKey !== undefined && !existingKeys.has(ledgerKey) && !existingKeys.has(refund.idempotencyKey)) {
+        // For the batch insert we use the deterministic ledger key as the
+        // idempotencyKey (same as the single-instance path uses via
+        // runIdempotentBookingLedgerOp.applyLedgerChange).
+        toInsert.push({
+          studentId: refund.studentId,
+          classInstanceId: refund.classInstanceId,
+          creditedByUserId: refund.creditedByUserId,
+          idempotencyKey: ledgerKey,
+        });
+      }
+    });
+
+    if (toInsert.length === 0) return 0;
+
+    // ONE multi-row INSERT.
+    const insertRows = toInsert.map(r => ({
+      studentId: r.studentId,
+      changeAmount: 1,
+      reason: CreditReason.REFUND,
+      sourcePaymentId: null,
+      classInstanceId: r.classInstanceId,
+      notes: null,
+      creditedByUserId: r.creditedByUserId,
+      idempotencyKey: r.idempotencyKey,
+    }));
+
+    await CreditRepository.insertBatch(tx, insertRows);
+
+    // Group inserted refunds by studentId for batch student updates.
+    const byStudent = new Map<string, number>();
+    for (const r of toInsert) {
+      byStudent.set(r.studentId, (byStudent.get(r.studentId) ?? 0) + 1);
+    }
+
+    // ONE addClasses call per unique student (amount = count for that student).
+    // ONE refreshStudentOndemandInstances call per unique student.
+    // Each student's addClasses → refresh is kept sequential (same student, same tx),
+    // but independent students are processed in parallel via Promise.all.
+    await Promise.all(
+      [...byStudent].map(async ([studentId, count]) => {
+        await StudentRepository.addClasses(studentId, tErrors, count, undefined, tx);
+        await QuotaService.refreshStudentOndemandInstances(studentId, tx);
+      })
+    );
+
+    logger.info("Batch credit refund completed", {
+      totalRequested: refunds.length,
+      totalInserted: toInsert.length,
+      uniqueStudents: byStudent.size,
+    });
+
+    return toInsert.length;
   }
 }
 

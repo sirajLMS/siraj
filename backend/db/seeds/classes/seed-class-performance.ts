@@ -12,10 +12,10 @@ import {
 import { ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
-import type { ClassInstanceEntity, ClassInstancePerformanceInsertType } from "@/backend/types";
+import type { ClassInstancePerformanceInsertType, ClassInstanceSelectType } from "@/backend/types";
 
 function buildPerformanceRow(
-  instance: ClassInstanceEntity,
+  instance: ClassInstanceSelectType,
   config: SeedConfig,
   rowIndex: number,
   now: Date
@@ -39,7 +39,7 @@ function buildPerformanceRow(
   };
 }
 
-export async function seedOrGet(classInstancesList: ClassInstanceEntity[], config?: SeedConfig) {
+export async function seedOrGet(classInstancesList: ClassInstanceSelectType[], config?: SeedConfig) {
   logger.info("Seeding system class performance...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

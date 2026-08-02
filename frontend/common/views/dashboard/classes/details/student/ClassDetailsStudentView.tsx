@@ -19,6 +19,10 @@ const EXECUTION_STATE_TO_STATUS: Record<ClassExecutionState, ClassInstanceStatus
   [ClassExecutionState.Running]: "active",
   [ClassExecutionState.Completed]: "completed",
   [ClassExecutionState.NotActivated]: "scheduled",
+  [ClassExecutionState.OnDemandConflictHeld]: "pending",
+  [ClassExecutionState.OnDemandNoCreditsAbsent]: "cancelled",
+  [ClassExecutionState.OnDemandNoCreditsCancelled]: "cancelled",
+  [ClassExecutionState.OnDemandPendingCredits]: "pending",
 };
 
 const NULL_TEACHER = {

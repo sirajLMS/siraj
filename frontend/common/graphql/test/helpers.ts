@@ -4,6 +4,7 @@ import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   ClassType,
   type CreateRecurringClassInput,
+  type DayOfWeek,
   IanaTimezone,
   type ManagerAccountType,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -37,6 +38,13 @@ const TEST_USER_PASSWORD = "Test_Pass1!";
 
 let demoUsersReadyPromise: Promise<void> | null = null;
 
+async function waitForServerRecovery(): Promise<void> {
+  for (let wait = 0; wait < 60; wait++) {
+    if (await isTestServerRunning()) break;
+    await new Promise(resolve => setTimeout(resolve, 3_000));
+  }
+}
+
 /**
  * Idempotently provisions canonical demo login users via the test-helper mutation.
  * Safe to call from every suite's beforeAll — concurrent callers share one in-flight request.
@@ -53,12 +61,7 @@ export async function ensureDemoUsersForTests(): Promise<void> {
         if (result.error) {
           lastError = new Error(`ensureDemoUsers failed: ${result.error.message ?? "unknown GraphQL error"}`);
           if (attempt < maxAttempts) {
-            // Wait for the dev server to recover (it may have crashed during
-            // route compilation and needs time to restart).
-            for (let wait = 0; wait < 60; wait++) {
-              if (await isTestServerRunning()) break;
-              await new Promise(resolve => setTimeout(resolve, 3_000));
-            }
+            await waitForServerRecovery();
             await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
             continue;
           }
@@ -344,13 +347,18 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,
-    days: [{ dayOfWeek, startTime: "10:00:00", isActive: true }],
-    classType: "REGULAR",
+    days: [{ dayOfWeek: dayOfWeek as DayOfWeek, startTime: "10:00:00", isActive: true }],
+    classType: ClassType.Regular,
     generateInstancesForWeeks: 2,
     effectiveFrom: date,
     effectiveUntil: null,
     hourlyRate: null,
     rateCurrency: null,
+    quotaId: null,
+    earmarkedClasses: null,
+    schedulingMode: null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: null,
   });
 
   const gridResult = await testClient.query({
@@ -618,7 +626,7 @@ export async function cleanupTestSuperAdmin(superAdminToken: string, userId: str
 
 export async function assertRecurringClassDenied(
   token: string,
-  days: { dayOfWeek: string; startTime: string; isActive: boolean }[]
+  days: { dayOfWeek: DayOfWeek; startTime: string; isActive: boolean }[]
 ): Promise<void> {
   const subjectId = await ensureTestSubjectId(token).catch(() => "00000000-0000-0000-0000-000000000000");
   const result = await mutateCreateRecurringClass(token, {
@@ -629,12 +637,18 @@ export async function assertRecurringClassDenied(
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,
     days,
-    classType: "REGULAR",
+    classType: ClassType.Regular,
     generateInstancesForWeeks: 4,
     effectiveFrom: null,
     effectiveUntil: null,
     hourlyRate: null,
     rateCurrency: null,
+    quotaId: null,
+    earmarkedClasses: null,
+    schedulingMode: null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: null,
   });
+
   expect(result.error).toBeDefined();
 }

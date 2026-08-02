@@ -12,13 +12,13 @@ import {
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import logger from "@/backend/lib/logger";
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
-import type { ManualInvoiceInsertInput, ParentEntity, StudentEntity, UserSelectType } from "@/backend/types";
+import type { ManualInvoiceInsertInput, ParentEntity, StudentSelectType, UserSelectType } from "@/backend/types";
 
 type InvoiceSeedSpec = ManualInvoiceInsertInput & { readonly idempotencyKey: string };
 
 function buildInvoiceSpecs(
   parentsList: ParentEntity[],
-  studentsList: StudentEntity[],
+  studentsList: StudentSelectType[],
   usersList: UserSelectType[],
   seedConfig: SeedConfig
 ): InvoiceSeedSpec[] {
@@ -62,7 +62,7 @@ async function findInvoicesByKeys(keys: readonly string[]) {
 
 export async function seedOrGet(
   parentsList: ParentEntity[],
-  studentsList: StudentEntity[],
+  studentsList: StudentSelectType[],
   usersList: UserSelectType[],
   config?: SeedConfig
 ) {

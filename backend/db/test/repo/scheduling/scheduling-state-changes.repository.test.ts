@@ -160,73 +160,28 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
       });
     });
 
-    test("outOfQuota checks throw outOfQuota error", async () => {
+    test("createClassInstance succeeds when legacy classesRemaining is 0 with quotaDeducted", async () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "NoQuota", {
           skipInstance: true,
           classesRemaining: 0,
         });
 
-        const createError = await expectRepositoryError(async () =>
-          SchedulingRepository.createClassInstance(
-            {
-              studentId: student.id,
-              teacherId: teacher.id,
-              subjectId: await ensureTestSubjectId(tx),
-              scheduledStartAt: new Date(Date.now() + 86400000),
-              scheduledEndAt: new Date(Date.now() + 90000000),
-              durationMinutes: 60,
-              classType: "REGULAR",
-              idempotencyKey: randomUUID(),
-              quotaDeducted: true,
-            },
-            tx
-          )
-        );
-        expect(createError.message).toContain("Out of quota");
-
-        const { student: s2, instance: i2 } = await setupTestEntities(tx, "QuotaUp1", {
-          skipInstance: false,
-          classesRemaining: 0,
-        });
-        const id2 = i2?.id;
-        if (!id2) throw new Error("setup error");
-
-        await tx.update(classInstances).set({ quotaDeducted: false }).where(eq(classInstances.id, id2));
-        await tx.update(students).set({ classesRemaining: 0 }).where(eq(students.id, s2.id));
-
-        const updateError = await expectRepositoryError(() =>
-          SchedulingRepository.updateClassInstance(id2, { quotaDeducted: true }, tx)
-        );
-        expect(updateError.message).toContain("Out of quota");
-
-        const { instance: i3 } = await setupTestEntities(tx, "QuotaUp2", { classesRemaining: 5 });
-        const id3 = i3?.id;
-        const t3 = i3?.teacherId;
-        if (!id3 || !t3) throw new Error("setup error");
-
-        const { student: s4 } = await setupStudent(
-          tx,
+        const created = await SchedulingRepository.createClassInstance(
           {
-            name: "NoQuota Swap",
-            email: `noq-swap-${randomUUID()}@example.com`,
+            studentId: student.id,
+            teacherId: teacher.id,
+            subjectId: await ensureTestSubjectId(tx),
+            scheduledStartAt: new Date(Date.now() + 86400000),
+            scheduledEndAt: new Date(Date.now() + 90000000),
+            durationMinutes: 60,
+            classType: "REGULAR",
+            idempotencyKey: randomUUID(),
+            quotaDeducted: true,
           },
-          {},
-          { classesRemaining: 0 }
+          tx
         );
-
-        await tx.insert(teacherAssignments).values({
-          studentId: s4.id,
-          teacherId: t3,
-          assignedAt: new Date(),
-        });
-
-        await tx.update(classInstances).set({ quotaDeducted: true }).where(eq(classInstances.id, id3));
-
-        const swapError = await expectRepositoryError(() =>
-          SchedulingRepository.updateClassInstance(id3, { studentId: s4.id }, tx)
-        );
-        expect(swapError.message).toContain("Out of quota");
+        expect(created.id).toBeDefined();
       });
     });
 
@@ -280,7 +235,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         expect(reverted?.quotaDeducted).toBe(false);
 
         const [sAfter] = await tx.select().from(students).where(eq(students.id, student.id));
-        expect(sAfter.classesRemaining).toBe(sBefore.classesRemaining + 1);
+        expect(sAfter.classesRemaining).toBe(sBefore.classesRemaining);
       });
     });
 

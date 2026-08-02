@@ -120,6 +120,81 @@ function assertRequiredAuthCookies(cookies: Cookie[]): void {
   }
 }
 
+async function attemptDemoLogin(graphqlUrl: string, groupSlug: string, fetchFn: typeof fetch): Promise<Response> {
+  return fetchFn(graphqlUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        mutation demoLogin($input: DemoLoginInput!) {
+          demoLogin(input: $input) {
+            token
+          }
+        }
+      `,
+      variables: { input: { groupSlug } },
+    }),
+  });
+}
+
+async function processDemoLoginResponse(
+  response: Response,
+  context: BrowserContext,
+  baseUrl: string
+): Promise<boolean> {
+  if (!response.ok) return false;
+
+  const body = (await response.json()) as {
+    data?: { demoLogin?: { token?: string } };
+    errors?: unknown[];
+  };
+  const token = body.data?.demoLogin?.token;
+  if (!token) return false;
+
+  const authCookies = getSetCookieHeaders(response)
+    .map(raw => parseSetCookieHeader(raw, baseUrl))
+    .filter((cookie): cookie is Cookie => cookie !== null);
+
+  assertRequiredAuthCookies(authCookies);
+  await context.addCookies(authCookies);
+  return true;
+}
+
+async function handleDemoLoginRetry(
+  attempt: number,
+  maxAttempts: number,
+  isDevMode: boolean,
+  is429 = false
+): Promise<boolean> {
+  if (attempt >= maxAttempts) return false;
+  const delay = is429 ? 2_000 * attempt : isDevMode ? 10_000 * attempt : 1_000 * attempt;
+  await new Promise(resolve => setTimeout(resolve, delay));
+  return true;
+}
+
+async function executeDemoLoginAttempt(
+  graphqlUrl: string,
+  groupSlug: string,
+  fetchFn: typeof fetch,
+  context: BrowserContext,
+  baseUrl: string
+): Promise<{ success: boolean; is429?: boolean; error?: unknown }> {
+  try {
+    const response = await attemptDemoLogin(graphqlUrl, groupSlug, fetchFn);
+    if (response.status === 429) {
+      return { success: false, is429: true };
+    }
+    const success = await processDemoLoginResponse(response, context, baseUrl);
+    if (success) return { success: true };
+    return {
+      success: false,
+      error: new Error(`Failed to login demo user with groupSlug: ${groupSlug}. Status: ${response.status}`),
+    };
+  } catch (err) {
+    return { success: false, error: err };
+  }
+}
+
 export async function authenticateDemoUser(context: BrowserContext, groupSlug: string): Promise<void> {
   const baseUrl = getTestBaseUrl();
   const graphqlUrl = `${baseUrl}/api/graphql`;
@@ -129,71 +204,13 @@ export async function authenticateDemoUser(context: BrowserContext, groupSlug: s
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    let response: Response;
-    try {
-      response = await fetchFn(graphqlUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `
-            mutation demoLogin($input: DemoLoginInput!) {
-              demoLogin(input: $input) {
-                token
-              }
-            }
-          `,
-          variables: { input: { groupSlug } },
-        }),
-      });
-    } catch (connErr) {
-      // Dev server may have crashed during page compilation and needs time
-      // to restart. Wait longer in dev mode.
-      lastError = connErr;
-      if (attempt < maxAttempts) {
-        const delay = isDevMode ? 10_000 * attempt : 1_000 * attempt;
-        await new Promise(resolve => setTimeout(resolve, delay));
-        continue;
-      }
-      throw lastError;
-    }
+    const result = await executeDemoLoginAttempt(graphqlUrl, groupSlug, fetchFn, context, baseUrl);
+    if (result.success) return;
 
-    if (response.status === 429 && attempt < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 2_000 * attempt));
-      continue;
-    }
-
-    if (!response.ok) {
-      lastError = new Error(`demoLogin request failed with status ${response.status}`);
-      if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 1_000 * attempt));
-        continue;
-      }
-      throw lastError;
-    }
-
-    const body = (await response.json()) as {
-      data?: { demoLogin?: { token?: string } };
-      errors?: unknown[];
-    };
-    const token = body.data?.demoLogin?.token;
-    if (!token) {
-      lastError = new Error(
-        `Failed to login demo user with groupSlug: ${groupSlug}. Response: ${JSON.stringify(body)}`
-      );
-      if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 1_000 * attempt));
-        continue;
-      }
-      throw lastError;
-    }
-
-    const authCookies = getSetCookieHeaders(response)
-      .map(raw => parseSetCookieHeader(raw, baseUrl))
-      .filter((cookie): cookie is Cookie => cookie !== null);
-
-    assertRequiredAuthCookies(authCookies);
-    await context.addCookies(authCookies);
-    return;
+    lastError = result.error ?? lastError;
+    const isRetryable = await handleDemoLoginRetry(attempt, maxAttempts, isDevMode, result.is429);
+    if (isRetryable) continue;
+    throw lastError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);
   }
 
   throw lastError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);

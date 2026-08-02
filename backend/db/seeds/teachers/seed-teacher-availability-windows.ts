@@ -7,12 +7,12 @@ import {
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { TeacherAvailabilitySeedService } from "@/backend/services/seed/teacher-availability-seed.service";
-import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
+import type { TeacherSelectType, TimezoneSelectType, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(
-  teachersList: TeacherEntity[],
+  teachersList: TeacherSelectType[],
   usersList: UserSelectType[],
-  timezones: TimezoneEntity[],
+  timezones: TimezoneSelectType[],
   config?: SeedConfig
 ) {
   logger.info("Seeding teacher availability windows...");

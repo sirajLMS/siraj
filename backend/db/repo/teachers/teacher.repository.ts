@@ -8,23 +8,23 @@ import { AccountStatus, type CurrencyCode, type Gender } from "@/backend/enum";
 import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/backend/lib/enum";
 import type {
   PaginationArgs,
-  TeacherCreateResult,
+  TeacherCreateReturnType,
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
-  TeacherEntity,
-  TeacherEntityInput,
+  TeacherInsertType,
   TeacherProfileReturnType,
   TeacherProfileUpdateInputType,
+  TeacherSelectType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherRepository {
   export async function create(
-    input: TeacherEntityInput,
+    input: TeacherInsertType,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<TeacherCreateResult> {
+  ): Promise<TeacherCreateReturnType> {
     const queryDb = tx ?? db;
 
     const existingTeacher = await queryDb
@@ -324,7 +324,7 @@ export namespace TeacherRepository {
     userId: string,
     extraValues?: { hourlyRate?: string | null; rateCurrency?: CurrencyCode | null },
     tx?: DBTransaction
-  ): Promise<TeacherEntity> => {
+  ): Promise<TeacherSelectType> => {
     const queryDb = tx ?? db;
     const now = new Date();
     const [row] = await queryDb

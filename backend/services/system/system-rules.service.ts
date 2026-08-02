@@ -1,6 +1,6 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
-import type { ClassInstanceEntity } from "@/backend/types";
+import type { ClassInstanceSelectType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace SystemRulesService {
@@ -8,7 +8,7 @@ export namespace SystemRulesService {
    * Asserts that a class instance can be activated based on the system activation window.
    * Window: now >= scheduledStartAt - beforeMinutes AND now <= scheduledEndAt
    */
-  export async function assertActivationTimeWindow(instance: ClassInstanceEntity, locale?: string): Promise<void> {
+  export async function assertActivationTimeWindow(instance: ClassInstanceSelectType, locale?: string): Promise<void> {
     const beforeMinutes = await SystemSettingsRepository.getIntValue("session_activation_window_before_minutes", 5);
     const now = new Date();
 
@@ -23,7 +23,7 @@ export namespace SystemRulesService {
     }
   }
 
-  export async function assertAbsentWaitingPeriod(instance: ClassInstanceEntity, locale?: string): Promise<void> {
+  export async function assertAbsentWaitingPeriod(instance: ClassInstanceSelectType, locale?: string): Promise<void> {
     const waitingMinutes = await SystemSettingsRepository.getIntValue("session_absent_waiting_minutes", 30);
     const now = new Date();
 

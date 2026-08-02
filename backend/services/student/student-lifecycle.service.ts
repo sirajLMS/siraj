@@ -6,7 +6,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import { buildStudentLifecyclePayloads } from "@/backend/services/notification/notification-payloads.builders";
 import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
-import type { ChangeStudentStatusResult, ReassignStudentTeacherResult, TeacherEntity } from "@/backend/types";
+import type { ChangeStudentStatusResult, ReassignStudentTeacherResult, TeacherSelectType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentLifecycleService {
@@ -136,7 +136,7 @@ async function dispatchStudentReassignmentNotifications(
   const parentUserId = student.parentId ? await ParentRepository.findUserIdByParentId(student.parentId) : null;
 
   const previousTeacherId = student.primaryTeacherId;
-  let oldTeacher: TeacherEntity | null = null;
+  let oldTeacher: TeacherSelectType | null = null;
   if (previousTeacherId) {
     oldTeacher = await TeacherRepository.findById(previousTeacherId);
   }

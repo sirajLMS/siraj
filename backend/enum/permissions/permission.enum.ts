@@ -246,6 +246,9 @@ export enum AppPermission {
   SETTINGS_AUDIT_VIEW = "settings.audit_view",
   SETTINGS_SITE_CONTENT_MANAGE = "settings.site_content_manage",
   SETTINGS_TIMEZONES_VIEW = "settings.timezones_view",
+  // Quota Management
+  QUOTAS_VIEW = "quotas.view",
+  QUOTAS_MANAGE = "quotas.manage",
 }
 
 let knownAppPermissionsCache: Set<string> | undefined;

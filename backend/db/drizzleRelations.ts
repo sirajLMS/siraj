@@ -236,6 +236,42 @@ export const relations = defineRelations(schema, r => ({
       to: r.payments.id,
     }),
   },
+  quotas: {
+    student: r.one.students({
+      from: r.quotas.studentId,
+      to: r.students.id,
+    }),
+    ledgerEntries: r.many.quotaLedger({
+      from: r.quotas.id,
+      to: r.quotaLedger.quotaId,
+    }),
+    recurringSchedules: r.many.recurringSchedules({
+      from: r.quotas.id,
+      to: r.recurringSchedules.quotaId,
+    }),
+  },
+  quotaLedger: {
+    quota: r.one.quotas({
+      from: r.quotaLedger.quotaId,
+      to: r.quotas.id,
+    }),
+    student: r.one.students({
+      from: r.quotaLedger.studentId,
+      to: r.students.id,
+    }),
+    recurringSchedule: r.one.recurringSchedules({
+      from: r.quotaLedger.recurringScheduleId,
+      to: r.recurringSchedules.id,
+    }),
+    classInstance: r.one.classInstances({
+      from: r.quotaLedger.classInstanceId,
+      to: r.classInstances.id,
+    }),
+    actorUser: r.one.users({
+      from: r.quotaLedger.actorUserId,
+      to: r.users.id,
+    }),
+  },
   studentProgress: {
     student: r.one.students({
       from: r.studentProgress.studentId,
@@ -284,6 +320,10 @@ export const relations = defineRelations(schema, r => ({
     dstMigrationEntries: r.many.dstMigrationEntries({
       from: r.recurringSchedules.id,
       to: r.dstMigrationEntries.recurringScheduleId,
+    }),
+    quota: r.one.quotas({
+      from: r.recurringSchedules.quotaId,
+      to: r.quotas.id,
     }),
   },
   recurringScheduleDays: {

@@ -93,5 +93,9 @@ export const dashboardAdminEn: AdminDashboardLabels = {
     ACTIVATED: "Activated",
     RUNNING: "Running",
     COMPLETED: "Completed",
+    ON_DEMAND_CONFLICT_HELD: "Conflict Held",
+    ON_DEMAND_NO_CREDITS_ABSENT: "No Credits (Absent)",
+    ON_DEMAND_NO_CREDITS_CANCELLED: "No Credits (Cancelled)",
+    ON_DEMAND_PENDING_CREDITS: "Pending Credit",
   },
 };

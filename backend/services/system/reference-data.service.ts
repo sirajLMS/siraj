@@ -6,13 +6,13 @@ import type {
   GroupWithPermissionIds,
   PaginationArgs,
   SettingsTimezonesPaginatedResult,
-  TimezoneEntity,
+  TimezoneSelectType,
   TimezoneUpsertInput,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
 
 export namespace ReferenceDataService {
-  export async function listTimezones(): Promise<TimezoneEntity[]> {
+  export async function listTimezones(): Promise<TimezoneSelectType[]> {
     return TimezoneRepository.listAll();
   }
 
@@ -42,11 +42,11 @@ export namespace ReferenceDataService {
     };
   }
 
-  export async function findTimezonesByIanaIds(ianaIds: string[]): Promise<TimezoneEntity[]> {
+  export async function findTimezonesByIanaIds(ianaIds: string[]): Promise<TimezoneSelectType[]> {
     return TimezoneRepository.findByIanaIds(ianaIds);
   }
 
-  export async function upsertManyTimezones(inputs: TimezoneUpsertInput[]): Promise<TimezoneEntity[]> {
+  export async function upsertManyTimezones(inputs: TimezoneUpsertInput[]): Promise<TimezoneSelectType[]> {
     return TimezoneRepository.upsertMany(inputs);
   }
 

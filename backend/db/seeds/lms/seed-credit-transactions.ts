@@ -2,7 +2,7 @@ import type { SeedConfig } from "@/backend/db/seeds/lib";
 import { findAdminUserOrFallback } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { CreditService } from "@/backend/services/billing/credit.service";
-import type { CreditTransactionReturnType, StudentEntity, UserSelectType } from "@/backend/types";
+import type { CreditTransactionReturnType, StudentSelectType, UserSelectType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 type CreditPurchaseSpec = {
@@ -36,7 +36,7 @@ function buildIdempotencyKey(spec: CreditPurchaseSpec): string {
 }
 
 export async function seedOrGet(
-  students: StudentEntity[],
+  students: StudentSelectType[],
   users: UserSelectType[],
   _config?: SeedConfig
 ): Promise<CreditTransactionReturnType[]> {

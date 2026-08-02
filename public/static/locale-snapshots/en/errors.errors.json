@@ -193,6 +193,32 @@
     "ttlOutOfRange": "TTL must be between 60 and 2,419,200 seconds.",
     "maxConcurrentOutOfRange": "Max concurrent sessions must be between 1 and 50."
   },
+  "quota": {
+    "insufficientRemaining": {
+      "__fn": "(requested, available) => `Only ${available} quota remaining \\u2014 requested ${requested}`"
+    },
+    "exceedsCreditBalance": {
+      "__fn": "(requested, available) => `Insufficient credit balance. Available: ${available}, needed: ${requested}`"
+    },
+    "periodicRefreshFailed": {
+      "__fn": "(quotaName, reason) => `Failed to refresh periodic quota ${quotaName}: ${reason}`"
+    },
+    "invalidPeriod": {
+      "__fn": "(quotaName) => `Quota ${quotaName} has expired or its period is invalid`"
+    },
+    "alreadyExpired": {
+      "__fn": "(quotaName) => `Quota ${quotaName} has already expired`"
+    },
+    "earmarkExceedsRemaining": {
+      "__fn": "(requested, available) => `Earmark of ${requested} exceeds remaining quota (${available})`"
+    },
+    "slotConflict": {
+      "__fn": "(startTime, endTime) => `Time slot ${startTime}\\u2013${endTime} conflicts with existing booking`"
+    },
+    "onDemandNoCredits": {
+      "__fn": "(studentName) => `Not enough credits for on-demand booking for ${studentName}`"
+    }
+  },
   "rateLimitExceeded": "Too many requests. Please try again later.",
   "duplicateRequest": "Duplicate request detected. This operation has already been processed.",
   "internalServerError": "An unexpected error occurred. Please try again later.",
@@ -276,6 +302,9 @@
   "cannotRescheduleCompleted": "Cannot reschedule a completed session.",
   "cannotRescheduleAlreadyRescheduled": "Cannot reschedule a session that has already been rescheduled.",
   "outOfQuota": "Out of quota.",
+  "quotaExpired": "Quota has expired.",
+  "quotaNotFound": "Quota not found.",
+  "invalidQuotaState": "Invalid quota state.",
   "leaveQuotaExceeded": {
     "__fn": "({ maxLeaves }) => `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`"
   },
@@ -295,5 +324,6 @@
   "teacherUnavailabilityConflict": "Booking blocked by recurring unavailability pattern.",
   "teacherOnVacation": "Booking blocked by approved vacation period.",
   "resourceNotFound": "Learning resource not found.",
-  "currencyInUse": "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles."
+  "currencyInUse": "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
+  "studentNameFallback": "Student"
 }

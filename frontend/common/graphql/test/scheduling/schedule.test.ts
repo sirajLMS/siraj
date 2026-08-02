@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ClassOutcome, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassOutcome, DayOfWeek, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { executeDstBulkUpdateMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/dst-migration.documents";
 import {
   adminDashboardScheduleQueryDocument,
@@ -274,7 +274,9 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("createRecurringClass denied for teacher role", async () => {
-    await assertRecurringClassDenied(teacherToken, [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }]);
+    await assertRecurringClassDenied(teacherToken, [
+      { dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true },
+    ]);
     expect(teacherToken).not.toBe("");
   });
 

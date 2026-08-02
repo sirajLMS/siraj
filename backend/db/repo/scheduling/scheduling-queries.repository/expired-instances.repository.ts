@@ -9,7 +9,7 @@ export const findExpiredPendingInstances = async (
   limit: number,
   now: Date,
   tx?: DBTransaction
-): Promise<Types.ClassInstanceEntity[]> => {
+): Promise<Types.ClassInstanceSelectType[]> => {
   const q = queryDb(tx);
   const missedDeadline = new Date(now.getTime() - graceMinutes * 60_000);
 

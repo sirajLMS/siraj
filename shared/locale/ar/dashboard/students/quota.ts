@@ -60,4 +60,22 @@ export const dashboardStudentQuotaAr: StudentQuotaLabels = {
   errors: {
     invalidId: "معرف الطالب غير صالح.",
   },
+  audience: {
+    studentTitle: "حصصي",
+    parentTitle: "حصص الأبناء",
+    teacherTitle: "استخدام حصص الصف",
+    supervisorTitle: "مراقبة الحصص",
+    activeQuotas: "الحصص النشطة",
+    remainingCredits: "الأرصدة المتبقية",
+    onDemandPending: "طلبات حسب الطلب معلقة",
+    noChildren: "لا يوجد أبناء",
+    quotaSummary: "ملخص الحصص",
+    classQuotaUsage: "استخدام حصص الصف",
+    onDemandPendingQueue: "قائمة انتظار الطلبات حسب الطلب",
+    classAnalytics: "تحليلات الصف",
+    lowBalanceAlerts: "تنبيهات الرصيد المنخفض",
+    conflictHeld: "تعارضات معلقة",
+    analyticsOverview: "نظرة عامة تحليلية",
+    noData: "لا توجد بيانات",
+  },
 };

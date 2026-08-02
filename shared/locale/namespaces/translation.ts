@@ -9,7 +9,9 @@ import { DashboardBillingCurrencyHedges } from "@/shared/locale/namespaces/dashb
 import { DashboardBillingExchangeRates } from "@/shared/locale/namespaces/dashboard/billing/exchangeRates.namespace";
 import { DashboardBilling } from "@/shared/locale/namespaces/dashboard/billing/main.namespace";
 import { DashboardBillingManual } from "@/shared/locale/namespaces/dashboard/billing/manual.namespace";
+import { DashboardBillingQuota } from "@/shared/locale/namespaces/dashboard/billing/quota.namespace";
 import { DashboardBillingSupportedCurrencies } from "@/shared/locale/namespaces/dashboard/billing/supportedCurrencies.namespace";
+
 import { DashboardClassAudit } from "@/shared/locale/namespaces/dashboard/classes/audit.namespace";
 import { DashboardCreateRecurringClass } from "@/shared/locale/namespaces/dashboard/classes/createRecurringClass.namespace";
 import { DashboardClassDetails } from "@/shared/locale/namespaces/dashboard/classes/details.namespace";
@@ -135,7 +137,9 @@ export const Translation = {
     AdminDstMigration: DashboardAdminDstMigration,
     Billing: DashboardBilling,
     BillingManual: DashboardBillingManual,
+    BillingQuota: DashboardBillingQuota,
     BillingCurrencyHedges: DashboardBillingCurrencyHedges,
+
     BillingSupportedCurrencies: DashboardBillingSupportedCurrencies,
     BillingExchangeRates: DashboardBillingExchangeRates,
     BooksAndBags: DashboardBooksAndBags,

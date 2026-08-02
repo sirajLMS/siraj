@@ -6,7 +6,7 @@ import { StudentRepository } from "@/backend/db/repo";
 import { parents, students, users } from "@/backend/db/schema";
 import { AccountStatus, AppLanguage, Gender, OrderSortDirection, ParentStatus, UserRole } from "@/backend/enum";
 import { parseIanaTimezone } from "@/backend/lib";
-import type { ParentEntity, StudentEntity, StudentFilterArgs, UserReturnType } from "@/backend/types";
+import type { ParentEntity, StudentFilterArgs, StudentSelectType, UserReturnType } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -190,7 +190,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
     testLogger.info("Testing cursor stability after a student update...");
 
     const baseTime = new Date("2026-06-02T10:00:00Z");
-    const createdStudents: StudentEntity[] = [];
+    const createdStudents: StudentSelectType[] = [];
 
     for (let i = 0; i < 4; i++) {
       const [s] = (await db
@@ -208,7 +208,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
           createdAt: new Date(baseTime.getTime() + i * 1000),
           updatedAt: new Date(baseTime.getTime() + i * 1000),
         })
-        .returning()) as [StudentEntity];
+        .returning()) as [StudentSelectType];
       createdStudents.push(s);
     }
 

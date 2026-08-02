@@ -113,14 +113,15 @@ export const PAGE_PERMISSIONS = {
     AppPermission.SettingsEditSession,
     AppPermission.SettingsAuditView,
     AppPermission.SettingsSiteContentManage,
-    AppPermission.SettingsTimezonesView,
+    AppPermission.ScheduleViewTimezones,
   ] as PagePermissions,
   settingsGeneral: [AppPermission.SettingsEditGeneral, AppPermission.SettingsView] as PagePermissions,
   settingsEnvironment: [AppPermission.SettingsEditEnv, AppPermission.SettingsView] as PagePermissions,
   settingsSession: [AppPermission.SettingsEditSession, AppPermission.SettingsView] as PagePermissions,
   settingsAudit: [AppPermission.SettingsAuditView] as PagePermissions,
   settingsSiteContent: [AppPermission.SettingsSiteContentManage] as PagePermissions,
-  settingsTimezones: [AppPermission.SettingsTimezonesView] as PagePermissions,
+  settingsTimezones: [AppPermission.ScheduleViewTimezones] as PagePermissions,
+
   // Phase 2 nav additions for previously-orphaned routes.
   classesPage: [AppPermission.ScheduleManageRecurring] as PagePermissions,
   recurringSchedules: [AppPermission.ScheduleManageRecurring] as PagePermissions,
@@ -129,4 +130,9 @@ export const PAGE_PERMISSIONS = {
     AppPermission.ProfileCoreIdentityViewOther,
     AppPermission.ProfileCoreIdentityViewOwn,
   ] as PagePermissions,
+  quotas: [AppPermission.QuotasView] as PagePermissions,
+  quotasCreate: [AppPermission.QuotasManage] as PagePermissions,
+  quotasView: [AppPermission.QuotasView] as PagePermissions,
+  quotasEdit: [AppPermission.QuotasManage] as PagePermissions,
+  quotasInsights: [AppPermission.QuotasView] as PagePermissions,
 } as const;

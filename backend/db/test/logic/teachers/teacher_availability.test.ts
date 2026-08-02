@@ -7,7 +7,7 @@ import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import type { StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
+import type { StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 
 async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserSelectType> {
   const now = new Date();
@@ -28,8 +28,8 @@ async function createTestUser(tx: DBTransaction, name: string, emailPrefix: stri
 }
 
 async function createBookingFixture(tx: DBTransaction): Promise<{
-  teacher: TeacherEntity;
-  student: StudentEntity;
+  teacher: TeacherSelectType;
+  student: StudentSelectType;
   teacherUser: UserSelectType;
   adminUser: UserSelectType;
 }> {

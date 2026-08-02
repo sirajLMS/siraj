@@ -13,7 +13,7 @@ import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-paym
 import { TeacherPaymentRepository } from "@/backend/db/repo/teachers/teacher-payment.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { TeacherPaymentInsertInput, TeacherPaymentSelectType, UserPaymentMethodSelectType } from "@/backend/types";
+import type { TeacherPaymentInsertType, TeacherPaymentSelectType, UserPaymentMethodSelectType } from "@/backend/types";
 
 export namespace TeacherPaymentSeedService {
   /** Read helper for seed scripts — resolve default payout method for a demo teacher. */
@@ -26,7 +26,7 @@ export namespace TeacherPaymentSeedService {
 
   /** Idempotently create teacher payment rows for demo payroll history. */
   export async function seedTeacherPaymentsIfMissing(
-    inputs: readonly TeacherPaymentInsertInput[],
+    inputs: readonly TeacherPaymentInsertType[],
     tx?: DBTransaction
   ): Promise<TeacherPaymentSelectType[]> {
     assertSeedWriteAllowed("Teacher payment seed writes");

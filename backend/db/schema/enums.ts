@@ -27,8 +27,15 @@ import {
   NotificationChannel,
   NotificationDeliveryStatus,
   NotificationEventType,
+  OnDemandNoCreditsOutcome,
+  OnDemandStatus,
   ParentStatus,
+  QuotaKind,
+  QuotaLedgerReason,
+  QuotaPeriodType,
+  QuotaStatus,
   RateSource,
+  SchedulingMode,
   StudentStatus,
   SuggestionStatus,
   SystemSettingCategory,
@@ -38,6 +45,23 @@ import {
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { createPgEnumFromEnum } from "@/backend/utils/db.utils";
+
+export const quotaKindEnum = createPgEnumFromEnum("quota_kind", QuotaKind);
+
+export const quotaStatusEnum = createPgEnumFromEnum("quota_status", QuotaStatus);
+
+export const quotaPeriodTypeEnum = createPgEnumFromEnum("quota_period_type", QuotaPeriodType);
+
+export const quotaLedgerReasonEnum = createPgEnumFromEnum("quota_ledger_reason", QuotaLedgerReason);
+
+export const schedulingModeEnum = createPgEnumFromEnum("scheduling_mode", SchedulingMode);
+
+export const onDemandNoCreditsOutcomeEnum = createPgEnumFromEnum(
+  "ondemand_no_credits_outcome",
+  OnDemandNoCreditsOutcome
+);
+
+export const onDemandStatusEnum = createPgEnumFromEnum("ondemand_status", OnDemandStatus);
 
 export const appLanguageEnum = createPgEnumFromEnum("app_language", AppLanguage);
 

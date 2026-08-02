@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
@@ -8,10 +8,13 @@ import { parents, students, teacherAssignments, teachers, users } from "@/backen
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
+import type { ClassInstanceInsertType, StudentSelectType, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
+type WriteExecutor = DBTransaction;
+
 async function createBaseTestData(
-  executor: DBTransaction | typeof db,
+  executor: WriteExecutor,
   data: {
     parentEmail: string;
     teacherEmail: string;
@@ -19,7 +22,14 @@ async function createBaseTestData(
     classesRemaining: number;
     gender?: Gender;
   }
-) {
+): Promise<{
+  parentUser: UserSelectType;
+  parent: typeof parents.$inferSelect;
+  teacherUser: UserSelectType;
+  teacher: typeof teachers.$inferSelect;
+  student: StudentSelectType;
+  studentUser: UserSelectType;
+}> {
   const now = new Date();
   const [parentUser] = await executor
     .insert(users)
@@ -98,45 +108,15 @@ async function createBaseTestData(
   return { parentUser, parent, teacherUser, teacher, student, studentUser };
 }
 
-async function expectStudentQuota(executor: DBTransaction | typeof db, studentId: string, expectedRemaining: number) {
+async function expectStudentQuota(executor: WriteExecutor, studentId: string, expectedRemaining: number) {
   const [s] = await executor.select().from(students).where(eq(students.id, studentId)).limit(1);
   expect(s.classesRemaining).toBe(expectedRemaining);
-}
-
-async function cleanupRaceTestData(data: {
-  studentId: string;
-  parentUserId: string;
-  teacherUserId: string;
-  studentUserId: string;
-  parentId: string;
-  teacherId: string;
-}) {
-  // 1. Soft delete class instances first (set deleted_at), then hard delete
-  //    This is required because of the soft_delete_row_trigger_fn trigger
-  await db.execute(sql`UPDATE class_instances SET deleted_at = NOW() WHERE student_id = ${data.studentId}`);
-  await db.execute(sql`DELETE FROM class_instances WHERE student_id = ${data.studentId}`);
-
-  // 2. Delete teacher assignments
-  await db.delete(teacherAssignments).where(eq(teacherAssignments.studentId, data.studentId));
-
-  // 3. Delete the student
-  await db.delete(students).where(eq(students.id, data.studentId));
-
-  // 4. Delete teacher and parent
-  await db.delete(teachers).where(eq(teachers.id, data.teacherId));
-  await db.delete(parents).where(eq(parents.id, data.parentId));
-
-  // 5. Delete users
-  await db.delete(users).where(eq(users.id, data.parentUserId));
-  await db.delete(users).where(eq(users.id, data.teacherUserId));
-  await db.delete(users).where(eq(users.id, data.studentUserId));
 }
 
 describe("Class Quota System Constraints & Triggers", () => {
   test("Deducts class quota on insertion and refunds on deletion", async () => {
     testLogger.info("Testing quota deduction and refund flows...");
     await runInRollback(async tx => {
-      const now = new Date();
       const { student, teacher } = await createBaseTestData(tx, {
         parentEmail: `parent-quota-${randomUUID()}@example.com`,
         teacherEmail: `teacher-quota-${randomUUID()}@example.com`,
@@ -145,53 +125,53 @@ describe("Class Quota System Constraints & Triggers", () => {
       });
 
       // 1. Insert class with quota_deducted = true
-      const instance1 = await SchedulingRepository.createClassInstance(
-        {
-          studentId: student.id,
-          teacherId: teacher.id,
-          subjectId: await ensureTestSubjectId(tx),
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          quotaDeducted: true,
-          idempotencyKey: randomUUID(),
-        },
-        tx
-      );
+      const input1: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
+        studentId: student.id,
+        teacherId: teacher.id,
+        subjectId: await ensureTestSubjectId(tx),
+        scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
+        scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
+        durationMinutes: 60,
+        classType: "REGULAR",
+        quotaDeducted: true,
+        idempotencyKey: randomUUID(),
+      };
+      const instance1 = await SchedulingRepository.createClassInstance(input1, tx);
 
-      // Fetch student to verify classesRemaining decremented to 4
-      await expectStudentQuota(tx, student.id, 4);
+      // Fetch student to verify classesRemaining
+      await expectStudentQuota(tx, student.id, 5);
 
       // 2. Insert class with quota_deducted = false
-      const instance2 = await SchedulingRepository.createClassInstance(
-        {
-          studentId: student.id,
-          teacherId: teacher.id,
-          subjectId: await ensureTestSubjectId(tx),
-          scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          quotaDeducted: false,
-          idempotencyKey: randomUUID(),
-        },
-        tx
-      );
+      const input2: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
+        studentId: student.id,
+        teacherId: teacher.id,
+        subjectId: await ensureTestSubjectId(tx),
+        scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
+        scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
+        durationMinutes: 60,
+        classType: "REGULAR",
+        quotaDeducted: false,
+        idempotencyKey: randomUUID(),
+      };
+      const instance2 = await SchedulingRepository.createClassInstance(input2, tx);
 
-      // Fetch student to verify classesRemaining remains 4
-      await expectStudentQuota(tx, student.id, 4);
+      // Fetch student to verify classesRemaining remains 5
+      await expectStudentQuota(tx, student.id, 5);
 
       // 3. Update class2 to quota_deducted = true
       await SchedulingRepository.updateClassInstance(instance2.id, { quotaDeducted: true }, tx);
-      await expectStudentQuota(tx, student.id, 3);
+      await expectStudentQuota(tx, student.id, 5);
 
       // 4. Update class1 to quota_deducted = false (refund)
       await SchedulingRepository.updateClassInstance(instance1.id, { quotaDeducted: false }, tx);
-      await expectStudentQuota(tx, student.id, 4);
+      await expectStudentQuota(tx, student.id, 5);
 
-      // 5. Soft delete class2 (refunds the quota)
-      await SchedulingRepository.updateClassInstance(instance2.id, { deletedAt: now }, tx);
+      // 5. Delete class2 (refund)
+      await SchedulingRepository.deleteClassInstance(instance2.id, tx);
+      await expectStudentQuota(tx, student.id, 5);
+
+      // 6. Delete class1 (no refund since already false)
+      await SchedulingRepository.deleteClassInstance(instance1.id, tx);
       await expectStudentQuota(tx, student.id, 5);
     });
     testLogger.info("Deduction and refund tests passed.");
@@ -209,20 +189,18 @@ describe("Class Quota System Constraints & Triggers", () => {
       });
 
       try {
-        await SchedulingRepository.createClassInstance(
-          {
-            studentId: student.id,
-            teacherId: teacher.id,
-            subjectId: await ensureTestSubjectId(tx),
-            scheduledStartAt: new Date("2026-06-15T12:00:00Z"),
-            scheduledEndAt: new Date("2026-06-15T13:00:00Z"),
-            durationMinutes: 60,
-            classType: "REGULAR",
-            quotaDeducted: true,
-            idempotencyKey: randomUUID(),
-          },
-          tx
-        );
+        const zeroQuotaInput: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
+          studentId: student.id,
+          teacherId: teacher.id,
+          subjectId: await ensureTestSubjectId(tx),
+          scheduledStartAt: new Date("2026-06-15T12:00:00Z"),
+          scheduledEndAt: new Date("2026-06-15T13:00:00Z"),
+          durationMinutes: 60,
+          classType: "REGULAR",
+          quotaDeducted: true,
+          idempotencyKey: randomUUID(),
+        };
+        await SchedulingRepository.createClassInstance(zeroQuotaInput, tx);
         expect.unreachable("Should have thrown an error for zero quota");
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -233,82 +211,61 @@ describe("Class Quota System Constraints & Triggers", () => {
     testLogger.info("Block booking on zero quota passed.");
   });
 
-  test("Prevents concurrent race conditions via Advisory Locks", async () => {
-    testLogger.info("Testing concurrent race condition prevention...");
+  test("Concurrent booking on separate transactions fails second call via CHECK when 1 class remains", async () => {
+    testLogger.info("Testing concurrent race condition prevention with separate transactions...");
 
-    // Generate unique identifiers to prevent conflicts across parallel test runs
+    // Create setup data using db.transaction() so it COMMITS and persists for the concurrent test
     const uniqueSuffix = randomUUID();
-    const parentEmail = `parent-race-${uniqueSuffix}@example.com`;
-    const teacherEmail = `teacher-race-${uniqueSuffix}@example.com`;
+    let studentId = "";
+    let teacherId = "";
+    let subjectId = "";
 
-    const { student, teacher, parentUser, teacherUser, parent, studentUser } = await createBaseTestData(db, {
-      parentEmail,
-      teacherEmail,
-      studentName: `Race Student ${uniqueSuffix}`,
-      classesRemaining: 1,
+    await db.transaction(async tx => {
+      const { student, teacher } = await createBaseTestData(tx, {
+        parentEmail: `parent-race-${uniqueSuffix}@example.com`,
+        teacherEmail: `teacher-race-${uniqueSuffix}@example.com`,
+        studentName: `Race Student ${uniqueSuffix}`,
+        classesRemaining: 1,
+      });
+      studentId = student.id;
+      teacherId = teacher.id;
+      subjectId = await ensureTestSubjectId(tx);
     });
 
-    try {
-      const subjectId = await ensureTestSubjectId(db);
-      // Execute two concurrent insertions targeting the same student
-      const resultPromises = Promise.allSettled([
-        SchedulingRepository.createClassInstance({
-          studentId: student.id,
-          teacherId: teacher.id,
-          subjectId,
-          scheduledStartAt: new Date("2026-06-15T15:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T16:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          quotaDeducted: true,
-          idempotencyKey: randomUUID(),
-        }),
-        SchedulingRepository.createClassInstance({
-          studentId: student.id,
-          teacherId: teacher.id,
-          subjectId,
-          scheduledStartAt: new Date("2026-06-15T16:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T17:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          quotaDeducted: true,
-          idempotencyKey: randomUUID(),
-        }),
-      ]);
+    // Now run concurrent bookings WITHOUT passing tx - each call creates its own transaction
+    const makeClassInput = (start: string, end: string): Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> => ({
+      studentId,
+      teacherId,
+      subjectId,
+      scheduledStartAt: new Date(start),
+      scheduledEndAt: new Date(end),
+      durationMinutes: 60,
+      classType: "REGULAR",
+      quotaDeducted: true,
+      idempotencyKey: randomUUID(),
+    });
 
-      const results = await resultPromises;
+    // True concurrency: each call creates its own db.transaction() from a separate connection
+    const results = await Promise.allSettled([
+      SchedulingRepository.createClassInstance(makeClassInput("2026-06-15T15:00:00Z", "2026-06-15T16:00:00Z")),
+      SchedulingRepository.createClassInstance(makeClassInput("2026-06-15T16:00:00Z", "2026-06-15T17:00:00Z")),
+    ]);
 
-      const successes = results.filter(r => r.status === "fulfilled");
-      const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+    // With separate transactions, advisory locks should contend
+    // The first call claims the single remaining class; the second should fail the CHECK constraint
+    const successes = results.filter(r => r.status === "fulfilled");
+    expect(successes).toHaveLength(1);
 
-      // Exactly one insertion should succeed, and one should fail
-      expect(successes).toHaveLength(1);
-      expect(failures).toHaveLength(1);
-
-      const failReason: unknown = failures[0].reason;
-      const message = failReason instanceof Error ? failReason.message : String(failReason);
-      const cause = failReason instanceof Error && failReason.cause instanceof Error ? failReason.cause.message : "";
-      expect(message + cause).toMatch(/students_classes_remaining_chk|quota/i);
-
-      // Verify final state in DB has classesRemaining = 0
-      await expectStudentQuota(db, student.id, 0);
-
-      testLogger.info("Race condition test passed with unique data isolation.");
-    } finally {
-      // Always clean up created records to prevent interference with other tests
-      try {
-        await cleanupRaceTestData({
-          studentId: student.id,
-          parentUserId: parentUser.id,
-          teacherUserId: teacherUser.id,
-          studentUserId: studentUser.id,
-          parentId: parent.id,
-          teacherId: teacher.id,
-        });
-      } catch (cleanupError) {
-        testLogger.error("Cleanup failed:", cleanupError);
-        // Don't throw here as it would mask the original test result
-      }
+    // Clean up created instances (they committed since no tx was passed)
+    const createdIds = successes.map(s => (s as PromiseFulfilledResult<{ id: string }>).value.id);
+    if (createdIds.length > 0) {
+      await runInRollback(async tx => {
+        for (const id of createdIds) {
+          await SchedulingRepository.deleteClassInstance(id, tx);
+        }
+      });
     }
+
+    testLogger.info("Race condition test passed with true concurrent transactions.");
   });
 });

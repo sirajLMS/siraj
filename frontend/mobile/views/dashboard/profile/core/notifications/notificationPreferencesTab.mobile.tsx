@@ -10,7 +10,9 @@ export function NotificationPreferencesTabMobile({
   preferences,
   preferenceMap,
   eventTypes,
+  categoryRows,
   onToggle,
+  onCategoryToggle,
   disabled,
   loading,
   snackbarOpen,
@@ -44,7 +46,9 @@ export function NotificationPreferencesTabMobile({
         preferences={preferences}
         preferenceMap={preferenceMap ?? new Map()}
         eventTypes={eventTypes}
+        categoryRows={categoryRows}
         onToggle={onToggle}
+        onCategoryToggle={onCategoryToggle}
         disabled={disabled}
         loading={loading}
         activeChannel={activeChannel ?? NotificationChannel.Email}

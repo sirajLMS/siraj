@@ -148,6 +148,7 @@ Use these service bootstrap entry points from seeders. Domain seed data (constan
 | `meeting/seed-class-meeting-configs` | `MeetingConfigService` | `upsertManyClassMeetingConfigs` |
 | `teachers/seed-teacher-important-notes` | `TeacherNotesService` | `findNotesByTitles`, `createManyImportantNotes` |
 | `billing/seed-invoice-payment-submissions` | `BillingManagementService` | `findInvoicePaymentSubmissionsByInvoiceIds`, `createManyInvoicePaymentSubmissions` |
+| `billing/seed-quotas` | `QuotaService`, `ClassCatalogService`, `RecurringClassService` | `seedOrGetQuotaBatch`, `findSubjectsBySlugs`, `upsertManyRecurringSchedules` |
 
 ### Avatar and logo helpers
 

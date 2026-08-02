@@ -32,4 +32,8 @@ export const SchedulingRepository = {
   findUpcomingInstances,
   getClassInstanceAffectedUsers,
   getClassInstanceAffectedUsersForTeacher,
+  findUpcomingInstancesByScheduleId: ClassInstances.findUpcomingInstancesByScheduleId,
+  hasOverlappingInstance: ClassInstances.hasOverlappingInstance,
+  findOverlappingInstancesForRange: ClassInstances.findOverlappingInstancesForRange,
+  updateOndemandStatusBatch: ClassInstances.updateOndemandStatusBatch,
 };
