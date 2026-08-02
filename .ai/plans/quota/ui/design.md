@@ -279,13 +279,13 @@ interface QuotaListViewModel {
   readonly onFilterKindChange: (kind: string) => void;
   readonly onSearchChange: (query: string) => void;
   readonly refetch: () => void;
-  readonly labels: DashboardBillingQuota;  // typed labels from useAppTranslation("DashboardBillingQuota")
+  readonly labels: DashboardBillingQuota;  // typed labels from useAppTranslation(Translation.Dashboard.BillingQuota)
 }
 ```
 - **State**: Zustand store (`page`, `pageSize`, `filterStatus`, `filterKind`, `searchQuery`)
 - **Apollo**: `useQuery(quotasQueryDocument, { variables, fetchPolicy: "cache-and-network" })`
 - **Permissions**: `QUOTAS_VIEW` for view, `QUOTAS_MANAGE` for "New Quota" action
-- **i18n**: Labels come from `useAppTranslation("DashboardBillingQuota")` — NOT a `t: (key: string) => string` function. The VM receives the full typed translation object.
+- **i18n**: Labels come from `useAppTranslation(Translation.Dashboard.BillingQuota)` — NOT a `t: (key: string) => string` function. The VM receives the full typed translation object.
 
 ### useQuotaFormViewModel
 
@@ -299,14 +299,14 @@ interface QuotaFormViewModel {
   readonly onCancel: () => void;
   readonly editingQuotaId: string | null;
   readonly permissions: { canEdit: boolean; canView: boolean };
-  readonly labels: DashboardBillingQuota;  // typed labels from useAppTranslation("DashboardBillingQuota")
+  readonly labels: DashboardBillingQuota;  // typed labels from useAppTranslation(Translation.Dashboard.BillingQuota)
 }
 ```
 - **Form**: `useForm` with `zodResolver(createQuotaSchema(labels))` — schema factory takes typed labels, NOT a `t` function
 - **Apollo**: `useMutation` (create/update) with cache `update` function
 - **Feedback**: `FormSuccessSnackbar` + `FormErrorSnackbar`
 - **Permissions**: `QUOTAS_MANAGE`
-- **i18n**: Labels come from `useAppTranslation("DashboardBillingQuota")` — the schema factory receives the typed translation object, not a string-keyed translator.
+- **i18n**: Labels come from `useAppTranslation(Translation.Dashboard.BillingQuota)` — the schema factory receives the typed translation object, not a string-keyed translator.
 
 ### useQuotaDetailViewModel
 
@@ -327,7 +327,7 @@ interface QuotaDetailViewModel {
   readonly ledgerTotalCount: number;
   readonly onLedgerPageChange: (page: number) => void;
   readonly permissions: { canEdit: boolean; canDelete: boolean };
-  readonly labels: DashboardBillingQuota;  // typed labels from useAppTranslation("DashboardBillingQuota")
+  readonly labels: DashboardBillingQuota;  // typed labels from useAppTranslation(Translation.Dashboard.BillingQuota)
 }
 ```
 
@@ -342,11 +342,11 @@ interface QuotaInsightsViewModel {
   readonly onFiltersChange: (filters: Partial<InsightsFilters>) => void;
   readonly onExport: () => void;
   readonly refetch: () => void;
-  readonly labels: DashboardBillingQuota;  // typed labels from useAppTranslation("DashboardBillingQuota")
+  readonly labels: DashboardBillingQuota;  // typed labels from useAppTranslation(Translation.Dashboard.BillingQuota)
 }
 ```
 - **Apollo**: `useQuery(quotasQueryDocument, { variables: { pageSize: 999 } })` for client-side aggregation (interim). See Decision 5 for proposed `quotaInsightsSummary` server-side query.
-- **i18n**: Labels come from `useAppTranslation("DashboardBillingQuota")` — NOT a `t` function.
+- **i18n**: Labels come from `useAppTranslation(Translation.Dashboard.BillingQuota)` — NOT a `t` function.
 
 ### useStudentQuotaViewModel (audience)
 
@@ -359,7 +359,7 @@ interface StudentQuotaViewModel {
   readonly audience: "student" | "parent" | "teacher" | "supervisor";
   readonly permissions: QuotaFormAccess;
   readonly refetch: () => void;
-  readonly labels: DashboardStudentQuota;  // typed labels from useAppTranslation("DashboardStudentQuota")
+  readonly labels: DashboardStudentQuota;  // typed labels from useAppTranslation(Translation.Dashboard.StudentQuota)
 }
 ```
 - **Apollo**: `useQuery(studentQuotasQueryDocument, { variables: { studentId } })`

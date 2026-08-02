@@ -181,7 +181,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
   - - [ ] 4.3.IV Instruction Verification: `frontend/views/AGENTS.md`
 
 - [ ] 4.4 Update useQuotaFormViewModel with RHF + zodResolver
-  - Replace plain controlled state with `useForm<QuotaFormData, undefined, QuotaFormInput>({ resolver: zodResolver(createQuotaSchema(labels)) })` where `labels` comes from `useAppTranslation("DashboardBillingQuota")`
+  - Replace plain controlled state with `useForm<QuotaFormData, undefined, QuotaFormInput>({ resolver: zodResolver(createQuotaSchema(labels)) })` where `labels` comes from `useAppTranslation(Translation.Dashboard.BillingQuota)`
   - Add cache `update` function for create/update mutations
   - Add `FormSuccessSnackbar` on success + redirect to detail
   - Add `FormErrorSnackbar` on error
