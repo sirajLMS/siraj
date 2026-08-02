@@ -1,11 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json.
 {
   "name": "Ubuntu 24.04 (Noble)",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
     "ghcr.io/devcontainers/features/postgres:1": {}
   },
