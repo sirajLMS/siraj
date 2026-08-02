@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
@@ -210,72 +211,61 @@ describe("Class Quota System Constraints & Triggers", () => {
     testLogger.info("Block booking on zero quota passed.");
   });
 
-  test("Serial booking on shared tx fails second call via CHECK when 1 class remains", async () => {
-    testLogger.info("Testing concurrent race condition prevention...");
+  test("Concurrent booking on separate transactions fails second call via CHECK when 1 class remains", async () => {
+    testLogger.info("Testing concurrent race condition prevention with separate transactions...");
 
-    await runInRollback(async tx => {
-      const uniqueSuffix = randomUUID();
+    // Create setup data using db.transaction() so it COMMITS and persists for the concurrent test
+    const uniqueSuffix = randomUUID();
+    let studentId = "";
+    let teacherId = "";
+    let subjectId = "";
 
+    await db.transaction(async tx => {
       const { student, teacher } = await createBaseTestData(tx, {
         parentEmail: `parent-race-${uniqueSuffix}@example.com`,
         teacherEmail: `teacher-race-${uniqueSuffix}@example.com`,
         studentName: `Race Student ${uniqueSuffix}`,
         classesRemaining: 1,
       });
-
-      const subjectId = await ensureTestSubjectId(tx);
-
-      const makeClassInput = (
-        start: string,
-        end: string
-      ): Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> => ({
-        studentId: student.id,
-        teacherId: teacher.id,
-        subjectId,
-        scheduledStartAt: new Date(start),
-        scheduledEndAt: new Date(end),
-        durationMinutes: 60,
-        classType: "REGULAR",
-        quotaDeducted: true,
-        idempotencyKey: randomUUID(),
-      });
-
-      // True concurrency testing requires separate database transactions
-      // (each with its own connection from the pool) so that advisory locks
-      // actually contend. The current test framework (runInRollback) provides
-      // a single shared transaction, so both createClassInstance calls execute
-      // serially within it. When called with the same `tx`, the advisory lock
-      // is reentrant (same session), so the second call never blocks — it simply
-      // hits the CHECK constraint after the first call consumes the quota.
-      //
-      // To properly test concurrent race conditions:
-      // 1. Create setup data outside runInRollback (or via db.transaction())
-      // 2. Call createClassInstance WITHOUT passing tx — each call creates its
-      //    own db.transaction() from a separate connection
-      // 3. Use Promise.allSettled on those two independent transactions
-      // 4. Manually clean up created records afterward (since they commit)
-      //
-      // This is deferred because it requires manual cleanup logic and risks
-      // leaving test data if the test fails mid-execution. The serial test
-      // below still validates that the quota CHECK constraint prevents
-      // over-booking when only 1 class remains.
-      const results = await Promise.allSettled([
-        SchedulingRepository.createClassInstance(makeClassInput("2026-06-15T15:00:00Z", "2026-06-15T16:00:00Z"), tx),
-        SchedulingRepository.createClassInstance(makeClassInput("2026-06-15T16:00:00Z", "2026-06-15T17:00:00Z"), tx),
-      ]);
-
-      // Both calls share the same rollback transaction (`tx`), so they execute
-      // serially within the test process rather than in true concurrent transactions.
-      // The first call claims the single remaining class; the second should fail the
-      // CHECK constraint (`reservedClasses + remaining <= totalClasses`). This verifies
-      // the guard logic serially; true multi-transaction concurrency testing would
-      // require separate connections (see the note above).
-      const successes = results.filter(r => r.status === "fulfilled");
-      // With a shared tx, Promise.allSettled resolves sequentially: the first call
-      // consumes the single quota, the second hits the CHECK constraint and rejects.
-      expect(successes).toHaveLength(1);
-
-      testLogger.info("Race condition test passed with rollback isolation.");
+      studentId = student.id;
+      teacherId = teacher.id;
+      subjectId = await ensureTestSubjectId(tx);
     });
+
+    // Now run concurrent bookings WITHOUT passing tx - each call creates its own transaction
+    const makeClassInput = (start: string, end: string): Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> => ({
+      studentId,
+      teacherId,
+      subjectId,
+      scheduledStartAt: new Date(start),
+      scheduledEndAt: new Date(end),
+      durationMinutes: 60,
+      classType: "REGULAR",
+      quotaDeducted: true,
+      idempotencyKey: randomUUID(),
+    });
+
+    // True concurrency: each call creates its own db.transaction() from a separate connection
+    const results = await Promise.allSettled([
+      SchedulingRepository.createClassInstance(makeClassInput("2026-06-15T15:00:00Z", "2026-06-15T16:00:00Z")),
+      SchedulingRepository.createClassInstance(makeClassInput("2026-06-15T16:00:00Z", "2026-06-15T17:00:00Z")),
+    ]);
+
+    // With separate transactions, advisory locks should contend
+    // The first call claims the single remaining class; the second should fail the CHECK constraint
+    const successes = results.filter(r => r.status === "fulfilled");
+    expect(successes).toHaveLength(1);
+
+    // Clean up created instances (they committed since no tx was passed)
+    const createdIds = successes.map(s => (s as PromiseFulfilledResult<{ id: string }>).value.id);
+    if (createdIds.length > 0) {
+      await runInRollback(async tx => {
+        for (const id of createdIds) {
+          await SchedulingRepository.deleteClassInstance(id, tx);
+        }
+      });
+    }
+
+    testLogger.info("Race condition test passed with true concurrent transactions.");
   });
 });

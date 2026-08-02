@@ -38,6 +38,13 @@ const TEST_USER_PASSWORD = "Test_Pass1!";
 
 let demoUsersReadyPromise: Promise<void> | null = null;
 
+async function waitForServerRecovery(): Promise<void> {
+  for (let wait = 0; wait < 60; wait++) {
+    if (await isTestServerRunning()) break;
+    await new Promise(resolve => setTimeout(resolve, 3_000));
+  }
+}
+
 /**
  * Idempotently provisions canonical demo login users via the test-helper mutation.
  * Safe to call from every suite's beforeAll — concurrent callers share one in-flight request.
@@ -54,12 +61,7 @@ export async function ensureDemoUsersForTests(): Promise<void> {
         if (result.error) {
           lastError = new Error(`ensureDemoUsers failed: ${result.error.message ?? "unknown GraphQL error"}`);
           if (attempt < maxAttempts) {
-            // Wait for the dev server to recover (it may have crashed during
-            // route compilation and needs time to restart).
-            for (let wait = 0; wait < 60; wait++) {
-              if (await isTestServerRunning()) break;
-              await new Promise(resolve => setTimeout(resolve, 3_000));
-            }
+            await waitForServerRecovery();
             await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
             continue;
           }
