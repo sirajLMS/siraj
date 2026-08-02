@@ -6,6 +6,7 @@ import type {
   SchedulingMode as BackendSchedulingMode,
 } from "@/backend/enum";
 import type {
+  ClassType,
   CreateRecurringClassInput,
   CurrencyCode,
   OnDemandNoCreditsOutcome,
@@ -38,7 +39,7 @@ export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurrin
     durationMinutes: calculateDurationMinutes(data),
     defaultStartTime: data.defaultStartTime,
     timezone: toGraphqlIanaTimezone(data.timezone),
-    classType: data.classType ?? null,
+    classType: (data.classType as ClassType | null) ?? null,
     days: activeDays,
     generateInstancesForWeeks: data.generateInstancesForWeeks ?? 4,
     effectiveFrom: data.effectiveFrom ?? null,

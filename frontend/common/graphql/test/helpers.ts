@@ -4,6 +4,7 @@ import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   ClassType,
   type CreateRecurringClassInput,
+  type DayOfWeek,
   IanaTimezone,
   type ManagerAccountType,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -327,8 +328,8 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,
-    days: [{ dayOfWeek, startTime: "10:00:00", isActive: true }],
-    classType: "REGULAR",
+    days: [{ dayOfWeek: dayOfWeek as DayOfWeek, startTime: "10:00:00", isActive: true }],
+    classType: ClassType.Regular,
     generateInstancesForWeeks: 2,
     effectiveFrom: date,
     effectiveUntil: null,
@@ -606,7 +607,7 @@ export async function cleanupTestSuperAdmin(superAdminToken: string, userId: str
 
 export async function assertRecurringClassDenied(
   token: string,
-  days: { dayOfWeek: string; startTime: string; isActive: boolean }[]
+  days: { dayOfWeek: DayOfWeek; startTime: string; isActive: boolean }[]
 ): Promise<void> {
   const subjectId = await ensureTestSubjectId(token).catch(() => "00000000-0000-0000-0000-000000000000");
   const result = await mutateCreateRecurringClass(token, {
@@ -617,7 +618,7 @@ export async function assertRecurringClassDenied(
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,
     days,
-    classType: "REGULAR",
+    classType: ClassType.Regular,
     generateInstancesForWeeks: 4,
     effectiveFrom: null,
     effectiveUntil: null,
