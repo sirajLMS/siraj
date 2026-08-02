@@ -819,11 +819,11 @@ Files to create:
 
 #### J. Accessibility (a11y)
 
-- **Semantic HTML** — every interactive element has an aria-label via i18n (e.g. `aria-label={t("action.create")}`).
-- **DataGrid** — `aria-label={t("dashboard.emailTemplates.pageTitle")}` + visible column headers; rows are real `<tr>` (MUI DataGrid default).
-- **Filter chips** — `<Chip>` filters carry `aria-label={t("filterByScope")}` etc.
+- **Semantic HTML** — every interactive element has an aria-label via i18n (e.g. `aria-label={t.emailTemplates.actionCreate}` where `t = useAppTranslation(Translation.Dashboard.EmailTemplates)` for template-specific keys, or `t = useAppTranslation(Translation.Common)` for shared keys like `create`/`cancel`/`save`).
+- **DataGrid** — `aria-label={t.emailTemplates.pageTitle}` + visible column headers; rows are real `<tr>` (MUI DataGrid default).
+- **Filter chips** — `<Chip>` filters carry `aria-label={t.emailTemplates.filterByScope}` etc.
 - **Dialog** — `aria-labelledby={titleId}` on `<Dialog>`, title's `<Typography id={titleId} variant="h6">`.
-- **Sandboxed preview iframe** — `title={t("previewTab")}` attribute (required for screen readers).
+- **Sandboxed preview iframe** — `title={t.emailTemplates.previewTab}` attribute (required for screen readers).
 - **Keyboard navigation** — editor toolbar buttons reachable via Tab; Drawer/Dialog trap focus (MUI default — no work). The Storybook addon-a11y toolbar surfaces any a11y warning per story.
 - **Color contrast** — WCAG AA minimum (4.5:1 text / 3:1 large text). Status badge colors must meet 4.5:1 against the row background. The Grid row default background is `theme.palette.background.paper` — verify each status palette slot.
 - **Reduced-motion** — `usePrefersReducedMotion()` guard (§G) — closes an existing gap.
@@ -936,12 +936,12 @@ Each story provides default / empty / loading / error / RTL variants. RTL varian
 - **Submit button**: `disabled` until both fields valid + `!isSendingTest`.  
 - **Rate-limit**: static notice `"Max 5 test emails/min"`. On `RATE_LIMITED { retryAfter }` error → inline `<Alert severity="warning">` with live countdown; disable Submit.  
 - **In-flight**: `isSendingTest` → button `loading=true`.  
-- **Success**: `SuccessCheckMark` animation (600ms) in dialog → `notifications.show(t("toast.testSent", { to }), { severity: "success" })` → close after 800ms.  
+- **Success**: `SuccessCheckMark` animation (600ms) in dialog → `notifications.show(t.emailTemplates.toastTestSent({ to }), { severity: "success" })` → close after 800ms.  
 - **Error**: inline `<Alert severity="error">{providerErrorMessage}</Alert>` from GraphQL error `extensions.message`.  
 - **Close with unsent changes**: confirm dialog `"Discard sample props changes?"` before closing.
 
 **P4. List View Edge Cases**  
-- **Empty search**: `DataGrid emptyMessage={hasFilters ? t("empty.noSearchResults") : t("empty.emptyState")}`. Create CTA only when `!hasFilters`.  
+- **Empty search**: `DataGrid emptyMessage={hasFilters ? t.emailTemplates.emptyNoSearchResults : t.emailTemplates.emptyEmptyState}`. Create CTA only when `!hasFilters`.  
 - **Server error**: `ErrorState` or `<Alert severity="error">` with `onRetry` button; `<Button onClick={refetch}>Retry</Button>`.  
 - **Stale data**: `fetchPolicy: "cache-and-network"` → list re-renders silently after background refetch.  
 - **Bulk archive**: confirm dialog → optimistic row removal → undo via toast for 4 seconds (same pattern as Toolpad `useNotifications` `action: { label: "Undo", onClick } }`).  
