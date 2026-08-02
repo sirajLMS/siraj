@@ -14,6 +14,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   openssl \
   xxd \
   postgresql-client \
+  postgresql \
+  postgresql-contrib \
+  redis-server \
   libglib2.0-0 \
   libnss3 \
   libatk-bridge2.0-0 \
@@ -31,6 +34,16 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
   libatk1.0-0t64 \
   libcairo-gobject2 \
   libgdk-pixbuf-2.0-0 \
+  libxext6 \
+  libxfixes3 \
+  libx11-6 \
+  libxcb1 \
+  libxshmfence1 \
+  libnspr4 \
+  libatspi2.0-0 \
+  libpulse0 \
+  libwebpdemux2 \
+  fonts-noto-cjk \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

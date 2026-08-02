@@ -25,7 +25,7 @@
   "forwardPorts": [3000, 5432],
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "bun install"
+  "postCreateCommand": "bun install && sudo service postgresql start && sudo service redis-server start"
 
   // Configure tool-specific properties.
   // "customizations": {},
