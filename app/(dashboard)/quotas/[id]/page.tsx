@@ -11,10 +11,11 @@ interface QuotaDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: QuotaDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
   const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.billingQuota;
-  return { title: t.quotaDetails };
+  return { title: `${t.quotaDetails} — ${id}` };
 }
 
 export default async function QuotaDetailPage({ params }: QuotaDetailPageProps) {

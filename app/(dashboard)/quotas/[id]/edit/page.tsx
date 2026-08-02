@@ -11,10 +11,11 @@ interface EditQuotaPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: EditQuotaPageProps): Promise<Metadata> {
+  const { id } = await params;
   const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.billingQuota;
-  return { title: t.editQuota };
+  return { title: `${t.editQuota} — ${id}` };
 }
 
 export default async function EditQuotaPage({ params }: EditQuotaPageProps) {

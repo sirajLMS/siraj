@@ -2,6 +2,8 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import type { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
+import { ValidationError } from "@/backend/lib/errors";
+import { logger } from "@/backend/lib/logger";
 import type { AvailableClassSlotReturnType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -49,7 +51,8 @@ export namespace AvailabilityService {
         txParam(tx),
         locale ?? "en"
       );
-    } catch {
+    } catch (error) {
+      logger.debug(error);
       return false;
     }
 
@@ -67,10 +70,8 @@ export namespace AvailabilityService {
   ): Promise<void> => {
     const available = await isSlotAvailable(studentId, teacherId, startAt, endAt, ignoreInstanceIds, tx, locale);
     if (!available) {
-      // TODO: No dedicated slotUnavailable translation key exists in the errors namespace.
-      // Reusing invalidInput as the closest match. Add a slotUnavailable key if user-facing clarity is needed.
       const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
   };
 
@@ -107,7 +108,7 @@ export namespace AvailabilityService {
       );
       if (conflicts.length > 0) {
         const tErrors = getServerTranslations(locale).errorsTranslations;
-        throw new Error(tErrors.invalidInput);
+        throw new ValidationError(tErrors.invalidInput);
       }
     }
 
@@ -119,9 +120,10 @@ export namespace AvailabilityService {
         tx as DBTransaction | undefined,
         locale
       );
-    } catch {
+    } catch (error) {
+      logger.error(error);
       const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
   };
 
@@ -274,8 +276,9 @@ function buildPatternOccurrences(
       try {
         const offsetMs = getTzOffsetMs(timezone, slotStart);
         slotStart.setTime(slotStart.getTime() - offsetMs);
-      } catch {
+      } catch (error) {
         // Fallback: treat as UTC (original behavior)
+        logger.debug(error);
       }
 
       const slotEnd = new Date(slotStart.getTime() + durationMinutes * 60 * 1000);

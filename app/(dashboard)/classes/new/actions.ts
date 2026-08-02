@@ -1,6 +1,5 @@
 "use server";
 
-import type { CurrencyCode, OnDemandNoCreditsOutcome, SchedulingMode } from "@/backend/enum";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { parseIanaTimezone } from "@/backend/lib/enum";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
@@ -40,9 +39,6 @@ export async function createRecurringClass(
       userId,
       {
         ...input,
-        schedulingMode: input.schedulingMode as SchedulingMode | undefined,
-        ondemandNoCreditsOutcome: input.ondemandNoCreditsOutcome as OnDemandNoCreditsOutcome | undefined,
-        rateCurrency: (input.rateCurrency as CurrencyCode | null) ?? undefined,
         timezone: parseIanaTimezone(toGraphqlIanaTimezone(input.timezone)),
       },
       tErrors

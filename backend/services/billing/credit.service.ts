@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository, StudentRepository } from "@/backend/db/repo";
 import { AppPermission, CreditReason } from "@/backend/enum";
-import { DomainError, logger } from "@/backend/lib";
+import { ConflictError, DomainError, logger, NotFoundError, ValidationError } from "@/backend/lib";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type {
@@ -36,7 +36,7 @@ function isUniqueViolation(error: unknown): boolean {
 async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Promise<void> {
   const existing = await StudentRepository.findById(studentId);
   if (!existing) {
-    throw new Error(tErrors.studentNotFound(studentId));
+    throw new NotFoundError("STUDENT", tErrors.studentNotFound(studentId));
   }
 }
 
@@ -61,11 +61,11 @@ export namespace CreditService {
     tErrors: ErrorsLabels
   ): Promise<CreditTransactionReturnType | null> {
     if (!input.studentId || input.studentId.trim().length === 0) {
-      throw new Error(tErrors.credit.invalidInput);
+      throw new ValidationError(tErrors.credit.invalidInput);
     }
 
     if (!Number.isFinite(input.hours) || input.hours <= 0) {
-      throw new Error(tErrors.credit.invalidInput);
+      throw new ValidationError(tErrors.credit.invalidInput);
     }
 
     // V3-078: Idempotency check is INSIDE the transaction to eliminate the
@@ -125,11 +125,11 @@ export namespace CreditService {
     await requirePermission(actorUserId, AppPermission.CREDITS_MANAGE, tErrors);
 
     if (!input.studentId || input.studentId.trim().length === 0) {
-      throw new Error(tErrors.credit.invalidInput);
+      throw new ValidationError(tErrors.credit.invalidInput);
     }
 
     if (!Number.isFinite(input.hours) || input.hours <= 0) {
-      throw new Error(tErrors.credit.invalidInput);
+      throw new ValidationError(tErrors.credit.invalidInput);
     }
 
     const idempotencyKey = CreditRepository.generateIdempotencyKey({
@@ -145,7 +145,7 @@ export namespace CreditService {
 
         const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey], tx);
         if (existing.length > 0) {
-          throw new Error(tErrors.credit.duplicatePurchase);
+          throw new ConflictError(tErrors.credit.duplicatePurchase);
         }
 
         const ledgerRow = await CreditRepository.createPurchase(tx, {
@@ -176,7 +176,7 @@ export namespace CreditService {
       // the insert (TOCTOU). Surface as a friendly duplicatePurchase error so
       // callers see a domain error instead of the raw Postgres constraint name.
       if (isUniqueViolation(error)) {
-        throw new Error(tErrors.credit.duplicatePurchase, { cause: error });
+        throw new ConflictError(tErrors.credit.duplicatePurchase, { cause: error });
       }
       logger.error("Failed to record credit purchase", {
         actorUserId,

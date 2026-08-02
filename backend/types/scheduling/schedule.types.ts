@@ -23,7 +23,7 @@ export type ClassSessionMetrics = {
   leave: number;
 };
 
-export type RescheduleClassInputType = {
+export type RescheduleClassInput = {
   scheduledStartAt: string;
   scheduledEndAt: string;
   durationMinutes: number;
@@ -135,7 +135,7 @@ export type DailyScheduleListReturnType = {
   effectiveMeeting?: EffectiveMeetingReturnType | null;
 };
 
-export type AdminDashboardScheduleInputType = {
+export type AdminDashboardScheduleInput = {
   date: string;
   teacherId?: string | null;
   search?: string | null;

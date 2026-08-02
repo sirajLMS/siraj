@@ -6,7 +6,7 @@ import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
-import { QuotaNotFoundError } from "@/backend/lib/errors";
+import { QuotaNotFoundError, UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -45,7 +45,7 @@ export namespace QuotaService {
   ): Promise<void> {
     if (!actorUserId) {
       const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new Error(tErrors.unauthorizedAction);
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
     const tErrors = getServerTranslations(locale).errorsTranslations;
     await sharedRequirePermission(actorUserId, permission, tErrors);

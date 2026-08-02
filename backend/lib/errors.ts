@@ -44,3 +44,15 @@ export class QuotaLedgerError extends DomainError {
     super("QUOTA_LEDGER_ERROR", message);
   }
 }
+
+export class ConflictError extends DomainError {
+  constructor(message: string, options?: ErrorOptions) {
+    super("CONFLICT", message, options);
+  }
+}
+
+export class ValidationError extends DomainError {
+  constructor(message: string, options?: ErrorOptions) {
+    super("VALIDATION", message, options);
+  }
+}

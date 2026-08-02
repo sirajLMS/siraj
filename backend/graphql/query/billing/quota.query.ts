@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { mapQuotaErrorToGraphQLError } from "@/backend/graphql/mutation/billing/quota.mutation";
 import {
   AvailableClassSlotPothosObject,
   QuotaBalancePothosObject,
@@ -27,7 +28,11 @@ gqlSchemaBuilder.queryField("quotaLedger", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       const pagination = PaginationArgs.fromArgs(args.pagination);
-      return QuotaService.getQuotaLedger(String(args.quotaId), pagination, actorUserId, ctx.locale);
+      try {
+        return await QuotaService.getQuotaLedger(String(args.quotaId), pagination, actorUserId, ctx.locale);
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );
@@ -42,7 +47,11 @@ gqlSchemaBuilder.queryField("quota", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return QuotaService.getQuota(String(args.id), ctx.locale, undefined, actorUserId);
+      try {
+        return await QuotaService.getQuota(String(args.id), ctx.locale, undefined, actorUserId);
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );
@@ -59,7 +68,11 @@ gqlSchemaBuilder.queryField("quotas", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       const pagination = PaginationArgs.fromArgs(args.pagination);
-      return QuotaService.listQuotas(args.filter ?? null, pagination, undefined, actorUserId, ctx.locale);
+      try {
+        return await QuotaService.listQuotas(args.filter ?? null, pagination, undefined, actorUserId, ctx.locale);
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );
@@ -74,7 +87,11 @@ gqlSchemaBuilder.queryField("studentQuotas", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return QuotaService.listStudentQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+      try {
+        return await QuotaService.listStudentQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );
@@ -89,7 +106,11 @@ gqlSchemaBuilder.queryField("studentOpenQuotas", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return QuotaService.listStudentOpenQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+      try {
+        return await QuotaService.listStudentOpenQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );
@@ -104,7 +125,11 @@ gqlSchemaBuilder.queryField("quotaBalance", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return QuotaService.getStudentQuotaBalance(String(args.studentId), undefined, actorUserId, ctx.locale);
+      try {
+        return await QuotaService.getStudentQuotaBalance(String(args.studentId), undefined, actorUserId, ctx.locale);
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );
@@ -124,14 +149,18 @@ gqlSchemaBuilder.queryField("availableClassSlots", t =>
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
       await assertAssociatedOrManage(actorUserId, String(args.studentId), tErrors);
-      return AvailabilityService.findAvailableSlots(
-        String(args.studentId),
-        args.date,
-        args.teacherId ? String(args.teacherId) : null,
-        args.durationMinutes ?? 60,
-        undefined,
-        ctx.locale
-      );
+      try {
+        return await AvailabilityService.findAvailableSlots(
+          String(args.studentId),
+          args.date,
+          args.teacherId ? String(args.teacherId) : null,
+          args.durationMinutes ?? 60,
+          undefined,
+          ctx.locale
+        );
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );

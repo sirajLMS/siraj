@@ -1,5 +1,6 @@
 import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
+import { ForbiddenError } from "@/backend/lib/errors";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -16,7 +17,7 @@ export async function requirePermission(
 ): Promise<void> {
   const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
   if (!hasPermission) {
-    throw new Error(tErrors.insufficientPermissions);
+    throw new ForbiddenError(tErrors.insufficientPermissions);
   }
 }
 
@@ -37,7 +38,7 @@ export async function assertAssociatedOrManage(
   const isAssociated = await resolveAssociatedViewer(uid, studentId);
   const hasManage = await PermissionsService.hasPermission(uid, managePermission);
   if (!isAssociated && !hasManage) {
-    throw new Error(tErrors.insufficientPermissions);
+    throw new ForbiddenError(tErrors.insufficientPermissions);
   }
 }
 

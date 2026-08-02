@@ -1,4 +1,11 @@
 import type {
+  ClassType as BackendClassType,
+  CurrencyCode as BackendCurrencyCode,
+  DayOfWeek as BackendDayOfWeek,
+  OnDemandNoCreditsOutcome as BackendOnDemandNoCreditsOutcome,
+  SchedulingMode as BackendSchedulingMode,
+} from "@/backend/enum";
+import type {
   CreateRecurringClassInput,
   CurrencyCode,
   OnDemandNoCreditsOutcome,
@@ -56,17 +63,20 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
     durationMinutes: calculateDurationMinutes(data),
     defaultStartTime: data.defaultStartTime,
     timezone: data.timezone,
-    days: activeDays,
-    classType: data.classType,
+    days: activeDays.map(day => ({
+      ...day,
+      dayOfWeek: day.dayOfWeek as unknown as BackendDayOfWeek,
+    })),
+    classType: data.classType as BackendClassType | null | undefined,
     effectiveFrom: data.effectiveFrom || undefined,
     effectiveUntil: data.effectiveUntil || undefined,
     generateInstancesForWeeks: data.generateInstancesForWeeks,
     hourlyRate: data.hourlyRate ?? null,
-    rateCurrency: (data.rateCurrency as CurrencyCode | null) ?? null,
-    schedulingMode: data.schedulingMode ?? undefined,
+    rateCurrency: (data.rateCurrency as BackendCurrencyCode | null) ?? null,
+    schedulingMode: data.schedulingMode as BackendSchedulingMode | undefined,
     quotaId: data.quotaId ?? undefined,
     earmarkedClasses: data.earmarkedClasses ?? undefined,
     generationHorizonWeeks: data.generationHorizonWeeks ?? undefined,
-    ondemandNoCreditsOutcome: data.ondemandNoCreditsOutcome ?? undefined,
+    ondemandNoCreditsOutcome: data.ondemandNoCreditsOutcome as BackendOnDemandNoCreditsOutcome | undefined,
   };
 }

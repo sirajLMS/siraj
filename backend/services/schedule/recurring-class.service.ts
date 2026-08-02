@@ -11,13 +11,7 @@ import {
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
-import {
-  AppPermission,
-  type CurrencyCode,
-  type IanaTimezone,
-  NotificationEventType,
-  SchedulingMode,
-} from "@/backend/enum";
+import { AppPermission, type CurrencyCode, NotificationEventType, SchedulingMode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -25,37 +19,8 @@ import { QuotaService } from "@/backend/services/billing/quota.service";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { RecurringScheduleDayEntity, RecurringScheduleEntity } from "@/backend/types";
+import type { CreateRecurringClassInput } from "@/backend/types/scheduling/scheduling.types";
 import type { ErrorsLabels } from "@/shared/locale";
-
-export interface CreateRecurringClassInput {
-  studentId: string;
-  teacherId: string;
-  subjectId: string;
-  durationMinutes: number;
-  defaultStartTime: string;
-  timezone: IanaTimezone;
-  timezoneId?: number | null;
-  effectiveFrom?: string | null;
-  effectiveUntil?: string | null;
-  days: {
-    dayOfWeek: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
-    startTime: string;
-    isActive: boolean;
-  }[];
-  classType?: "REGULAR" | "TRIAL" | "ADVANCE";
-  generateInstancesForWeeks?: number;
-  /** Recurring-class-level hourly rate (highest non-override tier). Nullable. */
-  hourlyRate?: string | null;
-  /** Currency for `hourlyRate`. Required when `hourlyRate` is set. */
-  rateCurrency?: CurrencyCode | null;
-  quotaId?: string | null;
-  earmarkedClasses?: number | null;
-  schedulingMode?: SchedulingMode | null;
-  generationHorizonWeeks?: number | null;
-  ondemandNoCreditsOutcome?: import("@/backend/enum").OnDemandNoCreditsOutcome | null;
-  /** Optional locale forwarded to `dispatchWithPreferences` for i18n. */
-  locale?: string;
-}
 
 export namespace RecurringClassService {
   /**
@@ -231,8 +196,8 @@ export namespace RecurringClassService {
           effectiveFrom: input.effectiveFrom ? new Date(input.effectiveFrom) : null,
           effectiveUntil: input.effectiveUntil ? new Date(input.effectiveUntil) : null,
           days: input.days,
-          classType: input.classType,
-          generateInstancesForWeeks: instanceWeeks,
+          classType: input.classType ?? undefined,
+          generateInstancesForWeeks: instanceWeeks ?? undefined,
           quotaDeducted: false,
           hourlyRate: input.hourlyRate ?? null,
           rateCurrency: input.rateCurrency ?? null,

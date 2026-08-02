@@ -8,7 +8,9 @@ import type {
 import type {
   ClassExecutionState,
   ClassOutcome,
+  ClassType,
   CurrencyCode,
+  DayOfWeek,
   LeaveRequestStatus,
   OnDemandNoCreditsOutcome,
   RescheduleDateLabel,
@@ -127,7 +129,7 @@ export type RescheduleTrackingMetrics = {
 };
 
 export type RecurringClassDayInput = {
-  dayOfWeek: string;
+  dayOfWeek: DayOfWeek;
   startTime: string;
   isActive: boolean;
 };
@@ -139,10 +141,11 @@ export type CreateRecurringClassInput = {
   durationMinutes: number;
   defaultStartTime: string;
   timezone: IanaTimezone;
+  timezoneId?: number | null;
   effectiveFrom?: string | null;
   effectiveUntil?: string | null;
   days: RecurringClassDayInput[];
-  classType?: string | null;
+  classType?: ClassType | null;
   generateInstancesForWeeks?: number | null;
   /** Recurring-class-level hourly rate (highest non-override tier). Nullable. */
   hourlyRate?: string | null;
@@ -153,6 +156,8 @@ export type CreateRecurringClassInput = {
   schedulingMode?: SchedulingMode | null;
   generationHorizonWeeks?: number | null;
   ondemandNoCreditsOutcome?: OnDemandNoCreditsOutcome | null;
+  /** Optional locale forwarded to `dispatchWithPreferences` for i18n. */
+  locale?: string;
 };
 
 export type CreateRecurringClassReturnType = {

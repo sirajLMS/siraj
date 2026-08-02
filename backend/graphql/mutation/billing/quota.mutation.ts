@@ -17,7 +17,7 @@ import {
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type { QuotaUpdateInput } from "@/backend/types";
 
-function mapQuotaErrorToGraphQLError(error: unknown): GraphQLError {
+export function mapQuotaErrorToGraphQLError(error: unknown): GraphQLError {
   const message = error instanceof Error ? error.message : "Unknown error";
 
   if (error instanceof ForbiddenError) {

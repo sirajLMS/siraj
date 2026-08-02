@@ -1,6 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  ClassTypePothosObject,
   CurrencyCodePothosObject,
+  DayOfWeekPothosObject,
   IanaTimezonePothosObject,
   OnDemandNoCreditsOutcomePothosEnum,
   SchedulingModePothosEnum,
@@ -15,7 +17,7 @@ export const RecurringClassDayInputPothosObject = gqlSchemaBuilder
   .inputRef<RecurringClassDayInput>("RecurringClassDayInput")
   .implement({
     fields: t => ({
-      dayOfWeek: t.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
+      dayOfWeek: t.field({ type: DayOfWeekPothosObject, required: true }),
       startTime: t.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
       isActive: t.boolean({ required: true }),
     }),
@@ -38,7 +40,7 @@ export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
         required: true,
         directives: { constraint: { maxItems: 7 } },
       }),
-      classType: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+      classType: t.field({ type: ClassTypePothosObject, required: false }),
       generateInstancesForWeeks: t.int({ required: false }),
       hourlyRate: t.string({ required: false }),
       rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
