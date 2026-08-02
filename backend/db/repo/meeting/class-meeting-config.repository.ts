@@ -124,6 +124,7 @@ export namespace ClassMeetingConfigRepository {
           isDefault: input.isDefault,
           details: input.details,
           encryptedSecret: input.encryptedSecret ?? null,
+          providerMetadata: input.providerMetadata ?? null,
           createdAt: now,
           updatedAt: now,
         })
@@ -153,6 +154,7 @@ export namespace ClassMeetingConfigRepository {
       details?: ClassMeetingConfigInsertType["details"];
       encryptedSecret?: string | null;
       providerId?: string;
+      providerMetadata?: Record<string, unknown> | null;
     },
     tErrors: ErrorsLabels,
     tx?: DBTransaction
@@ -173,6 +175,7 @@ export namespace ClassMeetingConfigRepository {
           ...(input.details !== undefined ? { details: input.details } : {}),
           ...(input.encryptedSecret !== undefined ? { encryptedSecret: input.encryptedSecret } : {}),
           ...(input.providerId !== undefined ? { providerId: input.providerId } : {}),
+          ...(input.providerMetadata !== undefined ? { providerMetadata: input.providerMetadata } : {}),
           updatedAt: new Date(),
         })
         .where(eq(classMeetingConfigs.id, id))
@@ -262,6 +265,7 @@ export namespace ClassMeetingConfigRepository {
             details: input.details,
             encryptedSecret: input.encryptedSecret,
             providerId: input.providerId,
+            providerMetadata: input.providerMetadata,
           },
           tErrors,
           t

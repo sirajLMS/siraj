@@ -15,6 +15,7 @@ import { AppPermission, type CurrencyCode, type IanaTimezone, NotificationEventT
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import type { RecurringScheduleDayEntity, RecurringScheduleEntity } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -211,6 +212,18 @@ export namespace RecurringClassService {
       const result = await createScheduleAndDeductCredits(userId, input, tErrors);
 
       await dispatchClassScheduledNotifications(result.classInstanceIds, input.studentId, input.locale);
+
+      // Best-effort meeting URL generation — never fails the booking.
+      for (const instanceId of result.classInstanceIds) {
+        try {
+          await MeetingConfigSnapshotService.generateAndAttachForClassInstance(instanceId);
+        } catch (error) {
+          logger.error("Booking-time meeting URL generation failed for class instance", {
+            classInstanceId: instanceId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
 
       return {
         id: result.recurringScheduleId,

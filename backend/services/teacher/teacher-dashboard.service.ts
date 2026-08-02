@@ -6,8 +6,10 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -105,7 +107,7 @@ export namespace TeacherDashboardService {
       idempotencyKey,
     };
 
-    return db.transaction(async tx => {
+    const created = await db.transaction(async tx => {
       const created = await SchedulingRepository.createClassInstance(entry, tx);
 
       const creditIdempotencyKey = `credit-deduction:${created.id}`;
@@ -113,6 +115,18 @@ export namespace TeacherDashboardService {
 
       return created;
     });
+
+    // Best-effort meeting URL generation — never fails the manual booking.
+    try {
+      await MeetingConfigSnapshotService.generateAndAttachForClassInstance(created.id);
+    } catch (error) {
+      logger.error("Booking-time meeting URL generation failed for manual class instance", {
+        classInstanceId: created.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return created;
   }
 
   export interface SupportRequestInput {

@@ -23,10 +23,12 @@ const zoomProvider: MeetingProviderFieldsFragment = {
   updatedAt: null,
   fieldSchema: {
     requiresMeetingUrl: true,
+    supportsAutoGeneration: false,
     supportsUsername: false,
     supportsPassword: false,
     supportsTenantId: false,
   },
+  providerKind: "manual",
 };
 
 const fullFieldsProvider: MeetingProviderFieldsFragment = {
@@ -43,10 +45,34 @@ const fullFieldsProvider: MeetingProviderFieldsFragment = {
   updatedAt: null,
   fieldSchema: {
     requiresMeetingUrl: true,
+    supportsAutoGeneration: false,
     supportsUsername: true,
     supportsPassword: true,
     supportsTenantId: true,
   },
+  providerKind: "manual",
+};
+
+const autoGenProvider: MeetingProviderFieldsFragment = {
+  id: "provider-zoom-auto",
+  slug: "zoom",
+  name: { en: "Zoom (Auto)", ar: "زوم (تلقائي)" },
+  description: null,
+  instructions: null,
+  urlAllowlist: ["*.zoom.us"],
+  urlExample: "https://zoom.us/j/123456789",
+  logoUrl: null,
+  isActive: true,
+  createdAt: null,
+  updatedAt: null,
+  fieldSchema: {
+    requiresMeetingUrl: false,
+    supportsAutoGeneration: true,
+    supportsUsername: false,
+    supportsPassword: false,
+    supportsTenantId: false,
+  },
+  providerKind: "zoom",
 };
 
 function MeetingConfigTypeFieldsStory({
@@ -120,5 +146,47 @@ export const Arabic: Story = {
     initialValue: {
       meetingUrl: "https://zoom.us/j/987654321",
     },
+  },
+};
+
+export const AutoGenerate: Story = {
+  args: {
+    provider: autoGenProvider,
+    initialValue: {
+      meetingUrl: "",
+    },
+    onGenerateUrl: () => {},
+  },
+};
+
+export const Generating: Story = {
+  args: {
+    provider: autoGenProvider,
+    initialValue: {
+      meetingUrl: "",
+    },
+    onGenerateUrl: () => {},
+    generating: true,
+  },
+};
+
+export const GenerationError: Story = {
+  args: {
+    provider: autoGenProvider,
+    initialValue: {
+      meetingUrl: "",
+    },
+    onGenerateUrl: () => {},
+    generationError: "Failed to generate meeting URL. Please try again.",
+  },
+};
+
+export const RegenerateUrl: Story = {
+  args: {
+    provider: autoGenProvider,
+    initialValue: {
+      meetingUrl: "https://zoom.us/j/987654321",
+    },
+    onGenerateUrl: () => {},
   },
 };

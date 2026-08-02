@@ -5,6 +5,7 @@ import {
   PublicOutlined,
   ScheduleOutlined,
   SettingsOutlined,
+  VideocamOutlined,
 } from "@mui/icons-material";
 import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
@@ -46,6 +47,12 @@ export const SETTINGS_TABS: readonly SettingsTabDefinition[] = [
     labelKey: "timezones",
     permissions: PAGE_PERMISSIONS.settingsTimezones,
     icon: LanguageOutlined,
+  },
+  {
+    id: "meetingIntegrations",
+    labelKey: "meetingIntegrations",
+    permissions: PAGE_PERMISSIONS.settingsMeetingIntegrations,
+    icon: VideocamOutlined,
   },
 ] as const;
 

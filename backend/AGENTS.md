@@ -77,3 +77,6 @@ The backend follows a consistent pattern for defining and using types across all
 - Follow the naming convention: `{Entity}SelectType`, `{Entity}InsertType`, `{Entity}ReturnType`, `{Entity}SubmitInput`, etc.
 - Use a single canonical GraphQL object type per entity, extending it with resolved properties as needed
 - Never create local type definitions in Pothos files; always use types from `backend/types/`
+## Important References
+
+- `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference (auto URL generation for Zoom, Google Meet, Microsoft Teams)

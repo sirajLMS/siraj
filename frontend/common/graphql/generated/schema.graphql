@@ -43,6 +43,18 @@ type AdminNoteInfo {
   lastUpdated: String
 }
 
+input AdminRevokeTokenInput {
+  providerSlug: MeetingIntegrationProviderSlug!
+  userId: String!
+}
+
+type AdminRevokeTokenResult {
+  id: String
+  providerSlug: String
+  revoked: Boolean
+  userId: String
+}
+
 """Paginated admin suggestion list with metrics."""
 type AdminSuggestionResult {
   id: String
@@ -204,6 +216,7 @@ enum AppPermission {
   SETTINGS_AUDIT_VIEW
   SETTINGS_EDIT_ENV
   SETTINGS_EDIT_GENERAL
+  SETTINGS_EDIT_MEETING_INTEGRATIONS
   SETTINGS_EDIT_SESSION
   SETTINGS_SITE_CONTENT_MANAGE
   SETTINGS_TIMEZONES_VIEW
@@ -596,6 +609,7 @@ type ClassMeetingConfig {
   label: String
   provider: MeetingProvider
   providerId: String
+  providerMetadata: JSON
   recurringScheduleId: String
   updatedAt: DateTime
 }
@@ -781,6 +795,17 @@ input ComplaintSubmitInput {
   files: [ComplaintFileMetadataInput!]
   studentId: String
   submitterEmail: String!
+}
+
+input ConnectMeetingProviderOAuthInput {
+  providerSlug: MeetingIntegrationProviderSlug!
+  returnPath: String!
+}
+
+type ConnectMeetingProviderOAuthResult {
+  authorizeUrl: String
+  id: String
+  state: String
 }
 
 input CoreUserProfileFieldsInput {
@@ -1301,6 +1326,16 @@ input DirectoryPermissionsUpdateInput {
   permissions: DirectoryPermissionsInput!
 }
 
+input DisconnectMeetingProviderOAuthInput {
+  providerSlug: MeetingIntegrationProviderSlug!
+}
+
+type DisconnectMeetingProviderOAuthResult {
+  id: String
+  ok: Boolean
+  providerSlug: String
+}
+
 type DisplayAmount {
   amount: String
   currency: CurrencyCode
@@ -1365,6 +1400,7 @@ type EffectiveMeeting {
   providerName: LocalizedString
   providerSlug: String
   source: EffectiveMeetingSource
+  supportsAutoGeneration: Boolean
 }
 
 enum EffectiveMeetingSource {
@@ -1613,6 +1649,19 @@ enum FxSyncStatus {
 enum Gender {
   FEMALE
   MALE
+}
+
+input GenerateMeetingUrlInput {
+  durationMinutes: Int
+  providerId: String!
+  startDateTime: String
+  topic: String!
+}
+
+type GenerateMeetingUrlResult {
+  expiresAt: String
+  joinUrl: String
+  meetingId: String
 }
 
 enum GroupClassAttendanceStatus {
@@ -2367,9 +2416,50 @@ type MeetingConfigDetails {
 }
 
 input MeetingConfigDetailsInput {
-  meetingUrl: String!
+  meetingUrl: String
   tenantId: String
   username: String
+}
+
+enum MeetingConnectionTestMode {
+  GENERATE_AND_DELETE
+  VALIDATE_CONFIG
+}
+
+type MeetingIntegrationConnectedAccount {
+  connectedAt: DateTime
+  email: String
+  expiresAt: DateTime
+  id: String
+  lastRefreshedAt: DateTime
+  name: String
+  scopes: [String!]
+  status: MeetingIntegrationConnectedAccountStatus
+  userId: String
+}
+
+enum MeetingIntegrationConnectedAccountStatus {
+  CONNECTED
+  EXPIRING_SOON
+  REAUTH_NEEDED
+  REVOKED
+}
+
+type MeetingIntegrationProvider {
+  connectedTeacherCount: Int
+  credentialsHealthy: Boolean
+  endpoints: [String!]
+  id: String
+  kind: String
+  lastTestedAt: DateTime
+  reauthNeededCount: Int
+  slug: String
+}
+
+enum MeetingIntegrationProviderSlug {
+  GOOGLE_MEET
+  MICROSOFT_TEAMS
+  ZOOM
 }
 
 type MeetingProvider {
@@ -2381,6 +2471,7 @@ type MeetingProvider {
   isActive: Boolean
   logoUrl: String
   name: LocalizedString
+  providerKind: String
   slug: String
   updatedAt: DateTime
   urlAllowlist: [String!]
@@ -2394,6 +2485,7 @@ input MeetingProviderCreateInput {
   isActive: Boolean
   logoUrl: String
   name: LocalizedString!
+  providerKind: String
   slug: String!
   urlAllowlist: [String!]!
   urlExample: String
@@ -2401,6 +2493,7 @@ input MeetingProviderCreateInput {
 
 type MeetingProviderFieldSchema {
   requiresMeetingUrl: Boolean
+  supportsAutoGeneration: Boolean
   supportsPassword: Boolean
   supportsTenantId: Boolean
   supportsUsername: Boolean
@@ -2408,6 +2501,7 @@ type MeetingProviderFieldSchema {
 
 input MeetingProviderFieldSchemaInput {
   requiresMeetingUrl: Boolean!
+  supportsAutoGeneration: Boolean
   supportsPassword: Boolean
   supportsTenantId: Boolean
   supportsUsername: Boolean
@@ -2420,6 +2514,7 @@ input MeetingProviderUpdateInput {
   isActive: Boolean
   logoUrl: String
   name: LocalizedString
+  providerKind: String
   slug: String
   urlAllowlist: [String!]
   urlExample: String
@@ -2429,6 +2524,7 @@ type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
   activateSupportedCurrency(input: SupportedCurrencyUpsertInput!): SupportedCurrency
+  adminRevokeMeetingProviderToken(input: AdminRevokeTokenInput!): AdminRevokeTokenResult
 
   """Approve a pending lesson report (supervisor/manager action)"""
   approveLessonReport(reportId: ID!): LessonReport
@@ -2445,6 +2541,7 @@ type Mutation {
   cleanupTestManager(userId: String!): Boolean
   cleanupTestSuperAdmin(userId: String!): Boolean
   clearWeeklySchedule(teacherId: ID!): Boolean
+  connectMeetingProviderOAuth(input: ConnectMeetingProviderOAuthInput!): ConnectMeetingProviderOAuthResult
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createClassCategory(input: ClassCategoryCreateInput!): ClassCategory
   createClassMeetingConfig(input: ClassMeetingConfigCreateInput!): ClassMeetingConfig
@@ -2537,10 +2634,12 @@ type Mutation {
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
   detachSubjectResource(learningResourceId: ID!, subjectId: ID!): Boolean
+  disconnectMeetingProviderOAuth(input: DisconnectMeetingProviderOAuthInput!): DisconnectMeetingProviderOAuthResult
   endImpersonation: EndImpersonationResponse
   endPermissionGroupSimulation: EndPermissionGroupSimulationResponse
   ensureDemoUsers: Boolean
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
+  generateMeetingUrl(input: GenerateMeetingUrlInput!): GenerateMeetingUrlResult
   linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocument
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
@@ -2608,6 +2707,7 @@ type Mutation {
 
   """Submits a new suggestion from the authenticated parent."""
   submitSuggestion(input: SubmitSuggestionInput!): Suggestion
+  testMeetingProviderConnection(input: TestMeetingConnectionInput!): TestMeetingConnectionResult
   updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
   updateClassCategory(id: ID!, input: ClassCategoryUpdateInput!): ClassCategory
   updateClassMeetingConfig(id: ID!, input: ClassMeetingConfigUpdateInput!): ClassMeetingConfig
@@ -2652,6 +2752,14 @@ type Mutation {
   upsertSiteContent(input: SiteContentUpsertInput!): SiteContentEntry
   upsertSystemSetting(input: SystemSettingUpsertInput!): SystemSetting
   verifyBankTransferPaymentMethod(id: ID!): UserPaymentMethod
+}
+
+type MyConnectedMeetingProvider {
+  connectedAt: DateTime
+  email: String
+  expiresAt: DateTime
+  id: String
+  providerSlug: String
 }
 
 type NextUnpaidInvoiceSummary {
@@ -3260,8 +3368,11 @@ type Query {
   """Lists all staff members with administrative access."""
   managerDirectory(paginationArgs: PaginationArgs, roleFilter: String, statusFilter: String): ManagerDirectoryResult
   me: User
+  meetingIntegrationConnectedAccounts(providerSlug: String!): [MeetingIntegrationConnectedAccount!]
+  meetingIntegrationProviders: [MeetingIntegrationProvider!]
   meetingProvider(id: ID!): MeetingProvider
   meetingProviders(activeOnly: Boolean = true): [MeetingProvider!]
+  myConnectedMeetingProviders: [MyConnectedMeetingProvider!]
   notificationAlerts: NotificationAlertsResult
   notificationPreferences: [NotificationPreference!]
 
@@ -4723,6 +4834,7 @@ type TeacherPayment {
   amount: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
   isTestPayment: Boolean
   paymentDate: DateTime
@@ -4820,6 +4932,26 @@ type TestEntities {
 
 type TestGroupClass {
   groupClassId: String
+}
+
+input TestMeetingConnectionInput {
+  mode: MeetingConnectionTestMode!
+  providerSlug: MeetingIntegrationProviderSlug!
+}
+
+type TestMeetingConnectionResult {
+  deleted: Boolean
+  errorCode: String
+  errorMessage: String
+  grantedScopes: [String!]
+  id: String
+  latencyMs: Int
+  mode: MeetingConnectionTestMode
+  ok: Boolean
+  rawUpstreamPayload: JSON
+  requiredScopes: [String!]
+  testJoinUrl: String
+  upstreamResponseSummary: String
 }
 
 type TestSuperAdmin {
@@ -4968,8 +5100,10 @@ type UserMeetingConfig {
   id: String
   isDefault: Boolean
   label: String
+  oauthTokenExpiresAt: DateTime
   provider: MeetingProvider
   providerId: String
+  providerMetadata: JSON
   updatedAt: DateTime
   userId: String
 }
@@ -4985,6 +5119,7 @@ input UserMeetingConfigCreateInput {
 
 input UserMeetingConfigUpdateInput {
   details: MeetingConfigDetailsInput
+  forceRegenerate: Boolean
   isDefault: Boolean
   label: String
   password: String

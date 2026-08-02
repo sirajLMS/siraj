@@ -1,5 +1,5 @@
 import { boolean, index, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderFieldSchema, MeetingProviderKind } from "@/backend/types/meeting/meeting-provider.types";
 import type { LocalizedString } from "@/shared/types";
 
 export const meetingProviders = pgTable(
@@ -7,6 +7,7 @@ export const meetingProviders = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     slug: varchar("slug", { length: 100 }).notNull().unique(),
+    providerKind: varchar("provider_kind", { length: 50 }).notNull().default("manual").$type<MeetingProviderKind>(),
     name: jsonb("name").$type<LocalizedString>().notNull(),
     description: jsonb("description").$type<LocalizedString>(),
     instructions: jsonb("instructions").$type<LocalizedString>(),
@@ -20,6 +21,7 @@ export const meetingProviders = pgTable(
   },
   table => [
     index("meeting_providers_is_active_idx").on(table.isActive),
+    index("meeting_providers_provider_kind_idx").on(table.providerKind),
     index("meeting_providers_created_at_idx").on(table.createdAt),
     index("meeting_providers_updated_at_idx").on(table.updatedAt),
   ]

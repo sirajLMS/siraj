@@ -12,4 +12,7 @@ export type MeetingConfigListProps = {
   readonly onEditAction?: (config: MeetingConfigListItem) => void;
   readonly onDeleteAction?: (id: string) => void;
   readonly emptyMessage?: string;
+  readonly requiresReconnect?: readonly string[];
+  /** Extra React content rendered below each config card (e.g. badge + bookings link). */
+  readonly renderRowExtra?: (config: MeetingConfigListItem) => React.ReactNode;
 };

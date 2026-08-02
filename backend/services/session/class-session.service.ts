@@ -15,6 +15,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { invalidateClassLifecycle } from "@/backend/services/cache";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
@@ -314,6 +315,16 @@ export namespace ClassSessionService {
       // Pass the pre-resolved triplet so the helper skips its own fetch (which
       // would fail post-soft-delete on the `deletedAt IS NULL` filter).
       await notifyClassLifecycle(classInstanceId, NotificationEventType.CLASS_CANCELLED, affected);
+
+      // Best-effort remote meeting cleanup — never fails the delete.
+      try {
+        await MeetingConfigSnapshotService.cancelMeetingForClassInstance(classInstanceId);
+      } catch (error) {
+        logger.error("Best-effort meeting cancel failed for class instance", {
+          classInstanceId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
     return result;
   }
@@ -476,6 +487,16 @@ export namespace ClassSessionService {
         originalInstanceId: classInstanceId,
       }
     );
+
+    // Best-effort meeting URL generation for the new (successor) instance.
+    try {
+      await MeetingConfigSnapshotService.generateAndAttachForClassInstance(created.id);
+    } catch (error) {
+      logger.error("Booking-time meeting URL generation failed for rescheduled class instance", {
+        classInstanceId: created.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
 
     return created;
   }

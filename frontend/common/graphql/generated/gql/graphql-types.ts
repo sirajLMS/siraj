@@ -70,6 +70,19 @@ export type AdminNoteInfo = {
   lastUpdated: Maybe<Scalars['String']['output']>;
 };
 
+export type AdminRevokeTokenInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+  userId: Scalars['String']['input'];
+};
+
+export type AdminRevokeTokenResult = {
+  __typename?: 'AdminRevokeTokenResult';
+  id: Maybe<Scalars['String']['output']>;
+  providerSlug: Maybe<Scalars['String']['output']>;
+  revoked: Maybe<Scalars['Boolean']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
+};
+
 /** Paginated admin suggestion list with metrics. */
 export type AdminSuggestionResult = {
   __typename?: 'AdminSuggestionResult';
@@ -232,6 +245,7 @@ export enum AppPermission {
   SettingsAuditView = 'SETTINGS_AUDIT_VIEW',
   SettingsEditEnv = 'SETTINGS_EDIT_ENV',
   SettingsEditGeneral = 'SETTINGS_EDIT_GENERAL',
+  SettingsEditMeetingIntegrations = 'SETTINGS_EDIT_MEETING_INTEGRATIONS',
   SettingsEditSession = 'SETTINGS_EDIT_SESSION',
   SettingsSiteContentManage = 'SETTINGS_SITE_CONTENT_MANAGE',
   SettingsTimezonesView = 'SETTINGS_TIMEZONES_VIEW',
@@ -639,6 +653,7 @@ export type ClassMeetingConfig = {
   label: Maybe<Scalars['String']['output']>;
   provider: Maybe<MeetingProvider>;
   providerId: Maybe<Scalars['String']['output']>;
+  providerMetadata: Maybe<Scalars['JSON']['output']>;
   recurringScheduleId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
@@ -833,6 +848,18 @@ export type ComplaintSubmitInput = {
   files: InputMaybe<Array<ComplaintFileMetadataInput>>;
   studentId: InputMaybe<Scalars['String']['input']>;
   submitterEmail: Scalars['String']['input'];
+};
+
+export type ConnectMeetingProviderOAuthInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+  returnPath: Scalars['String']['input'];
+};
+
+export type ConnectMeetingProviderOAuthResult = {
+  __typename?: 'ConnectMeetingProviderOAuthResult';
+  authorizeUrl: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  state: Maybe<Scalars['String']['output']>;
 };
 
 export type CoreUserProfileFieldsInput = {
@@ -1351,6 +1378,17 @@ export type DirectoryPermissionsUpdateInput = {
   permissions: DirectoryPermissionsInput;
 };
 
+export type DisconnectMeetingProviderOAuthInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+};
+
+export type DisconnectMeetingProviderOAuthResult = {
+  __typename?: 'DisconnectMeetingProviderOAuthResult';
+  id: Maybe<Scalars['String']['output']>;
+  ok: Maybe<Scalars['Boolean']['output']>;
+  providerSlug: Maybe<Scalars['String']['output']>;
+};
+
 export type DisplayAmount = {
   __typename?: 'DisplayAmount';
   amount: Maybe<Scalars['String']['output']>;
@@ -1423,6 +1461,7 @@ export type EffectiveMeeting = {
   providerName: Maybe<Scalars['LocalizedString']['output']>;
   providerSlug: Maybe<Scalars['String']['output']>;
   source: Maybe<EffectiveMeetingSource>;
+  supportsAutoGeneration: Maybe<Scalars['Boolean']['output']>;
 };
 
 export enum EffectiveMeetingSource {
@@ -1687,6 +1726,20 @@ export enum Gender {
   Female = 'FEMALE',
   Male = 'MALE'
 }
+
+export type GenerateMeetingUrlInput = {
+  durationMinutes: InputMaybe<Scalars['Int']['input']>;
+  providerId: Scalars['String']['input'];
+  startDateTime: InputMaybe<Scalars['String']['input']>;
+  topic: Scalars['String']['input'];
+};
+
+export type GenerateMeetingUrlResult = {
+  __typename?: 'GenerateMeetingUrlResult';
+  expiresAt: Maybe<Scalars['String']['output']>;
+  joinUrl: Maybe<Scalars['String']['output']>;
+  meetingId: Maybe<Scalars['String']['output']>;
+};
 
 export enum GroupClassAttendanceStatus {
   Absent = 'ABSENT',
@@ -2447,10 +2500,53 @@ export type MeetingConfigDetails = {
 };
 
 export type MeetingConfigDetailsInput = {
-  meetingUrl: Scalars['String']['input'];
+  meetingUrl: InputMaybe<Scalars['String']['input']>;
   tenantId: InputMaybe<Scalars['String']['input']>;
   username: InputMaybe<Scalars['String']['input']>;
 };
+
+export enum MeetingConnectionTestMode {
+  GenerateAndDelete = 'GENERATE_AND_DELETE',
+  ValidateConfig = 'VALIDATE_CONFIG'
+}
+
+export type MeetingIntegrationConnectedAccount = {
+  __typename?: 'MeetingIntegrationConnectedAccount';
+  connectedAt: Maybe<Scalars['DateTime']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  expiresAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  lastRefreshedAt: Maybe<Scalars['DateTime']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  scopes: Maybe<Array<Scalars['String']['output']>>;
+  status: Maybe<MeetingIntegrationConnectedAccountStatus>;
+  userId: Maybe<Scalars['String']['output']>;
+};
+
+export enum MeetingIntegrationConnectedAccountStatus {
+  Connected = 'CONNECTED',
+  ExpiringSoon = 'EXPIRING_SOON',
+  ReauthNeeded = 'REAUTH_NEEDED',
+  Revoked = 'REVOKED'
+}
+
+export type MeetingIntegrationProvider = {
+  __typename?: 'MeetingIntegrationProvider';
+  connectedTeacherCount: Maybe<Scalars['Int']['output']>;
+  credentialsHealthy: Maybe<Scalars['Boolean']['output']>;
+  endpoints: Maybe<Array<Scalars['String']['output']>>;
+  id: Maybe<Scalars['String']['output']>;
+  kind: Maybe<Scalars['String']['output']>;
+  lastTestedAt: Maybe<Scalars['DateTime']['output']>;
+  reauthNeededCount: Maybe<Scalars['Int']['output']>;
+  slug: Maybe<Scalars['String']['output']>;
+};
+
+export enum MeetingIntegrationProviderSlug {
+  GoogleMeet = 'GOOGLE_MEET',
+  MicrosoftTeams = 'MICROSOFT_TEAMS',
+  Zoom = 'ZOOM'
+}
 
 export type MeetingProvider = {
   __typename?: 'MeetingProvider';
@@ -2462,6 +2558,7 @@ export type MeetingProvider = {
   isActive: Maybe<Scalars['Boolean']['output']>;
   logoUrl: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['LocalizedString']['output']>;
+  providerKind: Maybe<Scalars['String']['output']>;
   slug: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   urlAllowlist: Maybe<Array<Scalars['String']['output']>>;
@@ -2475,6 +2572,7 @@ export type MeetingProviderCreateInput = {
   isActive: InputMaybe<Scalars['Boolean']['input']>;
   logoUrl: InputMaybe<Scalars['String']['input']>;
   name: Scalars['LocalizedString']['input'];
+  providerKind: InputMaybe<Scalars['String']['input']>;
   slug: Scalars['String']['input'];
   urlAllowlist: Array<Scalars['String']['input']>;
   urlExample: InputMaybe<Scalars['String']['input']>;
@@ -2483,6 +2581,7 @@ export type MeetingProviderCreateInput = {
 export type MeetingProviderFieldSchema = {
   __typename?: 'MeetingProviderFieldSchema';
   requiresMeetingUrl: Maybe<Scalars['Boolean']['output']>;
+  supportsAutoGeneration: Maybe<Scalars['Boolean']['output']>;
   supportsPassword: Maybe<Scalars['Boolean']['output']>;
   supportsTenantId: Maybe<Scalars['Boolean']['output']>;
   supportsUsername: Maybe<Scalars['Boolean']['output']>;
@@ -2490,6 +2589,7 @@ export type MeetingProviderFieldSchema = {
 
 export type MeetingProviderFieldSchemaInput = {
   requiresMeetingUrl: Scalars['Boolean']['input'];
+  supportsAutoGeneration: InputMaybe<Scalars['Boolean']['input']>;
   supportsPassword: InputMaybe<Scalars['Boolean']['input']>;
   supportsTenantId: InputMaybe<Scalars['Boolean']['input']>;
   supportsUsername: InputMaybe<Scalars['Boolean']['input']>;
@@ -2502,6 +2602,7 @@ export type MeetingProviderUpdateInput = {
   isActive: InputMaybe<Scalars['Boolean']['input']>;
   logoUrl: InputMaybe<Scalars['String']['input']>;
   name: InputMaybe<Scalars['LocalizedString']['input']>;
+  providerKind: InputMaybe<Scalars['String']['input']>;
   slug: InputMaybe<Scalars['String']['input']>;
   urlAllowlist: InputMaybe<Array<Scalars['String']['input']>>;
   urlExample: InputMaybe<Scalars['String']['input']>;
@@ -2512,6 +2613,7 @@ export type Mutation = {
   activateClass: Maybe<ClassInstanceDetail>;
   activateOverrideClass: Maybe<ClassInstanceDetail>;
   activateSupportedCurrency: Maybe<SupportedCurrency>;
+  adminRevokeMeetingProviderToken: Maybe<AdminRevokeTokenResult>;
   /** Approve a pending lesson report (supervisor/manager action) */
   approveLessonReport: Maybe<LessonReport>;
   approvePaymentProof: Maybe<MarkInvoicePaidResult>;
@@ -2527,6 +2629,7 @@ export type Mutation = {
   cleanupTestManager: Maybe<Scalars['Boolean']['output']>;
   cleanupTestSuperAdmin: Maybe<Scalars['Boolean']['output']>;
   clearWeeklySchedule: Maybe<Scalars['Boolean']['output']>;
+  connectMeetingProviderOAuth: Maybe<ConnectMeetingProviderOAuthResult>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createClassCategory: Maybe<ClassCategory>;
   createClassMeetingConfig: Maybe<ClassMeetingConfig>;
@@ -2595,10 +2698,12 @@ export type Mutation = {
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
   demoLogin: Maybe<LoginResponse>;
   detachSubjectResource: Maybe<Scalars['Boolean']['output']>;
+  disconnectMeetingProviderOAuth: Maybe<DisconnectMeetingProviderOAuthResult>;
   endImpersonation: Maybe<EndImpersonationResponse>;
   endPermissionGroupSimulation: Maybe<EndPermissionGroupSimulationResponse>;
   ensureDemoUsers: Maybe<Scalars['Boolean']['output']>;
   executeDstBulkUpdate: Maybe<DstMigrationReport>;
+  generateMeetingUrl: Maybe<GenerateMeetingUrlResult>;
   linkDocumentToParent: Maybe<ParentDocument>;
   logTeacherSupportRequest: Maybe<SupportRequestResult>;
   login: Maybe<LoginResponse>;
@@ -2653,6 +2758,7 @@ export type Mutation = {
   submitStudentLessonReportReflection: Maybe<LessonReport>;
   /** Submits a new suggestion from the authenticated parent. */
   submitSuggestion: Maybe<Suggestion>;
+  testMeetingProviderConnection: Maybe<TestMeetingConnectionResult>;
   updateClassAdminNote: Maybe<GroupClassAudit>;
   updateClassCategory: Maybe<ClassCategory>;
   updateClassMeetingConfig: Maybe<ClassMeetingConfig>;
@@ -2707,6 +2813,11 @@ export type MutationActivateOverrideClassArgs = {
 
 export type MutationActivateSupportedCurrencyArgs = {
   input: SupportedCurrencyUpsertInput;
+};
+
+
+export type MutationAdminRevokeMeetingProviderTokenArgs = {
+  input: AdminRevokeTokenInput;
 };
 
 
@@ -2788,6 +2899,11 @@ export type MutationCleanupTestSuperAdminArgs = {
 
 export type MutationClearWeeklyScheduleArgs = {
   teacherId: Scalars['ID']['input'];
+};
+
+
+export type MutationConnectMeetingProviderOAuthArgs = {
+  input: ConnectMeetingProviderOAuthInput;
 };
 
 
@@ -3092,9 +3208,19 @@ export type MutationDetachSubjectResourceArgs = {
 };
 
 
+export type MutationDisconnectMeetingProviderOAuthArgs = {
+  input: DisconnectMeetingProviderOAuthInput;
+};
+
+
 export type MutationExecuteDstBulkUpdateArgs = {
   description: Scalars['String']['input'];
   offsetMinutes: Scalars['Int']['input'];
+};
+
+
+export type MutationGenerateMeetingUrlArgs = {
+  input: GenerateMeetingUrlInput;
 };
 
 
@@ -3322,6 +3448,11 @@ export type MutationSubmitSuggestionArgs = {
 };
 
 
+export type MutationTestMeetingProviderConnectionArgs = {
+  input: TestMeetingConnectionInput;
+};
+
+
 export type MutationUpdateClassAdminNoteArgs = {
   classInstanceId: Scalars['String']['input'];
   content: Scalars['String']['input'];
@@ -3515,6 +3646,15 @@ export type MutationUpsertSystemSettingArgs = {
 
 export type MutationVerifyBankTransferPaymentMethodArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type MyConnectedMeetingProvider = {
+  __typename?: 'MyConnectedMeetingProvider';
+  connectedAt: Maybe<Scalars['DateTime']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  expiresAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  providerSlug: Maybe<Scalars['String']['output']>;
 };
 
 export type NextUnpaidInvoiceSummary = {
@@ -4135,8 +4275,11 @@ export type Query = {
   /** Lists all staff members with administrative access. */
   managerDirectory: Maybe<ManagerDirectoryResult>;
   me: Maybe<User>;
+  meetingIntegrationConnectedAccounts: Maybe<Array<MeetingIntegrationConnectedAccount>>;
+  meetingIntegrationProviders: Maybe<Array<MeetingIntegrationProvider>>;
   meetingProvider: Maybe<MeetingProvider>;
   meetingProviders: Maybe<Array<MeetingProvider>>;
+  myConnectedMeetingProviders: Maybe<Array<MyConnectedMeetingProvider>>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
   notificationPreferences: Maybe<Array<NotificationPreference>>;
   /** Returns onboarding metrics for staff accounts. */
@@ -4410,6 +4553,11 @@ export type QueryManagerDirectoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   roleFilter: InputMaybe<Scalars['String']['input']>;
   statusFilter: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryMeetingIntegrationConnectedAccountsArgs = {
+  providerSlug: Scalars['String']['input'];
 };
 
 
@@ -6100,6 +6248,7 @@ export type TeacherPayment = {
   amount: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   id: Maybe<Scalars['String']['output']>;
   isTestPayment: Maybe<Scalars['Boolean']['output']>;
   paymentDate: Maybe<Scalars['DateTime']['output']>;
@@ -6203,6 +6352,27 @@ export type TestEntities = {
 export type TestGroupClass = {
   __typename?: 'TestGroupClass';
   groupClassId: Maybe<Scalars['String']['output']>;
+};
+
+export type TestMeetingConnectionInput = {
+  mode: MeetingConnectionTestMode;
+  providerSlug: MeetingIntegrationProviderSlug;
+};
+
+export type TestMeetingConnectionResult = {
+  __typename?: 'TestMeetingConnectionResult';
+  deleted: Maybe<Scalars['Boolean']['output']>;
+  errorCode: Maybe<Scalars['String']['output']>;
+  errorMessage: Maybe<Scalars['String']['output']>;
+  grantedScopes: Maybe<Array<Scalars['String']['output']>>;
+  id: Maybe<Scalars['String']['output']>;
+  latencyMs: Maybe<Scalars['Int']['output']>;
+  mode: Maybe<MeetingConnectionTestMode>;
+  ok: Maybe<Scalars['Boolean']['output']>;
+  rawUpstreamPayload: Maybe<Scalars['JSON']['output']>;
+  requiredScopes: Maybe<Array<Scalars['String']['output']>>;
+  testJoinUrl: Maybe<Scalars['String']['output']>;
+  upstreamResponseSummary: Maybe<Scalars['String']['output']>;
 };
 
 export type TestSuperAdmin = {
@@ -6359,8 +6529,10 @@ export type UserMeetingConfig = {
   id: Maybe<Scalars['String']['output']>;
   isDefault: Maybe<Scalars['Boolean']['output']>;
   label: Maybe<Scalars['String']['output']>;
+  oauthTokenExpiresAt: Maybe<Scalars['DateTime']['output']>;
   provider: Maybe<MeetingProvider>;
   providerId: Maybe<Scalars['String']['output']>;
+  providerMetadata: Maybe<Scalars['JSON']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   userId: Maybe<Scalars['String']['output']>;
 };
@@ -6376,6 +6548,7 @@ export type UserMeetingConfigCreateInput = {
 
 export type UserMeetingConfigUpdateInput = {
   details: InputMaybe<MeetingConfigDetailsInput>;
+  forceRegenerate: InputMaybe<Scalars['Boolean']['input']>;
   isDefault: InputMaybe<Scalars['Boolean']['input']>;
   label: InputMaybe<Scalars['String']['input']>;
   password: InputMaybe<Scalars['String']['input']>;

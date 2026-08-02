@@ -323,6 +323,13 @@ export const profileEn: ProfileLabels = {
     saved: "Notification preferences saved.",
     errorLoading: "Failed to load notification preferences.",
     errorSaving: "Failed to save notification preferences.",
+    autoGeneration: {
+      title: "Auto-generation modes",
+      onSave: "On save — a meeting URL is generated automatically when you enable auto-generation",
+      preview: "Preview — generate a test URL to see what your meeting will look like",
+      booking: "Booking — a fresh URL is generated when a meeting is booked",
+      learnMore: "Learn more",
+    },
     channels: {
       EMAIL: "Email",
       SMS: "SMS",
@@ -350,6 +357,19 @@ export const profileEn: ProfileLabels = {
       CLASS_RESET: "Class Reset",
       LESSON_REPORT_SUBMITTED: "Lesson Report Submitted",
       LESSON_REPORT_REVIEWED: "Lesson Report Reviewed",
+    },
+    connectAccount: {
+      connectButton: "Connect",
+      connectingLabel: "Connecting...",
+      connectedAs: email => `Connected as ${email}`,
+      disconnectButton: "Disconnect",
+      disconnectConfirmTitle: "Disconnect meeting provider",
+      disconnectConfirm:
+        "Are you sure you want to disconnect this meeting provider? You will need to re-connect to use it again.",
+      confirmDisconnect: "Disconnect",
+      cancel: "Cancel",
+      reconnectButton: "Reconnect",
+      reconnectCallout: "Reconnect your account",
     },
   },
   changePassword: {

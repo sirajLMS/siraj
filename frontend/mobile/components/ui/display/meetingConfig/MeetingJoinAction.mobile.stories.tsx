@@ -12,6 +12,7 @@ const mockMeeting: EffectiveMeetingFieldsFragment = {
   source: "class",
   configId: "cfg-1",
   providerId: "prov-1",
+  supportsAutoGeneration: false,
 };
 
 const meta: Meta<typeof MobileMeetingJoinAction> = {
@@ -88,5 +89,41 @@ export const DisabledIcon: Story = {
     <Stack sx={{ p: 2, alignItems: "center" }}>
       <MobileMeetingJoinAction variant="icon" disabled />
     </Stack>
+  ),
+};
+
+const urlPendingMeeting: EffectiveMeetingFieldsFragment = {
+  joinUrl: null,
+  providerSlug: "zoom",
+  providerName: { en: "Zoom", ar: "زووم" },
+  logoUrl: null,
+  meetingId: null,
+  source: "class",
+  configId: "cfg-1",
+  providerId: "prov-1",
+  supportsAutoGeneration: true,
+};
+
+export const UrlPendingAction: Story = {
+  render: () => (
+    <Box sx={{ p: 2 }}>
+      <MobileMeetingJoinAction meeting={urlPendingMeeting} />
+    </Box>
+  ),
+};
+
+export const UrlPendingButton: Story = {
+  render: () => (
+    <Box sx={{ p: 2 }}>
+      <MobileMeetingJoinAction meeting={urlPendingMeeting} variant="button" label="Join meeting" />
+    </Box>
+  ),
+};
+
+export const UrlPendingIcon: Story = {
+  render: () => (
+    <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
+      <MobileMeetingJoinAction meeting={urlPendingMeeting} variant="icon" />
+    </Box>
   ),
 };

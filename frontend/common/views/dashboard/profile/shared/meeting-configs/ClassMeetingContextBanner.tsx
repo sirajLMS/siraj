@@ -36,6 +36,7 @@ export function ClassMeetingContextBanner({
   const sourceLabel = tDisplay[sourceKey as "sourceClass" | "sourceRecurring" | "sourceTeacher" | "sourceNone"];
   const isClassOverride = effectiveMeeting?.source === EffectiveMeetingSource.Class;
   const isInherited = effectiveMeeting?.source === EffectiveMeetingSource.Teacher && !hasScopeConfigs;
+  const isUrlPending = effectiveMeeting?.supportsAutoGeneration === true && !effectiveMeeting?.joinUrl;
 
   return (
     <Stack spacing={1}>
@@ -48,6 +49,7 @@ export function ClassMeetingContextBanner({
         <Chip size="small" color="warning" label={t.overrideActive} />
       ) : null}
       {isInherited ? <Chip size="small" variant="outlined" label={t.inheritedFromTeacher} /> : null}
+      {isUrlPending ? <Chip size="small" color="info" label={tDisplay.urlPending} /> : null}
     </Stack>
   );
 }

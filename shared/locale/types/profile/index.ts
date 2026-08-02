@@ -308,6 +308,13 @@ export interface ProfileNotificationsLabels {
   readonly saved: string;
   readonly errorLoading: string;
   readonly errorSaving: string;
+  readonly autoGeneration: {
+    readonly title: string;
+    readonly onSave: string;
+    readonly preview: string;
+    readonly booking: string;
+    readonly learnMore: string;
+  };
   readonly channels: {
     readonly EMAIL: string;
     readonly SMS: string;
@@ -337,6 +344,18 @@ export interface ProfileNotificationsLabels {
     // Supervisor / lesson-report matrix
     readonly LESSON_REPORT_SUBMITTED: string;
     readonly LESSON_REPORT_REVIEWED: string;
+  };
+  readonly connectAccount: {
+    readonly connectButton: string;
+    readonly connectingLabel: string;
+    readonly connectedAs: (email: string) => string;
+    readonly disconnectButton: string;
+    readonly disconnectConfirmTitle: string;
+    readonly disconnectConfirm: string;
+    readonly confirmDisconnect: string;
+    readonly cancel: string;
+    readonly reconnectButton: string;
+    readonly reconnectCallout: string;
   };
 }
 

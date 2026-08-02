@@ -37,7 +37,8 @@ export type AuditEntityType =
   | "COMPLAINT"
   | "LEARNING_RESOURCE"
   | "SUGGESTION"
-  | "BOOK";
+  | "BOOK"
+  | "MEETING_PROVIDER_TOKEN";
 
 /**
  * Action types for audit logs

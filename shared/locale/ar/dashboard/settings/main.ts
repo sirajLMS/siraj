@@ -1,5 +1,6 @@
 import { dashboardSettingsEnvironmentAr } from "@/shared/locale/ar/dashboard/settings/environment";
 import { dashboardSettingsGeneralAr } from "@/shared/locale/ar/dashboard/settings/general";
+import { dashboardSettingsMeetingIntegrationsAr } from "@/shared/locale/ar/dashboard/settings/meeting-integrations";
 import { dashboardSettingsSessionAr } from "@/shared/locale/ar/dashboard/settings/session";
 import { dashboardSettingsSiteContentAr } from "@/shared/locale/ar/dashboard/settings/siteContent";
 import { dashboardSettingsTimezonesAr } from "@/shared/locale/ar/dashboard/settings/timezones";
@@ -51,6 +52,7 @@ export const dashboardSettingsAr: SettingsLabels = {
     audit: "التدقيق",
     siteContent: "محتوى الموقع",
     timezones: "المناطق الزمنية",
+    meetingIntegrations: "تكامل الاجتماعات",
   },
   audit: {
     emptyMessage: "لا توجد سجلات تدقيق تطابق عوامل التصفية الحالية.",
@@ -75,6 +77,7 @@ export const dashboardSettingsAr: SettingsLabels = {
   },
   environment: dashboardSettingsEnvironmentAr,
   general: dashboardSettingsGeneralAr,
+  meetingIntegrations: dashboardSettingsMeetingIntegrationsAr,
   session: dashboardSettingsSessionAr,
   siteContent: dashboardSettingsSiteContentAr,
   timezones: dashboardSettingsTimezonesAr,

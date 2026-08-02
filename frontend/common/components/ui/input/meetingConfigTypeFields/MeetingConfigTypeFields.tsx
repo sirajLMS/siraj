@@ -1,7 +1,9 @@
 "use client";
 
+import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -20,6 +22,9 @@ export type MeetingConfigTypeFieldsProps = {
   readonly disabled?: boolean;
   readonly passwordHelperText?: string;
   readonly onMeetingUrlBlur?: () => void;
+  readonly onGenerateUrl?: () => void;
+  readonly generating?: boolean;
+  readonly generationError?: string | null;
 };
 
 export function MeetingConfigTypeFields({
@@ -29,6 +34,9 @@ export function MeetingConfigTypeFields({
   disabled,
   passwordHelperText,
   onMeetingUrlBlur,
+  onGenerateUrl,
+  generating,
+  generationError,
 }: MeetingConfigTypeFieldsProps) {
   const { fields: t } = useAppTranslation(Translation.Ui.MeetingConfig);
 
@@ -37,19 +45,30 @@ export function MeetingConfigTypeFields({
   }
 
   const fields = getVisibleMeetingConfigFields(provider);
+  const supportsAuto = provider.fieldSchema?.supportsAutoGeneration === true;
 
   return (
     <Stack spacing={2}>
       <TextField
         label={t.meetingUrl}
         value={value.meetingUrl}
-        disabled={disabled}
+        disabled={disabled || (supportsAuto && Boolean(value.meetingUrl.trim()))}
         fullWidth
         placeholder={provider.urlExample ?? undefined}
         onChange={event => onChangeAction({ ...value, meetingUrl: event.target.value })}
         onBlur={onMeetingUrlBlur}
         slotProps={{ htmlInput: { dir: "ltr" } }}
       />
+      {supportsAuto && onGenerateUrl ? (
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <Button variant="outlined" size="small" disabled={disabled || generating} onClick={onGenerateUrl}>
+            {generating ? t.generating : value.meetingUrl.trim() ? t.regenerate : t.generateAutomatically}
+          </Button>
+          {generationError ? (
+            <Typography sx={{ typography: "bodySm", color: "error.main" }}>{generationError}</Typography>
+          ) : null}
+        </Stack>
+      ) : null}
       {fields.showUsername ? (
         <TextField
           label={t.username}

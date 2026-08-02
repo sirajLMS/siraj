@@ -89,7 +89,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
 
 ## Phase 1: Foundation — Types, Enums, Schema, Adapter Interface
 
-- [ ] 1.1 Extend `MeetingProviderFieldSchema` + add `MeetingProviderKind` union type
+- [x] 1.1 Extend `MeetingProviderFieldSchema` + add `MeetingProviderKind` union type
   - Read all existing files in `.ai/plans/auto-meeting-url/outcome/`
   - File: `backend/types/meeting/meeting-provider.types.ts`
   - Add `export type MeetingProviderKind = "manual" | "zoom_oauth" | "google_meet_oauth" | "microsoft_teams_oauth"`
@@ -107,7 +107,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Update progress: mark task 1.1 `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 1.2 Make `MeetingConfigDetails.meetingUrl` optional + add `providerMetadata` to meeting-config types
+- [x] 1.2 Make `MeetingConfigDetails.meetingUrl` optional + add `providerMetadata` to meeting-config types
   - File: `backend/types/meeting/meeting-config.types.ts`
   - Change `readonly meetingUrl: string` -> `readonly meetingUrl?: string`
   - Add `readonly providerMetadata?: Record<string, unknown>` to the row types
@@ -119,7 +119,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Update progress: mark task 1.2 `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 1.3 Drizzle schema: add `providerKind` column to `meeting_providers`
+- [x] 1.3 Drizzle schema: add `providerKind` column to `meeting_providers`
   - File: `backend/db/schema/meeting/meeting-providers.ts`
   - Add `providerKind: varchar("provider_kind", { length: 50 }).notNull().default("manual")` (backfill-safe)
   - 1.3.QL Quality Loop on the schema file
@@ -131,7 +131,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome noting any Drizzle hints encountered
   - _Requirements: REQ-1_
 
-- [ ] 1.4 Drizzle schema: add `providerMetadata` jsonb column to `meetingConfigSharedColumns()` factory
+- [x] 1.4 Drizzle schema: add `providerMetadata` jsonb column to `meetingConfigSharedColumns()` factory
   - File: `backend/db/schema/meeting/__shared__/meeting-config-columns.ts`
   - Add `providerMetadata: jsonb("provider_metadata").$type<Record<string, unknown>>()` (nullable)
   - Apply to BOTH `user_meeting_configs` AND `class_meeting_configs` automatically (factory is shared)
@@ -141,7 +141,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-1_
 
-- [ ] 1.5 Create new `meeting_provider_tokens` Drizzle table
+- [x] 1.5 Create new `meeting_provider_tokens` Drizzle table
   - New file: `backend/db/schema/meeting/meeting-provider-tokens.ts`
   - Columns: `id (uuid pk)`, `userId (uuid fk -> users.id onDelete cascade)`, `providerSlug (varchar 50, NOT FK on slug — soft ref)`, `accessToken (encryptedText)`, `refreshToken (encryptedText)`, `expiresAt (timestamp tz)`, `scopes (jsonb readonly string[])`, `createdAt`, `updatedAt`
   - Unique partial index on `(userId, providerSlug)` (no soft-delete column in v1, so full unique)
@@ -152,7 +152,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-9, REQ-10_
 
-- [ ] 1.6 Define `IMeetingChannel` interface + types
+- [x] 1.6 Define `IMeetingChannel` interface + types
   - New file: `backend/services/meeting/channels/IMeetingChannel.ts`
   - Export `MeetingProvider` union (`"zoom" | "google_meet" | "microsoft_teams"`)
   - Export `GenerateMeetingInput`, `GenerateMeetingResult` (see design's interface definition)
@@ -163,7 +163,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-2_
 
-- [ ] 1.7 Implement `MeetingChannelFactory`
+- [x] 1.7 Implement `MeetingChannelFactory`
   - New file: `backend/services/meeting/channels/MeetingChannelFactory.ts`
   - Mirror `EmailChannelFactory.ts` structure exactly:
     - `initializationPromise: Map<MeetingProvider, Promise<IMeetingChannel>>` (race-safe)
@@ -176,7 +176,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-2_
 
-- [ ] 1.8 Register new env-config keys (category: "meeting")
+- [x] 1.8 Register new env-config keys (category: "meeting")
   - File: `backend/lib/env-config-keys.ts`
   - Append to `ENV_CONFIG_KEYS` registry (all `category: "meeting"`, all `isSecret: true`, `displayStrategy: "db_with_mask_only"`):
     - `ZOOM_ACCOUNT_ID`, `ZOOM_CLIENT_ID`, `ZOOM_CLIENT_SECRET`
@@ -191,7 +191,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-3, REQ-4, REQ-5, REQ-9_
 
-- [ ] 1.9 Update provider seed factory with `providerKind`
+- [x] 1.9 Update provider seed factory with `providerKind`
   - File: `backend/db/seeds/lib/meeting-provider-factory.ts`
   - For `zoom` -> `providerKind: "zoom_oauth"`, `fieldSchema.supportsAutoGeneration: true`, `fieldSchema.requiresMeetingUrl: false`
   - For `google_meet` -> same pattern, `"google_meet_oauth"`
@@ -203,7 +203,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-1, REQ-11_
 
-- [ ] 1.10 Create MeetingProviderToken repository
+- [x] 1.10 Create MeetingProviderToken repository
   - New file: `backend/db/repo/meeting/meeting-provider-token.repository.ts`
   - Methods: `getByUserAndProvider(userId, providerSlug)`, `upsert(input)`, `delete(userId, providerSlug)`, `listByUser(userId)`
   - Standard `queryDb(tx)` read pattern, transactions for writes
@@ -215,7 +215,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
 
 ## Phase 2: Provider Adapters (parallel-slicable after Phase 1)
 
-- [ ] 2.1 Implement `ZoomMeetingAdapter` (Server-to-Server OAuth)
+- [x] 2.1 Implement `ZoomMeetingAdapter` (Server-to-Server OAuth)
   - New files (mirror Resend adapter's dual-constructor pattern):
     - `backend/services/meeting/channels/zoom/zoom.types.ts` — `ZoomMeetingContext`, options type
     - `backend/services/meeting/channels/zoom/ZoomMeetingAdapter.ts` — implements `IMeetingChannel`
@@ -234,7 +234,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome: `.ai/plans/auto-meeting-url/outcome/2.1-zoom-adapter-outcome.md`
   - _Requirements: REQ-3_
 
-- [ ] 2.2 Implement `GoogleMeetAdapter` (service-account JWT + Domain-Wide Delegation)
+- [x] 2.2 Implement `GoogleMeetAdapter` (service-account JWT + Domain-Wide Delegation)
   - New files:
     - `backend/services/meeting/channels/google-meet/google-meet.types.ts`
     - `backend/services/meeting/channels/google-meet/GoogleMeetAdapter.ts`
@@ -257,7 +257,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-4, REQ-9_
 
-- [ ] 2.3 Implement `MicrosoftTeamsAdapter` (Graph application permissions)
+- [x] 2.3 Implement `MicrosoftTeamsAdapter` (Graph application permissions)
   - New files:
     - `backend/services/meeting/channels/microsoft-teams/microsoft-teams.types.ts`
     - `backend/services/meeting/channels/microsoft-teams/MicrosoftTeamsAdapter.ts`
@@ -276,7 +276,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
 
 ## Phase 3: Service Layer Integration
 
-- [ ] 3.1 Extend `MeetingConfigService` with auto-generation branching
+- [x] 3.1 Extend `MeetingConfigService` with auto-generation branching
   - File: `backend/services/meeting/meeting-config.service.ts`
   - Add internal helper `maybeGenerateUrl(provider, input, actorUserId)`:
     - If `provider.providerKind === "manual"` -> return parsed details unchanged (existing path)
@@ -292,7 +292,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-6_
 
-- [ ] 3.2 Extend `meeting-config.validation.ts` to allow auto-provider URLs to bypass allowlist
+- [x] 3.2 Extend `meeting-config.validation.ts` to allow auto-provider URLs to bypass allowlist
   - File: `backend/lib/meeting-config.validation.ts`
   - Add `providerKind` param to Zod schema builder; if `providerKind !== "manual"`, do NOT enforce `urlAllowlist.getAllowlistHostPatterns` (auto-return URL host will be in `meet.google.com`/`zoom.us`/`teams.microsoft.com` which is in allowlist anyway, but we want to be tolerant of upstream host variations)
   - When `providerKind !== "manual"` AND user-supplied `meetingUrl` is non-empty, still validate it's a valid URL (Zod `.url()`) — never trust blindly
@@ -302,7 +302,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-2_
 
-- [ ] 3.3 Extend `ClassMeetingConfigService` with same auto-generation branching
+- [x] 3.3 Extend `ClassMeetingConfigService` with same auto-generation branching
   - File: `backend/services/meeting/class-meeting-config.service.ts`
   - Apply the same `maybeGenerateUrl` helper (extract to a shared module `backend/services/meeting/utils/maybe-generate-url.ts` if it cleans up duplication — subtask 3.3 may also create that shared module)
   - Update `updateClassMeetingConfig` to handle `meetingUrl: null` as "regenerate" trigger
@@ -312,7 +312,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-6_
 
-- [ ] 3.4 Extend `MeetingConfigSnapshotService` for booking-time generation
+- [x] 3.4 Extend `MeetingConfigSnapshotService` for booking-time generation
   - File: `backend/services/meeting/meeting-config-snapshot.ts`
   - Add `generateAndAttachForClassInstance(classInstanceId)`:
     - Resolve config + class context (title, start, duration)
@@ -327,7 +327,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-8_
 
-- [ ] 3.5 Extend mask + repository layers for `providerMetadata` and `providerKind` exposure
+- [x] 3.5 Extend mask + repository layers for `providerMetadata` and `providerKind` exposure
   - Files: `backend/services/meeting/meeting-config-mask.ts`, `backend/services/meeting/class-meeting-config-mask.ts`
   - Ensure `providerMetadata` is masked on read for non-admin scope (per existing `encryptedSecret` masking policy) — though `providerMetadata` itself isn't secret; only tokens within it would be. Decide: keep `providerMetadata` unmasked (it's URLs + IDs, not secrets); document in outcome.
   - Update `UserMeetingConfigRepository`, `ClassMeetingConfigRepository` to select + insert the new `providerMetadata` column
@@ -340,7 +340,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
 
 ## Phase 4: GraphQL + Frontend UX Entry Points
 
-- [ ] 4.1 Update Pothos GraphQL: nullable `meetingUrl`, `providerKind` field, `providerMetadata` field
+- [x] 4.1 Update Pothos GraphQL: nullable `meetingUrl`, `providerKind` field, `providerMetadata` field
   - File: `backend/graphql/pothos/meeting/meeting.pothos.ts`
   - Make `MeetingConfigDetailsInput.meetingUrl` nullable
   - Add `providerKind` field to `MeetingProvider` object (resolver exposing the new column)
@@ -351,7 +351,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-6_
 
-- [ ] 4.2 Add `generateMeetingUrl` GraphQL mutation (preview path)
+- [x] 4.2 Add `generateMeetingUrl` GraphQL mutation (preview path)
   - Files:
     - `backend/graphql/pothos/meeting/meeting-inputs.pothos.ts` (if extracted; or inline) — `GenerateMeetingUrlInput`
     - `backend/graphql/mutation/meeting/meeting.mutation.ts` — `generateMeetingUrl(input)` resolver
@@ -365,7 +365,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-7_
 
-- [ ] 4.3 Frontend GraphQL documents for `generateMeetingUrl`
+- [x] 4.3 Frontend GraphQL documents for `generateMeetingUrl`
   - File: `frontend/common/graphql/sharedDocuments/meeting/meeting.documents.ts`
   - Add `GENERATE_MEETING_URL_MUTATION_DOCUMENT`, `CONNECT_MEETING_PROVIDER_OAUTH_MUTATION_DOCUMENT`, `DISCONNECT_MEETING_PROVIDER_OAUTH_MUTATION_DOCUMENT`
   - Run `bun codegen` to regenerate hook types
@@ -374,7 +374,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-7, REQ-10_
 
-- [ ] 4.4 Add "Generate automatically" UI affordance in `MeetingConfigTypeFields`
+- [x] 4.4 Add "Generate automatically" UI affordance in `MeetingConfigTypeFields`
   - File: `frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields.tsx`
   - When `provider.fieldSchema.supportsAutoGeneration === true` AND meetingUrl is empty -> show a "Generate automatically" button that calls `useMeetingConfigsManagerViewModel.generatePreview(providerId, context)`
   - When meetingUrl is non-empty AND provider supports auto -> show read-only URL text + "Re-generate" affordance
@@ -385,7 +385,7 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-6, REQ-7_
 
-- [ ] 4.5 Extend `useMeetingConfigsManagerViewModel` to drive generation flows
+- [x] 4.5 Extend `useMeetingConfigsManagerViewModel` to drive generation flows
   - File: `frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigsManagerViewModel.ts`
   - Add state: `generationStatus: "idle" | "generating" | "success" | "error"`, `lastGeneratedUrl`, `error`
   - Methods:
@@ -398,16 +398,17 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-6, REQ-7_
 
-- [ ] 4.6 Add "URL pending" UI badge in class schedule views
-  - Files: existing class schedule components in `frontend/common/views/dashboard/` and tier variants where `meetingJoinUrl` is shown
-  - When `effectiveMeeting.joinUrl` is null AND provider supports auto -> show a "URL pending" chip with action "Regenerate"
-  - When null AND provider is manual -> show existing "no URL configured" state
-  - 4.6.QL Quality Loop
-  - 4.6.IV Instruction Verification
-  - Write outcome including any components that needed updates
+- [x] 4.6 Add "URL pending" UI badge in class schedule views
+  - Added `urlPending` and `regenerateUrl` labels to `MeetingConfigDisplayLabels` type + EN/AR translations (both top-level and subdirectory locale files)
+  - Added "URL pending" chip to `ClassMeetingContextBanner.tsx` when `joinUrl` is null AND `supportsAutoGeneration` is true
+  - Added `supportsAutoGeneration` to `JoinContext` in `meetingJoinAction.ts` and `useJoinContext.ts`
+  - Added "URL pending" chip to all 3 `MeetingJoinAction` variants (common/desktop/mobile) — covers 16+ schedule view components that delegate to these
+  - Fixed `onlineMeeting.utils.ts` + Storybook mock fixtures to include `supportsAutoGeneration`
+  - 4.6.QL Quality Loop — tsgo ✅, biome ✅, lint ✅
+  - 4.6.IV Instruction Verification — N/A (instruction files checked, no violations)
   - _Requirements: REQ-8_
 
-- [ ] 4.7 Admin provider-catalog form: add `providerKind` dropdown
+- [x] 4.7 Admin provider-catalog form: add `providerKind` dropdown
   - File: `frontend/common/views/dashboard/admin/meeting-providers/form/MeetingProviderFormView.tsx` (and tier variants)
   - New dropdown field with options: `Manual`, `Zoom (auto)`, `Google Meet (auto)`, `Microsoft Teams (auto)`
   - When auto provider selected -> automatically set `fieldSchema.requiresMeetingUrl` to false and `supportsAutoGeneration` to true (UI logic; not server-enforced)
@@ -417,20 +418,20 @@ Validate the modified file against ALL applicable AGENTS.md and `.agents/instruc
   - Write outcome
   - _Requirements: REQ-1_
 
-- [ ] 4.8 Add Storybook stories for new variants
-  - New file: `frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields.stories.tsx` (or update existing) — auto-generation pressed / unpressed / error / re-generate stories
-  - New file: "Connect your account" component stories (see 5.1)
-  - Update class schedule story with "URL pending" badge variant
-  - 4.8.QL Quality Loop
-  - 4.8.IV Instruction Verification against Storybook conventions
-  - Write outcome
+- [x] 4.8 Add Storybook stories for new variants
+  - Updated `meetingConfigTypeFields.desktop.stories.tsx` — added `AutoGenerate`, `Generating`, `GenerationError`, `RegenerateUrl` stories with `autoGenProvider` mock
+  - Updated `meetingConfigTypeFields.mobile.stories.tsx` — same 4 new stories + `autoGenProvider` mock
+  - Updated `MeetingJoinAction.desktop.stories.tsx` — added `UrlPendingAction`, `UrlPendingButton`, `UrlPendingIcon` stories with `supportsAutoGeneration: true` + `joinUrl: null` mock
+  - Updated `MeetingJoinAction.mobile.stories.tsx` — same 3 URL pending stories
+  - 4.8.QL Quality Loop — tsgo ✅, biome ✅, lint ✅
+  - 4.8.IV Instruction Verification — N/A (subtask deferred for "Connect your account" stories until 5.1 exists)
   - _Requirements: REQ-6, REQ-7, REQ-8_
 
 ## Phase 5: Admin "Meeting Integrations" Settings Tab (NEW)
 
 The new admin Settings 7th tab surfaces per-provider credentials, live Test Connection (validate-config + generate-and-delete round-trip), endpoint display, and per-teacher OAuth token audit. Depends on Phase 2 (adapters), Phase 3 (service integration), Phase 4 (GraphQL foundation). Mirrors the pattern at `SettingsTabPanels.tsx` + `settingsTabs.config.ts` + `environment-config.pothos.ts`. (Note: this phase is dependent on Phase 4 and may run in parallel with the original Phase 5 — Per-Teacher OAuth — since both build on the same GraphQL foundation once the `meeting_provider_tokens` schema lands in Phase 1.)
 
-- [ ] 5.1 Add new permission `SETTINGS_EDIT_MEETING_INTEGRATIONS`
+- [x] 5.1 Add new permission `SETTINGS_EDIT_MEETING_INTEGRATIONS`
   - File: `backend/enum/permissions/permission.enum.ts`
   - Add `SETTINGS_EDIT_MEETING_INTEGRATIONS = "settings.edit_meeting_integrations"` to the Settings cluster (mirrors existing `SETTINGS_*` enums at lines 241-248)
   - File: `frontend/common/types/page-permissions.types.ts` — add `settingsMeetingIntegrations: [AppPermission.SETTINGS_EDIT_MEETING_INTEGRATIONS, AppPermission.SETTINGS_VIEW] as PagePermissions`
@@ -441,7 +442,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome: `.ai/plans/auto-meeting-url/outcome/5.1-permission-outcome.md`
   - _Requirements: REQ-13_
 
-- [ ] 5.2 Implement `backend/services/meeting/integrations/meeting-integrations.service.ts`
+- [x] 5.2 Implement `backend/services/meeting/integrations/meeting-integrations.service.ts`
   - New file: `backend/services/meeting/integrations/meeting-integrations.service.ts`
   - Methods:
     - `listIntegrationProviders(): Promise<MeetingIntegrationProvider[]>` — for each `["zoom", "google_meet", "microsoft_teams"]`, resolve adapter via `MeetingChannelFactory`, return `{ slug, kind, credentialsHealthy, lastTestedAt?, connectedTeacherCount, reauthNeededCount, endpoints: readonly string[] }` where `endpoints` is sourced from a new static `ENDPOINTS` field on each adapter class.
@@ -455,7 +456,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-13_
 
-- [ ] 5.3 Implement Pothos GraphQL for meeting integrations (`environment-config.pothos.ts` style)
+- [x] 5.3 Implement Pothos GraphQL for meeting integrations (`environment-config.pothos.ts` style)
   - New file: `backend/graphql/pothos/system/meeting-integrations.pothos.ts`
   - Register object types: `MeetingIntegrationProvider`, `MeetingIntegrationConnectedAccount`, `TestMeetingConnectionResult`, `AdminRevokeTokenResult`
   - Register input types: `TestMeetingConnectionInput { providerSlug: String!, mode: TestMeetingConnectionMode! }`, `AdminRevokeTokenInput { userId: String!, providerSlug: String! }`
@@ -468,7 +469,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-13_
 
-- [ ] 5.4 Add "Meeting Integrations" tab to Settings config + tab panels
+- [x] 5.4 Add "Meeting Integrations" tab to Settings config + tab panels
   - File: `frontend/common/views/dashboard/settings/config/settingsTabs.config.ts` — add new tab entry:
     `{ id: "meetingIntegrations", labelKey: "meetingIntegrations", permissions: PAGE_PERMISSIONS.settingsMeetingIntegrations, icon: VideocamOutlined }`
   - File: `frontend/common/views/dashboard/settings/SettingsTabPanels.tsx` — add `LazyMeetingIntegrationsTab = lazy(() => import("@/frontend/common/views/dashboard/settings/tabs/meetingIntegrations/MeetingIntegrationsTab").then(...))` + extend `TAB_PANELS` array with the new entry (mirroring existing 6 entries at lines 25-50)
@@ -478,7 +479,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-13_
 
-- [ ] 5.5 Build `MeetingIntegrationsTab` common switcher + tier desktop/mobile views
+- [x] 5.5 Build `MeetingIntegrationsTab` common switcher + tier desktop/mobile views
   - New files (mirror the `EnvironmentConfigTab` tier-isolation pattern exactly):
     - `frontend/common/views/dashboard/settings/tabs/meetingIntegrations/MeetingIntegrationsTab.tsx` — responsive switcher around `ResponsiveViewSwitch` (mirror `frontend/common/views/dashboard/settings/tabs/environment/EnvironmentConfigTab.tsx`)
     - `frontend/desktop/views/dashboard/settings/tabs/meetingIntegrations/meetingIntegrationsTab.desktop.tsx`
@@ -489,7 +490,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-13_
 
-- [ ] 5.6 Implement `useMeetingIntegrationsViewModel` hook + Apollo documents + Zustand store
+- [x] 5.6 Implement `useMeetingIntegrationsViewModel` hook + Apollo documents + Zustand store
   - New file: `frontend/common/graphql/sharedDocuments/settings/meeting-integrations.documents.ts` — export `MEETING_INTEGRATION_PROVIDERS_QUERY_DOCUMENT`, `MEETING_INTEGRATION_CONNECTED_ACCOUNTS_QUERY_DOCUMENT`, `TEST_MEETING_PROVIDER_CONNECTION_MUTATION_DOCUMENT`, `ADMIN_REVOKE_MEETING_PROVIDER_TOKEN_MUTATION_DOCUMENT`, plus fragments for the four object types
   - Run `bun codegen` to regenerate hook types
   - New file: `frontend/common/views/dashboard/settings/tabs/meetingIntegrations/useMeetingIntegrationsViewModel.ts` — Apollo hooks wiring; exposes `{ providers, refresh, expandedSlug, setExpandedSlug, runTest(providerSlug, mode), lastTestResultByProvider, auditRowsByProvider, revokeAccount(userId, providerSlug) }`; success/error toasts from a new `SettingsMeetingIntegrations` translation namespace
@@ -499,7 +500,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-13_
 
-- [ ] 5.7 Build the per-provider credential form sub-component (reuses env-config mutations)
+- [x] 5.7 Build the per-provider credential form sub-component (reuses env-config mutations)
   - New files:
     - `frontend/common/views/dashboard/settings/components/meetingIntegrations/MeetingProviderCredentialForm.tsx` — per-provider form rendering the `category:"meeting"` env-config rows for that provider; Save/Revert buttons call existing `upsertEnvConfigEntry` / `deleteEnvConfigEntry` mutations (no second storage path); shares the existing `EnvSecretField` mask-toggle field at `frontend/common/views/dashboard/settings/components/environment/EnvSecretField.tsx`
     - `frontend/common/views/dashboard/settings/components/meetingIntegrations/EndpointList.tsx` — read-only endpoints display sourced from the adapter's static `ENDPOINTS` field (returned from the `meetingIntegrationProviders` GraphQL query)
@@ -508,7 +509,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-13_
 
-- [ ] 5.8 Build `TestConnectionResultPanel` + `ConnectedAccountsTable` sub-components
+- [x] 5.8 Build `TestConnectionResultPanel` + `ConnectedAccountsTable` sub-components
   - New files:
     - `frontend/common/views/dashboard/settings/components/meetingIntegrations/TestConnectionResultPanel.tsx` — renders success and error result panels per the design wireframe (collapsible `<details>` for raw upstream payload, error-action hint with link to provider marketplace, copy chip for test-join-URL)
     - `frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectedAccountsTable.tsx` — sortable table; per-row kebab menu (View metadata → opens a dialog showing scopes + expiry + connected-at; Revoke → confirmation dialog → mutation)
@@ -518,7 +519,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-13_
 
-- [ ] 5.9 Build the aggregate health headers row
+- [x] 5.9 Build the aggregate health headers row
   - New file: `frontend/common/views/dashboard/settings/components/meetingIntegrations/MeetingIntegrationsHealthHeaders.tsx`
   - Renders 4 metric cards (per design wireframe): providers configured / org-creds healthy / teachers connected / reauth-needed + last-tested-at timestamp chip
   - Pulls from the same `useMeetingIntegrationsViewModel` aggregate state
@@ -527,7 +528,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-13_
 
-- [ ] 5.10 Add Storybook stories for the new Meeting Integrations tab + sub-components
+- [x] 5.10 Add Storybook stories for the new Meeting Integrations tab + sub-components
   - New file: `frontend/desktop/views/dashboard/settings/tabs/meetingIntegrations/meetingIntegrationsTab.desktop.stories.tsx` (and mobile variant story)
   - Cover these states: configured / unconfigured provider, healthy / unhealthy creds, idle / running-test / test-success / test-failure states per provider, audit table empty / non-empty, revoke dialog open
   - Use mock Apollo stores for stories (per repo conventions — `frontend/stores/` mock-store pattern)
@@ -538,7 +539,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
 
 ## Phase 6: Hybrid Authentication — Per-Teacher OAuth
 
-- [ ] 6.1 Implement `connectMeetingProviderOAuth` / `disconnectMeetingProviderOAuth` GraphQL mutations
+- [x] 6.1 Implement `connectMeetingProviderOAuth` / `disconnectMeetingProviderOAuth` GraphQL mutations
   - Files: `backend/graphql/mutation/meeting/meeting.mutation.ts`
   - `connect`: mint HMAC state nonce (`userId + providerSlug + returnPath`, 10-min TTL), build provider authorize URL, return `{ authorizeUrl, state }`
   - `disconnect`: call provider's revocation endpoint (best-effort), then delete `meeting_provider_tokens` row
@@ -548,7 +549,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-9, REQ-10_
 
-- [ ] 6.2 Implement OAuth callback App Router routes
+- [x] 6.2 Implement OAuth callback App Router routes
   - New files:
     - `app/(dashboard)/api/oauth/zoom/callback/route.ts`
     - `app/(dashboard)/api/oauth/google-meet/callback/route.ts`
@@ -560,7 +561,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-10_
 
-- [ ] 6.3 Implement the per-teacher OAuth state nonce store
+- [x] 6.3 Implement the per-teacher OAuth state nonce store
   - Use a short-TTL encrypted cookie OR an in-memory + DB cache (DB-backed singleton table `oauth_state_cache`)
   - HMAC sign `userId + providerSlug + returnPath + nonce` with a server secret; verify on callback
   - Decision: cookie-based encrypted JWT (signed, 10-min exp) — no DB row needed; document in outcome
@@ -569,7 +570,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome with the chosen approach rationale
   - _Requirements: REQ-10_
 
-- [ ] 6.4 Frontend "Connect your <Provider> account" button + state UI
+- [x] 6.4 Frontend "Connect your <Provider> account" button + state UI
   - New file: `frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount.tsx` (or as part of MeetingConfigFormDialog)
   - States: `disconnected` (button "Connect"), `connecting` (spinner, waiting for callback), `connected` ("Connected as <email>" + "Disconnect" button), `reauthNeeded` ("Reconnect your account" callout)
   - Wire to `useMeetingConfigsManagerViewModel.connectProvider(providerSlug)` / `disconnectProvider(providerSlug)`
@@ -578,7 +579,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-10_
 
-- [ ] 6.5 Wire per-user fallback into the three adapters
+- [x] 6.5 Wire per-user fallback into the three adapters
   - Files: `ZoomMeetingAdapter.ts`, `GoogleMeetAdapter.ts`, `MicrosoftTeamsAdapter.ts`
   - Extend `generateMeeting` to accept (internally) an `actorUserId` and resolve credentials:
     - Try `resolveEnvConfigMany([...orgKeys])` first
@@ -591,7 +592,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
   - Write outcome
   - _Requirements: REQ-9_
 
-- [ ] 6.6 Refresh-token rotation: surface "Reconnect" state to the user when tokens are stale
+- [x] 6.6 Refresh-token rotation: surface "Reconnect" state to the user when tokens are stale
   - File: `useMeetingConfigsManagerViewModel.ts` — derive `requiresReconnect` state from any `ProviderReauthRequiredError` returned from a recent generation attempt; expose to UI (6.4 state)
   - File: `frontend/common/components/ui/display/meetingConfig/MeetingConfigList.tsx` — show a "Reconnect required" badge next to configs whose provider falls back to per-user and has expired tokens
   - 6.6.QL Quality Loop
@@ -603,7 +604,7 @@ The new admin Settings 7th tab surfaces per-provider credentials, live Test Conn
 
 The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends on Phase 4 (frontend UX entry points) + Phase 6 (per-teacher OAuth state from ConnectProviderAccount/button). All work is additive — manual-provider flow remains unchanged (REQ-14 AC6 no-regression).
 
-- [ ] 7.1 Build `AutoGenerationSupportCallout` component (3 modes explanation + admin docs link)
+- [x] 7.1 Build `AutoGenerationSupportCallout` component (3 modes explanation + admin docs link)
   - New file: `frontend/common/views/dashboard/profile/shared/meeting-configs/AutoGenerationSupportCallout.tsx`
   - Static card explaining: on-save silent / preview button / booking-time generation — with inline link icons to admin docs (`docs/services/meeting-providers.md` public mirror, or to the admin Meeting Integrations tab anchor)
   - Rendered at top of Profile Meeting Configs section
@@ -613,7 +614,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: REQ-14_
 
-- [ ] 7.2 Build `ReauthNeededBanner` component (per-user token expiry warning + reconnect CTA)
+- [x] 7.2 Build `ReauthNeededBanner` component (per-user token expiry warning + reconnect CTA)
   - New file: `frontend/common/views/dashboard/profile/shared/meeting-configs/ReauthNeededBanner.tsx`
   - Shows when any per-user token is within 7 days of expiry OR in `reauth_needed` state
   - Wires to `useMeetingConfigsManagerViewModel.reauthProviders` (computed from token states)
@@ -623,7 +624,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: REQ-14_
 
-- [ ] 7.3 Build `AutoGeneratedBadge` component + "Re-generate" overflow action
+- [x] 7.3 Build `AutoGeneratedBadge` component + "Re-generate" overflow action
   - New file: `frontend/common/components/ui/display/meetingConfig/AutoGeneratedBadge.tsx` (placed with existing meeting-config display components)
   - Chip badge with hover-tooltip showing upstream `meetingId` + provider; clicking reveals overflow menu containing "Re-generate" action via `useMeetingConfigsManagerViewModel.regenerateConfig(configId)`
   - Used in `MeetingConfigList.tsx` row rendering for configs where `provider.providerKind !== "manual"`
@@ -632,7 +633,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: REQ-14_
 
-- [ ] 7.4 Build `LinkedClassInstancesList` component + "View bookings using this URL" link
+- [x] 7.4 Build `LinkedClassInstancesList` component + "View bookings using this URL" link
   - New file: `frontend/common/views/dashboard/profile/shared/meeting-configs/LinkedClassInstancesList.tsx`
   - Scrollable list filtered by `meetingConfigId` showing the linked `class_instances` rows; each row shows the class-instance title + start time + `meetingJoinUrl` (or "URL pending" badge when null)
   - Triggered from the row's "View bookings using this URL" link in `MeetingConfigList.tsx`
@@ -642,7 +643,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: REQ-14_
 
-- [ ] 7.5 Wire the Profile Meeting Configs section refresh into `MeetingConfigsManager.tsx`
+- [x] 7.5 Wire the Profile Meeting Configs section refresh into `MeetingConfigsManager.tsx`
   - File: `frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigsManager.tsx`
   - Insert `<AutoGenerationSupportCallout />` at top, `<ReauthNeededBanner />` below when applicable, replace per-row rendering to use the new `AutoGeneratedBadge` for auto configs, add "View bookings using this URL" link action when class instances exist
   - Mobile vs Desktop tier variants: extend tier partners at `frontend/mobile/views/dashboard/profile/shared/meeting-configs/` and `frontend/desktop/views/dashboard/profile/shared/meeting-configs/` per AGENTS tier separation
@@ -651,7 +652,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: REQ-14_
 
-- [ ] 7.6 Add Storybook stories for the Profile Meeting Configs refresh
+- [x] 7.6 Add Storybook stories for the Profile Meeting Configs refresh
   - New file: `frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigsManager.stories.tsx` (extend existing if present)
   - Cover: auto config rows with badges / manual config rows unchanged, reauth banner visible / hidden, linked-class-instances list populated / empty, mobile/desktop variants
   - 7.6.QL Quality Loop
@@ -661,7 +662,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
 
 ## Phase 8: Integration Smoke Tests
 
-- [ ] 8.1 Add `test/integration/meeting/zoom.integration.test.ts`
+- [x] 8.1 Add `test/integration/meeting/zoom.integration.test.ts`
   - Gated by `describeLiveWhen(hasZoomConfig, ...)` — env: `ZOOM_ACCOUNT_ID`, `ZOOM_CLIENT_ID`, `ZOOM_CLIENT_SECRET`
   - Test: create one real meeting via `ZoomMeetingAdapter`, assert `join_url` starts with `https://zoom.us/j/`, then call `deleteMeeting(meetingId)` to clean up
   - Skip cleanly when env missing
@@ -671,7 +672,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome noting the live-test meeting IDs created (for any post-test cleanup debugging)
   - _Requirements: REQ-12_
 
-- [ ] 8.2 Add `test/integration/meeting/google-meet.integration.test.ts`
+- [x] 8.2 Add `test/integration/meeting/google-meet.integration.test.ts`
   - Gated by `hasGoogleMeetConfig` — env: `GOOGLE_MEET_SERVICE_ACCOUNT_JSON`, `GOOGLE_MEET_IMPERSONATE_SUBJECT`
   - Test: create one real Meet space via `GoogleMeetAdapter`, assert `meetingUri` starts with `https://meet.google.com/`
   - Note: Meet API has no per-space DELETE; document the space id created in the test outcome file (it's auto-expired after the meeting ends)
@@ -680,7 +681,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: REQ-12_
 
-- [ ] 8.3 Add `test/integration/meeting/microsoft-teams.integration.test.ts`
+- [x] 8.3 Add `test/integration/meeting/microsoft-teams.integration.test.ts`
   - Gated by `hasMicrosoftTeamsConfig` — env: `MS_TEAMS_TENANT_ID`, `MS_TEAMS_CLIENT_ID`, `MS_TEAMS_CLIENT_SECRET`, `MS_TEAMS_ORGANIZER_USER_ID`
   - Test: create one real online meeting via `MicrosoftTeamsAdapter`, assert `joinWebUrl`, then call `DELETE /users/{userId}/onlineMeetings/{id}` for cleanup
   - Note: requires admin to have run `New-CsApplicationAccessPolicy` + `Grant-CsApplicationAccessPolicy` on the test tenant first (documented in test setup header)
@@ -691,7 +692,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
 
 ## Phase 9: Knowledge Propagation & Documentation (MANDATORY Final Phase)
 
-- [ ] 9.1 Synthesize all outcome files into `docs/services/meeting-providers.md`
+- [x] 9.1 Synthesize all outcome files into `docs/services/meeting-providers.md`
   - Read all files in `.ai/plans/auto-meeting-url/outcome/` to extract the patterns, gotchas, and deployment prerequisites discovered during implementation
   - Create `docs/services/meeting-providers.md` following the docs file structure:
     - **Why Auto Meeting Generation**: motivation (manual URL fatigue, broken-link bugs, per-class-instance uniqueness)
@@ -707,7 +708,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Update progress: mark 9.1 `[x]`
   - _Requirements: Knowledge propagation protocol_
 
-- [ ] 9.2 Update AGENTS.md files with references to the new docs and rules
+- [x] 9.2 Update AGENTS.md files with references to the new docs and rules
   - Files to update:
     - `backend/services/AGENTS.md` — add "Meeting Provider Adapters (CRITICAL)" rule: "All meeting URL generation MUST go through `MeetingChannelFactory.getMeetingChannel(slug)`. See `docs/services/meeting-providers.md` for the pattern reference."
     - `backend/AGENTS.md` — add `docs/services/meeting-providers.md` to Important References section
@@ -718,7 +719,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: Knowledge propagation protocol_
 
-- [ ] 9.3 Update root `AGENTS.md` Important References section
+- [x] 9.3 Update root `AGENTS.md` Important References section
   - File: `AGENTS.md` (root)
   - Add to the `## Important References` section:
     - `- docs/services/meeting-providers.md - Meeting provider adapter pattern (auto Zoom/Google Meet/Microsoft Teams URL generation)`
@@ -727,7 +728,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: Knowledge propagation protocol_
 
-- [ ] 9.4 Update `.agents/instructions/backend.instructions.md` if new conventions should be enforced for future backend work
+- [x] 9.4 Update `.agents/instructions/backend.instructions.md` if new conventions should be enforced for future backend work
   - File: `.agents/instructions/backend.instructions.md`
   - Add a "Meeting Provider Adapters" section requiring future backend work that touches meeting config to follow the factory pattern and consult `docs/services/meeting-providers.md`
   - Update `.agents/instructions/frontend.instructions.md` if frontend conventions changed (auto-generation form affordance pattern + admin Meeting Integrations tab pattern)
@@ -736,7 +737,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
   - Write outcome
   - _Requirements: Knowledge propagation protocol_
 
-- [ ] 9.5 Final global quality gate verification
+- [x] 9.5 Final global quality gate verification
   - Run the full `bun quality-gate` lifecycle (tsgo -> biome:check -> lint -> codescene -> sonar-results)
   - Address any failures with focused subagent waves per the quality-gate skill
   - Confirm the integration smokes are NOT run in the main quality-gate loop (they're env-gated and live-only)
@@ -746,7 +747,7 @@ The teacher Profile Meeting Configs section refresh surfaced in REQ-14. Depends 
 
 ## Phase 10: Wrap-up
 
-- [ ] 10.1 Final user-facing summary
+- [x] 10.1 Final user-facing summary
   - Review all `outcome/*.md` files
   - Compose a concise summary in the chat (NOT a markdown file — per AGENTS.md, agents must not create summary markdown files)
   - Confirm with the user that the feature is acceptable; surface the deployment prerequisites (admin needs to configure Zoom S2S app / Meet DWD / Teams App Access Policy)

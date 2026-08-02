@@ -5,10 +5,51 @@ import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ScheduleDeletionService {
+  /**
+   * Best-effort remote meeting cleanup for a single class instance.
+   * Never throws — failures are logged and swallowed so provider API
+   * errors never fail the parent deletion operation.
+   */
+  async function cancelMeetingSafe(classInstanceId: string, context: string): Promise<void> {
+    try {
+      await MeetingConfigSnapshotService.cancelMeetingForClassInstance(classInstanceId);
+    } catch (error) {
+      logger.error(`Best-effort meeting cancel failed for class instance (${context})`, {
+        classInstanceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Dispatch `CLASS_CANCELLED` notifications for all affected users
+   * of every cleared instance, then cancel their remote meetings.
+   */
+  async function notifyAndCancelCleared(
+    preAffected: { classInstanceId: string; affected: ClassInstanceAffectedUsers | null }[]
+  ): Promise<void> {
+    const settled = await Promise.allSettled(
+      preAffected.map(async entry => {
+        await notifyClassCancelled(entry.classInstanceId, entry.affected);
+        await cancelMeetingSafe(entry.classInstanceId, "weekly clear");
+      })
+    );
+
+    for (const [i, result] of settled.entries()) {
+      if (result.status === "rejected") {
+        logger.warn("Class cancelled (weekly clear) notification+cancel failed", {
+          classInstanceId: preAffected[i]?.classInstanceId,
+          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+        });
+      }
+    }
+  }
+
   /**
    * Dispatch `CLASS_CANCELLED` to the parent + teacher + student of a
    * now-deleted class instance. The affected-user set MUST be resolved
@@ -48,6 +89,23 @@ export namespace ScheduleDeletionService {
     }
   }
 
+  async function executeDeletionTx(
+    classInstanceId: string,
+    actorUserId: string,
+    tErrors: ErrorsLabels
+  ): Promise<boolean> {
+    return db.transaction(async tx => {
+      const deleted = await SchedulingRepository.deleteRecurringClass(classInstanceId, tx);
+      if (!deleted?.deleted || !deleted.quotaDeducted) {
+        return deleted !== null;
+      }
+
+      const idempotencyKey = `credit-refund:${deleted.id}`;
+      await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
+      return true;
+    });
+  }
+
   /**
    * Deletes a specific class instance from the weekly schedule.
    * Requires: schedule.delete_class permission.
@@ -68,19 +126,11 @@ export namespace ScheduleDeletionService {
     // and return `null`.
     const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
 
-    const result = await db.transaction(async tx => {
-      const deleted = await SchedulingRepository.deleteRecurringClass(classInstanceId, tx);
-      if (!deleted?.deleted || !deleted.quotaDeducted) {
-        return deleted !== null;
-      }
-
-      const idempotencyKey = `credit-refund:${deleted.id}`;
-      await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
-      return true;
-    });
+    const result = await executeDeletionTx(classInstanceId, actorUserId, tErrors);
 
     if (result) {
       await notifyClassCancelled(classInstanceId, affected);
+      await cancelMeetingSafe(classInstanceId, "delete class");
     }
     return result;
   }
@@ -119,16 +169,7 @@ export namespace ScheduleDeletionService {
     });
 
     if (result) {
-      for (const entry of preAffected) {
-        try {
-          await notifyClassCancelled(entry.classInstanceId, entry.affected);
-        } catch (error) {
-          logger.error("Class cancelled (weekly clear) notification dispatch failed", {
-            classInstanceId: entry.classInstanceId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+      await notifyAndCancelCleared(preAffected);
     }
 
     return result;

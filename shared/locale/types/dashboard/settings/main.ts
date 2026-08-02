@@ -1,5 +1,6 @@
 import type { SettingsEnvironmentLabels } from "@/shared/locale/types/dashboard/settings/environment";
 import type { SettingsGeneralTabLabels } from "@/shared/locale/types/dashboard/settings/general";
+import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import type { SettingsSessionTabLabels } from "@/shared/locale/types/dashboard/settings/session";
 import type { SettingsSiteContentTabLabels } from "@/shared/locale/types/dashboard/settings/siteContent";
 import type { SettingsTimezonesLabels } from "@/shared/locale/types/dashboard/settings/timezones";
@@ -37,10 +38,12 @@ export interface SettingsLabels {
     readonly audit: string;
     readonly siteContent: string;
     readonly timezones: string;
+    readonly meetingIntegrations: string;
   };
   readonly audit: SettingsAuditLabels;
   readonly environment: SettingsEnvironmentLabels;
   readonly general: SettingsGeneralTabLabels;
+  readonly meetingIntegrations: SettingsMeetingIntegrationsLabels;
   readonly session: SettingsSessionTabLabels;
   readonly siteContent: SettingsSiteContentTabLabels;
   readonly timezones: SettingsTimezonesLabels;

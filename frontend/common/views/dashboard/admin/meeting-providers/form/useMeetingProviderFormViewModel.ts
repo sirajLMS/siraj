@@ -31,9 +31,11 @@ const defaultFormValues: MeetingProviderFormData = {
   urlAllowlist: [],
   urlExample: "",
   logoUrl: null,
+  supportsAutoGeneration: false,
   supportsUsername: false,
   supportsPassword: false,
   supportsTenantId: false,
+  providerKind: "manual",
   isActive: true,
 };
 
@@ -61,6 +63,13 @@ export function useMeetingProviderFormViewModel({
 
   const urlAllowlist = useWatch({ control, name: "urlAllowlist" }) ?? [];
   const urlExample = useWatch({ control, name: "urlExample" }) ?? "";
+  const providerKind = useWatch({ control, name: "providerKind" }) ?? "manual";
+
+  // Auto-set supportsAutoGeneration when providerKind changes
+  useEffect(() => {
+    const isAuto = providerKind !== "manual";
+    setValue("supportsAutoGeneration", isAuto);
+  }, [providerKind, setValue]);
 
   const isUrlExampleValid = Boolean(
     !urlExample.trim() || urlAllowlist.length === 0 || isUrlAllowedByProvider(urlExample.trim(), urlAllowlist)
@@ -86,9 +95,11 @@ export function useMeetingProviderFormViewModel({
         urlAllowlist: [...(provider.urlAllowlist ?? [])],
         urlExample: provider.urlExample ?? "",
         logoUrl: provider.logoUrl ?? null,
+        supportsAutoGeneration: Boolean(provider.fieldSchema?.supportsAutoGeneration),
         supportsUsername: Boolean(provider.fieldSchema?.supportsUsername),
         supportsPassword: Boolean(provider.fieldSchema?.supportsPassword),
         supportsTenantId: Boolean(provider.fieldSchema?.supportsTenantId),
+        providerKind: provider.providerKind ?? "manual",
         isActive: provider.isActive ?? true,
       });
     }
@@ -120,7 +131,8 @@ export function useMeetingProviderFormViewModel({
     setErrorMsg(null);
 
     const fieldSchema = {
-      requiresMeetingUrl: true,
+      requiresMeetingUrl: !values.supportsAutoGeneration,
+      supportsAutoGeneration: values.supportsAutoGeneration ?? false,
       supportsUsername: values.supportsUsername,
       supportsPassword: values.supportsPassword,
       supportsTenantId: values.supportsTenantId,
@@ -154,6 +166,7 @@ export function useMeetingProviderFormViewModel({
               urlExample: values.urlExample?.trim() || null,
               logoUrl: values.logoUrl?.trim() || null,
               fieldSchema,
+              providerKind: values.providerKind,
               isActive: values.isActive,
             },
           },
@@ -172,6 +185,7 @@ export function useMeetingProviderFormViewModel({
               urlExample: values.urlExample?.trim() || null,
               logoUrl: values.logoUrl?.trim() || null,
               fieldSchema,
+              providerKind: values.providerKind,
               isActive: values.isActive,
             },
           },

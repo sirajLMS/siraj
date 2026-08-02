@@ -60,3 +60,12 @@ Each sub-directory (except `scheduling/` and `utils/` which pre-date this refact
 3. Add `export * from "./<entity>.repository";` to the sub-directory's `index.ts`.
 4. If a new sub-directory was created, add the sub-directory re-export to the top-level `backend/db/repo/index.ts`.
 5. Wired types live in `backend/types/<subdir>/<entity>.types.ts`; wired GraphQL exposure lives in `backend/graphql/pothos/<subdir>/`.
+
+## Meeting Provider Tokens (`meeting_provider_tokens`)
+
+- **Encrypted storage (CRITICAL)**: The `meeting_provider_tokens` table uses the `encryptedText` custom Drizzle type (from `backend/db/schema/custom-types`) for both `access_token` and `refresh_token` columns. The `MeetingProviderTokenRepository` (`backend/db/repo/meeting/meeting-provider-token.repository.ts`) handles encryption/decryption transparently — never write plaintext tokens to a side table or log them.
+- **Unique constraint**: A unique index on `(userId, providerSlug)` ensures one token row per user per provider. Use `upsert` (not manual insert-or-update) to respect this constraint.
+- **Reads via `queryDb(tx)`**: Non-transactional reads (`getByUserAndProvider`, `listByUser`, `listByProvider`) use `queryDb(tx)` per the Neon HTTP Client pattern. See `docs/drizzle/neon-http-client.md`.
+- **Refresh-token rotation**: Zoom rotates refresh tokens on every exchange. After `refreshAccessToken` (`backend/services/meeting/integrations/token-refresh.ts`) succeeds, the service layer calls `upsert` with the rotated `refresh_token` value. Never assume the stored refresh token is still valid after a refresh.
+- **Scope column**: Per-user OAuth tokens carry a `scope` text column for auditing which scopes were granted at consent time. adapters compare it against the required scope set and throw `InsufficientScopesError` when missing.
+- See `docs/services/meeting-providers.md` for the complete adapter/factory pattern reference.

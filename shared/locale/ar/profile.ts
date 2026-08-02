@@ -323,6 +323,13 @@ export const profileAr: ProfileLabels = {
     saved: "تم حفظ تفضيلات الإشعارات.",
     errorLoading: "تعذر تحميل تفضيلات الإشعارات.",
     errorSaving: "تعذر حفظ تفضيلات الإشعارات.",
+    autoGeneration: {
+      title: "أوضاع التوليد التلقائي",
+      onSave: "عند الحفظ — يتم توليد رابط الاجتماع تلقائيًا عند تفعيل التوليد التلقائي",
+      preview: "معاينة — ولّد رابطًا تجريبيًا لمعرفة شكل اجتماعك",
+      booking: "الحجز — يتم توليد رابط جديد عند حجز اجتماع",
+      learnMore: "اعرف المزيد",
+    },
     channels: {
       EMAIL: "البريد الإلكتروني",
       SMS: "رسائل SMS",
@@ -350,6 +357,18 @@ export const profileAr: ProfileLabels = {
       CLASS_RESET: "إعادة ضبط الحصة",
       LESSON_REPORT_SUBMITTED: "تقديم تقرير حصة",
       LESSON_REPORT_REVIEWED: "مراجعة تقرير حصة",
+    },
+    connectAccount: {
+      connectButton: "ربط",
+      connectingLabel: "جارٍ الربط...",
+      connectedAs: email => `مرتبط باسم ${email}`,
+      disconnectButton: "إلغاء الربط",
+      disconnectConfirmTitle: "إلغاء ربط مزود الاجتماعات",
+      disconnectConfirm: "هل أنت متأكد من إلغاء ربط هذا المزود؟ ستحتاج إلى إعادة الربط لاستخدامه مرة أخرى.",
+      confirmDisconnect: "إلغاء الربط",
+      cancel: "إلغاء",
+      reconnectButton: "إعادة الربط",
+      reconnectCallout: "أعد ربط حسابك",
     },
   },
   changePassword: {

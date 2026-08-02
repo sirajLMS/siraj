@@ -47,6 +47,7 @@ import { DashboardScheduleTrackingParent } from "@/shared/locale/namespaces/dash
 import { DashboardSettingsEnvironment } from "@/shared/locale/namespaces/dashboard/settings/environment.namespace";
 import { DashboardSettingsGeneral } from "@/shared/locale/namespaces/dashboard/settings/general.namespace";
 import { DashboardSettings } from "@/shared/locale/namespaces/dashboard/settings/main.namespace";
+import { DashboardSettingsMeetingIntegrations } from "@/shared/locale/namespaces/dashboard/settings/meetingIntegrations.namespace";
 import { DashboardSettingsSession } from "@/shared/locale/namespaces/dashboard/settings/session.namespace";
 import { DashboardSettingsSiteContent } from "@/shared/locale/namespaces/dashboard/settings/siteContent.namespace";
 import { DashboardSettingsTimezones } from "@/shared/locale/namespaces/dashboard/settings/timezones.namespace";
@@ -176,6 +177,7 @@ export const Translation = {
     Settings: DashboardSettings,
     SettingsEnvironment: DashboardSettingsEnvironment,
     SettingsGeneral: DashboardSettingsGeneral,
+    SettingsMeetingIntegrations: DashboardSettingsMeetingIntegrations,
     SettingsSession: DashboardSettingsSession,
     SettingsSiteContent: DashboardSettingsSiteContent,
     SettingsTimezones: DashboardSettingsTimezones,

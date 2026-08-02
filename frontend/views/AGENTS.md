@@ -46,6 +46,13 @@
 - **State serialization**: Non-serializable values (`File`, `Blob`, `FormData`, `Promise`) must NOT be stored in `persist`-enabled Zustand stores. Use `partialize` to exclude them or keep in a `useRef` in the ViewModel hook.
 - **Cross-reference**: See `frontend/common/components/ui/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`.
 
+## Meeting Config Auto-Generation Affordance (`MeetingConfigTypeFields`)
+
+- **`MeetingConfigTypeFields`** (`frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields.tsx`) conditionally renders a "Generate URL" affordance when `provider.fieldSchema.supportsAutoGeneration === true`. The component accepts three new props: `onGenerateUrl`, `generating`, and `generationError`. View Models wire these to mutation calls against the backend adapter.
+- **Auto-generation vs manual override**: When an auto-capable provider's config comes with a user-supplied `meetingUrl` (non-empty), the service treats it as a **manual override** — no generation occurs, and the URL allowlist is enforced against the user-supplied URL. Only when `meetingUrl` is empty does the "Generate" button call the backend to produce a fresh join link via the adapter.
+- **Admin Meeting Integrations tab**: The admin "Meeting Integrations" tab (mirrors `EnvironmentConfigTab`) uses the standard `createLazyView` + `ResponsiveViewSwitch` pattern. See `frontend/common/views/dashboard/settings/tabs/meetingIntegrations/MeetingIntegrationsTab.tsx` (switcher), `useMeetingIntegrationsViewModel.ts` (view model), and `frontend/common/stores/meetingIntegrationsSettingsStore.ts` (Zustand store). Components live in `frontend/common/views/dashboard/settings/components/meetingIntegrations/` (`MeetingProviderCredentialForm`, `TestConnectionResultPanel`, `ConnectedAccountsTable`, `RevokeTokenDialog`, `MeetingIntegrationsHealthHeaders`).
+- See `docs/services/meeting-providers.md` for backend adapter/factory details.
+
 ## Storybook Best Practices
 
 - **Permission Seeding**: Components wrapped in `<RequirePermission>` will default to admin permissions in Storybook via the global `StoryWrapper`. If you need to test a specific permission state (e.g., Parent vs Teacher), use `useUserStore.setState()` within the story or a local decorator to seed the required permissions.

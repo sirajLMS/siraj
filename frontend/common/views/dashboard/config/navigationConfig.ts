@@ -118,7 +118,12 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     labelKey: "navGroupAdmin",
     iconKey: "security",
     section: "main",
-    permission: [AppPermission.PermissionGroupsManage, AppPermission.SettingsView, AppPermission.SystemBulkUpdateDst],
+    permission: [
+      AppPermission.PermissionGroupsManage,
+      AppPermission.SettingsView,
+      AppPermission.SystemBulkUpdateDst,
+      AppPermission.SettingsEditMeetingIntegrations,
+    ],
     separator: true,
   },
 ] as const;
