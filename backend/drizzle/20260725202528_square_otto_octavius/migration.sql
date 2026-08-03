@@ -178,7 +178,7 @@ DO $$ BEGIN
         CREATE TYPE "vacation_request_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
     END IF;
 END $$;--> statement-breakpoint
-CREATE TABLE "admin_audit_logs" (
+CREATE TABLE IF NOT EXISTS "admin_audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"actor_user_id" uuid NOT NULL,
 	"target_user_id" uuid,
@@ -189,7 +189,7 @@ CREATE TABLE "admin_audit_logs" (
 	"ip_address" inet,
 	"created_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "audit_logs" (
+CREATE TABLE IF NOT EXISTS "audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"actor_user_id" uuid,
 	"actor_type" varchar(50) NOT NULL,
@@ -205,7 +205,7 @@ CREATE TABLE "audit_logs" (
 	"metadata" jsonb,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "impersonation_sessions" (
+CREATE TABLE IF NOT EXISTS "impersonation_sessions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"actor_user_id" uuid NOT NULL,
 	"target_user_id" uuid NOT NULL,
@@ -217,7 +217,7 @@ CREATE TABLE "impersonation_sessions" (
 	"user_agent" text,
 	"is_active" boolean DEFAULT true NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "currency_exchange_audit_logs" (
+CREATE TABLE IF NOT EXISTS "currency_exchange_audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"from_currency" "currency_code" NOT NULL,
 	"to_currency" "currency_code" NOT NULL,
@@ -227,7 +227,7 @@ CREATE TABLE "currency_exchange_audit_logs" (
 	"changed_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "currency_exchange_rates" (
+CREATE TABLE IF NOT EXISTS "currency_exchange_rates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"from_currency" "currency_code" NOT NULL,
 	"to_currency" "currency_code" NOT NULL,
@@ -238,7 +238,7 @@ CREATE TABLE "currency_exchange_rates" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "currency_hedges" (
+CREATE TABLE IF NOT EXISTS "currency_hedges" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"currency" "currency_code" NOT NULL,
 	"amount" numeric(12,2) NOT NULL,
@@ -247,13 +247,13 @@ CREATE TABLE "currency_hedges" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "invoice_coverage_months" (
+CREATE TABLE IF NOT EXISTS "invoice_coverage_months" (
 	"invoice_id" uuid,
 	"year" smallint,
 	"month" smallint,
 	CONSTRAINT "invoice_coverage_months_pkey" PRIMARY KEY("invoice_id","year","month")
 );--> statement-breakpoint
-CREATE TABLE "invoices" (
+CREATE TABLE IF NOT EXISTS "invoices" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid NOT NULL,
 	"student_id" uuid,
@@ -274,7 +274,7 @@ CREATE TABLE "invoices" (
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "payments" (
+CREATE TABLE IF NOT EXISTS "payments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"invoice_id" uuid NOT NULL,
 	"amount" numeric(12,2) NOT NULL,
@@ -292,7 +292,7 @@ CREATE TABLE "payments" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "credit_transactions" (
+CREATE TABLE IF NOT EXISTS "credit_transactions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
 	"change_amount" integer NOT NULL,
@@ -305,7 +305,7 @@ CREATE TABLE "credit_transactions" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "supported_currencies" (
+CREATE TABLE IF NOT EXISTS "supported_currencies" (
 	"code" "currency_code" PRIMARY KEY,
 	"symbol" varchar(16) NOT NULL,
 	"country_code" "country_code",
@@ -315,7 +315,7 @@ CREATE TABLE "supported_currencies" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "fx_sync_runs" (
+CREATE TABLE IF NOT EXISTS "fx_sync_runs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"provider" "fx_provider" NOT NULL,
 	"status" "fx_sync_status" NOT NULL,
@@ -330,7 +330,7 @@ CREATE TABLE "fx_sync_runs" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "invoice_payment_submissions" (
+CREATE TABLE IF NOT EXISTS "invoice_payment_submissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"invoice_id" uuid NOT NULL,
 	"file_id" uuid NOT NULL,
@@ -343,7 +343,7 @@ CREATE TABLE "invoice_payment_submissions" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "supported_mobile_wallets" (
+CREATE TABLE IF NOT EXISTS "supported_mobile_wallets" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
 	"name" jsonb NOT NULL,
@@ -358,7 +358,7 @@ CREATE TABLE "supported_mobile_wallets" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "supported_online_accounts" (
+CREATE TABLE IF NOT EXISTS "supported_online_accounts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
 	"name" jsonb NOT NULL,
@@ -372,7 +372,7 @@ CREATE TABLE "supported_online_accounts" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "supported_payment_links" (
+CREATE TABLE IF NOT EXISTS "supported_payment_links" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
 	"name" jsonb NOT NULL,
@@ -386,7 +386,7 @@ CREATE TABLE "supported_payment_links" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "user_payment_methods" (
+CREATE TABLE IF NOT EXISTS "user_payment_methods" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
 	"type" "payment_method_type" NOT NULL,
@@ -399,14 +399,14 @@ CREATE TABLE "user_payment_methods" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "books" (
+CREATE TABLE IF NOT EXISTS "books" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" varchar(255) NOT NULL,
 	"availability_status" "availability_status" NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "class_categories" (
+CREATE TABLE IF NOT EXISTS "class_categories" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" varchar(200) NOT NULL,
 	"slug" varchar(100) NOT NULL UNIQUE,
@@ -417,7 +417,7 @@ CREATE TABLE "class_categories" (
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "class_subjects" (
+CREATE TABLE IF NOT EXISTS "class_subjects" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"category_id" uuid NOT NULL,
 	"name" varchar(200) NOT NULL,
@@ -430,7 +430,7 @@ CREATE TABLE "class_subjects" (
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "class_communications" (
+CREATE TABLE IF NOT EXISTS "class_communications" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"group_class_id" uuid NOT NULL,
 	"type" varchar(20) NOT NULL,
@@ -443,7 +443,7 @@ CREATE TABLE "class_communications" (
 	"timestamp" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "group_class_enrollments" (
+CREATE TABLE IF NOT EXISTS "group_class_enrollments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"group_class_id" uuid NOT NULL,
 	"student_id" uuid NOT NULL,
@@ -452,7 +452,7 @@ CREATE TABLE "group_class_enrollments" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "group_classes" (
+CREATE TABLE IF NOT EXISTS "group_classes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL,
 	"course_name" varchar(255) NOT NULL,
@@ -467,7 +467,7 @@ CREATE TABLE "group_classes" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "lesson_reports" (
+CREATE TABLE IF NOT EXISTS "lesson_reports" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL,
 	"student_id" uuid NOT NULL,
@@ -490,7 +490,7 @@ CREATE TABLE "lesson_reports" (
 	CONSTRAINT "lesson_reports_completion_percentage_chk" CHECK ("completion_percentage" >= 0 AND "completion_percentage" <= 100),
 	CONSTRAINT "lesson_reports_review_consistency_chk" CHECK (("status" != 'REJECTED' OR "rejection_reason" IS NOT NULL) AND ("status" != 'APPROVED' OR "rejection_reason" IS NULL))
 );--> statement-breakpoint
-CREATE TABLE "class_instance_performance" (
+CREATE TABLE IF NOT EXISTS "class_instance_performance" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL UNIQUE,
 	"engagement_score" integer,
@@ -507,7 +507,7 @@ CREATE TABLE "class_instance_performance" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "class_instances" (
+CREATE TABLE IF NOT EXISTS "class_instances" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
 	"teacher_id" uuid NOT NULL,
@@ -557,7 +557,7 @@ CREATE TABLE "class_instances" (
 	CONSTRAINT "class_instances_rescheduled_no_quota_chk" CHECK ("is_rescheduled" = false OR "quota_deducted" = false),
 	CONSTRAINT "class_instances_rescheduled_no_complete_chk" CHECK ("is_rescheduled" = false OR ("execution_state" != 'COMPLETED' OR "outcome" != 'TAKEN'))
 );--> statement-breakpoint
-CREATE TABLE "class_status_events" (
+CREATE TABLE IF NOT EXISTS "class_status_events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL,
 	"event_type" varchar(50) NOT NULL,
@@ -567,21 +567,21 @@ CREATE TABLE "class_status_events" (
 	"actor_user_id" uuid,
 	"created_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "dst_migration_entries" (
+CREATE TABLE IF NOT EXISTS "dst_migration_entries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"run_id" uuid NOT NULL,
 	"recurring_schedule_id" uuid NOT NULL,
 	"result" "dst_migration_result" NOT NULL,
 	"conflict_detail" text
 );--> statement-breakpoint
-CREATE TABLE "dst_migration_runs" (
+CREATE TABLE IF NOT EXISTS "dst_migration_runs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"run_by_user_id" uuid NOT NULL,
 	"offset_minutes" integer NOT NULL,
 	"description" varchar(255),
 	"created_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "leave_quota_usage" (
+CREATE TABLE IF NOT EXISTS "leave_quota_usage" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid,
 	"student_id" uuid,
@@ -590,7 +590,7 @@ CREATE TABLE "leave_quota_usage" (
 	"used_count" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "leave_quota_usage_teacher_student_xor_chk" CHECK (("teacher_id" IS NOT NULL AND "student_id" IS NULL) OR ("teacher_id" IS NULL AND "student_id" IS NOT NULL))
 );--> statement-breakpoint
-CREATE TABLE "leave_requests" (
+CREATE TABLE IF NOT EXISTS "leave_requests" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL,
 	"requested_by_user_id" uuid NOT NULL,
@@ -601,14 +601,14 @@ CREATE TABLE "leave_requests" (
 	"processed_at" timestamp(3) with time zone,
 	"processed_by_user_id" uuid
 );--> statement-breakpoint
-CREATE TABLE "recurring_schedule_days" (
+CREATE TABLE IF NOT EXISTS "recurring_schedule_days" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"recurring_schedule_id" uuid NOT NULL,
 	"day_of_week" "day_of_week" NOT NULL,
 	"start_time" time NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "recurring_schedules" (
+CREATE TABLE IF NOT EXISTS "recurring_schedules" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
 	"teacher_id" uuid NOT NULL,
@@ -626,7 +626,7 @@ CREATE TABLE "recurring_schedules" (
 	"deleted_at" timestamp(3) with time zone,
 	CONSTRAINT "recurring_schedules_timezone_chk" CHECK (is_valid_timezone("timezone"))
 );--> statement-breakpoint
-CREATE TABLE "subject_resources" (
+CREATE TABLE IF NOT EXISTS "subject_resources" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"subject_id" uuid NOT NULL,
 	"learning_resource_id" uuid NOT NULL,
@@ -634,7 +634,7 @@ CREATE TABLE "subject_resources" (
 	"sort_order" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "complaint_responses" (
+CREATE TABLE IF NOT EXISTS "complaint_responses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"complaint_id" uuid NOT NULL,
 	"responder_user_id" uuid,
@@ -642,7 +642,7 @@ CREATE TABLE "complaint_responses" (
 	"email_sent" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "complaints" (
+CREATE TABLE IF NOT EXISTS "complaints" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid NOT NULL,
 	"student_id" uuid,
@@ -654,7 +654,7 @@ CREATE TABLE "complaints" (
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "learning_resources" (
+CREATE TABLE IF NOT EXISTS "learning_resources" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"display_name" varchar(255) NOT NULL,
 	"file_path" varchar(1024) NOT NULL,
@@ -662,7 +662,7 @@ CREATE TABLE "learning_resources" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "notification_deliveries" (
+CREATE TABLE IF NOT EXISTS "notification_deliveries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
 	"device_token_id" uuid,
@@ -682,7 +682,7 @@ CREATE TABLE "notification_deliveries" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "suggestions" (
+CREATE TABLE IF NOT EXISTS "suggestions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid NOT NULL,
 	"submitter_name" varchar(255) NOT NULL,
@@ -696,7 +696,7 @@ CREATE TABLE "suggestions" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"deleted_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "user_device_tokens" (
+CREATE TABLE IF NOT EXISTS "user_device_tokens" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
 	"token" varchar(512) NOT NULL,
@@ -707,7 +707,7 @@ CREATE TABLE "user_device_tokens" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "user_notification_preferences" (
+CREATE TABLE IF NOT EXISTS "user_notification_preferences" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
 	"channel" "notification_channel" NOT NULL,
@@ -716,7 +716,7 @@ CREATE TABLE "user_notification_preferences" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "class_meeting_configs" (
+CREATE TABLE IF NOT EXISTS "class_meeting_configs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid,
 	"recurring_schedule_id" uuid,
@@ -732,7 +732,7 @@ CREATE TABLE "class_meeting_configs" (
         OR ("class_instance_id" IS NULL AND "recurring_schedule_id" IS NOT NULL)
       ))
 );--> statement-breakpoint
-CREATE TABLE "meeting_providers" (
+CREATE TABLE IF NOT EXISTS "meeting_providers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
 	"name" jsonb NOT NULL,
@@ -746,7 +746,7 @@ CREATE TABLE "meeting_providers" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "user_meeting_configs" (
+CREATE TABLE IF NOT EXISTS "user_meeting_configs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
 	"provider_id" uuid NOT NULL,
@@ -757,7 +757,7 @@ CREATE TABLE "user_meeting_configs" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "parents" (
+CREATE TABLE IF NOT EXISTS "parents" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
 	"status" "parent_status" NOT NULL,
@@ -772,12 +772,12 @@ CREATE TABLE "parents" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "group_permissions" (
+CREATE TABLE IF NOT EXISTS "group_permissions" (
 	"group_id" uuid,
 	"permission_id" uuid,
 	CONSTRAINT "group_permissions_pkey" PRIMARY KEY("group_id","permission_id")
 );--> statement-breakpoint
-CREATE TABLE "permission_groups" (
+CREATE TABLE IF NOT EXISTS "permission_groups" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" jsonb NOT NULL,
 	"description" jsonb,
@@ -787,7 +787,7 @@ CREATE TABLE "permission_groups" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "permissions" (
+CREATE TABLE IF NOT EXISTS "permissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"key" "app_permission" NOT NULL UNIQUE,
 	"resource" varchar(100) NOT NULL,
@@ -796,14 +796,14 @@ CREATE TABLE "permissions" (
 	"category" jsonb NOT NULL,
 	"is_system" boolean DEFAULT false NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "user_permission_groups" (
+CREATE TABLE IF NOT EXISTS "user_permission_groups" (
 	"user_id" uuid,
 	"group_id" uuid,
 	"assigned_at" timestamp(3) with time zone NOT NULL,
 	"assigned_by_user_id" uuid,
 	CONSTRAINT "user_permission_groups_pkey" PRIMARY KEY("user_id","group_id")
 );--> statement-breakpoint
-CREATE TABLE "user_permission_overrides" (
+CREATE TABLE IF NOT EXISTS "user_permission_overrides" (
 	"user_id" uuid,
 	"permission_id" uuid,
 	"state" varchar(20) NOT NULL,
@@ -811,17 +811,17 @@ CREATE TABLE "user_permission_overrides" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "user_permission_overrides_pkey" PRIMARY KEY("user_id","permission_id")
 );--> statement-breakpoint
-CREATE TABLE "rate_limit_cache" (
+CREATE TABLE IF NOT EXISTS "rate_limit_cache" (
 	"key" text PRIMARY KEY,
 	"value" text NOT NULL,
 	"expires_at" timestamp with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "session_cache" (
+CREATE TABLE IF NOT EXISTS "session_cache" (
 	"key" text PRIMARY KEY,
 	"value" text NOT NULL,
 	"expires_at" timestamp with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "system_settings" (
+CREATE TABLE IF NOT EXISTS "system_settings" (
 	"key" varchar(100) PRIMARY KEY,
 	"value" text NOT NULL,
 	"data_type" varchar(20) DEFAULT 'string' NOT NULL,
@@ -830,13 +830,13 @@ CREATE TABLE "system_settings" (
 	"updated_by_user_id" uuid,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "timezones" (
+CREATE TABLE IF NOT EXISTS "timezones" (
 	"id" serial PRIMARY KEY,
 	"iana_id" varchar(100) NOT NULL UNIQUE,
 	"base_offset_minutes" integer NOT NULL,
 	"is_dst_supported" boolean DEFAULT true NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "site_content" (
+CREATE TABLE IF NOT EXISTS "site_content" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"slug" varchar(100) NOT NULL UNIQUE,
 	"title" varchar(255) NOT NULL,
@@ -847,49 +847,49 @@ CREATE TABLE "site_content" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "class_instance_files" (
+CREATE TABLE IF NOT EXISTS "class_instance_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"class_instance_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "complaint_files" (
+CREATE TABLE IF NOT EXISTS "complaint_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"complaint_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "invoice_files" (
+CREATE TABLE IF NOT EXISTS "invoice_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"invoice_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "learning_resource_files" (
+CREATE TABLE IF NOT EXISTS "learning_resource_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"learning_resource_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "parent_files" (
+CREATE TABLE IF NOT EXISTS "parent_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"parent_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "recurring_schedule_files" (
+CREATE TABLE IF NOT EXISTS "recurring_schedule_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"recurring_schedule_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "signed_url" (
+CREATE TABLE IF NOT EXISTS "signed_url" (
 	"id" varchar(64) PRIMARY KEY,
 	"file_path" varchar(1024) NOT NULL,
 	"content_type" varchar(255) NOT NULL,
@@ -899,14 +899,14 @@ CREATE TABLE "signed_url" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"used" boolean DEFAULT false NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "staff_profile_files" (
+CREATE TABLE IF NOT EXISTS "staff_profile_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"staff_profile_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "storage_directory" (
+CREATE TABLE IF NOT EXISTS "storage_directory" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"path" varchar(1024) NOT NULL UNIQUE,
 	"allow_uploads" boolean DEFAULT true NOT NULL,
@@ -918,33 +918,33 @@ CREATE TABLE "storage_directory" (
 	"is_protected" boolean DEFAULT false NOT NULL,
 	"protect_children" boolean DEFAULT false NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "storage_file" (
+CREATE TABLE IF NOT EXISTS "storage_file" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"path" text NOT NULL UNIQUE,
 	"is_protected" boolean DEFAULT false NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "student_files" (
+CREATE TABLE IF NOT EXISTS "student_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"student_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "teacher_files" (
+CREATE TABLE IF NOT EXISTS "teacher_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"teacher_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "user_files" (
+CREATE TABLE IF NOT EXISTS "user_files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"file_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
 	"usage_type" varchar(100) NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "student_progress" (
+CREATE TABLE IF NOT EXISTS "student_progress" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
 	"class_instance_id" uuid NOT NULL,
@@ -956,7 +956,7 @@ CREATE TABLE "student_progress" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "student_status_history" (
+CREATE TABLE IF NOT EXISTS "student_status_history" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
 	"old_status" "student_status",
@@ -964,7 +964,7 @@ CREATE TABLE "student_status_history" (
 	"changed_by_user_id" uuid,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "students" (
+CREATE TABLE IF NOT EXISTS "students" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid,
 	"user_id" uuid NOT NULL,
@@ -987,7 +987,7 @@ CREATE TABLE "students" (
 	CONSTRAINT "students_classes_total_chk" CHECK ("classes_total" >= 0),
 	CONSTRAINT "students_timezone_override_chk" CHECK ("timezone_override" IS NULL OR is_valid_timezone("timezone_override"))
 );--> statement-breakpoint
-CREATE TABLE "teacher_assignments" (
+CREATE TABLE IF NOT EXISTS "teacher_assignments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
 	"teacher_id" uuid NOT NULL,
@@ -995,7 +995,7 @@ CREATE TABLE "teacher_assignments" (
 	"assigned_by_user_id" uuid,
 	"ended_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "staff_profiles" (
+CREATE TABLE IF NOT EXISTS "staff_profiles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
 	"hourly_rate" numeric(12,2),
@@ -1003,7 +1003,7 @@ CREATE TABLE "staff_profiles" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "teacher_availability_windows" (
+CREATE TABLE IF NOT EXISTS "teacher_availability_windows" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
 	"day_of_week" "day_of_week" NOT NULL,
@@ -1017,7 +1017,7 @@ CREATE TABLE "teacher_availability_windows" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "teacher_recurring_unavailability" (
+CREATE TABLE IF NOT EXISTS "teacher_recurring_unavailability" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
 	"day_of_week" "day_of_week" NOT NULL,
@@ -1032,7 +1032,7 @@ CREATE TABLE "teacher_recurring_unavailability" (
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	"reason" text
 );--> statement-breakpoint
-CREATE TABLE "teacher_vacation_requests" (
+CREATE TABLE IF NOT EXISTS "teacher_vacation_requests" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
 	"requested_by_user_id" uuid NOT NULL,
@@ -1048,7 +1048,7 @@ CREATE TABLE "teacher_vacation_requests" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "teacher_dues" (
+CREATE TABLE IF NOT EXISTS "teacher_dues" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
 	"class_instance_id" uuid NOT NULL,
@@ -1063,7 +1063,7 @@ CREATE TABLE "teacher_dues" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "teacher_important_notes" (
+CREATE TABLE IF NOT EXISTS "teacher_important_notes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid,
 	"title" varchar(300) NOT NULL,
@@ -1077,7 +1077,7 @@ CREATE TABLE "teacher_important_notes" (
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp(3) with time zone
 );--> statement-breakpoint
-CREATE TABLE "teacher_payments" (
+CREATE TABLE IF NOT EXISTS "teacher_payments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
 	"user_payment_method_id" uuid,
@@ -1090,7 +1090,7 @@ CREATE TABLE "teacher_payments" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "teachers" (
+CREATE TABLE IF NOT EXISTS "teachers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
 	"nationality" "country_code",
@@ -1106,7 +1106,7 @@ CREATE TABLE "teachers" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "auth_rate_limits" (
+CREATE TABLE IF NOT EXISTS "auth_rate_limits" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"ip_address" inet,
 	"email" varchar(255),
@@ -1115,14 +1115,14 @@ CREATE TABLE "auth_rate_limits" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "password_reset_tokens" (
+CREATE TABLE IF NOT EXISTS "password_reset_tokens" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"email" varchar(255) NOT NULL,
 	"hashed_token" varchar(255) NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"expires_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "session_config" (
+CREATE TABLE IF NOT EXISTS "session_config" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"role_name" varchar(100) NOT NULL UNIQUE,
 	"ttl_seconds" integer DEFAULT 604800 NOT NULL,
@@ -1130,7 +1130,7 @@ CREATE TABLE "session_config" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "session_metadata" (
+CREATE TABLE IF NOT EXISTS "session_metadata" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"session_id" varchar(255) NOT NULL UNIQUE,
 	"user_id" uuid NOT NULL,
@@ -1142,7 +1142,7 @@ CREATE TABLE "session_metadata" (
 	"last_activity_at" timestamp(3) with time zone NOT NULL,
 	"expires_at" timestamp(3) with time zone NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "sessions" (
+CREATE TABLE IF NOT EXISTS "sessions" (
 	"hashed_id" varchar(255) PRIMARY KEY,
 	"user_id" uuid,
 	"ip_address" inet,
@@ -1150,7 +1150,7 @@ CREATE TABLE "sessions" (
 	"payload" text NOT NULL,
 	"last_activity" bigint NOT NULL
 );--> statement-breakpoint
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL UNIQUE,
@@ -1170,202 +1170,202 @@ CREATE TABLE "users" (
 	"deleted_at" timestamp(3) with time zone,
 	CONSTRAINT "users_timezone_chk" CHECK (is_valid_timezone("timezone"))
 );--> statement-breakpoint
-CREATE INDEX "admin_audit_logs_actor_idx" ON "admin_audit_logs" ("actor_user_id");--> statement-breakpoint
-CREATE INDEX "admin_audit_logs_target_idx" ON "admin_audit_logs" ("target_user_id");--> statement-breakpoint
-CREATE INDEX "admin_audit_logs_action_idx" ON "admin_audit_logs" ("action");--> statement-breakpoint
-CREATE INDEX "audit_logs_actor_user_id_idx" ON "audit_logs" ("actor_user_id");--> statement-breakpoint
-CREATE INDEX "audit_logs_entity_type_idx" ON "audit_logs" ("entity_type");--> statement-breakpoint
-CREATE INDEX "audit_logs_entity_id_idx" ON "audit_logs" ("entity_id");--> statement-breakpoint
-CREATE INDEX "audit_logs_entity_type_id_idx" ON "audit_logs" ("entity_type","entity_id");--> statement-breakpoint
-CREATE INDEX "audit_logs_action_idx" ON "audit_logs" ("action");--> statement-breakpoint
-CREATE INDEX "audit_logs_created_at_idx" ON "audit_logs" ("created_at");--> statement-breakpoint
-CREATE INDEX "audit_logs_actor_type_idx" ON "audit_logs" ("actor_type");--> statement-breakpoint
-CREATE INDEX "impersonation_sessions_actor_idx" ON "impersonation_sessions" ("actor_user_id");--> statement-breakpoint
-CREATE INDEX "impersonation_sessions_target_idx" ON "impersonation_sessions" ("target_user_id");--> statement-breakpoint
-CREATE INDEX "impersonation_sessions_session_idx" ON "impersonation_sessions" ("session_id");--> statement-breakpoint
-CREATE INDEX "impersonation_sessions_active_actor_idx" ON "impersonation_sessions" ("actor_user_id","is_active");--> statement-breakpoint
-CREATE UNIQUE INDEX "impersonation_sessions_one_active_per_actor" ON "impersonation_sessions" ("actor_user_id") WHERE "is_active" = true;--> statement-breakpoint
-CREATE INDEX "currency_exchange_audit_from_to_idx" ON "currency_exchange_audit_logs" ("from_currency","to_currency");--> statement-breakpoint
-CREATE INDEX "currency_exchange_rates_from_to_idx" ON "currency_exchange_rates" ("from_currency","to_currency");--> statement-breakpoint
-CREATE UNIQUE INDEX "currency_exchange_rates_effective_unique_idx" ON "currency_exchange_rates" ("from_currency","to_currency","effective_date");--> statement-breakpoint
-CREATE INDEX "currency_hedges_currency_idx" ON "currency_hedges" ("currency");--> statement-breakpoint
-CREATE INDEX "invoices_parent_id_idx" ON "invoices" ("parent_id");--> statement-breakpoint
-CREATE INDEX "invoices_student_id_idx" ON "invoices" ("student_id");--> statement-breakpoint
-CREATE INDEX "invoices_status_due_date_idx" ON "invoices" ("status","due_date");--> statement-breakpoint
-CREATE UNIQUE INDEX "invoices_idempotency_key_unique_idx" ON "invoices" ("idempotency_key");--> statement-breakpoint
-CREATE INDEX "payments_invoice_id_idx" ON "payments" ("invoice_id");--> statement-breakpoint
-CREATE INDEX "payments_transaction_id_idx" ON "payments" ("transaction_id");--> statement-breakpoint
-CREATE INDEX "payments_user_payment_method_id_idx" ON "payments" ("user_payment_method_id");--> statement-breakpoint
-CREATE INDEX "payments_payment_method_type_idx" ON "payments" ("payment_method_type");--> statement-breakpoint
-CREATE UNIQUE INDEX "payments_idempotency_key_unique_idx" ON "payments" ("idempotency_key");--> statement-breakpoint
-CREATE UNIQUE INDEX "credit_transactions_idempotency_key_unique_idx" ON "credit_transactions" ("idempotency_key");--> statement-breakpoint
-CREATE INDEX "credit_transactions_student_id_idx" ON "credit_transactions" ("student_id");--> statement-breakpoint
-CREATE INDEX "credit_transactions_reason_idx" ON "credit_transactions" ("reason");--> statement-breakpoint
-CREATE INDEX "credit_transactions_class_instance_id_idx" ON "credit_transactions" ("class_instance_id");--> statement-breakpoint
-CREATE INDEX "supported_currencies_is_active_idx" ON "supported_currencies" ("is_active");--> statement-breakpoint
-CREATE INDEX "fx_sync_runs_status_idx" ON "fx_sync_runs" ("status");--> statement-breakpoint
-CREATE INDEX "fx_sync_runs_provider_started_idx" ON "fx_sync_runs" ("provider","started_at");--> statement-breakpoint
-CREATE INDEX "fx_sync_runs_triggered_by_idx" ON "fx_sync_runs" ("triggered_by_user_id");--> statement-breakpoint
-CREATE INDEX "invoice_payment_submissions_invoice_id_idx" ON "invoice_payment_submissions" ("invoice_id");--> statement-breakpoint
-CREATE INDEX "invoice_payment_submissions_status_idx" ON "invoice_payment_submissions" ("status");--> statement-breakpoint
-CREATE INDEX "invoice_payment_submissions_file_id_idx" ON "invoice_payment_submissions" ("file_id");--> statement-breakpoint
-CREATE INDEX "supported_mobile_wallets_country_code_idx" ON "supported_mobile_wallets" ("country_code");--> statement-breakpoint
-CREATE INDEX "supported_mobile_wallets_is_active_idx" ON "supported_mobile_wallets" ("is_active");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_user_id_idx" ON "user_payment_methods" ("user_id");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_type_idx" ON "user_payment_methods" ("type");--> statement-breakpoint
-CREATE UNIQUE INDEX "user_payment_methods_payin_default_idx" ON "user_payment_methods" ("user_id") WHERE "is_default" = true AND "direction" IN ('PAYIN', 'BOTH');--> statement-breakpoint
-CREATE UNIQUE INDEX "user_payment_methods_payout_default_idx" ON "user_payment_methods" ("user_id") WHERE "is_default" = true AND "direction" IN ('PAYOUT', 'BOTH');--> statement-breakpoint
-CREATE INDEX "books_deleted_at_idx" ON "books" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "class_categories_slug_idx" ON "class_categories" ("slug");--> statement-breakpoint
-CREATE INDEX "class_subjects_category_id_idx" ON "class_subjects" ("category_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "class_subjects_slug_idx" ON "class_subjects" ("slug");--> statement-breakpoint
-CREATE INDEX "class_communications_group_class_id_idx" ON "class_communications" ("group_class_id");--> statement-breakpoint
-CREATE INDEX "class_communications_type_idx" ON "class_communications" ("type");--> statement-breakpoint
-CREATE UNIQUE INDEX "group_class_enrollments_unique_idx" ON "group_class_enrollments" ("group_class_id","student_id");--> statement-breakpoint
-CREATE INDEX "group_class_enrollments_group_class_id_idx" ON "group_class_enrollments" ("group_class_id");--> statement-breakpoint
-CREATE INDEX "group_class_enrollments_student_id_idx" ON "group_class_enrollments" ("student_id");--> statement-breakpoint
-CREATE INDEX "group_classes_class_instance_id_idx" ON "group_classes" ("class_instance_id");--> statement-breakpoint
-CREATE INDEX "group_classes_status_idx" ON "group_classes" ("status");--> statement-breakpoint
-CREATE UNIQUE INDEX "lesson_reports_class_instance_id_unique_idx" ON "lesson_reports" ("class_instance_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "lesson_reports_idempotency_key_unique_idx" ON "lesson_reports" ("idempotency_key");--> statement-breakpoint
-CREATE INDEX "lesson_reports_status_idx" ON "lesson_reports" ("status");--> statement-breakpoint
-CREATE INDEX "lesson_reports_teacher_id_idx" ON "lesson_reports" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "lesson_reports_student_id_idx" ON "lesson_reports" ("student_id");--> statement-breakpoint
-CREATE INDEX "class_instances_scheduled_start_at_idx" ON "class_instances" ("scheduled_start_at");--> statement-breakpoint
-CREATE INDEX "class_instances_teacher_scheduled_idx" ON "class_instances" ("teacher_id","scheduled_start_at");--> statement-breakpoint
-CREATE INDEX "class_instances_student_scheduled_idx" ON "class_instances" ("student_id","scheduled_start_at");--> statement-breakpoint
-CREATE INDEX "class_instances_original_class_id_idx" ON "class_instances" ("original_class_id");--> statement-breakpoint
-CREATE INDEX "class_instances_subject_id_idx" ON "class_instances" ("subject_id");--> statement-breakpoint
-CREATE INDEX "class_instances_class_type_idx" ON "class_instances" ("class_type");--> statement-breakpoint
-CREATE INDEX "class_instances_outcome_idx" ON "class_instances" ("outcome");--> statement-breakpoint
-CREATE UNIQUE INDEX "class_instances_idempotency_key_unique_idx" ON "class_instances" ("idempotency_key");--> statement-breakpoint
-CREATE INDEX "class_instances_execution_state_idx" ON "class_instances" ("execution_state");--> statement-breakpoint
-CREATE INDEX "class_instances_frozen_idx" ON "class_instances" ("is_frozen") WHERE "is_frozen" = true;--> statement-breakpoint
-CREATE INDEX "class_instances_rescheduled_idx" ON "class_instances" ("is_rescheduled") WHERE "is_rescheduled" = true;--> statement-breakpoint
-CREATE UNIQUE INDEX "class_instances_original_class_uniq_idx" ON "class_instances" ("original_class_id") WHERE "original_class_id" IS NOT NULL AND "deleted_at" IS NULL;--> statement-breakpoint
-CREATE INDEX "class_status_events_class_instance_id_idx" ON "class_status_events" ("class_instance_id");--> statement-breakpoint
-CREATE INDEX "class_status_events_instance_created_idx" ON "class_status_events" ("class_instance_id","created_at");--> statement-breakpoint
-CREATE INDEX "dst_migration_entries_run_id_idx" ON "dst_migration_entries" ("run_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "leave_quota_teacher_period_idx" ON "leave_quota_usage" ("teacher_id","period_year","period_month") WHERE "teacher_id" IS NOT NULL;--> statement-breakpoint
-CREATE UNIQUE INDEX "leave_quota_student_period_idx" ON "leave_quota_usage" ("student_id","period_year","period_month") WHERE "student_id" IS NOT NULL;--> statement-breakpoint
-CREATE INDEX "leave_requests_class_instance_id_idx" ON "leave_requests" ("class_instance_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "recurring_schedule_days_schedule_day_idx" ON "recurring_schedule_days" ("recurring_schedule_id","day_of_week");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_student_id_idx" ON "recurring_schedules" ("student_id");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_teacher_id_idx" ON "recurring_schedules" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_timezone_id_idx" ON "recurring_schedules" ("timezone_id");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_subject_id_idx" ON "recurring_schedules" ("subject_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "subject_resources_subject_id_learning_resource_id_idx" ON "subject_resources" ("subject_id","learning_resource_id");--> statement-breakpoint
-CREATE INDEX "complaint_responses_complaint_id_idx" ON "complaint_responses" ("complaint_id");--> statement-breakpoint
-CREATE INDEX "complaints_status_idx" ON "complaints" ("status");--> statement-breakpoint
-CREATE INDEX "complaints_parent_id_idx" ON "complaints" ("parent_id");--> statement-breakpoint
-CREATE INDEX "learning_resources_deleted_at_idx" ON "learning_resources" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_user_id_idx" ON "notification_deliveries" ("user_id");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_status_idx" ON "notification_deliveries" ("status");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_event_type_idx" ON "notification_deliveries" ("event_type");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_channel_idx" ON "notification_deliveries" ("channel");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_created_at_idx" ON "notification_deliveries" ("created_at");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_provider_message_id_idx" ON "notification_deliveries" ("provider_message_id");--> statement-breakpoint
-CREATE INDEX "suggestions_parent_id_idx" ON "suggestions" ("parent_id");--> statement-breakpoint
-CREATE INDEX "suggestions_status_idx" ON "suggestions" ("status");--> statement-breakpoint
-CREATE INDEX "suggestions_duplicate_of_id_idx" ON "suggestions" ("duplicate_of_id");--> statement-breakpoint
-CREATE INDEX "suggestions_reviewed_by_user_id_idx" ON "suggestions" ("reviewed_by_user_id");--> statement-breakpoint
-CREATE INDEX "suggestions_deleted_at_idx" ON "suggestions" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "suggestions_active_created_at_idx" ON "suggestions" ("created_at") WHERE "deleted_at" IS NULL;--> statement-breakpoint
-CREATE INDEX "user_device_tokens_user_id_idx" ON "user_device_tokens" ("user_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "user_device_tokens_token_unique_idx" ON "user_device_tokens" ("token");--> statement-breakpoint
-CREATE INDEX "user_notification_preferences_user_id_idx" ON "user_notification_preferences" ("user_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "user_notification_preferences_unique_idx" ON "user_notification_preferences" ("user_id","channel","event_type");--> statement-breakpoint
-CREATE INDEX "class_meeting_configs_class_instance_id_idx" ON "class_meeting_configs" ("class_instance_id");--> statement-breakpoint
-CREATE INDEX "class_meeting_configs_recurring_schedule_id_idx" ON "class_meeting_configs" ("recurring_schedule_id");--> statement-breakpoint
-CREATE INDEX "class_meeting_configs_provider_id_idx" ON "class_meeting_configs" ("provider_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "class_meeting_configs_one_default_per_instance_idx" ON "class_meeting_configs" ("class_instance_id") WHERE "is_default" = true AND "class_instance_id" IS NOT NULL;--> statement-breakpoint
-CREATE UNIQUE INDEX "class_meeting_configs_one_default_per_recurring_idx" ON "class_meeting_configs" ("recurring_schedule_id") WHERE "is_default" = true AND "recurring_schedule_id" IS NOT NULL;--> statement-breakpoint
-CREATE INDEX "meeting_providers_is_active_idx" ON "meeting_providers" ("is_active");--> statement-breakpoint
-CREATE INDEX "user_meeting_configs_user_id_idx" ON "user_meeting_configs" ("user_id");--> statement-breakpoint
-CREATE INDEX "user_meeting_configs_provider_id_idx" ON "user_meeting_configs" ("provider_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "user_meeting_configs_one_default_per_user_idx" ON "user_meeting_configs" ("user_id") WHERE "is_default" = true;--> statement-breakpoint
-CREATE INDEX "parents_user_id_idx" ON "parents" ("user_id");--> statement-breakpoint
-CREATE INDEX "parents_status_idx" ON "parents" ("status");--> statement-breakpoint
-CREATE INDEX "group_permissions_group_id_idx" ON "group_permissions" ("group_id");--> statement-breakpoint
-CREATE INDEX "permissions_key_idx" ON "permissions" ("key");--> statement-breakpoint
-CREATE INDEX "user_permission_groups_user_id_idx" ON "user_permission_groups" ("user_id");--> statement-breakpoint
-CREATE INDEX "user_permission_overrides_user_id_idx" ON "user_permission_overrides" ("user_id");--> statement-breakpoint
-CREATE INDEX "rate_limit_cache_expires_at_idx" ON "rate_limit_cache" ("expires_at");--> statement-breakpoint
-CREATE INDEX "session_cache_expires_at_idx" ON "session_cache" ("expires_at");--> statement-breakpoint
-CREATE INDEX "system_settings_category_idx" ON "system_settings" ("category");--> statement-breakpoint
-CREATE INDEX "site_content_slug_idx" ON "site_content" ("slug");--> statement-breakpoint
-CREATE INDEX "site_content_type_idx" ON "site_content" ("content_type");--> statement-breakpoint
-CREATE INDEX "class_instance_files_file_id_idx" ON "class_instance_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "class_instance_files_instance_id_idx" ON "class_instance_files" ("class_instance_id");--> statement-breakpoint
-CREATE INDEX "complaint_files_file_id_idx" ON "complaint_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "complaint_files_complaint_id_idx" ON "complaint_files" ("complaint_id");--> statement-breakpoint
-CREATE INDEX "invoice_files_file_id_idx" ON "invoice_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "invoice_files_invoice_id_idx" ON "invoice_files" ("invoice_id");--> statement-breakpoint
-CREATE INDEX "learning_resource_files_file_id_idx" ON "learning_resource_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "learning_resource_files_res_id_idx" ON "learning_resource_files" ("learning_resource_id");--> statement-breakpoint
-CREATE INDEX "parent_files_file_id_idx" ON "parent_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "parent_files_parent_id_idx" ON "parent_files" ("parent_id");--> statement-breakpoint
-CREATE INDEX "recurring_schedule_files_file_id_idx" ON "recurring_schedule_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "recurring_schedule_files_sched_id_idx" ON "recurring_schedule_files" ("recurring_schedule_id");--> statement-breakpoint
-CREATE INDEX "signed_url_expires_at_idx" ON "signed_url" ("expires_at");--> statement-breakpoint
-CREATE INDEX "signed_url_used_expires_idx" ON "signed_url" ("used","expires_at");--> statement-breakpoint
-CREATE INDEX "staff_profile_files_file_id_idx" ON "staff_profile_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "staff_profile_files_staff_id_idx" ON "staff_profile_files" ("staff_profile_id");--> statement-breakpoint
-CREATE INDEX "student_files_file_id_idx" ON "student_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "student_files_student_id_idx" ON "student_files" ("student_id");--> statement-breakpoint
-CREATE INDEX "teacher_files_file_id_idx" ON "teacher_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "teacher_files_teacher_id_idx" ON "teacher_files" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "user_files_file_id_idx" ON "user_files" ("file_id");--> statement-breakpoint
-CREATE INDEX "user_files_user_id_idx" ON "user_files" ("user_id");--> statement-breakpoint
-CREATE INDEX "student_progress_student_id_idx" ON "student_progress" ("student_id");--> statement-breakpoint
-CREATE INDEX "student_progress_class_instance_id_idx" ON "student_progress" ("class_instance_id");--> statement-breakpoint
-CREATE INDEX "student_progress_teacher_id_idx" ON "student_progress" ("teacher_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "student_progress_student_class_uniq_idx" ON "student_progress" ("student_id","class_instance_id");--> statement-breakpoint
-CREATE INDEX "student_status_history_student_id_idx" ON "student_status_history" ("student_id");--> statement-breakpoint
-CREATE INDEX "student_status_history_changed_by_user_id_idx" ON "student_status_history" ("changed_by_user_id");--> statement-breakpoint
-CREATE INDEX "students_parent_id_idx" ON "students" ("parent_id");--> statement-breakpoint
-CREATE INDEX "students_user_id_idx" ON "students" ("user_id");--> statement-breakpoint
-CREATE INDEX "students_primary_teacher_id_idx" ON "students" ("primary_teacher_id");--> statement-breakpoint
-CREATE INDEX "students_status_idx" ON "students" ("status");--> statement-breakpoint
-CREATE INDEX "idx_students_name_fts" ON "students" USING gin (to_tsvector('simple', "name"));--> statement-breakpoint
-CREATE INDEX "idx_students_name_trgm" ON "students" USING gist ("name" gist_trgm_ops);--> statement-breakpoint
-CREATE UNIQUE INDEX "students_idempotency_key_unique_idx" ON "students" ("idempotency_key");--> statement-breakpoint
-CREATE UNIQUE INDEX "students_user_id_unique_idx" ON "students" ("user_id");--> statement-breakpoint
-CREATE INDEX "students_pagination_idx" ON "students" ("created_at","id");--> statement-breakpoint
-CREATE INDEX "idx_students_filter_mobile" ON "students" ("status","primary_teacher_id","date_of_birth");--> statement-breakpoint
-CREATE INDEX "idx_students_parent_status" ON "students" ("parent_id","status");--> statement-breakpoint
-CREATE INDEX "idx_students_status_created" ON "students" ("status","created_at");--> statement-breakpoint
-CREATE INDEX "teacher_assignments_student_id_idx" ON "teacher_assignments" ("student_id");--> statement-breakpoint
-CREATE INDEX "teacher_assignments_teacher_id_idx" ON "teacher_assignments" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "staff_profiles_user_id_idx" ON "staff_profiles" ("user_id");--> statement-breakpoint
-CREATE INDEX "teacher_availability_windows_teacher_id_idx" ON "teacher_availability_windows" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "teacher_availability_windows_teacher_day_idx" ON "teacher_availability_windows" ("teacher_id","day_of_week");--> statement-breakpoint
-CREATE INDEX "teacher_recurring_unavailability_teacher_id_idx" ON "teacher_recurring_unavailability" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "teacher_recurring_unavailability_teacher_day_idx" ON "teacher_recurring_unavailability" ("teacher_id","day_of_week");--> statement-breakpoint
-CREATE INDEX "teacher_vacation_requests_teacher_id_idx" ON "teacher_vacation_requests" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "teacher_vacation_requests_status_idx" ON "teacher_vacation_requests" ("status");--> statement-breakpoint
-CREATE INDEX "teacher_vacation_requests_start_at_idx" ON "teacher_vacation_requests" ("start_at");--> statement-breakpoint
-CREATE UNIQUE INDEX "teacher_dues_class_instance_id_unique_idx" ON "teacher_dues" ("class_instance_id");--> statement-breakpoint
-CREATE INDEX "teacher_dues_teacher_id_idx" ON "teacher_dues" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "teacher_dues_status_idx" ON "teacher_dues" ("status");--> statement-breakpoint
-CREATE INDEX "teacher_dues_approved_at_idx" ON "teacher_dues" ("approved_at");--> statement-breakpoint
-CREATE INDEX "teacher_important_notes_teacher_id_idx" ON "teacher_important_notes" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "teacher_payments_teacher_id_idx" ON "teacher_payments" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "teacher_payments_user_payment_method_id_idx" ON "teacher_payments" ("user_payment_method_id");--> statement-breakpoint
-CREATE INDEX "teachers_user_id_idx" ON "teachers" ("user_id");--> statement-breakpoint
-CREATE INDEX "auth_rate_limits_ip_idx" ON "auth_rate_limits" ("ip_address");--> statement-breakpoint
-CREATE INDEX "auth_rate_limits_email_idx" ON "auth_rate_limits" ("email");--> statement-breakpoint
-CREATE UNIQUE INDEX "auth_rate_limits_ip_email_unique_idx" ON "auth_rate_limits" ("ip_address","email");--> statement-breakpoint
-CREATE INDEX "password_reset_tokens_email_idx" ON "password_reset_tokens" ("email");--> statement-breakpoint
-CREATE INDEX "password_reset_tokens_expires_at_idx" ON "password_reset_tokens" ("expires_at");--> statement-breakpoint
-CREATE INDEX "password_reset_tokens_token_idx" ON "password_reset_tokens" ("hashed_token");--> statement-breakpoint
-CREATE INDEX "session_metadata_user_id_idx" ON "session_metadata" ("user_id");--> statement-breakpoint
-CREATE INDEX "session_metadata_expires_at_idx" ON "session_metadata" ("expires_at");--> statement-breakpoint
-CREATE INDEX "session_metadata_device_type_idx" ON "session_metadata" ("device_type");--> statement-breakpoint
-CREATE INDEX "session_metadata_session_id_idx" ON "session_metadata" ("session_id");--> statement-breakpoint
-CREATE INDEX "sessions_user_id_index" ON "sessions" ("user_id");--> statement-breakpoint
-CREATE INDEX "sessions_last_activity_index" ON "sessions" ("last_activity");--> statement-breakpoint
-CREATE INDEX "users_status_idx" ON "users" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "admin_audit_logs_actor_idx" ON "admin_audit_logs" ("actor_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "admin_audit_logs_target_idx" ON "admin_audit_logs" ("target_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "admin_audit_logs_action_idx" ON "admin_audit_logs" ("action");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_actor_user_id_idx" ON "audit_logs" ("actor_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_entity_type_idx" ON "audit_logs" ("entity_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_entity_id_idx" ON "audit_logs" ("entity_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_entity_type_id_idx" ON "audit_logs" ("entity_type","entity_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_action_idx" ON "audit_logs" ("action");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_created_at_idx" ON "audit_logs" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_actor_type_idx" ON "audit_logs" ("actor_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "impersonation_sessions_actor_idx" ON "impersonation_sessions" ("actor_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "impersonation_sessions_target_idx" ON "impersonation_sessions" ("target_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "impersonation_sessions_session_idx" ON "impersonation_sessions" ("session_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "impersonation_sessions_active_actor_idx" ON "impersonation_sessions" ("actor_user_id","is_active");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "impersonation_sessions_one_active_per_actor" ON "impersonation_sessions" ("actor_user_id") WHERE "is_active" = true;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_exchange_audit_from_to_idx" ON "currency_exchange_audit_logs" ("from_currency","to_currency");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_exchange_rates_from_to_idx" ON "currency_exchange_rates" ("from_currency","to_currency");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "currency_exchange_rates_effective_unique_idx" ON "currency_exchange_rates" ("from_currency","to_currency","effective_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_hedges_currency_idx" ON "currency_hedges" ("currency");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoices_parent_id_idx" ON "invoices" ("parent_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoices_student_id_idx" ON "invoices" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoices_status_due_date_idx" ON "invoices" ("status","due_date");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "invoices_idempotency_key_unique_idx" ON "invoices" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "payments_invoice_id_idx" ON "payments" ("invoice_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "payments_transaction_id_idx" ON "payments" ("transaction_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "payments_user_payment_method_id_idx" ON "payments" ("user_payment_method_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "payments_payment_method_type_idx" ON "payments" ("payment_method_type");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "payments_idempotency_key_unique_idx" ON "payments" ("idempotency_key");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "credit_transactions_idempotency_key_unique_idx" ON "credit_transactions" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_student_id_idx" ON "credit_transactions" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_reason_idx" ON "credit_transactions" ("reason");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_class_instance_id_idx" ON "credit_transactions" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_currencies_is_active_idx" ON "supported_currencies" ("is_active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fx_sync_runs_status_idx" ON "fx_sync_runs" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fx_sync_runs_provider_started_idx" ON "fx_sync_runs" ("provider","started_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fx_sync_runs_triggered_by_idx" ON "fx_sync_runs" ("triggered_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_payment_submissions_invoice_id_idx" ON "invoice_payment_submissions" ("invoice_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_payment_submissions_status_idx" ON "invoice_payment_submissions" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_payment_submissions_file_id_idx" ON "invoice_payment_submissions" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_mobile_wallets_country_code_idx" ON "supported_mobile_wallets" ("country_code");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_mobile_wallets_is_active_idx" ON "supported_mobile_wallets" ("is_active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_user_id_idx" ON "user_payment_methods" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_type_idx" ON "user_payment_methods" ("type");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "user_payment_methods_payin_default_idx" ON "user_payment_methods" ("user_id") WHERE "is_default" = true AND "direction" IN ('PAYIN', 'BOTH');--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "user_payment_methods_payout_default_idx" ON "user_payment_methods" ("user_id") WHERE "is_default" = true AND "direction" IN ('PAYOUT', 'BOTH');--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "books_deleted_at_idx" ON "books" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_categories_slug_idx" ON "class_categories" ("slug");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_subjects_category_id_idx" ON "class_subjects" ("category_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "class_subjects_slug_idx" ON "class_subjects" ("slug");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_communications_group_class_id_idx" ON "class_communications" ("group_class_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_communications_type_idx" ON "class_communications" ("type");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "group_class_enrollments_unique_idx" ON "group_class_enrollments" ("group_class_id","student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_class_enrollments_group_class_id_idx" ON "group_class_enrollments" ("group_class_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_class_enrollments_student_id_idx" ON "group_class_enrollments" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_classes_class_instance_id_idx" ON "group_classes" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_classes_status_idx" ON "group_classes" ("status");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "lesson_reports_class_instance_id_unique_idx" ON "lesson_reports" ("class_instance_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "lesson_reports_idempotency_key_unique_idx" ON "lesson_reports" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_status_idx" ON "lesson_reports" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_teacher_id_idx" ON "lesson_reports" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_student_id_idx" ON "lesson_reports" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_scheduled_start_at_idx" ON "class_instances" ("scheduled_start_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_teacher_scheduled_idx" ON "class_instances" ("teacher_id","scheduled_start_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_student_scheduled_idx" ON "class_instances" ("student_id","scheduled_start_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_original_class_id_idx" ON "class_instances" ("original_class_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_subject_id_idx" ON "class_instances" ("subject_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_class_type_idx" ON "class_instances" ("class_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_outcome_idx" ON "class_instances" ("outcome");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "class_instances_idempotency_key_unique_idx" ON "class_instances" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_execution_state_idx" ON "class_instances" ("execution_state");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_frozen_idx" ON "class_instances" ("is_frozen") WHERE "is_frozen" = true;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_rescheduled_idx" ON "class_instances" ("is_rescheduled") WHERE "is_rescheduled" = true;--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "class_instances_original_class_uniq_idx" ON "class_instances" ("original_class_id") WHERE "original_class_id" IS NOT NULL AND "deleted_at" IS NULL;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_status_events_class_instance_id_idx" ON "class_status_events" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_status_events_instance_created_idx" ON "class_status_events" ("class_instance_id","created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dst_migration_entries_run_id_idx" ON "dst_migration_entries" ("run_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "leave_quota_teacher_period_idx" ON "leave_quota_usage" ("teacher_id","period_year","period_month") WHERE "teacher_id" IS NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "leave_quota_student_period_idx" ON "leave_quota_usage" ("student_id","period_year","period_month") WHERE "student_id" IS NOT NULL;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "leave_requests_class_instance_id_idx" ON "leave_requests" ("class_instance_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "recurring_schedule_days_schedule_day_idx" ON "recurring_schedule_days" ("recurring_schedule_id","day_of_week");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_student_id_idx" ON "recurring_schedules" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_teacher_id_idx" ON "recurring_schedules" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_timezone_id_idx" ON "recurring_schedules" ("timezone_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_subject_id_idx" ON "recurring_schedules" ("subject_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "subject_resources_subject_id_learning_resource_id_idx" ON "subject_resources" ("subject_id","learning_resource_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaint_responses_complaint_id_idx" ON "complaint_responses" ("complaint_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaints_status_idx" ON "complaints" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaints_parent_id_idx" ON "complaints" ("parent_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "learning_resources_deleted_at_idx" ON "learning_resources" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_user_id_idx" ON "notification_deliveries" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_status_idx" ON "notification_deliveries" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_event_type_idx" ON "notification_deliveries" ("event_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_channel_idx" ON "notification_deliveries" ("channel");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_created_at_idx" ON "notification_deliveries" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_provider_message_id_idx" ON "notification_deliveries" ("provider_message_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_parent_id_idx" ON "suggestions" ("parent_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_status_idx" ON "suggestions" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_duplicate_of_id_idx" ON "suggestions" ("duplicate_of_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_reviewed_by_user_id_idx" ON "suggestions" ("reviewed_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_deleted_at_idx" ON "suggestions" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_active_created_at_idx" ON "suggestions" ("created_at") WHERE "deleted_at" IS NULL;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_device_tokens_user_id_idx" ON "user_device_tokens" ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "user_device_tokens_token_unique_idx" ON "user_device_tokens" ("token");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_notification_preferences_user_id_idx" ON "user_notification_preferences" ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "user_notification_preferences_unique_idx" ON "user_notification_preferences" ("user_id","channel","event_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_meeting_configs_class_instance_id_idx" ON "class_meeting_configs" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_meeting_configs_recurring_schedule_id_idx" ON "class_meeting_configs" ("recurring_schedule_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_meeting_configs_provider_id_idx" ON "class_meeting_configs" ("provider_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "class_meeting_configs_one_default_per_instance_idx" ON "class_meeting_configs" ("class_instance_id") WHERE "is_default" = true AND "class_instance_id" IS NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "class_meeting_configs_one_default_per_recurring_idx" ON "class_meeting_configs" ("recurring_schedule_id") WHERE "is_default" = true AND "recurring_schedule_id" IS NOT NULL;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "meeting_providers_is_active_idx" ON "meeting_providers" ("is_active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_meeting_configs_user_id_idx" ON "user_meeting_configs" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_meeting_configs_provider_id_idx" ON "user_meeting_configs" ("provider_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "user_meeting_configs_one_default_per_user_idx" ON "user_meeting_configs" ("user_id") WHERE "is_default" = true;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "parents_user_id_idx" ON "parents" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "parents_status_idx" ON "parents" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_permissions_group_id_idx" ON "group_permissions" ("group_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "permissions_key_idx" ON "permissions" ("key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_permission_groups_user_id_idx" ON "user_permission_groups" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_permission_overrides_user_id_idx" ON "user_permission_overrides" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "rate_limit_cache_expires_at_idx" ON "rate_limit_cache" ("expires_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "session_cache_expires_at_idx" ON "session_cache" ("expires_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "system_settings_category_idx" ON "system_settings" ("category");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "site_content_slug_idx" ON "site_content" ("slug");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "site_content_type_idx" ON "site_content" ("content_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instance_files_file_id_idx" ON "class_instance_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instance_files_instance_id_idx" ON "class_instance_files" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaint_files_file_id_idx" ON "complaint_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaint_files_complaint_id_idx" ON "complaint_files" ("complaint_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_files_file_id_idx" ON "invoice_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_files_invoice_id_idx" ON "invoice_files" ("invoice_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "learning_resource_files_file_id_idx" ON "learning_resource_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "learning_resource_files_res_id_idx" ON "learning_resource_files" ("learning_resource_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "parent_files_file_id_idx" ON "parent_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "parent_files_parent_id_idx" ON "parent_files" ("parent_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedule_files_file_id_idx" ON "recurring_schedule_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedule_files_sched_id_idx" ON "recurring_schedule_files" ("recurring_schedule_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "signed_url_expires_at_idx" ON "signed_url" ("expires_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "signed_url_used_expires_idx" ON "signed_url" ("used","expires_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "staff_profile_files_file_id_idx" ON "staff_profile_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "staff_profile_files_staff_id_idx" ON "staff_profile_files" ("staff_profile_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_files_file_id_idx" ON "student_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_files_student_id_idx" ON "student_files" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_files_file_id_idx" ON "teacher_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_files_teacher_id_idx" ON "teacher_files" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_files_file_id_idx" ON "user_files" ("file_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_files_user_id_idx" ON "user_files" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_progress_student_id_idx" ON "student_progress" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_progress_class_instance_id_idx" ON "student_progress" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_progress_teacher_id_idx" ON "student_progress" ("teacher_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "student_progress_student_class_uniq_idx" ON "student_progress" ("student_id","class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_status_history_student_id_idx" ON "student_status_history" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_status_history_changed_by_user_id_idx" ON "student_status_history" ("changed_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_parent_id_idx" ON "students" ("parent_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_user_id_idx" ON "students" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_primary_teacher_id_idx" ON "students" ("primary_teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_status_idx" ON "students" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_students_name_fts" ON "students" USING gin (to_tsvector('simple', "name"));--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_students_name_trgm" ON "students" USING gist ("name" gist_trgm_ops);--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "students_idempotency_key_unique_idx" ON "students" ("idempotency_key");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "students_user_id_unique_idx" ON "students" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_pagination_idx" ON "students" ("created_at","id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_students_filter_mobile" ON "students" ("status","primary_teacher_id","date_of_birth");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_students_parent_status" ON "students" ("parent_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_students_status_created" ON "students" ("status","created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_assignments_student_id_idx" ON "teacher_assignments" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_assignments_teacher_id_idx" ON "teacher_assignments" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "staff_profiles_user_id_idx" ON "staff_profiles" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_availability_windows_teacher_id_idx" ON "teacher_availability_windows" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_availability_windows_teacher_day_idx" ON "teacher_availability_windows" ("teacher_id","day_of_week");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_recurring_unavailability_teacher_id_idx" ON "teacher_recurring_unavailability" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_recurring_unavailability_teacher_day_idx" ON "teacher_recurring_unavailability" ("teacher_id","day_of_week");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_vacation_requests_teacher_id_idx" ON "teacher_vacation_requests" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_vacation_requests_status_idx" ON "teacher_vacation_requests" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_vacation_requests_start_at_idx" ON "teacher_vacation_requests" ("start_at");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "teacher_dues_class_instance_id_unique_idx" ON "teacher_dues" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_teacher_id_idx" ON "teacher_dues" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_status_idx" ON "teacher_dues" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_approved_at_idx" ON "teacher_dues" ("approved_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_important_notes_teacher_id_idx" ON "teacher_important_notes" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_payments_teacher_id_idx" ON "teacher_payments" ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_payments_user_payment_method_id_idx" ON "teacher_payments" ("user_payment_method_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teachers_user_id_idx" ON "teachers" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "auth_rate_limits_ip_idx" ON "auth_rate_limits" ("ip_address");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "auth_rate_limits_email_idx" ON "auth_rate_limits" ("email");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "auth_rate_limits_ip_email_unique_idx" ON "auth_rate_limits" ("ip_address","email");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "password_reset_tokens_email_idx" ON "password_reset_tokens" ("email");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "password_reset_tokens_expires_at_idx" ON "password_reset_tokens" ("expires_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "password_reset_tokens_token_idx" ON "password_reset_tokens" ("hashed_token");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "session_metadata_user_id_idx" ON "session_metadata" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "session_metadata_expires_at_idx" ON "session_metadata" ("expires_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "session_metadata_device_type_idx" ON "session_metadata" ("device_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "session_metadata_session_id_idx" ON "session_metadata" ("session_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "sessions_user_id_index" ON "sessions" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "sessions_last_activity_index" ON "sessions" ("last_activity");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_status_idx" ON "users" ("status");--> statement-breakpoint
 DO $$ BEGIN
     ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;

@@ -20,229 +20,229 @@ ALTER TABLE "system_settings" ALTER COLUMN "data_type" DROP DEFAULT;--> statemen
 ALTER TABLE "system_settings" ALTER COLUMN "data_type" SET DATA TYPE "system_setting_data_type" USING "data_type"::"system_setting_data_type";--> statement-breakpoint
 ALTER TABLE "system_settings" ALTER COLUMN "data_type" SET DEFAULT 'string'::"system_setting_data_type";--> statement-breakpoint
 ALTER TABLE "system_settings" ALTER COLUMN "category" SET DATA TYPE "system_setting_category" USING "category"::"system_setting_category";--> statement-breakpoint
-CREATE INDEX "admin_audit_logs_created_at_idx" ON "admin_audit_logs" ("created_at");--> statement-breakpoint
-CREATE INDEX "admin_audit_logs_ip_address_idx" ON "admin_audit_logs" ("ip_address");--> statement-breakpoint
-CREATE INDEX "audit_logs_entity_type_entity_id_created_at_idx" ON "audit_logs" ("entity_type","entity_id","created_at");--> statement-breakpoint
-CREATE INDEX "audit_logs_actor_user_id_created_at_idx" ON "audit_logs" ("actor_user_id","created_at");--> statement-breakpoint
-CREATE INDEX "audit_logs_action_created_at_idx" ON "audit_logs" ("action","created_at");--> statement-breakpoint
-CREATE INDEX "impersonation_sessions_started_at_idx" ON "impersonation_sessions" ("started_at");--> statement-breakpoint
-CREATE INDEX "impersonation_sessions_ended_at_idx" ON "impersonation_sessions" ("ended_at");--> statement-breakpoint
-CREATE INDEX "currency_exchange_audit_logs_created_at_idx" ON "currency_exchange_audit_logs" ("created_at");--> statement-breakpoint
-CREATE INDEX "currency_exchange_audit_logs_changed_by_user_id_idx" ON "currency_exchange_audit_logs" ("changed_by_user_id");--> statement-breakpoint
-CREATE INDEX "currency_exchange_rates_effective_date_idx" ON "currency_exchange_rates" ("effective_date");--> statement-breakpoint
-CREATE INDEX "currency_exchange_rates_created_at_idx" ON "currency_exchange_rates" ("created_at");--> statement-breakpoint
-CREATE INDEX "currency_hedges_hedge_type_idx" ON "currency_hedges" ("hedge_type");--> statement-breakpoint
-CREATE INDEX "currency_hedges_created_at_idx" ON "currency_hedges" ("created_at");--> statement-breakpoint
-CREATE INDEX "invoices_due_date_idx" ON "invoices" ("due_date");--> statement-breakpoint
-CREATE INDEX "invoices_paid_date_idx" ON "invoices" ("paid_date");--> statement-breakpoint
-CREATE INDEX "invoices_created_by_user_id_idx" ON "invoices" ("created_by_user_id");--> statement-breakpoint
-CREATE INDEX "invoices_email_sent_at_idx" ON "invoices" ("email_sent_at");--> statement-breakpoint
-CREATE INDEX "payments_payment_date_idx" ON "payments" ("payment_date");--> statement-breakpoint
-CREATE INDEX "payments_created_at_idx" ON "payments" ("created_at");--> statement-breakpoint
-CREATE INDEX "credit_transactions_created_at_idx" ON "credit_transactions" ("created_at");--> statement-breakpoint
-CREATE INDEX "credit_transactions_source_payment_id_idx" ON "credit_transactions" ("source_payment_id");--> statement-breakpoint
-CREATE INDEX "credit_transactions_credited_by_user_id_idx" ON "credit_transactions" ("credited_by_user_id");--> statement-breakpoint
-CREATE INDEX "supported_currencies_country_code_idx" ON "supported_currencies" ("country_code");--> statement-breakpoint
-CREATE INDEX "supported_currencies_sort_order_idx" ON "supported_currencies" ("sort_order");--> statement-breakpoint
-CREATE INDEX "supported_currencies_created_at_idx" ON "supported_currencies" ("created_at");--> statement-breakpoint
-CREATE INDEX "fx_sync_runs_started_at_idx" ON "fx_sync_runs" ("started_at");--> statement-breakpoint
-CREATE INDEX "fx_sync_runs_finished_at_idx" ON "fx_sync_runs" ("finished_at");--> statement-breakpoint
-CREATE INDEX "fx_sync_runs_trigger_type_idx" ON "fx_sync_runs" ("trigger_type");--> statement-breakpoint
-CREATE INDEX "fx_sync_runs_created_at_idx" ON "fx_sync_runs" ("created_at");--> statement-breakpoint
-CREATE INDEX "invoice_payment_submissions_submitted_by_user_id_idx" ON "invoice_payment_submissions" ("submitted_by_user_id");--> statement-breakpoint
-CREATE INDEX "invoice_payment_submissions_reviewed_by_user_id_idx" ON "invoice_payment_submissions" ("reviewed_by_user_id");--> statement-breakpoint
-CREATE INDEX "invoice_payment_submissions_submitted_at_idx" ON "invoice_payment_submissions" ("submitted_at");--> statement-breakpoint
-CREATE INDEX "invoice_payment_submissions_reviewed_at_idx" ON "invoice_payment_submissions" ("reviewed_at");--> statement-breakpoint
-CREATE INDEX "supported_mobile_wallets_currency_code_idx" ON "supported_mobile_wallets" ("currency_code");--> statement-breakpoint
-CREATE INDEX "supported_mobile_wallets_phone_region_idx" ON "supported_mobile_wallets" ("phone_region");--> statement-breakpoint
-CREATE INDEX "supported_mobile_wallets_supported_directions_idx" ON "supported_mobile_wallets" ("supported_directions");--> statement-breakpoint
-CREATE INDEX "supported_mobile_wallets_created_at_idx" ON "supported_mobile_wallets" ("created_at");--> statement-breakpoint
-CREATE INDEX "supported_online_accounts_identifier_kind_idx" ON "supported_online_accounts" ("identifier_kind");--> statement-breakpoint
-CREATE INDEX "supported_online_accounts_supported_directions_idx" ON "supported_online_accounts" ("supported_directions");--> statement-breakpoint
-CREATE INDEX "supported_online_accounts_is_active_idx" ON "supported_online_accounts" ("is_active");--> statement-breakpoint
-CREATE INDEX "supported_online_accounts_created_at_idx" ON "supported_online_accounts" ("created_at");--> statement-breakpoint
-CREATE INDEX "supported_payment_links_is_active_idx" ON "supported_payment_links" ("is_active");--> statement-breakpoint
-CREATE INDEX "supported_payment_links_supported_directions_idx" ON "supported_payment_links" ("supported_directions");--> statement-breakpoint
-CREATE INDEX "supported_payment_links_created_at_idx" ON "supported_payment_links" ("created_at");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_verified_at_idx" ON "user_payment_methods" ("verified_at");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_verified_by_user_id_idx" ON "user_payment_methods" ("verified_by_user_id");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_created_at_idx" ON "user_payment_methods" ("created_at");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_direction_idx" ON "user_payment_methods" ("direction");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_is_default_idx" ON "user_payment_methods" ("is_default");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_user_id_is_default_idx" ON "user_payment_methods" ("user_id","is_default");--> statement-breakpoint
-CREATE INDEX "user_payment_methods_user_id_direction_idx" ON "user_payment_methods" ("user_id","direction");--> statement-breakpoint
-CREATE INDEX "books_availability_status_idx" ON "books" ("availability_status");--> statement-breakpoint
-CREATE INDEX "books_created_at_idx" ON "books" ("created_at");--> statement-breakpoint
-CREATE INDEX "books_name_idx" ON "books" ("name");--> statement-breakpoint
-CREATE INDEX "class_categories_deleted_at_idx" ON "class_categories" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "class_subjects_deleted_at_idx" ON "class_subjects" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "class_communications_is_active_idx" ON "class_communications" ("is_active");--> statement-breakpoint
-CREATE INDEX "class_communications_is_delivered_idx" ON "class_communications" ("is_delivered");--> statement-breakpoint
-CREATE INDEX "class_communications_notification_delivery_id_idx" ON "class_communications" ("notification_delivery_id");--> statement-breakpoint
-CREATE INDEX "class_communications_class_status_event_id_idx" ON "class_communications" ("class_status_event_id");--> statement-breakpoint
-CREATE INDEX "class_communications_timestamp_idx" ON "class_communications" ("timestamp");--> statement-breakpoint
-CREATE INDEX "class_communications_created_at_idx" ON "class_communications" ("created_at");--> statement-breakpoint
-CREATE INDEX "group_class_enrollments_attendance_status_idx" ON "group_class_enrollments" ("attendance_status");--> statement-breakpoint
-CREATE INDEX "group_class_enrollments_created_at_idx" ON "group_class_enrollments" ("created_at");--> statement-breakpoint
-CREATE INDEX "group_classes_created_at_idx" ON "group_classes" ("created_at");--> statement-breakpoint
-CREATE INDEX "group_classes_audit_logged_at_idx" ON "group_classes" ("audit_logged_at");--> statement-breakpoint
-CREATE INDEX "group_classes_class_type_idx" ON "group_classes" ("class_type");--> statement-breakpoint
-CREATE INDEX "group_classes_original_date_idx" ON "group_classes" ("original_date");--> statement-breakpoint
-CREATE INDEX "group_classes_rescheduled_date_idx" ON "group_classes" ("rescheduled_date");--> statement-breakpoint
-CREATE INDEX "lesson_reports_submitted_by_user_id_idx" ON "lesson_reports" ("submitted_by_user_id");--> statement-breakpoint
-CREATE INDEX "lesson_reports_reviewed_by_user_id_idx" ON "lesson_reports" ("reviewed_by_user_id");--> statement-breakpoint
-CREATE INDEX "lesson_reports_submitted_at_idx" ON "lesson_reports" ("submitted_at");--> statement-breakpoint
-CREATE INDEX "lesson_reports_reviewed_at_idx" ON "lesson_reports" ("reviewed_at");--> statement-breakpoint
-CREATE INDEX "lesson_reports_lesson_date_idx" ON "lesson_reports" ("lesson_date");--> statement-breakpoint
-CREATE INDEX "lesson_reports_attendance_evaluation_idx" ON "lesson_reports" ("attendance_evaluation");--> statement-breakpoint
-CREATE INDEX "lesson_reports_status_submitted_at_idx" ON "lesson_reports" ("status","submitted_at");--> statement-breakpoint
-CREATE INDEX "lesson_reports_teacher_id_status_idx" ON "lesson_reports" ("teacher_id","status");--> statement-breakpoint
-CREATE INDEX "lesson_reports_student_id_status_idx" ON "lesson_reports" ("student_id","status");--> statement-breakpoint
-CREATE INDEX "class_instance_performance_created_at_idx" ON "class_instance_performance" ("created_at");--> statement-breakpoint
-CREATE INDEX "class_instance_performance_updated_at_idx" ON "class_instance_performance" ("updated_at");--> statement-breakpoint
-CREATE INDEX "class_instances_recurring_schedule_id_idx" ON "class_instances" ("recurring_schedule_id");--> statement-breakpoint
-CREATE INDEX "class_instances_user_meeting_config_id_idx" ON "class_instances" ("user_meeting_config_id");--> statement-breakpoint
-CREATE INDEX "class_instances_meeting_provider_id_idx" ON "class_instances" ("meeting_provider_id");--> statement-breakpoint
-CREATE INDEX "class_instances_activated_by_user_id_idx" ON "class_instances" ("activated_by_user_id");--> statement-breakpoint
-CREATE INDEX "class_instances_force_activated_by_user_id_idx" ON "class_instances" ("force_activated_by_user_id");--> statement-breakpoint
-CREATE INDEX "class_instances_booking_timezone_id_idx" ON "class_instances" ("booking_timezone_id");--> statement-breakpoint
-CREATE INDEX "class_instances_created_at_idx" ON "class_instances" ("created_at");--> statement-breakpoint
-CREATE INDEX "class_instances_updated_at_idx" ON "class_instances" ("updated_at");--> statement-breakpoint
-CREATE INDEX "class_instances_actual_start_at_idx" ON "class_instances" ("actual_start_at");--> statement-breakpoint
-CREATE INDEX "class_instances_actual_end_at_idx" ON "class_instances" ("actual_end_at");--> statement-breakpoint
-CREATE INDEX "class_instances_activated_at_idx" ON "class_instances" ("activated_at");--> statement-breakpoint
-CREATE INDEX "class_instances_quota_deducted_idx" ON "class_instances" ("quota_deducted");--> statement-breakpoint
-CREATE INDEX "class_instances_payroll_credited_idx" ON "class_instances" ("payroll_credited");--> statement-breakpoint
-CREATE INDEX "class_instances_is_rate_overridden_idx" ON "class_instances" ("is_rate_overridden");--> statement-breakpoint
-CREATE INDEX "class_instances_rate_source_idx" ON "class_instances" ("rate_source");--> statement-breakpoint
-CREATE INDEX "class_instances_deleted_at_idx" ON "class_instances" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "class_instances_teacher_state_start_idx" ON "class_instances" ("teacher_id","execution_state","scheduled_start_at");--> statement-breakpoint
-CREATE INDEX "class_instances_student_state_start_idx" ON "class_instances" ("student_id","execution_state","scheduled_start_at");--> statement-breakpoint
-CREATE INDEX "class_instances_state_start_idx" ON "class_instances" ("execution_state","scheduled_start_at");--> statement-breakpoint
-CREATE INDEX "class_status_events_event_type_idx" ON "class_status_events" ("event_type");--> statement-breakpoint
-CREATE INDEX "class_status_events_actor_user_id_idx" ON "class_status_events" ("actor_user_id");--> statement-breakpoint
-CREATE INDEX "dst_migration_entries_recurring_schedule_id_idx" ON "dst_migration_entries" ("recurring_schedule_id");--> statement-breakpoint
-CREATE INDEX "dst_migration_entries_result_idx" ON "dst_migration_entries" ("result");--> statement-breakpoint
-CREATE INDEX "dst_migration_runs_created_at_idx" ON "dst_migration_runs" ("created_at");--> statement-breakpoint
-CREATE INDEX "leave_quota_usage_period_year_period_month_idx" ON "leave_quota_usage" ("period_year","period_month");--> statement-breakpoint
-CREATE INDEX "leave_requests_requested_by_user_id_idx" ON "leave_requests" ("requested_by_user_id");--> statement-breakpoint
-CREATE INDEX "leave_requests_processed_by_user_id_idx" ON "leave_requests" ("processed_by_user_id");--> statement-breakpoint
-CREATE INDEX "leave_requests_status_idx" ON "leave_requests" ("status");--> statement-breakpoint
-CREATE INDEX "leave_requests_requester_type_idx" ON "leave_requests" ("requester_type");--> statement-breakpoint
-CREATE INDEX "leave_requests_created_at_idx" ON "leave_requests" ("created_at");--> statement-breakpoint
-CREATE INDEX "leave_requests_processed_at_idx" ON "leave_requests" ("processed_at");--> statement-breakpoint
-CREATE INDEX "recurring_schedule_days_recurring_schedule_id_idx" ON "recurring_schedule_days" ("recurring_schedule_id");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_deleted_at_idx" ON "recurring_schedules" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_effective_from_idx" ON "recurring_schedules" ("effective_from");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_effective_until_idx" ON "recurring_schedules" ("effective_until");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_created_at_idx" ON "recurring_schedules" ("created_at");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_updated_at_idx" ON "recurring_schedules" ("updated_at");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_teacher_id_deleted_at_idx" ON "recurring_schedules" ("teacher_id","deleted_at");--> statement-breakpoint
-CREATE INDEX "recurring_schedules_student_id_deleted_at_idx" ON "recurring_schedules" ("student_id","deleted_at");--> statement-breakpoint
-CREATE INDEX "complaint_responses_responder_user_id_idx" ON "complaint_responses" ("responder_user_id");--> statement-breakpoint
-CREATE INDEX "complaint_responses_created_at_idx" ON "complaint_responses" ("created_at");--> statement-breakpoint
-CREATE INDEX "complaint_responses_email_sent_idx" ON "complaint_responses" ("email_sent");--> statement-breakpoint
-CREATE INDEX "complaints_student_id_idx" ON "complaints" ("student_id");--> statement-breakpoint
-CREATE INDEX "complaints_category_idx" ON "complaints" ("category");--> statement-breakpoint
-CREATE INDEX "complaints_created_at_idx" ON "complaints" ("created_at");--> statement-breakpoint
-CREATE INDEX "complaints_updated_at_idx" ON "complaints" ("updated_at");--> statement-breakpoint
-CREATE INDEX "learning_resources_uploaded_by_user_id_idx" ON "learning_resources" ("uploaded_by_user_id");--> statement-breakpoint
-CREATE INDEX "learning_resources_created_at_idx" ON "learning_resources" ("created_at");--> statement-breakpoint
-CREATE INDEX "learning_resources_display_name_idx" ON "learning_resources" ("display_name");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_device_token_id_idx" ON "notification_deliveries" ("device_token_id");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_sent_at_idx" ON "notification_deliveries" ("sent_at");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_delivered_at_idx" ON "notification_deliveries" ("delivered_at");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_failed_at_idx" ON "notification_deliveries" ("failed_at");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_opened_at_idx" ON "notification_deliveries" ("opened_at");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_user_id_status_created_at_idx" ON "notification_deliveries" ("user_id","status","created_at");--> statement-breakpoint
-CREATE INDEX "notification_deliveries_status_created_at_idx" ON "notification_deliveries" ("status","created_at");--> statement-breakpoint
-CREATE INDEX "suggestions_created_at_idx" ON "suggestions" ("created_at");--> statement-breakpoint
-CREATE INDEX "suggestions_reviewed_at_idx" ON "suggestions" ("reviewed_at");--> statement-breakpoint
-CREATE INDEX "suggestions_email_sent_at_idx" ON "suggestions" ("email_sent_at");--> statement-breakpoint
-CREATE INDEX "user_device_tokens_is_active_idx" ON "user_device_tokens" ("is_active");--> statement-breakpoint
-CREATE INDEX "user_device_tokens_last_used_at_idx" ON "user_device_tokens" ("last_used_at");--> statement-breakpoint
-CREATE INDEX "user_device_tokens_user_id_is_active_idx" ON "user_device_tokens" ("user_id","is_active");--> statement-breakpoint
-CREATE INDEX "user_notification_preferences_channel_idx" ON "user_notification_preferences" ("channel");--> statement-breakpoint
-CREATE INDEX "user_notification_preferences_event_type_idx" ON "user_notification_preferences" ("event_type");--> statement-breakpoint
-CREATE INDEX "user_notification_preferences_enabled_idx" ON "user_notification_preferences" ("enabled");--> statement-breakpoint
-CREATE INDEX "class_meeting_configs_is_default_idx" ON "class_meeting_configs" ("is_default");--> statement-breakpoint
-CREATE INDEX "meeting_providers_created_at_idx" ON "meeting_providers" ("created_at");--> statement-breakpoint
-CREATE INDEX "meeting_providers_updated_at_idx" ON "meeting_providers" ("updated_at");--> statement-breakpoint
-CREATE INDEX "user_meeting_configs_is_default_idx" ON "user_meeting_configs" ("is_default");--> statement-breakpoint
-CREATE INDEX "user_meeting_configs_user_id_is_default_idx" ON "user_meeting_configs" ("user_id","is_default");--> statement-breakpoint
-CREATE INDEX "parents_created_at_idx" ON "parents" ("created_at");--> statement-breakpoint
-CREATE INDEX "parents_updated_at_idx" ON "parents" ("updated_at");--> statement-breakpoint
-CREATE INDEX "parents_invoice_type_idx" ON "parents" ("invoice_type");--> statement-breakpoint
-CREATE INDEX "parents_currency_idx" ON "parents" ("currency");--> statement-breakpoint
-CREATE INDEX "group_permissions_permission_id_idx" ON "group_permissions" ("permission_id");--> statement-breakpoint
-CREATE INDEX "permission_groups_is_system_idx" ON "permission_groups" ("is_system");--> statement-breakpoint
-CREATE INDEX "permission_groups_created_by_user_id_idx" ON "permission_groups" ("created_by_user_id");--> statement-breakpoint
-CREATE INDEX "permission_groups_created_at_idx" ON "permission_groups" ("created_at");--> statement-breakpoint
-CREATE INDEX "permission_groups_updated_at_idx" ON "permission_groups" ("updated_at");--> statement-breakpoint
-CREATE INDEX "permissions_resource_idx" ON "permissions" ("resource");--> statement-breakpoint
-CREATE INDEX "permissions_action_idx" ON "permissions" ("action");--> statement-breakpoint
-CREATE INDEX "permissions_is_system_idx" ON "permissions" ("is_system");--> statement-breakpoint
-CREATE INDEX "user_permission_groups_assigned_at_idx" ON "user_permission_groups" ("assigned_at");--> statement-breakpoint
-CREATE INDEX "user_permission_groups_assigned_by_user_id_idx" ON "user_permission_groups" ("assigned_by_user_id");--> statement-breakpoint
-CREATE INDEX "user_permission_overrides_state_idx" ON "user_permission_overrides" ("state");--> statement-breakpoint
-CREATE INDEX "user_permission_overrides_assigned_by_user_id_idx" ON "user_permission_overrides" ("assigned_by_user_id");--> statement-breakpoint
-CREATE INDEX "user_permission_overrides_created_at_idx" ON "user_permission_overrides" ("created_at");--> statement-breakpoint
-CREATE INDEX "rate_limit_cache_value_idx" ON "rate_limit_cache" ("value");--> statement-breakpoint
-CREATE INDEX "session_cache_value_idx" ON "session_cache" ("value");--> statement-breakpoint
-CREATE INDEX "system_settings_updated_by_user_id_idx" ON "system_settings" ("updated_by_user_id");--> statement-breakpoint
-CREATE INDEX "system_settings_updated_at_idx" ON "system_settings" ("updated_at");--> statement-breakpoint
-CREATE INDEX "system_settings_data_type_idx" ON "system_settings" ("data_type");--> statement-breakpoint
-CREATE INDEX "timezones_is_dst_supported_idx" ON "timezones" ("is_dst_supported");--> statement-breakpoint
-CREATE INDEX "timezones_base_offset_minutes_idx" ON "timezones" ("base_offset_minutes");--> statement-breakpoint
-CREATE INDEX "site_content_updated_by_user_id_idx" ON "site_content" ("updated_by_user_id");--> statement-breakpoint
-CREATE INDEX "site_content_created_at_idx" ON "site_content" ("created_at");--> statement-breakpoint
-CREATE INDEX "site_content_updated_at_idx" ON "site_content" ("updated_at");--> statement-breakpoint
-CREATE INDEX "site_content_is_published_content_type_idx" ON "site_content" ("is_published","content_type");--> statement-breakpoint
-CREATE INDEX "signed_url_created_at_idx" ON "signed_url" ("created_at");--> statement-breakpoint
-CREATE INDEX "signed_url_file_path_idx" ON "signed_url" ("file_path");--> statement-breakpoint
-CREATE INDEX "signed_url_content_hash_idx" ON "signed_url" ("content_hash");--> statement-breakpoint
-CREATE INDEX "storage_directories_is_protected_idx" ON "storage_directory" ("is_protected");--> statement-breakpoint
-CREATE INDEX "storage_directories_allow_uploads_idx" ON "storage_directory" ("allow_uploads");--> statement-breakpoint
-CREATE INDEX "storage_files_is_protected_idx" ON "storage_file" ("is_protected");--> statement-breakpoint
-CREATE INDEX "student_progress_parent_visible_idx" ON "student_progress" ("parent_visible");--> statement-breakpoint
-CREATE INDEX "student_progress_created_at_idx" ON "student_progress" ("created_at");--> statement-breakpoint
-CREATE INDEX "students_language_idx" ON "students" ("language");--> statement-breakpoint
-CREATE INDEX "students_date_of_birth_idx" ON "students" ("date_of_birth");--> statement-breakpoint
-CREATE INDEX "students_updated_at_idx" ON "students" ("updated_at");--> statement-breakpoint
-CREATE INDEX "students_primary_teacher_id_status_idx" ON "students" ("primary_teacher_id","status");--> statement-breakpoint
-CREATE INDEX "teacher_assignments_ended_at_idx" ON "teacher_assignments" ("ended_at");--> statement-breakpoint
-CREATE INDEX "teacher_assignments_assigned_by_user_id_idx" ON "teacher_assignments" ("assigned_by_user_id");--> statement-breakpoint
-CREATE INDEX "staff_profiles_created_at_idx" ON "staff_profiles" ("created_at");--> statement-breakpoint
-CREATE INDEX "staff_profiles_updated_at_idx" ON "staff_profiles" ("updated_at");--> statement-breakpoint
-CREATE INDEX "staff_profiles_rate_currency_idx" ON "staff_profiles" ("rate_currency");--> statement-breakpoint
-CREATE INDEX "teacher_vacation_requests_end_at_idx" ON "teacher_vacation_requests" ("end_at");--> statement-breakpoint
-CREATE INDEX "teacher_vacation_requests_requested_by_user_id_idx" ON "teacher_vacation_requests" ("requested_by_user_id");--> statement-breakpoint
-CREATE INDEX "teacher_vacation_requests_processed_by_user_id_idx" ON "teacher_vacation_requests" ("processed_by_user_id");--> statement-breakpoint
-CREATE INDEX "teacher_dues_student_id_idx" ON "teacher_dues" ("student_id");--> statement-breakpoint
-CREATE INDEX "teacher_dues_teacher_payment_id_idx" ON "teacher_dues" ("teacher_payment_id");--> statement-breakpoint
-CREATE INDEX "teacher_dues_approved_by_user_id_idx" ON "teacher_dues" ("approved_by_user_id");--> statement-breakpoint
-CREATE INDEX "teacher_dues_currency_idx" ON "teacher_dues" ("currency");--> statement-breakpoint
-CREATE INDEX "teacher_dues_rate_source_idx" ON "teacher_dues" ("rate_source");--> statement-breakpoint
-CREATE INDEX "teacher_important_notes_is_published_idx" ON "teacher_important_notes" ("is_published");--> statement-breakpoint
-CREATE INDEX "teacher_important_notes_deleted_at_idx" ON "teacher_important_notes" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "teacher_important_notes_created_by_user_id_idx" ON "teacher_important_notes" ("created_by_user_id");--> statement-breakpoint
-CREATE INDEX "teacher_payments_payment_date_idx" ON "teacher_payments" ("payment_date");--> statement-breakpoint
-CREATE INDEX "teacher_payments_payment_method_type_idx" ON "teacher_payments" ("payment_method_type");--> statement-breakpoint
-CREATE INDEX "teacher_payments_is_test_payment_idx" ON "teacher_payments" ("is_test_payment");--> statement-breakpoint
-CREATE INDEX "teachers_created_at_idx" ON "teachers" ("created_at");--> statement-breakpoint
-CREATE INDEX "teachers_updated_at_idx" ON "teachers" ("updated_at");--> statement-breakpoint
-CREATE INDEX "teachers_nationality_idx" ON "teachers" ("nationality");--> statement-breakpoint
-CREATE INDEX "teachers_country_code_idx" ON "teachers" ("country_code");--> statement-breakpoint
-CREATE INDEX "teachers_gender_idx" ON "teachers" ("gender");--> statement-breakpoint
-CREATE INDEX "teachers_rate_currency_idx" ON "teachers" ("rate_currency");--> statement-breakpoint
-CREATE INDEX "users_last_login_at_idx" ON "users" ("last_login_at");--> statement-breakpoint
-CREATE INDEX "users_created_at_idx" ON "users" ("created_at");--> statement-breakpoint
-CREATE INDEX "users_updated_at_idx" ON "users" ("updated_at");--> statement-breakpoint
-CREATE INDEX "users_deleted_at_idx" ON "users" ("deleted_at");--> statement-breakpoint
-CREATE INDEX "users_display_currency_idx" ON "users" ("display_currency");--> statement-breakpoint
-CREATE INDEX "users_timezone_idx" ON "users" ("timezone");--> statement-breakpoint
-CREATE INDEX "users_is_super_admin_idx" ON "users" ("is_super_admin");--> statement-breakpoint
-CREATE INDEX "users_phone_idx" ON "users" ("phone");--> statement-breakpoint
-CREATE INDEX "users_name_idx" ON "users" ("name");--> statement-breakpoint
-CREATE INDEX "users_status_deleted_at_idx" ON "users" ("status","deleted_at");--> statement-breakpoint
-CREATE INDEX "users_status_created_at_idx" ON "users" ("status","created_at");
+CREATE INDEX IF NOT EXISTS "admin_audit_logs_created_at_idx" ON "admin_audit_logs" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "admin_audit_logs_ip_address_idx" ON "admin_audit_logs" ("ip_address");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_entity_type_entity_id_created_at_idx" ON "audit_logs" ("entity_type","entity_id","created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_actor_user_id_created_at_idx" ON "audit_logs" ("actor_user_id","created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "audit_logs_action_created_at_idx" ON "audit_logs" ("action","created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "impersonation_sessions_started_at_idx" ON "impersonation_sessions" ("started_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "impersonation_sessions_ended_at_idx" ON "impersonation_sessions" ("ended_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_exchange_audit_logs_created_at_idx" ON "currency_exchange_audit_logs" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_exchange_audit_logs_changed_by_user_id_idx" ON "currency_exchange_audit_logs" ("changed_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_exchange_rates_effective_date_idx" ON "currency_exchange_rates" ("effective_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_exchange_rates_created_at_idx" ON "currency_exchange_rates" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_hedges_hedge_type_idx" ON "currency_hedges" ("hedge_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "currency_hedges_created_at_idx" ON "currency_hedges" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoices_due_date_idx" ON "invoices" ("due_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoices_paid_date_idx" ON "invoices" ("paid_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoices_created_by_user_id_idx" ON "invoices" ("created_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoices_email_sent_at_idx" ON "invoices" ("email_sent_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "payments_payment_date_idx" ON "payments" ("payment_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "payments_created_at_idx" ON "payments" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_created_at_idx" ON "credit_transactions" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_source_payment_id_idx" ON "credit_transactions" ("source_payment_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "credit_transactions_credited_by_user_id_idx" ON "credit_transactions" ("credited_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_currencies_country_code_idx" ON "supported_currencies" ("country_code");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_currencies_sort_order_idx" ON "supported_currencies" ("sort_order");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_currencies_created_at_idx" ON "supported_currencies" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fx_sync_runs_started_at_idx" ON "fx_sync_runs" ("started_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fx_sync_runs_finished_at_idx" ON "fx_sync_runs" ("finished_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fx_sync_runs_trigger_type_idx" ON "fx_sync_runs" ("trigger_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fx_sync_runs_created_at_idx" ON "fx_sync_runs" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_payment_submissions_submitted_by_user_id_idx" ON "invoice_payment_submissions" ("submitted_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_payment_submissions_reviewed_by_user_id_idx" ON "invoice_payment_submissions" ("reviewed_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_payment_submissions_submitted_at_idx" ON "invoice_payment_submissions" ("submitted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "invoice_payment_submissions_reviewed_at_idx" ON "invoice_payment_submissions" ("reviewed_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_mobile_wallets_currency_code_idx" ON "supported_mobile_wallets" ("currency_code");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_mobile_wallets_phone_region_idx" ON "supported_mobile_wallets" ("phone_region");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_mobile_wallets_supported_directions_idx" ON "supported_mobile_wallets" ("supported_directions");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_mobile_wallets_created_at_idx" ON "supported_mobile_wallets" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_online_accounts_identifier_kind_idx" ON "supported_online_accounts" ("identifier_kind");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_online_accounts_supported_directions_idx" ON "supported_online_accounts" ("supported_directions");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_online_accounts_is_active_idx" ON "supported_online_accounts" ("is_active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_online_accounts_created_at_idx" ON "supported_online_accounts" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_payment_links_is_active_idx" ON "supported_payment_links" ("is_active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_payment_links_supported_directions_idx" ON "supported_payment_links" ("supported_directions");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "supported_payment_links_created_at_idx" ON "supported_payment_links" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_verified_at_idx" ON "user_payment_methods" ("verified_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_verified_by_user_id_idx" ON "user_payment_methods" ("verified_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_created_at_idx" ON "user_payment_methods" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_direction_idx" ON "user_payment_methods" ("direction");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_is_default_idx" ON "user_payment_methods" ("is_default");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_user_id_is_default_idx" ON "user_payment_methods" ("user_id","is_default");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_payment_methods_user_id_direction_idx" ON "user_payment_methods" ("user_id","direction");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "books_availability_status_idx" ON "books" ("availability_status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "books_created_at_idx" ON "books" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "books_name_idx" ON "books" ("name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_categories_deleted_at_idx" ON "class_categories" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_subjects_deleted_at_idx" ON "class_subjects" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_communications_is_active_idx" ON "class_communications" ("is_active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_communications_is_delivered_idx" ON "class_communications" ("is_delivered");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_communications_notification_delivery_id_idx" ON "class_communications" ("notification_delivery_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_communications_class_status_event_id_idx" ON "class_communications" ("class_status_event_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_communications_timestamp_idx" ON "class_communications" ("timestamp");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_communications_created_at_idx" ON "class_communications" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_class_enrollments_attendance_status_idx" ON "group_class_enrollments" ("attendance_status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_class_enrollments_created_at_idx" ON "group_class_enrollments" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_classes_created_at_idx" ON "group_classes" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_classes_audit_logged_at_idx" ON "group_classes" ("audit_logged_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_classes_class_type_idx" ON "group_classes" ("class_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_classes_original_date_idx" ON "group_classes" ("original_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_classes_rescheduled_date_idx" ON "group_classes" ("rescheduled_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_submitted_by_user_id_idx" ON "lesson_reports" ("submitted_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_reviewed_by_user_id_idx" ON "lesson_reports" ("reviewed_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_submitted_at_idx" ON "lesson_reports" ("submitted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_reviewed_at_idx" ON "lesson_reports" ("reviewed_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_lesson_date_idx" ON "lesson_reports" ("lesson_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_attendance_evaluation_idx" ON "lesson_reports" ("attendance_evaluation");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_status_submitted_at_idx" ON "lesson_reports" ("status","submitted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_teacher_id_status_idx" ON "lesson_reports" ("teacher_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lesson_reports_student_id_status_idx" ON "lesson_reports" ("student_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instance_performance_created_at_idx" ON "class_instance_performance" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instance_performance_updated_at_idx" ON "class_instance_performance" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_recurring_schedule_id_idx" ON "class_instances" ("recurring_schedule_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_user_meeting_config_id_idx" ON "class_instances" ("user_meeting_config_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_meeting_provider_id_idx" ON "class_instances" ("meeting_provider_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_activated_by_user_id_idx" ON "class_instances" ("activated_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_force_activated_by_user_id_idx" ON "class_instances" ("force_activated_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_booking_timezone_id_idx" ON "class_instances" ("booking_timezone_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_created_at_idx" ON "class_instances" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_updated_at_idx" ON "class_instances" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_actual_start_at_idx" ON "class_instances" ("actual_start_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_actual_end_at_idx" ON "class_instances" ("actual_end_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_activated_at_idx" ON "class_instances" ("activated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_quota_deducted_idx" ON "class_instances" ("quota_deducted");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_payroll_credited_idx" ON "class_instances" ("payroll_credited");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_is_rate_overridden_idx" ON "class_instances" ("is_rate_overridden");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_rate_source_idx" ON "class_instances" ("rate_source");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_deleted_at_idx" ON "class_instances" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_teacher_state_start_idx" ON "class_instances" ("teacher_id","execution_state","scheduled_start_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_student_state_start_idx" ON "class_instances" ("student_id","execution_state","scheduled_start_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_state_start_idx" ON "class_instances" ("execution_state","scheduled_start_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_status_events_event_type_idx" ON "class_status_events" ("event_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_status_events_actor_user_id_idx" ON "class_status_events" ("actor_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dst_migration_entries_recurring_schedule_id_idx" ON "dst_migration_entries" ("recurring_schedule_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dst_migration_entries_result_idx" ON "dst_migration_entries" ("result");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "dst_migration_runs_created_at_idx" ON "dst_migration_runs" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "leave_quota_usage_period_year_period_month_idx" ON "leave_quota_usage" ("period_year","period_month");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "leave_requests_requested_by_user_id_idx" ON "leave_requests" ("requested_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "leave_requests_processed_by_user_id_idx" ON "leave_requests" ("processed_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "leave_requests_status_idx" ON "leave_requests" ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "leave_requests_requester_type_idx" ON "leave_requests" ("requester_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "leave_requests_created_at_idx" ON "leave_requests" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "leave_requests_processed_at_idx" ON "leave_requests" ("processed_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedule_days_recurring_schedule_id_idx" ON "recurring_schedule_days" ("recurring_schedule_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_deleted_at_idx" ON "recurring_schedules" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_effective_from_idx" ON "recurring_schedules" ("effective_from");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_effective_until_idx" ON "recurring_schedules" ("effective_until");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_created_at_idx" ON "recurring_schedules" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_updated_at_idx" ON "recurring_schedules" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_teacher_id_deleted_at_idx" ON "recurring_schedules" ("teacher_id","deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_student_id_deleted_at_idx" ON "recurring_schedules" ("student_id","deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaint_responses_responder_user_id_idx" ON "complaint_responses" ("responder_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaint_responses_created_at_idx" ON "complaint_responses" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaint_responses_email_sent_idx" ON "complaint_responses" ("email_sent");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaints_student_id_idx" ON "complaints" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaints_category_idx" ON "complaints" ("category");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaints_created_at_idx" ON "complaints" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complaints_updated_at_idx" ON "complaints" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "learning_resources_uploaded_by_user_id_idx" ON "learning_resources" ("uploaded_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "learning_resources_created_at_idx" ON "learning_resources" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "learning_resources_display_name_idx" ON "learning_resources" ("display_name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_device_token_id_idx" ON "notification_deliveries" ("device_token_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_sent_at_idx" ON "notification_deliveries" ("sent_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_delivered_at_idx" ON "notification_deliveries" ("delivered_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_failed_at_idx" ON "notification_deliveries" ("failed_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_opened_at_idx" ON "notification_deliveries" ("opened_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_user_id_status_created_at_idx" ON "notification_deliveries" ("user_id","status","created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notification_deliveries_status_created_at_idx" ON "notification_deliveries" ("status","created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_created_at_idx" ON "suggestions" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_reviewed_at_idx" ON "suggestions" ("reviewed_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "suggestions_email_sent_at_idx" ON "suggestions" ("email_sent_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_device_tokens_is_active_idx" ON "user_device_tokens" ("is_active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_device_tokens_last_used_at_idx" ON "user_device_tokens" ("last_used_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_device_tokens_user_id_is_active_idx" ON "user_device_tokens" ("user_id","is_active");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_notification_preferences_channel_idx" ON "user_notification_preferences" ("channel");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_notification_preferences_event_type_idx" ON "user_notification_preferences" ("event_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_notification_preferences_enabled_idx" ON "user_notification_preferences" ("enabled");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_meeting_configs_is_default_idx" ON "class_meeting_configs" ("is_default");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "meeting_providers_created_at_idx" ON "meeting_providers" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "meeting_providers_updated_at_idx" ON "meeting_providers" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_meeting_configs_is_default_idx" ON "user_meeting_configs" ("is_default");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_meeting_configs_user_id_is_default_idx" ON "user_meeting_configs" ("user_id","is_default");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "parents_created_at_idx" ON "parents" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "parents_updated_at_idx" ON "parents" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "parents_invoice_type_idx" ON "parents" ("invoice_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "parents_currency_idx" ON "parents" ("currency");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_permissions_permission_id_idx" ON "group_permissions" ("permission_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "permission_groups_is_system_idx" ON "permission_groups" ("is_system");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "permission_groups_created_by_user_id_idx" ON "permission_groups" ("created_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "permission_groups_created_at_idx" ON "permission_groups" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "permission_groups_updated_at_idx" ON "permission_groups" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "permissions_resource_idx" ON "permissions" ("resource");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "permissions_action_idx" ON "permissions" ("action");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "permissions_is_system_idx" ON "permissions" ("is_system");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_permission_groups_assigned_at_idx" ON "user_permission_groups" ("assigned_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_permission_groups_assigned_by_user_id_idx" ON "user_permission_groups" ("assigned_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_permission_overrides_state_idx" ON "user_permission_overrides" ("state");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_permission_overrides_assigned_by_user_id_idx" ON "user_permission_overrides" ("assigned_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_permission_overrides_created_at_idx" ON "user_permission_overrides" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "rate_limit_cache_value_idx" ON "rate_limit_cache" ("value");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "session_cache_value_idx" ON "session_cache" ("value");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "system_settings_updated_by_user_id_idx" ON "system_settings" ("updated_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "system_settings_updated_at_idx" ON "system_settings" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "system_settings_data_type_idx" ON "system_settings" ("data_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "timezones_is_dst_supported_idx" ON "timezones" ("is_dst_supported");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "timezones_base_offset_minutes_idx" ON "timezones" ("base_offset_minutes");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "site_content_updated_by_user_id_idx" ON "site_content" ("updated_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "site_content_created_at_idx" ON "site_content" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "site_content_updated_at_idx" ON "site_content" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "site_content_is_published_content_type_idx" ON "site_content" ("is_published","content_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "signed_url_created_at_idx" ON "signed_url" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "signed_url_file_path_idx" ON "signed_url" ("file_path");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "signed_url_content_hash_idx" ON "signed_url" ("content_hash");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "storage_directories_is_protected_idx" ON "storage_directory" ("is_protected");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "storage_directories_allow_uploads_idx" ON "storage_directory" ("allow_uploads");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "storage_files_is_protected_idx" ON "storage_file" ("is_protected");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_progress_parent_visible_idx" ON "student_progress" ("parent_visible");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_progress_created_at_idx" ON "student_progress" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_language_idx" ON "students" ("language");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_date_of_birth_idx" ON "students" ("date_of_birth");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_updated_at_idx" ON "students" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "students_primary_teacher_id_status_idx" ON "students" ("primary_teacher_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_assignments_ended_at_idx" ON "teacher_assignments" ("ended_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_assignments_assigned_by_user_id_idx" ON "teacher_assignments" ("assigned_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "staff_profiles_created_at_idx" ON "staff_profiles" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "staff_profiles_updated_at_idx" ON "staff_profiles" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "staff_profiles_rate_currency_idx" ON "staff_profiles" ("rate_currency");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_vacation_requests_end_at_idx" ON "teacher_vacation_requests" ("end_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_vacation_requests_requested_by_user_id_idx" ON "teacher_vacation_requests" ("requested_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_vacation_requests_processed_by_user_id_idx" ON "teacher_vacation_requests" ("processed_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_student_id_idx" ON "teacher_dues" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_teacher_payment_id_idx" ON "teacher_dues" ("teacher_payment_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_approved_by_user_id_idx" ON "teacher_dues" ("approved_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_currency_idx" ON "teacher_dues" ("currency");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_dues_rate_source_idx" ON "teacher_dues" ("rate_source");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_important_notes_is_published_idx" ON "teacher_important_notes" ("is_published");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_important_notes_deleted_at_idx" ON "teacher_important_notes" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_important_notes_created_by_user_id_idx" ON "teacher_important_notes" ("created_by_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_payments_payment_date_idx" ON "teacher_payments" ("payment_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_payments_payment_method_type_idx" ON "teacher_payments" ("payment_method_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teacher_payments_is_test_payment_idx" ON "teacher_payments" ("is_test_payment");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teachers_created_at_idx" ON "teachers" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teachers_updated_at_idx" ON "teachers" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teachers_nationality_idx" ON "teachers" ("nationality");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teachers_country_code_idx" ON "teachers" ("country_code");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teachers_gender_idx" ON "teachers" ("gender");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "teachers_rate_currency_idx" ON "teachers" ("rate_currency");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_last_login_at_idx" ON "users" ("last_login_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_created_at_idx" ON "users" ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_updated_at_idx" ON "users" ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_deleted_at_idx" ON "users" ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_display_currency_idx" ON "users" ("display_currency");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_timezone_idx" ON "users" ("timezone");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_is_super_admin_idx" ON "users" ("is_super_admin");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_phone_idx" ON "users" ("phone");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_name_idx" ON "users" ("name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_status_deleted_at_idx" ON "users" ("status","deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_status_created_at_idx" ON "users" ("status","created_at");

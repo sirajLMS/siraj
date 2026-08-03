@@ -58,4 +58,3 @@ WHERE
   g.slug IN ('super_admin', 'academy_admin')
   AND p.key = 'quotas.manage'
 ON CONFLICT DO NOTHING;
-

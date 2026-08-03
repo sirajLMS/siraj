@@ -1,14 +1,7 @@
 -- Migration: Add quotas.view and quotas.manage to app_permission pgEnum
--- Wrapped in DO block with exception handling for safe re-runnability.
-DO $$ BEGIN
-  ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'quotas.view';
-EXCEPTION
-  WHEN duplicate_value THEN NULL;
-  WHEN object_not_string THEN NULL;
-END $$;
-DO $$ BEGIN
-  ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'quotas.manage';
-EXCEPTION
-  WHEN duplicate_value THEN NULL;
-  WHEN object_not_string THEN NULL;
-END $$;
+-- `ADD VALUE IF NOT EXISTS` is natively idempotent; no EXCEPTION block is needed.
+-- (A DO $$ ... EXCEPTION block would require valid PL/pgSQL condition names —
+--  duplicate_value / object_not_string are not, and the IF NOT EXISTS guard
+--  makes swallow-on-duplicate unnecessary.)
+ALTER TYPE "app_permission" ADD VALUE IF NOT EXISTS 'quotas.view';
+ALTER TYPE "app_permission" ADD VALUE IF NOT EXISTS 'quotas.manage';
