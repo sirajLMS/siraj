@@ -35,6 +35,24 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
     removeOverride: "إزالة التخصيص",
     label: _day => `وقت مخصص`,
   },
+  scheduling: {
+    mode: "وضع الجدولة",
+    quotaId: "معرف الحصة",
+    earmarkedClasses: "الحصص المحجوزة",
+    generationHorizon: "أفق التوليد (أسابيع)",
+    ondemandNoCreditsOutcome: "نتيجة عدم توفر الرصيد عند الطلب",
+    noMode: "بدون",
+    ondemandNoCredits: {
+      AutoCancel: "تخطي",
+      AutoAbsentNoCredits: "توليد على أي حال",
+      RemindOnly: "تذكير فقط",
+    },
+    modes: {
+      NumberOfClasses: "جدولة ثابتة",
+      OnDemand: "عند الطلب",
+      Quota: "حصة",
+    },
+  },
   actions: {
     create: "إنشاء الحصة",
     cancel: "إلغاء",

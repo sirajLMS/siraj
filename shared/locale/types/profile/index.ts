@@ -308,11 +308,25 @@ export interface ProfileNotificationsLabels {
   readonly saved: string;
   readonly errorLoading: string;
   readonly errorSaving: string;
+  readonly autoGeneration: {
+    readonly title: string;
+    readonly onSave: string;
+    readonly preview: string;
+    readonly booking: string;
+    readonly learnMore: string;
+  };
+  readonly categories: {
+    readonly info: string;
+    readonly reminder: string;
+    readonly urgent: string;
+    readonly digest: string;
+  };
   readonly channels: {
     readonly EMAIL: string;
     readonly SMS: string;
     readonly PUSH: string;
     readonly ON_APP: string;
+    readonly WHATSAPP: string;
   };
   readonly events: {
     readonly CLASS_REMINDER: string;
@@ -337,6 +351,26 @@ export interface ProfileNotificationsLabels {
     // Supervisor / lesson-report matrix
     readonly LESSON_REPORT_SUBMITTED: string;
     readonly LESSON_REPORT_REVIEWED: string;
+    // Quota & on-demand events
+    readonly QUOTA_EXPIRING_SOON: string;
+    readonly QUOTA_EXPIRED: string;
+    readonly QUOTA_LOW_BALANCE: string;
+    readonly ON_DEMAND_INSTANCE_PENDING_CREDIT: string;
+    readonly ON_DEMAND_INSTANCE_REMINDER_T3: string;
+    readonly ON_DEMAND_INSTANCE_REMINDER_T1: string;
+    readonly ON_DEMAND_TEACHER_DAILY_DIGEST: string;
+  };
+  readonly connectAccount: {
+    readonly connectButton: string;
+    readonly connectingLabel: string;
+    readonly connectedAs: (email: string) => string;
+    readonly disconnectButton: string;
+    readonly disconnectConfirmTitle: string;
+    readonly disconnectConfirm: string;
+    readonly confirmDisconnect: string;
+    readonly cancel: string;
+    readonly reconnectButton: string;
+    readonly reconnectCallout: string;
   };
 }
 

@@ -1,35 +1,32 @@
 /**
  * Pure notification payload builders — the SOLE producer of `CommunicationPayload`
  * objects in the codebase. Domain services call these builders and hand the
- * resulting array to `dispatchWithPreferences` (specs.md rule #2).
+ * resulting array to `dispatchWithPreferences`.
  *
- * Contract (specs.md §5.1):
+ * Contract:
  *   - PURE: no I/O, no logger, no side-effects. The only "external" call is
  *     `getServerTranslations(locale)` — a synchronous lookup against the
  *     compile-time i18n registry in `@/shared/locale`, which is safe.
  *   - LOCALIZED: every title/body flows through the `notifications` namespace
  *     in `shared/locale/notifications/`. NO hardcoded English literals
- *     (specs.md F3).
+ *     No hardcoded English literals.
  *   - IDEMPOTENT: same inputs -> same outputs.
- *   - ALL FOUR CHANNELS: every builder emits one payload per channel
- *     (`on_app`, `email`, `sms`, `push`). Channel filtering by user prefs +
+ *   - ALL FIVE CHANNELS: every builder emits one payload per channel
+ *     (`on_app`, `email`, `sms`, `push`, `whatsapp`). Channel filtering by user prefs +
  *     event allowlist happens in `dispatchWithPreferences`.
  *
  * Fan-out strategy: each builder accepts `affectedUserIds[]` and emits
- * `4 * affectedUserIds.length` payloads, one per (user, channel). Callers
+ * up to `5 * affectedUserIds.length` payloads, one per (user, channel). Callers
  * pass the SAME `affectedUserIds` to `dispatchWithPreferences` so prefs are
  * applied per user. For single-recipient events (invoice, payment-method)
- * pass a one-element array.
+ * pass a one-element array. WhatsApp payloads are only emitted for events
+ * that have a template in `NOTIFICATION_TEMPLATE_MAP` (B1).
  */
 
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
-import type {
-  ClassInstanceSelectType,
-  CommunicationChannelType,
-  CommunicationPayload,
-  InvoiceSelectType,
-} from "@/backend/types";
+import type { ClassInstanceSelectType, CommunicationPayload, InvoiceSelectType } from "@/backend/types";
 import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
+import type { WhatsappTemplateMetadata } from "@/backend/types/whatsapp/whatsapp-account.types";
 import { getServerTranslations } from "@/shared/locale";
 import type {
   ClassLifecycleBodyParams,
@@ -43,29 +40,90 @@ type PayloadMetadata = NotificationMetadata & Record<string, unknown>;
 // ─── Helpers ───────────────────────────────────────────────────────────
 
 /**
- * The four dispatch channels as `CommunicationChannelType` literals.
- *
- * NOTE: `CommunicationChannelType = "on_app" | "email" | "sms" | "push"`
- * (lowercase) is the existing payload-channel type alias. The
- * `NotificationChannel` enum members (`EMAIL`, `SMS`, `PUSH`, `ON_APP`)
- * are uppercase and are used to key prefs + DB columns. We map enum →
- * payload-channel here in a single place so builders can stay typed
- * against the lowercase alias without sprinkling string literals
- * throughout call sites (specs.md F15 — no `case "EMAIL":` literals).
+ * Maps `NotificationChannel` enum members to their lowercase string identifiers
+ * used in channel comparison and routing. WhatsApp joins the existing four.
+ * Exported for downstream consumers (dispatch helpers, tests).
  */
-const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, CommunicationChannelType>> = Object.freeze({
+export const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, string>> = Object.freeze({
   [NotificationChannel.ON_APP]: "on_app",
   [NotificationChannel.EMAIL]: "email",
   [NotificationChannel.SMS]: "sms",
   [NotificationChannel.PUSH]: "push",
+  [NotificationChannel.WHATSAPP]: "whatsapp",
 });
 
-const ALL_CHANNELS: readonly NotificationChannel[] = [
+export const ALL_CHANNELS: readonly NotificationChannel[] = [
   NotificationChannel.ON_APP,
   NotificationChannel.EMAIL,
   NotificationChannel.SMS,
   NotificationChannel.PUSH,
+  NotificationChannel.WHATSAPP,
 ] as const;
+
+/**
+ * Per-event canonical WhatsApp template mapping (B1).
+ *
+ * Each entry maps a `NotificationEventType` to the approved Meta template name
+ * and the ordered parameter names that the template body/header expects.
+ * `notification-payloads.builders` uses this to stamp
+ * `metadata.whatsappTemplate: { name, languageCode, paramsOrder }` on WhatsApp
+ * payloads so `dispatchWhatsapp` (6.3) can build the templated send.
+ *
+ * `languageCode` defaults to `null` so the dispatch layer MUST set it from the
+ * recipient's locale — the pure builder has no I/O or locale dependency (r7-020).
+ *
+ * Only utility events that Meta allows as business-initiated templates are
+ * listed here.  Events absent from this map will NOT emit a WhatsApp payload
+ * even if `WHATSAPP` is in the event allowlist — the builder simply omits
+ * `metadata.whatsappTemplate` and the dispatch layer skips the send.
+ *
+ * REQ-10 / BL1 — Per-user opt-in gate:
+ * Builders are pure (no I/O) so they cannot check the per-user `whatsappEnabled`
+ * flag.  The opt-in gate is applied downstream in `dispatchWithPreferences`
+ * → `dispatchForUser`, which already checks per-user channel preferences via
+ * `NotificationPreferencesRepository`.  When Task 29 adds the dedicated
+ * `whatsappEnabled` column, `dispatchForUser` will also check it there.
+ * Until then, the existing channel-preference gate serves as the opt-in:
+ * a user with WhatsApp disabled in their prefs will not receive WhatsApp
+ * payloads.
+ */
+export const NOTIFICATION_TEMPLATE_MAP: Readonly<
+  Partial<Record<NotificationEventType, { readonly templateName: string; readonly paramsOrder: readonly string[] }>>
+> = {
+  [NotificationEventType.CLASS_REMINDER]: {
+    templateName: "class_reminder_utility_v1",
+    paramsOrder: ["studentName", "scheduledStartAt"],
+  },
+  [NotificationEventType.CLASS_ACTIVATED]: {
+    templateName: "class_activated_utility_v1",
+    paramsOrder: ["studentName", "scheduledStartAt"],
+  },
+  [NotificationEventType.LESSON_REPORT_SUBMITTED]: {
+    templateName: "lesson_report_submitted_utility_v1",
+    paramsOrder: ["reportId", "teacherName"],
+  },
+  [NotificationEventType.LESSON_REPORT_REVIEWED]: {
+    templateName: "lesson_report_reviewed_utility_v1",
+    paramsOrder: ["reportId", "teacherName", "decision"],
+  },
+  [NotificationEventType.INVOICE_GENERATED]: {
+    templateName: "invoice_generated_utility_v1",
+    paramsOrder: ["invoiceId", "amount", "currency"],
+  },
+};
+
+/**
+ * Default language code for WhatsApp templates.
+ *
+ * Set to `null` so the dispatch layer is FORCED to set `languageCode` from the
+ * recipient's locale. The dispatch layer (6.3) overrides this from the synced
+ * template row's `languageCode` when available (B6). Kept here so pure builders
+ * have no I/O dependency.
+ *
+ * r7-020: Previously hardcoded to `"en"`, which caused Arabic-locale recipients
+ * to receive English templates because the dispatch layer never overrode it.
+ */
+const DEFAULT_WHATSAPP_LANGUAGE_CODE: string | null = null;
 
 function labelsFor(locale: string | undefined): NotificationsLabels {
   return getServerTranslations(locale ?? "en").notificationsTranslations;
@@ -75,25 +133,47 @@ function labelsFor(locale: string | undefined): NotificationsLabels {
  * Build one `CommunicationPayload` per channel for the given user/event.
  * `body` is shared across channels (channel adapters handle format
  * differences — see `CommunicationService.dispatch`).
+ *
+ * For WhatsApp payloads, `metadata.whatsappTemplate` is stamped from
+ * `NOTIFICATION_TEMPLATE_MAP` (B1) so `dispatchWhatsapp` (6.3) can build
+ * the templated send. Events without a template mapping get no
+ * `whatsappTemplate` — the dispatch layer skips the send in that case.
  */
-function buildPerChannel(
+export function buildPerChannel(
   userId: string,
   eventType: NotificationEventType,
   title: string,
   body: string,
-  metadata: PayloadMetadata
+  metadata: Record<string, unknown>
 ): CommunicationPayload[] {
   if (!userId) return [];
   const payloads: CommunicationPayload[] = [];
   for (const channel of ALL_CHANNELS) {
-    payloads.push({
-      userId,
-      title,
-      body,
-      channel: CHANNEL_FROM_ENUM[channel],
-      eventType,
-      metadata,
-    });
+    if (channel === NotificationChannel.WHATSAPP) {
+      const templateDef = NOTIFICATION_TEMPLATE_MAP[eventType];
+      if (!templateDef) continue; // no approved template for this event — skip WhatsApp
+      if (!templateDef.paramsOrder || templateDef.paramsOrder.length === 0) {
+        // Internal config error — NOTIFICATION_TEMPLATE_MAP misconfigured, not user-facing, no i18n needed
+        throw new Error(`Missing template paramsOrder for event ${eventType}`);
+      }
+      payloads.push({
+        userId,
+        title,
+        body,
+        channel,
+        eventType,
+        metadata: {
+          ...metadata,
+          whatsappTemplate: {
+            name: templateDef.templateName,
+            languageCode: DEFAULT_WHATSAPP_LANGUAGE_CODE,
+            paramsOrder: templateDef.paramsOrder,
+          } satisfies WhatsappTemplateMetadata,
+        },
+      });
+    } else {
+      payloads.push({ userId, title, body, channel, eventType, metadata });
+    }
   }
   return payloads;
 }
@@ -105,12 +185,12 @@ function buildPerChannel(
  * `for (const userId of affectedUserIds) { ... buildPerChannel(...) }`
  * shape lives in exactly one place.
  */
-function fanOutToUsers(
+export function fanOutToUsers(
   affectedUserIds: readonly string[],
   eventType: NotificationEventType,
   title: string,
   body: string,
-  sharedMetadata: PayloadMetadata
+  sharedMetadata: Record<string, unknown>
 ): CommunicationPayload[] {
   const payloads: CommunicationPayload[] = [];
   for (const userId of affectedUserIds) {
@@ -271,6 +351,22 @@ function renderStudentLifecycle(
   }
 }
 
+// ─── Quota & on-demand event builder registry ─────────────────────────
+//
+// The quota/on-demand notification builders live in `quota-notification.builders.ts`
+// to keep the pure three-arg thousand-line file from growing further. They are
+// re-exported here so every notification builder shares a single import surface
+// (`notification-payloads.builders`) — resolving task 11.4 "register new builders".
+export {
+  buildOndemandInstancePendingCreditPayloads,
+  buildOndemandInstanceReminderT1Payloads,
+  buildOndemandInstanceReminderT3Payloads,
+  buildOndemandTeacherDailyDigestPayloads,
+  buildQuotaExpiredPayloads,
+  buildQuotaExpiringSoonPayloads,
+  buildQuotaLowBalancePayloads,
+} from "@/backend/services/notification/quota-notification.builders";
+
 // ─── Invoice event builders ───────────────────────────────────────────
 
 /**
@@ -307,7 +403,7 @@ export function buildInvoiceGeneratedPayloads(
  * @param action        Which status transition triggered the event.
  * @param invoice       The invoice whose status changed.
  * @param locale        Optional locale code.
- * @returns One `CommunicationPayload[]` of length 4 (one per channel).
+ * @returns One `CommunicationPayload[]` of length up to 5 (one per channel; WhatsApp only when a template exists).
  */
 export function buildInvoiceStatusChangedPayloads(
   parentUserId: string,
@@ -342,7 +438,7 @@ export function buildInvoiceStatusChangedPayloads(
  * @param metadata   Optional metadata bag (must include `identifier` if
  *                   the locale's body template requires it). If `identifier`
  *                   is absent the literal `"—"` is substituted for safety.
- * @returns One `CommunicationPayload[]` of length 4.
+ * @returns One `CommunicationPayload[]` of length up to 5.
  */
 export function buildPaymentMethodChangedPayloads(
   userId: string,
@@ -397,7 +493,7 @@ const CLASS_LIFECYCLE_EVENTS: ReadonlySet<NotificationEventType> = new Set([
  * @param locale            Optional locale code.
  * @param metadata          Optional metadata bag (`studentName`, `newStartAt`,
  *                          any extra context).
- * @returns `CommunicationPayload[]` of length `4 * affectedUserIds.length`.
+ * @returns `CommunicationPayload[]` of length up to `5 * affectedUserIds.length`.
  *          Returns `[]` if `affectedUserIds` is empty or `eventType` is not
  *          a CLASS_* lifecycle event.
  */
@@ -442,7 +538,7 @@ const STUDENT_LIFECYCLE_EVENTS: ReadonlySet<NotificationEventType> = new Set([
  * Build payloads for a student-lifecycle event. Emits 4 payloads per
  * affected user (one per channel).
  *
- * Per specs.md §5.1 the signature is `(studentId, eventType, affectedUserIds, locale?, metadata?)`:
+ * Signature is `(studentId, eventType, affectedUserIds, locale?, metadata?)`:
  * builders do NOT read the `students` table. Context (student name, old/new
  * status, quota values, recipient role) is supplied via `metadata` by the
  * domain service that owns the join.
@@ -464,7 +560,7 @@ const STUDENT_LIFECYCLE_EVENTS: ReadonlySet<NotificationEventType> = new Set([
  * @param affectedUserIds   Users who should receive the notification.
  * @param locale            Optional locale code.
  * @param metadata          Required context bag per event type (see above).
- * @returns `CommunicationPayload[]` of length `4 * affectedUserIds.length`.
+ * @returns `CommunicationPayload[]` of length up to `5 * affectedUserIds.length`.
  */
 export function buildStudentLifecyclePayloads(
   studentId: string,

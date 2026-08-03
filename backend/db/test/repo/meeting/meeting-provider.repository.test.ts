@@ -43,6 +43,7 @@ function buildProviderInput(slug: string) {
     urlAllowlist: ["zoom.us", "*.zoom.us"] as const,
     urlExample: "https://zoom.us/j/123456789",
     fieldSchema: { requiresMeetingUrl: true, supportsPassword: true },
+    providerKind: "manual" as const,
     isActive: true,
   };
 }
@@ -74,6 +75,7 @@ describe("MeetingProviderRepository", () => {
     expect(created.id).toBeDefined();
     expect(created.slug).toBe(slug);
     expect(created.name.en).toBe("Zoom");
+    expect(created.providerKind).toBe("manual");
     expect(created.isActive).toBe(true);
     expect(created.createdAt).toBeInstanceOf(Date);
   });

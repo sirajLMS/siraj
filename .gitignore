@@ -99,4 +99,5 @@ skills-lock.json
 
 scripts/run-test/feedback/feedback*.md
 
+.graphql-test-heartbeats/dump.rdb
 .graphql-test-heartbeats/

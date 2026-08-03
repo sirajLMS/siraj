@@ -53,6 +53,11 @@ export const dashboardMeetingProvidersAr: MeetingProvidersLabels = {
     supportsUsername: "دعم اسم المستخدم",
     supportsPassword: "دعم كلمة المرور",
     supportsTenantId: "دعم معرف المؤسسة (Tenant ID)",
+    providerKind: "نوع المنصة",
+    providerKindManual: "يدوي (يُدخل المستخدم الرابط)",
+    providerKindZoom: "Zoom (توليد تلقائي)",
+    providerKindGoogleMeet: "Google Meet (توليد تلقائي)",
+    providerKindTeams: "Microsoft Teams (توليد تلقائي)",
   },
   validation: {
     slugRequired: "المعرّف مطلوب",

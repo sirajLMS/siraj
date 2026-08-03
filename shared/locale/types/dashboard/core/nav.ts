@@ -38,7 +38,13 @@ export interface DashboardNavigationLabels {
   readonly scheduleReschedule: string;
   readonly dstMigration: string;
   readonly billingAdmin: string;
+  readonly quotas: string;
+  readonly quotasCreate: string;
+  readonly quotasView: string;
+  readonly quotasEdit: string;
+  readonly quotasInsights: string;
   readonly exchangeRates: string;
+
   readonly supportedCurrencies: string;
   readonly currencyHedges: string;
   readonly paymentCatalogs: string;
@@ -67,6 +73,7 @@ export interface DashboardNavigationLabels {
   readonly cron: string;
   readonly permissions: string;
   readonly settings: string;
+  readonly whatsappSettings: string;
   readonly booksAndBags: string;
   readonly studentTodayClasses: string;
   readonly studentSchedule: string;
@@ -97,6 +104,7 @@ export interface DashboardNavigationLabels {
   readonly navGroupFeedback: string;
   readonly navGroupReports: string;
   readonly navGroupAdmin: string;
+  readonly navGroupIntegrations: string;
   readonly navGroupResources: string;
   readonly navGroupClasses: string;
   readonly navGroupAccount: string;

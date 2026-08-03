@@ -1,5 +1,6 @@
 import { dashboardSettingsEnvironmentEn } from "@/shared/locale/en/dashboard/settings/environment";
 import { dashboardSettingsGeneralEn } from "@/shared/locale/en/dashboard/settings/general";
+import { dashboardSettingsMeetingIntegrationsEn } from "@/shared/locale/en/dashboard/settings/meeting-integrations";
 import { dashboardSettingsSessionEn } from "@/shared/locale/en/dashboard/settings/session";
 import { dashboardSettingsSiteContentEn } from "@/shared/locale/en/dashboard/settings/siteContent";
 import { dashboardSettingsTimezonesEn } from "@/shared/locale/en/dashboard/settings/timezones";
@@ -15,6 +16,7 @@ const auditEntityTypes = {
   PERMISSION_GROUP: "Permission group",
   USER_PERMISSION: "User permission",
   EXCHANGE_RATE: "Exchange rate",
+  WHATSAPP_ACCOUNT: "WhatsApp account",
   USER: "User",
   STUDENT: "Student",
   TEACHER: "Teacher",
@@ -51,6 +53,7 @@ export const dashboardSettingsEn: SettingsLabels = {
     audit: "Audit",
     siteContent: "Site Content",
     timezones: "Timezones",
+    meetingIntegrations: "Meeting Integrations",
   },
   audit: {
     emptyMessage: "No audit log entries match the current filters.",
@@ -75,6 +78,7 @@ export const dashboardSettingsEn: SettingsLabels = {
   },
   environment: dashboardSettingsEnvironmentEn,
   general: dashboardSettingsGeneralEn,
+  meetingIntegrations: dashboardSettingsMeetingIntegrationsEn,
   session: dashboardSettingsSessionEn,
   siteContent: dashboardSettingsSiteContentEn,
   timezones: dashboardSettingsTimezonesEn,

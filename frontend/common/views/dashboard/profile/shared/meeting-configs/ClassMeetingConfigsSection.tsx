@@ -97,7 +97,9 @@ function ConfigsContent({
       />
 
       {!resolvedCanManage && configs.length === 0 ? (
-        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t.noConfigs}</Typography>
+        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })}>
+          {t.noConfigs}
+        </Typography>
       ) : null}
     </Stack>
   );

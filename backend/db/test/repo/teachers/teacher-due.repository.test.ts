@@ -7,9 +7,9 @@ import { teacherDues, teacherPayments } from "@/backend/db/schema";
 import { createTestTeacherDue, setupStudent, setupTeacher, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode, PaymentDirection, PaymentMethodType, TeacherDueStatus } from "@/backend/enum";
-import type { ClassInstanceEntity } from "@/backend/types";
+import type { ClassInstanceSelectType } from "@/backend/types";
 
-function requireInstance(instance: ClassInstanceEntity | null): ClassInstanceEntity {
+function requireInstance(instance: ClassInstanceSelectType | null): ClassInstanceSelectType {
   if (!instance) {
     throw new Error("setupTestEntities returned a null instance — pass skipInstance:false");
   }

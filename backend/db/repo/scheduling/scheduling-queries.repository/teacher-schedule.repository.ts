@@ -2,6 +2,8 @@ import { and, eq, gte, inArray, isNull, lt, ne, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, classSubjects, recurringSchedules, students } from "@/backend/db/schema";
+import type { ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { DayOfWeek } from "@/backend/enum";
 import type {
   FutureClassRow,
   TeacherAssignedClassRow,
@@ -50,7 +52,11 @@ export async function getTeacherFutureClasses(
     )
     .orderBy(classInstances.scheduledStartAt);
 
-  return rows;
+  return rows.map(row => ({
+    ...row,
+    executionState: row.executionState as ClassExecutionState,
+    outcome: row.outcome as ClassOutcome | null,
+  }));
 }
 
 export const getWeeklyScheduleGrid = async (
@@ -92,9 +98,19 @@ export const getWeeklyScheduleGrid = async (
 
   return rows.map(row => {
     const dayIndex = row.scheduledStartAt.getUTCDay();
-    const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const dayNames: DayOfWeek[] = [
+      DayOfWeek.SUNDAY,
+      DayOfWeek.MONDAY,
+      DayOfWeek.TUESDAY,
+      DayOfWeek.WEDNESDAY,
+      DayOfWeek.THURSDAY,
+      DayOfWeek.FRIDAY,
+      DayOfWeek.SATURDAY,
+    ];
     return {
       ...row,
+      executionState: row.executionState as ClassExecutionState,
+      outcome: row.outcome as ClassOutcome | null,
       dayOfWeek: dayNames[dayIndex],
     };
   });
@@ -167,5 +183,9 @@ export const getTeacherAssignedClasses = async (
     .orderBy(classInstances.scheduledStartAt)
     .limit(200);
 
-  return rows;
+  return rows.map(row => ({
+    ...row,
+    executionState: row.executionState as ClassExecutionState,
+    outcome: row.outcome as ClassOutcome | null,
+  }));
 };

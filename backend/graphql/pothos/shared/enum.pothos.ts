@@ -30,23 +30,38 @@ import {
   LeaveRequestStatus,
   LessonReportStatus,
   ManagerAccountType,
+  MeetingConnectionTestMode,
+  MeetingIntegrationConnectedAccountStatus,
+  MeetingIntegrationProviderSlug,
   NotificationChannel,
   NotificationEventType,
+  OnDemandNoCreditsOutcome,
+  OnDemandStatus,
   OrderSortDirection,
   OverrideState,
   ParentStatus,
   ProfileAudience,
   ProfileMode,
   ProfileScope,
+  QuotaKind,
+  QuotaLedgerReason,
+  QuotaPeriodType,
+  QuotaStatus,
   RateSource,
   RescheduleDateLabel,
+  SchedulingMode,
   StudentStatus,
   SystemSettingCategory,
   SystemSettingDataType,
   TeacherDueStatus,
   TeacherProgressFeedEventKind,
   UserRole,
+  WhatsappLimitTier,
+  WhatsappQualityRating,
+  WhatsappTemplateCategory,
+  WhatsappTemplateStatus,
 } from "@/backend/enum";
+
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -275,4 +290,61 @@ export const CronTriggerSourcePothosEnum = gqlSchemaBuilder.enumType(CronTrigger
 
 export const CronConcurrencyPolicyPothosEnum = gqlSchemaBuilder.enumType(CronConcurrencyPolicy, {
   name: "CronConcurrencyPolicy",
+});
+
+export const MeetingConnectionTestModePothosEnum = gqlSchemaBuilder.enumType(MeetingConnectionTestMode, {
+  name: "MeetingConnectionTestMode",
+});
+
+export const MeetingIntegrationConnectedAccountStatusPothosEnum = gqlSchemaBuilder.enumType(
+  MeetingIntegrationConnectedAccountStatus,
+  { name: "MeetingIntegrationConnectedAccountStatus" }
+);
+
+export const MeetingIntegrationProviderSlugPothosEnum = gqlSchemaBuilder.enumType(MeetingIntegrationProviderSlug, {
+  name: "MeetingIntegrationProviderSlug",
+});
+
+export const WhatsappQualityRatingPothosEnum = gqlSchemaBuilder.enumType(WhatsappQualityRating, {
+  name: "WhatsappQualityRating",
+});
+
+export const WhatsappLimitTierPothosEnum = gqlSchemaBuilder.enumType(WhatsappLimitTier, {
+  name: "WhatsappLimitTier",
+});
+
+export const WhatsappTemplateStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappTemplateStatus, {
+  name: "WhatsappTemplateStatus",
+});
+
+export const WhatsappTemplateCategoryPothosEnum = gqlSchemaBuilder.enumType(WhatsappTemplateCategory, {
+  name: "WhatsappTemplateCategory",
+});
+
+export const QuotaKindPothosEnum = gqlSchemaBuilder.enumType(QuotaKind, {
+  name: "QuotaKind",
+});
+
+export const QuotaStatusPothosEnum = gqlSchemaBuilder.enumType(QuotaStatus, {
+  name: "QuotaStatus",
+});
+
+export const QuotaPeriodTypePothosEnum = gqlSchemaBuilder.enumType(QuotaPeriodType, {
+  name: "QuotaPeriodType",
+});
+
+export const QuotaLedgerReasonPothosEnum = gqlSchemaBuilder.enumType(QuotaLedgerReason, {
+  name: "QuotaLedgerReason",
+});
+
+export const SchedulingModePothosEnum = gqlSchemaBuilder.enumType(SchedulingMode, {
+  name: "SchedulingMode",
+});
+
+export const OnDemandNoCreditsOutcomePothosEnum = gqlSchemaBuilder.enumType(OnDemandNoCreditsOutcome, {
+  name: "OnDemandNoCreditsOutcome",
+});
+
+export const OnDemandStatusPothosEnum = gqlSchemaBuilder.enumType(OnDemandStatus, {
+  name: "OnDemandStatus",
 });

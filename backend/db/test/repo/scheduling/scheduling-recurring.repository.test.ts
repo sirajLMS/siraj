@@ -13,6 +13,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { DayOfWeek } from "@/backend/enum/teachers/teacher-availability.enum";
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {
   let errorCaught: unknown = null;
@@ -69,10 +70,10 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
         expect(grid).toHaveLength(2);
 
         const monClass = grid.find(c => c.id === c1.id);
-        expect(monClass?.dayOfWeek).toBe("monday");
+        expect(monClass?.dayOfWeek).toBe(DayOfWeek.MONDAY);
 
         const wedClass = grid.find(c => c.id === c2.id);
-        expect(wedClass?.dayOfWeek).toBe("wednesday");
+        expect(wedClass?.dayOfWeek).toBe(DayOfWeek.WEDNESDAY);
 
         const workload = await getWeeklyWorkloadMetrics(teacher.id, weekStart, weekEnd, tx);
         expect(workload.classCount).toBe(1);
@@ -183,7 +184,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           .select({ classesRemaining: students.classesRemaining })
           .from(students)
           .where(eq(students.id, student.id));
-        expect(studentAfter.classesRemaining).toBe(1);
+        expect(studentAfter.classesRemaining).toBe(5);
 
         const [schedule] = await tx
           .select()

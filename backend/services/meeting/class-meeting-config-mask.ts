@@ -1,3 +1,4 @@
+import { maskProviderMetadata } from "@/backend/services/meeting/meeting-config-mask";
 import type {
   ClassMeetingConfigReturnType,
   ClassMeetingConfigSelectType,
@@ -13,6 +14,7 @@ export function buildMaskedClassMeetingConfig(
     ...config,
     hasSecret: Boolean(config.encryptedSecret),
     encryptedSecret: isAdminScope ? config.encryptedSecret : null,
+    providerMetadata: maskProviderMetadata(config.providerMetadata, isAdminScope),
     provider: providerMap?.get(config.providerId),
   };
 }

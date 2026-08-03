@@ -8,6 +8,7 @@ import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
 import type { CreditInsertInput, CreditTransactionSelectType, PaginationArgs } from "@/backend/types";
 
+// NOTE: Overload-by-type-discrimination — tx parameter is polymorphic: string (studentId) or Transaction instance. Callers must be aware that getBalance(tx, undefined) silently targets the wrong studentId.
 type ReadExecutor = DBTransaction | typeof db;
 
 export namespace CreditRepository {
@@ -144,6 +145,41 @@ export namespace CreditRepository {
       .where(inArray(creditTransactions.idempotencyKey, [...keys]));
   };
 
+  /**
+   * Batch multi-row insert of credit transactions. Deduplicates against
+   * existing rows by `idempotencyKey` within the same call — only rows
+   * whose `idempotencyKey` is not already present (from the `rows` set)
+   * are actually inserted.
+   */
+  export const insertBatch = async (
+    tx: DBTransaction,
+    rows: CreditInsertInput[]
+  ): Promise<CreditTransactionSelectType[]> => {
+    if (rows.length === 0) return [];
+
+    const keys = rows.map(r => r.idempotencyKey);
+    const existing = await findByIdempotencyKeys(keys, tx);
+    const existingKeys = new Set(existing.map(r => r.idempotencyKey));
+    const toInsert = rows.filter(r => !existingKeys.has(r.idempotencyKey));
+    if (toInsert.length === 0) return [];
+
+    const now = new Date();
+    const values = toInsert.map(r => ({
+      studentId: r.studentId,
+      changeAmount: r.changeAmount,
+      reason: r.reason,
+      sourcePaymentId: r.sourcePaymentId ?? null,
+      classInstanceId: r.classInstanceId ?? null,
+      notes: r.notes ?? null,
+      creditedByUserId: r.creditedByUserId,
+      idempotencyKey: r.idempotencyKey,
+      createdAt: now,
+      updatedAt: now,
+    }));
+
+    return tx.insert(creditTransactions).values(values).returning();
+  };
+
   export const findByClassInstanceId = async (
     tx: ReadExecutor | string,
     classInstanceId?: string | CreditReason,
@@ -179,11 +215,17 @@ export namespace CreditRepository {
     };
   };
 
-  export const generateIdempotencyKey = (input: { studentId: string; hours: number; notes?: string }): string => {
+  export const generateIdempotencyKey = (input: {
+    studentId: string;
+    hours: number;
+    notes?: string;
+    sourcePaymentId?: string | null;
+  }): string => {
     const content = JSON.stringify({
       studentId: input.studentId,
       hours: input.hours,
       notes: input.notes ?? "",
+      sourcePaymentId: input.sourcePaymentId ?? "none",
     });
     // Deterministic prefix: sha256 of the source content. Using a random UUID
     // prefix would break idempotency (two calls with identical inputs would

@@ -71,7 +71,7 @@ export class FcmPushAdapter implements IPushChannel {
     };
   }
 
-  async send(payload: PushPayload, _locale?: string): Promise<PushSendResult> {
+  async send(payload: PushPayload, locale = "en"): Promise<PushSendResult> {
     const deviceTokens = await NotificationRepository.getActiveDeviceTokensForUser(payload.userId);
 
     if (deviceTokens.length === 0) {
@@ -102,7 +102,7 @@ export class FcmPushAdapter implements IPushChannel {
 
       const response = await this.context.messaging.sendEach(messages);
 
-      const result = await this.processMulticastResponse(response, deliveries, deviceTokens, payload.userId);
+      const result = await this.processMulticastResponse(response, deliveries, deviceTokens, payload.userId, locale);
 
       logger.info("Push notification multicast completed", {
         userId: payload.userId,
@@ -113,7 +113,7 @@ export class FcmPushAdapter implements IPushChannel {
 
       return result;
     } catch (error) {
-      return this.handleMulticastError(payload.userId, deliveries, error);
+      return this.handleMulticastError(payload.userId, deliveries, error, locale);
     }
   }
 
@@ -146,7 +146,8 @@ export class FcmPushAdapter implements IPushChannel {
     response: BatchResponse,
     deliveries: NotificationDeliverySelectType[],
     deviceTokens: UserDeviceTokenSelectType[],
-    userId: string
+    userId: string,
+    locale: string
   ): Promise<PushSendResult> {
     const errors: string[] = [];
     let successCount = 0;
@@ -165,7 +166,7 @@ export class FcmPushAdapter implements IPushChannel {
         await this.markDeliverySent(delivery.id, tokenResponse);
       } else {
         failureCount++;
-        await this.markDeliveryFailed(delivery.id, tokenResponse, errors);
+        await this.markDeliveryFailed(delivery.id, tokenResponse, errors, locale);
         await this.deactivateTokenIfNeeded(tokenResponse, deviceTokens[i], userId);
       }
     }
@@ -186,12 +187,16 @@ export class FcmPushAdapter implements IPushChannel {
     });
   }
 
-  private async markDeliveryFailed(deliveryId: string, tokenResponse: SendResponse, errors: string[]): Promise<void> {
+  private async markDeliveryFailed(
+    deliveryId: string,
+    tokenResponse: SendResponse,
+    errors: string[],
+    locale: string
+  ): Promise<void> {
     const errorCode = tokenResponse.error?.code ?? "unknown";
     const errorMessage = tokenResponse.error?.message ?? "Unknown FCM error";
 
-    errors.push(deliveryFailedMessage("push"));
-
+    errors.push(deliveryFailedMessage(NotificationChannel.PUSH, locale));
     await NotificationRepository.updateDeliveryStatus({
       deliveryId,
       status: NotificationDeliveryStatus.FAILED,
@@ -226,7 +231,8 @@ export class FcmPushAdapter implements IPushChannel {
   private async handleMulticastError(
     userId: string,
     deliveries: NotificationDeliverySelectType[],
-    error: unknown
+    error: unknown,
+    locale: string
   ): Promise<PushSendResult> {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -247,7 +253,7 @@ export class FcmPushAdapter implements IPushChannel {
       success: false,
       successCount: 0,
       failureCount: deliveries.length,
-      errors: [deliveryFailedMessage("push")],
+      errors: [deliveryFailedMessage(NotificationChannel.PUSH, locale)],
     };
   }
 }

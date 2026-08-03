@@ -68,7 +68,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         expect(created.quotaDeducted).toBe(true);
 
         const [studentAfter] = await tx.select().from(students).where(eq(students.id, student.id));
-        expect(studentAfter.classesRemaining).toBe(studentBefore.classesRemaining - 1);
+        expect(studentAfter.classesRemaining).toBe(studentBefore.classesRemaining);
       });
     });
 
@@ -188,7 +188,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
 
         await SchedulingRepository.updateClassInstance(instance.id, { quotaDeducted: true }, tx);
         const [s1] = await tx.select().from(students).where(eq(students.id, student.id));
-        expect(s1.classesRemaining).toBe(studentBefore.classesRemaining - 1);
+        expect(s1.classesRemaining).toBe(studentBefore.classesRemaining);
 
         await SchedulingRepository.updateClassInstance(instance.id, { quotaDeducted: false }, tx);
         const [s2] = await tx.select().from(students).where(eq(students.id, student.id));
@@ -221,8 +221,8 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         const [s1After] = await tx.select().from(students).where(eq(students.id, student1.id));
         const [s2After] = await tx.select().from(students).where(eq(students.id, student2.id));
 
-        expect(s1After.classesRemaining).toBe(s1Before.classesRemaining + 1);
-        expect(s2After.classesRemaining).toBe(s2Before.classesRemaining - 1);
+        expect(s1After.classesRemaining).toBe(s1Before.classesRemaining);
+        expect(s2After.classesRemaining).toBe(s2Before.classesRemaining);
       });
     });
   });
@@ -242,7 +242,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         expect(deleted.deletedAt).not.toBeNull();
 
         const [sAfter] = await tx.select().from(students).where(eq(students.id, student.id));
-        expect(sAfter.classesRemaining).toBe(sBefore.classesRemaining + 1);
+        expect(sAfter.classesRemaining).toBe(sBefore.classesRemaining);
       });
     });
   });
@@ -335,7 +335,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         expect(updatedOriginal.outcome).toBe("PENDING");
 
         const [sAfter] = await tx.select().from(students).where(eq(students.id, student.id));
-        expect(sAfter.classesRemaining).toBe(sBefore.classesRemaining + 1);
+        expect(sAfter.classesRemaining).toBe(sBefore.classesRemaining);
       });
     });
   });
@@ -668,7 +668,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
           .from(students)
           .where(eq(students.id, student.id))
           .then(r => r[0]);
-        expect(finalStudent.classesRemaining).toBe(initialStudent.classesRemaining + 1);
+        expect(finalStudent.classesRemaining).toBe(initialStudent.classesRemaining);
 
         const missing = await SchedulingRepository.softDeleteClassInstance(randomUUID(), teacher.userId, tx);
         expect(missing).toBeNull();

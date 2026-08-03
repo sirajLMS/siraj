@@ -27,6 +27,15 @@ export class RedisCacheAdapter implements ICacheService {
   }
 
   /**
+   * Atomically set a value only if the key does NOT exist, with a TTL in ms.
+   * Returns `"OK"` if set (first caller), `null` if key already exists.
+   */
+  async setNx(key: string, value: string, pxMs: number): Promise<string | null> {
+    const redis = await getRedisService();
+    return await redis.setNx(key, value, pxMs);
+  }
+
+  /**
    * Increment a value in cache
    */
   async incr(key: string): Promise<number> {

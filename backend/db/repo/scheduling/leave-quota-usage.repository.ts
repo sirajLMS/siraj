@@ -3,15 +3,9 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { leaveQuotaUsage } from "@/backend/db/schema/classes/scheduling";
+import type { UpsertStudentLeaveQuotaInput } from "@/backend/types/scheduling/scheduling.types";
 
 export type LeaveQuotaUsageRow = typeof leaveQuotaUsage.$inferSelect;
-
-export type UpsertStudentLeaveQuotaInput = {
-  studentId: string;
-  periodYear: number;
-  periodMonth: number;
-  usedCount: number;
-};
 
 export namespace LeaveQuotaUsageRepository {
   export async function findStudentPeriodQuota(

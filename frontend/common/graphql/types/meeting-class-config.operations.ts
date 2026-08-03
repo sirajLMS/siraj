@@ -24,6 +24,7 @@ export type EffectiveMeetingFieldsFragment = {
   readonly source: EffectiveMeetingSource | string | null;
   readonly configId: string | null;
   readonly providerId: string | null;
+  readonly supportsAutoGeneration: boolean | null;
 };
 
 export type ClassMeetingConfigsQuery = {

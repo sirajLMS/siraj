@@ -42,3 +42,4 @@ export * from "./profile";
 export * from "./session";
 export * from "./sms";
 export * from "./ui";
+export * from "./whatsapp";

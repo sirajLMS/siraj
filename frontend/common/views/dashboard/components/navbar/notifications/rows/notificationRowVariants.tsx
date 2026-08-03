@@ -167,6 +167,41 @@ export const EVENT_VARIANT_CONFIG: Record<NotificationEventType, EventVariantCon
     iconColor: successAccent,
     accentColor: successAccent,
   },
+  [NotificationEventType.QuotaExpiringSoon]: {
+    icon: <ScheduleOutlined fontSize="small" />,
+    iconColor: warningAccent,
+    accentColor: warningAccent,
+  },
+  [NotificationEventType.QuotaExpired]: {
+    icon: <CancelOutlined fontSize="small" />,
+    iconColor: errorAccent,
+    accentColor: errorAccent,
+  },
+  [NotificationEventType.QuotaLowBalance]: {
+    icon: <WarningAmberOutlined fontSize="small" />,
+    iconColor: warningAccent,
+    accentColor: warningAccent,
+  },
+  [NotificationEventType.OnDemandInstancePendingCredit]: {
+    icon: <WarningAmberOutlined fontSize="small" />,
+    iconColor: warningAccent,
+    accentColor: warningAccent,
+  },
+  [NotificationEventType.OnDemandInstanceReminderT3]: {
+    icon: <ScheduleOutlined fontSize="small" />,
+    iconColor: infoAccent,
+    accentColor: infoAccent,
+  },
+  [NotificationEventType.OnDemandInstanceReminderT1]: {
+    icon: <ScheduleOutlined fontSize="small" />,
+    iconColor: warningAccent,
+    accentColor: warningAccent,
+  },
+  [NotificationEventType.OnDemandTeacherDailyDigest]: {
+    icon: <FactCheckOutlined fontSize="small" />,
+    iconColor: infoAccent,
+    accentColor: infoAccent,
+  },
 };
 
 export const COMPLAINT_BUCKET_VARIANT: EventVariantConfig = {

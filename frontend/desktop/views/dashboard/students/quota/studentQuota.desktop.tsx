@@ -2,9 +2,8 @@
 
 import { CheckCircleOutlined, Save, ScheduleOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { FormProvider, type UseFormReturn } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 import { QuotaFormAccessProvider } from "@/frontend/common/views/dashboard/students/quota/QuotaFormAccessProvider";
-import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type { FormActionsProps, StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
 import type { StudentQuotaViewModel } from "@/frontend/common/views/dashboard/students/quota/useStudentQuotaViewModel";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
@@ -176,7 +175,7 @@ function QuotaFormCardDesktop({
           mx: "auto",
         })}
       >
-        <FormProvider {...(methods as unknown as UseFormReturn<StudentQuotaFormData>)}>
+        <FormProvider {...methods}>
           <QuotaFormAccessProvider
             value={{
               readOnly,

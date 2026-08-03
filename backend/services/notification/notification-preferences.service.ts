@@ -75,7 +75,8 @@ function mergeWithDefaults(
         id: preferenceKey(channel, eventType),
         channel,
         eventType,
-        enabled: true,
+        // REQ-10.1: WhatsApp is opt-in — default disabled until user explicitly opts in
+        enabled: channel !== NotificationChannel.WHATSAPP,
       };
     })
   );

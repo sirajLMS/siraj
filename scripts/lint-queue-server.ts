@@ -14,7 +14,7 @@
  *   - File-scoped lint should call `requestLint(id, [files])` from
  *     `scripts/lint-queue-client.ts` (or the equivalent HTTP call below) so
  *     eslint doesn't walk the whole repo.
-    10| *
+ *
  * Architecture:
  *   - Single-threaded FIFO queue backed by a `running` flag
  *   - POST /lint  → Enqueue a lint request; blocks until the result is ready

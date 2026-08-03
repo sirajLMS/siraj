@@ -18,5 +18,9 @@ export interface TeacherClassListLabels {
     readonly ACTIVATED: string;
     readonly RUNNING: string;
     readonly COMPLETED: string;
+    readonly ON_DEMAND_CONFLICT_HELD: string;
+    readonly ON_DEMAND_NO_CREDITS_ABSENT: string;
+    readonly ON_DEMAND_NO_CREDITS_CANCELLED: string;
+    readonly ON_DEMAND_PENDING_CREDITS: string;
   };
 }

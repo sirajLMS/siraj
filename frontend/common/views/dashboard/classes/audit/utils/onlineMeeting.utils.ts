@@ -27,5 +27,6 @@ export function toEffectiveMeeting(
     meetingId: meetingInfo.meetingId,
     configId: null,
     providerId: null,
+    supportsAutoGeneration: false,
   };
 }

@@ -36,6 +36,7 @@ export type EnvConfigCategory =
   | "app"
   | "meeting"
   | "billing"
+  | "whatsapp"
   | "general"
   | "cron";
 
@@ -626,6 +627,299 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
     },
     isSecret: true,
     excludeFromDb: true,
+  },
+
+  // ---------------------------------------------------------------------------
+  // Meeting Integrations (Zoom S2S, Google Meet DWD, Microsoft Teams Graph)
+  // ---------------------------------------------------------------------------
+  {
+    key: "ZOOM_ACCOUNT_ID",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Zoom Server-to-Server OAuth account ID.",
+      ar: "معرّف حساب Zoom لمصادقة Server-to-Server OAuth.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "ZOOM_CLIENT_ID",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Zoom Server-to-Server OAuth client ID.",
+      ar: "معرّف العميل لـ Zoom Server-to-Server OAuth.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "ZOOM_CLIENT_SECRET",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Zoom Server-to-Server OAuth client secret.",
+      ar: "سرّ العميل لـ Zoom Server-to-Server OAuth.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "GOOGLE_MEET_SERVICE_ACCOUNT_JSON",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Google service-account JSON key for Google Meet (Domain-Wide Delegation).",
+      ar: "مفتاح JSON لحساب خدمة Google لـ Google Meet (تفويض على مستوى النطاق).",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "ZOOM_REQUIRED_SCOPES",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Comma-separated OAuth scopes required for Zoom Server-to-Server OAuth.",
+      ar: "نطاقات OAuth المطلوبة لـ Zoom Server-to-Server OAuth مفصولة بفواصل.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "GOOGLE_MEET_IMPERSONATE_SUBJECT",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Google Workspace user email to impersonate for Meet space creation.",
+      ar: "بريد مستخدم Google Workspace لانتحال صلاحياته لإنشاء مساحات Meet.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "GOOGLE_MEET_CLIENT_ID",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Google Meet OAuth client ID.",
+      ar: "معرّف عميل OAuth لـ Google Meet.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "GOOGLE_MEET_CLIENT_SECRET",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Google Meet OAuth client secret.",
+      ar: "سرّ عميل OAuth لـ Google Meet.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_TENANT_ID",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Microsoft Teams (Entra ID) tenant ID for client-credentials OAuth.",
+      ar: "معرّف مستأجر Microsoft Teams (Entra ID) لمصادقة client-credentials.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_CLIENT_ID",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Microsoft Teams (Entra ID) app registration client ID.",
+      ar: "معرّف العميل لتسجيل تطبيق Microsoft Teams (Entra ID).",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_CLIENT_SECRET",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Microsoft Teams (Entra ID) app registration client secret.",
+      ar: "سرّ العميل لتسجيل تطبيق Microsoft Teams (Entra ID).",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_ORGANIZER_USER_ID",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Entra user object ID of the Teams meeting organizer.",
+      ar: "معرّف كائن مستخدم Entra لمنظّم اجتماع Teams.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_REQUIRED_SCOPES",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Comma-separated OAuth scopes required for Microsoft Teams client-credentials OAuth.",
+      ar: "نطاقات OAuth المطلوبة لـ Microsoft Teams client-credentials مفصولة بفواصل.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "OAUTH_REDIRECT_BASE_URL",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Base URL for per-teacher OAuth callback redirects.",
+      ar: "الرابط الأساسي لإعادة توجيه OAuth لكل معلّم.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+
+  // WhatsApp
+  // ---------------------------------------------------------------------------
+  {
+    key: "WHATSAPP_PROVIDER",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "WhatsApp API provider (cloud_api).",
+      ar: "مزوّد واجهة برمجة تطبيقات واتساب (cloud_api).",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_APP_ID",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "WhatsApp App ID for webhook validation.",
+      ar: "معرّف تطبيق واتساب للتحقق من webhook.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_ACCESS_TOKEN",
+    category: "whatsapp",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Access token for Meta WhatsApp Cloud API Graph calls.",
+      ar: "رمز الوصول لواجهة Meta WhatsApp Cloud API Graph.",
+    },
+    isSecret: true,
+    excludeFromDb: true,
+  },
+  {
+    key: "WHATSAPP_PHONE_NUMBER_ID",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Default phone number ID for the WhatsApp Business account.",
+      ar: "معرّف رقم الهاتف الافتراضي لحساب واتساب للأعمال.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_APP_SECRET",
+    category: "whatsapp",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "App secret used for webhook HMAC verification.",
+      ar: "سرّ التطبيق المستخدم للتحقق من HMAC في webhook.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_VERIFY_TOKEN",
+    category: "whatsapp",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Verify token for WhatsApp webhook GET verification.",
+      ar: "رمز التحقق لـ GET webhook في واتساب.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_WABA_ID",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Default WhatsApp Business Account ID for account sync.",
+      ar: "معرّف حساب واتساب للأعمال الافتراضي لمزامنة الحساب.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_TEST_TO_PHONE",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Recipient phone number for WhatsApp integration tests (digits only).",
+      ar: "رقم هاتف المستلم لاختبارات تكامل واتساب (أرقام فقط).",
+    },
+    isSecret: false,
+    excludeFromDb: true,
+  },
+  {
+    key: "WHATSAPP_TEST_TEMPLATE_NAME",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Template name for WhatsApp integration tests (e.g., hello_world).",
+      ar: "اسم القالب لاختبارات تكامل واتساب (مثل hello_world).",
+    },
+    isSecret: false,
+    excludeFromDb: true,
+  },
+  {
+    key: "WHATSAPP_TEST_TEMPLATE_LANGUAGE",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Template language code for WhatsApp integration tests (e.g., en_US).",
+      ar: "رمز لغة القالب لاختبارات تكامل واتساب (مثل en_US).",
+    },
+    isSecret: false,
+    excludeFromDb: true,
+  },
+  {
+    key: "WHATSAPP_API_VERSION",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "WhatsApp Cloud API version (e.g., v21.0).",
+      ar: "نسخة واجهة برمجة WhatsApp Cloud API (مثل v21.0).",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_WEBHOOK_BASE_URL",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Base URL for WhatsApp webhooks.",
+      ar: "عنوان URL الأساسي لـ webhook الخاص بـ واتساب.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
   },
 ];
 

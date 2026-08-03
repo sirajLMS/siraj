@@ -18,12 +18,13 @@ export namespace MeetingProviderRepository {
       .select()
       .from(meetingProviders)
       .where(eq(meetingProviders.isActive, true))
-      .orderBy(asc(meetingProviders.slug));
+      .orderBy(asc(meetingProviders.slug))
+      .limit(100);
   }
 
   export async function listAll(tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {
     const client = queryDb(tx);
-    return client.select().from(meetingProviders).orderBy(asc(meetingProviders.slug));
+    return client.select().from(meetingProviders).orderBy(asc(meetingProviders.slug)).limit(100);
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<MeetingProviderSelectType | null> {
@@ -67,6 +68,7 @@ export namespace MeetingProviderRepository {
         .insert(meetingProviders)
         .values({
           slug: input.slug,
+          providerKind: input.providerKind,
           name: input.name,
           description: input.description ?? null,
           instructions: input.instructions ?? null,
@@ -106,6 +108,7 @@ export namespace MeetingProviderRepository {
         .update(meetingProviders)
         .set({
           ...(Object.hasOwn(input, "slug") ? { slug: input.slug } : {}),
+          ...(Object.hasOwn(input, "providerKind") ? { providerKind: input.providerKind } : {}),
           ...(Object.hasOwn(input, "name") ? { name: input.name } : {}),
           ...(Object.hasOwn(input, "description") ? { description: input.description } : {}),
           ...(Object.hasOwn(input, "instructions") ? { instructions: input.instructions } : {}),
@@ -148,6 +151,7 @@ export namespace MeetingProviderRepository {
           .insert(meetingProviders)
           .values({
             slug: input.slug,
+            providerKind: input.providerKind,
             name: input.name,
             description: input.description ?? null,
             instructions: input.instructions ?? null,
@@ -162,6 +166,7 @@ export namespace MeetingProviderRepository {
           .onConflictDoUpdate({
             target: meetingProviders.slug,
             set: {
+              providerKind: input.providerKind,
               name: input.name,
               description: input.description ?? null,
               instructions: input.instructions ?? null,

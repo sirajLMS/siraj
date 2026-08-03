@@ -14,8 +14,8 @@ import {
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
-import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEntity } from "@/backend/types";
-import type { ClassInstanceEntity } from "@/backend/types/scheduling/scheduling.types";
+import type { ParentEntity, StudentProgressSelectType, StudentSelectType, TeacherSelectType } from "@/backend/types";
+import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function insertUser(tx: DBTransaction, now: Date, name: string, prefix: string) {
@@ -40,14 +40,19 @@ async function insertParent(tx: DBTransaction, now: Date, userId: string): Promi
   return parent;
 }
 
-async function insertTeacher(tx: DBTransaction, now: Date, userId: string): Promise<TeacherEntity> {
+async function insertTeacher(tx: DBTransaction, now: Date, userId: string): Promise<TeacherSelectType> {
   const [teacher] = (await tx.insert(teachers).values({ userId, createdAt: now, updatedAt: now }).returning()) as [
-    TeacherEntity,
+    TeacherSelectType,
   ];
   return teacher;
 }
 
-async function insertStudent(tx: DBTransaction, now: Date, parentId: string, userId: string): Promise<StudentEntity> {
+async function insertStudent(
+  tx: DBTransaction,
+  now: Date,
+  parentId: string,
+  userId: string
+): Promise<StudentSelectType> {
   const [student] = (await tx
     .insert(students)
     .values({
@@ -60,7 +65,7 @@ async function insertStudent(tx: DBTransaction, now: Date, parentId: string, use
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [StudentEntity];
+    .returning()) as [StudentSelectType];
   return student;
 }
 
@@ -69,7 +74,7 @@ async function insertClassInstance(
   now: Date,
   studentId: string,
   teacherId: string
-): Promise<ClassInstanceEntity> {
+): Promise<ClassInstanceSelectType> {
   const [classInst] = (await tx
     .insert(classInstances)
     .values({
@@ -84,7 +89,7 @@ async function insertClassInstance(
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [ClassInstanceEntity];
+    .returning()) as [ClassInstanceSelectType];
   return classInst;
 }
 

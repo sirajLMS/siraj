@@ -3,6 +3,7 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
+import type { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { UpcomingClassRow } from "@/backend/types/scheduling/scheduling.types";
 
@@ -96,7 +97,7 @@ export const getStudentFutureClasses = async (
     id: r.id,
     executionState: r.executionState,
     scheduledStartAt: r.scheduledStartAt,
-  }));
+  })) as { id: string; executionState: string; scheduledStartAt: Date }[];
 };
 
 export const getUpcomingClassesForStudent = async (
@@ -143,8 +144,8 @@ export const getUpcomingClassesForStudent = async (
     scheduledStartAt: r.scheduledStartAt,
     scheduledEndAt: r.scheduledEndAt,
     durationMinutes: r.durationMinutes,
-    executionState: r.executionState,
-    outcome: r.outcome,
+    executionState: r.executionState as ClassExecutionState,
+    outcome: r.outcome as ClassOutcome | null,
     isFrozen: r.isFrozen,
     instructor: r.instructor,
     teacherId: r.teacherId,

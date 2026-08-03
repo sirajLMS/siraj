@@ -50,6 +50,11 @@ export interface MeetingProvidersLabels {
     readonly supportsUsername: string;
     readonly supportsPassword: string;
     readonly supportsTenantId: string;
+    readonly providerKind: string;
+    readonly providerKindManual: string;
+    readonly providerKindZoom: string;
+    readonly providerKindGoogleMeet: string;
+    readonly providerKindTeams: string;
   };
   readonly validation: {
     readonly slugRequired: string;

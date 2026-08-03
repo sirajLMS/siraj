@@ -2,9 +2,9 @@ import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/
 import { ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
-import type { ClassInstanceEntity } from "@/backend/types";
+import type { ClassInstanceSelectType } from "@/backend/types";
 
-export async function seedOrGet(classInstancesList: ClassInstanceEntity[], config?: SeedConfig) {
+export async function seedOrGet(classInstancesList: ClassInstanceSelectType[], config?: SeedConfig) {
   logger.info("Seeding student progress...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

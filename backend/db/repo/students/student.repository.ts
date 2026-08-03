@@ -15,6 +15,39 @@ import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/uti
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 
+function decodeCursor(after: string): { createdAt: string; id: string } | null {
+  try {
+    const decoded = Buffer.from(after, "base64").toString("utf8");
+    const cursorObj = JSON.parse(decoded) as { createdAt?: string; id?: string };
+    if (cursorObj.createdAt && cursorObj.id) {
+      return { createdAt: cursorObj.createdAt, id: cursorObj.id };
+    }
+  } catch {
+    /* ignore invalid cursor */
+  }
+  return null;
+}
+
+function applyCursorCondition(
+  query: PgSelect,
+  cursor: { createdAt: string; id: string },
+  orderBy?: Types.StudentsOrderByClause[] | null
+): PgSelect {
+  const cursorDate = new Date(cursor.createdAt);
+  const cursorId = cursor.id;
+  const isDesc = orderBy?.some(
+    o => o.column === Types.StudentsOrderByColumn.CREATED_AT && o.order === OrderSortDirection.DESC
+  );
+  if (isDesc) {
+    return query.where(
+      or(lt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), lt(students.id, cursorId)))
+    );
+  }
+  return query.where(
+    or(gt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), gt(students.id, cursorId)))
+  );
+}
+
 const _processStudentQuery = async (
   query: PgSelect,
   paginationArgs?: Types.PaginationArgs | null,
@@ -25,29 +58,10 @@ const _processStudentQuery = async (
   processedQuery = StudentFilterUtils.applyFilters(processedQuery, filters);
   processedQuery = StudentFilterUtils.applyOrdering(processedQuery, orderBy);
 
-  if (paginationArgs?.after) {
-    try {
-      const decoded = Buffer.from(paginationArgs.after, "base64").toString("utf8");
-      const cursorObj = JSON.parse(decoded) as { createdAt?: string; id?: string };
-      if (cursorObj.createdAt && cursorObj.id) {
-        const cursorDate = new Date(cursorObj.createdAt);
-        const cursorId = cursorObj.id;
-        const isDesc = orderBy?.some(
-          o => o.column === Types.StudentsOrderByColumn.CREATED_AT && o.order === OrderSortDirection.DESC
-        );
-        if (isDesc) {
-          processedQuery = processedQuery.where(
-            or(lt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), lt(students.id, cursorId)))
-          );
-        } else {
-          processedQuery = processedQuery.where(
-            or(gt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), gt(students.id, cursorId)))
-          );
-        }
-      }
-    } catch {
-      /* ignore invalid cursor */
-    }
+  const cursor = paginationArgs?.after ? decodeCursor(paginationArgs.after) : null;
+
+  if (cursor) {
+    processedQuery = applyCursorCondition(processedQuery, cursor, orderBy);
   }
 
   if (paginationArgs?.after) {
@@ -56,24 +70,26 @@ const _processStudentQuery = async (
     processedQuery = queryWithPagination(processedQuery, paginationArgs);
   }
 
-  const results = await (processedQuery as unknown as Promise<{ student: Types.StudentEntity; total: number }[]>);
+  const results = await (processedQuery as unknown as Promise<{ student: Types.StudentSelectType; total: number }[]>);
 
   const total = results[0]?.total ?? 0;
-  const items: Types.Student[] = results
+  const items: Types.StudentReturnType[] = results
     .map(r => StudentUtils.mapEntityToDto(r.student))
-    .filter((s): s is Types.Student => s !== null);
+    .filter((s): s is Types.StudentReturnType => s !== null);
 
   const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, items.length, total);
 
   if (items.length > 0) {
-    const firstItem = items[0];
-    const lastItem = items.at(-1);
-    pageInfo.startCursor = Buffer.from(
-      JSON.stringify({ createdAt: firstItem.createdAt.toISOString(), id: firstItem.id })
-    ).toString("base64");
-    pageInfo.endCursor = Buffer.from(
-      JSON.stringify({ createdAt: lastItem?.createdAt.toISOString(), id: lastItem?.id })
-    ).toString("base64");
+    const firstItem = results[0]?.student;
+    const lastItem = results.at(-1)?.student;
+    if (firstItem && lastItem) {
+      pageInfo.startCursor = Buffer.from(
+        JSON.stringify({ createdAt: firstItem.createdAt.toISOString(), id: firstItem.id })
+      ).toString("base64");
+      pageInfo.endCursor = Buffer.from(
+        JSON.stringify({ createdAt: lastItem.createdAt.toISOString(), id: lastItem.id })
+      ).toString("base64");
+    }
   }
 
   return { data: items, pageInfo };
@@ -87,7 +103,7 @@ export namespace StudentRepository {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_' || ${studentId}::text))`);
   }
 
-  export const findById = async (id: string): Promise<Types.StudentEntity | null | undefined> => {
+  export const findById = async (id: string): Promise<Types.StudentSelectType | null | undefined> => {
     const q = queryDb();
     return await q.query.students.findFirst({
       where: { id: id },
@@ -104,11 +120,11 @@ export namespace StudentRepository {
     input: Types.StudentCreateInput,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const err = await StudentUtils.validateName(input.name);
     if (err) throw new Error(err);
 
-    const insertInput: Types.StudentEntityInput = {
+    const insertInput: Types.StudentInsertType = {
       parentId: input.parentId,
       userId: input.userId,
       primaryTeacherId: input.primaryTeacherId ?? null,
@@ -153,14 +169,14 @@ export namespace StudentRepository {
   export const createList = async (
     input: Types.StudentCreateInput[],
     tErrors: ErrorsLabels
-  ): Promise<Types.StudentEntity[]> => {
+  ): Promise<Types.StudentSelectType[]> => {
     if (input.length === 0) return [];
     try {
       for (const item of input) {
         const nameErr = await StudentUtils.validateName(item.name);
         if (nameErr) throw new Error(nameErr);
       }
-      const values: Types.StudentEntityInput[] = input.map(item => ({
+      const values: Types.StudentInsertType[] = input.map(item => ({
         parentId: item.parentId,
         userId: item.userId,
         primaryTeacherId: item.primaryTeacherId ?? null,
@@ -183,7 +199,7 @@ export namespace StudentRepository {
     }
   };
 
-  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.Student | Error)[]> => {
+  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.StudentReturnType | Error)[]> => {
     if (ids.length === 0) return [];
     const q = queryDb();
     const foundStudents = await q.select().from(students).where(inArray(students.id, ids));
@@ -191,7 +207,7 @@ export namespace StudentRepository {
 
     return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
-      return s ? (StudentUtils.mapEntityToDto(s) as Types.Student) : new Error(studentNotFound(id));
+      return s ? (StudentUtils.mapEntityToDto(s) as Types.StudentReturnType) : new Error(studentNotFound(id));
     });
   };
 
@@ -210,7 +226,7 @@ export namespace StudentRepository {
     return await q.$count(students);
   };
 
-  export const deleteById = async (id: string, tErrors: ErrorsLabels): Promise<Types.StudentEntity> => {
+  export const deleteById = async (id: string, tErrors: ErrorsLabels): Promise<Types.StudentSelectType> => {
     const existingStudent = await findById(id);
     if (!existingStudent) {
       throw new Error(tErrors.studentNotFound(id));
@@ -225,7 +241,7 @@ export namespace StudentRepository {
     input: Types.PartialStudentUpdateInput,
     tErrors: ErrorsLabels,
     locale?: string
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const existingStudent = await findById(input.id);
     if (!existingStudent) {
       throw new Error(tErrors.studentNotFound(input.id));
@@ -236,7 +252,7 @@ export namespace StudentRepository {
       if (nameErr) throw new Error(nameErr);
     }
 
-    const updateInput: Types.StudentEntityInput = {
+    const updateInput: Types.StudentInsertType = {
       id: input.id,
       parentId: input.parentId ?? existingStudent.parentId,
       userId: existingStudent.userId,
@@ -284,10 +300,10 @@ export namespace StudentRepository {
   async function adjustClassesQuota(
     t: DBTransaction,
     studentId: string,
-    updateFn: (current: Types.StudentEntity) => Record<string, unknown> | Promise<Record<string, unknown>>,
+    updateFn: (current: Types.StudentSelectType) => Record<string, unknown> | Promise<Record<string, unknown>>,
     tErrors: ErrorsLabels,
     expectedVersion?: number
-  ): Promise<Types.StudentEntity> {
+  ): Promise<Types.StudentSelectType> {
     await acquireStudentLock(t, studentId);
 
     const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
@@ -319,7 +335,7 @@ export namespace StudentRepository {
     amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
         t,
@@ -345,7 +361,7 @@ export namespace StudentRepository {
     amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
         t,
@@ -363,11 +379,11 @@ export namespace StudentRepository {
 
   function runStudentUpdate(
     studentId: string,
-    updates: () => Partial<Types.StudentEntity>,
+    updates: () => Partial<Types.StudentSelectType>,
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> {
+  ): Promise<Types.StudentSelectType> {
     const runner = async (t: DBTransaction) => adjustClassesQuota(t, studentId, updates, tErrors, expectedVersion);
     return tx ? runner(tx) : db.transaction(runner);
   }
@@ -378,7 +394,7 @@ export namespace StudentRepository {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> =>
+  ): Promise<Types.StudentSelectType> =>
     runStudentUpdate(studentId, () => ({ classesRemaining: newClassesRemaining }), tErrors, expectedVersion, tx);
 
   export const reassignTeacher = async (
@@ -387,7 +403,7 @@ export namespace StudentRepository {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> =>
+  ): Promise<Types.StudentSelectType> =>
     runStudentUpdate(studentId, () => ({ primaryTeacherId: newTeacherId }), tErrors, expectedVersion, tx);
 
   export const changeStatus = async (
@@ -396,7 +412,7 @@ export namespace StudentRepository {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
         t,
@@ -430,6 +446,7 @@ export namespace StudentRepository {
     let baseQuery = queryDb
       .select({
         id: students.id,
+        userId: students.userId,
         name: students.name,
         email: sql<string>`COALESCE(${parentUsers.email}, '')`,
         avatarUrl: students.avatarUrl,
@@ -477,8 +494,9 @@ export namespace StudentRepository {
         r =>
           ({
             ...r,
+            status: r.status as StudentStatus,
             hoursPerWeek: r.hoursPerWeek ? Number.parseFloat(r.hoursPerWeek) : 0,
-          }) as Types.StudentDirectory
+          }) satisfies Types.StudentDirectory
       ),
       totalCount,
     };
@@ -535,7 +553,10 @@ export namespace StudentRepository {
       totalCount: rows.length,
     };
   };
-  export const findByIdempotencyKeys = async (keys: string[], tx?: DBTransaction): Promise<Types.StudentEntity[]> => {
+  export const findByIdempotencyKeys = async (
+    keys: string[],
+    tx?: DBTransaction
+  ): Promise<Types.StudentSelectType[]> => {
     if (keys.length === 0) return [];
     const executor = tx ?? db;
     return executor.select().from(students).where(inArray(students.idempotencyKey, keys));
@@ -555,7 +576,7 @@ export namespace StudentRepository {
       idempotencyKey: string;
     },
     tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
+  ): Promise<Types.StudentSelectType> => {
     const executor = tx ?? db;
     const now = new Date();
     const [row] = await executor
@@ -731,5 +752,46 @@ export namespace StudentRepository {
     }
 
     return mapStudentProfileRow(results[0]);
+  };
+
+  /**
+   * V3-023: Resolve student IDs for a parent and/or teacher without
+   * the caller needing to touch the DB directly. Returns students
+   * whose `parentId` matches, whose `primaryTeacherId` matches, or
+   * who have an active `teacher_assignments` row for the teacher.
+   */
+  export const findIdsByParentOrTeacher = async (
+    parentId: string | null,
+    teacherId: string | null,
+    tx?: DBTransaction
+  ): Promise<string[]> => {
+    if (!parentId && !teacherId) return [];
+    const queryDb = tx ?? db;
+    const orConditions: ReturnType<typeof eq>[] = [];
+    if (parentId) {
+      orConditions.push(eq(students.parentId, parentId));
+    }
+    if (teacherId) {
+      orConditions.push(eq(students.primaryTeacherId, teacherId));
+    }
+
+    const rows = await queryDb
+      .select({ id: students.id })
+      .from(students)
+      .where(or(...orConditions));
+
+    const studentIds = new Set(rows.map(r => r.id));
+
+    if (teacherId) {
+      const assignedRows = await queryDb
+        .select({ studentId: teacherAssignments.studentId })
+        .from(teacherAssignments)
+        .where(and(eq(teacherAssignments.teacherId, teacherId), isNull(teacherAssignments.endedAt)));
+      for (const r of assignedRows) {
+        studentIds.add(r.studentId);
+      }
+    }
+
+    return [...studentIds];
   };
 }

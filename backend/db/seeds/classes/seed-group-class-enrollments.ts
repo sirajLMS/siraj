@@ -1,7 +1,7 @@
 import { orchestrateSeedMany, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { GroupClassService } from "@/backend/services/group-class/group-class.service";
-import type { GroupClassEnrollmentSelectType, StudentEntity } from "@/backend/types";
+import type { GroupClassEnrollmentSelectType, StudentSelectType } from "@/backend/types";
 
 type GroupClassEntity = { id: string; classInstanceId: string };
 
@@ -19,7 +19,7 @@ function parseEnrollmentKey(key: string): { groupClassId: string; studentId: str
 
 export async function seedOrGet(
   groupClassesList: GroupClassEntity[],
-  studentsList: StudentEntity[],
+  studentsList: StudentSelectType[],
   _config?: SeedConfig
 ) {
   logger.info("Seeding system group class enrollments...");

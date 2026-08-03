@@ -17,10 +17,12 @@ export function useJoinContext(props: MeetingJoinActionProps): JoinContext {
   const buttonLabel = props.label ?? t.joinMeeting;
   const tooltip = resolveTooltip({ hasUrl, meeting: props.meeting, locale, t, tDisplay, emptyRole: props.emptyRole });
   const providerLogo = props.meeting?.logoUrl?.trim() || null;
+  const supportsAutoGeneration = props.meeting?.supportsAutoGeneration === true;
   return {
     t,
     tDisplay,
     hasUrl,
+    supportsAutoGeneration,
     resolvedUrl,
     buttonLabel,
     tooltip,

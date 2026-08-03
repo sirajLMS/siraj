@@ -5,7 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { teachers, userMeetingConfigs, users } from "@/backend/db/schema";
 import { createTestMeetingConfig, createTestMeetingProvider } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { TeacherEntityInput } from "@/backend/types";
+import type { TeacherInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date) {
@@ -25,7 +25,7 @@ async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date
 
 async function insertTeacherDetails(args: { tx: DBTransaction; userId: string; plainNationalId: string; now: Date }) {
   const { tx, userId, plainNationalId, now } = args;
-  const teacherInput: TeacherEntityInput = {
+  const teacherInput: TeacherInsertType = {
     userId,
     nationalId: plainNationalId,
     createdAt: now,

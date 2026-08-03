@@ -20,7 +20,7 @@ import type {
   ClassStatusEventReturnType,
   FutureClassReturnType,
   LeaveProcessResultReturnType,
-  RescheduleClassInputType,
+  RescheduleClassInput,
   SupportRequestResultReturnType,
   TeacherFutureScheduleReturnType,
 } from "@/backend/types";
@@ -145,7 +145,7 @@ export const ClassStatusEventPothosObject = ClassStatusEventRef.implement({
 // ─── Input: Reschedule Class ──────────────────────────────────────────────────
 
 export const RescheduleClassInputPothosObject = gqlSchemaBuilder
-  .inputRef<RescheduleClassInputType>("RescheduleClassInput")
+  .inputRef<RescheduleClassInput>("RescheduleClassInput")
   .implement({
     fields: t => ({
       scheduledStartAt: t.string({ required: true }),

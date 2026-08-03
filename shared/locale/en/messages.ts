@@ -9,7 +9,9 @@ import { dashboardBillingExchangeRatesEn } from "@/shared/locale/en/dashboard/bi
 import { dashboardBillingEn } from "@/shared/locale/en/dashboard/billing/main.ts";
 import { dashboardBillingManualEn } from "@/shared/locale/en/dashboard/billing/manual.ts";
 import { dashboardBillingPaymentEn } from "@/shared/locale/en/dashboard/billing/payment.ts";
+import { quotaEn } from "@/shared/locale/en/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesEn } from "@/shared/locale/en/dashboard/billing/supportedCurrencies.ts";
+
 import { dashboardClassAuditEn } from "@/shared/locale/en/dashboard/classes/audit.ts";
 import { dashboardCreateRecurringClassEn } from "@/shared/locale/en/dashboard/classes/createRecurringClass.ts";
 import { dashboardClassDetailsEn } from "@/shared/locale/en/dashboard/classes/details.ts";
@@ -119,6 +121,7 @@ import { uiPhoneInputEn } from "@/shared/locale/en/ui/phone-input.ts";
 import { uiTagInputEn } from "@/shared/locale/en/ui/tag-input.ts";
 import { uiTimezoneSelectEn } from "@/shared/locale/en/ui/timezone-select.ts";
 import { uiUserSelectEn } from "@/shared/locale/en/ui/user-select.ts";
+import { whatsappEn } from "@/shared/locale/en/whatsapp";
 import type { Translations } from "@/shared/locale/types/message";
 
 export const enMessages: Translations = {
@@ -167,7 +170,9 @@ export const enMessages: Translations = {
     dstMigration: dashboardDstMigrationEn,
     billing: dashboardBillingEn,
     billingManual: dashboardBillingManualEn,
+    billingQuota: quotaEn,
     billingPayment: dashboardBillingPaymentEn,
+
     billingExchangeRates: dashboardBillingExchangeRatesEn,
     billingCurrencyHedges: dashboardBillingCurrencyHedgesEn,
     billingSupportedCurrencies: dashboardBillingSupportedCurrenciesEn,
@@ -248,4 +253,5 @@ export const enMessages: Translations = {
     notifications: profileNotificationsEn,
   },
   notificationsTranslations: notificationsEn,
+  whatsappTranslations: whatsappEn,
 };

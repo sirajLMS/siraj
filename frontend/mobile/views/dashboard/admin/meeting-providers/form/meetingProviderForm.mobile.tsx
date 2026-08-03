@@ -6,8 +6,12 @@ import {
   Button,
   Checkbox,
   CircularProgress,
+  FormControl,
   FormControlLabel,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Skeleton,
   Stack,
   Switch,
@@ -214,6 +218,21 @@ function CapabilitiesSection({ t, control, isSaving, isActiveValue }: Readonly<C
   return (
     <FormSectionPaper title={t.fields.capabilities}>
       <Stack spacing={1}>
+        <Controller<MeetingProviderFormData, "providerKind">
+          name="providerKind"
+          control={control}
+          render={({ field }) => (
+            <FormControl fullWidth disabled={isSaving}>
+              <InputLabel>{t.fields.providerKind}</InputLabel>
+              <Select {...field} label={t.fields.providerKind}>
+                <MenuItem value="manual">{t.fields.providerKindManual}</MenuItem>
+                <MenuItem value="zoom_oauth">{t.fields.providerKindZoom}</MenuItem>
+                <MenuItem value="google_meet_oauth">{t.fields.providerKindGoogleMeet}</MenuItem>
+                <MenuItem value="microsoft_teams_oauth">{t.fields.providerKindTeams}</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+        />
         <Controller<MeetingProviderFormData, "supportsUsername">
           name="supportsUsername"
           control={control}

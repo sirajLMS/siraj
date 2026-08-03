@@ -51,6 +51,7 @@ Sub-directories contain only `*.test.ts` files. They are NOT imported by anythin
 | `testPort.ts` | `import { getTestBaseUrl, getTestGraphqlUrl } from "@/frontend/common/graphql/test/testPort";` | Use for non-GraphQL REST endpoints or E2E `baseURL`. |
 | Documents | `import { fooQueryDocument } from "@/frontend/common/graphql/sharedDocuments/<subdir>/foo.documents";` | Always use the full deep alias, including the `sharedDocuments` sub-directory segment. See `frontend/common/graphql/sharedDocuments/AGENTS.md`. |
 | Generated types | `import { … } from "@/frontend/common/graphql/generated/gql/graphql-types";` or `Operations` | Unchanged. |
+| Generated enums | `import { CurrencyCode, AccountStatus, ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";` | Always import enum values from generated types — never hardcode string equivalents (see rule 11). |
 | Relative `../helpers` etc. | `import { … } from "../helpers";` | Tolerated in legacy files. Files in a sub-directory are one level deeper than the old flat layout, so infra resolves as `../helpers` / `../lifecycle` / `../testClient`. Prefer the `@/` alias for new tests. |
 
 When adding a **new** test:
@@ -58,7 +59,8 @@ When adding a **new** test:
 2. Create `<scenario>.test.ts` in that sub-directory.
 3. Use the alias form `@/frontend/common/graphql/test/(helpers|lifecycle|testClient)` — it keeps the test portable across sub-directory moves.
 4. If a new sub-directory is created, document it under **Layout** above.
-5. Run `bun tsgo` and `bun biome:check` on the new file before considering it done.
+5. For mutations: look up `Mutation<Name>Args` in generated types and pass ALL args (required + optional) as `variables` — see rule 11.
+6. Run `bun tsgo` and `bun biome:check` on the new file before considering it done.
 
 ---
 
@@ -121,9 +123,106 @@ When adding a **new** test:
    - Never duplicate standard test setup routines—such as demo user login mutations or querying/extracting basic database entities (e.g., matching student/teacher ID pairs)—across multiple test files.
    - Centralize all reusable test logic in the shared helpers file at `frontend/common/graphql/test/helpers.ts`.
    - Use `authenticatedRequest` from `helpers.ts` when performing authenticated queries/mutations in tests instead of manually setting authorization headers and assertions on each call.
+   - For mutation variable construction shared across test cases (e.g., `buildInvoiceVars`, `buildTeacherInput`), use a typed builder helper that defaults optional fields to `null` and accepts `Partial<T>` overrides — see rule 11 for the builder pattern.
 
 9. **Large Method Remediation (CodeScene Compliance)**:
    - Keep helper functions and database seeders modular and concise. If a function or seeder (such as `seedOrGet` in `seed-students.ts`) exceeds ~70–80 lines, refactor it by extracting distinct steps into smaller helper functions (e.g., `upsertStudent(...)`, `ensureTeacherAssignments(...)`).
 
 10. **Strict Interface Layer Separation**:
     - Integration tests under `frontend/common/graphql/test/` must interact with the application *exclusively* via the GraphQL API (using `testClient`). Under no circumstances should backend repositories (`db/repo/`), drizzle schemas directly (other than for checking in seed files), or service layers (`backend/services/`) be imported or invoked directly inside integration test files.
+
+11. **Mutation Argument Coverage (CRITICAL)**:
+
+    **Core Rule**: Every mutation call site MUST pass ALL available input arguments (both required AND optional) as `variables` — no field may be silently omitted. Optional fields must explicitly appear as `null` even when you don't intend to test them in that call site.
+
+    **Discovering Arguments**: Look up the mutation's args type in `frontend/common/graphql/generated/gql/graphql-types.ts` (search for `Mutation<Name>Args`). For `input` object mutations, also look up the input type definition (e.g., `TeacherOnboardingInput`) and include **ALL** its fields:
+
+    ```typescript
+    // MutationUpdateStudentQuotaArgs — from graphql-types.ts
+    type MutationUpdateStudentQuotaArgs = {
+      expectedVersion: InputMaybe<Scalars['Int']['input']>;  // OPTIONAL — has InputMaybe
+      newClassesRemaining: Scalars['Int']['input'];          // REQUIRED — no InputMaybe
+      studentId: Scalars['ID']['input'];                     // REQUIRED
+    };
+    ```
+
+    - Fields **without** `InputMaybe` → required — always pass a value.
+    - Fields **with** `InputMaybe` → optional — test both a **meaningful non-null value** AND **`null`** in separate test cases.
+
+    **Testing Matrix for Optional Fields**: For each optional field, ensure at least two test cases exercise it:
+    - One with a meaningful non-null value (real enum values, realistic strings, valid IDs — never empty strings or `""` for required fields).
+    - One with `null` explicitly (do not omit the field — pass `null` to exercise the resolver's optional branch).
+
+    **Enum Values**: Import and use generated enum values — never hardcode string literals:
+
+    ```typescript
+    // ✅ Correct — generated enums
+    import { CurrencyCode, AccountStatus, ClassType, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+    const input = { status: AccountStatus.Activated, currency: CurrencyCode.Usd };
+
+    // ❌ Wrong — hardcoded strings
+    const input = { status: "ACTIVATED", currency: "USD" };
+    ```
+
+    **Nested Input Types**: For input objects containing nested input types (e.g., `PaymentMethodDetailsInput` inside `UserPaymentMethodCreateInput`), populate ALL fields at every nesting level — do not skip nested optional fields.
+
+    **Builder Pattern for Large Input Objects**: When a mutation has many optional fields (e.g., `TeacherOnboardingInput` with 17 fields, `ManagerOnboardingInput` with 10+), use a typed builder helper:
+
+    ```typescript
+    type TeacherInputOverrides = Partial<TeacherOnboardingInput> & { name: string; email: string; password: string; timezone: IanaTimezone };
+
+    function buildTeacherInput(overrides: TeacherInputOverrides): TeacherOnboardingInput {
+      return {
+        name: overrides.name,
+        email: overrides.email,
+        password: overrides.password,
+        timezone: overrides.timezone,
+        // Required defaults — always present
+        address: overrides.address ?? null,
+        avatarUrl: overrides.avatarUrl ?? null,
+        hourlyRate: overrides.hourlyRate ?? null,
+        rateCurrency: overrides.rateCurrency ?? null,
+        // ... all optional fields default to null, overridable
+      };
+    }
+
+    // Usage: full input with non-null optionals
+    const fullInput = buildTeacherInput({ name: "Teacher 1", email: "t1@test.com", password: "pw", timezone: "Africa/Cairo", avatarUrl: "https://example.com/a.png", hourlyRate: 250 });
+    // Usage: minimal input with null optionals
+    const minimalInput = buildTeacherInput({ name: "Teacher 2", email: "t2@test.com", password: "pw", timezone: "Africa/Cairo" });
+    ```
+
+    **Cleanup Guards**: When tests provision multiple entities used in cleanup mutations, guard against `null` IDs for **ALL** required arguments — not just the ones used as variables in the test body. Missing an ID in the guard can cause empty strings to be passed for required `String!` fields:
+
+    ```typescript
+    // ✅ Good — guard all 6 required IDs
+    if (studentId && teacherId && parentId && studentUserId && teacherUserId && parentUserId) {
+      // cleanup mutations with all required variables
+    }
+
+    // ❌ Bad — only checks 3 of 6, empty-string fallback for remaining required fields
+    if (studentUserId && teacherUserId && parentUserId) {
+      // studentId: studentId || "" → empty string for required String! field
+    }
+    ```
+
+    **Helper Function Pattern**: For mutations shared across multiple test cases, centralize the variable construction in a typed helper function (following rule 8 about test duplication):
+
+    ```typescript
+    function buildInvoiceVars(parentId: string, overrides: Partial<CreateManualInvoiceInput> = {}): CreateManualInvoiceInput {
+      return {
+        parentId,
+        // required fields
+        issueDate: overrides.issueDate ?? new Date().toISOString(),
+        // default optional fields to null
+        description: overrides.description ?? null,
+        lineItems: overrides.lineItems ?? null,
+        currency: overrides.currency ?? null,
+        expectedVersion: overrides.expectedVersion ?? null,
+      };
+    }
+    ```
+
+    **Reference Files**:
+    - `docs/testing/mutation-argument-coverage.md` — comprehensive pattern reference with examples
+    - `.ai/plans/graphql-mutation-test-args/outcome/mutation-args-reference.json` — JSON map of all 137 mutation documents and their variable fields

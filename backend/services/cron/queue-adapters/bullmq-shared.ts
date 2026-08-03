@@ -37,8 +37,9 @@ export function pruneMaps<KA extends string, VA>(
 }
 
 /** Shared BullMQ import helper — avoids duplicating dynamic-import logic across adapters. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- bullmq is an optional dependency; type varies by installed version
-export async function tryImportBullMQ(): Promise<any | null> {
+export type BullMQModule = typeof import("bullmq");
+
+export async function tryImportBullMQ(): Promise<BullMQModule | null> {
   try {
     // Use variable to avoid static module resolution for optional dependency
     const moduleName = "bullmq";

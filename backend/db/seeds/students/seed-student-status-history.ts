@@ -3,9 +3,9 @@ import { StudentStatus } from "@/backend/enum";
 import { parseStudentStatus } from "@/backend/lib/enum";
 import logger from "@/backend/lib/logger";
 import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
-import type { StudentEntity, UserSelectType } from "@/backend/types";
+import type { StudentSelectType, UserSelectType } from "@/backend/types";
 
-export async function seedOrGet(studentsList: StudentEntity[], usersList: UserSelectType[], config?: SeedConfig) {
+export async function seedOrGet(studentsList: StudentSelectType[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding student status history...");
   const seedConfig = config ?? loadSeedConfig();
 

@@ -21,7 +21,7 @@ import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
-import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
+import type { ClassInstanceInsertType, ParentEntity, StudentSelectType, TeacherSelectType } from "@/backend/types";
 import type { UserSelectType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -37,9 +37,9 @@ beforeAll(() => {
 describe("Timezone Handling & DST Adjustment", () => {
   let testUser: UserSelectType | null = null;
   let testParentUser: UserSelectType | null = null;
-  let testTeacher: TeacherEntity | null = null;
+  let testTeacher: TeacherSelectType | null = null;
   let testParent: ParentEntity | null = null;
-  let testStudent: StudentEntity | null = null;
+  let testStudent: StudentSelectType | null = null;
 
   beforeAll(async () => {
     testLogger.info("Setting up timezone test data...");
@@ -237,7 +237,7 @@ describe("Timezone Handling & DST Adjustment", () => {
         idempotencyKey: randomUUID(),
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as ClassInstanceInsertInput)
+      } as ClassInstanceInsertType)
       .returning();
 
     testLogger.info(`Created drifted class with ID: ${driftedClass.id}`);

@@ -21,10 +21,12 @@ const mockProvider = {
   updatedAt: "2026-01-01T00:00:00.000Z",
   fieldSchema: {
     requiresMeetingUrl: true,
+    supportsAutoGeneration: false,
     supportsUsername: true,
     supportsPassword: true,
     supportsTenantId: false,
   },
+  providerKind: "manual",
 };
 
 const sampleConfigs: MobileMeetingConfigListItem[] = [
@@ -35,6 +37,7 @@ const sampleConfigs: MobileMeetingConfigListItem[] = [
     label: "Personal Zoom",
     isDefault: true,
     hasSecret: true,
+    oauthTokenExpiresAt: null,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     details: {
@@ -42,6 +45,7 @@ const sampleConfigs: MobileMeetingConfigListItem[] = [
       username: "teacher@example.com",
       tenantId: null,
     },
+    providerMetadata: null,
     provider: mockProvider,
   },
   {
@@ -51,6 +55,7 @@ const sampleConfigs: MobileMeetingConfigListItem[] = [
     label: "Backup Meet",
     isDefault: false,
     hasSecret: false,
+    oauthTokenExpiresAt: null,
     createdAt: "2026-01-02T00:00:00.000Z",
     updatedAt: "2026-01-02T00:00:00.000Z",
     details: {
@@ -58,6 +63,7 @@ const sampleConfigs: MobileMeetingConfigListItem[] = [
       username: null,
       tenantId: null,
     },
+    providerMetadata: null,
     provider: {
       ...mockProvider,
       id: "prov-gmeet",
@@ -67,10 +73,12 @@ const sampleConfigs: MobileMeetingConfigListItem[] = [
       urlExample: "https://meet.google.com/abc-defg-hij",
       fieldSchema: {
         requiresMeetingUrl: true,
+        supportsAutoGeneration: false,
         supportsUsername: false,
         supportsPassword: false,
         supportsTenantId: false,
       },
+      providerKind: "manual",
     },
   },
 ];

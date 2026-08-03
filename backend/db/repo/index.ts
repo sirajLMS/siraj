@@ -5,6 +5,8 @@ export {
   CreditRepository,
   CurrencyHedgeRepository,
   InvoicePaymentSubmissionRepository,
+  QuotaLedgerRepository,
+  QuotaRepository,
   SupportedCurrencyRepository,
   SupportedMobileWalletRepository,
   SupportedOnlineAccountRepository,
@@ -63,4 +65,5 @@ export {
   TeacherRepository,
 } from "@/backend/db/repo/teachers";
 export { SessionConfigRepository, UserRepository } from "@/backend/db/repo/users";
+export { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 export type { UserReturnType, UserSelectType } from "@/backend/types";

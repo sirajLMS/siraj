@@ -17,3 +17,4 @@ import "./storage";
 import "./students";
 import "./supervisor";
 import "./teachers";
+import "./whatsapp";

@@ -46,6 +46,9 @@ const createFullParentInput = (
   overrides?: Partial<{
     name: string;
     email: string;
+    avatarUrl: string | null;
+    phone: string | null;
+    displayCurrency: CurrencyCode | null;
     invoiceType: InvoiceType | null;
     feeAmount: string | null;
     initialPayinMethod: UserPaymentMethodInitialInput | null;
@@ -55,16 +58,15 @@ const createFullParentInput = (
     facebook: string | null;
     whatsapp: string | null;
     twitter: string | null;
-    skype: string | null;
     nationality: string | null;
-    phone: string | null;
   }>
 ) => ({
   name: overrides?.name ?? "Test Parent",
   email: overrides?.email ?? `test_parent_${Date.now()}@test.com`,
-  avatarUrl: null,
+  avatarUrl: overrides?.avatarUrl ?? "https://example.com/avatar.png",
   password: `Pwd_${randomUUID()}`,
   phone: overrides?.phone ?? "+1234567890",
+  displayCurrency: overrides?.displayCurrency ?? CurrencyCode.Eur,
   invoiceType: overrides?.invoiceType ?? InvoiceType.Monthly,
   feeAmount: overrides?.feeAmount ?? "500.00",
   initialPayinMethod: overrides?.initialPayinMethod ?? {
@@ -95,7 +97,6 @@ const createFullParentInput = (
   whatsapp: overrides?.whatsapp ?? "+1234567890",
   twitter: overrides?.twitter ?? "@testparent",
   nationality: overrides?.nationality ?? "US",
-  displayCurrency: null,
 });
 
 describe("Parent Onboarding GraphQL API", () => {

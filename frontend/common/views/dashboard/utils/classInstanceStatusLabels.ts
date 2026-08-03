@@ -13,5 +13,9 @@ export function buildClassInstanceStatusLabels(
     [ClassExecutionState.Activated]: t.ACTIVATED,
     [ClassExecutionState.Running]: t.RUNNING,
     [ClassExecutionState.Completed]: t.COMPLETED,
+    [ClassExecutionState.OnDemandConflictHeld]: t.ON_DEMAND_CONFLICT_HELD,
+    [ClassExecutionState.OnDemandNoCreditsAbsent]: t.ON_DEMAND_NO_CREDITS_ABSENT,
+    [ClassExecutionState.OnDemandNoCreditsCancelled]: t.ON_DEMAND_NO_CREDITS_CANCELLED,
+    [ClassExecutionState.OnDemandPendingCredits]: t.ON_DEMAND_PENDING_CREDITS,
   };
 }

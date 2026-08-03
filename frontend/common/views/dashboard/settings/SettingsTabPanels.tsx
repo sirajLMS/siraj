@@ -52,6 +52,12 @@ const LazySettingsTimezonesTab = lazy(() =>
   }))
 );
 
+const LazyMeetingIntegrationsTab = lazy(() =>
+  import("@/frontend/common/views/dashboard/settings/tabs/meetingIntegrations/MeetingIntegrationsTab").then(module => ({
+    default: module.MeetingIntegrationsTab,
+  }))
+);
+
 const TAB_PANELS: readonly TabPanelDefinition[] = [
   { id: "general", permissions: PAGE_PERMISSIONS.settingsGeneral, Component: LazyGeneralSettingsTab },
   { id: "environment", permissions: PAGE_PERMISSIONS.settingsEnvironment, Component: LazyEnvironmentConfigTab },
@@ -59,6 +65,11 @@ const TAB_PANELS: readonly TabPanelDefinition[] = [
   { id: "audit", permissions: PAGE_PERMISSIONS.settingsAudit, Component: LazySettingsAuditTab },
   { id: "siteContent", permissions: PAGE_PERMISSIONS.settingsSiteContent, Component: LazySiteContentSettingsTab },
   { id: "timezones", permissions: PAGE_PERMISSIONS.settingsTimezones, Component: LazySettingsTimezonesTab },
+  {
+    id: "meetingIntegrations",
+    permissions: PAGE_PERMISSIONS.settingsMeetingIntegrations,
+    Component: LazyMeetingIntegrationsTab,
+  },
 ];
 
 function TabPanelFallback() {

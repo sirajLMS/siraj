@@ -6,28 +6,34 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
+import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { QuotaService } from "@/backend/services/billing/quota.service";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
+
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
-import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
+import type { ClassInstanceInsertType, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherDashboardService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, permission);
     if (!isAuthorized) {
-      throw new Error(tErrors.unauthorized);
+      throw new UnauthorizedError(tErrors.unauthorized);
     }
   }
 
-  export async function getDashboard(userId: string, date: string, pagination?: PaginationArgs | null) {
-    const tErrors = { unauthorized: "You must be logged in first." } as ErrorsLabels;
+  export async function getDashboard(userId: string, date: string, pagination: PaginationArgs | null, locale: string) {
+    const { errorsTranslations: tErrors } = getServerTranslations(locale);
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
     await assertPermission(userId, AppPermission.SCHEDULE_VIEW_ASSIGNED, tErrors);
 
     const teacher = await TeacherRepository.findByUserId(userId);
     if (!teacher) {
-      throw new Error("Teacher profile not found");
+      throw new NotFoundError("TEACHER", tErrors.teacher.teacherNotFound(userId));
     }
 
     const user = await UserRepository.findById(userId);
@@ -77,12 +83,12 @@ export namespace TeacherDashboardService {
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
 
     if (!input.subjectId) {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
 
     const balance = await CreditRepository.getBalance(db, input.studentId);
     if (balance.classesRemaining <= 0) {
-      throw new Error(
+      throw new ValidationError(
         tErrors.credit.insufficientBalance?.({
           studentId: input.studentId,
           remaining: balance.classesRemaining,
@@ -91,7 +97,7 @@ export namespace TeacherDashboardService {
     }
 
     const idempotencyKey = `manual-${userId}-${Date.now()}`;
-    const entry: Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
+    const entry: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
       studentId: input.studentId,
       teacherId: input.teacherId,
       subjectId: input.subjectId,
@@ -105,14 +111,31 @@ export namespace TeacherDashboardService {
       idempotencyKey,
     };
 
-    return db.transaction(async tx => {
+    const created = await db.transaction(async tx => {
       const created = await SchedulingRepository.createClassInstance(entry, tx);
 
-      const creditIdempotencyKey = `credit-deduction:${created.id}`;
-      await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx, tErrors);
+      const openQuota = await QuotaService.selectQuotaForBooking(input.studentId, tx, userId);
+      if (openQuota) {
+        await QuotaService.redeemForInstance(input.studentId, created.id, openQuota.id, userId, tx);
+      } else {
+        const creditIdempotencyKey = `credit-deduction:${created.id}`;
+        await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx, tErrors);
+      }
 
       return created;
     });
+
+    // Best-effort meeting URL generation — never fails the manual booking.
+    try {
+      await MeetingConfigSnapshotService.generateAndAttachForClassInstance(created.id);
+    } catch (error) {
+      logger.error("Booking-time meeting URL generation failed for manual class instance", {
+        classInstanceId: created.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return created;
   }
 
   export interface SupportRequestInput {

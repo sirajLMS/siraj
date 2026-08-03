@@ -1,38 +1,38 @@
-import type {
-  classInstances,
-  leaveQuotaUsage,
-  recurringScheduleDays,
-  recurringSchedules,
-  timezones,
-} from "@/backend/db/schema";
+import type { leaveQuotaUsage, recurringScheduleDays, recurringSchedules, timezones } from "@/backend/db/schema";
 import type {
   ClassExecutionState,
   ClassOutcome,
+  ClassType,
   CurrencyCode,
+  DayOfWeek,
   LeaveRequestStatus,
+  OnDemandNoCreditsOutcome,
   RescheduleDateLabel,
+  SchedulingMode,
   StudentStatus,
 } from "@/backend/enum";
+
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import type { PageInfo, PaginationArgs } from "@/backend/types/shared/pagination.types";
-import type { StudentEntity } from "@/backend/types/students/student.types";
-import type { TeacherEntity } from "@/backend/types/teachers/teacher.types";
+import type { StudentSelectType } from "@/backend/types/students/student.types";
+import type { TeacherSelectType } from "@/backend/types/teachers/teacher.types";
 import type { UserSelectType } from "@/backend/types/users/user.types";
 import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
-export type RecurringScheduleEntity = typeof recurringSchedules.$inferSelect;
-export type RecurringScheduleInsertInput = typeof recurringSchedules.$inferInsert;
+export type RecurringScheduleSelectType = typeof recurringSchedules.$inferSelect;
+export type RecurringScheduleInsertType = typeof recurringSchedules.$inferInsert;
 
-export type RecurringScheduleDayEntity = typeof recurringScheduleDays.$inferSelect;
-export type RecurringScheduleDayInsertInput = typeof recurringScheduleDays.$inferInsert;
+export type RecurringScheduleDaySelectType = typeof recurringScheduleDays.$inferSelect;
+export type RecurringScheduleDayInsertType = typeof recurringScheduleDays.$inferInsert;
 
-export type ClassInstanceEntity = typeof classInstances.$inferSelect;
-export type ClassInstanceInsertInput = typeof classInstances.$inferInsert;
+export type DailyScheduleTeacher = TeacherSelectType & { user: UserSelectType };
 
-export type DailyScheduleTeacher = TeacherEntity & { user: UserSelectType };
-
-export type DailyScheduleResult = Omit<ClassInstanceEntity, "deletedAt" | "createdAt" | "updatedAt"> & {
+export type DailyScheduleResult = Omit<
+  ClassInstanceSelectType,
+  "deletedAt" | "createdAt" | "updatedAt" | "idempotencyKey"
+> & {
   courseName: string | null;
   avatarUrl?: string | null;
   instanceId: string;
@@ -40,18 +40,18 @@ export type DailyScheduleResult = Omit<ClassInstanceEntity, "deletedAt" | "creat
   startTime: string;
   endTime: string;
   durationMinutes: number;
-  status: ClassInstanceEntity["executionState"];
+  status: ClassExecutionState;
   remarks: string | null;
   hasTimezoneMismatch: boolean;
   studentTimezone: IanaTimezone | null;
   teacherTimezone: IanaTimezone | null;
   performance: ClassInstancePerformanceSelectType | null;
-  student?: StudentEntity;
+  student?: StudentSelectType;
   teacher?: DailyScheduleTeacher;
   yourTimeFormatted?: string;
 };
 
-export type AdminDashboardScheduleInput = {
+export type AdminDashboardScheduleRepoInput = {
   date: Date;
   teacherId?: string;
   search?: string;
@@ -68,21 +68,28 @@ export type AdminDashboardScheduleResult = {
   pageInfo: PageInfo | null;
 };
 
-export type LeaveQuotaUsageEntity = typeof leaveQuotaUsage.$inferSelect;
-export type LeaveQuotaUsageInsertInput = typeof leaveQuotaUsage.$inferInsert;
+export type LeaveQuotaUsageSelectType = typeof leaveQuotaUsage.$inferSelect;
+export type LeaveQuotaUsageInsertType = typeof leaveQuotaUsage.$inferInsert;
 
-export type TimezoneEntity = typeof timezones.$inferSelect;
+export type UpsertStudentLeaveQuotaInput = {
+  studentId: string;
+  periodYear: number;
+  periodMonth: number;
+  usedCount: number;
+};
+
+export type TimezoneSelectType = typeof timezones.$inferSelect;
 
 export type TimezoneUpsertInput = {
   ianaId: string;
   baseOffsetMinutes: number;
   isDstSupported?: boolean;
 };
-export type TimezoneInsertInput = typeof timezones.$inferInsert;
+export type TimezoneInsertType = typeof timezones.$inferInsert;
 
 export type SettingsTimezonesPaginatedResult = {
   readonly id: string;
-  readonly rows: TimezoneEntity[];
+  readonly rows: TimezoneSelectType[];
   readonly totalCount: number;
   readonly pageInfo: PageInfo | null;
 };
@@ -124,7 +131,7 @@ export type RescheduleTrackingMetrics = {
 };
 
 export type RecurringClassDayInput = {
-  dayOfWeek: string;
+  dayOfWeek: DayOfWeek;
   startTime: string;
   isActive: boolean;
 };
@@ -136,15 +143,23 @@ export type CreateRecurringClassInput = {
   durationMinutes: number;
   defaultStartTime: string;
   timezone: IanaTimezone;
+  timezoneId?: number | null;
   effectiveFrom?: string | null;
   effectiveUntil?: string | null;
   days: RecurringClassDayInput[];
-  classType?: string | null;
+  classType?: ClassType | null;
   generateInstancesForWeeks?: number | null;
   /** Recurring-class-level hourly rate (highest non-override tier). Nullable. */
   hourlyRate?: string | null;
   /** Currency for `hourlyRate`. Required when `hourlyRate` is set. */
   rateCurrency?: CurrencyCode | null;
+  quotaId?: string | null;
+  earmarkedClasses?: number | null;
+  schedulingMode?: SchedulingMode | null;
+  generationHorizonWeeks?: number | null;
+  ondemandNoCreditsOutcome?: OnDemandNoCreditsOutcome | null;
+  /** Optional locale forwarded to `dispatchWithPreferences` for i18n. */
+  locale?: string;
 };
 
 export type CreateRecurringClassReturnType = {
@@ -182,8 +197,8 @@ export type FutureClassRow = {
   subjectAvatarUrl?: string | null;
   recurringAvatarUrl?: string | null;
   meetingJoinUrl?: string | null;
-  executionState?: string | null;
-  outcome?: string | null;
+  executionState?: ClassExecutionState | null;
+  outcome?: ClassOutcome | null;
 };
 
 export type WeeklyScheduleGridRow = {
@@ -194,9 +209,9 @@ export type WeeklyScheduleGridRow = {
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  dayOfWeek: string;
-  executionState: string;
-  outcome: string;
+  dayOfWeek: DayOfWeek;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
   isFrozen: boolean;
   subjectId?: string | null;
   subjectName?: string | null;
@@ -242,8 +257,8 @@ export type UpcomingClassRow = {
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  executionState: string;
-  outcome: string;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
   isFrozen: boolean;
 };
 
@@ -253,7 +268,7 @@ export type TeacherAssignedClassRow = {
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  executionState: string;
-  outcome: string | null;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
   isFrozen: boolean;
 };

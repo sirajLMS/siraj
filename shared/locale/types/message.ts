@@ -12,6 +12,7 @@ import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billin
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main.ts";
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual.ts";
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment.ts";
+import type { QuotaLabels as BillingQuotaLabels } from "@/shared/locale/types/dashboard/billing/quota.ts";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies.ts";
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit.ts";
 import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass.ts";
@@ -93,7 +94,6 @@ import type {
 } from "@/shared/locale/types/profile";
 import type { SessionLabels } from "@/shared/locale/types/session";
 import type { SmsLabels } from "@/shared/locale/types/sms";
-
 // ─── ui/leaf interfaces (collected into UiTranslations) ──────────────────
 import type {
   CatalogImageUploadLabels,
@@ -127,6 +127,7 @@ import type {
   TimezoneSelectLabels,
   UserSelectLabels,
 } from "@/shared/locale/types/ui";
+import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 export type { AppLocale };
 
@@ -138,7 +139,9 @@ export interface DashboardTranslations {
   dstMigration: DstMigrationLabels;
   billing: BillingLabels;
   billingManual: BillingManualLabels;
+  billingQuota: BillingQuotaLabels;
   billingPayment: PaymentComponentLabels;
+
   billingExchangeRates: ExchangeRatesLabels;
   billingCurrencyHedges: CurrencyHedgesLabels;
   billingSupportedCurrencies: SupportedCurrenciesLabels;
@@ -266,4 +269,5 @@ export type Translations = {
   dashboardTranslations: DashboardTranslations;
   profileTranslations: ProfileTranslations;
   notificationsTranslations: NotificationsLabels;
+  whatsappTranslations: WhatsappLabels;
 };

@@ -3,8 +3,8 @@ import { SupportedMobileWalletRepository } from "@/backend/db/repo/billing/suppo
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-payment-method.repository";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
+import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import { NotificationEventType } from "@/backend/enum/notifications/notificationDeliveries.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
@@ -74,10 +74,10 @@ describe("PaymentMethodService notification dispatch", () => {
     spies.push(userSpy);
 
     dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockResolvedValue([
-      { channel: "on_app", success: true },
-      { channel: "email", success: true },
-      { channel: "sms", success: true },
-      { channel: "push", success: true },
+      { channel: NotificationChannel.ON_APP, success: true },
+      { channel: NotificationChannel.EMAIL, success: true },
+      { channel: NotificationChannel.SMS, success: true },
+      { channel: NotificationChannel.PUSH, success: true },
     ]);
     spies.push(dispatchMultiSpy);
 
