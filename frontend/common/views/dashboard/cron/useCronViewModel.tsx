@@ -20,7 +20,7 @@ import {
   CronScheduleStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
-  CronRunFieldsFragment,
+  CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun,
   CronScheduleFieldsFragment,
 } from "@/frontend/common/graphql/generated/gql/operations";
 import {
@@ -262,7 +262,15 @@ export function useCronViewModel(): CronViewModel {
   const { data: runsData, loading: runsLoading } = useQuery(cronRunsQueryDocument, {
     variables: {
       input: runsSchedule
-        ? { scheduleId: runsSchedule.id ?? "", from: null, offset: 0, status: null, to: null, limit: 50 }
+        ? {
+            scheduleId: runsSchedule.id ?? "",
+            from: null,
+            offset: 0,
+            status: null,
+            statuses: null,
+            to: null,
+            limit: 50,
+          }
         : null,
     },
     skip: !runsOpen || !runsSchedule,
@@ -277,7 +285,10 @@ export function useCronViewModel(): CronViewModel {
 
   const rows = useMemo(() => data?.cronSchedules?.rows ?? [], [data?.cronSchedules?.rows]);
   const queueStats = useMemo(() => queueStatsData?.cronQueueStats ?? null, [queueStatsData?.cronQueueStats]);
-  const runs = useMemo<CronRunFieldsFragment[]>(() => runsData?.cronRuns?.rows ?? [], [runsData?.cronRuns?.rows]);
+  const runs = useMemo<CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun[]>(
+    () => runsData?.cronRuns?.rows ?? [],
+    [runsData?.cronRuns?.rows]
+  );
   const saving = creating || updating;
 
   const handleCreateOpen = useCallback(() => setCreateOpen(true), []);

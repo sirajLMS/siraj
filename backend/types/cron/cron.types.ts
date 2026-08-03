@@ -222,3 +222,14 @@ export type CronQueueAdapter = {
   getQueueStats(): Promise<CronQueueStats>;
   shutdown(): Promise<void>;
 };
+
+// ── Build-time config types ──
+
+export type CronExecutionMode = "vercel" | "vercel-daily" | "external" | "standalone";
+
+export interface CronDefinition {
+  path: string;
+  scheduleEnv: string;
+  defaultSchedule: string;
+  alwaysInclude: boolean;
+}

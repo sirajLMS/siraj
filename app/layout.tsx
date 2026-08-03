@@ -100,14 +100,27 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       className={`${inter.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <head>
-        <script
-          nonce={nonce}
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: Service worker registration script
-          dangerouslySetInnerHTML={{
-            __html:
-              "if('serviceWorker' in navigator && window.isSecureContext){navigator.serviceWorker.register('/sw.js').catch(function(){});}",
-          }}
-        />
+        {process.env.NODE_ENV === "production" ? (
+          <script
+            nonce={nonce}
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Service worker registration script
+            dangerouslySetInnerHTML={{
+              __html:
+                "if('serviceWorker' in navigator && window.isSecureContext){navigator.serviceWorker.register('/sw.js?build=" +
+                process.env.NEXT_PUBLIC_BUILD_ID +
+                "').catch(function(){});}",
+            }}
+          />
+        ) : (
+          <script
+            nonce={nonce}
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Unregister stale SW left over from prod-mode caching of Turbopack chunks
+            dangerouslySetInnerHTML={{
+              __html:
+                "if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister();});}).catch(function(){});caches.keys().then(function(k){k.filter(function(n){return n.indexOf('siraj-static-chunks-')===0||n.indexOf('siraj-api-')===0;}).forEach(function(n){caches.delete(n);});}).catch(function(){});}",
+            }}
+          />
+        )}
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Safe server-side generated theme CSS variables */}
         <style id="server-theme-css" dangerouslySetInnerHTML={{ __html: serverThemeCss }} />
       </head>

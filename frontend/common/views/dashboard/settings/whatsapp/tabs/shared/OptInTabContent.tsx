@@ -29,6 +29,7 @@ export function OptInTabContent({ labels, isOptedIn, optInLoading, onToggleOptIn
           <FormControlLabel
             control={<Switch checked={isOptedIn} onChange={e => onToggleOptIn(e.target.checked)} />}
             label={t.optInToggle}
+            sx={{ gap: 1.5 }}
           />
         )}
         <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 1, display: "block" }}>

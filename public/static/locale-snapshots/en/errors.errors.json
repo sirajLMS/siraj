@@ -328,6 +328,9 @@
   "teacherOnVacation": "Booking blocked by approved vacation period.",
   "resourceNotFound": "Learning resource not found.",
   "currencyInUse": "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
+  "invalidRunStatus": {
+    "__fn": "(status, runId) => `Cannot retry a run with status ${status} (runId: ${runId}).`"
+  },
   "complaintNotFound": "Complaint not found.",
   "suggestionNotFound": "Suggestion not found.",
   "complaintTooManyFiles": {

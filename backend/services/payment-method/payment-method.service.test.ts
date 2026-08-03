@@ -67,10 +67,13 @@ describe("PaymentMethodService notification dispatch", () => {
   beforeEach(() => {
     tErrors = getServerTranslations("en").errorsTranslations;
 
-    const userSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue({
-      email: "owner@test.com",
-      phone: "+1234567890",
-    } as never);
+    const userSpy = spyOn(UserRepository, "findSafeByIds").mockImplementation(async (ids: string[]) => {
+      const map = new Map<string, { email: string; phone: string }>();
+      for (const id of ids) {
+        map.set(id, { email: "owner@test.com", phone: "+1234567890" });
+      }
+      return map as never;
+    });
     spies.push(userSpy);
 
     dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockResolvedValue([
@@ -81,7 +84,7 @@ describe("PaymentMethodService notification dispatch", () => {
     ]);
     spies.push(dispatchMultiSpy);
 
-    const prefsSpy = spyOn(NotificationPreferencesRepository, "getByUserId").mockResolvedValue([]);
+    const prefsSpy = spyOn(NotificationPreferencesRepository, "getByUserIds").mockResolvedValue(new Map());
     spies.push(prefsSpy);
 
     const permsSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);

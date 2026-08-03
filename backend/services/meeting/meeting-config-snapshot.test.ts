@@ -223,6 +223,7 @@ mock.module("@/backend/db/drizzleDb", () => ({
 
 mock.module("@/backend/db/schema", () => ({
   classInstances: { id: "id" },
+  teachers: { id: "id", userId: "userId" },
 }));
 
 function buildQueryClient() {

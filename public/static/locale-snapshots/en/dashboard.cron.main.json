@@ -78,6 +78,7 @@
   },
   "manualTriggerConfirmButton": "Trigger Now",
   "manualTriggerCancel": "Cancel",
+  "loading": "Loading…",
   "scheduleCreated": "Schedule created successfully",
   "scheduleUpdated": "Schedule updated successfully",
   "scheduleDeleted": "Schedule deleted successfully",
@@ -108,6 +109,12 @@
       "__fn": "(id) => `Run not found: ${id}`"
     },
     "manualTriggerConflict": "A run is already in progress for this schedule",
+    "dispatchSendFailed": {
+      "__fn": "(id) => `Failed to dispatch run for schedule \"${id}\" \\u2014 the queue adapter could not be reached`"
+    },
+    "enqueueRetryFailed": {
+      "__fn": "(id) => `Failed to enqueue retry for run \"${id}\" \\u2014 the queue adapter could not be reached`"
+    },
     "queueBackendUnknown": {
       "__fn": "(backend) => `Unknown queue backend: ${backend}`"
     },
@@ -116,6 +123,9 @@
     "invalidScheduleIdFormat": "Invalid scheduleId format",
     "tickerFailed": "Ticker failed",
     "classRemindersFailed": "Class reminders failed",
-    "userContextRequired": "Authenticated user context is required to perform this action"
+    "userContextRequired": "Authenticated user context is required to perform this action",
+    "unauthorized": "Unauthorized",
+    "methodNotAllowed": "Method not allowed",
+    "serverMisconfigured": "Server misconfigured"
   }
 }

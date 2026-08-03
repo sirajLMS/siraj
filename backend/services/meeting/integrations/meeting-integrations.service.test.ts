@@ -109,20 +109,28 @@ mock.module("@/backend/lib/logger", () => ({
 
 // --- Repositories
 const listByProviderMock = mock(async (): Promise<MeetingProviderTokenSelectType[]> => []);
+const getByUserAndProviderMock = mock(async (): Promise<MeetingProviderTokenSelectType | null> => null);
 const deleteByUserAndProviderMock = mock(async (): Promise<void> => undefined);
 
 mock.module("@/backend/db/repo/meeting/meeting-provider-token.repository", () => ({
   MeetingProviderTokenRepository: {
     listByProvider: listByProviderMock,
+    getByUserAndProvider: getByUserAndProviderMock,
     deleteByUserAndProvider: deleteByUserAndProviderMock,
   },
 }));
 
-const userFindByIdMock = mock(async (): Promise<UserSelectType | null> => null);
+const userFindByIdsMock = mock(async (ids: string[]): Promise<Map<string, UserSelectType | null>> => {
+  const map = new Map<string, UserSelectType | null>();
+  for (const id of ids) {
+    map.set(id, null);
+  }
+  return map;
+});
 
 mock.module("@/backend/db/repo/users/user.repository", () => ({
   UserRepository: {
-    findById: userFindByIdMock,
+    findByIds: userFindByIdsMock,
   },
 }));
 
@@ -195,8 +203,17 @@ function resetMocks(): void {
   deleteByUserAndProviderMock.mockReset();
   deleteByUserAndProviderMock.mockResolvedValue(undefined);
 
-  userFindByIdMock.mockReset();
-  userFindByIdMock.mockResolvedValue(null);
+  getByUserAndProviderMock.mockReset();
+  getByUserAndProviderMock.mockResolvedValue(null);
+
+  userFindByIdsMock.mockReset();
+  userFindByIdsMock.mockImplementation(async (ids: string[]) => {
+    const map = new Map<string, UserSelectType | null>();
+    for (const id of ids) {
+      map.set(id, null);
+    }
+    return map;
+  });
 
   createManyAuditLogsMock.mockReset();
   createManyAuditLogsMock.mockResolvedValue([]);
@@ -299,11 +316,22 @@ describe("MeetingIntegrationService", () => {
       listByProviderMock.mockResolvedValue([
         makeToken({ userId: USER_ID_A, expiresAt: expiresFuture, createdAt: createdDate, updatedAt: updatedDate }),
       ]);
-      userFindByIdMock.mockResolvedValue({
-        id: USER_ID_A,
-        name: "Alice",
-        email: "alice@test.com",
-      } as unknown as UserSelectType);
+      userFindByIdsMock.mockImplementation(async (ids: string[]) => {
+        const map = new Map<string, UserSelectType | null>();
+        for (const id of ids) {
+          map.set(
+            id,
+            id === USER_ID_A
+              ? ({
+                  id: USER_ID_A,
+                  name: "Alice",
+                  email: "alice@test.com",
+                } as unknown as UserSelectType)
+              : null
+          );
+        }
+        return map;
+      });
 
       const result = await MeetingIntegrationService.listConnectedAccounts(ACTOR_ID, "zoom", FAKE_ERRORS);
 
@@ -349,7 +377,6 @@ describe("MeetingIntegrationService", () => {
     test("handles missing user (name/email default to null)", async () => {
       const { MeetingIntegrationService } = await importService();
       listByProviderMock.mockResolvedValue([makeToken({ userId: "nonexistent" })]);
-      userFindByIdMock.mockResolvedValue(null);
 
       const result = await MeetingIntegrationService.listConnectedAccounts(ACTOR_ID, "zoom", FAKE_ERRORS);
 

@@ -21,7 +21,7 @@ const MOCK_TOKEN_RESPONSE = {
   access_token: "mock-zoom-access-token",
   token_type: "Bearer",
   expires_in: 3600,
-  scope: "meeting:write:admin meeting:write",
+  scope: "meeting:write:meeting user:read:user meeting:write:admin meeting:write",
   api_url: "https://api.zoom.us/v2",
 };
 

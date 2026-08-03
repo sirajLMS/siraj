@@ -48,7 +48,7 @@ export function WhatsappConfigLayout({
         </Tabs>
       </Box>
 
-      {children(activeTab)}
+      <Box sx={{ mt: 3 }}>{children(activeTab)}</Box>
     </>
   );
 }

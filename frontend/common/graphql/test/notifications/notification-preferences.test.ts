@@ -8,6 +8,10 @@ import { authenticatedRequest, loginDemoUser } from "@/frontend/common/graphql/t
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
 
+/** Full matrix: every channel × every event type (teacher allowlist is ALL). */
+const EXPECTED_DEFAULT_PREF_COUNT =
+  Object.values(NotificationChannel).length * Object.values(NotificationEventType).length;
+
 describe("GraphQL Notification Preferences Integration Tests", () => {
   setupTestServerLifecycle();
 
@@ -45,11 +49,19 @@ describe("GraphQL Notification Preferences Integration Tests", () => {
     });
 
     const data = await authenticatedRequest(token, "query", notificationPreferencesQueryDocument);
+    const prefs = data.notificationPreferences;
 
-    expect(Array.isArray(data.notificationPreferences)).toBe(true);
-    expect(data.notificationPreferences?.length).toBe(124);
-    expect(data.notificationPreferences?.[0]?.id).toBeDefined();
-    expect(data.notificationPreferences?.every(pref => pref?.enabled)).toBe(true);
+    expect(Array.isArray(prefs)).toBe(true);
+    expect(prefs?.length).toBe(EXPECTED_DEFAULT_PREF_COUNT);
+    expect(prefs?.[0]?.id).toBeDefined();
+
+    // Non-WhatsApp channels default enabled; WhatsApp is opt-in (REQ-10.1).
+    expect(prefs?.filter(pref => pref?.channel !== NotificationChannel.Whatsapp).every(pref => pref?.enabled)).toBe(
+      true
+    );
+    expect(
+      prefs?.filter(pref => pref?.channel === NotificationChannel.Whatsapp).every(pref => pref?.enabled === false)
+    ).toBe(true);
   });
 
   test("notificationPreferences — denied when unauthenticated", async () => {

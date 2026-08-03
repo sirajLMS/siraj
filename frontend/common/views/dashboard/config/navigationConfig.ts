@@ -481,24 +481,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.quotasInsights,
     groupId: "grp_finance",
   },
-  {
-    key: "quotas-view",
-    labelKey: "quotasView",
-    iconKey: "visibility",
-    href: "/quotas/[id]",
-    section: "main",
-    permission: PAGE_PERMISSIONS.quotasView,
-    groupId: "grp_finance",
-  },
-  {
-    key: "quotas-edit",
-    labelKey: "quotasEdit",
-    iconKey: "edit",
-    href: "/quotas/[id]/edit",
-    section: "main",
-    permission: PAGE_PERMISSIONS.quotasEdit,
-    groupId: "grp_finance",
-  },
+
   {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",
@@ -901,6 +884,11 @@ export function getNavItemsForPermissions(
     const permissions = itemsOrPermissions as readonly AppPermission[];
     const featureFlags = resolveNavFeatureFlags(maybePermissionsOrFlags);
     const filtered = items.filter(item => {
+      // Next.js App Router Link rejects unresolved dynamic segments
+      // (e.g. `/quotas/[id]`). Detail routes must be linked with a real id.
+      if (item.href.includes("[")) {
+        return false;
+      }
       if (item.audience === "teacher" && !isTeacherPortalUser(permissions)) return false;
       if (item.audience === "parent" && !isParentPortalUser(permissions)) return false;
       if (item.audience === "student" && !isStudentPortalUser(permissions)) return false;

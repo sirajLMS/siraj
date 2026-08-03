@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository, WhatsappAccountRepository } from "@/backend/db/repo";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { invalidateEnvConfigCache } from "@/backend/lib/env-config-resolver";
 import {
@@ -12,6 +12,7 @@ import type { NotificationDeliverySelectType } from "@/backend/types";
 
 const MOCK_USER_ID = "user-uuid-wa-0001";
 const MOCK_DELIVERY_ID = "delivery-uuid-wa-0001";
+const MOCK_ACCOUNT_ID = "11111111-1111-4111-8111-111111111111";
 
 function sendParams() {
   return {
@@ -20,6 +21,16 @@ function sendParams() {
     userId: MOCK_USER_ID,
     template: { name: "test_template", languageCode: "en" },
   } as const;
+}
+
+function mockWhatsappCredentialsAccount(overrides: Record<string, unknown> = {}) {
+  return {
+    id: MOCK_ACCOUNT_ID,
+    encryptedAccessToken: "test-token-abc123",
+    phoneNumberId: "phone-id-123",
+    isActive: true,
+    ...overrides,
+  };
 }
 
 const mockDelivery: NotificationDeliverySelectType = {
@@ -46,23 +57,25 @@ const mockDelivery: NotificationDeliverySelectType = {
 describe("WhatsApp Channel Factory", () => {
   let createDeliverySpy: ReturnType<typeof spyOn>;
   let updateDeliveryStatusSpy: ReturnType<typeof spyOn>;
+  let findFirstActiveForCredentialsSpy: ReturnType<typeof spyOn>;
 
   beforeEach(async () => {
     await resetWhatsappChannel();
     invalidateEnvConfigCache();
-    process.env.WHATSAPP_ACCESS_TOKEN = "test-token-abc123";
-    process.env.WHATSAPP_PHONE_NUMBER_ID = "phone-id-123";
+    findFirstActiveForCredentialsSpy = spyOn(
+      WhatsappAccountRepository,
+      "findFirstActiveForCredentials"
+    ).mockResolvedValue(mockWhatsappCredentialsAccount() as never);
     createDeliverySpy = spyOn(NotificationRepository, "createDelivery").mockResolvedValue(mockDelivery);
     updateDeliveryStatusSpy = spyOn(NotificationRepository, "updateDeliveryStatus").mockResolvedValue(mockDelivery);
   });
 
   afterEach(async () => {
+    findFirstActiveForCredentialsSpy.mockRestore();
     createDeliverySpy.mockRestore();
     updateDeliveryStatusSpy.mockRestore();
     await resetWhatsappChannel();
     invalidateEnvConfigCache();
-    delete process.env.WHATSAPP_ACCESS_TOKEN;
-    delete process.env.WHATSAPP_PHONE_NUMBER_ID;
   });
 
   describe("S4: resetWhatsappChannel — singleton lifecycle", () => {
@@ -88,41 +101,37 @@ describe("WhatsApp Channel Factory", () => {
   });
 
   describe("validateConfig", () => {
-    test("returns true when WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID are present", async () => {
+    test("returns true when an active WhatsApp account with credentials is present", async () => {
       const result = await whatsappChannel.validateConfig();
       expect(result).toBe(true);
     });
 
-    test("returns false when WHATSAPP_ACCESS_TOKEN is missing", async () => {
-      delete process.env.WHATSAPP_ACCESS_TOKEN;
-      invalidateEnvConfigCache("WHATSAPP_ACCESS_TOKEN");
-      invalidateEnvConfigCache("WHATSAPP_PHONE_NUMBER_ID");
+    test("returns false when no active WhatsApp account is configured", async () => {
+      findFirstActiveForCredentialsSpy.mockResolvedValue(null);
+      await resetWhatsappChannel();
       const result = await whatsappChannel.validateConfig();
       expect(result).toBe(false);
     });
 
-    test("returns false when WHATSAPP_PHONE_NUMBER_ID is missing", async () => {
-      delete process.env.WHATSAPP_PHONE_NUMBER_ID;
-      invalidateEnvConfigCache("WHATSAPP_ACCESS_TOKEN");
-      invalidateEnvConfigCache("WHATSAPP_PHONE_NUMBER_ID");
+    test("returns false when the active account has a null access token", async () => {
+      findFirstActiveForCredentialsSpy.mockResolvedValue(
+        mockWhatsappCredentialsAccount({ encryptedAccessToken: null }) as never
+      );
+      await resetWhatsappChannel();
       const result = await whatsappChannel.validateConfig();
       expect(result).toBe(false);
     });
   });
 
   describe("send — empty recipient guard", () => {
-    test("returns failure when `to` is empty — delivery created with FAILURE + failureReason", async () => {
+    test("returns failure when `to` is empty — no delivery row (fail-fast before create)", async () => {
       const result = await whatsappChannel.send({ ...sendParams(), to: "" });
 
       expect(result.success).toBe(false);
       expect(result.error).toBeTruthy();
-      expect(createDeliverySpy).toHaveBeenCalled();
-      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: NotificationDeliveryStatus.FAILED,
-          failureReason: "empty recipient address",
-        })
-      );
+      expect(result.sendAttempted).toBe(false);
+      expect(createDeliverySpy).not.toHaveBeenCalled();
+      expect(updateDeliveryStatusSpy).not.toHaveBeenCalled();
     });
 
     test("returns failure when `to` is whitespace-only", async () => {
@@ -209,10 +218,8 @@ describe("WhatsApp Channel Factory", () => {
     test("returns failure with sendAttempted=false when credentials are missing", async () => {
       fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 200 }));
 
-      delete process.env.WHATSAPP_ACCESS_TOKEN;
-      delete process.env.WHATSAPP_PHONE_NUMBER_ID;
-      invalidateEnvConfigCache("WHATSAPP_ACCESS_TOKEN");
-      invalidateEnvConfigCache("WHATSAPP_PHONE_NUMBER_ID");
+      findFirstActiveForCredentialsSpy.mockResolvedValue(null);
+      await resetWhatsappChannel();
 
       const result = await whatsappChannel.send(sendParams());
 
