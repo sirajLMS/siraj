@@ -286,9 +286,12 @@ describe("QuotaService", () => {
       const quota = await QuotaService.createQuota(quotaInput, actor.id, "en", tx);
       expect(quota.remaining).toBe(1);
 
-      // Sequential Redeems on a shared tx (serial within rollback, mirroring class_quota_race.test.ts).
+      // Sequential Redeems on a shared tx (serial within rollback). True concurrency testing
+      // (separate connections contending on the same quota via SELECT FOR UPDATE) is deferred
+      // per the quota-system plan (.ai/plans/quota/skill-improvement-observations.md). The repo
+      // SchedulingRepository.createClassInstance does NOT deduct quota (that lives here at the
+      // service layer), so this service-layer test is the authoritative oversell guard.
       // The first redeem succeeds (remaining 1 → 0), the second must fail because remaining hits 0.
-      // True concurrency testing requires separate connections and is deferred — see class_quota_race.test.ts.
       const teacher1 = await setupTeacher(tx);
       const instance1 = await createMockClassInstance(tx, student.id, teacher1.teacher.id);
 
