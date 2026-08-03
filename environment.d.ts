@@ -19,6 +19,14 @@ declare global {
       SIGNED_URL_CLEANUP_STRATEGY?: "lazy" | "cron" | "both" | "disabled";
       SIGNED_URL_CLEANUP_CRON_SCHEDULE?: string;
       CRON_SECRET?: string;
+      CRON_EXECUTION_MODE?: "vercel" | "vercel-daily" | "external" | "standalone";
+      CRON_FX_REFRESH_SCHEDULE?: string;
+      CRON_CLASS_REMINDERS_SCHEDULE?: string;
+      CRON_TICKER_SCHEDULE?: string;
+      CRON_EXTERNAL_ENABLED?: string;
+      CRON_EXTERNAL_ENDPOINT?: string;
+      CRON_EXTERNAL_SCHEDULE?: string;
+      CRON_EXTERNAL_SECRET?: string;
 
       // GCP Storage Configuration
       GCP_PROJECT_ID?: string;

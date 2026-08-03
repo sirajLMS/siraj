@@ -4,10 +4,13 @@ import { existsSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 const SCRIPT_PATH = join(process.cwd(), "scripts/build/generate-vercel-config.ts");
-const OUTPUT_DIR = join(process.cwd(), ".vercel", "output");
-const OUTPUT_PATH = join(OUTPUT_DIR, "config.json");
+const OUTPUT_PATH = join(process.cwd(), "vercel.json");
 
-function runScript(env: Record<string, string> = {}): { stdout: string; stderr: string; exitCode: number } {
+function runScript(env: Record<string, string | undefined> = {}): {
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+} {
   const result = spawnSync("bun", ["run", SCRIPT_PATH], {
     env: { ...process.env, ...env },
     encoding: "utf-8",
@@ -19,15 +22,15 @@ function runScript(env: Record<string, string> = {}): { stdout: string; stderr: 
   };
 }
 
-function readConfig(): { version: number; fluid: boolean; crons: Array<{ path: string; schedule: string }> } | null {
+function readConfig(): { fluid: boolean; crons: Array<{ path: string; schedule: string }> } | null {
   if (!existsSync(OUTPUT_PATH)) return null;
   const content = readFileSync(OUTPUT_PATH, "utf-8");
   return JSON.parse(content);
 }
 
 function cleanup(): void {
-  if (existsSync(OUTPUT_DIR)) {
-    rmSync(OUTPUT_DIR, { recursive: true, force: true });
+  if (existsSync(OUTPUT_PATH)) {
+    rmSync(OUTPUT_PATH, { force: true });
   }
 }
 
@@ -47,7 +50,6 @@ describe("generate-vercel-config", () => {
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
-    expect(config.version).toBe(3);
     expect(config.fluid).toBe(true);
     expect(config.crons).toHaveLength(2);
     expect(config.crons.map(c => c.path).sort()).toEqual(["/api/cron/class-reminders", "/api/fx/refresh"]);
@@ -100,6 +102,17 @@ describe("generate-vercel-config", () => {
     expect(config.crons).toHaveLength(2);
   });
 
+  test("unset mode defaults to vercel-daily without warning", () => {
+    const result = runScript({ CRON_EXECUTION_MODE: "" });
+    expect(result.exitCode).toBe(0);
+    expect(result.stderr).not.toContain("WARN");
+
+    const config = readConfig();
+    expect(config).not.toBeNull();
+    if (!config) return;
+    expect(config.crons).toHaveLength(2);
+  });
+
   test("valid cron expressions pass validation", () => {
     const result = runScript({
       CRON_EXECUTION_MODE: "vercel",
@@ -134,7 +147,11 @@ describe("generate-vercel-config", () => {
   });
 
   test("default values used when env vars not set", () => {
-    const result = runScript({ CRON_EXECUTION_MODE: "vercel-daily" });
+    const result = runScript({
+      CRON_EXECUTION_MODE: "vercel-daily",
+      CRON_FX_REFRESH_SCHEDULE: "",
+      CRON_CLASS_REMINDERS_SCHEDULE: "",
+    });
     expect(result.exitCode).toBe(0);
 
     const config = readConfig();

@@ -37,6 +37,8 @@ yarn-error.log*
 
 # vercel
 .vercel
+# Generated at build time by scripts/build/generate-vercel-config.ts
+/vercel.json
 
 # typescript
 *.tsbuildinfo

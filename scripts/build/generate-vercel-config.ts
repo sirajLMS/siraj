@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
 /**
- * Generate .vercel/output/config.json for Vercel Cron Jobs
- * Runs at build time via prebuild script
- * Validates cron expressions with cron-parser, fails fast on invalid
+ * Generate root vercel.json for Vercel Cron Jobs.
+ * Runs at build time via prebuild — vercel.json is gitignored.
+ * Defaults to Hobby-safe schedules (vercel-daily); Pro ticker only when CRON_EXECUTION_MODE=vercel.
+ * Validates cron expressions with cron-parser, fails fast on invalid.
  */
 
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CronExpressionParser } from "cron-parser";
 import type { CronDefinition, CronExecutionMode } from "@/backend/types/cron/cron.types";
@@ -15,8 +16,7 @@ interface VercelCron {
   schedule: string;
 }
 
-interface VercelConfig {
-  version: 3;
+interface VercelJson {
   fluid: boolean;
   crons: VercelCron[];
 }
@@ -44,13 +44,17 @@ const CRON_DEFINITIONS: CronDefinition[] = [
 
 function parseMode(raw: string | undefined): CronExecutionMode {
   const valid: CronExecutionMode[] = ["vercel", "vercel-daily", "external", "standalone"];
-  if (!raw || !valid.includes(raw as CronExecutionMode)) {
+  const trimmed = raw?.trim();
+  if (!trimmed) {
+    return "vercel-daily";
+  }
+  if (!valid.includes(trimmed as CronExecutionMode)) {
     process.stderr.write(
       `[generate-vercel-config] WARN: Invalid CRON_EXECUTION_MODE="${raw}", defaulting to "vercel-daily"\n`
     );
     return "vercel-daily";
   }
-  return raw as CronExecutionMode;
+  return trimmed as CronExecutionMode;
 }
 
 function validateCronExpression(expression: string, name: string): void {
@@ -90,20 +94,13 @@ function main(): void {
     }
   }
 
-  const config: VercelConfig = {
-    version: 3,
+  const config: VercelJson = {
     fluid: true,
     crons,
   };
 
-  const outputDir = join(process.cwd(), ".vercel", "output");
-  const outputPath = join(outputDir, "config.json");
-
-  if (!existsSync(outputDir)) {
-    mkdirSync(outputDir, { recursive: true });
-  }
-
-  writeFileSync(outputPath, JSON.stringify(config, null, 2));
+  const outputPath = join(process.cwd(), "vercel.json");
+  writeFileSync(outputPath, `${JSON.stringify(config, null, 2)}\n`);
   process.stderr.write(`[generate-vercel-config] Mode: ${mode}\n`);
   process.stderr.write(`[generate-vercel-config] Generated ${outputPath}\n`);
   process.stderr.write(`[generate-vercel-config] Crons: ${JSON.stringify(crons, null, 2)}\n`);
