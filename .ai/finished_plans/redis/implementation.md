@@ -486,7 +486,7 @@ For every new file:
 2. `bun biome:check` (lightweight — safe in parallel).
 3. POST the file to the lint queue:
    ```bash
-   curl -s -X POST http://localhost:4777/lint \
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
      -H "Content-Type: application/json" \
      -d '{"id":"verify","files":["<path>"]}'
    ```

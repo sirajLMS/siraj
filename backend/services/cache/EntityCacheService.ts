@@ -1,7 +1,5 @@
-import { CacheDbRepository } from "@/backend/db/repo/shared/cache.repository";
 import logger from "@/backend/lib/logger";
-import { cacheService, getCacheService } from "@/backend/services/cache/CacheServiceFactory";
-import { PostgresCacheAdapter } from "@/backend/services/cache/PostgresCacheAdapter";
+import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
 
 export const CACHE_VERSION = 1;
 
@@ -46,6 +44,15 @@ export interface CacheStats {
   hitsByPrefix: Record<string, { hits: number; misses: number }>;
 }
 
+/**
+ * Maximum number of entries allowed in hitMissMap.
+ * Normal usage derives a finite set of prefixes via prefixOf(), so this cap
+ * is a safety net — it prevents unbounded growth if keys with unexpected
+ * prefixes are introduced. When the limit is exceeded, oldest entries are
+ * evicted first.
+ */
+const MAX_HIT_MISS_ENTRIES = 100;
+
 const hitMissMap = new Map<string, { hits: number; misses: number }>();
 
 function prefixOf(key: string): string {
@@ -67,14 +74,30 @@ function prefixOf(key: string): string {
   return parts[0] || "general";
 }
 
+/**
+ * Enforce the MAX_HIT_MISS_ENTRIES cap by deleting oldest entries.
+ * Map preserves insertion order, so we delete the first N excess entries.
+ */
+function enforceHitMissCap(): void {
+  const excess = hitMissMap.size - MAX_HIT_MISS_ENTRIES;
+  if (excess > 0) {
+    for (const key of hitMissMap.keys()) {
+      hitMissMap.delete(key);
+      if (hitMissMap.size <= MAX_HIT_MISS_ENTRIES) break;
+    }
+  }
+}
+
 function recordHit(prefix: string): void {
   const current = hitMissMap.get(prefix) ?? { hits: 0, misses: 0 };
   hitMissMap.set(prefix, { hits: current.hits + 1, misses: current.misses });
+  enforceHitMissCap();
 }
 
 function recordMiss(prefix: string): void {
   const current = hitMissMap.get(prefix) ?? { hits: 0, misses: 0 };
   hitMissMap.set(prefix, { hits: current.hits, misses: current.misses + 1 });
+  enforceHitMissCap();
 }
 
 export function getEntityCacheStats(): Record<string, { hits: number; misses: number }> {
@@ -182,11 +205,6 @@ export async function cachedRead<T>(
 
 async function setSingleFlight(key: string, value: string, ttlSeconds: number): Promise<boolean> {
   try {
-    const service = await getCacheService();
-    if (service instanceof PostgresCacheAdapter) {
-      const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
-      return await CacheDbRepository.insertIfNotExists(key, value, expiresAt);
-    }
     const res = await cacheService.pipeline([{ command: "set", args: [key, value, "EX", ttlSeconds, "NX"] }]);
     return Array.isArray(res) && (res[0] === "OK" || res[0] === true);
   } catch (err) {

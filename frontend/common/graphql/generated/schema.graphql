@@ -43,6 +43,18 @@ type AdminNoteInfo {
   lastUpdated: String
 }
 
+input AdminRevokeTokenInput {
+  providerSlug: MeetingIntegrationProviderSlug!
+  userId: String!
+}
+
+type AdminRevokeTokenResult {
+  id: String
+  providerSlug: String
+  revoked: Boolean
+  userId: String
+}
+
 """Paginated admin suggestion list with metrics."""
 type AdminSuggestionResult {
   id: String
@@ -79,6 +91,7 @@ enum AppPermission {
   COMPLAINTS_LIST
   COMPLAINTS_RESPOND
   CREDITS_MANAGE
+  CRON_MANAGE
   DASHBOARD_FILTER_METRICS
   DASHBOARD_METRICS_VIEW_ALL
   DASHBOARD_SEARCH
@@ -172,6 +185,8 @@ enum AppPermission {
   PROFILE_TEACHER_STUDENTS_EDIT_OWN
   PROFILE_TEACHER_STUDENTS_VIEW_OTHER
   PROFILE_TEACHER_STUDENTS_VIEW_OWN
+  QUOTAS_MANAGE
+  QUOTAS_VIEW
   REPORTS_GENERATE
   REPORT_GENERATE_CUSTOM
   REPORT_VIEW_FINANCIALS
@@ -204,6 +219,7 @@ enum AppPermission {
   SETTINGS_AUDIT_VIEW
   SETTINGS_EDIT_ENV
   SETTINGS_EDIT_GENERAL
+  SETTINGS_EDIT_MEETING_INTEGRATIONS
   SETTINGS_EDIT_SESSION
   SETTINGS_SITE_CONTENT_MANAGE
   SETTINGS_TIMEZONES_VIEW
@@ -283,6 +299,9 @@ enum AppPermission {
   TEST_CUSTOM_ALT
   TEST_CUSTOM_ONLY
   TEST_SYSTEM_ONLY
+  WHATSAPP_CONFIG_MANAGE
+  WHATSAPP_TEMPLATES_MANAGE
+  WHATSAPP_VIEW
 }
 
 input AssignPermissionGroupToUserInput {
@@ -434,6 +453,15 @@ enum AvailabilityStatus {
   OUT_OF_STOCK
 }
 
+"""An available class slot for a student on a given date"""
+type AvailableClassSlot {
+  available: Boolean
+  endAt: DateTime
+  id: String
+  startAt: DateTime
+  teacherId: String
+}
+
 type BillingCurrencyTotal {
   amount: String
   currency: CurrencyCode
@@ -518,6 +546,10 @@ enum ClassExecutionState {
   ACTIVATED
   COMPLETED
   NOT_ACTIVATED
+  ON_DEMAND_CONFLICT_HELD
+  ON_DEMAND_NO_CREDITS_ABSENT
+  ON_DEMAND_NO_CREDITS_CANCELLED
+  ON_DEMAND_PENDING_CREDITS
   RUNNING
 }
 
@@ -596,6 +628,7 @@ type ClassMeetingConfig {
   label: String
   provider: MeetingProvider
   providerId: String
+  providerMetadata: JSON
   recurringScheduleId: String
   updatedAt: DateTime
 }
@@ -781,6 +814,17 @@ input ComplaintSubmitInput {
   files: [ComplaintFileMetadataInput!]
   studentId: String
   submitterEmail: String!
+}
+
+input ConnectMeetingProviderOAuthInput {
+  providerSlug: MeetingIntegrationProviderSlug!
+  returnPath: String!
+}
+
+type ConnectMeetingProviderOAuthResult {
+  authorizeUrl: String
+  id: String
+  state: String
 }
 
 input CoreUserProfileFieldsInput {
@@ -1057,15 +1101,20 @@ input CreatePermissionGroupInput {
 }
 
 input CreateRecurringClassInput {
-  classType: String
+  classType: ClassType
   days: [RecurringClassDayInput!]!
   defaultStartTime: String!
   durationMinutes: Int!
+  earmarkedClasses: Int
   effectiveFrom: String
   effectiveUntil: String
   generateInstancesForWeeks: Int
+  generationHorizonWeeks: Int
   hourlyRate: String
+  ondemandNoCreditsOutcome: OnDemandNoCreditsOutcome
+  quotaId: String
   rateCurrency: CurrencyCode
+  schedulingMode: SchedulingMode
   studentId: String!
   subjectId: String!
   teacherId: String!
@@ -1134,6 +1183,154 @@ type CreditTransaction {
   sourcePaymentId: String
   studentId: String
   updatedAt: DateTime
+}
+
+enum CronConcurrencyPolicy {
+  ALLOW
+  REPLACE
+  SKIP
+}
+
+enum CronJobKind {
+  NOOP
+}
+
+type CronPaginatedRuns {
+  rows: [CronRun!]
+  totalCount: Int
+}
+
+type CronPaginatedSchedules {
+  rows: [CronSchedule!]
+  totalCount: Int
+}
+
+type CronQueueStats {
+  backend: String
+  byJobKind: JSON
+  failed: Int
+  id: String
+  inFlight: Int
+  pending: Int
+}
+
+type CronRun {
+  attempt: Int
+  completedAt: DateTime
+  createdAt: DateTime
+  durationMs: Int
+  errorMessage: String
+  id: String
+  jobKind: CronJobKind
+  payload: JSON
+  scheduleId: String
+  startedAt: DateTime
+  status: CronRunStatus
+  triggerSource: CronTriggerSource
+  updatedAt: DateTime
+  workerId: String
+}
+
+input CronRunListInput {
+  from: DateTime
+  limit: Int
+  offset: Int
+  scheduleId: String
+  status: CronRunStatus
+  statuses: [CronRunStatus!]
+  to: DateTime
+}
+
+input CronRunRetryInput {
+  attempt: Int
+  runId: String!
+}
+
+enum CronRunStatus {
+  CANCELLED
+  COMPLETED
+  FAILED
+  PENDING
+  RETRYING
+  RUNNING
+  TIMEOUT
+}
+
+input CronRunTriggerInput {
+  id: String!
+  payload: JSON
+}
+
+type CronSchedule {
+  concurrencyPolicy: CronConcurrencyPolicy
+  createdAt: DateTime
+  cronExpression: String
+  description: String
+  id: String
+  jobKind: CronJobKind
+  lastRunAt: DateTime
+  maxRetries: Int
+  name: String
+  nextRunAt: DateTime
+  payload: JSON
+  retryBackoffSeconds: Int
+  status: CronScheduleStatus
+  timeoutSeconds: Int
+  timezone: String
+  updatedAt: DateTime
+}
+
+input CronScheduleDeleteInput {
+  hard: Boolean
+  id: String!
+}
+
+input CronScheduleListInput {
+  jobKind: CronJobKind
+  limit: Int
+  name: String
+  offset: Int
+  status: CronScheduleStatus
+}
+
+enum CronScheduleStatus {
+  ACTIVE
+  DISABLED
+  PAUSED
+}
+
+input CronScheduleSubmitInput {
+  concurrencyPolicy: CronConcurrencyPolicy
+  cronExpression: String!
+  description: String
+  jobKind: CronJobKind!
+  maxRetries: Int
+  name: String!
+  payload: JSON
+  retryBackoffSeconds: Int
+  timeoutSeconds: Int
+  timezone: String
+}
+
+input CronScheduleUpdateInput {
+  concurrencyPolicy: CronConcurrencyPolicy
+  cronExpression: String
+  description: String
+  jobKind: CronJobKind
+  maxRetries: Int
+  name: String
+  payload: JSON
+  retryBackoffSeconds: Int
+  timeoutSeconds: Int
+  timezone: String
+}
+
+enum CronTriggerSource {
+  EXTERNAL
+  MANUAL
+  VERCEL_EXPLICIT
+  VERCEL_TICKER
+  WORKER_RETRY
 }
 
 enum CurrencyCode {
@@ -1301,6 +1498,16 @@ input DirectoryPermissionsUpdateInput {
   permissions: DirectoryPermissionsInput!
 }
 
+input DisconnectMeetingProviderOAuthInput {
+  providerSlug: MeetingIntegrationProviderSlug!
+}
+
+type DisconnectMeetingProviderOAuthResult {
+  id: String
+  ok: Boolean
+  providerSlug: String
+}
+
 type DisplayAmount {
   amount: String
   currency: CurrencyCode
@@ -1365,6 +1572,7 @@ type EffectiveMeeting {
   providerName: LocalizedString
   providerSlug: String
   source: EffectiveMeetingSource
+  supportsAutoGeneration: Boolean
 }
 
 enum EffectiveMeetingSource {
@@ -1613,6 +1821,19 @@ enum FxSyncStatus {
 enum Gender {
   FEMALE
   MALE
+}
+
+input GenerateMeetingUrlInput {
+  durationMinutes: Int
+  providerId: String!
+  startDateTime: String
+  topic: String!
+}
+
+type GenerateMeetingUrlResult {
+  expiresAt: String
+  joinUrl: String
+  meetingId: String
 }
 
 enum GroupClassAttendanceStatus {
@@ -2367,9 +2588,50 @@ type MeetingConfigDetails {
 }
 
 input MeetingConfigDetailsInput {
-  meetingUrl: String!
+  meetingUrl: String
   tenantId: String
   username: String
+}
+
+enum MeetingConnectionTestMode {
+  GENERATE_AND_DELETE
+  VALIDATE_CONFIG
+}
+
+type MeetingIntegrationConnectedAccount {
+  connectedAt: DateTime
+  email: String
+  expiresAt: DateTime
+  id: String
+  lastRefreshedAt: DateTime
+  name: String
+  scopes: [String!]
+  status: MeetingIntegrationConnectedAccountStatus
+  userId: String
+}
+
+enum MeetingIntegrationConnectedAccountStatus {
+  CONNECTED
+  EXPIRING_SOON
+  REAUTH_NEEDED
+  REVOKED
+}
+
+type MeetingIntegrationProvider {
+  connectedTeacherCount: Int
+  credentialsHealthy: Boolean
+  endpoints: [String!]
+  id: String
+  kind: String
+  lastTestedAt: DateTime
+  reauthNeededCount: Int
+  slug: String
+}
+
+enum MeetingIntegrationProviderSlug {
+  GOOGLE_MEET
+  MICROSOFT_TEAMS
+  ZOOM
 }
 
 type MeetingProvider {
@@ -2381,6 +2643,7 @@ type MeetingProvider {
   isActive: Boolean
   logoUrl: String
   name: LocalizedString
+  providerKind: String
   slug: String
   updatedAt: DateTime
   urlAllowlist: [String!]
@@ -2394,6 +2657,7 @@ input MeetingProviderCreateInput {
   isActive: Boolean
   logoUrl: String
   name: LocalizedString!
+  providerKind: String
   slug: String!
   urlAllowlist: [String!]!
   urlExample: String
@@ -2401,6 +2665,7 @@ input MeetingProviderCreateInput {
 
 type MeetingProviderFieldSchema {
   requiresMeetingUrl: Boolean
+  supportsAutoGeneration: Boolean
   supportsPassword: Boolean
   supportsTenantId: Boolean
   supportsUsername: Boolean
@@ -2408,6 +2673,7 @@ type MeetingProviderFieldSchema {
 
 input MeetingProviderFieldSchemaInput {
   requiresMeetingUrl: Boolean!
+  supportsAutoGeneration: Boolean
   supportsPassword: Boolean
   supportsTenantId: Boolean
   supportsUsername: Boolean
@@ -2420,6 +2686,7 @@ input MeetingProviderUpdateInput {
   isActive: Boolean
   logoUrl: String
   name: LocalizedString
+  providerKind: String
   slug: String
   urlAllowlist: [String!]
   urlExample: String
@@ -2429,6 +2696,7 @@ type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
   activateSupportedCurrency(input: SupportedCurrencyUpsertInput!): SupportedCurrency
+  adminRevokeMeetingProviderToken(input: AdminRevokeTokenInput!): AdminRevokeTokenResult
 
   """Approve a pending lesson report (supervisor/manager action)"""
   approveLessonReport(reportId: ID!): LessonReport
@@ -2445,6 +2713,7 @@ type Mutation {
   cleanupTestManager(userId: String!): Boolean
   cleanupTestSuperAdmin(userId: String!): Boolean
   clearWeeklySchedule(teacherId: ID!): Boolean
+  connectMeetingProviderOAuth(input: ConnectMeetingProviderOAuthInput!): ConnectMeetingProviderOAuthResult
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createClassCategory(input: ClassCategoryCreateInput!): ClassCategory
   createClassMeetingConfig(input: ClassMeetingConfigCreateInput!): ClassMeetingConfig
@@ -2460,6 +2729,9 @@ type Mutation {
   """Create a new parent account with billing configuration"""
   createParent(input: ParentOnboardingInput!): ParentOnboardingResult
   createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
+
+  """Create a new quota allocation for a student"""
+  createQuota(input: QuotaSubmitInput!): Quota
   createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
 
   """Create a new student profile under an existing parent"""
@@ -2483,6 +2755,30 @@ type Mutation {
   createTestSuperAdmin(prefix: String!): TestSuperAdmin
   createUserMeetingConfig(input: UserMeetingConfigCreateInput!): UserMeetingConfig
   createUserPaymentMethod(input: UserPaymentMethodCreateInput!): UserPaymentMethod
+
+  """Create a new WhatsApp business account record."""
+  createWhatsappAccount(input: WhatsappAccountCreateInput!): WhatsappAccount
+
+  """Retry a failed cron run."""
+  cronRunRetry(input: CronRunRetryInput!): CronRun
+
+  """Manually trigger a cron schedule to run immediately."""
+  cronRunTrigger(input: CronRunTriggerInput!): CronRun
+
+  """Create a new cron schedule."""
+  cronScheduleCreate(input: CronScheduleSubmitInput!): CronSchedule
+
+  """Delete a cron schedule (soft by default, hard if specified)."""
+  cronScheduleDelete(input: CronScheduleDeleteInput!): Boolean
+
+  """Pause a cron schedule."""
+  cronSchedulePause(id: String!): CronSchedule
+
+  """Resume a paused cron schedule."""
+  cronScheduleResume(id: String!): CronSchedule
+
+  """Update an existing cron schedule."""
+  cronScheduleUpdate(id: String!, input: CronScheduleUpdateInput!): CronSchedule
   deactivateParent(parentId: String!): DeactivateParentResult
   deactivateSupportedCurrency(code: CurrencyCode!): Boolean
   deactivateSupportedMobileWallet(id: ID!): SupportedMobileWallet
@@ -2515,6 +2811,9 @@ type Mutation {
   ): Boolean
   deleteMeetingProvider(id: ID!): Boolean
   deletePermissionGroup(groupId: String!): Boolean
+
+  """Soft delete a student quota allocation"""
+  deleteQuota(id: ID!): Quota
   deleteRecurringClass(classInstanceId: ID!): Boolean
 
   """Deletes a per-role session configuration."""
@@ -2533,14 +2832,21 @@ type Mutation {
   deleteUserPaymentMethod(id: ID!): Boolean
 
   """
+  Deactivate a WhatsApp account. Calls resetWhatsappChannel() on success (S4).
+  """
+  deleteWhatsappAccount(id: String!): WhatsappAccount
+
+  """
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
   detachSubjectResource(learningResourceId: ID!, subjectId: ID!): Boolean
+  disconnectMeetingProviderOAuth(input: DisconnectMeetingProviderOAuthInput!): DisconnectMeetingProviderOAuthResult
   endImpersonation: EndImpersonationResponse
   endPermissionGroupSimulation: EndPermissionGroupSimulationResponse
   ensureDemoUsers: Boolean
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
+  generateMeetingUrl(input: GenerateMeetingUrlInput!): GenerateMeetingUrlResult
   linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocument
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
@@ -2592,6 +2898,21 @@ type Mutation {
   setDefaultMeetingConfig(id: ID!): UserMeetingConfig
   setDefaultUserPaymentMethod(id: ID!): UserPaymentMethod
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
+
+  """
+  Enable or disable WhatsApp notification opt-in for a user (REQ-10/BL1).
+  """
+  setUserWhatsappOptIn(enabled: Boolean!, source: String, userId: String!): WhatsappAccount
+
+  """
+  Set the access token for a WhatsApp account. Calls resetWhatsappChannel() on success (S4).
+  """
+  setWhatsappAccessToken(accessToken: String!, id: String!): WhatsappAccount
+
+  """
+  Set the two-step verification PIN for a WhatsApp account. Calls resetWhatsappChannel() on success (S4).
+  """
+  setWhatsappTwoStepPin(id: String!, twoStepPin: String!): WhatsappAccount
   startImpersonation(reason: String, targetUserId: String!): StartImpersonationResponse
   startPermissionGroupSimulation(groupSlug: String!): StartPermissionGroupSimulationResponse
   stopClass(classInstanceId: ID!): ClassInstanceDetail
@@ -2608,6 +2929,12 @@ type Mutation {
 
   """Submits a new suggestion from the authenticated parent."""
   submitSuggestion(input: SubmitSuggestionInput!): Suggestion
+
+  """
+  Sync WhatsApp phone numbers and message templates from Meta Graph API (BL3: includes template snapshot).
+  """
+  syncWhatsappAccountsFromMeta: WhatsappSyncFromMetaResult
+  testMeetingProviderConnection(input: TestMeetingConnectionInput!): TestMeetingConnectionResult
   updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
   updateClassCategory(id: ID!, input: ClassCategoryUpdateInput!): ClassCategory
   updateClassMeetingConfig(id: ID!, input: ClassMeetingConfigUpdateInput!): ClassMeetingConfig
@@ -2622,6 +2949,9 @@ type Mutation {
   updateNotificationPreferences(input: [NotificationPreferenceInput!]!): [NotificationPreference!]
   updateOwnProfile(input: UpdateOwnProfileInput!): UnifiedProfile
   updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
+
+  """Update an existing student quota allocation"""
+  updateQuota(id: ID!, input: QuotaUpdateInput!): Quota
   updateRecurringClassRate(input: UpdateRecurringClassRateInput!): RecurringScheduleDetail
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
@@ -2640,6 +2970,11 @@ type Mutation {
   updateUserPaymentMethod(id: ID!, input: UserPaymentMethodUpdateInput!): UserPaymentMethod
   updateUserProfile(input: UpdateUserProfileInput!, userId: String!): UnifiedProfile
 
+  """
+  Update an existing WhatsApp account. Calls resetWhatsappChannel() on success (S4).
+  """
+  updateWhatsappAccount(id: String!, input: WhatsappAccountUpdateInput!): WhatsappAccount
+
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
   upsertEnvConfigEntry(input: EnvConfigUpsertInput!): EnvConfigUpsertResult
@@ -2652,6 +2987,14 @@ type Mutation {
   upsertSiteContent(input: SiteContentUpsertInput!): SiteContentEntry
   upsertSystemSetting(input: SystemSettingUpsertInput!): SystemSetting
   verifyBankTransferPaymentMethod(id: ID!): UserPaymentMethod
+}
+
+type MyConnectedMeetingProvider {
+  connectedAt: DateTime
+  email: String
+  expiresAt: DateTime
+  id: String
+  providerSlug: String
 }
 
 type NextUnpaidInvoiceSummary {
@@ -2674,6 +3017,7 @@ enum NotificationChannel {
   ON_APP
   PUSH
   SMS
+  WHATSAPP
 }
 
 enum NotificationEventType {
@@ -2695,7 +3039,14 @@ enum NotificationEventType {
   LESSON_REPORT_SUBMITTED
   NEW_COMPLAINT
   NEW_SUGGESTION
+  ON_DEMAND_INSTANCE_PENDING_CREDIT
+  ON_DEMAND_INSTANCE_REMINDER_T1
+  ON_DEMAND_INSTANCE_REMINDER_T3
+  ON_DEMAND_TEACHER_DAILY_DIGEST
   PAYMENT_METHOD_CHANGED
+  QUOTA_EXPIRED
+  QUOTA_EXPIRING_SOON
+  QUOTA_LOW_BALANCE
   STUDENT_QUOTA_OVERRIDDEN
   STUDENT_STATUS_CHANGED
   STUDENT_TEACHER_REASSIGNED
@@ -2714,6 +3065,21 @@ input NotificationPreferenceInput {
   channel: NotificationChannel!
   enabled: Boolean!
   eventType: NotificationEventType!
+}
+
+enum OnDemandNoCreditsOutcome {
+  AUTO_ABSENT_NO_CREDITS
+  AUTO_CANCEL
+  REMIND_ONLY
+}
+
+enum OnDemandStatus {
+  AVAILABLE
+  CANCELLED
+  CONVERTED
+  NO_CREDITS_ABSENT
+  NO_CREDITS_CANCELLED
+  PENDING_CREDIT
 }
 
 """Summary metrics for the staff onboarding process"""
@@ -3198,6 +3564,9 @@ type Query {
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
 
+  """Find available class slots for a student on a given date"""
+  availableClassSlots(date: DateTime!, durationMinutes: Int, studentId: ID!, teacherId: ID): [AvailableClassSlot!]
+
   """Lists all books and bags available to the academy."""
   booksAndBags: [Book!]
   classCategories: [ClassCategory!]
@@ -3211,6 +3580,21 @@ type Query {
   Returns file attachments for a specific complaint. Accessible by the owning parent or admins.
   """
   complaintFiles(complaintId: String!): [ComplaintFile!]
+
+  """Get queue statistics for the active queue backend."""
+  cronQueueStats: CronQueueStats
+
+  """Fetch a single cron run by ID."""
+  cronRun(id: ID!): CronRun
+
+  """List cron runs with optional filters."""
+  cronRuns(input: CronRunListInput): CronPaginatedRuns
+
+  """Fetch a single cron schedule by ID."""
+  cronSchedule(id: ID!): CronSchedule
+
+  """List cron schedules with optional filters."""
+  cronSchedules(input: CronScheduleListInput): CronPaginatedSchedules
   currencyHedges: [CurrencyHedge!]
   dailyScheduleList(date: String!, metricFilter: String, search: String, teacherId: String): [DailyScheduleList!]
   dailyScheduleMetrics(date: String!, teacherId: String): DailyScheduleMetrics
@@ -3237,6 +3621,9 @@ type Query {
   impersonationStatus: ImpersonationStatus
   invoicePaymentSubmission(invoiceId: String!): InvoicePaymentSubmission
   invoicePayments(invoiceId: ID!): [Payment!]
+
+  """Check if a user has opted in to WhatsApp notifications (REQ-10/BL1)."""
+  isUserWhatsappOptIn(userId: String!): Boolean!
   latestExchangeRates(paginationArgs: PaginationArgs): [ExchangeRate!]
   latestFxSyncRun: FxSyncRun
 
@@ -3260,8 +3647,11 @@ type Query {
   """Lists all staff members with administrative access."""
   managerDirectory(paginationArgs: PaginationArgs, roleFilter: String, statusFilter: String): ManagerDirectoryResult
   me: User
+  meetingIntegrationConnectedAccounts(providerSlug: String!): [MeetingIntegrationConnectedAccount!]
+  meetingIntegrationProviders: [MeetingIntegrationProvider!]
   meetingProvider(id: ID!): MeetingProvider
   meetingProviders(activeOnly: Boolean = true): [MeetingProvider!]
+  myConnectedMeetingProviders: [MyConnectedMeetingProvider!]
   notificationAlerts: NotificationAlertsResult
   notificationPreferences: [NotificationPreference!]
 
@@ -3305,6 +3695,18 @@ type Query {
   """List all permission catalog entries."""
   permissions: [Permission!]
   profileByUserId(userId: String!): UnifiedProfile
+
+  """Get a specific quota by ID"""
+  quota(id: ID!): Quota
+
+  """Get aggregated quota balance summary for a student"""
+  quotaBalance(studentId: ID!): QuotaBalance
+
+  """Get paginated audit ledger history for a quota"""
+  quotaLedger(pagination: PaginationArgs, quotaId: ID!): QuotaLedgerPaginatedResult
+
+  """List quotas with optional filters and pagination"""
+  quotas(filter: QuotaPaginatedFilterInput, pagination: PaginationArgs): QuotaPaginatedResult
 
   """
   Get paginated recently approved lesson reports for the supervisor dashboard
@@ -3381,7 +3783,15 @@ type Query {
   Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
   """
   studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
+
+  """
+  List only active/open quotas (status ACTIVE, remaining > 0) for a student
+  """
+  studentOpenQuotas(studentId: ID!): [Quota!]
   studentProfile(includeUpcomingClasses: Boolean, month: Int, studentId: String, year: Int): StudentProfile
+
+  """List all quotas for a student"""
+  studentQuotas(studentId: ID!): [Quota!]
 
   """
   Paginated lesson reports for the logged-in student (student portal dashboard)
@@ -3448,6 +3858,136 @@ type Query {
     search: String
   ): [User!]
   welcomeMessage: String
+
+  """List all active WhatsApp business accounts."""
+  whatsappAccounts: [WhatsappAccount!]
+}
+
+"""A class quota allocation for a student"""
+type Quota {
+  createdAt: DateTime
+  id: String
+  kind: QuotaKind
+  name: String
+  periodDays: Int
+  periodType: QuotaPeriodType
+  priority: Int
+  remaining: Int
+  reservedClasses: Int
+  status: QuotaStatus
+  studentId: String
+  totalClasses: Int
+  updatedAt: DateTime
+  validFrom: DateTime
+  validUntil: DateTime
+}
+
+"""Aggregated quota balance summary for a student"""
+type QuotaBalance {
+  breakdownByExpiration: [QuotaExpirationBreakdown!]
+  id: String
+  studentId: String
+  totalActiveClasses: Int
+  totalRemaining: Int
+  totalReserved: Int
+}
+
+"""Per-quota breakdown of remaining classes by expiration date"""
+type QuotaExpirationBreakdown {
+  id: String
+  quotaId: String
+  quotaName: String
+  remaining: Int
+  validUntil: DateTime
+}
+
+enum QuotaKind {
+  PACKAGE
+  PERIODIC
+}
+
+"""An append-only transaction ledger row for a quota"""
+type QuotaLedger {
+  actorUserId: String
+  classInstanceId: String
+  createdAt: DateTime
+  delta: Int
+  id: String
+  quotaId: String
+  reason: QuotaLedgerReason
+  reasonNote: String
+  recurringScheduleId: String
+  studentId: String
+}
+
+"""Paginated result set of quota ledger entries"""
+type QuotaLedgerPaginatedResult {
+  rows: [QuotaLedger!]
+  totalCount: Int
+}
+
+enum QuotaLedgerReason {
+  ADJUST
+  EXPIRE
+  GRANT
+  REDEEM
+  RELEASE
+  RESERVE
+}
+
+"""Filter options for querying quotas"""
+input QuotaPaginatedFilterInput {
+  kind: QuotaKind
+  search: String
+  status: QuotaStatus
+  studentId: String
+}
+
+"""Paginated result set of quotas"""
+type QuotaPaginatedResult {
+  rows: [Quota!]
+  totalCount: Int
+}
+
+enum QuotaPeriodType {
+  CUSTOM
+  MONTHLY
+  WEEKLY
+}
+
+"""Rollover policy configuration for periodic quotas"""
+input QuotaRolloverPolicyInput {
+  accumulationCap: Int
+  maxRolloverPercent: Float
+}
+
+enum QuotaStatus {
+  ACTIVE
+  ARCHIVED
+  EXPIRED
+}
+
+"""Input for creating a new student quota"""
+input QuotaSubmitInput {
+  idempotencyKey: String
+  kind: QuotaKind!
+  name: String!
+  periodDays: Int
+  periodType: QuotaPeriodType
+  priority: Int
+  rolloverPolicy: QuotaRolloverPolicyInput
+  studentId: String!
+  totalClasses: Int!
+  validFrom: DateTime
+  validUntil: DateTime
+}
+
+"""Input for updating an existing quota"""
+input QuotaUpdateInput {
+  name: String
+  priority: Int
+  status: QuotaStatus
+  validUntil: DateTime
 }
 
 enum RateSource {
@@ -3478,7 +4018,7 @@ input RecordPurchaseInput {
 }
 
 input RecurringClassDayInput {
-  dayOfWeek: String!
+  dayOfWeek: DayOfWeek!
   isActive: Boolean!
   startTime: String!
 }
@@ -3593,6 +4133,12 @@ input RespondToSuggestionInput {
 input RevokePermissionGroupFromUserInput {
   groupId: String!
   userId: String!
+}
+
+enum SchedulingMode {
+  NUMBER_OF_CLASSES
+  ON_DEMAND
+  QUOTA
 }
 
 type SendPaymentReminderResult {
@@ -4628,6 +5174,9 @@ type TeacherOnboarding {
   """Resolved teacher display name"""
   name: String
 
+  """Teacher phone number"""
+  phone: String
+
   """Current teacher account status"""
   status: String
 
@@ -4723,6 +5272,7 @@ type TeacherPayment {
   amount: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
   isTestPayment: Boolean
   paymentDate: DateTime
@@ -4820,6 +5370,26 @@ type TestEntities {
 
 type TestGroupClass {
   groupClassId: String
+}
+
+input TestMeetingConnectionInput {
+  mode: MeetingConnectionTestMode!
+  providerSlug: MeetingIntegrationProviderSlug!
+}
+
+type TestMeetingConnectionResult {
+  deleted: Boolean
+  errorCode: String
+  errorMessage: String
+  grantedScopes: [String!]
+  id: String
+  latencyMs: Int
+  mode: MeetingConnectionTestMode
+  ok: Boolean
+  rawUpstreamPayload: JSON
+  requiredScopes: [String!]
+  testJoinUrl: String
+  upstreamResponseSummary: String
 }
 
 type TestSuperAdmin {
@@ -4968,8 +5538,10 @@ type UserMeetingConfig {
   id: String
   isDefault: Boolean
   label: String
+  oauthTokenExpiresAt: DateTime
   provider: MeetingProvider
   providerId: String
+  providerMetadata: JSON
   updatedAt: DateTime
   userId: String
 }
@@ -4985,6 +5557,7 @@ input UserMeetingConfigCreateInput {
 
 input UserMeetingConfigUpdateInput {
   details: MeetingConfigDetailsInput
+  forceRegenerate: Boolean
   isDefault: Boolean
   label: String
   password: String
@@ -5083,6 +5656,96 @@ type WeeklyWorkloadMetrics {
   id: String
   totalMinutes: Int
   weeklyHoursWorked: String
+}
+
+type WhatsappAccount {
+  createdAt: DateTime
+  displayName: LocalizedString
+  displayPhoneNumber: String
+  id: String
+  isActive: Boolean
+  lastWebhookAt: DateTime
+  maxPhoneNumbersPerBusiness: String
+  phoneNumberId: String
+  portfolioMessagingLimitTier: WhatsappLimitTier
+  qualityRating: WhatsappQualityRating
+  throughputLevel: String
+  updatedAt: DateTime
+  wabaId: String
+}
+
+input WhatsappAccountCreateInput {
+  displayName: LocalizedString
+
+  """Display phone number (max 32 chars)"""
+  displayPhoneNumber: String
+  isActive: Boolean
+
+  """Phone number ID (max 64 chars)"""
+  phoneNumberId: String!
+  portfolioMessagingLimitTier: WhatsappLimitTier
+  qualityRating: WhatsappQualityRating
+  throughputLevel: String
+
+  """WhatsApp Business Account ID (max 64 chars)"""
+  wabaId: String!
+}
+
+input WhatsappAccountUpdateInput {
+  displayName: LocalizedString
+  displayPhoneNumber: String
+  isActive: Boolean
+  portfolioMessagingLimitTier: WhatsappLimitTier
+  qualityRating: WhatsappQualityRating
+  throughputLevel: String
+}
+
+enum WhatsappLimitTier {
+  TIER_1K
+  TIER_10K
+  TIER_50
+  TIER_100K
+  TIER_250
+  TIER_NOT_SET
+  TIER_UNLIMITED
+  UNTIERED
+}
+
+enum WhatsappQualityRating {
+  GREEN
+  RED
+  UNKNOWN
+  YELLOW
+}
+
+type WhatsappSyncFromMetaResult {
+  accounts: [WhatsappAccount!]
+  id: String
+  templates: [WhatsappTemplateSnapshot!]
+}
+
+enum WhatsappTemplateCategory {
+  AUTHENTICATION
+  MARKETING
+  UTILITY
+}
+
+type WhatsappTemplateSnapshot {
+  category: WhatsappTemplateCategory
+  id: String
+  language: String
+  lastSyncedAt: DateTime
+  name: String
+  status: WhatsappTemplateStatus
+}
+
+enum WhatsappTemplateStatus {
+  APPROVED
+  DISABLED
+  PAUSED
+  PENDING
+  PENDING_DELETION
+  REJECTED
 }
 
 type WorkshopPromo {

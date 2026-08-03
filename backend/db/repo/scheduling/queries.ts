@@ -21,7 +21,7 @@ export {
   incrementTeacherLeaveQuota,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 export type {
-  AdminDashboardScheduleInput,
+  AdminDashboardScheduleRepoInput,
   AdminDashboardScheduleResult,
   DailyScheduleResult,
   FutureClassRow,

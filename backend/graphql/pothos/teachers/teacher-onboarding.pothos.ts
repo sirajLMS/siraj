@@ -51,7 +51,7 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
         description: "Teacher national ID (encrypted)",
         directives: { constraint: { maxLength: 512 } },
       }),
-      phone: t.string({ description: "Teacher phone number", directives: { constraint: { maxLength: 512 } } }),
+      phone: t.string({ description: "Teacher phone number", directives: { constraint: { maxLength: 50 } } }),
       dateOfBirth: t.string({
         description: "Teacher date of birth (ISO date string)",
         directives: { constraint: { maxLength: 512 } },
@@ -108,6 +108,10 @@ export const TeacherOnboardingPothosObject = TeacherOnboardingRef.implement({
       type: GenderPothosObject,
       nullable: true,
       description: "Teacher gender",
+    }),
+    phone: t.exposeString("phone", {
+      nullable: true,
+      description: "Teacher phone number",
     }),
     timezoneDisplay: t.exposeString("timezoneDisplay", {
       nullable: true,

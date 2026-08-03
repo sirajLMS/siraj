@@ -15,10 +15,12 @@ const MEETING_PROVIDER_FIELDS = gql`
     logoUrl
     fieldSchema {
       requiresMeetingUrl
+      supportsAutoGeneration
       supportsUsername
       supportsPassword
       supportsTenantId
     }
+    providerKind
     isActive
     createdAt
     updatedAt
@@ -33,11 +35,13 @@ const USER_MEETING_CONFIG_FIELDS = gql`
     label
     isDefault
     hasSecret
+    oauthTokenExpiresAt
     details {
       meetingUrl
       username
       tenantId
     }
+    providerMetadata
     provider {
       ...MeetingProviderFields
     }
@@ -187,6 +191,7 @@ const CLASS_MEETING_CONFIG_FIELDS = gql`
       username
       tenantId
     }
+    providerMetadata
     provider {
       ...MeetingProviderFields
     }
@@ -206,6 +211,7 @@ const EFFECTIVE_MEETING_FIELDS = gql`
     source
     configId
     providerId
+    supportsAutoGeneration
   }
 `;
 
@@ -274,6 +280,57 @@ export const setDefaultClassMeetingConfigMutationDocument: TypedDocumentNode<
   mutation setDefaultClassMeetingConfig($id: ID!) {
     setDefaultClassMeetingConfig(id: $id) {
       ...ClassMeetingConfigFields
+    }
+  }
+`;
+
+export const generateMeetingUrlMutationDocument: TypedDocumentNode<
+  Operations.GenerateMeetingUrlMutation,
+  Types.MutationGenerateMeetingUrlArgs
+> = gql`
+  mutation generateMeetingUrl($input: GenerateMeetingUrlInput!) {
+    generateMeetingUrl(input: $input) {
+      joinUrl
+      meetingId
+      expiresAt
+    }
+  }
+`;
+
+export const connectMeetingProviderOAuthMutationDocument: TypedDocumentNode<
+  Operations.ConnectMeetingProviderOAuthMutation,
+  Types.MutationConnectMeetingProviderOAuthArgs
+> = gql`
+  mutation connectMeetingProviderOAuth($input: ConnectMeetingProviderOAuthInput!) {
+    connectMeetingProviderOAuth(input: $input) {
+      id
+      authorizeUrl
+      state
+    }
+  }
+`;
+
+export const disconnectMeetingProviderOAuthMutationDocument: TypedDocumentNode<
+  Operations.DisconnectMeetingProviderOAuthMutation,
+  Types.MutationDisconnectMeetingProviderOAuthArgs
+> = gql`
+  mutation disconnectMeetingProviderOAuth($input: DisconnectMeetingProviderOAuthInput!) {
+    disconnectMeetingProviderOAuth(input: $input) {
+      id
+      ok
+      providerSlug
+    }
+  }
+`;
+
+export const myConnectedMeetingProvidersQueryDocument: TypedDocumentNode<Operations.MyConnectedMeetingProvidersQuery> = gql`
+  query myConnectedMeetingProviders {
+    myConnectedMeetingProviders {
+      id
+      providerSlug
+      email
+      connectedAt
+      expiresAt
     }
   }
 `;

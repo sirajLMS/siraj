@@ -25,7 +25,7 @@ class ViewSwitchErrorBoundary extends Component<ViewSwitchErrorBoundaryProps, Vi
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    logger.error("ResponsiveViewSwitch lazy load failed", { error: error.message, errorInfo });
+    logger.error("ResponsiveViewSwitch lazy load failed", { error: error.message, errorInfo, stack: error.stack });
   }
 
   override render(): ReactNode {

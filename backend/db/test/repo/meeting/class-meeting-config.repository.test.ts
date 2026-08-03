@@ -74,4 +74,30 @@ describe("ClassMeetingConfigRepository", () => {
     expect(firstAfter?.isDefault).toBe(false);
     expect(secondAfter?.isDefault).toBe(true);
   });
+
+  configTest("create and retrieve providerMetadata round-trip", async tx => {
+    const { student } = await setupStudent(tx);
+    const { teacher } = await setupTeacher(tx);
+    const instance = await createMockClassInstance(tx, student.id, teacher.id);
+    const provider = await createTestMeetingProvider(tx);
+    const metadata = { meetingId: "zoom-456", hostEmail: "class@example.com" };
+
+    const created = await ClassMeetingConfigRepository.create(
+      {
+        classInstanceId: instance.id,
+        providerId: provider.id,
+        label: "Auto class config",
+        isDefault: false,
+        details: { meetingUrl: "https://zoom.us/j/999999999" },
+        providerMetadata: metadata,
+      },
+      tErrors,
+      tx
+    );
+
+    expect(created.providerMetadata).toEqual(metadata);
+
+    const found = await ClassMeetingConfigRepository.getById(created.id, tx);
+    expect(found?.providerMetadata).toEqual(metadata);
+  });
 });

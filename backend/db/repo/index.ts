@@ -5,6 +5,8 @@ export {
   CreditRepository,
   CurrencyHedgeRepository,
   InvoicePaymentSubmissionRepository,
+  QuotaLedgerRepository,
+  QuotaRepository,
   SupportedCurrencyRepository,
   SupportedMobileWalletRepository,
   SupportedOnlineAccountRepository,
@@ -25,6 +27,7 @@ export {
   ComplaintRepository,
   ComplaintResponseRepository,
 } from "@/backend/db/repo/complaints";
+export { CronRepository, toScheduleReturnType } from "@/backend/db/repo/cron";
 export { FxSyncRepository } from "@/backend/db/repo/fx-sync.repository";
 export { MeetingProviderRepository, UserMeetingConfigRepository } from "@/backend/db/repo/meeting";
 export {
@@ -62,4 +65,5 @@ export {
   TeacherRepository,
 } from "@/backend/db/repo/teachers";
 export { SessionConfigRepository, UserRepository } from "@/backend/db/repo/users";
+export { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 export type { UserReturnType, UserSelectType } from "@/backend/types";

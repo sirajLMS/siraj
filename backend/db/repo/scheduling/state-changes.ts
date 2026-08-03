@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import {
@@ -7,10 +7,14 @@ import {
   performRescheduleValidations,
 } from "@/backend/db/repo/scheduling/shared";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
-import { classInstances, classStatusEvents, leaveRequests, parents, students, teachers } from "@/backend/db/schema";
-import { AppPermission, type CurrencyCode, RateSource } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { classInstances, classStatusEvents, leaveRequests, parents, teachers } from "@/backend/db/schema";
+import { type CurrencyCode, RateSource } from "@/backend/enum";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import {
+  checkStateChangeAuth,
+  validateRescheduleState,
+  validateStateTransition,
+} from "@/backend/services/scheduling/state-change-validation.service";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
@@ -19,13 +23,13 @@ export async function updateInstanceState(
   t: DBTransaction,
   id: string,
   actorUserId: string | null,
-  state: Partial<Types.ClassInstanceInsertInput>,
+  state: Partial<Types.ClassInstanceInsertType>,
   event: {
     fromState: Record<string, unknown>;
     toState: Record<string, unknown>;
     description: string;
   }
-): Promise<Types.ClassInstanceEntity | null> {
+): Promise<Types.ClassInstanceSelectType | null> {
   const now = new Date();
   const [updated] = await t
     .update(classInstances)
@@ -50,78 +54,14 @@ export async function updateInstanceState(
   return updated;
 }
 
-async function checkStateChangeAuth(
-  t: DBTransaction,
-  existing: Types.ClassInstanceEntity,
-  actorUserId: string,
-  tErrors: ErrorsLabels
-) {
-  const isPrivilegedActor = await PermissionsService.hasAnyPermission(actorUserId, [
-    AppPermission.SESSION_OVERRIDE_ACTIONS,
-    AppPermission.SESSION_ACTIVATE_OVERRIDE,
-    AppPermission.SESSION_RESET,
-  ]);
-
-  if (isPrivilegedActor) {
-    return;
-  }
-
-  const [teacher] = await t.select({ id: teachers.id }).from(teachers).where(eq(teachers.userId, actorUserId)).limit(1);
-
-  const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
-
-  let isParentOfStudent = false;
-  if (parent) {
-    const [studentLink] = await t
-      .select({ id: students.id })
-      .from(students)
-      .where(and(eq(students.id, existing.studentId), eq(students.parentId, parent.id)))
-      .limit(1);
-    if (studentLink) {
-      isParentOfStudent = true;
-    }
-  }
-
-  const isTeacherOfClass = existing.teacherId === teacher?.id;
-
-  if (!isTeacherOfClass && !isParentOfStudent) {
-    throw new Error(tErrors.unauthorizedAction);
-  }
-}
-
-async function validateStateTransition(
-  existing: Types.ClassInstanceEntity,
-  state: Partial<Types.ClassInstanceInsertInput>,
-  tErrors: ErrorsLabels
-) {
-  if (state.executionState === "ACTIVATED") {
-    if (existing.executionState !== "NOT_ACTIVATED") {
-      throw new Error(tErrors.invalidTransition);
-    }
-  } else if (state.executionState === "RUNNING") {
-    if (existing.executionState !== "ACTIVATED") {
-      throw new Error(tErrors.invalidTransition);
-    }
-  } else if (state.executionState === "COMPLETED") {
-    const isValidStandard = existing.executionState === "RUNNING";
-    const isValidEarly =
-      existing.executionState === "ACTIVATED" && (state.outcome === "ABSENT" || state.outcome === "LEAVE");
-    const isValidAutomatedLeave = existing.executionState === "NOT_ACTIVATED" && state.outcome === "LEAVE";
-    const isValidAutomatedAbsent = existing.executionState === "NOT_ACTIVATED" && state.outcome === "ABSENT";
-    if (!isValidStandard && !isValidEarly && !isValidAutomatedLeave && !isValidAutomatedAbsent) {
-      throw new Error(tErrors.invalidTransition);
-    }
-  }
-}
-
 async function runStateChange(
   id: string,
   actorUserId: string,
   logic: (
     t: DBTransaction,
-    existing: Types.ClassInstanceEntity
+    existing: Types.ClassInstanceSelectType
   ) => Promise<{
-    state: Partial<Types.ClassInstanceInsertInput>;
+    state: Partial<Types.ClassInstanceInsertType>;
     event: {
       fromState: Record<string, unknown>;
       toState: Record<string, unknown>;
@@ -130,7 +70,7 @@ async function runStateChange(
   }>,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity | null> {
+): Promise<Types.ClassInstanceSelectType | null> {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
@@ -193,7 +133,7 @@ async function getRequesterTypeForUser(t: DBTransaction, actorUserId: string): P
 }
 
 async function buildLeaveStateChangePayload(
-  existing: Types.ClassInstanceEntity,
+  existing: Types.ClassInstanceSelectType,
   successorId: string,
   reason: string | null
 ) {
@@ -296,101 +236,6 @@ async function executeProcessClassLeave(
   return { originalId, successorId: successor.id };
 }
 
-async function validateRescheduleState(
-  original: Types.ClassInstanceEntity,
-  input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
-  tErrors: ErrorsLabels
-) {
-  if (original.id === input.id) {
-    throw new Error(tErrors.cannotRescheduleToSelf);
-  }
-  if (original.executionState === "COMPLETED" || original.outcome === "TAKEN") {
-    throw new Error(tErrors.cannotRescheduleCompleted);
-  }
-  if (original.isRescheduled) {
-    throw new Error(tErrors.cannotRescheduleAlreadyRescheduled);
-  }
-}
-
-async function handleOriginalQuotaRestoration(t: DBTransaction, original: Types.ClassInstanceEntity): Promise<void> {
-  // If the original class had quota deducted, refund it when rescheduling
-  if (original.quotaDeducted) {
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, original.studentId));
-  }
-}
-
-export async function adjustQuotaOnUpdate(
-  t: DBTransaction,
-  existing: Types.ClassInstanceEntity,
-  input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
-  isBeingSoftDeleted: boolean
-): Promise<void> {
-  const newQuotaDeducted = input.quotaDeducted ?? existing.quotaDeducted;
-
-  if (isBeingSoftDeleted) {
-    if (existing.quotaDeducted) {
-      // Refund quota when soft deleting
-      await t
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-        .where(eq(students.id, existing.studentId));
-    }
-    return;
-  }
-
-  if (existing.quotaDeducted && !newQuotaDeducted) {
-    // Was deducted, now not deducted - refund
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, existing.studentId));
-  } else if (!existing.quotaDeducted && newQuotaDeducted) {
-    // Was not deducted, now deducted - deduct
-    const [student] = await t
-      .select({ classesRemaining: students.classesRemaining })
-      .from(students)
-      .where(eq(students.id, existing.studentId))
-      .limit(1);
-
-    if (!student || student.classesRemaining <= 0) {
-      throw new Error("Out of quota");
-    }
-
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-      .where(eq(students.id, existing.studentId));
-  }
-
-  // Handle student swap when quota was deducted
-  if (input.studentId && input.studentId !== existing.studentId && existing.quotaDeducted) {
-    // Refund old student
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, existing.studentId));
-
-    // Deduct from new student
-    const [newStudent] = await t
-      .select({ classesRemaining: students.classesRemaining })
-      .from(students)
-      .where(eq(students.id, input.studentId))
-      .limit(1);
-
-    if (!newStudent || newStudent.classesRemaining <= 0) {
-      throw new Error("Out of quota");
-    }
-
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-      .where(eq(students.id, input.studentId));
-  }
-}
-
 export const activateClassInstance = async (
   id: string,
   actorUserId: string,
@@ -490,7 +335,7 @@ export const markClassMissedBySystem = async (
   id: string,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity | null> => {
+): Promise<Types.ClassInstanceSelectType | null> => {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) {
@@ -545,10 +390,8 @@ export const resetClassInstance = async (
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) return null;
 
-    // Handle quota restoration if the instance was quota-deducted
-    if (existing.quotaDeducted) {
-      await adjustQuotaOnUpdate(t, existing, { quotaDeducted: false }, false);
-    }
+    // Quota handling for cancellations is managed by QuotaService + quota_ledger
+    // (no repository-level quota adjustment needed here)
 
     return runStateChange(
       id,
@@ -587,10 +430,10 @@ export const resetClassInstance = async (
 };
 
 export function buildRescheduledClassInput(
-  original: Types.ClassInstanceEntity,
-  input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+  original: Types.ClassInstanceSelectType,
+  input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
   originalClassId: string
-): Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt"> {
+): Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt"> {
   return {
     ...input,
     subjectId: input.subjectId ?? original.subjectId,
@@ -630,7 +473,7 @@ export async function overrideClassInstanceRate(
   rateAmount: string | null,
   rateCurrency: CurrencyCode | null,
   tx?: DBTransaction
-): Promise<Types.ClassInstanceEntity | null> {
+): Promise<Types.ClassInstanceSelectType | null> {
   const executor = tx ?? db;
   const isOverridden = rateAmount != null && rateAmount !== "";
   const [updated] = await executor
@@ -649,10 +492,10 @@ export async function overrideClassInstanceRate(
 
 export const rescheduleClassInstance = async (
   originalClassId: string,
-  input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+  input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
-): Promise<Types.ClassInstanceEntity> => {
+): Promise<Types.ClassInstanceSelectType> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const results = await t.select().from(classInstances).where(eq(classInstances.id, originalClassId)).limit(1);
@@ -687,37 +530,13 @@ export const rescheduleClassInstance = async (
 
     await markOriginalAsRescheduled(t, originalClassId);
 
-    await handleOriginalQuotaRestoration(t, original);
+    // Quota operations are now handled by QuotaService + quota_ledger
 
     return created;
   };
 
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
-
-export async function handleQuotaDeduction(
-  t: DBTransaction,
-  studentId: string,
-  quotaDeducted: boolean,
-  tErrors: ErrorsLabels
-): Promise<void> {
-  if (!quotaDeducted) return;
-
-  const [student] = await t
-    .select({ classesRemaining: students.classesRemaining })
-    .from(students)
-    .where(eq(students.id, studentId))
-    .limit(1);
-
-  if (!student || student.classesRemaining <= 0) {
-    throw new Error(tErrors.outOfQuota);
-  }
-
-  await t
-    .update(students)
-    .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-    .where(eq(students.id, studentId));
-}
 
 export async function processAutomatedClassLeave(
   id: string,

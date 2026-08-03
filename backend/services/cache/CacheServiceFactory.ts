@@ -152,6 +152,10 @@ export const cacheService = {
     const service = await getCacheService();
     return service.set(key, value, options);
   },
+  setNx: async (key: string, value: string, pxMs: number) => {
+    const service = await getCacheService();
+    return service.setNx(key, value, pxMs);
+  },
   del: async (key: string) => {
     const service = await getCacheService();
     return service.del(key);

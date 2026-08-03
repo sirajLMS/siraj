@@ -92,6 +92,7 @@ export const PAGE_PERMISSIONS = {
   suggestionsManage: [AppPermission.SuggestionsList] as PagePermissions,
   complaintsSubmit: [AppPermission.SupportSubmitComplaint] as PagePermissions,
   dstMigration: [AppPermission.SystemBulkUpdateDst] as PagePermissions,
+  cronManagement: [AppPermission.CronManage] as PagePermissions,
   permissions: [AppPermission.PermissionGroupsManage] as PagePermissions,
   studentSelfDashboard: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
   studentCredits: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
@@ -106,6 +107,7 @@ export const PAGE_PERMISSIONS = {
   teacherDuesView: [AppPermission.TeacherDuesView] as PagePermissions,
   monthlyReportsView: [AppPermission.MonthlyReportsView] as PagePermissions,
   lessonReportsSubmit: [AppPermission.LessonReportsSubmit] as PagePermissions,
+  whatsappSettings: [AppPermission.WhatsappView] as PagePermissions,
   settings: [
     AppPermission.SettingsView,
     AppPermission.SettingsEditGeneral,
@@ -113,7 +115,7 @@ export const PAGE_PERMISSIONS = {
     AppPermission.SettingsEditSession,
     AppPermission.SettingsAuditView,
     AppPermission.SettingsSiteContentManage,
-    AppPermission.SettingsTimezonesView,
+    AppPermission.ScheduleViewTimezones,
   ] as PagePermissions,
   settingsGeneral: [AppPermission.SettingsEditGeneral, AppPermission.SettingsView] as PagePermissions,
   settingsEnvironment: [AppPermission.SettingsEditEnv, AppPermission.SettingsView] as PagePermissions,
@@ -121,6 +123,10 @@ export const PAGE_PERMISSIONS = {
   settingsAudit: [AppPermission.SettingsAuditView] as PagePermissions,
   settingsSiteContent: [AppPermission.SettingsSiteContentManage] as PagePermissions,
   settingsTimezones: [AppPermission.SettingsTimezonesView] as PagePermissions,
+  settingsMeetingIntegrations: [
+    AppPermission.SettingsEditMeetingIntegrations,
+    AppPermission.SettingsView,
+  ] as PagePermissions,
   // Phase 2 nav additions for previously-orphaned routes.
   classesPage: [AppPermission.ScheduleManageRecurring] as PagePermissions,
   recurringSchedules: [AppPermission.ScheduleManageRecurring] as PagePermissions,
@@ -129,4 +135,9 @@ export const PAGE_PERMISSIONS = {
     AppPermission.ProfileCoreIdentityViewOther,
     AppPermission.ProfileCoreIdentityViewOwn,
   ] as PagePermissions,
+  quotas: [AppPermission.QuotasView] as PagePermissions,
+  quotasCreate: [AppPermission.QuotasManage] as PagePermissions,
+  quotasView: [AppPermission.QuotasView] as PagePermissions,
+  quotasEdit: [AppPermission.QuotasManage] as PagePermissions,
+  quotasInsights: [AppPermission.QuotasView] as PagePermissions,
 } as const;

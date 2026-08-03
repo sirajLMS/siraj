@@ -7,7 +7,7 @@ import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
-import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
+import type { LeaveQuotaUsageSelectType, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -29,7 +29,7 @@ async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
 async function insertLeaveQuota(
   tx: DBTransaction,
   params: { teacherId?: string; studentId?: string; year: number; month: number; count: number }
-): Promise<LeaveQuotaUsageEntity> {
+): Promise<LeaveQuotaUsageSelectType> {
   const [quota] = (await tx
     .insert(leaveQuotaUsage)
     .values({
@@ -39,7 +39,7 @@ async function insertLeaveQuota(
       periodMonth: params.month,
       usedCount: params.count,
     })
-    .returning()) as [LeaveQuotaUsageEntity];
+    .returning()) as [LeaveQuotaUsageSelectType];
   return quota;
 }
 
@@ -61,7 +61,7 @@ async function setLeaveLimit(tx: DBTransaction, key: "teacher_max_leaves" | "stu
     .execute();
 }
 
-async function withTeacher(tx: DBTransaction, fn: (teacher: TeacherEntity) => Promise<void>) {
+async function withTeacher(tx: DBTransaction, fn: (teacher: TeacherSelectType) => Promise<void>) {
   const { teacher } = await setupTeacher(tx, {
     name: "Quota Teacher",
     email: `teacher-leave-${randomUUID()}@example.com`,
@@ -69,7 +69,7 @@ async function withTeacher(tx: DBTransaction, fn: (teacher: TeacherEntity) => Pr
   await fn(teacher);
 }
 
-async function withStudent(tx: DBTransaction, fn: (student: StudentEntity) => Promise<void>) {
+async function withStudent(tx: DBTransaction, fn: (student: StudentSelectType) => Promise<void>) {
   const { student } = await setupStudent(
     tx,
     { name: "Quota Parent", email: `parent-leave-${randomUUID()}@example.com` },
@@ -287,7 +287,7 @@ describe("Leave Quota Repository Methods", () => {
 
 async function setupTeacherAndStudent(
   tx: DBTransaction
-): Promise<{ user: UserSelectType; teacher: TeacherEntity; student: StudentEntity }> {
+): Promise<{ user: UserSelectType; teacher: TeacherSelectType; student: StudentSelectType }> {
   const { user, teacher } = await setupTeacher(tx, {
     name: "Quota Teacher User",
     email: `quota-teacher-${randomUUID()}@example.com`,

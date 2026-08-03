@@ -387,7 +387,7 @@ After creating/modifying ANY file, the executing agent MUST run:
 ```bash
 bun tsgo
 bun biome:check
-curl -s -X POST http://localhost:4777/lint \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"verify","files":["<the-file>"]}'
 ```

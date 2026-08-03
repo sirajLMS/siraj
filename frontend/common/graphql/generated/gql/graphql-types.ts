@@ -70,6 +70,19 @@ export type AdminNoteInfo = {
   lastUpdated: Maybe<Scalars['String']['output']>;
 };
 
+export type AdminRevokeTokenInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+  userId: Scalars['String']['input'];
+};
+
+export type AdminRevokeTokenResult = {
+  __typename?: 'AdminRevokeTokenResult';
+  id: Maybe<Scalars['String']['output']>;
+  providerSlug: Maybe<Scalars['String']['output']>;
+  revoked: Maybe<Scalars['Boolean']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
+};
+
 /** Paginated admin suggestion list with metrics. */
 export type AdminSuggestionResult = {
   __typename?: 'AdminSuggestionResult';
@@ -107,6 +120,7 @@ export enum AppPermission {
   ComplaintsList = 'COMPLAINTS_LIST',
   ComplaintsRespond = 'COMPLAINTS_RESPOND',
   CreditsManage = 'CREDITS_MANAGE',
+  CronManage = 'CRON_MANAGE',
   DashboardFilterMetrics = 'DASHBOARD_FILTER_METRICS',
   DashboardMetricsViewAll = 'DASHBOARD_METRICS_VIEW_ALL',
   DashboardSearch = 'DASHBOARD_SEARCH',
@@ -200,6 +214,8 @@ export enum AppPermission {
   ProfileTeacherStudentsEditOwn = 'PROFILE_TEACHER_STUDENTS_EDIT_OWN',
   ProfileTeacherStudentsViewOther = 'PROFILE_TEACHER_STUDENTS_VIEW_OTHER',
   ProfileTeacherStudentsViewOwn = 'PROFILE_TEACHER_STUDENTS_VIEW_OWN',
+  QuotasManage = 'QUOTAS_MANAGE',
+  QuotasView = 'QUOTAS_VIEW',
   ReportsGenerate = 'REPORTS_GENERATE',
   ReportGenerateCustom = 'REPORT_GENERATE_CUSTOM',
   ReportViewFinancials = 'REPORT_VIEW_FINANCIALS',
@@ -232,6 +248,7 @@ export enum AppPermission {
   SettingsAuditView = 'SETTINGS_AUDIT_VIEW',
   SettingsEditEnv = 'SETTINGS_EDIT_ENV',
   SettingsEditGeneral = 'SETTINGS_EDIT_GENERAL',
+  SettingsEditMeetingIntegrations = 'SETTINGS_EDIT_MEETING_INTEGRATIONS',
   SettingsEditSession = 'SETTINGS_EDIT_SESSION',
   SettingsSiteContentManage = 'SETTINGS_SITE_CONTENT_MANAGE',
   SettingsTimezonesView = 'SETTINGS_TIMEZONES_VIEW',
@@ -310,7 +327,10 @@ export enum AppPermission {
   TeacherViewStudents = 'TEACHER_VIEW_STUDENTS',
   TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
-  TestSystemOnly = 'TEST_SYSTEM_ONLY'
+  TestSystemOnly = 'TEST_SYSTEM_ONLY',
+  WhatsappConfigManage = 'WHATSAPP_CONFIG_MANAGE',
+  WhatsappTemplatesManage = 'WHATSAPP_TEMPLATES_MANAGE',
+  WhatsappView = 'WHATSAPP_VIEW'
 }
 
 export type AssignPermissionGroupToUserInput = {
@@ -464,6 +484,16 @@ export enum AvailabilityStatus {
   OutOfStock = 'OUT_OF_STOCK'
 }
 
+/** An available class slot for a student on a given date */
+export type AvailableClassSlot = {
+  __typename?: 'AvailableClassSlot';
+  available: Maybe<Scalars['Boolean']['output']>;
+  endAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  startAt: Maybe<Scalars['DateTime']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+};
+
 export type BillingCurrencyTotal = {
   __typename?: 'BillingCurrencyTotal';
   amount: Maybe<Scalars['String']['output']>;
@@ -555,6 +585,10 @@ export enum ClassExecutionState {
   Activated = 'ACTIVATED',
   Completed = 'COMPLETED',
   NotActivated = 'NOT_ACTIVATED',
+  OnDemandConflictHeld = 'ON_DEMAND_CONFLICT_HELD',
+  OnDemandNoCreditsAbsent = 'ON_DEMAND_NO_CREDITS_ABSENT',
+  OnDemandNoCreditsCancelled = 'ON_DEMAND_NO_CREDITS_CANCELLED',
+  OnDemandPendingCredits = 'ON_DEMAND_PENDING_CREDITS',
   Running = 'RUNNING'
 }
 
@@ -639,6 +673,7 @@ export type ClassMeetingConfig = {
   label: Maybe<Scalars['String']['output']>;
   provider: Maybe<MeetingProvider>;
   providerId: Maybe<Scalars['String']['output']>;
+  providerMetadata: Maybe<Scalars['JSON']['output']>;
   recurringScheduleId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
@@ -833,6 +868,18 @@ export type ComplaintSubmitInput = {
   files: InputMaybe<Array<ComplaintFileMetadataInput>>;
   studentId: InputMaybe<Scalars['String']['input']>;
   submitterEmail: Scalars['String']['input'];
+};
+
+export type ConnectMeetingProviderOAuthInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+  returnPath: Scalars['String']['input'];
+};
+
+export type ConnectMeetingProviderOAuthResult = {
+  __typename?: 'ConnectMeetingProviderOAuthResult';
+  authorizeUrl: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  state: Maybe<Scalars['String']['output']>;
 };
 
 export type CoreUserProfileFieldsInput = {
@@ -1109,15 +1156,20 @@ export type CreatePermissionGroupInput = {
 };
 
 export type CreateRecurringClassInput = {
-  classType: InputMaybe<Scalars['String']['input']>;
+  classType: InputMaybe<ClassType>;
   days: Array<RecurringClassDayInput>;
   defaultStartTime: Scalars['String']['input'];
   durationMinutes: Scalars['Int']['input'];
+  earmarkedClasses: InputMaybe<Scalars['Int']['input']>;
   effectiveFrom: InputMaybe<Scalars['String']['input']>;
   effectiveUntil: InputMaybe<Scalars['String']['input']>;
   generateInstancesForWeeks: InputMaybe<Scalars['Int']['input']>;
+  generationHorizonWeeks: InputMaybe<Scalars['Int']['input']>;
   hourlyRate: InputMaybe<Scalars['String']['input']>;
+  ondemandNoCreditsOutcome: InputMaybe<OnDemandNoCreditsOutcome>;
+  quotaId: InputMaybe<Scalars['String']['input']>;
   rateCurrency: InputMaybe<CurrencyCode>;
+  schedulingMode: InputMaybe<SchedulingMode>;
   studentId: Scalars['String']['input'];
   subjectId: Scalars['String']['input'];
   teacherId: Scalars['String']['input'];
@@ -1187,6 +1239,159 @@ export type CreditTransaction = {
   studentId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
+
+export enum CronConcurrencyPolicy {
+  Allow = 'ALLOW',
+  Replace = 'REPLACE',
+  Skip = 'SKIP'
+}
+
+export enum CronJobKind {
+  Noop = 'NOOP'
+}
+
+export type CronPaginatedRuns = {
+  __typename?: 'CronPaginatedRuns';
+  rows: Maybe<Array<CronRun>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export type CronPaginatedSchedules = {
+  __typename?: 'CronPaginatedSchedules';
+  rows: Maybe<Array<CronSchedule>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export type CronQueueStats = {
+  __typename?: 'CronQueueStats';
+  backend: Maybe<Scalars['String']['output']>;
+  byJobKind: Maybe<Scalars['JSON']['output']>;
+  failed: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  inFlight: Maybe<Scalars['Int']['output']>;
+  pending: Maybe<Scalars['Int']['output']>;
+};
+
+export type CronRun = {
+  __typename?: 'CronRun';
+  attempt: Maybe<Scalars['Int']['output']>;
+  completedAt: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  durationMs: Maybe<Scalars['Int']['output']>;
+  errorMessage: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  jobKind: Maybe<CronJobKind>;
+  payload: Maybe<Scalars['JSON']['output']>;
+  scheduleId: Maybe<Scalars['String']['output']>;
+  startedAt: Maybe<Scalars['DateTime']['output']>;
+  status: Maybe<CronRunStatus>;
+  triggerSource: Maybe<CronTriggerSource>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  workerId: Maybe<Scalars['String']['output']>;
+};
+
+export type CronRunListInput = {
+  from: InputMaybe<Scalars['DateTime']['input']>;
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  scheduleId: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<CronRunStatus>;
+  statuses: InputMaybe<Array<CronRunStatus>>;
+  to: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type CronRunRetryInput = {
+  attempt: InputMaybe<Scalars['Int']['input']>;
+  runId: Scalars['String']['input'];
+};
+
+export enum CronRunStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Retrying = 'RETRYING',
+  Running = 'RUNNING',
+  Timeout = 'TIMEOUT'
+}
+
+export type CronRunTriggerInput = {
+  id: Scalars['String']['input'];
+  payload: InputMaybe<Scalars['JSON']['input']>;
+};
+
+export type CronSchedule = {
+  __typename?: 'CronSchedule';
+  concurrencyPolicy: Maybe<CronConcurrencyPolicy>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  cronExpression: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  jobKind: Maybe<CronJobKind>;
+  lastRunAt: Maybe<Scalars['DateTime']['output']>;
+  maxRetries: Maybe<Scalars['Int']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  nextRunAt: Maybe<Scalars['DateTime']['output']>;
+  payload: Maybe<Scalars['JSON']['output']>;
+  retryBackoffSeconds: Maybe<Scalars['Int']['output']>;
+  status: Maybe<CronScheduleStatus>;
+  timeoutSeconds: Maybe<Scalars['Int']['output']>;
+  timezone: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type CronScheduleDeleteInput = {
+  hard: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type CronScheduleListInput = {
+  jobKind: InputMaybe<CronJobKind>;
+  limit: InputMaybe<Scalars['Int']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  status: InputMaybe<CronScheduleStatus>;
+};
+
+export enum CronScheduleStatus {
+  Active = 'ACTIVE',
+  Disabled = 'DISABLED',
+  Paused = 'PAUSED'
+}
+
+export type CronScheduleSubmitInput = {
+  concurrencyPolicy: InputMaybe<CronConcurrencyPolicy>;
+  cronExpression: Scalars['String']['input'];
+  description: InputMaybe<Scalars['String']['input']>;
+  jobKind: CronJobKind;
+  maxRetries: InputMaybe<Scalars['Int']['input']>;
+  name: Scalars['String']['input'];
+  payload: InputMaybe<Scalars['JSON']['input']>;
+  retryBackoffSeconds: InputMaybe<Scalars['Int']['input']>;
+  timeoutSeconds: InputMaybe<Scalars['Int']['input']>;
+  timezone: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CronScheduleUpdateInput = {
+  concurrencyPolicy: InputMaybe<CronConcurrencyPolicy>;
+  cronExpression: InputMaybe<Scalars['String']['input']>;
+  description: InputMaybe<Scalars['String']['input']>;
+  jobKind: InputMaybe<CronJobKind>;
+  maxRetries: InputMaybe<Scalars['Int']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  payload: InputMaybe<Scalars['JSON']['input']>;
+  retryBackoffSeconds: InputMaybe<Scalars['Int']['input']>;
+  timeoutSeconds: InputMaybe<Scalars['Int']['input']>;
+  timezone: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum CronTriggerSource {
+  External = 'EXTERNAL',
+  Manual = 'MANUAL',
+  VercelExplicit = 'VERCEL_EXPLICIT',
+  VercelTicker = 'VERCEL_TICKER',
+  WorkerRetry = 'WORKER_RETRY'
+}
 
 export enum CurrencyCode {
   Aed = 'AED',
@@ -1351,6 +1556,17 @@ export type DirectoryPermissionsUpdateInput = {
   permissions: DirectoryPermissionsInput;
 };
 
+export type DisconnectMeetingProviderOAuthInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+};
+
+export type DisconnectMeetingProviderOAuthResult = {
+  __typename?: 'DisconnectMeetingProviderOAuthResult';
+  id: Maybe<Scalars['String']['output']>;
+  ok: Maybe<Scalars['Boolean']['output']>;
+  providerSlug: Maybe<Scalars['String']['output']>;
+};
+
 export type DisplayAmount = {
   __typename?: 'DisplayAmount';
   amount: Maybe<Scalars['String']['output']>;
@@ -1423,6 +1639,7 @@ export type EffectiveMeeting = {
   providerName: Maybe<Scalars['LocalizedString']['output']>;
   providerSlug: Maybe<Scalars['String']['output']>;
   source: Maybe<EffectiveMeetingSource>;
+  supportsAutoGeneration: Maybe<Scalars['Boolean']['output']>;
 };
 
 export enum EffectiveMeetingSource {
@@ -1687,6 +1904,20 @@ export enum Gender {
   Female = 'FEMALE',
   Male = 'MALE'
 }
+
+export type GenerateMeetingUrlInput = {
+  durationMinutes: InputMaybe<Scalars['Int']['input']>;
+  providerId: Scalars['String']['input'];
+  startDateTime: InputMaybe<Scalars['String']['input']>;
+  topic: Scalars['String']['input'];
+};
+
+export type GenerateMeetingUrlResult = {
+  __typename?: 'GenerateMeetingUrlResult';
+  expiresAt: Maybe<Scalars['String']['output']>;
+  joinUrl: Maybe<Scalars['String']['output']>;
+  meetingId: Maybe<Scalars['String']['output']>;
+};
 
 export enum GroupClassAttendanceStatus {
   Absent = 'ABSENT',
@@ -2447,10 +2678,53 @@ export type MeetingConfigDetails = {
 };
 
 export type MeetingConfigDetailsInput = {
-  meetingUrl: Scalars['String']['input'];
+  meetingUrl: InputMaybe<Scalars['String']['input']>;
   tenantId: InputMaybe<Scalars['String']['input']>;
   username: InputMaybe<Scalars['String']['input']>;
 };
+
+export enum MeetingConnectionTestMode {
+  GenerateAndDelete = 'GENERATE_AND_DELETE',
+  ValidateConfig = 'VALIDATE_CONFIG'
+}
+
+export type MeetingIntegrationConnectedAccount = {
+  __typename?: 'MeetingIntegrationConnectedAccount';
+  connectedAt: Maybe<Scalars['DateTime']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  expiresAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  lastRefreshedAt: Maybe<Scalars['DateTime']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  scopes: Maybe<Array<Scalars['String']['output']>>;
+  status: Maybe<MeetingIntegrationConnectedAccountStatus>;
+  userId: Maybe<Scalars['String']['output']>;
+};
+
+export enum MeetingIntegrationConnectedAccountStatus {
+  Connected = 'CONNECTED',
+  ExpiringSoon = 'EXPIRING_SOON',
+  ReauthNeeded = 'REAUTH_NEEDED',
+  Revoked = 'REVOKED'
+}
+
+export type MeetingIntegrationProvider = {
+  __typename?: 'MeetingIntegrationProvider';
+  connectedTeacherCount: Maybe<Scalars['Int']['output']>;
+  credentialsHealthy: Maybe<Scalars['Boolean']['output']>;
+  endpoints: Maybe<Array<Scalars['String']['output']>>;
+  id: Maybe<Scalars['String']['output']>;
+  kind: Maybe<Scalars['String']['output']>;
+  lastTestedAt: Maybe<Scalars['DateTime']['output']>;
+  reauthNeededCount: Maybe<Scalars['Int']['output']>;
+  slug: Maybe<Scalars['String']['output']>;
+};
+
+export enum MeetingIntegrationProviderSlug {
+  GoogleMeet = 'GOOGLE_MEET',
+  MicrosoftTeams = 'MICROSOFT_TEAMS',
+  Zoom = 'ZOOM'
+}
 
 export type MeetingProvider = {
   __typename?: 'MeetingProvider';
@@ -2462,6 +2736,7 @@ export type MeetingProvider = {
   isActive: Maybe<Scalars['Boolean']['output']>;
   logoUrl: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['LocalizedString']['output']>;
+  providerKind: Maybe<Scalars['String']['output']>;
   slug: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   urlAllowlist: Maybe<Array<Scalars['String']['output']>>;
@@ -2475,6 +2750,7 @@ export type MeetingProviderCreateInput = {
   isActive: InputMaybe<Scalars['Boolean']['input']>;
   logoUrl: InputMaybe<Scalars['String']['input']>;
   name: Scalars['LocalizedString']['input'];
+  providerKind: InputMaybe<Scalars['String']['input']>;
   slug: Scalars['String']['input'];
   urlAllowlist: Array<Scalars['String']['input']>;
   urlExample: InputMaybe<Scalars['String']['input']>;
@@ -2483,6 +2759,7 @@ export type MeetingProviderCreateInput = {
 export type MeetingProviderFieldSchema = {
   __typename?: 'MeetingProviderFieldSchema';
   requiresMeetingUrl: Maybe<Scalars['Boolean']['output']>;
+  supportsAutoGeneration: Maybe<Scalars['Boolean']['output']>;
   supportsPassword: Maybe<Scalars['Boolean']['output']>;
   supportsTenantId: Maybe<Scalars['Boolean']['output']>;
   supportsUsername: Maybe<Scalars['Boolean']['output']>;
@@ -2490,6 +2767,7 @@ export type MeetingProviderFieldSchema = {
 
 export type MeetingProviderFieldSchemaInput = {
   requiresMeetingUrl: Scalars['Boolean']['input'];
+  supportsAutoGeneration: InputMaybe<Scalars['Boolean']['input']>;
   supportsPassword: InputMaybe<Scalars['Boolean']['input']>;
   supportsTenantId: InputMaybe<Scalars['Boolean']['input']>;
   supportsUsername: InputMaybe<Scalars['Boolean']['input']>;
@@ -2502,6 +2780,7 @@ export type MeetingProviderUpdateInput = {
   isActive: InputMaybe<Scalars['Boolean']['input']>;
   logoUrl: InputMaybe<Scalars['String']['input']>;
   name: InputMaybe<Scalars['LocalizedString']['input']>;
+  providerKind: InputMaybe<Scalars['String']['input']>;
   slug: InputMaybe<Scalars['String']['input']>;
   urlAllowlist: InputMaybe<Array<Scalars['String']['input']>>;
   urlExample: InputMaybe<Scalars['String']['input']>;
@@ -2512,6 +2791,7 @@ export type Mutation = {
   activateClass: Maybe<ClassInstanceDetail>;
   activateOverrideClass: Maybe<ClassInstanceDetail>;
   activateSupportedCurrency: Maybe<SupportedCurrency>;
+  adminRevokeMeetingProviderToken: Maybe<AdminRevokeTokenResult>;
   /** Approve a pending lesson report (supervisor/manager action) */
   approveLessonReport: Maybe<LessonReport>;
   approvePaymentProof: Maybe<MarkInvoicePaidResult>;
@@ -2527,6 +2807,7 @@ export type Mutation = {
   cleanupTestManager: Maybe<Scalars['Boolean']['output']>;
   cleanupTestSuperAdmin: Maybe<Scalars['Boolean']['output']>;
   clearWeeklySchedule: Maybe<Scalars['Boolean']['output']>;
+  connectMeetingProviderOAuth: Maybe<ConnectMeetingProviderOAuthResult>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createClassCategory: Maybe<ClassCategory>;
   createClassMeetingConfig: Maybe<ClassMeetingConfig>;
@@ -2540,6 +2821,8 @@ export type Mutation = {
   /** Create a new parent account with billing configuration */
   createParent: Maybe<ParentOnboardingResult>;
   createPermissionGroup: Maybe<PermissionGroup>;
+  /** Create a new quota allocation for a student */
+  createQuota: Maybe<Quota>;
   createRecurringClass: Maybe<CreateRecurringClassResult>;
   /** Create a new student profile under an existing parent */
   createStudent: Maybe<StudentOnboardingResult>;
@@ -2558,6 +2841,22 @@ export type Mutation = {
   createTestSuperAdmin: Maybe<TestSuperAdmin>;
   createUserMeetingConfig: Maybe<UserMeetingConfig>;
   createUserPaymentMethod: Maybe<UserPaymentMethod>;
+  /** Create a new WhatsApp business account record. */
+  createWhatsappAccount: Maybe<WhatsappAccount>;
+  /** Retry a failed cron run. */
+  cronRunRetry: Maybe<CronRun>;
+  /** Manually trigger a cron schedule to run immediately. */
+  cronRunTrigger: Maybe<CronRun>;
+  /** Create a new cron schedule. */
+  cronScheduleCreate: Maybe<CronSchedule>;
+  /** Delete a cron schedule (soft by default, hard if specified). */
+  cronScheduleDelete: Maybe<Scalars['Boolean']['output']>;
+  /** Pause a cron schedule. */
+  cronSchedulePause: Maybe<CronSchedule>;
+  /** Resume a paused cron schedule. */
+  cronScheduleResume: Maybe<CronSchedule>;
+  /** Update an existing cron schedule. */
+  cronScheduleUpdate: Maybe<CronSchedule>;
   deactivateParent: Maybe<DeactivateParentResult>;
   deactivateSupportedCurrency: Maybe<Scalars['Boolean']['output']>;
   deactivateSupportedMobileWallet: Maybe<SupportedMobileWallet>;
@@ -2579,6 +2878,8 @@ export type Mutation = {
   deleteLearningResource: Maybe<Scalars['Boolean']['output']>;
   deleteMeetingProvider: Maybe<Scalars['Boolean']['output']>;
   deletePermissionGroup: Maybe<Scalars['Boolean']['output']>;
+  /** Soft delete a student quota allocation */
+  deleteQuota: Maybe<Quota>;
   deleteRecurringClass: Maybe<Scalars['Boolean']['output']>;
   /** Deletes a per-role session configuration. */
   deleteSessionConfig: Maybe<Scalars['Boolean']['output']>;
@@ -2592,13 +2893,17 @@ export type Mutation = {
   deleteTeacherImportantNote: Maybe<Scalars['Boolean']['output']>;
   deleteUserMeetingConfig: Maybe<Scalars['Boolean']['output']>;
   deleteUserPaymentMethod: Maybe<Scalars['Boolean']['output']>;
+  /** Deactivate a WhatsApp account. Calls resetWhatsappChannel() on success (S4). */
+  deleteWhatsappAccount: Maybe<WhatsappAccount>;
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
   demoLogin: Maybe<LoginResponse>;
   detachSubjectResource: Maybe<Scalars['Boolean']['output']>;
+  disconnectMeetingProviderOAuth: Maybe<DisconnectMeetingProviderOAuthResult>;
   endImpersonation: Maybe<EndImpersonationResponse>;
   endPermissionGroupSimulation: Maybe<EndPermissionGroupSimulationResponse>;
   ensureDemoUsers: Maybe<Scalars['Boolean']['output']>;
   executeDstBulkUpdate: Maybe<DstMigrationReport>;
+  generateMeetingUrl: Maybe<GenerateMeetingUrlResult>;
   linkDocumentToParent: Maybe<ParentDocument>;
   logTeacherSupportRequest: Maybe<SupportRequestResult>;
   login: Maybe<LoginResponse>;
@@ -2641,6 +2946,12 @@ export type Mutation = {
   setDefaultMeetingConfig: Maybe<UserMeetingConfig>;
   setDefaultUserPaymentMethod: Maybe<UserPaymentMethod>;
   setStorageItemProtection: Maybe<FileOperationResult>;
+  /** Enable or disable WhatsApp notification opt-in for a user (REQ-10/BL1). */
+  setUserWhatsappOptIn: Maybe<WhatsappAccount>;
+  /** Set the access token for a WhatsApp account. Calls resetWhatsappChannel() on success (S4). */
+  setWhatsappAccessToken: Maybe<WhatsappAccount>;
+  /** Set the two-step verification PIN for a WhatsApp account. Calls resetWhatsappChannel() on success (S4). */
+  setWhatsappTwoStepPin: Maybe<WhatsappAccount>;
   startImpersonation: Maybe<StartImpersonationResponse>;
   startPermissionGroupSimulation: Maybe<StartPermissionGroupSimulationResponse>;
   stopClass: Maybe<ClassInstanceDetail>;
@@ -2653,6 +2964,9 @@ export type Mutation = {
   submitStudentLessonReportReflection: Maybe<LessonReport>;
   /** Submits a new suggestion from the authenticated parent. */
   submitSuggestion: Maybe<Suggestion>;
+  /** Sync WhatsApp phone numbers and message templates from Meta Graph API (BL3: includes template snapshot). */
+  syncWhatsappAccountsFromMeta: Maybe<WhatsappSyncFromMetaResult>;
+  testMeetingProviderConnection: Maybe<TestMeetingConnectionResult>;
   updateClassAdminNote: Maybe<GroupClassAudit>;
   updateClassCategory: Maybe<ClassCategory>;
   updateClassMeetingConfig: Maybe<ClassMeetingConfig>;
@@ -2666,6 +2980,8 @@ export type Mutation = {
   updateNotificationPreferences: Maybe<Array<NotificationPreference>>;
   updateOwnProfile: Maybe<UnifiedProfile>;
   updatePermissionGroup: Maybe<PermissionGroup>;
+  /** Update an existing student quota allocation */
+  updateQuota: Maybe<Quota>;
   updateRecurringClassRate: Maybe<RecurringScheduleDetail>;
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
@@ -2682,6 +2998,8 @@ export type Mutation = {
   updateUserOverrides: Maybe<Scalars['Boolean']['output']>;
   updateUserPaymentMethod: Maybe<UserPaymentMethod>;
   updateUserProfile: Maybe<UnifiedProfile>;
+  /** Update an existing WhatsApp account. Calls resetWhatsappChannel() on success (S4). */
+  updateWhatsappAccount: Maybe<WhatsappAccount>;
   /** Uploads a new learning resource to the academy library. */
   uploadLearningResource: Maybe<LearningResourceRow>;
   upsertEnvConfigEntry: Maybe<EnvConfigUpsertResult>;
@@ -2707,6 +3025,11 @@ export type MutationActivateOverrideClassArgs = {
 
 export type MutationActivateSupportedCurrencyArgs = {
   input: SupportedCurrencyUpsertInput;
+};
+
+
+export type MutationAdminRevokeMeetingProviderTokenArgs = {
+  input: AdminRevokeTokenInput;
 };
 
 
@@ -2791,6 +3114,11 @@ export type MutationClearWeeklyScheduleArgs = {
 };
 
 
+export type MutationConnectMeetingProviderOAuthArgs = {
+  input: ConnectMeetingProviderOAuthInput;
+};
+
+
 export type MutationCopyStorageItemsArgs = {
   input: StorageItemsCopyInput;
 };
@@ -2856,6 +3184,11 @@ export type MutationCreateParentArgs = {
 
 export type MutationCreatePermissionGroupArgs = {
   input: CreatePermissionGroupInput;
+};
+
+
+export type MutationCreateQuotaArgs = {
+  input: QuotaSubmitInput;
 };
 
 
@@ -2938,6 +3271,47 @@ export type MutationCreateUserMeetingConfigArgs = {
 
 export type MutationCreateUserPaymentMethodArgs = {
   input: UserPaymentMethodCreateInput;
+};
+
+
+export type MutationCreateWhatsappAccountArgs = {
+  input: WhatsappAccountCreateInput;
+};
+
+
+export type MutationCronRunRetryArgs = {
+  input: CronRunRetryInput;
+};
+
+
+export type MutationCronRunTriggerArgs = {
+  input: CronRunTriggerInput;
+};
+
+
+export type MutationCronScheduleCreateArgs = {
+  input: CronScheduleSubmitInput;
+};
+
+
+export type MutationCronScheduleDeleteArgs = {
+  input: CronScheduleDeleteInput;
+};
+
+
+export type MutationCronSchedulePauseArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationCronScheduleResumeArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationCronScheduleUpdateArgs = {
+  id: Scalars['String']['input'];
+  input: CronScheduleUpdateInput;
 };
 
 
@@ -3031,6 +3405,11 @@ export type MutationDeletePermissionGroupArgs = {
 };
 
 
+export type MutationDeleteQuotaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteRecurringClassArgs = {
   classInstanceId: Scalars['ID']['input'];
 };
@@ -3081,6 +3460,11 @@ export type MutationDeleteUserPaymentMethodArgs = {
 };
 
 
+export type MutationDeleteWhatsappAccountArgs = {
+  id: Scalars['String']['input'];
+};
+
+
 export type MutationDemoLoginArgs = {
   input: DemoLoginInput;
 };
@@ -3092,9 +3476,19 @@ export type MutationDetachSubjectResourceArgs = {
 };
 
 
+export type MutationDisconnectMeetingProviderOAuthArgs = {
+  input: DisconnectMeetingProviderOAuthInput;
+};
+
+
 export type MutationExecuteDstBulkUpdateArgs = {
   description: Scalars['String']['input'];
   offsetMinutes: Scalars['Int']['input'];
+};
+
+
+export type MutationGenerateMeetingUrlArgs = {
+  input: GenerateMeetingUrlInput;
 };
 
 
@@ -3277,6 +3671,25 @@ export type MutationSetStorageItemProtectionArgs = {
 };
 
 
+export type MutationSetUserWhatsappOptInArgs = {
+  enabled: Scalars['Boolean']['input'];
+  source: InputMaybe<Scalars['String']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+
+export type MutationSetWhatsappAccessTokenArgs = {
+  accessToken: Scalars['String']['input'];
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationSetWhatsappTwoStepPinArgs = {
+  id: Scalars['String']['input'];
+  twoStepPin: Scalars['String']['input'];
+};
+
+
 export type MutationStartImpersonationArgs = {
   reason: InputMaybe<Scalars['String']['input']>;
   targetUserId: Scalars['String']['input'];
@@ -3319,6 +3732,11 @@ export type MutationSubmitStudentLessonReportReflectionArgs = {
 
 export type MutationSubmitSuggestionArgs = {
   input: SubmitSuggestionInput;
+};
+
+
+export type MutationTestMeetingProviderConnectionArgs = {
+  input: TestMeetingConnectionInput;
 };
 
 
@@ -3389,6 +3807,12 @@ export type MutationUpdateOwnProfileArgs = {
 
 export type MutationUpdatePermissionGroupArgs = {
   input: UpdatePermissionGroupInput;
+};
+
+
+export type MutationUpdateQuotaArgs = {
+  id: Scalars['ID']['input'];
+  input: QuotaUpdateInput;
 };
 
 
@@ -3480,6 +3904,12 @@ export type MutationUpdateUserProfileArgs = {
 };
 
 
+export type MutationUpdateWhatsappAccountArgs = {
+  id: Scalars['String']['input'];
+  input: WhatsappAccountUpdateInput;
+};
+
+
 export type MutationUploadLearningResourceArgs = {
   input: ResourceUploadInput;
 };
@@ -3517,6 +3947,15 @@ export type MutationVerifyBankTransferPaymentMethodArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type MyConnectedMeetingProvider = {
+  __typename?: 'MyConnectedMeetingProvider';
+  connectedAt: Maybe<Scalars['DateTime']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  expiresAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  providerSlug: Maybe<Scalars['String']['output']>;
+};
+
 export type NextUnpaidInvoiceSummary = {
   __typename?: 'NextUnpaidInvoiceSummary';
   amount: Maybe<Scalars['String']['output']>;
@@ -3538,7 +3977,8 @@ export enum NotificationChannel {
   Email = 'EMAIL',
   OnApp = 'ON_APP',
   Push = 'PUSH',
-  Sms = 'SMS'
+  Sms = 'SMS',
+  Whatsapp = 'WHATSAPP'
 }
 
 export enum NotificationEventType {
@@ -3560,7 +4000,14 @@ export enum NotificationEventType {
   LessonReportSubmitted = 'LESSON_REPORT_SUBMITTED',
   NewComplaint = 'NEW_COMPLAINT',
   NewSuggestion = 'NEW_SUGGESTION',
+  OnDemandInstancePendingCredit = 'ON_DEMAND_INSTANCE_PENDING_CREDIT',
+  OnDemandInstanceReminderT1 = 'ON_DEMAND_INSTANCE_REMINDER_T1',
+  OnDemandInstanceReminderT3 = 'ON_DEMAND_INSTANCE_REMINDER_T3',
+  OnDemandTeacherDailyDigest = 'ON_DEMAND_TEACHER_DAILY_DIGEST',
   PaymentMethodChanged = 'PAYMENT_METHOD_CHANGED',
+  QuotaExpired = 'QUOTA_EXPIRED',
+  QuotaExpiringSoon = 'QUOTA_EXPIRING_SOON',
+  QuotaLowBalance = 'QUOTA_LOW_BALANCE',
   StudentQuotaOverridden = 'STUDENT_QUOTA_OVERRIDDEN',
   StudentStatusChanged = 'STUDENT_STATUS_CHANGED',
   StudentTeacherReassigned = 'STUDENT_TEACHER_REASSIGNED',
@@ -3581,6 +4028,21 @@ export type NotificationPreferenceInput = {
   enabled: Scalars['Boolean']['input'];
   eventType: NotificationEventType;
 };
+
+export enum OnDemandNoCreditsOutcome {
+  AutoAbsentNoCredits = 'AUTO_ABSENT_NO_CREDITS',
+  AutoCancel = 'AUTO_CANCEL',
+  RemindOnly = 'REMIND_ONLY'
+}
+
+export enum OnDemandStatus {
+  Available = 'AVAILABLE',
+  Cancelled = 'CANCELLED',
+  Converted = 'CONVERTED',
+  NoCreditsAbsent = 'NO_CREDITS_ABSENT',
+  NoCreditsCancelled = 'NO_CREDITS_CANCELLED',
+  PendingCredit = 'PENDING_CREDIT'
+}
 
 /** Summary metrics for the staff onboarding process */
 export type OnboardingMetrics = {
@@ -4092,6 +4554,8 @@ export type Query = {
   adminInvoices: Maybe<AdminInvoiceHistoryResult>;
   /** Returns the paginated admin suggestion list with metrics. */
   adminSuggestions: Maybe<AdminSuggestionResult>;
+  /** Find available class slots for a student on a given date */
+  availableClassSlots: Maybe<Array<AvailableClassSlot>>;
   /** Lists all books and bags available to the academy. */
   booksAndBags: Maybe<Array<Book>>;
   classCategories: Maybe<Array<ClassCategory>>;
@@ -4102,6 +4566,16 @@ export type Query = {
   classSubjects: Maybe<Array<ClassSubject>>;
   /** Returns file attachments for a specific complaint. Accessible by the owning parent or admins. */
   complaintFiles: Maybe<Array<ComplaintFile>>;
+  /** Get queue statistics for the active queue backend. */
+  cronQueueStats: Maybe<CronQueueStats>;
+  /** Fetch a single cron run by ID. */
+  cronRun: Maybe<CronRun>;
+  /** List cron runs with optional filters. */
+  cronRuns: Maybe<CronPaginatedRuns>;
+  /** Fetch a single cron schedule by ID. */
+  cronSchedule: Maybe<CronSchedule>;
+  /** List cron schedules with optional filters. */
+  cronSchedules: Maybe<CronPaginatedSchedules>;
   currencyHedges: Maybe<Array<CurrencyHedge>>;
   dailyScheduleList: Maybe<Array<DailyScheduleList>>;
   dailyScheduleMetrics: Maybe<DailyScheduleMetrics>;
@@ -4121,6 +4595,8 @@ export type Query = {
   impersonationStatus: Maybe<ImpersonationStatus>;
   invoicePaymentSubmission: Maybe<InvoicePaymentSubmission>;
   invoicePayments: Maybe<Array<Payment>>;
+  /** Check if a user has opted in to WhatsApp notifications (REQ-10/BL1). */
+  isUserWhatsappOptIn: Scalars['Boolean']['output'];
   latestExchangeRates: Maybe<Array<ExchangeRate>>;
   latestFxSyncRun: Maybe<FxSyncRun>;
   /** Lists all learning resources available to the academy. */
@@ -4135,8 +4611,11 @@ export type Query = {
   /** Lists all staff members with administrative access. */
   managerDirectory: Maybe<ManagerDirectoryResult>;
   me: Maybe<User>;
+  meetingIntegrationConnectedAccounts: Maybe<Array<MeetingIntegrationConnectedAccount>>;
+  meetingIntegrationProviders: Maybe<Array<MeetingIntegrationProvider>>;
   meetingProvider: Maybe<MeetingProvider>;
   meetingProviders: Maybe<Array<MeetingProvider>>;
+  myConnectedMeetingProviders: Maybe<Array<MyConnectedMeetingProvider>>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
   notificationPreferences: Maybe<Array<NotificationPreference>>;
   /** Returns onboarding metrics for staff accounts. */
@@ -4168,6 +4647,14 @@ export type Query = {
   /** List all permission catalog entries. */
   permissions: Maybe<Array<Permission>>;
   profileByUserId: Maybe<UnifiedProfile>;
+  /** Get a specific quota by ID */
+  quota: Maybe<Quota>;
+  /** Get aggregated quota balance summary for a student */
+  quotaBalance: Maybe<QuotaBalance>;
+  /** Get paginated audit ledger history for a quota */
+  quotaLedger: Maybe<QuotaLedgerPaginatedResult>;
+  /** List quotas with optional filters and pagination */
+  quotas: Maybe<QuotaPaginatedResult>;
   /** Get paginated recently approved lesson reports for the supervisor dashboard */
   recentApprovedLessonReports: Maybe<PendingLessonReportsPayload>;
   recurringMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
@@ -4207,7 +4694,11 @@ export type Query = {
   studentDirectory: Maybe<StudentDirectoryPayload>;
   /** Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity. */
   studentMonthlyReport: Maybe<StudentMonthlyReport>;
+  /** List only active/open quotas (status ACTIVE, remaining > 0) for a student */
+  studentOpenQuotas: Maybe<Array<Quota>>;
   studentProfile: Maybe<StudentProfile>;
+  /** List all quotas for a student */
+  studentQuotas: Maybe<Array<Quota>>;
   /** Paginated lesson reports for the logged-in student (student portal dashboard) */
   studentRecentLessonReports: Maybe<PendingLessonReportsPayload>;
   studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
@@ -4253,6 +4744,8 @@ export type Query = {
   userPermissionGroups: Maybe<Array<Scalars['String']['output']>>;
   users: Maybe<Array<User>>;
   welcomeMessage: Maybe<Scalars['String']['output']>;
+  /** List all active WhatsApp business accounts. */
+  whatsappAccounts: Maybe<Array<WhatsappAccount>>;
 };
 
 
@@ -4275,6 +4768,14 @@ export type QueryAdminInvoicesArgs = {
 
 export type QueryAdminSuggestionsArgs = {
   filter: SuggestionFilter;
+};
+
+
+export type QueryAvailableClassSlotsArgs = {
+  date: Scalars['DateTime']['input'];
+  durationMinutes: InputMaybe<Scalars['Int']['input']>;
+  studentId: Scalars['ID']['input'];
+  teacherId: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -4305,6 +4806,26 @@ export type QueryClassSubjectsArgs = {
 
 export type QueryComplaintFilesArgs = {
   complaintId: Scalars['String']['input'];
+};
+
+
+export type QueryCronRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryCronRunsArgs = {
+  input: InputMaybe<CronRunListInput>;
+};
+
+
+export type QueryCronScheduleArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryCronSchedulesArgs = {
+  input: InputMaybe<CronScheduleListInput>;
 };
 
 
@@ -4375,6 +4896,11 @@ export type QueryInvoicePaymentsArgs = {
 };
 
 
+export type QueryIsUserWhatsappOptInArgs = {
+  userId: Scalars['String']['input'];
+};
+
+
 export type QueryLatestExchangeRatesArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
 };
@@ -4410,6 +4936,11 @@ export type QueryManagerDirectoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   roleFilter: InputMaybe<Scalars['String']['input']>;
   statusFilter: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryMeetingIntegrationConnectedAccountsArgs = {
+  providerSlug: Scalars['String']['input'];
 };
 
 
@@ -4496,6 +5027,28 @@ export type QueryPermissionGroupArgs = {
 
 export type QueryProfileByUserIdArgs = {
   userId: Scalars['String']['input'];
+};
+
+
+export type QueryQuotaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryQuotaBalanceArgs = {
+  studentId: Scalars['ID']['input'];
+};
+
+
+export type QueryQuotaLedgerArgs = {
+  pagination: InputMaybe<PaginationArgs>;
+  quotaId: Scalars['ID']['input'];
+};
+
+
+export type QueryQuotasArgs = {
+  filter: InputMaybe<QuotaPaginatedFilterInput>;
+  pagination: InputMaybe<PaginationArgs>;
 };
 
 
@@ -4626,11 +5179,21 @@ export type QueryStudentMonthlyReportArgs = {
 };
 
 
+export type QueryStudentOpenQuotasArgs = {
+  studentId: Scalars['ID']['input'];
+};
+
+
 export type QueryStudentProfileArgs = {
   includeUpcomingClasses: InputMaybe<Scalars['Boolean']['input']>;
   month: InputMaybe<Scalars['Int']['input']>;
   studentId: InputMaybe<Scalars['String']['input']>;
   year: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryStudentQuotasArgs = {
+  studentId: Scalars['ID']['input'];
 };
 
 
@@ -4791,6 +5354,139 @@ export type QueryUsersArgs = {
   search: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A class quota allocation for a student */
+export type Quota = {
+  __typename?: 'Quota';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  kind: Maybe<QuotaKind>;
+  name: Maybe<Scalars['String']['output']>;
+  periodDays: Maybe<Scalars['Int']['output']>;
+  periodType: Maybe<QuotaPeriodType>;
+  priority: Maybe<Scalars['Int']['output']>;
+  remaining: Maybe<Scalars['Int']['output']>;
+  reservedClasses: Maybe<Scalars['Int']['output']>;
+  status: Maybe<QuotaStatus>;
+  studentId: Maybe<Scalars['String']['output']>;
+  totalClasses: Maybe<Scalars['Int']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  validFrom: Maybe<Scalars['DateTime']['output']>;
+  validUntil: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** Aggregated quota balance summary for a student */
+export type QuotaBalance = {
+  __typename?: 'QuotaBalance';
+  breakdownByExpiration: Maybe<Array<QuotaExpirationBreakdown>>;
+  id: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  totalActiveClasses: Maybe<Scalars['Int']['output']>;
+  totalRemaining: Maybe<Scalars['Int']['output']>;
+  totalReserved: Maybe<Scalars['Int']['output']>;
+};
+
+/** Per-quota breakdown of remaining classes by expiration date */
+export type QuotaExpirationBreakdown = {
+  __typename?: 'QuotaExpirationBreakdown';
+  id: Maybe<Scalars['String']['output']>;
+  quotaId: Maybe<Scalars['String']['output']>;
+  quotaName: Maybe<Scalars['String']['output']>;
+  remaining: Maybe<Scalars['Int']['output']>;
+  validUntil: Maybe<Scalars['DateTime']['output']>;
+};
+
+export enum QuotaKind {
+  Package = 'PACKAGE',
+  Periodic = 'PERIODIC'
+}
+
+/** An append-only transaction ledger row for a quota */
+export type QuotaLedger = {
+  __typename?: 'QuotaLedger';
+  actorUserId: Maybe<Scalars['String']['output']>;
+  classInstanceId: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  delta: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  quotaId: Maybe<Scalars['String']['output']>;
+  reason: Maybe<QuotaLedgerReason>;
+  reasonNote: Maybe<Scalars['String']['output']>;
+  recurringScheduleId: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+};
+
+/** Paginated result set of quota ledger entries */
+export type QuotaLedgerPaginatedResult = {
+  __typename?: 'QuotaLedgerPaginatedResult';
+  rows: Maybe<Array<QuotaLedger>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export enum QuotaLedgerReason {
+  Adjust = 'ADJUST',
+  Expire = 'EXPIRE',
+  Grant = 'GRANT',
+  Redeem = 'REDEEM',
+  Release = 'RELEASE',
+  Reserve = 'RESERVE'
+}
+
+/** Filter options for querying quotas */
+export type QuotaPaginatedFilterInput = {
+  kind: InputMaybe<QuotaKind>;
+  search: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<QuotaStatus>;
+  studentId: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Paginated result set of quotas */
+export type QuotaPaginatedResult = {
+  __typename?: 'QuotaPaginatedResult';
+  rows: Maybe<Array<Quota>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export enum QuotaPeriodType {
+  Custom = 'CUSTOM',
+  Monthly = 'MONTHLY',
+  Weekly = 'WEEKLY'
+}
+
+/** Rollover policy configuration for periodic quotas */
+export type QuotaRolloverPolicyInput = {
+  accumulationCap: InputMaybe<Scalars['Int']['input']>;
+  maxRolloverPercent: InputMaybe<Scalars['Float']['input']>;
+};
+
+export enum QuotaStatus {
+  Active = 'ACTIVE',
+  Archived = 'ARCHIVED',
+  Expired = 'EXPIRED'
+}
+
+/** Input for creating a new student quota */
+export type QuotaSubmitInput = {
+  idempotencyKey: InputMaybe<Scalars['String']['input']>;
+  kind: QuotaKind;
+  name: Scalars['String']['input'];
+  periodDays: InputMaybe<Scalars['Int']['input']>;
+  periodType: InputMaybe<QuotaPeriodType>;
+  priority: InputMaybe<Scalars['Int']['input']>;
+  rolloverPolicy: InputMaybe<QuotaRolloverPolicyInput>;
+  studentId: Scalars['String']['input'];
+  totalClasses: Scalars['Int']['input'];
+  validFrom: InputMaybe<Scalars['DateTime']['input']>;
+  validUntil: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+/** Input for updating an existing quota */
+export type QuotaUpdateInput = {
+  name: InputMaybe<Scalars['String']['input']>;
+  priority: InputMaybe<Scalars['Int']['input']>;
+  status: InputMaybe<QuotaStatus>;
+  validUntil: InputMaybe<Scalars['DateTime']['input']>;
+};
+
 export enum RateSource {
   Override = 'OVERRIDE',
   Recurring = 'RECURRING',
@@ -4821,7 +5517,7 @@ export type RecordPurchaseInput = {
 };
 
 export type RecurringClassDayInput = {
-  dayOfWeek: Scalars['String']['input'];
+  dayOfWeek: DayOfWeek;
   isActive: Scalars['Boolean']['input'];
   startTime: Scalars['String']['input'];
 };
@@ -4944,6 +5640,12 @@ export type RevokePermissionGroupFromUserInput = {
   groupId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
 };
+
+export enum SchedulingMode {
+  NumberOfClasses = 'NUMBER_OF_CLASSES',
+  OnDemand = 'ON_DEMAND',
+  Quota = 'QUOTA'
+}
 
 export type SendPaymentReminderResult = {
   __typename?: 'SendPaymentReminderResult';
@@ -6019,6 +6721,8 @@ export type TeacherOnboarding = {
   id: Maybe<Scalars['String']['output']>;
   /** Resolved teacher display name */
   name: Maybe<Scalars['String']['output']>;
+  /** Teacher phone number */
+  phone: Maybe<Scalars['String']['output']>;
   /** Current teacher account status */
   status: Maybe<Scalars['String']['output']>;
   /** Formatted timezone display string */
@@ -6100,6 +6804,7 @@ export type TeacherPayment = {
   amount: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   id: Maybe<Scalars['String']['output']>;
   isTestPayment: Maybe<Scalars['Boolean']['output']>;
   paymentDate: Maybe<Scalars['DateTime']['output']>;
@@ -6203,6 +6908,27 @@ export type TestEntities = {
 export type TestGroupClass = {
   __typename?: 'TestGroupClass';
   groupClassId: Maybe<Scalars['String']['output']>;
+};
+
+export type TestMeetingConnectionInput = {
+  mode: MeetingConnectionTestMode;
+  providerSlug: MeetingIntegrationProviderSlug;
+};
+
+export type TestMeetingConnectionResult = {
+  __typename?: 'TestMeetingConnectionResult';
+  deleted: Maybe<Scalars['Boolean']['output']>;
+  errorCode: Maybe<Scalars['String']['output']>;
+  errorMessage: Maybe<Scalars['String']['output']>;
+  grantedScopes: Maybe<Array<Scalars['String']['output']>>;
+  id: Maybe<Scalars['String']['output']>;
+  latencyMs: Maybe<Scalars['Int']['output']>;
+  mode: Maybe<MeetingConnectionTestMode>;
+  ok: Maybe<Scalars['Boolean']['output']>;
+  rawUpstreamPayload: Maybe<Scalars['JSON']['output']>;
+  requiredScopes: Maybe<Array<Scalars['String']['output']>>;
+  testJoinUrl: Maybe<Scalars['String']['output']>;
+  upstreamResponseSummary: Maybe<Scalars['String']['output']>;
 };
 
 export type TestSuperAdmin = {
@@ -6359,8 +7085,10 @@ export type UserMeetingConfig = {
   id: Maybe<Scalars['String']['output']>;
   isDefault: Maybe<Scalars['Boolean']['output']>;
   label: Maybe<Scalars['String']['output']>;
+  oauthTokenExpiresAt: Maybe<Scalars['DateTime']['output']>;
   provider: Maybe<MeetingProvider>;
   providerId: Maybe<Scalars['String']['output']>;
+  providerMetadata: Maybe<Scalars['JSON']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   userId: Maybe<Scalars['String']['output']>;
 };
@@ -6376,6 +7104,7 @@ export type UserMeetingConfigCreateInput = {
 
 export type UserMeetingConfigUpdateInput = {
   details: InputMaybe<MeetingConfigDetailsInput>;
+  forceRegenerate: InputMaybe<Scalars['Boolean']['input']>;
   isDefault: InputMaybe<Scalars['Boolean']['input']>;
   label: InputMaybe<Scalars['String']['input']>;
   password: InputMaybe<Scalars['String']['input']>;
@@ -6480,6 +7209,96 @@ export type WeeklyWorkloadMetrics = {
   totalMinutes: Maybe<Scalars['Int']['output']>;
   weeklyHoursWorked: Maybe<Scalars['String']['output']>;
 };
+
+export type WhatsappAccount = {
+  __typename?: 'WhatsappAccount';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  displayName: Maybe<Scalars['LocalizedString']['output']>;
+  displayPhoneNumber: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  lastWebhookAt: Maybe<Scalars['DateTime']['output']>;
+  maxPhoneNumbersPerBusiness: Maybe<Scalars['String']['output']>;
+  phoneNumberId: Maybe<Scalars['String']['output']>;
+  portfolioMessagingLimitTier: Maybe<WhatsappLimitTier>;
+  qualityRating: Maybe<WhatsappQualityRating>;
+  throughputLevel: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  wabaId: Maybe<Scalars['String']['output']>;
+};
+
+export type WhatsappAccountCreateInput = {
+  displayName: InputMaybe<Scalars['LocalizedString']['input']>;
+  /** Display phone number (max 32 chars) */
+  displayPhoneNumber: InputMaybe<Scalars['String']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  /** Phone number ID (max 64 chars) */
+  phoneNumberId: Scalars['String']['input'];
+  portfolioMessagingLimitTier: InputMaybe<WhatsappLimitTier>;
+  qualityRating: InputMaybe<WhatsappQualityRating>;
+  throughputLevel: InputMaybe<Scalars['String']['input']>;
+  /** WhatsApp Business Account ID (max 64 chars) */
+  wabaId: Scalars['String']['input'];
+};
+
+export type WhatsappAccountUpdateInput = {
+  displayName: InputMaybe<Scalars['LocalizedString']['input']>;
+  displayPhoneNumber: InputMaybe<Scalars['String']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  portfolioMessagingLimitTier: InputMaybe<WhatsappLimitTier>;
+  qualityRating: InputMaybe<WhatsappQualityRating>;
+  throughputLevel: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum WhatsappLimitTier {
+  Tier_1K = 'TIER_1K',
+  Tier_10K = 'TIER_10K',
+  Tier_50 = 'TIER_50',
+  Tier_100K = 'TIER_100K',
+  Tier_250 = 'TIER_250',
+  TierNotSet = 'TIER_NOT_SET',
+  TierUnlimited = 'TIER_UNLIMITED',
+  Untiered = 'UNTIERED'
+}
+
+export enum WhatsappQualityRating {
+  Green = 'GREEN',
+  Red = 'RED',
+  Unknown = 'UNKNOWN',
+  Yellow = 'YELLOW'
+}
+
+export type WhatsappSyncFromMetaResult = {
+  __typename?: 'WhatsappSyncFromMetaResult';
+  accounts: Maybe<Array<WhatsappAccount>>;
+  id: Maybe<Scalars['String']['output']>;
+  templates: Maybe<Array<WhatsappTemplateSnapshot>>;
+};
+
+export enum WhatsappTemplateCategory {
+  Authentication = 'AUTHENTICATION',
+  Marketing = 'MARKETING',
+  Utility = 'UTILITY'
+}
+
+export type WhatsappTemplateSnapshot = {
+  __typename?: 'WhatsappTemplateSnapshot';
+  category: Maybe<WhatsappTemplateCategory>;
+  id: Maybe<Scalars['String']['output']>;
+  language: Maybe<Scalars['String']['output']>;
+  lastSyncedAt: Maybe<Scalars['DateTime']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  status: Maybe<WhatsappTemplateStatus>;
+};
+
+export enum WhatsappTemplateStatus {
+  Approved = 'APPROVED',
+  Disabled = 'DISABLED',
+  Paused = 'PAUSED',
+  Pending = 'PENDING',
+  PendingDeletion = 'PENDING_DELETION',
+  Rejected = 'REJECTED'
+}
 
 export type WorkshopPromo = {
   __typename?: 'WorkshopPromo';

@@ -7,7 +7,7 @@ import type { LocalizedString } from "@/shared/types";
 // ============================================================================
 
 export type MeetingConfigDetails = {
-  readonly meetingUrl: string;
+  readonly meetingUrl?: string | null;
   readonly username?: string;
   readonly tenantId?: string;
 };
@@ -21,6 +21,7 @@ export type MeetingProviderCatalogSnapshot = {
   readonly catalogSlug: string;
   readonly catalogName: LocalizedString;
   readonly logoUrl: string | null;
+  readonly supportsAutoGeneration: boolean;
 };
 
 export type MeetingConfigSnapshot = {
@@ -30,6 +31,12 @@ export type MeetingConfigSnapshot = {
   readonly details: MeetingConfigDetails;
   readonly provider: MeetingProviderCatalogSnapshot;
   readonly snapshottedAt: string;
+  /** Upstream provider meeting ID (set when auto-generation creates a meeting).
+   * Used by `cancelMeetingForClassInstance` to call `adapter.deleteMeeting`. */
+  readonly upstreamMeetingId?: string | null;
+  /** Provider-specific metadata captured at generation time (e.g. Zoom meeting
+   * password, Google Meet space name). Frozen alongside the URL in the snapshot. */
+  readonly providerMetadata?: Record<string, unknown> | null;
 };
 
 // ============================================================================
@@ -44,6 +51,7 @@ export type UserMeetingConfigSelectType = {
   readonly isDefault: boolean;
   readonly details: MeetingConfigDetails;
   readonly encryptedSecret: string | null;
+  readonly providerMetadata: Record<string, unknown> | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 };
@@ -56,6 +64,7 @@ export type UserMeetingConfigInsertType = {
   readonly isDefault: boolean;
   readonly details: MeetingConfigDetails;
   readonly encryptedSecret?: string | null;
+  readonly providerMetadata?: Record<string, unknown> | null;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 };
@@ -67,9 +76,26 @@ export type UserMeetingConfigReturnType = UserMeetingConfigSelectType & {
 
 export type UserMeetingConfigSubmitInput = Omit<
   UserMeetingConfigInsertType,
-  "id" | "createdAt" | "updatedAt" | "encryptedSecret"
+  "id" | "createdAt" | "updatedAt" | "encryptedSecret" | "providerMetadata"
 > & {
   readonly password?: string | null;
 };
 
-export type UpdateUserMeetingConfigInput = Partial<Omit<UserMeetingConfigSubmitInput, "userId">>;
+export type UpdateUserMeetingConfigInput = Partial<Omit<UserMeetingConfigSubmitInput, "userId">> & {
+  /**
+   * When `true` and the provider supports auto-generation, forces URL
+   * regeneration even if no other field changed.  Has no effect on
+   * manual providers or when a user-supplied URL is present in `details`.
+   */
+  readonly forceRegenerate?: boolean;
+};
+
+// ============================================================================
+// Generate Meeting URL — preview path (non-persisting)
+// ============================================================================
+
+export type GenerateMeetingUrlResult = {
+  readonly joinUrl: string;
+  readonly meetingId?: string | null;
+  readonly expiresAt?: string | null;
+};

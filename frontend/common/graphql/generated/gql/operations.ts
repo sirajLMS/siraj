@@ -16,6 +16,11 @@ export type AdminDashboardScheduleInput = {
   teacherId: string | null | undefined;
 };
 
+export type AdminRevokeTokenInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+  userId: string;
+};
+
 export type AppLanguage =
   | 'ar'
   | 'en';
@@ -43,6 +48,7 @@ export type AppPermission =
   | 'COMPLAINTS_LIST'
   | 'COMPLAINTS_RESPOND'
   | 'CREDITS_MANAGE'
+  | 'CRON_MANAGE'
   | 'DASHBOARD_FILTER_METRICS'
   | 'DASHBOARD_METRICS_VIEW_ALL'
   | 'DASHBOARD_SEARCH'
@@ -136,6 +142,8 @@ export type AppPermission =
   | 'PROFILE_TEACHER_STUDENTS_EDIT_OWN'
   | 'PROFILE_TEACHER_STUDENTS_VIEW_OTHER'
   | 'PROFILE_TEACHER_STUDENTS_VIEW_OWN'
+  | 'QUOTAS_MANAGE'
+  | 'QUOTAS_VIEW'
   | 'REPORTS_GENERATE'
   | 'REPORT_GENERATE_CUSTOM'
   | 'REPORT_VIEW_FINANCIALS'
@@ -168,6 +176,7 @@ export type AppPermission =
   | 'SETTINGS_AUDIT_VIEW'
   | 'SETTINGS_EDIT_ENV'
   | 'SETTINGS_EDIT_GENERAL'
+  | 'SETTINGS_EDIT_MEETING_INTEGRATIONS'
   | 'SETTINGS_EDIT_SESSION'
   | 'SETTINGS_SITE_CONTENT_MANAGE'
   | 'SETTINGS_TIMEZONES_VIEW'
@@ -246,7 +255,10 @@ export type AppPermission =
   | 'TEACHER_VIEW_STUDENTS'
   | 'TEST_CUSTOM_ALT'
   | 'TEST_CUSTOM_ONLY'
-  | 'TEST_SYSTEM_ONLY';
+  | 'TEST_SYSTEM_ONLY'
+  | 'WHATSAPP_CONFIG_MANAGE'
+  | 'WHATSAPP_TEMPLATES_MANAGE'
+  | 'WHATSAPP_VIEW';
 
 export type AssignPermissionGroupToUserInput = {
   groupId: string;
@@ -332,6 +344,10 @@ export type ClassExecutionState =
   | 'ACTIVATED'
   | 'COMPLETED'
   | 'NOT_ACTIVATED'
+  | 'ON_DEMAND_CONFLICT_HELD'
+  | 'ON_DEMAND_NO_CREDITS_ABSENT'
+  | 'ON_DEMAND_NO_CREDITS_CANCELLED'
+  | 'ON_DEMAND_PENDING_CREDITS'
   | 'RUNNING';
 
 export type ClassMeetingConfigCreateInput = {
@@ -418,6 +434,11 @@ export type ComplaintSubmitInput = {
   files: Array<ComplaintFileMetadataInput> | null | undefined;
   studentId: string | null | undefined;
   submitterEmail: string;
+};
+
+export type ConnectMeetingProviderOAuthInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+  returnPath: string;
 };
 
 export type CoreUserProfileFieldsInput = {
@@ -693,15 +714,20 @@ export type CreatePermissionGroupInput = {
 };
 
 export type CreateRecurringClassInput = {
-  classType: string | null | undefined;
+  classType: ClassType | null | undefined;
   days: Array<RecurringClassDayInput>;
   defaultStartTime: string;
   durationMinutes: number;
+  earmarkedClasses: number | null | undefined;
   effectiveFrom: string | null | undefined;
   effectiveUntil: string | null | undefined;
   generateInstancesForWeeks: number | null | undefined;
+  generationHorizonWeeks: number | null | undefined;
   hourlyRate: string | null | undefined;
+  ondemandNoCreditsOutcome: OnDemandNoCreditsOutcome | null | undefined;
+  quotaId: string | null | undefined;
   rateCurrency: CurrencyCode | null | undefined;
+  schedulingMode: SchedulingMode | null | undefined;
   studentId: string;
   subjectId: string;
   teacherId: string;
@@ -722,6 +748,89 @@ export type CreditReason =
   | 'DEDUCTION'
   | 'PURCHASE'
   | 'REFUND';
+
+export type CronConcurrencyPolicy =
+  | 'ALLOW'
+  | 'REPLACE'
+  | 'SKIP';
+
+export type CronJobKind =
+  | 'NOOP';
+
+export type CronRunListInput = {
+  from: string | null | undefined;
+  limit: number | null | undefined;
+  offset: number | null | undefined;
+  scheduleId: string | null | undefined;
+  status: CronRunStatus | null | undefined;
+  statuses: Array<CronRunStatus> | null | undefined;
+  to: string | null | undefined;
+};
+
+export type CronRunStatus =
+  | 'CANCELLED'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'PENDING'
+  | 'RETRYING'
+  | 'RUNNING'
+  | 'TIMEOUT';
+
+export type CronRunTriggerInput = {
+  id: string;
+  payload: unknown;
+};
+
+export type CronScheduleDeleteInput = {
+  hard: boolean | null | undefined;
+  id: string;
+};
+
+export type CronScheduleListInput = {
+  jobKind: CronJobKind | null | undefined;
+  limit: number | null | undefined;
+  name: string | null | undefined;
+  offset: number | null | undefined;
+  status: CronScheduleStatus | null | undefined;
+};
+
+export type CronScheduleStatus =
+  | 'ACTIVE'
+  | 'DISABLED'
+  | 'PAUSED';
+
+export type CronScheduleSubmitInput = {
+  concurrencyPolicy: CronConcurrencyPolicy | null | undefined;
+  cronExpression: string;
+  description: string | null | undefined;
+  jobKind: CronJobKind;
+  maxRetries: number | null | undefined;
+  name: string;
+  payload: unknown;
+  retryBackoffSeconds: number | null | undefined;
+  timeoutSeconds: number | null | undefined;
+  timezone: string | null | undefined;
+};
+
+export type CronScheduleUpdateInput = {
+  concurrencyPolicy: CronConcurrencyPolicy | null | undefined;
+  cronExpression: string | null | undefined;
+  description: string | null | undefined;
+  jobKind: CronJobKind | null | undefined;
+  maxRetries: number | null | undefined;
+  name: string | null | undefined;
+  payload: unknown;
+  retryBackoffSeconds: number | null | undefined;
+  timeoutSeconds: number | null | undefined;
+  timezone: string | null | undefined;
+};
+
+export type CronTriggerSource =
+  | 'EXTERNAL'
+  | 'MANUAL'
+  | 'VERCEL_EXPLICIT'
+  | 'VERCEL_TICKER'
+  | 'WORKER_RETRY';
 
 export type CurrencyCode =
   | 'AED'
@@ -772,6 +881,10 @@ export type DemoLoginInput = {
   groupSlug: string;
 };
 
+export type DisconnectMeetingProviderOAuthInput = {
+  providerSlug: MeetingIntegrationProviderSlug;
+};
+
 export type EffectiveMeetingSource =
   | 'class'
   | 'none'
@@ -800,6 +913,13 @@ export type FxSyncStatus =
 export type Gender =
   | 'FEMALE'
   | 'MALE';
+
+export type GenerateMeetingUrlInput = {
+  durationMinutes: number | null | undefined;
+  providerId: string;
+  startDateTime: string | null | undefined;
+  topic: string;
+};
 
 export type GroupClassAttendanceStatus =
   | 'ABSENT'
@@ -1328,10 +1448,25 @@ export type MarkSuggestionDuplicateInput = {
 };
 
 export type MeetingConfigDetailsInput = {
-  meetingUrl: string;
+  meetingUrl: string | null | undefined;
   tenantId: string | null | undefined;
   username: string | null | undefined;
 };
+
+export type MeetingConnectionTestMode =
+  | 'GENERATE_AND_DELETE'
+  | 'VALIDATE_CONFIG';
+
+export type MeetingIntegrationConnectedAccountStatus =
+  | 'CONNECTED'
+  | 'EXPIRING_SOON'
+  | 'REAUTH_NEEDED'
+  | 'REVOKED';
+
+export type MeetingIntegrationProviderSlug =
+  | 'GOOGLE_MEET'
+  | 'MICROSOFT_TEAMS'
+  | 'ZOOM';
 
 export type MeetingProviderCreateInput = {
   description: Partial<Record<'ar' | 'en', string>> | null | undefined;
@@ -1340,6 +1475,7 @@ export type MeetingProviderCreateInput = {
   isActive: boolean | null | undefined;
   logoUrl: string | null | undefined;
   name: Partial<Record<'ar' | 'en', string>>;
+  providerKind: string | null | undefined;
   slug: string;
   urlAllowlist: Array<string>;
   urlExample: string | null | undefined;
@@ -1347,6 +1483,7 @@ export type MeetingProviderCreateInput = {
 
 export type MeetingProviderFieldSchemaInput = {
   requiresMeetingUrl: boolean;
+  supportsAutoGeneration: boolean | null | undefined;
   supportsPassword: boolean | null | undefined;
   supportsTenantId: boolean | null | undefined;
   supportsUsername: boolean | null | undefined;
@@ -1359,6 +1496,7 @@ export type MeetingProviderUpdateInput = {
   isActive: boolean | null | undefined;
   logoUrl: string | null | undefined;
   name: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  providerKind: string | null | undefined;
   slug: string | null | undefined;
   urlAllowlist: Array<string> | null | undefined;
   urlExample: string | null | undefined;
@@ -1368,7 +1506,8 @@ export type NotificationChannel =
   | 'EMAIL'
   | 'ON_APP'
   | 'PUSH'
-  | 'SMS';
+  | 'SMS'
+  | 'WHATSAPP';
 
 export type NotificationEventType =
   | 'CLASS_ACTIVATED'
@@ -1389,7 +1528,14 @@ export type NotificationEventType =
   | 'LESSON_REPORT_SUBMITTED'
   | 'NEW_COMPLAINT'
   | 'NEW_SUGGESTION'
+  | 'ON_DEMAND_INSTANCE_PENDING_CREDIT'
+  | 'ON_DEMAND_INSTANCE_REMINDER_T1'
+  | 'ON_DEMAND_INSTANCE_REMINDER_T3'
+  | 'ON_DEMAND_TEACHER_DAILY_DIGEST'
   | 'PAYMENT_METHOD_CHANGED'
+  | 'QUOTA_EXPIRED'
+  | 'QUOTA_EXPIRING_SOON'
+  | 'QUOTA_LOW_BALANCE'
   | 'STUDENT_QUOTA_OVERRIDDEN'
   | 'STUDENT_STATUS_CHANGED'
   | 'STUDENT_TEACHER_REASSIGNED'
@@ -1401,6 +1547,11 @@ export type NotificationPreferenceInput = {
   enabled: boolean;
   eventType: NotificationEventType;
 };
+
+export type OnDemandNoCreditsOutcome =
+  | 'AUTO_ABSENT_NO_CREDITS'
+  | 'AUTO_CANCEL'
+  | 'REMIND_ONLY';
 
 export type OrderSortDirection =
   | 'ASC'
@@ -1508,6 +1659,65 @@ export type ProfileScope =
   | 'OTHER'
   | 'OWN';
 
+export type QuotaKind =
+  | 'PACKAGE'
+  | 'PERIODIC';
+
+export type QuotaLedgerReason =
+  | 'ADJUST'
+  | 'EXPIRE'
+  | 'GRANT'
+  | 'REDEEM'
+  | 'RELEASE'
+  | 'RESERVE';
+
+/** Filter options for querying quotas */
+export type QuotaPaginatedFilterInput = {
+  kind: QuotaKind | null | undefined;
+  search: string | null | undefined;
+  status: QuotaStatus | null | undefined;
+  studentId: string | null | undefined;
+};
+
+export type QuotaPeriodType =
+  | 'CUSTOM'
+  | 'MONTHLY'
+  | 'WEEKLY';
+
+/** Rollover policy configuration for periodic quotas */
+export type QuotaRolloverPolicyInput = {
+  accumulationCap: number | null | undefined;
+  maxRolloverPercent: number | null | undefined;
+};
+
+export type QuotaStatus =
+  | 'ACTIVE'
+  | 'ARCHIVED'
+  | 'EXPIRED';
+
+/** Input for creating a new student quota */
+export type QuotaSubmitInput = {
+  idempotencyKey: string | null | undefined;
+  kind: QuotaKind;
+  name: string;
+  periodDays: number | null | undefined;
+  periodType: QuotaPeriodType | null | undefined;
+  priority: number | null | undefined;
+  rolloverPolicy: QuotaRolloverPolicyInput | null | undefined;
+  studentId: string;
+  totalClasses: number;
+  validFrom: string | null | undefined;
+  validUntil: string | null | undefined;
+};
+
+/** Input for updating an existing quota */
+export type QuotaUpdateInput = {
+  name: string | null | undefined;
+  priority: number | null | undefined;
+  status: QuotaStatus | null | undefined;
+  validUntil: string | null | undefined;
+};
+
 export type RateSource =
   | 'OVERRIDE'
   | 'RECURRING'
@@ -1515,7 +1725,7 @@ export type RateSource =
   | 'TEACHER';
 
 export type RecurringClassDayInput = {
-  dayOfWeek: string;
+  dayOfWeek: DayOfWeek;
   isActive: boolean;
   startTime: string;
 };
@@ -1558,6 +1768,11 @@ export type RevokePermissionGroupFromUserInput = {
   groupId: string;
   userId: string;
 };
+
+export type SchedulingMode =
+  | 'NUMBER_OF_CLASSES'
+  | 'ON_DEMAND'
+  | 'QUOTA';
 
 /** Input for creating or updating a per-role session configuration. */
 export type SessionConfigUpsertInput = {
@@ -1902,6 +2117,11 @@ export type TeacherProgressFeedEventKind =
   | 'OTHER'
   | 'STARTED';
 
+export type TestMeetingConnectionInput = {
+  mode: MeetingConnectionTestMode;
+  providerSlug: MeetingIntegrationProviderSlug;
+};
+
 export type UpdateManagerProfileInput = {
   hourlyRate: string | null | undefined;
   phone: string | null | undefined;
@@ -1967,6 +2187,7 @@ export type UserMeetingConfigCreateInput = {
 
 export type UserMeetingConfigUpdateInput = {
   details: MeetingConfigDetailsInput | null | undefined;
+  forceRegenerate: boolean | null | undefined;
   isDefault: boolean | null | undefined;
   label: string | null | undefined;
   password: string | null | undefined;
@@ -2001,6 +2222,58 @@ export type UserPaymentMethodUpdateInput = {
   isDefault: boolean | null | undefined;
   label: string | null | undefined;
 };
+
+export type WhatsappAccountCreateInput = {
+  displayName: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  /** Display phone number (max 32 chars) */
+  displayPhoneNumber: string | null | undefined;
+  isActive: boolean | null | undefined;
+  /** Phone number ID (max 64 chars) */
+  phoneNumberId: string;
+  portfolioMessagingLimitTier: WhatsappLimitTier | null | undefined;
+  qualityRating: WhatsappQualityRating | null | undefined;
+  throughputLevel: string | null | undefined;
+  /** WhatsApp Business Account ID (max 64 chars) */
+  wabaId: string;
+};
+
+export type WhatsappAccountUpdateInput = {
+  displayName: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  displayPhoneNumber: string | null | undefined;
+  isActive: boolean | null | undefined;
+  portfolioMessagingLimitTier: WhatsappLimitTier | null | undefined;
+  qualityRating: WhatsappQualityRating | null | undefined;
+  throughputLevel: string | null | undefined;
+};
+
+export type WhatsappLimitTier =
+  | 'TIER_1K'
+  | 'TIER_10K'
+  | 'TIER_50'
+  | 'TIER_100K'
+  | 'TIER_250'
+  | 'TIER_NOT_SET'
+  | 'TIER_UNLIMITED'
+  | 'UNTIERED';
+
+export type WhatsappQualityRating =
+  | 'GREEN'
+  | 'RED'
+  | 'UNKNOWN'
+  | 'YELLOW';
+
+export type WhatsappTemplateCategory =
+  | 'AUTHENTICATION'
+  | 'MARKETING'
+  | 'UTILITY';
+
+export type WhatsappTemplateStatus =
+  | 'APPROVED'
+  | 'DISABLED'
+  | 'PAUSED'
+  | 'PENDING'
+  | 'PENDING_DELETION'
+  | 'REJECTED';
 
 export type MeQuery_me_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
@@ -2854,6 +3127,125 @@ export type DeactivateSupportedOnlineAccountMutationVariables = Exact<{
 
 export type DeactivateSupportedOnlineAccountMutation = DeactivateSupportedOnlineAccountMutation_Mutation;
 
+export type QuotaFieldsFragment = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotaQuery_quota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotaQuery_Query = { quota: QuotaQuery_quota_Quota | null };
+
+
+export type QuotaQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type QuotaQuery = QuotaQuery_Query;
+
+export type QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotasQuery_quotas_QuotaPaginatedResult = { totalCount: number | null, rows: Array<QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota> | null };
+
+export type QuotasQuery_Query = { quotas: QuotasQuery_quotas_QuotaPaginatedResult | null };
+
+
+export type QuotasQueryVariables = Exact<{
+  filter: Types.QuotaPaginatedFilterInput | null | undefined;
+  pagination: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type QuotasQuery = QuotasQuery_Query;
+
+export type QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult_rows_QuotaLedger = { id: string | null, quotaId: string | null, studentId: string | null, recurringScheduleId: string | null, classInstanceId: string | null, delta: number | null, reason: Types.QuotaLedgerReason | null, reasonNote: string | null, actorUserId: string | null, createdAt: string | null };
+
+export type QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult = { totalCount: number | null, rows: Array<QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult_rows_QuotaLedger> | null };
+
+export type QuotaLedgerQuery_Query = { quotaLedger: QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult | null };
+
+
+export type QuotaLedgerQueryVariables = Exact<{
+  quotaId: string | number;
+  pagination: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type QuotaLedgerQuery = QuotaLedgerQuery_Query;
+
+export type CreateQuotaMutation_createQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateQuotaMutation_Mutation = { createQuota: CreateQuotaMutation_createQuota_Quota | null };
+
+
+export type CreateQuotaMutationVariables = Exact<{
+  input: Types.QuotaSubmitInput;
+}>;
+
+
+export type CreateQuotaMutation = CreateQuotaMutation_Mutation;
+
+export type UpdateQuotaMutation_updateQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpdateQuotaMutation_Mutation = { updateQuota: UpdateQuotaMutation_updateQuota_Quota | null };
+
+
+export type UpdateQuotaMutationVariables = Exact<{
+  id: string | number;
+  input: Types.QuotaUpdateInput;
+}>;
+
+
+export type UpdateQuotaMutation = UpdateQuotaMutation_Mutation;
+
+export type DeleteQuotaMutation_deleteQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, status: Types.QuotaStatus | null };
+
+export type DeleteQuotaMutation_Mutation = { deleteQuota: DeleteQuotaMutation_deleteQuota_Quota | null };
+
+
+export type DeleteQuotaMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteQuotaMutation = DeleteQuotaMutation_Mutation;
+
+export type StudentQuotasQuery_studentQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentQuotasQuery_Query = { studentQuotas: Array<StudentQuotasQuery_studentQuotas_Quota> | null };
+
+
+export type StudentQuotasQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentQuotasQuery = StudentQuotasQuery_Query;
+
+export type StudentOpenQuotasQuery_studentOpenQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentOpenQuotasQuery_Query = { studentOpenQuotas: Array<StudentOpenQuotasQuery_studentOpenQuotas_Quota> | null };
+
+
+export type StudentOpenQuotasQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentOpenQuotasQuery = StudentOpenQuotasQuery_Query;
+
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown = { quotaId: string | null, quotaName: string | null, remaining: number | null, validUntil: string | null };
+
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance = { id: string | null, studentId: string | null, totalActiveClasses: number | null, totalRemaining: number | null, totalReserved: number | null, breakdownByExpiration: Array<QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown> | null };
+
+export type QuotaBalanceQuery_Query = { quotaBalance: QuotaBalanceQuery_quotaBalance_QuotaBalance | null };
+
+
+export type QuotaBalanceQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type QuotaBalanceQuery = QuotaBalanceQuery_Query;
+
 export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_nextUnpaidInvoice_NextUnpaidInvoiceSummary = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, dueDate: string | null, studentName: string | null };
 
 export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_outstandingByCurrency_BillingCurrencyTotal_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
@@ -3295,17 +3687,132 @@ export type DeleteComplaintMutationVariables = Exact<{
 
 export type DeleteComplaintMutation = DeleteComplaintMutation_Mutation;
 
-export type MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema = { requiresMeetingUrl: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null };
+export type CronScheduleFieldsFragment = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type MeetingProviderFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
+export type CronRunFieldsFragment = { id: string | null, scheduleId: string | null, jobKind: Types.CronJobKind | null, status: Types.CronRunStatus | null, triggerSource: Types.CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronQueueStatsFieldsFragment = { id: string | null, backend: string | null, pending: number | null, inFlight: number | null, failed: number | null, byJobKind: unknown };
+
+export type CronSchedulesQuery_cronSchedules_CronPaginatedSchedules_rows_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronSchedulesQuery_cronSchedules_CronPaginatedSchedules = { totalCount: number | null, rows: Array<CronSchedulesQuery_cronSchedules_CronPaginatedSchedules_rows_CronSchedule> | null };
+
+export type CronSchedulesQuery_Query = { cronSchedules: CronSchedulesQuery_cronSchedules_CronPaginatedSchedules | null };
+
+
+export type CronSchedulesQueryVariables = Exact<{
+  input: Types.CronScheduleListInput | null | undefined;
+}>;
+
+
+export type CronSchedulesQuery = CronSchedulesQuery_Query;
+
+export type CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun = { id: string | null, scheduleId: string | null, jobKind: Types.CronJobKind | null, status: Types.CronRunStatus | null, triggerSource: Types.CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronRunsQuery_cronRuns_CronPaginatedRuns = { totalCount: number | null, rows: Array<CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun> | null };
+
+export type CronRunsQuery_Query = { cronRuns: CronRunsQuery_cronRuns_CronPaginatedRuns | null };
+
+
+export type CronRunsQueryVariables = Exact<{
+  input: Types.CronRunListInput | null | undefined;
+}>;
+
+
+export type CronRunsQuery = CronRunsQuery_Query;
+
+export type CronQueueStatsQuery_cronQueueStats_CronQueueStats = { id: string | null, backend: string | null, pending: number | null, inFlight: number | null, failed: number | null, byJobKind: unknown };
+
+export type CronQueueStatsQuery_Query = { cronQueueStats: CronQueueStatsQuery_cronQueueStats_CronQueueStats | null };
+
+
+export type CronQueueStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CronQueueStatsQuery = CronQueueStatsQuery_Query;
+
+export type CronScheduleCreateMutation_cronScheduleCreate_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronScheduleCreateMutation_Mutation = { cronScheduleCreate: CronScheduleCreateMutation_cronScheduleCreate_CronSchedule | null };
+
+
+export type CronScheduleCreateMutationVariables = Exact<{
+  input: Types.CronScheduleSubmitInput;
+}>;
+
+
+export type CronScheduleCreateMutation = CronScheduleCreateMutation_Mutation;
+
+export type CronScheduleUpdateMutation_cronScheduleUpdate_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronScheduleUpdateMutation_Mutation = { cronScheduleUpdate: CronScheduleUpdateMutation_cronScheduleUpdate_CronSchedule | null };
+
+
+export type CronScheduleUpdateMutationVariables = Exact<{
+  id: string;
+  input: Types.CronScheduleUpdateInput;
+}>;
+
+
+export type CronScheduleUpdateMutation = CronScheduleUpdateMutation_Mutation;
+
+export type CronSchedulePauseMutation_cronSchedulePause_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronSchedulePauseMutation_Mutation = { cronSchedulePause: CronSchedulePauseMutation_cronSchedulePause_CronSchedule | null };
+
+
+export type CronSchedulePauseMutationVariables = Exact<{
+  id: string;
+}>;
+
+
+export type CronSchedulePauseMutation = CronSchedulePauseMutation_Mutation;
+
+export type CronScheduleResumeMutation_cronScheduleResume_CronSchedule = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: Types.CronJobKind | null, payload: unknown, status: Types.CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: Types.CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronScheduleResumeMutation_Mutation = { cronScheduleResume: CronScheduleResumeMutation_cronScheduleResume_CronSchedule | null };
+
+
+export type CronScheduleResumeMutationVariables = Exact<{
+  id: string;
+}>;
+
+
+export type CronScheduleResumeMutation = CronScheduleResumeMutation_Mutation;
+
+export type CronScheduleDeleteMutation_Mutation = { cronScheduleDelete: boolean | null };
+
+
+export type CronScheduleDeleteMutationVariables = Exact<{
+  input: Types.CronScheduleDeleteInput;
+}>;
+
+
+export type CronScheduleDeleteMutation = CronScheduleDeleteMutation_Mutation;
+
+export type CronRunTriggerMutation_cronRunTrigger_CronRun = { id: string | null, scheduleId: string | null, jobKind: Types.CronJobKind | null, status: Types.CronRunStatus | null, triggerSource: Types.CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronRunTriggerMutation_Mutation = { cronRunTrigger: CronRunTriggerMutation_cronRunTrigger_CronRun | null };
+
+
+export type CronRunTriggerMutationVariables = Exact<{
+  input: Types.CronRunTriggerInput;
+}>;
+
+
+export type CronRunTriggerMutation = CronRunTriggerMutation_Mutation;
+
+export type MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema = { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null };
+
+export type MeetingProviderFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
 export type UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails = { meetingUrl: string | null, username: string | null, tenantId: string | null };
 
-export type UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
+export type UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
-export type UserMeetingConfigFieldsFragment = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
+export type UserMeetingConfigFieldsFragment = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
 
-export type MeetingProvidersQuery_meetingProviders_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
+export type MeetingProvidersQuery_meetingProviders_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
 export type MeetingProvidersQuery_Query = { meetingProviders: Array<MeetingProvidersQuery_meetingProviders_MeetingProvider> | null };
 
@@ -3317,7 +3824,7 @@ export type MeetingProvidersQueryVariables = Exact<{
 
 export type MeetingProvidersQuery = MeetingProvidersQuery_Query;
 
-export type MeetingProviderQuery_meetingProvider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
+export type MeetingProviderQuery_meetingProvider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
 export type MeetingProviderQuery_Query = { meetingProvider: MeetingProviderQuery_meetingProvider_MeetingProvider | null };
 
@@ -3329,7 +3836,7 @@ export type MeetingProviderQueryVariables = Exact<{
 
 export type MeetingProviderQuery = MeetingProviderQuery_Query;
 
-export type UserMeetingConfigsQuery_userMeetingConfigs_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
+export type UserMeetingConfigsQuery_userMeetingConfigs_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
 
 export type UserMeetingConfigsQuery_Query = { userMeetingConfigs: Array<UserMeetingConfigsQuery_userMeetingConfigs_UserMeetingConfig> | null };
 
@@ -3341,7 +3848,7 @@ export type UserMeetingConfigsQueryVariables = Exact<{
 
 export type UserMeetingConfigsQuery = UserMeetingConfigsQuery_Query;
 
-export type UserMeetingConfigQuery_userMeetingConfig_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
+export type UserMeetingConfigQuery_userMeetingConfig_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
 
 export type UserMeetingConfigQuery_Query = { userMeetingConfig: UserMeetingConfigQuery_userMeetingConfig_UserMeetingConfig | null };
 
@@ -3353,7 +3860,7 @@ export type UserMeetingConfigQueryVariables = Exact<{
 
 export type UserMeetingConfigQuery = UserMeetingConfigQuery_Query;
 
-export type CreateMeetingProviderMutation_createMeetingProvider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
+export type CreateMeetingProviderMutation_createMeetingProvider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
 export type CreateMeetingProviderMutation_Mutation = { createMeetingProvider: CreateMeetingProviderMutation_createMeetingProvider_MeetingProvider | null };
 
@@ -3365,7 +3872,7 @@ export type CreateMeetingProviderMutationVariables = Exact<{
 
 export type CreateMeetingProviderMutation = CreateMeetingProviderMutation_Mutation;
 
-export type UpdateMeetingProviderMutation_updateMeetingProvider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
+export type UpdateMeetingProviderMutation_updateMeetingProvider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
 export type UpdateMeetingProviderMutation_Mutation = { updateMeetingProvider: UpdateMeetingProviderMutation_updateMeetingProvider_MeetingProvider | null };
 
@@ -3388,7 +3895,7 @@ export type DeleteMeetingProviderMutationVariables = Exact<{
 
 export type DeleteMeetingProviderMutation = DeleteMeetingProviderMutation_Mutation;
 
-export type CreateUserMeetingConfigMutation_createUserMeetingConfig_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
+export type CreateUserMeetingConfigMutation_createUserMeetingConfig_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
 
 export type CreateUserMeetingConfigMutation_Mutation = { createUserMeetingConfig: CreateUserMeetingConfigMutation_createUserMeetingConfig_UserMeetingConfig | null };
 
@@ -3400,7 +3907,7 @@ export type CreateUserMeetingConfigMutationVariables = Exact<{
 
 export type CreateUserMeetingConfigMutation = CreateUserMeetingConfigMutation_Mutation;
 
-export type UpdateUserMeetingConfigMutation_updateUserMeetingConfig_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
+export type UpdateUserMeetingConfigMutation_updateUserMeetingConfig_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
 
 export type UpdateUserMeetingConfigMutation_Mutation = { updateUserMeetingConfig: UpdateUserMeetingConfigMutation_updateUserMeetingConfig_UserMeetingConfig | null };
 
@@ -3423,7 +3930,7 @@ export type DeleteUserMeetingConfigMutationVariables = Exact<{
 
 export type DeleteUserMeetingConfigMutation = DeleteUserMeetingConfigMutation_Mutation;
 
-export type SetDefaultMeetingConfigMutation_setDefaultMeetingConfig_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
+export type SetDefaultMeetingConfigMutation_setDefaultMeetingConfig_UserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails | null, provider: UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider | null };
 
 export type SetDefaultMeetingConfigMutation_Mutation = { setDefaultMeetingConfig: SetDefaultMeetingConfigMutation_setDefaultMeetingConfig_UserMeetingConfig | null };
 
@@ -3437,13 +3944,13 @@ export type SetDefaultMeetingConfigMutation = SetDefaultMeetingConfigMutation_Mu
 
 export type ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails = { meetingUrl: string | null, username: string | null, tenantId: string | null };
 
-export type ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
+export type ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
-export type ClassMeetingConfigFieldsFragment = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
+export type ClassMeetingConfigFieldsFragment = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
 
-export type EffectiveMeetingFieldsFragment = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type EffectiveMeetingFieldsFragment = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type ClassMeetingConfigsQuery_classMeetingConfigs_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
+export type ClassMeetingConfigsQuery_classMeetingConfigs_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
 
 export type ClassMeetingConfigsQuery_Query = { classMeetingConfigs: Array<ClassMeetingConfigsQuery_classMeetingConfigs_ClassMeetingConfig> | null };
 
@@ -3455,7 +3962,7 @@ export type ClassMeetingConfigsQueryVariables = Exact<{
 
 export type ClassMeetingConfigsQuery = ClassMeetingConfigsQuery_Query;
 
-export type RecurringMeetingConfigsQuery_recurringMeetingConfigs_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
+export type RecurringMeetingConfigsQuery_recurringMeetingConfigs_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
 
 export type RecurringMeetingConfigsQuery_Query = { recurringMeetingConfigs: Array<RecurringMeetingConfigsQuery_recurringMeetingConfigs_ClassMeetingConfig> | null };
 
@@ -3467,7 +3974,7 @@ export type RecurringMeetingConfigsQueryVariables = Exact<{
 
 export type RecurringMeetingConfigsQuery = RecurringMeetingConfigsQuery_Query;
 
-export type CreateClassMeetingConfigMutation_createClassMeetingConfig_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
+export type CreateClassMeetingConfigMutation_createClassMeetingConfig_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
 
 export type CreateClassMeetingConfigMutation_Mutation = { createClassMeetingConfig: CreateClassMeetingConfigMutation_createClassMeetingConfig_ClassMeetingConfig | null };
 
@@ -3479,7 +3986,7 @@ export type CreateClassMeetingConfigMutationVariables = Exact<{
 
 export type CreateClassMeetingConfigMutation = CreateClassMeetingConfigMutation_Mutation;
 
-export type UpdateClassMeetingConfigMutation_updateClassMeetingConfig_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
+export type UpdateClassMeetingConfigMutation_updateClassMeetingConfig_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
 
 export type UpdateClassMeetingConfigMutation_Mutation = { updateClassMeetingConfig: UpdateClassMeetingConfigMutation_updateClassMeetingConfig_ClassMeetingConfig | null };
 
@@ -3502,7 +4009,7 @@ export type DeleteClassMeetingConfigMutationVariables = Exact<{
 
 export type DeleteClassMeetingConfigMutation = DeleteClassMeetingConfigMutation_Mutation;
 
-export type SetDefaultClassMeetingConfigMutation_setDefaultClassMeetingConfig_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
+export type SetDefaultClassMeetingConfigMutation_setDefaultClassMeetingConfig_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
 
 export type SetDefaultClassMeetingConfigMutation_Mutation = { setDefaultClassMeetingConfig: SetDefaultClassMeetingConfigMutation_setDefaultClassMeetingConfig_ClassMeetingConfig | null };
 
@@ -3513,6 +4020,52 @@ export type SetDefaultClassMeetingConfigMutationVariables = Exact<{
 
 
 export type SetDefaultClassMeetingConfigMutation = SetDefaultClassMeetingConfigMutation_Mutation;
+
+export type GenerateMeetingUrlMutation_generateMeetingUrl_GenerateMeetingUrlResult = { joinUrl: string | null, meetingId: string | null, expiresAt: string | null };
+
+export type GenerateMeetingUrlMutation_Mutation = { generateMeetingUrl: GenerateMeetingUrlMutation_generateMeetingUrl_GenerateMeetingUrlResult | null };
+
+
+export type GenerateMeetingUrlMutationVariables = Exact<{
+  input: Types.GenerateMeetingUrlInput;
+}>;
+
+
+export type GenerateMeetingUrlMutation = GenerateMeetingUrlMutation_Mutation;
+
+export type ConnectMeetingProviderOAuthMutation_connectMeetingProviderOAuth_ConnectMeetingProviderOAuthResult = { id: string | null, authorizeUrl: string | null, state: string | null };
+
+export type ConnectMeetingProviderOAuthMutation_Mutation = { connectMeetingProviderOAuth: ConnectMeetingProviderOAuthMutation_connectMeetingProviderOAuth_ConnectMeetingProviderOAuthResult | null };
+
+
+export type ConnectMeetingProviderOAuthMutationVariables = Exact<{
+  input: Types.ConnectMeetingProviderOAuthInput;
+}>;
+
+
+export type ConnectMeetingProviderOAuthMutation = ConnectMeetingProviderOAuthMutation_Mutation;
+
+export type DisconnectMeetingProviderOAuthMutation_disconnectMeetingProviderOAuth_DisconnectMeetingProviderOAuthResult = { id: string | null, ok: boolean | null, providerSlug: string | null };
+
+export type DisconnectMeetingProviderOAuthMutation_Mutation = { disconnectMeetingProviderOAuth: DisconnectMeetingProviderOAuthMutation_disconnectMeetingProviderOAuth_DisconnectMeetingProviderOAuthResult | null };
+
+
+export type DisconnectMeetingProviderOAuthMutationVariables = Exact<{
+  input: Types.DisconnectMeetingProviderOAuthInput;
+}>;
+
+
+export type DisconnectMeetingProviderOAuthMutation = DisconnectMeetingProviderOAuthMutation_Mutation;
+
+export type MyConnectedMeetingProvidersQuery_myConnectedMeetingProviders_MyConnectedMeetingProvider = { id: string | null, providerSlug: string | null, email: string | null, connectedAt: string | null, expiresAt: string | null };
+
+export type MyConnectedMeetingProvidersQuery_Query = { myConnectedMeetingProviders: Array<MyConnectedMeetingProvidersQuery_myConnectedMeetingProviders_MyConnectedMeetingProvider> | null };
+
+
+export type MyConnectedMeetingProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyConnectedMeetingProvidersQuery = MyConnectedMeetingProvidersQuery_Query;
 
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, deliveryId: string | null, type: string | null, eventType: Types.NotificationEventType | null, channel: Types.NotificationChannel | null, metadata: unknown, title: string | null, body: string | null, createdAt: string | null, severity: string | null, readAt: string | null };
 
@@ -3657,7 +4210,7 @@ export type ParentBillingSummaryQueryVariables = Exact<{
 
 export type ParentBillingSummaryQuery = ParentBillingSummaryQuery_Query;
 
-export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: Types.BookingStatus | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, classTimeFormatted: string | null, effectiveMeeting: ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow_effectiveMeeting_EffectiveMeeting | null };
 
@@ -4243,7 +4796,22 @@ export type SearchTeacherAvailabilityQueryVariables = Exact<{
 
 export type SearchTeacherAvailabilityQuery = SearchTeacherAvailabilityQuery_Query;
 
-export type ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type AvailableClassSlotsQuery_availableClassSlots_AvailableClassSlot = { id: string | null, teacherId: string | null, startAt: string | null, endAt: string | null, available: boolean | null };
+
+export type AvailableClassSlotsQuery_Query = { availableClassSlots: Array<AvailableClassSlotsQuery_availableClassSlots_AvailableClassSlot> | null };
+
+
+export type AvailableClassSlotsQueryVariables = Exact<{
+  studentId: string | number;
+  date: string;
+  teacherId: string | number | null | undefined;
+  durationMinutes: number | null | undefined;
+}>;
+
+
+export type AvailableClassSlotsQuery = AvailableClassSlotsQuery_Query;
+
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
 
@@ -4480,7 +5048,7 @@ export type ClearWeeklyScheduleMutation = ClearWeeklyScheduleMutation_Mutation;
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
-export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem = { id: string | null, name: string | null, avatarUrl: string | null };
 
@@ -4515,7 +5083,7 @@ export type DailyScheduleMetricsQueryVariables = Exact<{
 
 export type DailyScheduleMetricsQuery = DailyScheduleMetricsQuery_Query;
 
-export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem = { id: string | null, name: string | null, avatarUrl: string | null };
 
@@ -4564,7 +5132,7 @@ export type RescheduleTrackingMetricsQueryVariables = Exact<{ [key: string]: nev
 
 export type RescheduleTrackingMetricsQuery = RescheduleTrackingMetricsQuery_Query;
 
-export type StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, studentStatus: Types.StudentStatus | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, courseName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow_effectiveMeeting_EffectiveMeeting | null };
 
@@ -4580,7 +5148,7 @@ export type StatusTrackingScheduleQueryVariables = Exact<{
 
 export type StatusTrackingScheduleQuery = StatusTrackingScheduleQuery_Query;
 
-export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass = { id: string | null, studentName: string | null, studentId: string | null, duration: number | null, startTime: string | null, day: string | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, subjectName: string | null, classType: Types.ClassType | null, meetingJoinUrl: string | null, effectiveMeeting: TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass_effectiveMeeting_EffectiveMeeting | null };
 
@@ -4695,6 +5263,60 @@ export type DeleteSystemSettingMutationVariables = Exact<{
 
 
 export type DeleteSystemSettingMutation = DeleteSystemSettingMutation_Mutation;
+
+export type MeetingIntegrationProviderFieldsFragment = { id: string | null, slug: string | null, kind: string | null, credentialsHealthy: boolean | null, lastTestedAt: string | null, connectedTeacherCount: number | null, reauthNeededCount: number | null, endpoints: Array<string> | null };
+
+export type MeetingIntegrationConnectedAccountFieldsFragment = { id: string | null, userId: string | null, name: string | null, email: string | null, connectedAt: string | null, expiresAt: string | null, lastRefreshedAt: string | null, status: Types.MeetingIntegrationConnectedAccountStatus | null, scopes: Array<string> | null };
+
+export type TestMeetingConnectionResultFieldsFragment = { ok: boolean | null, latencyMs: number | null, mode: Types.MeetingConnectionTestMode | null, testJoinUrl: string | null, deleted: boolean | null, upstreamResponseSummary: string | null, errorCode: string | null, errorMessage: string | null, rawUpstreamPayload: unknown, requiredScopes: Array<string> | null, grantedScopes: Array<string> | null };
+
+export type AdminRevokeTokenResultFieldsFragment = { id: string | null, providerSlug: string | null, userId: string | null, revoked: boolean | null };
+
+export type MeetingIntegrationProvidersQuery_meetingIntegrationProviders_MeetingIntegrationProvider = { id: string | null, slug: string | null, kind: string | null, credentialsHealthy: boolean | null, lastTestedAt: string | null, connectedTeacherCount: number | null, reauthNeededCount: number | null, endpoints: Array<string> | null };
+
+export type MeetingIntegrationProvidersQuery_Query = { meetingIntegrationProviders: Array<MeetingIntegrationProvidersQuery_meetingIntegrationProviders_MeetingIntegrationProvider> | null };
+
+
+export type MeetingIntegrationProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeetingIntegrationProvidersQuery = MeetingIntegrationProvidersQuery_Query;
+
+export type MeetingIntegrationConnectedAccountsQuery_meetingIntegrationConnectedAccounts_MeetingIntegrationConnectedAccount = { id: string | null, userId: string | null, name: string | null, email: string | null, connectedAt: string | null, expiresAt: string | null, lastRefreshedAt: string | null, status: Types.MeetingIntegrationConnectedAccountStatus | null, scopes: Array<string> | null };
+
+export type MeetingIntegrationConnectedAccountsQuery_Query = { meetingIntegrationConnectedAccounts: Array<MeetingIntegrationConnectedAccountsQuery_meetingIntegrationConnectedAccounts_MeetingIntegrationConnectedAccount> | null };
+
+
+export type MeetingIntegrationConnectedAccountsQueryVariables = Exact<{
+  providerSlug: string;
+}>;
+
+
+export type MeetingIntegrationConnectedAccountsQuery = MeetingIntegrationConnectedAccountsQuery_Query;
+
+export type TestMeetingProviderConnectionMutation_testMeetingProviderConnection_TestMeetingConnectionResult = { ok: boolean | null, latencyMs: number | null, mode: Types.MeetingConnectionTestMode | null, testJoinUrl: string | null, deleted: boolean | null, upstreamResponseSummary: string | null, errorCode: string | null, errorMessage: string | null, rawUpstreamPayload: unknown, requiredScopes: Array<string> | null, grantedScopes: Array<string> | null };
+
+export type TestMeetingProviderConnectionMutation_Mutation = { testMeetingProviderConnection: TestMeetingProviderConnectionMutation_testMeetingProviderConnection_TestMeetingConnectionResult | null };
+
+
+export type TestMeetingProviderConnectionMutationVariables = Exact<{
+  input: Types.TestMeetingConnectionInput;
+}>;
+
+
+export type TestMeetingProviderConnectionMutation = TestMeetingProviderConnectionMutation_Mutation;
+
+export type AdminRevokeMeetingProviderTokenMutation_adminRevokeMeetingProviderToken_AdminRevokeTokenResult = { id: string | null, providerSlug: string | null, userId: string | null, revoked: boolean | null };
+
+export type AdminRevokeMeetingProviderTokenMutation_Mutation = { adminRevokeMeetingProviderToken: AdminRevokeMeetingProviderTokenMutation_adminRevokeMeetingProviderToken_AdminRevokeTokenResult | null };
+
+
+export type AdminRevokeMeetingProviderTokenMutationVariables = Exact<{
+  input: Types.AdminRevokeTokenInput;
+}>;
+
+
+export type AdminRevokeMeetingProviderTokenMutation = AdminRevokeMeetingProviderTokenMutation_Mutation;
 
 export type SessionConfigFieldsFragment = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
 
@@ -4982,7 +5604,7 @@ export type StudentsDirectoryQuery = StudentsDirectoryQuery_Query;
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 
-export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession_effectiveMeeting_EffectiveMeeting | null };
 
@@ -5000,7 +5622,7 @@ export type StudentClassHistoryQueryVariables = Exact<{
 
 export type StudentClassHistoryQuery = StudentClassHistoryQuery_Query;
 
-export type StudentClassSessionDetailQuery_studentClassSessionDetail_StudentSessionDetail_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type StudentClassSessionDetailQuery_studentClassSessionDetail_StudentSessionDetail_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type StudentClassSessionDetailQuery_studentClassSessionDetail_StudentSessionDetail = { id: string | null, durationMinutes: number | null, executionState: string | null, outcome: string | null, remarks: string | null, meetingJoinUrl: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, effectiveMeeting: StudentClassSessionDetailQuery_studentClassSessionDetail_StudentSessionDetail_effectiveMeeting_EffectiveMeeting | null };
 
@@ -5054,13 +5676,13 @@ export type CreateStudentMutationVariables = Exact<{
 
 export type CreateStudentMutation = CreateStudentMutation_Mutation;
 
-export type StudentUpcomingClassFieldsFragment_StudentUpcomingClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type StudentUpcomingClassFieldsFragment_StudentUpcomingClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type StudentUpcomingClassFieldsFragment = { id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: StudentUpcomingClassFieldsFragment_StudentUpcomingClass_effectiveMeeting_EffectiveMeeting | null };
 
 export type StudentHistoryMetricsFieldsFragment = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 
-export type StudentHistorySessionFieldsFragment_StudentHistorySession_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type StudentHistorySessionFieldsFragment_StudentHistorySession_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type StudentHistorySessionFieldsFragment = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentHistorySessionFieldsFragment_StudentHistorySession_effectiveMeeting_EffectiveMeeting | null };
 
@@ -5101,7 +5723,7 @@ export type RecordStudentProfileEditMutationVariables = Exact<{
 
 export type RecordStudentProfileEditMutation = RecordStudentProfileEditMutation_Mutation;
 
-export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass = { id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass_effectiveMeeting_EffectiveMeeting | null };
 
@@ -5364,7 +5986,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 
 export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
 
-export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
 
@@ -5379,7 +6001,7 @@ export type UpdateTeacherProfileMutation = UpdateTeacherProfileMutation_Mutation
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
-export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, yourTimeFormatted: string | null, effectiveMeeting: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow_effectiveMeeting_EffectiveMeeting | null };
 
@@ -5424,7 +6046,7 @@ export type LogTeacherSupportRequestMutationVariables = Exact<{
 
 export type LogTeacherSupportRequestMutation = LogTeacherSupportRequestMutation_Mutation;
 
-export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null, subjectId: string | null, subjectName: string | null, classType: Types.ClassType | null, executionState: string | null, outcome: string | null, meetingJoinUrl: string | null, avatarUrl: string | null, effectiveMeeting: TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass_effectiveMeeting_EffectiveMeeting | null };
 
@@ -5540,7 +6162,7 @@ export type DeleteTeacherImportantNoteMutationVariables = Exact<{
 
 export type DeleteTeacherImportantNoteMutation = DeleteTeacherImportantNoteMutation_Mutation;
 
-export type CreateTeacherMutation_createTeacher_TeacherOnboarding = { userId: string | null, id: string | null, name: string | null, email: string | null, status: string | null, gender: Types.Gender | null, timezoneDisplay: string | null };
+export type CreateTeacherMutation_createTeacher_TeacherOnboarding = { userId: string | null, id: string | null, name: string | null, email: string | null, phone: string | null, status: string | null, gender: Types.Gender | null, timezoneDisplay: string | null };
 
 export type CreateTeacherMutation_Mutation = { createTeacher: CreateTeacherMutation_createTeacher_TeacherOnboarding | null };
 
@@ -5576,7 +6198,7 @@ export type TeacherOwnProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TeacherOwnProfileQuery = TeacherOwnProfileQuery_Query;
 
-export type TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
+export type TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass = { id: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass_effectiveMeeting_EffectiveMeeting | null };
 
@@ -5604,3 +6226,118 @@ export type TeachersQueryVariables = Exact<{
 export type TeachersQuery = TeachersQuery_Query;
 
 export type UserFieldsFragmentFragment = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
+
+export type WhatsappAccountFieldsFragment = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type WhatsappTemplateSnapshotFieldsFragment = { id: string | null, name: string | null, language: string | null, status: Types.WhatsappTemplateStatus | null, category: Types.WhatsappTemplateCategory | null, lastSyncedAt: string | null };
+
+export type WhatsappAccountsQuery_whatsappAccounts_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type WhatsappAccountsQuery_Query = { whatsappAccounts: Array<WhatsappAccountsQuery_whatsappAccounts_WhatsappAccount> | null };
+
+
+export type WhatsappAccountsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type WhatsappAccountsQuery = WhatsappAccountsQuery_Query;
+
+export type IsUserWhatsappOptInQuery_Query = { isUserWhatsappOptIn: boolean };
+
+
+export type IsUserWhatsappOptInQueryVariables = Exact<{
+  userId: string;
+}>;
+
+
+export type IsUserWhatsappOptInQuery = IsUserWhatsappOptInQuery_Query;
+
+export type CreateWhatsappAccountMutation_createWhatsappAccount_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateWhatsappAccountMutation_Mutation = { createWhatsappAccount: CreateWhatsappAccountMutation_createWhatsappAccount_WhatsappAccount | null };
+
+
+export type CreateWhatsappAccountMutationVariables = Exact<{
+  input: Types.WhatsappAccountCreateInput;
+}>;
+
+
+export type CreateWhatsappAccountMutation = CreateWhatsappAccountMutation_Mutation;
+
+export type UpdateWhatsappAccountMutation_updateWhatsappAccount_WhatsappAccount = { id: string | null };
+
+export type UpdateWhatsappAccountMutation_Mutation = { updateWhatsappAccount: UpdateWhatsappAccountMutation_updateWhatsappAccount_WhatsappAccount | null };
+
+
+export type UpdateWhatsappAccountMutationVariables = Exact<{
+  id: string;
+  input: Types.WhatsappAccountUpdateInput;
+}>;
+
+
+export type UpdateWhatsappAccountMutation = UpdateWhatsappAccountMutation_Mutation;
+
+export type DeleteWhatsappAccountMutation_deleteWhatsappAccount_WhatsappAccount = { id: string | null };
+
+export type DeleteWhatsappAccountMutation_Mutation = { deleteWhatsappAccount: DeleteWhatsappAccountMutation_deleteWhatsappAccount_WhatsappAccount | null };
+
+
+export type DeleteWhatsappAccountMutationVariables = Exact<{
+  id: string;
+}>;
+
+
+export type DeleteWhatsappAccountMutation = DeleteWhatsappAccountMutation_Mutation;
+
+export type SetWhatsappAccessTokenMutation_setWhatsappAccessToken_WhatsappAccount = { id: string | null };
+
+export type SetWhatsappAccessTokenMutation_Mutation = { setWhatsappAccessToken: SetWhatsappAccessTokenMutation_setWhatsappAccessToken_WhatsappAccount | null };
+
+
+export type SetWhatsappAccessTokenMutationVariables = Exact<{
+  id: string;
+  accessToken: string;
+}>;
+
+
+export type SetWhatsappAccessTokenMutation = SetWhatsappAccessTokenMutation_Mutation;
+
+export type SetWhatsappTwoStepPinMutation_setWhatsappTwoStepPin_WhatsappAccount = { id: string | null };
+
+export type SetWhatsappTwoStepPinMutation_Mutation = { setWhatsappTwoStepPin: SetWhatsappTwoStepPinMutation_setWhatsappTwoStepPin_WhatsappAccount | null };
+
+
+export type SetWhatsappTwoStepPinMutationVariables = Exact<{
+  id: string;
+  twoStepPin: string;
+}>;
+
+
+export type SetWhatsappTwoStepPinMutation = SetWhatsappTwoStepPinMutation_Mutation;
+
+export type SetUserWhatsappOptInMutation_setUserWhatsappOptIn_WhatsappAccount = { id: string | null };
+
+export type SetUserWhatsappOptInMutation_Mutation = { setUserWhatsappOptIn: SetUserWhatsappOptInMutation_setUserWhatsappOptIn_WhatsappAccount | null };
+
+
+export type SetUserWhatsappOptInMutationVariables = Exact<{
+  userId: string;
+  enabled: boolean;
+  source: string | null | undefined;
+}>;
+
+
+export type SetUserWhatsappOptInMutation = SetUserWhatsappOptInMutation_Mutation;
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_accounts_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_templates_WhatsappTemplateSnapshot = { id: string | null, name: string | null, language: string | null, status: Types.WhatsappTemplateStatus | null, category: Types.WhatsappTemplateCategory | null, lastSyncedAt: string | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult = { id: string | null, accounts: Array<SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_accounts_WhatsappAccount> | null, templates: Array<SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_templates_WhatsappTemplateSnapshot> | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_Mutation = { syncWhatsappAccountsFromMeta: SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult | null };
+
+
+export type SyncWhatsappAccountsFromMetaMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SyncWhatsappAccountsFromMetaMutation = SyncWhatsappAccountsFromMetaMutation_Mutation;

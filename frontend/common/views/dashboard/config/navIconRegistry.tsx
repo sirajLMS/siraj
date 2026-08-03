@@ -24,6 +24,7 @@ const ICON_LOADERS: Record<NavIconKey, () => Promise<IconModule>> = {
   folderOpen: () => import("@mui/icons-material/FolderOpenOutlined"),
   group: () => import("@mui/icons-material/GroupOutlined"),
   history: () => import("@mui/icons-material/HistoryOutlined"),
+  hub: () => import("@mui/icons-material/HubOutlined"),
   lightbulb: () => import("@mui/icons-material/LightbulbOutlined"),
   logout: () => import("@mui/icons-material/LogoutOutlined"),
   menuBook: () => import("@mui/icons-material/MenuBookOutlined"),
@@ -44,6 +45,7 @@ const ICON_LOADERS: Record<NavIconKey, () => Promise<IconModule>> = {
   timeline: () => import("@mui/icons-material/TimelineOutlined"),
   update: () => import("@mui/icons-material/UpdateOutlined"),
   videocam: () => import("@mui/icons-material/VideocamOutlined"),
+  visibility: () => import("@mui/icons-material/VisibilityOutlined"),
 };
 
 const LAZY_ICONS = (Object.keys(ICON_LOADERS) as NavIconKey[]).reduce(

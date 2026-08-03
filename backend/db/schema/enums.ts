@@ -12,6 +12,12 @@ import {
   ComplaintStatus,
   CountryCode,
   CreditReason,
+  CronConcurrencyPolicy,
+  CronJobKind,
+  CronQueueBackend,
+  CronRunStatus,
+  CronScheduleStatus,
+  CronTriggerSource,
   CurrencyCode,
   DayOfWeek,
   DevicePlatform,
@@ -27,8 +33,15 @@ import {
   NotificationChannel,
   NotificationDeliveryStatus,
   NotificationEventType,
+  OnDemandNoCreditsOutcome,
+  OnDemandStatus,
   ParentStatus,
+  QuotaKind,
+  QuotaLedgerReason,
+  QuotaPeriodType,
+  QuotaStatus,
   RateSource,
+  SchedulingMode,
   StudentStatus,
   SuggestionStatus,
   SystemSettingCategory,
@@ -38,6 +51,23 @@ import {
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { createPgEnumFromEnum } from "@/backend/utils/db.utils";
+
+export const quotaKindEnum = createPgEnumFromEnum("quota_kind", QuotaKind);
+
+export const quotaStatusEnum = createPgEnumFromEnum("quota_status", QuotaStatus);
+
+export const quotaPeriodTypeEnum = createPgEnumFromEnum("quota_period_type", QuotaPeriodType);
+
+export const quotaLedgerReasonEnum = createPgEnumFromEnum("quota_ledger_reason", QuotaLedgerReason);
+
+export const schedulingModeEnum = createPgEnumFromEnum("scheduling_mode", SchedulingMode);
+
+export const onDemandNoCreditsOutcomeEnum = createPgEnumFromEnum(
+  "ondemand_no_credits_outcome",
+  OnDemandNoCreditsOutcome
+);
+
+export const onDemandStatusEnum = createPgEnumFromEnum("ondemand_status", OnDemandStatus);
 
 export const appLanguageEnum = createPgEnumFromEnum("app_language", AppLanguage);
 
@@ -119,3 +149,15 @@ export const attendanceEvaluationEnum = createPgEnumFromEnum("attendance_evaluat
 export const creditReasonEnum = createPgEnumFromEnum("credit_reason", CreditReason);
 
 export const rateSourceEnum = createPgEnumFromEnum("rate_source", RateSource);
+
+export const cronScheduleStatusEnum = createPgEnumFromEnum("cron_schedule_status", CronScheduleStatus);
+
+export const cronRunStatusEnum = createPgEnumFromEnum("cron_run_status", CronRunStatus);
+
+export const cronJobKindEnum = createPgEnumFromEnum("cron_job_kind", CronJobKind);
+
+export const cronTriggerSourceEnum = createPgEnumFromEnum("cron_trigger_source", CronTriggerSource);
+
+export const cronConcurrencyPolicyEnum = createPgEnumFromEnum("cron_concurrency_policy", CronConcurrencyPolicy);
+
+export const cronQueueBackendEnum = createPgEnumFromEnum("cron_queue_backend", CronQueueBackend);

@@ -4,7 +4,7 @@ import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import VideocamOffOutlinedIcon from "@mui/icons-material/VideocamOffOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
-import { Alert, Avatar, alpha, Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Alert, Avatar, alpha, Box, Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { useJoinContext } from "@/frontend/common/hooks/useJoinContext";
 import {
@@ -136,13 +136,30 @@ export function MeetingJoinAction(props: MeetingJoinActionProps) {
     return renderSetupAlert(ctx, setupHref, emptyRole);
   }
 
+  const isUrlPending = !ctx.hasUrl && ctx.supportsAutoGeneration;
+
   if (variant === "icon") {
-    return renderIconVariant(ctx, setupHref);
+    return (
+      <Stack sx={{ alignItems: "center", gap: 0.5 }}>
+        {renderIconVariant(ctx, setupHref)}
+        {isUrlPending ? <Chip size="small" color="info" label={ctx.tDisplay.urlPending} /> : null}
+      </Stack>
+    );
   }
 
   if (variant === "button") {
-    return renderButtonVariant(ctx);
+    return (
+      <Stack sx={{ gap: 0.5 }}>
+        {renderButtonVariant(ctx)}
+        {isUrlPending ? <Chip size="small" color="info" label={ctx.tDisplay.urlPending} /> : null}
+      </Stack>
+    );
   }
 
-  return renderActionVariant(ctx);
+  return (
+    <Stack sx={{ gap: 0.5 }}>
+      {renderActionVariant(ctx)}
+      {isUrlPending ? <Chip size="small" color="info" label={ctx.tDisplay.urlPending} /> : null}
+    </Stack>
+  );
 }

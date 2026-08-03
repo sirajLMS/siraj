@@ -6,6 +6,7 @@ import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-pro
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -14,6 +15,7 @@ import {
 } from "@/backend/services/meeting/class-meeting-config-mask";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
+import { isMeetingChannelError, maybeGenerateUrl } from "@/backend/services/meeting/utils/maybe-generate-url";
 import type {
   ClassMeetingConfigReturnType,
   ClassMeetingConfigSelectType,
@@ -21,8 +23,48 @@ import type {
   EffectiveMeetingReturnType,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
+import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import type { ErrorsLabels } from "@/shared/locale";
+
+/**
+ * Wraps `maybeGenerateUrl` with typed error handling for class meeting configs.
+ *
+ * - `MeetingChannelError` subclasses are logged at `warn` and re-thrown as-is.
+ * - Unexpected errors are logged at `error` and re-thrown as a user-friendly error.
+ */
+async function safeClassMaybeGenerateUrl(
+  provider: MeetingProviderSelectType,
+  details: MeetingConfigDetails,
+  options: {
+    readonly topic: string;
+    readonly actorUserId?: string;
+  },
+  friendlyMessage: string
+): Promise<{
+  details: MeetingConfigDetails;
+  providerMetadata: Record<string, unknown> | null;
+}> {
+  try {
+    return await maybeGenerateUrl(provider, details, options);
+  } catch (error) {
+    if (isMeetingChannelError(error)) {
+      logger.warn("safeClassMaybeGenerateUrl: typed adapter error", {
+        providerKind: provider.providerKind,
+        slug: provider.slug,
+        code: error.code,
+        message: error.message,
+      });
+      throw error;
+    }
+    logger.error("safeClassMaybeGenerateUrl: unexpected error during URL generation", {
+      providerKind: provider.providerKind,
+      slug: provider.slug,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw new Error(friendlyMessage, { cause: error });
+  }
+}
 
 export namespace ClassMeetingConfigService {
   async function assertCanManageClass(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
@@ -89,7 +131,16 @@ export namespace ClassMeetingConfigService {
       throw new Error(tErrors.meetingProviderInactive);
     }
 
-    const details = parseMeetingConfigDetails(provider, input.details);
+    const parsedDetails = parseMeetingConfigDetails(provider, input.details);
+    const { details, providerMetadata } = await safeClassMaybeGenerateUrl(
+      provider,
+      parsedDetails,
+      {
+        topic: input.label ?? "Class Meeting",
+        actorUserId,
+      },
+      tErrors.meetingProvider.meetingConfigCreateFailed
+    );
 
     const created = await ClassMeetingConfigRepository.create(
       {
@@ -100,6 +151,7 @@ export namespace ClassMeetingConfigService {
         isDefault: input.isDefault,
         details,
         encryptedSecret: input.password ?? null,
+        providerMetadata,
       },
       tErrors
     );
@@ -118,7 +170,48 @@ export namespace ClassMeetingConfigService {
     const providerId = input.providerId ?? existing.providerId;
     const provider = await MeetingProviderRepository.getByIdOrThrow(providerId, tErrors);
 
-    const details = input.details === undefined ? undefined : parseMeetingConfigDetails(provider, input.details);
+    const detailsChanged = input.details !== undefined;
+    const providerChanged = input.providerId !== undefined && input.providerId !== existing.providerId;
+
+    let details: MeetingConfigDetails | undefined;
+    let providerMetadata: Record<string, unknown> | null | undefined;
+
+    if (detailsChanged || providerChanged) {
+      const inputDetails = input.details ?? existing.details;
+      const parsed = parseMeetingConfigDetails(provider, inputDetails);
+
+      const shouldRegenerate = !parsed.meetingUrl && provider.providerKind !== "manual" && detailsChanged;
+
+      if (shouldRegenerate) {
+        const result = await safeClassMaybeGenerateUrl(
+          provider,
+          parsed,
+          {
+            topic: input.label ?? existing.label ?? "Class Meeting",
+            actorUserId,
+          },
+          tErrors.meetingProvider.meetingConfigUpdateFailed
+        );
+        details = result.details;
+        providerMetadata = result.providerMetadata;
+      } else {
+        const result = await safeClassMaybeGenerateUrl(
+          provider,
+          parsed,
+          {
+            topic: input.label ?? existing.label ?? "Class Meeting",
+            actorUserId,
+          },
+          tErrors.meetingProvider.meetingConfigUpdateFailed
+        );
+        details = result.details;
+        providerMetadata = result.providerMetadata;
+
+        if (providerMetadata === null && !detailsChanged) {
+          providerMetadata = existing.providerMetadata ?? null;
+        }
+      }
+    }
 
     const updated = await ClassMeetingConfigRepository.update(
       id,
@@ -128,6 +221,7 @@ export namespace ClassMeetingConfigService {
         details,
         encryptedSecret: input.password === undefined ? undefined : input.password,
         providerId: input.providerId,
+        providerMetadata,
       },
       tErrors
     );
@@ -188,6 +282,7 @@ export namespace EffectiveMeetingService {
     source: "none",
     configId: null,
     providerId: null,
+    supportsAutoGeneration: false,
   };
 
   async function fromClassConfig(
@@ -202,14 +297,15 @@ export namespace EffectiveMeetingService {
 
     const snapshot = await MeetingConfigSnapshotService.buildClassSessionSnapshot(config.id, tErrors, tx);
     return {
-      joinUrl: snapshot.details.meetingUrl,
+      joinUrl: snapshot.details.meetingUrl ?? null,
       providerSlug: snapshot.provider.catalogSlug,
       providerName: snapshot.provider.catalogName,
       logoUrl: snapshot.provider.logoUrl,
-      meetingId: extractMeetingId(snapshot.details.meetingUrl),
+      meetingId: snapshot.details.meetingUrl ? extractMeetingId(snapshot.details.meetingUrl) : null,
       source,
       configId: config.id,
       providerId: config.providerId,
+      supportsAutoGeneration: snapshot.provider.supportsAutoGeneration,
     };
   }
 
@@ -224,14 +320,15 @@ export namespace EffectiveMeetingService {
 
     const snapshot = await MeetingConfigSnapshotService.buildSessionSnapshot(teacherDefault.id, tErrors, tx);
     return {
-      joinUrl: snapshot.details.meetingUrl,
+      joinUrl: snapshot.details.meetingUrl ?? null,
       providerSlug: snapshot.provider.catalogSlug,
       providerName: snapshot.provider.catalogName,
       logoUrl: snapshot.provider.logoUrl,
-      meetingId: extractMeetingId(snapshot.details.meetingUrl),
+      meetingId: snapshot.details.meetingUrl ? extractMeetingId(snapshot.details.meetingUrl) : null,
       source: "teacher",
       configId: teacherDefault.id,
       providerId: teacherDefault.providerId,
+      supportsAutoGeneration: snapshot.provider.supportsAutoGeneration,
     };
   }
 

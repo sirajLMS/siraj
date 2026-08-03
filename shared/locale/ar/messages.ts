@@ -9,7 +9,9 @@ import { dashboardBillingExchangeRatesAr } from "@/shared/locale/ar/dashboard/bi
 import { dashboardBillingAr } from "@/shared/locale/ar/dashboard/billing/main.ts";
 import { dashboardBillingManualAr } from "@/shared/locale/ar/dashboard/billing/manual.ts";
 import { dashboardBillingPaymentAr } from "@/shared/locale/ar/dashboard/billing/payment.ts";
+import { quotaAr } from "@/shared/locale/ar/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesAr } from "@/shared/locale/ar/dashboard/billing/supportedCurrencies.ts";
+
 import { dashboardClassAuditAr } from "@/shared/locale/ar/dashboard/classes/audit.ts";
 import { dashboardCreateRecurringClassAr } from "@/shared/locale/ar/dashboard/classes/createRecurringClass.ts";
 import { dashboardClassDetailsAr } from "@/shared/locale/ar/dashboard/classes/details.ts";
@@ -24,6 +26,7 @@ import { dashboardCoreParentDashboardAr } from "@/shared/locale/ar/dashboard/cor
 import { dashboardCoreScheduleAlertsAr } from "@/shared/locale/ar/dashboard/core/scheduleAlerts.ts";
 import { dashboardCoreSearchScheduleAr } from "@/shared/locale/ar/dashboard/core/searchSchedule.ts";
 import { dashboardCoreStatusTrackingAr } from "@/shared/locale/ar/dashboard/core/statusTracking.ts";
+import { dashboardCronAr } from "@/shared/locale/ar/dashboard/cron/main";
 import { dashboardFeedbackManageParentAr } from "@/shared/locale/ar/dashboard/feedback/main.ts";
 import { dashboardLmsCreditAr } from "@/shared/locale/ar/dashboard/lms/credit.ts";
 import { dashboardLmsLessonReportsAr } from "@/shared/locale/ar/dashboard/lms/lessonReports.ts";
@@ -118,6 +121,7 @@ import { uiPhoneInputAr } from "@/shared/locale/ar/ui/phone-input.ts";
 import { uiTagInputAr } from "@/shared/locale/ar/ui/tag-input.ts";
 import { uiTimezoneSelectAr } from "@/shared/locale/ar/ui/timezone-select.ts";
 import { uiUserSelectAr } from "@/shared/locale/ar/ui/user-select.ts";
+import { whatsappAr } from "@/shared/locale/ar/whatsapp";
 import type { Translations } from "@/shared/locale/types/message";
 
 export const arMessages: Translations = {
@@ -162,10 +166,13 @@ export const arMessages: Translations = {
   dashboardTranslations: {
     admin: dashboardAdminAr,
     adminView: dashboardAdminViewAr,
+    cron: dashboardCronAr,
     dstMigration: dashboardDstMigrationAr,
     billing: dashboardBillingAr,
     billingManual: dashboardBillingManualAr,
+    billingQuota: quotaAr,
     billingPayment: dashboardBillingPaymentAr,
+
     billingExchangeRates: dashboardBillingExchangeRatesAr,
     billingCurrencyHedges: dashboardBillingCurrencyHedgesAr,
     billingSupportedCurrencies: dashboardBillingSupportedCurrenciesAr,
@@ -246,4 +253,5 @@ export const arMessages: Translations = {
     notifications: profileNotificationsAr,
   },
   notificationsTranslations: notificationsAr,
+  whatsappTranslations: whatsappAr,
 };

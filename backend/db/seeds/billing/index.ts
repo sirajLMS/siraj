@@ -9,6 +9,7 @@ export { seedOrGet as seedOrGetInvoiceCoverageMonths } from "./seed-invoice-cove
 export { seedOrGet as seedOrGetInvoicePaymentSubmissions } from "./seed-invoice-payment-submissions";
 export { seedOrGet as seedOrGetInvoices } from "./seed-invoices";
 export { seedOrGet as seedOrGetPayments } from "./seed-payments";
+export { seedOrGet as seedOrGetQuotas } from "./seed-quotas";
 export { seedOrGet as seedOrGetSupportedMobileWallets } from "./seed-supported-mobile-wallets";
 export { seedOrGet as seedOrGetSupportedOnlineAccounts } from "./seed-supported-online-accounts";
 export { seedOrGet as seedOrGetSupportedPaymentLinks } from "./seed-supported-payment-links";

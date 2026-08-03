@@ -61,6 +61,7 @@ export const dashboardTeacherOnboardingEn: TeacherOnboardingLabels = {
     passwordRequired: "Password is required",
     nationalIdRequired: "National ID is required",
     phoneRequired: "Phone is required",
+    phoneMaxLength: "Phone number must be at most 50 characters",
     genderRequired: "Gender is required",
     countryRequired: "Country is required",
     timezoneRequired: "Timezone is required",

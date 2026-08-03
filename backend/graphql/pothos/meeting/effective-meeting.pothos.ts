@@ -20,6 +20,7 @@ export const EffectiveMeetingPothosObject = EffectiveMeetingRef.implement({
     source: t.expose("source", { type: EffectiveMeetingSourceRef }),
     configId: t.exposeString("configId", { nullable: true }),
     providerId: t.exposeString("providerId", { nullable: true }),
+    supportsAutoGeneration: t.exposeBoolean("supportsAutoGeneration"),
   }),
 });
 

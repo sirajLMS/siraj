@@ -1,0 +1,535 @@
+# Requirements — Plan 21: Knowledge Propagation
+
+> **Plan #:** 21
+> **Plan Name:** Knowledge Propagation
+> **Dependencies:** Plans 1–20 (all prior plans)
+> **Stakeholders:** Backend engineering, frontend engineering, DevOps, documentation team, AI agent maintainers
+> **Related Docs:** `MASTER_ARCHITECTURE.md`, `siraj_analysis/10-testing-quality-patterns.md`, `siraj_analysis/12-cron-config-infra.md`, all layer-level `AGENTS.md` files, `.agents/instructions/*.instructions.md`
+
+---
+
+## 1. Introduction
+
+### Overview
+
+This plan creates the knowledge propagation artifacts for the certificate feature: a dedicated documentation directory (`docs/certificates/`), updates to all relevant `AGENTS.md` files, updates to instruction files (`.agents/instructions/*.instructions.md`), and updates to skills. The goal is to ensure that every architecture layer, convention, deviation, and non-obvious pattern introduced by the certificate feature is documented for human developers and AI agents alike.
+
+Knowledge propagation is the final cross-cutting plan (Plan 21 of 22). It runs in parallel with Plan 20 (Testing & Quality) and after all code-producing plans (1–19). Where Plan 22 (Cron & Cleanup) introduces cron-specific conventions, this plan documents those conventions in the appropriate layer `AGENTS.md` files and instruction files.
+
+### Business Value
+
+- **Onboarding**: New developers can understand the certificate feature's architecture without reading every plan.
+- **AI agent accuracy**: Copilot CLI agents and other AI tools rely on `AGENTS.md` files and instruction files for context; updating them ensures agents follow certificate-specific conventions.
+- **Convention consistency**: Documenting deviations from standard Siraj patterns (e.g., cache tag naming, PDF render lifecycle, verification log retention) prevents future regressions.
+- **Searchability**: A structured `docs/certificates/` directory with an index enables keyword search across certificate documentation.
+- **Skill automation**: Updated skills encode certificate-specific workflows (e.g., certificate QA, certificate review) for AI-assisted development.
+
+### Scope
+
+| In Scope | Out of Scope |
+|----------|-------------|
+| `docs/certificates/` directory structure and all documentation files | Source code changes to application logic |
+| Root `AGENTS.md` updates (certificate-specific section) | Database schema changes (Plan 1) |
+| `app/AGENTS.md` updates (certificate route conventions) | Service implementation (Plans 4, 17) |
+| `shared/AGENTS.md` updates (shared certificate types/lib) | Frontend component implementation (Plans 8–10, 16–17) |
+| `frontend/AGENTS.md` updates (certificate UI conventions) | Cron route implementation (Plan 22) |
+| `frontend/views/AGENTS.md` updates (certificate view patterns) | GraphQL schema definitions (Plan 5) |
+| `frontend/common/stores/AGENTS.md` updates (certificate store conventions) | Template editor implementation (Plans 10, 12) |
+| `frontend/common/graphql/AGENTS.md` updates (certificate documents) | Storage adapter implementation (Plan 7) |
+| `backend/services/AGENTS.md` updates (certificate service patterns) | Testing implementation (Plan 20) |
+| `backend/graphql/AGENTS.md` updates (certificate Pothos patterns) | — |
+| `backend/db/repo/AGENTS.md` updates (certificate repository patterns) | — |
+| `backend/db/seeds/AGENTS.md` updates (certificate seed data) | — |
+| `backend/types/AGENTS.md` updates (certificate type definitions) | — |
+| `backend/enum/AGENTS.md` updates (certificate enums) | — |
+| `.agents/instructions/frontend.instructions.md` updates | — |
+| `.agents/instructions/backend.instructions.md` updates | — |
+| `.agents/instructions/tests.instructions.md` updates | — |
+| Skill updates for certificate-specific workflows | New skill creation (skills referenced from existing skill framework) |
+| i18n keys for documentation-related strings | — |
+
+---
+
+## 2. Requirements
+
+### Feature Area 1: Documentation Directory Structure
+
+**REQ-21.1 (docs-directory-creation)**
+WHEN the knowledge propagation plan is executed
+THEN the system SHALL create a `docs/certificates/` directory at the project root
+AND it SHALL contain an `INDEX.md` serving as the entry point that links to all other documentation files in the directory.
+
+**REQ-21.2 (docs-architecture-overview)**
+WHEN the `docs/certificates/` directory is created
+THEN it SHALL include an `ARCHITECTURE.md` file documenting:
+- The certificate feature's position within the Siraj architecture layers
+- Data flow from client component through Apollo, GraphQL, Pothos, service, repository, to database
+- Server component data flow (cached wrapper → service → repository → database)
+- The certificate entity model and its relationships (template → template elements → template variables, certificate → verification log, recipient group → group items)
+- Cross-layer boundary rules specific to certificates (e.g., no frontend imports in repository layer)
+
+**REQ-21.3 (docs-database-patterns)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `DATABASE_PATTERNS.md` file documenting:
+- The Drizzle schema barrel structure for certificate tables (`backend/db/schema/cert/`)
+- The repository pattern (one repository per entity, `runInRollback` in tests, `tx` propagation)
+- The entity cache service pattern for certificate entities
+- The prepared statement pattern for high-frequency queries (verification lookup by code)
+- The seed data structure for certificate demo data
+
+**REQ-21.4 (docs-service-patterns)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `SERVICE_PATTERNS.md` file documenting:
+- The certificate service namespace structure (`backend/services/cert/`)
+- The generation pipeline service pattern (batch generation, idempotency keys, retry logic)
+- The verification service pattern (code lookup, audit logging, cache invalidation)
+- The template management service pattern (version bumping, publish workflow, draft→published state machine)
+- The entity cache service pattern for certificate data (TTL, cache tags, invalidation)
+
+**REQ-21.5 (docs-graphql-patterns)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `GRAPHQL_PATTERNS.md` file documenting:
+- The Pothos builder pattern for certificate types (input types, object types, enum types)
+- The auth scope pattern for certificate mutations (staff, admin, teacher roles)
+- The DataLoader batching pattern for certificate-related nested queries (template elements, variable bindings, verification logs)
+- The GraphQL document conventions for certificate frontend documents (naming, always include `id`, no `useLazyQuery`)
+- The manual trigger mutation pattern (modeled after `refreshExchangeRates` for cron-related admin triggers)
+
+**REQ-21.6 (docs-frontend-patterns)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `FRONTEND_PATTERNS.md` file documenting:
+- The certificate view organization (`frontend/views/dashboard/certificates/`)
+- The Apollo hook usage pattern for certificate queries and mutations
+- The Zustand store pattern for certificate UI state (cert list filters, generation dialog state, template editor state)
+- The MUI v9 component patterns specific to certificates (DataGrid configuration, template editor canvas, preview dialog)
+- The i18n usage pattern for certificate UI labels (compile-time `useAppTranslation` with certificate namespace)
+
+**REQ-21.7 (docs-storage-patterns)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `STORAGE_PATTERNS.md` file documenting:
+- The storage adapter pattern for PDF files and background images
+- The signed URL generation and cleanup pattern
+- The orphan file detection and grace-period deletion pattern
+- The storage quota check and alerting pattern
+- The render cache invalidation pattern (cache tag naming: `render-cache:template:{id}`, `render-cache:cert:{id}`)
+
+**REQ-21.8 (docs-cron-patterns)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `CRON_PATTERNS.md` file documenting:
+- The Vercel Cron route pattern for certificate jobs (`app/api/cron/cert-*/route.ts`)
+- The `verifyCronSecretAuth` guard pattern
+- The Redis single-flight lock pattern for overlapping cron invocations
+- The per-item failure isolation pattern
+- The UTC-date idempotency key pattern for cron job runs
+- The env config registration pattern for cron schedules and strategies
+
+**REQ-21.9 (docs-testing-patterns)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `TESTING_PATTERNS.md` file documenting:
+- The entity-setup helper extensions for certificates (cert, template, element, variable, group, group item)
+- The `runInRollback` test pattern for certificate repository tests
+- The test client pattern for certificate GraphQL integration tests
+- The mock Apollo provider pattern for certificate component tests
+- The E2E test pattern for certificate flows (generation, verification, template management)
+- The Storybook story pattern for certificate components
+
+**REQ-21.10 (docs-i18n-patterns)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include an `I18N_PATTERNS.md` file documenting:
+- The compile-time translation system structure for the `certificates` namespace
+- All sub-domains within the namespace (entities, templates, generation, verification, cron, errors, ui)
+- The Arabic pluralization rules for count-based interpolations (zero/one/two/few/many/other)
+- The type schema definition pattern in `shared/locale/`
+- The locale implementation pattern in `shared/locale/en/` and `shared/locale/ar/`
+- The translation key naming convention (dot-separated, sub-domain prefixed)
+
+**REQ-21.11 (docs-template-editor)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `TEMPLATE_EDITOR.md` file documenting:
+- The template editor canvas architecture (drag-and-drop, element positioning, zIndex management)
+- The template element types and their rendering behavior
+- The template variable system (text, date, image, QR code)
+- The template preview and publish workflow
+- The template version bumping pattern
+
+**REQ-21.12 (docs-verification-system)**
+WHEN the documentation is created
+THEN the `docs/certificates/` directory SHALL include a `VERIFICATION_SYSTEM.md` file documenting:
+- The verification code generation pattern (UUID-based, uniqueness guarantee)
+- The public verification page architecture (server component, no auth)
+- The verification log entry pattern (IP, user agent, timestamp, success/fail)
+- The verification log retention and aggregation pattern
+- The QR code embedding pattern for certificates
+
+**REQ-21.13 (docs-index-file)**
+WHEN all documentation files are created
+THEN the `docs/certificates/INDEX.md` SHALL list every documentation file with a brief description and link
+AND the index SHALL be organized by architecture layer (database → services → GraphQL → frontend → storage → cron → testing → i18n)
+AND the index SHALL cross-reference relevant `AGENTS.md` files and instruction files.
+
+---
+
+### Feature Area 2: AGENTS.md Updates
+
+**REQ-21.14 (root-agents-md-update)**
+WHEN the root `AGENTS.md` is updated for the certificate feature
+THEN it SHALL include a new "Certificate Feature" section documenting:
+- The `docs/certificates/` directory location and index
+- The certificate namespace in `shared/locale/` with its sub-domains
+- The certificate-specific cron routes (`/api/cron/cert-*`)
+- The certificate-specific env vars (`CERT_*`)
+- The certificate storage directory naming convention (`certificates/`, `templates/`)
+- The certificate render cache tag naming convention (`render-cache:cert:*`, `render-cache:template:*`)
+- Cross-references to layer-specific `AGENTS.md` files for certificate conventions
+
+**REQ-21.15 (shared-agents-md-update)**
+WHEN `shared/AGENTS.md` is updated for the certificate feature
+THEN it SHALL document:
+- The `certificates` translation namespace and its structure
+- The certificate shared types location (`shared/types/cert/` if any, or reference to `backend/types/`)
+- The certificate shared constants location (`shared/constants/cert/` if any)
+- The certificate shared utility functions location (`shared/lib/cert/` if any)
+- The rule that shared-layer certificate code must never import from `@/frontend/**`, `@/backend/**`, or `@/app/**`
+
+**REQ-21.16 (backend-agents-md-updates)**
+WHEN the backend `AGENTS.md` files are updated for the certificate feature
+THEN the following files SHALL receive certificate-specific sections:
+- `backend/services/AGENTS.md`: certificate service namespace structure, generation pipeline pattern, verification service, template management service, entity cache service
+- `backend/graphql/AGENTS.md`: certificate Pothos type definitions, auth scope pattern, DataLoader batching for certificate entities, manual trigger mutation pattern
+- `backend/db/repo/AGENTS.md`: certificate repository barrel structure, `runInRollback` test requirement, `tx` propagation rule, entity cache integration, prepared statement for verification lookup
+- `backend/db/seeds/AGENTS.md`: certificate seed data structure, demo template, demo certificates, demo recipient groups
+- `backend/types/AGENTS.md`: certificate entity types (`CertificateSelectType`, `CertificateInsertType`, `CertificateReturnType`, `CertificateSubmitInput`), template types, verification types, the rule that Pothos files must import from `@/backend/types`
+- `backend/enum/AGENTS.md`: certificate status enum, template status enum, template element type enum, batch generation status enum, verification log status enum
+
+**REQ-21.17 (frontend-agents-md-updates)**
+WHEN the frontend `AGENTS.md` files are updated for the certificate feature
+THEN the following files SHALL receive certificate-specific sections:
+- `frontend/AGENTS.md`: certificate view organization, Apollo hook patterns for certificates, Zustand store conventions for certificate state, MUI component patterns for certificates
+- `frontend/views/AGENTS.md`: certificate page component structure, DataGrid configuration for certificate lists, generation dialog composition, template editor view organization
+- `frontend/common/stores/AGENTS.md`: certificate store naming convention, store composition pattern, mock store pattern for Storybook
+- `frontend/common/graphql/AGENTS.md`: certificate GraphQL document file organization, naming conventions, `id` field inclusion rule, no `useLazyQuery` rule, import from `@apollo/client/react`
+
+**REQ-21.18 (app-agents-md-update)**
+WHEN `app/AGENTS.md` is updated for the certificate feature
+THEN it SHALL document:
+- The certificate public verification route (`app/verify/[code]/page.tsx`)
+- The certificate admin routes (`app/(dashboard)/certificates/`)
+- The certificate cron routes (`app/api/cron/cert-*/route.ts`)
+- The locale routing for certificate pages (preserved `[locale]` routing)
+- The server component data flow for the verification page (no Apollo, direct service call)
+
+---
+
+### Feature Area 3: Instruction File Updates
+
+**REQ-21.19 (frontend-instructions-update)**
+WHEN `.agents/instructions/frontend.instructions.md` is updated for the certificate feature
+THEN it SHALL include:
+- Certificate component naming conventions (`*CertificateList`, `*TemplateEditor`, `*GenerationDialog`, `*VerificationPage`)
+- Certificate Apollo hook naming conventions (`useCertificate*Query`, `useCertificate*Mutation`)
+- Certificate Zustand store naming conventions (`certificate*Store`)
+- Certificate GraphQL document naming conventions (`*CertificateQueryDocument`, `*CertificateMutationDocument`, `*TemplateQueryDocument`)
+- Certificate MUI component usage notes (DataGrid column configuration for certificates, template editor canvas rendering)
+- Certificate i18n usage notes (`useAppTranslation(Translation.Dashboard.Certificate)` with sub-domain access)
+- Certificate-specific gotchas (PDF preview rendering, QR code generation, template element drag-and-drop)
+
+**REQ-21.20 (backend-instructions-update)**
+WHEN `.agents/instructions/backend.instructions.md` is updated for the certificate feature
+THEN it SHALL include:
+- Certificate service naming conventions (`Certificate*Service`, `Template*Service`, `Verification*Service`)
+- Certificate repository naming conventions (`Certificate*Repository`, `Template*Repository`)
+- Certificate type naming conventions (`Certificate{Entity}SelectType`, `Certificate{Entity}InsertType`, `Certificate{Entity}ReturnType`)
+- Certificate Pothos type naming conventions
+- Certificate enum naming conventions
+- Certificate cron route naming conventions (`cert-*` prefix)
+- Certificate env var naming conventions (`CERT_*` prefix)
+- Certificate cache tag naming conventions (`render-cache:*`)
+- Certificate-specific gotchas (generation pipeline idempotency, verification code uniqueness, template version bumping, storage orphan detection)
+
+**REQ-21.21 (tests-instructions-update)**
+WHEN `.agents/instructions/tests.instructions.md` is updated for the certificate feature
+THEN it SHALL include:
+- Certificate entity-setup helper naming conventions and signatures
+- Certificate repository test file naming and location conventions
+- Certificate GraphQL integration test patterns (testClient usage, auth scope setup)
+- Certificate component test patterns (renderWithWrapper, MockLink setup)
+- Certificate E2E test patterns (Playwright, production server, cert flow fixtures)
+- Certificate Storybook story patterns
+- Certificate-specific test gotchas (PDF render mocking, storage adapter mocking, cron route testing)
+
+---
+
+### Feature Area 4: Skill Updates
+
+**REQ-21.22 (skill-review-workflow-update)**
+WHEN skills are updated for the certificate feature
+THEN the review workflow skills (if applicable) SHALL include certificate-specific review checklist items:
+- Verify certificate type definitions follow `backend/types/` pattern
+- Verify certificate GraphQL documents include `id` field and use correct import path
+- Verify certificate services follow namespace structure and per-item failure isolation
+- Verify certificate repositories use `runInRollback` in tests and pass `tx` to all methods
+- Verify certificate i18n keys are defined in type schema and implemented in both `en/` and `ar/`
+- Verify certificate cron routes follow `verifyCronSecretAuth` pattern
+- Verify certificate frontend components use `sx` prop (not style props) and correct MUI v9 icon names
+- Verify certificate stores follow Zustand composition pattern
+
+**REQ-21.23 (skill-quality-gate-update)**
+WHEN skills are updated for the certificate feature
+THEN the quality gate skills SHALL recognize certificate-specific files:
+- Certificate service files in `backend/services/cert/` as backend files (trigger `backend.instructions.md`)
+- Certificate repository files in `backend/db/repo/cert/` as backend files
+- Certificate view files in `frontend/views/dashboard/certificates/` as frontend files (trigger `frontend.instructions.md`)
+- Certificate test files in `backend/db/test/repo/cert/` and `backend/db/test/logic/cert/` as test files (trigger `tests.instructions.md`)
+- Certificate cron routes in `app/api/cron/cert-*/` as backend files (trigger `backend.instructions.md`)
+
+**REQ-21.24 (skill-coding-agent-update)**
+WHEN skills are updated for the certificate feature
+THEN the coding agent skills SHALL include certificate-specific guidance:
+- When working on certificate files, read `docs/certificates/INDEX.md` for architecture context
+- When working on certificate cron routes, reference `docs/certificates/CRON_PATTERNS.md`
+- When working on certificate tests, reference `docs/certificates/TESTING_PATTERNS.md`
+- When working on certificate i18n, reference `docs/certificates/I18N_PATTERNS.md`
+- When working on certificate frontend components, reference `docs/certificates/FRONTEND_PATTERNS.md`
+
+---
+
+### Feature Area 5: Cross-References and Consistency
+
+**REQ-21.25 (cross-reference-consistency)**
+WHEN documentation files and AGENTS.md updates are created
+THEN every cross-reference between a documentation file and an AGENTS.md file SHALL be bidirectional:
+- If `docs/certificates/DATABASE_PATTERNS.md` references `backend/db/repo/AGENTS.md`, then `backend/db/repo/AGENTS.md` SHALL reference `docs/certificates/DATABASE_PATTERNS.md`
+- If `docs/certificates/GRAPHQL_PATTERNS.md` references `backend/graphql/AGENTS.md`, then `backend/graphql/AGENTS.md` SHALL reference `docs/certificates/GRAPHQL_PATTERNS.md`
+- And so on for every documentation file ↔ AGENTS.md pair
+
+**REQ-21.26 (instruction-file-ags-md-consistency)**
+WHEN instruction files and AGENTS.md files are updated
+THEN the instruction files SHALL reference the relevant AGENTS.md files for certificate-specific rules
+AND the AGENTS.md files SHALL not duplicate instruction file content — they SHALL reference instruction files for generic rules and only contain certificate-specific additions.
+
+**REQ-21.27 (docs-no-code-snippets)**
+WHEN documentation files in `docs/certificates/` are created
+THEN no documentation file SHALL contain code snippets, code blocks, or inline code exceeding 3 lines
+AND interface descriptions SHALL use tables, bullet lists, and prose instead of code
+AND data flow diagrams SHALL use ASCII art boxes (not code blocks with syntax highlighting).
+
+**REQ-21.28 (docs-i18n-inline)**
+WHEN documentation files reference i18n keys or translation behavior
+THEN the documentation SHALL describe the keys and their behavior inline (in tables) rather than referencing external files
+AND all Arabic translations cited in documentation SHALL be accurate and reviewed.
+
+**REQ-21.29 (docs-no-hardcoded-strings)**
+WHEN documentation files describe i18n patterns
+THEN the documentation SHALL explicitly note that no user-facing strings in certificate code SHALL be hardcoded
+AND the documentation SHALL provide the `docs/certificates/I18N_PATTERNS.md` reference as the canonical source for all certificate translation keys.
+
+---
+
+## 3. i18n Requirements
+
+### Feature Area 6: Knowledge Propagation i18n
+
+All documentation-related user-facing strings (e.g., documentation index labels, skill descriptions) SHALL use the compile-time translation system in `shared/locale/`.
+
+**Namespace:** `certificates` (sub-domain: `knowledge` — used only if any user-facing strings are generated from documentation metadata; most documentation is Markdown and not localized)
+
+**Translation Keys (sub-domain: `knowledge`):**
+
+| Key | English | Arabic | Notes |
+|-----|---------|--------|-------|
+| `knowledge.docsIndexTitle` | `"Certificate Documentation"` | `"توثيق الشهادات"` | Title for documentation index if surfaced in UI |
+| `knowledge.architectureOverview` | `"Architecture Overview"` | `"نظرة عامة على البنية"` | Section label |
+| `knowledge.databasePatterns` | `"Database Patterns"` | `"أنماط قاعدة البيانات"` | Section label |
+| `knowledge.servicePatterns` | `"Service Patterns"` | `"أنماط الخدمات"` | Section label |
+| `knowledge.graphqlPatterns` | `"GraphQL Patterns"` | `"أنماط GraphQL"` | Section label |
+| `knowledge.frontendPatterns` | `"Frontend Patterns"` | `"أنماط الواجهة الأمامية"` | Section label |
+| `knowledge.storagePatterns` | `"Storage Patterns"` | `"أنماط التخزين"` | Section label |
+| `knowledge.cronPatterns` | `"Cron Job Patterns"` | `"أنماط مهام Cron"` | Section label |
+| `knowledge.testingPatterns` | `"Testing Patterns"` | `"أنماط الاختبار"` | Section label |
+| `knowledge.i18nPatterns` | `"Internationalization Patterns"` | `"أنماط التدويل"` | Section label |
+| `knowledge.templateEditor` | `"Template Editor"` | `"محرر القوالب"` | Section label |
+| `knowledge.verificationSystem` | `"Verification System"` | `"نظام التحقق"` | Section label |
+
+**Arabic Pluralization Rules:** Not applicable for this sub-domain — all keys are singular labels without count interpolations.
+
+---
+
+## 4. Acceptance Criteria
+
+### AC-21.1: Documentation Directory
+
+- [ ] `docs/certificates/` directory exists at project root
+- [ ] `INDEX.md` exists with links to all documentation files, organized by architecture layer
+- [ ] `ARCHITECTURE.md` documents certificate feature position, data flow, entity model
+- [ ] `DATABASE_PATTERNS.md` documents schema barrel, repository pattern, cache, prepared statements, seeds
+- [ ] `SERVICE_PATTERNS.md` documents namespace structure, generation pipeline, verification, template management, cache
+- [ ] `GRAPHQL_PATTERNS.md` documents Pothos builders, auth scopes, DataLoader, document conventions, manual triggers
+- [ ] `FRONTEND_PATTERNS.md` documents view organization, Apollo hooks, Zustand stores, MUI patterns, i18n
+- [ ] `STORAGE_PATTERNS.md` documents adapter pattern, signed URLs, orphan detection, quota, cache invalidation
+- [ ] `CRON_PATTERNS.md` documents Vercel Cron pattern, auth guard, Redis lock, failure isolation, idempotency, env config
+- [ ] `TESTING_PATTERNS.md` documents entity-setup helpers, runInRollback, test client, component tests, E2E, Storybook
+- [ ] `I18N_PATTERNS.md` documents namespace structure, sub-domains, pluralization, type schema, locale implementation
+- [ ] `TEMPLATE_EDITOR.md` documents canvas architecture, element types, variable system, preview/publish, versioning
+- [ ] `VERIFICATION_SYSTEM.md` documents code generation, public page, log entries, retention, QR codes
+- [ ] All documentation files contain no code snippets or code blocks exceeding 3 lines
+- [ ] All documentation files use tables, bullet lists, prose, and ASCII art for descriptions
+
+### AC-21.2: AGENTS.md Updates
+
+- [ ] Root `AGENTS.md` has "Certificate Feature" section with docs reference, namespace, cron routes, env vars, storage naming, cache tags
+- [ ] `shared/AGENTS.md` documents certificate namespace, shared types, constants, utilities, import rules
+- [ ] `backend/services/AGENTS.md` documents certificate service namespace, pipeline, verification, template management, cache
+- [ ] `backend/graphql/AGENTS.md` documents Pothos types, auth scopes, DataLoader, manual triggers
+- [ ] `backend/db/repo/AGENTS.md` documents barrel structure, runInRollback, tx propagation, cache, prepared statements
+- [ ] `backend/db/seeds/AGENTS.md` documents certificate seed data structure
+- [ ] `backend/types/AGENTS.md` documents certificate entity types, import-from-types rule
+- [ ] `backend/enum/AGENTS.md` documents certificate enums (status, template status, element type, batch status, verification status)
+- [ ] `frontend/AGENTS.md` documents certificate view organization, Apollo hooks, Zustand stores, MUI patterns
+- [ ] `frontend/views/AGENTS.md` documents certificate page structure, DataGrid, generation dialog, template editor
+- [ ] `frontend/common/stores/AGENTS.md` documents certificate store naming, composition, mock store pattern
+- [ ] `frontend/common/graphql/AGENTS.md` documents certificate documents, naming, id inclusion, no lazy query
+- [ ] `app/AGENTS.md` documents certificates routes (public verify, admin dashboard, cron routes), locale routing, server component flow
+
+### AC-21.3: Instruction File Updates
+
+- [ ] `.agents/instructions/frontend.instructions.md` has certificate naming conventions, Apollo hooks, stores, documents, MUI notes, i18n notes, gotchas
+- [ ] `.agents/instructions/backend.instructions.md` has certificate service, repository, type, Pothos, enum, cron, env var, cache, gotchas
+- [ ] `.agents/instructions/tests.instructions.md` has certificate entity-setup, repo tests, GraphQL integration, component, E2E, Storybook, gotchas
+
+### AC-21.4: Skill Updates
+
+- [ ] Review workflow skills include certificate-specific review checklist items
+- [ ] Quality gate skills recognize certificate-specific file paths for instruction file discovery
+- [ ] Coding agent skills include certificate-specific documentation references
+
+### AC-21.5: Cross-References and Consistency
+
+- [ ] All cross-references between documentation files and AGENTS.md files are bidirectional
+- [ ] Instruction files reference relevant AGENTS.md files for certificate rules
+- [ ] AGENTS.md files do not duplicate instruction file content — they contain only certificate-specific additions
+- [ ] No documentation file contains code snippets exceeding 3 lines
+- [ ] All Arabic translations in documentation are accurate
+
+### AC-21.6: i18n
+
+- [ ] All `knowledge.*` translation keys defined in `shared/locale/` with English and Arabic implementations
+- [ ] Type schema for `knowledge` sub-domain defined in locale type schema file
+- [ ] No hardcoded user-facing strings in any documentation-related UI surfaces
+- [ ] Arabic translations reviewed for accuracy and context
+
+---
+
+## 5. Knowledge Base Section
+
+### Plan 21 Knowledge Propagation
+
+This plan itself contributes knowledge to the following locations:
+
+| Knowledge Area | Target Document | Target Section |
+|----------------|-----------------|----------------|
+| Documentation directory structure | `docs/certificates/INDEX.md` | All sections |
+| Architecture overview | `docs/certificates/ARCHITECTURE.md` | All sections |
+| Database patterns | `docs/certificates/DATABASE_PATTERNS.md` | All sections |
+| Service patterns | `docs/certificates/SERVICE_PATTERNS.md` | All sections |
+| GraphQL patterns | `docs/certificates/GRAPHQL_PATTERNS.md` | All sections |
+| Frontend patterns | `docs/certificates/FRONTEND_PATTERNS.md` | All sections |
+| Storage patterns | `docs/certificates/STORAGE_PATTERNS.md` | All sections |
+| Cron patterns | `docs/certificates/CRON_PATTERNS.md` | All sections |
+| Testing patterns | `docs/certificates/TESTING_PATTERNS.md` | All sections |
+| i18n patterns | `docs/certificates/I18N_PATTERNS.md` | All sections |
+| Template editor docs | `docs/certificates/TEMPLATE_EDITOR.md` | All sections |
+| Verification system docs | `docs/certificates/VERIFICATION_SYSTEM.md` | All sections |
+| Certificate conventions (root) | `AGENTS.md` | Certificate Feature section |
+| Certificate conventions (shared) | `shared/AGENTS.md` | Certificate section |
+| Certificate conventions (backend services) | `backend/services/AGENTS.md` | Certificate section |
+| Certificate conventions (backend GraphQL) | `backend/graphql/AGENTS.md` | Certificate section |
+| Certificate conventions (backend repo) | `backend/db/repo/AGENTS.md` | Certificate section |
+| Certificate conventions (backend seeds) | `backend/db/seeds/AGENTS.md` | Certificate section |
+| Certificate conventions (backend types) | `backend/types/AGENTS.md` | Certificate section |
+| Certificate conventions (backend enum) | `backend/enum/AGENTS.md` | Certificate section |
+| Certificate conventions (frontend) | `frontend/AGENTS.md` | Certificate section |
+| Certificate conventions (frontend views) | `frontend/views/AGENTS.md` | Certificate section |
+| Certificate conventions (frontend stores) | `frontend/common/stores/AGENTS.md` | Certificate section |
+| Certificate conventions (frontend GraphQL) | `frontend/common/graphql/AGENTS.md` | Certificate section |
+| Certificate conventions (app) | `app/AGENTS.md` | Certificate route section |
+| Frontend instruction updates | `.agents/instructions/frontend.instructions.md` | Certificate subsection |
+| Backend instruction updates | `.agents/instructions/backend.instructions.md` | Certificate subsection |
+| Test instruction updates | `.agents/instructions/tests.instructions.md` | Certificate subsection |
+| Skill updates | Skills framework | Certificate review checklist, file path recognition, doc references |
+
+---
+
+## 6. Non-Functional Requirements
+
+**REQ-21.30 (documentation-maintainability)**
+WHEN documentation is created
+THEN each file SHALL be self-contained (readable without requiring other files for context)
+AND each file SHALL include a header with the document title, last-updated context, and related-links section
+AND the documentation SHALL be structured so that future plans can append new sections without restructuring existing content.
+
+**REQ-21.31 (documentation-searchability)**
+WHEN documentation is created
+THEN the `INDEX.md` SHALL include keywords for each documentation file to enable text search
+AND each documentation file SHALL include a table of contents at the top for quick navigation.
+
+**REQ-21.32 (documentation-accuracy)**
+WHEN documentation is created
+THEN all described patterns SHALL match the actual implementation in Plans 1–20
+AND documentation SHALL be validated against the actual codebase before the plan is considered complete
+AND any discrepancies between documentation and implementation SHALL be resolved by updating either the documentation or flagging the implementation deviation.
+
+**REQ-21.33 (agents-md-no-duplication)**
+WHEN AGENTS.md files are updated
+THEN certificate-specific sections SHALL NOT duplicate content already present in the root AGENTS.md
+AND they SHALL NOT duplicate content from `docs/certificates/` files — they SHALL reference and summarize, not copy.
+
+---
+
+## 7. Security Considerations
+
+**REQ-21.34 (no-sensitive-info)**
+WHEN documentation is created
+THEN no documentation file SHALL contain actual database credentials, API keys, secrets, or environment variable values
+AND documentation SHALL reference env var names (e.g., `CERT_EXPIRY_CRON_SCHEDULE`) but never their actual values
+AND the `.env.example` reference in documentation SHALL describe the variable's purpose, not its configured value.
+
+---
+
+## 8. Traceability
+
+| Requirement ID | Feature Area | Acceptance Criterion |
+|----------------|------------- |---------------------|
+| REQ-21.1 | Documentation directory | AC-21.1 |
+| REQ-21.2 | Documentation directory | AC-21.1 |
+| REQ-21.3 | Documentation directory | AC-21.1 |
+| REQ-21.4 | Documentation directory | AC-21.1 |
+| REQ-21.5 | Documentation directory | AC-21.1 |
+| REQ-21.6 | Documentation directory | AC-21.1 |
+| REQ-21.7 | Documentation directory | AC-21.1 |
+| REQ-21.8 | Documentation directory | AC-21.1 |
+| REQ-21.9 | Documentation directory | AC-21.1 |
+| REQ-21.10 | Documentation directory | AC-21.1 |
+| REQ-21.11 | Documentation directory | AC-21.1 |
+| REQ-21.12 | Documentation directory | AC-21.1 |
+| REQ-21.13 | Documentation directory | AC-21.1 |
+| REQ-21.14 | AGENTS.md updates | AC-21.2 |
+| REQ-21.15 | AGENTS.md updates | AC-21.2 |
+| REQ-21.16 | AGENTS.md updates | AC-21.2 |
+| REQ-21.17 | AGENTS.md updates | AC-21.2 |
+| REQ-21.18 | AGENTS.md updates | AC-21.2 |
+| REQ-21.19 | Instruction files | AC-21.3 |
+| REQ-21.20 | Instruction files | AC-21.3 |
+| REQ-21.21 | Instruction files | AC-21.3 |
+| REQ-21.22 | Skills | AC-21.4 |
+| REQ-21.23 | Skills | AC-21.4 |
+| REQ-21.24 | Skills | AC-21.4 |
+| REQ-21.25 | Cross-references | AC-21.5 |
+| REQ-21.26 | Cross-references | AC-21.5 |
+| REQ-21.27 | Cross-references | AC-21.5 |
+| REQ-21.28 | Cross-references | AC-21.5 |
+| REQ-21.29 | Cross-references | AC-21.5 |
+| REQ-21.30 | Non-functional | AC-21.5 |
+| REQ-21.31 | Non-functional | AC-21.5 |
+| REQ-21.32 | Non-functional | AC-21.5 |
+| REQ-21.33 | Non-functional | AC-21.5 |
+| REQ-21.34 | Security | AC-21.5 |

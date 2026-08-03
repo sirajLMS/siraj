@@ -1,6 +1,9 @@
 "use client";
 
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -19,10 +22,12 @@ export type MeetingProviderFieldsFragment = {
   readonly updatedAt: string | null;
   readonly fieldSchema: {
     readonly requiresMeetingUrl: boolean | null;
+    readonly supportsAutoGeneration: boolean | null;
     readonly supportsUsername: boolean | null;
     readonly supportsPassword: boolean | null;
     readonly supportsTenantId: boolean | null;
   } | null;
+  readonly providerKind: string | null;
 };
 
 export type MeetingConfigDetailsFormValue = {
@@ -39,6 +44,9 @@ export type MeetingConfigTypeFieldsProps = {
   readonly disabled?: boolean;
   readonly passwordHelperText?: string;
   readonly onMeetingUrlBlur?: () => void;
+  readonly onGenerateUrl?: () => void;
+  readonly generating?: boolean;
+  readonly generationError?: string | null;
 };
 
 export function MeetingConfigTypeFieldsMobile({
@@ -48,6 +56,9 @@ export function MeetingConfigTypeFieldsMobile({
   disabled,
   passwordHelperText,
   onMeetingUrlBlur,
+  onGenerateUrl,
+  generating,
+  generationError,
 }: MeetingConfigTypeFieldsProps) {
   const { fields: t } = useAppTranslation(Translation.Ui.MeetingConfig);
 
@@ -56,13 +67,14 @@ export function MeetingConfigTypeFieldsMobile({
   }
 
   const fields = getVisibleMeetingConfigFields(provider);
+  const supportsAuto = provider.fieldSchema?.supportsAutoGeneration === true;
 
   return (
     <MobileContentStack gap={1.5}>
       <TextField
         label={t.meetingUrl}
         value={value.meetingUrl}
-        disabled={disabled}
+        disabled={disabled || (supportsAuto && Boolean(value.meetingUrl.trim()))}
         fullWidth
         size="small"
         inputMode="url"
@@ -71,6 +83,16 @@ export function MeetingConfigTypeFieldsMobile({
         onBlur={onMeetingUrlBlur}
         slotProps={{ htmlInput: { dir: "ltr" } }}
       />
+      {supportsAuto && onGenerateUrl ? (
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <Button variant="outlined" size="small" disabled={disabled || generating} onClick={onGenerateUrl}>
+            {generating ? t.generating : value.meetingUrl.trim() ? t.regenerate : t.generateAutomatically}
+          </Button>
+          {generationError ? (
+            <Typography sx={{ typography: "bodySm", color: "error.main" }}>{generationError}</Typography>
+          ) : null}
+        </Stack>
+      ) : null}
       {fields.showUsername ? (
         <TextField
           label={t.username}

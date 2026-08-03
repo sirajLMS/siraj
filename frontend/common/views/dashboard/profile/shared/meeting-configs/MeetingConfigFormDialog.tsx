@@ -2,10 +2,12 @@
 
 import { useMutation } from "@apollo/client/react";
 import { Dialog } from "@mui/material";
+import { useState } from "react";
 import type { UserMeetingConfigUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   createUserMeetingConfigMutationDocument,
+  generateMeetingUrlMutationDocument,
   updateUserMeetingConfigMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { MeetingConfigFormDialogContent } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
@@ -48,12 +50,23 @@ export function MeetingConfigFormDialog({
 
   const [createConfig, { loading: creating }] = useMutation(createUserMeetingConfigMutationDocument);
   const [updateConfig, { loading: updating }] = useMutation(updateUserMeetingConfigMutationDocument);
+  const [generateUrl, { loading: generating }] = useMutation(generateMeetingUrlMutationDocument);
   const saving = creating || updating;
 
   const handleSave = async () => {
-    if (!validateUrl()) return;
+    const supportsAutoGeneration = provider?.fieldSchema?.supportsAutoGeneration === true;
+
     if (!isEdit && !provider?.id) return;
-    if (!details.meetingUrl.trim()) return;
+
+    // Block save when URL is blank and the provider does NOT support auto-generation.
+    if (!details.meetingUrl.trim() && !supportsAutoGeneration) return;
+
+    // validateUrl handles allowlist checks — skip when URL is blank (auto-gen path).
+    if (details.meetingUrl.trim() && !validateUrl()) return;
+
+    // When supportsAutoGeneration is true and URL is blank, send null so the
+    // backend's maybeGenerateUrl generates one (REQ-6 AC1).
+    const meetingUrl = details.meetingUrl.trim() || null;
 
     setSaveError(null);
 
@@ -64,8 +77,9 @@ export function MeetingConfigFormDialog({
           isDefault,
           password: details.password.trim() || null,
           providerId: providerChanged && provider?.id ? provider.id : null,
+          forceRegenerate: null,
           details: {
-            meetingUrl: details.meetingUrl.trim(),
+            meetingUrl,
             username: details.username.trim() || null,
             tenantId: details.tenantId.trim() || null,
           },
@@ -86,7 +100,7 @@ export function MeetingConfigFormDialog({
               isDefault,
               password: details.password.trim() || null,
               details: {
-                meetingUrl: details.meetingUrl.trim(),
+                meetingUrl,
                 username: details.username.trim() || null,
                 tenantId: details.tenantId.trim() || null,
               },
@@ -102,6 +116,34 @@ export function MeetingConfigFormDialog({
     }
   };
 
+  const [generationError, setGenerationError] = useState<string | null>(null);
+
+  const handleGenerateUrl = async () => {
+    if (!provider?.id) return;
+    setGenerationError(null);
+    try {
+      const result = await generateUrl({
+        variables: {
+          input: {
+            providerId: provider.id,
+            topic: label.trim() || "Meeting",
+            startDateTime: null,
+            durationMinutes: null,
+          },
+        },
+      });
+      const joinUrl = result.data?.generateMeetingUrl?.joinUrl;
+      if (joinUrl) {
+        state.setDetails({ ...details, meetingUrl: joinUrl });
+        state.setUrlError(null);
+      } else {
+        setGenerationError(t.saveError);
+      }
+    } catch {
+      setGenerationError(t.saveError);
+    }
+  };
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <MeetingConfigFormDialogContent
@@ -113,6 +155,11 @@ export function MeetingConfigFormDialog({
           void handleSave();
         }}
         providerSelectDisabled={false}
+        onGenerateUrl={() => {
+          void handleGenerateUrl();
+        }}
+        generating={generating}
+        generationError={generationError}
       />
     </Dialog>
   );

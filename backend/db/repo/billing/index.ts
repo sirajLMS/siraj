@@ -3,6 +3,8 @@ export { CreditRepository } from "./credit.repository";
 export { SupportedCurrencyRepository } from "./currency.repository";
 export { CurrencyHedgeRepository } from "./currency-hedge.repository";
 export { InvoicePaymentSubmissionRepository } from "./invoice-payment-submission.repository";
+export { QuotaRepository } from "./quota.repository";
+export { QuotaLedgerRepository } from "./quota-ledger.repository";
 export { SupportedMobileWalletRepository } from "./supported-mobile-wallet.repository";
 export { SupportedOnlineAccountRepository } from "./supported-online-account.repository";
 export { SupportedPaymentLinkRepository } from "./supported-payment-link.repository";

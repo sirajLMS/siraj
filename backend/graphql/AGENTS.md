@@ -92,3 +92,12 @@ export const {Entity}PothosObject = {Entity}Ref.implement({
 - Input types (mutation inputs, filter inputs) are allowed as separate definitions when they serve a specific purpose
 - Wrapper types for collections or complex responses (e.g., paginated results) are allowed as separate definitions
 - Complex computed/derived types that don't map directly to a single table may require custom definitions (but should still import base types from `backend/types/`)
+
+## WhatsApp GraphQL Patterns
+
+- **Canonical reference**: `docs/services/whatsapp-cloud-api.md` — comprehensive WhatsApp integration patterns.
+- **Object types**: `WhatsappAccountPothosObject`, `WhatsappTemplateSnapshotPothosObject` (BL3), `WhatsappSyncFromMetaResultPothosObject` (wrapper). All expose `id` for Apollo cache normalization.
+- **Input type pattern**: Use `inputType(string-named)` instead of `inputRef<BackendType>` to avoid LocalizedString null incompatibility.
+- **Credential mutations**: `setWhatsappAccessToken`, `setWhatsappTwoStepPin` — all credential/config mutations call `resetWhatsappChannel()` (S4) for token rotation without restart.
+- **Delete behavior**: `deleteWhatsappAccount` deactivates (`isActive = false`), does not hard-delete.
+- **Side-effect barrels**: `import "./whatsapp-account.mutation";` registers resolvers via side-effect imports.

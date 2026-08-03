@@ -79,7 +79,7 @@ export class ResendEmailAdapter implements IEmailChannel {
     };
   }
 
-  async send(payload: EmailPayload, _locale?: string): Promise<EmailSendResult> {
+  async send(payload: EmailPayload, locale = "en"): Promise<EmailSendResult> {
     // Defensive guard: a non-empty `to` is required before we touch the
     // provider. This turns a future dispatch path that forgets `metadata.to`
     // into an actionable local failure instead of a cryptic provider error
@@ -97,7 +97,7 @@ export class ResendEmailAdapter implements IEmailChannel {
     }
 
     const delivery = await this.createEmailDelivery(payload);
-    return this.executeSend(delivery, payload, recipient);
+    return this.executeSend(delivery, payload, recipient, locale);
   }
 
   private async handleEmptyRecipient(payload: EmailPayload): Promise<EmailSendResult> {
@@ -133,7 +133,8 @@ export class ResendEmailAdapter implements IEmailChannel {
   private async executeSend(
     delivery: Awaited<ReturnType<typeof NotificationRepository.createDelivery>>,
     payload: EmailPayload,
-    recipient: string
+    recipient: string,
+    locale: string
   ): Promise<EmailSendResult> {
     try {
       const response = await this.context.client.emails.send({
@@ -144,18 +145,19 @@ export class ResendEmailAdapter implements IEmailChannel {
       });
 
       if (response.error) {
-        return this.handleResendApiError(delivery.id, response.error);
+        return this.handleResendApiError(delivery.id, response.error, locale);
       }
 
       return this.handleSendSuccess(delivery.id, response.data?.id);
     } catch (error) {
-      return this.handleSendException(delivery.id, error);
+      return this.handleSendException(delivery.id, error, locale);
     }
   }
 
   private async handleResendApiError(
     deliveryId: string,
-    error: { name: string; message: string }
+    error: { name: string; message: string },
+    locale: string
   ): Promise<EmailSendResult> {
     logger.error("Resend API returned an error", {
       errorName: error.name,
@@ -170,7 +172,7 @@ export class ResendEmailAdapter implements IEmailChannel {
 
     return {
       success: false,
-      error: deliveryFailedMessage("email"),
+      error: deliveryFailedMessage(NotificationChannel.EMAIL, locale),
     };
   }
 
@@ -192,7 +194,7 @@ export class ResendEmailAdapter implements IEmailChannel {
     };
   }
 
-  private async handleSendException(deliveryId: string, error: unknown): Promise<EmailSendResult> {
+  private async handleSendException(deliveryId: string, error: unknown, locale: string): Promise<EmailSendResult> {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     logger.error("Failed to send email via Resend", {
@@ -208,7 +210,7 @@ export class ResendEmailAdapter implements IEmailChannel {
 
     return {
       success: false,
-      error: deliveryFailedMessage("email"),
+      error: deliveryFailedMessage(NotificationChannel.EMAIL, locale),
     };
   }
 

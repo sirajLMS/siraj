@@ -25,7 +25,7 @@ import { NotificationPreferencesRepository, UserRepository } from "@/backend/db/
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
-import type { ChannelDispatchResult, CommunicationChannelType, CommunicationPayload } from "@/backend/types";
+import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
 
 // ─── Event/channel allowlist ───────────────────────────────────────────
 
@@ -63,33 +63,21 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
 
 // ─── Channel comparison helper ────────────────────────────────────────
 
-/**
- * Map `NotificationChannel` enum value → `CommunicationChannelType`
- * string literal (`NotificationChannel.EMAIL` is `"EMAIL"` while
- * `CommunicationChannelType` is `"email"` lowercase). Centralized so the
- * allowlist can stay keyed by enum members (F15) while payload
- * filtering matches by lowercase payload-channel string.
- */
-const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, CommunicationChannelType>> = Object.freeze({
-  [NotificationChannel.ON_APP]: "on_app",
-  [NotificationChannel.EMAIL]: "email",
-  [NotificationChannel.SMS]: "sms",
-  [NotificationChannel.PUSH]: "push",
-});
+const ALL_ENUM_CHANNELS: readonly NotificationChannel[] = Object.values(NotificationChannel).filter(
+  ch => ch !== NotificationChannel.WHATSAPP
+);
 
-const ALL_ENUM_CHANNELS: readonly NotificationChannel[] = Object.values(NotificationChannel);
-
-function isAllowed(eventType: NotificationEventType, channel: CommunicationChannelType): boolean {
+function isAllowed(eventType: NotificationEventType, channel: NotificationChannel): boolean {
   const allowedEnums = EVENT_CHANNEL_ALLOWLIST[eventType];
-  if (!allowedEnums) return true; // absent → all 4 channels allowed
-  return allowedEnums.some(enumChannel => CHANNEL_FROM_ENUM[enumChannel] === channel);
+  if (!allowedEnums) return true; // absent → all channels allowed
+  return allowedEnums.includes(channel);
 }
 
 // ─── Preferences helper ───────────────────────────────────────────────
 
 type PreferencesByChannel = Map<string, boolean>;
 
-function prefKey(channel: CommunicationChannelType, eventType: NotificationEventType): string {
+function prefKey(channel: NotificationChannel, eventType: NotificationEventType): string {
   return `${channel}:${eventType}`;
 }
 
@@ -110,50 +98,40 @@ function prefsToMap(
 ): PreferencesByChannel {
   const map = new Map<string, boolean>();
   for (const row of rows) {
-    const channel = CHANNEL_FROM_ENUM[row.channel as NotificationChannel];
-    map.set(prefKey(channel, row.eventType as NotificationEventType), row.enabled);
+    map.set(prefKey(row.channel as NotificationChannel, row.eventType as NotificationEventType), row.enabled);
   }
   return map;
 }
 
 /**
- * Resolve prefs for a user, returning an empty map on any fetch failure.
- * The caller treats an empty map as "all channels enabled" (safe over-notify).
- * Fetch errors are logged here so downstream callers don't need to.
+ * Resolve prefs for a user from a pre-loaded batch `Map<userId, prefRows[]>`.
+ * Returns an empty `PreferencesByChannel` (all-enabled) when the user has no
+ * stored prefs — matching the safe over-notify contract from the former
+ * per-user `_loadPrefsSafe` fallback.
  */
-async function loadPrefsSafe(userId: string): Promise<PreferencesByChannel> {
-  try {
-    const rows = await NotificationPreferencesRepository.getByUserId(userId);
-    return prefsToMap(rows);
-  } catch (error) {
-    logger.warn("dispatchWithPreferences: prefs fetch failed, falling back to all-enabled", {
-      userId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return new Map();
-  }
+function prefsMapForUser(
+  userId: string,
+  batch: ReadonlyMap<
+    string,
+    ReadonlyArray<{ readonly channel: string; readonly eventType: string; readonly enabled: boolean }>
+  >
+): PreferencesByChannel {
+  const rows = batch.get(userId);
+  return rows ? prefsToMap(rows) : new Map();
 }
 
 /**
- * Resolve a user's contact info (email/phone) for recipient-address stamping.
- * Returns `null` on fetch failure or when the user is not found / soft-deleted
- * — the caller drops all email/sms payloads for that user (per-user isolation,
- * §5.2) rather than poisoning the dispatch. `findSafeById` is used
- * (not `findById`) because it RLS-excludes soft-deleted rows, matching the
- * safe-user resolution pattern in `gqlContext.ts` / `session.service.ts`.
+ * Resolve contact info for multiple users from a pre-loaded
+ * `Map<userId, UserSelectType | null>`. Returns `null` for users not found
+ * in the map (fetch failure or soft-deleted) — matching the per-user
+ * `loadUserSafe` contract. This avoids the N+1 of calling `loadUserSafe`
+ * per user inside the dispatch loop.
  */
-async function loadUserSafe(
-  userId: string
-): Promise<{ readonly email: string | null; readonly phone: string | null } | null> {
-  try {
-    return await UserRepository.findSafeById(userId);
-  } catch (error) {
-    logger.warn("dispatchWithPreferences: user fetch failed, dropping contact channels for user", {
-      userId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return null;
-  }
+function userFromBatch(
+  userId: string,
+  batch: ReadonlyMap<string, { readonly email: string | null; readonly phone: string | null } | null>
+): { readonly email: string | null; readonly phone: string | null } | null {
+  return batch.get(userId) ?? null;
 }
 
 // ─── Recipient resolution ─────────────────────────────────────────────
@@ -169,20 +147,20 @@ type RecipientAddress = string | null;
 /**
  * Resolve the recipient address for a payload's channel from the user row.
  *
- *   - `email` → `user.email` (always non-null in the schema, but defended).
- *   - `sms`   → `user.phone` (nullable).
- *   - `on_app` / `push` → `null` (no address needed).
+ *   - `NotificationChannel.EMAIL` → `user.email` (always non-null in the schema, but defended).
+ *   - `NotificationChannel.SMS`   → `user.phone` (nullable).
+ *   - `NotificationChannel.ON_APP` / `NotificationChannel.PUSH` → `null` (no address needed).
  *
  * Returns `null` for channels that don't need an address, and `""` for
  * channels that do but the user lacks the contact field (caller drops the
  * payload). Keeping this pure (no I/O) lets the caller batch the user fetch.
  */
 function recipientAddressForChannel(
-  channel: CommunicationChannelType,
+  channel: NotificationChannel,
   user: { readonly email: string | null; readonly phone: string | null } | null
 ): RecipientAddress {
-  if (channel === "email") return user?.email ?? "";
-  if (channel === "sms") return user?.phone ?? "";
+  if (channel === NotificationChannel.EMAIL) return user?.email ?? "";
+  if (channel === NotificationChannel.SMS) return user?.phone ?? "";
   return null; // on_app, push — no address needed
 }
 
@@ -258,11 +236,16 @@ interface UserDispatchOutcome {
  * `CommunicationService.dispatchMulti`. Per-user errors are caught and
  * logged so a single user's failure does NOT poison other users'
  * dispatches (§5.2).
+ *
+ * @param prefs  Pre-loaded preference map for this user (from batch fetch).
+ * @param user   Pre-loaded user contact info for this user (from batch fetch),
+ *               or `null` if not found / fetch failed.
  */
 async function dispatchForUser(
   userId: string,
   allowlistedPayloads: readonly CommunicationPayload[],
   prefs: PreferencesByChannel,
+  user: { readonly email: string | null; readonly phone: string | null } | null,
   locale: string | undefined
 ): Promise<UserDispatchOutcome> {
   const userPayloads: CommunicationPayload[] = [];
@@ -282,12 +265,11 @@ async function dispatchForUser(
     return { results: [], dispatched: 0, failed: 0, skippedByPref };
   }
 
-  // Resolve the recipient's contact info and stamp `metadata.to` on each
-  // email/sms payload. Pure builders can't do DB I/O (§5.1), so this
-  // is the single place where the recipient address is populated for the
-  // builder-driven dispatch path. Contactless payloads (user has no email or
-  // phone) are dropped here with a warn — per-user isolation (§5.2).
-  const user = await loadUserSafe(userId);
+  // Stamp recipient addresses using pre-loaded user data. Pure builders
+  // can't do DB I/O (§5.1), so this is the single place where the recipient
+  // address is populated for the builder-driven dispatch path. Contactless
+  // payloads (user has no email or phone) are dropped here with a warn —
+  // per-user isolation (§5.2).
   const dispatchPayloads = stampRecipientAddress(userId, userPayloads, user);
 
   if (dispatchPayloads.length === 0) {
@@ -352,15 +334,48 @@ export async function dispatchWithPreferences(
   const allowlistedPayloads = payloads.filter(p => isAllowed(p.eventType, p.channel));
   const skippedByAllowlist = payloads.length - allowlistedPayloads.length;
 
-  // Steps 3-5 — per-user prefs filter + dispatch, aggregated.
+  // Steps 3-4 — batch-fetch ALL user prefs and user contact info in parallel
+  // before the dispatch loop, eliminating the N+1 of per-user `getByUserId` +
+  // `findSafeById` inside a sequential `for...of`.
+  const [prefsBatch, userBatch] = await Promise.all([
+    NotificationPreferencesRepository.getByUserIds(affectedUserIds),
+    UserRepository.findSafeByIds(affectedUserIds),
+  ]);
+
+  // Step 5 — dispatch per-user with pre-loaded data. Dispatches are
+  // independent across users, so they run in parallel via `Promise.allSettled`
+  // — a failure for one user does NOT poison others (§5.2).
+  const settled = await Promise.allSettled(
+    affectedUserIds.map(userId =>
+      dispatchForUser(
+        userId,
+        allowlistedPayloads,
+        prefsMapForUser(userId, prefsBatch),
+        userFromBatch(userId, userBatch),
+        locale
+      )
+    )
+  );
+
+  // Aggregate results from all settled outcomes.
   let dispatchedCount = 0;
   let skippedByPref = 0;
   let failedCount = 0;
   const allResults: ChannelDispatchResult[] = [];
 
-  for (const userId of affectedUserIds) {
-    const prefs = await loadPrefsSafe(userId);
-    const outcome = await dispatchForUser(userId, allowlistedPayloads, prefs, locale);
+  for (const result of settled) {
+    // `dispatchForUser` catches its own errors internally and returns a
+    // `UserDispatchOutcome` with per-user failure results, so a "rejected"
+    // promise here is an unexpected bug. Log and skip — never re-throw,
+    // matching the per-user isolation contract (§5.2).
+    if (result.status === "rejected") {
+      const error = result.reason;
+      logger.error("dispatchWithPreferences: unexpected rejection from dispatchForUser", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      continue;
+    }
+    const outcome = result.value;
     allResults.push(...outcome.results);
     dispatchedCount += outcome.dispatched;
     failedCount += outcome.failed;

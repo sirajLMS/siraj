@@ -18,7 +18,7 @@
    ```bash
    bun tsgo
    bun biome:check
-   curl -s -X POST http://localhost:4777/lint \
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
      -H "Content-Type: application/json" \
      -d '{"id":"verify","files":["<the-file>"]}'
    ```
@@ -73,7 +73,7 @@
       ```bash
       bun tsgo
       bun biome:check
-      curl -s -X POST http://localhost:4777/lint \
+      curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["app/layout.tsx"]}'
       ```
@@ -99,7 +99,7 @@
       ```bash
       bun tsgo
       bun biome:check
-      curl -s -X POST http://localhost:4777/lint \
+      curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["next.config.ts"]}'
       ```
@@ -123,7 +123,7 @@
       ```bash
       bun tsgo
       bun biome:check
-      curl -s -X POST http://localhost:4777/lint \
+      curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["shared/locale/namespaces/define-namespace.ts"]}'
       ```
@@ -169,7 +169,7 @@
       ```bash
       bun tsgo
       bun biome:check
-      curl -s -X POST http://localhost:4777/lint \
+      curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["scripts/locale-snapshots.ts"]}'
       ```
@@ -217,7 +217,7 @@
       ```bash
       bun tsgo
       bun biome:check
-      curl -s -X POST http://localhost:4777/lint \
+      curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["shared/locale/client/snapshot-cache.ts"]}'
       ```
@@ -253,7 +253,7 @@
       ```bash
       bun tsgo
       bun biome:check
-      curl -s -X POST http://localhost:4777/lint \
+      curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["shared/locale/client/translation-cache-store.ts"]}'
       ```

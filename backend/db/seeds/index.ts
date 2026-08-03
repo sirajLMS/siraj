@@ -9,6 +9,7 @@ import { seedOrGet as seedOrGetInvoiceCoverageMonths } from "@/backend/db/seeds/
 import { seedOrGet as seedOrGetInvoicePaymentSubmissions } from "@/backend/db/seeds/billing/seed-invoice-payment-submissions";
 import { seedOrGet as seedOrGetInvoices } from "@/backend/db/seeds/billing/seed-invoices";
 import { seedOrGet as seedOrGetPayments } from "@/backend/db/seeds/billing/seed-payments";
+import { seedOrGet as seedOrGetQuotas } from "@/backend/db/seeds/billing/seed-quotas";
 import { seedOrGet as seedOrGetSupportedMobileWallets } from "@/backend/db/seeds/billing/seed-supported-mobile-wallets";
 import { seedOrGet as seedOrGetSupportedOnlineAccounts } from "@/backend/db/seeds/billing/seed-supported-online-accounts";
 import { seedOrGet as seedOrGetSupportedPaymentLinks } from "@/backend/db/seeds/billing/seed-supported-payment-links";
@@ -62,19 +63,19 @@ import { seedOrGet as seedOrGetUsers } from "@/backend/db/seeds/users/seed-users
 import logger from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 import type {
-  ClassInstanceEntity,
+  ClassInstanceSelectType,
   CreditTransactionReturnType,
   GroupWithPermissionIds,
   InvoiceSelectType,
   LessonReportReturnType,
   ParentEntity,
-  RecurringScheduleDayEntity,
-  RecurringScheduleEntity,
-  StudentEntity,
+  RecurringScheduleDaySelectType,
+  RecurringScheduleSelectType,
+  StudentSelectType,
   SystemSettingSelectType,
   TeacherDueReturnType,
-  TeacherEntity,
-  TimezoneEntity,
+  TeacherSelectType,
+  TimezoneSelectType,
   UserSelectType,
 } from "@/backend/types";
 
@@ -82,15 +83,15 @@ export type SeedContext = {
   actorUserId?: string;
   config?: SeedConfig;
   systemSettings?: SystemSettingSelectType[];
-  timezones?: TimezoneEntity[];
+  timezones?: TimezoneSelectType[];
   permissionGroups?: GroupWithPermissionIds[];
   users?: UserSelectType[];
-  teachers?: TeacherEntity[];
+  teachers?: TeacherSelectType[];
   parents?: ParentEntity[];
-  students?: StudentEntity[];
-  classes?: RecurringScheduleEntity[];
-  recurringScheduleDays?: RecurringScheduleDayEntity[];
-  classInstances?: ClassInstanceEntity[];
+  students?: StudentSelectType[];
+  classes?: RecurringScheduleSelectType[];
+  recurringScheduleDays?: RecurringScheduleDaySelectType[];
+  classInstances?: ClassInstanceSelectType[];
   exchangeRates?: Awaited<ReturnType<typeof seedOrGetCurrencyExchangeRates>>;
   invoices?: InvoiceSelectType[];
   groupClasses?: { id: string; classInstanceId: string; courseName: string }[];
@@ -395,6 +396,7 @@ async function runBillingSeeds(context: SeedContext, step: RunStep, config: Seed
     seedOrGetInvoicePaymentSubmissions(context.invoices ?? [], context.parents ?? [], context.users ?? [], config)
   );
   await step("payments", () => seedOrGetPayments(context.invoices ?? [], config));
+  await step("quotas", () => seedOrGetQuotas());
 }
 
 async function runCommunicationsSeeds(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {

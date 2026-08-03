@@ -33,6 +33,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
+import { BASE_URL as LINT_QUEUE_URL } from "@/scripts/lint-queue-config";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -45,8 +46,6 @@ interface CheckResult {
 }
 
 // ─── Constants ──────────────────────────────────────────────────────────────
-
-const LINT_QUEUE_URL = "http://localhost:4777";
 const PROJECT_ROOT = process.cwd();
 
 const LIFECYCLE_ORDER: Record<Lifecycle, number> = {

@@ -1,5 +1,5 @@
 import { ComplaintRepository, ComplaintResponseRepository, ParentRepository, UserRepository } from "@/backend/db/repo";
-import { AppPermission, NotificationEventType } from "@/backend/enum";
+import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
@@ -12,15 +12,16 @@ async function assertCanRespondToComplaint(
   complaintId: string,
   locale?: string
 ): Promise<ComplaintById> {
+  const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+
   const hasPermission = await PermissionsService.hasPermission(responderUserId, AppPermission.COMPLAINTS_RESPOND);
   if (!hasPermission) {
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
     throw new Error(tErrors.insufficientPermissions);
   }
 
   const complaint = await ComplaintRepository.getComplaintById(complaintId);
   if (!complaint) {
-    throw new Error("complaintNotFound");
+    throw new Error(tErrors.complaintNotFound);
   }
 
   return complaint;
@@ -30,8 +31,10 @@ async function dispatchResponseNotifications(
   response: ComplaintResponseReturnType,
   complaint: ComplaintById,
   responderUserId: string,
-  locale?: string
+  locale = "en"
 ): Promise<void> {
+  const tNotifications = getServerTranslations(locale).notificationsTranslations;
+
   if (response.emailSent) {
     // Resolve the responder's email so the email adapter has a valid `to`.
     // The pure-payload contract is not in play here — this is
@@ -48,9 +51,9 @@ async function dispatchResponseNotifications(
       await CommunicationService.dispatch(
         {
           userId: responderUserId,
-          title: "Complaint Response",
+          title: tNotifications.complaintResponse.title,
           body: response.body,
-          channel: "email",
+          channel: NotificationChannel.EMAIL,
           eventType: NotificationEventType.COMPLAINT_RESPONSE,
           metadata: { to, entityKind: "complaint", entityId: complaint.id },
         },
@@ -65,9 +68,9 @@ async function dispatchResponseNotifications(
   await CommunicationService.dispatch(
     {
       userId: notificationUserId,
-      title: "Complaint Response",
+      title: tNotifications.complaintResponse.title,
       body: response.body,
-      channel: "on_app",
+      channel: NotificationChannel.ON_APP,
       eventType: NotificationEventType.COMPLAINT_RESPONSE,
     },
     locale

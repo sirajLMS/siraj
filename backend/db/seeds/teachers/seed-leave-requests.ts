@@ -10,11 +10,17 @@ import {
 import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
+import type {
+  ClassInstanceSelectType,
+  ParentEntity,
+  StudentSelectType,
+  TeacherSelectType,
+  UserSelectType,
+} from "@/backend/types";
 
 function resolveRequesterUserId(
   requesterType: LeaveRequesterType,
-  instance: ClassInstanceEntity,
+  instance: ClassInstanceSelectType,
   teacherUserMap: Map<string, string>,
   studentParentUserMap: Map<string, string>,
   adminUserId: string | undefined
@@ -35,7 +41,11 @@ type LeaveRequestContext = {
   fakerSeed: number;
 };
 
-function buildApprovedLeaveInputs(leaveInstances: ClassInstanceEntity[], maxLeaves: number, ctx: LeaveRequestContext) {
+function buildApprovedLeaveInputs(
+  leaveInstances: ClassInstanceSelectType[],
+  maxLeaves: number,
+  ctx: LeaveRequestContext
+) {
   const inputs = [];
   for (let i = 0; i < maxLeaves; i++) {
     const instance = leaveInstances[i];
@@ -65,7 +75,7 @@ function buildApprovedLeaveInputs(leaveInstances: ClassInstanceEntity[], maxLeav
 }
 
 function buildSupplementalLeaveInputs(
-  pendingFutureInstances: ClassInstanceEntity[],
+  pendingFutureInstances: ClassInstanceSelectType[],
   supplementalCount: number,
   offsetIndex: number,
   ctx: LeaveRequestContext
@@ -106,10 +116,10 @@ function buildSupplementalLeaveInputs(
 }
 
 export async function seedOrGet(
-  classInstancesList: ClassInstanceEntity[],
-  teachersList: TeacherEntity[],
+  classInstancesList: ClassInstanceSelectType[],
+  teachersList: TeacherSelectType[],
   usersList: UserSelectType[],
-  studentsList: StudentEntity[],
+  studentsList: StudentSelectType[],
   parentsList: ParentEntity[],
   config?: SeedConfig
 ) {

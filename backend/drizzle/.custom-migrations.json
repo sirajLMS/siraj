@@ -1,5 +1,5 @@
 {
-  "manifestHash": "2f060dc4f1651f9c5e3d86b9f7e200da2964cdb469e0ae3004c17cec9bfe38c4",
+  "manifestHash": "5ae401ddcd203714ce3d8d83c0ae6a63d1d34429510294a0b102ac3e48e86493",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -39,7 +39,7 @@
     },
     {
       "file": "4c-system_settings_seed.sql",
-      "sha256": "f1bc2f7901144fc931aa60f2bb7f6be47bdce81c6509329071c80e07410f4e2b"
+      "sha256": "e04345038b056eaacbacb25d7b007a62262f40a43f993042999c05e0cc380813"
     },
     {
       "file": "4d-timezones_seed.sql",
@@ -86,8 +86,32 @@
       "sha256": "ecbf57d7aa5dc681ca3151e6dc5926232ad3501d812b5efe73484d9a23c0a08d"
     },
     {
+      "file": "7c-quota_permissions_enum.sql",
+      "sha256": "9f2c9d2161c791762c091aee3130b121cd8b88cc886ed68584a982afe0b6e475"
+    },
+    {
+      "file": "7d-quota_permissions_data.sql",
+      "sha256": "b0f2eb0e2ba551aa4b043c23522dc40324581ed88687173c1276bdcb4b5343bc"
+    },
+    {
       "file": "8a-system-setting-enums.sql",
       "sha256": "7d1f38de7fa1d10f430abc571c02f8138f761586a20606ea57b3c508411071b5"
+    },
+    {
+      "file": "8a-whatsapp-permissions-enum.sql",
+      "sha256": "e0d2105462e3bb4fb13d667d481d545cb7249ebcb7811625fd18b22f48ed2a9f"
+    },
+    {
+      "file": "8b-whatsapp-permissions-data.sql",
+      "sha256": "e47aab6a8e11f61401cac6fd8d294f6239ac05c6bb5ca301291ffb7be37d8806"
+    },
+    {
+      "file": "9a-cron-permissions-enum.sql",
+      "sha256": "2a9aef0fc69418175071c8e5940ecc941fcfe9dbcefcfafeb4c2f122898fe631"
+    },
+    {
+      "file": "9b-cron-permissions-data.sql",
+      "sha256": "b586c4f63faf3f33bf46c711da7763ea4ddb8d8e5815bf9edbde6c71ac2f7021"
     },
     {
       "file": "add_test_custom_alt_permission.sql",
@@ -201,6 +225,15 @@
     "20260729150220_custom_3-system_permissions_and_groups",
     "20260729152150_custom_6d-profile-fine-grained-only",
     "20260729153127_custom_6d-profile-fine-grained-only",
-    "20260729155331_custom_6d-profile-fine-grained-only"
+    "20260729155331_custom_6d-profile-fine-grained-only",
+    "20260731155052_custom_4c-system_settings_seed",
+    "20260731224523_custom_8a-whatsapp-permissions-enum",
+    "20260731224524_custom_8b-whatsapp-permissions-data",
+    "20260803041717_custom_4c-system_settings_seed",
+    "20260803041718_custom_7c-quota_permissions_enum",
+    "20260803041719_custom_7d-quota_permissions_data",
+    "20260803041720_custom_8b-whatsapp-permissions-data",
+    "20260803041721_custom_9a-cron-permissions-enum",
+    "20260803041722_custom_9b-cron-permissions-data"
   ]
 }

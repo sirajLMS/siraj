@@ -39,7 +39,7 @@ All rules from the parent `backend/db/test/AGENTS.md` apply here (transaction ro
 - **Clean Setup Helpers**: Use helpers from `@/backend/db/test/entity-setup` (or `../../entity-setup`) — `createTestUser`, `createTestTeacher`, `setupTestEntities`, etc. Generate unique emails / IDs via `randomUUID()` or prefixed strings to avoid unique-constraint violations.
 - **Bun Test**: Use `import { describe, test, it, expect, beforeAll, afterAll } from "bun:test"` — never Jest/Vitest.
 - **Strict Type Safety**: No `as any` overrides. No `console.log` — use `testLogger` or no logging.
-- **Code Cleanliness**: Run `bun tsgo` and lint via the queue client after creating or modifying tests (`curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" -d '{"id":"db-logic","files":["<file>"]}'`). Fix all resulting TS6133 unused-import / unused-variable errors.
+- **Code Cleanliness**: Run `bun tsgo` and lint via the queue client after creating or modifying tests (`curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"db-logic","files":["<file>"]}'`). Fix all resulting TS6133 unused-import / unused-variable errors.
 
 ### Import Convention
 - **Aliased imports for parent helpers** (preferred): `import { runInRollback } from "@/backend/db/test/test-utils";` and `import { setupTestEntities } from "@/backend/db/test/entity-setup";`. Aliased paths are unchanged by sub-directory moves, so prefer them over relative references.

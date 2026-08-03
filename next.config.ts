@@ -50,6 +50,7 @@ function buildDevOrigins(): string[] {
 const buildId = resolveBuildId();
 
 /** @type {import('next').NextConfig} */
+const isDev = getEnv("NODE_ENV", "development") === "development";
 const nextConfig: NextConfig = {
   distDir: getEnv("NEXT_DIST_DIR", ".next"),
   reactStrictMode: true,
@@ -94,22 +95,25 @@ const nextConfig: NextConfig = {
   images: {
     // Disable image optimization for localhost URLs to avoid 400 errors
     // The Next.js Image Optimization API can't reach localhost:5000 from the server side
-    unoptimized: getEnv("NODE_ENV", "development") === "development",
-    // NOTE: localhost/127.0.0.1 patterns should ONLY be used in development environments.
-    // Remove or restrict these in production to prevent unauthorized image source origins.
+    unoptimized: isDev,
+    // localhost/127.0.0.1 and "backend" hostnames are dev-only to avoid SSRF risk in production.
     remotePatterns: [
-      ...["localhost", "127.0.0.1", "backend"].flatMap(hostname => [
-        {
-          protocol: "http" as const,
-          hostname,
-          pathname: "/**",
-        },
-        {
-          protocol: "https" as const,
-          hostname,
-          pathname: "/**",
-        },
-      ]),
+      // Dev-only: allow optimized images from local backend services
+      ...(isDev
+        ? (["localhost", "127.0.0.1", "backend"] as const).flatMap(hostname => [
+            {
+              protocol: "http" as const,
+              hostname,
+              pathname: "/**",
+            },
+            {
+              protocol: "https" as const,
+              hostname,
+              pathname: "/**",
+            },
+          ])
+        : []),
+      // Production: only trusted third-party image CDNs
       {
         protocol: "https",
         hostname: "images.unsplash.com",

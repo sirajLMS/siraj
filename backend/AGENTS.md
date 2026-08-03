@@ -32,6 +32,7 @@ The backend follows a consistent pattern for defining and using types across all
 - Example: Using `{Entity}SubmitInput` for input validation and `{Entity}ReturnType` for output in `{entity}.service.ts`
 - **Batch Service Methods**: Services called from GraphQL resolvers MUST expose batch versions (e.g., `resolveTeacherIdsForUsers(userIds: string[])`) returning `Map<string, T | null>` for DataLoader support. See `docs/graphql/dataloader-batching.md`.
 - **Hot-Resolver & Read Caching**: Hot read paths use `cachedRead` from `@/backend/services/cache` with identity+role-scoped key formats. Mutation write paths invoke tag invalidation helpers in `try/catch`. See `docs/services/entity-cache-service.md`.
+- **Cron Service**: Scheduled job execution with pluggable queue backends (pg-boss, custom-sql, bullmq). Uses hybrid trigger model (Vercel ticker + manual trigger). See `docs/services/cron-service.md` for the complete pattern reference.
 
 ### 5. GraphQL Layer (`backend/graphql/pothos/*.pothos.ts`)
 - Reference types from `backend/types/` for Pothos object implementations
@@ -77,3 +78,49 @@ The backend follows a consistent pattern for defining and using types across all
 - Follow the naming convention: `{Entity}SelectType`, `{Entity}InsertType`, `{Entity}ReturnType`, `{Entity}SubmitInput`, etc.
 - Use a single canonical GraphQL object type per entity, extending it with resolved properties as needed
 - Never create local type definitions in Pothos files; always use types from `backend/types/`
+
+## Important References
+
+- `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference (auto URL generation for Zoom, Google Meet, Microsoft Teams)
+
+## WhatsApp Cloud API Integration
+
+- **Canonical reference**: `docs/services/whatsapp-cloud-api.md` — covers the full integration (adapter, factory, webhook, dispatch, schema, opt-in, frontend).
+- **Schema**: `backend/db/schema/whatsapp-accounts.ts` — `whatsapp_accounts` table with `encryptedText` columns for credentials, `varchar` for raw Meta tier enums (no local mapping), `isActive` for soft delete (no `deletedAt`).
+- **Permissions**: `WHATSAPP_VIEW`, `WHATSAPP_CONFIG_MANAGE`, `WHATSAPP_TEMPLATES_MANAGE` (no `WHATSAPP_DISPATCH` in v1 — no send mutation).
+- **Migrations**: Two-phase (enum ALTER TYPE + data INSERT) with idempotent `IF NOT EXISTS` / `ON CONFLICT` clauses.
+- **Partial unique index**: `notification_deliveries_provider_message_id_unique WHERE provider_message_id IS NOT NULL` (B5) — enables P3 ON CONFLICT upsert by `provider_message_id`.
+
+## Quota System (Billing Domain)
+
+The Quota System is an append-only ledger-based class credit tracking system. See `docs/billing/quota-system.md` for the complete architecture reference. Key rules for backend code interacting with quotas:
+
+### Ledger & Cached Columns
+
+- **Single Writer**: Only `QuotaRepository` writes to `quota_ledger` and updates `quotas` cached columns (`remaining`, `reservedClasses`, `usedThisPeriod`). No other code — including `CreditService`, `state-changes.ts`, or recurring-class flows — directly modifies quota columns. All quota state changes go through `QuotaService` → `QuotaRepository`.
+- **Ledger Transaction**: Ledger inserts and cache updates MUST share the same Drizzle transaction (`tx`). Idempotency keys are checked within the same tx.
+- **Foreign Key Constraint**: `quota_ledger.quotaId` uses `ON DELETE RESTRICT`. Quotas cannot be hard-deleted while ledger entries exist — use soft-delete (`deletedAt`) or archive.
+
+### FIFO Selection
+
+- Always use `QuotaRepository.selectQuotaForBookingFIFO` for automatic quota assignment. Sorts by priority DESC, then validUntil ASC.
+- Idempotency keys: All ledger writes require a deterministic idempotency key (SHA-256). See `QuotaRepository` for the 6 key derivation helpers.
+
+### Permissions
+
+- `QUOTAS_VIEW` (`"quotas.view"`) — read access to quotas, balances, ledger
+- `QUOTAS_MANAGE` (`"quotas.manage"`) — create, update, delete, manage reservations
+- All `QuotaService` methods gate on these via `requireManagePermission` / `requireViewPermission`
+
+### Integration Points
+
+- `AvailabilityService`: slot availability checks that integrate with `class_instances`
+- `RecurringClassService`: `cancelSchedule` + `switchSchedulingMode` interact with `QuotaService`
+- `CreditService`: after any credit change, call `QuotaService.refreshStudentOndemandInstances(studentId, tx)` in same transaction
+- `Notification`: 7 quota event types registered in `NotificationEventCategory` + `NOTIFICATION_EVENT_CATEGORY`
+
+### Testing
+
+- Always use `runInRollback` wrapper for DB tests involving quotas
+- Always pass `tx` to ALL repository methods inside transactions
+- Race condition tests for quota reservation/redeem are NOT yet implemented

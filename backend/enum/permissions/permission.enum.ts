@@ -246,6 +246,16 @@ export enum AppPermission {
   SETTINGS_AUDIT_VIEW = "settings.audit_view",
   SETTINGS_SITE_CONTENT_MANAGE = "settings.site_content_manage",
   SETTINGS_TIMEZONES_VIEW = "settings.timezones_view",
+  SETTINGS_EDIT_MEETING_INTEGRATIONS = "settings.edit_meeting_integrations",
+  // WhatsApp admin (BL2: no whatsapp.dispatch — no send-mutation in v1)
+  WHATSAPP_VIEW = "whatsapp.view",
+  WHATSAPP_CONFIG_MANAGE = "whatsapp.config_manage",
+  WHATSAPP_TEMPLATES_MANAGE = "whatsapp.templates_manage",
+  // Quota Management
+  QUOTAS_VIEW = "quotas.view",
+  QUOTAS_MANAGE = "quotas.manage",
+  // Cron Management
+  CRON_MANAGE = "cron.manage",
 }
 
 let knownAppPermissionsCache: Set<string> | undefined;

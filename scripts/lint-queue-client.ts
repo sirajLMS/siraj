@@ -15,7 +15,7 @@
  *
  * Usage from a sub-agent (PowerShell):
  *   $body = @{ id = "phase8"; files = @("src/foo.ts","src/bar.ts") } | ConvertTo-Json
- *   Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
+ *   Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/lint -Method POST -ContentType 'application/json' -Body $body
  *
  * Usage from TypeScript:
  *   import { requestLint, requestFullRepoLint } from "@/scripts/lint-queue-client";
@@ -25,7 +25,7 @@
  *   const r2 = await requestFullRepoLint("phase8");
  */
 
-const BASE_URL = "http://localhost:4777";
+import { BASE_URL } from "@/scripts/lint-queue-config";
 
 /** Shape of the lint execution result returned by the queue server. */
 export type LintResult = { success: boolean; output: string; exitCode: number };

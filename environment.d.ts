@@ -19,6 +19,14 @@ declare global {
       SIGNED_URL_CLEANUP_STRATEGY?: "lazy" | "cron" | "both" | "disabled";
       SIGNED_URL_CLEANUP_CRON_SCHEDULE?: string;
       CRON_SECRET?: string;
+      CRON_EXECUTION_MODE?: "vercel" | "vercel-daily" | "external" | "standalone";
+      CRON_FX_REFRESH_SCHEDULE?: string;
+      CRON_CLASS_REMINDERS_SCHEDULE?: string;
+      CRON_TICKER_SCHEDULE?: string;
+      CRON_EXTERNAL_ENABLED?: string;
+      CRON_EXTERNAL_ENDPOINT?: string;
+      CRON_EXTERNAL_SCHEDULE?: string;
+      CRON_EXTERNAL_SECRET?: string;
 
       // GCP Storage Configuration
       GCP_PROJECT_ID?: string;
@@ -62,6 +70,15 @@ declare global {
       TWILIO_VERIFIED_TEST_RECIPIENT?: string;
       /** Valid FCM device token for test/live-comm runs (loaded from .env.test) */
       FCM_TEST_DEVICE_TOKEN?: string;
+
+      // WhatsApp Cloud API Configuration
+      WHATSAPP_ACCESS_TOKEN?: string;
+      WHATSAPP_PHONE_NUMBER_ID?: string;
+      WHATSAPP_WABA_ID?: string;
+      WHATSAPP_API_VERSION?: string;
+      WHATSAPP_TEST_TO_PHONE?: string;
+      WHATSAPP_TEST_TEMPLATE_NAME?: string;
+      WHATSAPP_TEST_TEMPLATE_LANGUAGE?: string;
 
       // SMS Configuration
       SMS_PROVIDER?: "twilio";
@@ -129,6 +146,22 @@ declare global {
        */
       BLOB_READ_WRITE_TOKEN?: string;
 
+      // Meeting Integrations (auto-generation)
+      ZOOM_ACCOUNT_ID?: string;
+      ZOOM_CLIENT_ID?: string;
+      ZOOM_CLIENT_SECRET?: string;
+      ZOOM_REQUIRED_SCOPES?: string;
+      GOOGLE_MEET_SERVICE_ACCOUNT_JSON?: string;
+      GOOGLE_MEET_IMPERSONATE_SUBJECT?: string;
+      GOOGLE_MEET_CLIENT_ID?: string;
+      GOOGLE_MEET_CLIENT_SECRET?: string;
+      MS_TEAMS_TENANT_ID?: string;
+      MS_TEAMS_CLIENT_ID?: string;
+      MS_TEAMS_CLIENT_SECRET?: string;
+      MS_TEAMS_REQUIRED_SCOPES?: string;
+      MS_TEAMS_ORGANIZER_USER_ID?: string;
+      OAUTH_REDIRECT_BASE_URL?: string;
+
       // Demo Site Configuration
       // NEXT_PUBLIC_IS_DEMO controls the client-side demo UI (fast-login buttons).
       // IS_DEMO is the authoritative server-side gate for the demoLogin mutation.
@@ -146,6 +179,13 @@ declare global {
        * via `next start` on http://localhost).
        */
       AUTH_COOKIE_SECURE?: string;
+
+      // WhatsApp Configuration
+      WHATSAPP_PROVIDER?: "cloud_api";
+      WHATSAPP_APP_ID?: string;
+      WHATSAPP_APP_SECRET?: string;
+      WHATSAPP_VERIFY_TOKEN?: string;
+      WHATSAPP_WEBHOOK_BASE_URL?: string;
 
       // Logging
       // ENABLE_LOGGING gates the server-side BaseLogger (shared/lib/logger/base-logger.ts)

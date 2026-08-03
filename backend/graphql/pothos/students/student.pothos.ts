@@ -10,16 +10,16 @@ import {
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
   PartialStudentUpdateInput,
-  Student,
   StudentCreateInput,
   StudentFilterArgs,
+  StudentReturnType,
   StudentsOrderByClause,
   StudentsWithFiltersResponse,
 } from "@/backend/types";
 import { StudentsOrderByColumn } from "@/backend/types";
 
 export const StudentPothosObject = gqlSchemaBuilder
-  .loadableObjectRef<Student, string>("Student", {
+  .loadableObjectRef<StudentReturnType, string>("Student", {
     load: async (ids: string[]) => StudentRepository.loadByIds(ids),
     sort: s => s.id,
   })
@@ -57,13 +57,15 @@ export const StudentPothosObject = gqlSchemaBuilder
       hoursPerWeek: t.float({
         resolve: s => s.hoursPerWeek ?? 0,
       }),
-      createdAt: t.expose("createdAt", {
+      createdAt: t.field({
         type: "DateTime",
         nullable: true,
+        resolve: s => (s as { createdAt?: Date }).createdAt ?? null,
       }),
-      updatedAt: t.expose("updatedAt", {
+      updatedAt: t.field({
         type: "DateTime",
         nullable: true,
+        resolve: s => (s as { updatedAt?: Date }).updatedAt ?? null,
       }),
     }),
   });

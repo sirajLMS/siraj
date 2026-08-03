@@ -106,6 +106,9 @@ export interface MeetingProviderErrors {
   readonly meetingProviderCreateFailed: string;
   readonly meetingProviderUpdateFailed: string;
   readonly meetingProviderInUse: string;
+  readonly invalidReturnPath: string;
+  readonly missingSubject: string;
+  readonly dwdNotEnabled: string;
 }
 
 /**
@@ -209,6 +212,20 @@ export interface SessionConfigErrors {
 }
 
 /**
+ * QuotaErrors — quota system errors (nested under `errors.quota`).
+ */
+export interface QuotaErrors {
+  readonly insufficientRemaining: (requested: number, available: number) => string;
+  readonly exceedsCreditBalance: (requested: number, available: number) => string;
+  readonly periodicRefreshFailed: (quotaName: string, reason: string) => string;
+  readonly invalidPeriod: (quotaName: string) => string;
+  readonly alreadyExpired: (quotaName: string) => string;
+  readonly earmarkExceedsRemaining: (requested: number, available: number) => string;
+  readonly slotConflict: (startTime: string, endTime: string) => string;
+  readonly onDemandNoCredits: (studentName: string) => string;
+}
+
+/**
  * ErrorsLabels — the top-level errors namespace.
  * Only the subset needed by the login GraphQL mutation is defined here.
  * Grow this interface as more errors are migrated.
@@ -227,6 +244,7 @@ export interface ErrorsLabels {
   readonly scheduling: SchedulingErrors;
   readonly permissionGroup: PermissionGroupErrors;
   readonly sessionConfig: SessionConfigErrors;
+  readonly quota: QuotaErrors;
   readonly parent: ParentErrors;
   readonly staff: StaffErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
@@ -289,7 +307,11 @@ export interface ErrorsLabels {
   readonly cannotRescheduleCompleted: string;
   readonly cannotRescheduleAlreadyRescheduled: string;
   readonly outOfQuota: string;
+  readonly quotaExpired: string;
+  readonly quotaNotFound: string;
+  readonly invalidQuotaState: string;
   readonly leaveQuotaExceeded: (params: { maxLeaves: string }) => string;
+
   readonly classInstanceNotFound: (params: { id: string }) => string;
   readonly originalClassNotFound: string;
   readonly invalidTransition: string;
@@ -304,4 +326,40 @@ export interface ErrorsLabels {
   readonly teacherOnVacation: string;
   readonly resourceNotFound: string;
   readonly currencyInUse: string;
+
+  // ─── Cron errors ──────────────────────────────────────────────────
+  readonly invalidRunStatus: (status: string, runId: string) => string;
+
+  // ─── Communication / suggestion / complaint errors ─────────────────────
+  readonly complaintNotFound: string;
+  readonly suggestionNotFound: string;
+  readonly complaintTooManyFiles: (maxFiles: number) => string;
+  readonly complaintFileTooLarge: (maxSizeMb: number) => string;
+  readonly suggestionCannotMarkSelfAsDuplicate: string;
+  readonly suggestionCircularDuplicate: string;
+  readonly suggestionTargetIsAlreadyDuplicate: string;
+
+  // ─── Communication dispatch errors ──────────────────────────────────────
+  readonly unknownCommunicationChannel: (channel: string) => string;
+  readonly unknownError: string;
+  readonly unknownDispatchError: string;
+  readonly whatsappTemplateMissing: string;
+
+  // ─── WhatsApp account management errors ─────────────────────────────────
+  readonly whatsappAccountNotFound: (id: string) => string;
+  readonly whatsappAccessTokenNotConfigured: string;
+  readonly whatsappWabaIdNotConfigured: string;
+
+  // ─── Delivery failure messages ───────────────────────────────────────────
+  readonly emailChannelLabel: string;
+  readonly smsChannelLabel: string;
+  readonly pushChannelLabel: string;
+  readonly whatsappChannelLabel: string;
+  readonly onAppChannelLabel: string;
+  readonly deliveryFailed: (channelLabel: string) => string;
+
+  // Quota errors accessible via quota.* — see QuotaErrors
+
+  // ─── Offline resolver / notification fallbacks ──────────────────────
+  readonly studentNameFallback: string;
 }

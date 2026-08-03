@@ -2,11 +2,11 @@ import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
-import type { ClassInstanceEntity } from "@/backend/types";
+import type { ClassInstanceSelectType } from "@/backend/types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import { getServerTranslations } from "@/shared/locale";
 
-export async function seedOrGet(classInstancesList: ClassInstanceEntity[], config?: SeedConfig) {
+export async function seedOrGet(classInstancesList: ClassInstanceSelectType[], config?: SeedConfig) {
   logger.info("Seeding class meeting configs...");
   const seedConfig = config ?? loadSeedConfig();
 

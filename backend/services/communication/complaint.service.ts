@@ -352,7 +352,8 @@ export namespace ComplaintService {
 
     const complaint = await ComplaintRepository.getComplaintById(complaintId);
     if (!complaint) {
-      throw new Error("complaintNotFound");
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.complaintNotFound);
     }
 
     if (!canListComplaints) {
@@ -412,7 +413,7 @@ async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale
 
   const maxFiles = await SystemSettingsRepository.getIntValue("complaint_max_files_per_complaint", 5);
   if (files.length > maxFiles) {
-    throw new Error(`complaint.tooManyFiles:${maxFiles}`);
+    throw new Error(tErrors.complaintTooManyFiles(maxFiles));
   }
 
   const maxSizeMb = await SystemSettingsRepository.getIntValue("complaint_max_file_size_mb", 25);
@@ -432,7 +433,7 @@ async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale
 
   for (const file of files) {
     if (file.sizeBytes > maxSizeBytes) {
-      throw new Error(`complaint.fileTooLarge:${maxSizeMb}`);
+      throw new Error(tErrors.complaintFileTooLarge(maxSizeMb));
     }
 
     if (!allowedMimeTypes.has(file.mimeType)) {

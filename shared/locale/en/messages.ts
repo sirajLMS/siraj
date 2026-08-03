@@ -9,7 +9,9 @@ import { dashboardBillingExchangeRatesEn } from "@/shared/locale/en/dashboard/bi
 import { dashboardBillingEn } from "@/shared/locale/en/dashboard/billing/main.ts";
 import { dashboardBillingManualEn } from "@/shared/locale/en/dashboard/billing/manual.ts";
 import { dashboardBillingPaymentEn } from "@/shared/locale/en/dashboard/billing/payment.ts";
+import { quotaEn } from "@/shared/locale/en/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesEn } from "@/shared/locale/en/dashboard/billing/supportedCurrencies.ts";
+
 import { dashboardClassAuditEn } from "@/shared/locale/en/dashboard/classes/audit.ts";
 import { dashboardCreateRecurringClassEn } from "@/shared/locale/en/dashboard/classes/createRecurringClass.ts";
 import { dashboardClassDetailsEn } from "@/shared/locale/en/dashboard/classes/details.ts";
@@ -24,6 +26,7 @@ import { dashboardCoreParentDashboardEn } from "@/shared/locale/en/dashboard/cor
 import { dashboardCoreScheduleAlertsEn } from "@/shared/locale/en/dashboard/core/scheduleAlerts.ts";
 import { dashboardCoreSearchScheduleEn } from "@/shared/locale/en/dashboard/core/searchSchedule.ts";
 import { dashboardCoreStatusTrackingEn } from "@/shared/locale/en/dashboard/core/statusTracking.ts";
+import { dashboardCronEn } from "@/shared/locale/en/dashboard/cron/main";
 import { dashboardFeedbackManageParentEn } from "@/shared/locale/en/dashboard/feedback/main.ts";
 import { dashboardLmsCreditEn } from "@/shared/locale/en/dashboard/lms/credit.ts";
 import { dashboardLmsLessonReportsEn } from "@/shared/locale/en/dashboard/lms/lessonReports.ts";
@@ -118,6 +121,7 @@ import { uiPhoneInputEn } from "@/shared/locale/en/ui/phone-input.ts";
 import { uiTagInputEn } from "@/shared/locale/en/ui/tag-input.ts";
 import { uiTimezoneSelectEn } from "@/shared/locale/en/ui/timezone-select.ts";
 import { uiUserSelectEn } from "@/shared/locale/en/ui/user-select.ts";
+import { whatsappEn } from "@/shared/locale/en/whatsapp";
 import type { Translations } from "@/shared/locale/types/message";
 
 export const enMessages: Translations = {
@@ -162,10 +166,13 @@ export const enMessages: Translations = {
   dashboardTranslations: {
     admin: dashboardAdminEn,
     adminView: dashboardAdminViewEn,
+    cron: dashboardCronEn,
     dstMigration: dashboardDstMigrationEn,
     billing: dashboardBillingEn,
     billingManual: dashboardBillingManualEn,
+    billingQuota: quotaEn,
     billingPayment: dashboardBillingPaymentEn,
+
     billingExchangeRates: dashboardBillingExchangeRatesEn,
     billingCurrencyHedges: dashboardBillingCurrencyHedgesEn,
     billingSupportedCurrencies: dashboardBillingSupportedCurrenciesEn,
@@ -246,4 +253,5 @@ export const enMessages: Translations = {
     notifications: profileNotificationsEn,
   },
   notificationsTranslations: notificationsEn,
+  whatsappTranslations: whatsappEn,
 };

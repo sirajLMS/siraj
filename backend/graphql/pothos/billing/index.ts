@@ -6,3 +6,4 @@ export * from "@/backend/graphql/pothos/billing/credit.pothos";
 export * from "@/backend/graphql/pothos/billing/currency.pothos";
 export * from "@/backend/graphql/pothos/billing/currency-hedge.pothos";
 export * from "@/backend/graphql/pothos/billing/fx-ingestion.pothos";
+export * from "@/backend/graphql/pothos/billing/quota.pothos";

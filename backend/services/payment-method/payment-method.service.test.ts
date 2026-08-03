@@ -3,8 +3,8 @@ import { SupportedMobileWalletRepository } from "@/backend/db/repo/billing/suppo
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-payment-method.repository";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
+import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import { NotificationEventType } from "@/backend/enum/notifications/notificationDeliveries.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
@@ -67,21 +67,24 @@ describe("PaymentMethodService notification dispatch", () => {
   beforeEach(() => {
     tErrors = getServerTranslations("en").errorsTranslations;
 
-    const userSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue({
-      email: "owner@test.com",
-      phone: "+1234567890",
-    } as never);
+    const userSpy = spyOn(UserRepository, "findSafeByIds").mockImplementation(async (ids: string[]) => {
+      const map = new Map<string, { email: string; phone: string }>();
+      for (const id of ids) {
+        map.set(id, { email: "owner@test.com", phone: "+1234567890" });
+      }
+      return map as never;
+    });
     spies.push(userSpy);
 
     dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockResolvedValue([
-      { channel: "on_app", success: true },
-      { channel: "email", success: true },
-      { channel: "sms", success: true },
-      { channel: "push", success: true },
+      { channel: NotificationChannel.ON_APP, success: true },
+      { channel: NotificationChannel.EMAIL, success: true },
+      { channel: NotificationChannel.SMS, success: true },
+      { channel: NotificationChannel.PUSH, success: true },
     ]);
     spies.push(dispatchMultiSpy);
 
-    const prefsSpy = spyOn(NotificationPreferencesRepository, "getByUserId").mockResolvedValue([]);
+    const prefsSpy = spyOn(NotificationPreferencesRepository, "getByUserIds").mockResolvedValue(new Map());
     spies.push(prefsSpy);
 
     const permsSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);

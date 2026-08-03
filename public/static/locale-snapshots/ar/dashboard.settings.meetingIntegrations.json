@@ -1,0 +1,92 @@
+{
+  "description": "إدارة تكاملات مزودي الاجتماعات، واختبار بيانات الاعتماد، ومراجعة حسابات OAuth للمعلمين المتصلين.",
+  "loading": "جارٍ تحميل تكاملات الاجتماعات…",
+  "loadError": "تعذّر تحميل تكاملات الاجتماعات.",
+  "providersConfigured": "المزودون المُعدّون",
+  "credentialsHealthy": "بيانات المؤسسة صحية",
+  "teachersConnected": "المعلمون المتصلون",
+  "reauthNeeded": "يحتاج إعادة مصادقة",
+  "lastTested": "آخر اختبار",
+  "neverTested": "لم يُختبر",
+  "provider": {
+    "zoom": "زووم",
+    "googleMeet": "جوجل ميت",
+    "microsoftTeams": "مايكروسوفت تيمز"
+  },
+  "endpoints": "نقاط النهاية",
+  "credentialForm": {
+    "title": "بيانات الاعتماد",
+    "noFields": "لا توجد حقول بيانات اعتماد لهذا المزود.",
+    "save": "حفظ",
+    "saving": "جارٍ الحفظ…",
+    "revert": "إرجاع",
+    "showValue": "إظهار القيمة",
+    "hideValue": "إخفاء القيمة",
+    "emptyValue": "غير مضبوط"
+  },
+  "testConnection": "اختبار الاتصال",
+  "validateConfig": "التحقق من الإعداد",
+  "generateAndDelete": "إنشاء وحذف",
+  "runTest": "تشغيل",
+  "testing": "جارٍ الاختبار…",
+  "testResult": "نتيجة الاختبار",
+  "testSuccess": "نجاح",
+  "testFailure": "فشل",
+  "joinUrl": "رابط الانضمام",
+  "deleted": "تم حذف الاجتماع",
+  "notDeleted": "لم يُحذف",
+  "latency": "زمن الاستجابة",
+  "errorCode": "رمز الخطأ",
+  "errorMessage": "رسالة الخطأ",
+  "rawPayload": "الحزمة الخام من المزود",
+  "connectedAccounts": "حسابات المعلمين المتصلين",
+  "noConnectedAccounts": "لا توجد حسابات معلمين متصلين لهذا المزود.",
+  "columns": {
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "connectedAt": "تاريخ الاتصال",
+    "expiresAt": "تاريخ الانتهاء",
+    "status": "الحالة",
+    "actions": "إجراءات"
+  },
+  "status": {
+    "connected": "متصل",
+    "expiringSoon": "ينتهي قريباً",
+    "reauthNeeded": "يحتاج إعادة مصادقة",
+    "revoked": "ملغي"
+  },
+  "actions": {
+    "viewMetadata": "عرض البيانات الوصفية",
+    "revoke": "إلغاء",
+    "revokeConfirm": "هل أنت متأكد من إلغاء هذا الرمز؟ سيتعين على المعلم إعادة الاتصال.",
+    "revokeConfirmTitle": "إلغاء رمز مزود الاجتماعات",
+    "cancel": "إلغاء",
+    "confirmRevoke": "إلغاء"
+  },
+  "metadata": {
+    "title": "البيانات الوصفية للرمز",
+    "scopes": "النطاقات",
+    "expiry": "الانتهاء",
+    "connectedAt": "تاريخ الاتصال",
+    "lastRefreshed": "آخر تحديث",
+    "requiredScopes": "النطاقات المطلوبة",
+    "grantedScopes": "النطاقات الممنوحة",
+    "noScopes": "لا توجد نطاقات متاحة",
+    "provider": "المزود",
+    "email": "البريد الإلكتروني المتصل"
+  },
+  "testPanel": {
+    "rawResponse": "الاستجابة الخام",
+    "copyUrl": "نسخ الرابط",
+    "copied": "تم النسخ!",
+    "marketplaceHint": "تكوين في سوق المزود"
+  },
+  "notifications": {
+    "testSuccess": "نجح اختبار الاتصال.",
+    "testError": "فشل اختبار الاتصال.",
+    "revokeSuccess": "تم إلغاء الرمز بنجاح.",
+    "revokeError": "تعذّر إلغاء الرمز.",
+    "saveSuccess": "تم حفظ بيانات الاعتماد.",
+    "saveError": "تعذّر حفظ بيانات الاعتماد."
+  }
+}

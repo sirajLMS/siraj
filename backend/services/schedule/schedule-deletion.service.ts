@@ -5,10 +5,52 @@ import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { QuotaService } from "@/backend/services/billing/quota.service";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ScheduleDeletionService {
+  /**
+   * Best-effort remote meeting cleanup for a single class instance.
+   * Never throws — failures are logged and swallowed so provider API
+   * errors never fail the parent deletion operation.
+   */
+  async function cancelMeetingSafe(classInstanceId: string, context: string): Promise<void> {
+    try {
+      await MeetingConfigSnapshotService.cancelMeetingForClassInstance(classInstanceId);
+    } catch (error) {
+      logger.error(`Best-effort meeting cancel failed for class instance (${context})`, {
+        classInstanceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Dispatch `CLASS_CANCELLED` notifications for all affected users
+   * of every cleared instance, then cancel their remote meetings.
+   */
+  async function notifyAndCancelCleared(
+    preAffected: { classInstanceId: string; affected: ClassInstanceAffectedUsers | null }[]
+  ): Promise<void> {
+    const settled = await Promise.allSettled(
+      preAffected.map(async entry => {
+        await notifyClassCancelled(entry.classInstanceId, entry.affected);
+        await cancelMeetingSafe(entry.classInstanceId, "weekly clear");
+      })
+    );
+
+    for (const [i, result] of settled.entries()) {
+      if (result.status === "rejected") {
+        logger.warn("Class cancelled (weekly clear) notification+cancel failed", {
+          classInstanceId: preAffected[i]?.classInstanceId,
+          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+        });
+      }
+    }
+  }
+
   /**
    * Dispatch `CLASS_CANCELLED` to the parent + teacher + student of a
    * now-deleted class instance. The affected-user set MUST be resolved
@@ -48,6 +90,44 @@ export namespace ScheduleDeletionService {
     }
   }
 
+  async function executeDeletionTx(
+    classInstanceId: string,
+    actorUserId: string,
+    tErrors: ErrorsLabels
+  ): Promise<boolean> {
+    return db.transaction(async tx => {
+      const deleted = await SchedulingRepository.deleteRecurringClass(classInstanceId, tx);
+      if (!deleted?.deleted || !deleted.quotaDeducted) {
+        return deleted !== null;
+      }
+
+      // Release quota if this class was deducted from a quota.
+      // On failure we log AND throw so the transaction rolls back consistently
+      // — matching the credit-backed refund path which also throws. This
+      // prevents the soft-delete from committing while the quota balance stays
+      // over-decremented, which would be a silent data inconsistency.
+      if (deleted.quotaId) {
+        try {
+          await QuotaService.releaseForInstance(deleted.studentId, deleted.id, deleted.quotaId, actorUserId, tx);
+        } catch (error) {
+          logger.error("Quota release failed during class deletion — rolling back transaction", {
+            classInstanceId: deleted.id,
+            quotaId: deleted.quotaId,
+            studentId: deleted.studentId,
+            actorUserId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          throw error;
+        }
+      } else {
+        // Credit-backed instance — refund credits
+        const idempotencyKey = `credit-refund:${deleted.id}`;
+        await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
+      }
+      return true;
+    });
+  }
+
   /**
    * Deletes a specific class instance from the weekly schedule.
    * Requires: schedule.delete_class permission.
@@ -68,19 +148,11 @@ export namespace ScheduleDeletionService {
     // and return `null`.
     const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
 
-    const result = await db.transaction(async tx => {
-      const deleted = await SchedulingRepository.deleteRecurringClass(classInstanceId, tx);
-      if (!deleted?.deleted || !deleted.quotaDeducted) {
-        return deleted !== null;
-      }
-
-      const idempotencyKey = `credit-refund:${deleted.id}`;
-      await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
-      return true;
-    });
+    const result = await executeDeletionTx(classInstanceId, actorUserId, tErrors);
 
     if (result) {
       await notifyClassCancelled(classInstanceId, affected);
+      await cancelMeetingSafe(classInstanceId, "delete class");
     }
     return result;
   }
@@ -110,25 +182,44 @@ export namespace ScheduleDeletionService {
       const cleared = await SchedulingRepository.clearWeeklySchedule(teacherId, tx);
       if (!cleared) return false;
 
+      // Sequential per-instance credit refunds (credit-backed classes).
+      // Running these in parallel would issue concurrent async DB ops on the
+      // same shared single-connection transaction, which is not safe.
       for (const instance of cleared.refundedInstances) {
         const idempotencyKey = `credit-refund:${instance.id}`;
         await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
+      }
+
+      // Sequential per-schedule quota releases (quota-backed classes).
+      // Quota release failures abort the transaction (rethrown) so class
+      // deletion and quota release are atomic — no silent over-decrement.
+      for (const schedule of cleared.quotaSchedules) {
+        try {
+          await QuotaService.releaseForRecurringSchedule(
+            schedule.studentId,
+            schedule.id,
+            schedule.quotaId,
+            schedule.earmarkedClasses,
+            actorUserId,
+            tx
+          );
+        } catch (error) {
+          logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
+            recurringScheduleId: schedule.id,
+            quotaId: schedule.quotaId,
+            studentId: schedule.studentId,
+            actorUserId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          throw error;
+        }
       }
 
       return true;
     });
 
     if (result) {
-      for (const entry of preAffected) {
-        try {
-          await notifyClassCancelled(entry.classInstanceId, entry.affected);
-        } catch (error) {
-          logger.error("Class cancelled (weekly clear) notification dispatch failed", {
-            classInstanceId: entry.classInstanceId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+      await notifyAndCancelCleared(preAffected);
     }
 
     return result;

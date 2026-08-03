@@ -1,0 +1,84 @@
+{
+  "title": "حصص الطلاب",
+  "newQuota": "حصة جديدة",
+  "editQuota": "تعديل الحصة",
+  "quotaDetails": "تفاصيل الحصة",
+  "insights": "تحليلات الحصص",
+  "listTitle": "قائمة الحصص",
+  "noQuotas": "لم يتم العثور على حصص.",
+  "fields": {
+    "name": "اسم الحصة",
+    "student": "الطالب",
+    "kind": "نوع الحصة",
+    "totalClasses": "إجمالي الحصص",
+    "remaining": "الحصص المتبقية",
+    "reservedClasses": "الحصص المحجوزة",
+    "validUntil": "صالحة حتى",
+    "status": "الحالة",
+    "periodType": "نوع الفترة",
+    "priority": "الأولوية",
+    "all": "الكل",
+    "studentIdPlaceholder": "معرف الطالب"
+  },
+  "kinds": {
+    "PACKAGE": "باقة",
+    "PERIODIC": "دورية"
+  },
+  "statuses": {
+    "ACTIVE": "نشطة",
+    "EXPIRED": "منتهية",
+    "ARCHIVED": "مؤرشفة"
+  },
+  "periodTypes": {
+    "WEEKLY": "أسبوعية",
+    "MONTHLY": "شهرية",
+    "CUSTOM": "مخصصة"
+  },
+  "actions": {
+    "create": "إنشاء حصة",
+    "save": "حفظ التغييرات",
+    "edit": "تعديل الحصة",
+    "delete": "حذف الحصة",
+    "cancel": "إلغاء",
+    "viewLedger": "عرض سجل التدقيق"
+  },
+  "errors": {
+    "createFailed": "فشل في إنشاء الحصة. يرجى المحاولة مرة أخرى.",
+    "updateFailed": "فشل في تحديث الحصة. يرجى المحاولة مرة أخرى."
+  },
+  "ledger": {
+    "title": "سجل تدقيق الحصة",
+    "reason": "السبب",
+    "delta": "تغيير الحصص",
+    "note": "ملاحظات",
+    "date": "التاريخ"
+  },
+  "insightsTitle": "نظرة عامة على نظام الحصص",
+  "activeQuotasCount": {
+    "__fn": "(count) => count === 1 ? \"\\u062D\\u0635\\u0629 \\u0646\\u0634\\u0637\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\" : `${count} \\u062D\\u0635\\u0635 \\u0646\\u0634\\u0637\\u0629`"
+  },
+  "totalClassesRemaining": {
+    "__fn": "(count) => count === 1 ? \"\\u062D\\u0635\\u0629 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\" : `${count} \\u062D\\u0635\\u0635 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629`"
+  },
+  "expiringThisWeekCount": {
+    "__fn": "(count) => count === 1 ? \"\\u062D\\u0635\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629 \\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\" : `${count} \\u062D\\u0635\\u0635 \\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639`"
+  },
+  "charts": {
+    "quotaPurchasesOverTime": "مشتريات الحصص عبر الزمن",
+    "redemptionRateByType": "معدل الاسترداد حسب النوع",
+    "onDemandDeliveryRate": "معدل تسليم الحصص الفورية",
+    "pendingCreditBacklogGauge": "تراكم الرصيد المعلق",
+    "expiredSlippage": "انزلاق الحصص المنتهية",
+    "months": "الأشهر",
+    "classes": "حصص",
+    "packageType": "باقة",
+    "periodicType": "دورية",
+    "onDemandType": "فورية",
+    "committed": "ملتزم بها",
+    "cancelled": "ملغاة",
+    "deliveryRate": "معدل التسليم",
+    "pendingCredits": "الرصيد المعلق",
+    "expiredClasses": "منتهية",
+    "redeemedClasses": "مستردة"
+  }
+}

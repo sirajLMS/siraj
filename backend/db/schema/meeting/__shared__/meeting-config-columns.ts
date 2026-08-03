@@ -16,6 +16,7 @@ export function meetingConfigSharedColumns() {
     isDefault: boolean("is_default").notNull().default(false),
     details: jsonb("details").$type<MeetingConfigDetails>().notNull(),
     encryptedSecret: encryptedText("encrypted_secret"),
+    providerMetadata: jsonb("provider_metadata").$type<Record<string, unknown>>(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   };

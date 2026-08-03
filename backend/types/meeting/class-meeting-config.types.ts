@@ -13,6 +13,7 @@ export type ClassMeetingConfigSelectType = {
   readonly isDefault: boolean;
   readonly details: MeetingConfigDetails;
   readonly encryptedSecret: string | null;
+  readonly providerMetadata: Record<string, unknown> | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 };
@@ -26,6 +27,7 @@ export type ClassMeetingConfigInsertType = {
   readonly isDefault: boolean;
   readonly details: MeetingConfigDetails;
   readonly encryptedSecret?: string | null;
+  readonly providerMetadata?: Record<string, unknown> | null;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 };
@@ -37,7 +39,7 @@ export type ClassMeetingConfigReturnType = ClassMeetingConfigSelectType & {
 
 export type ClassMeetingConfigSubmitInput = Omit<
   ClassMeetingConfigInsertType,
-  "id" | "createdAt" | "updatedAt" | "encryptedSecret"
+  "id" | "createdAt" | "updatedAt" | "encryptedSecret" | "providerMetadata"
 > & {
   readonly password?: string | null;
 };
@@ -57,4 +59,5 @@ export type EffectiveMeetingReturnType = {
   readonly source: EffectiveMeetingSource;
   readonly configId: string | null;
   readonly providerId: string | null;
+  readonly supportsAutoGeneration: boolean;
 };

@@ -54,6 +54,21 @@ export interface EnvironmentConfig {
   dbProvider?: string;
   cleanupEnabled?: boolean;
   devOrigin?: string;
+  // Meeting integrations (optional — surfaced from process.env)
+  zoomAccountId?: string;
+  zoomClientId?: string;
+  zoomClientSecret?: string;
+  zoomRequiredScopes?: string;
+  googleMeetServiceAccountJson?: string;
+  googleMeetImpersonateSubject?: string;
+  googleMeetClientId?: string;
+  googleMeetClientSecret?: string;
+  msTeamsTenantId?: string;
+  msTeamsClientId?: string;
+  msTeamsClientSecret?: string;
+  msTeamsOrganizerUserId?: string;
+  msTeamsRequiredScopes?: string;
+  oauthRedirectBaseUrl?: string;
 }
 
 /**
@@ -357,6 +372,20 @@ function buildEnvironmentConfig(
     dbProvider: process.env.DB_PROVIDER,
     cleanupEnabled: getBooleanEnv("CLEANUP_ENABLED"),
     devOrigin: process.env.DEV_ORIGIN,
+    zoomAccountId: process.env.ZOOM_ACCOUNT_ID,
+    zoomClientId: process.env.ZOOM_CLIENT_ID,
+    zoomClientSecret: process.env.ZOOM_CLIENT_SECRET,
+    zoomRequiredScopes: process.env.ZOOM_REQUIRED_SCOPES,
+    googleMeetServiceAccountJson: process.env.GOOGLE_MEET_SERVICE_ACCOUNT_JSON,
+    googleMeetImpersonateSubject: process.env.GOOGLE_MEET_IMPERSONATE_SUBJECT,
+    googleMeetClientId: process.env.GOOGLE_MEET_CLIENT_ID,
+    googleMeetClientSecret: process.env.GOOGLE_MEET_CLIENT_SECRET,
+    msTeamsTenantId: process.env.MS_TEAMS_TENANT_ID,
+    msTeamsClientId: process.env.MS_TEAMS_CLIENT_ID,
+    msTeamsClientSecret: process.env.MS_TEAMS_CLIENT_SECRET,
+    msTeamsOrganizerUserId: process.env.MS_TEAMS_ORGANIZER_USER_ID,
+    msTeamsRequiredScopes: process.env.MS_TEAMS_REQUIRED_SCOPES,
+    oauthRedirectBaseUrl: process.env.OAUTH_REDIRECT_BASE_URL,
   };
 }
 

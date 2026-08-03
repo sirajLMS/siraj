@@ -61,6 +61,7 @@ export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
     passwordRequired: "كلمة المرور مطلوبة",
     nationalIdRequired: "الرقم القومي مطلوب",
     phoneRequired: "الهاتف مطلوب",
+    phoneMaxLength: "يجب ألا يزيد رقم الهاتف عن 50 حرف",
     genderRequired: "الجنس مطلوب",
     countryRequired: "البلد مطلوب",
     timezoneRequired: "المنطقة الزمنية مطلوبة",

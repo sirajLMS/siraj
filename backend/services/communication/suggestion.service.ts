@@ -1,5 +1,5 @@
 import { ParentRepository, SoftDeleteRepository, SuggestionRepository, UserRepository } from "@/backend/db/repo";
-import { AppPermission, NotificationEventType, SuggestionStatus } from "@/backend/enum";
+import { AppPermission, NotificationChannel, NotificationEventType, SuggestionStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
@@ -58,12 +58,13 @@ export namespace SuggestionService {
           suggestionId: created.id,
         });
       } else {
+        const tNotifications = getServerTranslations(locale ?? "en").notificationsTranslations;
         await CommunicationService.dispatch(
           {
             userId: actorUserId,
-            title: "New Suggestion Submitted",
+            title: tNotifications.newSuggestion.title,
             body: created.body,
-            channel: "email",
+            channel: NotificationChannel.EMAIL,
             eventType: NotificationEventType.NEW_SUGGESTION,
             metadata: { to, entityKind: "suggestion", entityId: created.id },
           },
@@ -249,7 +250,8 @@ export namespace SuggestionService {
 
     const suggestion = await SuggestionRepository.getSuggestionById(suggestionId);
     if (!suggestion) {
-      throw new Error("suggestionNotFound");
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.suggestionNotFound);
     }
 
     try {
@@ -269,20 +271,21 @@ export namespace SuggestionService {
         // `ParentProfileResult`). Stamp it on the email payload's `metadata.to`
         // so the email adapter has a valid recipient. Legacy direct-dispatch
         // path (F1 grandfather): `metadata.to` populated inline.
+        const tNotifications = getServerTranslations(locale ?? "en").notificationsTranslations;
         await CommunicationService.dispatchMulti(
           [
             {
               userId: parentProfile.userId,
-              title: "Suggestion Response",
+              title: tNotifications.suggestionResponse.title,
               body: adminResponse,
-              channel: "on_app",
+              channel: NotificationChannel.ON_APP,
               eventType: NotificationEventType.SUGGESTION_ACKNOWLEDGED,
             },
             {
               userId: parentProfile.userId,
-              title: "Suggestion Response",
+              title: tNotifications.suggestionResponse.title,
               body: adminResponse,
-              channel: "email",
+              channel: NotificationChannel.EMAIL,
               eventType: NotificationEventType.SUGGESTION_ACKNOWLEDGED,
               metadata: { to: parentProfile.email, entityKind: "suggestion", entityId: suggestionId },
             },
@@ -311,31 +314,32 @@ export namespace SuggestionService {
     locale?: string
   ): Promise<SuggestionSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+
     if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
       throw new Error(tErrors.insufficientPermissions);
     }
 
     if (suggestionId === duplicateOfId) {
-      throw new Error("suggestion.cannotMarkSelfAsDuplicate");
+      throw new Error(tErrors.suggestionCannotMarkSelfAsDuplicate);
     }
 
     const sourceSuggestion = await SuggestionRepository.getSuggestionById(suggestionId);
     if (!sourceSuggestion) {
-      throw new Error("suggestion.notFound");
+      throw new Error(tErrors.suggestionNotFound);
     }
 
     const targetSuggestion = await SuggestionRepository.getSuggestionById(duplicateOfId);
     if (!targetSuggestion) {
-      throw new Error("suggestion.notFound");
+      throw new Error(tErrors.suggestionNotFound);
     }
 
     if (targetSuggestion.status === SuggestionStatus.DUPLICATE) {
-      throw new Error("suggestion.targetIsAlreadyDuplicate");
+      throw new Error(tErrors.suggestionTargetIsAlreadyDuplicate);
     }
 
     if (targetSuggestion.duplicateOfId === suggestionId) {
-      throw new Error("suggestion.cannotCreateCircularDuplicate");
+      throw new Error(tErrors.suggestionCircularDuplicate);
     }
 
     try {
@@ -351,12 +355,13 @@ export namespace SuggestionService {
 
       const parentProfile = await ParentRepository.getParentProfile(sourceSuggestion.parentId);
       if (parentProfile) {
+        const tNotifications = getServerTranslations(locale ?? "en").notificationsTranslations;
         await CommunicationService.dispatch(
           {
             userId: parentProfile.userId,
-            title: "Suggestion Marked as Duplicate",
-            body: `Your suggestion has been marked as a duplicate of suggestion #${duplicateOfId.slice(0, 8)}`,
-            channel: "on_app",
+            title: tNotifications.suggestionMarkedDuplicate.title,
+            body: tNotifications.suggestionMarkedDuplicate.body({ duplicateId: duplicateOfId }),
+            channel: NotificationChannel.ON_APP,
             eventType: NotificationEventType.SUGGESTION_DUPLICATE_MARKED,
           },
           locale
@@ -389,7 +394,8 @@ export namespace SuggestionService {
 
     const suggestion = await SuggestionRepository.getSuggestionById(suggestionId);
     if (!suggestion) {
-      throw new Error("suggestionNotFound");
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.suggestionNotFound);
     }
 
     try {

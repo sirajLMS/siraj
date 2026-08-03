@@ -8,8 +8,8 @@ import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { ParentEntity } from "@/backend/types/parents/parent.types";
-import type { StudentEntity } from "@/backend/types/students/student.types";
-import type { TeacherEntity } from "@/backend/types/teachers/teacher.types";
+import type { StudentSelectType } from "@/backend/types/students/student.types";
+import type { TeacherSelectType } from "@/backend/types/teachers/teacher.types";
 import type { UserSelectType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -42,7 +42,7 @@ async function createTestTeacher(tx: DBTransaction, name: string, email: string)
   const [teacher] = (await tx
     .insert(teachers)
     .values({ userId: user.id, createdAt: now, updatedAt: now })
-    .returning()) as [TeacherEntity];
+    .returning()) as [TeacherSelectType];
   return teacher;
 }
 
@@ -61,7 +61,7 @@ async function createTestStudent(tx: DBTransaction, parentId: string, name: stri
       updatedAt: now,
       idempotencyKey: randomUUID(),
     })
-    .returning()) as [StudentEntity];
+    .returning()) as [StudentSelectType];
 
   return student;
 }

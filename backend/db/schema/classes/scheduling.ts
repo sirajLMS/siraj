@@ -17,6 +17,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { quotas } from "@/backend/db/schema/billing/quotas";
 import { classSubjects } from "@/backend/db/schema/classes/class-subject";
 import {
   classExecutionStateEnum,
@@ -27,8 +28,12 @@ import {
   dstMigrationResultEnum,
   leaveRequesterTypeEnum,
   leaveRequestStatusEnum,
+  onDemandNoCreditsOutcomeEnum,
+  onDemandStatusEnum,
   rateSourceEnum,
+  schedulingModeEnum,
 } from "@/backend/db/schema/enums";
+
 import { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
 import { userMeetingConfigs } from "@/backend/db/schema/meeting/user-meeting-configs";
 import { timezones } from "@/backend/db/schema/shared/timezones";
@@ -74,6 +79,11 @@ export const recurringSchedules = pgTable(
     rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
     effectiveFrom: date("effective_from"),
     effectiveUntil: date("effective_until"),
+    quotaId: uuid("quota_id").references(() => quotas.id, { onDelete: "set null" }),
+    earmarkedClasses: integer("earmarked_classes"),
+    schedulingMode: schedulingModeEnum("scheduling_mode").notNull().default("NUMBER_OF_CLASSES"),
+    generationHorizonWeeks: integer("generation_horizon_weeks"),
+    ondemandNoCreditsOutcome: onDemandNoCreditsOutcomeEnum("ondemand_no_credits_outcome"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
@@ -83,6 +93,7 @@ export const recurringSchedules = pgTable(
     index("recurring_schedules_teacher_id_idx").on(table.teacherId),
     index("recurring_schedules_timezone_id_idx").on(table.timezoneId),
     index("recurring_schedules_subject_id_idx").on(table.subjectId),
+    index("recurring_schedules_quota_id_idx").on(table.quotaId),
     index("recurring_schedules_deleted_at_idx").on(table.deletedAt),
     index("recurring_schedules_effective_from_idx").on(table.effectiveFrom),
     index("recurring_schedules_effective_until_idx").on(table.effectiveUntil),
@@ -178,6 +189,8 @@ export const classInstances = pgTable(
     actualStartAt: timestamp("actual_start_at", { withTimezone: true, precision: 3 }),
     actualEndAt: timestamp("actual_end_at", { withTimezone: true, precision: 3 }),
     quotaDeducted: boolean("quota_deducted").notNull().default(false),
+    schedulingMode: schedulingModeEnum("scheduling_mode").notNull().default("NUMBER_OF_CLASSES"),
+    ondemandStatus: onDemandStatusEnum("ondemand_status"),
     payrollCredited: boolean("payroll_credited").notNull().default(false),
     // Rate snapshot — captured at class completion, overridable by admin
     rateAmount: numeric("rate_amount", { precision: 12, scale: 2 }),
@@ -204,6 +217,8 @@ export const classInstances = pgTable(
     index("class_instances_outcome_idx").on(table.outcome),
     uniqueIndex("class_instances_idempotency_key_unique_idx").on(table.idempotencyKey),
     index("class_instances_execution_state_idx").on(table.executionState),
+    index("class_instances_ondemand_status_idx").on(table.ondemandStatus),
+
     index("class_instances_frozen_idx").on(table.isFrozen).where(sql`${table.isFrozen} = true`),
     index("class_instances_rescheduled_idx").on(table.isRescheduled).where(sql`${table.isRescheduled} = true`),
     index("class_instances_recurring_schedule_id_idx").on(table.recurringScheduleId),
@@ -235,7 +250,15 @@ export const classInstances = pgTable(
         (${table.executionState} != 'NOT_ACTIVATED' OR ${table.actualStartAt} IS NULL) AND
         (${table.forceActivated} = false OR ${table.forceActivatedByUserId} IS NOT NULL) AND
         (${table.outcome} != 'TAKEN' OR ${table.actualStartAt} IS NOT NULL) AND
-        (${table.isRateOverridden} = false OR ${table.rateAmount} IS NOT NULL)
+        (${table.isRateOverridden} = false OR ${table.rateAmount} IS NOT NULL) AND
+        (${table.executionState} NOT IN ('ON_DEMAND_PENDING_CREDITS', 'ON_DEMAND_CONFLICT_HELD', 'ON_DEMAND_NO_CREDITS_CANCELLED', 'ON_DEMAND_NO_CREDITS_ABSENT') OR ${table.schedulingMode} = 'ON_DEMAND')
+      `
+    ),
+    check(
+      "class_instances_ondemand_status_scheduling_mode_chk",
+      sql`
+        (${table.ondemandStatus} IS NULL AND ${table.schedulingMode} != 'ON_DEMAND') OR
+        (${table.ondemandStatus} IS NOT NULL AND ${table.schedulingMode} = 'ON_DEMAND')
       `
     ),
     check(

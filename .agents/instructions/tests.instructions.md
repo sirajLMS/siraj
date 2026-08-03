@@ -192,3 +192,13 @@ bun run test:ui:kill         # stop stale test servers (ports 3001, 3020–3199 
 - Always use `~/.bun/bin/bun` - never npm/yarn/pnpm
 - Run `bun tsgo` and `bun run lint` (which IS the lint queue client) after creating or modifying tests - fix all errors
 - Follow Biome/ESLint formatting and linting rules
+
+### GraphQL Mutation Argument Coverage (CRITICAL)
+
+- Every mutation call in integration tests MUST pass ALL available input arguments (required AND optional) as `variables`
+- Look up mutation arg types in `frontend/common/graphql/generated/gql/graphql-types.ts` (search for `Mutation<Name>Args`)
+- Required fields (no `InputMaybe`): always pass a value
+- Optional fields (`InputMaybe`): test BOTH a meaningful non-null value AND `null` in separate test cases
+- For `input` object mutations: include ALL fields of the input type, including nested input types
+- Use valid enum values from generated types (e.g., `CurrencyCode.Usd`, `AccountStatus.Activated`) — never hardcode strings
+- See `docs/testing/mutation-argument-coverage.md` for the complete pattern reference

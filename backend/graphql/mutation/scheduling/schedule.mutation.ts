@@ -1,3 +1,4 @@
+import type { ClassType, DayOfWeek } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CreateRecurringClassInputPothosObject,
@@ -36,18 +37,11 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
           effectiveFrom: args.input.effectiveFrom || undefined,
           effectiveUntil: args.input.effectiveUntil || undefined,
           days: args.input.days.map(d => ({
-            dayOfWeek: d.dayOfWeek as
-              | "MONDAY"
-              | "TUESDAY"
-              | "WEDNESDAY"
-              | "THURSDAY"
-              | "FRIDAY"
-              | "SATURDAY"
-              | "SUNDAY",
+            dayOfWeek: d.dayOfWeek as DayOfWeek,
             startTime: d.startTime,
             isActive: d.isActive,
           })),
-          classType: args.input.classType as "REGULAR" | "TRIAL" | "ADVANCE" | undefined,
+          classType: args.input.classType as ClassType | undefined,
           generateInstancesForWeeks: args.input.generateInstancesForWeeks || undefined,
           hourlyRate: args.input.hourlyRate || null,
           rateCurrency: args.input.rateCurrency ?? null,

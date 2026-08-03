@@ -1,0 +1,315 @@
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ondemand_no_credits_outcome') THEN
+        CREATE TYPE "ondemand_no_credits_outcome" AS ENUM('AUTO_CANCEL', 'AUTO_ABSENT_NO_CREDITS', 'REMIND_ONLY');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ondemand_status') THEN
+        CREATE TYPE "ondemand_status" AS ENUM('PENDING_CREDIT', 'AVAILABLE', 'CONVERTED', 'NO_CREDITS_CANCELLED', 'NO_CREDITS_ABSENT', 'CANCELLED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'quota_kind') THEN
+        CREATE TYPE "quota_kind" AS ENUM('PACKAGE', 'PERIODIC');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'quota_ledger_reason') THEN
+        CREATE TYPE "quota_ledger_reason" AS ENUM('GRANT', 'RESERVE', 'REDEEM', 'RELEASE', 'EXPIRE', 'ADJUST');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'quota_period_type') THEN
+        CREATE TYPE "quota_period_type" AS ENUM('WEEKLY', 'MONTHLY', 'CUSTOM');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'quota_status') THEN
+        CREATE TYPE "quota_status" AS ENUM('ACTIVE', 'EXPIRED', 'ARCHIVED');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'scheduling_mode') THEN
+        CREATE TYPE "scheduling_mode" AS ENUM('NUMBER_OF_CLASSES', 'ON_DEMAND', 'QUOTA');
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_PENDING_CREDITS'
+    ) THEN
+        ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_PENDING_CREDITS';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_CONFLICT_HELD'
+    ) THEN
+        ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_CONFLICT_HELD';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_NO_CREDITS_CANCELLED'
+    ) THEN
+        ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_NO_CREDITS_CANCELLED';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_NO_CREDITS_ABSENT'
+    ) THEN
+        ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_NO_CREDITS_ABSENT';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_EXPIRING_SOON'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_EXPIRING_SOON';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_EXPIRED'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_EXPIRED';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_LOW_BALANCE'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_LOW_BALANCE';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_PENDING_CREDIT'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_PENDING_CREDIT';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_REMINDER_T3'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_REMINDER_T3';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_REMINDER_T1'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_REMINDER_T1';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_TEACHER_DAILY_DIGEST'
+    ) THEN
+        ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_TEACHER_DAILY_DIGEST';
+    END IF;
+END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "quota_ledger" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"quota_id" uuid NOT NULL,
+	"student_id" uuid NOT NULL,
+	"recurring_schedule_id" uuid,
+	"class_instance_id" uuid,
+	"delta" integer NOT NULL,
+	"reason" "quota_ledger_reason" NOT NULL,
+	"reason_note" text,
+	"idempotency_key" varchar(255) NOT NULL,
+	"actor_user_id" uuid,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "quotas" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"student_id" uuid NOT NULL,
+	"kind" "quota_kind" NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"total_classes" integer NOT NULL,
+	"remaining" integer DEFAULT 0 NOT NULL,
+	"reserved_classes" integer DEFAULT 0 NOT NULL,
+	"used_this_period" integer DEFAULT 0 NOT NULL,
+	"period_type" "quota_period_type",
+	"period_days" integer,
+	"period_anchor" timestamp(3) with time zone,
+	"valid_from" date,
+	"valid_until" date,
+	"status" "quota_status" DEFAULT 'ACTIVE'::"quota_status" NOT NULL,
+	"priority" integer DEFAULT 0 NOT NULL,
+	"rollover_policy" jsonb,
+	"version" integer DEFAULT 1 NOT NULL,
+	"idempotency_key" varchar(255) NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp(3) with time zone,
+	CONSTRAINT "quotas_kind_period_consistency_chk" CHECK (
+        ("kind" = 'PACKAGE' AND "period_type" IS NULL AND "period_days" IS NULL AND "period_anchor" IS NULL) OR
+        ("kind" = 'PERIODIC' AND "period_type" IS NOT NULL AND "period_days" IS NOT NULL)
+      ),
+	CONSTRAINT "quotas_total_classes_positive_chk" CHECK ("total_classes" > 0),
+	CONSTRAINT "quotas_priority_non_negative_chk" CHECK ("priority" >= 0),
+	CONSTRAINT "quotas_remaining_non_negative_chk" CHECK ("remaining" >= 0),
+	CONSTRAINT "quotas_reserved_classes_non_negative_chk" CHECK ("reserved_classes" >= 0),
+	CONSTRAINT "quotas_reserved_not_exceed_remaining_chk" CHECK ("reserved_classes" <= "remaining"),
+	CONSTRAINT "quotas_used_this_period_non_negative_chk" CHECK ("used_this_period" >= 0),
+	CONSTRAINT "quotas_rollover_policy_valid_chk" CHECK (
+        "rollover_policy" IS NULL OR (
+          jsonb_typeof("rollover_policy") = 'object' AND
+          "rollover_policy" ? 'maxRolloverPercent' AND
+          "rollover_policy" ? 'accumulationCap'
+        )
+      )
+);--> statement-breakpoint
+ALTER TABLE "class_instances" ADD COLUMN IF NOT EXISTS "scheduling_mode" "scheduling_mode" DEFAULT 'NUMBER_OF_CLASSES'::"scheduling_mode" NOT NULL;--> statement-breakpoint
+ALTER TABLE "class_instances" ADD COLUMN IF NOT EXISTS "ondemand_status" "ondemand_status";--> statement-breakpoint
+ALTER TABLE "recurring_schedules" ADD COLUMN IF NOT EXISTS "quota_id" uuid;--> statement-breakpoint
+ALTER TABLE "recurring_schedules" ADD COLUMN IF NOT EXISTS "earmarked_classes" integer;--> statement-breakpoint
+ALTER TABLE "recurring_schedules" ADD COLUMN IF NOT EXISTS "scheduling_mode" "scheduling_mode" DEFAULT 'NUMBER_OF_CLASSES'::"scheduling_mode" NOT NULL;--> statement-breakpoint
+ALTER TABLE "recurring_schedules" ADD COLUMN IF NOT EXISTS "generation_horizon_weeks" integer;--> statement-breakpoint
+ALTER TABLE "recurring_schedules" ADD COLUMN IF NOT EXISTS "ondemand_no_credits_outcome" "ondemand_no_credits_outcome";--> statement-breakpoint
+ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE text;--> statement-breakpoint
+-- DEPENDENCY: The next statement casts "permissions"."key" from text → app_permission.
+-- This cast can ONLY succeed if the app_permission enum already contains the
+-- values 'quotas.view' and 'quotas.manage' (and all other values present in the
+-- permissions.key column). These enum values are added by manual migration
+-- 7c-quota_permissions_enum.sql (ALTER TYPE ADD VALUE). If 7c has NOT been
+-- applied first, the USING cast will raise "invalid input value for enum"
+-- for any row whose key is not a valid app_permission label.
+-- Ensure 7c-quota_permissions_enum runs before this Drizzle migration.
+-- SAFETY: Delete any permission rows whose key is not a valid app_permission
+-- enum value BEFORE the cast, so the ALTER TYPE does not fail on orphaned keys.
+BEGIN;
+DELETE FROM "permissions" WHERE "key" NOT IN (
+    SELECT e.enumlabel
+    FROM pg_enum e
+    JOIN pg_type t ON t.oid = e.enumtypid
+    WHERE t.typname = 'app_permission'
+);
+COMMIT;--> statement-breakpoint
+-- NOTE: This re-cast assumes all existing permission keys are in app_permission enum — verify before deploying to production.
+ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE "app_permission" USING "key"::"app_permission";--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "quota_ledger_idempotency_key_unique_idx" ON "quota_ledger" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "quota_ledger_quota_id_created_at_idx" ON "quota_ledger" ("quota_id","created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "quota_ledger_student_id_idx" ON "quota_ledger" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "quota_ledger_class_instance_id_idx" ON "quota_ledger" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "quota_ledger_recurring_schedule_id_idx" ON "quota_ledger" ("recurring_schedule_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "quotas_idempotency_key_unique_idx" ON "quotas" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "quotas_student_id_idx" ON "quotas" ("student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "quotas_student_status_remaining_idx" ON "quotas" ("student_id","status","remaining") WHERE deleted_at IS NULL AND status = 'ACTIVE' AND remaining > 0;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "quotas_valid_until_idx" ON "quotas" ("valid_until") WHERE deleted_at IS NULL AND status = 'ACTIVE';--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "quotas_admin_list_idx" ON "quotas" ("student_id","status","deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "class_instances_ondemand_status_idx" ON "class_instances" ("ondemand_status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "recurring_schedules_quota_id_idx" ON "recurring_schedules" ("quota_id");--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "quota_ledger" ADD CONSTRAINT "quota_ledger_quota_id_quotas_id_fkey" FOREIGN KEY ("quota_id") REFERENCES "quotas"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "quota_ledger" ADD CONSTRAINT "quota_ledger_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "quota_ledger" ADD CONSTRAINT "quota_ledger_recurring_schedule_id_recurring_schedules_id_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "quota_ledger" ADD CONSTRAINT "quota_ledger_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "quota_ledger" ADD CONSTRAINT "quota_ledger_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "quotas" ADD CONSTRAINT "quotas_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_quota_id_quotas_id_fkey" FOREIGN KEY ("quota_id") REFERENCES "quotas"("id") ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    -- VALIDATE PATTERN: Using NOT VALID + separate VALIDATE to avoid long table-rewrite
+-- locks on existing data. Adding a CHECK constraint with NOT VALID skips the scan
+-- of existing rows during ALTER TABLE (only new/updated rows are validated). The
+-- subsequent VALIDATE CONSTRAINT acquires only a SHARE UPDATE EXCLUSIVE lock
+-- (concurrent reads/writes are allowed) and verifies existing data in a separate,
+-- non-blocking pass. This is the recommended PostgreSQL pattern for adding
+-- constraints to large tables in production.
+ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_ondemand_status_scheduling_mode_chk" CHECK (
+        ("ondemand_status" IS NULL AND "scheduling_mode" != 'ON_DEMAND') OR
+        ("ondemand_status" IS NOT NULL AND "scheduling_mode" = 'ON_DEMAND')
+      ) NOT VALID;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
+ALTER TABLE "class_instances" VALIDATE CONSTRAINT "class_instances_ondemand_status_scheduling_mode_chk";--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "class_instances" DROP CONSTRAINT "class_instances_state_machine_chk", ADD CONSTRAINT "class_instances_state_machine_chk" CHECK (
+        ("execution_state" != 'COMPLETED' OR "outcome" != 'PENDING') AND
+        ("execution_state" != 'NOT_ACTIVATED' OR "actual_start_at" IS NULL) AND
+        ("force_activated" = false OR "force_activated_by_user_id" IS NOT NULL) AND
+        ("outcome" != 'TAKEN' OR "actual_start_at" IS NOT NULL) AND
+        ("is_rate_overridden" = false OR "rate_amount" IS NOT NULL) AND
+        ("execution_state" NOT IN ('ON_DEMAND_PENDING_CREDITS', 'ON_DEMAND_CONFLICT_HELD', 'ON_DEMAND_NO_CREDITS_CANCELLED', 'ON_DEMAND_NO_CREDITS_ABSENT') OR "scheduling_mode" = 'ON_DEMAND')
+      );
+
+-- DOWN MIGRATION
+-- ===============
+-- To reverse this migration, apply the following steps in order:
+--
+-- 1. Re-insert the deleted permission rows:
+--    The DELETE FROM "permissions" statement removed rows whose key was not a valid
+--    app_permission enum value. To restore them, re-run the seed data from
+--    backend/db/migration/7d-quota_permissions_data.sql (the source of truth for
+--    quotas.view and quotas.manage permissions) against the permissions table.
+--    Before re-inserting, revert the permissions.key column back to text:
+--      ALTER TABLE "permissions" ALTER COLUMN "key" SET DATA TYPE text USING "key"::text;
+--    Then run 7d-quota_permissions_data.sql to re-insert the rows.
+--
+-- 2. Drop the quotas and quota_ledger tables:
+--    DROP INDEX IF EXISTS "quota_ledger_idempotency_key_unique_idx";
+--    DROP INDEX IF EXISTS "quota_ledger_quota_id_created_at_idx";
+--    DROP INDEX IF EXISTS "quota_ledger_student_id_idx";
+--    DROP INDEX IF EXISTS "quota_ledger_class_instance_id_idx";
+--    DROP INDEX IF EXISTS "quota_ledger_recurring_schedule_id_idx";
+--    DROP INDEX IF EXISTS "quotas_idempotency_key_unique_idx";
+--    DROP INDEX IF EXISTS "quotas_student_id_idx";
+--    DROP INDEX IF EXISTS "quotas_student_status_remaining_idx";
+--    DROP INDEX IF EXISTS "quotas_admin_list_idx";
+--    DROP INDEX IF EXISTS "quotas_valid_until_idx";
+--    DROP INDEX IF EXISTS "class_instances_ondemand_status_idx";
+--    DROP INDEX IF EXISTS "recurring_schedules_quota_id_idx";
+--    ALTER TABLE "class_instances" DROP CONSTRAINT "class_instances_ondemand_status_scheduling_mode_chk";
+--    DROP TABLE IF EXISTS "quota_ledger";
+--    DROP TABLE IF EXISTS "quotas";
+--
+-- 3. Drop the new enum types:
+--    DROP TYPE IF EXISTS "ondemand_no_credits_outcome";
+--    DROP TYPE IF EXISTS "ondemand_status";
+--    DROP TYPE IF EXISTS "quota_kind";
+--    DROP TYPE IF EXISTS "quota_ledger_reason";
+--    DROP TYPE IF EXISTS "quota_period_type";
+--    DROP TYPE IF EXISTS "quota_status";
+--    DROP TYPE IF EXISTS "scheduling_mode";
+--
+-- 4. Revert column changes on class_instances and recurring_schedules:
+--    ALTER TABLE "class_instances" DROP COLUMN "ondemand_status";
+--    ALTER TABLE "class_instances" ALTER COLUMN "scheduling_mode" DROP DEFAULT;
+--    ALTER TABLE "class_instances" DROP COLUMN "scheduling_mode";
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "quota_id";
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "earmarked_classes";
+--    ALTER TABLE "recurring_schedules" ALTER COLUMN "scheduling_mode" DROP DEFAULT;
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "scheduling_mode";
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "generation_horizon_weeks";
+--    ALTER TABLE "recurring_schedules" DROP COLUMN "ondemand_no_credits_outcome";
+--
+-- 5. Revert the extension enum values (class_execution_state, notification_event_type):
+--    These ALTER TYPE ADD VALUE statements cannot be reversed in PostgreSQL —
+--    enum values cannot be removed once added. A full rollback would require
+--    recreating the enum types without the added values.;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;

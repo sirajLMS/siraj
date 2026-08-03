@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { ParentRepository, SoftDeleteRepository, SuggestionRepository, UserRepository } from "@/backend/db/repo";
-import { AccountStatus, AppPermission, SuggestionStatus } from "@/backend/enum";
+import { AccountStatus, AppPermission, NotificationChannel, SuggestionStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
@@ -136,7 +136,10 @@ describe("SuggestionService", () => {
     hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
     getSuggestionByIdSpy = spyOn(SuggestionRepository, "getSuggestionById").mockResolvedValue(mockSuggestionRow);
     dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockResolvedValue([]);
-    dispatchSpy = spyOn(CommunicationService, "dispatch").mockResolvedValue({ channel: "on_app", success: true });
+    dispatchSpy = spyOn(CommunicationService, "dispatch").mockResolvedValue({
+      channel: NotificationChannel.ON_APP,
+      success: true,
+    });
     findByUserIdSpy = spyOn(ParentRepository, "findByUserId").mockResolvedValue(mockParent);
     getParentProfileSpy = spyOn(ParentRepository, "getParentProfile").mockResolvedValue(mockParentProfile);
     getSuggestionsByParentSpy = spyOn(SuggestionRepository, "getSuggestionsByParent").mockResolvedValue([]);
@@ -233,8 +236,8 @@ describe("SuggestionService", () => {
       expect(dispatchMultiSpy).toHaveBeenCalledTimes(1);
       const dispatchedPayloads = dispatchMultiSpy.mock.calls[0][0];
       expect(dispatchedPayloads).toHaveLength(2);
-      expect(dispatchedPayloads[0].channel).toBe("on_app");
-      expect(dispatchedPayloads[1].channel).toBe("email");
+      expect(dispatchedPayloads[0].channel).toBe(NotificationChannel.ON_APP);
+      expect(dispatchedPayloads[1].channel).toBe(NotificationChannel.EMAIL);
       // Legacy direct-dispatch path must stamp `metadata.to` on the email payload.
       expect(dispatchedPayloads[1].metadata?.to).toBe("parent@test.com");
     });
@@ -252,7 +255,7 @@ describe("SuggestionService", () => {
       getSuggestionByIdSpy.mockResolvedValue(null);
       await expectErrorMatching(
         SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, "nonexistent-uuid", "Response"),
-        msg => msg.includes("suggestionnotfound")
+        msg => msg.includes("suggestion not found")
       );
     });
   });
@@ -262,7 +265,7 @@ describe("SuggestionService", () => {
       hasPermissionSpy.mockResolvedValue(true);
       findByUserIdSpy.mockResolvedValue(mockParent);
       findSafeByIdSpy.mockResolvedValue({ email: "parent@test.com", phone: null } as unknown as UserSelectType);
-      dispatchSpy.mockResolvedValue({ channel: "email", success: true });
+      dispatchSpy.mockResolvedValue({ channel: NotificationChannel.EMAIL, success: true });
 
       await SuggestionService.submitSuggestion(MOCK_ACTOR_ID, {
         submitterName: "Test Parent",
@@ -271,7 +274,7 @@ describe("SuggestionService", () => {
 
       expect(dispatchSpy).toHaveBeenCalledTimes(1);
       const dispatchedPayload = dispatchSpy.mock.calls[0][0];
-      expect(dispatchedPayload.channel).toBe("email");
+      expect(dispatchedPayload.channel).toBe(NotificationChannel.EMAIL);
       expect(dispatchedPayload.metadata?.to).toBe("parent@test.com");
     });
 
@@ -299,7 +302,7 @@ describe("SuggestionService", () => {
         duplicateOfId: MOCK_DUPLICATE_TARGET_ID,
       });
       getParentProfileSpy.mockResolvedValue(mockParentProfile);
-      dispatchSpy.mockResolvedValue({ channel: "on_app", success: true });
+      dispatchSpy.mockResolvedValue({ channel: NotificationChannel.ON_APP, success: true });
 
       const result = await SuggestionService.markAsDuplicate(
         MOCK_ACTOR_ID,
@@ -349,7 +352,7 @@ describe("SuggestionService", () => {
       mockSuggestionLookup();
       await expectErrorMatching(
         SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID),
-        msg => msg.includes("suggestion.notfound")
+        msg => msg.includes("suggestion not found")
       );
     });
 

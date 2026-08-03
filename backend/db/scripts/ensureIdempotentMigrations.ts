@@ -85,8 +85,69 @@ function transformInsertGroupPermissions(trimmed: string): string | null {
 }
 
 /**
+ * Wraps `DROP INDEX` / `DROP CONSTRAINT` in `IF EXISTS` so a re-run after a partial
+ * migration (where the object was already dropped) does not raise `undefined_object`
+ * (PG 42704). Only transforms bare `DROP INDEX`/`DROP CONSTRAINT` statements that are
+ * NOT already inside a `DO $$` block and NOT already `IF EXISTS`.
+ */
+function transformDropObject(trimmed: string): string | null {
+  if (/DO\s+\$\$/i.test(trimmed)) return null;
+  if (/\bDROP\s+(?:INDEX|CONSTRAINT)\s+IF\s+EXISTS\b/i.test(trimmed)) return null;
+  if (/\bDROP\s+CONSTRAINT\b/i.test(trimmed)) {
+    return trimmed.replace(/\bDROP\s+CONSTRAINT\b/gi, "DROP CONSTRAINT IF EXISTS");
+  }
+  if (/\bDROP\s+INDEX\b/i.test(trimmed)) {
+    return trimmed.replace(/\bDROP\s+INDEX\b/gi, "DROP INDEX IF EXISTS");
+  }
+  return null;
+}
+
+/**
+ * Wraps a `CREATE TABLE` statement with `IF NOT EXISTS` so that a partially-applied
+ * migration (table already created on a prior failed run) re-executes without raising
+ * `relation "<table>" already exists` (PG 42P07).
+ *
+ * PostgreSQL's `CREATE TABLE IF NOT EXISTS` skips the entire DDL block when the table
+ * exists — acceptable here because the table's columns/constraints were written in full
+ * by the original attempt, and any follow-up `ADD COLUMN` / `ADD CONSTRAINT` statements
+ * in the same migration are already independently idempotent (see {@link transformAddColumn}
+ * and {@link transformAddConstraint}). Indexes are handled separately by
+ * {@link transformCreateIndex}.
+ */
+function transformCreateTable(trimmed: string): string | null {
+  if (
+    /\bCREATE\s+TABLE\b/i.test(trimmed) &&
+    !/\bCREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\b/i.test(trimmed) &&
+    !/\bCREATE\s+TABLE\b[\s\S]*?\bAS\b/i.test(trimmed) &&
+    !/DO\s+\$\$/i.test(trimmed)
+  ) {
+    return trimmed.replace(/\bCREATE\s+TABLE\b/gi, "CREATE TABLE IF NOT EXISTS");
+  }
+  return null;
+}
+
+/**
+ * Wraps a `CREATE [UNIQUE] INDEX` statement with `IF NOT EXISTS`. This makes index
+ * creation idempotent against partially-applied migrations where the index was already
+ * created before the migration aborted.
+ *
+ * PostgreSQL's `CREATE INDEX IF NOT EXISTS` is the documented idempotent form and is
+ * safe for both fresh and partial-apply scenarios.
+ */
+function transformCreateIndex(trimmed: string): string | null {
+  if (
+    /\bCREATE\s+(UNIQUE\s+)?INDEX\b/i.test(trimmed) &&
+    !/\bCREATE\s+(?:UNIQUE\s+)?INDEX\s+IF\s+NOT\s+EXISTS\b/i.test(trimmed) &&
+    !/DO\s+\$\$/i.test(trimmed)
+  ) {
+    return trimmed.replace(/\bCREATE\s+(UNIQUE\s+)?INDEX\b/gi, "CREATE $1INDEX IF NOT EXISTS");
+  }
+  return null;
+}
+
+/**
  * Transforms a single SQL statement to be idempotent for PostgreSQL.
- * Handles `CREATE TYPE`, `ADD COLUMN`, `ADD CONSTRAINT`, `ALTER TYPE ... ADD VALUE`, `ALTER COLUMN ... TYPE`, and join-table `INSERT`s.
+ * Handles `CREATE TYPE`, `CREATE TABLE`, `CREATE [UNIQUE] INDEX`, `ADD COLUMN`, `ADD CONSTRAINT`, `ALTER TYPE ... ADD VALUE`, `ALTER COLUMN ... TYPE`, and join-table `INSERT`s.
  *
  * @param stmt The SQL statement string to transform.
  * @returns The transformed, idempotent SQL statement.
@@ -103,6 +164,15 @@ export function transformStatementIdempotent(stmt: string): string {
 
   const createType = transformCreateType(trimmed);
   if (createType) return createType;
+
+  const createTable = transformCreateTable(trimmed);
+  if (createTable) return createTable;
+
+  const createIndex = transformCreateIndex(trimmed);
+  if (createIndex) return createIndex;
+
+  const dropObject = transformDropObject(trimmed);
+  if (dropObject) return dropObject;
 
   const withColumn = transformAddColumn(trimmed);
 

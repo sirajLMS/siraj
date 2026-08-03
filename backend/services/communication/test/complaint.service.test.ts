@@ -155,7 +155,7 @@ describe("ComplaintService", () => {
 
       await expectSubmitComplaintThrows(
         [{ path: "huge.jpg", sizeBytes: 5 * 1024 * 1024, mimeType: "image/jpeg" }],
-        "large"
+        "exceed"
       );
     });
 

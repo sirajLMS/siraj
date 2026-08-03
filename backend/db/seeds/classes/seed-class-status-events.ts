@@ -2,22 +2,22 @@ import { orchestrateSeedMany, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
-import type { ClassInstanceEntity, TeacherEntity } from "@/backend/types";
+import type { ClassInstanceSelectType, TeacherSelectType } from "@/backend/types";
 import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
 
 type StatusEventSpec = {
   classInstanceId: string;
   eventType: string;
   fromState: { executionState: ClassExecutionState; outcome: ClassOutcome };
-  toState: { executionState: ClassInstanceEntity["executionState"]; outcome: ClassInstanceEntity["outcome"] };
+  toState: { executionState: ClassInstanceSelectType["executionState"]; outcome: ClassInstanceSelectType["outcome"] };
   description: string;
   actorUserId: string;
   createdAt: Date;
 };
 
 export async function seedOrGet(
-  classInstancesList: ClassInstanceEntity[],
-  teachersList?: TeacherEntity[],
+  classInstancesList: ClassInstanceSelectType[],
+  teachersList?: TeacherSelectType[],
   _config?: SeedConfig
 ) {
   logger.info("Seeding system class status events...");

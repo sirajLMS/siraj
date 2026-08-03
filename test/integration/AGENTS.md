@@ -10,6 +10,7 @@ Live **provider smokes** only — one real API round-trip per external service t
 | FX providers | `fx/*.integration.test.ts` | Fixer, OpenExchangeRates |
 | Database providers | `db/*.integration.test.ts` | Neon HTTP |
 | Cache / Redis providers | `redis/*.integration.test.ts` | Upstash, Redis Cloud, local Redis |
+| Meeting adapters | `meeting/*.integration.test.ts` | Zoom, Google Meet, Microsoft Teams |
 
 **Naming:** `*.integration.test.ts` only. One `describe` block per provider adapter, **one `test` per file** (single API call — avoids quota / rate limits).
 
@@ -96,6 +97,7 @@ test/integration/
   fx/                         # Fixer, OpenExchangeRates
   db/                         # Neon HTTP, etc.
   redis/                      # Upstash, Redis Cloud, local (planned)
+  meeting/                    # Meeting provider smokes (Zoom, Google Meet, Microsoft Teams)
 ```
 
 ## Adding a new provider smoke
