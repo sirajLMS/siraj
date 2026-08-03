@@ -6,8 +6,8 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
-  type NotificationPreferenceRole,
   isEventAllowedForRole,
+  type NotificationPreferenceRole,
   resolveNotificationEventAllowlist,
 } from "@/shared/constants/notification-event-allowlists";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";

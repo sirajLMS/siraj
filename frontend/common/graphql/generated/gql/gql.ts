@@ -130,6 +130,18 @@ type Documents = {
     "\n  mutation SubmitComplaint($input: ComplaintSubmitInput!) {\n    submitComplaint(input: $input) {\n      id\n      category\n      body\n      status\n      createdAt\n    }\n  }\n": typeof types.SubmitComplaintDocument,
     "\n  mutation RespondToComplaint($input: RespondToComplaintInput!) {\n    respondToComplaint(input: $input) {\n      id\n      body\n      emailSent\n      createdAt\n      responderName\n    }\n  }\n": typeof types.RespondToComplaintDocument,
     "\n  mutation DeleteComplaint($complaintId: String!) {\n    deleteComplaint(complaintId: $complaintId)\n  }\n": typeof types.DeleteComplaintDocument,
+    "\n  fragment CronScheduleFields on CronSchedule {\n    id\n    name\n    description\n    cronExpression\n    jobKind\n    payload\n    status\n    timezone\n    nextRunAt\n    lastRunAt\n    concurrencyPolicy\n    maxRetries\n    retryBackoffSeconds\n    timeoutSeconds\n    createdAt\n    updatedAt\n  }\n": typeof types.CronScheduleFieldsFragmentDoc,
+    "\n  fragment CronRunFields on CronRun {\n    id\n    scheduleId\n    jobKind\n    status\n    triggerSource\n    payload\n    attempt\n    startedAt\n    completedAt\n    durationMs\n    errorMessage\n    workerId\n    createdAt\n    updatedAt\n  }\n": typeof types.CronRunFieldsFragmentDoc,
+    "\n  fragment CronQueueStatsFields on CronQueueStats {\n    id\n    backend\n    pending\n    inFlight\n    failed\n    byJobKind\n  }\n": typeof types.CronQueueStatsFieldsFragmentDoc,
+    "\n  \n  query cronSchedules($input: CronScheduleListInput) {\n    cronSchedules(input: $input) {\n      rows {\n        ...CronScheduleFields\n      }\n      totalCount\n    }\n  }\n": typeof types.CronSchedulesDocument,
+    "\n  \n  query cronRuns($input: CronRunListInput) {\n    cronRuns(input: $input) {\n      rows {\n        ...CronRunFields\n      }\n      totalCount\n    }\n  }\n": typeof types.CronRunsDocument,
+    "\n  \n  query cronQueueStats {\n    cronQueueStats {\n      ...CronQueueStatsFields\n    }\n  }\n": typeof types.CronQueueStatsDocument,
+    "\n  \n  mutation cronScheduleCreate($input: CronScheduleSubmitInput!) {\n    cronScheduleCreate(input: $input) {\n      ...CronScheduleFields\n    }\n  }\n": typeof types.CronScheduleCreateDocument,
+    "\n  \n  mutation cronScheduleUpdate($id: String!, $input: CronScheduleUpdateInput!) {\n    cronScheduleUpdate(id: $id, input: $input) {\n      ...CronScheduleFields\n    }\n  }\n": typeof types.CronScheduleUpdateDocument,
+    "\n  \n  mutation cronSchedulePause($id: String!) {\n    cronSchedulePause(id: $id) {\n      ...CronScheduleFields\n    }\n  }\n": typeof types.CronSchedulePauseDocument,
+    "\n  \n  mutation cronScheduleResume($id: String!) {\n    cronScheduleResume(id: $id) {\n      ...CronScheduleFields\n    }\n  }\n": typeof types.CronScheduleResumeDocument,
+    "\n  mutation cronScheduleDelete($input: CronScheduleDeleteInput!) {\n    cronScheduleDelete(input: $input)\n  }\n": typeof types.CronScheduleDeleteDocument,
+    "\n  \n  mutation cronRunTrigger($input: CronRunTriggerInput!) {\n    cronRunTrigger(input: $input) {\n      ...CronRunFields\n    }\n  }\n": typeof types.CronRunTriggerDocument,
     "\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsAutoGeneration\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    providerKind\n    isActive\n    createdAt\n    updatedAt\n  }\n": typeof types.MeetingProviderFieldsFragmentDoc,
     "\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    oauthTokenExpiresAt\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": typeof types.UserMeetingConfigFieldsFragmentDoc,
     "\n  \n  query meetingProviders($activeOnly: Boolean) {\n    meetingProviders(activeOnly: $activeOnly) {\n      ...MeetingProviderFields\n    }\n  }\n": typeof types.MeetingProvidersDocument,
@@ -466,6 +478,18 @@ const documents: Documents = {
     "\n  mutation SubmitComplaint($input: ComplaintSubmitInput!) {\n    submitComplaint(input: $input) {\n      id\n      category\n      body\n      status\n      createdAt\n    }\n  }\n": types.SubmitComplaintDocument,
     "\n  mutation RespondToComplaint($input: RespondToComplaintInput!) {\n    respondToComplaint(input: $input) {\n      id\n      body\n      emailSent\n      createdAt\n      responderName\n    }\n  }\n": types.RespondToComplaintDocument,
     "\n  mutation DeleteComplaint($complaintId: String!) {\n    deleteComplaint(complaintId: $complaintId)\n  }\n": types.DeleteComplaintDocument,
+    "\n  fragment CronScheduleFields on CronSchedule {\n    id\n    name\n    description\n    cronExpression\n    jobKind\n    payload\n    status\n    timezone\n    nextRunAt\n    lastRunAt\n    concurrencyPolicy\n    maxRetries\n    retryBackoffSeconds\n    timeoutSeconds\n    createdAt\n    updatedAt\n  }\n": types.CronScheduleFieldsFragmentDoc,
+    "\n  fragment CronRunFields on CronRun {\n    id\n    scheduleId\n    jobKind\n    status\n    triggerSource\n    payload\n    attempt\n    startedAt\n    completedAt\n    durationMs\n    errorMessage\n    workerId\n    createdAt\n    updatedAt\n  }\n": types.CronRunFieldsFragmentDoc,
+    "\n  fragment CronQueueStatsFields on CronQueueStats {\n    id\n    backend\n    pending\n    inFlight\n    failed\n    byJobKind\n  }\n": types.CronQueueStatsFieldsFragmentDoc,
+    "\n  \n  query cronSchedules($input: CronScheduleListInput) {\n    cronSchedules(input: $input) {\n      rows {\n        ...CronScheduleFields\n      }\n      totalCount\n    }\n  }\n": types.CronSchedulesDocument,
+    "\n  \n  query cronRuns($input: CronRunListInput) {\n    cronRuns(input: $input) {\n      rows {\n        ...CronRunFields\n      }\n      totalCount\n    }\n  }\n": types.CronRunsDocument,
+    "\n  \n  query cronQueueStats {\n    cronQueueStats {\n      ...CronQueueStatsFields\n    }\n  }\n": types.CronQueueStatsDocument,
+    "\n  \n  mutation cronScheduleCreate($input: CronScheduleSubmitInput!) {\n    cronScheduleCreate(input: $input) {\n      ...CronScheduleFields\n    }\n  }\n": types.CronScheduleCreateDocument,
+    "\n  \n  mutation cronScheduleUpdate($id: String!, $input: CronScheduleUpdateInput!) {\n    cronScheduleUpdate(id: $id, input: $input) {\n      ...CronScheduleFields\n    }\n  }\n": types.CronScheduleUpdateDocument,
+    "\n  \n  mutation cronSchedulePause($id: String!) {\n    cronSchedulePause(id: $id) {\n      ...CronScheduleFields\n    }\n  }\n": types.CronSchedulePauseDocument,
+    "\n  \n  mutation cronScheduleResume($id: String!) {\n    cronScheduleResume(id: $id) {\n      ...CronScheduleFields\n    }\n  }\n": types.CronScheduleResumeDocument,
+    "\n  mutation cronScheduleDelete($input: CronScheduleDeleteInput!) {\n    cronScheduleDelete(input: $input)\n  }\n": types.CronScheduleDeleteDocument,
+    "\n  \n  mutation cronRunTrigger($input: CronRunTriggerInput!) {\n    cronRunTrigger(input: $input) {\n      ...CronRunFields\n    }\n  }\n": types.CronRunTriggerDocument,
     "\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsAutoGeneration\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    providerKind\n    isActive\n    createdAt\n    updatedAt\n  }\n": types.MeetingProviderFieldsFragmentDoc,
     "\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    oauthTokenExpiresAt\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": types.UserMeetingConfigFieldsFragmentDoc,
     "\n  \n  query meetingProviders($activeOnly: Boolean) {\n    meetingProviders(activeOnly: $activeOnly) {\n      ...MeetingProviderFields\n    }\n  }\n": types.MeetingProvidersDocument,
@@ -1164,6 +1188,54 @@ export function graphql(source: "\n  mutation RespondToComplaint($input: Respond
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteComplaint($complaintId: String!) {\n    deleteComplaint(complaintId: $complaintId)\n  }\n"): (typeof documents)["\n  mutation DeleteComplaint($complaintId: String!) {\n    deleteComplaint(complaintId: $complaintId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment CronScheduleFields on CronSchedule {\n    id\n    name\n    description\n    cronExpression\n    jobKind\n    payload\n    status\n    timezone\n    nextRunAt\n    lastRunAt\n    concurrencyPolicy\n    maxRetries\n    retryBackoffSeconds\n    timeoutSeconds\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment CronScheduleFields on CronSchedule {\n    id\n    name\n    description\n    cronExpression\n    jobKind\n    payload\n    status\n    timezone\n    nextRunAt\n    lastRunAt\n    concurrencyPolicy\n    maxRetries\n    retryBackoffSeconds\n    timeoutSeconds\n    createdAt\n    updatedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment CronRunFields on CronRun {\n    id\n    scheduleId\n    jobKind\n    status\n    triggerSource\n    payload\n    attempt\n    startedAt\n    completedAt\n    durationMs\n    errorMessage\n    workerId\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment CronRunFields on CronRun {\n    id\n    scheduleId\n    jobKind\n    status\n    triggerSource\n    payload\n    attempt\n    startedAt\n    completedAt\n    durationMs\n    errorMessage\n    workerId\n    createdAt\n    updatedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment CronQueueStatsFields on CronQueueStats {\n    id\n    backend\n    pending\n    inFlight\n    failed\n    byJobKind\n  }\n"): (typeof documents)["\n  fragment CronQueueStatsFields on CronQueueStats {\n    id\n    backend\n    pending\n    inFlight\n    failed\n    byJobKind\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query cronSchedules($input: CronScheduleListInput) {\n    cronSchedules(input: $input) {\n      rows {\n        ...CronScheduleFields\n      }\n      totalCount\n    }\n  }\n"): (typeof documents)["\n  \n  query cronSchedules($input: CronScheduleListInput) {\n    cronSchedules(input: $input) {\n      rows {\n        ...CronScheduleFields\n      }\n      totalCount\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query cronRuns($input: CronRunListInput) {\n    cronRuns(input: $input) {\n      rows {\n        ...CronRunFields\n      }\n      totalCount\n    }\n  }\n"): (typeof documents)["\n  \n  query cronRuns($input: CronRunListInput) {\n    cronRuns(input: $input) {\n      rows {\n        ...CronRunFields\n      }\n      totalCount\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query cronQueueStats {\n    cronQueueStats {\n      ...CronQueueStatsFields\n    }\n  }\n"): (typeof documents)["\n  \n  query cronQueueStats {\n    cronQueueStats {\n      ...CronQueueStatsFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation cronScheduleCreate($input: CronScheduleSubmitInput!) {\n    cronScheduleCreate(input: $input) {\n      ...CronScheduleFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation cronScheduleCreate($input: CronScheduleSubmitInput!) {\n    cronScheduleCreate(input: $input) {\n      ...CronScheduleFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation cronScheduleUpdate($id: String!, $input: CronScheduleUpdateInput!) {\n    cronScheduleUpdate(id: $id, input: $input) {\n      ...CronScheduleFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation cronScheduleUpdate($id: String!, $input: CronScheduleUpdateInput!) {\n    cronScheduleUpdate(id: $id, input: $input) {\n      ...CronScheduleFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation cronSchedulePause($id: String!) {\n    cronSchedulePause(id: $id) {\n      ...CronScheduleFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation cronSchedulePause($id: String!) {\n    cronSchedulePause(id: $id) {\n      ...CronScheduleFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation cronScheduleResume($id: String!) {\n    cronScheduleResume(id: $id) {\n      ...CronScheduleFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation cronScheduleResume($id: String!) {\n    cronScheduleResume(id: $id) {\n      ...CronScheduleFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation cronScheduleDelete($input: CronScheduleDeleteInput!) {\n    cronScheduleDelete(input: $input)\n  }\n"): (typeof documents)["\n  mutation cronScheduleDelete($input: CronScheduleDeleteInput!) {\n    cronScheduleDelete(input: $input)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation cronRunTrigger($input: CronRunTriggerInput!) {\n    cronRunTrigger(input: $input) {\n      ...CronRunFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation cronRunTrigger($input: CronRunTriggerInput!) {\n    cronRunTrigger(input: $input) {\n      ...CronRunFields\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

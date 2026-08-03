@@ -70,6 +70,7 @@ export interface DashboardNavigationLabels {
   readonly invoices: string;
   readonly parentRules: string;
   readonly socialMedia: string;
+  readonly cron: string;
   readonly permissions: string;
   readonly settings: string;
   readonly whatsappSettings: string;

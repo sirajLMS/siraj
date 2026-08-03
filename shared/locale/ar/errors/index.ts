@@ -293,6 +293,10 @@ export const errorsAr: ErrorsLabels = {
   currencyInUse:
     "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
 
+  // ─── Cron errors ──────────────────────────────────────────────────
+  invalidRunStatus: (status: string, runId: string) =>
+    `لا يمكن إعادة محاولة تشغيل بحالة ${status} (معرف التشغيل: ${runId}).`,
+
   // ─── Communication / suggestion / complaint errors ─────────────────────
   complaintNotFound: "الشكوى غير موجودة.",
   suggestionNotFound: "الاقتراح غير موجود.",

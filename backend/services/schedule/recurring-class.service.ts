@@ -16,8 +16,8 @@ import { DomainError, NotFoundError, UnauthorizedError, ValidationError } from "
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
-import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { RecurringScheduleDaySelectType, RecurringScheduleSelectType } from "@/backend/types";

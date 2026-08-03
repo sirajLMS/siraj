@@ -4,10 +4,10 @@ import { Box, Switch, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { NotificationChannel, type NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import {
-  type CategoryRow,
-  type NotificationEventCategory,
-  type PreferenceMatrixRow,
+import type {
+  CategoryRow,
+  NotificationEventCategory,
+  PreferenceMatrixRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";

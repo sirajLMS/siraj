@@ -419,3 +419,4 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference (adapter, factory, webhook, dispatch, schema, opt-in, frontend)
 - `docs/billing/quota-system.md` - Quota System: append-only ledger, FIFO selection, periodic rollover, on-demand scheduling integration
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
+- `docs/services/cron-service.md` - Cron service pattern reference

@@ -120,6 +120,7 @@ export enum AppPermission {
   ComplaintsList = 'COMPLAINTS_LIST',
   ComplaintsRespond = 'COMPLAINTS_RESPOND',
   CreditsManage = 'CREDITS_MANAGE',
+  CronManage = 'CRON_MANAGE',
   DashboardFilterMetrics = 'DASHBOARD_FILTER_METRICS',
   DashboardMetricsViewAll = 'DASHBOARD_METRICS_VIEW_ALL',
   DashboardSearch = 'DASHBOARD_SEARCH',
@@ -1238,6 +1239,159 @@ export type CreditTransaction = {
   studentId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
+
+export enum CronConcurrencyPolicy {
+  Allow = 'ALLOW',
+  Replace = 'REPLACE',
+  Skip = 'SKIP'
+}
+
+export enum CronJobKind {
+  Noop = 'NOOP'
+}
+
+export type CronPaginatedRuns = {
+  __typename?: 'CronPaginatedRuns';
+  rows: Maybe<Array<CronRun>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export type CronPaginatedSchedules = {
+  __typename?: 'CronPaginatedSchedules';
+  rows: Maybe<Array<CronSchedule>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export type CronQueueStats = {
+  __typename?: 'CronQueueStats';
+  backend: Maybe<Scalars['String']['output']>;
+  byJobKind: Maybe<Scalars['JSON']['output']>;
+  failed: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  inFlight: Maybe<Scalars['Int']['output']>;
+  pending: Maybe<Scalars['Int']['output']>;
+};
+
+export type CronRun = {
+  __typename?: 'CronRun';
+  attempt: Maybe<Scalars['Int']['output']>;
+  completedAt: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  durationMs: Maybe<Scalars['Int']['output']>;
+  errorMessage: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  jobKind: Maybe<CronJobKind>;
+  payload: Maybe<Scalars['JSON']['output']>;
+  scheduleId: Maybe<Scalars['String']['output']>;
+  startedAt: Maybe<Scalars['DateTime']['output']>;
+  status: Maybe<CronRunStatus>;
+  triggerSource: Maybe<CronTriggerSource>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  workerId: Maybe<Scalars['String']['output']>;
+};
+
+export type CronRunListInput = {
+  from: InputMaybe<Scalars['DateTime']['input']>;
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  scheduleId: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<CronRunStatus>;
+  statuses: InputMaybe<Array<CronRunStatus>>;
+  to: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type CronRunRetryInput = {
+  attempt: InputMaybe<Scalars['Int']['input']>;
+  runId: Scalars['String']['input'];
+};
+
+export enum CronRunStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Retrying = 'RETRYING',
+  Running = 'RUNNING',
+  Timeout = 'TIMEOUT'
+}
+
+export type CronRunTriggerInput = {
+  id: Scalars['String']['input'];
+  payload: InputMaybe<Scalars['JSON']['input']>;
+};
+
+export type CronSchedule = {
+  __typename?: 'CronSchedule';
+  concurrencyPolicy: Maybe<CronConcurrencyPolicy>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  cronExpression: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  jobKind: Maybe<CronJobKind>;
+  lastRunAt: Maybe<Scalars['DateTime']['output']>;
+  maxRetries: Maybe<Scalars['Int']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  nextRunAt: Maybe<Scalars['DateTime']['output']>;
+  payload: Maybe<Scalars['JSON']['output']>;
+  retryBackoffSeconds: Maybe<Scalars['Int']['output']>;
+  status: Maybe<CronScheduleStatus>;
+  timeoutSeconds: Maybe<Scalars['Int']['output']>;
+  timezone: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type CronScheduleDeleteInput = {
+  hard: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['String']['input'];
+};
+
+export type CronScheduleListInput = {
+  jobKind: InputMaybe<CronJobKind>;
+  limit: InputMaybe<Scalars['Int']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  status: InputMaybe<CronScheduleStatus>;
+};
+
+export enum CronScheduleStatus {
+  Active = 'ACTIVE',
+  Disabled = 'DISABLED',
+  Paused = 'PAUSED'
+}
+
+export type CronScheduleSubmitInput = {
+  concurrencyPolicy: InputMaybe<CronConcurrencyPolicy>;
+  cronExpression: Scalars['String']['input'];
+  description: InputMaybe<Scalars['String']['input']>;
+  jobKind: CronJobKind;
+  maxRetries: InputMaybe<Scalars['Int']['input']>;
+  name: Scalars['String']['input'];
+  payload: InputMaybe<Scalars['JSON']['input']>;
+  retryBackoffSeconds: InputMaybe<Scalars['Int']['input']>;
+  timeoutSeconds: InputMaybe<Scalars['Int']['input']>;
+  timezone: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CronScheduleUpdateInput = {
+  concurrencyPolicy: InputMaybe<CronConcurrencyPolicy>;
+  cronExpression: InputMaybe<Scalars['String']['input']>;
+  description: InputMaybe<Scalars['String']['input']>;
+  jobKind: InputMaybe<CronJobKind>;
+  maxRetries: InputMaybe<Scalars['Int']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  payload: InputMaybe<Scalars['JSON']['input']>;
+  retryBackoffSeconds: InputMaybe<Scalars['Int']['input']>;
+  timeoutSeconds: InputMaybe<Scalars['Int']['input']>;
+  timezone: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum CronTriggerSource {
+  External = 'EXTERNAL',
+  Manual = 'MANUAL',
+  VercelExplicit = 'VERCEL_EXPLICIT',
+  VercelTicker = 'VERCEL_TICKER',
+  WorkerRetry = 'WORKER_RETRY'
+}
 
 export enum CurrencyCode {
   Aed = 'AED',
@@ -2689,6 +2843,20 @@ export type Mutation = {
   createUserPaymentMethod: Maybe<UserPaymentMethod>;
   /** Create a new WhatsApp business account record. */
   createWhatsappAccount: Maybe<WhatsappAccount>;
+  /** Retry a failed cron run. */
+  cronRunRetry: Maybe<CronRun>;
+  /** Manually trigger a cron schedule to run immediately. */
+  cronRunTrigger: Maybe<CronRun>;
+  /** Create a new cron schedule. */
+  cronScheduleCreate: Maybe<CronSchedule>;
+  /** Delete a cron schedule (soft by default, hard if specified). */
+  cronScheduleDelete: Maybe<Scalars['Boolean']['output']>;
+  /** Pause a cron schedule. */
+  cronSchedulePause: Maybe<CronSchedule>;
+  /** Resume a paused cron schedule. */
+  cronScheduleResume: Maybe<CronSchedule>;
+  /** Update an existing cron schedule. */
+  cronScheduleUpdate: Maybe<CronSchedule>;
   deactivateParent: Maybe<DeactivateParentResult>;
   deactivateSupportedCurrency: Maybe<Scalars['Boolean']['output']>;
   deactivateSupportedMobileWallet: Maybe<SupportedMobileWallet>;
@@ -3108,6 +3276,42 @@ export type MutationCreateUserPaymentMethodArgs = {
 
 export type MutationCreateWhatsappAccountArgs = {
   input: WhatsappAccountCreateInput;
+};
+
+
+export type MutationCronRunRetryArgs = {
+  input: CronRunRetryInput;
+};
+
+
+export type MutationCronRunTriggerArgs = {
+  input: CronRunTriggerInput;
+};
+
+
+export type MutationCronScheduleCreateArgs = {
+  input: CronScheduleSubmitInput;
+};
+
+
+export type MutationCronScheduleDeleteArgs = {
+  input: CronScheduleDeleteInput;
+};
+
+
+export type MutationCronSchedulePauseArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationCronScheduleResumeArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationCronScheduleUpdateArgs = {
+  id: Scalars['String']['input'];
+  input: CronScheduleUpdateInput;
 };
 
 
@@ -4362,6 +4566,16 @@ export type Query = {
   classSubjects: Maybe<Array<ClassSubject>>;
   /** Returns file attachments for a specific complaint. Accessible by the owning parent or admins. */
   complaintFiles: Maybe<Array<ComplaintFile>>;
+  /** Get queue statistics for the active queue backend. */
+  cronQueueStats: Maybe<CronQueueStats>;
+  /** Fetch a single cron run by ID. */
+  cronRun: Maybe<CronRun>;
+  /** List cron runs with optional filters. */
+  cronRuns: Maybe<CronPaginatedRuns>;
+  /** Fetch a single cron schedule by ID. */
+  cronSchedule: Maybe<CronSchedule>;
+  /** List cron schedules with optional filters. */
+  cronSchedules: Maybe<CronPaginatedSchedules>;
   currencyHedges: Maybe<Array<CurrencyHedge>>;
   dailyScheduleList: Maybe<Array<DailyScheduleList>>;
   dailyScheduleMetrics: Maybe<DailyScheduleMetrics>;
@@ -4592,6 +4806,26 @@ export type QueryClassSubjectsArgs = {
 
 export type QueryComplaintFilesArgs = {
   complaintId: Scalars['String']['input'];
+};
+
+
+export type QueryCronRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryCronRunsArgs = {
+  input: InputMaybe<CronRunListInput>;
+};
+
+
+export type QueryCronScheduleArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryCronSchedulesArgs = {
+  input: InputMaybe<CronScheduleListInput>;
 };
 
 

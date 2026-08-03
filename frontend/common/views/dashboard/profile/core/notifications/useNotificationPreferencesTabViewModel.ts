@@ -17,11 +17,11 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import {
   buildCategoryRows,
+  NOTIFICATION_CHANNELS,
+  NOTIFICATION_EVENT_TYPES_BY_CATEGORY,
   type NotificationEventCategory,
   type NotificationPreferencesTabVariantProps,
   type NotificationPrefRow,
-  NOTIFICATION_CHANNELS,
-  NOTIFICATION_EVENT_TYPES_BY_CATEGORY,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import {
   buildDefaultPreferences,

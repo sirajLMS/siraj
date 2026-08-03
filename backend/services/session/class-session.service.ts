@@ -587,43 +587,43 @@ export namespace ClassSessionService {
     const finalRemarks = buildRescheduleRemarks(existing.remarks, quotaNote);
 
     const created = await db.transaction(async tx => {
-        const insertPayload = buildRescheduleInsert(classInstanceId, existing, input, finalRemarks);
-        const newInstance = await SchedulingRepository.rescheduleClassInstance(classInstanceId, insertPayload, tx);
+      const insertPayload = buildRescheduleInsert(classInstanceId, existing, input, finalRemarks);
+      const newInstance = await SchedulingRepository.rescheduleClassInstance(classInstanceId, insertPayload, tx);
 
-        // Re-deduct the quota/credit against the successor that was refunded from
-        // the original instance. Without this step the reschedule leaks a free
-        // class: the original is refunded, but the successor is inserted with
-        // `quotaDeducted: false` and never charged again.
-        if (existing.quotaDeducted && existing.deletedAt === null) {
-          const { quotaId, isQuotaBacked } = await releaseQuotaIfDeducted(existing, userId, tx, locale);
-          // Only refund credit when the instance is NOT quota-backed (credit-backed
-          // fallback). When quota release genuinely failed on a quota-backed
-          // instance, do NOT also refund credit — a phantom credit refund masks a
-          // quota leak (RBL2-5).
-          const creditRefunded =
-            !isQuotaBacked &&
-            (await refundCreditIfDeducted(existing, userId, getServerTranslations(locale).errorsTranslations, tx));
+      // Re-deduct the quota/credit against the successor that was refunded from
+      // the original instance. Without this step the reschedule leaks a free
+      // class: the original is refunded, but the successor is inserted with
+      // `quotaDeducted: false` and never charged again.
+      if (existing.quotaDeducted && existing.deletedAt === null) {
+        const { quotaId, isQuotaBacked } = await releaseQuotaIfDeducted(existing, userId, tx, locale);
+        // Only refund credit when the instance is NOT quota-backed (credit-backed
+        // fallback). When quota release genuinely failed on a quota-backed
+        // instance, do NOT also refund credit — a phantom credit refund masks a
+        // quota leak (RBL2-5).
+        const creditRefunded =
+          !isQuotaBacked &&
+          (await refundCreditIfDeducted(existing, userId, getServerTranslations(locale).errorsTranslations, tx));
 
-          // Mirror the deduction against the newly created successor instance.
-          if (quotaId) {
-            await QuotaService.redeemForInstance(newInstance.studentId, newInstance.id, quotaId, userId, tx, locale);
-            await SchedulingRepository.updateClassInstance(newInstance.id, { quotaDeducted: true }, tx);
-          } else if (creditRefunded) {
-            const deductIdempotencyKey = `credit-deduction:${newInstance.id}`;
-            await CreditService.deductForBooking(
-              newInstance.studentId,
-              newInstance.id,
-              userId,
-              deductIdempotencyKey,
-              tx,
-              tErrors
-            );
-            await SchedulingRepository.updateClassInstance(newInstance.id, { quotaDeducted: true }, tx);
-          }
+        // Mirror the deduction against the newly created successor instance.
+        if (quotaId) {
+          await QuotaService.redeemForInstance(newInstance.studentId, newInstance.id, quotaId, userId, tx, locale);
+          await SchedulingRepository.updateClassInstance(newInstance.id, { quotaDeducted: true }, tx);
+        } else if (creditRefunded) {
+          const deductIdempotencyKey = `credit-deduction:${newInstance.id}`;
+          await CreditService.deductForBooking(
+            newInstance.studentId,
+            newInstance.id,
+            userId,
+            deductIdempotencyKey,
+            tx,
+            tErrors
+          );
+          await SchedulingRepository.updateClassInstance(newInstance.id, { quotaDeducted: true }, tx);
         }
+      }
 
-        return newInstance;
-      });
+      return newInstance;
+    });
 
     // Best-effort meeting URL generation for the new (successor) instance.
     try {

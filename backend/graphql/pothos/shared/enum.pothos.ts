@@ -12,6 +12,11 @@ import {
   ClassType,
   CountryCode,
   CreditReason,
+  CronConcurrencyPolicy,
+  CronJobKind,
+  CronRunStatus,
+  CronScheduleStatus,
+  CronTriggerSource,
   CurrencyCode,
   DayOfWeek,
   FxProvider,
@@ -265,6 +270,26 @@ export const FxProviderConfigSourcePothosEnum = gqlSchemaBuilder.enumType(FxProv
 
 export const TeacherProgressFeedEventKindPothosEnum = gqlSchemaBuilder.enumType(TeacherProgressFeedEventKind, {
   name: "TeacherProgressFeedEventKind",
+});
+
+export const CronScheduleStatusPothosEnum = gqlSchemaBuilder.enumType(CronScheduleStatus, {
+  name: "CronScheduleStatus",
+});
+
+export const CronRunStatusPothosEnum = gqlSchemaBuilder.enumType(CronRunStatus, {
+  name: "CronRunStatus",
+});
+
+export const CronJobKindPothosEnum = gqlSchemaBuilder.enumType(CronJobKind, {
+  name: "CronJobKind",
+});
+
+export const CronTriggerSourcePothosEnum = gqlSchemaBuilder.enumType(CronTriggerSource, {
+  name: "CronTriggerSource",
+});
+
+export const CronConcurrencyPolicyPothosEnum = gqlSchemaBuilder.enumType(CronConcurrencyPolicy, {
+  name: "CronConcurrencyPolicy",
 });
 
 export const MeetingConnectionTestModePothosEnum = gqlSchemaBuilder.enumType(MeetingConnectionTestMode, {

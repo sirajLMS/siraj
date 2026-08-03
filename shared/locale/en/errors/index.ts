@@ -297,6 +297,9 @@ export const errorsEn: ErrorsLabels = {
   currencyInUse:
     "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
 
+  // ─── Cron errors ──────────────────────────────────────────────────
+  invalidRunStatus: (status: string, runId: string) => `Cannot retry a run with status ${status} (runId: ${runId}).`,
+
   // ─── Communication / suggestion / complaint errors ─────────────────────
   complaintNotFound: "Complaint not found.",
   suggestionNotFound: "Suggestion not found.",

@@ -12,6 +12,12 @@ import {
   ComplaintStatus,
   CountryCode,
   CreditReason,
+  CronConcurrencyPolicy,
+  CronJobKind,
+  CronQueueBackend,
+  CronRunStatus,
+  CronScheduleStatus,
+  CronTriggerSource,
   CurrencyCode,
   DayOfWeek,
   DevicePlatform,
@@ -143,3 +149,15 @@ export const attendanceEvaluationEnum = createPgEnumFromEnum("attendance_evaluat
 export const creditReasonEnum = createPgEnumFromEnum("credit_reason", CreditReason);
 
 export const rateSourceEnum = createPgEnumFromEnum("rate_source", RateSource);
+
+export const cronScheduleStatusEnum = createPgEnumFromEnum("cron_schedule_status", CronScheduleStatus);
+
+export const cronRunStatusEnum = createPgEnumFromEnum("cron_run_status", CronRunStatus);
+
+export const cronJobKindEnum = createPgEnumFromEnum("cron_job_kind", CronJobKind);
+
+export const cronTriggerSourceEnum = createPgEnumFromEnum("cron_trigger_source", CronTriggerSource);
+
+export const cronConcurrencyPolicyEnum = createPgEnumFromEnum("cron_concurrency_policy", CronConcurrencyPolicy);
+
+export const cronQueueBackendEnum = createPgEnumFromEnum("cron_queue_backend", CronQueueBackend);

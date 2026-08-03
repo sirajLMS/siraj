@@ -26,6 +26,7 @@ export { DashboardCoreParentDashboard } from "@/shared/locale/namespaces/dashboa
 export { DashboardCoreScheduleAlerts } from "@/shared/locale/namespaces/dashboard/core/scheduleAlerts.namespace";
 export { DashboardCoreSearchSchedule } from "@/shared/locale/namespaces/dashboard/core/searchSchedule.namespace";
 export { DashboardCoreStatusTracking } from "@/shared/locale/namespaces/dashboard/core/statusTracking.namespace";
+export { DashboardCron } from "@/shared/locale/namespaces/dashboard/cron/main.namespace";
 export { DashboardLmsCredit } from "@/shared/locale/namespaces/dashboard/lms/credit.namespace";
 export { DashboardLmsLessonReports } from "@/shared/locale/namespaces/dashboard/lms/lessonReports.namespace";
 export { DashboardLmsMonthlyReports } from "@/shared/locale/namespaces/dashboard/lms/monthlyReports.namespace";

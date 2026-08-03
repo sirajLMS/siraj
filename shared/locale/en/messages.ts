@@ -26,6 +26,7 @@ import { dashboardCoreParentDashboardEn } from "@/shared/locale/en/dashboard/cor
 import { dashboardCoreScheduleAlertsEn } from "@/shared/locale/en/dashboard/core/scheduleAlerts.ts";
 import { dashboardCoreSearchScheduleEn } from "@/shared/locale/en/dashboard/core/searchSchedule.ts";
 import { dashboardCoreStatusTrackingEn } from "@/shared/locale/en/dashboard/core/statusTracking.ts";
+import { dashboardCronEn } from "@/shared/locale/en/dashboard/cron/main";
 import { dashboardFeedbackManageParentEn } from "@/shared/locale/en/dashboard/feedback/main.ts";
 import { dashboardLmsCreditEn } from "@/shared/locale/en/dashboard/lms/credit.ts";
 import { dashboardLmsLessonReportsEn } from "@/shared/locale/en/dashboard/lms/lessonReports.ts";
@@ -165,6 +166,7 @@ export const enMessages: Translations = {
   dashboardTranslations: {
     admin: dashboardAdminEn,
     adminView: dashboardAdminViewEn,
+    cron: dashboardCronEn,
     dstMigration: dashboardDstMigrationEn,
     billing: dashboardBillingEn,
     billingManual: dashboardBillingManualEn,

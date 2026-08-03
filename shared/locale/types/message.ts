@@ -28,6 +28,7 @@ import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core
 import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts.ts";
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule.ts";
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core/statusTracking.ts";
+import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 import type { FeedbackManageParentLabels } from "@/shared/locale/types/dashboard/feedback/main.ts";
 import type { CreditLabels } from "@/shared/locale/types/dashboard/lms/credit.ts";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports.ts";
@@ -134,6 +135,7 @@ export type { AppLocale };
 export interface DashboardTranslations {
   admin: AdminDashboardLabels;
   adminView: AdminViewLabels;
+  cron: CronLabels;
   dstMigration: DstMigrationLabels;
   billing: BillingLabels;
   billingManual: BillingManualLabels;

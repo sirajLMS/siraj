@@ -327,6 +327,9 @@ export interface ErrorsLabels {
   readonly resourceNotFound: string;
   readonly currencyInUse: string;
 
+  // ─── Cron errors ──────────────────────────────────────────────────
+  readonly invalidRunStatus: (status: string, runId: string) => string;
+
   // ─── Communication / suggestion / complaint errors ─────────────────────
   readonly complaintNotFound: string;
   readonly suggestionNotFound: string;

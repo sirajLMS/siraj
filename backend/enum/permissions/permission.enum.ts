@@ -254,6 +254,8 @@ export enum AppPermission {
   // Quota Management
   QUOTAS_VIEW = "quotas.view",
   QUOTAS_MANAGE = "quotas.manage",
+  // Cron Management
+  CRON_MANAGE = "cron.manage",
 }
 
 let knownAppPermissionsCache: Set<string> | undefined;

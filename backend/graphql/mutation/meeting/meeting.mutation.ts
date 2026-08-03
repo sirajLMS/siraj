@@ -15,9 +15,9 @@ import {
   UserMeetingConfigPothosObject,
   UserMeetingConfigUpdateInputPothos,
 } from "@/backend/graphql/pothos/meeting/meeting.pothos";
+import { withAuthResult, withAuthVoid } from "@/backend/graphql/utils";
 import { handleMeetingChannelError } from "@/backend/graphql/utils/handle-meeting-channel-error";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { withAuthResult, withAuthVoid } from "@/backend/graphql/utils";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   ClassMeetingConfigService,
