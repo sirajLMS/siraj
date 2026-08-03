@@ -3,6 +3,7 @@ export enum NotificationChannel {
   SMS = "SMS",
   PUSH = "PUSH",
   ON_APP = "ON_APP",
+  WHATSAPP = "WHATSAPP",
 }
 
 export enum NotificationDeliveryStatus {

@@ -173,6 +173,21 @@
       "__fn": "({ complaintId, category }) => `A new ${category} complaint (${complaintId}) has been submitted.`"
     }
   },
+  "complaintResponse": {
+    "title": "Complaint Response"
+  },
+  "newSuggestion": {
+    "title": "New Suggestion Submitted"
+  },
+  "suggestionResponse": {
+    "title": "Suggestion Response"
+  },
+  "suggestionMarkedDuplicate": {
+    "title": "Suggestion Marked as Duplicate",
+    "body": {
+      "__fn": "({ duplicateId }) => `Your suggestion has been marked as a duplicate of suggestion #${duplicateId.slice(0, 8)}`"
+    }
+  },
   "quotaExpiringSoon": {
     "title": "Quota Expiring Soon",
     "body": {
@@ -226,5 +241,9 @@
   "noNotifications": "No notifications",
   "unreadCount": {
     "__fn": "(count) => {\n    if (count === 0)\n      return \"No unread notifications\";\n    if (count === 1)\n      return \"1 unread notification\";\n    return `${count} unread notifications`;\n  }"
+  },
+  "whatsappDeliveryFailed": "WhatsApp message delivery failed",
+  "whatsappDeliveryFailedWithReason": {
+    "__fn": "(reason) => `WhatsApp message delivery failed: ${reason}`"
   }
 }

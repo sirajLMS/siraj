@@ -415,5 +415,6 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/drizzle/neon-http-client.md` - Neon HTTP Client & Provider-Agnostic Stateless Queries reference
 - `docs/graphql/dataloader-batching.md` - Pothos DataLoader batching pattern reference
 - `docs/services/entity-cache-service.md` - Entity Cache Service pattern reference
+- `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference (adapter, factory, webhook, dispatch, schema, opt-in, frontend)
 - `docs/billing/quota-system.md` - Quota System: append-only ledger, FIFO selection, periodic rollover, on-demand scheduling integration
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines

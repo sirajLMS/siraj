@@ -17,6 +17,7 @@ export const profileNotificationsEn: ProfileNotificationsLabels = {
     SMS: "SMS",
     PUSH: "Push Notifications",
     ON_APP: "In-App",
+    WHATSAPP: "WhatsApp",
   },
   events: {
     CLASS_REMINDER: "Class Reminders",

@@ -110,3 +110,4 @@ export { UiPhoneInput } from "@/shared/locale/namespaces/ui/phoneInput.namespace
 export { UiTagInput } from "@/shared/locale/namespaces/ui/tagInput.namespace";
 export { UiTimezoneSelect } from "@/shared/locale/namespaces/ui/timezoneSelect.namespace";
 export { UiUserSelect } from "@/shared/locale/namespaces/ui/userSelect.namespace";
+export { Whatsapp } from "@/shared/locale/namespaces/whatsapp/whatsapp.namespace";

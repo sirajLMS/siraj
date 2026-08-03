@@ -134,6 +134,20 @@ export const notificationsEn: NotificationsLabels = {
     title: "New Complaint",
     body: ({ complaintId, category }) => `A new ${category} complaint (${complaintId}) has been submitted.`,
   },
+  complaintResponse: {
+    title: "Complaint Response",
+  },
+  newSuggestion: {
+    title: "New Suggestion Submitted",
+  },
+  suggestionResponse: {
+    title: "Suggestion Response",
+  },
+  suggestionMarkedDuplicate: {
+    title: "Suggestion Marked as Duplicate",
+    body: ({ duplicateId }) =>
+      `Your suggestion has been marked as a duplicate of suggestion #${duplicateId.slice(0, 8)}`,
+  },
   quotaExpiringSoon: {
     title: "Quota Expiring Soon",
     body: ({ quotaName, validUntil, remaining }) =>
@@ -183,4 +197,6 @@ export const notificationsEn: NotificationsLabels = {
     if (count === 1) return "1 unread notification";
     return `${count} unread notifications`;
   },
+  whatsappDeliveryFailed: "WhatsApp message delivery failed",
+  whatsappDeliveryFailedWithReason: (reason: string) => `WhatsApp message delivery failed: ${reason}`,
 };

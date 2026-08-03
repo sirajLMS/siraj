@@ -14,3 +14,4 @@ import "./shared";
 import "./storage";
 import "./students";
 import "./teachers";
+import "./whatsapp";

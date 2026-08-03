@@ -290,6 +290,34 @@ export const errorsAr: ErrorsLabels = {
   currencyInUse:
     "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
 
+  // ─── Communication / suggestion / complaint errors ─────────────────────
+  complaintNotFound: "الشكوى غير موجودة.",
+  suggestionNotFound: "الاقتراح غير موجود.",
+  complaintTooManyFiles: (maxFiles: number) => `يمكنك رفع ${maxFiles} ملفات كحد أقصى لكل شكوى.`,
+  complaintFileTooLarge: (maxSizeMb: number) => `يجب ألا يتجاوز حجم الملف ${maxSizeMb} ميجابايت.`,
+  suggestionCannotMarkSelfAsDuplicate: "لا يمكن وضع علامة على الاقتراح كنسخة مكررة من نفسه.",
+  suggestionCircularDuplicate: "لا يمكن إنشاء سلسلة نسخ مكررة دائرية.",
+  suggestionTargetIsAlreadyDuplicate: "الاقتراح الهدف مُعلَّم بالفعل كنسخة مكررة لاقتراح آخر.",
+
+  // ─── Communication dispatch errors ──────────────────────────────────────
+  unknownCommunicationChannel: (channel: string) => `قناة تواصل غير معروفة: ${channel}`,
+  unknownError: "حدث خطأ غير معروف.",
+  unknownDispatchError: "حدث خطأ غير معروف أثناء الإرسال.",
+  whatsappTemplateMissing: "تكوين قالب واتساب مفقود لهذا الإشعار.",
+
+  // ─── WhatsApp account management errors ─────────────────────────────────
+  whatsappAccountNotFound: (id: string) => `حساب واتساب غير موجود: ${id}`,
+  whatsappAccessTokenNotConfigured: "رمز الوصول لواتساب غير مُهيأ.",
+  whatsappWabaIdNotConfigured: "معرف حساب واتساب التجاري غير مُهيأ.",
+
+  // ─── Delivery failure messages ───────────────────────────────────────────
+  emailChannelLabel: "البريد الإلكتروني",
+  smsChannelLabel: "رسائل SMS",
+  pushChannelLabel: "إشعارات الدفع",
+  whatsappChannelLabel: "واتساب",
+  onAppChannelLabel: "داخل التطبيق",
+  deliveryFailed: (channelLabel: string) => `فشل تسليم ${channelLabel}. يرجى المحاولة مرة أخرى لاحقاً.`,
+
   // Quota errors accessible via quota.* — see QuotaErrors
 
   // ─── Offline resolver / notification fallbacks ──────────────────────

@@ -248,7 +248,10 @@ export type AppPermission =
   | 'TEACHER_VIEW_STUDENTS'
   | 'TEST_CUSTOM_ALT'
   | 'TEST_CUSTOM_ONLY'
-  | 'TEST_SYSTEM_ONLY';
+  | 'TEST_SYSTEM_ONLY'
+  | 'WHATSAPP_CONFIG_MANAGE'
+  | 'WHATSAPP_TEMPLATES_MANAGE'
+  | 'WHATSAPP_VIEW';
 
 export type AssignPermissionGroupToUserInput = {
   groupId: string;
@@ -1379,7 +1382,8 @@ export type NotificationChannel =
   | 'EMAIL'
   | 'ON_APP'
   | 'PUSH'
-  | 'SMS';
+  | 'SMS'
+  | 'WHATSAPP';
 
 export type NotificationEventType =
   | 'CLASS_ACTIVATED'
@@ -2088,6 +2092,58 @@ export type UserPaymentMethodUpdateInput = {
   isDefault: boolean | null | undefined;
   label: string | null | undefined;
 };
+
+export type WhatsappAccountCreateInput = {
+  displayName: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  /** Display phone number (max 32 chars) */
+  displayPhoneNumber: string | null | undefined;
+  isActive: boolean | null | undefined;
+  /** Phone number ID (max 64 chars) */
+  phoneNumberId: string;
+  portfolioMessagingLimitTier: WhatsappLimitTier | null | undefined;
+  qualityRating: WhatsappQualityRating | null | undefined;
+  throughputLevel: string | null | undefined;
+  /** WhatsApp Business Account ID (max 64 chars) */
+  wabaId: string;
+};
+
+export type WhatsappAccountUpdateInput = {
+  displayName: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  displayPhoneNumber: string | null | undefined;
+  isActive: boolean | null | undefined;
+  portfolioMessagingLimitTier: WhatsappLimitTier | null | undefined;
+  qualityRating: WhatsappQualityRating | null | undefined;
+  throughputLevel: string | null | undefined;
+};
+
+export type WhatsappLimitTier =
+  | 'TIER_1K'
+  | 'TIER_10K'
+  | 'TIER_50'
+  | 'TIER_100K'
+  | 'TIER_250'
+  | 'TIER_NOT_SET'
+  | 'TIER_UNLIMITED'
+  | 'UNTIERED';
+
+export type WhatsappQualityRating =
+  | 'GREEN'
+  | 'RED'
+  | 'UNKNOWN'
+  | 'YELLOW';
+
+export type WhatsappTemplateCategory =
+  | 'AUTHENTICATION'
+  | 'MARKETING'
+  | 'UTILITY';
+
+export type WhatsappTemplateStatus =
+  | 'APPROVED'
+  | 'DISABLED'
+  | 'PAUSED'
+  | 'PENDING'
+  | 'PENDING_DELETION'
+  | 'REJECTED';
 
 export type MeQuery_me_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
@@ -5825,3 +5881,118 @@ export type TeachersQueryVariables = Exact<{
 export type TeachersQuery = TeachersQuery_Query;
 
 export type UserFieldsFragmentFragment = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
+
+export type WhatsappAccountFieldsFragment = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type WhatsappTemplateSnapshotFieldsFragment = { id: string | null, name: string | null, language: string | null, status: Types.WhatsappTemplateStatus | null, category: Types.WhatsappTemplateCategory | null, lastSyncedAt: string | null };
+
+export type WhatsappAccountsQuery_whatsappAccounts_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type WhatsappAccountsQuery_Query = { whatsappAccounts: Array<WhatsappAccountsQuery_whatsappAccounts_WhatsappAccount> | null };
+
+
+export type WhatsappAccountsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type WhatsappAccountsQuery = WhatsappAccountsQuery_Query;
+
+export type IsUserWhatsappOptInQuery_Query = { isUserWhatsappOptIn: boolean };
+
+
+export type IsUserWhatsappOptInQueryVariables = Exact<{
+  userId: string;
+}>;
+
+
+export type IsUserWhatsappOptInQuery = IsUserWhatsappOptInQuery_Query;
+
+export type CreateWhatsappAccountMutation_createWhatsappAccount_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateWhatsappAccountMutation_Mutation = { createWhatsappAccount: CreateWhatsappAccountMutation_createWhatsappAccount_WhatsappAccount | null };
+
+
+export type CreateWhatsappAccountMutationVariables = Exact<{
+  input: Types.WhatsappAccountCreateInput;
+}>;
+
+
+export type CreateWhatsappAccountMutation = CreateWhatsappAccountMutation_Mutation;
+
+export type UpdateWhatsappAccountMutation_updateWhatsappAccount_WhatsappAccount = { id: string | null };
+
+export type UpdateWhatsappAccountMutation_Mutation = { updateWhatsappAccount: UpdateWhatsappAccountMutation_updateWhatsappAccount_WhatsappAccount | null };
+
+
+export type UpdateWhatsappAccountMutationVariables = Exact<{
+  id: string;
+  input: Types.WhatsappAccountUpdateInput;
+}>;
+
+
+export type UpdateWhatsappAccountMutation = UpdateWhatsappAccountMutation_Mutation;
+
+export type DeleteWhatsappAccountMutation_deleteWhatsappAccount_WhatsappAccount = { id: string | null };
+
+export type DeleteWhatsappAccountMutation_Mutation = { deleteWhatsappAccount: DeleteWhatsappAccountMutation_deleteWhatsappAccount_WhatsappAccount | null };
+
+
+export type DeleteWhatsappAccountMutationVariables = Exact<{
+  id: string;
+}>;
+
+
+export type DeleteWhatsappAccountMutation = DeleteWhatsappAccountMutation_Mutation;
+
+export type SetWhatsappAccessTokenMutation_setWhatsappAccessToken_WhatsappAccount = { id: string | null };
+
+export type SetWhatsappAccessTokenMutation_Mutation = { setWhatsappAccessToken: SetWhatsappAccessTokenMutation_setWhatsappAccessToken_WhatsappAccount | null };
+
+
+export type SetWhatsappAccessTokenMutationVariables = Exact<{
+  id: string;
+  accessToken: string;
+}>;
+
+
+export type SetWhatsappAccessTokenMutation = SetWhatsappAccessTokenMutation_Mutation;
+
+export type SetWhatsappTwoStepPinMutation_setWhatsappTwoStepPin_WhatsappAccount = { id: string | null };
+
+export type SetWhatsappTwoStepPinMutation_Mutation = { setWhatsappTwoStepPin: SetWhatsappTwoStepPinMutation_setWhatsappTwoStepPin_WhatsappAccount | null };
+
+
+export type SetWhatsappTwoStepPinMutationVariables = Exact<{
+  id: string;
+  twoStepPin: string;
+}>;
+
+
+export type SetWhatsappTwoStepPinMutation = SetWhatsappTwoStepPinMutation_Mutation;
+
+export type SetUserWhatsappOptInMutation_setUserWhatsappOptIn_WhatsappAccount = { id: string | null };
+
+export type SetUserWhatsappOptInMutation_Mutation = { setUserWhatsappOptIn: SetUserWhatsappOptInMutation_setUserWhatsappOptIn_WhatsappAccount | null };
+
+
+export type SetUserWhatsappOptInMutationVariables = Exact<{
+  userId: string;
+  enabled: boolean;
+  source: string | null | undefined;
+}>;
+
+
+export type SetUserWhatsappOptInMutation = SetUserWhatsappOptInMutation_Mutation;
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_accounts_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_templates_WhatsappTemplateSnapshot = { id: string | null, name: string | null, language: string | null, status: Types.WhatsappTemplateStatus | null, category: Types.WhatsappTemplateCategory | null, lastSyncedAt: string | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult = { id: string | null, accounts: Array<SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_accounts_WhatsappAccount> | null, templates: Array<SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_templates_WhatsappTemplateSnapshot> | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_Mutation = { syncWhatsappAccountsFromMeta: SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult | null };
+
+
+export type SyncWhatsappAccountsFromMetaMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SyncWhatsappAccountsFromMetaMutation = SyncWhatsappAccountsFromMetaMutation_Mutation;

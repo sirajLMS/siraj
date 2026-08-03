@@ -11,3 +11,4 @@ export * from "./payment-method-jsonb";
 export * from "./server";
 export * from "./storage";
 export * from "./timezone";
+export * from "./whatsapp-sanitize";

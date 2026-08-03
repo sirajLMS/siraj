@@ -25,6 +25,7 @@ export type EnvConfigCategory =
   | "app"
   | "meeting"
   | "billing"
+  | "whatsapp"
   | "general";
 
 /** How a resolved value should be presented in the UI. */

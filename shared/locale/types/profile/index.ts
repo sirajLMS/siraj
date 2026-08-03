@@ -319,6 +319,7 @@ export interface ProfileNotificationsLabels {
     readonly SMS: string;
     readonly PUSH: string;
     readonly ON_APP: string;
+    readonly WHATSAPP: string;
   };
   readonly events: {
     readonly CLASS_REMINDER: string;

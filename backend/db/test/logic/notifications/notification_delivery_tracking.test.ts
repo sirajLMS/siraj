@@ -2,16 +2,16 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { NotificationRepository } from "@/backend/db/repo";
-import { notificationDeliveries, userDeviceTokens, users } from "@/backend/db/schema";
+import { notificationDeliveries, userDeviceTokens } from "@/backend/db/schema";
+import { createTestUser } from "@/backend/db/test/entity-setup";
 import {
-  createTestUser,
+  closeRlsClients,
   runInRollback,
   setupRlsPolicies,
   setupRlsRole,
   teardownRlsRole,
 } from "@/backend/db/test/test-utils";
 import { DevicePlatform, NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
-import type { UserReturnType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Notification Delivery Tracking", () => {
@@ -34,6 +34,7 @@ describe("Notification Delivery Tracking", () => {
   });
 
   afterAll(async () => {
+    await closeRlsClients();
     await teardownRlsRole();
   });
 
@@ -100,18 +101,10 @@ describe("Notification Delivery Tracking", () => {
   test("Webhook handler resolves delivery by provider message id", async () => {
     testLogger.info("Testing delivery webhook handler...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const [rawUser] = await tx
-        .insert(users)
-        .values({
-          name: "Webhook Test User",
-          email: `webhook-${randomUUID()}@example.com`,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-      const user = rawUser as unknown as UserReturnType;
+      const user = await createTestUser(tx, {
+        name: "Webhook Test User",
+        email: `webhook-${randomUUID()}@example.com`,
+      });
 
       const providerMessageId = `provider-${randomUUID()}`;
       const delivery = await NotificationRepository.createDelivery(
@@ -142,9 +135,10 @@ describe("Notification Delivery Tracking", () => {
         tx
       );
 
-      expect(webhookDelivery.status).toBe(NotificationDeliveryStatus.DELIVERED);
-      expect(webhookDelivery.deliveredAt).not.toBeNull();
-      expect(webhookDelivery.webhookPayload).toEqual({ event: "delivery_confirmed" });
+      expect(webhookDelivery).not.toBeNull();
+      expect(webhookDelivery?.status).toBe(NotificationDeliveryStatus.DELIVERED);
+      expect(webhookDelivery?.deliveredAt).not.toBeNull();
+      expect(webhookDelivery?.webhookPayload).toEqual({ event: "delivery_confirmed" });
     });
     testLogger.info("Webhook handler test passed.");
   });
@@ -152,18 +146,10 @@ describe("Notification Delivery Tracking", () => {
   test("Analytics report counts statuses and rates", async () => {
     testLogger.info("Testing notification delivery analytics...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const [rawUser] = await tx
-        .insert(users)
-        .values({
-          name: "Analytics Test User",
-          email: `analytics-${randomUUID()}@example.com`,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-      const user = rawUser as unknown as UserReturnType;
+      const user = await createTestUser(tx, {
+        name: "Analytics Test User",
+        email: `analytics-${randomUUID()}@example.com`,
+      });
 
       const openedDelivery = await NotificationRepository.createDelivery(
         {

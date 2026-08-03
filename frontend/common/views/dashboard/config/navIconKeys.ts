@@ -15,6 +15,7 @@ export type NavIconKey =
   | "folderOpen"
   | "group"
   | "history"
+  | "hub"
   | "lightbulb"
   | "logout"
   | "menuBook"

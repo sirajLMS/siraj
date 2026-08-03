@@ -285,6 +285,9 @@ enum AppPermission {
   TEST_CUSTOM_ALT
   TEST_CUSTOM_ONLY
   TEST_SYSTEM_ONLY
+  WHATSAPP_CONFIG_MANAGE
+  WHATSAPP_TEMPLATES_MANAGE
+  WHATSAPP_VIEW
 }
 
 input AssignPermissionGroupToUserInput {
@@ -2506,6 +2509,9 @@ type Mutation {
   createTestSuperAdmin(prefix: String!): TestSuperAdmin
   createUserMeetingConfig(input: UserMeetingConfigCreateInput!): UserMeetingConfig
   createUserPaymentMethod(input: UserPaymentMethodCreateInput!): UserPaymentMethod
+
+  """Create a new WhatsApp business account record."""
+  createWhatsappAccount(input: WhatsappAccountCreateInput!): WhatsappAccount
   deactivateParent(parentId: String!): DeactivateParentResult
   deactivateSupportedCurrency(code: CurrencyCode!): Boolean
   deactivateSupportedMobileWallet(id: ID!): SupportedMobileWallet
@@ -2557,6 +2563,11 @@ type Mutation {
   deleteTeacherImportantNote(id: ID!): Boolean
   deleteUserMeetingConfig(id: ID!): Boolean
   deleteUserPaymentMethod(id: ID!): Boolean
+
+  """
+  Deactivate a WhatsApp account. Calls resetWhatsappChannel() on success (S4).
+  """
+  deleteWhatsappAccount(id: String!): WhatsappAccount
 
   """
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
@@ -2618,6 +2629,21 @@ type Mutation {
   setDefaultMeetingConfig(id: ID!): UserMeetingConfig
   setDefaultUserPaymentMethod(id: ID!): UserPaymentMethod
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
+
+  """
+  Enable or disable WhatsApp notification opt-in for a user (REQ-10/BL1).
+  """
+  setUserWhatsappOptIn(enabled: Boolean!, source: String, userId: String!): WhatsappAccount
+
+  """
+  Set the access token for a WhatsApp account. Calls resetWhatsappChannel() on success (S4).
+  """
+  setWhatsappAccessToken(accessToken: String!, id: String!): WhatsappAccount
+
+  """
+  Set the two-step verification PIN for a WhatsApp account. Calls resetWhatsappChannel() on success (S4).
+  """
+  setWhatsappTwoStepPin(id: String!, twoStepPin: String!): WhatsappAccount
   startImpersonation(reason: String, targetUserId: String!): StartImpersonationResponse
   startPermissionGroupSimulation(groupSlug: String!): StartPermissionGroupSimulationResponse
   stopClass(classInstanceId: ID!): ClassInstanceDetail
@@ -2634,6 +2660,11 @@ type Mutation {
 
   """Submits a new suggestion from the authenticated parent."""
   submitSuggestion(input: SubmitSuggestionInput!): Suggestion
+
+  """
+  Sync WhatsApp phone numbers and message templates from Meta Graph API (BL3: includes template snapshot).
+  """
+  syncWhatsappAccountsFromMeta: WhatsappSyncFromMetaResult
   updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
   updateClassCategory(id: ID!, input: ClassCategoryUpdateInput!): ClassCategory
   updateClassMeetingConfig(id: ID!, input: ClassMeetingConfigUpdateInput!): ClassMeetingConfig
@@ -2669,6 +2700,11 @@ type Mutation {
   updateUserPaymentMethod(id: ID!, input: UserPaymentMethodUpdateInput!): UserPaymentMethod
   updateUserProfile(input: UpdateUserProfileInput!, userId: String!): UnifiedProfile
 
+  """
+  Update an existing WhatsApp account. Calls resetWhatsappChannel() on success (S4).
+  """
+  updateWhatsappAccount(id: String!, input: WhatsappAccountUpdateInput!): WhatsappAccount
+
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
   upsertEnvConfigEntry(input: EnvConfigUpsertInput!): EnvConfigUpsertResult
@@ -2703,6 +2739,7 @@ enum NotificationChannel {
   ON_APP
   PUSH
   SMS
+  WHATSAPP
 }
 
 enum NotificationEventType {
@@ -3291,6 +3328,9 @@ type Query {
   impersonationStatus: ImpersonationStatus
   invoicePaymentSubmission(invoiceId: String!): InvoicePaymentSubmission
   invoicePayments(invoiceId: ID!): [Payment!]
+
+  """Check if a user has opted in to WhatsApp notifications (REQ-10/BL1)."""
+  isUserWhatsappOptIn(userId: String!): Boolean!
   latestExchangeRates(paginationArgs: PaginationArgs): [ExchangeRate!]
   latestFxSyncRun: FxSyncRun
 
@@ -3522,6 +3562,9 @@ type Query {
     search: String
   ): [User!]
   welcomeMessage: String
+
+  """List all active WhatsApp business accounts."""
+  whatsappAccounts: [WhatsappAccount!]
 }
 
 """A class quota allocation for a student"""
@@ -5294,6 +5337,96 @@ type WeeklyWorkloadMetrics {
   id: String
   totalMinutes: Int
   weeklyHoursWorked: String
+}
+
+type WhatsappAccount {
+  createdAt: DateTime
+  displayName: LocalizedString
+  displayPhoneNumber: String
+  id: String
+  isActive: Boolean
+  lastWebhookAt: DateTime
+  maxPhoneNumbersPerBusiness: String
+  phoneNumberId: String
+  portfolioMessagingLimitTier: WhatsappLimitTier
+  qualityRating: WhatsappQualityRating
+  throughputLevel: String
+  updatedAt: DateTime
+  wabaId: String
+}
+
+input WhatsappAccountCreateInput {
+  displayName: LocalizedString
+
+  """Display phone number (max 32 chars)"""
+  displayPhoneNumber: String
+  isActive: Boolean
+
+  """Phone number ID (max 64 chars)"""
+  phoneNumberId: String!
+  portfolioMessagingLimitTier: WhatsappLimitTier
+  qualityRating: WhatsappQualityRating
+  throughputLevel: String
+
+  """WhatsApp Business Account ID (max 64 chars)"""
+  wabaId: String!
+}
+
+input WhatsappAccountUpdateInput {
+  displayName: LocalizedString
+  displayPhoneNumber: String
+  isActive: Boolean
+  portfolioMessagingLimitTier: WhatsappLimitTier
+  qualityRating: WhatsappQualityRating
+  throughputLevel: String
+}
+
+enum WhatsappLimitTier {
+  TIER_1K
+  TIER_10K
+  TIER_50
+  TIER_100K
+  TIER_250
+  TIER_NOT_SET
+  TIER_UNLIMITED
+  UNTIERED
+}
+
+enum WhatsappQualityRating {
+  GREEN
+  RED
+  UNKNOWN
+  YELLOW
+}
+
+type WhatsappSyncFromMetaResult {
+  accounts: [WhatsappAccount!]
+  id: String
+  templates: [WhatsappTemplateSnapshot!]
+}
+
+enum WhatsappTemplateCategory {
+  AUTHENTICATION
+  MARKETING
+  UTILITY
+}
+
+type WhatsappTemplateSnapshot {
+  category: WhatsappTemplateCategory
+  id: String
+  language: String
+  lastSyncedAt: DateTime
+  name: String
+  status: WhatsappTemplateStatus
+}
+
+enum WhatsappTemplateStatus {
+  APPROVED
+  DISABLED
+  PAUSED
+  PENDING
+  PENDING_DELETION
+  REJECTED
 }
 
 type WorkshopPromo {

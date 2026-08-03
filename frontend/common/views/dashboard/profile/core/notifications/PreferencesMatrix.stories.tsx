@@ -6,14 +6,15 @@ import { NotificationChannel, NotificationEventType } from "@/frontend/common/gr
 import {
   buildPreferenceMap,
   buildPreferenceMatrixRows,
-  NOTIFICATION_CHANNELS,
-  NOTIFICATION_EVENT_TYPES,
   preferenceKey,
-} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";
 import { PreferencesMatrixDesktopView } from "@/frontend/desktop/views/dashboard/profile/core/notifications/preferencesMatrix.desktop";
 
-const mockPreferences = NOTIFICATION_CHANNELS.flatMap(channel =>
-  NOTIFICATION_EVENT_TYPES.map(eventType => ({
+const CHANNELS = Object.values(NotificationChannel);
+const EVENT_TYPES = Object.values(NotificationEventType);
+
+const mockPreferences = CHANNELS.flatMap(channel =>
+  EVENT_TYPES.map(eventType => ({
     id: preferenceKey(channel, eventType),
     channel,
     eventType,
@@ -23,8 +24,8 @@ const mockPreferences = NOTIFICATION_CHANNELS.flatMap(channel =>
 
 // NEW FOR PLAN v5: story args build the pre-shaped matrix rows (data-shaping
 // now lives in common — the desktop tier takes them as a prop).
-const mockMatrixRows = buildPreferenceMatrixRows(buildPreferenceMap(mockPreferences));
-const emptyMatrixRows = buildPreferenceMatrixRows(buildPreferenceMap([]));
+const mockMatrixRows = buildPreferenceMatrixRows(buildPreferenceMap(mockPreferences), EVENT_TYPES, CHANNELS);
+const emptyMatrixRows = buildPreferenceMatrixRows(buildPreferenceMap([]), EVENT_TYPES, CHANNELS);
 
 const meta: Meta<typeof PreferencesMatrixDesktopView> = {
   title: "Views/profile/core/notifications/PreferencesMatrix",

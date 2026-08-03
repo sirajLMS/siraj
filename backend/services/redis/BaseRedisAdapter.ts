@@ -52,6 +52,23 @@ export abstract class BaseRedisAdapter<TClient> implements IRedisService {
     await client.set(key, value);
   }
 
+  async setNx(key: string, value: string, pxMs: number): Promise<string | null> {
+    const client = this.clientRef;
+    const isIoRedis = typeof client.quit === "function";
+
+    if (isIoRedis) {
+      // ioredis uses positional SET key value NX PX ms-string
+      const result = await client.set(key, value, "NX", "PX", String(pxMs));
+      return typeof result === "string" ? result : null;
+    }
+
+    // Upstash Redis uses an options object: { nx: true, px: ms-number }
+    const upstashClient = client as unknown as {
+      set: (key: string, value: string, opts: { nx: true; px: number }) => Promise<string | null>;
+    };
+    return await upstashClient.set(key, value, { nx: true, px: pxMs });
+  }
+
   async incr(key: string): Promise<number> {
     const result = await this.clientRef.incr(key);
     return typeof result === "number" ? result : Number(result);

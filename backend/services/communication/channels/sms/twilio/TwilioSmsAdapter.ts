@@ -56,7 +56,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
     };
   }
 
-  async send(payload: SmsPayload, _locale?: string): Promise<SmsSendResult> {
+  async send(payload: SmsPayload, locale = "en"): Promise<SmsSendResult> {
     // Defensive guard: a non-empty `to` is required before we touch the
     // provider. This turns a future dispatch path that forgets `metadata.to`
     // into an actionable local failure instead of a cryptic provider error.
@@ -99,7 +99,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
       metadata: payload.metadata ?? null,
     });
 
-    return this.sendTwilioMessage(payload, delivery.id);
+    return this.sendTwilioMessage(payload, delivery.id, locale);
   }
 
   private async checkRateLimit(userId: string): Promise<SmsSendResult | null> {
@@ -120,7 +120,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
     };
   }
 
-  private async sendTwilioMessage(payload: SmsPayload, deliveryId: string): Promise<SmsSendResult> {
+  private async sendTwilioMessage(payload: SmsPayload, deliveryId: string, locale: string): Promise<SmsSendResult> {
     try {
       const message = await this.context.client.messages.create({
         to: payload.to,
@@ -129,7 +129,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
       });
 
       if (message.errorCode) {
-        return this.handleTwilioApiError(deliveryId, message);
+        return this.handleTwilioApiError(deliveryId, message, locale);
       }
 
       await NotificationRepository.updateDeliveryStatus({
@@ -163,14 +163,15 @@ export class TwilioSmsAdapter implements ISmsChannel {
 
       return {
         success: false,
-        error: deliveryFailedMessage("sms"),
+        error: deliveryFailedMessage(NotificationChannel.SMS, locale),
       };
     }
   }
 
   private async handleTwilioApiError(
     deliveryId: string,
-    message: { sid: string; errorCode: number | null; errorMessage: string | null }
+    message: { sid: string; errorCode: number | null; errorMessage: string | null },
+    locale: string
   ): Promise<SmsSendResult> {
     logger.error("Twilio API returned an error", {
       deliveryId,
@@ -190,7 +191,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
     return {
       success: false,
       providerMessageId: message.sid,
-      error: deliveryFailedMessage("sms"),
+      error: deliveryFailedMessage(NotificationChannel.SMS, locale),
     };
   }
 

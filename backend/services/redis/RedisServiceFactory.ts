@@ -202,6 +202,10 @@ export const redisService: IRedisService = {
     const service = await getRedisService();
     return service.set(key, value, options);
   },
+  setNx: async (key: string, value: string, pxMs: number) => {
+    const service = await getRedisService();
+    return service.setNx(key, value, pxMs);
+  },
   del: async (key: string) => {
     const service = await getRedisService();
     return service.del(key);

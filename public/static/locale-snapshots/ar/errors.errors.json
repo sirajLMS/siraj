@@ -325,5 +325,35 @@
   "teacherOnVacation": "الحجز محظور بسبب إجازة معتمدة.",
   "resourceNotFound": "مورد التعلم غير موجود.",
   "currencyInUse": "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
+  "complaintNotFound": "الشكوى غير موجودة.",
+  "suggestionNotFound": "الاقتراح غير موجود.",
+  "complaintTooManyFiles": {
+    "__fn": "(maxFiles) => `\\u064A\\u0645\\u0643\\u0646\\u0643 \\u0631\\u0641\\u0639 ${maxFiles} \\u0645\\u0644\\u0641\\u0627\\u062A \\u0643\\u062D\\u062F \\u0623\\u0642\\u0635\\u0649 \\u0644\\u0643\\u0644 \\u0634\\u0643\\u0648\\u0649.`"
+  },
+  "complaintFileTooLarge": {
+    "__fn": "(maxSizeMb) => `\\u064A\\u062C\\u0628 \\u0623\\u0644\\u0627 \\u064A\\u062A\\u062C\\u0627\\u0648\\u0632 \\u062D\\u062C\\u0645 \\u0627\\u0644\\u0645\\u0644\\u0641 ${maxSizeMb} \\u0645\\u064A\\u062C\\u0627\\u0628\\u0627\\u064A\\u062A.`"
+  },
+  "suggestionCannotMarkSelfAsDuplicate": "لا يمكن وضع علامة على الاقتراح كنسخة مكررة من نفسه.",
+  "suggestionCircularDuplicate": "لا يمكن إنشاء سلسلة نسخ مكررة دائرية.",
+  "suggestionTargetIsAlreadyDuplicate": "الاقتراح الهدف مُعلَّم بالفعل كنسخة مكررة لاقتراح آخر.",
+  "unknownCommunicationChannel": {
+    "__fn": "(channel) => `\\u0642\\u0646\\u0627\\u0629 \\u062A\\u0648\\u0627\\u0635\\u0644 \\u063A\\u064A\\u0631 \\u0645\\u0639\\u0631\\u0648\\u0641\\u0629: ${channel}`"
+  },
+  "unknownError": "حدث خطأ غير معروف.",
+  "unknownDispatchError": "حدث خطأ غير معروف أثناء الإرسال.",
+  "whatsappTemplateMissing": "تكوين قالب واتساب مفقود لهذا الإشعار.",
+  "whatsappAccountNotFound": {
+    "__fn": "(id) => `\\u062D\\u0633\\u0627\\u0628 \\u0648\\u0627\\u062A\\u0633\\u0627\\u0628 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+  },
+  "whatsappAccessTokenNotConfigured": "رمز الوصول لواتساب غير مُهيأ.",
+  "whatsappWabaIdNotConfigured": "معرف حساب واتساب التجاري غير مُهيأ.",
+  "emailChannelLabel": "البريد الإلكتروني",
+  "smsChannelLabel": "رسائل SMS",
+  "pushChannelLabel": "إشعارات الدفع",
+  "whatsappChannelLabel": "واتساب",
+  "onAppChannelLabel": "داخل التطبيق",
+  "deliveryFailed": {
+    "__fn": "(channelLabel) => `\\u0641\\u0634\\u0644 \\u062A\\u0633\\u0644\\u064A\\u0645 ${channelLabel}. \\u064A\\u0631\\u062C\\u0649 \\u0627\\u0644\\u0645\\u062D\\u0627\\u0648\\u0644\\u0629 \\u0645\\u0631\\u0629 \\u0623\\u062E\\u0631\\u0649 \\u0644\\u0627\\u062D\\u0642\\u0627\\u064B.`"
+  },
   "studentNameFallback": "طالب"
 }

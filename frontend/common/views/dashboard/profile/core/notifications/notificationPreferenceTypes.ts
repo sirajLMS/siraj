@@ -1,4 +1,3 @@
-// NEW FOR PLAN v5 (notificationPreferences extended props)
 import {
   NotificationChannel,
   NotificationEventType,
@@ -7,8 +6,8 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
-  isEventAllowedForRole,
   type NotificationPreferenceRole,
+  isEventAllowedForRole,
   resolveNotificationEventAllowlist,
 } from "@/shared/constants/notification-event-allowlists";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
@@ -136,33 +135,23 @@ export interface NotificationPreferencesTabVariantProps {
   readonly snackbarSeverity: "success" | "error";
   readonly onSnackbarClose: () => void;
   readonly errorLoading: boolean;
-  // NEW FOR PLAN v5: channel-tab selection lifted from mobile tier so the
-  // tier view remains pure (no `useState`). Mobile uses these; the desktop
-  // matrix variant ignores them.
   readonly activeChannel?: NotificationChannel;
   readonly slideDirection?: "left" | "right";
   readonly onChannelChange?: (channel: NotificationChannel, slideDirection: "left" | "right") => void;
-  // NEW FOR PLAN v5: pre-computed preference lookup map lifted out of both
-  // tier views so the tier views stay render-only (no `buildPreferenceMap`
-  // call inside tier). Mobile reads single-event entries; desktop reads the
-  // matrix via `matrixRows`.
   readonly preferenceMap?: ReadonlyMap<string, NotificationPrefRow>;
-  // NEW FOR PLAN v5: pre-shaped desktop matrix rows lifted out of the desktop
-  // tier (data-shaping belongs in the ViewModel). Desktop only reads them.
   readonly matrixRows?: readonly PreferenceMatrixRow[];
-  /** Role-filtered event types for the prefs matrix (mobile should iterate these). */
   readonly eventTypes?: readonly NotificationEventType[];
   /** Category grouping rows — one per category for master mute toggles. */
   readonly categoryRows?: readonly CategoryRow[];
   /** Toggle all events in a category — called from category-level switch. */
   readonly onCategoryToggle?: (category: NotificationEventCategory, enabled: boolean) => void;
 }
-
 export const NOTIFICATION_CHANNELS = [
   NotificationChannel.Email,
   NotificationChannel.Sms,
   NotificationChannel.Push,
   NotificationChannel.OnApp,
+  NotificationChannel.Whatsapp,
 ] as const;
 
 /** Full event catalog — staff/parent/teacher/admin matrices use this when allowlist is ALL. */

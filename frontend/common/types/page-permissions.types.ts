@@ -106,6 +106,7 @@ export const PAGE_PERMISSIONS = {
   teacherDuesView: [AppPermission.TeacherDuesView] as PagePermissions,
   monthlyReportsView: [AppPermission.MonthlyReportsView] as PagePermissions,
   lessonReportsSubmit: [AppPermission.LessonReportsSubmit] as PagePermissions,
+  whatsappSettings: [AppPermission.WhatsappView] as PagePermissions,
   settings: [
     AppPermission.SettingsView,
     AppPermission.SettingsEditGeneral,

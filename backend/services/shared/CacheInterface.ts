@@ -20,6 +20,17 @@ export interface ICacheServiceBase {
   set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void>;
 
   /**
+   * Atomically set a value only if the key does NOT exist (SET NX),
+   * with a TTL in milliseconds (PX).
+   *
+   * Returns `"OK"` if the key was set (caller is the first/owner).
+   * Returns `null` if the key already exists (caller should defer).
+   *
+   * This is the atomic primitive used for TOCTOU-safe rate-limit slot claims.
+   */
+  setNx(key: string, value: string, pxMs: number): Promise<string | null>;
+
+  /**
    * Increment a value in cache
    */
   incr(key: string): Promise<number>;

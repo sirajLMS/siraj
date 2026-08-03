@@ -78,6 +78,14 @@ The backend follows a consistent pattern for defining and using types across all
 - Use a single canonical GraphQL object type per entity, extending it with resolved properties as needed
 - Never create local type definitions in Pothos files; always use types from `backend/types/`
 
+## WhatsApp Cloud API Integration
+
+- **Canonical reference**: `docs/services/whatsapp-cloud-api.md` — covers the full integration (adapter, factory, webhook, dispatch, schema, opt-in, frontend).
+- **Schema**: `backend/db/schema/whatsapp-accounts.ts` — `whatsapp_accounts` table with `encryptedText` columns for credentials, `varchar` for raw Meta tier enums (no local mapping), `isActive` for soft delete (no `deletedAt`).
+- **Permissions**: `WHATSAPP_VIEW`, `WHATSAPP_CONFIG_MANAGE`, `WHATSAPP_TEMPLATES_MANAGE` (no `WHATSAPP_DISPATCH` in v1 — no send mutation).
+- **Migrations**: Two-phase (enum ALTER TYPE + data INSERT) with idempotent `IF NOT EXISTS` / `ON CONFLICT` clauses.
+- **Partial unique index**: `notification_deliveries_provider_message_id_unique WHERE provider_message_id IS NOT NULL` (B5) — enables P3 ON CONFLICT upsert by `provider_message_id`.
+
 ## Quota System (Billing Domain)
 
 The Quota System is an append-only ledger-based class credit tracking system. See `docs/billing/quota-system.md` for the complete architecture reference. Key rules for backend code interacting with quotas:

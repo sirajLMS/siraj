@@ -124,6 +124,19 @@ export const notificationsAr: NotificationsLabels = {
     title: "شكوى جديدة",
     body: ({ complaintId, category }) => `تم تقديم شكوى جديدة من نوع ${category} (${complaintId}).`,
   },
+  complaintResponse: {
+    title: "رد على الشكوى",
+  },
+  newSuggestion: {
+    title: "تم تقديم اقتراح جديد",
+  },
+  suggestionResponse: {
+    title: "رد على الاقتراح",
+  },
+  suggestionMarkedDuplicate: {
+    title: "تم تعليم الاقتراح كمكرر",
+    body: ({ duplicateId }) => `تم تعليم اقتراحك كمكرر للاقتراح رقم #${duplicateId.slice(0, 8)}`,
+  },
   quotaExpiringSoon: {
     title: "حصة تنتهي قريبًا",
     body: ({ quotaName, validUntil, remaining }) =>
@@ -175,4 +188,6 @@ export const notificationsAr: NotificationsLabels = {
     if (count >= 3 && count <= 10) return `${count} إشعارات غير مقروءة`;
     return `${count} إشعاراً غير مقروءاً`;
   },
+  whatsappDeliveryFailed: "فشل تسليم رسالة واتساب",
+  whatsappDeliveryFailedWithReason: (reason: string) => `فشل تسليم رسالة واتساب: ${reason}`,
 };

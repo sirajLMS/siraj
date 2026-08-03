@@ -325,6 +325,17 @@ type Documents = {
     "\n  \n  query teacherAssignedClasses {\n    teacherAssignedClasses {\n      id\n      totalCount\n      rows {\n        id\n        studentName\n        scheduledStartAt\n        scheduledEndAt\n        durationMinutes\n        executionState\n        outcome\n        isFrozen\n        meetingJoinUrl\n        effectiveMeeting {\n          ...EffectiveMeetingFields\n        }\n      }\n    }\n  }\n": typeof types.TeacherAssignedClassesDocument,
     "\n  query teachers($search: String!, $limit: Int!) {\n    teachers(search: $search, limit: $limit) {\n      id\n      name\n      avatarUrl\n    }\n  }\n": typeof types.TeachersDocument,
     "\n  fragment UserFieldsFragment on User {\n    id\n    name\n    email\n    emailVerifiedAt\n    createdAt\n    updatedAt\n    avatarUrl\n    phone\n    status\n    permissions\n    role\n    notificationCount\n    teacherId\n    parentId\n    displayCurrency\n  }\n": typeof types.UserFieldsFragmentFragmentDoc,
+    "\n  fragment WhatsappAccountFields on WhatsappAccount {\n    id\n    wabaId\n    phoneNumberId\n    displayPhoneNumber\n    displayName\n    isActive\n    qualityRating\n    portfolioMessagingLimitTier\n    throughputLevel\n    maxPhoneNumbersPerBusiness\n    lastWebhookAt\n    createdAt\n    updatedAt\n  }\n": typeof types.WhatsappAccountFieldsFragmentDoc,
+    "\n  fragment WhatsappTemplateSnapshotFields on WhatsappTemplateSnapshot {\n    id\n    name\n    language\n    status\n    category\n    lastSyncedAt\n  }\n": typeof types.WhatsappTemplateSnapshotFieldsFragmentDoc,
+    "\n  \n  query whatsappAccounts {\n    whatsappAccounts {\n      ...WhatsappAccountFields\n    }\n  }\n": typeof types.WhatsappAccountsDocument,
+    "\n  query isUserWhatsappOptIn($userId: String!) {\n    isUserWhatsappOptIn(userId: $userId)\n  }\n": typeof types.IsUserWhatsappOptInDocument,
+    "\n  \n  mutation createWhatsappAccount($input: WhatsappAccountCreateInput!) {\n    createWhatsappAccount(input: $input) {\n      ...WhatsappAccountFields\n    }\n  }\n": typeof types.CreateWhatsappAccountDocument,
+    "\n  mutation updateWhatsappAccount($id: String!, $input: WhatsappAccountUpdateInput!) {\n    updateWhatsappAccount(id: $id, input: $input) {\n      id\n    }\n  }\n": typeof types.UpdateWhatsappAccountDocument,
+    "\n  mutation deleteWhatsappAccount($id: String!) {\n    deleteWhatsappAccount(id: $id) {\n      id\n    }\n  }\n": typeof types.DeleteWhatsappAccountDocument,
+    "\n  mutation setWhatsappAccessToken($id: String!, $accessToken: String!) {\n    setWhatsappAccessToken(id: $id, accessToken: $accessToken) {\n      id\n    }\n  }\n": typeof types.SetWhatsappAccessTokenDocument,
+    "\n  mutation setWhatsappTwoStepPin($id: String!, $twoStepPin: String!) {\n    setWhatsappTwoStepPin(id: $id, twoStepPin: $twoStepPin) {\n      id\n    }\n  }\n": typeof types.SetWhatsappTwoStepPinDocument,
+    "\n  mutation setUserWhatsappOptIn($userId: String!, $enabled: Boolean!, $source: String) {\n    setUserWhatsappOptIn(userId: $userId, enabled: $enabled, source: $source) {\n      id\n    }\n  }\n": typeof types.SetUserWhatsappOptInDocument,
+    "\n  \n  \n  mutation syncWhatsappAccountsFromMeta {\n    syncWhatsappAccountsFromMeta {\n      id\n      accounts {\n        ...WhatsappAccountFields\n      }\n      templates {\n        ...WhatsappTemplateSnapshotFields\n      }\n    }\n  }\n": typeof types.SyncWhatsappAccountsFromMetaDocument,
 };
 const documents: Documents = {
     "\n  \n  query me {\n    me {\n      ...UserFieldsFragment\n    }\n  }\n": types.MeDocument,
@@ -638,6 +649,17 @@ const documents: Documents = {
     "\n  \n  query teacherAssignedClasses {\n    teacherAssignedClasses {\n      id\n      totalCount\n      rows {\n        id\n        studentName\n        scheduledStartAt\n        scheduledEndAt\n        durationMinutes\n        executionState\n        outcome\n        isFrozen\n        meetingJoinUrl\n        effectiveMeeting {\n          ...EffectiveMeetingFields\n        }\n      }\n    }\n  }\n": types.TeacherAssignedClassesDocument,
     "\n  query teachers($search: String!, $limit: Int!) {\n    teachers(search: $search, limit: $limit) {\n      id\n      name\n      avatarUrl\n    }\n  }\n": types.TeachersDocument,
     "\n  fragment UserFieldsFragment on User {\n    id\n    name\n    email\n    emailVerifiedAt\n    createdAt\n    updatedAt\n    avatarUrl\n    phone\n    status\n    permissions\n    role\n    notificationCount\n    teacherId\n    parentId\n    displayCurrency\n  }\n": types.UserFieldsFragmentFragmentDoc,
+    "\n  fragment WhatsappAccountFields on WhatsappAccount {\n    id\n    wabaId\n    phoneNumberId\n    displayPhoneNumber\n    displayName\n    isActive\n    qualityRating\n    portfolioMessagingLimitTier\n    throughputLevel\n    maxPhoneNumbersPerBusiness\n    lastWebhookAt\n    createdAt\n    updatedAt\n  }\n": types.WhatsappAccountFieldsFragmentDoc,
+    "\n  fragment WhatsappTemplateSnapshotFields on WhatsappTemplateSnapshot {\n    id\n    name\n    language\n    status\n    category\n    lastSyncedAt\n  }\n": types.WhatsappTemplateSnapshotFieldsFragmentDoc,
+    "\n  \n  query whatsappAccounts {\n    whatsappAccounts {\n      ...WhatsappAccountFields\n    }\n  }\n": types.WhatsappAccountsDocument,
+    "\n  query isUserWhatsappOptIn($userId: String!) {\n    isUserWhatsappOptIn(userId: $userId)\n  }\n": types.IsUserWhatsappOptInDocument,
+    "\n  \n  mutation createWhatsappAccount($input: WhatsappAccountCreateInput!) {\n    createWhatsappAccount(input: $input) {\n      ...WhatsappAccountFields\n    }\n  }\n": types.CreateWhatsappAccountDocument,
+    "\n  mutation updateWhatsappAccount($id: String!, $input: WhatsappAccountUpdateInput!) {\n    updateWhatsappAccount(id: $id, input: $input) {\n      id\n    }\n  }\n": types.UpdateWhatsappAccountDocument,
+    "\n  mutation deleteWhatsappAccount($id: String!) {\n    deleteWhatsappAccount(id: $id) {\n      id\n    }\n  }\n": types.DeleteWhatsappAccountDocument,
+    "\n  mutation setWhatsappAccessToken($id: String!, $accessToken: String!) {\n    setWhatsappAccessToken(id: $id, accessToken: $accessToken) {\n      id\n    }\n  }\n": types.SetWhatsappAccessTokenDocument,
+    "\n  mutation setWhatsappTwoStepPin($id: String!, $twoStepPin: String!) {\n    setWhatsappTwoStepPin(id: $id, twoStepPin: $twoStepPin) {\n      id\n    }\n  }\n": types.SetWhatsappTwoStepPinDocument,
+    "\n  mutation setUserWhatsappOptIn($userId: String!, $enabled: Boolean!, $source: String) {\n    setUserWhatsappOptIn(userId: $userId, enabled: $enabled, source: $source) {\n      id\n    }\n  }\n": types.SetUserWhatsappOptInDocument,
+    "\n  \n  \n  mutation syncWhatsappAccountsFromMeta {\n    syncWhatsappAccountsFromMeta {\n      id\n      accounts {\n        ...WhatsappAccountFields\n      }\n      templates {\n        ...WhatsappTemplateSnapshotFields\n      }\n    }\n  }\n": types.SyncWhatsappAccountsFromMetaDocument,
 };
 
 /**
@@ -1898,6 +1920,50 @@ export function graphql(source: "\n  query teachers($search: String!, $limit: In
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  fragment UserFieldsFragment on User {\n    id\n    name\n    email\n    emailVerifiedAt\n    createdAt\n    updatedAt\n    avatarUrl\n    phone\n    status\n    permissions\n    role\n    notificationCount\n    teacherId\n    parentId\n    displayCurrency\n  }\n"): (typeof documents)["\n  fragment UserFieldsFragment on User {\n    id\n    name\n    email\n    emailVerifiedAt\n    createdAt\n    updatedAt\n    avatarUrl\n    phone\n    status\n    permissions\n    role\n    notificationCount\n    teacherId\n    parentId\n    displayCurrency\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment WhatsappAccountFields on WhatsappAccount {\n    id\n    wabaId\n    phoneNumberId\n    displayPhoneNumber\n    displayName\n    isActive\n    qualityRating\n    portfolioMessagingLimitTier\n    throughputLevel\n    maxPhoneNumbersPerBusiness\n    lastWebhookAt\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment WhatsappAccountFields on WhatsappAccount {\n    id\n    wabaId\n    phoneNumberId\n    displayPhoneNumber\n    displayName\n    isActive\n    qualityRating\n    portfolioMessagingLimitTier\n    throughputLevel\n    maxPhoneNumbersPerBusiness\n    lastWebhookAt\n    createdAt\n    updatedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment WhatsappTemplateSnapshotFields on WhatsappTemplateSnapshot {\n    id\n    name\n    language\n    status\n    category\n    lastSyncedAt\n  }\n"): (typeof documents)["\n  fragment WhatsappTemplateSnapshotFields on WhatsappTemplateSnapshot {\n    id\n    name\n    language\n    status\n    category\n    lastSyncedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query whatsappAccounts {\n    whatsappAccounts {\n      ...WhatsappAccountFields\n    }\n  }\n"): (typeof documents)["\n  \n  query whatsappAccounts {\n    whatsappAccounts {\n      ...WhatsappAccountFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query isUserWhatsappOptIn($userId: String!) {\n    isUserWhatsappOptIn(userId: $userId)\n  }\n"): (typeof documents)["\n  query isUserWhatsappOptIn($userId: String!) {\n    isUserWhatsappOptIn(userId: $userId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation createWhatsappAccount($input: WhatsappAccountCreateInput!) {\n    createWhatsappAccount(input: $input) {\n      ...WhatsappAccountFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation createWhatsappAccount($input: WhatsappAccountCreateInput!) {\n    createWhatsappAccount(input: $input) {\n      ...WhatsappAccountFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation updateWhatsappAccount($id: String!, $input: WhatsappAccountUpdateInput!) {\n    updateWhatsappAccount(id: $id, input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation updateWhatsappAccount($id: String!, $input: WhatsappAccountUpdateInput!) {\n    updateWhatsappAccount(id: $id, input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deleteWhatsappAccount($id: String!) {\n    deleteWhatsappAccount(id: $id) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation deleteWhatsappAccount($id: String!) {\n    deleteWhatsappAccount(id: $id) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation setWhatsappAccessToken($id: String!, $accessToken: String!) {\n    setWhatsappAccessToken(id: $id, accessToken: $accessToken) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation setWhatsappAccessToken($id: String!, $accessToken: String!) {\n    setWhatsappAccessToken(id: $id, accessToken: $accessToken) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation setWhatsappTwoStepPin($id: String!, $twoStepPin: String!) {\n    setWhatsappTwoStepPin(id: $id, twoStepPin: $twoStepPin) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation setWhatsappTwoStepPin($id: String!, $twoStepPin: String!) {\n    setWhatsappTwoStepPin(id: $id, twoStepPin: $twoStepPin) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation setUserWhatsappOptIn($userId: String!, $enabled: Boolean!, $source: String) {\n    setUserWhatsappOptIn(userId: $userId, enabled: $enabled, source: $source) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation setUserWhatsappOptIn($userId: String!, $enabled: Boolean!, $source: String) {\n    setUserWhatsappOptIn(userId: $userId, enabled: $enabled, source: $source) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  \n  mutation syncWhatsappAccountsFromMeta {\n    syncWhatsappAccountsFromMeta {\n      id\n      accounts {\n        ...WhatsappAccountFields\n      }\n      templates {\n        ...WhatsappTemplateSnapshotFields\n      }\n    }\n  }\n"): (typeof documents)["\n  \n  \n  mutation syncWhatsappAccountsFromMeta {\n    syncWhatsappAccountsFromMeta {\n      id\n      accounts {\n        ...WhatsappAccountFields\n      }\n      templates {\n        ...WhatsappTemplateSnapshotFields\n      }\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

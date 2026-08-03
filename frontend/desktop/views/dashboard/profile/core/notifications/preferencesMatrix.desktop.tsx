@@ -3,10 +3,9 @@
 import { Box, Switch, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel, type NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type CategoryRow,
-  NOTIFICATION_CHANNELS,
   type NotificationEventCategory,
   type PreferenceMatrixRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
@@ -15,6 +14,8 @@ import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 interface PreferencesMatrixDesktopViewProps {
   readonly labels: ProfileNotificationsLabels;
+  // Pre-shaped matrix rows lifted out of the desktop tier — data-shaping
+  // belongs in the ViewModel. The tier view only consumes them.
   readonly matrixRows: readonly PreferenceMatrixRow[];
   /** Category grouping rows — one per category for master mute toggles above the grid. */
   readonly categoryRows?: readonly CategoryRow[];
@@ -75,7 +76,7 @@ export function PreferencesMatrixDesktopView({
     const eventLabels = labels.events as Record<string, string>;
     const getEventLabel = (eventType: NotificationEventType): string => eventLabels[eventType] ?? eventType;
 
-    const channelColumns: GridColDef<PreferenceMatrixRow>[] = NOTIFICATION_CHANNELS.map(channel => ({
+    const channelColumns: GridColDef<PreferenceMatrixRow>[] = Object.values(NotificationChannel).map(channel => ({
       field: channel,
       headerName: labels.channels[channel],
       width: 120,
