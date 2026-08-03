@@ -346,9 +346,9 @@ After ANY error:
 
 | Namespace | Usage Context | Access Pattern |
 |---|---|---|
-| `certificates.errors.render` | Service layer error messages | `getServerTranslations(locale, "certificates.errors.render")` |
-| `certificates.generation` | Batch progress messages | `getServerTranslations(locale, "certificates.generation")` |
-| `certificates.dateFormats` | Date element formatting (Arabic month names) | `getServerTranslations(locale, "certificates.dateFormats")` |
+| `certificates.errors.render` | Service layer error messages | `getServerTranslations(locale).errorsTranslations.certificate` |
+| `certificates.generation` | Batch progress messages | `getServerTranslations(locale).dashboardTranslations.certificateGeneration` |
+| `certificates.dateFormats` | Date element formatting (Arabic month names) | `getServerTranslations(locale).dashboardTranslations.certificateDateFormats` |
 
 ### Key Details
 
@@ -357,7 +357,7 @@ After ANY error:
 8 keys as defined in REQ-RENDER-09:
 - `timeout`, `fontNotFound` (interpolation: fontFamily), `imageLoadFailed`, `qrFailed`, `backgroundNotFound`, `missingVariable` (interpolation: variableName), `puppeteerFailed`, `batchMaxErrors` (interpolation: maxErrors)
 
-Accessed via: `const t = await getServerTranslations(locale, "certificates.errors.render"); t.fontNotFound("Cairo")`
+Accessed via: `const t = await getServerTranslations(locale).errorsTranslations.certificate; t.fontNotFound("Cairo")`
 
 #### `certificates.generation` (render progress sub-domain)
 
@@ -514,7 +514,7 @@ This is a **backend-only plan** — no UI routes, sidebar items, or user-facing 
 
 ### A. Correctness defects against the ACTUAL codebase (must fix)
 
-1. **`getServerTranslations(locale, "certificates.errors.render")` is WRONG — two-arg
+1. **`getServerTranslations(locale).errorsTranslations.certificate` is WRONG — two-arg
    form does not exist.** Verified at `shared/locale/server-graphql.ts:3`:
    `export function getServerTranslations(locale: string): ReturnType<typeof getTranslations>`.
    It takes exactly ONE argument and returns the full `Translations` object. All cert

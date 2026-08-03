@@ -799,7 +799,7 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] DialogActions: "Next" button (disabled if no format selected), "Cancel" (calls `onClose`)
 - [ ] Responsive: `useMediaQuery` for mobile detection — `fullScreen` on <600px
 - [ ] All text from i18n keys in `certificates.templates.importExport` namespace
-- [ ] Use `useAppTranslation("certificates.templates.importExport")` hook
+- [ ] Use `useAppTranslation(Translation.Dashboard.CertificateImportExport)` hook
 
 **Quality checks:**
 - [ ] `bun tsgo` passes
@@ -893,7 +893,7 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] Error feedback: `Alert` severity="error" if file too large or wrong type
 - [ ] DialogActions: "Cancel" (calls `onClose`), no "Next" (auto-advance on file selection)
 - [ ] Responsive: `useMediaQuery` for mobile `fullScreen`
-- [ ] All text via `useAppTranslation("certificates.templates.importExport")`
+- [ ] All text via `useAppTranslation(Translation.Dashboard.CertificateImportExport)`
 
 **Quality checks:**
 - [ ] `bun tsgo` passes

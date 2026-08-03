@@ -383,7 +383,7 @@ Plans MUST NOT invent: `ValidationError`, `ConflictError`, `AuthorizationError`,
 | Storage full | `DomainError` | `errors.certificates.storageFull` |
 | Validation failed | `DomainError` | `errors.certificates.validationFailed` |
 
-All error messages MUST use `getServerTranslations(locale)` (single arg) or `ctx.t("errors")` (GraphQL resolver).
+All error messages MUST use `getServerTranslations(locale)` (single arg) or `ctx.t().errorsTranslations` (GraphQL resolver).
 
 ---
 

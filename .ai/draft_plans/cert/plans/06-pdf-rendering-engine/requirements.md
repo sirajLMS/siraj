@@ -302,7 +302,7 @@ The rendering engine is the core value-producing component of the certificate fe
 
 ### Namespace: `certificates.errors.render`
 
-Translation keys for rendering errors, accessed via `getServerTranslations(locale, "certificates.errors.render")` in API/etc contexts.
+Translation keys for rendering errors, accessed via `getServerTranslations(locale).errorsTranslations.certificate` in API/etc contexts.
 
 | Key | Type | Interpolation | English | Arabic |
 |---|---|---|---|---|
@@ -344,7 +344,7 @@ Date formatting labels for Arabic month names (used by `data_date` element rende
 
 ### i18n Integration Points
 
-- **Service layer**: `getServerTranslations(locale, "certificates.errors.render")` for error messages thrown from the render service
+- **Service layer**: `getServerTranslations(locale).errorsTranslations.certificate` for error messages thrown from the render service
 - **Batch progress**: progress events include locale for progress message construction
 - **Date formatting**: `data_date` element uses locale-specific month name arrays from `shared/locale` type schema
 - **Type schema location**: `shared/locale/types/certificates/` — new type definitions for all `certificates.*` namespaces

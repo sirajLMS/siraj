@@ -1037,7 +1037,7 @@ an `expiryDate` in the past. Plan 22 owns the cron scheduling; Plan 4 owns the e
 - **Fire-and-forget audit + `dispatchWithPreferences` (best-effort notificationdispatcher)** ✅ — both exist and match `backend/services/notification/notification-dispatch.helpers`.
 
 ### Corrections Made
-- **`getServerTranslations` signature** — corrected. The actual `getServerTranslations(locale)` in `backend/graphql/gqlContext.ts` → `@/shared/locale/server-graphql.ts` takes **ONE** argument (`locale`). There is no `(locale, "namespace")` two-arg form. `tErrors` is extracted from a property on the returned `Translations` object. All occurrences of `getServerTranslations(locale, "certificates.errors.services")` were changed to `getServerTranslations(locale).errorsTranslations`. (Import location `@/shared/locale/server-graphql` per `backend/services/AGENTS.md` is correct; `gqlContext.ts` imports `getServerTranslations` from `@/shared/locale` which re-exports it.)
+- **`getServerTranslations` signature** — corrected. The actual `getServerTranslations(locale)` in `backend/graphql/gqlContext.ts` → `@/shared/locale/server-graphql.ts` takes **ONE** argument (`locale`). There is no `(locale, "namespace")` two-arg form. `tErrors` is extracted from a property on the returned `Translations` object. All occurrences of `getServerTranslations(locale).errorsTranslations.certificate` were changed to `getServerTranslations(locale).errorsTranslations`. (Import location `@/shared/locale/server-graphql` per `backend/services/AGENTS.md` is correct; `gqlContext.ts` imports `getServerTranslations` from `@/shared/locale` which re-exports it.)
 - **`ctx.t("certificates.errors.services")` → `ctx.t().errorsTranslations`** — `BaseContext.t` is `() => Translations` (no namespace argument, see `backend/graphql/gqlContext.ts:30`). Resolvers access the error namespace via `ctx.t().errorsTranslations` (verified across `backend/graphql/pothos/{scheduling,billing,auth}/...`). Fixed in Plan 04 §14.1 handoff and `requirements.md` final note.
 - **`REQ-SVC-003` wording** — reworded. The original said "a service method … SHALL construct `tErrors`"; the codebase invariant is the *caller* (resolver/server component) constructs `tErrors` once and passes it in — services never construct it. Corrected to reflect caller-construction, matching `StudentManagementService` pattern.
 
@@ -1229,7 +1229,7 @@ an `expiryDate` in the past. Plan 22 owns the cron scheduling; Plan 4 owns the e
 15. **`getServerTranslations` is single-arg.** Verified at
     `shared/locale/server-graphql.ts:3` (`function getServerTranslations(locale: string)`).
     Every cert error key must be reachable through `getServerTranslations(locale).errorsTranslations`
-    — i.e. by extending `ErrorsLabels`. Do NOT add `getServerTranslations(locale, "ns")`
+    — i.e. by extending `ErrorsLabels`. Do NOT add `getServerTranslations(locale).errorsTranslations`
     two-arg calls anywhere (Plan 06 design §348/§360 still does — fix there).
 
 16. **Arabic pluralization rule is correctly cited** ✅ (CLDR six forms

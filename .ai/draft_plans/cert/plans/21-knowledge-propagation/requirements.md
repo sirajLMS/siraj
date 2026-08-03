@@ -230,7 +230,7 @@ THEN it SHALL include:
 - Certificate Zustand store naming conventions (`certificate*Store`)
 - Certificate GraphQL document naming conventions (`*CertificateQueryDocument`, `*CertificateMutationDocument`, `*TemplateQueryDocument`)
 - Certificate MUI component usage notes (DataGrid column configuration for certificates, template editor canvas rendering)
-- Certificate i18n usage notes (`useAppTranslation("certificates")` with sub-domain access)
+- Certificate i18n usage notes (`useAppTranslation(Translation.Dashboard.Certificate)` with sub-domain access)
 - Certificate-specific gotchas (PDF preview rendering, QR code generation, template element drag-and-drop)
 
 **REQ-21.20 (backend-instructions-update)**
