@@ -17,9 +17,6 @@ export function formatError(err: unknown): string {
     .replace(/(password|token|secret|api[_-]?key)\s*=\s*[^\s,;]+/gi, "$1=[REDACTED]");
 }
 
-/** Vercel Fluid Compute max duration for cron routes */
-export const CRON_MAX_DURATION = 300;
-
 /** Extract locale from request Accept-Language header */
 export function extractLocale(request: Request): string {
   return request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] || "en";

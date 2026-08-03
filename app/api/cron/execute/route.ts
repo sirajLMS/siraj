@@ -4,7 +4,7 @@ import { withCronAuth } from "@/backend/lib/cron-auth";
 import { DomainError } from "@/backend/lib/errors";
 import logger from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
-import { CRON_MAX_DURATION, extractLocale, formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
+import { extractLocale, formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
 
 /**
  * Manual / per-schedule execute endpoint. Allows external schedulers to trigger
@@ -13,10 +13,11 @@ import { CRON_MAX_DURATION, extractLocale, formatError, getCronErrorT } from "@/
  *
  * Auth: CRON_SECRET bearer (withCronAuth). GET-only.
  * maxDuration: 300s (Vercel Fluid Compute).
+ * Must be a numeric literal — Next.js cannot statically analyze imported consts.
  *
  * Query: `?scheduleId=<uuid>` — the schedule to dispatch.
  */
-export const maxDuration = CRON_MAX_DURATION;
+export const maxDuration = 300;
 
 export const GET = withCronAuth(async (request: NextRequest) => {
   const scheduleId = request.nextUrl.searchParams.get("scheduleId");

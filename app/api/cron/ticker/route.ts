@@ -3,7 +3,7 @@ import { CronTriggerSource } from "@/backend/enum/cron/cron.enums";
 import { withCronAuth } from "@/backend/lib/cron-auth";
 import logger from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
-import { CRON_MAX_DURATION, formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
+import { formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
 import { runDrainLoop } from "@/backend/services/cron/cron-worker.runtime";
 
 /**
@@ -20,8 +20,9 @@ import { runDrainLoop } from "@/backend/services/cron/cron-worker.runtime";
  *
  * Auth: CRON_SECRET bearer (withCronAuth). GET-only.
  * maxDuration: 300s (Vercel Fluid Compute).
+ * Must be a numeric literal — Next.js cannot statically analyze imported consts.
  */
-export const maxDuration = CRON_MAX_DURATION;
+export const maxDuration = 300;
 
 export const GET = withCronAuth(async (request: NextRequest) => {
   try {

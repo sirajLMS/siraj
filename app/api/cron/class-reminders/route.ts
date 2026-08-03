@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { withCronAuth } from "@/backend/lib/cron-auth";
 import { logger } from "@/backend/lib/logger";
-import { CRON_MAX_DURATION, formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
+import { formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
 import { ClassReminderService } from "@/backend/services/notification/class-reminder.service";
 
 /**
@@ -17,8 +17,9 @@ import { ClassReminderService } from "@/backend/services/notification/class-remi
  * 06:00 today and 06:00 tomorrow UTC.
  *
  * maxDuration: 300s (Vercel Fluid Compute).
+ * Must be a numeric literal — Next.js cannot statically analyze imported consts.
  */
-export const maxDuration = CRON_MAX_DURATION;
+export const maxDuration = 300;
 
 export const GET = withCronAuth(async (request: NextRequest) => {
   try {
