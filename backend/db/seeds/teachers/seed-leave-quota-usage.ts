@@ -1,7 +1,7 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
-import type { StudentEntity } from "@/backend/types";
+import type { StudentSelectType } from "@/backend/types";
 
 type LeaveRequestRow = {
   createdAt: Date;
@@ -9,7 +9,7 @@ type LeaveRequestRow = {
 
 export async function seedOrGet(
   leaveRequestsList: LeaveRequestRow[],
-  studentsList: StudentEntity[],
+  studentsList: StudentSelectType[],
   config?: SeedConfig
 ) {
   logger.info("Seeding leave quota usage...");

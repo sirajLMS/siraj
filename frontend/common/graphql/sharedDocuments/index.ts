@@ -17,3 +17,4 @@ export * from "./suggestions";
 export * from "./supervisor";
 export * from "./teachers";
 export * from "./users";
+export * from "./whatsapp";

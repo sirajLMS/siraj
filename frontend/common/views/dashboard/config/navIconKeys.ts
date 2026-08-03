@@ -15,6 +15,7 @@ export type NavIconKey =
   | "folderOpen"
   | "group"
   | "history"
+  | "hub"
   | "lightbulb"
   | "logout"
   | "menuBook"
@@ -34,4 +35,5 @@ export type NavIconKey =
   | "shield"
   | "timeline"
   | "update"
-  | "videocam";
+  | "videocam"
+  | "visibility";

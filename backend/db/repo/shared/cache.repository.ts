@@ -129,7 +129,7 @@ export namespace CacheDbRepository {
         .update(table)
         .set({ expiresAt: newExpiresAt })
         .where(sql`${table.key} LIKE ${prefix + "%"}`)
-        .returning();
+        .returning({ key: table.key });
       return result.length;
     } catch (error) {
       logger.error(`Failed to update expiry for prefix ${prefix}:`, error);
@@ -167,6 +167,8 @@ export namespace CacheDbRepository {
    * Used by PostgresCacheAdapter.zcard to count rate-limit entries
    * Only counts non-expired entries
    */
+  // NOTE: For optimal performance of LIKE 'prefix%' queries on this column,
+  // consider adding an index: CREATE INDEX idx_session_cache_key_pattern ON session_cache (key varchar_pattern_ops);
   export const countByKeyPrefix = async (prefix: string): Promise<number> => {
     try {
       const table = getTable(prefix);
@@ -198,13 +200,28 @@ export namespace CacheDbRepository {
     }
   };
 
+  /**
+   * Insert a cache entry only if the key does not already exist, OR if the
+   * existing entry has expired (overwrites expired rows). This prevents
+   * rate-limit and auth keys from being stuck when using the Postgres cache
+   * fallback — `onConflictDoNothing` would permanently block re-inserting
+   * an expired key, but `onConflictDoUpdate` with a `setWhere` guard only
+   * overwrites when `expires_at < now()`.
+   */
   export const insertIfNotExists = async (key: string, value: string, expiresAt: Date): Promise<boolean> => {
     try {
       const table = getTable(key);
       const result = await db
         .insert(table)
         .values({ key, value, expiresAt })
-        .onConflictDoNothing({ target: table.key })
+        .onConflictDoUpdate({
+          target: table.key,
+          set: {
+            value,
+            expiresAt,
+          },
+          setWhere: and(eq(table.key, key), lt(table.expiresAt, sql`now()`)),
+        })
         .returning();
 
       return result.length > 0;

@@ -13,11 +13,18 @@ export const profileNotificationsAr: ProfileNotificationsLabels = {
     booking: "الحجز — يتم توليد رابط جديد عند حجز اجتماع",
     learnMore: "اعرف المزيد",
   },
+  categories: {
+    info: "معلومات",
+    reminder: "تذكيرات",
+    urgent: "عاجل",
+    digest: "ملخصات",
+  },
   channels: {
     EMAIL: "البريد الإلكتروني",
     SMS: "رسائل SMS",
     PUSH: "إشعارات الدفع",
     ON_APP: "داخل التطبيق",
+    WHATSAPP: "واتساب",
   },
   events: {
     CLASS_REMINDER: "تذكيرات الحصص",
@@ -40,6 +47,13 @@ export const profileNotificationsAr: ProfileNotificationsLabels = {
     CLASS_RESET: "إعادة ضبط الحصة",
     LESSON_REPORT_SUBMITTED: "تقديم تقرير حصة",
     LESSON_REPORT_REVIEWED: "مراجعة تقرير حصة",
+    QUOTA_EXPIRING_SOON: "الحصة ستنتهي قريباً",
+    QUOTA_EXPIRED: "انتهت صلاحية الحصة",
+    QUOTA_LOW_BALANCE: "رصيد الحصة منخفض",
+    ON_DEMAND_INSTANCE_PENDING_CREDIT: "طلب حصة بانتظار الرصيد",
+    ON_DEMAND_INSTANCE_REMINDER_T3: "تذكير بالحصة (3 أيام)",
+    ON_DEMAND_INSTANCE_REMINDER_T1: "تذكير بالحصة (يوم واحد)",
+    ON_DEMAND_TEACHER_DAILY_DIGEST: "ملخص يومي للمعلم",
   },
   connectAccount: {
     connectButton: "ربط",

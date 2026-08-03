@@ -9,7 +9,9 @@ export { DashboardBillingCurrencyHedges } from "@/shared/locale/namespaces/dashb
 export { DashboardBillingExchangeRates } from "@/shared/locale/namespaces/dashboard/billing/exchangeRates.namespace";
 export { DashboardBilling } from "@/shared/locale/namespaces/dashboard/billing/main.namespace";
 export { DashboardBillingManual } from "@/shared/locale/namespaces/dashboard/billing/manual.namespace";
+export { DashboardBillingQuota } from "@/shared/locale/namespaces/dashboard/billing/quota.namespace";
 export { DashboardBillingSupportedCurrencies } from "@/shared/locale/namespaces/dashboard/billing/supportedCurrencies.namespace";
+
 export { DashboardClassAudit } from "@/shared/locale/namespaces/dashboard/classes/audit.namespace";
 export { DashboardCreateRecurringClass } from "@/shared/locale/namespaces/dashboard/classes/createRecurringClass.namespace";
 export { DashboardClassDetails } from "@/shared/locale/namespaces/dashboard/classes/details.namespace";
@@ -108,3 +110,4 @@ export { UiPhoneInput } from "@/shared/locale/namespaces/ui/phoneInput.namespace
 export { UiTagInput } from "@/shared/locale/namespaces/ui/tagInput.namespace";
 export { UiTimezoneSelect } from "@/shared/locale/namespaces/ui/timezoneSelect.namespace";
 export { UiUserSelect } from "@/shared/locale/namespaces/ui/userSelect.namespace";
+export { Whatsapp } from "@/shared/locale/namespaces/whatsapp/whatsapp.namespace";

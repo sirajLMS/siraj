@@ -1,0 +1,784 @@
+# Plan 04 — Services & Business Logic: Tasks
+
+> **Feature**: Certificate Module — Services & Business Logic
+> **Plan #**: 04
+> **Dependencies**: Plan 1 (DB Schema & Enums), Plan 2 (Types & Permissions), Plan 3 (Repository Layer)
+> **Execution Model**: Sequential per task (each task produces files the next task imports)
+> **Quality Model**: Per-file tsgo + biome + lint via `scripts/health/sub-loop.ts`
+> **Time Budget**: 2-4 hours per task
+
+---
+
+## Task Dependency Graph
+
+```
+T01 (i18n schema) ──────────────┐
+                                 ├─→ T02 (barrel) ──→ T03 (CertificateGenerationService)
+                                 │                    ├─→ T04 (CertificateBatchService)
+                                 │                    ├─→ T05 (CertificateRevocationService)
+                                 │                    ├─→ T06 (CertificateVerificationService)
+                                 │                    ├─→ T07 (CertificateExpiryService)
+                                 │                    ├─→ T08 (TemplateManagementService)
+                                 │                    ├─→ T09 (TemplateElementService)
+                                 │                    ├─→ T10 (TemplateVariableService)
+                                 │                    ├─→ T11 (RecipientGroupService)
+                                 │                    └─→ T12 (CategoryService)
+                                 │                              │
+                                 │                              ├─→ T13 (cache.ts helpers)
+                                 │                              ├─→ T14 (cert/index.ts barrel)
+                                 │                              └─→ T15 (services/index.ts update)
+                                 │                                     │
+                                 │                                     └─→ T16 (knowledge propagation)
+                                 └─────────────────────────────────────┘
+```
+
+**Execution order**: T01 → T02 → (T03, T04, T05, T06, T07, T08, T09, T10, T11, T12 in parallel after T02) → T13 → T14 → T15 → T16
+
+> **Note**: T04 depends on T03 (batch calls generation). T05, T06, T07 are independent
+> of each other but rely on T01 for `tErrors` type. T09 and T10 are independent.
+> T11 depends on T10 (validates against template variables). T12 is independent.
+
+---
+
+## T01 — Create i18n Error and Notification Translation Schemas
+
+**Estimated time**: 2 hours
+**Depends on**: Plan 2 (Types) complete, Plan 3 (Repository i18n for pattern reference)
+**Requirements**: §3.2, §3.3, §3.4, §3.5, AC-63, AC-64, AC-65
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `shared/AGENTS.md` — i18n system rules (compile-time TypeScript, function-per-key)
+   - `AGENTS.md` root — path alias conventions
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference file**:
+   - `shared/locale/<existing-namespace>.errors.ts` — existing type schema for pattern reference (e.g., billing errors)
+   - `shared/locale/en/<existing-namespace>.errors.ts` — English implementation pattern
+   - `shared/locale/ar/<existing-namespace>.errors.ts` — Arabic implementation + pluralization pattern
+
+4. **Create type schema** `shared/locale/certificates.errors.services.ts`:
+   - One function type per key listed in `requirements.md` §3.2
+   - Keys with no params: `() => string`
+   - Keys with params: `(id: string) => string`, `(studentName: string, templateName: string) => string`, etc.
+   - Pluralized keys: `(id: string, count: number) => string` — the locale impl dispatches on count
+   - Export the aggregate type as `CertificateServiceErrors`
+
+5. **Create English implementation** `shared/locale/en/certificates.errors.services.ts`:
+   - One const function per key, matching the type schema signatures
+   - Pluralization: `one` / `other` for `categoryHasTemplates`, `batchGenerationPartialFailure`
+
+6. **Create notification type schema** `shared/locale/certificates.notifications.ts`:
+   - Keys: `certificateIssuedTitle`, `certificateIssuedBody`, `certificateRevokedTitle`, `certificateRevokedBody`
+   - Export the aggregate type as `CertificateNotifications`
+
+7. **Create English notification implementation** `shared/locale/en/certificates.notifications.ts`
+
+8. **Create Arabic notification implementation** `shared/locale/ar/certificates.notifications.ts`
+
+9. **Create Arabic implementation** `shared/locale/ar/certificates.errors.services.ts`:
+   - One const function per key
+   - Pluralization: six CLDR forms (zero/one/two/few/many/other) for `categoryHasTemplates`
+
+### Quality Loop
+
+For each file created:
+```bash
+bun tsgo
+bun biome:check -- <file>
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"t01","files":["<file>"]}'
+```
+
+Or equivalently:
+```bash
+bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+```
+
+### Verification
+- `bun tsgo` passes with zero new type errors
+- Arabic pluralization covers all six forms for `categoryHasTemplates`
+- No hardcoded English or Arabic strings in service files (they will use `tErrors`)
+
+---
+
+## T02 — Create Service Sub-Directory Barrel
+
+**Estimated time**: 30 minutes
+**Depends on**: T01 (i18n schema exists for type imports)
+**Requirements**: AC-5
+
+### Subtasks
+
+1. **Read** `backend/services/AGENTS.md` — barrel structure rules
+2. **Read** one existing sub-barrel for reference (e.g., `backend/services/billing/index.ts` or `backend/services/students/index.ts`)
+3. **Create** `backend/services/cert/index.ts`:
+   - Will re-export each service namespace: `CertificateGenerationService`, `CertificateBatchService`,
+     `CertificateRevocationService`, `CertificateVerificationService`, `CertificateExpiryService`,
+     `TemplateManagementService`, `TemplateElementService`, `TemplateVariableService`,
+     `RecipientGroupService`, `CategoryService`
+   - Type-only re-exports for input types from `@/backend/types/certificates/*` if needed
+
+> **Note**: This barrel will initially fail tsgo because the service files don't exist yet.
+> Create it incrementally — add each re-export line as the corresponding service file is
+> created in T03-T12. The barrel is only "complete" after T12.
+
+### Execution Strategy
+
+Create `backend/services/cert/index.ts` **incrementally** — add each re-export line as
+the corresponding service file is created in T03-T12. The barrel is the aggregation point;
+it's only "complete" after T12.
+
+### Quality Loop
+
+Run only after all T03-T12 services are added:
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle lint
+```
+
+---
+
+## T03 — Create CertificateGenerationService
+
+**Estimated time**: 4 hours
+**Depends on**: T01 (i18n), T02 (barrel), Plan 3 (Repository Layer)
+**Requirements**: REQ-SVC-001 through REQ-SVC-005, REQ-PERM-001, REQ-PERM-006, REQ-GEN-001 through REQ-GEN-004, AC-1 through AC-5, AC-6, AC-11 through AC-17, AC-49, AC-50, AC-56, AC-57, AC-61
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root) — logging, path aliases
+   - `backend/services/AGENTS.md` — service rules, namespace pattern, SSR-safe, tErrors pattern, caching rules
+   - `backend/types/AGENTS.md` — type usage
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §B (Service Layer patterns), §D (Certificate Integration Blueprint)
+   - `cgvs_analysis/01-generation-logic.md` §1 (Pipeline), §7 (Lifecycle)
+   - `backend/services/billing/billing.service.ts` (or equivalent) — namespace pattern, permission check, audit, notification dispatch
+   - `backend/lib/index.ts` — `NotFoundError`, `ValidationError`, `ConflictError`, `AuthorizationError` constructors
+
+4. **Create** `backend/services/cert/certificate-generation.service.ts`:
+   - Module-level Zod schema for `GenerateCertificateInput` (prose description in design.md §11.1)
+   - Private helpers inside namespace:
+     - `computeIdempotencyKey(templateId, studentId, groupId, versionId)` — SHA256 hex digest per §9.1
+     - `resolveVariables(template, variableValues)` — merge defaults with overrides
+     - `validateRequiredVariables(template, resolvedVariables, tErrors)` — check required vars present
+     - `validateVariableTypes(template, resolvedVariables, tErrors)` — check value types match declaration
+     - `checkPermission(userId, permission, tErrors)` — private permission check helper
+   - Public methods:
+     - `generateCertificate(input, locale, tErrors)` — 15-step pipeline per REQ-GEN-001 and design.md §3.1
+     - `getById(certificateId, userId, locale, tErrors)` — simple read with permission check
+
+5. **Integration points** (interfaces defined in this plan, implementations in other plans):
+   - `PdfRenderService.renderCertificate` — Plan 6 (step 9 of pipeline, outside transaction, catch failure)
+   - `StorageService.linkFileToEntity` — Plan 7 (step 12 of pipeline, outside transaction)
+   - `PermissionsService.hasPermission` — Plan 2
+   - `AuditService.createManyAuditLogs` — existing Siraj service (fire-and-forget)
+   - `dispatchWithPreferences` — existing Siraj notification service (best-effort)
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/certificate-generation.service.ts --lifecycle lint
+```
+
+### Verification
+- `bun tsgo` passes with zero new type errors
+- Zod schema matches design.md §11.1
+- Idempotency key computation matches design.md §9.1 formula
+- 15-step pipeline order matches REQ-GEN-001
+- Permission check uses `CERT_GENERATE`
+- PDF render failure transitions certificate to `failed` status
+- 23505 on idempotency key catches and returns existing certificate (no re-render)
+- All error messages use `tErrors` — no hardcoded strings
+- Audit log and notification dispatch are fire-and-forget (try/catch)
+
+---
+
+## T04 — Create CertificateBatchService
+
+**Estimated time**: 3 hours
+**Depends on**: T01 (i18n), T03 (CertificateGenerationService — batch calls generateCertificate)
+**Requirements**: REQ-PERM-005, REQ-BATCH-001 through REQ-BATCH-003, AC-18 through AC-21
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §D (batch generation blueprint)
+   - `cgvs_analysis/01-generation-logic.md` §10 (Batch generation)
+
+4. **Create** `backend/services/cert/certificate-batch.service.ts`:
+   - Module-level Zod schema for `GenerateBatchInput` (templateId, recipientGroupId, userId)
+   - Private helper: `checkPermission(userId, permission, tErrors)` — requires both `CERT_GENERATE` AND `CERT_MANAGE`
+   - Public method: `generateBatch(input, locale, tErrors)` per design.md §3.2:
+     - Load recipient group with items (relational)
+     - Validate group not empty
+     - Iterate items, call `CertificateGenerationService.generateCertificate` per item
+     - Accumulate results: `{ total, succeeded, failed, alreadyExisted, failures, partialFailure }`
+     - Idempotency: catch `ConflictError` (23505) → count as `alreadyExisted`, not `failed`
+     - IF >50% failed → set `partialFailure = true`, audit log warning
+     - Return `BatchGenerationResultType`
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/certificate-batch.service.ts --lifecycle lint
+```
+
+### Verification
+- Batch loops without rolling back succeeded certificates
+- `ConflictError` from generation caught and counted as `alreadyExisted`
+- `partialFailure` flag set when >50% fail
+- Both `CERT_GENERATE` AND `CERT_MANAGE` permissions required
+- Audit log for batch start + completion (fire-and-forget)
+
+---
+
+## T05 — Create CertificateRevocationService
+
+**Estimated time**: 2 hours
+**Depends on**: T01 (i18n), T02 (barrel), T13 (cache helpers — or create stub and wire later)
+**Requirements**: REQ-PERM-004, REQ-REV-001 through REQ-REV-003, AC-22 through AC-24, AC-62
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §D (revocation blueprint)
+   - `cgvs_analysis/01-generation-logic.md` §7 (Lifecycle — revocation section)
+
+4. **Create** `backend/services/cert/certificate-revocation.service.ts`:
+   - Module-level Zod schema for `RevokeCertificateInput` (design.md §11.2)
+   - Private helper: `checkPermission(userId, permission, tErrors)` — requires `CERT_MANAGE`
+   - Public method: `revokeCertificate(input, locale, tErrors)` per design.md §3.3:
+     - Load certificate → validate status = `issued`
+     - `db.transaction(runner)` wrapping: status update + audit entry prep
+     - Cache invalidation: `invalidateVerificationCache(code)` + `invalidateCertificatePdfCache(cert.id)`
+     - Fire-and-forget: audit log, notification (IF `notifyRecipient: true`)
+     - Return `CertificateReturnType`
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/certificate-revocation.service.ts --lifecycle lint
+```
+
+### Verification
+- Revoking non-issued certificate throws `tErrors.certificateNotRevocable`
+- Transaction wraps status update
+- Cache invalidation called (T13 helpers imported)
+- Notification dispatched IF `notifyRecipient: true`
+- Audit log fire-and-forget
+
+---
+
+## T06 — Create CertificateVerificationService
+
+**Estimated time**: 3 hours
+**Depends on**: T01 (i18n), T02 (barrel), T13 (cache helpers)
+**Requirements**: REQ-VER-001 through REQ-VER-003, AC-25 through AC-28, AC-54
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §D (verification blueprint), §B (caching rules)
+   - `cgvs_analysis/01-generation-logic.md` §7 (Lifecycle — verification section)
+   - `backend/services/students/` or equivalent — public read service pattern (no auth)
+
+4. **Create** `backend/services/cert/certificate-verification.service.ts`:
+   - No Zod schema needed (single string input `code`)
+   - No permission check (public endpoint)
+   - Private helper: `determineEffectiveStatus(certificate)` — logic per REQ-VER-001 step 4:
+     - `issued` + `expiryDate < now` → `expired`
+     - `issued` + `expiryDate >= now` OR `expiryDate = null` → `valid`
+     - `revoked` → `revoked`
+     - `draft`/`pending`/`failed` → throw `tErrors.certificateNotAvailable()`
+   - Private helper: `toPublicSafeResult(certificate, template, effectiveStatus)` — maps to `PublicCertificateVerificationResultType`, strips internal fields
+   - Public method: `verifyCertificate(code, requestMetadata)` per design.md §3.4:
+     - Cache lookup (fail-open) — ONLY for `issued` status
+     - `VerificationRepository.findByCode` → load certificate + template
+     - Determine effective status
+     - Log verification event (IP, UA, result) — fire-and-forget
+     - Populate cache IF `issued` (stable state) — skip for `revoked`/`expired`
+     - Return `PublicCertificateVerificationResultType`
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/certificate-verification.service.ts --lifecycle lint
+```
+
+### Verification
+- No permission check (public)
+- Cache bypassed for `revoked`/`expired` certificates
+- Verification event ALWAYS logged (even on cache hit)
+- Public-safe response excludes internal fields (idempotency key, studentId, element config)
+- Expired certificates report `expired` status without DB write
+- Cache is fail-open
+
+---
+
+## T07 — Create CertificateExpiryService
+
+**Estimated time**: 1 hour
+**Depends on**: T01 (i18n), T02 (barrel)
+**Requirements**: REQ-EXP-001, REQ-EXP-002, AC-29, AC-30
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference file**:
+   - `cgvs_analysis/01-generation-logic.md` §7 (Lifecycle — expiry section)
+
+4. **Create** `backend/services/cert/certificate-expiry.service.ts`:
+   - No Zod schema (single uuid input)
+   - Public method: `checkExpiry(certificateId, locale, tErrors)` per design.md §3.5:
+     - Load certificate → if not found, throw `NotFoundError`
+     - IF status ≠ `issued` → return as-is (no-op)
+     - IF `expiryDate` = null → return as-is
+     - IF `expiryDate >= now` → return as-is
+     - Update status to `expired` → audit log (fire-and-forget) → return updated cert
+   - **Idempotency**: Calling on already-expired cert is a no-op (status ≠ `issued` short-circuits)
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/certificate-expiry.service.ts --lifecycle lint
+```
+
+### Verification
+- Idempotent — no double status update or audit log
+- Only transitions `issued` → `expired`
+- Null expiry date is safe no-op
+
+---
+
+## T08 — Create TemplateManagementService
+
+**Estimated time**: 4 hours
+**Depends on**: T01 (i18n), T02 (barrel), T13 (cache helpers)
+**Requirements**: REQ-PERM-002, REQ-TPL-001 through REQ-TPL-005, AC-31 through AC-36, AC-51, AC-52, AC-53
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §B (template service patterns), §D (template lifecycle)
+   - `cgvs_analysis/01-generation-logic.md` §1 (template structure)
+   - `backend/services/billing/billing.service.ts` — namespace pattern with multiple CRUD + lifecycle methods
+
+4. **Create** `backend/services/cert/template-management.service.ts`:
+   - Zod schemas for: `CloneTemplateInput`, `RollbackInput`, `TemplateListFilters`
+   - Private helper: `checkPermission(userId, permission, tErrors)` — requires `TEMPLATE_MANAGE` for publish/archive/clone/rollback, `TEMPLATE_MANAGE` or `CERT_GENERATE` for read
+   - Private helper: `validateTemplateCompleteness(template, tErrors)` — elements > 0, required variables have defaults
+   - Public methods per design.md §3.6:
+     - `getById(templateId, userId, locale, tErrors)` — cache lookup → repo fallback → populate cache
+     - `list(filters, userId, locale, tErrors)` — repo `findMany` with cursor pagination
+     - `publish(templateId, userId, locale, tErrors)` — validate completeness → create version snapshot → update status → invalidate cache → audit
+     - `archive(templateId, userId, locale, tErrors)` — update status → invalidate cache → audit
+     - `cloneTemplate(input, userId, locale, tErrors)` — load → create draft → copy elements → copy variables → audit
+     - `getVersionChain(templateId, userId, locale, tErrors)` — cache lookup → repo fallback
+     - `rollbackToVersion(input, userId, locale, tErrors)` — validate version owned → delete current elements/vars → recreate from snapshot → increment version → invalidate cache → audit
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/template-management.service.ts --lifecycle lint
+```
+
+### Verification
+- `publish` rejects empty templates
+- `publish` creates version snapshot (deep copy)
+- `cloneTemplate` creates draft copy with all elements + variables
+- `rollbackToVersion` replaces elements/variables and increments version
+- Cache is invalidated on publish, archive, clone, rollback
+- All lifecycle methods require `TEMPLATE_MANAGE`
+- Audit logs fire-and-forget
+
+---
+
+## T09 — Create TemplateElementService
+
+**Estimated time**: 3 hours
+**Depends on**: T01 (i18n), T02 (barrel), T13 (cache helpers)
+**Requirements**: REQ-ELEM-001 through REQ-ELEM-003, AC-37, AC-38
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §D (element service blueprint)
+   - `cgvs_analysis/01-generation-logic.md` §1 (element types)
+
+4. **Create** `backend/services/cert/template-element.service.ts`:
+   - Zod schema for `CreateElementInput` — discriminated union by `type` (design.md §11.4)
+   - Private helper: `validateElementConfig(type, config, tErrors)` — decision table per REQ-ELEM-001:
+     - `text` → `content` non-empty
+     - `image` → `storageUrl` non-empty valid storage reference
+     - `signature` → `signatureId` valid uuid
+     - `qr` → `size` positive int ≤ 500
+     - `border` → `width` positive int ≤ 50
+     - `datetime` → `format` valid date format string
+   - Private helper: `checkPermission(userId, permission, tErrors)` — requires `TEMPLATE_MANAGE`
+   - Public methods per design.md §3.7:
+     - `create(input, userId, locale, tErrors)` — validate config → repo create → audit → invalidate template cache
+     - `update(elementId, patch, userId, locale, tErrors)` — validate config on patch → repo update → audit
+     - `delete(elementId, userId, locale, tErrors)` — repo soft delete → audit
+     - `reorderElements(templateId, orderedElementIds, userId, locale, tErrors)` — validate all IDs belong to template → batch update zIndex → invalidate template cache → audit
+     - `listByTemplate(templateId, userId, locale, tErrors)` — repo find by template → return
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/template-element.service.ts --lifecycle lint
+```
+
+### Verification
+- Each element type validated per decision table
+- `reorderElements` validates all IDs belong to template
+- Template cache invalidated on create/update/delete/reorder
+- `TEMPLATE_MANAGE` required for all methods
+
+---
+
+## T10 — Create TemplateVariableService
+
+**Estimated time**: 2 hours
+**Depends on**: T01 (i18n), T02 (barrel), T13 (cache helpers)
+**Requirements**: REQ-VAR-001, REQ-VAR-002, AC-39, AC-40
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §D (variable service blueprint)
+   - `cgvs_analysis/01-generation-logic.md` §6 (variable system)
+
+4. **Create** `backend/services/cert/template-variable.service.ts`:
+   - Zod schema for `CreateVariableInput` — `key`, `type` enum, `options` (for select), `defaultValue`, `required`
+   - Private helper: `validateDefaultValue(type, defaultValue, options, tErrors)` — decision table per REQ-VAR-001:
+     - `text` → string
+     - `date` → valid ISO date
+     - `number` → finite number
+     - `boolean` → true/false
+     - `select` → value in options array
+   - Private helper: `checkPermission(userId, permission, tErrors)` — requires `TEMPLATE_MANAGE`
+   - Public methods per design.md §3.8:
+     - `create(input, userId, locale, tErrors)` — validate key uniqueness → validate default value type → repo create → audit → invalidate template cache
+     - `update(variableId, patch, userId, locale, tErrors)` — validate key uniqueness (if changed) → validate default value → repo update → audit
+     - `delete(variableId, userId, locale, tErrors)` — repo soft delete → audit
+     - `listByTemplate(templateId, userId, locale, tErrors)` — repo find by template → return
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/template-variable.service.ts --lifecycle lint
+```
+
+### Verification
+- Variable `key` uniqueness enforced within template
+- Default value validates against declared type
+- `select` type requires non-empty `options`
+- Template cache invalidated on CRUD
+
+---
+
+## T11 — Create RecipientGroupService
+
+**Estimated time**: 3 hours
+**Depends on**: T01 (i18n), T02 (barrel), T10 (TemplateVariableService — for variable validation reference)
+**Requirements**: REQ-RGP-001 through REQ-RGP-004, AC-41 through AC-44
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §D (recipient group blueprint)
+   - `cgvs_analysis/01-generation-logic.md` §6 (Recipient system)
+
+4. **Create** `backend/services/cert/recipient-group.service.ts`:
+   - Zod schemas for: `CreateRecipientGroupInput`, `AddStudentInput`, `SetVariableValueInput`
+   - Private helper: `validateVariableValues(group, variableValues, tErrors)` — for each key:
+     - Template variable with that key must exist on the group's template
+     - Value validates against variable's type (reuse `TemplateVariableService.validateDefaultValue` or replicate logic)
+     - Required variables (no default) must have a value
+   - Private helper: `checkPermission(userId, permission, tErrors)` — requires `CERT_MANAGE`
+   - Public methods per design.md §3.9:
+     - `create(input, userId, locale, tErrors)` — repo create → audit
+     - `getById(groupId, userId, locale, tErrors)` — repo findById (relational) → return
+     - `addStudent(input, userId, locale, tErrors)` — validate student exists → validate not already member → validate variableValues → `db.transaction` (addItem + setItemVariableValues) → audit
+     - `removeStudent(groupId, studentId, userId, locale, tErrors)` — repo removeItem (soft delete) → audit
+     - `setVariableValue(input, userId, locale, tErrors)` — validate value type → repo upsert variable value → audit
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/recipient-group.service.ts --lifecycle lint
+```
+
+### Verification
+- Duplicate student membership rejected with `tErrors.studentAlreadyInGroup`
+- Variable values validated against template variable types
+- Required variables without default MUST have value at add time
+- `addStudent` wrapped in transaction (addItem + setItemVariableValues)
+- `CERT_MANAGE` required for all methods
+
+---
+
+## T12 — Create CategoryService
+
+**Estimated time**: 3 hours
+**Depends on**: T01 (i18n), T02 (barrel), T13 (cache helpers)
+**Requirements**: REQ-CAT-001 through REQ-CAT-004, AC-45 through AC-48, AC-55
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §D (category blueprint)
+   - `siraj_analysis/03-repository-patterns.md` §10 (repo patterns for category tree)
+
+4. **Create** `backend/services/cert/category.service.ts`:
+   - Zod schemas for: `CreateCategoryInput`, `MoveCategoryInput`
+   - Private helper: `wouldCreateCycle(categoryId, newParentId, tErrors)` — walk descendants of categoryId BFS; IF newParentId found in descendants → throw `tErrors.circularReference(categoryId, newParentId)`
+   - Private helper: `checkPermission(userId, permission, tErrors)` — requires `TEMPLATE_MANAGE`
+   - Public methods per design.md §3.10:
+     - `create(input, userId, locale, tErrors)` — IF parentId, validate parent exists → repo create → invalidate category tree cache → audit
+     - `update(categoryId, patch, userId, locale, tErrors)` — repo update → invalidate cache → audit
+     - `move(categoryId, newParentId, userId, locale, tErrors)` — validate category exists → IF newParentId, validate exists + no circular ref → repo update → invalidate cache → audit
+     - `delete(categoryId, userId, locale, tErrors)` — validate no children → validate no templates → repo soft delete → invalidate cache → audit
+     - `getTree(locale, tErrors)` — cache lookup (`cert:category:tree`) → IF miss, repo findAll → build tree → populate cache → return
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/category.service.ts --lifecycle lint
+```
+
+### Verification
+- Circular reference detection works (target parent not a descendant of moved category)
+- `delete` rejects categories with children or assigned templates
+- `getTree` uses entity cache and rebuilds on miss
+- Category tree cache invalidated on create/move/delete
+- `TEMPLATE_MANAGE` required for all methods
+
+---
+
+## T13 — Create Cache Invalidation Helpers
+
+**Estimated time**: 2 hours
+**Depends on**: T01 (i18n), T02 (barrel), Plan 3 (Repository Layer — for cache key format reference)
+**Requirements**: REQ-CACHE-001 through REQ-CACHE-006, AC-51 through AC-55
+
+### Subtasks
+
+1. **Read applicable AGENTS.md**:
+   - `AGENTS.md` (root), `backend/services/AGENTS.md` — caching rules (fail-open, permission before cache)
+
+2. **Read applicable instruction files**:
+   - `.github/instructions/backend.instructions.md`
+
+3. **Read reference files**:
+   - `siraj_analysis/04-services-graphql-patterns.md` §B (Caching section), §D (cache strategy)
+   - `backend/services/students/` or equivalent — existing cache helper patterns
+   - `backend/lib/cache.ts` (or equivalent) — cache get/set/delete API
+
+4. **Create** `backend/services/cert/cache.ts`:
+   - Exported helper functions (not a namespace — utility helpers):
+     - `invalidateTemplateCache(templateId)` — deletes `template:${id}` and `template:${id}:versions`
+     - `invalidateVerificationCache(code)` — deletes `cert:verify:${code}`
+     - `invalidateCertificatePdfCache(certificateId)` — deletes `ec:cert:pdf:${id}`
+     - `invalidateCategoryTreeCache()` — deletes `cert:category:tree`
+   - All helpers are fire-and-forget (try/catch, logger.warn on failure)
+   - Cache key formats match design.md §4.1 table
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/cache.ts --lifecycle lint
+```
+
+### Verification
+- All helpers catch errors and log via `logger.warn` (never throw)
+- Cache keys match design.md §4.1 table exactly
+- `invalidateTemplateCache` deletes both template and version chain keys
+
+---
+
+## T14 — Populate Cert Sub-Directory Barrel
+
+**Estimated time**: 30 minutes
+**Depends on**: T03 through T12 (all service files created), T13 (cache helpers)
+**Requirements**: AC-5
+
+### Subtasks
+
+1. **Read** `backend/services/cert/index.ts` (created in T02, incrementally populated)
+2. **Verify** all re-exports are present:
+   - `CertificateGenerationService` from `./certificate-generation.service`
+   - `CertificateBatchService` from `./certificate-batch.service`
+   - `CertificateRevocationService` from `./certificate-revocation.service`
+   - `CertificateVerificationService` from `./certificate-verification.service`
+   - `CertificateExpiryService` from `./certificate-expiry.service`
+   - `TemplateManagementService` from `./template-management.service`
+   - `TemplateElementService` from `./template-element.service`
+   - `TemplateVariableService` from `./template-variable.service`
+   - `RecipientGroupService` from `./recipient-group.service`
+   - `CategoryService` from `./category.service`
+   - `*` from `./cache` (invalidation helpers)
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle lint
+```
+
+### Verification
+- `bun tsgo` passes — all imports resolve
+- No circular imports within `cert/` barrel
+
+---
+
+## T15 — Update Top-Level Services Barrel
+
+**Estimated time**: 15 minutes
+**Depends on**: T14 (cert barrel complete)
+**Requirements**: AC-5
+
+### Subtasks
+
+1. **Read** `backend/services/index.ts` — existing top-level barrel
+2. **Add** `export * from "./cert";` to the barrel (alphabetical or at end of domain list)
+3. **Verify** no namespace conflicts with existing services
+
+### Quality Loop
+
+```bash
+bun run scripts/health/sub-loop.ts backend/services/index.ts --lifecycle lint
+```
+
+### Verification
+- `bun tsgo` passes — `import { CertificateGenerationService } from "@/backend/services"` resolves
+- No namespace name collisions with existing `backend/services/` exports
+
+---
+
+## T16 — Knowledge Propagation
+
+**Estimated time**: 2 hours
+**Depends on**: T15 (all service files created, barrel complete)
+**Requirements**: §6.2 (Knowledge Artifacts for Plan 21)
+
+### Subtasks
+
+1. **Document** service patterns discovered or confirmed during implementation:
+   - Generation pipeline flow (15-step reference)
+   - Idempotency key formula and DB unique index strategy
+   - Cache key map and invalidation strategy
+   - Error type hierarchy and translation pattern
+   - Permission check pattern (helper per service, fire-and-forget audit on denial)
+   - Notification dispatch pattern (best-effort, fire-and-forget)
+   - Audit log pattern (fire-and-forget, try/catch)
+
+2. **Record** any deviations from `siraj_analysis/04-services-graphql-patterns.md` §B/§D:
+   - Document in session `todos` table with `deviation` label
+   - Include the pattern, the deviation, and the rationale
+
+3. **Verify** handoff contracts for Plan 5, Plan 6, Plan 7, Plan 22:
+   - Plan 5: service interfaces are importable from `@/backend/services`
+   - Plan 6: `PdfRenderService.renderCertificate` delegation point is step 9 of generation pipeline
+   - Plan 7: `StorageService.linkFileToEntity` delegation point is step 12 of generation pipeline
+   - Plan 22: `CertificateExpiryService.checkExpiry` is callable for cron expiry checks
+
+4. **Run** full-repo quality gate to verify no regressions:
+   ```bash
+   bun run lint
+   bun tsgo
+   bun biome:check
+   ```
+
+### Verification
+- All service files pass tsgo, biome, lint
+- Handoff contracts documented and verified
+- Deviations logged to session todos
+- Knowledge artifacts ready for Plan 21 incorporation
+
+---
+
+## Summary
+
+| Task | File | Est. Time | Depends On |
+|---|---|---|---|
+| T01 | i18n schemas (6 files) | 2h | Plan 2 |
+| T02 | `backend/services/cert/index.ts` (stub) | 30m | T01 |
+| T03 | `certificate-generation.service.ts` | 4h | T01, T02, Plan 3 |
+| T04 | `certificate-batch.service.ts` | 3h | T01, T03 |
+| T05 | `certificate-revocation.service.ts` | 2h | T01, T02, T13 |
+| T06 | `certificate-verification.service.ts` | 3h | T01, T02, T13 |
+| T07 | `certificate-expiry.service.ts` | 1h | T01, T02 |
+| T08 | `template-management.service.ts` | 4h | T01, T02, T13 |
+| T09 | `template-element.service.ts` | 3h | T01, T02, T13 |
+| T10 | `template-variable.service.ts` | 2h | T01, T02, T13 |
+| T11 | `recipient-group.service.ts` | 3h | T01, T02, T10 |
+| T12 | `category.service.ts` | 3h | T01, T02, T13 |
+| T13 | `cache.ts` | 2h | T01, T02, Plan 3 |
+| T14 | `cert/index.ts` (complete) | 30m | T03-T13 |
+| T15 | `services/index.ts` update | 15m | T14 |
+| T16 | Knowledge propagation | 2h | T15 |
+
+**Total estimated time**: ~35 hours
+**Critical path**: T01 → T02 → T03 → T04 → T14 → T15 → T16

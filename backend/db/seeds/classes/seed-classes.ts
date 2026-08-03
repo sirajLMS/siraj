@@ -12,9 +12,13 @@ import {
 import logger from "@/backend/lib/logger";
 import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
-import type { StudentEntity, TeacherEntity } from "@/backend/types";
+import type { StudentSelectType, TeacherSelectType } from "@/backend/types";
 
-export async function seedOrGet(teachersList: TeacherEntity[], studentsList: StudentEntity[], config?: SeedConfig) {
+export async function seedOrGet(
+  teachersList: TeacherSelectType[],
+  studentsList: StudentSelectType[],
+  config?: SeedConfig
+) {
   logger.info("Seeding system classes (recurring schedules)...");
   const seedConfig = config ?? loadSeedConfig();
   const { start, end } = getDateWindow(seedConfig.anchorDate, seedConfig.monthsBefore, seedConfig.monthsAfter);

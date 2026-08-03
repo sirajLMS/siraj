@@ -1,0 +1,9244 @@
+# Design — Plan 12: Template Editor — Element Management
+
+| Field | Value |
+|---|---|
+| **Plan #** | 12 |
+| **Feature** | Template Editor — Element Management |
+| **Depends On** | Plan 5 (GraphQL API), Plan 11 (Visual Canvas) |
+| **Related Docs** | `MASTER_ARCHITECTURE.md`, `cgvs_analysis/01-generation-logic.md` §4, `siraj_analysis/05-frontend-patterns.md` |
+
+---
+
+## 1. Architecture Overview
+
+### Layer Position
+
+This plan operates in the **frontend presentation + data-fetching layers**. It consumes the GraphQL mutations defined in Plan 5 and the canvas interactions from Plan 11, providing the element management UI that sits alongside the canvas.
+
+```
+Plan 11 (Canvas) ──────────┐
+                           ├──→ Element CRUD Mutations (Plan 5) ──→ Services ──→ Repo ──→ DB
+Plan 10 (Template meta) ───┘
+```
+
+### Data Flow
+
+```
+Desktop:
+  Canvas (Plan 11) ── selection ──→ Zustand Store ──→ Property Panel
+  Property Panel ── save ──→ Apollo useMutation ──→ GraphQL API ──→ Service ──→ Repo
+  Layer Panel ── reorder ──→ Apollo batch reorder mutation ──→ GraphQL ──→ Service
+  Add Element toolbar ── create ──→ Apollo create mutation ──→ cache update ──→ canvas
+
+Mobile:
+  Element List ── tap ──→ Edit Dialog ── save ──→ Apollo useMutation ──→ GraphQL
+  Element List ── reorder arrows ──→ Apollo reorder mutation
+  Add FAB ── element type bottom sheet ──→ Apollo create mutation
+```
+
+### Three-Location Split
+
+| Location | Components |
+|---|---|
+| `app/(dashboard)/certificates/templates/[templateId]/page.tsx` | Server component: guard, audience resolution, renders Container (shared with Plans 10–15) |
+| `frontend/common/views/dashboard/certificates/template-editor/elements/` | ViewModel hook, Container, switcher, types, schemas, utils, shared components |
+| `frontend/desktop/views/dashboard/certificates/template-editor/elements/` | Desktop property panel, desktop layer panel, desktop add-element toolbar |
+| `frontend/mobile/views/dashboard/certificates/template-editor/elements/` | Mobile element list view, mobile element edit dialog |
+
+---
+
+## 2. Design Decisions
+
+### DD-1: Property Panel as Right Sidebar (Desktop)
+
+**Decision**: The property panel lives in the right sidebar of the desktop template editor, with the layer panel on the left sidebar. The canvas occupies the center.
+
+**Rationale**: Standard design-tool layout (Photoshop, Figma, Canva). Props and layers flanking the canvas is the convention users expect.
+
+**Alternative**: Property panel as a modal dialog — rejected because it blocks canvas interaction and requires multiple clicks to reach properties.
+
+### DD-2: Mobile Uses List + Dialog (No Canvas)
+
+**Decision**: Mobile replaces the visual canvas with a scrollable element list. Tapping an element opens a full-screen edit dialog with numeric inputs for position/size.
+
+**Rationale**: Touch drag on a canvas is unreliable for pixel-precise positioning. Numeric inputs in a dialog provide better UX on small screens. This follows the Siraj mobile/desktop isolation pattern where mobile is fundamentally different (not a squished desktop view).
+
+**Alternative**: Responsive canvas with touch handlers — rejected as too complex and poor UX for precise positioning.
+
+### DD-3: Dynamic Type-Specific Forms
+
+**Decision**: The property panel renders a common properties section (always visible) and a type-specific properties section that switches based on `element.type`. Each element type maps to a dedicated form component.
+
+**Rationale**: Avoids a monolithic form with conditionally-hidden fields. Each type's form is self-contained, testable, and follows single-responsibility.
+
+### DD-4: Zustand Store for Element Editor State
+
+**Decision**: A single `useTemplateElementEditorStore` manages selection, dirty state, panel collapse, and dialog open/close flags. Draft property values (unsaved form input) also live in the store.
+
+**Rationale**: Mutable UI state must survive tier switching (resize from desktop to mobile and back). Zustand is the Siraj pattern for this. The store is non-persisted (session-only).
+
+**Alternative**: React state in the ViewModel — rejected because it resets on tier switching.
+
+### DD-5: Apollo Cache Strategy for Element Mutations
+
+**Decision**: After element mutations, Apollo cache is updated as follows:
+- **Create**: append element to the template's element list in cache, auto-select new element
+- **Update**: update element fields in cache (or refetch element query if complex)
+- **Delete**: evict element from cache, clear selection if deleted element was selected
+- **Duplicate**: append cloned element to cache, auto-select duplicate
+- **Reorder**: update z-index values in cache for all affected elements
+
+**Rationale**: Optimistic updates give immediate feedback. Cache eviction prevents stale data. Using `update` function in `useMutation` ensures the canvas and layer panel reflect changes without refetching.
+
+### DD-6: Shape Element Type (Siraj Extension)
+
+**Decision**: Add a 6th element type `shape` beyond CGVS's original 5 (static_text, data_text, data_date, image, qr_code). Shapes support rectangle, circle, and line with fill/border properties.
+
+**Rationale**: Certificate templates commonly need decorative shapes (borders, dividers, decorative circles). This was noted as a gap in the CGVS analysis. Schema and mutations are defined in Plans 1–4.
+
+### DD-7: Dirty State Tracking
+
+**Decision**: The store tracks `isDirty` based on whether draft properties differ from the persisted element. When dirty and the user attempts to switch elements or navigate away, a warning dialog shows ("Save", "Discard", "Cancel").
+
+**Rationale**: Prevents accidental data loss when switching between elements in a complex template.
+
+---
+
+## 3. Complete File Scaffold
+
+### 3.1 Shared Components (`frontend/common/views/dashboard/certificates/template-editor/elements/`)
+
+| File | Purpose |
+|---|---|
+| `useTemplateElementEditorViewModel.ts` | ViewModel hook — Apollo mutations, validation wiring, i18n labels, callbacks |
+| `elementEditorContainer.tsx` | Container component — wraps `ResponsiveViewSwitch` for desktop/mobile |
+| `types/elementEditor.types.ts` | `ElementWithDetails` discriminated union, `ElementDraftProperties` union, `ElementEditorViewModel` interface, `VariableOption` type |
+| `utils/validateElement.ts` | Pure validation function — common + type-specific rules dispatch |
+| `utils/elementValidationRules.ts` | Validation rule constants (field name, validator, error i18n key) |
+| `utils/elementDefaults.ts` | Default property values per element type (for creation) |
+| `utils/elementLabels.ts` | Helper to derive display label from element (first 30 chars of text or type label) |
+| `components/CommonPropertiesForm.tsx` | Shared position/size/rotation/opacity form (used by desktop panel + mobile dialog) |
+| `components/PositionSizeInputs.tsx` | X, Y, Width, Height, Rotation numeric inputs with validation helper text |
+| `components/OpacitySlider.tsx` | MUI Slider 0–100 with label |
+| `components/ColorPickerField.tsx` | MUI Popover wrapping `react-color` `ChromePicker` + hex `TextField` for a11y |
+| `components/FontPicker.tsx` | MUI `Autocomplete` from `ALLOWED_FONTS` constant list |
+| `components/TypeSpecificFormDispatcher.tsx` | Switch on `element.type` → renders the correct type-specific form |
+| `components/StaticTextPropertiesForm.tsx` | Static text editor: content, font, size, weight, color, align, line height |
+| `components/DataTextPropertiesForm.tsx` | Data text editor: variable ref, font, size, color, align, text transform |
+| `components/DataDatePropertiesForm.tsx` | Data date editor: variable ref, date format, custom format, locale, font, size, color |
+| `components/ImagePropertiesForm.tsx` | Image editor: URL + browse, alt text, fit mode, border radius |
+| `components/QrCodePropertiesForm.tsx` | QR editor: data source, custom text, size, error correction, margin |
+| `components/ShapePropertiesForm.tsx` | Shape editor: shape type, fill, border, border width, border style |
+| `components/VariablePlaceholderPreview.tsx` | Shows variable `previewValue` when data element selected (read-only preview) |
+
+### 3.2 Desktop Components (`frontend/desktop/views/dashboard/certificates/template-editor/elements/`)
+
+| File | Purpose |
+|---|---|
+| `propertyPanel/PropertyPanelSection.desktop.tsx` | Right sidebar container — header + collapsible sections + form dispatcher |
+| `propertyPanel/PropertyPanelHeader.desktop.tsx` | Element type label + Save/Delete action buttons |
+| `propertyPanel/PropertyPanelEmptyState.desktop.tsx` | "Select an element to edit its properties" empty state |
+| `propertyPanel/MultiSelectBadge.desktop.tsx` | "N elements selected" batch-actions badge (when multi-selected) |
+| `layerPanel/LayerPanelSection.desktop.tsx` | Left sidebar — DndContext + SortableContext wrapper |
+| `layerPanel/LayerPanelItem.desktop.tsx` | Sortable layer row — visibility, lock, icon, label, drag handle |
+| `layerPanel/LayerPanelHeader.desktop.tsx` | "Layers" label + collapse toggle |
+| `AddElementToolbar.desktop.tsx` | Toolbar dropdown for adding elements (6 menu items) |
+| `ElementContextMenu.desktop.tsx` | Right-click context menu (reorder, duplicate, delete, z-order) |
+| `elementEditor.desktop.tsx` | Main desktop view — composites layer panel + canvas + property panel |
+
+### 3.3 Mobile Components (`frontend/mobile/views/dashboard/certificates/template-editor/elements/`)
+
+| File | Purpose |
+|---|---|
+| `elementEditor.mobile.tsx` | Main mobile view — list + conditional edit dialog |
+| `ElementListView.mobile.tsx` | Scrollable element list sorted by z-index |
+| `ElementListRow.mobile.tsx` | Row: type icon, label, up/down reorder, chevron |
+| `ElementEditDialog.mobile.tsx` | Full-screen Dialog — common + type-specific forms, save/delete |
+| `ElementEditDialogHeader.mobile.tsx` | Dialog app bar: element type label + close button |
+| `AddElementBottomSheet.mobile.tsx` | Bottom sheet with 6 element type options |
+| `MiniCanvasThumbnail.mobile.tsx` | Read-only mini-canvas preview showing element position spatially |
+
+### 3.4 Store (`frontend/common/stores/`)
+
+| File | Purpose |
+|---|---|
+| `certificates/templateElementEditorStore.ts` | Zustand store — draft properties, panel collapse flags, dialog open flags |
+
+### 3.5 GraphQL Documents (`frontend/common/graphql/sharedDocuments/certificates/`)
+
+| File | Purpose |
+|---|---|
+| `template-elements.documents.ts` | Fragment + 5 mutation documents (create, update, delete, duplicate, reorder) |
+
+### 3.6 i18n (`shared/locale/`)
+
+| File | Purpose |
+|---|---|
+| `namespaces/dashboard/certificates/templateElements.namespace.ts` | Flat dashboard namespace registration |
+| `ar/dashboard/certificates/templateElements.ts` | Arabic translations (AR impl) |
+| `en/dashboard/certificates/templateElements.ts` | English translations (EN impl) |
+
+---
+
+## 5. Zustand Store Shape Definition (NEW — Round 2 Enhancement)
+
+### 5.1 `useTemplateElementEditorStore` (`frontend/common/stores/certificates/templateElementEditorStore.ts`)
+
+```typescript
+interface TemplateElementEditorState {
+  // Selection (synced from Plan 11 canvas store — single source of truth)
+  selectedElementIds: string[];           // Read-only mirror of canvas store selectedIds
+  selectedElementId: string | null;       // selectedElementIds[0] || null
+  
+  // Draft properties (unsaved form input) — discriminated union
+  draftProperties: ElementDraftProperties | null;
+  originalProperties: ElementWithDetails | null;  // Snapshot on selection for dirty diff
+  
+  // Dirty tracking
+  isDirty: boolean;                       // draftProperties !== originalProperties (deep equal)
+  
+  // Panel collapse states (persist across tier switch)
+  layerPanelCollapsed: boolean;
+  propertyPanelCollapsed: boolean;
+  
+  // Dialog / UI state
+  addElementMenuOpen: boolean;
+  deleteDialogOpen: boolean;
+  unsavedChangesDialogOpen: boolean;
+  mobileEditDialogOpen: boolean;
+  
+  // Clipboard for copy/paste (cross-template, cross-tab via BroadcastChannel)
+  clipboard: {
+    elements: ElementWithDetails[];
+    sourceTemplateId: string;
+    timestamp: number;
+  } | null;
+  
+  // Mobile-specific
+  mobileSelectedElementId: string | null;
+}
+
+interface TemplateElementEditorActions {
+  // Selection (called by Plan 11 canvas on selection change)
+  setSelectedElementIds: (ids: string[]) => void;
+  
+  // Draft property management
+  initializeDraft: (element: ElementWithDetails) => void;
+  updateDraftProperty: <K extends keyof ElementDraftProperties>(
+    key: K, 
+    value: ElementDraftProperties[K]
+  ) => void;
+  updateDraftTypeSpecific: (typeSpecificProps: Partial<ElementDraftProperties>) => void;
+  resetDraft: () => void;
+  commitDraft: () => void;  // Called after successful save mutation
+  
+  // Dirty tracking
+  markDirty: () => void;
+  markClean: () => void;
+  
+  // Panel collapse
+  toggleLayerPanel: () => void;
+  setLayerPanelCollapsed: (collapsed: boolean) => void;
+  togglePropertyPanel: () => void;
+  setPropertyPanelCollapsed: (collapsed: boolean) => void;
+  
+  // Dialogs
+  openAddElementMenu: () => void;
+  closeAddElementMenu: () => void;
+  openDeleteDialog: () => void;
+  closeDeleteDialog: () => void;
+  openUnsavedChangesDialog: () => void;
+  closeUnsavedChangesDialog: () => void;
+  openMobileEditDialog: (elementId: string) => void;
+  closeMobileEditDialog: () => void;
+  
+  // Clipboard
+  copyToClipboard: (elements: ElementWithDetails[], templateId: string) => void;
+  pasteFromClipboard: (targetTemplateId: string) => ElementWithDetails[] | null;
+  clearClipboard: () => void;
+  
+  // Mobile
+  setMobileSelectedElement: (elementId: string | null) => void;
+}
+
+type TemplateElementEditorStore = TemplateElementEditorState & TemplateElementEditorActions;
+```
+
+### 5.2 Store Selectors (for performance)
+
+```typescript
+// In store file — memoized selectors
+const selectSelectedElement = (state: TemplateElementEditorState) => 
+  state.selectedElementId ? elementsMap.get(state.selectedElementId) : null;
+
+const selectIsDirty = (state: TemplateElementEditorState) => state.isDirty;
+
+const selectDraftProperties = (state: TemplateElementEditorState) => state.draftProperties;
+
+// Use with shallow equality in components:
+const selectedElement = useTemplateElementEditorStore(selectSelectedElement);
+const isDirty = useTemplateElementEditorStore(selectIsDirty);
+```
+
+---
+
+## 6. State Machine Definitions (NEW — Round 2 Enhancement)
+
+### 6.1 Property Panel State Machine
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     PROPERTY PANEL STATES                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   EMPTY ──────► SINGLE_SELECT ──────► MULTI_SELECT             │
+│     │              │                    │                       │
+│     │   select 1   │   select 2+        │   deselect to 1      │
+│     │   element    │   elements         │   element            │
+│     ▼              ▼                    ▼                       │
+│   (empty state)  (form)               (badge + batch actions)  │
+│                                                                 │
+│   SINGLE_SELECT ──► DIRTY ◄──► CLEAN                           │
+│       │              │          │                               │
+│       │   edit field │  save   │  discard                      │
+│       ▼              ▼          ▼                               │
+│    (form with    (form +       (form,                          │
+│     unsaved       warning)      saved)                          │
+│     changes)                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Transitions:**
+- `EMPTY → SINGLE_SELECT`: `store.setSelectedElementIds([id])` → `store.initializeDraft(element)`
+- `SINGLE_SELECT → DIRTY`: Any `store.updateDraftProperty()` call
+- `DIRTY → CLEAN`: `store.commitDraft()` after successful mutation
+- `DIRTY → SINGLE_SELECT`: `store.resetDraft()` on discard
+- `SINGLE_SELECT → MULTI_SELECT`: `store.setSelectedElementIds([id1, id2, ...])` (length > 1)
+- `MULTI_SELECT → SINGLE_SELECT`: `store.setSelectedElementIds([id])` (length = 1)
+- `ANY → EMPTY`: `store.setSelectedElementIds([])`
+
+### 6.2 Mobile Edit Dialog State Machine
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    MOBILE EDIT DIALOG STATES                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   CLOSED ──────► OPENING ──────► OPEN ──────► CLOSING ────► CLOSED
+│       │              │            │            │               │
+│       │  tap row     │  animation │  user      │  animation    │
+│       │  (setMobile  │  complete  │  action    │  complete     │
+│       │   Selected)  │            │            │               │
+│       ▼              ▼            ▼            ▼               │
+│    (idle)        (render)      (edit)      (cleanup)          │
+│                                                                 │
+│   OPEN ──► DIRTY ──► SAVING ──► OPEN (clean)                   │
+│     │        │         │           │                            │
+│     │  edit   │  press  │  mutation │  success                 │
+│     │  field  │  Save   │  pending  │                          │
+│     ▼        ▼         ▼           ▼                            │
+│   (form)   (warning) (spinner)  (form)                         │
+│                                                                 │
+│   OPEN ──► DELETE_CONFIRM ──► DELETING ──► CLOSED              │
+│     │           │              │            │                   │
+│     │  press   │  confirm   │  mutation  │  success            │
+│     │  Delete  │  Delete    │  pending   │                     │
+│     ▼           ▼            ▼           ▼                     │
+│   (form)    (dialog)     (spinner)   (list refresh)            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 6.3 Layer Panel Drag Reorder State Machine
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    LAYER PANEL DRAG STATES                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   IDLE ──────► DRAGGING ──────► DROP_PENDING ──────► IDLE      │
+│     │            │                │                │           │
+│     │  drag     │  move over     │  drop          │  mutation  │
+│     │  start    │  valid target  │  (optimistic)  │  complete  │
+│     ▼            ▼                ▼                ▼           │
+│  (selected)  (drag preview)  (reordered list)  (cache update)  │
+│                                                                 │
+│   DRAGGING ──► CANCELLED ──► IDLE                              │
+│     │           │                │                             │
+│     │  Escape   │  cleanup       │  no mutation                │
+│     │  or       │  original      │                             │
+│     │  outside  │  order         │                             │
+│     ▼           ▼                ▼                             │
+│  (drag)    (restore)         (idle)                           │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 7. GraphQL Document Interface Contracts (NEW — Round 2 Enhancement)
+
+### 7.1 `template-elements.documents.ts` Exports
+
+```typescript
+// Fragment
+export const templateElementFragment = gql`
+  fragment TemplateElement on TemplateElement {
+    id
+    templateId
+    type
+    xCoordinate
+    yCoordinate
+    width
+    height
+    rotation
+    zIndex
+    opacity
+    hidden
+    locked
+    createdAt
+    updatedAt
+    ... on StaticTextElement {
+      textContent
+      fontFamily
+      fontSize
+      fontWeight
+      textColor
+      textAlign
+      lineHeight
+    }
+    ... on DataTextElement {
+      variableId
+      fontFamily
+      fontSize
+      textColor
+      textAlign
+      textTransform
+    }
+    ... on DataDateElement {
+      variableId
+      dateFormat
+      customFormat
+      locale
+      fontFamily
+      fontSize
+      textColor
+    }
+    ... on ImageElement {
+      imageUrl
+      altText
+      fitMode
+      borderRadius
+    }
+    ... on QrCodeElement {
+      qrDataSource
+      variableId
+      qrCustomText
+      qrSize
+      qrErrorCorrection
+      qrMargin
+    }
+    ... on ShapeElement {
+      shapeType
+      fillColor
+      borderColor
+      borderWidth
+      borderStyle
+    }
+  }
+`;
+
+// Mutations (all include expectedTemplateVersion for optimistic locking)
+export const createTemplateElementMutationDocument = gql`
+  mutation CreateTemplateElement($input: CreateTemplateElementInput!) {
+    createTemplateElement(input: $input) {
+      ...TemplateElement
+    }
+  }
+  ${templateElementFragment}
+`;
+
+export const updateTemplateElementMutationDocument = gql`
+  mutation UpdateTemplateElement($id: ID!, $input: UpdateTemplateElementInput!, $expectedTemplateVersion: Int!) {
+    updateTemplateElement(id: $id, input: $input, expectedTemplateVersion: $expectedTemplateVersion) {
+      ...TemplateElement
+    }
+  }
+  ${templateElementFragment}
+`;
+
+export const deleteTemplateElementMutationDocument = gql`
+  mutation DeleteTemplateElement($id: ID!, $expectedTemplateVersion: Int!) {
+    deleteTemplateElement(id: $id, expectedTemplateVersion: $expectedTemplateVersion)
+  }
+`;
+
+export const duplicateTemplateElementMutationDocument = gql`
+  mutation DuplicateTemplateElement($id: ID!, $expectedTemplateVersion: Int!) {
+    duplicateTemplateElement(id: $id, expectedTemplateVersion: $expectedTemplateVersion) {
+      ...TemplateElement
+    }
+  }
+  ${templateElementFragment}
+`;
+
+export const reorderTemplateElementsMutationDocument = gql`
+  mutation ReorderTemplateElements($templateId: ID!, $items: [ReorderElementInput!]!, $expectedTemplateVersion: Int!) {
+    reorderTemplateElements(templateId: $templateId, items: $items, expectedTemplateVersion: $expectedTemplateVersion)
+  }
+`;
+
+export const setElementVisibilityMutationDocument = gql`
+  mutation SetElementVisibility($id: ID!, $isVisible: Boolean!, $expectedTemplateVersion: Int!) {
+    setElementVisibility(id: $id, isVisible: $isVisible, expectedTemplateVersion: $expectedTemplateVersion)
+  }
+`;
+
+export const setElementLockMutationDocument = gql`
+  mutation SetElementLock($id: ID!, $isLocked: Boolean!, $expectedTemplateVersion: Int!) {
+    setElementLock(id: $id, isLocked: $isLocked, expectedTemplateVersion: $expectedTemplateVersion)
+  }
+`;
+
+export const copyTemplateElementsMutationDocument = gql`
+  mutation CopyTemplateElements($templateId: ID!, $elementIds: [ID!]!, $expectedTemplateVersion: Int!) {
+    copyTemplateElements(templateId: $templateId, elementIds: $elementIds, expectedTemplateVersion: $expectedTemplateVersion) {
+      ...TemplateElement
+    }
+  }
+  ${templateElementFragment}
+`;
+
+export const pasteTemplateElementsMutationDocument = gql`
+  mutation PasteTemplateElements($templateId: ID!, $elements: [PasteElementInput!]!, $expectedTemplateVersion: Int!) {
+    pasteTemplateElements(templateId: $templateId, elements: $elements, expectedTemplateVersion: $expectedTemplateVersion) {
+      ...TemplateElement
+    }
+  }
+  ${templateElementFragment}
+`;
+```
+
+### 7.2 Apollo Cache Update Functions (for `useMutation` `update` option)
+
+```typescript
+// Create: append to template's element list, select new element
+const createUpdate = (cache, { data: { createTemplateElement } }) => {
+  const templateId = createTemplateElement.templateId;
+  const existing = cache.readQuery({ query: TEMPLATE_QUERY, variables: { templateId } });
+  if (existing) {
+    cache.writeQuery({
+      query: TEMPLATE_QUERY,
+      variables: { templateId },
+      data: { template: { ...existing.template, elements: [...existing.template.elements, createTemplateElement] } }
+    });
+  }
+  elementEditorStore.setSelectedElementIds([createTemplateElement.id]);
+};
+
+// Update: update element in cache
+const updateUpdate = (cache, { data: { updateTemplateElement } }) => {
+  const templateId = updateTemplateElement.templateId;
+  const existing = cache.readQuery({ query: TEMPLATE_QUERY, variables: { templateId } });
+  if (existing) {
+    cache.writeQuery({
+      query: TEMPLATE_QUERY,
+      variables: { templateId },
+      data: {
+        template: {
+          ...existing.template,
+          elements: existing.template.elements.map((el: any) =>
+            el.id === updateTemplateElement.id ? updateTemplateElement : el
+          )
+        }
+      }
+    });
+  }
+};
+
+// Delete: evict from cache, clear selection if needed
+const deleteUpdate = (cache, { data: { deleteTemplateElement }, variables: { id } }) => {
+  // Evict from all template queries (normalize via fragment)
+  cache.evict({ id: `TemplateElement:${id}` });
+  cache.gc();
+  
+  const selectedId = elementEditorStore.getState().selectedElementId;
+  if (selectedId === id) {
+    elementEditorStore.setSelectedElementIds([]);
+  }
+};
+
+// Reorder: update z-index for all affected elements
+const reorderUpdate = (cache, { data: { reorderTemplateElements }, variables: { items } }) => {
+  // Items already have new z-index from server; refetch or update individually
+  // Simpler: invalidate template query to refetch
+  cache.invalidate({ __typename: 'Template', id: variables.templateId });
+};
+```
+
+---
+
+## 8. i18n Key Structure Design (NEW — Round 2 Enhancement)
+
+### 8.1 Namespace Registration (`shared/locale/namespaces/dashboard/certificates/templateElements.namespace.ts`)
+
+```typescript
+import { defineNamespace } from '@/shared/locale/schema';
+
+export const certificateTemplateElementsNamespace = defineNamespace('dashboard.certificateTemplateElements', {
+  // Panels
+  panels: {
+    layerPanel: {
+      title: 'string',
+      collapse: 'string',
+      expand: 'string',
+    },
+    propertyPanel: {
+      title: 'string',
+      collapse: 'string',
+      expand: 'string',
+      empty: 'string',
+      multiSelect: '(count: number) => string',
+    },
+  },
+  
+  // Element Types
+  elementTypes: {
+    static_text: 'string',
+    data_text: 'string',
+    data_date: 'string',
+    image: 'string',
+    qr_code: 'string',
+    shape: 'string',
+  },
+  
+  // Common Properties
+  properties: {
+    common: {
+      position: 'string',
+      x: 'string',
+      y: 'string',
+      size: 'string',
+      width: 'string',
+      height: 'string',
+      rotation: 'string',
+      opacity: 'string',
+      zIndex: 'string',
+      visibility: 'string',
+      lock: 'string',
+      hidden: 'string',
+      locked: 'string',
+    },
+    static_text: {
+      content: 'string',
+      fontFamily: 'string',
+      fontSize: 'string',
+      fontWeight: 'string',
+      textColor: 'string',
+      textAlign: 'string',
+      lineHeight: 'string',
+      align: {
+        left: 'string',
+        center: 'string',
+        right: 'string',
+        justify: 'string',
+      },
+      weight: {
+        normal: 'string',
+        medium: 'string',
+        bold: 'string',
+        extraBold: 'string',
+      },
+    },
+    data_text: {
+      variable: 'string',
+      selectVariable: 'string',
+      fontFamily: 'string',
+      fontSize: 'string',
+      textColor: 'string',
+      textAlign: 'string',
+      textTransform: 'string',
+      transform: {
+        none: 'string',
+        uppercase: 'string',
+        lowercase: 'string',
+        capitalize: 'string',
+      },
+    },
+    data_date: {
+      variable: 'string',
+      selectVariable: 'string',
+      format: 'string',
+      formatOptions: {
+        iso: 'string',
+        arabicFullMonth: 'string',
+        numeric: 'string',
+        custom: 'string',
+      },
+      customFormat: 'string',
+      locale: 'string',
+      fontFamily: 'string',
+      fontSize: 'string',
+      textColor: 'string',
+    },
+    image: {
+      url: 'string',
+      browse: 'string',
+      altText: 'string',
+      fitMode: 'string',
+      fit: {
+        contain: 'string',
+        cover: 'string',
+        fill: 'string',
+        none: 'string',
+      },
+      borderRadius: 'string',
+    },
+    qr_code: {
+      dataSource: 'string',
+      source: {
+        variable: 'string',
+        custom: 'string',
+        verificationUrl: 'string',
+      },
+      variable: 'string',
+      customText: 'string',
+      size: 'string',
+      errorCorrection: 'string',
+      correction: {
+        L: 'string',
+        M: 'string',
+        Q: 'string',
+        H: 'string',
+      },
+      margin: 'string',
+    },
+    shape: {
+      type: 'string',
+      typeOptions: {
+        rectangle: 'string',
+        circle: 'string',
+        line: 'string',
+      },
+      fillColor: 'string',
+      borderColor: 'string',
+      borderWidth: 'string',
+      borderStyle: 'string',
+      style: {
+        solid: 'string',
+        dashed: 'string',
+        none: 'string',
+      },
+    },
+  },
+  
+  // Actions
+  actions: {
+    addElement: 'string',
+    addStaticText: 'string',
+    addDataText: 'string',
+    addDataDate: 'string',
+    addImage: 'string',
+    addQrCode: 'string',
+    addShape: 'string',
+    save: 'string',
+    cancel: 'string',
+    delete: 'string',
+    duplicate: 'string',
+    copy: 'string',
+    paste: 'string',
+    bringForward: 'string',
+    sendBackward: 'string',
+    bringToFront: 'string',
+    sendToBack: 'string',
+    undo: 'string',
+    redo: 'string',
+  },
+  
+  // Dialogs
+  dialogs: {
+    deleteElement: {
+      title: 'string',
+      message: 'string',
+      confirm: 'string',
+    },
+    unsavedChanges: {
+      title: 'string',
+      message: 'string',
+      save: 'string',
+      discard: 'string',
+      cancel: 'string',
+    },
+    copyConflict: {
+      title: 'string',
+      message: 'string',
+      reload: 'string',
+    },
+  },
+  
+  // Validation
+  validation: {
+    required: 'string',
+    min: '(min: number) => string',
+    max: '(max: number) => string',
+    integer: 'string',
+    number: 'string',
+    rotationRange: 'string',
+    opacityRange: 'string',
+    widthMin: '(min: number) => string',
+    heightMin: '(min: number) => string',
+    elementOutOfBounds: 'string',
+    duplicateName: 'string',
+    noVariableSelected: 'string',
+    invalidColor: 'string',
+    invalidHexColor: 'string',
+  },
+  
+  // Errors
+  errors: {
+    networkError: 'string',
+    permissionDenied: 'string',
+    elementNotFound: 'string',
+    templateVersionMismatch: 'string',
+    serverError: 'string',
+  },
+  
+  // Layer Panel
+  layerPanel: {
+    visibility: {
+      on: 'string',
+      off: 'string',
+    },
+    lock: {
+      on: 'string',
+      off: 'string',
+    },
+    dragHint: 'string',
+  },
+  
+  // Mobile
+  mobile: {
+    elementList: {
+      title: 'string',
+    },
+    addElement: {
+      fab: 'string',
+    },
+    editDialog: {
+      title: 'string',
+    },
+    miniCanvas: {
+      alt: 'string',
+    },
+    reorder: {
+      up: 'string',
+      down: 'string',
+    },
+  },
+});
+```
+
+### 8.2 Type-Safe Usage in ViewModel
+
+```typescript
+// In useTemplateElementEditorViewModel.ts
+const t = useAppTranslation('dashboard.certificateTemplateElements');
+
+// Type-safe access:
+const layerTitle = t.panels.layerPanel.title;           // string
+const multiSelect = t.panels.propertyPanel.multiSelect(3); // "3 elements selected"
+const rotationLabel = t.properties.common.rotation;      // "Rotation (°)"
+const deleteConfirm = t.dialogs.deleteElement.confirm;   // "Delete"
+```
+
+---
+
+## 9. Complete Component Tree (NEW — Round 2 Enhancement)
+
+### 9.1 Desktop Component Tree (Detailed with Props)
+
+```
+TemplateEditorContainer (Plan 10 shared)
+  │
+  ├── useTemplateEditorViewModel (Plan 10)
+  │     └── useTemplateElementEditorViewModel (Plan 12)
+  │           └── useTemplateElementEditorStore (Zustand)
+  │
+  ├── ResponsiveViewSwitch (from Plan 10)
+  │     ├── DesktopView (this plan)
+  │     │     ├── elementEditor.desktop.tsx (main composite)
+  │     │     │     ├── LayerPanelSection.desktop.tsx (LEFT SIDEBAR)
+  │     │     │     │     ├── LayerPanelHeader.desktop.tsx
+  │     │     │     │     │     ├── Label: t.panels.layerPanel.title
+  │     │     │     │     │     └── CollapseToggle (IconButton)
+  │     │     │     │     └── DndContext (wrapping SortableContext)
+  │     │     │     │           └── SortableContext (verticalListSortingStrategy)
+  │     │     │     │                 └── LayerPanelItem.desktop.tsx (×N elements, sorted by z-index DESC)
+  │     │     │     │                       ├── useSortable({ id: element.id, data: { element } })
+  │     │     │     │                       ├── DragHandleIcon (GripVerticalIcon)
+  │     │     │     │                       ├── VisibilityIconButton
+  │     │     │     │                       │     └── Icon: eye / eye-off (onClick: setElementVisibility)
+  │     │     │     │                       ├── LockIconButton
+  │     │     │     │                       │     └── Icon: lock / lock-open (onClick: setElementLock)
+  │     │     │     │                       ├── ElementTypeIcon (type-specific icon)
+  │     │     │     │                       ├── ElementLabel (Typography, maxWidth, ellipsis)
+  │     │     │     │                       └── DragOverlay (for drag preview)
+  │     │     │     │
+  │     │     │     ├── Canvas (Plan 11 — enhanced for property sync)
+  │     │     │     │     └── Element rendering (Plan 11)
+  │     │     │     │
+  │     │     │     ├── AddElementToolbar.desktop.tsx (TOP TOOLBAR)
+  │     │     │     │     └── ElementTypeMenu (Menu with 6 MenuItems)
+  │     │     │     │           ├── MenuItem: StaticText (Icon: FormatSize, onClick: createElement('static_text'))
+  │     │     │     │           ├── MenuItem: DataText (Icon: DataObject, onClick: createElement('data_text'))
+  │     │     │     │           ├── MenuItem: DataDate (Icon: CalendarMonth, onClick: createElement('data_date'))
+  │     │     │     │           ├── MenuItem: Image (Icon: Image, onClick: createElement('image'))
+  │     │     │     │           ├── MenuItem: QRCode (Icon: QrCode, onClick: createElement('qr_code'))
+  │     │     │     │           └── MenuItem: Shape (Icon: CropFree, onClick: createElement('shape'))
+  │     │     │     │
+  │     │     │     ├── ElementContextMenu.desktop.tsx (RIGHT-CLICK on canvas element)
+  │     │     │     │     ├── MenuItem: Bring Forward (Icon: ArrowUpward, onClick: reorderRelative(+1))
+  │     │     │     │     ├── MenuItem: Send Backward (Icon: ArrowDownward, onClick: reorderRelative(-1))
+  │     │     │     │     ├── MenuItem: Bring to Front (Icon: FirstPage, onClick: reorderToFront())
+  │     │     │     │     ├── MenuItem: Send to Back (Icon: LastPage, onClick: reorderToBack())
+  │     │     │     │     ├── Divider
+  │     │     │     │     ├── MenuItem: Duplicate (Icon: ContentCopy, onClick: duplicateElement())
+  │     │     │     │     ├── MenuItem: Copy (Icon: ContentCopy, onClick: copyElement())
+  │     │     │     │     ├── MenuItem: Paste (Icon: ContentPaste, onClick: pasteElement() — disabled if clipboard empty)
+  │     │     │     │     ├── Divider
+  │     │     │     │     └── MenuItem: Delete (Icon: Delete, color: error, onClick: openDeleteDialog())
+  │     │     │     │
+  │     │     │     └── PropertyPanelSection.desktop.tsx (RIGHT SIDEBAR)
+  │     │     │           ├── PropertyPanelHeader.desktop.tsx
+  │     │     │           │     ├── ElementTypeLabel (Typography, t.elementTypes[element.type])
+  │     │     │           │     ├── SaveButton (Button, variant: contained, disabled: !isDirty || invalid, onClick: saveDraft)
+  │     │     │           │     └── DeleteButton (Button, variant: outlined, color: error, onClick: openDeleteDialog)
+  │     │     │           ├── PropertyPanelEmptyState.desktop.tsx (when no selection)
+  │     │     │           │     └── Typography: t.panels.propertyPanel.empty
+  │     │     │           ├── MultiSelectBadge.desktop.tsx (when selectedCount > 1)
+  │     │     │           │     ├── Chip: label: t.panels.propertyPanel.multiSelect(selectedCount)
+  │     │     │           │     └── Button: "Batch Actions" (opens batch context menu)
+  │     │     │           └── PropertyPanelBody.desktop.tsx (when single selection)
+  │     │     │                 ├── Accordion (MUI) × sections
+  │     │     │                 │     ├── Section: "Position & Size" (t.properties.common.position)
+  │     │     │                 │     │     └── CommonPropertiesForm.tsx
+  │     │     │                 │     │           ├── PositionSizeInputs.tsx
+  │     │     │                 │     │           │     ├── X: NumberInput (min: 0, max: templateWidth)
+  │     │     │                 │     │           │     ├── Y: NumberInput (min: 0, max: templateHeight)
+  │     │     │                 │     │           │     ├── Width: NumberInput (min: 10, max: templateWidth - x)
+  │     │     │                 │     │           │     ├── Height: NumberInput (min: 10, max: templateHeight - y)
+  │     │     │                 │     │           │     └── Rotation: NumberInput (min: 0, max: 360, step: 1)
+  │     │     │                 │     │           ├── ZIndexDisplay.tsx (read-only, Typography)
+  │     │     │                 │     │           └── OpacitySlider.tsx (Slider 0-100, valueLabelDisplay: "auto")
+  │     │     │                 │     │
+  │     │     │                 │     ├── Section: "Appearance" (t.properties.common.opacity)
+  │     │     │                 │     │     └── OpacitySlider (already in Position section) + ColorPickerField for type-specific colors
+  │     │     │                 │     │
+  │     │     │                 │     └── Section: Type-Specific (dynamic via TypeSpecificFormDispatcher)
+  │     │     │                 │           └── TypeSpecificFormDispatcher.tsx
+  │     │     │                 │                 ├── StaticTextPropertiesForm.tsx
+  │     │     │                 │                 ├── DataTextPropertiesForm.tsx
+  │     │     │                 │                 ├── DataDatePropertiesForm.tsx
+  │     │     │                 │                 ├── ImagePropertiesForm.tsx
+  │     │     │                 │                 ├── QrCodePropertiesForm.tsx
+  │     │     │                 │                 └── ShapePropertiesForm.tsx
+  │     │     │                 │
+  │     │     │           ├── UnsavedChangesDialog (MUI Dialog, open: unsavedChangesDialogOpen)
+  │     │     │           │     ├── Title: t.dialogs.unsavedChanges.title
+  │     │     │           │     ├── Content: t.dialogs.unsavedChanges.message
+  │     │     │           │     ├── Save: onClick saveDraft → close
+  │     │     │           │     ├── Discard: onClick resetDraft → close
+  │     │     │           │     └── Cancel: close
+  │     │     │           └── DeleteDialog (MUI Dialog, open: deleteDialogOpen)
+  │     │     │                 ├── Title: t.dialogs.deleteElement.title
+  │     │     │                 ├── Content: t.dialogs.deleteElement.message
+  │     │     │                 ├── Confirm: onClick deleteElement → close
+  │     │     │                 └── Cancel: close
+  │     │     │
+  │     └── MobileView (this plan)
+  │           └── elementEditor.mobile.tsx (main composite)
+  │                 ├── ElementListHeader.mobile.tsx
+  │                 │     ├── Label: t.mobile.elementList.title
+  │                 │     └── AddElementFAB (Fab, aria-label: t.mobile.addElement.fab, onClick: openAddElementBottomSheet)
+  │                 ├── ElementListView.mobile.tsx (List, sorted by z-index DESC)
+  │                 │     └── ElementListRow.mobile.tsx (×N)
+  │                 │           ├── ElementTypeIcon (Icon)
+  │                 │           ├── ElementLabel (Typography)
+  │                 │           ├── ReorderUpButton (IconButton, disabled: index===0, onClick: reorderUp)
+  │                 │           ├── ReorderDownButton (IconButton, disabled: index===length-1, onClick: reorderDown)
+  │                 │           └── ChevronIcon (IconButton, onClick: openMobileEditDialog)
+  │                 ├── AddElementBottomSheet.mobile.tsx (Modal, anchorEl: FAB)
+  │                 │     └── List of 6 MenuItems (same as desktop toolbar)
+  │                 ├── ElementEditDialog.mobile.tsx (Dialog, fullScreen, maxWidth: "xs", open: mobileEditDialogOpen)
+  │                 │     ├── ElementEditDialogHeader.mobile.tsx
+  │                 │     │     ├── ElementTypeLabel
+  │                 │     │     └── CloseButton (IconButton, onClick: closeMobileEditDialog)
+  │                 │     ├── MiniCanvasThumbnail.mobile.tsx (120×170px, read-only canvas preview)
+  │                 │     ├── DialogBody (Scrollable)
+  │                 │     │     ├── CommonPropertiesForm.tsx (same as desktop)
+  │                 │     │     └── TypeSpecificFormDispatcher.tsx (same as desktop)
+  │                 │     ├── SaveButton (Button, fullWidth, variant: contained, onClick: saveDraft → close)
+  │                 │     └── DeleteButton (Button, fullWidth, variant: outlined, color: error, onClick: openDeleteDialog)
+  │                 └── UnsavedChangesDialog / DeleteDialog (same components as desktop, shared)
+```
+
+### 9.2 Mobile Component Tree (Detailed)
+
+Same as desktop mobile branch above.
+
+---
+
+## 10. Cross-Plan Integration Points (NEW — Round 2 Enhancement)
+
+### 10.1 Plan 11 (Visual Canvas) Integration
+
+| Integration Point | Plan 11 Provides | Plan 12 Consumes | Sync Direction |
+|-------------------|------------------|------------------|----------------|
+| Element Selection | `selectedIds` (string[]) in canvas store | `useTemplateElementEditorStore.setSelectedElementIds()` | Plan 11 → Plan 12 (one-way) |
+| Element Position/Size | Canvas drag/resize updates element in store | Property panel reads common props from canvas store | Plan 11 → Plan 12 |
+| Element Type/Visual | Canvas renders element visual | Property panel shows type-specific form | Plan 11 → Plan 12 |
+| Canvas Re-render | — | Apollo cache update after mutation | Plan 12 → Plan 11 (via cache) |
+
+### 10.2 Plan 10 (Template Meta) Integration
+
+| Integration Point | Plan 10 Provides | Plan 12 Consumes |
+|-------------------|------------------|------------------|
+| Template Query | `template` with `elements` (using `templateElementFragment`) | ViewModel reads `elements` from Plan 10 query |
+| Template Dimensions | `template.width`, `template.height` (A4: 794×1123 @ 96 DPI) | Validation bounds for X/Y/Width/Height |
+| Permission Check | `hasPermission('certificates.templates.manage')` | Gates all mutations & UI |
+
+### 10.3 Plan 5 (GraphQL API) Integration
+
+| Mutation | Plan 5 Defines | Plan 12 Calls |
+|----------|----------------|---------------|
+| `createTemplateElement` | Input + Output types | `useCreateTemplateElementMutation` |
+| `updateTemplateElement` | Input + Output types | `useUpdateTemplateElementMutation` |
+| `deleteTemplateElement` | Input + Boolean | `useDeleteTemplateElementMutation` |
+| `duplicateTemplateElement` | Input + Output types | `useDuplicateTemplateElementMutation` |
+| `reorderTemplateElements` | Input + Boolean | `useReorderTemplateElementsMutation` |
+| `setElementVisibility` | Input + Boolean | `useSetElementVisibilityMutation` |
+| `setElementLock` | Input + Boolean | `useSetElementLockMutation` |
+| `copyTemplateElements` | Input + [Element] | `useCopyTemplateElementsMutation` |
+| `pasteTemplateElements` | Input + [Element] | `usePasteTemplateElementsMutation` |
+
+### 10.4 Plan 7 (Storage) Integration
+
+| Feature | Plan 7 Provides | Plan 12 Uses |
+|---------|-----------------|--------------|
+| Image Upload | `uploadFile` mutation, returns signed URL | `ImagePropertiesForm` → upload → set `imageUrl` |
+| File Validation | 5MB limit, MIME whitelist | Client-side pre-validation before upload |
+
+### 10.5 Plan 13 (Variables) Integration (Future)
+
+| Feature | Plan 13 Will Provide | Plan 12 Prepares For |
+|---------|----------------------|----------------------|
+| Variable List | `templateVariables` query → `VariableOption[]` | `DataTextPropertiesForm`, `DataDatePropertiesForm`, `QrCodePropertiesForm` use `VariableOption` type |
+
+---
+
+## 11. Error Class Mapping (NEW — Round 2 Enhancement)
+
+Per `INTER_PLAN_CONTRACTS.md` — only these error classes allowed:
+
+| Backend Error | Frontend Handling | User Message (i18n key) |
+|---------------|-------------------|------------------------|
+| `DomainError` | Toast + inline form error | `errors.serverError` |
+| `NotFoundError` | Redirect to template list | `errors.elementNotFound` |
+| `UnauthorizedError` | Redirect to login | `errors.permissionDenied` |
+| `ForbiddenError` | Disable UI + toast | `errors.permissionDenied` |
+| `OptimisticLockError` (custom, extends DomainError) | Reload dialog | `errors.templateVersionMismatch` |
+
+**Mapping in ViewModel:**
+```typescript
+const handleError = (error: ApolloError) => {
+  const graphQLError = error.graphQLErrors[0];
+  const code = graphQLError?.extensions?.code;
+  
+  switch (code) {
+    case 'NOT_FOUND':
+      showToast(t.errors.elementNotFound, 'error');
+      router.push(`/dashboard/certificates/templates`);
+      break;
+    case 'UNAUTHENTICATED':
+      showToast(t.errors.permissionDenied, 'error');
+      auth.signOut();
+      break;
+    case 'FORBIDDEN':
+      showToast(t.errors.permissionDenied, 'error');
+      break;
+    case 'OPTIMISTIC_LOCK':
+      store.openUnsavedChangesDialog(); // Actually shows copyConflict dialog
+      break;
+    default:
+      showToast(t.errors.serverError, 'error');
+  }
+};
+```
+
+## 4. Component Hierarchy
+
+### Desktop Component Tree
+
+```
+TemplateEditorContainer (from Plan 10, shared)
+  ├── TemplateEditorViewModel hook (Plan 10, extended by this plan)
+  │     └── useTemplateElementEditorViewModel hook (this plan)
+  ├── Canvas (Plan 11)
+  │     └── Element rendering (Plan 11, enhanced by this plan for property syncing)
+  ├── LayerPanelSection (left sidebar — this plan)
+  │     ├── LayerPanelHeader
+  │     │     ├── Label "Layers"
+  │     │     └── Collapse toggle button
+  │     └── DndContext (wrapping SortableContext)
+  │           └── SortableContext (verticalListSortingStrategy)
+  │                 └── LayerPanelItem (one per element, sorted by z-index desc)
+  │                       ├── DragHandleIcon (useSortable listeners)
+  │                       ├── VisibilityIconButton (eye icon)
+  │                       ├── LockIconButton (lock icon)
+  │                       ├── ElementTypeIcon
+  │                       ├── ElementLabel (Typography)
+  │                       └── (DragOverlay for drag preview)
+  ├── AddElementToolbar (top toolbar above canvas — this plan)
+  │     └── ElementTypeMenu
+  │           └── MenuItem × 6 (static_text, data_text, data_date, image, qr_code, shape)
+  ├── ElementContextMenu (right-click on canvas element)
+  │     ├── Bring Forward / Send Backward / Bring to Front / Send to Back
+  │     ├── Duplicate Element
+  │     └── Delete Element
+  └── PropertyPanelSection (right sidebar — this plan)
+        ├── PropertyPanelHeader
+        │     ├── Element type label (translated)
+        │     └── Save / Delete buttons
+        ├── PropertyPanelEmptyState (when no selection)
+        ├── MultiSelectBadge (when >1 element selected)
+        └── PropertyPanelBody (when single selection)
+              ├── CommonPropertiesForm (collapsible "Position" section)
+              │     ├── PositionSizeInputs (X, Y, Width, Height, Rotation)
+              │     ├── ZIndexDisplay (read-only)
+              │     └── OpacitySlider (0–100)
+              └── TypeSpecificFormDispatcher
+                    ├── StaticTextPropertiesForm
+                    ├── DataTextPropertiesForm
+                    ├── DataDatePropertiesForm
+                    ├── ImagePropertiesForm
+                    ├── QrCodePropertiesForm
+                    └── ShapePropertiesForm
+```
+
+### Mobile Component Tree
+
+```
+TemplateEditorMobileView
+  ├── ElementListHeader
+  │     ├── Label "Elements"
+  │     └── AddElementFAB
+  │           └── AddElementBottomSheet (6 type options)
+  ├── ElementListView (scrollable list, sorted by z-index)
+  │     └── ElementListRow
+  │           ├── ElementTypeIcon
+  │           ├── ElementLabel
+  │           ├── ReorderUpButton
+  │           ├── ReorderDownButton
+  │           └── ChevronIcon (taps to open edit dialog)
+  └── ElementEditDialog (full-screen Dialog, opened on row tap)
+        ├── ElementEditDialogHeader (element type label + close button)
+        ├── MiniCanvasThumbnail (read-only position preview)
+        ├── DialogBody (scrollable)
+        │     ├── CommonPropertiesForm (same shared component as desktop)
+        │     └── TypeSpecificFormDispatcher (same shared component as desktop)
+        ├── SaveButton
+        └── DeleteButton (with confirmation dialog)
+
+---
+
+## 4. Interface Contracts
+
+### 4.1 Core Types (in `types/elementEditor.types.ts`)
+
+#### `ElementWithDetails` discriminated union
+
+Each variant carries all base fields plus type-specific fields. Base fields: `id`, `templateId`, `type`, `xCoordinate`, `yCoordinate`, `width`, `height`, `rotation` (0–360), `zIndex`, `opacity` (0–100), `hidden`, `locked`, `createdAt`, `updatedAt`.
+
+- `StaticTextElement` — adds: `textContent: string`, `fontFamily: string`, `fontSize: number`, `fontWeight: string`, `textColor: string`, `textAlign: "left" | "center" | "right" | "justify"`, `lineHeight: number`
+- `DataTextElement` — adds: `variableId: string`, `fontFamily: string`, `fontSize: number`, `textColor: string`, `textAlign: "left" | "center" | "right" | "justify"`, `textTransform: "none" | "uppercase" | "lowercase" | "capitalize"`
+- `DataDateElement` — adds: `variableId: string`, `dateFormat: "iso" | "short" | "long" | "custom"`, `customFormat: string | null`, `locale: string`, `fontFamily: string`, `fontSize: number`, `textColor: string`
+- `ImageElement` — adds: `imageUrl: string`, `altText: string`, `fitMode: "contain" | "cover" | "fill" | "none"`, `borderRadius: number`
+- `QrCodeElement` — adds: `qrDataSource: "variable" | "custom_text"`, `variableId: string | null`, `qrCustomText: string | null`, `qrSize: number`, `qrErrorCorrection: "L" | "M" | "Q" | "H"`, `qrMargin: number`
+- `ShapeElement` — adds: `shapeType: "rectangle" | "circle" | "line"`, `fillColor: string`, `borderColor: string`, `borderWidth: number`, `borderStyle: "solid" | "dashed" | "none"`
+
+#### `ElementDraftProperties` discriminated union
+
+Same shape as `ElementWithDetails` but all type-specific fields are optional (pending edits). Common fields match `ElementWithDetails` base. This union is what `draftProperties` in the store holds. The draft is initialized from the selected `ElementWithDetails` on selection.
+
+#### `VariableOption`
+
+`{ variableId: string, displayName: string, type: "text" | "number" | "date", previewValue: string | null }` — used in data element dropdowns.
+
+#### `ValidationRule`
+
+`{ field: string, validator: (value: unknown, context: ValidationContext) => boolean, errorKey: string }` — where `ValidationContext` carries `templateDimensions`, `templateVariables`, and `elementType`.
+
+### 4.2 ViewModel Hook: `useTemplateElementEditorViewModel`
+
+The hook returns a flat plain object (matching Siraj ViewModel pattern) consumed by both desktop and mobile views:
+
+| Returned Field | Type | Description |
+|---|---|---|
+| `labels` | i18n translations object | All property labels, action labels, dialog messages from `useAppTranslation` |
+| `elements` | ElementWithDetails[] \| null | All elements for this template, sorted by z-index descending |
+| `selectedElement` | ElementWithDetails \| null | Currently selected element (READ from Plan 11 canvas store `selectedIds[0]` — no duplication) |
+| `selectedCount` | number | Number of selected elements (from canvas store `selectedIds.length`) |
+| `isDirty` | boolean | Whether draft has unsaved changes vs persisted values |
+| `draftProperties` | ElementDraftProperties \| null | Pending unsaved property edits (discriminated union) |
+| `layerPanelCollapsed` | boolean | Layer panel collapse state |
+| `propertyPanelCollapsed` | boolean | Property panel collapse state |
+| `addElementMenuOpen` | boolean | Add element menu open state |
+| `deleteDialogOpen` | boolean | Delete confirmation dialog state |
+| `unsavedChangesDialogOpen` | boolean | Unsaved changes dialog state |
+| `templateDimensions` | { width: number, height: number } | From Plan 10 template query |
+| `templateVariables` | VariableOption[] | Variable list for data element dropdowns (from Plan 13) |
+| `isSaving` | boolean | Update/create mutation in flight |
+| `isDeleting` | boolean | Delete mutation in flight |
+| `isDuplicating` | boolean | Duplicate mutation in flight |
+| `isReordering` | boolean | Reorder mutation in flight |
+| `validationErrors` | Record<string, string> | Field-path → error i18n key |
+| `canManage` | boolean | `hasPermission("certificates.templates.manage")` |
+| `clipboardElement` | ElementWithDetails \| null | Copied element (session-only, not persisted) |
+
+| Callback | Signature | Description |
+|---|---|---|
+| `onSelectElement` | (elementId: string) => void | Select element — delegates to Plan 11 canvas store `setSelectedIds` |
+| `onCreateElement` | (type: ElementTypeEnum) => void | Optimistic create + select new element |
+| `onUpdateDraftProperty` | (field: string, value: unknown) => void | Update a draft property field in store; mark dirty |
+| `onSaveElement` | () => void | Validate → if clean, fire update mutation → reset dirty |
+| `onDeleteElement` | (elementId: string) => void | Delete element (after confirmation dialog) |
+| `onDuplicateElement` | (elementId: string) => void | Duplicate element — new element auto-selected |
+| `onCopyElement` | (elementId: string) => void | Copy element to clipboard |
+| `onPasteElement` | () => void | Paste clipboard element (creates new with offset +20, +20) |
+| `onReorderElement` | (elementId: string, direction: "up" \| "down") => void | Mobile: swap z-index with adjacent element |
+| `onBatchReorder` | (orderedIds: string[]) => void | Desktop layer panel: reorder from drag — renormalize z-index to dense 0..N, call reorder mutation |
+| `onToggleVisibility` | (elementId: string) => void | Toggle element `hidden` flag (optimistic) |
+| `onToggleLock` | (elementId: string) => void | Toggle element `locked` flag (optimistic) |
+| `onBringForward` | (elementId: string) => void | Z-order: +1 relative to next element |
+| `onSendBackward` | (elementId: string) => void | Z-order: -1 relative to previous element |
+| `onBringToFront` | (elementId: string) => void | Z-order: set zIndex to max+1 |
+| `onSendToBack` | (elementId: string) => void | Z-order: set zIndex to 0, shift others up |
+| `onSetLayerPanelCollapsed` | (collapsed: boolean) => void | Collapse/expand layer panel |
+| `onSetPropertyPanelCollapsed` | (collapsed: boolean) => void | Collapse/expand property panel |
+| `onSetAddElementMenuOpen` | (open: boolean) => void | Open/close add element menu |
+| `onSetDeleteDialogOpen` | (open: boolean) => void | Open/close delete confirmation dialog |
+| `onDiscardChanges` | () => void | Discard draft and reset to persisted values |
+| `onCloseElement` | () => void | Deselect element (with unsaved changes check) |
+| `onImageUpload` | (file: File) => Promise<string> | Upload image → returns URL (delegates to Plan 10 upload service) |
+
+### 4.3 Zustand Store: `useTemplateElementEditorStore`
+
+Extends Plan 11 canvas store via a slice relationship — does NOT duplicate selection (canvas store owns `selectedIds` and `elements`).
+
+| State | Type | Setters |
+|---|---|---|
+| `draftProperties` | ElementDraftProperties \| null | `setDraftProperties` |
+| `isDirty` | boolean | `setIsDirty` |
+| `layerPanelCollapsed` | boolean | `setLayerPanelCollapsed` |
+| `propertyPanelCollapsed` | boolean | `setPropertyPanelCollapsed` |
+| `addElementMenuOpen` | boolean | `setAddElementMenuOpen` |
+| `deleteDialogOpen` | boolean | `setDeleteDialogOpen` |
+| `unsavedChangesDialogOpen` | boolean | `setUnsavedChangesDialogOpen` |
+| `pendingAction` | (() => void) \| null | `setPendingAction` |
+| `clipboardElement` | ElementWithDetails \| null | `setClipboardElement` |
+
+**Read-only selectors from Plan 11 canvas store (accessed via `useTemplateCanvasStore` import):**
+- `selectedIds` → used to derive `selectedElement` and `selectedCount`
+- `elements` → used to render layer panel and mobile list
+- `interactionState` → used to throttle property panel updates during active drag/resize
+
+**Element update actions (in ViewModel, NOT in store):**
+
+The store only holds UI state (draft, dirty, panel collapse, dialog flags, clipboard). All element data mutations flow through Apollo mutations in the ViewModel hook. The store's `draftProperties` is initialized on selection from the canvas store's `elements[selectedId]` and is updated via `onUpdateDraftProperty`. On save, the ViewModel validates, fires the update mutation, and on success resets `draftProperties` + `isDirty`.
+
+### 4.4 GraphQL Documents Contract
+
+All documents live in `frontend/common/graphql/sharedDocuments/certificates/template-elements.documents.ts`.
+
+| Document Name | Input Type | Output Type |
+|---|---|---|
+| `templateElementFragment` | — | Fragment spreading base fields + inline fragments per type |
+| `createTemplateElementMutationDocument` | `{ templateId, type, xCoordinate, yCoordinate, width, height, expectedTemplateVersion }` | `{ createTemplateElement: { id, type, ... } }` |
+| `updateTemplateElementMutationDocument` | `{ id, input: ElementUpdateInput, expectedTemplateVersion }` | `{ updateTemplateElement: { id, ... } }` |
+| `deleteTemplateElementMutationDocument` | `{ id, expectedTemplateVersion }` | `{ deleteTemplateElement: boolean }` |
+| `duplicateTemplateElementMutationDocument` | `{ id, expectedTemplateVersion }` | `{ duplicateTemplateElement: { id, ... } }` |
+| `reorderTemplateElementsMutationDocument` | `{ templateId, items: [{ id, zIndex }], expectedTemplateVersion }` | `{ reorderTemplateElements: boolean }` |
+
+`expectedTemplateVersion` provides optimistic locking — on mismatch (backend returns error), the ViewModel refetches the template and warns the user.
+
+### 4.5 Component Prop Interfaces
+
+All components use `sx` prop for styling (MUI v9 rule — no style props). Icons use `*Outlined` naming.
+
+#### Shared Components
+
+**CommonPropertiesForm** — shared between desktop panel and mobile dialog. Collapsible "Position & Appearance" accordion with:
+
+| Prop | Type | Description |
+|---|---|---|
+| `draft` | ElementDraftProperties | Current draft values for common fields |
+| `onChange` | (field: string, value: unknown) => void | Update callback for any common field |
+| `errors` | Record<string, string> | Validation errors keyed by field name |
+| `labels` | i18n labels object | Form field labels |
+| `templateDimensions` | { width: number, height: number } | For helper text showing bounds |
+| `disabled` | boolean | Disable all inputs (when locked or no permission) |
+
+**PositionSizeInputs** — 5 numeric `TextField`s in a `Grid` (2 columns:
+
+| Prop | Type | Description |
+|---|---|---|
+| `xCoordinate` | number | X position (px) |
+| `yCoordinate` | number | Y position (px) |
+| `width` | number | Element width (px) |
+| `height` | number | Element height (px) |
+| `rotation` | number | Rotation (0–360 degrees) |
+| `onChange` | (field: string, value: number) => void | Update callback |
+| `errors` | Record<string, string> | Per-field validation errors |
+| `labels` | i18n labels object | Field labels |
+| `disabled` | boolean | Disable all inputs |
+
+Each `TextField` has `type="number"`, `size="small"`, `InputProps={{ inputProps: { min: 0 } }}` (or `min: 0, max: 360` for rotation). Helper text shows current value's bound (e.g., `0–1000px` for X within template width). Error state (`error={!!errors[field]}`) shows red helper text with translated message.
+
+**OpacitySlider** — MUI `Slider` in a `Stack`:
+
+| Prop | Type | Description |
+|---|---|---|
+| `value` | number | 0–100 |
+| `onChange` | (value: number) => void | Update callback |
+| `disabled` | boolean | Disable slider |
+
+Slider: `min={0} max={100} step={1}` with `valueLabelDisplay="auto"` and `valueLabelFormat={(v) => \`${v}%\`}`.
+
+**ColorPickerField** — MUI `Popover` wrapping `react-color` `ChromePicker` + hex `TextField`:
+
+| Prop | Type | Description |
+|---|---|---|
+| `label` | string | Field label (i18n) |
+| `value` | string | Hex color string (e.g., `#FF5733`) |
+| `onChange` | (hex: string) => void | Color change callback |
+| `disabled` | boolean | Disable field |
+| `error` | string \| undefined | Validation error message |
+
+Implementation: A `Box` showing the current color swatch (24×24px, `border: 1px solid` theme divider) + hex `TextField` (`size="small"`, `sx={{ width: 100 }}`). Clicking the swatch opens a `Popover` containing `<ChromePicker color={value} onChange={(c) => onChange(c.hex)} disableAlpha />`. The hex `TextField` is always visible for keyboard/a11y input — values typed are validated as hex (`/^#[0-9A-Fa-f]{6}$/`). `ChromePicker` width defaults to 225px (from node research). Popover `anchorOrigin={{ vertical: "bottom", horizontal: "left" }}`.
+
+**FontPicker** — MUI `Autocomplete` from `ALLOWED_FONTS`:
+
+| Prop | Type | Description |
+|---|---|---|
+| `value` | string | Selected font family name |
+| `onChange` | (font: string) => void | Selection callback |
+| `disabled` | boolean | Disable field |
+| `error` | string \| undefined | Validation error |
+
+`Autocomplete` with `options={ALLOWED_FONTS}` (array of font family names from Plan 02's `FontFamily` type union), `freeSolo={false}`, `renderInput` with `TextField` label. Each option renders the font name in its own font (`renderOption` applies `sx={{ fontFamily: option }}`).
+
+#### Type-Specific Form Components
+
+All type-specific forms receive these shared props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `element` | ElementWithDetails | The selected element (typed by discriminated union) |
+| `draft` | ElementDraftProperties | Draft values for this element type |
+| `onChange` | (field: string, value: unknown) => void | Field update callback |
+| `errors` | Record<string, string> | Validation errors |
+| `labels` | i18n labels object | Property field labels |
+| `variables` | VariableOption[] | Template variables (only for data_text and data_date) |
+| `disabled` | boolean | Disable all inputs (locked or no permission) |
+
+**StaticTextPropertiesForm** fields:
+
+| Field | Input Control | Validation | Default |
+|---|---|---|---|
+| `textContent` | MUI `TextField` multiline, rows=3 | required, maxLen 1000 | `""` |
+| `fontFamily` | `FontPicker` autocomplete | must be in `ALLOWED_FONTS` | `"Inter"` |
+| `fontSize` | `TextField` type=number | min 1, max 200 | `16` |
+| `fontWeight` | MUI `Select` dropdown | one of: 400, 500, 600, 700 | `400` |
+| `textColor` | `ColorPickerField` | valid hex | `"#000000"` |
+| `textAlign` | MUI `ToggleButtonGroup` (4 buttons w/ icons) | one of: left, center, right, justify | `"left"` |
+| `lineHeight` | `TextField` type=number, step=0.1 | min 0.5, max 3.0 | `1.5` |
+
+**DataTextPropertiesForm** fields:
+
+| Field | Input Control | Validation | Default |
+|---|---|---|---|
+| `variableId` | MUI `Select` (populated from `variables` filtered to type=text/number) | required, must exist | `""` |
+| `fontFamily` | `FontPicker` autocomplete | must be in `ALLOWED_FONTS` | `"Inter"` |
+| `fontSize` | `TextField` type=number | min 1, max 200 | `16` |
+| `textColor` | `ColorPickerField` | valid hex | `"#000000"` |
+| `textAlign` | MUI `ToggleButtonGroup` (4 buttons w/ icons) | one of: left, center, right, justify | `"left"` |
+| `textTransform` | MUI `Select` dropdown | one of: none, uppercase, lowercase, capitalize | `"none"` |
+
+**DataDatePropertiesForm** fields:
+
+| Field | Input Control | Validation | Default |
+|---|---|---|---|
+| `variableId` | MUI `Select` (populated from `variables` filtered to type=date only) | required, must exist, must be date type | `""` |
+| `dateFormat` | MUI `Select` (iso, short, long, custom) | one of enum values | `"short"` |
+| `customFormat` | `TextField` (conditionally shown when dateFormat="custom") | required when dateFormat="custom", maxLen 100 | `null` |
+| `locale` | `TextField` (e.g., "en", "ar") | required, 2–5 chars | `"en"` |
+| `fontFamily` | `FontPicker` autocomplete | must be in `ALLOWED_FONTS` | `"Inter"` |
+| `fontSize` | `TextField` type=number | min 1, max 200 | `16` |
+| `textColor` | `ColorPickerField` | valid hex | `"#000000"` |
+
+**ImagePropertiesForm** fields:
+
+| Field | Input Control | Validation | Default |
+|---|---|---|---|
+| `imageUrl` | `TextField` + `Button` ("Browse")→ file picker | required, maxLen 500, valid URL | `""` |
+| `altText` | `TextField` | maxLen 200 | `""` |
+| `fitMode` | MUI `Select` (contain, cover, fill, none) | one of enum values | `"contain"` |
+| `borderRadius` | `TextField` type=number | min 0, max 500 | `0` |
+
+Image upload: the Browse button opens a file picker (`<input type="file" accept="image/*">`). The selected file is uploaded via `onImageUpload(file: File)` → returns a URL. During upload, a `CircularProgress` replaces the browse button. Drag and drop zone: the Image form also accepts a drag-drop on a `Box` (`onDragOver`, `onDrop` handlers) that calls `onImageUpload`.
+
+**QrCodePropertiesForm** fields:
+
+| Field | Input Control | Validation | Default |
+|---|---|---|---|
+| `qrDataSource` | MUI `Select` (variable, custom_text) | one of two values | `"variable"` |
+| `variableId` | MUI `Select` (conditionally shown when qrDataSource="variable") | required when qrDataSource="variable" | `null` |
+| `qrCustomText` | `TextField` (conditionally shown when qrDataSource="custom_text") | required when qrDataSource="custom_text", maxLen 500 | `null` |
+| `qrSize` | `TextField` type=number | min 32, max 512 | `128` |
+| `qrErrorCorrection` | MUI `Select` (L, M, Q, H) | one of 4 values | `"M"` |
+| `qrMargin` | `TextField` type=number | min 0, max 50 | `0` |
+
+**ShapePropertiesForm** fields:
+
+| Field | Input Control | Validation | Default |
+|---|---|---|---|
+| `shapeType` | MUI `Select` (rectangle, circle, line) | one of 3 values | `"rectangle"` |
+| `fillColor` | `ColorPickerField` | valid hex | `"#FFFFFF"` |
+| `borderColor` | `ColorPickerField` | valid hex | `"#000000"` |
+| `borderWidth` | `TextField` type=number | min 0, max 20 | `1` |
+| `borderStyle` | MUI `Select` (solid, dashed, none) | one of 3 values | `"solid"` |
+
+#### Desktop Components
+
+**LayerPanelSection.desktop** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `elements` | ElementWithDetails[] | All template elements sorted by z-index desc |
+| `selectedIds` | string[] | Currently selected element IDs (from canvas store) |
+| `collapsed` | boolean | Panel collapse state |
+| `onToggleCollapse` | () => void | Collapse/expand toggle |
+| `onSelectElement` | (id: string) => void | Click to select (delegates to canvas store) |
+| `onToggleVisibility` | (id: string) => void | Toggle hidden flag |
+| `onToggleLock` | (id: string) => void | Toggle locked flag |
+| `onBatchReorder` | (orderedIds: string[]) => void | Drag reorder callback |
+| `labels` | i18n labels object | "Layers" header, empty state |
+| `disabled` | boolean | No permission |
+
+Implements `DndContext` with `closestCenter` collision, `PointerSensor` (activationConstraint distance 8) + `KeyboardSensor` (sortableKeyboardCoordinates). Wrapped `SortableContext` with `verticalListSortingStrategy`. `items` = element IDs sorted by z-index desc. On `onDragEnd`, compute new order via `arrayMove(oldIndex, newIndex)`, call `onBatchReorder(orderedIds)`.
+
+**LayerPanelItem.desktop** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `element` | ElementWithDetails | The element for this row |
+| `selected` | boolean | Whether this element is in `selectedIds` |
+| `onSelect` | () => void | Click handler to select |
+| `onToggleVisibility` | () => void | Eye toggle |
+| `onToggleLock` | () => void | Lock toggle |
+| `elementTypeIcon` | ReactNode | Icon for element type (TextFields, Image, QrCode, CropShapes) |
+| `label` | string | Display label (derived from element) |
+| `disabled` | boolean | No permission |
+
+Uses `useSortable({ id: element.id })`. Returns `{ attributes, listeners, setNodeRef, transform, transition, isDragging }`. Drag handle is a `DragHandleIcon` at left. Apply transform via `CSS.Transform.toString(transform)` on `sx={{ transform }}`. Active drag row shows `opacity: 0.5` and `DragOverlay` renders a translucent copy. Layer row has `role="option"`, `aria-selected={selected}`.
+
+**AddElementToolbar.desktop** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `onCreateElement` | (type: ElementTypeEnum) => void | Called when a menu item is clicked |
+| `menuOpen` | boolean | Menu open state |
+| `onSetMenuOpen` | (open: boolean) => void | Menu open/close |
+| `labels` | i18n labels object | Button label + 6 menu item labels |
+| `disabled` | boolean | No permission |
+
+MUI `Button` with `AddIcon` + "Add Element" label. `Menu` with 6 `MenuItem`s, each with an icon + translated element type label.
+
+**ElementContextMenu.desktop** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `open` | boolean | Menu visible |
+| `position` | { x: number, y: number } | Screen position for menu |
+| `elementId` | string \| null | Target element |
+| `onClose` | () => void | Close menu |
+| `onBringForward` | (id: string) => void | Z-order +1 |
+| `onSendBackward` | (id: string) => void | Z-order -1 |
+| `onBringToFront` | (id: string) => void | Z-order to front |
+| `onSendToBack` | (id: string) => void | Z-order to back |
+| `onDuplicate` | (id: string) => void | Duplicate element |
+| `onDelete` | (id: string) => void | Delete element |
+| `labels` | i18n labels object | Menu item labels |
+
+MUI `Menu` positioned at `position`. 7 `MenuItem`s: Bring Forward, Send Backward, Bring to Front, Send to Back, (divider), Duplicate, Delete (red text).
+
+**PropertyPanelSection.desktop** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `selectedElement` | ElementWithDetails \| null | Single-selected element |
+| `selectedCount` | number | Number of selected elements |
+| `draft` | ElementDraftProperties \| null | Draft properties |
+| `isDirty` | boolean | Dirty state |
+| `validationErrors` | Record<string, string> | Field errors |
+| `labels` | i18n labels object | All panel labels |
+| `templateDimensions` | { width: number, height: number } | For helper text |
+| `templateVariables` | VariableOption[] | For data element forms |
+| `collapsed` | boolean | Panel collapse state |
+| `onToggleCollapse` | () => void | Collapse/expand |
+| `onUpdateDraftProperty` | (field: string, value: unknown) => void | Draft update |
+| `onSave` | () => void | Save draft |
+| `onDiscard` | () => void | Discard changes |
+| `onDelete` | (id: string) => void | Delete with confirmation |
+| `onCloseElement` | () => void | Close/deselect |
+| `canManage` | boolean | Permission flag |
+| `isSaving` | boolean | Mutation in flight |
+| `isDeleting` | boolean | Delete in flight |
+
+Renders 4 collapsible `Accordion` sections (expanded state in local `useState`):
+1. **Position** (always first) — `PositionSizeInputs` + `OpacitySlider`
+2. **Content** (type-specific — title changes per type: "Text" for text types, "Image" for image, "QR Code" for qr_code, "Shape" for shape)
+3. **Appearance** — `ColorPickerField`s for text color / fill color / border color (varies by type)
+4. **Advanced** — hidden flag toggle + lock flag toggle + z-index (read-only display)
+
+Header: element type label (translated) + Save button (`disabled={!isDirty || isSaving}`) + Delete button (with confirmation) + close button.
+
+Empty state: centered `Typography` with "Select an element to edit its properties" + `MouseOutlined` icon.
+
+Multi-select state (>1 selected): centered `Typography` "{N} elements selected" + batch Delete button + batch Lock/Unlock buttons.
+
+**MultiSelectBadge.desktop** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `selectedCount` | number | Number of selected elements |
+| `onDelete` | () => void | Batch delete |
+| `onLock` | () => void | Batch lock |
+| `onUnlock` | () => void | Batch unlock |
+| `labels` | i18n labels object |
+
+#### Mobile Components
+
+**ElementListView.mobile** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `elements` | ElementWithDetails[] | Elements sorted by z-index desc |
+| `selectedId` | string \| null | Currently selected element |
+| `onSelect` | (id: string) => void | Tap row to open edit dialog |
+| `onReorder` | (id: string, dir: "up" \| "down") => void | Up/down reorder buttons |
+| `labels` | i18n labels object | Row labels, type labels |
+| `disabled` | boolean | No permission |
+
+`List` with `ListItem` rows. Each row: type icon + label + up/down `IconButton`s + chevron.
+
+**ElementEditDialog.mobile** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `open` | boolean | Dialog visible |
+| `element` | ElementWithDetails \| null | Element being edited |
+| `draft` | ElementDraftProperties \| null | Draft properties |
+| `validationErrors` | Record<string, string> | Field errors |
+| `labels` | i18n labels object | All labels |
+| `templateDimensions` | { width: number, height: number } | For min/max bounds display |
+| `templateVariables` | VariableOption[] | For data element forms |
+| `onClose` | () => void | Close dialog (with unsaved changes check) |
+| `onChange` | (field: string, value: unknown) => void | Draft update |
+| `onSave` | () => void | Save element |
+| `onDelete` | (id: string) => void | Delete with confirmation |
+| `canManage` | boolean | Permission flag |
+| `isSaving` | boolean | Mutation in flight |
+
+Full-screen `Dialog` (`fullScreen` prop). App bar header with element type + close button. Body: scrollable `Stack` containing `MiniCanvasThumbnail` + `CommonPropertiesForm` + `TypeSpecificFormDispatcher`. Footer: sticky `Stack` with Save button (full width) + Delete button (outline, full width with confirmation).
+
+**MiniCanvasThumbnail.mobile** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `element` | ElementWithDetails | Element being edited |
+| `templateDimensions` | { width: number, height: number } | Canvas dimensions |
+| `allElements` | ElementWithDetails[] | All elements for context |
+
+Renders a scaled-down read-only preview of the canvas (e.g., 120×80px) showing all elements as outlines and the current element highlighted in primary color. No interaction — purely visual spatial feedback.
+
+**AddElementBottomSheet.mobile** props:
+
+| Prop | Type | Description |
+|---|---|---|
+| `open` | boolean | Sheet visible |
+| `onClose` | () => void | Close sheet |
+| `onCreateElement` | (type: ElementTypeEnum) => void | Create element of type |
+| `labels` | i18n labels object | 6 type labels |
+
+MUI `BottomSheet` / `SwipeableDrawer` with `List` of 6 `ListItem`s — type icon + label each.
+
+---
+
+## 5. Element Type System Design
+
+### Type Enum Values
+
+The `elementTypeEnum` from Plan 1 defines: `static_text`, `data_text`, `data_date`, `image`, `qr_code`, `shape`.
+
+### Polymorphic Client Model
+
+On the client, elements are loaded as a flat list from the template query (Plan 11/5). Each element has:
+- Base fields: `id`, `templateId`, `type`, `xCoordinate`, `yCoordinate`, `width`, `height`, `rotation`, `zIndex`, `opacity`, `hidden`, `locked`, `createdAt`, `updatedAt`
+- Type-specific fields: fetched via inline fragments in the GraphQL query, merged into a single `ElementWithDetails` client type
+
+### `ElementWithDetails` Client Type (view-model level)
+
+A discriminated union by `type`:
+- `type: "static_text"` → adds `textContent`, `fontFamily`, `fontSize`, `fontWeight`, `textColor`, `textAlign`, `lineHeight`
+- `type: "data_text"` → adds `variableId`, `fontFamily`, `fontSize`, `textColor`, `textAlign`, `textTransform`
+- `type: "data_date"` → adds `variableId`, `dateFormat`, `customFormat`, `locale`, `fontFamily`, `fontSize`, `textColor`
+- `type: "image"` → adds `imageUrl`, `altText`, `fitMode`, `borderRadius`
+- `type: "qr_code"` → adds `qrDataSource`, `qrCustomText`, `qrSize`, `qrErrorCorrection`, `qrMargin`
+- `type: "shape"` → adds `shapeType`, `fillColor`, `borderColor`, `borderWidth`, `borderStyle`
+
+### Type-Specific Form Dispatch
+
+| Element Type | Form Component | Dynamic fields rendered |
+|---|---|---|
+| `static_text` | `StaticTextPropertiesForm` | textContent, fontFamily, fontSize, fontWeight, textColor, textAlign, lineHeight |
+| `data_text` | `DataTextPropertiesForm` | variableId (dropdown), fontFamily, fontSize, textColor, textAlign, textTransform |
+| `data_date` | `DataDatePropertiesForm` | variableId (dropdown, date type only), dateFormat, customFormat (conditional), locale, fontFamily, fontSize, textColor |
+| `image` | `ImagePropertiesForm` | imageUrl (text + browse button), altText, fitMode, borderRadius |
+| `qr_code` | `QrCodePropertiesForm` | qrDataSource, qrCustomText (conditional), qrSize, qrErrorCorrection, qrMargin |
+| `shape` | `ShapePropertiesForm` | shapeType, fillColor, borderColor, borderWidth, borderStyle |
+
+### Variable Binding Interface
+
+Data text and data date elements reference template variables (Plan 13). The binding interface is:
+- A dropdown component populated from the template's variable list (queried via the template fragment from Plan 13)
+- Data text dropdown shows variables of type `text` and `number`
+- Data date dropdown shows variables of type `date` only
+- The dropdown displays each variable's display name; the value is the variable ID
+- If no variables exist, the dropdown shows a disabled placeholder with a message to create variables first
+- When a variable is selected, the canvas preview shows the variable's `previewValue` (not the variable name)
+
+---
+
+## 6. Validation Flow
+
+### Validation Architecture
+
+Validation runs on form submit (`onSaveElement`). The ViewModel exposes a `validateElement(draft, templateDimensions, templateVariables)` function that returns a `Record<string, string>` of field-path → error-message-key.
+
+### Validation Pipeline
+
+1. **Common properties validation**:
+   - Position bounds: parse template dimensions from Plan 10's template query; check `0 ≤ x ≤ templateWidth` and `0 ≤ y ≤ templateHeight`
+   - Size: `width > 0` and `height > 0`
+   - Rotation: `0 ≤ rotation ≤ 360` (normalized — NOT -360..360, per SWE review fix #7)
+   - Opacity: `0 ≤ opacity ≤ 100`
+
+2. **Type-specific validation** (dispatched by element type):
+   - `static_text`: textContent not empty, max 1000 chars; fontSize 1–200; lineHeight 0.5–3.0
+   - `data_text`: variableId must be non-null and exist in templateVariables; fontSize 1–200
+   - `data_date`: variableId must be non-null and reference a date-type variable; customFormat must be non-empty when dateFormat = "custom"
+   - `image`: imageUrl non-empty, max 500 chars
+   - `qr_code`: if qrDataSource = "custom_text", qrCustomText must be non-empty; qrSize 32–512; qrMargin 0–50
+   - `shape`: borderWidth 0–20
+
+3. **Error aggregation**: All errors collected into a single map, set on the store, rendered inline on each field.
+
+4. **Mutation guard**: If any errors exist, the save mutation is NOT fired. Errors shown via inline form helper text + snackbar summary.
+
+### Validation Error Display
+
+- Each form field that fails validation shows a red helper text with the translated error message
+- The save button is disabled while `isSaving` is true
+- A form-level error count appears in the panel header if any errors exist
+- Selecting a different element clears all validation errors (fresh form)
+
+---
+
+## 6A. Layer Panel Specification (@dnd-kit/sortable Integration)
+
+### DndContext + SortableContext Setup
+
+The layer panel uses `@dnd-kit/sortable` (v10.0.0) and `@dnd-kit/core` (v6.3.1), both installed in the project. The desktop `LayerPanelSection.desktop.tsx` wraps items in:
+
+- `DndContext` — provides drag context, sensors, collision detection
+- `SortableContext` — manages sortable items with `verticalListSortingStrategy`
+
+### Sensors
+
+Two sensors configured via `useSensors`:
+- `PointerSensor` with `activationConstraint: { distance: 8 }` — requires 8px movement before drag starts (prevents accidental drag on click-to-select)
+- `KeyboardSensor` with `coordinateGetter: sortableKeyboardCoordinates` — enables keyboard reorder (Tab to focus, Space to pick up, Arrow keys to move, Space to drop)
+
+### Collision Detection
+
+`closestCenter` — standard for vertical sortable lists. When dragging an item, the item closest to the pointer's center becomes the drop target.
+
+### Items
+
+`SortableContext.items` = element IDs sorted by z-index descending (top layer first). Each `LayerPanelItem` calls `useSortable({ id: element.id })`.
+
+### Drag End Handler
+
+On `onDragEnd`:
+1. Extract `active.id` and `over.id` from the event
+2. Find old and new indices in the sorted element array
+3. Compute new order via `arrayMove(elements, oldIndex, newIndex)`
+4. Extract `orderedIds` from the reordered array
+5. Call `onBatchReorder(orderedIds)` — ViewModel renormalizes z-indices to dense `0..N` and fires `reorderTemplateElementsMutationDocument`
+
+### DragOverlay
+
+A `DragOverlay` wraps a translucent copy of the dragged `LayerPanelItem` for smooth drag preview. The original item sets `opacity: 0.5` during `isDragging`.
+
+### Performance
+
+- React-virtualized NOT needed for typical element counts (<50 elements). Plan 11 canvas renders all elements; layer panel is bounded by the same count.
+
+### Keyboard Reorder (a11y)
+
+- `Tab` moves focus into the layer panel list
+- `Tab` again moves focus to a layer row
+- `Space` picks up the focused row (enters drag mode)
+- `ArrowUp`/`ArrowDown` moves the row up/down
+- `Space` again drops the row at the current position
+- Screen reader announcements from `DndContext` `accessibility` prop (default announcements cover "Picked up X", "Moved to position N", "Dropped X")
+
+### Layer Panel Item Anatomy
+
+Each row (from left to right):
+1. **Drag handle** — `DragIndicatorOutlined` icon, receives `listeners` from `useSortable`. `sx={{ cursor: "grab" }}` (or `cursor: "grabbing"` when `isDragging`)
+2. **Element type icon** — maps to element type: `static_text` → `TextFieldsOutlined`, `data_text` → `DataObjectOutlined`, `data_date` → `CalendarMonthOutlined`, `image` → `ImageOutlined`, `qr_code` → `QrCode2Outlined`, `shape` → `CropDinOutlined`
+3. **Element label** — `Typography variant="body2"` — first 30 chars of textContent (text types), "Image: {altText}" (image), element type label (others)
+4. **Spacer** — flex grow
+5. **Visibility toggle** — `IconButton` with `VisibilityOutlined` (visible) / `VisibilityOffOutlined` (hidden). ARIA label from i18n key
+6. **Lock toggle** — `IconButton` with `LockOutlined` (locked) / `LockOpenOutlined` (unlocked). ARIA label from i18n key
+
+Row styling:
+- `sx={{ backgroundColor: selected ? theme.palette.action.selected : "transparent", borderLeft: selected ? \`3px solid ${theme.palette.primary.main}\` : "3px solid transparent" }}`
+- `selected` is true when `element.id` is in `selectedIds` from canvas store
+
+### Layer Panel Header
+
+- "Layers" label (i18n key `layerPanel.header`)
+- Collapse toggle button (`chevron-left` to collapse, `chevron-right` to expand)
+- When collapsed, panel narrows to a thin sidebar showing only the collapse toggle button
+
+---
+
+## 6B. Desktop Property Panel Layout
+
+### Three-Pane Desktop Layout
+
+The desktop editor uses a three-pane layout: layer panel (left), canvas (center, owned by Plan 11), property panel (right). Panes are resizable via MUI `Drawer` or fixed-width columns.
+
+### Property Panel Sections (Collapsible Accordion)
+
+The property panel renders 4 collapsible sections using MUI `Accordion`:
+
+| Section | Title i18n Key | Expanded Default | Contents |
+|---|---|---|---|
+| Position | `sections.position` | true | `PositionSizeInputs` (X, Y, width, height, rotation) + z-index display (read-only) + `OpacitySlider` |
+| Content | dynamic (type-specific) | true | `TypeSpecificFormDispatcher` renders the appropriate type form |
+| Appearance | `sections.appearance` | false | Color fields (text color / fill color / border color depending on type) + visibility toggle + lock toggle |
+| Advanced | `sections.advanced` | false | Element ID display + created/updated timestamps + z-index numeric display + hidden/locked toggle switches |
+
+### Section Title Variations by Element Type
+
+The "Content" section title changes per element type:
+- `static_text` → "Text Content" (`sections.textContent`)
+- `data_text` → "Data Text" (`sections.dataText`)
+- `data_date` → "Date Format" (`sections.dateFormat`)
+- `image` → "Image" (`sections.image`)
+- `qr_code` → "QR Code" (`sections.qrCode`)
+- `shape` → "Shape" (`sections.shape`)
+
+### Property Panel States
+
+| State | Renders |
+|---|---|
+| No element selected | Empty state: `MouseOutlined` icon + "Select an element to edit its properties" text |
+| Single element selected | 4 accordion sections + header with Save/Delete/Close buttons |
+| Multi-element selected (>1) | `MultiSelectBadge`: "N elements selected" + batch Delete + batch Lock/Unlock |
+| Locked element selected | Same as single, but all form inputs `disabled` + banner "This element is locked" |
+| No permission | Same as single, but all inputs `disabled`, Save/Delete buttons hidden |
+
+### Property Panel Header
+
+- Element type label (translated, e.g., "Static Text", "Image", "QR Code")
+- Dirty indicator: dot badge on Save button when `isDirty` is true
+- Save button: `Button` variant="contained" color="primary" — `disabled={!isDirty || isSaving}`. Shows `CircularProgress` in button when `isSaving`
+- Discard button: `Button` variant="text" — shows when `isDirty` — resets draft to persisted values
+- Delete button: `IconButton` with `DeleteOutlined` — opens confirmation dialog
+- Close button: `IconButton` with `CloseOutlined` — deselects (with unsaved changes check if dirty)
+
+### Re-render Throttling
+
+During active canvas drag/resize (Plan 11 `interactionState !== "idle"`), the property panel's PositionSizeInputs should NOT update on every frame. Instead:
+- Position/size values in the inputs show the pre-drag values until `pointerup`
+- On `pointerup`, the inputs update to the final values from the canvas store
+- This prevents input stutter and preserves frame budget
+- Implementation: ViewModel subscribes to canvas store `interactionState`; when not `"idle"`, the Position section shows a "Dragging..." placeholder instead of live numbers
+
+---
+
+## 6C. Mobile Property Panel Layout
+
+### Mobile Editor Structure
+
+Mobile replaces the desktop three-pane layout with a list-based view + full-screen edit dialog:
+
+1. **Element list** — scrollable list sorted by z-index descending (IS the layer panel on mobile)
+2. **Edit dialog** — opened on row tap, replaces the property panel
+
+### Element List (Mobile)
+
+- Header: "Elements" label + Add FAB (`AddIcon`, `aria-label` from i18n)
+- Each row: type icon + label + up/down reorder `IconButton`s + chevron icon
+- Row tap opens the `ElementEditDialog`
+- Up/down buttons swap z-index with adjacent element via mobile reorder (optimistic)
+- Row swipe-right: reveal Delete action (MUI `SwipeableDrawer` pattern)
+- Row swipe-left: reveal Lock/Unlock toggle
+
+### Edit Dialog (Mobile)
+
+Full-screen MUI `Dialog` (`fullScreen` prop):
+- **App bar header**: element type label + close button (`CloseOutlined`) + Save button
+- **Mini canvas thumbnail**: `MiniCanvasThumbnail` — scaled-down read-only preview (120×80px) showing element position on a mini-canvas for spatial feedback
+- **Body** (scrollable `Stack`):
+  - Collapsible accordion: "Position" — `CommonPropertiesForm` (shared desktop/mobile component)
+  - Collapsible accordion: type-specific content — `TypeSpecificFormDispatcher` (shared component)
+  - Collapsible accordion: "Appearance" — color + visibility + lock
+- **Footer** (sticky `Stack`):
+  - Save button: full width, `disabled={!isDirty || isSaving}`
+  - Delete button: outline variant, full width, opens confirmation dialog
+
+### Mobile Simplification
+
+Mobile shows the same fields as desktop (not a reduced set) because:
+- Numeric inputs replace canvas drag/resize (no canvas on mobile)
+- All type-specific properties are needed for meaningful editing
+- Mobile screen is full-width (no sidebar constraints)
+- Accordions keep the form compact — collapse sections the user doesn't need
+
+### Dialog Lifecycle
+
+1. `open` is local state in `ElementListView.mobile` (not in Zustand — avoids stale state on tier switch)
+2. On row tap, `setEditingElementId(element.id)` opens dialog
+3. Dialog reads its element from `elements` array by ID
+4. On save/delete, dialog closes and list refreshes (Apollo cache update re-renders list)
+5. On close with dirty state: show "Unsaved changes" confirmation dialog
+
+---
+
+## 6D. Element Creation Flow
+
+### Creation Trigger
+
+**Desktop**: Click "Add Element" `Button` in `AddElementToolbar` → MUI `Menu` opens with 6 type options (icon + translated label). Click a type → `onCreateElement(type)` fires.
+
+**Mobile**: Tap Add FAB → `AddElementBottomSheet` opens with 6 type options. Tap a type → `onCreateElement(type)` fires and bottom sheet closes.
+
+### Creation Sequence
+
+1. ViewModel calls `createTemplateElementMutationDocument` with:
+   - `templateId` (from Plan 10 template context)
+   - `type` (the selected type)
+   - `xCoordinate`: template width / 2 - default width / 2 (center horizontal)
+   - `yCoordinate`: template height / 2 - default height / 2 (center vertical)
+   - `width`: default width for type (see defaults table below)
+   - `height`: default height for type
+   - `expectedTemplateVersion`: current template version
+2. Apollo cache update (optimistic): append new element to template's element list
+3. On success: auto-select the new element (canvas store `setSelectedIds([newElementId])`)
+4. Property panel opens showing the new element with default values
+5. Element is in "draft dirty" state — user edits properties and clicks Save
+
+### Default Dimensions Per Element Type
+
+| Element Type | Default Width | Default Height | Default Specific Properties |
+|---|---|---|---|
+| `static_text` | 200px | 40px | textContent="", fontFamily="Inter", fontSize=16, fontWeight="400", textColor="#000000", textAlign="left", lineHeight=1.5 |
+| `data_text` | 200px | 40px | variableId="", fontFamily="Inter", fontSize=16, textColor="#000000", textAlign="left", textTransform="none" |
+| `data_date` | 150px | 40px | variableId="", dateFormat="short", customFormat=null, locale="en", fontFamily="Inter", fontSize=16, textColor="#000000" |
+| `image` | 150px | 150px | imageUrl="", altText="", fitMode="contain", borderRadius=0 |
+| `qr_code` | 128px | 128px | qrDataSource="variable", variableId=null, qrCustomText=null, qrSize=128, qrErrorCorrection="M", qrMargin=0 |
+| `shape` | 100px | 100px | shapeType="rectangle", fillColor="#FFFFFF", borderColor="#000000", borderWidth=1, borderStyle="solid" |
+
+### Post-Creation Behavior
+
+- New element appears at center of canvas (desktop) or top of element list (mobile, since it gets the highest z-index)
+- Element is immediately selected → property panel populated with defaults
+- `isDirty` is false initially (element was just created with valid defaults)
+- User can immediately start dragging/resizing on canvas (desktop) or editing via dialog (mobile)
+- If user selects another element without saving a dirty draft, "Unsaved changes" dialog appears
+
+---
+
+## 6E. Element Manipulation Specification
+
+### Element CRUD Operations
+
+| Operation | Trigger | Desktop Input | Mobile Input | Mutation | Cache Update |
+|---|---|---|---|---|---|
+| **Create** | Add toolbar/bottom sheet | Click type in menu | Tap type in bottom sheet | `createTemplateElement` | Append to element list |
+| **Update** | Save button in panel/dialog | Click Save | Tap Save in dialog | `updateTemplateElement` | Modify in cache by id |
+| **Delete** | Delete button + confirm | Click Delete + confirm dialog | Tap Delete + confirm dialog | `deleteTemplateElement` | Evict from cache by id |
+| **Duplicate** | Context menu / keyboard | Ctrl+D or right-click → Duplicate | Not available | `duplicateTemplateElement` | Append duplicate to list |
+| **Copy** | Context menu / keyboard | Ctrl+C | Not available | — (clipboard in store) | — |
+| **Paste** | Context menu / keyboard | Ctrl+V | Not available | `createTemplateElement` (from clipboard) | Append to list |
+
+### Keyboard Shortcuts (Desktop)
+
+| Shortcut | Action | Condition |
+|---|---|---|
+| Ctrl+D | Duplicate selected element | When element is selected |
+| Ctrl+C | Copy selected element to clipboard | When element is selected |
+| Ctrl+V | Paste clipboard element (offset +20,+20) | When clipboard has element |
+| Delete | Delete selected element (opens confirmation) | When element is selected and not locked |
+| Escape | Deselect element (or cancel drag) | When element is selected |
+
+### Z-Order Operations
+
+| Operation | Desktop Input | Mobile Input | Effect |
+|---|---|---|---|
+| **Bring Forward** | Context menu or Ctrl+] | Not available (use up/down reorder) | Swap z-index with element above |
+| **Send Backward** | Context menu or Ctrl+[ | Not available | Swap z-index with element below |
+| **Bring to Front** | Context menu | Not available | Set z-index to max+1 |
+| **Send to Back** | Context menu | Not available | Set z-index to 0, shift others up |
+| **Drag Reorder** | Drag in layer panel | Not available | Batch reorder via @dnd-kit, renormalize to 0..N |
+| **Up/Down Reorder** | Not available | Up/down buttons in list row | Swap z-index with adjacent |
+
+### Visibility & Lock
+
+| Toggle | Behavior | Persistence |
+|---|---|---|
+| **Visibility (eye)** | Toggles `hidden` flag. Hidden element: not rendered on canvas, not in PDF, still in layer panel (dimmed) | Immediate optimistic update via `updateTemplateElement` |
+| **Lock (padlock)** | Toggles `locked` flag. Locked element: cannot be dragged/resized/rotated on canvas, but can still be selected and properties edited | Immediate optimistic update via `updateTemplateElement` |
+
+### Context Menu (Desktop)
+
+Opened on right-click on a canvas element. Renders `ElementContextMenu.desktop.tsx`:
+- `Bring Forward` (i18n: `actions.bringForward`)
+- `Send Backward` (i18n: `actions.sendBackward`)
+- `Bring to Front` (i18n: `actions.bringToFront`)
+- `Send to Back` (i18n: `actions.sendToBack`)
+- Divider
+- `Duplicate` (i18n: `actions.duplicate`)
+- `Copy` (i18n: `actions.copy`)
+- `Paste` (i18n: `actions.paste`) — disabled if clipboard empty
+- Divider
+- `Delete` (i18n: `actions.delete`) — red text (`sx={{ color: theme.palette.error.main }}`)
+
+---
+
+## 6F. Accessibility Specification
+
+### Layer Panel a11y
+
+- `LayerPanelSection` root: `role="listbox"`, `aria-label` from i18n "Layers panel"
+- `LayerPanelItem` root: `role="option"`, `aria-selected={selected}`, `aria-label` = element type + label
+- Drag handle: `aria-label` "Drag to reorder {elementLabel}"
+- Visibility toggle: `aria-label` "Hide element {elementLabel}" / "Show element {elementLabel}"
+- Lock toggle: `aria-label` "Lock element {elementLabel}" / "Unlock element {elementLabel}"
+
+### Property Panel a11y
+
+- All MUI `TextField`s have `label` from i18n (MUI renders `<label>` automatically)
+- All `Select`s have `label` from i18n
+- `ColorPickerField`: hex `TextField` has `label` + `aria-label` includes field name (e.g., "Text color hex value")
+- `ColorPickerField` swatch button: has `aria-label` "Open color picker for {fieldLabel}"
+- Save/Discard/Delete buttons: `aria-label` from i18n
+- Accordion section titles: `AccordionSummary` renders as a button with accessible name from i18n
+
+### Dialog a11y
+
+- All `Dialog`s use MUI `Dialog` with `aria-labelledby` pointing to the dialog title
+- Delete confirmation dialog: `aria-labelledby="delete-element-dialog-title"`
+- Unsaved changes dialog: `aria-labelledby="unsaved-changes-dialog-title"`
+- Mobile edit dialog: `aria-labelledby="element-edit-dialog-title"`
+- Focus trap automatically provided by MUI `Dialog`
+- Focus restoration: MUI Dialog restores focus to triggering element on close
+
+### Keyboard Navigation
+
+- `Tab` moves through property panel fields in logical order (Position → Content → Appearance → Advanced)
+- `Enter` on focused textarea does not submit form; Save is a separate button
+- Layer panel: `Tab` to focus, `Space` to grab, `Arrow` keys to reorder, `Space` to drop
+- Canvas elements (Plan 11): `Tab` to focus element, `Arrow` keys to nudge position
+
+### Color Contrast
+
+- All colors come from theme palette (no hardcoded colors)
+- Error states use `theme.palette.error.main` for helper text
+- Selected layer row uses `theme.palette.action.selected` background
+- Active drag handle uses `theme.palette.primary.main` color
+
+### Screen Reader Announcements
+
+- Layer panel drag: `DndContext` `accessibility.announcements` prop provides stock announcements for pick up/move/drop
+- Form validation errors: `aria-live="polite"` region displays error count ("3 validation errors")
+- Save success: snackbar announcement "Element saved"
+- Delete success: snackbar announcement "Element deleted"
+
+---
+
+## 7. Desktop vs Mobile Design Comparison
+
+| Aspect | Desktop | Mobile |
+|---|---|---|
+| Element addition | Toolbar dropdown above canvas | FAB → bottom sheet with type options |
+| Element selection | Click on canvas or click layer panel row | Tap on list row |
+| Element editing | Property panel right sidebar (always visible) | Full-screen dialog (opened on tap) |
+| Position editing | Drag on canvas (Plan 11) + numeric inputs in panel | Numeric inputs only in dialog |
+| Size editing | Resize handles on canvas (Plan 11) + numeric inputs | Numeric inputs only in dialog |
+| Z-index reorder | Drag in layer panel + context menu (bring forward/backward) | Up/down buttons on each list row |
+| Layer panel | Left sidebar with visibility/lock/drag | Not applicable (list view IS the layer view) |
+| Delete | Button in property panel + context menu on canvas | Button in edit dialog |
+| Dashboard entry | Select element on canvas → panel auto-opens | Tap element → dialog opens |
+
+---
+
+## 8. Error Handling Strategy
+
+| Error Type | Handling |
+|---|---|
+| Network error during mutation | Apollo error link handles global error toast; form shows error state |
+| Permission denied | Mutation returns error; ViewModel shows permission error via i18n `errors.permissionDenied` |
+| Validation error (client-side) | Inline field error messages; save button stays clickable but mutation not fired |
+| Element not found (deleted elsewhere) | Mutation returns error; cache evict stale element; show toast "Element not found" |
+| Template in published state | Attempting to edit elements shows error: "Cannot edit elements of a published template" (i18n key) |
+
+---
+
+## 9. UX / Navigation Specification
+
+### Routes
+
+This plan does not create new routes — it enhances the template editor page from Plan 10:
+- `app/(dashboard)/certificates/templates/[templateId]/` → TemplateEditorContainer (shared with Plans 10–15)
+- This plan's components are rendered as children/sections within that editor
+
+### Sidebar Navigation
+
+Not applicable — this is a sub-page of the template editor, accessed from the template list (Plan 8).
+
+### Roles & Permissions
+
+| Permission | Who | Action |
+|---|---|---|
+| `certificates.templates.manage` | Admin | All element CRUD: create, read, update, delete, duplicate, reorder, visibility, lock |
+
+Permission checks occur in the Container via `<RequirePermission permission="certificates.templates.manage">` and on each mutation via GraphQL auth scopes (Plan 5). There is NO per-element-type or per-action sub-permission — `certificates.templates.manage` is the single canonical permission from `INTER_PLAN_CONTRACTS.md`.
+
+### Desktop/Mobile Breakdown
+
+The `ResponsiveViewSwitch` in the Container (from Plan 10) handles tier switching. This plan contributes:
+- Desktop: Property panel section + layer panel section (rendered as sidebars in the desktop editor layout)
+- Mobile: Element list section + element edit dialog (rendered as main content in the mobile editor)
+
+---
+
+## 10. Data Model References
+
+### Tables Read/Written
+
+| Table | Operation | Plan |
+|---|---|---|
+| `certificate_template_elements` | CRUD | Plan 1 (schema), Plan 3 (repo), Plan 5 (GraphQL) |
+| `certificate_static_text_elements` | CRUD | Plan 1, 3, 5 |
+| `certificate_data_text_elements` | CRUD | Plan 1, 3, 5 |
+| `certificate_data_date_elements` | CRUD | Plan 1, 3, 5 |
+| `certificate_image_elements` | CRUD | Plan 1, 3, 5 |
+| `certificate_qr_code_elements` | CRUD | Plan 1, 3, 5 |
+| `certificate_shape_elements` | CRUD | Plan 1, 3, 5 |
+| `certificate_template_variables` | Read only (for variable dropdowns) | Plan 1, 3, 5, 13 |
+
+### GraphQL Operations Consumed
+
+| Operation | From Plan | Purpose |
+|---|---|---|
+| `createTemplateElement` mutation | Plan 5 | Create element |
+| `updateTemplateElement` mutation | Plan 5 | Update element |
+| `deleteTemplateElement` mutation | Plan 5 | Delete element |
+| `duplicateTemplateElement` mutation | Plan 5 | Duplicate element |
+| `reorderTemplateElements` mutation | Plan 5 | Batch z-index reorder |
+| `templateElements` query (fragment) | Plan 5/11 | Load elements for canvas + layer panel |
+| `templateVariables` query | Plan 5/13 | Variable dropdown for data elements |
+
+---
+
+## 11. i18n Design
+
+### Namespace Structure
+
+`certificates.templates.editor` — nested sub-domains within the flat dashboard namespace handle `Translation.Dashboard.CertificateTemplateElements`:
+
+- `elementTypes.*` — element type labels (6 keys)
+- `properties.*` — property field labels (all properties across all element types)
+- `sections.*` — property panel section headers
+- `actions.*` — action button and context menu labels
+- `errors.*` — validation error messages
+- `dialogs.*` — dialog titles, messages, button labels
+- `qrErrorCorrection.*` — QR error correction level labels (4 keys)
+- `shapeTypes.*` — shape type labels (3 keys)
+- `fitModes.*` — image fit mode labels (4 keys)
+- `fontWeights.*` — font weight labels (4 keys)
+- `textTransforms.*` — text transform labels (4 keys)
+- `layerPanel.*` — layer panel labels (header, empty state, visibility, lock)
+- `emptyState.*` — property panel empty state messages
+- `multiSelect.*` — multi-select badge messages
+
+### Complete i18n Key Catalog
+
+#### `elementTypes` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `elementTypes.staticText` | "Static Text" | "نص ثابت" |
+| `elementTypes.dataText` | "Data Text" | "نص بيانات" |
+| `elementTypes.dataDate` | "Data Date" | "تاريخ بيانات" |
+| `elementTypes.image` | "Image" | "صورة" |
+| `elementTypes.qrCode` | "QR Code" | "رمز QR" |
+| `elementTypes.shape` | "Shape" | "شكل" |
+
+#### `properties` Sub-domain (all property field labels)
+
+| Key | English | Arabic |
+|---|---|---|
+| `properties.textContent` | "Text Content" | "محتوى النص" |
+| `properties.fontFamily` | "Font Family" | "عائلة الخط" |
+| `properties.fontSize` | "Font Size" | "حجم الخط" |
+| `properties.fontWeight` | "Font Weight" | "وزن الخط" |
+| `properties.textColor` | "Text Color" | "لون النص" |
+| `properties.textAlign` | "Text Alignment" | "محاذاة النص" |
+| `properties.lineHeight` | "Line Height" | "ارتفاع السطر" |
+| `properties.variableId` | "Variable" | "المتغير" |
+| `properties.textTransform` | "Text Transform" | "تحويل النص" |
+| `properties.dateFormat` | "Date Format" | "تنسيق التاريخ" |
+| `properties.customFormat` | "Custom Format" | "تنسيق مخصص" |
+| `properties.locale` | "Locale" | "اللغة المحلية" |
+| `properties.imageUrl` | "Image URL" | "رابط الصورة" |
+| `properties.altText` | "Alt Text" | "نص بديل" |
+| `properties.fitMode` | "Fit Mode" | "وضع الملاءمة" |
+| `properties.borderRadius` | "Border Radius" | "نصف قطر الحدود" |
+| `properties.qrDataSource` | "QR Data Source" | "مصدر بيانات QR" |
+| `properties.qrCustomText` | "Custom QR Text" | "نص QR مخصص" |
+| `properties.qrSize` | "QR Size" | "حجم QR" |
+| `properties.qrErrorCorrection` | "Error Correction" | "تصحيح الأخطاء" |
+| `properties.qrMargin` | "QR Margin" | "هامش QR" |
+| `properties.shapeType` | "Shape Type" | "نوع الشكل" |
+| `properties.fillColor` | "Fill Color" | "لون التعبئة" |
+| `properties.borderColor` | "Border Color" | "لون الحدود" |
+| `properties.borderWidth` | "Border Width" | "عرض الحدود" |
+| `properties.borderStyle` | "Border Style" | "نمط الحدود" |
+| `properties.xCoordinate` | "X Position" | "الموضع X" |
+| `properties.yCoordinate` | "Y Position" | "الموضع Y" |
+| `properties.width` | "Width" | "العرض" |
+| `properties.height` | "Height" | "الارتفاع" |
+| `properties.rotation` | "Rotation" | "التدوير" |
+| `properties.zIndex` | "Z-Index" | "مؤشر Z" |
+| `properties.opacity` | "Opacity" | "الشفافية" |
+
+#### `sections` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `sections.position` | "Position" | "الموضع" |
+| `sections.content` | "Content" | "المحتوى" |
+| `sections.appearance` | "Appearance" | "المظهر" |
+| `sections.advanced` | "Advanced" | "متقدم" |
+| `sections.textContent` | "Text Content" | "محتوى النص" |
+| `sections.dataText` | "Data Text" | "نص البيانات" |
+| `sections.dateFormat` | "Date Format" | "تنسيق التاريخ" |
+| `sections.image` | "Image" | "الصورة" |
+| `sections.qrCode` | "QR Code" | "رمز QR" |
+| `sections.shape` | "Shape" | "الشكل" |
+
+#### `actions` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `actions.save` | "Save" | "حفظ" |
+| `actions.discard` | "Discard" | "تجاهل" |
+| `actions.delete` | "Delete" | "حذف" |
+| `actions.duplicate` | "Duplicate" | "نسخ مكرر" |
+| `actions.copy` | "Copy" | "نسخ" |
+| `actions.paste` | "Paste" | "لصق" |
+| `actions.bringForward` | "Bring Forward" | "إحضار للأمام" |
+| `actions.sendBackward` | "Send Backward" | "إرسال للخلف" |
+| `actions.bringToFront` | "Bring to Front" | "إحضار للمقدمة" |
+| `actions.sendToBack` | "Send to Back" | "إرسال للمؤخرة" |
+| `actions.addElement` | "Add Element" | "إضافة عنصر" |
+| `actions.close` | "Close" | "إغلاق" |
+| `actions.uploadImage` | "Browse" | "تصفح" |
+| `actions.confirmDelete` | "Confirm Delete" | "تأكيد الحذف" |
+| `actions.cancel` | "Cancel" | "إلغاء" |
+| `actions.saveAnyway` | "Save Anyway" | "حفظ على أي حال" |
+| `actions.discardChanges` | "Discard Changes" | "تجاهل التغييرات" |
+
+#### `errors` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `errors.textContentRequired` | "Text content is required" | "محتوى النص مطلوب" |
+| `errors.textContentTooLong` | "Text content must be at most 1000 characters" | "يجب ألا يتجاوز محتوى النص 1000 حرف" |
+| `errors.fontSizeRange` | "Font size must be between 1 and 200" | "حجم الخط يجب أن يكون بين 1 و 200" |
+| `errors.lineHeightRange` | "Line height must be between 0.5 and 3.0" | "ارتفاع السطر يجب أن يكون بين 0.5 و 3.0" |
+| `errors.variableRequired` | "A variable must be selected" | "يجب اختيار متغير" |
+| `errors.variableMustBeDate` | "A date-type variable must be selected" | "يجب اختيار متغير من نوع تاريخ" |
+| `errors.customFormatRequired` | "Custom format is required when date format is 'custom'" | "التنسيق المخصص مطلوب عندما يكون تنسيق التاريخ 'مخصص'" |
+| `errors.imageUrlRequired` | "Image URL is required" | "رابط الصورة مطلوب" |
+| `errors.imageUrlTooLong` | "Image URL must be at most 500 characters" | "يجب ألا يتجاوز رابط الصورة 500 حرف" |
+| `errors.qrCustomTextRequired` | "Custom QR text is required when data source is 'custom text'" | "نص QR المخصص مطلوب عندما يكون مصدر البيانات 'نص مخصص'" |
+| `errors.qrSizeRange` | "QR size must be between 32 and 512" | "حجم QR يجب أن يكون بين 32 و 512" |
+| `errors.qrMarginRange` | "QR margin must be between 0 and 50" | "هامش QR يجب أن يكون بين 0 و 50" |
+| `errors.borderWidthRange` | "Border width must be between 0 and 20" | "عرض الحدود يجب أن يكون بين 0 و 20" |
+| `errors.xOutOfRange` | "X position must be within template bounds" | "الموضع X يجب أن يكون ضمن حدود القالب" |
+| `errors.yOutOfRange` | "Y position must be within template bounds" | "الموضع Y يجب أن يكون ضمن حدود القالب" |
+| `errors.widthMustBePositive` | "Width must be greater than 0" | "العرض يجب أن يكون أكبر من 0" |
+| `errors.heightMustBePositive` | "Height must be greater than 0" | "الارتفاع يجب أن يكون أكبر من 0" |
+| `errors.rotationRange` | "Rotation must be between 0 and 360" | "التدوير يجب أن يكون بين 0 و 360" |
+| `errors.opacityRange` | "Opacity must be between 0 and 100" | "الشفافية يجب أن تكون بين 0 و 100" |
+| `errors.invalidHexColor` | "Color must be a valid hex value (e.g., #FF5733)" | "اللون يجب أن يكون قيمة سداسية عشرية صالحة" |
+| `errors.permissionDenied` | "You do not have permission to manage template elements" | "ليس لديك صلاحية لإدارة عناصر القالب" |
+| `errors.templatePublished` | "Cannot edit elements of a published template" | "لا يمكن تعديل عناصر قالب منشور" |
+| `errors.elementNotFound` | "Element not found" | "العنصر غير موجود" |
+| `errors.uploadFailed` | "Image upload failed" | "فشل رفع الصورة" |
+| `errors.optimisticLockFailed` | "This template has been modified by another user. Please refresh and try again." | "تم تعديل هذا القالب بواسطة مستخدم آخر. يرجى التحديث والمحاولة مرة أخرى." |
+
+#### `dialogs` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `dialogs.deleteTitle` | "Delete Element" | "حذف العنصر" |
+| `dialogs.deleteMessage` | "Are you sure you want to delete this {elementType}?" (interpolated) | "هل أنت متأكد من حذف هذا {elementType}؟" |
+| `dialogs.unsavedChangesTitle` | "Unsaved Changes" | "تغييرات غير محفوظة" |
+| `dialogs.unsavedChangesMessage` | "You have unsaved changes. What would you like to do?" | "لديك تغييرات غير محفوظة. ماذا تريد أن تفعل؟" |
+| `dialogs.unsavedChangesSave` | "Save Changes" | "حفظ التغييرات" |
+| `dialogs.unsavedChangesDiscard` | "Discard Changes" | "تجاهل التغييرات" |
+| `dialogs.unsavedChangesCancel` | "Cancel" | "إلغاء" |
+
+#### Enum Label Sub-domains
+
+**`qrErrorCorrection` (4 keys):**
+
+| Key | English | Arabic |
+|---|---|---|
+| `qrErrorCorrection.L` | "Low (7% recovery)" | "منخفض (استرجاع 7%)" |
+| `qrErrorCorrection.M` | "Medium (15% recovery)" | "متوسط (استرجاع 15%)" |
+| `qrErrorCorrection.Q` | "Quartile (25% recovery)" | "ربع (استرجاع 25%)" |
+| `qrErrorCorrection.H` | "High (30% recovery)" | "عالي (استرجاع 30%)" |
+
+**`shapeTypes` (3 keys):**
+
+| Key | English | Arabic |
+|---|---|---|
+| `shapeTypes.rectangle` | "Rectangle" | "مستطيل" |
+| `shapeTypes.circle` | "Circle" | "دائرة" |
+| `shapeTypes.line` | "Line" | "خط" |
+
+**`fitModes` (4 keys):**
+
+| Key | English | Arabic |
+|---|---|---|
+| `fitModes.contain` | "Contain" | "احتواء" |
+| `fitModes.cover` | "Cover" | "تغطية" |
+| `fitModes.fill` | "Fill" | "ملء" |
+| `fitModes.none` | "None" | "بدون" |
+
+**`fontWeights` (4 keys):**
+
+| Key | English | Arabic |
+|---|---|---|
+| `fontWeights.400` | "Regular" | "عادي" |
+| `fontWeights.500` | "Medium" | "متوسط" |
+| `fontWeights.600` | "Semi-Bold" | "شبه عريض" |
+| `fontWeights.700` | "Bold" | "عريض" |
+
+**`textTransforms` (4 keys):**
+
+| Key | English | Arabic |
+|---|---|---|
+| `textTransforms.none` | "None" | "بدون" |
+| `textTransforms.uppercase` | "UPPERCASE" | "أحرف كبيرة" |
+| `textTransforms.lowercase` | "lowercase" | "أحرف صغيرة" |
+| `textTransforms.capitalize` | "Capitalize" | "أحرف كبيرة أولية" |
+
+**`layerPanel` (4 keys):**
+
+| Key | English | Arabic |
+|---|---|---|
+| `layerPanel.header` | "Layers" | "الطبقات" |
+| `layerPanel.empty` | "No elements yet. Click 'Add Element' to begin." | "لا توجد عناصر بعد. انقر على 'إضافة عنصر' للبدء." |
+| `layerPanel.showElement` | "Show element" | "إظهار العنصر" |
+| `layerPanel.hideElement` | "Hide element" | "إخفاء العنصر" |
+| `layerPanel.lockElement` | "Lock element" | "قفل العنصر" |
+| `layerPanel.unlockElement` | "Unlock element" | "فتح العنصر" |
+| `layerPanel.dragToReorder` | "Drag to reorder" | "اسحب لإعادة الترتيب" |
+
+**`emptyState` (1 key):**
+
+| Key | English | Arabic |
+|---|---|---|
+| `emptyState.selectElement` | "Select an element to edit its properties" | "اختر عنصراً لتعديل خصائصه" |
+
+**`multiSelect` (3 keys):**
+
+| Key | English | Arabic |
+|---|---|---|
+| `multiSelect.elementsSelected` | "{count} elements selected" (interpolated with count) | "{count} عناصر محددة" |
+| `multiSelect.batchDelete` | "Delete Selected" | "حذف المحدد" |
+| `multiSelect.batchLock` | "Lock Selected" | "قفل المحدد" |
+
+### Translation System Integration
+
+- Desktop and mobile views use `useAppTranslation(Translation.Dashboard.CertificateTemplateElements)` from `@/shared/locale/client` (handle pattern — takes a `NamespaceHandle` object from the `Translation` const, NOT a string)
+- Error messages resolved in the ViewModel hook (not in tier views)
+- Interpolation: `dialogs.deleteMessage` uses `elementType` parameter (the translated element type label); `multiSelect.elementsSelected` uses `count` parameter
+- Pluralization: `multiSelect.elementsSelected` may use `(count: number) => string` plural form for Arabic (one/few/many rules)
+
+### Additional i18n Keys for Interaction States
+
+The following additional keys are required for element interaction state labels and accessibility announcements:
+
+#### `interactionStates` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `interactionStates.selected` | "Selected" | "محدد" |
+| `interactionStates.hovered` | "Hovered" | "ممرر عليه" |
+| `interactionStates.dragging` | "Dragging" | "يتم سحبه" |
+| `interactionStates.resizing` | "Resizing" | "يتم تغيير حجمه" |
+| `interactionStates.focused` | "Focused" | "مُركّز عليه" |
+| `interactionStates.disabled` | "Disabled" | "معطل" |
+| `interactionStates.locked` | "Locked" | "مقفل" |
+| `interactionStates.hidden` | "Hidden" | "مخفي" |
+
+#### `resizeHandles` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `resizeHandles.nw` | "Resize top-left" | "تغيير الحجم أعلى اليسار" |
+| `resizeHandles.n` | "Resize top" | "تغيير الحجم أعلى" |
+| `resizeHandles.ne` | "Resize top-right" | "تغيير الحجم أعلى اليمين" |
+| `resizeHandles.e` | "Resize right" | "تغيير الحجم يمين" |
+| `resizeHandles.se` | "Resize bottom-right" | "تغيير الحجم أسفل اليمين" |
+| `resizeHandles.s` | "Resize bottom" | "تغيير الحجم أسفل" |
+| `resizeHandles.sw` | "Resize bottom-left" | "تغيير الحجم أسفل اليسار" |
+| `resizeHandles.w` | "Resize left" | "تغيير الحجم يسار" |
+| `resizeHandles.rotate` | "Rotate" | "تدوير" |
+
+#### `propertyPanelStates` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `propertyPanelStates.noSelection` | "Select an element to edit its properties" | "اختر عنصراً لتعديل خصائصه" |
+| `propertyPanelStates.singleSelection` | "Editing {elementType}" (interpolated) | "تحرير {elementType}" |
+| `propertyPanelStates.multiSelection` | "{count} elements selected" (interpolated) | "{count} عناصر محددة" |
+| `propertyPanelStates.locked` | "This element is locked. Unlock to edit." | "هذا العنصر مقفل. افتح القفل للتعديل." |
+| `propertyPanelStates.noPermission` | "You don't have permission to edit elements" | "ليس لديك صلاحية لتعديل العناصر" |
+| `propertyPanelStates.saving` | "Saving..." | "جاري الحفظ..." |
+| `propertyPanelStates.deleting` | "Deleting..." | "جاري الحذف..." |
+
+#### `canvasStates` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `canvasStates.empty` | "No elements on canvas. Click 'Add Element' to start." | "لا توجد عناصر على اللوحة. انقر على 'إضافة عنصر' للبدء." |
+| `canvasStates.dragging` | "Dragging element..." | "جاري سحب العنصر..." |
+| `canvasStates.resizing` | "Resizing element..." | "جاري تغيير حجم العنصر..." |
+| `canvasStates.rotating` | "Rotating element..." | "جاري تدوير العنصر..." |
+| `canvasStates.multiSelect` | "Multi-select active. Click to add to selection." | "تحديد متعدد نشط. انقر لإضافة للتحديد." |
+
+#### `toastMessages` Sub-domain
+
+| Key | English | Arabic |
+|---|---|---|
+| `toastMessages.elementCreated` | "Element created" | "تم إنشاء العنصر" |
+| `toastMessages.elementUpdated` | "Element updated" | "تم تحديث العنصر" |
+| `toastMessages.elementDeleted` | "Element deleted" | "تم حذف العنصر" |
+| `toastMessages.elementDuplicated` | "Element duplicated" | "تم نسخ العنصر" |
+| `toastMessages.elementsReordered` | "Elements reordered" | "تم إعادة ترتيب العناصر" |
+| `toastMessages.visibilityToggled` | "Visibility toggled" | "تم تبديل الرؤية" |
+| `toastMessages.lockToggled` | "Lock toggled" | "تم تبديل القفل" |
+| `toastMessages.copiedToClipboard` | "Copied to clipboard" | "تم النسخ إلى الحافظة" |
+| `toastMessages.pastedFromClipboard` | "Pasted from clipboard" | "تم اللصق من الحافظة" |
+
+---
+
+### Element Interaction States Specification
+
+This section defines the visual and behavioral states for each element type across desktop and mobile tiers.
+
+#### Desktop Canvas Element States
+
+| State | Visual Indicators | Behavior | Applicable Element Types |
+|---|---|---|---|
+| **Default** | Standard rendering, no selection outline | Click to select; drag to move | All |
+| **Hovered** | Subtle outline (2px, `theme.palette.primary.light`), cursor changes to `move` | Preview selection; show tooltip with element type | All |
+| **Selected** | Primary color outline (2px, `theme.palette.primary.main`), 8 resize handles visible at corners and edges, rotate handle above top-center | Drag to move; drag handles to resize; drag rotate handle to rotate; arrow keys nudge 1px | All |
+| **Dragging** | Semi-transparent ghost (opacity 0.5), original position shows placeholder outline | Follows pointer; snap to grid if enabled; other elements don't react | All |
+| **Resizing** | Active handle highlighted (primary color, 16px hit area), opposite handle fixed, live dimension tooltip | Constrained by min/max size; aspect ratio lock with Shift; snaps to grid | All |
+| **Rotating** | Rotate handle highlighted, rotation angle tooltip near cursor | Rotation around center; snaps to 15° increments with Shift | All |
+| **Focused (keyboard)** | Same as Selected + focus ring (2px, `theme.palette.primary.main`, offset 2px) | Arrow keys nudge; Enter/Space activates; Escape deselects | All |
+| **Locked** | Lock icon overlay (top-right), no resize/rotate handles, cursor `not-allowed` on drag attempt | Click selects; drag/resize/rotate blocked; properties editable in panel | All |
+| **Hidden** | Not rendered on canvas; layer panel row dimmed (opacity 0.4) | Click in layer panel selects; eye toggle restores visibility | All |
+| **Multi-selected** | Each element shows selected outline; no individual resize handles; group bounding box with 8 handles | Drag group moves all; group resize scales all proportionally; context menu shows batch actions | All |
+
+#### Mobile Element List/Dialog States
+
+| State | Visual Indicators | Behavior |
+|---|---|---|
+| **List Row Default** | Type icon + label, full opacity | Tap opens edit dialog |
+| **List Row Selected** | Primary background tint (`theme.palette.action.selected`), left border accent (3px primary) | Indicates current editing element |
+| **List Row Hidden** | Opacity 0.5, `VisibilityOffOutlined` icon suffix | Tap still opens dialog |
+| **List Row Locked** | `LockOutlined` icon overlay on type icon | Tap opens dialog (read-only if locked) |
+| **Edit Dialog Open** | Full-screen, backdrop blur, focus trapped | Back swipe or close button dismisses |
+| **Dialog Saving** | Save button shows `CircularProgress`, disabled | Prevents double-submit |
+| **Dialog Deleting** | Delete button shows `CircularProgress` | Confirms before action |
+| **Dialog Dirty** | Discard button visible, Save button primary | Unsaved changes warning on close |
+| **Bottom Sheet Open** | Slides up from bottom, drag handle at top | Tap type creates element, auto-closes |
+| **Mini-Canvas** | Scaled preview (120×80px), element highlighted in primary | Read-only spatial reference |
+
+#### Resize Handle Specifications (Desktop)
+
+| Handle | Position | Cursor | Min Size Constraints | Element Types |
+|---|---|---|---|---|
+| NW (top-left) | (-8, -8) from top-left | `nwse-resize` | width ≥ minWidth, height ≥ minHeight | All |
+| N (top-center) | (width/2 - 8, -8) | `ns-resize` | height ≥ minHeight | All |
+| NE (top-right) | (width - 8, -8) | `nesw-resize` | width ≥ minWidth, height ≥ minHeight | All |
+| E (middle-right) | (width - 8, height/2 - 8) | `ew-resize` | width ≥ minWidth | All |
+| SE (bottom-right) | (width - 8, height - 8) | `nwse-resize` | width ≥ minWidth, height ≥ minHeight | All |
+| S (bottom-center) | (width/2 - 8, height - 8) | `ns-resize` | height ≥ minHeight | All |
+| SW (bottom-left) | (-8, height - 8) | `nesw-resize` | width ≥ minWidth, height ≥ minHeight | All |
+| W (middle-left) | (-8, height/2 - 8) | `ew-resize` | width ≥ minWidth | All |
+| Rotate | (width/2 - 8, -32) | `grab` / `grabbing` | — | All |
+
+**Min sizes per element type:**
+- `static_text`, `data_text`, `data_date`: 40×20px
+- `image`: 32×32px
+- `qr_code`: 32×32px (square enforced)
+- `shape` (rectangle/circle): 20×20px; (line): 20×2px
+
+#### Keyboard Navigation Flow (Desktop)
+
+| Context | Tab Order | Arrow Keys | Enter/Space | Escape |
+|---|---|---|---|---|
+| **Layer Panel** | Items top→bottom | Up/Down moves focus; Space picks up for reorder | Space picks up/drops | Deselects / closes context menu |
+| **Canvas** | Elements by z-index | Nudge selected 1px (Shift: 10px) | — | Deselects |
+| **Property Panel** | Fields top→bottom per section | — | Activates focused button | — |
+| **Context Menu** | Items top→bottom | Up/Down navigates | Activates item | Closes menu |
+| **Edit Dialog (Mobile)** | Fields top→bottom | — | Activates focused button | Closes dialog (with dirty check) |
+
+---
+
+### UX / Navigation Specification (Expanded)
+
+#### Desktop Three-Pane Layout Behavior
+
+| Pane | Width | Collapse Behavior | Resize Handle |
+|---|---|---|---|
+| Layer Panel (left) | 240px expanded, 56px collapsed | Icon-only mode shows drag handle + collapse toggle | Vertical divider (drag to resize 180–320px) |
+| Canvas (center) | Flex: 1 (fills remaining) | N/A | N/A |
+| Property Panel (right) | 320px fixed | N/A | N/A |
+
+**Panel Transitions:**
+- Layer panel collapse/expand: 200ms ease-out animation
+- Property panel content swap (selection change): 150ms cross-fade
+- Context menu appear: 100ms fade + scale(0.95→1)
+- Dialog appear: 200ms fade + slide up
+
+#### Focus Management Rules
+
+1. **Initial Focus**: On editor load, focus goes to canvas (for keyboard canvas navigation)
+2. **Element Selection**: When element selected via click, focus stays on canvas; property panel updates without focus shift
+3. **Layer Panel Click**: Focus moves to clicked layer item (for keyboard reorder)
+4. **Property Panel Edit**: First `Tab` from canvas moves to first field in Position section
+5. **Dialog Open (Mobile)**: Focus trapped in dialog; first focusable element is close button
+6. **Dialog Close**: Focus returns to triggering element (list row or FAB)
+7. **Context Menu**: Focus on first menu item; `Escape` returns focus to canvas element
+7. **Unsaved Changes Dialog**: Focus on "Save Changes" button (primary action)
+
+#### Keyboard Shortcut Summary (Desktop)
+
+| Shortcut | Action | Scope | Conflict Avoidance |
+|---|---|---|---|
+| `Ctrl+D` | Duplicate selected element(s) | Canvas focused | Disabled when typing in TextField |
+| `Delete` / `Backspace` | Delete selected (with confirm) | Canvas focused | Disabled when typing in TextField |
+| `Ctrl+C` | Copy selected to clipboard | Canvas focused | Disabled when typing in TextField |
+| `Ctrl+V` | Paste from clipboard (offset +20,+20) | Canvas focused | Disabled when typing in TextField |
+| `Ctrl+]` | Bring forward | Canvas focused | Disabled when typing in TextField |
+| `Ctrl+[` | Send backward | Canvas focused | Disabled when typing in TextField |
+| `Ctrl+Shift+]` | Bring to front | Canvas focused | Disabled when typing in TextField |
+| `Ctrl+Shift+[` | Send to back | Canvas focused | Disabled when typing in TextField |
+| `Escape` | Deselect / close dialog/menu | Global | Always works |
+| `Ctrl+Z` | Undo (Plan 11 canvas store) | Canvas focused | — |
+| `Ctrl+Shift+Z` / `Ctrl+Y` | Redo (Plan 11 canvas store) | Canvas focused | — |
+| `Tab` | Next focusable | Global | — |
+| `Shift+Tab` | Previous focusable | Global | — |
+
+#### Mobile Navigation Flow
+
+1. **Editor Entry** → Element List (scrollable)
+2. **Tap Row** → Element Edit Dialog (full-screen)
+3. **Dialog Save/Delete** → Return to List (auto-scroll to edited item)
+4. **FAB Tap** → Add Element Bottom Sheet
+5. **Bottom Sheet Tap Type** → Create Element → Return to List (new item at top)
+6. **Back Swipe / Close** → Return to Template List (Plan 10)
+
+---
+
+### Error Handling Strategy (Expanded)
+
+| Error Type | Detection Point | User Feedback | Recovery Action |
+|---|---|---|---|
+| **Network error (mutation)** | Apollo error link / `onError` callback | Toast: `errors.networkError` + retry button | Auto-retry on reconnect; manual retry via button |
+| **Permission denied** | GraphQL `errors` array in mutation result | Toast: `errors.permissionDenied` | Disable all edit UI; show read-only state |
+| **Validation error (client)** | `validateElement()` in ViewModel | Inline field helper text (red) + panel error count badge | Fix fields; Save re-enabled when valid |
+| **Validation error (server)** | GraphQL `errors` with `validation` code | Toast + inline field errors mapped from server | Fix fields; Save re-enabled when valid |
+| **Element not found** | Mutation returns `elementNotFound` error | Toast: `errors.elementNotFound` | Evict from cache; refetch element list |
+| **Template published** | `template.status === "published"` check in ViewModel | Banner: `errors.templatePublished` | Disable all edit actions; show read-only |
+| **Optimistic lock conflict** | `expectedTemplateVersion` mismatch | Dialog: `errors.optimisticLockFailed` with Refresh/Discard | Refresh refetches; Discard keeps local draft |
+| **Image upload failed** | Storage service (Plan 7) returns error | Toast: `errors.uploadFailed` + inline error on Image form | Retry upload; fallback to URL input |
+| **Image too large** | Client check before upload (>10MB) | Inline error: `errors.imageTooLarge` | Compress or choose smaller image |
+| **Invalid hex color** | `ColorPickerField` regex validation | Inline error: `errors.invalidHexColor` | Correct hex format or use picker |
+| **Variable not found** | Data element validation | Inline error: `errors.variableNotFound` | Select valid variable or create new (Plan 13) |
+| **QR data too long** | `qrCustomText` > 500 chars or variable preview > 2KB | Inline error: `errors.qrDataTooLong` | Shorten text or use shorter variable |
+
+#### Error Display Patterns
+
+- **Inline field errors**: Red helper text below field (`FormHelperText`), `aria-live="polite"` on error container
+- **Panel-level error count**: Badge on section header showing "3 errors" with `AlertCircleOutlined` icon
+- **Toast notifications**: MUI `Snackbar` auto-dismiss 5s (errors), 3s (success); action button for retry
+- **Dialog errors**: Full-screen dialog for critical errors (conflict, permission, not found)
+- **Banner errors**: Persistent top banner for template-wide state (published, read-only)
+
+---
+
+### Design Decisions (Extended)
+
+| Decision | Rationale | Alternative Considered | Trade-off |
+|---|---|---|---|
+| **Three-pane desktop layout** | Standard design tool pattern; simultaneous layer/canvas/property visibility | Two-pane (layer+canvas or canvas+property) | Requires wider viewport; collapses on small desktop |
+| **Mobile list + full-screen dialog** | No canvas on mobile; numeric inputs precise; full-screen maximizes form space | Bottom sheet forms; slide-over panel | Loses spatial context; mitigated by mini-canvas thumbnail |
+| **Discriminated union `ElementWithDetails`** | Type-safe form dispatch; exhaustive switch checking | Flat `Record<string, unknown>` with runtime checks | Requires GraphQL union/interface on backend; more code gen |
+| **Zustand store for draft only (not selection)** | Single source of truth for selection (Plan 11 canvas store); avoids sync bugs | Separate selection in element editor store | Must subscribe to Plan 11 store via selector; slight coupling |
+| **`@dnd-kit/sortable` for layer reorder** | Installed; accessible keyboard support; `DragOverlay` built-in | Custom drag implementation | Bundle size (~15KB); learning curve |
+| **React-color `ChromePicker` in MUI `Popover`** | Compact; hex TextField for a11y; `disableAlpha` matches opacity separation | MUI `ColorPicker` (v6+) / `react-colorful` | `react-color` unmaintained; planned migration to `@mui/x-color-picker` |
+| **Rotation 0–360 normalized** | Consistent with Plan 11; avoids -180°/+180° ambiguity; PDF render stable | -360 to 360 (original REQ-12.6) | Must normalize on save; migration for existing data |
+| **Z-index renormalization to 0..N** | Prevents sparse drift over time; dense indices simpler for PDF layer order | Relative +1/-1 swaps | Requires batch mutation on every reorder |
+| **No multi-select property editing (v1)** | Complex UX (which values win?); scope containment | Batch property panel | Deferred to v2; multi-select shows batch actions only |
+| **Image max 10MB / 4096px** | PDF generation performance; storage costs | No limit | Coordinate with Plan 7 for server-side resize |
+| **QR `verification_url` data source** | Delegates URL construction to Plan 6 (certificate generation) | Full URL in element | Requires Plan 6 to read `qrDataSource` enum |
+| **Shape types: rectangle, circle, line** | Covers 90% of decorative needs; `line` is distinct from rectangle with 0 fill | Polygon, star, custom SVG | Extensible via `shapeType` enum addition |
+| **Date formats: iso, arabicFullMonth, numeric, custom** | Covers Arabic locale needs (Hijri not in v1) | Full ICU format tokens | Custom format allows flexibility; Hijri in Plan 13+ |
+| **Font picker from `ALLOWED_FONTS` constant** | Security (no arbitrary font injection); PDF font embedding control | Google Fonts API search | Limited to pre-approved fonts; update constant for new fonts |
+| **Color picker no alpha** | Opacity handled separately (0–100 slider); simpler mental model | Full RGBA picker | Two controls for color+opacity; more clicks |
+| **Unsaved changes dialog on element switch** | Prevents accidental data loss; consistent with form patterns | Auto-save draft | More clicks; explicit user intent for save |
+| **Optimistic locking via `expectedTemplateVersion`** | Prevents lost updates in collaborative editing | Last-write-wins | Conflict dialog adds friction; rare in practice |
+| **Permission `certificates.templates.manage` only** | Single canonical permission per `INTER_PLAN_CONTRACTS.md`; no sub-permissions | Per-element-type permissions | All-or-nothing; matches backend scope design |
+
+---
+
+## 13. Element Management UI Components (Round 3 Enhancement)
+
+This section augments the design with additional components surfaced during the interactive element editor review: a full right-sidebar property panel, alignment guide engine, right-click context menu, multi-select toolbar, element library palette, and an extended Zustand store. These complement (do not replace) the components defined in §4 and §9. All new components live under `frontend/views/dashboard/cert/templates/editor/` following the existing tier split.
+
+### 13.A — Element Properties Panel (Right Sidebar)
+
+**Component**: `ElementPropertiesPanel`
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/ElementPropertiesPanel.tsx`
+
+The right sidebar of the desktop editor shows a vertical accordion with three sections. The panel adapts to the currently selected element's type.
+
+**Accordion Sections:**
+
+1. **Position & Size** (expanded by default):
+   - X, Y (number inputs with `px` suffix)
+   - Width, Height (number inputs)
+   - Rotation (slider -180 to 180, with degree `°` suffix)
+   - Lock aspect ratio toggle (checkbox)
+
+2. **Appearance**:
+   - Opacity (slider 0-100)
+   - Border radius (number input, for shapes)
+   - Shadow (dropdown: None, Small, Medium, Large, Custom)
+   - Z-index controls (bring forward, send backward, bring to front, send to back — `IconButton` row)
+
+3. **Element-Specific Properties** (depends on `element.type`):
+   - **Text** (`static_text` / `data_text`): font family, font size, weight, color, alignment, line height, letter spacing
+   - **Image**: source URL, fit mode (contain / cover / fill), border radius, opacity
+   - **Shape**: fill color, border color, border width, border style (solid / dashed / dotted)
+   - **QRCode**: size, error correction level (L / M / Q / H), foreground color, background color
+   - **Signature**: placeholder text, font style (cursive / normal), ink color, stroke width
+   - **Background**: fill type (solid / gradient), color(s), opacity
+
+**Integration notes:**
+- Subscribe to the Plan 11 canvas store for the selected element's common props (X/Y/Width/Height/rotation) — read-only binding, the panel does not own these values (per DD §B canvas↔panel sync direction).
+- Type-specific + opacity props live in the `draftProperties` slice of the Zustand store (see §13.F).
+- When `selectedIds.length === 0`: render `PropertyPanelEmptyState` (see §9.1).
+- When `selectedIds.length > 1`: render `MultiSelectBadge` + batch action buttons (see §13.D), NOT the accordion.
+- Throttle the Position & Size inputs during an active drag/resize (Plan 11 `interactionState !== 'idle'`) to prevent input stutter (SWE review §E perf recommendation).
+
+### 13.B — Alignment Guide Engine
+
+**Component**: `AlignmentGuides`
+**File**: `frontend/views/dashboard/cert/templates/editor/canvas/AlignmentGuides.tsx`
+
+A canvas overlay that renders momentary guide lines while the user drags an element. Overlays the React Flow canvas from Plan 11. Guides are pure visual feedback — they do not mutate element data; snapping adjusts the drag target position.
+
+**Features:**
+- **Smart guides**: vertical/horizontal lines appear when the dragged element's center aligns with another element's center or the canvas center.
+- **Edge guides**: lines appear when the dragged element's edges align with other element edges.
+- **Distribution guides**: equal-spacing indicators when 3+ elements have equal gaps (rendered as arrow lines between elements).
+- **Snap threshold**: 5px (configurable via props; clamps the element into alignment when within the threshold).
+- **Guide color**: `theme.palette.primary.main` at 0.5 opacity (no hardcoded colors — read from theme).
+- **Momentary display**: guides vanish on `pointerup` / drag end.
+
+**Smart guide types:**
+- Center-to-center vertical (left centers aligned)
+- Center-to-center horizontal (top centers aligned)
+- Edge-to-edge (top edges, bottom edges, left edges, right edges)
+- Page center (horizontal center = page width/2, vertical center = page height/2)
+- Page edge (element edge = page margin — 0 offset by default)
+
+**Algorithm sketch:**
+```
+onDragMove(draggedElement):
+  candidates = elements.filter(e => e.id !== draggedElement.id)
+  guides = []
+  for each candidate:
+    if |draggedElement.centerX - candidate.centerX| < threshold: guides.push(verticalLine at candidate.centerX)
+    if |draggedElement.centerY - candidate.centerY| < threshold: guides.push(horizontalLine at candidate.centerY)
+    ...edges...
+  pageCenterX = canvasWidth / 2; pageCenterY = canvasHeight / 2
+  if |draggedElement.centerX - pageCenterX| < threshold: guides.push(verticalLine at pageCenterX)
+  ...page edges...
+  if guides.length > 0: snap the dragged element to the closest guide (within threshold)
+  render guides overlay
+```
+
+**Integration notes:**
+- Imports the canvas dimensions from Plan 11 (`useCanvasStore((s) => ({ width, height }))`).
+- Pure presentational component — no mutations, no clipboard.
+- Memoize guide computation (`useMemo`) keyed on `[elements, draggedId, pointerX, pointerY]`.
+
+### 13.C — Element Context Menu
+
+**Component**: `ElementContextMenu`
+**File**: `frontend/views/dashboard/cert/templates/editor/canvas/ElementContextMenu.tsx`
+
+A right-click context menu for canvas elements. Uses MUI `Menu` (not a custom popover). Opens on the `onContextMenu` event of the canvas element wrapper.
+
+**Trigger**: Right-click on an element in the canvas.
+
+**Menu items (in order):**
+
+| Icon | Label | Shortcut | Action | Disabled state |
+|---|---|---|---|---|
+| ContentCut | Cut | Ctrl+X | `cutSelection()` | element locked |
+| ContentCopy | Copy | Ctrl+C | `copySelection()` | element locked |
+| ContentPaste | Paste | Ctrl+V | `pasteFromClipboard()` | clipboard empty |
+| ContentDuplicate | Duplicate | Ctrl+D | `duplicateElement()` | element locked |
+| Delete | Delete | Del | `deleteElements()` | — |
+| — | Divider | | | |
+| ArrowUpward | Bring to Front | — | `bringToFront()` | already at front |
+| MoveUp | Bring Forward | — | `bringForward()` | already at front |
+| MoveDown | Send Backward | — | `sendBackward()` | already at back |
+| ArrowDownward | Send to Back | — | `sendToBack()` | already at back |
+| — | Divider | | | |
+| — | Align ▸ | | submenu: Left, Center, Right, Top, Middle, Bottom | requires 2+ selected |
+| — | Distribute ▸ | | submenu: Horizontally, Vertically | requires 3+ selected |
+| — | Divider | | | |
+| GroupWork | Group | Ctrl+G | `group()` | requires 2+ selected; already grouped |
+| GroupOff | Ungroup | Ctrl+Shift+G | `ungroup()` | no group selected |
+
+**Positioning**: Menu opens at cursor coordinates `(clientX, clientY)`, clamped to viewport edges so the menu never overflows the window.
+
+**Disabled items**: Rendered grayed out with a tooltip explaining why (e.g. "Clipboard is empty", "Select 2+ elements to align", "Element is locked").
+
+**Keyboard**: Full arrow-key navigation (MUI `Menu` provides this by default). `Escape` closes. `Enter` triggers the focused item.
+
+**RTL**: In Arabic locale the menu mirrors; icons and shortcuts follow text direction.
+
+### 13.D — Multi-Select Operations
+
+**Component**: `MultiSelectToolbar`
+**File**: `frontend/views/dashboard/cert/templates/editor/canvas/MultiSelectToolbar.tsx`
+
+When 2+ elements are selected, a floating toolbar appears above the selection bounding box. The bounding box is a dashed rectangle drawn around all selected elements (uses `theme.palette.primary.main` for the dashed border).
+
+**Toolbar buttons:**
+
+| Button group | Icon(s) | Action |
+|---|---|---|
+| Align Left / Center / Right | StartAlign / HorizontalAlignCenter / EndAlign | `alignElements('left' | 'center' | 'right')` |
+| Align Top / Middle / Bottom | VerticalAlignTop / VerticalAlignCenter / VerticalAlignBottom | `alignElements('top' | 'middle' | 'bottom')` |
+| Distribute Horizontally / Vertically | HorizontalDistribute / VerticalDistribute | `distributeElements('horizontal' | 'vertical')` |
+| Group | GroupWork | `group()` |
+| Same Size | CropFree | `matchSize(firstSelectedId)` |
+| Delete | Delete | `deleteElements()` |
+
+**Selection rectangle:** Click and drag on empty canvas creates a marquee selection rectangle. All elements whose bounding boxes intersect the rectangle at `pointerup` become selected (`selectMultiple(ids)`). The rectangle is a `div` with a `theme.palette.primary.main` semi-transparent fill and a 1px dashed border.
+
+**Integration notes:**
+- Reads `selectedElementIds` from the Zustand store (see §13.F).
+- Distribute requires 3+ selected (button disabled with tooltip otherwise).
+- Same Size matches the width AND height of the first element added to the selection (topmost in z-order).
+- Toolbar is positioned at the top edge of the bounding box, centered horizontally.
+
+### 13.E — Element Library Palette (Left Sidebar)
+
+**Component**: `ElementLibrary`
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/ElementLibrary.tsx`
+
+A left-sidebar palette of draggable element templates. Replaces (or sits alongside) the LayerPanel — the editor layout becomes: Palette (left) | Canvas (center) | Properties (right), matching standard design tools.
+
+**Layout**: Vertical panel with four collapsible sections (MUI `Accordion`):
+
+1. **Text Elements**:
+   - Heading (large text, 32px default)
+   - Subheading (medium text, 20px default)
+   - Body text (16px default)
+   - Small text (12px default)
+   - Variable text (shows `{{variable}}` placeholder — maps to `data_text`)
+
+2. **Media Elements**:
+   - Image (upload or URL)
+   - QR Code
+   - Barcode
+   - Signature placeholder
+
+3. **Shapes**:
+   - Rectangle
+   - Rounded rectangle
+   - Circle
+   - Triangle
+   - Line
+
+4. **Background**:
+   - Solid color background
+   - Gradient background
+   - Pattern background
+
+**Interaction:**
+- Each palette item is a `DraggableRow` with an icon + i18n label.
+- **Drag and drop**: `onDragStart` sets a `DataTransfer` payload `{ elementType, defaults }`; dropping on the canvas calls `addElement(type, { x, y }, defaults)` at the drop position (converted from client XY to canvas coordinates).
+- **Click**: creates the element at the canvas center (`canvasWidth/2 - defaultWidth/2`, `canvasHeight/2 - defaultHeight/2`).
+- HTML5 drag-and-drop API (or `@dnd-kit/core` DragOverlay if the canvas already uses dnd-kit — align with the layer panel from Task 8).
+
+**Default properties per palette item** (defined in a `PALETTE_DEFAULTS` constant in the utils file from Task 4):
+| Palette item | element type | defaults |
+|---|---|---|
+| Heading | `static_text` | `{ fontSize: 32, fontWeight: 'bold', width: 300, height: 40 }` |
+| Subheading | `static_text` | `{ fontSize: 20, fontWeight: 'semibold', width: 250, height: 28 }` |
+| Body text | `static_text` | `{ fontSize: 16, fontWeight: 'normal', width: 200, height: 20 }` |
+| Small text | `static_text` | `{ fontSize: 12, fontWeight: 'normal', width: 150, height: 16 }` |
+| Variable text | `data_text` | `{ content: '{{variable}}', fontSize: 16, width: 200, height: 20 }` |
+| Image | `image` | `{ fitMode: 'contain', width: 200, height: 200 }` |
+| QR Code | `qr_code` | `{ errorCorrectionLevel: 'M', width: 100, height: 100 }` |
+| Barcode | `barcode` | `{ width: 200, height: 60 }` (note: `barcode` is a new type — see REQ extension below) |
+| Signature | `signature` | `{ placeholderText: 'Signature', inkColor: '#000000', strokeWidth: 1.5, width: 200, height: 80 }` |
+| Background | `background` | `{ fillType: 'solid', width: canvasWidth, height: canvasHeight }` |
+
+**Types note**: `barcode`, `signature`, and `background` are element types that extend the existing 6 (`static_text`, `data_text`, `data_date`, `image`, `qr_code`, `shape`). They require backend schema additions (coordinate with Plans 1–5). For v1 implementation, if those backend types are not yet available, the palette can render the items as disabled with a tooltip "Coming soon" and only enable the 6 types whose mutations exist — but the UI scaffolding ships now.
+
+### 13.F — Extended Zustand Element Store
+
+The Zustand store from Task 2 is extended with multi-select, clipboard, groups, and undo/redo state. The extended interface:
+
+```typescript
+interface ElementState {
+  // Element list (mirror of Apollo cache for local ordering)
+  elements: CanvasElement[];
+  // Selection (single source of truth — Plan 11 canvas reads this via selector)
+  selectedElementIds: string[];
+  // Clipboard for copy/paste (deep-cloned canvas element snapshots)
+  clipboard: CanvasElement[];
+  // Group definitions (named groups of element ids)
+  groups: ElementGroup[];
+  // Actions — element lifecycle
+  addElement: (type: ElementType, position: { x: number; y: number }, defaults?: Partial<CanvasElement>) => void;
+  updateElement: (id: string, patch: Partial<CanvasElement>) => void;
+  deleteElements: (ids: string[]) => void;
+  duplicateElement: (id: string) => void;
+  // Selection
+  selectElement: (id: string, additive?: boolean) => void;
+  selectMultiple: (ids: string[]) => void;
+  selectAll: () => void;
+  clearSelection: () => void;
+  // Clipboard
+  copySelection: () => void;
+  cutSelection: () => void;
+  pasteFromClipboard: (position: { x: number; y: number }) => void;
+  // Z-order
+  bringToFront: (ids: string[]) => void;
+  bringForward: (ids: string[]) => void;
+  sendToBack: (ids: string[]) => void;
+  sendBackward: (ids: string[]) => void;
+  reorder: (orderedIds: string[]) => void;
+  // Groups
+  group: (name: string, ids: string[]) => string;        // returns new group id
+  ungroup: (groupId: string) => void;
+  addToGroup: (groupId: string, ids: string[]) => void;
+  removeFromGroup: (groupId: string, ids: string[]) => void;
+  // Alignment & distribution (operate on selectedElementIds)
+  alignElements: (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void;
+  distributeElements: (axis: 'horizontal' | 'vertical') => void;
+  matchSize: (referenceId: string) => void;              // match width+height of reference
+  // Undo / Redo
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+  pushHistory: (command: HistoryCommand) => void;       // internal — for action implementations
+  // Internal state
+  history: { past: HistoryCommand[]; future: HistoryCommand[] };
+  isSaving: boolean;
+}
+
+interface ElementGroup {
+  id: string;
+  name: string;
+  elementIds: string[];
+  color?: string;            // visual label color in the layer panel
+}
+
+type HistoryCommand =
+  | { type: 'addElement'; element: CanvasElement }
+  | { type: 'deleteElements'; elements: CanvasElement[]; indices: number[] }
+  | { type: 'updateElement'; id: string; before: Partial<CanvasElement>; after: Partial<CanvasElement> }
+  | { type: 'reorder'; before: string[]; after: string[] }
+  | { type: 'group'; groupId: string; elementIds: string[] }
+  | { type: 'ungroup'; group: ElementGroup };
+```
+
+**Implementation notes:**
+- The store is NON-persisted (session-only) — matches `frontend/common/stores/AGENTS.md`.
+- Undo/redo uses a command pattern (see `HistoryCommand` union). `undo` pops `past`, applies the inverse, pushes to `future`; `redo` reverses. Cap history at 50 entries.
+- `cutSelection` copies to clipboard then deletes (as a single `HistoryCommand`).
+- `pasteFromClipboard` offsets pasted elements by 10px to avoid exact overlap.
+- Selection is the single source of truth — Plan 11 canvas subscribes via `useElementStore((s) => s.selectedElementIds)`. Removes duplicate `selectedElementId` from the original Task 2 store (per SWE review §A consolidation recommendation).
+- Grouped elements move/drag together (Plan 11 handles the visual grouping; this store tracks membership).
+- All actions that mutate `elements[]` mutate the Apollo cache (for persistence) AND the local store (for immediate UI). Use optimistic updates — write to local store first, then fire the Apollo mutation; on error, roll back via history.
+
+---
+
+## 12. Outcome & Knowledge Transfer Protocol
+
+### Knowledge Captured
+
+1. **Element type form architecture** — pattern for polymorphic forms that switch on a type enum with discriminated union client type
+2. **Property panel + layer panel sidebar layout** — the three-pane desktop editor design
+3. **Mobile list-and-dialog pattern** — how to adapt a complex design tool for mobile without a canvas
+4. **Apollo cache update strategy for hierarchical element mutations** — create/evict/update patterns
+5. **Validation pipeline for polymorphic forms** — common + type-specific validation dispatch
+
+### Knowledge Propagation Targets
+
+- `frontend/AGENTS.md` — document the property panel + layer panel pattern if it becomes reusable
+- `frontend/views/AGENTS.md` — document the discriminated-union type form dispatch pattern
+- Component library patterns shared with Plans 13–14 (variable forms, recipient group forms use similar property panel approaches)
+
+### Success Metrics
+
+- Admin can create all 6 element types and configure their properties without errors
+- Mobile element editing works fully without canvas interaction
+- Validation prevents invalid element data from persisting
+- i18n keys render correctly in both English and Arabic locales
+- Tier switching (resize) preserves element editor state
+
+---
+
+## Reality Check Notes
+
+Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on the date of this edit.
+
+### Verified as accurate (matches codebase)
+- **Store location & naming**: `frontend/common/stores/certificates/templateElementEditorStore.ts` with hook `useTemplateElementEditorStore` is consistent with `frontend/common/stores/` camelCase conventions (e.g. `adminBillingStore.ts`, `subjectManagementStore.ts`). The non-persisted, session-only design matches `frontend/common/stores/AGENTS.md` (and the no-`File`/`Blob` serialization rule).
+- **View paths include `dashboard/` segment**: All view paths in this plan already correctly include the `dashboard/` segment — `frontend/common/views/dashboard/certificates/template-editor/elements/`, `frontend/desktop/views/dashboard/certificates/template-editor/elements/`, `frontend/mobile/views/dashboard/certificates/template-editor/elements/`. This matches the repo convention (`frontend/{common,desktop,mobile}/views/dashboard/<domain>/`). ✓
+- **Tier-view / ViewModel split**: Aligns with `frontend/views/AGENTS.md` (`frontend/common/views/AGENTS.md`) — `useTemplateElementEditorViewModel.ts` + container + desktop/mobile presentation.
+- **GraphQL**: Consuming Plan 5 mutations via `useMutation` in the ViewModel (Apollo v4) matches `frontend/common/graphql/AGENTS.md`. `@pdfme/common|schemas|ui` present in `package.json` for QR/image element rendering.
+- **i18n label-key nesting**: The dotted form `elementTypes.*` etc. describes nested-object label keys WITHIN a single flat `Labels` interface — that's fine (sibling Labels like `BillingLabels` use nested objects). Only the registration handle must be flat (see corrections).
+
+### Corrections made
+1. **`frontend/stores/AGENTS.md` → `frontend/common/stores/AGENTS.md`** (in `tasks.md` Task 2 and the Agent Knowledge Base table). `frontend/stores/` does NOT exist.
+2. **i18n `useAppTranslation` API signature**: `design.md` used `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` (string arg). The real `useAppTranslation(handle: NamespaceHandle<TLabels>)` in `shared/locale/client/use-app-translation.ts` takes a **namespace handle OBJECT from the `Translation` const, NOT a string**. Corrected to `useAppTranslation(Translation.Dashboard.CertificateTemplateElements)`.
+3. **i18n FLAT namespace registration**: `DashboardTranslations` and `Translation.Dashboard` are FLAT (no `Certificates` subgroup — verified in `shared/locale/types/message.ts` / `shared/locale/namespaces/translation.ts`). Corrected `tasks.md` Task 10a to register a flat dashboard namespace (`dashboard.certificateTemplateElements`), with handle `CertificateTemplateEditor` `TemplateElements` added under `Translation.Dashboard` and `certificateTemplateEditorElements` under `DashboardTranslations`, and AR/EN export identifiers `dashboardCertificateTemplateElementsAr`/`En` wired into `shared/locale/{ar,en}/messages.ts` as `dashboardTranslations.certificateTemplateElements`. (Mirrors the existing `dashboardBillingAr` convention.)
+
+### Known internal spec drift (flagged for human review, not a codebase-alignment issue)
+- Subdirectory casing differs from Plan 10/11: this plan uses `certificates/template-editor/elements/` (kebab `template-editor`) while Plan 10/11 use `certificates/templates/editor/` (separate `templates/` + `editor/`). Recommend a single canonical path segment across Plans 10–12.
+- `requirements.md` REQ-12.18 mentions "redundant type imports from `graphql-types.ts`" — terminology should match `frontend/common/stores/AGENTS.md` ("Import Types from `graphql-types.ts`"), i.e. import entity types from `@/frontend/common/graphql/generated/gql/graphql-types`, not "redundant".
+
+
+---
+
+## SWE Expert Review Notes
+
+> Added during expert architectural review. Augments the design; flags risks and recommended refinements before implementation. Plan 12 closes the editor loop (CRUD + property forms + layer panel + mobile editor) and is tightly coupled to Plans 11 (canvas) and 13 (variables).
+
+### A. Architectural Soundness
+
+- **Property panel (right) + Layer panel (left) + Canvas (center) — SOUND** (DD-1). Standard design-tool layout. Distinguishing this from Plan 11 is correct: Plan 11 owns canvas *interaction*; Plan 12 owns element *data lifecycle* (CRUD/forms/layers/mobile).
+- **Two Zustand stores — FRAGMENTATION RISK.** Plan 10 defines `useTemplateEditorStore` (template meta), Plan 11 defines a canvas store (`elements[]`, `selectedIds`, history, zoom, grid), and Plan 12 defines `useTemplateElementEditorStore` (`selectedElementId`, `draftProperties`). **Three stores for one editor screen.** Risks: (a) `selectedElementId` (Plan 12) must stay in sync with `selectedIds` (Plan 11) — two sources of truth for "what is selected"; (b) `draftProperties` (Plan 12) duplicates the element's live props that Plan 11's canvas mutates on drag/resize — when the user drags, does Plan 11 update the canvas element AND Plan 12's draft? **Recommendation:** Consolidate selection into ONE store (the canvas store owns `selectedIds`; Plan 12 reads it). Plan 12's store should own only: draft form state for the *currently-editing-in-panel* element, panel collapse flags, dialog open flags — NOT selection. Sync via a selector subscription, not duplicate state.
+- **Mobile list + dialog (DD-2) — CORRECT.** Numeric inputs for position on mobile is the right call (touch drag is unreliable for pixel-precision). This matches the codebase mobile/desktop isolation rule.
+- **Dynamic type-specific forms (DD-3) — GOOD.** Common + per-type form dispatch is clean and testable.
+- **Polymorphic client model — STRONG (§5 `ElementWithDetails` discriminated union).** This is the *correct* model and should be the SINGLE source of truth shared with Plan 11's canvas (see Plan 11 review A.4 — Plan 11's `props: Record<string, unknown>` must be replaced by this union). GraphQL inline fragments → merged `ElementWithDetails` is the right pattern. **Verify:** the backend (Plans 1-5) must expose the type-specific sub-records via a GraphQL **union** or **interface** with inline fragments. Plan 12 assumes this but REQ-12.16 just says "type-specific sub-record via union/interface selection." Confirm Plan 5 exposes a polymorphic `TemplateElement` union — if it uses flat nullable columns instead, the discriminated-union client model doesn't hold. **Cross-plan contract to verify.**
+
+### B. State Management
+
+- **Draft state in Zustand (DD-4, REQ-12.18) — SOUND** but `draftProperties` is loosely typed in REQ-12.18 (`ElementDraftProperties | null`). Given §5's discriminated union, `draftProperties` should be a discriminated union too (one draft shape per element type) for type-safe form binding. **Recommendation:** Type `draftProperties` as `ElementDraftProperties` discriminated by `type`, mirroring `ElementWithDetails`.
+- **Dirty tracking (DD-7) — GOOD** with the 3-way "Save / Discard / Cancel" dialog on switch-away. Matches the unsaved-changes-warning pattern.
+- **Undo/redo — NOT in Plan 12's store.** Plan 11 owns undo/redo (canvas ops). But Plan 12's *property edits* (changing fontSize, text content, variable ref) are also user actions that undo should cover. **Gap:** Plan 11's command pattern (MoveElement/ResizeElement/RotateElement/Add/Delete/Duplicate) has **no UpdateElementProperties command**. Property-panel edits are NOT undoable per the current Plan 11 design. **Recommendation:** Either (a) extend Plan 11's command set with `UpdateElementProperties` (old props → new props) so property edits are undoable from the canvas toolbar, or (b) explicitly scope v1 undo to canvas transforms only and document that property edits are not undoable. (a) is strongly preferred for UX.
+- **Canvas↔property-panel sync (REQ-12.2 third WHEN) — UNDERSPECIFIED.** "When the admin modifies properties on the canvas (drag, resize, rotate), the system SHALL sync those values into the property panel form fields." This means Plan 11's canvas writes must flow into Plan 12's `draftProperties`. But Plan 11's canvas writes go to the canvas store `elements[]`, and Plan 12's `draftProperties` is separate. **Recommendation:** Define the sync direction explicitly: canvas `elements[selectedId]` is the source of truth for position/size/rotation; the property panel's common fields (X/Y/W/H/rotation) READ from the canvas store via selector (not from `draftProperties`), and only type-specific props + opacity live in `draftProperties`. Otherwise two stores + a draft can disagree.
+
+### C. UX Quality
+
+- **Layer panel reorder — DEFINED via drag handle (REQ-12.14).** `@dnd-kit/sortable` is installed (verified) and is the canonical choice for sortable lists in this stack — **use it**, don't hand-roll drag reorder. The dnd-kit kit also covers the mobile up/down buttons (degenerate case).
+- **Visibility/lock toggles (REQ-12.14) — GOOD.** `hidden` excludes from canvas+PDF; `locked` blocks drag/resize on canvas. Confirm Plan 11's selection/drag checks the `locked` flag (cross-plan: Plan 11 must gate `pointerdown` on `!element.locked`).
+- **Mobile reorder via up/down buttons (REQ-12.15) — GOOD** (no mobile drag-reorder, matches isolation rule).
+- **Multi-select property editing — NOT ADDRESSED.** Plan 11 supports multi-select; Plan 12's property panel shows a *single* element's form. When multiple elements are selected, what does the right panel show? **Recommendation:** Define: (a) panel shows "N elements selected" with batch actions (align, distribute, z-order, delete, group-opacity) — NOT individual property fields — when `selectedIds.length > 1`; (b) editing common props for a multi-selection (e.g., set all fontSize to 14) is a v2 nicety, can be out of v1 scope but must be stated.
+- **Copy/paste/duplicate — duplicate defined (REQ-12.4); copy/paste is Plan 11 context menu via in-store clipboard.** Consistent.
+
+### D. Completeness
+
+- **All element types fully specified? — YES** (REQ-12.7 through REQ-12.12: static_text, data_text, data_date, image, qr_code, shape). Good coverage including the Siraj `shape` extension (DD-6).
+- **Element styling (font/color/size/weight) — DEFINED per type** (REQ-12.7 static text has fontWeight, lineHeight, textAlign; data_text has textTransform). Good.
+- **Text overflow — UNADDRESSED** (same as Plan 11 review D). Static text caps at 1000 chars but no overflow policy. **Cross-plan with Plan 6.**
+- **Z-index / layer management — DEFINED** (REQ-12.5: bring forward/backward single; drag reorder batch). **Same renormalization concern as Plan 11** — batch reorder should produce a dense 0..N z sequence, not relative +1/-1 swaps that drift over time. Plan 12's batch reorder mutation (`{ id, zIndex }[]`) is the right place to normalize.
+- **Rotation — Applied via common property (REQ-12.6: -360 to 360).** Note REQ-11-05 uses 0-360 normalized, REQ-12.6 uses -360 to 360 — **inconsistent range**. A -180° value and a +180° value are identical rotations but different stored numbers → dirty-diff false positives and PDF double-render risk. **Recommendation:** Normalize rotation to ONE canonical range (recommend `0..360`) across both plans on save.
+- **QR code data source (REQ-12.11) — "verification URL" defers URL to Plan 6.** Good separation. Confirm Plan 6 knows the QR element's `qrDataSource` enum to resolve the verification URL.
+- **Image element (REQ-12.10) — "Browse" opens storage picker from Plan 7.** Good cross-plan. Alt text for a11y is a nice touch. **Gap:** no max image dimensions / downscale policy — a 4096×4096 background logo bloats the PDF. Coordinate with Plan 7 on upload-time resize.
+
+### E. Performance
+
+- Property forms are trivial; layer panel with React-virtualized list (`@dnd-kit` handles 100s of rows fine). Not a concern for typical element counts.
+- **Re-render risk:** property panel re-renders on every drag frame if it reads canvas `elements[selectedId].x/y` live. **Recommendation:** During an active drag/resize (Plan 11 `interactionState !== 'idle'`), throttle or pause property-panel number-input updates (round + update on `pointerup`), otherwise the inputs stutter and steal frame budget.
+
+### F. Accessibility
+
+- **No explicit a11y section in Plan 12** (Plan 11 has REQ-11-ACC-*). **Gap:** the property panel and layer panel need ARIA: layer panel items are listbox options (`role="option"`), property inputs are labeled `TextField`s (MUI provides by default but labels must come from i18n), dialogs (`deleteDialog`, `unsavedChangesDialog`, `elementEditDialog` mobile) need focus trap + `aria-labelledby`. **Recommendation:** Add an a11y section: layer panel as `role="listbox"`/`option`; all dialogs use MUI `Dialog` with `aria-labelledby`; mobile FAB has `aria-label`; property form fields use MUI `label`/`aria-label` from i18n; keyboard reorder in layer panel via up/down arrow + Space to select.
+- **Color pickers** (REQ-12.7 etc.) — same `react-color` + hex `TextField` a11y note as Plan 10. The hex field is the keyboard path.
+
+### G. Mobile/Desktop Split
+
+- **WELL DEFINED (REQ-12.15, DD-2).** Mobile: list + full-screen edit dialog + numeric inputs + up/down reorder + add FAB + bottom-sheet type picker. No canvas, no drag. Matches codebase isolation rule (no `useMediaQuery` in `.mobile.tsx`).
+- **Gap:** mobile has no layer *panel*, but the list IS effectively the layer panel (sorted by z-index) — good. Confirm the list and the desktop layer panel share the same data source and reorder mutation.
+- **Gap:** mobile cannot *visually verify* element positions (no canvas). A mobile admin edits X/Y blindly. **Recommendation:** Add a tiny inline thumbnail preview at the top of the mobile edit dialog showing the element's position on a mini-canvas (read-only), so the admin has spatial feedback. Optional but high-value.
+
+### H. Data Flow
+
+- **Apollo cache strategy (DD-5) — GOOD:** create appends, update modifies, delete evicts, duplicate appends+selects, reorder updates z-indices. Optimistic updates. Matches `sharedDocuments/AGENTS.md` (`id` on all objects, `update` function in `useMutation`). **Verify:** the `templateElementFragment` (REQ-12.16) is spread into the template query (Plan 11/Plan 5) so cache normalization works across the template's element list — confirm Plan 11's template query includes this fragment.
+- **Atomic batch reorder (REQ-12.5) — GOOD.** Single mutation for N elements.
+- **Conflict resolution — MISSING** (same as Plans 10/11). If two admins edit elements of the same template, no optimistic lock. The batch reorder and per-element update mutations should carry `expectedTemplateVersion` or per-element `updatedAt`. **Recommendation:** Thread `template.version` (or per-element `updatedAt`) into all element mutations; on mismatch, refetch + warn.
+- **Draft/published — UNADDRESSED** (same gap): editing elements of a *published* template mutates the published rows. Coordinate with Plan 15.
+
+### Reality-Check Corrections (codebase `/home/ahmed/Projects/siraj-cert`)
+
+1. **Three Zustand stores for one screen — no precedent** for multi-store-per-screen in `frontend/common/stores/` (each domain typically has ONE store, e.g. `classDetailsStore.ts`). Verify whether Plan 10's `useTemplateEditorStore` + Plan 11's canvas store + Plan 12's `useTemplateElementEditorStore` should be ONE store with slices (matching the `createTabbedPaneStore` / `dashboardStore` slice patterns) to avoid selection-state duplication. At minimum, consolidate selection.
+2. **`@dnd-kit/sortable` is installed** (verified) — use it for the layer-panel drag reorder and mobile up/down is the degenerate fallback. Don't hand-roll sortable.
+3. **`react-color` is installed** (verified) — use it (not a non-existent "MUI ColorPicker") for all color property fields, with hex `TextField` for a11y.
+4. **`ColorPicker` not in MUI v9** — the requirements tables (REQ-12.7–12.12) say "Color picker (hex)" generically; ensure the design specifies `react-color`.
+5. **i18n keys are dot-nested strings in the type tables** (`properties.textContent`) — must be nested TS object fields in the `CertificatesTemplateEditor` labels interface (flat top-level handle, nested keys within). Align with Plan 10/11 approach.
+6. **GraphQL barrel** — Plan 12 correctly uses `certificates/template-elements.documents.ts` (plural domain dir). Plan 10 used `cert/` — normalize Plan 10 to `certificates/` to match Plan 12 and the barrel convention.
+7. **`useLazyQuery` is banned** (verified `sharedDocuments/AGENTS.md`) — Plan 12 doesn't use it, good. Ensure the variable list (Plan 13 dependency) is fetched via stateful `useQuery`, not lazy.
+
+### Key Architectural Fixes (action items)
+
+1. **Consolidate selection into ONE store** (canvas store owns `selectedIds`; Plan 12 reads via selector). Remove `selectedElementId` duplication.
+2. **Add `UpdateElementProperties` to Plan 11's undo command set** OR explicitly scope property edits out of v1 undo.
+3. **Define canvas↔panel sync direction**: common props (X/Y/W/H/rotation) READ from canvas store; only type-specific + opacity live in `draftProperties`.
+4. **Type `draftProperties` as a discriminated union** matching `ElementWithDetails`.
+5. **Use `@dnd-kit/sortable`** for layer-panel reorder (not hand-rolled drag).
+6. **Use `react-color`** (not "MUI ColorPicker") for all color fields, with a11y hex input.
+7. **Normalize rotation range** to `0..360` across Plans 11/12.
+8. **Renormalize z-index** to dense `0..N` in the batch reorder mutation.
+9. **Add optimistic locking** (`expectedTemplateVersion` or per-element `updatedAt`) to element mutations.
+10. **Add a dedicated a11y section** (layer panel listbox roles, dialog focus traps, labeled inputs, keyboard reorder, mobile FAB label).
+11. **Define multi-select property-panel behavior** ("N selected" batch-actions state vs single-element form).
+12. **Add mobile mini-canvas thumbnail** in the edit dialog for spatial feedback (optional, high-value).
+13. **Verify Plan 5 exposes a polymorphic element union** (union/interface + inline fragments) — the discriminated-union client model depends on it.
+
+### Remaining Risks
+
+- Three-store coordination (selection/draft sync) is the leading state-correctness risk; if not consolidated, expect "panel shows stale element" bugs.
+- Rotation range inconsistency (-360..360 vs 0..360) will cause dirty-diff noise and possible PDF re-render issues.
+- Property-edit undo is missing — high likelihood of user frustration ("why can't I undo changing the font?").
+- Concurrent element editing has no conflict handling — multiple admins will silently clobber each other's element changes.
+- The `elementEnum` 6 types assume a backend polymorphic union (Plans 1-5); if the backend used flat nullable columns instead, the discriminated-union client model collapses — verify before building.
+
+---
+
+## Round 4 Enhancement — Production Hardening
+
+> Added as Round 4 production hardening. Extends the design with advanced property panel sections, a full-featured color/gradient/font picker system, image crop & resize, alignment edge-case handling, z-index layer management, element grouping, opacity & blend modes, shadow & effects, border & corner radius controls, and a transform toolset. Each subsection below specifies the component contract, file location, store additions, and integration points.
+
+### R4-1. Property Panel Scroll & Section Collapse
+
+**Component**: `CollapsiblePanelShell`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/CollapsiblePanelShell.tsx`
+
+**Design**:
+
+The property panel (right sidebar) gets a sticky header containing the element name, type icon, and "Expand All / Collapse All" `IconButton` pair. Below the header, the accordion sections scroll independently in a virtualised scroll container (`@dnd-kit` not needed here — use MUI `Box` with `overflow: auto` and `maxHeight` from `theme.mixins.toolbar` minus header height).
+
+```typescript
+interface CollapsiblePanelShellProps {
+  elementId: string;
+  sections: PanelSectionConfig[];
+  onSectionToggle: (sectionId: string, expanded: boolean) => void;
+}
+```
+
+**Sticky header**: `position: sticky; top: 0; zIndex: 1; backgroundColor: theme.palette.surface.container` — the panel header stays pinned while section content scrolls beneath it.
+
+**Collapsible sections**: MUI `Accordion` with `expanded` controlled by the Zustand store's `panelExpandedSections: Record<string, boolean>`. Each `AccordionSummary` includes an icon (`SvgIcon` from `@mui/icons-material`) on the left and the section label from i18n on the right.
+
+**Expand/Collapse All**: Two `IconButton`s in the header — `UnfoldMoreOutlined` (expand all → set all `panelExpandedSections` values to `true`) and `UnfoldLessOutlined` (collapse all → all `false`). Both call the store action `setAllPanelExpanded(expanded: boolean)`.
+
+**Section state persistence**: The `panelExpandedSections` record is persisted to `localStorage` under key `siraj.cert.templateEditor.panelExpandedSections`. On mount, `useEffect` reads from `localStorage` and hydrates the store; on section toggle, a debounced `useEffect` writes back. Only the per-section collapsed state is persisted — not per-element, so this is a global editor preference, not per-element.
+
+**Scroll-to-active-property on element select**: When `selectedElementIds` changes to a new single-element selection, the panel container auto-scrolls to the last-edited section (tracked in `lastEditedSectionId` in the store). Uses `scrollIntoView({ block: 'nearest', behavior: 'smooth' })` on the accordion's DOM ref via a `refMap: Record<string, HTMLDivElement>`.
+
+**Section icons**:
+| Section | Icon |
+|---|---|
+| Position & Size | `OpenWithOutlined` |
+| Appearance | `PaletteOutlined` |
+| Color & Fill | `ColorizeOutlined` |
+| Font & Text | `TextFieldsOutlined` |
+| Border & Corner | `BorderOuterOutlined` |
+| Shadow & Effects | `FilterDramaOutlined` |
+| Transform | `Rotate90DegreesCwOutlined` |
+| Element-Specific | `TuneOutlined` |
+
+**Zustand store additions** (to `templateElementEditorStore.ts`):
+```typescript
+panelExpandedSections: Record<string, boolean>;
+lastEditedSectionId: string | null;
+setPanelExpanded: (sectionId: string, expanded: boolean) => void;
+setAllPanelExpanded: (expanded: boolean) => void;
+setLastEditedSection: (sectionId: string) => void;
+hydratePanelState: () => void;   // reads localStorage on mount
+```
+
+**i18n keys**: `dashboard.certificateTemplateElements.panel.expandAll`, `panel.collapseAll`, `panel.section.*` (one per section above).
+
+### R4-2. Color Picker Component
+
+**Component**: `ColorPickerField` (enhanced from Task 5's basic hex picker)
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/ColorPickerField.tsx`
+
+**Design**:
+
+The existing `react-color` `ChromePicker` from Task 5 is enhanced with multiple input modes, a swatch history, preset palettes, alpha channel, and a WCAG contrast checker.
+
+```typescript
+interface ColorPickerFieldProps {
+  label: string;
+  value: string;                    // hex "#rrggbb" or hex8 "#rrggbbaa"
+  onChange: (color: string) => void;
+  enableAlpha?: boolean;            // default false — only shapes support alpha
+  elementId?: string;               // for per-element color history
+}
+```
+
+**Input modes**: Three `ToggleButton` tabs at the top of the popover — HEX, RGB, HSL. Each mode shows the appropriate input fields:
+- HEX: `TextField` with regex validation `/^#?[0-9a-fA-F]{0,8}$/`
+- RGB: Three `TextField`s (R, G, B) with 0–255 range + optional A (0–100)
+- HSL: Three `TextField`s (H: 0–360, S: 0–100, L: 0–100) + optional A
+
+All three modes sync bidirectionally — editing one updates the others via a `parseColor()` / `formatColor()` utility in `colorUtils.ts`.
+
+**Recent colors swatch**: A row of 8 color swatches below the input fields. Populated from a per-session `recentColors: string[]` in the store (cap 8, most-recent-first). Clicking a swatch sets the current value. Displayed as `Box` with `display: flex; gap: 4px` and each swatch is a `Box` with `width: 24; height: 24; borderRadius: 50%; border: 1px solid theme.palette.divider; cursor: pointer`.
+
+**Color palette presets**: Material Design color palette grid — 19 hues × 10 shades (50–900). Rendered as a `Grid` with `columns: 10` of small `Box` swatches. Clicking sets the value to that hex. The palette is a static constant in `paletteConstants.ts` (no runtime fetching needed).
+
+**Eyedropper support**: An `IconButton` (`ColorizeOutlined`) that calls `navigator.permissions.query({ name: 'eyedropper' as PermissionName })` — if supported, invokes the EyeDropper API (`new EyeDropper().open()`) to sample a screen pixel. If not supported (Safari, older browsers), the button is hidden (feature detection, not a disabled state — avoids confusion).
+
+**Alpha channel slider**: When `enableAlpha` is `true`, an additional slider row appears below the color picker — MUI `Slider` with `min: 0; max: 1; step: 0.01` and a checkered transparency background (`linear-gradient` CSS) beneath the slider track. The alpha value is appended to the hex as the 2-digit alpha suffix (`#rrggbbaa`). For text elements, `enableAlpha` is always `false` (text alpha is controlled by the separate Opacity slider in Appearance).
+
+**Color contrast checker**: A small info section at the bottom of the popover showing the computed contrast ratio between the current color and the canvas background color (`theme.palette.surface.container`). Displays "WCAG AA: ✓ Pass / ✗ Fail" and "WCAG AAA: ✓ Pass / ✗ Fail" with the numeric ratio (e.g., "4.7:1"). Pass thresholds: AA ≥ 4.5:1 (normal text), AA ≥ 3:1 (large text), AAA ≥ 7:1 (normal), AAA ≥ 4.5:1 (large). The checker uses the `wcag-contrast` utility from `colorUtils.ts` (pure functions `relativeLuminance(rgb)` and `contrastRatio(rgb1, rgb2)` — these are dependency-free, no external library needed).
+
+**Color history per element**: A per-element `colorHistory: Record<string, string[]>` in the store (cap 5 colors per element). Every color change pushes the previous value to the element's history (deduplicated, most-recent-first). Displayed as a small 5-swatch row in the popover header when `elementId` is provided. This survives element switch (tied to element ID, not selection).
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/colorUtils.ts` — pure color conversion + contrast functions:
+```typescript
+export function hexToRgb(hex: string): { r: number; g: number; b: number; a?: number };
+export function rgbToHex(r: number, g: number, b: number, a?: number): string;
+export function hexToHsl(hex: string): { h: number; s: number; l: number; a?: number };
+export function hslToHex(h: number, s: number, l: number, a?: number): string;
+export function relativeLuminance(rgb: { r: number; g: number; b: number }): number;
+export function contrastRatio(color1: string, color2: string): number;
+export function checkWcag(foreground: string, background: string): { aa: boolean; aaa: boolean; ratio: number };
+```
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/paletteConstants.ts` — Material Design color palette constant.
+
+**Zustand store additions**:
+```typescript
+recentColors: string[];
+colorHistory: Record<string, string[]>;
+addRecentColor: (color: string) => void;
+addElementColorHistory: (elementId: string, color: string) => void;
+```
+
+### R4-3. Gradient Picker
+
+**Component**: `GradientPickerField`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/GradientPickerField.tsx`
+
+**Design**:
+
+Used only by the `BackgroundPropertiesForm` (Task 16 R4 addition) and the `ShapePropertiesForm` fill mode. Not shown for text elements. The gradient picker extends the color picker infrastructure with multi-stop gradient editing.
+
+```typescript
+interface GradientStops {
+  id: string;
+  color: string;     // hex or hex8
+  position: number;  // 0..100 (percentage)
+}
+interface GradientValue {
+  type: 'linear' | 'radial';
+  stops: GradientStops[];
+  angle: number;     // 0..360 (linear only — ignored for radial)
+}
+interface GradientPickerFieldProps {
+  label: string;
+  value: GradientValue | null;
+  onChange: (gradient: GradientValue) => void;
+}
+```
+
+**Linear / radial toggle**: A `ToggleButtonGroup` at the top with two `ToggleButton`s — "Linear" (`LinearScaleOutlined` icon) and "Radial" (`RadioButtonUnchecked` icon — represent the radial center). Switching type preserves stops and positions; only the angle selector hides/shows.
+
+**Gradient stops editor**: A horizontal bar (width 100%, height 32px) showing the rendered gradient preview (CSS `linear-gradient` / `radial-gradient` string from `formatGradientCss(grad)`). Below the bar, stop handles (small triangular markers) are positioned at each stop's `position%`. Handles are `Box` elements with `position: absolute; left: calc(pos% - 6px)`:
+- Dragging a handle horizontally updates its `position` (clamped 0–100, snaps to integer).
+- Clicking a handle selects it (visual highlight: `border: 2px solid theme.palette.primary.main`).
+- The selected stop's color is editable via the embedded `ColorPickerField` (R4-2) below the bar.
+- "Add Stop" `IconButton` at the right end (`AddOutlined`) — adds at position 50 if 0 stops exist, or at the midpoint of the two nearest stops otherwise. Max 10 stops.
+- "Remove Stop" `IconButton` (`RemoveOutlined`) — removes the selected stop. Minimum 2 stops required; if 2, the remove button is disabled.
+
+**Angle selector** (linear only): A circular dial component — `Box` with `width: 80px; height: 80px; borderRadius: 50%; border: 2px solid theme.palette.divider` and an indicator line from center to edge (rotated by `angle`). Dragging the indicator handle updates the angle (snaps to 1° increments; Shift snaps to 15°). A numeric `TextField` shows the value with `°` suffix. Range 0–360. Hidden when `type === 'radial'`.
+
+**Gradient presets library**: A collapsible `Accordion` section at the bottom containing 12 preset gradients (e.g., "Sunset", "Ocean", "Forest", "Mono Blue", "Mono Gray", "Fire"). Each preset is a small thumbnail `Box` (48×24px) rendered with its CSS gradient. Clicking sets `value` to the preset's `GradientValue`. Presets defined in `paletteConstants.ts` alongside the color palette.
+
+**Gradient preview thumbnail**: The gradient bar itself IS the preview (see stops editor above). Additionally, a small 24×24px thumbnail is shown in the field's collapsed state (when the Popover is closed) showing the current gradient — replaces the solid color swatch.
+
+**CSS gradient export**: The `formatGradientCss(grad: GradientValue): string` utility produces the CSS string:
+- Linear: `linear-gradient(${angle}deg, ${stops[0].color} ${pos}%, ...)`
+- Radial: `radial-gradient(circle, ${stops[0].color} ${pos}%, ...)`
+
+This CSS string is stored on the element's `fillGradient` property and consumed by the canvas rendering layer (Plan 11).
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/gradientUtils.ts` — pure gradient functions:
+```typescript
+export function formatGradientCss(grad: GradientValue): string;
+export function parseGradientCss(css: string): GradientValue | null;
+export function createDefaultGradient(): GradientValue;
+export function addStop(grad: GradientValue, position: number): GradientValue;
+export function removeStop(grad: GradientValue, stopId: string): GradientValue;
+export function moveStop(grad: GradientValue, stopId: string, newPosition: number): GradientValue;
+```
+
+**i18n keys**: `dashboard.certificateTemplateElements.gradient.linear`, `gradient.radial`, `gradient.addStop`, `gradient.removeStop`, `gradient.angle`, `gradient.presets`, `gradient.preset.*` (one per preset).
+
+### R4-4. Font Family Picker
+
+**Component**: `FontPickerField` (enhanced from Task 5's `react-color`-equivalent `Autocomplete`)
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/FontPickerField.tsx`
+
+**Design**:
+
+Extends the Task 5 `Autocomplete`-based font picker into a full typography control panel section.
+
+```typescript
+interface FontPickerFieldProps {
+  label: string;
+  value: FontConfig;
+  onChange: (config: FontConfig) => void;
+  disabledFields?: ('fontFamily' | 'fontWeight' | 'fontStyle' | 'fontSize' | 'lineHeight' | 'letterSpacing' | 'textTransform' | 'textDecoration')[];
+}
+interface FontConfig {
+  fontFamily: string;
+  fontWeight: number;       // 100..900
+  fontStyle: 'normal' | 'italic' | 'oblique';
+  fontSize: number;         // px
+  lineHeight: number;       // unitless multiplier (1.0–3.0)
+  letterSpacing: number;    // px (-5..20)
+  textTransform: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+  textDecoration: 'none' | 'underline' | 'overline' | 'line-through';
+}
+```
+
+**System fonts + Google Fonts + custom uploaded fonts**: The `Autocomplete` options come from three sources:
+1. **System fonts**: Derived from the `ALLOWED_FONTS` constant in the store (already in Task 5's design — standard web-safe stack: Arial, Helvetica, Times New Roman, Georgia, Courier New, etc.)
+2. **Google Fonts**: Dynamically loaded via the `@fontsource` packages already installed in the project (verify in `package.json` — if not, defer to a hardcoded list of available Google fonts loaded via `<link href="https://fonts.googleapis.com/..." />`). The list is a curated subset: Inter, Roboto, Open Sans, Lato, Montserrat, Noto Sans Arabic, Amiri, Cairo, Tajawal (Arabic support is critical for Siraj).
+3. **Custom uploaded fonts**: From Plan 7's font storage (cross-plan contract — Plan 7 returns a list of uploaded fonts with their `@font-face` URL and CSS). Populated via a stateful `useQuery` (not `useLazyQuery` — banned per AGENTS.md) for `uploadedFonts(templateId)`.
+
+**Font preview text**: The `Autocomplete` `renderOption` renders each option in its own font family (CSS `fontFamily: option.value`) with a sample text "AaBbCc 123" — exactly as in Task 5. Additionally, the top of the panel shows a large preview `Typography` with the current font/size/weight/style applied, rendering the text "The quick brown fox" (configurable via a `TextField` below it). This preview updates in real-time as any typography control changes.
+
+**Font weight selector**: A `Select` dropdown with options 100, 200, 300, 400 (Regular), 500 (Medium), 600 (Semi-Bold), 700 (Bold), 800 (Extra-Bold), 900 (Black). Only shows weights that the currently selected font supports (if the font doesn't have a 900 weight, that option is disabled). Font weight availability is hardcoded in a `FONT_WEIGHT_SUPPORT` record in `fontUtils.ts` per known font family. Unknown fonts show all weights (browser substitution handles missing weights).
+
+**Font style**: A `ToggleButtonGroup` with three `ToggleButton`s — "Normal", "Italic" (`FormatItalicOutlined`), "Oblique". Only shown for fonts that support italic (`FONT_ITALIC_SUPPORT` record). If not supported, hidden entirely.
+
+**Font size**: A composite control — MUI `Slider` (range 8–200px, step 1) with a numeric `TextField` (width 64px) side by side. The slider and text field are bidirectionally synced. The slider has visual tick marks at common sizes (12, 14, 16, 18, 24, 32, 48, 64, 96).
+
+**Line-height**: MUI `Slider` (range 1.0–3.0, step 0.1) + numeric `TextField` (step 0.1). Default 1.5.
+
+**Letter-spacing**: MUI `Slider` (range -5px to 20px, step 0.5) + numeric `TextField` (step 0.5). Includes a `0` tick mark.
+
+**Text-transform**: MUI `Select` with options None, Uppercase, Lowercase, Capitalize. Each option shows a preview in its own style ("AAA" for UPPERCASE, "aaa" for lowercase).
+
+**Text-decoration**: MUI `Select` with options None, Underline, Overline, Line-through. Or a `ToggleButtonGroup` with `FormatUnderlinedOutlined`, (no icon for overline — use "O"), `FormatStrikethroughOutlined`.
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/fontUtils.ts` — pure font utilities:
+```typescript
+export const ALLOWED_FONTS: string[];
+export const FONT_WEIGHT_SUPPORT: Record<string, number[]>;
+export const FONT_ITALIC_SUPPORT: Record<string, boolean>;
+export function getFontPreviewCss(config: FontConfig): React.CSSProperties;
+export function isArabicFont(fontFamily: string): boolean;
+export function getFontStack(fontFamily: string): string;  // returns e.g. "'Amiri', 'Noto Naskh Arabic', serif"
+```
+
+**i18n keys**: `dashboard.certificateTemplateElements.font.family`, `font.weight`, `font.style`, `font.size`, `font.lineHeight`, `font.letterSpacing`, `font.textTransform`, `font.textDecoration`, `font.preview`, `font.weight.*`, `font.style.*`, `font.transform.*`, `font.decoration.*`.
+
+### R4-5. Image Crop & Resize
+
+**Component**: `ImageCropResizeDialog`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ImageCropResizeDialog.tsx`
+
+**Design**:
+
+A modal `Dialog` (full-screen on mobile, 600×500 on desktop) that opens when the user clicks "Edit Image" in the `ImagePropertiesForm`. Handles upload, crop, resize, filters, and replacement.
+
+```typescript
+interface ImageCropResizeDialogProps {
+  open: boolean;
+  elementId: string;
+  currentImageUrl: string | null;
+  onSave: (result: ImageEditResult) => void;
+  onClose: () => void;
+}
+interface ImageEditResult {
+  imageUrl: string;               // data URL or CDN URL from Plan 7
+  cropRect: { x: number; y: number; width: number; height: number };
+  filters: ImageFilters;
+  originalWidth: number;
+  originalHeight: number;
+}
+interface ImageFilters {
+  brightness: number;    // 0..200 (100 = normal)
+  contrast: number;      // 0..200 (100 = normal)
+  saturation: number;    // 0..200 (100 = normal)
+}
+```
+
+**Image upload with drag-drop**: The top area of the dialog is a drop zone — a `Box` with `border: 2px dashed theme.palette.divider; borderRadius: 2` that accepts drag-drop (`onDrop`, `onDragOver`) and click-to-browse (`<input type="file" accept="image/*,image/svg+xml">`). On file selection, reads the file as a data URL via `FileReader.readAsDataURL`. Validates: max file size 5MB (show error toast if exceeded), accepted types `image/png, image/jpeg, image/webp, image/svg+xml`. The dropped/selected image is shown in the crop canvas below.
+
+**Crop aspect ratio presets**: A row of `ToggleButton`s at the top — 1:1 (Square), 4:3 (Standard), 16:9 (Widescreen), Free (no aspect lock). Each preset sets the crop region to a centered rectangle with the given aspect ratio. "Free" removes the constraint. The aspect lock enforces `cropWidth / cropHeight === ratio` during crop handle dragging.
+
+**Crop with visual drag handles**: The image is rendered in a `Box` (max 400×400 display, scaled to fit). Overlaid is a crop rectangle (semi-transparent dark overlay outside the crop region, clear inside). The crop rectangle has 8 drag handles (4 corners + 4 edge midpoints) rendered as small `Box` squares (8×8px, `backgroundColor: theme.palette.primary.main, border: 2px solid white`). Dragging a corner resizes the crop region maintaining aspect lock (if set). Dragging an edge moves only that edge (if no aspect lock, or adjusts the perpendicular edge to maintain lock). Dragging inside the crop region moves it (not resizing). All drag uses pointer events (`onPointerDown`, `onPointerMove`, `onPointerUp`).
+
+**Resize with quality slider**: An "Output Size" section with width × height numeric inputs (synced — changing width adjusts height proportionally if aspect lock is on). A quality `Slider` (0–100, default 85) controls JPEG/WebP compression. The output format defaults to the input format (PNG stays lossless, JPEG/WebP get quality slider). Shows estimated file size: `(width * height * bpp / 8 * compressionFactor)` — approximate, displayed as "≈ 245 KB".
+
+**Image filters**: Three sliders below the crop area — Brightness, Contrast, Saturation (each 0–200, 100 = none). A "Reset Filters" `Button` sets all to 100. The preview canvas applies the filters live via CSS `filter: brightness(1.0) contrast(1.0) saturate(1.0)` — so the user sees the effect in real time. The filter values are stored on the element and applied at render time (both canvas and PDF — Plan 6's `@pdfme` layer handles these via CSS filter emulation in PDF).
+
+**Image replacement (keep size/position)**: A "Replace Image" `Button` that opens the file picker again. On replacement, the new image inherits the old element's position, width, height, and crop settings (if the new image has different dimensions, the crop is reset to full image). This is distinct from deleting and re-adding — it preserves layout.
+
+**SVG support**: SVG files are handled specially — no crop (SVG is vector, crop doesn't make sense as raster crop), no resize quality slider (SVG scales losslessly). The dialog detects SVG via file type and shows a simplified UI: only "Replace" and "Filters" (brightness/contrast, not saturation for SVG — saturation filter may not apply cleanly to SVG). The SVG is rendered via `<img>` with `src` set to the data URL — browsers handle SVG rendering natively.
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/utils/imageUtils.ts` — pure image utilities:
+```typescript
+export function readFileAsDataURL(file: File): Promise<string>;
+export function getImageDimensions(dataUrl: string): Promise<{ width: number; height: number }>;
+export function validateImageFile(file: File): { valid: boolean; error?: string };
+export function computeCropRect(imgW: number, imgH: number, aspectRatio: number | null): CropRect;
+export function formatCssFilters(filters: ImageFilters): string;
+export function estimateFileSize(width: number, height: number, quality: number, format: string): number;
+```
+
+**Cross-plan contract**: Image upload ultimately sends files to Plan 7's storage API. The dialog uses the data URL for preview/crop (client-side), and on "Save", uploads the processed result to Plan 7's storage via `useUploadImageMutation` (Plan 5/7). Coordinate the upload mutation signature.
+
+**i18n keys**: `dashboard.certificateTemplateElements.image.upload`, `image.dropHere`, `image.crop`, `image.aspectRatio.*`, `image.resize`, `image.quality`, `image.filters.*`, `image.brightness`, `image.contrast`, `image.saturation`, `image.resetFilters`, `image.replace`, `image.replaceKeepSize`, `image.save`, `image.cancel`, `image.fileTooLarge`, `image.invalidType`, `image.estimatedSize`.
+
+### R4-6. Alignment Edge Cases
+
+**Component**: N/A (logic in `alignmentEngine.ts` from Task 17, extended)
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/canvas/alignmentEngine.ts` (extend existing)
+
+**Design**:
+
+The existing `alignmentEngine.ts` from Task 17 handles basic smart/edge/distribution/page guides. Round 4 extends it for edge-case scenarios that production templates will encounter.
+
+**Single element alignment to canvas (no other elements)**: When only 1 element is selected and the user invokes "Align Center" from the context menu or toolbar, the alignment target is the canvas itself, not other elements. The engine's `alignElements()` function checks `selectedElementIds.length === 1` and falls back to canvas-relative alignment:
+- "Align Left" → `element.x = 0`
+- "Align Center (horizontal)" → `element.x = (canvasWidth - element.width) / 2`
+- "Align Right" → `element.x = canvasWidth - element.width`
+- "Align Top" → `element.y = 0`
+- "Align Middle (vertical)" → `element.y = (canvasHeight - element.height) / 2`
+- "Align Bottom" → `element.y = canvasHeight - element.height`
+
+Canvas dimensions come from the template's `widthPx` / `heightPx` fields (Plan 10/Plan 5 schema).
+
+**2-element alignment baseline**: When exactly 2 elements are selected, alignment is relative to each other (not the canvas). "Align Left" sets both `x` to `min(el1.x, el2.x)`. "Align Center" sets both `x` to `((min_x + max_width) / 2 - element.width / 2)`. The "first" element (lower z-index) is the reference for "top/middle/bottom" vertical alignment. This is the standard behavior, but the engine must explicitly handle the 2-element case without distribution logic (distribution requires 3+).
+
+**3+ element distribution**: `distributeElements(axis: 'horizontal' | 'vertical')` for 3+ elements:
+- Sort elements by their position on the axis (horizontal → `x`, vertical → `y`).
+- Compute the total available space: `gapTotal = (lastMaxPos - firstMinPos) - sum(elementSizes)`.
+- Set each gap to `gapTotal / (n - 1)` where `n` is the element count.
+- Position each element in order with the computed equal gap.
+
+Edge case: if elements overlap (negative gap), distribute pushes them apart to equal positive gaps. If they have zero size (degenerate), center them.
+
+**Alignment to grid intersection**: When the canvas grid is enabled (Plan 11 `gridVisible: boolean`), the `snapToGuides` function also checks grid intersections. The grid size comes from Plan 11's `gridSize` (default 20px). A new function `snapToGrid(pos: number, gridSize: number): number` rounds to the nearest grid line. `snapToGuides` tries guide snapping first (5px threshold), then grid snapping (if within `gridSize/2`), then returns the original position. This creates a priority: smart guides > grid > no snap.
+
+**Alignment with rotation consideration**: When elements have non-zero rotation, alignment must account for the rotated bounding box, not the axis-aligned bounding box (AABB). A rotated element's visual left edge may not be `element.x`. The function `getRotatedBounds(element: CanvasElement): { left, top, right, bottom, center }` computes the OBB (oriented bounding box) corners and returns the AABB of the rotated rectangle. Alignment uses this AABB for position computation but updates `element.x / element.y` (the un-rotated origin) such that the rotated visual bounds are correctly aligned. This is computationally heavier — only invoked when `element.rotation !== 0`.
+
+**Alignment group locking**: When a `ElementGroup` (R4-8) contains elements and the user aligns one of the group's elements to an external element, the entire group moves to maintain relative positions. Implementation: `alignElements()` checks if any selected element is part of a group — if yes, the group offset (delta from alignment) is applied to ALL elements in the group, not just the selected one. The delta is computed as `(newX - oldX, newY - oldY)` and all group members are shifted by the same delta. This preserves intra-group layout.
+
+**New utility functions** in `alignmentEngine.ts`:
+```typescript
+export function alignToCanvas(element: CanvasElement, alignment: AlignmentType, canvasW: number, canvasH: number): Partial<CanvasElement>;
+export function alignTwoElements(el1: CanvasElement, el2: CanvasElement, alignment: AlignmentType): [Partial<CanvasElement>, Partial<CanvasElement>];
+export function distributeHorizontally(elements: CanvasElement[]): Partial<CanvasElement>[];
+export function distributeVertically(elements: CanvasElement[]): Partial<CanvasElement>[];
+export function snapToGrid(pos: number, gridSize: number): number;
+export function getRotatedBounds(element: CanvasElement): RotatedBounds;
+export function alignWithGroups(elements: CanvasElement[], groups: ElementGroup[], alignment: AlignmentType): Map<string, Partial<CanvasElement>>;
+```
+
+### R4-7. Z-Index Management
+
+**Component**: `LayerPanel` (enhanced from Task 8)
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/LayerPanel.tsx` (extend existing from Task 8)
+
+**Design**:
+
+The Task 8 layer panel (`@dnd-kit/sortable` drag reorder + visibility/lock toggles) is enhanced into a full Photoshop-style layer management panel.
+
+**Layer panel (Photoshop-style)**: The panel is a vertical sidebar (250px wide, full canvas height) containing a scrollable list of layer rows. Each row represents one element (or one group — R4-8). Rows are sorted by z-index descending (topmost layer at the top of the list). Each row shows:
+- Drag handle (`DragIndicatorOutlined` `Icon`)
+- Layer name (`TextField` — editable inline, click to edit name, Enter to save, Escape to cancel)
+- Type icon (element-type-specific icon from Task 20's palette)
+- Visibility toggle (`VisibilityOutlined` / `VisibilityOffOutlined` `IconButton`)
+- Lock toggle (`LockOutlined` / `LockOpenOutlined` `IconButton`)
+- Mini thumbnail (24×24px preview of the element rendered via a lightweight SVG/canvas snapshot)
+
+**Drag to reorder**: Uses the existing `@dnd-kit/sortable` from Task 8. On drag end, `reorder(orderedIds)` is called, which renormalizes z-indices to dense 0..N (per the key architectural fix #8 in the SWE review).
+
+**Bring forward / backward / send to front / back**: Contextual Z-order buttons appear as a floating toolbar at the bottom of the layer panel when an element is selected. Four `IconButton`s:
+| Button | Icon | Action |
+|---|---|---|
+| Bring to Front | `VerticalAlignTopOutlined` | `bringToFront([id])` |
+| Bring Forward | `ArrowUpwardOutlined` | `bringForward([id])` |
+| Send Backward | `ArrowDownwardOutlined` | `sendBackward([id])` |
+| Send to Back | `VerticalAlignBottomOutlined` | `sendToBack([id])` |
+
+These call the existing store z-order actions from Task 21. Buttons are disabled when the element is already at the extremum (front when at top z-index, back when at bottom).
+
+**Z-index numeric input**: A small `TextField` (width 48px) at the right of the selected layer row showing the current z-index as an integer. Editing it directly sets the z-index (clamped to 0..N-1 where N is element count — values outside are clamped and the list re-sorts). On Enter/blur, calls `reorder` with the new order (splices the element to the new position, then renormalizes).
+
+**Layer visibility toggle**: Clicking the `VisibilityOutlined` icon calls `setVisibility(id, !visible)`. Hidden layers show `VisibilityOffOutlined` with `opacity: 0.5` on the entire row. Hidden layers are excluded from the canvas render (Plan 11) and from the PDF output (Plan 6).
+
+**Layer lock**: Clicking the `LockOpenOutlined` icon calls `setLock(id, !locked)`. Locked layers show `LockOutlined` icon. Locked layers cannot be dragged, resized, or have properties edited (the property panel shows a read-only state with a "Locked" banner).
+
+**Layer naming**: Double-clicking the layer name `TextField` enters edit mode. The name is stored on `element.name` (a new optional field — if not set, defaults to a humanised element type, e.g. "Text Element 1", "Image 2"). i18n key for the default name pattern: `dashboard.certificateTemplateElements.layer.defaultName`.
+
+### R4-8. Element Grouping
+
+**Component**: N/A (store logic + canvas rendering)
+
+**Files**:
+- `frontend/common/stores/certificates/templateElementEditorStore.ts` (extend — store actions already in Task 21)
+- `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/GroupIndicator.tsx`
+
+**Design**:
+
+Element grouping allows the admin to bind multiple elements into a group that moves, resizes, and transforms as a single unit.
+
+**Group / ungroup (Cmd+G / Ctrl+Shift+G)**: The store's `group(name, ids)` action (already defined in Task 21) creates an `ElementGroup { id, name, elementIds, color }`. The default name is "Group N" (auto-incrementing). The default color is assigned from a rotating palette of 6 group colors (stored in `GROUP_COLORS` constant in `groupUtils.ts`: blue, green, amber, purple, teal, pink — all from `theme.palette` as `light.main` variants). `Ctrl+G` / `Cmd+G` triggers `group()` on the current selection; `Ctrl+Shift+G` / `Cmd+Shift+G` triggers `ungroup()`.
+
+**Nested groups**: A group can contain sub-groups. `ElementGroup.elementIds` can contain either element IDs OR group IDs. The store enforces max nesting depth of 3 (to prevent pathological cases — deeply nested groups become unwieldy and hard to render). `ungroup` recursively flattens nested groups into the parent or root.
+
+**Group selection highlight**: When a group is selected (any element in the group is selected, or the group node itself is selected in the layer panel), the canvas renders a bounding box around ALL elements in the group with the group's assigned color (`border: 2px solid ${group.color}`). Individual element selection outlines use `theme.palette.primary.main`; the group outline uses the group color to visually distinguish grouped vs. standalone selected elements.
+
+**Group transform as unit**: On the canvas (Plan 11), dragging any element in a group moves ALL group members by the same delta. Resizing a group element scales all members proportionally (anchored to the group center). Rotating a group rotates all members around the group center. These are canvas-store interactions — the element store just tracks group membership; the transformation math lives in `groupUtils.ts`:
+```typescript
+export function transformGroupAsUnit(group: ElementGroup, elements: CanvasElement[], transform: GroupTransform): Map<string, Partial<CanvasElement>>;
+```
+where `GroupTransform` is `{ type: 'move' | 'resize' | 'rotate'; delta: { dx, dy } | { scaleX, scaleY } | { angle } }`.
+
+**Group property inheritance**: Common properties set on the group (e.g., opacity, visibility) propagate to all member elements. The group's `opacity` (if set) multiplies each element's opacity (e.g., element 80% + group 50% = 40% effective). The group's `visible` — if `false`, all members are hidden (regardless of individual visibility). The group's `locked` — if `true`, all members are locked.
+
+**Group bounding box display**: The `GroupIndicator` component renders a small label tag above the group bounding box showing the group name and color dot. Rendered as an SVG `<rect>` + `<text>` overlay on the canvas (pointer-events: none — click passes through to elements). The label is positioned at the top-left of the group's AABB (computed from all member AABBs).
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/utils/groupUtils.ts`:
+```typescript
+export const GROUP_COLORS: string[];
+export function getGroupBoxBounds(members: CanvasElement[]): { x: number; y: number; width: number; height: number };
+export function transformGroupAsUnit(group: ElementGroup, members: CanvasElement[], transform: GroupTransform): Map<string, Partial<CanvasElement>>;
+export function flattenGroup(group: ElementGroup, allGroups: ElementGroup[]): string[];  // recursively get all element IDs
+export function isDescendantGroup(candidateId: string, ancestorId: string, allGroups: ElementGroup[]): boolean;
+export function getEffectiveOpacity(element: CanvasElement, groups: ElementGroup[]): number;
+export function getEffectiveVisibility(element: CanvasElement, groups: ElementGroup[]): boolean;
+export function getEffectiveLock(element: CanvasElement, groups: ElementGroup[]): boolean;
+```
+
+**i18n keys**: `dashboard.certificateTemplateElements.group.defaultName`, `group.ungroup`, `group.nestedLimit`, `group.select`, `group.name`.
+
+### R4-9. Opacity & Blend Modes
+
+**Component**: `OpacitySlider` (enhanced from Task 5) + `BlendModeSelect`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/OpacitySlider.tsx` (extend existing) + `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/BlendModeSelect.tsx`
+
+**Design**:
+
+**Opacity slider per element**: The Task 5 `OpacitySlider` (range 0–100, default 100) is extended to also show a real-time preview — the element's `opacity` property is applied to the canvas element via CSS `opacity`. No visual change to the slider control itself, but the store's `updateElement(id, { opacity })` triggers a canvas re-render that shows the element semi-transparent in real time. The slider label shows the current value with a `%` suffix.
+
+**Blend mode dropdown**: A new `BlendModeSelect` `Select` dropdown listing all CSS blend modes:
+| Mode | CSS `mix-blend-mode` value |
+|---|---|
+| Normal | `normal` |
+| Multiply | `multiply` |
+| Screen | `screen` |
+| Overlay | `overlay` |
+| Soft Light | `soft-light` |
+| Hard Light | `hard-light` |
+| Color Dodge | `color-dodge` |
+| Color Burn | `color-burn` |
+| Difference | `difference` |
+| Exclusion | `exclusion` |
+| Hue | `hue` |
+| Saturation | `saturation` |
+| Color | `color` |
+| Luminosity | `luminosity` |
+
+Each option in the `Select` shows both the label and a tiny preview swatch — a 16×16px `Box` with `background: linear-gradient(red, blue); mixBlendMode: <mode>` so the user sees the blend effect. The blend mode is stored on `element.blendMode` (default `'normal'`).
+
+**Blend mode preview**: Beyond the dropdown swatches, the canvas itself applies `mixBlendMode` in real time — as the user changes the blend mode, the element's rendering on the canvas updates immediately (CSS `mix-blend-mode` applies natively in the browser). No separate preview component needed. However, a tooltip on the dropdown label shows a short description of the selected mode (from i18n: `blendMode.description.normal` = "Default — no blending", `blendMode.description.multiply` = "Darkens by multiplying colors", etc.).
+
+**Zustand store additions**: The `CanvasElement` type extended with `blendMode?: 'normal' | 'multiply' | ...` (optional, defaults to `'normal'`). The `updateElement` action handles this like any other property patch.
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/blendModeUtils.ts`:
+```typescript
+export const BLEND_MODES: { value: string; labelKey: string }[];
+export type BlendMode = (typeof BLEND_MODES)[number]['value'];
+export function getBlendModePreviewCss(mode: BlendMode): React.CSSProperties;
+export function isValidBlendMode(value: string): value is BlendMode;
+```
+
+**i18n keys**: `dashboard.certificateTemplateElements.appearance.opacity`, `appearance.blendMode`, `appearance.blendMode.*` (16 modes), `appearance.blendMode.description.*` (16 descriptions).
+
+### R4-10. Shadow & Effects
+
+**Component**: `ShadowEditor` + `TextShadowEditor`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/ShadowEditor.tsx`
+
+**Design**:
+
+A unified shadow editor component that handles box shadow (for shapes/images), text shadow (for text elements), with presets and a glow effect toggle.
+
+```typescript
+interface ShadowConfig {
+  enabled: boolean;
+  type: 'outer' | 'inner';
+  x: number;          // px, -50..50
+  y: number;          // px, -50..50
+  blur: number;       // px, 0..100
+  spread: number;     // px, -50..50
+  color: string;      // hex
+  inset: boolean;     // for box shadow `inset` keyword
+}
+interface ShadowEditorProps {
+  label: string;
+  value: ShadowConfig;
+  onChange: (shadow: ShadowConfig) => void;
+  mode: 'box' | 'text';   // box = shapes/images, text = text elements
+}
+```
+
+**Box shadow editor (x, y, blur, spread, color)**: Four numeric `Slider` + `TextField` pairs arranged in a 2×2 grid:
+- **X Offset**: -50..50px, default 4
+- **Y Offset**: -50..50px, default 4
+- **Blur Radius**: 0..100px, default 8
+- **Spread Radius**: -50..50px, default 0
+
+A `ColorPickerField` (R4-2) for the shadow color (default `#000000`).
+
+**Text shadow editor**: Same as box shadow but without `spread` (CSS `text-shadow` doesn't support spread — `{ x, y, blur, color }`). Disabled `spread` row with a tooltip: "Not applicable to text shadows" (i18n key).
+
+**Inner shadow toggle**: A `Switch` labeled "Inner Shadow" — when ON, `inset: true` is added to the CSS `box-shadow` property (e.g., `box-shadow: inset 4px 4px 8px 0 rgba(0,0,0,0.5)`). Only available for box shadow mode (hidden for text shadow — CSS `text-shadow` has no inset).
+
+**Shadow presets**: A collapsible section with 5 preset shadows:
+| Preset | Config |
+|---|---|
+| None | `enabled: false` |
+| Small Drop | `x:2, y:2, blur:4, spread:0, color:#00000033` |
+| Medium Drop | `x:4, y:4, blur:8, spread:0, color:#00000044` |
+| Large Drop | `x:8, y:8, blur:16, spread:0, color:#00000055` |
+| Inner | `x:0, y:0, blur:8, spread:2, color:#00000044, inset:true` |
+
+Clicking a preset sets `value` to the preset config. Each preset is a small preview `Box` (48×24px) showing the shadow effect applied to a white rectangle.
+
+**Glow effect**: The "glow" is a special case of box shadow with positive `spread` and a colored (non-black) shadow color. A `ToggleButton` "Glow" next to "Drop Shadow" switches the editor to glow mode — sets `spread` to a positive value (default 8) and changes the default color to a bright accent (`theme.palette.warning.main`). The `spread` `Slider` becomes prominent (primarily controlling the glow intensity over `blur`). The preview updates in real time.
+
+**CSS export**: `formatShadowCss(shadow: ShadowConfig, mode: 'box' | 'text'): string`:
+- Box: `${inset ? 'inset ' : ''}${x}px ${y}px ${blur}px ${spread}px ${color}`
+- Text: `${x}px ${y}px ${blur}px ${color}`
+
+The CSS string is stored on the element and consumed by the canvas render layer. For PDF (Plan 6), `@pdfme` emulates box shadow via its custom shadow filter (coordinate with Plan 6 on shadow support).
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/shadowUtils.ts`:
+```typescript
+export const SHADOW_PRESETS: { labelKey: string; config: ShadowConfig }[];
+export function formatShadowCss(shadow: ShadowConfig, mode: 'box' | 'text'): string;
+export function createDefaultShadow(): ShadowConfig;
+export function createDefaultTextShadow(): ShadowConfig;
+export function createGlowShadow(color: string): ShadowConfig;
+```
+
+**i18n keys**: `dashboard.certificateTemplateElements.shadow.x`, `shadow.y`, `shadow.blur`, `shadow.spread`, `shadow.color`, `shadow.inner`, `shadow.presets`, `shadow.preset.*`, `shadow.glow`, `shadow.notApplicableText`, `shadow.enabled`.
+
+### R4-11. Border & Corner Radius
+
+**Component**: `BorderEditor` + `CornerRadiusEditor`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/BorderEditor.tsx`
+
+**Design**:
+
+```typescript
+interface BorderConfig {
+  style: 'solid' | 'dashed' | 'dotted' | 'none';
+  width: number;    // px, 0..20
+  color: string;    // hex
+}
+interface CornerRadiusConfig {
+  uniform: boolean;        // if true, top-left=tr=bl=br
+  topLeft: number;         // px, 0..100
+  topRight: number;
+  bottomLeft: number;
+  bottomRight: number;
+}
+interface BorderEditorProps {
+  border: BorderConfig;
+  cornerRadius: CornerRadiusConfig;
+  onBorderChange: (border: BorderConfig) => void;
+  onCornerRadiusChange: (radius: CornerRadiusConfig) => void;
+}
+```
+
+**Border style (solid / dashed / dotted)**: A `ToggleButtonGroup` with four `ToggleButton`s — "None" (`BorderClearOutlined`), "Solid" (`BorderStyleOutlined` — full line), "Dashed" (`LineStyleOutlined`), "Dotted" (no MUI icon — use a custom `SvgIcon` with dotted line). Selecting "None" disables the width and color controls (`opacity: 0.5, pointerEvents: none`).
+
+**Border width**: A `Slider` (0–20px, step 1) + numeric `TextField`. Default 1px. Shows a live preview of the border on a 40×40px `Box` to the right of the controls.
+
+**Border color**: A `ColorPickerField` (R4-2) with `enableAlpha: true` (borders can be semi-transparent for subtle effects).
+
+**Individual corner radius**: When `uniform: true` (default), a single `Slider` (0–100px) + `TextField` controls all four corners. A "Link" `IconButton` (`LinkOutlined`) toggles to `uniform: false`, which then shows 4 independent `Slider`+`TextField` pairs:
+- Top-Left, Top-Right, Bottom-Left, Bottom-Right (each 0–100px)
+
+Each corner label has a small icon (`RoundedCornerOutlined` rotated for each corner) for visual clarity.
+
+**Corner radius visual handle**: Instead of (or in addition to) the sliders, the element on the canvas shows a draggable corner-radius handle at the top-left corner of the element (when selected and the border section is open). Dragging this handle inward increases the corner radius (visible as a curved dashed line in the corner). This is a Plan 11 canvas interaction — the element store just needs the `cornerRadius` data model and the `updateElement` patch.
+
+**CSS export**:
+```typescript
+export function formatBorderCss(border: BorderConfig): string;  // returns "none" or "4px solid #ff0000"
+export function formatCornerRadiusCss(radius: CornerRadiusConfig): string;  // returns "8px" (uniform) or "8px 4px 4px 8px" (individual)
+```
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/borderUtils.ts`:
+```typescript
+export function formatBorderCss(border: BorderConfig): string;
+export function formatCornerRadiusCss(radius: CornerRadiusConfig): string;
+export function createDefaultBorder(): BorderConfig;
+export function createDefaultCornerRadius(): CornerRadiusConfig;
+```
+
+**i18n keys**: `dashboard.certificateTemplateElements.border.style`, `border.width`, `border.color`, `border.style.solid`, `border.style.dashed`, `border.style.dotted`, `border.style.none`, `cornerRadius.uniform`, `cornerRadius.unlink`, `cornerRadius.topLeft`, `cornerRadius.topRight`, `cornerRadius.bottomLeft`, `cornerRadius.bottomRight`.
+
+### R4-12. Transform
+
+**Component**: `TransformPanel`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/TransformPanel.tsx`
+
+**Design**:
+
+A comprehensive transform control panel section that extends the basic rotation from Task 5's common properties.
+
+```typescript
+interface TransformConfig {
+  rotation: number;        // 0..360 (normalized per SWE fix #7)
+  skewX: number;          // -45..45 degrees
+  skewY: number;          // -45..45 degrees
+  flipHorizontal: boolean;
+  flipVertical: boolean;
+  scale: number;          // 0.1..5.0 (uniform — scaleX = scaleY)
+  transformOrigin: TransformOrigin;
+}
+type TransformOrigin = 'top-left' | 'top-center' | 'top-right' | 'middle-left' | 'center' | 'middle-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+```
+
+**Rotation (visual handle + numeric)**: The element's rotation is controlled both by the canvas rotate handle (Plan 11) and a numeric `TextField` in this panel (range 0–360, step 1, `°` suffix). The visual handle on the canvas is a circular grip above the element bounding box — dragging it computes the angle from `atan2(dy, dx)` relative to the element center. The numeric field is for precise entry. Both update the same `element.rotation` property.
+
+**Rotation snap (15° increments with Shift)**: When dragging the rotate handle with `Shift` held, the rotation snaps to the nearest 15° increment (0, 15, 30, ..., 345, 360/0). Without `Shift`, rotation is free (1° step). The snap is implemented in Plan 11's canvas pointer-move handler but the snap increment is configurable via the element store: `rotationSnapEnabled: boolean` (default true) and `rotationSnapAngle: number` (default 15).
+
+**Skew (x, y)**: Two `Slider` + `TextField` pairs — Skew X and Skew Y, each -45° to 45°, step 1°. Default 0° (no skew). The skew is applied via CSS `transform: skew(xdeg, ydeg)` in combination with the rotation and flip. A "Reset Transform" button sets rotation=0, skewX=0, skewY=0, flipH=false, flipV=false, scale=1.
+
+**Flip horizontal / vertical**: Two `IconButton`s — `FlipOutlined` (horizontal, `scaleX(-1)` CSS) and a vertical variant (`scaleY(-1)`). Toggling flips the lement. Both flips can be active simultaneously. The flip is a boolean toggle, not a slider — clicking again un-flips.
+
+**Scale (uniform lock)**: A `Slider` (0.1–5.0, step 0.1) + numeric `TextField`. The scale is uniform (scaleX = scaleY = scale) — no independent axis scaling (that would distort text and images unrecognisably). A "Lock" `IconButton` is always in the locked state (visually showing `LockOutlined`) to indicate uniform scaling — it's not togglable, just communicating the constraint. Scale 1.0 = original size. The scale multiplies the element's `width` and `height` at render time (the stored `width`/`height` are the unscaled base dimensions).
+
+**Transform origin (9-point grid)**: A 3×3 grid of small `IconButton`s representing the transform origin points:
+```
+[•] [•] [•]
+[•] [•] [•]
+[•] [•] [•]
+```
+Each button is a dotted circle (`RadioButtonUncheckedOutlined`, 16px). The selected origin is filled (`RadioButtonCheckedOutlined`). Clicking sets `transformOrigin`. The origin affects how rotation, skew, and scale are applied — e.g., `transform-origin: top left` rotates around the top-left corner, `center` (default) rotates around the center. Each button has an `aria-label` from i18n (e.g., "top-left", "center", "bottom-right").
+
+**CSS export**:
+```typescript
+export function formatTransformCss(transform: TransformConfig): string {
+  const parts: string[] = [];
+  if (transform.rotation !== 0) parts.push(`rotate(${transform.rotation}deg)`);
+  if (transform.skewX !== 0 || transform.skewY !== 0) parts.push(`skew(${transform.skewX}deg, ${transform.skewY}deg)`);
+  if (transform.flipHorizontal) parts.push('scaleX(-1)');
+  if (transform.flipVertical) parts.push('scaleY(-1)');
+  if (transform.scale !== 1) parts.push(`scale(${transform.scale})`);
+  return parts.length ? `transform: ${parts.join(' ')}` : '';
+}
+export function formatTransformOriginCss(origin: TransformOrigin): string;  // "center center" for 'center', "top left" for 'top-left', etc.
+```
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/transformUtils.ts`:
+```typescript
+export function formatTransformCss(transform: TransformConfig): string;
+export function formatTransformOriginCss(origin: TransformOrigin): string;
+export function createDefaultTransform(): TransformConfig;
+export function normalizeRotation(deg: number): number;  // clamps to 0..360 (used across Plans 11/12 per SWE fix #7)
+export function snapRotation(deg: number, snapAngle: number): number;  // snaps to nearest snapAngle increment
+export const TRANSFORM_ORIGINS: { value: TransformOrigin; labelKey: string; cssValue: string }[];
+```
+
+**Zustand store additions**:
+```typescript
+rotationSnapEnabled: boolean;
+rotationSnapAngle: number;
+setRotationSnap: (enabled: boolean, angle: number) => void;
+```
+
+**i18n keys**: `dashboard.certificateTemplateElements.transform.rotation`, `transform.skewX`, `transform.skewY`, `transform.flipHorizontal`, `transform.flipVertical`, `transform.scale`, `transform.scaleLock`, `transform.origin`, `transform.origin.*` (9 origins), `transform.reset`, `transform.snapEnabled`, `transform.snapAngle`.
+
+### R4 Summary: New Store Properties & Actions
+
+All Round 4 additions to the `templateElementEditorStore` (extending Task 21's `ElementState`):
+
+```typescript
+// Panel collapse (R4-1)
+panelExpandedSections: Record<string, boolean>;
+lastEditedSectionId: string | null;
+setPanelExpanded: (sectionId: string, expanded: boolean) => void;
+setAllPanelExpanded: (expanded: boolean) => void;
+setLastEditedSection: (sectionId: string) => void;
+hydratePanelState: () => void;
+
+// Color history (R4-2)
+recentColors: string[];
+colorHistory: Record<string, string[]>;
+addRecentColor: (color: string) => void;
+addElementColorHistory: (elementId: string, color: string) => void;
+
+// Element name (R4-7)
+// element.name is added to CanvasElement type, updated via existing updateElement()
+
+// Rotation snap (R4-12)
+rotationSnapEnabled: boolean;
+rotationSnapAngle: number;
+setRotationSnap: (enabled: boolean, angle: number) => void;
+```
+
+New `CanvasElement` type fields:
+```typescript
+interface CanvasElement {
+  // ... existing fields ...
+  // R4-2
+  fillGradient?: GradientValue;          // for shapes/backgrounds with gradient fill
+  // R4-8
+  name?: string;                        // layer panel display name
+  groupId?: string;                     // parent group ID (null = ungrouped)
+  // R4-9
+  blendMode?: BlendMode;                // default 'normal'
+  // R4-10
+  boxShadow?: ShadowConfig;            // null = no shadow
+  textShadow?: ShadowConfig;           // null = no text shadow (text elements only)
+  // R4-11
+  border?: BorderConfig;                // default { style: 'none', width: 0, color: '#000000' }
+  cornerRadius?: CornerRadiusConfig;    // default { uniform: true, all: 0 }
+  // R4-12
+  skewX?: number;                       // default 0
+  skewY?: number;                       // default 0
+  flipHorizontal?: boolean;             // default false
+  flipVertical?: boolean;              // default false
+  scale?: number;                        // default 1.0
+  transformOrigin?: TransformOrigin;    // default 'center'
+}
+```
+
+### R4 Quality & Verification
+
+**Per-file verification loop** (per AGENTS.md): Each new file created in Round 4 must pass:
+1. `bun run tsgo` — zero type errors
+2. `bun biome:check` — zero formatting/lint issues
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r4-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read** before working on Round 4 files:
+- `.github/instructions/frontend.instructions.md` (all frontend files)
+- `.github/instructions/tests.instructions.md` (test files)
+- `frontend/views/AGENTS.md`, `frontend/AGENTS.md` (view components)
+- `frontend/common/stores/AGENTS.md` (store modifications)
+- `frontend/common/graphql/AGENTS.md` (if any new GraphQL documents needed)
+
+**Cross-plan contracts**:
+- Plan 5: `element.blendMode`, `element.boxShadow`, `element.textShadow`, `element.border`, `element.cornerRadius`, `element.scale`, `element.skewX/Y`, `element.flipH/V`, `element.transformOrigin`, `element.fillGradient`, `element.name`, `element.groupId` must be added to the backend schema and exposed via the GraphQL API. Verify the element mutations accept these fields.
+- Plan 6: PDF rendering must support `box-shadow`, `text-shadow`, `mixBlendMode`, `skew`, `flip`, `scale`, `transformOrigin`, and gradient fills. Coordinate CSS-to-PDF emulation.
+- Plan 7: Image upload (R4-5) uses Plan 7's storage API for the processed crop/resize result. Uploadeed fonts (R4-4) come from Plan 7.
+- Plan 11: Canvas must render `blendMode`, `shadow`, `skew`, `flip`, `scale`, `transformOrigin` correctly, handle group transforms, and implement the rotation snap and corner-radius visual handle.
+
+**Performance considerations**:
+- The property panel re-render risk (SWE review §E) is amplified by the number of controls in R4. The panel must memoize each section component with `React.memo` and use `useCallback` for all onChange handlers to prevent cascade re-renders.
+- The `ColorPickerField` with alpha slider and contrast checker is the heaviest control — defer rendering until the Popover opens (don't compute contrast on the closed state).
+- The `ImageCropResizeDialog` should use canvas-based cropping (HTML5 Canvas API) for performance — not DOM-based pixel manipulation.
+- The 9-point transform origin grid is trivial (9 `IconButton`s).
+
+---
+
+## Round 5: Advanced Fill & Stroke System
+
+> Added as Round 5 to extend the Plan 12 element properties panel with Photoshop/Illustrator-grade fill and stroke editing capabilities. This section defines the fill property panel, stroke property panel, gradient editor dialog, pattern picker dialog, and gradient mesh editor. The shared type definitions live in `frontend/common/stores/cert/fillStrokeTypes.ts` (created in Plan 10 §R5.8), and the on-canvas rendering is in Plan 11 §R5. The property panel imports both the types and the renderer contracts.
+
+### R5.1 Fill Property Panel Overview
+
+**Component**: `FillPropertyPanel`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/FillPropertyPanel.tsx` (new)
+
+**Design**:
+
+The fill property panel is rendered in the right sidebar (`PropertiesPanel` from R4-T1's `CollapsiblePanelShell`) when the selected element supports fill (`shape`, `background`, `text` — text uses fill for the text color). The panel is a `CollapsiblePanelShell` section with id `"fill"`, label `"Fill"`, icon `ColorizeOutlined` (from the R4-T1 section icon mapping).
+
+```typescript
+interface FillPropertyPanelProps {
+  elementId: string;
+  fill: FillConfig;
+  elementBounds: CanvasBounds;  // { width, height } for gradient/mesh preview
+  onFillChange: (fill: FillConfig) => void;
+}
+```
+
+**Top-level layout**:
+```tsx
+<CollapsiblePanelShell sectionId="fill" title={t("certificateTemplateEditor.fill.sectionTitle")} icon={<ColorizeOutlined />}>
+  <FillToggleRow fill={fill} onToggle={(enabled) => onFillChange({ ...fill, enabled })} />
+  <FillTypeDropdown fill={fill} onTypeChange={handleFillTypeChange} />
+  <Box sx={{ mt: 1 }}>
+    {fill.type === 'none' && <NoFillNotice />}
+    {fill.type === 'solid' && <SolidFillEditor fill={fill} onChange={onFillChange} />}
+    {fill.type === 'linear-gradient' && <GradientFillEditor fill={fill} onChange={onFillChange} type="linear" />}
+    {fill.type === 'radial-gradient' && <GradientFillEditor fill={fill} onChange={onFillChange} type="radial" />}
+    {fill.type === 'conic-gradient' && <GradientFillEditor fill={fill} onChange={onFillChange} type="conic" />}
+    {fill.type === 'pattern' && <PatternFillEditor fill={fill} onChange={onFillChange} />}
+    {fill.type === 'image' && <ImageFillEditor fill={fill} onChange={onFillChange} />}
+    {fill.type === 'gradient-mesh' && <GradientMeshEditor fill={fill} onChange={onFillChange} />}
+  </Box>
+  <FillGlobalControls fill={fill} onChange={onFillChange} />
+</CollapsiblePanelShell>
+```
+
+### R5.2 Fill Type Dropdown
+
+**Component**: `FillTypeDropdown`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/FillTypeDropdown.tsx` (new)
+
+A MUI v9 `Select` (full width) listing all fill types with icons:
+- None — `NotInterestedOutlined`
+- Solid — `CircleOutlined`
+- Linear Gradient — `GradientOutlined` (custom — MUI has no gradient icon; use a custom SVG icon)
+- Radial Gradient — same custom icon, rotated
+- Conic Gradient — same custom icon, different orientation
+- Pattern — `GridOnOutlined`
+- Image — `ImageOutlined`
+- Gradient Mesh — `BlurOnOutlined`
+
+Each `MenuItem` shows the icon + i18n label: `t("certificateTemplateEditor.fill.types.${fill.type}")`.
+
+```typescript
+interface FillTypeDropdownProps {
+  fill: FillConfig;
+  onTypeChange: (type: FillType) => void;
+}
+```
+
+When the type changes, default values are populated for the new type (gradient: 2 stops at 0% and 100%, default colors black→white; pattern: first library pattern; image: empty; mesh: 4 corner points).
+
+### R5.3 Solid Fill Editor
+
+**Component**: `SolidFillEditor`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/SolidFillEditor.tsx` (new)
+
+**Layout**:
+
+```tsx
+<Stack spacing={1.5}>
+  <ColorPickerField
+    label={t("certificateTemplateEditor.fill.solidColor")}
+    value={fill.solidColor ?? '#000000'}
+    onChange={(color) => onFillChange({ ...fill, solidColor: color })}
+    enableAlpha
+  />
+  <OpacitySlider
+    label={t("certificateTemplateEditor.fill.solidOpacity")}
+    value={fill.solidOpacity ?? 100}
+    onChange={(opacity) => onFillChange({ ...fill, solidOpacity: opacity })}
+  />
+</Stack>
+```
+
+`ColorPickerField` is the R4-T2 color picker component (already built). The `OpacitySlider` is a `Slider` (0–100, step 1) with a numeric `TextField` next to it.
+
+### R5.4 Gradient Fill Editor (Linear, Radial, Conic)
+
+**Component**: `GradientFillEditor`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/GradientFillEditor.tsx` (new)
+
+```typescript
+interface GradientFillEditorProps {
+  fill: FillConfig;
+  onChange: (fill: FillConfig) => void;
+  type: 'linear' | 'radial' | 'conic';
+}
+```
+
+**Sub-controls**:
+
+```tsx
+<Stack spacing={1.5}>
+  <GradientPreviewBar gradient={fill.gradient!} onStopsChange={(stops) => updateGradient({ stops })} />
+  <GradientStopList stops={fill.gradient!.stops} onStopChange={handleStopChange} onAddStop={addStop} onRemoveStop={removeStop} />
+  <GradientAngleControl gradient={fill.gradient!} onAngleChange={(angle) => updateGradient({ angle })} type={type} />
+  <RadialConicControls gradient={fill.gradient!} onChange={updateGradient} type={type} />
+  <ReverseGradientButton stops={fill.gradient!.stops} onReverse={reverseStops} />
+  <EditOnCanvasButton onActivate={() => fillStrokeStore.setGradientEditorActive(true, elementId)} />
+  <OpenFullEditorButton onClick={openGradientDialog} />
+</Stack>
+```
+
+**Gradient Preview Bar**: A 100% width, 32px tall bar with the gradient rendered (CSS `linear-gradient`/`radial-gradient`/`conic-gradient`). Click to add a stop at the click position (`position = (clickX / barWidth) * 100`). The stop is added near the nearest neighbor (split precedence). Each stop is a draggable handle (8×16 px, navy blue with white border). Double-click a stop opens a `ColorPickerField` popover. Drag a stop off the bar (down by >20px) removes it (with a visual feedback: the stop scales down and fades).
+
+**Gradient Stop List**: Below the preview bar, a list of stops — each row showing: position `Slider` (0–100), color swatch (click → ColorPickerField), opacity `Slider` (0–100), and a delete `IconButton` (delete is disabled when only 2 stops remain — minimum is 2).
+
+**Gradient Angle Control**: Linear gradients: a circular dial with a draggable radial handle (visual rotation, 0–360°). Numeric `TextField` next to the dial showing the angle in degrees. Conic gradients: same dial for the rotation.
+
+**Radial/Conic Controls** (visible only when type is `radial` or `conic`):
+- Center X `Slider` (0–100, percentage)
+- Center Y `Slider` (0–100)
+- Radius `Slider` (0–200, percentage) — radial only
+- Focal Offset X `Slider` (-100 to 100) — radial only
+- Focal Offset Y `Slider` (-100 to 100) — radial only
+
+**Reverse Gradient Button**: A `Button` with `FlipOutlined` icon — flips `stops` array (positions become `100 - position`, array order reversed).
+
+**Edit on Canvas Button**: A `Button` that calls `fillStrokeStore.setGradientEditorActive(true, elementId)` — this triggers the on-canvas gradient editing overlay (Plan 11 §R5.2).
+
+**Open Full Editor Button**: Opens the `GradientEditorDialog` (§R5.10) for advanced editing with preset library and import/export.
+
+### R5.5 Pattern Fill Editor
+
+**Component**: `PatternFillEditor`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/PatternFillEditor.tsx` (new)
+
+```tsx
+<Stack spacing={1.5}>
+  <PatternTypeDropdown value={fill.pattern?.patternId} onChange={handlePatternChange} />
+  <PatternPreviewThumbnail patternId={fill.pattern?.patternId} size={60} />
+  <SliderField label={t("certificateTemplateEditor.fill.pattern.scale")} min={10} max={200} value={fill.pattern?.scale} onChange={updateField('scale')} />
+  <SliderField label={t("certificateTemplateEditor.fill.pattern.angle")} min={0} max={360} value={fill.pattern?.angle} onChange={updateField('angle')} />
+  <Stack direction="row" spacing={1}>
+    <TextField label={t("certificateTemplateEditor.fill.pattern.offsetX")} type="number" value={fill.pattern?.offsetX} onChange={updateField('offsetX')} />
+    <TextField label={t("certificateTemplateEditor.fill.pattern.offsetY")} type="number" value={fill.pattern?.offsetY} onChange={updateField('offsetY')} />
+  </Stack>
+  <Button onClick={openPatternDialog} startIcon={<GridOnOutlined />}>
+    {t("certificateTemplateEditor.fill.pattern.browse")}
+  </Button>
+  <Button onClick={handleUploadPattern} startIcon={<UploadFileOutlined />}>
+    {t("certificateTemplateEditor.fill.pattern.uploadCustom")}
+  </Button>
+</Stack>
+```
+
+**Pattern Type Dropdown**: A `Select` listing all patterns from `fillStrokeStore.patternLibrary`, grouped by category (`basic`, `geometric`, `organic`, `custom`). Each `MenuItem` shows a small thumbnail + name. Default patterns: **Stripes (horizontal/vertical/diagonal), Dots (small/large), Checkerboard, Herringbone, Weave, Cross-hatch, Basket**.
+
+**Pattern Preview Thumbnail**: A 60×60 px SVG tile of the selected pattern, rendered at default scale.
+
+**Upload Custom Pattern**: Accepts PNG/JPG via a hidden `<input type="file">`. The uploaded image is sent to Plan 7's storage API (`uploadAsset` mutation), returns a URL, and the URL is wrapped into a `PatternDef` with `category: 'custom'` and added to `fillStrokeStore.patternLibrary` and `fillStrokeStore.addCustomPattern`.
+
+### R5.6 Image Fill Editor
+
+**Component**: `ImageFillEditor`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/ImageFillEditor.tsx` (new)
+
+```tsx
+<Stack spacing={1.5}>
+  <ImagePreviewThumbnail url={fill.image?.url} size={80} />
+  <Button onClick={handleUpload} startIcon={<UploadFileOutlined />}>{t("certificateTemplateEditor.fill.image.upload")}</Button>
+  <TextField label={t("certificateTemplateEditor.fill.image.url")} value={fill.image?.url} onChange={updateField('url')} fullWidth />
+  <RadioGroupField row label={t("certificateTemplateEditor.fill.image.mode")} value={fill.image?.mode} onChange={updateField('mode')}
+    options={[
+      { value: 'fill', label: t('certificateTemplateEditor.fill.image.modeFill') },
+      { value: 'fit', label: t('certificateTemplateEditor.fill.image.modeFit') },
+      { value: 'stretch', label: t('certificateTemplateEditor.fill.image.modeStretch') },
+      { value: 'tile', label: t('certificateTemplateEditor.fill.image.modeTile') },
+    ]} />
+  <SliderField label={t("certificateTemplateEditor.fill.image.opacity")} min={0} max={100} value={fill.image?.opacity} onChange={updateField('opacity')} />
+  <Stack direction="row" spacing={1}>
+    <TextField label={t("certificateTemplateEditor.fill.image.positionX")} type="number" value={fill.image?.positionX} onChange={updateField('positionX')} />
+    <TextField label={t("certificateTemplateEditor.fill.image.positionY")} type="number" value={fill.image?.positionY} onChange={updateField('positionY')} />
+  </Stack>
+  <SliderField label={t("certificateTemplateEditor.fill.image.scale")} min={10} max={200} value={fill.image?.scale} onChange={updateField('scale')} />
+</Stack>
+```
+
+**Image preview**: 80×80 px scaled preview. If no image URL yet, shows a placeholder `ImageOutlined` icon.
+
+### R5.7 Gradient Mesh Editor
+
+**Component**: `GradientMeshEditor`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/GradientMeshEditor.tsx` (new)
+
+**Design**:
+
+```tsx
+<Stack spacing={1.5}>
+  <MeshPreviewCanvas mesh={fill.mesh!} width={240} height={160} onAddPoint={addMeshPoint} onMovePoint={handleMoveMeshPoint} onSelectPoint={handleSelectMeshPoint} />
+  {/* Right-click on preview to add a point at the cursor position; left-click to select */}
+  {selectedPointId && (
+    <Stack direction="row" spacing={1}>
+      <ColorPickerField label={t("certificateTemplateEditor.fill.mesh.pointColor")} value={selectedPoint.color} onChange={updateMeshPointColor} />
+      <IconButton onClick={removeMeshPoint} sx={{ color: 'error.main' }}><DeleteOutlined /></IconButton>
+    </Stack>
+  )}
+  <SliderField label={t("certificateTemplateEditor.fill.mesh.smoothing")} min={0} max={100} value={fill.mesh?.smoothing} onChange={updateField('smoothing')} />
+  <Button onClick={addMeshPointCentered} startIcon={<AddCircleOutlined />}>{t("certificateTemplateEditor.fill.mesh.addPoint")}</Button>
+  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t("certificateTemplateEditor.fill.mesh.hint")}</Typography>
+</Stack>
+```
+
+**Mesh Preview Canvas**: A small HTML5 canvas (240×160 by default, scaling with the property panel width) showing the mesh interpolated over the element's aspect ratio. This is a mini version of the Plan 11 gradient-mesh rasterizer, with interactive overlays:
+- Each mesh point is rendered as a 6×6 px circle, colored with its own color and outlined in white.
+- Points are draggable on the mini-canvas. The preview re-rasterizes in real-time as points move (throttled to 30fps — sufficient for property-panel preview).
+- Right-click on a non-point area adds a new point at that position.
+- Click an existing point to select it (highlight with secondary color outline); the per-point color editor appears below.
+
+**Default mesh**: On init, a 4-point grid at the corners with `colors`: top-left red, top-right yellow, bottom-left blue, bottom-right green (`#F44336, #FFC107, #2196F3, #4CAF50`).
+
+### R5.8 Fill Global Controls
+
+**Component**: `FillGlobalControls`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/FillGlobalControls.tsx` (new)
+
+**Layout**:
+
+```tsx
+<Stack spacing={1} sx={{ mt: 1, borderTop: '1px solid', borderColor: 'divider', pt: 1.5 }}>
+  <Typography variant="subtitle2">{t("certificateTemplateEditor.fill.global")}</Typography>
+  <SliderField label={t("certificateTemplateEditor.fill.globalOpacity")} min={0} max={100} value={fill.globalOpacity} onChange={(v) => onFillChange({ ...fill, globalOpacity: v })} />
+  <BlendModeSelect label={t("certificateTemplateEditor.fill.blendMode")} value={fill.blendMode} onChange={(v) => onFillChange({ ...fill, blendMode: v })} />
+  <FormControlLabel control={<Switch checked={fill.enabled} onChange={(e) => onFillChange({ ...fill, enabled: e.target.checked })} />} label={t("certificateTemplateEditor.fill.toggle")} />
+</Stack>
+```
+
+**BlendModeSelect**: A `Select` with all 16 blend modes from `BlendMode` type (Normal, Multiply, Screen, Overlay, Darken, Lighten, Color Dodge, Color Burn, Hard Light, Soft Light, Difference, Exclusion, Hue, Saturation, Color, Luminosity). Each option shows a tiny preview swatch applying that blend mode to two stacked colored squares — visual at-a-glance identification.
+
+### R5.9 Stroke Property Panel
+
+**Component**: `StrokePropertyPanel`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/StrokePropertyPanel.tsx` (new)
+
+Similar in structure to `FillPropertyPanel`, but for stroke. Lives in the same `PropertiesPanel` shell under section id `"stroke"`, with icon `BorderOuterOutlined`.
+
+```typescript
+interface StrokePropertyPanelProps {
+  elementId: string;
+  stroke: StrokeConfig;
+  onStrokeChange: (stroke: StrokeConfig) => void;
+}
+```
+
+**Layout**:
+
+```tsx
+<CollapsiblePanelShell sectionId="stroke" title={t("certificateTemplateEditor.stroke.sectionTitle")} icon={<BorderOuterOutlined />}>
+  <FormControlLabel control={<Switch checked={stroke.enabled} onChange={(e) => onStrokeChange({ ...stroke, enabled: e.target.checked })} />} label={t("certificateTemplateEditor.stroke.toggle")} />
+  <StrokeLayersList layers={stroke.layers} onReorder={handleReorderLayers} onAddLayer={addLayer} onRemoveLayer={removeLayer} onToggleLayer={toggleLayer} onChangeLayer={updateLayer} />
+  {activeLayer && <StrokeLayerEditor layer={activeLayer} onChange={updateLayer} elementType={elementType} /> }
+</CollapsiblePanelShell>
+```
+
+### R5.10 Stroke Layer Editor (per-layer controls)
+
+**Component**: `StrokeLayerEditor`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/StrokeLayerEditor.tsx` (new)
+
+For each `StrokeLayer` in `stroke.layers`:
+
+```tsx
+<Stack spacing={1.5} sx={{ mt: 1 }}>
+  <StrokeTypeDropdown layer={layer} onTypeChange={handleTypeChange} />
+  {layer.type === 'solid' && (
+    <ColorPickerField label={t("certificateTemplateEditor.stroke.color")} value={layer.color} onChange={(c) => updateLayer({ color: c })} enableAlpha />
+  )}
+  {layer.type === 'gradient' && (
+    <GradientFillEditor fill={fillFromGradientLayer(layer)} onChange={updateLayerGradient} type="linear" />
+  )}
+  {layer.type === 'pattern' && (
+    <PatternFillEditor fill={fillFromPatternLayer(layer)} onChange={updateLayerPattern} />
+  )}
+  <Stack direction="row" spacing={1}>
+    <SliderField label={t("certificateTemplateEditor.stroke.width")} min={0} max={50} step={0.5} value={layer.width} onChange={(v) => updateLayer({ width: v })} />
+    <TextField sx={{ width: 60 }} type="number" value={layer.width} onChange={(e) => updateLayer({ width: Number(e.target.value) })} />
+  </Stack>
+  <RadioGroupField row label={t("certificateTemplateEditor.stroke.position")} value={layer.position} onChange={(v) => updateLayer({ position: v })}
+    options={[{ value: 'inside', label: t('...inside'), icon: <StrokeInsideIcon /> }, { value: 'center', label: t('...center'), icon: <StrokeCenterIcon /> }, { value: 'outside', label: t('...outside'), icon: <StrokeOutsideIcon /> }]} />
+  <SliderField label={t("certificateTemplateEditor.stroke.opacity")} min={0} max={100} value={layer.opacity} onChange={(v) => updateLayer({ opacity: v })} />
+  <RadioGroupField row label={t("certificateTemplateEditor.stroke.dashStyle")} value={layer.dashStyle} onChange={handleDashStyleChange}
+    options={[{ value: 'solid', label: t('...solid') }, { value: 'dashed', label: t('...dashed') }, { value: 'dotted', label: t('...dotted') }, { value: 'custom', label: t('...custom') }]} />
+  {layer.dashStyle === 'custom' && (
+    <Stack direction="row" spacing={1}>
+      <TextField type="number" label={t("certificateTemplateEditor.stroke.dashLength")} value={layer.dashLength} onChange={(e) => updateLayer({ dashLength: Number(e.target.value) })} />
+      <TextField type="number" label={t("certificateTemplateEditor.stroke.gapLength")} value={layer.gapLength} onChange={(e) => updateLayer({ gapLength: Number(e.target.value) })} />
+    </Stack>
+  )}
+  <SliderField label={t("certificateTemplateEditor.stroke.dashOffset")} min={0} max={100} value={layer.dashOffset} onChange={(v) => updateLayer({ dashOffset: v })} />
+  <RadioGroupField row label={t("certificateTemplateEditor.stroke.cap")} value={layer.cap} onChange={(v) => updateLayer({ cap: v })}
+    options={[{ value: 'butt', label: t('...butt'), icon: <StrokeButtCapIcon /> }, { value: 'round', label: t('...round'), icon: <StrokeRoundCapIcon /> }, { value: 'square', label: t('...square'), icon: <StrokeSquareCapIcon /> }]} />
+  <RadioGroupField row label={t("certificateTemplateEditor.stroke.join")} value={layer.join} onChange={(v) => updateLayer({ join: v })}
+    options={[{ value: 'miter', label: t('...miter'), icon: <StrokeMiterJoinIcon /> }, { value: 'round', label: t('...round'), icon: <StrokeRoundJoinIcon /> }, { value: 'bevel', label: t('...bevel'), icon: <StrokeBevelJoinIcon /> }]} />
+  {layer.join === 'miter' && <TextField type="number" label={t("certificateTemplateEditor.stroke.miterLimit")} value={layer.miterLimit} inputProps={{ min: 1, max: 20, step: 0.5 }} onChange={(e) => updateLayer({ miterLimit: Number(e.target.value) })} />}
+  <BlendModeSelect label={t("certificateTemplateEditor.stroke.blendMode")} value={layer.blendMode} onChange={(v) => updateLayer({ blendMode: v })} />
+</Stack>
+```
+
+**Stroke position radio group icons**: Custom SVG icons showing a rectangle with the stroke drawn inside, centered, or outside the boundary — visual at-a-glance.
+
+**Stroke cap/join icons**: Custom SVG icons showing line endings/joins with each style.
+
+### R5.11 Stroke Layers List (Multi-Stroke)
+
+**Component**: `StrokeLayersList`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/StrokeLayersList.tsx` (new)
+
+```typescript
+interface StrokeLayersListProps {
+  layers: StrokeLayer[];
+  onReorder: (from: number, to: number) => void;
+  onAddLayer: () => void;
+  onRemoveLayer: (id: string) => void;
+  onToggleLayer: (id: string, enabled: boolean) => void;
+  onChangeLayer: (id: string, patch: Partial<StrokeLayer>) => void;
+}
+```
+
+**List item** (per `StrokeLayer`):
+- A draggable row showing: drag handle (`DragIndicatorOutlined`), enabled `Switch`, color preview swatch (the layer's `color` or a tiny gradient/pattern sample), label `t("certificateTemplateEditor.stroke.layer.n", N)` (1-indexed), "Delete" `IconButton`.
+- The active (selected) layer is highlighted with `sx={{ backgroundColor: theme.palette.action.selected }}`.
+- Reorder via `@dnd-kit/sortable` — drag the row up/down. Reordering updates the `stroke.layers` array order (which controls z-order on canvas).
+- "Add Layer" `Button` at the bottom — defaults to a new `StrokeLayer` with `type: 'solid', color: '#000000', width: 1, position: 'center'`.
+- Maximum 5 stroke layers — above that, an `AlertDialog` warns and refuses to add.
+
+### R5.12 Gradient Editor Dialog
+
+**Component**: `GradientEditorDialog`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/GradientEditorDialog.tsx` (new)
+
+A modal `Dialog` (full-screen on mobile, 600px-wide on desktop) for advanced gradient editing.
+
+```typescript
+interface GradientEditorDialogProps {
+  open: boolean;
+  onClose: () => void;
+  gradient: GradientValue;
+  onGradientChange: (gradient: GradientValue) => void;
+  type: 'linear' | 'radial' | 'conic';
+}
+```
+
+**Layout**:
+
+```tsx
+<Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+  <DialogTitle>{t("certificateTemplateEditor.gradientEditor.title")}</DialogTitle>
+  <DialogContent>
+    <Stack spacing={2}>
+      <GradientTypeToggle value={type} onChange={handleTypeChange} />
+
+      {/* Large gradient preview bar (full width of dialog) */}
+      <GradientPreviewBar gradient={gradient} onStopsChange={(stops) => onGradientChange({ ...gradient, stops })} width={400} height={48} showStops />
+
+      {/* Per-stop editor list */}
+      <GradientStopList stops={gradient.stops} onStopChange={handleStopChange} onAddStop={addStop} onRemoveStop={removeStop} />
+
+      {/* Angle dial (large circular control, 120px) */}
+      <GradientAngleDial value={gradient.angle ?? 90} onChange={(v) => onGradientChange({ ...gradient, angle: v })} size={120} />
+      <TextField type="number" label={t("certificateTemplateEditor.gradientEditor.angle")} value={gradient.angle ?? 90} onChange={(e) => onGradientChange({ ...gradient, angle: Number(e.target.value) })} />
+
+      {/* Radial/Conic controls */}
+      {type === 'radial' && <RadialControls gradient={gradient} onChange={onGradientChange} />}
+      {type === 'conic' && <ConicControls gradient={gradient} onChange={onGradientChange} />}
+
+      {/* Preset library */}
+      <Divider />
+      <Typography variant="subtitle2">{t("certificateTemplateEditor.gradientEditor.presets")}</Typography>
+      <GradientPresetGrid presets={fillStrokeStore.gradientPresets} onSelectPreset={applyPreset} />
+
+      {/* Save as preset */}
+      <Stack direction="row" spacing={1}>
+        <TextField label={t("certificateTemplateEditor.gradientEditor.presetName")} value={presetName} onChange={(e) => setPresetName(e.target.value)} size="small" />
+        <Button onClick={saveAsPreset} startIcon={<BookmarkAddOutlined />}>{t("certificateTemplateEditor.gradientEditor.savePreset")}</Button>
+      </Stack>
+
+      {/* Import/Export CSS */}
+      <Divider />
+      <Stack direction="row" spacing={1}>
+        <TextField label={t("certificateTemplateEditor.gradientEditor.cssString")} value={gradientToCss(gradient)} InputProps={{ readOnly: true, endAdornment: <IconButton onClick={copyToClipboard}><ContentCopyOutlined /></IconButton> }} size="small" fullWidth />
+        <Button onClick={openImportField}>{t("certificateTemplateEditor.gradientEditor.import")}</Button>
+      </Stack>
+      {importFieldOpen && (
+        <TextField label={t("certificateTemplateEditor.gradientEditor.pasteCss")} onChange={(e) => setImportCss(e.target.value)} onBlur={handleImport} size="small" fullWidth />
+      )}
+    </Stack>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={onClose}>{t("common.close")}</Button>
+  </DialogActions>
+</Dialog>
+```
+
+**GradientTypeToggle**: A `ToggleButtonGroup` with three buttons: Linear (with `GradientOutlined`-style custom icon), Radial, Conic — each with its own custom SVG icon.
+
+**GradientPresetGrid**: A grid of 12 default gradient presets (loaded from a static config in `gradientPresets.ts`) + user-saved presets from `fillStrokeStore.gradientPresets`. Each cell shows a 60×30 px gradient thumbnail; clicking applies the preset to the current gradient.
+
+**CSS Import/Export**: `gradientToCss(gradient)` returns a CSS string like `linear-gradient(90deg, #ff0000 0%, #00ff00 50%, #0000ff 100%)`. The import flow parses a CSS gradient string into a `GradientValue` (using a regex parser; supports linear-gradient and conic-gradient; radial-gradient support for known CSS syntax).
+
+### R5.13 Pattern Picker Dialog
+
+**Component**: `PatternPickerDialog`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/PatternPickerDialog.tsx` (new)
+
+```typescript
+interface PatternPickerDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onPick: (patternId: string) => void;
+  currentPatternId: string | null;
+}
+```
+
+**Layout**:
+
+```tsx
+<Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+  <DialogTitle>
+    <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Typography variant="h6">{t("certificateTemplateEditor.patternPicker.title")}</Typography>
+      <TextField sx={{ width: 200 }} size="small" placeholder={t("...search")}
+        value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+        InputProps={{ startAdornment: <InputAdornment position="start"><SearchOutlined /></InputAdornment> }} />
+    </Stack>
+  </DialogTitle>
+  <DialogContent>
+    <Tabs value={activeCategory} onChange={(_, v) => setActiveCategory(v)}>
+      <Tab label={t("...basic")} value="basic" />
+      <Tab label={t("...geometric")} value="geometric" />
+      <Tab label={t("...organic")} value="organic" />
+      <Tab label={t("...custom")} value="custom" />
+    </Tabs>
+    <Box sx={{ mt: 2 }}>
+      <Grid container spacing={1.5} columns={6}>
+        {filteredPatterns.map(p => (
+          <Grid item xs={1} key={p.id}>
+            <PatternThumbnail pattern={p} isSelected={p.id === currentPatternId} onPick={() => onPick(p.id)} />
+            <Typography variant="caption" align="center">{p.name}</Typography>
+          </Grid>
+        ))}
+      </Grid>
+      {activeCategory === 'custom' && (
+        <Button onClick={handleUploadCustom} sx={{ mt: 2 }} startIcon={<UploadFileOutlined />}>{t("...uploadCustom")}</Button>
+      )}
+    </Box>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={onClose}>{t("common.close")}</Button>
+  </DialogActions>
+</Dialog>
+```
+
+**PatternThumbnail**: A `ButtonBase` showing a 120×120 px tile of the pattern. When `isSelected`, the thumbnail has a 2px `secondary.main` border and a `CheckCircleOutlined` badge in the corner.
+
+**Pattern categories** (default library):
+- **Basic**: Solid Stripe-Horizontal, Solid Stripe-Vertical, Solid Stripe-Diagonal, Thin Stripe-Horizontal, Thin Stripe-Vertical
+- **Geometric**: Checkerboard, Herringbone, Weave, Cross-hatch, Diamond, Hex
+- **Organic**: Bubbles, Clouds, Waves, Topographic
+- **Custom**: user-uploaded patterns (from `fillStrokeStore.patternLibrary`)
+
+### R5.14 i18n Keys Summary (Plan 12 R5)
+
+All keys are added under the `certificateEditor` namespace:
+- `fill.sectionTitle`, `fill.toggle`, `fill.types.*` (none, solid, linear-gradient, radial-gradient, conic-gradient, pattern, image, gradient-mesh)
+- `fill.solidColor`, `fill.solidOpacity`, `fill.global`, `fill.globalOpacity`, `fill.blendMode`
+- `fill.gradient.stops`, `fill.gradient.angle`, `fill.gradient.reverse`, `fill.gradient.editOnCanvas`
+- `fill.gradient.radial.centerX`, `...centerY`, `...radius`, `...focalOffsetX`, `...focalOffsetY`
+- `fill.gradient.conic.rotation`
+- `fill.pattern.scale`, `...angle`, `...offsetX`, `...offsetY`, `...browse`, `...uploadCustom`, `...thumbnail`
+- `fill.image.upload`, `...url`, `...mode`, `...modeFill`, `...modeFit`, `...modeStretch`, `...modeTile`, `...opacity`, `...positionX`, `...positionY`, `...scale`
+- `fill.mesh.pointColor`, `...smoothing`, `...addPoint`, `...hint`
+- `stroke.sectionTitle`, `stroke.toggle`, `stroke.color`, `stroke.width`, `stroke.opacity`, `stroke.position`, `...inside`, `...center`, `...outside`
+- `stroke.dashStyle`, `...solid`, `...dashed`, `...dotted`, `...custom`, `stroke.dashLength`, `stroke.gapLength`, `stroke.dashOffset`
+- `stroke.cap`, `...butt`, `...round`, `...square`, `stroke.join`, `...miter`, `...round`, `...bevel`, `stroke.miterLimit`, `stroke.blendMode`
+- `stroke.layer.add`, `stroke.layer.n` (interpolation `(n) \`Layer ${n}\``), `stroke.layer.maxLayers`
+- `gradientEditor.title`, `...presets`, `...presetName`, `...savePreset`, `...cssString`, `...import`, `...pasteCss`, `...angle`
+- `patternPicker.title`, `...search`, `...basic`, `...geometric`, `...organic`, `...custom`, `...uploadCustom`
+
+All keys must be defined in `shared/locale/types/dashboard/certificates/templateEditor.ts` (type schema) and implemented in both `shared/locale/ar/...` and `shared/locale/en/...`.
+
+### R5.15 Store Additions (Plan 12 R5)
+
+The `templateElementEditorStore` (from R4) gains:
+
+```typescript
+gradientDialogOpen: boolean;
+gradientDialogType: 'linear' | 'radial' | 'conic';
+gradientDialogElementId: string | null;
+setGradientDialogOpen: (open: boolean, type?: 'linear' | 'radial' | 'conic', elementId?: string | null) => void;
+
+patternDialogOpen: boolean;
+patternDialogElementId: string | null;
+setPatternDialogOpen: (open: boolean, elementId?: string | null) => void;
+
+activeStrokeLayerId: string | null;
+setActiveStrokeLayerId: (id: string | null) => void;
+```
+
+### R5.16 Quality & Verification (Plan 12 R5)
+
+**Per-file verification**: tsgo → biome → lint queue client → sub-loop.
+
+**Instruction files**: `.github/instructions/frontend.instructions.md`
+
+**Cross-plan contracts**:
+- **Plan 10**: imports `FillConfig`, `StrokeConfig`, and all sub-types from `@/frontend/common/stores/cert/fillStrokeTypes` (created by Plan 10 R5.8).
+- **Plan 11**: The "Edit on Canvas" button (in `GradientFillEditor` §R5.4) calls `fillStrokeStore.setGradientEditorActive(true, elementId)` which triggers Plan 11's `GradientEditorOverlay`.
+- **Plan 5**: The GraphQL input types for element mutations extend with `FillConfig` and `StrokeConfig` (full nesting).
+- **Plan 6**: PDF rendering must handle all `FillType`, `StrokeConfig.layers`, `StrokePosition`, `StrokeDashStyle`, `StrokeCapStyle`, `StrokeJoinStyle`, blend modes (emulated via color math).
+
+**Performance**:
+- The `FillPropertyPanel` must `React.memo` all sub-editors (`SolidFillEditor`, `GradientFillEditor`, etc.) to prevent cascade re-renders when the user drags a stop on the canvas overlay.
+- Use `useCallback` for all `onFillChange` handlers — their identity must stay stable across re-renders unless the underlying fill changes.
+- The mesh preview canvas (§R5.7) rasterizer must be throttled to 30fps minimum during drag — higher than 30fps causes noticeable canvas lag in the small preview.
+- The `GradientPresetGrid` (§R5.12) memoizes gradient thumbnails at module load — 60×30 px thumbnails are cheap and reused across all open dialogs.
+- The `PatternThumbnail` (§R5.13) renders patterns at 120×120 px — the SVG `pattern` is reused (no per-thumbnail rasterization).
+
+**Accessibility**:
+- All sliders have `aria-label` from i18n strings.
+- The gradient preview bar's draggable stops are keyboard-accessible: `ArrowLeft`/`ArrowRight` adjusts position by 1%, `ArrowUp`/`ArrowDown` adjusts opacity by 5%, `Delete` removes the stop, `Enter` opens the color picker.
+- The stroke layer list supports drag reorder via keyboard: `Space` enters "drag mode" (focus trapped in the row), `ArrowUp`/`ArrowDown` moves the row, `Space` drops.
+- The gradient angle dial has a numeric `TextField` fallback (visible alongside) for accessibility — the dial alone is not sufficient for screen readers.
+
+---
+
+## Round 5: Transform Engine — Property Panel & Numeric Dialog
+
+> **Round**: 6 · **Topic**: Transform Engine (Numeric Surface)
+> **Depends on**: Plan 10 R6 (Edit→Transform→Numeric… menu + last-transform record), Plan 11 R6 (`transformEngine/` math + `transformTypes.ts`)
+> **PredecessorRound**: Round 5 (Fill/Stroke — defines `CollapsiblePanelShell` + property panel layout that this section reuses)
+> **Goal**: Add the **transform property panel section** (always-visible Position/Size/Rotation/Skew/Flip + reset) to the right sidebar, and the **Numeric Transform Input dialog** launched from Edit→Transform→Numeric…. Plan 12 owns the **numeric UX**; Plan 11 owns the canvas math (Plan 12 calls into `transformEngine/*`). Plan 10 owns the Edit menu launcher.
+
+### R6.1 Scope Boundary (Plan 12 vs Plan 11 vs Plan 10)
+
+| Concern | Owner Plan | File(s) |
+|---|---|---|
+| Transform property panel section (live inputs) | **Plan 12** | `TransformPropertyPanelSection.tsx` |
+| Numeric Transform Input dialog (form + apply/copy) | **Plan 12** | `NumericTransformDialog.tsx` |
+| Origin selector (top-left/center/bottom-right 3-state) | **Plan 12** | `OriginSelector.tsx` (small reusable) |
+| Aspect-ratio chain lock button (shared) | **Plan 12** | `ChainLockButton.tsx` (reused from Round 4 if already exists; else create here) |
+| Flip H/V quick buttons | **Plan 12** | `TransformPropertyPanelSection.tsx` (inline) |
+| Transform reset button | **Plan 12** | `TransformPropertyPanelSection.tsx` |
+| Reference point 3×3 grid selector (used in options bar) | **Plan 11** | `FreeTransformOptionsBar.tsx` (Plan 11 R6.10) |
+
+**Rule**: Plan 12's property panel and dialog must NOT re-implement transform math. They call `transformEngine/*` utilities exported by Plan 11: `formatTransformCss`, `solveProjective`, `normalizeRotation`, `nineSliceRegions`, `applyWarpToElement`. Plan 12 composes the numeric inputs and dispatches element mutations via the existing `updateElement` mutation (Plan 5, already extended in Rounds 4-5).
+
+### R6.2 Transform Property Panel Section
+
+**Component**: `TransformPropertyPanelSection`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/TransformPropertyPanelSection.tsx`
+
+Replaces the Round 4 `TransformPanel` (which had a visual dial + skew sliders + flip toggles + scale lock + 9-point origin grid). R6.2 **upgrades** that panel to a Photoshop-style transform section with **live update + undo + reset** and adds support for the new `warp` field's read-only summary (full warp editing happens in the canvas overlay, Plan 11 — the panel just shows "Warp: <preset>" with a "Remove Warp" button).
+
+```tsx
+import { Stack, TextField, IconButton, Box, Tooltip } from '@mui/material';
+import { FlipOutlined, FlipOutlined as FlipVIcon, RefreshOutlined } from '@mui/icons-material';
+import { useAppTranslation } from '@/shared/locale/client';
+
+export function TransformPropertyPanelSection({ elementId }: { elementId: string }) {
+  const t = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const element = useTemplateElementEditorStore((s) => s.elementsById[elementId]);
+  const draft = useTemplateElementEditorStore((s) => s.draftProperties[elementId]);
+  const updateField = useTemplateElementEditorStore((s) => s.updateDraftField);
+  const resetTransform = useTemplateElementEditorStore((s) => s.resetTransform);
+
+  const uniformLocked = useTemplateElementEditorStore((s) => s.uniformScaleLock[elementId] ?? true);
+  const origin = useTemplateElementEditorStore((s) => s.transformOrigin[elementId] ?? 'top-left');
+
+  return (
+    <CollapsiblePanelShell
+      sectionId="transform-r6"
+      title={t('certificateTemplateEditor.transform.propertyPanel.title')}
+      icon={<TransformOutlined />}
+      action={<Tooltip title={t('certificateTemplateEditor.transform.propertyPanel.reset')}><IconButton size="small" onClick={() => resetTransform(elementId)}><RefreshOutlined /></IconButton></Tooltip>}
+    >
+      <Stack spacing={1.5}>
+        {/* Position X/Y + origin selector */}
+        <Stack direction="row" spacing={1} alignItems="center">
+          <OriginSelector value={origin} onChange={(o) => useTemplateElementEditorStore.getState().setTransformOrigin(elementId, o)} />
+          <TextField size="small" type="number" label="X" value={draft.x} onChange={(e) => updateField(elementId, 'x', Number(e.target.value))} sx={{ flex: 1 }} />
+          <TextField size="small" type="number" label="Y" value={draft.y} onChange={(e) => updateField(elementId, 'y', Number(e.target.value))} sx={{ flex: 1 }} />
+        </Stack>
+        {/* Width/Height with chain lock */}
+        <Stack direction="row" spacing={1} alignItems="center">
+          <TextField size="small" type="number" label="W" value={draft.width} onChange={(e) => updateField(elementId, 'width', Number(e.target.value), { uniform: uniformLocked })} sx={{ flex: 1 }} />
+          <ChainLockButton locked={uniformLocked} onToggle={() => useTemplateElementEditorStore.getState().toggleUniformScaleLock(elementId)} />
+          <TextField size="small" type="number" label="H" value={draft.height} onChange={(e) => updateField(elementId, 'height', Number(e.target.value), { uniform: uniformLocked })} sx={{ flex: 1 }} />
+        </Stack>
+        {/* Rotation slider + numeric */}
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="caption" sx={{ minWidth: 60 }}>{t('certificateTemplateEditor.transform.propertyPanel.rotation')}</Typography>
+          <Slider min={-180} max={180} value={draft.rotation} onChange={(_, v) => updateField(elementId, 'rotation', v)} sx={{ flex: 1 }} />
+          <TextField size="small" type="number" value={draft.rotation} onChange={(e) => updateField(elementId, 'rotation', Number(e.target.value))} sx={{ width: 80 }} inputProps={{ 'aria-label': t('certificateTemplateEditor.transform.propertyPanel.rotationAria') }} />
+        </Stack>
+        {/* Skew X/Y */}
+        <Stack direction="row" spacing={1}>
+          <TextField size="small" type="number" label={t('certificateTemplateEditor.transform.propertyPanel.skewX')} value={draft.skewX} onChange={(e) => updateField(elementId, 'skewX', Number(e.target.value))} sx={{ flex: 1 }} inputProps={{ min: -45, max: 45 }} />
+          <TextField size="small" type="number" label={t('certificateTemplateEditor.transform.propertyPanel.skewY')} value={draft.skewY} onChange={(e) => updateField(elementId, 'skewY', Number(e.target.value))} sx={{ flex: 1 }} inputProps={{ min: -45, max: 45 }} />
+        </Stack>
+        {/* Flip H/V quick buttons */}
+        <Stack direction="row" spacing={1}>
+          <Button variant="outlined" size="small" onClick={() => updateField(elementId, 'flipH', !draft.flipH)} startIcon={<FlipOutlined />}>{t('certificateTemplateEditor.transform.flipHorizontal')}</Button>
+          <Button variant="outlined" size="small" onClick={() => updateField(elementId, 'flipV', !draft.flipV)} startIcon={<FlipVIcon />}>{t('certificateTemplateEditor.transform.flipVertical')}</Button>
+        </Stack>
+        {/* Warp read-only summary (full editing is the canvas overlay, Plan 11) */}
+        {draft.warp && (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {t('certificateTemplateEditor.transform.propertyPanel.warpSummary', { preset: draft.warp.preset })}
+            </Typography>
+            <Button size="small" onClick={() => updateField(elementId, 'warp', null)} sx={{ color: 'error.main' }}>
+              {t('certificateTemplateEditor.transform.propertyPanel.removeWarp')}
+            </Button>
+          </Stack>
+        )}
+      </Stack>
+    </CollapsiblePanelShell>
+  );
+}
+```
+
+Notes:
+- `updateField` accepts a 3rd `{ uniform }` param so W or H auto-derives the other when the chain lock is on (derivation uses the existing draft values + new entry — proportions preserved from the unchanged axis).
+- `resetTransform(elementId)` restores `x/y/width/height/rotation/skewX/skewY/flipH/flipV/warp` to the element's original (last-saved) values. This is one undo step (pushed to history before reset, so undo restores back to the pre-reset state).
+- All colors via `sx={{ color: ... }}` referencing `theme.palette.*` — never hardcoded.
+
+#### R6.2.1 Origin Selector (3-state)
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/OriginSelector.tsx`
+
+A small 3-button `ToggleButtonGroup` (Top-Left | Center | Bottom-Right) controlling the origin anchor for Position/Size readouts. Affects how the numeric dialog interprets X/Y (R6.3) and how the property panel X/Y display maps to canvas coordinates.
+
+```typescript
+export type TransformOrigin = 'top-left' | 'center' | 'bottom-right';
+export interface OriginSelectorProps {
+  value: TransformOrigin;
+  onChange: (origin: TransformOrigin) => void;
+}
+```
+
+#### R6.2.2 Chain Lock Button (reused)
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/controls/ChainLockButton.tsx`
+
+A small `IconButton` that toggles `LockOutlined` ↔ `LockOpenOutlined`. If Round 4 already created a chain lock for the scale panel, **reuse** it — do not create a duplicate. Search for `ChainLockButton` before creating.
+
+### R6.3 Numeric Transform Input Dialog
+
+**Component**: `NumericTransformDialog`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/NumericTransformDialog.tsx`
+
+A `Dialog` launched from:
+1. Edit → Transform → Numeric… (Plan 10 menu action → `store.openNumericTransformDialog()`)
+2. Double-click on an element when the transform tool is active (`activeTool === 'freeTransform'` — handled by Plan 11s canvas pointer handler, which calls `store.openNumericTransformDialog()` on double-click)
+
+The dialog provides absolute numeric entry for all transform fields in one place.
+
+#### R6.3.1 Dialog Fields
+
+```
+┌─ Transform — ────────────────────────────────────────┐
+│ Apply to: ● All selected elements                    │
+│                                                       │
+│ Position origin: [Top-Left ▼] [Abs|Rel toggle]       │
+│   X: [____]  Y: [____]                                │
+│                                                       │
+│ Size  W: [____]  H: [____]  [🔗]                      │
+│                                                       │
+│ Rotation  Angle: [____]°  (-180..180)                │
+│                                                       │
+│ Skew  X: [____]°  Y: [____]°  (-45..45)              │
+│                                                       │
+│             [ Copy Transformed ] [ Apply ]           │
+└───────────────────────────────────────────────────────┘
+```
+
+**Fields**:
+
+| Field | Type | Range | Notes |
+|---|---|---|---|
+| Position X, Y | number | — | origin dropdown: top-left / center / bottom-right |
+| Position mode | `Abs` / `Rel` toggle | — | Absolute sets to X; Relative adds X to current |
+| Size W, H | number | ≥0 | chain lock for proportional |
+| Chain lock | toggle | — | lock/unlock proportional W:H |
+| Rotation angle | number | −180..180 | degrees |
+| Skew X | number | −45..45 | degrees |
+| Skew Y | number | −45..45 | degrees |
+
+**Buttons**:
+- **Apply** — applies specified transforms to all selected elements, closes dialog, pushes one history entry (all selected elements in one undo step).
+- **Copy Transformed** — duplicates each selected element first (Plan 12 `duplicateSelection`), then applies transforms to the duplicates. Original elements untouched. Useful for radial/array patterns (combined with Transform Again — Plan 10 R6.5).
+
+#### R6.3.2 Dialog Component
+
+```tsx
+export function NumericTransformDialog() {
+  const t = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const open = useTemplateElementEditorStore((s) => s.numericTransformDialogOpen);
+  const close = useTemplateElementEditorStore((s) => s.setNumericTransformDialogOpen);
+  const selectedIds = useCertTemplateEditorStore((s) => s.selectedElementIds, useShallow);
+  const [origin, setOrigin] = useState<TransformOrigin>('top-left');
+  const [absRel, setAbsRel] = useState<'absolute' | 'relative'>('absolute');
+  const [uniform, setUniform] = useState(true);
+  const [vals, setVals] = useState<TransformDialogValues>(emptyValues);
+
+  const apply = useCallback((mode: 'apply' | 'copyTransformed') => {
+    for (const id of selectedIds) {
+      const targetId = mode === 'copyTransformed' ? duplicateElement(id) : id;
+      applyTransformFromDialog(targetId, { ...vals, origin, absRel, uniform });
+    }
+    pushHistoryEntry(mode === 'copyTransformed' ? 'transform.copyTransformed' : 'transform.numericApply');
+    close(false);
+  }, [selectedIds, vals, origin, absRel, uniform]);
+
+  return (
+    <Dialog open={open} onClose={() => close(false)} maxWidth="xs" fullWidth>
+      <DialogTitle>{t('certificateTemplateEditor.transform.dialog.title')}</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          <FormControl fullWidth>
+            <InputLabel>{t('certificateTemplateEditor.transform.dialog.originLabel')}</InputLabel>
+            <Select value={origin} label={t('certificateTemplateEditor.transform.dialog.originLabel')} onChange={(e) => setOrigin(e.target.value as TransformOrigin)}>
+              <MenuItem value="top-left">{t('certificateTemplateEditor.transform.dialog.originTopLeft')}</MenuItem>
+              <MenuItem value="center">{t('certificateTemplateEditor.transform.dialog.originCenter')}</MenuItem>
+              <MenuItem value="bottom-right">{t('certificateTemplateEditor.transform.dialog.originBottomRight')}</MenuItem>
+            </Select>
+          </FormControl>
+          <ToggleButtonGroup exclusive value={absRel} onChange={(_, v) => v && setAbsRel(v)} size="small" sx={{ alignSelf: 'flex-start' }}>
+            <ToggleButton value="absolute">{t('certificateTemplateEditor.transform.dialog.absolute')}</ToggleButton>
+            <ToggleButton value="relative">{t('certificateTemplateEditor.transform.dialog.relative')}</ToggleButton>
+          </ToggleButtonGroup>
+          <Stack direction="row" spacing={1}>
+            <TextField label="X" type="number" value={vals.x} onChange={(e) => setVals({ ...vals, x: Number(e.target.value) })} fullWidth />
+            <TextField label="Y" type="number" value={vals.y} onChange={(e) => setVals({ ...vals, y: Number(e.target.value) })} fullWidth />
+          </Stack>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextField label="W" type="number" value={vals.width} onChange={(e) => setVals({ ...vals, width: Number(e.target.value), height: uniform ? (vals.height / vals.width) * Number(e.target.value) : vals.height })} fullWidth inputProps={{ min: 0 }} />
+            <ChainLockButton locked={uniform} onToggle={() => setUniform(!uniform)} />
+            <TextField label="H" type="number" value={vals.height} onChange={(e) => setVals({ ...vals, height: Number(e.target.value), width: uniform ? (vals.width / vals.height) * Number(e.target.value) : vals.width })} fullWidth inputProps={{ min: 0 }} />
+          </Stack>
+          <TextField label={t('certificateTemplateEditor.transform.dialog.rotation')} type="number" value={vals.rotation} onChange={(e) => setVals({ ...vals, rotation: clamp(Number(e.target.value), -180, 180) })} inputProps={{ min: -180, max: 180 }} />
+          <Stack direction="row" spacing={1}>
+            <TextField label={t('certificateTemplateEditor.transform.dialog.skewX')} type="number" value={vals.skewX} onChange={(e) => setVals({ ...vals, skewX: clamp(Number(e.target.value), -45, 45) })} fullWidth inputProps={{ min: -45, max: 45 }} />
+            <TextField label={t('certificateTemplateEditor.transform.dialog.skewY')} type="number" value={vals.skewY} onChange={(e) => setVals({ ...vals, skewY: clamp(Number(e.target.value), -45, 45) })} fullWidth inputProps={{ min: -45, max: 45 }} />
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => apply('copyTransformed')} startIcon={<FileCopyOutlined />}>{t('certificateTemplateEditor.transform.dialog.copyTransformed')}</Button>
+        <Button variant="contained" onClick={() => apply('apply')}>{t('certificateTemplateEditor.transform.dialog.apply')}</Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+```
+
+Notes:
+- `applyTransformFromDialog` lives in `frontend/views/dashboard/certificates/template-editor/elements/utils/transformDialog.ts` and calls `transformEngine/*` (Plan 11) for the math (perspective matrix construction, skew matrix, etc.) then dispatches the existing `updateElement` mutation per element.
+- The dialog disables fields that don't apply (e.g., if element is a path-only, skew/distort may be irrelevant — out of R6 scope).
+- `duplicateElement(id)` is the existing Plan 12 duplication utility (Task 1 mutation or Round 4 clipboard).
+
+### R6.4 Store Additions (Plan 12 R6)
+
+The `templateElementEditorStore` (Round 5 store) gains:
+
+```typescript
+numericTransformDialogOpen: boolean;
+setNumericTransformDialogOpen: (open: boolean) => void;
+uniformScaleLock: Record<string, boolean>;     // per element id; default true
+toggleUniformScaleLock: (elementId: string) => void;
+transformOrigin: Record<string, TransformOrigin>; // per element id; default 'top-left'
+setTransformOrigin: (elementId: string, origin: TransformOrigin) => void;
+resetTransform: (elementId: string) => void;    // restore to last-saved transform; one undo step
+```
+
+These live in the **element editor store** (Plan 12), not the canvas store (Plan 11) — they're property-panel/dialog state, not canvas-interaction state. Plan 11's `FreeTransformController` reads `transformOrigin` and `uniformScaleLock` so the options bar and property panel stay in sync (e.g., unifform lock toggled in the panel reflects immediately in the options bar's chain icon).
+
+### R6.5 i18n Keys Added (Plan 12 R6)
+
+Append to `shared/locale/types/dashboard/certificates/templateEditor.ts` (the `certificateEditor` namespace):
+
+```typescript
+// property panel (Plan 12)
+'certificateEditor.transform.propertyPanel.title': string;
+'certificateEditor.transform.propertyPanel.reset': string;
+'certificateEditor.transform.propertyPanel.rotation': string;
+'certificateEditor.transform.propertyPanel.rotationAria': string;
+'certificateEditor.transform.propertyPanel.skewX': string;
+'certificateEditor.transform.propertyPanel.skewY': string;
+'certificateEditor.transform.propertyPanel.warpSummary': (preset: string) => string; // interpolation
+'certificateEditor.transform.propertyPanel.removeWarp': string;
+
+// numeric dialog (Plan 12)
+'certificateEditor.transform.dialog.title': string;
+'certificateEditor.transform.dialog.originLabel': string;
+'certificateEditor.transform.dialog.originTopLeft': string;
+'certificateEditor.transform.dialog.originCenter': string;
+'certificateEditor.transform.dialog.originBottomRight': string;
+'certificateEditor.transform.dialog.absolute': string;
+'certificateEditor.transform.dialog.relative': string;
+'certificateEditor.transform.dialog.rotation': string;
+'certificateEditor.transform.dialog.skewX': string;
+'certificateEditor.transform.dialog.skewY': string;
+'certificateEditor.transform.dialog.copyTransformed': string;
+'certificateEditor.transform.dialog.apply': string;
+```
+
+`warpSummary` is the only interpolation key: `(preset: string) => string`. AR/EN implementations: Arabic `warpSummary: (preset) => 'تشويه: ' + preset怜 (or template literal)`; English `warpSummary: (preset) => \`Warp: ${preset}\``. Per `shared/AGENTS.md`, do not hardcode the word "Warp" — use the typed key and let the locale files localize it.
+
+### R6.6 Quality & Verification (Plan 12 R6)
+
+**Per-file verification**: tsgo → biome → lint queue client → sub-loop.
+
+**Instruction files**: `.github/instructions/frontend.instructions.md`
+
+**Cross-plan contracts**:
+- **Plan 10**: imports `TransformOrigin` from `@/frontend/common/stores/cert/transformTypes` (Plan 11 R6.1 file) for the origin-selector type — single source of truth.
+- **Plan 11**: `applyTransformFromDialog` (Plan 12) calls `transformEngine/*` utilities (Plan 11). The property panel's `warpSummary` reads `draft.warp` which is set by Plan 11's commit-path (after the user commits a warp on the canvas).
+- **Plan 5**: the `updateElement` mutation must accept `warp: WarpControlPoint[9] | null` on the element's `transform` field — R6 of Plan 12 declares the input type; Plan 5 owns the schema column (`jsonb`).
+
+**Performance**:
+- `TransformPropertyPanelSection` must `React.memo` the numeric sub-components (`TextField`s) so a slider drag in one section doesn't re-render the entire panel. Each field reads its own slice via a selector — never pass the entire `draft` object as a prop.
+- `NumericTransformDialog` input handlers use `setVals` (local state); only on Apply does it dispatch mutations. Avoid dispatching per keystroke.
+- `resetTransform` clones the original transform once and writes back — one history entry (not one per field).
+
+**Accessibility**:
+- All `TextField`s have `label` from i18n.
+- Slider has `aria-label`, `aria-valuemin`, `aria-valuemax`, `aria-valuenow`.
+- The reset button has `aria-label` from `t('certificateTemplateEditor.transform.propertyPanel.reset')`.
+- Dialog: `Escape` closes (default MUI behavior); focus trap active (default `Dialog`).
+- Chain lock button has `aria-pressed` reflecting lock state.
+- Origin selector `ToggleButtonGroup` exposes `aria-label` per button.
+
+## Round 5: Pen Tool & Vector Path Drawing
+
+> Added as part of Round 5, enhancing the Plan 12 element properties layer with path-specific property panels, path operations, and path-to-shape conversion. This section specifies the path property panel UI, path operation actions, path simplification/smoothing algorithms, and SVG export. The toolbar integration is specified in Plan 10 §"Round 5". The canvas rendering and interaction is specified in Plan 11 §"Round 5". Each sub-section maps to tasks in `tasks.md` §"Round 5: Pen Tool Tasks".
+
+### R5.1 Path Property Panel
+
+When a path element is selected (`element.type === 'path'`), the right-side property panel renders path-specific sections in addition to the common element sections (position, opacity, etc. from earlier rounds).
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/PathPropertyPanel.tsx`
+
+```tsx
+interface PathPropertyPanelProps {
+  elementId: string;
+}
+```
+
+The panel renders collapsible `Accordion` sections (using the `CollapsiblePanelShell` from R4-1) with the following sections:
+
+#### R5.1.1 Path Dimensions Section
+
+| Property | Control type | i18n key | Notes |
+|----------|-------------|----------|-------|
+| X | `TextField` (numeric) | `pathPanel.x` | Bounding box X position |
+| Y | `TextField` (numeric) | `pathPanel.y` | Bounding box Y position |
+| Width | `TextField` (numeric, readonly) | `pathPanel.width` | Computed from `computePathBBox`, not editable directly |
+| Height | `TextField` (numeric, readonly) | `pathPanel.height` | Computed from `computePathBBox`, not editable directly |
+
+X and Y updates move all anchors by the delta (not setting absolute position — the path is translated). Width/Height are informational (read-only display of the bounding box dimensions).
+
+```tsx
+<Stack spacing={1}>
+  <Box sx={{ display: 'flex', gap: 1 }}>
+    <TextField
+      label={t('pathPanel.x')}
+      type="number"
+      value={bbox.minX.toFixed(2)}
+      onChange={(e) => onPathTranslate(parseFloat(e.target.value) - bbox.minX, 0)}
+      size="small"
+      sx={{ flex: 1 }}
+    />
+    <TextField
+      label={t('pathPanel.y')}
+      type="number"
+      value={bbox.minY.toFixed(2)}
+      onChange={(e) => onPathTranslate(0, parseFloat(e.target.value) - bbox.minY)}
+      size="small"
+      sx={{ flex: 1 }}
+    />
+  </Box>
+  <Box sx={{ display: 'flex', gap: 1 }}>
+    <TextField
+      label={t('pathPanel.width')}
+      type="number"
+      value={(bbox.maxX - bbox.minX).toFixed(2)}
+      InputProps={{ readOnly: true }}
+      size="small"
+      sx={{ flex: 1 }}
+    />
+    <TextField
+      label={t('pathPanel.height')}
+      type="number"
+      value={(bbox.maxY - bbox.minY).toFixed(2)}
+      InputProps={{ readOnly: true }}
+      size="small"
+      sx={{ flex: 1 }}
+    />
+  </Box>
+</Stack>
+```
+
+#### R5.1.2 Stroke Properties Section
+
+| Property | Control | i18n key | Range |
+|----------|---------|----------|-------|
+| Stroke enabled | `Switch` | `pathPanel.strokeEnabled` | on/off |
+| Width | `Slider` + `TextField` | `pathPanel.strokeWidth` | 1–50px |
+| Color | `ColorPickerField` (from R4-2) | `pathPanel.strokeColor` | any |
+| Opacity | `Slider` | `pathPanel.strokeOpacity` | 0–100% |
+| Dash pattern | `TextField` + preset dropdown | `pathPanel.dashPattern` | e.g. `"4,2"`, `"none"`, `"8,4,2,4"` |
+| Linecap | `ToggleButtonGroup` | `pathPanel.linecap` | `butt`, `round`, `square` |
+| Linejoin | `ToggleButtonGroup` | `pathPanel.linejoin` | `miter`, `round`, `bevel` |
+
+**Dash pattern presets** (dropdown `Select` with `MenuItem`s):
+
+| Preset | Value | i18n key |
+|--------|-------|----------|
+| Solid | `"none"` | `pathPanel.dashSolid` |
+| Dashed | `"8,4"` | `pathPanel.dashDashed` |
+| Dotted | `"1,3"` | `pathPanel.dashDotted` |
+| Long dash | `"12,4"` | `pathPanel.dashLong` |
+| Dash-dot | `"8,4,2,4"` | `pathPanel.dashDashDot` |
+| Custom | (user input in TextField) | `pathPanel.dashCustom` |
+
+**Linecap / Linejoin visual toggles**: Use icons within `ToggleButton`s:
+
+| Linecap | Icon |
+|---------|------|
+| Butt | `MinimizeOutlined` (flat end) |
+| Round | `RadioButtonUncheckedOutlined` (round end) |
+| Square | `StopOutlined` (square end) |
+
+| Linejoin | Icon |
+|----------|------|
+| Miter | `ArrowForwardOutlined` (sharp point) |
+| Round | `TurnRightOutlined` (round corner) |
+| Bevel | `ChangeHistoryOutlined` (beveled corner) |
+
+#### R5.1.3 Fill Properties Section
+
+| Property | Control | i18n key | Range |
+|----------|---------|----------|-------|
+| Fill enabled | `Switch` | `pathPanel.fillEnabled` | on/off |
+| Color | `ColorPickerField` | `pathPanel.fillColor` | any |
+| Opacity | `Slider` | `pathPanel.fillOpacity` | 0–100% |
+| Fill rule | `ToggleButtonGroup` | `pathPanel.fillRule` | `evenodd`, `nonzero` |
+
+**Fill rule toggle** with visual diagrams as icons:
+
+| Fill rule | Visual indication | i18n key |
+|-----------|-------------------|----------|
+| Even-odd | Two overlapping circles with donut/hole | `pathPanel.fillEvenOdd` |
+| Nonzero | Two overlapping circles merged | `pathPanel.fillNonzero` |
+
+#### R5.1.4 Path Info Section
+
+| Info | Control | i18n key |
+|------|---------|----------|
+| Total length | `Typography` (computed) | `pathPanel.totalLength` |
+| Anchor count | `Typography` (computed) | `pathPanel.anchorCount` (pluralized) |
+| Bounding box dimensions | `Typography` (computed) | `pathPanel.bboxDimensions` |
+| Path type (open/closed) | `Chip` | `pathPanel.pathClosed` / `pathPanel.pathOpen` |
+
+**Total length** is computed by summing the arc length of each bezier segment:
+
+```typescript
+export function computePathLength(pathData: PathData): number
+```
+
+Each cubic bezier segment's length is approximated via Gauss-Legendre quadrature (16-node, sufficient precision):
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/utils/pathMetrics.ts`
+
+```typescript
+function cubicBezierLength(
+  p0: Point, p1: Point, p2: Point, p3: Point
+): number {
+  // 16-point Gauss-Legendre quadrature
+  const nodes = [
+    -0.9894, -0.9445, -0.8652, -0.7554, -0.6179, -0.4580, -0.2816, -0.0950,
+     0.0950,  0.2816,  0.4580,  0.6179,  0.7554,  0.8652,  0.9445,  0.9894,
+  ];
+  const weights = [
+    0.0313, 0.0725, 0.1128, 0.1504, 0.1836, 0.2112, 0.2320, 0.2449,
+    0.2449, 0.2320, 0.2112, 0.1836, 0.1504, 0.1128, 0.0725, 0.0313,
+  ];
+  let length = 0;
+  for (let i = 0; i < 16; i++) {
+    const t = 0.5 * (nodes[i] + 1);
+    const d = bezierDerivative(t, p0, p1, p2, p3);
+    length += weights[i] * Math.sqrt(d.x * d.x + d.y * d.y);
+  }
+  return 0.5 * length;
+}
+```
+
+**Anchor count** uses the pluralization function `anchorCount(count: number) => string` from the i18n type schema. E.g. en: `"1 anchor"` / `"5 anchors"`, ar: `"1 نقطة"` / `"5 نقاط"`.
+
+#### R5.1.5 Path Operations Section
+
+Path operations are shown as a grid of `IconButton`s with `Tooltip`s:
+
+| Operation | Icon | i18n key | Action |
+|-----------|------|----------|--------|
+| Close/Open Path | `LinkOutlined` / `LinkOffOutlined` | `pathPanel.toggleClosed` | Toggles `pathData.closed` |
+| Reverse Direction | `SwapHorizOutlined` | `pathPanel.reversePath` | Reverses anchor order |
+| Simplify | `AutoFixHighOutlined` | `pathPanel.simplify` | Opens simplify dialog |
+| Smooth | `WavesOutlined` | `pathPanel.smooth` | Opens smooth dialog |
+| Offset Path | `LineWeightOutlined` | `pathPanel.offset` | Opens offset dialog |
+| Export as SVG | `FileDownloadOutlined` | `pathPanel.exportSvg` | Downloads standalone SVG |
+
+**Simplify control** — opens a `Dialog` with a `Slider` (0.0–1.0) and an Apply button:
+
+```tsx
+<Dialog open={simplifyOpen} onClose={() => setSimplifyOpen(false)}>
+  <DialogTitle>{t('pathPanel.simplifyTitle')}</DialogTitle>
+  <DialogContent sx={{ pt: 2 }}>
+    <Typography variant="body2">{t('pathPanel.simplifyHint')}</Typography>
+    <Slider
+      value={simplifyAmount}
+      onChange={(_, val) => setSimplifyAmount(val as number)}
+      min={0} max={1} step={0.05}
+      valueLabelDisplay="auto"
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setSimplifyOpen(false)}>{t('common.cancel')}</Button>
+    <Button variant="contained" onClick={handleSimplifyApply}>
+      {t('pathPanel.apply')}
+    </Button>
+  </DialogActions>
+</Dialog>
+```
+
+**Smooth control** — same dialog pattern with a `Slider` (0.0–1.0) and Apply button.
+
+### R5.2 Path Operations
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/PathOperations.tsx`
+
+This module contains the path operation implementations called by the property panel.
+
+#### R5.2.1 Path Simplification (Douglas-Peucker)
+
+```typescript
+export function simplifyPath(pathData: PathData, tolerance: number): PathData
+```
+
+- `tolerance` is mapped from the slider value (0.0–1.0) to canvas units: `toleranceCanvas = tolerance * 50` (so 1.0 = 50 canvas px tolerance, 0.0 = no simplification)
+- Applies Douglas-Peucker to each subpath's anchor points
+- Keep anchor type: if a smooth anchor survives simplification, it retains its handles (recomputed from the new neighbors)
+- If a smooth anchor is removed, its handles are lost (the neighbors' handles are re-estimated from the tangent direction)
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/utils/simplifyPath.ts`
+
+#### R5.2.2 Path Smoothing (Gaussian)
+
+```typescript
+export function smoothPath(pathData: PathData, strength: number): PathData
+```
+
+- `strength` (0.0–1.0) controls the Gaussian kernel sigma: `sigma = strength * 3` (so 1.0 = sigma 3, 0.0 = no smoothing)
+- Applies Gaussian smoothing to anchor positions: each anchor's position is a weighted average of its neighbors (Gaussian-weighted) and itself
+- Handle positions are re-computed from the new tangent directions (Catmull-Rom-to-bezier conversion, using the 1/3 handle length formula)
+- Anchor types are preserved (corner stays corner, smooth stays smooth)
+- Closed paths wrap around (first and last anchors are neighbors)
+
+```typescript
+function gaussianSmooth(points: Point[], sigma: number, closed: boolean): Point[] {
+  const radius = Math.ceil(sigma * 3);
+  const kernel = gaussianKernel(sigma, radius);
+  return points.map((_, i) => {
+    let sx = 0, sy = 0, w = 0;
+    for (let j = -radius; j <= radius; j++) {
+      let idx = i + j;
+      if (closed) idx = ((idx % points.length) + points.length) % points.length;
+      else if (idx < 0 || idx >= points.length) continue;
+      const weight = kernel[j + radius];
+      sx += points[idx].x * weight;
+      sy += points[idx].y * weight;
+      w += weight;
+    }
+    return { x: sx / w, y: sy / w };
+  });
+}
+```
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/utils/smoothPath.ts`
+
+#### R5.2.3 Path Offset
+
+```typescript
+export function offsetPath(pathData: PathData, distance: number): PathData
+```
+
+- Creates a parallel path at `distance` units from the original
+- Each anchor point is offset perpendicular to the path direction at that point
+- Curve offsets use the Minkowski sum approach: for each bezier segment, compute the parallel bezier by offsetting the control points
+- Positive `distance` offsets outward (right of the path direction), negative offsets inward (left)
+
+**Algorithm:**
+
+1. Compute the normal at each anchor (perpendicular to the tangent)
+2. Translate each anchor by `distance * normal`
+3. Recompute handle vectors to maintain the original curvature, adjusted for the offset
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/utils/offsetPath.ts`
+
+#### R5.2.4 Reverse Path Direction
+
+```typescript
+export function reversePath(pathData: PathData): PathData
+```
+
+- Reverses the order of anchors in each subpath
+- Swaps `handleIn` and `handleOut` for each anchor (since the path direction is reversed)
+- Preserves anchor types (corner/corner, smooth/smooth)
+- Preserves `closed` state
+
+#### R5.2.5 Close/Open Path
+
+```typescript
+export function togglePathClosed(pathData: PathData): PathData
+```
+
+- Opens a closed path: sets `closed = false`, removes the closing segment (the path no longer renders the closure `Z` in SVG `d`)
+- Closes an open path: sets `closed = true`, the path now renders the closure `Z`; if the first and last anchors are close enough (within 10 canvas units), they may be merged into one
+
+#### R5.2.6 Stroke to Shape
+
+```typescript
+export function strokeToShape(element: PathElement, strokeConfig: PathStrokeConfig): PathElement
+```
+
+- Converts a stroked path into a filled shape: the stroke geometry becomes the fill area (like "Outline Stroke" in Illustrator or "Expand Stroke" in Figma)
+- For each bezier segment, compute the parallel paths on both sides at `width / 2` offset distance
+- Join the offset paths at the endpoints (rounded join for `linecap: round`, squared join for `linecap: square`, miter join for `linecap: butt`)
+- The result is a compound path (two subpaths: one for the outer boundary, one for the inner boundary if the stroke creates a hole)
+- The new `PathElement` has `stroke.enabled = false`, `fill.enabled = true`, and the `pathData` contains the expanded geometry
+
+This is the most complex operation — simplified as:
+
+1. Offset each subpath outward by `strokeConfig.width / 2`
+2. Offset each subpath inward by `strokeConfig.width / 2`
+3. Combine into outer + inner contours as compound subpaths
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/utils/strokeToShape.ts`
+
+#### R5.2.7 Path to Shape
+
+```typescript
+export function pathToShape(element: PathElement): PathElement
+```
+
+- Converts a path element into a shape element that appears in the layers panel as a shape type
+- The path geometry is preserved but the element's `type` changes from `'path'` to `'shape'`
+- The shape element gets a `shapeData` field containing the path data (rendered as an SVG path within the shape's rendering)
+- This allows paths created with the pen tool to be treated as shapes for alignment, grouping, and other shape-specific operations
+
+#### R5.2.8 Path to Selection
+
+```typescript
+export function pathToSelection(pathData: PathData): SelectionMarquee
+```
+
+- Converts the path outline into a selection area (marching ants marquee)
+- Creates a `SelectionMarquee` object with the path's polygon tessellation (polygon points array)
+- The selection can be used for cut/copy/filter operations (similar to Photoshop's "Load Path as Selection")
+- The marquee is rendered as a dashed animated outline on the canvas (not an element — ephemeral selection state)
+
+```typescript
+interface SelectionMarquee {
+  polygon: { x: number; y: number }[];
+  bounds: BBox;
+  fillRule: 'evenodd' | 'nonzero';
+}
+```
+
+#### R5.2.9 Export as SVG
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/utils/exportPathSvg.ts`
+
+```typescript
+export function exportPathAsSvg(element: PathElement): string
+```
+
+- Generates a standalone SVG file string from the path element
+- Includes `<svg>` root with `xmlns`, `viewBox` from the path's bounding box (+ 10px padding)
+- Contains the `<path d="...">` with all stroke and fill attributes
+- The file is downloaded via a `Blob` + `URL.createObjectURL` + `<a download>`:
+
+```typescript
+function downloadSvg(svgString: string, filename: string) {
+  const blob = new Blob([svgString], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+```
+
+### R5.3 Subpath & Compound Path Support
+
+A single path element can contain multiple subpaths (compound paths). This is used for:
+- Punched holes (e.g., a ring shape = outer circle + inner circle with even-odd fill)
+- Complex shapes with disconnected regions
+
+**Subpath data model** (from Plan 10's `penTool.types.ts`):
+
+```typescript
+interface PathData {
+  anchors: AnchorPoint[];    // backward-compat: if subpaths is empty, use this single-anchor list
+  closed: boolean;
+  fillRule: 'evenodd' | 'nonzero';
+  subpaths: Subpath[];       // primary: subpaths array for compound paths
+}
+```
+
+When `subpaths.length === 0`, the path uses the top-level `anchors` array as a single subpath. When `subpaths.length > 0`, each subpath has its own anchors and `closed` flag, and the top-level `closed` and `anchors` are ignored (legacy/deprecated).
+
+**Creating subpaths during drawing**: When the pen tool is active and the user finishes a subpath (Enter or closing), they can start a new subpath by clicking elsewhere without deselecting the path element. A keyboard shortcut `Ctrl+Shift+N` (or a toolbar button) creates a new subpath within the current path element. The `onPathOperationChange` (from Plan 10's tool options bar) triggers a new subpath.
+
+**Compound path rendering**: The `buildPathD` function (from Plan 11's `pathBuilder.ts`) concatenates all subpaths' `d` strings with no separator (SVG naturally chains multiple `M` commands in a single `d` attribute). The `fill-rule` attribute on the `<path>` element determines how overlaps are filled:
+
+| Fill rule | Behavior |
+|-----------|----------|
+| `evenodd` | Holes appear where subpaths overlap (odd-crossing-count = empty) |
+| `nonzero` | Holes depend on subpath winding direction (overlapping same-direction = solid) |
+
+### R5.4 Anchor-Level Property Panel
+
+When `activePathElementId` is set and `selectedAnchorIds.length === 1`, the property panel shows an **Anchor Info** sub-section above the path sections:
+
+| Property | Control | i18n key | Notes |
+|----------|---------|----------|-------|
+| Anchor X | `TextField` (numeric) | `anchorPanel.x` | Absolute position on canvas |
+| Anchor Y | `TextField` (numeric) | `anchorPanel.y` | Absolute position on canvas |
+| Anchor type | `ToggleButtonGroup` | `anchorPanel.type` | `corner` / `smooth` |
+| Handle In X | `TextField` + drag control | `anchorPanel.handleInX` | Offset from anchor |
+| Handle In Y | `TextField` + drag control | `anchorPanel.handleInY` | Offset from anchor |
+| Handle Out X | `TextField` + drag control | `anchorPanel.handleOutX` | Offset from anchor |
+| Handle Out Y | `TextField` + drag control | `anchorPanel.handleOutY` | Offset from anchor |
+| Handles locked | `Switch` | `anchorPanel.handleLocked` | Symmetric handles (locked together) |
+
+**File**: `frontend/views/dashboard/certificates/template-editor/properties/AnchorPropertyPanel.tsx`
+
+When `selectedAnchorIds.length > 1` (multi-select), the panel shows only the count and a "Delete N Anchors" button. When `selectedAnchorIds.length === 0`, the anchor panel is hidden and the path-level sections are shown.
+
+### R5.5 Store Additions for Path Operations
+
+**File**: `frontend/common/stores/certificates/templateElementEditorStore.ts` (modify)
+
+```typescript
+// R5: Path operations
+applyPathSimplify: (elementId: string, tolerance: number) => void;
+applyPathSmooth: (elementId: string, strength: number) => void;
+applyPathOffset: (elementId: string, distance: number) => void;
+applyStrokeToShape: (elementId: string) => void;
+applyPathToShape: (elementId: string) => void;
+applyPathToSelection: (elementId: string) => void;
+exportPathAsSvg: (elementId: string) => void;
+reversePathDirection: (elementId: string) => void;
+togglePathClosed: (elementId: string) => void;
+addSubpathToPath: (elementId: string) => void;
+updateAnchorPosition: (elementId: string, anchorId: string, x: number, y: number) => void;
+updateAnchorHandle: (
+  elementId: string, anchorId: string,
+  handle: 'in' | 'out',
+  offset: { x: number; y: number },
+  symmetric: boolean
+) => void;
+convertAnchorType: (elementId: string, anchorId: string, type: AnchorType) => void;
+addAnchorAtPosition: (elementId: string, x: number, y: number, subpathIndex?: number) => void;
+deleteAnchor: (elementId: string, anchorId: string) => void;
+```
+
+Each action:
+1. Reads the current path element from `elements` store
+2. Applies the path operation (calling the utility function from `PathOperations.ts`)
+3. Updates the element's `pathData` in the store
+4. Pushes to the history stack (undo/redo)
+5. Marks the template as dirty (triggers auto-save debounce)
+
+### R5.6 i18n Keys for Path Panel
+
+Added to `shared/locale/types/dashboard/certificates/templateEditor.ts` (extends the existing `penTool` namespace from Plan 10):
+
+```typescript
+// R5: Path property panel
+pathPanel: {
+  x: string;
+  y: string;
+  width: string;
+  height: string;
+  strokeEnabled: string;
+  strokeWidth: string;
+  strokeColor: string;
+  strokeOpacity: string;
+  dashPattern: string;
+  dashSolid: string;
+  dashDashed: string;
+  dashDotted: string;
+  dashLong: string;
+  dashDashDot: string;
+  dashCustom: string;
+  linecap: string;
+  linejoin: string;
+  fillEnabled: string;
+  fillColor: string;
+  fillOpacity: string;
+  fillRule: string;
+  fillEvenOdd: string;
+  fillNonzero: string;
+  totalLength: string;
+  anchorCount: (count: number) => string;
+  bboxDimensions: string;
+  pathClosed: string;
+  pathOpen: string;
+  toggleClosed: string;
+  reversePath: string;
+  simplify: string;
+  smooth: string;
+  offset: string;
+  exportSvg: string;
+  simplifyTitle: string;
+  simplifyHint: string;
+  smoothTitle: string;
+  smoothHint: string;
+  offsetTitle: string;
+  offsetHint: string;
+  apply: string;
+  cancel: string;
+}
+// R5: Anchor property panel
+anchorPanel: {
+  x: string;
+  y: string;
+  type: string;
+  typeCorner: string;
+  typeSmooth: string;
+  handleInX: string;
+  handleInY: string;
+  handleOutX: string;
+  handleOutY: string;
+  handleLocked: string;
+  deleteAnchors: (count: number) => string;
+}
+```
+
+Each key implemented in both `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts`.
+
+### R5.7 Element Schema Extension for Path Type
+
+The `CanvasElement` type (from Plan 12's earlier rounds) is extended:
+
+```typescript
+interface CanvasElement {
+  // ... existing fields from Rounds 1-4 ...
+  // R5: Path element
+  type: ElementType; // now includes 'path'
+  pathData?: PathData;            // present only when type === 'path'
+  stroke?: PathStrokeConfig;     // present only when type === 'path' (or shape with stroke)
+  fill?: PathFillConfig;         // present only when type === 'path' (or shape with fill)
+}
+```
+
+The existing `ElementType` enum (from Plan 1) gains a `'path'` value. When `type === 'path'`, the element does NOT use `width`, `height`, `fontSize`, `imageUrl`, or other type-specific fields — its geometry is defined entirely by `pathData.anchors`.
+
+### R5.8 Cross-Plan Contracts
+
+| Consumer Plan | Contract |
+|---------------|----------|
+| **Plan 10** | `selectedAnchorIds`, `activePathElementId`, and all `applyPath*` actions in `templateElementEditorStore` — Plan 10's tool options bar reads `activeTool` and `hasActivePath` from `certTemplateEditorStore` and calls `setPathOperation` which triggers Plan 12's storefront → action routing. |
+| **Plan 11** | `PathPropertyPanel` imports types `PathElement`, `PathData`, `AnchorPoint` from Plan 10's `penTool.types.ts` and `AnchorPoint` from Plan 11's `AnchorOverlay` rendering — the store actions (`updateAnchorPosition`, `updateAnchorHandle`, `addAnchorAtPosition`, `deleteAnchor`, `convertAnchorType`) are called by Plan 11's pointer event handlers (via `usePenToolPointerEvents`). |
+| **Plan 11** | `computePathBBox` and `computePathLength` are in Plan 11's `pathBBox.ts` and `pathMetrics.ts` (since they're used by the canvas for rendering/culling). Plan 12's property panel imports them from there. |
+| **Plan 5** | `ElementType` enum must include `'path'` on the backend. `createTemplateElement` and `updateTemplateElement` GraphQL mutations must accept `pathData`, `stroke`, and `fill` fields. The `template_element` table (or JSON column) must store `pathData` as JSONB. |
+| **Plan 6** | PDF rendering must convert `PathElement.pathData` to PDF vector graphics (bezier curves), applying stroke/fill/dash/opacity/fill-rule. Uses `pathBuilder.buildPathD` (or equivalent parametric evaluation) for shape reconstruction. |
+| **Plan 15** | Publishing serializes `PathElement` data in the template's `renderData`. The public preview renders paths as SVG (browser) or rasterized image fallback. |
+
+## Round 5: Professional Color System
+
+> Added as Round 5 to extend Plan 12's element properties panel with Photoshop/Illustrator-grade color management tools. This section defines the advanced Color Picker Dialog, the Color Harmony Engine, Swatches Panel management, and Color Profile Management. These tools integrate with the existing fill/stroke editors (§R5.1-R5.13) and the canvas eyedropper (Plan 11 R5). The shared color utilities live in `@/frontend/common/stores/cert/colorSystemTypes.ts` (created in Plan 10 §R5 — Color System). The property panel imports both the types and the harmony engine contracts.
+
+### R5-CS1 Color Picker Dialog Architecture
+
+**Component**: `ColorPickerDialog`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPickerDialog.tsx` (new)
+
+**Design**:
+
+A full-featured modal dialog (`Dialog` from MUI v9, `maxWidth="md"`, `fullWidth={false}`) that replaces the simple `ChromePicker` popover used in earlier solid/gradient fills. The dialog is context-aware — it receives a `colorContext` prop that adjusts the dialog label and behavior.
+
+```typescript
+interface ColorPickerDialogProps {
+  open: boolean;
+  initialColor: ColorValue;              // { hex: string; alpha: number; space: ColorSpace }
+  previousColor: ColorValue | null;       // color before change — for "new vs old" preview
+  colorContext: ColorPickerContext;       // 'fill' | 'stroke' | 'shadow' | 'gradientStop' | 'swatch'
+  onConfirm: (color: ColorValue) => void;
+  onCancel: () => void;
+  rememberMode: boolean;                  // whether to remember last mode tab
+}
+
+type ColorPickerContext =
+  | 'fill'
+  | 'stroke'
+  | 'shadow'
+  | 'gradientStop'
+  | 'swatch'
+  | 'backgroundColor';
+
+type ColorSpace = 'hsl' | 'rgb' | 'hsv' | 'hex' | 'cmyk';
+```
+
+**Dialog layout** (top-to-bottom):
+
+```tsx
+<Dialog open={open} onClose={handleCancel} maxWidth="md" fullWidth>
+  <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <Typography variant="h6">{t(`certificateEditor.colorPicker.context.${colorContext}`)}</Typography>
+    <ColorProfileIndicator profile={activeProfile} />
+  </DialogTitle>
+  <DialogContent>
+    <Stack direction="row" spacing={3}>
+      {/* Left: 2D picker area + hue slider */}
+      <ColorPicker2DArea
+        color={currentColor}
+        onColorChange={setCurrentColor}
+        areaMode={mode === 'hsl' ? 'saturation-lightness' : 'saturation-value'}
+      />
+      <HueSliderRing
+        hue={hsl.h}
+        onChange={(h) => setCurrentColor(updateHue(currentColor, h))}
+      />
+      {/* Right: mode tabs + numeric inputs */}
+      <Stack spacing={2} sx={{ flex: 1, minWidth: 240 }}>
+        <ColorModeTabs mode={mode} onModeChange={setMode} />
+        {/* Mode-specific inputs rendered below */}
+        {mode === 'hsl' && <HSLInputs color={currentColor} onChange={setCurrentColor} />}
+        {mode === 'rgb' && <RGBInputs color={currentColor} onChange={setCurrentColor} />}
+        {mode === 'hsv' && <HSVInputs color={currentColor} onChange={setCurrentColor} />}
+        {mode === 'hex' && <HEXInput color={currentColor} onChange={setCurrentColor} />}
+        {mode === 'cmyk' && <CMYKInputs color={currentColor} onChange={setCurrentColor} profile={activeProfile} />}
+        {/* Alpha slider — always visible */}
+        <AlphaSlider value={currentColor.alpha} onChange={(a) => setCurrentColor({ ...currentColor, alpha: a })} />
+        {/* Gamut warning */}
+        <GamutWarning color={currentColor} profile={activeProfile} />
+        {/* New vs Old split preview */}
+        <ColorPreviewSplit newColor={currentColor} oldColor={previousColor} />
+        {/* Color history */}
+        <ColorHistorySwatches colors={colorHistory} onPick={setCurrentColor} />
+        {/* Color harmony */}
+        <ColorHarmonySection
+          baseColor={currentColor}
+          scheme={harmonyScheme}
+          onSchemeChange={setHarmonyScheme}
+          onPickColor={setCurrentColor}
+          onSaveToSwatches={handleSaveHarmonyToSwatches}
+        />
+      </Stack>
+    </Stack>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCancel} color="inherit">{t("certificateTemplateEditor.colorPicker.cancel")}</Button>
+    <Button onClick={handleConfirm} variant="contained">{t("certificateTemplateEditor.colorPicker.confirm")}</Button>
+  </DialogActions>
+</Dialog>
+```
+
+**State management**: The dialog maintains local state (`currentColor`, `mode`, `harmonyScheme`) initialized from `initialColor`. On confirm, `onConfirm(currentColor)` fires and the intermediate color is pushed to color history. On cancel, the local state is discarded and `previousColor` remains unchanged.
+
+**Context-aware label**: The dialog title text comes from `t(\`certificateEditor.colorPicker.context.${colorContext}\`)`. The i18n keys are: `context.fill`, `context.stroke`, `context.shadow`, `context.gradientStop`, `context.swatch`, `context.backgroundColor`.
+
+### R5-CS2 Color Mode Tabs
+
+**Component**: `ColorModeTabs`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPickerDialog.tsx` (co-located)
+
+**Design**:
+
+A MUI v9 `Tabs` component with 5 `Tab` entries:
+
+```tsx
+<Tabs value={mode} onChange={(_, v) => onModeChange(v)} variant="fullWidth">
+  <Tab value="hsl" label={t("certificateTemplateEditor.colorPicker.mode.hsl")} />
+  <Tab value="rgb" label={t("certificateTemplateEditor.colorPicker.mode.rgb")} />
+  <Tab value="hsv" label={t("certificateTemplateEditor.colorPicker.mode.hsv")} />
+  <Tab value="hex" label={t("certificateTemplateEditor.colorPicker.mode.hex")} />
+  <Tab value="cmyk" label={t("certificateTemplateEditor.colorPicker.mode.cmyk")} />
+</Tabs>
+```
+
+The active tab's corresponding numeric input component re-renders below. The underlying color value is the same — only the display/edit representation changes. All mode switches are lossless (no color degradation), because the canonical representation is always `{ hex, alpha }` and conversions to HSL/RGB/HSV/CMYK are display-only.
+
+**Mode persistence**: The `rememberMode` prop (default `true`) stores the last-used mode in `localStorage` key `"certEditor.colorPicker.mode"`. On open, the dialog initializes from this value if it exists, otherwise defaults to `'hsl'`.
+
+### R5-CS3 HSL Mode — 2D Saturation/Lightness Area + Hue Slider
+
+**Component**: `ColorPicker2DArea`, `HueSliderRing`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPicker2DArea.tsx` (new)
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/HueSliderRing.tsx` (new)
+
+**Design — 2D Area**:
+
+A rectangular `Box` (220×220px canvas) showing the saturation/lightness (or saturation/value) plane at the current hue. The background is built via CSS:
+
+```tsx
+<canvas
+  ref={canvasRef}
+  sx={{ width: 220, height: 220, borderRadius: 1, border: '1px solid', borderColor: 'divider', cursor: 'crosshair' }}
+  onMouseDown={handlePointerDown}
+  onMouseMove={handlePointerMove}
+  onMouseUp={handlePointerUp}
+/>
+```
+
+The canvas is painted with:
+- **Horizontal gradient** (left → right): from `hsl(${hue}, 0%, 50%)` to `hsl(${hue}, 100%, 50%)` — saturation axis.
+- **Vertical gradient** (top → bottom): from `rgba(255,255,255,1)` to `rgba(0,0,0,1)` — lightness axis (for HSL) or value axis (for HSV).
+
+A draggable **selector marker** (small circle, 12px diameter, white with 2px dark border) is rendered at the `(s, l)` position:
+```tsx
+const markerX = (saturation / 100) * 220;
+const markerY = (1 - lightness / 100) * 220;
+<Box sx={{
+  position: 'absolute',
+  left: markerX - 6, top: markerY - 6,
+  width: 12, height: 12, borderRadius: '50%',
+  border: '2px solid white',
+  boxShadow: `0 0 0 1px ${theme.palette.divider}`,
+  pointerEvents: 'none'
+}} />
+```
+
+**Interaction**:
+- Click anywhere → snaps marker to that position, updates `saturation` and `lightness` (or `value` for HSV).
+- Drag → continuous update.
+- The canvas itself is rendered once per hue change (memoized with `useMemo` keyed on `hue` + `areaMode`).
+
+**Hue Slider**:
+
+A vertical or horizontal slider (default vertical, 220px height, 24px width) showing the full hue spectrum:
+```tsx
+<Slider
+  orientation="vertical"
+  min={0} max={360}
+  value={hue}
+  onChange={(_, v) => onChange(v as number)}
+  sx={{
+    height: 220,
+    '& .MuiSlider-rail': {
+      background: 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)',
+      opacity: 1
+    },
+    '& .MuiSlider-track': { display: 'none' }
+  }}
+/>
+```
+
+The slider thumb is circular and follows the hue value. The track is invisible (only the rainbow rail shows).
+
+### R5-CS4 RGB Mode — Visual Gradient Sliders
+
+**Component**: `RGBInputs`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPickerDialog.tsx` (co-located)
+
+**Design**:
+
+Three labeled `Slider` components (R, G, B), each with a visual gradient track showing what the color looks like as that channel changes from 0 to 255:
+
+```tsx
+// Red slider
+<Box>
+  <Typography variant="caption" sx={{ fontWeight: 600 }}>{t("certificateTemplateEditor.colorPicker.rgb.r")}</Typography>
+  <Slider
+    min={0} max={255} value={r}
+    onChange={(_, v) => handleChange('r', v as number)}
+    sx={{
+      '& .MuiSlider-rail': {
+        background: `linear-gradient(to right, rgb(0,${g},${b}), rgb(255,${g},${b}))`
+      },
+      '& .MuiSlider-track': { display: 'none' }
+    }}
+  />
+  <TextField
+    type="number" size="small" value={r}
+    onChange={(e) => handleChange('r', parseInt(e.target.value) || 0)}
+    inputProps={{ min: 0, max: 255 }}
+    sx={{ width: 64 }}
+  />
+</Box>
+```
+
+Each slider has the adjacent numeric `TextField` for precise entry. The gradient on each slider track dynamically reflects the other two channels — so sliding R shows the real color space transition for R given the current G and B values.
+
+### R5-CS5 HSV Mode — 2D Saturation/Value Area + Hue
+
+**Component**: `ColorPicker2DArea` (reused with `areaMode="saturation-value"`), `HSVInputs`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPicker2DArea.tsx` (reused)
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPickerDialog.tsx` (HSVInputs co-located)
+
+**Design**:
+
+The 2D area in HSV mode maps:
+- **X-axis**: Saturation (0% at left → 100% at right)
+- **Y-axis**: Value (100% at top → 0% at bottom)
+
+The background gradients:
+- Horizontal: `hsv(${hue}, 0%, 100%)` → `hsv(${hue}, 100%, 100%)`
+- Vertical: `hsv(${hue}, ${saturation}%, 100%)` → `hsv(${hue}, ${saturation}%, 0%)` (overlaid with opacity)
+
+The `HSVInputs` below shows three numeric `TextField` + `Slider` pairs for Hue (0-360°), Saturation (0-100%), Value (0-100%). Same visual gradient pattern as RGB sliders but using HSV channel math.
+
+### R5-CS6 HEX Mode — Direct Hex Input
+
+**Component**: `HEXInput`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPickerDialog.tsx` (co-located)
+
+**Design**:
+
+```tsx
+<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+  <Typography variant="caption" sx={{ fontWeight: 600 }}>{t("certificateTemplateEditor.colorPicker.hex")}</Typography>
+  <TextField
+    size="small"
+    value={hexInput}
+    onChange={handleHexChange}
+    onBlur={handleHexBlur}
+    error={hexError}
+    sx={{ width: 120 }}
+    inputProps={{ maxLength: 7 }}
+  />
+  <TextField
+    label={t("certificateTemplateEditor.colorPicker.hexShorthand")}
+    size="small"
+    value={shorthandInput}
+    onChange={handleShorthandChange}
+    sx={{ width: 80 }}
+    inputProps={{ maxLength: 4 }}
+  />
+</Stack>
+```
+
+**Validation**:
+- Full hex: `/^#?[0-9A-Fa-f]{6}$/` — strips leading `#`, normalizes to uppercase, prefixed with `#`.
+- Shorthand (3-digit): `/^#?[0-9A-Fa-f]{3}$/` — expands `#RGB` → `#RRGGBB` (e.g. `#F0A` → `#FF00AA`).
+- On invalid input: `hexError = true`, `TextField` shows error state (red border + helper text `t("certificateTemplateEditor.colorPicker.hexInvalid")`).
+- The `onChange` handler updates the local text only — the actual color value updates on `onBlur` (allows typing partial values without mid-typing errors).
+
+**Large color swatch preview**: Always visible in this mode, showing the current hex color at 40×40px:
+```tsx
+<Box sx={{ width: 40, height: 40, borderRadius: 1, border: '1px solid', borderColor: 'divider', backgroundColor: `#${hex}` }} />
+```
+
+### R5-CS7 CMYK Mode — Print Preview
+
+**Component**: `CMYKInputs`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/CMYKInputs.tsx` (new)
+
+**Design**:
+
+Four labeled sliders (`C`, `M`, `Y`, `K`), each 0-100%, with visual gradient tracks:
+
+```tsx
+// Cyan slider — track shows how cyan affects the color
+<Box>
+  <Typography variant="caption" sx={{ fontWeight: 600 }}>{t("certificateTemplateEditor.colorPicker.cmyk.c")}</Typography>
+  <Slider
+    min={0} max={100} value={c}
+    onChange={(_, v) => handleChange('c', v as number)}
+    sx={{
+      '& .MuiSlider-rail': {
+        background: `linear-gradient(to right, ${cmykToHex(0, m, y, k)}, ${cmykToHex(100, m, y, k)})`
+      },
+      '& .MuiSlider-track': { display: 'none' }
+    }}
+  />
+  <TextField
+    type="number" size="small" value={c}
+    onChange={(e) => handleChange('c', clamp(parseInt(e.target.value) || 0, 0, 100))}
+    inputProps={{ min: 0, max: 100 }}
+    sx={{ width: 64 }}
+  />
+</Box>
+```
+
+Each slider track gradient runs from that channel at 0% to 100%, keeping the other three channels at their current values. A numeric `TextField` (0-100) accompanies each slider.
+
+**Print preview note**: A `Typography` helper text under the CMYK inputs: `t("certificateTemplateEditor.colorPicker.cmyk.printPreviewNotice")` — explains CMYK is an approximation and actual print output depends on the ICC profile + printer calibration.
+
+**Profile selector**: A `Select` dropdown to choose the target CMYK profile: "U.S. Web Coated (SWOP) v2" (default), "Coated FOGRA39", "Japan Color 2001 Coated", "U.S. Sheetfed Coated v2". The selected profile changes the conversion math (uses `colorProfileUtils.ts` — Plan 10 R5-CS).
+
+### R5-CS8 Alpha Channel Slider
+
+**Component**: `AlphaSlider`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/AlphaSlider.tsx` (new)
+
+**Design**:
+
+A horizontal slider (full dialog width) always visible at the bottom of the dialog, before the preview area:
+
+```tsx
+<Box>
+  <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 0.5 }}>
+    <Typography variant="caption" sx={{ fontWeight: 600 }}>{t("certificateTemplateEditor.colorPicker.alpha")}</Typography>
+    <Typography variant="caption">{`${Math.round(value * 100)}%`}</Typography>
+  </Stack>
+  <Slider
+    min={0} max={100} value={Math.round(value * 100)}
+    onChange={(_, v) => onChange((v as number) / 100)}
+    sx={{
+      '& .MuiSlider-rail': {
+        background: `linear-gradient(to right, transparent, ${hexToRgba(color.hex, 1)})`,
+        backgroundImage: `linear-gradient(45deg, ${theme.palette.action.disabled} 25%, transparent 25%, transparent 75%, ${theme.palette.action.disabled} 75%), linear-gradient(45deg, ${theme.palette.action.disabled} 25%, transparent 25%, transparent 75%, ${theme.palette.action.disabled} 75%)`,
+        backgroundSize: '8px 8px',
+        backgroundPosition: '0 0, 4px 4px'
+      }
+    }}
+  />
+  <Box sx={{ width: '100%', height: 16, borderRadius: '4px',
+    backgroundImage: `linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)`,
+    backgroundSize: '8px 8px',
+    backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px',
+    overflow: 'hidden'
+  }}>
+    <Box sx={{ width: `${value * 100}%`, height: '100%', backgroundColor: hexToRgba(color.hex, value), transition: 'width 0.05s' }} />
+  </Box>
+</Box>
+```
+
+The alpha slider shows a checkerboard pattern behind the color swatch — the classic transparency indicator. The track gradient goes from transparent (left) to fully opaque (right), showing what the color looks like at each alpha level.
+
+**Numeric input**: An adjacent `TextField` (size="small", type="number", max 100) for precise entry — `value={Math.round(value * 100)}`, `onChange` converts back to 0-1 range.
+
+### R5-CS9 Color Preview — New vs Old Split
+
+**Component**: `ColorPreviewSplit`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPreviewSplit.tsx` (new)
+
+**Design**:
+
+A split swatch showing the new color (left half) and previous color (right half), with a divider:
+
+```tsx
+<Box>
+  <Typography variant="caption" sx={{ fontWeight: 600, mb: 0.5 }}>{t("certificateTemplateEditor.colorPicker.preview")}</Typography>
+  <Box sx={{ position: 'relative', width: '100%', height: 48, borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
+    {/* Left: Old color */}
+    <Box sx={{
+      position: 'absolute', left: 0, top: 0, width: '50%', height: '100%',
+      backgroundColor: oldColor ? hexToRgba(oldColor.hex, oldColor.alpha) : 'transparent',
+      backgroundImage: oldColor ? 'none' : CHECKERBOARD_PATTERN
+    }} />
+    {/* Right: New color */}
+    <Box sx={{
+      position: 'absolute', right: 0, top: 0, width: '50%', height: '100%',
+      backgroundColor: hexToRgba(newColor.hex, newColor.alpha),
+      backgroundImage: CHECKERBOARD_PATTERN,
+      backgroundBlendMode: 'multiply'
+    }} />
+    {/* Divider */}
+    <Box sx={{ position: 'absolute', left: '50%', top: 0, width: 1, height: '100%', backgroundColor: theme.palette.divider }} />
+  </Box>
+  <Stack direction="row" sx={{ justifyContent: 'space-between', mt: 0.5 }}>
+    <Typography variant="caption">{t("certificateTemplateEditor.colorPicker.previewOld")}</Typography>
+    <Typography variant="caption">{t("certificateTemplateEditor.colorPicker.previewNew")}</Typography>
+  </Stack>
+</Box>
+```
+
+The checkerboard pattern (`CHECKERBOARD_PATTERN` constant from `colorSystemTypes.ts`) is drawn behind both halves so alpha is visible.
+
+When the dialog is opened fresh (no previous color), the old half shows the checkerboard pattern only.
+
+### R5-CS10 Color History
+
+**Component**: `ColorHistorySwatches`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorPickerDialog.tsx` (co-located)
+
+**Design**:
+
+A horizontal scrollable row of color swatches representing the last 20 colors selected. Each swatch is 24×24px:
+
+```tsx
+<Box>
+  <Typography variant="caption" sx={{ fontWeight: 600, mb: 0.5 }}>{t("certificateTemplateEditor.colorPicker.history")}</Typography>
+  <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', maxWidth: 280 }}>
+    {colorHistory.map((c, i) => (
+      <ColorSwatchTile
+        key={`${c.hex}-${i}`}
+        color={c}
+        size="medium"
+        onClick={() => onPick(c)}
+        tooltip={`${c.hex} (${Math.round(c.alpha * 100)}%)`}
+      />
+    ))}
+  </Stack>
+</Box>
+```
+
+**Storage**: Color history is maintained in the `colorSystemStore` (Plan 10 R5-CS store). The store keeps an array of up to 20 `ColorValue` entries, with the most recent first. Duplicates are skipped (if the same hex+alpha already exists, it moves to front instead of duplicating).
+
+**Persists**: Paper-color history persists across sessions in `localStorage` key `"certEditor.colorHistory"` (as an array of `{ hex, alpha }` — small payload, <1KB).
+
+### R5-CS11 Color Harmony Engine
+
+**Component**: `ColorHarmonySection`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorHarmonySection.tsx` (new)
+
+**Design**:
+
+A compact section at the bottom of the color picker dialog showing:
+1. A **harmony dropdown** (`Select`) to choose the scheme.
+2. A row of **harmony swatches** generated from the base color.
+3. An **"Apply all to swatches"** `Button`.
+
+```tsx
+<Box sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 1.5 }}>
+  <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+    <Select
+      size="small" value={scheme}
+      onChange={(e) => onSchemeChange(e.target.value as HarmonyScheme)}
+      sx={{ minWidth: 180 }}
+    >
+      {HARMONY_SCHEMES.map((s) => (
+        <MenuItem key={s.id} value={s.id}>{t(`certificateEditor.colorPicker.harmony.${s.id}`)}</MenuItem>
+      ))}
+    </Select>
+    <Button size="small" startIcon={<SaveOutlined />} onClick={handleSaveToSwatches}>
+      {t("certificateTemplateEditor.colorPicker.harmony.applyToSwatches")}
+    </Button>
+  </Stack>
+  {/* Harmony preview swatches */}
+  <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+    {harmonyColors.map((c, i) => (
+      <Box key={i}>
+        {/* Base color swatch highlighted */}
+        <ColorSwatchTile
+          color={c}
+          size="medium"
+          isBase={i === 0}
+          onClick={() => onPickColor(c)}
+          tooltip={`${c.hex} — ${getHarmonyLabel(scheme, i)}`}
+        />
+      </Box>
+    ))}
+  </Stack>
+</Box>
+```
+
+**Harmony algorithm** (from `colorHarmonyUtils.ts` — Plan 10 R5-CS):
+
+```typescript
+type HarmonyScheme =
+  | 'complementary'
+  | 'analogous'
+  | 'triadic'
+  | 'tetradic'
+  | 'splitComplementary'
+  | 'monochromatic'
+  | 'square';
+
+interface HarmonyColor {
+  color: ColorValue;
+  role: string;  // 'base' | 'complement' | 'analogous1' | ...
+}
+
+function computeHarmony(base: ColorValue, scheme: HarmonyScheme): HarmonyColor[] {
+  const hsl = hexToHSL(base.hex);
+  switch (scheme) {
+    case 'complementary':
+      return [
+        { color: base, role: 'base' },
+        { color: rotateHue(base, 180), role: 'complement' }
+      ];
+    case 'analogous':
+      return [
+        { color: rotateHue(base, -30), role: 'analogous1' },
+        { color: base, role: 'base' },
+        { color: rotateHue(base, 30), role: 'analogous2' }
+      ];
+    case 'triadic':
+      return [
+        { color: base, role: 'base' },
+        { color: rotateHue(base, 120), role: 'triad1' },
+        { color: rotateHue(base, 240), role: 'triad2' }
+      ];
+    case 'tetradic':
+      return [
+        { color: base, role: 'base' },
+        { color: rotateHue(base, 90), role: 'tetrad1' },
+        { color: rotateHue(base, 180), role: 'tetrad2' },
+        { color: rotateHue(base, 270), role: 'tetrad3' }
+      ];
+    case 'splitComplementary':
+      return [
+        { color: base, role: 'base' },
+        { color: rotateHue(base, 150), role: 'split1' },
+        { color: rotateHue(base, 210), role: 'split2' }
+      ];
+    case 'monochromatic':
+      return [
+        { color: adjustLightness(base, -20), role: 'mono1' },
+        { color: adjustLightness(base, -10), role: 'mono2' },
+        { color: base, role: 'base' },
+        { color: adjustLightness(base, 10), role: 'mono3' },
+        { color: adjustLightness(base, 20), role: 'mono4' }
+      ];
+    case 'square':
+      return [
+        { color: base, role: 'base' },
+        { color: rotateHue(base, 90), role: 'square1' },
+        { color: rotateHue(base, 180), role: 'square2' },
+        { color: rotateHue(base, 270), role: 'square3' }
+      ];
+  }
+}
+```
+
+**Key functions** (in `colorHarmonyUtils.ts`):
+- `rotateHue(color: ColorValue, degrees: number): ColorValue` — rotates hue by `degrees`, preserving S, L, and alpha.
+- `adjustLightness(color: ColorValue, delta: number): ColorValue` — shifts lightness by `delta` percentage points, clamped to [0, 100].
+- `adjustSaturation(color: ColorValue, delta: number): ColorValue` — shifts saturation by `delta`, clamped to [0, 100].
+
+**Harmony update**: When the base color changes (user drags in the 2D area or types a new hex), the harmony swatches recompute. This is `useMemo`-ed on `[base.hex, scheme]`.
+
+**Save to swatches**: The "Apply all to swatches" button creates a new swatch group named after the scheme (e.g. "Complementary 2025-08-02") containing all harmony colors, via `colorSystemStore.addSwatchGroup(name, colors)`.
+
+### R5-CS12 Swatches Panel in Properties Panel
+
+**Component**: `SwatchesPanel`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/SwatchesPanel.tsx` (new)
+
+**Design**:
+
+A collapsible panel section within the right sidebar (`PropertiesPanel`), showing swatch groups in tabs:
+
+```tsx
+<CollapsiblePanelShell sectionId="swatches" title={t("certificateTemplateEditor.swatches.sectionTitle")} icon={<PaletteOutlined />}>
+  <SwatchDisplaySizeToggle size={displaySize} onSizeChange={setDisplaySize} />
+  <Tabs value={activeGroup} onChange={(_, v) => setActiveGroup(v)}>
+    <Tab value="document" label={t("certificateTemplateEditor.swatches.groups.document")} />
+    <Tab value="custom" label={t("certificateTemplateEditor.swatches.groups.custom")} />
+    <Tab value="recent" label={t("certificateTemplateEditor.swatches.groups.recent")} />
+  </Tabs>
+  <Box sx={{ mt: 1 }}>
+    {activeGroup === 'document' && <DocumentSwatchesGrid size={displaySize} onPick={handlePick} />}
+    {activeGroup === 'custom' && <CustomSwatchesGrid size={displaySize} onPick={handlePick}
+      onDelete={handleDeleteSwatch} onEdit={handleEditSwatch} onAdd={handleAddSwatch} />}
+    {activeGroup === 'recent' && <RecentSwatchesGrid size={displaySize} onPick={handlePick} />}
+  </Box>
+  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+    <Button size="small" startIcon={<DownloadOutlined />} onClick={handleExport}>
+      {t("certificateTemplateEditor.swatches.export")}
+    </Button>
+    <Button size="small" startIcon={<UploadOutlined />} onClick={handleImport}>
+      {t("certificateTemplateEditor.swatches.import")}
+    </Button>
+    <Select size="small" value={presetPalette} onChange={handleLoadPreset} sx={{ minWidth: 120 }}>
+      <MenuItem value="material">{t("certificateTemplateEditor.swatches.presetMaterial")}</MenuItem>
+      <MenuItem value="pantone">{t("certificateTemplateEditor.swatches.presetPantone")}</MenuItem>
+      <MenuItem value="webStandard">{t("certificateTemplateEditor.swatches.presetWebStandard")}</MenuItem>
+      <MenuItem value="custom">{t("certificateTemplateEditor.swatches.presetCustom")}</MenuItem>
+    </Select>
+  </Stack>
+</CollapsiblePanelShell>
+```
+
+**Document swatches**: Colors used in the current certificate template — collected automatically by scanning all element fills/strokes (via `templateElementEditorStore`). Updated on every element fill/stroke change.
+
+**Custom swatches**: User-saved colors, persisted in `localStorage` key `"certEditor.customSwatches"`. Each swatch has `{ id, name, color: ColorValue }`.
+
+**Recent swatches**: Last 10 colors used in the current session — same source as color history, truncated to 10 (vs 20 in the color history).
+
+**Swatch display size**: Toggle (`ToggleButtonGroup`) with 3 options:
+- Small: 16px swatches, 10 columns
+- Medium: 24px swatches, 8 columns
+- Large: 32px swatches, 6 columns
+
+**Swatch interactions**:
+- **Left-click**: Sets the swatch as the current fill (or stroke, whichever is active) — same as picking from the color picker.
+- **Double-click**: Opens `ColorPickerDialog` with `colorContext='swatch'`, `initialColor` = the swatch's color, `onConfirm` → updates the swatch.
+- **Right-click**: Opens `Menu` with options: "Edit", "Delete", "Duplicate".
+- **"+"** (always present in custom group): Opens `ColorPickerDialog` with the current color pre-set — on confirm, creates a new custom swatch.
+
+**Import/Export**:
+- **Export**: Opens a `Save` dialog (browser `download`), saves as `.json` (primary format) or `.ase` (if user selects .ase from dropdown). JSON format: `{ version: 1, groups: [{ name, swatches: [{ name, hex, alpha }] }] }`.
+- **Import**: Opens hidden `<input type="file" accept=".ase,.aco,.json">`. Reads file, parses format, adds a new swatch group.
+
+### R5-CS13 Color Management — Profiles & Conversion
+
+**Component**: `ColorProfileIndicator`, `GamutWarning`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/ColorProfileIndicator.tsx` (new)
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/dialogs/GamutWarning.tsx` (new)
+
+**Design — Color Profile Indicator**:
+
+A small badge in the dialog header showing the active color profile:
+
+```tsx
+<Tooltip title={t("certificateTemplateEditor.colorProfile.tooltip")}>
+  <Chip
+    size="small"
+    label={profile}
+    icon={<ColorLensOutlined />}
+    onClick={handleOpenProfileMenu}
+    sx={{ cursor: 'pointer' }}
+  />
+</Chip>
+<Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+  <MenuItem selected={profile === 'sRGB'} onClick={() => handleSelect('sRGB')}>sRGB</MenuItem>
+  <MenuItem selected={profile === 'AdobeRGB'} onClick={() => handleSelect('AdobeRGB')}>Adobe RGB</MenuItem>
+  <MenuItem selected={profile === 'CMYK'} onClick={() => handleSelect('CMYK')}>CMYK preview (SWOP)</MenuItem>
+</Menu>
+```
+
+The profile is stored in `colorSystemStore.activeProfile` and defaults to `'sRGB'`.
+
+**Design — Gamut Warning**:
+
+When the current color is out of CMYK gamut, a warn badge appears:
+
+```tsx
+{isOutOfGamut(currentColor, 'CMYK') && (
+  <Tooltip title={t("certificateTemplateEditor.colorPicker.gamutWarning")}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <WarningAmberOutlined sx={{ fontSize: 18, color: theme.palette.warning.main }} />
+      <Typography variant="caption" sx={{ color: theme.palette.warning.main }}>
+        {t("certificateTemplateEditor.colorPicker.outOfGamut")}
+      </Typography>
+    </Box>
+  </Tooltip>
+)}
+```
+
+The `isOutOfGamut` function (from `colorProfileUtils.ts` — Plan 10 R5-CS) checks whether the color's RGB values, when converted through the CMYK profile, round-trip back to the same RGB values. If they don't match (within a tolerance of ±3 per channel), the color is out of gamut.
+
+### R5-CS14 Color Conversion Utilities
+
+**Module**: `colorConversionUtils.ts`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/utils/colorConversionUtils.ts` (new)
+
+**Pure functions** (no React, no side effects) for lossless color space conversion:
+
+```typescript
+// Hex ↔ RGB
+export function hexToRGB(hex: string): { r: number; g: number; b: number };
+export function rgbToHex(r: number, g: number, b: number): string;
+export function hexShorthandToFull(hex: string): string;  // "F0A" → "FF00AA"
+
+// RGB ↔ HSL
+export function rgbToHSL(r: number, g: number, b: number): { h: number; s: number; l: number };
+export function hslToRGB(h: number, s: number, l: number): { r: number; g: number; b: number };
+
+// RGB ↔ HSV
+export function rgbToHSV(r: number, g: number, b: number): { h: number; s: number; v: number };
+export function hsvToRGB(h: number, s: number, v: number): { r: number; g: number; b: number };
+
+// RGB ↔ CMYK (profile-dependent — default sRGB→SWOP)
+export function rgbToCMYK(r: number, g: number, b: number, profile?: string): { c: number; m: number; y: number; k: number };
+export function cmykToRGB(c: number, m: number, y: number, k: number, profile?: string): { r: number; g: number; b: number };
+
+// Convenience
+export function hexToRgba(hex: string, alpha: number): string;  // "rgba(r, g, b, a)" — for CSS
+export function hexToHSL(hex: string): { h: number; s: number; l: number };
+export function hslToHex(h: number, s: number, l: number): string;
+export function rotateHue(color: ColorValue, degrees: number): ColorValue;
+export function adjustLightness(color: ColorValue, delta: number): ColorValue;
+export function adjustSaturation(color: ColorValue, delta: number): ColorValue;
+export function isOutOfGamut(color: ColorValue, targetSpace: 'CMYK'): boolean;
+export function clamp(value: number, min: number, max: number): number;
+```
+
+All functions accept and return numbers (not strings) where possible. The canonical `ColorValue` is `{ hex: string; alpha: number; space: ColorSpace }` — hex is always the master representation. HSL/RGB/HSV/CMYK are derived views for UI display.
+
+### R5-CS15 i18n Keys (Plan 12 R5 — Color System)
+
+**Type file**: `shared/locale/types/dashboard/certificates/templateEditor.ts` — append to `TemplateEditorLabels`:
+
+```typescript
+// Color System keys
+colorPicker: {
+  context: {
+    fill: string;
+    stroke: string;
+    shadow: string;
+    gradientStop: string;
+    swatch: string;
+    backgroundColor: string;
+  };
+  mode: {
+    hsl: string;
+    rgb: string;
+    hsv: string;
+    hex: string;
+    cmyk: string;
+  };
+  hsl: { hue: string; saturation: string; lightness: string; };
+  rgb: { r: string; g: string; b: string; };
+  hsv: { hue: string; saturation: string; value: string; };
+  hex: string;
+  hexShorthand: string;
+  hexInvalid: string;
+  cmyk: {
+    c: string; m: string; y: string; k: string;
+    printPreviewNotice: string;
+    profile: string;
+  };
+  alpha: string;
+  preview: string;
+  previewOld: string;
+  previewNew: string;
+  history: string;
+  confirm: string;
+  cancel: string;
+  gamutWarning: string;
+  outOfGamut: string;
+  harmony: {
+    complementary: string;
+    analogous: string;
+    triadic: string;
+    tetradic: string;
+    splitComplementary: string;
+    monochromatic: string;
+    square: string;
+    applyToSwatches: string;
+  };
+};
+swatches: {
+  sectionTitle: string;
+  groups: {
+    document: string;
+    custom: string;
+    recent: string;
+    preset: string;
+  };
+  displaySize: { small: string; medium: string; large: string; };
+  export: string;
+  import: string;
+  presetMaterial: string;
+  presetPantone: string;
+  presetWebStandard: string;
+  presetCustom: string;
+  edit: string;
+  delete: string;
+  duplicate: string;
+  addSwatch: string;
+  emptySwatches: string;
+};
+colorProfile: {
+  tooltip: string;
+  sRGB: string;
+  adobeRGB: string;
+  cmykPreview: string;
+};
+```
+
+All keys are added under `certificateEditor.*` namespace (matching existing patterns). AR translations use dhikr-appropriate Arabic strings where applicable.
+
+### R5-CS16 Store Additions (Plan 12 — Color System)
+
+The existing `useTemplateElementEditorStore` (from §3.4) gains:
+
+```typescript
+// Color system state
+activeColorContext: ColorPickerContext;
+setActiveColorContext: (ctx: ColorPickerContext) => void;
+
+colorPickerOpen: boolean;
+colorPickerColor: ColorValue | null;
+colorPickerPreviousColor: ColorValue | null;
+openColorPicker: (ctx: ColorPickerContext, initial: ColorValue) => void;
+closeColorPicker: () => void;
+```
+
+The color picker dialog reads from / writes to these store properties. When `openColorPicker` is called, it captures the current color (from the element's fill/stroke) as `previousColor`, stores the `initial` as `colorPickerColor`, sets `activeColorContext`, and opens the dialog. On confirm, `closeColorPicker` either commits (the calling component reads the new color from the store) or cancels.
+
+### R5-CS17 Quality & Verification (Plan 12 R5 — Color System)
+
+**Per-file verification**: tsgo → biome → lint queue client → sub-loop.
+
+**Instruction files**: `.github/instructions/frontend.instructions.md`
+
+**Cross-plan contracts**:
+- **Plan 10**: imports `ColorValue`, `ColorSpace`, `ColorPickerContext`, `HarmonyScheme`, `ColorProfile`, and all color conversion utilities from `@/frontend/common/stores/cert/colorSystemTypes.ts` (created by Plan 10 R5-CS store). Swatches store: `colorSystemStore` (Plan 10 R5-CS).
+- **Plan 11**: The eyedropper tool (Plan 11 R5-CS) feeds sampled colors into `colorSystemStore.addToColorHistory`.
+- **Plan 5**: No GraphQL changes — color values are stored as `{ hex, alpha }` JSON in the existing `FillConfig.solid.color` and `StrokeConfig.layers[].color` fields.
+
+**Performance**:
+- The 2D picker canvas repaints only on hue change — `useMemo` keyed on `[hue, areaMode]`. The marker position is a separate `Box` (not canvas-redraw) so dragging the marker doesn't repaint the canvas.
+- Color conversion functions are O(1) and memoized per color value.
+- The harmony computation is O(7) (max 7 swatches) — negligible.
+- The gamut check runs `rgbToCMYK` then `cmykToRGB` and compares — 2 O(1) conversions + 3 comparisons ≈ instant.
+- Color history capping at 20 means the store array is small (<1KB serialized).
+- Swatch grids are memoized via `React.memo` + `useMemo` — only re-renders when the specific group's swatches change.
+
+**Accessibility**:
+- All sliders have `aria-label` from i18n strings (`aria-label={t("certificateTemplateEditor.colorPicker.hsl.hue")}`).
+- The 2D picker area is keyboard-accessible: arrow keys move the marker by 1% (or 5% with Shift).
+- The harmony dropdown uses MUI `Select` (keyboard navigable).
+- The swatch tiles are `role="button"` with `aria-label` containing the hex + alpha.
+- CMYK mode's print preview note uses `aria-describedby`.
+- The alpha slider's percentage is announced via `aria-valuetext={`${value}%`}`.
+
+---
+
+## Round 5: Rulers, Guides & Grid System
+
+> Added as a distinct Round 5 topic (Rulers/Guides/Grid) to extend the Plan 12 element management with the settings dialogs and property-panel surfaces for the ruler, guide, and grid system. Plan 11 §R5 owns the canvas-side rendering and interaction (rulers, guide overlay, grid overlay, smart guides, snap engine). Plan 10 §R5 owns the View menu entries and toolbar toggles. Plan 12 owns: the Guide & Grid Settings dialog (grid type selection, modular grid params, baseline grid params, isometric params, snap settings), the Guide Preset Manager dialog (CRUD for custom presets), the New Guide dialog (exact-position guide creation), the snap-settings sub-panel, and the mobile settings sheet for guides/grid. All settings read/write the shared `guideGridStore` (Plan 11 §R5-G.13).
+
+### R5-G.1 Guide & Grid Settings Dialog
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/GuideGridSettingsDialog.tsx` (new — shared component, rendered by both desktop and mobile)
+
+A full `Dialog` with tabbed sections. The dialog is opened from Plan 10's View menu ("Guide & Grid Settings…" or "Grid Settings…" with `Ctrl+Alt+'`).
+
+```tsx
+interface GuideGridSettingsDialogProps {
+  open: boolean;
+  onClose: () => void;
+  // From guideGridStore
+  gridConfig: GridConfig;
+  guideColorToken: GuideGridState['guideColorToken'];
+  snapConfig: SnapConfig;
+  smartGuides: SmartGuideConfig;
+  rulerUnit: RulerUnit;
+  onSetGridConfig: (config: Partial<GridConfig>) => void;
+  onSetGuideColor: (token: GuideGridState['guideColorToken']) => void;
+  onSetSnapConfig: (config: Partial<SnapConfig>) => void;
+  onSetSmartGuides: (config: Partial<SmartGuideConfig>) => void;
+  onSetRulerUnit: (unit: RulerUnit) => void;
+  onConvertGridToGuides: () => void;
+}
+```
+
+**Tab structure** (MUI `Tabs`):
+
+| Tab | Content |
+|---|---|
+| Grid | Grid type selector, size, subdivisions, color, opacity, show above/below, snap to grid, convert to guides |
+| Guides | Guide color, lock/clear actions, new guide button, guide list |
+| Smart Guides | Enable toggle, snap sensitivity, distance/spacing/size toggles |
+| Snap | Snap-to targets (checkboxes), threshold slider, priority order |
+| Units | Ruler unit selector, document dimensions display |
+
+### R5-G.2 Grid Settings Tab
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/GridSettingsTab.tsx` (new)
+
+**Grid type selector**: `ToggleButtonGroup` with 5 options (Square, Baseline, Modular, Isometric, Dot). Each button shows an icon representing the grid style.
+
+**Common settings** (always visible):
+- **Grid size**: `Slider` (10–200px) + `TextField` (numeric). Label: `t('grid.settings.size')`.
+- **Subdivisions**: `Slider` (1–20) + `TextField`. Only relevant for square/dot grids.
+- **Grid color**: `ColorPickerField` (reused from Plan 12 R4-T2) — renders a color swatch and opens the color picker. Stores a `GridColorToken` (theme palette key), not a hex value.
+- **Grid opacity**: `Slider` (0–100). Label: `t('grid.settings.opacity')`.
+- **Show grid above elements**: `Switch`. Label: `t('grid.settings.showAboveElements')`.
+- **Snap to grid**: `Switch`. Toggles `snapConfig.snapToGrid`.
+- **Convert grid to guides**: `Button` — calls `guideGridStore.convertGridToGuides()` which creates a guide for every major grid line.
+
+**Conditional sections** (rendered based on `gridConfig.type`):
+
+*(a) Modular grid settings* (when `type === 'modular'`):
+
+```tsx
+<Stack spacing={2} sx={{ mt: 2 }}>
+  <Typography sx={{ fontWeight: 600 }}>{t('grid.settings.modular')}</Typography>
+  <FormControl>
+    <InputLabel>{t('grid.settings.columns')}</InputLabel>
+    <Select value={gridConfig.columns ?? 4} onChange={(e) => onSetGridConfig({ columns: Number(e.target.value) })}>
+      {[1,2,3,4,5,6,8,12].map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
+    </Select>
+  </FormControl>
+  <FormControl>
+    <InputLabel>{t('grid.settings.rows')}</InputLabel>
+    <Select value={gridConfig.rows ?? 4} onChange={(e) => onSetGridConfig({ rows: Number(e.target.value) })}>
+      {Array.from({length: 20}, (_, i) => i + 1).map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
+    </Select>
+  </FormControl>
+  <TextField
+    label={t('grid.settings.gutterWidth')}
+    type="number"
+    value={gridConfig.gutterWidth ?? 20}
+    onChange={(e) => onSetGridConfig({ gutterWidth: Number(e.target.value) })}
+    InputProps={{ endAdornment: <InputAdornment position="end">px</InputAdornment> }}
+  />
+  <ToggleButtonGroup
+    exclusive
+    value={gridConfig.alignment ?? 'top'}
+    onChange={(e, val) => val && onSetGridConfig({ alignment: val })}
+  >
+    <ToggleButton value="top">{t('grid.settings.alignmentTop')}</ToggleButton>
+    <ToggleButton value="center">{t('grid.settings.alignmentCenter')}</ToggleButton>
+    <ToggleButton value="bottom">{t('grid.settings.alignmentBottom')}</ToggleButton>
+  </ToggleButtonGroup>
+</Stack>
+```
+
+*(b) Baseline grid settings* (when `type === 'baseline'`):
+
+```tsx
+<Stack spacing={2} sx={{ mt: 2 }}>
+  <Typography sx={{ fontWeight: 600 }}>{t('grid.settings.baseline')}</Typography>
+  <TextField
+    label={t('grid.settings.baselineSpacing')}
+    type="number"
+    value={gridConfig.baselineSpacing ?? 24}
+    onChange={(e) => onSetGridConfig({ baselineSpacing: Number(e.target.value) })}
+    InputProps={{ endAdornment: <InputAdornment position="end">px</InputAdornment> }}
+  />
+  <TextField
+    label={t('grid.settings.baselineStart')}
+    type="number"
+    value={gridConfig.baselineStart ?? 0}
+    onChange={(e) => onSetGridConfig({ baselineStart: Number(e.target.value) })}
+    InputProps={{ endAdornment: <InputAdornment position="end">px</InputAdornment> }}
+  />
+  <ToggleButtonGroup
+    exclusive
+    value={gridConfig.baselineRelativeTo ?? 'canvas'}
+    onChange={(e, val) => val && onSetGridConfig({ baselineRelativeTo: val })}
+  >
+    <ToggleButton value="canvas">{t('grid.settings.relativeToCanvas')}</ToggleButton>
+    <ToggleButton value="selectedElement">{t('grid.settings.relativeToSelected')}</ToggleButton>
+  </ToggleButtonGroup>
+</Stack>
+```
+
+*(c) Isometric grid settings* (when `type === 'isometric'`):
+
+```tsx
+<Stack spacing={2} sx={{ mt: 2 }}>
+  <Typography sx={{ fontWeight: 600 }}>{t('grid.settings.isometric')}</Typography>
+  <TextField
+    label={t('grid.settings.isoAngle')}
+    type="number"
+    value={gridConfig.isoAngle ?? 30}
+    onChange={(e) => onSetGridConfig({ isoAngle: Math.max(5, Math.min(85, Number(e.target.value))) })}
+    InputProps={{ endAdornment: <InputAdornment position="end">°</InputAdornment> }}
+    helperText={t('grid.settings.isoAngleHint')}
+  />
+  <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+    {t('grid.settings.isoAngleHint')}
+  </Typography>
+</Stack>
+```
+
+### R5-G.3 Guides Settings Tab
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/GuidesSettingsTab.tsx` (new)
+
+- **Guide color**: `ToggleButtonGroup` with 4 theme palette tokens (`info` = cyan/blue default, `primary`, `secondary`, `error` = magenta). Each shows a color swatch from the theme.
+- **Lock guides**: `Switch` — toggles `guideGridStore.guidesLocked`.
+- **Clear all guides**: `Button` with confirmation `Dialog` — calls `guideGridStore.clearGuides()`.
+- **New guide** button — opens the `NewGuideDialog` (§R5-G.5).
+- **Guide list**: A `List` showing all current guides with their orientation icon (horizontal/vertical), position in current units, and a delete `IconButton` per row.
+
+```tsx
+interface GuidesSettingsTabProps {
+  guides: readonly GuideLine[];
+  guidesLocked: boolean;
+  guideColorToken: GuideGridState['guideColorToken'];
+  unit: RulerUnit;
+  onSetGuideColor: (token: GuideGridState['guideColorToken']) => void;
+  onToggleGuidesLock: () => void;
+  onClearGuides: () => void;
+  onOpenNewGuideDialog: () => void;
+  onDeleteGuide: (id: string) => void;
+}
+```
+
+### R5-G.4 Smart Guides Settings Tab
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/SmartGuidesSettingsTab.tsx` (new)
+
+```tsx
+<Stack spacing={2}>
+  <FormControlLabel
+    control={<Switch checked={smartGuides.enabled} onChange={(e) => onSetSmartGuides({ enabled: e.target.checked })} />}
+    label={t('smartGuides.toggle')}
+  />
+  <Typography sx={{ fontWeight: 600 }}>{t('smartGuides.snapSensitivity')}</Typography>
+  <Slider
+    value={smartGuides.snapThreshold}
+    onChange={(_, val) => onSetSmartGuides({ snapThreshold: val as number })}
+    min={2}
+    max={20}
+    valueLabelDisplay="auto"
+    valueLabelFormat={(v) => `${v}px`}
+  />
+  <FormControlLabel
+    control={<Switch checked={smartGuides.showDistance} onChange={(e) => onSetSmartGuides({ showDistance: e.target.checked })} />}
+    label={t('smartGuides.showDistance')}
+  />
+  <FormControlLabel
+    control={<Switch checked={smartGuides.showEqualSpacing} onChange={(e) => onSetSmartGuides({ showEqualSpacing: e.target.checked })} />}
+    label={t('smartGuides.showEqualSpacing')}
+  />
+  <FormControlLabel
+    control={<Switch checked={smartGuides.showEqualSize} onChange={(e) => onSetSmartGuides({ showEqualSize: e.target.checked })} />}
+    label={t('smartGuides.showEqualSize')}
+  />
+</Stack>
+```
+
+### R5-G.5 New Guide Dialog (Settings Surface)
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/NewGuideDialog.tsx` (new)
+
+Note: The canvas interaction version (drag from ruler) is owned by Plan 11 §R5-G.8. This is the dialog version for exact-position guide creation, triggered from the View menu ("New Guide…" or `Ctrl+Shift+Alt+;`) or the Guides Settings tab.
+
+```tsx
+interface NewGuideDialogProps {
+  open: boolean;
+  onClose: () => void;
+  unit: RulerUnit;
+  canvasSize: { width: number; height: number };
+  onAddGuide: (orientation: 'horizontal' | 'vertical', positionPx: number) => void;
+  t: TranslationFunction; // for labels
+}
+```
+
+```tsx
+<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+  <DialogTitle>{t('guides.newGuideDialog.title')}</DialogTitle>
+  <DialogContent>
+    <Stack spacing={2} sx={{ mt: 1 }}>
+      <ToggleButtonGroup
+        exclusive
+        value={orientation}
+        onChange={(e, val) => val && setOrientation(val)}
+      >
+        <ToggleButton value="horizontal">{t('guides.newGuideDialog.horizontal')}</ToggleButton>
+        <ToggleButton value="vertical">{t('guides.newGuideDialog.vertical')}</ToggleButton>
+      </ToggleButtonGroup>
+      <TextField
+        label={t('guides.newGuideDialog.position')}
+        type="number"
+        value={position}
+        onChange={(e) => setPosition(e.target.value)}
+        InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment> }}
+        autoFocus
+        onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
+      />
+    </Stack>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={onClose}>{t('guides.newGuideDialog.cancel')}</Button>
+    <Button onClick={handleCreate} variant="contained">{t('guides.newGuideDialog.create')}</Button>
+  </DialogActions>
+</Dialog>
+```
+
+`handleCreate` converts the position from the current unit to template-px via `unitToPx(position, unit)` and calls `onAddGuide`.
+
+### R5-G.6 Snap Settings Tab
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/SnapSettingsTab.tsx` (new)
+
+```tsx
+<Stack spacing={2}>
+  <Typography sx={{ fontWeight: 600 }}>{t('snap.snapTo')}</Typography>
+  <FormGroup>
+    <FormControlLabel
+      control={<Checkbox checked={snapConfig.snapToGrid} onChange={(e) => onSetSnapConfig({ snapToGrid: e.target.checked })} />}
+      label={t('snap.grid')}
+    />
+    <FormControlLabel
+      control={<Checkbox checked={snapConfig.snapToGuides} onChange={(e) => onSetSnapConfig({ snapToGuides: e.target.checked })} />}
+      label={t('snap.guides')}
+    />
+    <FormControlLabel
+      control={<Checkbox checked={snapConfig.snapToElements} onChange={(e) => onSetSnapConfig({ snapToElements: e.target.checked })} />}
+      label={t('snap.layers')}
+    />
+    <FormControlLabel
+      control={<Checkbox checked={snapConfig.snapToPixels} onChange={(e) => onSetSnapConfig({ snapToPixels: e.target.checked })} />}
+      label={t('snap.pixels')}
+    />
+    <FormControlLabel
+      control={<Checkbox checked={snapConfig.snapToArtboard} onChange={(e) => onSetSnapConfig({ snapToArtboard: e.target.checked })} />}
+      label={t('snap.artboard')}
+    />
+  </FormGroup>
+  <Typography sx={{ fontWeight: 600, mt: 1 }}>{t('snap.threshold')}</Typography>
+  <Slider
+    value={snapConfig.threshold}
+    onChange={(_, val) => onSetSnapConfig({ threshold: val as number })}
+    min={2}
+    max={20}
+    valueLabelDisplay="auto"
+    valueLabelFormat={(v) => `${v}px`}
+  />
+  <Typography sx={{ fontWeight: 600 }}>{t('snap.priority')}</Typography>
+  <DndContext> {/* Or simple up/down buttons */}
+    {snapConfig.priority.map((target, i) => (
+      <Stack key={target} direction="row" spacing={1} alignItems="center">
+        <Typography sx={{ fontSize: 12 }}>{i + 1}.</Typography>
+        <Typography>{t(`snap.${target}`)}</Typography>
+        <IconButton size="small" disabled={i === 0} onClick={() => movePriority(i, i - 1)}><ArrowUpwardOutlined fontSize="small" /></IconButton>
+        <IconButton size="small" disabled={i === snapConfig.priority.length - 1} onClick={() => movePriority(i, i + 1)}><ArrowDownwardOutlined fontSize="small" /></IconButton>
+      </Stack>
+    ))}
+  </DndContext>
+</Stack>
+```
+
+The priority reordering uses simple up/down `IconButton`s (no need for full DnD for 5 items).
+
+### R5-G.7 Guide Preset Manager Dialog
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/GuidePresetManager.tsx` (new)
+
+Manages custom guide presets. Lists all presets (built-in + custom). Custom presets support rename and delete. Import/export via JSON file (using MUI `Button` + hidden `<input type="file">` for import, and a download blob for export).
+
+```tsx
+interface GuidePresetManagerProps {
+  open: boolean;
+  onClose: () => void;
+  presets: readonly GuidePreset[];
+  onSaveCurrentAsPreset: (name: string) => void;
+  onRenamePreset: (id: string, newName: string) => void;
+  onDeletePreset: (id: string) => void;
+  onImportPresets: (file: File) => void;
+  onExportPresets: () => void;
+}
+```
+
+**GuidePreset type** (defined in `frontend/common/stores/cert/guideGridTypes.ts`, see Plan 11 §R5-G.1, extended here):
+
+```typescript
+export interface GuidePreset {
+  id: string;
+  name: string;
+  isBuiltin: boolean;
+  // For built-in presets, the guide positions are computed at apply-time.
+  // For custom presets, the guides are stored explicitly.
+  guides?: GuideLine[];
+  // Print presets store canvas dimensions + margins
+  print?: {
+    width: number;  // template-px
+    height: number; // template-px
+    marginPx: { top: number; right: number; bottom: number; left: number };
+    bleedPx: { top: number; right: number; bottom: number; left: number };
+  };
+  // Preset type tag for display
+  category: 'composition' | 'print' | 'custom';
+}
+```
+
+**Built-in presets** (defined as constants in `frontend/common/stores/cert/guidePresetDefs.ts`):
+
+| Preset ID | Category | Guides created |
+|---|---|---|
+| `safe-area` | composition | 4 guides at 5% margin (inside edges) |
+| `bleed` | composition | 4 guides at bleed margin (outside trim — default 3mm) |
+| `thirds` | composition | 2 horizontal + 2 vertical at 1/3 and 2/3 |
+| `golden-ratio` | composition | 2 horizontal + 2 vertical at 38.2% and 61.8% |
+| `center-cross` | composition | 1 horizontal + 1 vertical at 50% |
+| `a4-portrait` | print | Canvas 794×1123px (210×297mm @96DPI), margin guides at 10mm insets |
+| `a4-landscape` | print | Canvas 1123×794px (297×210mm), margin guides at 10mm insets |
+| `letter-portrait` | print | Canvas 816×1056px (8.5×11in), margin guides at 0.5in insets |
+| `letter-landscape` | print | Canvas 1056×816px (11×8.5in), margin guides at 0.5in insets |
+| `custom-certificate` | print | Configurable dimensions (prompted in dialog) |
+
+The "Save Current as Preset" flows asks for a name via a `TextField` in a small dialog, then stores the current `guideGridStore.guides` as a new preset with `isBuiltin: false, category: 'custom'`.
+
+### R5-G.8 Units Settings Tab
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/UnitsSettingsTab.tsx` (new)
+
+```tsx
+<Stack spacing={2}>
+  <Typography sx={{ fontWeight: 600 }}>{t('ruler.contextMenu.changeUnit')}</Typography>
+  <ToggleButtonGroup
+    exclusive
+    value={rulerUnit}
+    onChange={(e, val) => val && onSetRulerUnit(val)}
+  >
+    {(['px', 'mm', 'cm', 'in', 'pica', 'pt'] as RulerUnit[]).map(u => (
+      <ToggleButton key={u} value={u}>{t(`ruler.units.${u}`)}</ToggleButton>
+    ))}
+  </ToggleButtonGroup>
+  <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+    {t('grid.settings.documentSize')}: {canvasSize.width} × {canvasSize.height}px
+  </Typography>
+  <Button onClick={onConvertGridToGuides} variant="outlined">
+    {t('grid.settings.convertToGuides')}
+  </Button>
+</Stack>
+```
+
+### R5-G.9 Mobile Settings Sheet for Guides & Grid
+
+**File**: `frontend/mobile/views/dashboard/certificates/template-editor/elements/components/GuideGridSettingsSheet.tsx` (new)
+
+Since mobile does not have a menu bar (Plan 10 DD-R5G-3), mobile users access guide/grid settings via a bottom sheet (`BottomSheet` or MUI `SwipeableDrawer` anchored to bottom). The sheet contains a simplified version of the settings:
+
+- Toggle switches for: Rulers, Guides, Grid, Smart Guides, Snap to Grid
+- Ruler unit selector (compact `Select`)
+- Guide clear button
+- "Grid Settings" button → opens the `GuideGridSettingsDialog` in full-screen mode on mobile
+
+```tsx
+<SwipeableDrawer
+  anchor="bottom"
+  open={open}
+  onClose={onClose}
+  onOpen={() => {}}
+  sx={{ '& .MuiDrawer-paper': { borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}
+>
+  <Stack spacing={1} sx={{ p: 2 }}>
+    {/* Toggle switches */}
+    {/* Compact unit selector */}
+    {/* Buttons */}
+  </Stack>
+</SwipeableDrawer>
+```
+
+### R5-G.10 Guide Properties in Info Bar (Integration)
+
+The info bar (Plan 11 §R5-G.14) shows guide position during guide drag/selection. Plan 12 provides the i18n strings for these:
+
+- `guide Selected Y: 397px` → `t('guides.infoBar.selected', { axis: 'Y', pos: formatRulerLabel(guide.position, unit) })`
+- `guide dragging Y: 397px` → `t('guides.infoBar.dragging', { axis: 'Y', pos: formatRulerLabel(guide.position, unit) })`
+
+These use interpolation functions defined in the i18n type schema (Plan 10 §R5-G.4).
+
+### R5-G.11 Bleed Margin Configuration
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/elements/components/guideGridSettings/BleedMarginField.tsx` (new)
+
+When the "Bleed" preset is applied or the user enables the bleed indicator, a `TextField` in the Guide & Grid Settings dialog (Guides tab or a dedicated section) lets the user set the bleed margin in the current ruler unit:
+
+```tsx
+<TextField
+  label={t('guides.bleedMargin')}
+  type="number"
+  value={bleedMargin}
+  onChange={(e) => setBleedMargin(Number(e.target.value))}
+  InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment> }}
+  helperText={t('guides.bleedHint')}
+/>
+```
+
+The bleed margin is stored in `guideGridStore.bleedMarginPx` (converted from the input unit to template-px). Default: 3mm (= ~11.34px at 96 DPI).
+
+### R5-G.12 Design Decisions
+
+**DD-R5G-12-1: Settings Dialog is Shared (Not Tier-Specific)**
+
+The `GuideGridSettingsDialog` and all tab components live in `frontend/common/views/...` (tier-neutral). Desktop renders it as a centered `Dialog`; mobile renders it full-screen. The mobile settings sheet (`GuideGridSettingsSheet`) is a separate mobile-only component that provides quick toggles and delegates to the shared dialog for full settings.
+
+**DD-R5G-12-2: Snap Priority Reordering Uses Simple Buttons**
+
+Rather than implementing full drag-and-drop for the 5 snap-priority items (Grid, Guides, Layers, Pixels, Artboard), up/down `IconButton`s are used. DnD for 5 items is overkill and adds complexity. The priority list updates via `guideGridStore.setSnapConfig({ priority: newArray })`.
+
+**DD-R5G-12-3: Built-in Presets are Non-Editable**
+
+Built-in presets (safe-area, bleed, thirds, golden-ratio, center-cross, print presets) cannot be renamed or deleted. Only custom presets (created via "Save Current as Preset") support full CRUD. This prevents users from accidentally destroying the standard presets.
+
+
+## Round 5: Custom Shapes & Boolean Operations
+
+> Added as Round 5. Extends the element properties panel with shape-specific property controls, boolean operation controls, the shape picker integration, and the shape-to-custom-shape save flow. This plan covers the **properties panel and element controls** portions; the toolbar/library panel is in Plan 10 and canvas rendering/interaction is in Plan 11.
+
+### R5.1 Shape Properties Panel Section
+
+**Component**: `ShapePropertiesSection`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/ShapePropertiesSection.tsx`
+
+**Design**:
+
+A new collapsible section in the right-side property panel (added to the `CollapsiblePanelShell` from R4-1) that appears when the selected element has `type: 'shape'`. The section displays shape-type-specific property controls that adapt dynamically based on `element.shapeType`.
+
+```tsx
+interface ShapePropertiesSectionProps {
+  elementId: string;
+  element: ShapeElementData;
+  onUpdate: (elementId: string, updates: Partial<ShapeElementData>) => void;
+}
+```
+
+**Section layout** (within an MUI `Accordion` with `TuneOutlined` icon):
+1. Shape type dropdown
+2. Dimensions (width, height with chain lock)
+3. Position (x, y with origin selector)
+4. Rotation slider + numeric input
+5. Shape-specific properties (dynamic — see R5.2)
+6. Fill properties (from R5-fill-stroke / Round 4 system)
+7. Stroke properties (from R5-fill-stroke / Round 4 system)
+8. Shadow/effects (from R5-effects / Round 4 system)
+9. Boolean operation controls (see R5.3)
+
+#### R5.1.1 Shape Type Dropdown
+
+An MUI `Select` showing all shape types. Changing the type converts the element to the new shape type (preserving width/height/position/fill/stroke where possible).
+
+```tsx
+<FormControl fullWidth size="small">
+  <InputLabel>{t("shapeProperties.shapeType")}</InputLabel>
+  <Select
+    value={element.shapeType}
+    label={t("shapeProperties.shapeType")}
+    onChange={(e) => onUpdate(elementId, { shapeType: e.target.value as ShapeType })}
+  >
+    <MenuItem value="rectangle">{t("shapeType.rectangle")}</MenuItem>
+    <MenuItem value="roundedRectangle">{t("shapeType.roundedRectangle")}</MenuItem>
+    <MenuItem value="ellipse">{t("shapeType.ellipse")}</MenuItem>
+    <MenuItem value="polygon">{t("shapeType.polygon")}</MenuItem>
+    <MenuItem value="star">{t("shapeType.star")}</MenuItem>
+    <MenuItem value="triangle">{t("shapeType.triangle")}</MenuItem>
+    <MenuItem value="line">{t("shapeType.line")}</MenuItem>
+    <MenuItem value="custom">{t("shapeType.custom")}</MenuItem>
+  </Select>
+</FormControl>
+```
+
+#### R5.1.2 Dimensions & Position
+
+**Dimensions**: Two `TextField`s (width, height) with numeric validation. A chain-lock toggle (`LinkOutlined` / `LinkOffOutlined`) controls proportional sizing — when locked, changing one dimension adjusts the other proportionally.
+
+```tsx
+<Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+  <TextField
+    type="number"
+    size="small"
+    label={t("shapeProperties.width")}
+    value={Math.round(element.width)}
+    onChange={(e) => handleDimensionChange('width', Number(e.target.value))}
+    sx={{ flex: 1 }}
+    InputProps={{ endAdornment: <InputAdornment position="end">px</InputAdornment> }}
+  />
+  <IconButton size="small" onClick={toggleDimensionLock}>
+    {dimensionLock ? <LockOutlined sx={{ fontSize: 18 }} /> : <LockOpenOutlined sx={{ fontSize: 18 }} />}
+  </IconButton>
+  <TextField
+    type="number"
+    size="small"
+    label={t("shapeProperties.height")}
+    value={Math.round(element.height)}
+    onChange={(e) => handleDimensionChange('height', Number(e.target.value))}
+    sx={{ flex: 1 }}
+    InputProps={{ endAdornment: <InputAdornment position="end">px</InputAdornment> }}
+  />
+</Box>
+```
+
+**Position**: Two `TextField`s (x, y) with an origin selector (`ToggleButtonGroup` with two options: top-left corner or center). When origin is "center", the x/y values represent the element's center point; the store converts to/from top-left coordinates internally.
+
+```tsx
+<Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
+  <TextField type="number" size="small" label="X" value={Math.round(pos.x)} sx={{ flex: 1 }} />
+  <TextField type="number" size="small" label="Y" value={Math.round(pos.y)} sx={{ flex: 1 }} />
+  <ToggleButtonGroup
+    size="small"
+    value={positionOrigin}
+    exclusive
+    onChange={(_, val) => setPositionOrigin(val)}
+  >
+    <ToggleButton value="topLeft" title={t("shapeProperties.originTopLeft")}>
+      <NorthWestOutlined sx={{ fontSize: 16 }} />
+    </ToggleButton>
+    <ToggleButton value="center" title={t("shapeProperties.originCenter")}>
+      <CenterFocusStrongOutlined sx={{ fontSize: 16 }} />
+    </ToggleButton>
+  </ToggleButtonGroup>
+</Box>
+```
+
+#### R5.1.3 Rotation Control
+
+An MUI `Slider` (−180 to +180, step 1) paired with a numeric `TextField`. A "reset rotation" button (small `IconButton` with `RotateLeftOutlined`) sets rotation to 0.
+
+```tsx
+<Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+  <Slider
+    min={-180}
+    max={180}
+    step={1}
+    value={element.rotation}
+    onChange={(_, val) => onUpdate(elementId, { rotation: val as number })}
+    sx={{ flex: 1 }}
+  />
+  <TextField
+    type="number"
+    size="small"
+    value={Math.round(element.rotation)}
+    onChange={(e) => onUpdate(elementId, { rotation: Number(e.target.value) })}
+    sx={{ width: 70 }}
+    InputProps={{ endAdornment: <InputAdornment position="end">°</InputAdornment> }}
+  />
+  <IconButton size="small" onClick={() => onUpdate(elementId, { rotation: 0 })}>
+    <RotateLeftOutlined sx={{ fontSize: 18 }} />
+  </IconButton>
+</Box>
+```
+
+### R5.2 Shape-Specific Property Controls
+
+Dynamic controls rendered based on `element.shapeType`. Each control group is a self-contained component that receives `element` and `onUpdate` props.
+
+#### R5.2.1 Rectangle Properties
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/shapeControls/RectangleControls.tsx`
+
+- **Corner radius**: When `cornerRadius.uniform` is `true`, a single `Slider` (0–100px) + numeric `TextField`. A "Per-corner" `Switch` toggles to individual control mode.
+- **Per-corner mode**: Four labeled `TextField`s (top-left, top-right, bottom-left, bottom-right) with small corner-position icons:
+```tsx
+<FormControlLabel
+  control={<Switch checked={cornerRadius.uniform} onChange={toggleUniformRadius} />}
+  label={t("shapeProperties.uniformRadius")}
+/>
+{cornerRadius.uniform ? (
+  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+    <Slider min={0} max={100} value={cornerRadius.all}
+      onChange={(_, val) => updateRadius({ all: val as number })} sx={{ flex: 1 }} />
+    <TextField type="number" size="small" value={cornerRadius.all} sx={{ width: 70 }}
+      InputProps={{ endAdornment: <InputAdornment position="end">px</InputAdornment> }} />
+  </Box>
+) : (
+  <Grid container spacing={1}>
+    <Grid size={6}>
+      <TextField type="number" size="small" label={t("shapeProperties.topLeft")} fullWidth
+        value={cornerRadius.topLeft} onChange={(e) => updateRadius({ topLeft: Number(e.target.value) })} />
+    </Grid>
+    <Grid size={6}>
+      <TextField type="number" size="small" label={t("shapeProperties.topRight")} fullWidth
+        value={cornerRadius.topRight} onChange={(e) => updateRadius({ topRight: Number(e.target.value) })} />
+    </Grid>
+    <Grid size={6}>
+      <TextField type="number" size="small" label={t("shapeProperties.bottomLeft")} fullWidth
+        value={cornerRadius.bottomLeft} onChange={(e) => updateRadius({ bottomLeft: Number(e.target.value) })} />
+    </Grid>
+    <Grid size={6}>
+      <TextField type="number" size="small" label={t("shapeProperties.bottomRight")} fullWidth
+        value={cornerRadius.bottomRight} onChange={(e) => updateRadius({ bottomRight: Number(e.target.value) })} />
+    </Grid>
+  </Grid>
+)}
+```
+
+#### R5.2.2 Rounded Rectangle Properties
+
+Same as rectangle but `cornerRadius.uniform` defaults to `true` with `all` defaulting to 12px. No separate component — reuses `RectangleControls` with a preset flag.
+
+#### R5.2.3 Ellipse Properties
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/shapeControls/EllipseControls.tsx`
+
+- Width, height (from dimension section — equal values when drawn with Shift)
+- Rotation (from rotation section)
+- **Arc/Pie controls** (collapsed by default):
+  - Start angle: `Slider` 0–360° + numeric input
+  - End angle: `Slider` 0–360° + numeric input
+  - Arc mode: `ToggleButtonGroup` — `Arc` (stroke only, open shape) vs `Pie` (filled, closed to center)
+  - When start=0 and end=360, this collapses (full ellipse — no arc controls needed)
+
+```tsx
+<Collapse in={isArcMode}>
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+    <Box sx={{ display: 'flex', gap: 1 }}>
+      <Typography sx={{ flexShrink: 0, minWidth: 80 }}>{t("shapeProperties.startAngle")}</Typography>
+      <Slider min={0} max={360} value={startAngle}
+        onChange={(_, val) => onUpdate(elementId, { ellipseStartAngle: val as number })} sx={{ flex: 1 }} />
+      <TextField type="number" size="small" value={startAngle} sx={{ width: 60 }} />
+    </Box>
+    <Box sx={{ display: 'flex', gap: 1 }}>
+      <Typography sx={{ flexShrink: 0, minWidth: 80 }}>{t("shapeProperties.endAngle")}</Typography>
+      <Slider min={0} max={360} value={endAngle}
+        onChange={(_, val) => onUpdate(elementId, { ellipseEndAngle: val as number })} sx={{ flex: 1 }} />
+      <TextField type="number" size="small" value={endAngle} sx={{ width: 60 }} />
+    </Box>
+  </Box>
+</Collapse>
+```
+
+#### R5.2.4 Triangle Properties
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/shapeControls/TriangleControls.tsx`
+
+- **Triangle type**: `ToggleButtonGroup` — Equilateral, Isosceles, Scalene
+  - Equilateral: all sides equal (width=height, fixed)
+  - Isosceles: two sides equal (width adjustable, height auto-computed)
+  - Scalene: all sides adjustable
+- **Point direction**: `ToggleButtonGroup` with four icon buttons — Up, Down, Left, Right
+  - `NorthOutlined`, `SouthOutlined`, `WestOutlined`, `EastOutlined`
+
+```tsx
+<ToggleButtonGroup value={triangleType} exclusive onChange={(_, v) => onUpdate(id, { triangleType: v })}>
+  <ToggleButton value="equilateral">{t("shapeProperties.equilateral")}</ToggleButton>
+  <ToggleButton value="isosceles">{t("shapeProperties.isosceles")}</ToggleButton>
+  <ToggleButton value="scalene">{t("shapeProperties.scalene")}</ToggleButton>
+</ToggleButtonGroup>
+<ToggleButtonGroup value={direction} exclusive onChange={(_, v) => onUpdate(id, { triangleDirection: v })}>
+  <ToggleButton value="up"><NorthOutlined /></ToggleButton>
+  <ToggleButton value="down"><SouthOutlined /></ToggleButton>
+  <ToggleButton value="left"><WestOutlined /></ToggleButton>
+  <ToggleButton value="right"><EastOutlined /></ToggleButton>
+</ToggleButtonGroup>
+```
+
+#### R5.2.5 Polygon Properties
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/shapeControls/PolygonControls.tsx`
+
+- **Sides count**: `TextField` type="number" min=3 max=12 + `IconButton` increment/decrement pair (same as canvas interactive handles)
+- **Rotation**: inherited from the rotation section
+- **Size**: width/height from dimension section (equal = equilateral polygon)
+
+```tsx
+<Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+  <IconButton size="small" onClick={() => updateSides(Math.max(3, sides - 1))}>
+    <RemoveOutlined sx={{ fontSize: 18 }} />
+  </IconButton>
+  <TextField
+    type="number"
+    size="small"
+    value={sides}
+    onChange={(e) => updateSides(Math.max(3, Math.min(12, Number(e.target.value))))}
+    sx={{ width: 60, textAlign: 'center' }}
+    slotProps={{ htmlInput: { min: 3, max: 12 } }}
+  />
+  <IconButton size="small" onClick={() => updateSides(Math.min(12, sides + 1))}>
+    <AddOutlined sx={{ fontSize: 18 }} />
+  </IconButton>
+  <Typography sx={{ ml: 1, fontSize: 12, color: 'text.secondary' }}>
+    {t("shapeProperties.sides")}
+  </Typography>
+</Box>
+```
+
+#### R5.2.6 Star Properties
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/shapeControls/StarControls.tsx`
+
+- **Points count**: `TextField` type="number" min=3 max=20 + increment/decrement `IconButton`s
+- **Outer radius**: Read-only display (derived from width/height — the star's outer radius = max(width, height) / 2)
+- **Inner radius**: `Slider` 10–90 (percent of outer radius) — controls star spike depth. Lower = sharper spikes, higher = shallower
+
+```tsx
+<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+    <IconButton size="small" onClick={() => updatePoints(Math.max(3, points - 1))}>
+      <RemoveOutlined sx={{ fontSize: 18 }} />
+    </IconButton>
+    <TextField type="number" size="small" value={points} sx={{ width: 60 }}
+      slotProps={{ htmlInput: { min: 3, max: 20 } }}
+      onChange={(e) => updatePoints(Math.max(3, Math.min(20, Number(e.target.value))))} />
+    <IconButton size="small" onClick={() => updatePoints(Math.min(20, points + 1))}>
+      <AddOutlined sx={{ fontSize: 18 }} />
+    </IconButton>
+    <Typography sx={{ ml: 1, fontSize: 12, color: 'text.secondary' }}>
+      {t("shapeProperties.points")}
+    </Typography>
+  </Box>
+  <Typography variant="caption">{t("shapeProperties.innerRadius")}</Typography>
+  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+    <Slider min={10} max={90} value={innerRadiusPercent}
+      onChange={(_, val) => onUpdate(elementId, { starInnerRadius: val as number })} sx={{ flex: 1 }} />
+    <TextField type="number" size="small" value={innerRadiusPercent} sx={{ width: 60 }}
+      InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }} />
+  </Box>
+  <Typography variant="caption" color="text.secondary">
+    {t("shapeProperties.outerRadius")}: {Math.round(Math.max(element.width, element.height) / 2)}px
+  </Typography>
+</Box>
+```
+
+#### R5.2.7 Line Properties
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/shapeControls/LineControls.tsx`
+
+- **Thickness**: `Slider` 1–20px + numeric `TextField`
+- **Style**: `ToggleButtonGroup` — Solid, Dashed, Dotted (with visual preview swatches)
+- **Arrow head (start)**: `Select` — None, Solid, Open, Triangle (each with a mini SVG preview icon)
+- **Arrow head (end)**: Same `Select` as above
+
+```tsx
+<FormControl fullWidth size="small">
+  <InputLabel>{t("shapeProperties.arrowStart")}</InputLabel>
+  <Select value={arrowStart} label={t("shapeProperties.arrowStart")}
+    onChange={(e) => onUpdate(elementId, { lineArrowStart: e.target.value })}>
+    <MenuItem value="none">{t("shapeProperties.arrowNone")}</MenuItem>
+    <MenuItem value="solid">
+      <ListItemIcon><ArrowForwardOutlined /></ListItemIcon>
+      {t("shapeProperties.arrowSolid")}
+    </MenuItem>
+    <MenuItem value="open">
+      <ListItemIcon><ArrowRightAltOutlined /></ListItemIcon>
+      {t("shapeProperties.arrowOpen")}
+    </MenuItem>
+    <MenuItem value="triangle">
+      <ListItemIcon><PlayArrowOutlined /></ListItemIcon>
+      {t("shapeProperties.arrowTriangle")}
+    </MenuItem>
+  </Select>
+</FormControl>
+```
+
+#### R5.2.8 Custom Shape Properties
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/shapeControls/CustomShapeControls.tsx`
+
+- **Path data** (read-only display): A `<Box>` showing the SVG path data in a monospace `Typography` (truncated with "Show full" toggle). This is read-only by default.
+- **Unlock to edit**: An `IconButton` (`LockOpenOutlined`) that switches the path data to an editable `TextField` (multiline, monospace). Editing path data directly is an advanced/developer feature — a warning tooltip appears: "Editing path data directly may break the shape."
+- **Shape from selection**: A button "Save as Custom Shape" that saves the current path data to the user's custom shape library (calls Plan 10's `addCustomShapePreset`).
+- **Replace with library shape**: A button that opens the shape library picker (Plan 10's `ShapeLibraryPanel` in a `Dialog`) — selecting a preset replaces this element's `pathData`.
+
+```tsx
+<Box sx={{ mt: 1 }}>
+  <Typography variant="caption" color="text.secondary">
+    {t("shapeProperties.pathData")}
+  </Typography>
+  <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', mt: 0.5 }}>
+    {pathEditingUnlocked ? (
+      <TextField
+        multiline
+        fullWidth
+        size="small"
+        value={element.pathData ?? ''}
+        onChange={(e) => onUpdate(elementId, { pathData: e.target.value })}
+        sx={{ fontFamily: 'monospace', fontSize: 11 }}
+      />
+    ) : (
+      <Typography sx={{
+        fontFamily: 'monospace', fontSize: 11, flex: 1,
+        overflow: 'hidden', textOverflow: 'ellipsis',
+        whiteSpace: showFullPath ? 'pre-wrap' : 'nowrap',
+      }}>
+        {showFullPath ? element.pathData : (element.pathData ?? '').slice(0, 80) + '…'}
+      </Typography>
+    )}
+    <IconButton size="small" onClick={() => setPathEditingUnlocked(!pathEditingUnlocked)}>
+      {pathEditingUnlocked ? <LockOutlined /> : <LockOpenOutlined />}
+    </IconButton>
+    {pathEditingUnlocked && (
+      <Button size="small" onClick={() => setShowFullPath(!showFullPath)}>
+        {showFullPath ? t("shapeProperties.showLess") : t("shapeProperties.showFull")}
+      </Button>
+    )}
+  </Box>
+  <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+    <Button size="small" variant="outlined" startIcon={<SaveOutlined />} onClick={saveAsCustomShape}>
+      {t("shapeProperties.saveAsCustom")}
+    </Button>
+    <Button size="small" variant="outlined" startIcon={<CategoryOutlined />} onClick={openShapePicker}>
+      {t("shapeProperties.replaceFromLibrary")}
+    </Button>
+  </Box>
+</Box>
+```
+
+### R5.3 Boolean Operation Controls
+
+**Component**: `BooleanOperationControls`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/BooleanOperationControls.tsx`
+
+**Design**:
+
+A property panel section that appears when the selected element is a boolean result (`shapeType: 'boolean'`). It shows the current operation and provides controls to change it or flatten the result.
+
+```tsx
+interface BooleanOperationControlsProps {
+  elementId: string;
+  booleanConfig: BooleanConfig;
+  onUpdate: (elementId: string, updates: Partial<ShapeElementData>) => void;
+  onFlatten: (elementId: string) => void;
+}
+```
+
+**Layout**:
+1. **Current operation dropdown**: `Select` showing the active boolean operation (Unite/Subtract/Intersect/Exclude/Divide/Trim/Merge). Changing it recomputes the boolean path on the canvas (Plan 11).
+2. **Operand list**: A reorderable list of operand shapes (each showing the shape's thumbnail, name, and type icon). Drag to reorder — order matters for Subtract (top minus bottom).
+3. **Operand visibility toggles**: Each operand has a visibility toggle `IconButton` — hidden operands don't participate in the boolean computation (useful for previewing effects).
+4. **Flatten button**: A `Button` with `LayersClearOutlined` icon. Triggers a confirmation `Dialog`: "Flattening will bake the boolean result into a single shape. The original shapes will be removed. This cannot be undone (except via Undo)."
+
+```tsx
+<Accordion>
+  <AccordionSummary expandIcon={<ExpandMoreOutlined />}>
+    <SvgIcon sx={{ mr: 1 }}><MergeOutlined /></SvgIcon>
+    <Typography>{t("boolean.toolbarTitle")}</Typography>
+  </AccordionSummary>
+  <AccordionDetails>
+    <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+      <InputLabel>{t("boolean.operationType")}</InputLabel>
+      <Select value={booleanConfig.operation}
+        onChange={(e) => onUpdate(elementId, { booleanConfig: { ...booleanConfig, operation: e.target.value } })}>
+        <MenuItem value="unite">{t("boolean.unite")}</MenuItem>
+        <MenuItem value="subtract">{t("boolean.subtract")}</MenuItem>
+        <MenuItem value="intersect">{t("boolean.intersect")}</MenuItem>
+        <MenuItem value="exclude">{t("boolean.exclude")}</MenuItem>
+        <MenuItem value="divide">{t("boolean.divide")}</MenuItem>
+        <MenuItem value="trim">{t("boolean.trim")}</MenuItem>
+        <MenuItem value="merge">{t("boolean.merge")}</MenuItem>
+      </Select>
+    </FormControl>
+
+    <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+      {t("boolean.operands")}
+    </Typography>
+    <List dense>
+      {booleanConfig.operands.map((operand, index) => (
+        <ListItem
+          key={operand.elementId}
+          secondaryAction={
+            <IconButton edge="end" size="small" onClick={() => toggleOperandVisibility(operand.elementId)}>
+              {operand.visible ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
+            </IconButton>
+          }
+          sx={{ cursor: 'grab' }}
+        >
+          <ListItemIcon sx={{ minWidth: 36 }}>
+            <DragHandleOutlined sx={{ fontSize: 18 }} />
+          </ListItemIcon>
+          <ListItemText
+            primary={`#${index + 1}: ${operand.name}`}
+            secondary={getShapeTypeLabel(operand.shapeType)}
+            slotProps={{ primary: { sx: { fontSize: 13 } } }}
+          />
+        </ListItem>
+      ))}
+    </List>
+
+    <Button
+      fullWidth
+      variant="outlined"
+      color="warning"
+      startIcon={<LayersClearOutlined />}
+      onClick={handleFlattenClick}
+      sx={{ mt: 2 }}
+    >
+      {t("boolean.flatten")}
+    </Button>
+
+    <Dialog open={flattenDialogOpen} onClose={() => setFlattenDialogOpen(false)}>
+      <DialogTitle>{t("boolean.flattenConfirmTitle")}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{t("boolean.flattenConfirmMessage")}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setFlattenDialogOpen(false)}>{t("boolean.cancel")}</Button>
+        <Button color="warning" onClick={confirmFlatten}>{t("boolean.flattenConfirm")}</Button>
+      </DialogActions>
+    </Dialog>
+  </AccordionDetails>
+</Accordion>
+```
+
+### R5.4 Shape Picker Integration
+
+When the user selects "Replace from library" in custom shape controls (R5.2.8) or clicks a shape in the Plan 10 library panel, the `ShapePickerDialog` provides a modal version of the shape library:
+
+**File**: `frontend/views/dashboard/cert/templates/editor/dialogs/ShapePickerDialog.tsx`
+
+```tsx
+interface ShapePickerDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSelect: (shapePreset: ShapePreset) => void;
+  onImportSvg: () => void;
+  onImportUrl: () => void;
+}
+```
+
+The dialog wraps the `ShapeLibraryPanel` (Plan 10) in a full-screen `Dialog` with `maxWidth="md"`. Selecting a shape calls `onSelect` and closes. This is the same component used both as a panel (left sidebar) and a modal picker.
+
+### R5.5 Interactive Corner Radius Slider Panel
+
+**File**: `frontend/views/dashboard/cert/templates/editor/elements/panels/shapeControls/CornerRadiusSlider.tsx`
+
+A reusable `Slider` component for corner radius that also shows a visual preview of the corner shape:
+
+```tsx
+<Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+  <Box sx={{ width: 40, height: 40, position: 'relative' }}>
+    <svg viewBox="0 0 40 40" width="40" height="40">
+      <path d={generateRoundedRectPath(2, 2, 36, 36, { tl: value, tr: value, bl: value, br: value })}
+        fill="none" stroke={theme.palette.primary.main} strokeWidth="1.5" />
+    </svg>
+  </Box>
+  <Slider min={0} max={Math.min(element.width, element.height) / 2}
+    value={value} onChange={(_, v) => onChange(v as number)} sx={{ flex: 1 }} />
+  <TextField type="number" size="small" value={value} sx={{ width: 60 }}
+    InputProps={{ endAdornment: <InputAdornment position="end">px</InputAdornment> }} />
+</Box>
+```
+
+### R5.6 i18n Keys for Round 5
+
+All Round 5 user-facing strings use `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` from `@/shared/locale/client`.
+
+```typescript
+// R5: Shape Properties & Boolean Controls
+shapeType: {
+  rectangle: string;
+  roundedRectangle: string;
+  ellipse: string;
+  polygon: string;
+  star: string;
+  triangle: string;
+  line: string;
+  custom: string;
+}
+shapeProperties: {
+  sectionTitle: string;
+  shapeType: string;
+  width: string;
+  height: string;
+  x: string;
+  y: string;
+  originTopLeft: string;
+  originCenter: string;
+  rotation: string;
+  uniformRadius: string;
+  topLeft: string;
+  topRight: string;
+  bottomLeft: string;
+  bottomRight: string;
+  cornerRadius: string;
+  sides: string;
+  points: string;
+  innerRadius: string;
+  outerRadius: string;
+  thickness: string;
+  lineStyle: string;
+  lineSolid: string;
+  lineDashed: string;
+  lineDotted: string;
+  arrowStart: string;
+  arrowEnd: string;
+  arrowNone: string;
+  arrowSolid: string;
+  arrowOpen: string;
+  arrowTriangle: string;
+  startAngle: string;
+  endAngle: string;
+  arcMode: string;
+  pieMode: string;
+  equilateral: string;
+  isosceles: string;
+  scalene: string;
+  pointDirection: string;
+  pathData: string;
+  showFull: string;
+  showLess: string;
+  saveAsCustom: string;
+  replaceFromLibrary: string;
+  editPathWarning: string;
+}
+booleanControls: {
+  operationType: string;
+  operands: string;
+  operandHidden: string;
+  operandVisible: string;
+  operandDragToReorder: string;
+}
+```
+
+Each key must be implemented in both `shared/locale/ar/.../certificateTemplateEditor.ts` and `shared/locale/en/.../certificateTemplateEditor.ts`.
+
+### R5.7 Store Contract for Round 5 (Elements)
+
+Additions to `frontend/common/stores/templateElementEditorStore.ts` (the element-specific store from Round 4):
+
+```typescript
+// Shape properties
+updateShapeProperty: (elementId: string, property: keyof ShapeElementData, value: unknown) => void;
+convertShapeType: (elementId: string, newType: ShapeType) => void;
+
+// Boolean operation controls
+updateBooleanOperation: (elementId: string, operation: BooleanOperation) => void;
+reorderBooleanOperands: (elementId: string, fromIndex: number, toIndex: number) => void;
+toggleOperandVisibility: (elementId: string, operandId: string) => void;
+flattenBooleanElement: (elementId: string) => void;
+
+// Shape picker
+shapePickerDialogOpen: boolean;
+openShapePicker: () => void;
+closeShapePicker: () => void;
+selectShapeFromPicker: (preset: ShapePreset, targetElementId?: string) => void;
+
+// Save as custom shape
+saveElementAsCustomShape: (elementId: string, name: string) => void;
+```
+
+### R5.8 Cross-Plan Contracts
+
+- **Plan 10 (Basic)**: Plan 10 provides the `ShapePreset` schema, `ShapeLibraryPanel`, `ShapePickerDialog`, and the `shapeToolConfig` defaults. Plan 12's `CustomShapeControls` calls `addCustomShapePreset` (Plan 10) and `openShapePicker` (Plan 12 store → Plan 10 dialog).
+- **Plan 11 (Canvas)**: Plan 11 renders the shape elements with `pathData` and applies boolean path math. Plan 12 updates `element.pathData`, `element.shapeType`, and `element.booleanConfig` via the store; Plan 11 re-renders on store change.
+- **Plan 5 (GraphQL API)**: The `ShapeElementData` fields (`shapeType`, `cornerRadius`, `polygonSides`, `starPoints`, `starInnerRadius`, `triangleType`, `triangleDirection`, `lineThickness`, `lineStyle`, `lineArrowStart`, `lineArrowEnd`, `ellipseStartAngle`, `ellipseEndAngle`, `pathData`, `booleanConfig`) must be added to the backend schema (Plan 5) and exposed via element mutations.
+- **Plan 6 (PDF Rendering)**: PDF rendering must support all SVG shape types and boolean operation results. Non-destructive booleans should be flattened at PDF export time using Plan 11's `flattenBoolean` function.
+- **Plan 7 (Storage)**: Custom shape presets saved via `saveElementAsCustomShape` are stored server-side per user via Plan 7's storage API.
+
+## Round 5: Snap & Align Engine — Align Panel, Distribute Panel, Spacing Controls, Match-Size Panel
+
+This is the **fourth** Round 5 domain in Plan 12 (after Fill/Stroke, Pen Tool, Effects). The toolbar/View-menu entry points are specified in Plan 10 §"Round 5: Snap & Align Engine"; the snap engine calculations, smart-guide overlay rendering, and interactive transform handles are specified in Plan 11 §"Round 5: Snap & Align Engine". Plan 12 owns the **right-panel property-page UI** for alignment, distribution, spacing, and match-size operations. All shared types (`AlignAxis`, `AlignTarget`, `DistributeMode`, `DistributeFrom`, `SnapSettings`, `SmartGuideColorToken`, `DEFAULT_SNAP_SETTINGS`) come from Plan 10's canonical `frontend/common/stores/cert/snapAlignTypes.ts`. All store actions (`alignElements`, `distributeElements`, `distributeSpacing`, `matchSize`, `setKeyObject`, `setAlignTarget`, `setDistributeFrom`, `updateSnapSettings`) are implemented in Plan 11's `useCanvasStore`.
+
+### R5S.1 Align Panel
+
+The right panel's properties tab family (existing from earlier rounds) gains a new tab entry — `align` — that hosts full alignment controls and surfaces the same operations available from the toolbar `AlignToolbarCluster`. The tab is enabled when ≥ 2 elements are selected (the tab itself is always visible, the controls inside disable when < 2 are selected).
+
+**File**: `frontend/views/dashboard/cert/templates/editor/properties/AlignPanel.tsx` (new)
+
+```tsx
+interface AlignPanelProps {
+  selectedElementIds: readonly string[];
+  alignTarget: AlignTarget;                 // from store
+  keyObjectId: string | null;               // from store
+  onAlign: (axis: AlignAxis, target: AlignTarget) => void;       // routes to useCanvasStore.alignElements
+  onSetAlignTarget: (target: AlignTarget) => void;
+  onSetKeyObject: (id: string | null) => void;
+  disabled?: boolean;
+}
+```
+
+Layout (vertical) — uses MUI v9 `Stack` with `spacing={1}`. No style props on `Stack`, use `sx={{ gap: 1 }}`.
+
+#### Top group — "Align To"
+
+- Two `RadioGroup` rows (compact, horizontal):
+  - `radio: selection` (default; always available)
+  - `radio: canvas`
+  - `radio: first selected`
+  - `radio: key object` — **disabled** indicator + label `i18n('alignTo.keyObjectHint')` when no key object is set.
+- A hint chip below the radios: `Box` with `sx={(theme) => ({ bgcolor: theme.palette.action.hover, color: theme.palette.text.secondary })}` and text `i18n('alignTo.keyObjectHint')` showing "Shift-click an element on canvas to set as key object".
+
+#### Middle group — buttons grid
+
+Six alignment buttons arranged as a **2-row × 3-column grid** (matching Photoshop's Align panel). Each button is `IconButton` with `Tooltip`:
+
+| Axis | Icon | Tooltip key |
+|---|---|---|
+| Vertical-align TOP    | `VerticalAlignTopOutlined` | `align.topEdges` |
+| Vertical-align MIDDLE | `VerticalAlignCenterOutlined` | `align.verticalCenters` |
+| Vertical-align BOTTOM | `VerticalAlignBottomOutlined` | `align.bottomEdges` |
+| Horizontal-align LEFT | `HorizontalAlignLeftOutlined` | `align.leftEdges` |
+| Horizontal-align CENTER (centers) | `HorizontalAlignCenterOutlined` | `align.horizontalCenters` |
+| Horizontal-align RIGHT | `HorizontalAlignRightOutlined` | `align.rightEdges` |
+
+All `IconButton`s use `sx={(theme) => ({ color: theme.palette.text.primary })}`. The grid container uses `sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0.5 }}` (no `display` style prop).
+
+Tooltip for each button includes the keyboard shortcut (pulled from `i18n('align.shortcut.*')` keys added by Plan 10).
+
+Disabled state: `disabled` prop — when fewer than 2 elements selected, the whole panel grid disables + shows small `Typography` hint `i18n('align.requiresTwo')` ("Align requires at least 2 selected elements"). No hard-coded alert colors — use `sx={(theme) => ({ color: theme.palette.text.disabled })}`.
+
+#### Bottom group — "Distribute" sub-section (within Align panel until R5S.2 superseded)
+
+Distribute buttons (also found in the toolbar cluster) are mirrored here for the property-panel UX:
+
+| Distribute icon | Action |
+|---|---|
+| `HorizontalDistributeOutlined` | `distributeElements('horizontalCenters', distributeFrom)` |
+| `VerticalDistributeOutlined` | `distributeElements('verticalCenters', distributeFrom)` |
+| `HorizontalSpaceBetweenOutlined` (custom) | `distributeSpacing(gap, 'horizontal')` with current `gap` input |
+| `VerticalSpaceBetweenOutlined` (custom) | `distributeSpacing(gap, 'vertical')` with current `gap` input |
+
+Disabled when `selectedElementIds.length < 3` (tooltip shows `i18n('distribute.requiresThree')`).
+
+### R5S.2 Distribute Panel
+
+A more fully-featured distribution sub-panel for users who want granularity beyond the toolbar cluster.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/properties/DistributePanel.tsx` (new)
+
+```tsx
+interface DistributePanelProps {
+  selectedElementIds: readonly string[];
+  from: DistributeFrom;
+  onDistributeElements: (mode: DistributeMode, from: DistributeFrom) => void;
+  onDistributeSpacing: (gapPx: number, axis: 'horizontal' | 'vertical') => void;
+  onSetDistributeFrom: (from: DistributeFrom) => void;
+  disabled?: boolean;
+}
+```
+
+#### "Distribute" controls
+
+- A `RadioGroup` for `from`: `edge`, `center`, `spacing` (per §"Distribute from").
+- A `TextField` for the **gap** in px: `type="number"`, `size="small"`, `slotProps={{ htmlInput: { min: 0, max: 1000 } }}`. The gap input lives in this panel and is shared with the toolbar (one source of truth — the value lives in `distributeGap` state in the store, added by R5S-T6-equivalent in Plan 12; see §R5S.5 below).
+- Two "Distribute with {gap}px gap" `Button`s (horizontal + vertical) — labels via `i18n('distribute.distributeWithGap', gap)`. Disabled when `from !== 'spacing'`.
+
+#### Mode buttons grid (3×2):
+
+| Row 1 | Row 2 |
+|---|---|
+| Distribute H centers (`HorizontalDistributeOutlined`) | Distribute V centers (`VerticalDistributeOutlined`) |
+| Distribute Left edges (`HorizontalAlignLeftOutlined` with a small "equal" badge) | Distribute Right edges (`HorizontalAlignRightOutlined` with a small "equal" badge) |
+| Distribute Top edges (`VerticalAlignTopOutlined` with a small "equal" badge) | Distribute Bottom edges (`VerticalAlignBottomOutlined` with a small "equal" badge) |
+| Distribute H spacing | Distribute V spacing |
+
+The "equal" badges on edge-distribute buttons are small `Box` overlays positioned via `sx={{ position: 'absolute', top: -4, right: -4, ... }}` — no style props, only `sx`. Badge content checks `selectedElementIds.length >= 3`. The badge uses `theme.palette.primary.main` background + `theme.palette.onPrimary` text. No hard-coded colors.
+
+Disabled when `selectedElementIds.length < 3`; full-panel disables and `Typography` hint `i18n('distribute.requiresThree')` shows. Tooltip everywhere.
+
+### R5S.3 Spacing Controls
+
+A small sub-component that wraps both `AlignToSelect`-equivalent (here: `DistributeFromSelect`) and the gap `TextField`, exposing a uniform style.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/properties/SpacingControls.tsx` (new)
+
+```tsx
+interface SpacingControlsProps {
+  gapValue: number;
+  onGapValueChange: (v: number) => void;
+  from: DistributeFrom;
+  onFromChange: (from: DistributeFrom) => void;
+  disabled?: boolean;
+}
+```
+
+Layout (`Stack` vertical):
+- `Row" — label + `RadioGroup` for `from` (edge / center / spacing) collapsed via `ToggleButtonGroup` for compactness (single row).
+- Row 2 — gap input; only editable when `from === 'spacing'` (greyed otherwise, not hidden — visual affordance that the gap is irrelevant).
+
+The `ToggleButtonGroup` for `from` lets the user switch modes with a single-row button group (compact), with `ToggleButtons` using `size="small"` and `sx={{ borderColor: theme.palette.divider }}`. No hardcoded colors.
+
+### R5S.4 Match-Size Panel
+
+A panel providing both Match Width/Height/Size and the reference-selection UI.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/properties/MatchSizePanel.tsx` (new)
+
+```tsx
+interface MatchSizePanelProps {
+  selectedElementIds: readonly string[];
+  keyObjectId: string | null;
+  onMatchSize: (
+    scope: 'width' | 'height' | 'both',
+    referenceKind: 'first' | 'key' | 'largest' | 'smallest',
+  ) => void;
+  disabled?: boolean;
+}
+```
+
+#### Match scope group (3 buttons)
+
+- `Match Width` — applies `matchSize(ref, 'width', …)` with selected reference kind.
+- `Match Height` — `('height', …)`.
+- `Match Size` — both width and height.
+- Three buttons in a `Box` row (`sx={{ display: 'flex' }}` — no `display` style prop on `Box`). All `Button` (not `IconButton`) — labels visible so the user sees the names from a property-panel context.
+
+#### Match-to-reference group (4 radios)
+
+- `First selected`
+- `Key object` (disabled when no key object)
+- `Largest selected` (max `width × height`)
+- `Smallest selected`
+
+All radios disable when fewer than 2 elements selected. Show `Typography` hint `i18n('matchSize.requiresTwo')`.
+
+Each button has a disabled-tooltip when:
+- Reference group has no key object set and `Key object` radio selected → tooltip "Shift-click on canvas to designate key object".
+- Selected elements are homogeneous in size (all the same) → panel shows a **notice** `i18n('matchSize.allIdentical')` ("All selected elements have the same size") AND disables buttons (visual sanity check).
+
+### R5S.5 Properties Store Additions
+
+The `templateElementEditorStore` (existing) stores UI state for the panels. R5S adds (mirroring Plan 11's store additions):
+
+**File**: `frontend/common/stores/templateElementEditorStore.ts` (modify) — note this is *separate* from `useCanvasStore` which Plan 11 owns; the panel UI state vs. canvas engine state are kept partitioned. The store mutation dispatches are forwarded to the canvas store actions.
+
+```typescript
+// R5S additions to templateElementEditorStore
+alignTarget: AlignTarget;
+setAlignTarget: (target: AlignTarget) => void;
+distributeFrom: DistributeFrom;
+setDistributeFrom: (from: DistributeFrom) => void;
+distributeGap: number;                       // px, default 20
+setDistributeGap: (px: number) => void;
+matchSizeReferenceKind: 'first' | 'key' | 'largest' | 'smallest';
+setMatchSizeReferenceKind: (k: 'first' | 'key' | 'largest' | 'smallest') => void;
+matchSizeScope: 'width' | 'height' | 'both';
+setMatchSizeScope: (s: 'width' | 'height' | 'both') => void;
+keyObjectId: string | null;                   // mirrored from useCanvasStore; mutated via setShowKeyObject delegating to useCanvasStore.setKeyObject
+```
+
+> Single source-of-truth caveat: Plan 11's `useCanvasStore.setKeyObject` is privileged. The `templateElementEditorStore.keyObjectId` is a **derived mirror**: it subscribes to the canvas store's `keyObjectId` via `subscribeWithSelector` so the panel always reflects the authoritative state. Plan 12 code calls the mirror action `setShowKeyObject` (which dispatches to Plan 11's store) — but the read path is subscription-driven (no manual sync).
+
+### R5S.6 Tab wiring
+
+The right panel tab family is extended.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/properties/RightPanelTabs.tsx` (modify)
+
+- Add new tab `'align'` after `'transform'` with icon `VerticalAlignCenterOutlined` and label `i18n('rightPanel.tabs.align')`.
+- Tab visibility: visible when ≥ 0 selected (it always renders to allow opening the settings/visibility affordances).
+- Tab enabled: panels inside disable per their own selection-count requirement (above).
+
+### R5S.7 Smart Guide Settings Sub-panel
+
+A small sub-panel inside the Align panel offering the **same** smart-guide colour/sensitivity/threshold configuration available in Plan 10's `SnapSettingsDialog`. Mirror entry-point so the user doesn't have to recall the View menu.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/properties/SnapSettingsSubPanel.tsx` (new)
+
+```tsx
+interface SnapSettingsSubPanelProps {
+  settings: SnapSettings;
+  onUpdate: (patch: Partial<SnapSettings>) => void;
+}
+```
+
+Layout: a `Stack` vertical with collapsed sections inside `Accordion` — collapsed by default to reduce clutter. Contains:
+- `Accordion` "Smart Guides" — toggles + sensitivity slider + colour-token `RadioGroup` of 4 `Box` swatches.
+- `Accordion` "Snap Targets" — 6 `Checkbox` rows for the enabled kinds.
+- `Accordion` "Snap Threshold" — `Slider` 2–20. Reset `Button` for defaults.
+
+No hardcoded colors; swatch backgrounds resolved from `theme.palette[token].main` via `sx={{ bgcolor: (theme) => theme.palette[token].main }}`.
+
+### R5S.8 i18n Keys Added (Plan 12 Snap & Align portion)
+
+Extra keys to support panel names, hints, and labels (supplementing Plan 10 §R5S.7 and Plan 11 §R5S.8):
+
+```typescript
+rightPanel: {
+  tabs: {
+    align: string;        // "Align"
+    distribute: string;   // "Distribute"
+    matchSize: string;    // "Match Size"
+  }
+}
+align: {
+  requiresTwo: string;     // "Align requires at least 2 selected elements"
+  // (Plan 10 owns the button label keys; here we add panel-only extras)
+}
+matchSize: {
+  sectionTitle: string;
+  matchWidth: string;
+  matchHeight: string;
+  matchBoth: string;
+  referenceKind: string;
+  referenceFirst: string;
+  referenceKey: string;
+  referenceLargest: string;
+  referenceSmallest: string;
+  requiresTwo: string;
+  allIdentical: string;
+  referenceNoKeyHint: string;
+}
+spacing: {
+  sectionTitle: string;
+  gapLabel: string;       // "Gap (px)"
+  fromEdge: string;
+  fromCenter: string;
+  fromSpacing: string;
+}
+subpanels: {
+  smartGuidesTitle: string;
+  snapTargetsTitle: string;
+  snapThresholdTitle: string;
+  resetToDefaults: string;
+}
+```
+
+All keys MUST be implemented in both `shared/locale/en/.../templateEditor.ts` and `shared/locale/ar/.../templateEditor.ts`.
+
+### R5S.9 Keyboard Accessibility (Panel)
+
+- `Tab` order inside the align panel moves top-to-bottom: Align-To radios → alignment buttons (row-major) → distribute buttons → match-size radios. `aria-roledescription="Align panel"` on the panel root.
+- Each `IconButton` exposes its keyboard shortcut via `aria-keyshortcuts` (e.g. `aria-keyshortcuts="Control+Shift+ArrowLeft"`).
+- The gap `TextField` accepts Enter to commit (triggers distribute on the last-touched axis).
+- `Esc` closes any open sub-`Accordion` (per base §"Accessibility").
+
+### R5S.10 Quality & Verification (Plan 12 R5S)
+
+**Per-file verification loop**:
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client:
+   ```bash
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+     -H "Content-Type: application/json" \
+     -d '{"id":"r5s-plan12-<file>","files":["<path>"]}'
+   ```
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files**: `.github/instructions/frontend.instructions.md`.
+
+**Cross-plan contracts**:
+- **Plan 10**: imports `AlignAxis`, `AlignTarget`, `DistributeMode`, `DistributeFrom`, `SnapSettings`, `SmartGuideColorToken` from `@/frontend/common/stores/cert/snapAlignTypes` (Plan 10's file). Plan 12 must NOT redefine these.
+- **Plan 11**: All align/distribute/matchSize actions live in `useCanvasStore`; Plan 12's panel UI invokes `useCanvasStore.getState().alignElements(axis, target)` etc. — directly, not via a passthrough store wrapper. (The `templateElementEditorStore` only owns UI state.)
+- **Plan 5 (template storage)**: The `editorSettings.snap` JSON sub-key (matching `SnapSettings`) gets persisted with templates. The `editorSettings.matchSizeReferenceKind`, `alignTarget`, and `distributeFrom` also get persisted as its sub-keys.
+
+**Performance**:
+- `AlignPanel`, `DistributePanel`, `MatchSizePanel` are wrapped with `React.memo` and subscribe to `selectedElementIds` via `useShallow` to avoid re-render on every pointer drag.
+- Button label/score: button tooltip intros re-derive their disabled state from `selectedElementIds.length`, no per-render label string interner.
+- Accordion render cost is kept low by hiding the contents via CSS (`sx={{ display: accordionExpanded ? 'block' : 'none' }}`) instead of unmounting so focus is preserved — but for heavy `SnapSettingsSubPanel`, mount-on-expand (only when expanded).
+
+**Accessibility recap** (per AGENTS.md and base §"Accessibility"):
+- Sliders expose `aria-label` from i18n.
+- All radios have `aria-labelledby` pointing at the section's `Typography` heading by ID.
+- `aria-live="polite"` on the "requires N selected" hint so SR users catch the requirement change.
+
+**Edge-case UX**:
+- "Align to canvas" with **no** other element selected works (single-element align-to-canvas). The Align Panel does NOT disable on single-element when `alignTarget === 'canvas'` — a special-case permit for aligning one element to the document centre.
+- "Distribute spacing" requires **all elements to be sized differently than the gap** if the result would push elements beyond the canvas bounds. We DO NOT auto-clip; we apply the math regardless and let the resulting placements land on/near the edge if needed (the user can then choose to align to canvas).
+- `matchSize(...` with `referenceKind='largest'/'smallest'`: largest = max `width × height`; ties broken by element id alphabetically for determinism.
+
+## Round 5: Advanced Typography Engine
+
+Round 5 in Plan 12 owns the **character-level property panel**, **paragraph-level property panel**, and the **typography panel UI** that docks these panels in the right sidebar. These panels provide Photoshop/Illustrator-grade typography control. All panels consume the `SpanStyles` and `ParagraphStyles` types defined in Plan 10 (shared types) and the `typographyStore` actions from Plan 10.
+
+### R5.1 Character Panel
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/CharacterPanel.tsx`
+
+A collapsible card with all character-level controls in a dense grid layout. It docks in the right sidebar `PropertyPanelSection` (from R4) below the existing common properties section.
+
+**Component contract:**
+
+```tsx
+interface CharacterPanelProps {
+  /** Text element ID being edited */
+  elementId: string;
+  /** Current active span styles (merged for display — element base styles + selection override) */
+  activeStyles: SpanStyles;
+  /** Whether there is a text selection within the inline editor */
+  hasSelection: boolean;
+  /** Dispatched when any character style changes */
+  onStyleChange: (key: keyof SpanStyles, value: SpanStyles[keyof SpanStyles]) => void;
+  /** Dispatched on paragraph-level alignment change */
+  onTextAlignChange: (align: ParagraphStyles["alignment"]) => void;
+}
+```
+
+**Panel layout** (dense grid, 12-column MUI `Grid`):
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ CHARACTER  (collapsible header)                    [v]    │
+├──────────────────────────────────────────────────────────┤
+│ Font Family: [Autocomplete with live preview ▾]           │
+│              ABCabc123 (sample, rendered in font)         │
+│                                                          │
+│ Weight: [Select ▾]    Style: [Normal|Italic|Oblique]      │
+│                                                          │
+│ Size: [Number] [Slider]  Presets: [▾ 8/10/12/14/16/...]   │
+│                                                          │
+│ ┌─ Kerning ──────────┐ ┌─ Tracking ─────────┐            │
+│ │ [-5em  ▬▬●▬  +5em]│ │ [-10  ▬●▬  +10]    │            │
+│ │ [Number]           │ │ [Number]            │            │
+│ └────────────────────┘ └─────────────────────┘            │
+│ ┌─ Leading ──────────┐ ┌─ Baseline Shift ────┐            │
+│ │ [0.8  ▬●▬▬  3.0]   │ │ [-50 ▬●▬  +50]px   │            │
+│ │ [Number]           │ │ [Number]            │            │
+│ └────────────────────┘ └─────────────────────┘            │
+│ ┌─ Horizontal Scale ┐ ┌─ Vertical Scale ────┐            │
+│ │ [50%  ▬●▬  200%]  │ │ [50%  ▬●▬  200%]   │            │
+│ └────────────────────┘ └─────────────────────┘            │
+│ Character Rotation: [0°  ▬●▬▬  360°]  [Number]           │
+│                                                          │
+│ ── Color & Fill ────────────────────────────────────────  │
+│ Text Color:  [ColorPickerField]  [Fill Type: Solid|Gradient|Pattern] │
+│   (gradient/pattern reveal GradientPickerField from R4)  │
+│                                                          │
+│ ── Stroke / Outline ────────────────────────────────────  │
+│ Stroke Color: [ColorPickerField]                         │
+│ Stroke Width: [0px  ▬●▬  10px]  Position: [Outside|Center|Inside] │
+│                                                          │
+│ ── Shadow ──────────────────────────────────────────────  │
+│ X: [±50px]  Y: [±50px]  Blur: [0-50px]                   │
+│ Color: [ColorPickerField]  Opacity: [0-100%]             │
+│                                                          │
+│ ── Transform & Direction ───────────────────────────────  │
+│ Transform: [ABC|abc|Abc|None]  Direction: [LTR|RTL|Auto] │
+│ Decoration: [U̲|S̶|Ō|None]  [▼ underline variants]        │
+│                                                          │
+│ ── Text on Path ────────────────────────────────────────  │
+│ [Bind to path ▾]  Start Offset: [▬●▬]  Baseline: [±50px] │
+│ [Flip ▢]  Direction: [Forward|Reverse]                   │
+└──────────────────────────────────────────────────────────┘
+```
+
+#### R5.1.1 Font Family Dropdown with Live Preview
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/FontFamilyPicker.tsx`
+
+Enhances the R4 `FontPicker` (basic `Autocomplete`) with:
+
+- `renderOption`: each option renders "ABCabc123" in the font itself — `sx={{ fontFamily: option.family }}`. The font loads on hover via `document.fonts.load("14px ${family}")`.
+- Grouped by category (serif, sans-serif, display, handwriting, monospace, arabic) via `groupBy` prop.
+- Search: filters by family name AND category label.
+- After loading, the font name displays "ABCabc123" in the font; before loading (status "loading"), shows `CircularProgress` at 14px beside the option name.
+- On `failureReason` of a font load: shows `WarningOutlined` icon + "Font failed to load" tooltip.
+- `freeSolo={false}` — restricted to loaded + system fonts only.
+- Custom fonts (uploaded via Plan 10's font manager) appear in a "Custom" group at the bottom.
+- Each option's `MenuItem` has `aria-label` = `${family} — ${weightLabel} — ${licenseLabel}`.
+
+**Props:**
+```tsx
+interface FontFamilyPickerProps {
+  value: string;
+  onChange: (family: string) => void;
+  label: string;
+  disabled?: boolean;
+}
+```
+
+#### R5.1.2 Font Weight Selector
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/FontWeightSelector.tsx`
+
+MUI `Select` dropdown (not `Autocomplete` — weights are a fixed enum).
+
+- Options: Thin (100), ExtraLight (200), Light (300), Regular (400), Medium (500), SemiBold (600), Bold (700), ExtraBold (800), Black (900).
+- Only weights the selected font actually supports are shown (reads from `loadedFonts[family].weights` in `typographyStore`).
+- If the currently selected weight is not available for the new font, falls back to 400 (Regular) with a warning `Snackbar`.
+- Each option label is rendered in the target weight within the selected font family (`sx={{ fontFamily: selectedFamily, fontWeight: option.value }}`).
+
+**Props:**
+```tsx
+interface FontWeightSelectorProps {
+  value: FontWeightValue;
+  onChange: (weight: FontWeightValue) => void;
+  fontFamily: string;         // to filter available weights
+  label: string;
+  disabled?: boolean;
+}
+```
+
+#### R5.1.3 Font Style & Size
+
+- **Font style**: `ToggleButtonGroup` with Normal / Italic / Oblique (`FormatItalicOutlined` for italic, `TextRotationNoneOutlined` for normal).
+- **Font size**: `TextField` (type=number, min=1, max=400) + `Slider` (1–400). Below the slider, a "Presets" dropdown with quick sizes (8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72, 96, 128).
+- Slider value displays as "Npx" (`valueLabelFormat`).
+- Both `TextField` and `Slider` update the same store field; they are bidirectionally synced.
+
+```tsx
+interface FontSizeControlProps {
+  value: number;
+  onChange: (size: number) => void;
+  presets: number[];
+  label: string;
+}
+```
+
+#### R5.1.4 Kerning, Tracking, Leading
+
+Each uses a paired `Slider` + numeric `TextField`.
+
+| Control | Range | Step | Default | Unit |
+|---------|-------|------|---------|------|
+| Kerning | -5em to +5em | 0.05 | 0 | em |
+| Tracking | -10 to +10 | 1 | 0 | (unitless) |
+| Leading | 0.8 to 3.0 | 0.05 | 1.5 | (ratio) |
+
+Each pair is in a `Box` with `sx={{ display: "flex", gap: 1, alignItems: "center" }}`. The `TextField` is `size="small"` with `sx={{ width: 64 }}`. The `Slider` is `sx={{ flex: 1 }}`.
+
+#### R5.1.5 Baseline Shift
+
+- `Slider` from -50px to +50px, step 1. Numeric `TextField` beside it.
+- Negative = subscript (shift down); positive = superscript (shift up).
+- Label: "Baseline Shift" via i18n.
+- Maps CSS `verticalAlign` (not `transform`) to avoid affecting surrounding text.
+
+#### R5.1.6 Horizontal & Vertical Scale
+
+Each: `Slider` 50%–200%, step 1. Numeric `TextField` with `%` suffix.
+
+These apply `transform: scaleX() / scaleY()` at the span level (CSS `transform`). The store stores as integer percentage (50–200). The renderer divides by 100.
+
+#### R5.1.7 Character Rotation
+
+- `Slider` 0°–360°, step 1. Numeric `TextField` with `°` suffix.
+- Applies `transform: rotate()` at the span level.
+
+#### R5.1.8 Text Color, Fill, Stroke
+
+- **Text color** (solid): reuses `ColorPickerField` from R4-§5c.
+- **Fill type**: `ToggleButtonGroup` with Solid / Gradient / Pattern options.
+  - Solid: `ColorPickerField`.
+  - Gradient: `GradientPickerField` from R4-T3.
+  - Pattern: `PatternPickerField` (new in R5) — selects from predefined tile patterns stored in `shared/constants/certificates/textPatterns.ts`.
+- **Stroke / outline** — new component:
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/StrokeEditor.tsx`
+
+```tsx
+interface StrokeEditorProps {
+  value: {
+    color: string;
+    width: number;         // 0-10px
+    position: "outside" | "center" | "inside";
+  };
+  onChange: (stroke: StrokeEditorProps["value"]) => void;
+  label: string;
+}
+```
+
+- Stroke color: `ColorPickerField`.
+- Stroke width: `Slider` 0–10px, step 0.5, + numeric `TextField`.
+- Stroke position: `ToggleButtonGroup` (Outside / Center / Inside). Maps to CSS `paint-order` and `-webkit-text-stroke`:
+
+| Position | CSS |
+|----------|-----|
+| Outside | `-webkit-text-stroke: ${width}px ${color}` (default — fills text then strokes outside) |
+| Center | `-webkit-text-stroke: ${width}px ${color}` + `paint-order: stroke fill` |
+| Inside | `-webkit-text-stroke: ${width}px ${color}` + `paint-order: stroke fill` + reduced width (half, inside-only) |
+
+`paint-order: stroke` ensures the stroke is rendered before the fill, so it doesn't cover the text.
+
+#### R5.1.9 Text Shadow
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/TextShadowEditor.tsx`
+
+Reuses the R4-T10 `ShadowEditor` but for text shadow (single shadow, no spread):
+
+```tsx
+interface TextShadowEditorProps {
+  value: {
+    x: number;        // ±50px
+    y: number;        // ±50px
+    blur: number;     // 0-50px
+    color: string;    // hex
+    opacity: number;  // 0-100
+    enabled: boolean;
+  };
+  onChange: (shadow: TextShadowEditorProps["value"]) => void;
+}
+```
+
+- Enable/disable `Switch` at top.
+- Previously active presets reuses R4 presets: Soft Drop, Hard Shadow, Inner Glow (text variant).
+- `X` and `Y` each: `Slider` ±50px + numeric.
+- `Blur`: `Slider` 0–50px.
+- `Color`: `ColorPickerField`.
+- `Opacity`: `Slider` 0–100%.
+
+Generated CSS:
+```ts
+function textShadowToCSS(shadow: TextShadowEditorProps["value"]): string | undefined {
+  if (!shadow.enabled) return undefined;
+  return `${shadow.x}px ${shadow.y}px ${shadow.blur}px ${alpha(shadow.color, shadow.opacity / 100)}`;
+}
+```
+
+#### R5.1.10 Text Transform, Decoration, Direction
+
+- **Transform**: `ToggleButtonGroup` with 4 buttons:
+  - `none` (icon: `TextFieldsOutlined`)
+  - `uppercase` (icon: `stop`-less text "AA" rendered as custom `Icon`)
+  - `lowercase` (icon: "aa")
+  - `capitalize` (icon: "Aa")
+  - For a11y: each button has `aria-label` via i18n (`t.typography.character.transform.uppercase`, etc.)
+
+- **Decoration**: `ToggleButtonGroup` with 5 buttons:
+  - `none`, `underline`, `strikethrough`, `overline`, "More" (`ExpandMoreOutlined` → opens dropdown with underline-double, underline-dotted, underline-dashed, underline-wavy).
+
+  CSS mapping:
+  ```ts
+  function textDecorationToCSS(decoration: TextDecorationValue): string | undefined {
+    const parts: string[] = [];
+    switch (decoration) {
+      case "underline": parts.push("underline"); break;
+      case "underline-double": parts.push("underline double"); break;
+      case "underline-dotted": parts.push("underline dotted"); break;
+      case "underline-dashed": parts.push("underline dashed"); break;
+      case "underline-wavy": parts.push("underline wavy"); break;
+      case "strikethrough": parts.push("line-through"); break;
+      case "overline": parts.push("overline"); break;
+      case "none": return undefined;
+    }
+    return parts.join(" ");
+  }
+  ```
+
+- **Direction**: `ToggleButtonGroup` with LTR / RTL / Auto:
+  - LTR: CSS `direction: ltr; unicode-bidi: normal;`
+  - RTL: CSS `direction: rtl; unicode-bidi: normal;`
+  - Auto: CSS `direction: ltr; unicode-bidi: plaintext;`
+
+#### R5.1.11 Text on Path Binding (within Character Panel)
+
+A collapsible sub-section at the bottom of the character panel:
+
+- "Bind to path" `Autocomplete` listing all path elements on the canvas (by name). Selecting one sets `element.pathId`.
+- "Unbind from path" `IconButton` (`LinkOffOutlined`) — clears `pathId`.
+- When bound: shows `startOffset` `Slider` (0.0–1.0), `baselineOffset` `TextField` (-50 to +50px), `flip` `Checkbox`, "Direction" `ToggleButtonGroup` (Forward / Reverse).
+- i18n via `t.typography.textOnPath.*` keys defined in Plan 11.
+
+#### R5.1.12 Variable Font Controls (within Character Panel)
+
+Reuses the `VariableFontControls` component from Plan 10's font management section. Renders only if the selected font has variable axes. Injects the axis sliders just below the "Font Family" row.
+
+### R5.2 Paragraph Panel
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/ParagraphPanel.tsx`
+
+```tsx
+interface ParagraphPanelProps {
+  elementId: string;
+  /** Paragraph styles for the current caret paragraph */
+  activeParagraph: ParagraphStyles;
+  hasSelection: boolean;
+  onParagraphStyleChange: (key: keyof ParagraphStyles, value: ParagraphStyles[keyof ParagraphStyles]) => void;
+}
+```
+
+**Panel layout** (dense grid):
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ PARAGRAPH  (collapsible header)                    [v]    │
+├──────────────────────────────────────────────────────────┤
+│ Alignment: [Left|Center|Right|Justify]                   │
+│ Justification: [Words|Characters|Auto]                   │
+│                                                          │
+│ Spacing Before: [0-100px]  Spacing After: [0-100px]      │
+│ First-Line Indent: [0-200px]                              │
+│ Left Indent: [0-500px]  Right Indent: [0-500px]           │
+│ Hanging Indent: [0-200px]                                 │
+│                                                          │
+│ Text Wrap: [None|To Shape|To Bounds|Custom]              │
+│ Columns: [1-10]  Gutter: [0-50px]  Width: [Auto|Manual N]│
+│                                                          │
+│ List Type: [None|Bullet|Numbered]                        │
+│   Bullet Style: [Disc|Circle|Square|Custom]              │
+│   Bullet Char: [↵]  Number Format: [1.|1)|...|i.]       │
+│   Bullet/Number Indent: [0-200px]                        │
+│                                                          │
+│ Hyphenation: [Switch]  Language: [▾]                     │
+│   Min Word Length: [N]  Min Fragments: [N]               │
+│                                                          │
+│ Orphan Control: [Switch]  Widow Control: [Switch]        │
+└──────────────────────────────────────────────────────────┘
+```
+
+#### R5.2.1 Text Alignment
+
+`ToggleButtonGroup` with 4 buttons (`FormatAlignLeftOutlined`, `FormatAlignCenterOutlined`, `FormatAlignRightOutlined`, `FormatAlignJustifyOutlined`).
+
+#### R5.2.2 Justification Method
+
+`Select` dropdown: Words, Characters, Auto. "Characters" applies justified spacing between every glyph (common for CJK text). Maps to CSS `text-align-last`.
+
+#### R5.2.3 Spacing & Indentation
+
+- Spacing before/after: `Slider` 0–100px + numeric. CSS `margin-top` / `margin-bottom`.
+- First-line indent: `Slider` 0–200px. CSS `text-indent`.
+- Left/right indent: each `Slider` 0–500px. CSS `padding-left` / `padding-right` (or `margin-left/right`).
+- Hanging indent: `Slider` 0–200px. CSS implementation: `text-indent` negative + `padding-left` positive (for bullet items).
+
+#### R5.2.4 Text Wrap
+
+`ToggleButtonGroup` with 4 buttons:
+
+| Mode | CSS | Use Case |
+|------|-----|----------|
+| None | `white-space: nowrap; overflow: hidden;` | Single-line text |
+| Wrap to shape | Requires custom layout (uses `shape-outside` CSS) | Text wrapping around a shape |
+| Wrap to bounds | `word-wrap: break-word; overflow-wrap: break-word;` (default) | Resize text wraps to element bounds |
+| Custom wrap | Custom bounding polygon (advanced — stored in element) | Asymmetric wrapping |
+
+For "Wrap to shape", the element references a `wrapShapeId` (another shape element). The renderer uses CSS `shape-outside: polygon(...)` based on the shape's vertices.
+
+#### R5.2.5 Columns
+
+Columns are CSS multi-column layout applied to the text element content.
+
+- Column count: `Slider` 1–10 + numeric. `column-count: N`.
+- Gutter: `Slider` 0–50px. `column-gap: Npx`.
+- Column width: `ToggleButtonGroup` Auto / Manual. Auto = `column-width: auto` (columns split evenly). Manual = `Slider` with numeric px value, `column-width: Npx`.
+
+#### R5.2.6 Bullet / Numbered Lists
+
+- List type: `ToggleButtonGroup` None / Bullet / Numbered.
+- Bullet style: `Select` with Disc `•`, Circle `○`, Square `▪`, Custom (custom char input revealed). For custom: `TextField` width 1 char + "Insert char" `IconButton` opening `SpecialCharPicker` (from Plan 10).
+- Bullet character: stored as string in `ParagraphStyles.bulletChar`.
+- Numbering format: `Select` with 1., 1), (1), a., A., i., I.
+- Bullet/number indent: `Slider` 0–200px — adds left padding to the list item.
+- CSS: `list-style-type: disc/circle/square` for bullets; CSS counters (`::before { content: counter(item, decimal) ". " }`) for numbered lists with custom format.
+
+#### R5.2.7 Hyphenation
+
+- Enable: `Switch`.
+- Language: `Select` dropdown of common languages (English, Arabic, French, German, Spanish, auto).
+- Min word length: `Slider` + numeric (default 5).
+- Min fragments: `Slider` + numeric (default 2 — word must remain at least 2 characters after hyphenation).
+- CSS: `hyphens: auto; lang: <language>` (browser does hyphenation if lang attribute is set).
+- Advanced: languages without native browser hyphenation need a server-side hyphenation library (defers to Plan 06 for PDF; canvas uses browser hyphenation).
+
+#### R5.2.8 Orphan/Widow Control
+
+- Orphan control `Switch` (prevent single line at bottom of column/page). CSS `orphans: 2` (default 1 → no orphan control; setting to 2 forces at least 2 lines at bottom).
+- Widow control `Switch` (prevent single line at top of column/page). CSS `widows: 2`.
+- These affect multi-column layout; for single-column text they are no-ops but reserved for PDF rendering (Plan 06).
+
+### R5.3 Typography Panel UI
+
+#### R5.3.1 Panel Dock in Right Sidebar
+
+The `CharacterPanel` and `ParagraphPanel` are stacked vertically in the right sidebar `PropertyPanelSection` (from R4-T1), BELOW the existing common properties section and ABOVE the type-specific properties section (text/image/shape/QR).
+
+```
+Right Sidebar (PropertyPanelSection):
+┌─ PropertyPanelHeader ──────────────────────┐
+├─ Common Properties (Position, Size, ...) ──┤
+├─ Character Panel ───────────────────────────┤
+├─ Paragraph Panel ───────────────────────────┤
+├─ Type-Specific Properties (Text/Image/...)──┤
+└─────────────────────────────────────────────┘
+```
+
+Both panels are collapsible. The collapse state is stored in `useTemplateElementEditorStore` (R4 added `panelCollapsed`):
+- `characterPanelCollapsed: boolean` (default `false`)
+- `paragraphPanelCollapsed: boolean` (default `true` — less commonly used, starts collapsed)
+
+Collapsing uses the R4-T1 panel collapse animation (`PanelCollapse` component).
+
+#### R5.3.2 Toggle Buttons
+
+Each panel header has a toggle `IconButton` (`ExpandMoreOutlined` / `ExpandLessOutlined`) to collapse/expand.
+
+#### R5.3.3 Quick Access: Double-Click Auto-Open Character Panel
+
+When a text element is double-clicked (entering inline edit mode from Plan 11 §R5.7):
+- `typographyStore.enterEditMode(elementId)` dispatches → character panel auto-expands (`characterPanelCollapsed = false`)
+- If paragraph panel was collapsed, leaves it collapsed (don't auto-expand less-relevant panels)
+- The character panel scrolls into view via `scrollIntoView({ behavior: "smooth", block: "nearest" })`
+
+This means double-clicking a text element both enters inline edit mode on canvas AND expands the character panel in the sidebar.
+
+#### R5.3.4 Responsive: Mobile Bottom Sheet
+
+On mobile, the character panel and paragraph panel are NOT shown in a sidebar — they are shown as bottom sheets.
+
+**File**: `frontend/mobile/views/dashboard/certificates/template-editor/elements/dialogs/CharacterPanelSheet.tsx`
+**File**: `frontend/mobile/views/dashboard/certificates/template-editor/elements/dialogs/ParagraphPanelSheet.tsx`
+
+Mobile flow: code-accessed via "Edit Typography" `IconButton` (icon `TextFieldsOutlined`) on the selected element action sheet. Opens full-screen (max height 80% viewport) bottom sheet. Inside the sheet: scrollable dense vertical layout (single-column instead of multi-column). Same controls, same logic, different layout for narrow viewport.
+
+#### R5.3.5 Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Alt+Shift+A` | Open / expand character panel |
+| `Alt+Shift+P` | Open / expand paragraph panel |
+| `Alt+Shift+C` | Collapse both typography panels |
+
+These shortcuts are registered in the `ShortcutManager` from R4-T32 (`frontend/views/dashboard/certificates/template-editor/ShortcutManager.tsx`). They use the existing priority scheme (R4-T32 added ShortcutManager to manage priority — typography shortcuts at default priority, same as panel collapse shortcuts from R4-T1).
+
+The handler:
+```ts
+{ key: "alt+shift+a", action: () => set.characterPanelCollapsed(false), description: t.typography.shortcuts.openCharacter },
+{ key: "alt+shift+p", action: () => set.paragraphPanelCollapsed(false), description: t.typography.shortcuts.openParagraph },
+{ key: "alt+shift+c", action: () => {
+    set.characterPanelCollapsed(true);
+    set.paragraphPanelCollapsed(true);
+  }, description: t.typography.shortcuts.collapseAll },
+```
+
+### R5.4 i18n Namespace Extension
+
+All keys added to `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts`:
+
+```ts
+typography: {
+  shortcuts: {
+    openCharacter: string;
+    openParagraph: string;
+    collapseAll: string;
+  };
+  character: {
+    title: string;
+    fontFamily: string;
+    fontFamilyPreview: string;
+    fontWeight: string;
+    fontStyle: string;
+    fontSize: string;
+    fontSizePresets: string;
+    normal: string;
+    italic: string;
+    oblique: string;
+    kerning: string;
+    tracking: string;
+    leading: string;
+    baselineShift: string;
+    horizontalScale: string;
+    verticalScale: string;
+    characterRotation: string;
+    textColor: string;
+    fillType: string;
+    fillSolid: string;
+    fillGradient: string;
+    fillPattern: string;
+    stroke: string;
+    strokeColor: string;
+    strokeWidth: string;
+    strokePosition: string;
+    strokeOutside: string;
+    strokeCenter: string;
+    strokeInside: string;
+    shadow: string;
+    shadowX: string;
+    shadowY: string;
+    shadowBlur: string;
+    shadowColor: string;
+    shadowOpacity: string;
+    shadowEnable: string;
+    shadowPresets: string;
+    transform: string;
+    transformUppercase: string;
+    transformLowercase: string;
+    transformCapitalize: string;
+    transformNone: string;
+    decoration: string;
+    decorationUnderline: string;
+    decorationStrikethrough: string;
+    decorationOverline: string;
+    decorationMore: string;
+    decorationUnderlineDouble: string;
+    decorationUnderlineDotted: string;
+    decorationUnderlineDashed: string;
+    decorationUnderlineWavy: string;
+    direction: string;
+    directionLTR: string;
+    directionRTL: string;
+    directionAuto: string;
+    textOnPath: string;
+    bindToPath: string;
+    noPath: string;
+    unbind: string;
+    startOffset: string;
+    baselineOffset: string;
+    flip: string;
+    pathDirection: string;
+    pathDirectionForward: string;
+    pathDirectionReverse: string;
+    verticalText: string;
+    verticalTextToggle: string;
+  };
+  paragraph: {
+    title: string;
+    alignment: string;
+    alignmentLeft: string;
+    alignmentCenter: string;
+    alignmentRight: string;
+    alignmentJustify: string;
+    justificationMethod: string;
+    justificationWords: string;
+    justificationCharacters: string;
+    justificationAuto: string;
+    spacingBefore: string;
+    spacingAfter: string;
+    firstLineIndent: string;
+    leftIndent: string;
+    rightIndent: string;
+    hangingIndent: string;
+    textWrap: string;
+    textWrapNone: string;
+    textWrapShape: string;
+    textWrapBounds: string;
+    textWrapCustom: string;
+    columns: string;
+    columnCount: string;
+    columnGutter: string;
+    columnWidth: string;
+    columnWidthAuto: string;
+    columnWidthManual: string;
+    listType: string;
+    listNone: string;
+    listBullet: string;
+    listNumbered: string;
+    bulletStyle: string;
+    bulletDisc: string;
+    bulletCircle: string;
+    bulletSquare: string;
+    bulletCustom: string;
+    bulletChar: string;
+    numberingFormat: string;
+    numbering1Dot: string;
+    numbering1Paren: string;
+    numberingParen1: string;
+    numberingLowerAlpha: string;
+    numberingUpperAlpha: string;
+    numberingLowerRoman: string;
+    numberingUpperRoman: string;
+    listIndent: string;
+    hyphenation: string;
+    hyphenationLanguage: string;
+    hyphenationMinWordLength: string;
+    hyphenationMinFragments: string;
+    orphanControl: string;
+    widowControl: string;
+  };
+  placeholder: {
+    empty: string;
+  };
+};
+```
+
+### R5.5 Desktop vs Mobile Differences
+
+| Feature | Desktop | Mobile |
+|---------|---------|--------|
+| Character/Paragraph panel location | Right sidebar stacked vertically | Bottom sheet (separate route from main edit dialog) |
+| Grid density | Multi-column grid (2–3 cols) | Single column, vertical scroll |
+| Quick access | Double-click → expand character panel | "Edit Typography" button → opens bottom sheet |
+| Toggle keyboard | `Alt+Shift+A/P/C` | N/A on mobile (no keyboard shortcuts) |
+| Stroke position | `ToggleButtonGroup` with 3 options inline | Stacked, one option per row |
+| List style | Inline label buttons | Full-width cards |
+| Hyphenation language | Compact `Select` | Full-screen modal selector |
+
+### R5.6 Cross-Plan Contracts
+
+- **Plan 02**: `TextOverflowSettings`, `ParagraphStyles` fields added to text element types.
+- **Plan 05**: GraphQL mutations must accept all new `SpanStyles` and `ParagraphStyles` fields.
+- **Plan 06**: PDF renderer must respect stroke (`paint-order`), shadow, lists (CSS counters → PDF list rendering), hyphenation, columns, and text-wrap.
+- **Plan 10**: Shared types (`SpanStyles`, `ParagraphStyles`) and `typographyStore` actions are defined in Plan 10. This plan only reads/writes via the store interface.
+- **Plan 11**: Canvas text rendering depends on these panel-defined settings (overflow, path binding, shadow).
+
+### R5.7 Quality & Verification
+
+**Per-file verification loop** (per AGENTS.md):
+1. `bun run tsgo` — zero type errors
+2. `bun biome:check` — zero formatting/lint issues
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5p12-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read**:
+- `.github/instructions/frontend.instructions.md`
+- `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
+- `frontend/common/stores/AGENTS.md`
+
+**Performance considerations**:
+- The character panel has many controls (~30). Each must be `React.memo`-ized to prevent full re-render on single control change. The memo comparator checks only the specific `SpanStyles` key relevant to that control.
+- Sliders can fire many `onChange` events per second. Slider-only updates should be debounced at 16ms (one frame) before committing to the store; the slider tick display updates immediately via local React state.
+- `ColorPickerField` popover should defer construction until opened (don't compute contrast gradient while closed).
+- The "Bind to path" `Autocomplete` searches only path elements on the canvas — typically <5 elements — so no virtualization needed.
+
+---
+
+## Round 5: Masking & Clipping System
+
+> Added as part of Round 5, enhancing the Plan 12 element properties panel with Photoshop/Illustrator-level mask controls. This section specifies the **property panel UI**: mask properties (density, feather, smooth, contrast, shift edge, view modes, invert/apply/delete/disable), opacity mask editor (Illustrator-style dual-thumbnail), Refine Edge dialog, and mask brush settings. The toolbar buttons, menubar items, and shortcuts are specified in Plan 10 §"Round 5: Masking & Clipping System". The canvas rendering of masks (clipping, layer masks, vector mask paths, mask editing mode, Quick Mask, clip groups, thumbnails) is specified in Plan 11 §"Round 5: Masking & Clipping System".
+
+### R5.1 Mask Properties Panel
+
+When a mask exists on the selected element (or `activeMaskTarget` is set to this element's mask), the property panel shows a **Mask Properties** section. This replaces or supplements the element's normal property panel when `maskMode === 'edit'`.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/MaskPropertyPanel.tsx`
+
+```tsx
+interface MaskPropertyPanelProps {
+  elementId: string;
+  mask: LayerMaskData | null;
+  maskType: MaskType;
+  viewMode: MaskViewMode;
+  onDensityChange: (value: number) => void;
+  onFeatherChange: (value: number) => void;
+  onSmoothChange: (value: number) => void;
+  onContrastChange: (value: number) => void;
+  onShiftEdgeChange: (value: number) => void;
+  onViewModeChange: (mode: MaskViewMode) => void;
+  onInvert: () => void;
+  onApply: () => void;
+  onDelete: () => void;
+  onToggleDisable: () => void;
+}
+```
+
+**Panel layout** (MUI v9 — all `sx={{}}`, no style props, all colors from theme palette):
+
+```
+┌─────────────────────────────────────────┐
+│  Mask Properties           [Pixel Mask]  │  ← Mask type indicator (Chip)
+├─────────────────────────────────────────┤
+│  Density      [██████████░░░░░░] 100%   │  ← Slider 0-100, i18n: mask.density
+│  Feather      [████░░░░░░░░░░░] 0px     │  ← Slider 0-250px, i18n: mask.feather
+│  Smooth       [██████████░░░░░] 0       │  ← Slider 0-100, i18n: mask.smooth
+│  Contrast     [██████████░░░░░] 0       │  ← Slider -100 to +100, i18n: mask.contrast
+│  Shift Edge   [██████████░░░░░] 0       │  ← Slider -100 to +100, i18n: mask.shiftEdge
+├─────────────────────────────────────────┤
+│  View Mode:                             │
+│  [Marching Ants] [Overlay] [On Black]  │  ← ToggleButtonGroup
+│  [On White] [On Layers] [Mask Only]    │
+├─────────────────────────────────────────┤
+│  [Invert]  [Apply]  [Delete]  [Disable] │  ← Button row
+└─────────────────────────────────────────┘
+```
+
+**Controls detail**:
+
+| Control | Type | Range | i18n key | Notes |
+|---------|------|-------|----------|-------|
+| Mask type indicator | MUI `Chip` | — | `mask.typeIndicator.pixel` / `.vector` / `.clipping` | Shows "Pixel Mask" / "Vector Mask" / "Clipping Mask" based on `maskType`. Color: `theme.palette.info.main` for pixel, `theme.palette.success.main` for vector, `theme.palette.warning.main` for clipping. |
+| Density | MUI `Slider` | 0-100 (%) | `mask.density` | `aria-valuetext={`${value}%`}`. Commits on `onChangeCommitted` (not per-move). Default: 100. |
+| Feather | MUI `Slider` | 0-250 (px) | `mask.feather` | `aria-valuetext={`${value}px`}`. Default: 0. |
+| Smooth | MUI `Slider` | 0-100 | `mask.smooth` | Default: 0. |
+| Contrast | MUI `Slider` | -100 to +100 | `mask.contrast` | Shows 0 as center. `aria-valuetext={`${value > 0 ? '+' : ''}${value}%`}`. Default: 0. |
+| Shift Edge | MUI `Slider` | -100 to +100 | `mask.shiftEdge` | Shows 0 as center. Default: 0. |
+| View Mode | MUI `ToggleButtonGroup` (exclusive) | 6 modes | `mask.viewMode.marchingAnts` / `.overlay` / `.onBlack` / `.onWhite` / `.onLayers` / `.maskOnly` | Each button is a `ToggleButton` with an icon + tooltip. Selecting a mode calls `setMaskViewMode(mode)` on the store. |
+| Invert | MUI `Button` | — | `mask.invert` | Calls `invertMask(elementId)`. Shows a confirmation tooltip. |
+| Apply | MUI `Button` (`color="primary"`) | — | `mask.apply` | Calls `applyMask(elementId)` — destructive. Shows confirmation `Dialog` first (`mask.applyConfirm` message). |
+| Delete | MUI `Button` (`color="error"`) | — | `mask.delete` | Calls `deleteMask(elementId)`. Shows confirmation `Dialog`. |
+| Disable | MUI `Button` | — | `mask.disable` / `mask.enable` | Toggles `mask.enabled`. Label changes based on current state. |
+
+```tsx
+import { Slider, Chip, Button, ToggleButton, ToggleButtonGroup, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { useAppTranslation } from '@/shared/locale/client';
+import { useShallow } from 'zustand/react/shallow';
+import type { MaskViewMode } from '@/frontend/common/stores/cert/maskTypes';
+
+export function MaskPropertyPanel({ elementId }: { elementId: string }) {
+  const t = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const { mask, maskType, viewMode, setMaskProperty, setMaskViewMode, invertMask, applyMask, deleteMask, toggleMaskEnabled } = useCertTemplateEditorStore(
+    useShallow((s) => ({
+      mask: s.elements[elementId]?.layerMask ?? null,
+      maskType: (s.elements[elementId]?.layerMask?.type ?? 'pixel') as MaskType,
+      viewMode: s.maskViewMode,
+      setMaskProperty: s.setMaskProperty,
+      setMaskViewMode: s.setMaskViewMode,
+      invertMask: s.invertMask,
+      applyMask: s.applyMask,
+      deleteMask: s.deleteMask,
+      toggleMaskEnabled: s.toggleMaskEnabled,
+    })),
+  );
+  if (!mask) return null;
+  return (
+    <>
+      <Chip label={t(`mask.typeIndicator.${maskType}`)} size="small" sx={{ mb: 2 }} />
+      <Slider
+        value={mask.density}
+        onChangeCommitted={(_, v) => setMaskProperty(elementId, { density: v as number })}
+        aria-label={t('mask.density')}
+        aria-valuetext={`${mask.density}%`}
+        sx={{ color: 'text.secondary' }}
+      />
+      {/* ...feather, smooth, contrast, shiftEdge sliders... */}
+      <ToggleButtonGroup
+        exclusive
+        value={viewMode}
+        onChange={(_, mode) => mode && setMaskViewMode(mode as MaskViewMode)}
+        size="small"
+        sx={{ mb: 2 }}
+      >
+        <ToggleButton value="marchingAnts"><Tooltip title={t('mask.viewMode.marchingAnts')}><MarchingAntsIcon /></Tooltip></ToggleButton>
+        {/* ...other view mode buttons... */}
+      </ToggleButtonGroup>
+      <Button variant="outlined" onClick={() => invertMask(elementId)} sx={{ mr: 1 }}>{t('mask.invert')}</Button>
+      <Button variant="contained" color="primary" onClick={() => applyMask(elementId)} sx={{ mr: 1 }}>{t('mask.apply')}</Button>
+      <Button variant="outlined" color="error" onClick={() => deleteMask(elementId)} sx={{ mr: 1 }}>{t('mask.delete')}</Button>
+      <Button variant="outlined" onClick={() => toggleMaskEnabled(elementId)}>{mask.enabled ? t('mask.disable') : t('mask.enable')}</Button>
+    </>
+  );
+}
+```
+
+### R5.2 Refine Edge Dialog
+
+A modal dialog for advanced mask edge refinement — launched from the mask properties panel (a "Refine Edge…" button) or the Layer menu.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/RefineEdgeDialog.tsx`
+
+```tsx
+interface RefineEdgeDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onApply: (settings: RefineEdgeSettings) => void;
+  elementId: string;
+  initialSettings?: RefineEdgeSettings;
+}
+```
+
+**Dialog layout** (MUI v9 `Dialog`, `sx={{}}` only):
+
+```
+┌──────────────────────────────────────────────┐
+│  Refine Edge                              [X] │
+├──────────────────────────────────────────────┤
+│  ┌─── Preview (live on canvas behind dialog) ─┤
+│  │ (canvas shows mask with current settings)  │
+│  ├────────────────────────────────────────────┤
+│  │  View Mode: [Marching Ants ▼]              │  ← Select dropdown
+│  ├────────────────────────────────────────────┤
+│  │  Smooth       [████████░░░░] 4             │  ← Slider 0-100
+│  │  Feather      [████░░░░░░░] 2px           │  ← Slider 0-250px
+│  │  Contrast     [████████░░░░] 12%          │  ← Slider 0-100%
+│  │  Shift Edge   [██░░░░░░░░░] -10%          │  ← Slider -100% to +100%
+│  ├────────────────────────────────────────────┤
+│  │  ☐ Decontaminate Colors                    │  ← Checkbox
+│  │    Amount   [████░░░░░░] 50%              │  ← Slider 0-100% (enabled when checked)
+│  ├────────────────────────────────────────────┤
+│  │  Output To:                                │
+│  │  ○ Layer Mask (selected)                   │  ← RadioGroup
+│  │  ○ New Document                            │
+│  │  ○ New Layer with Layer Mask               │
+│  │  ○ New Selection                          │
+│  ├────────────────────────────────────────────┤
+│ │  [Cancel]              [Apply & Close]      │
+└──────────────────────────────────────────────┘
+```
+
+**Controls**:
+
+| Control | Type | Range | i18n key | Notes |
+|---------|------|-------|----------|-------|
+| View Mode | MUI `Select` | 6 modes | — (shares `mask.viewMode.*`) | Changes `maskViewMode` on the store — canvas updates behind dialog. |
+| Smooth | `Slider` | 0-100 | `mask.refineEdge.smooth` | Reduces noise in mask edge. |
+| Feather | `Slider` | 0-250 (px) | `mask.refineEdge.feather` | Softens edge. |
+| Contrast | `Slider` | 0-100 (%) | `mask.refineEdge.contrast` | Sharpens mask transition. |
+| Shift Edge | `Slider` | -100 to +100 (%) | `mask.refineEdge.shiftEdge` | Moves mask in/out. Negative = contract, positive = expand. |
+| Decontaminate | `Checkbox` | boolean | `mask.refineEdge.decontaminate` | Enables color bleed removal. |
+| Decontaminate Amount | `Slider` | 0-100 (%) | `mask.refineEdge.decontaminateAmount` | Disabled when Decontaminate unchecked. |
+| Output To | `RadioGroup` | 4 options | `mask.refineEdge.output.layerMask` / `.newDocument` / `.newLayerWithMask` / `.newSelection` | Determines where the refined mask goes. |
+| Cancel | `Button` | — | `common.cancel` | Closes dialog without applying. |
+| Apply | `Button` (`color="primary"`) | — | `mask.refineEdge.apply` | Calls `applyRefineEdge(settings)` — commits to store. |
+
+**Live preview**: Every slider/checkbox change immediately updates `refineSettings` on the store — Plan 11's `RefineEdgePreviewOverlay` reads this and re-renders the on-canvas preview (debounced 100ms). The dialog does NOT manage its own preview state; it writes to the store, and the canvas reads from the store. This keeps the dialog thin and the preview authoritative.
+
+**Decontaminate Colors**: When enabled, edge pixels are sampled (from the element's rendered pixels at the mask boundary) and color-corrected to remove fringe/halo artifacts. The algorithm uses an `OffscreenCanvas` to:
+1. Render the element without the mask.
+2. For each edge pixel (where mask alpha is between 20-80%), sample the nearest fully-interior pixel's color.
+3. Blend the edge pixel's color toward the interior color at `decontaminateAmount / 100`.
+This is a raster operation — the result is baked into the mask when Output = Layer Mask.
+
+### R5.3 Opacity Mask Editor
+
+The opacity mask editor appears in the property panel when an opacity mask exists on the element. It mimics Illustrator's opacity mask panel.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/OpacityMaskEditor.tsx`
+
+```tsx
+interface OpacityMaskEditorProps {
+  elementId: string;
+  opacityMask: OpacityMaskData | null;
+  onMaskContentEdit: () => void;
+  onClipToggle: () => void;
+  onInvert: () => void;
+  onUnlink: () => void;
+}
+```
+
+**Panel layout**:
+
+```
+┌──────────────────────────────────────────────┐
+│  Opacity Mask                                 │
+├──────────────────────────────────────────────┤
+│  [Element     ] →← [Mask      ]  [Unlink]    │  ← Dual thumbnails with link icon
+│  thumbnail      link  thumbnail               │
+│  (left)               (right)                 │
+├──────────────────────────────────────────────┤
+│  ☑ Clip                                      │  ← Checkbox: masks out content outside bounds
+│  [Invert]                                    │
+├──────────────────────────────────────────────┤
+│  (Click mask thumbnail to edit)               │
+└──────────────────────────────────────────────┘
+```
+
+**Controls**:
+
+| Control | i18n key | Behavior |
+|---------|----------|----------|
+| Element thumbnail | — | Shows the element content (read-only miniature). Click → activates element content editing. |
+| Link icon (`LinkOutlined` / `LinkOffOutlined`) | `mask.opacityMask.link` / `.unlink` | Between the two thumbnails. Click toggles linkage — when linked, opacity mask transform follows element transform; when unlinked, independent. |
+| Mask thumbnail | — | Shows the opacity mask in grayscale. Click → enters mask editing mode for the opacity mask (`setActiveMaskTarget(elementId, 'layer', 'opacityMask')`, `setMaskMode('edit')`). |
+| Clip checkbox | `mask.opacityMask.clip` | When checked, content outside the original element's bounds is masked out. |
+| Invert button | `mask.opacityMask.invert` | Inverts the opacity mask (black ↔ white). |
+
+**Opacity mask editing**: Clicking the mask thumbnail enters the same mask editing mode as layer masks — `useMaskBrushPointerEvents` (Plan 11) operates on the opacity mask's grayscale buffer instead. The brush tools paint white = opaque, black = transparent. Gradients in the mask create smooth fades (e.g., fade image at edges).
+
+**Opacity mask transforms**: Independent from the element transform. When unlinked, the opacity mask has its own `transform` (`translateX`, `translateY`, `scaleX`, `scaleY`, `rotation`) — edited via the standard transform handles when the opacity mask is active (Plan 11 renders the transform overlay for the mask, not the element).
+
+### R5.4 Clipping Mask Properties
+
+When a clipping mask relationship exists (element is clipped or is a base), the property panel shows a **Clipping Mask** section.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/ClippingMaskProperties.tsx`
+
+```tsx
+interface ClippingMaskPropertiesProps {
+  elementId: string;
+  isClipped: boolean;        // this element is clipped to a base
+  isBase: boolean;           // this element is the base other clips to
+  baseElementId?: string;    // if clipped, the base shape's id
+  clippedElementIds: string[]; // if base, the elements clipping to it
+  onRelease: () => void;
+  onEditBaseShape: () => void;
+}
+```
+
+**Panel content**:
+- If `isClipped`: Shows "Clipped to: {baseElementName}" + a "Release Clipping Mask" button. Shows the masking type indicator (vector vs raster based on base shape type).
+- If `isBase`: Shows "Clipping base for: {clippedElementNames}" (list). Shows an "Edit Clipping Shape" button (enters base shape path edit mode — double-click equivalent).
+- Shows the clipping behavior description: "Element visible only inside the base shape's area" (i18n: `mask.clipping.description`).
+
+### R5.5 Mask Brush Settings Panel
+
+When in mask editing mode (`maskMode === 'edit'`), the property panel shows mask brush settings (shared with the normal brush settings but scoped to mask painting).
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/MaskBrushSettings.tsx`
+
+```tsx
+interface MaskBrushSettingsProps {
+  brushSize: number;
+  brushHardness: number;
+  brushOpacity: number;
+  brushFlow: number;
+  activeTool: string;
+  onSizeChange: (v: number) => void;
+  onHardnessChange: (v: number) => void;
+  onOpacityChange: (v: number) => void;
+  onFlowChange: (v: number) => void;
+}
+```
+
+**Panel content**:
+
+| Control | Type | Range | i18n key | Notes |
+|---------|------|-------|----------|-------|
+| Brush Size | `Slider` + `TextField` | 1-5000 (px) | `mask.brushSettings.size` | `aria-valuetext={`${value}px`}`. |
+| Hardness | `Slider` | 0-100 (%) | `mask.brushSettings.hardness` | 0 = fully soft, 100 = fully hard. |
+| Opacity | `Slider` | 0-100 (%) | `mask.brushSettings.opacity` | Max opacity per stroke. |
+| Flow | `Slider` | 0-100 (%) | `mask.brushSettings.flow` | Rate of paint application. |
+| Pressure (pen) | `Checkbox` | boolean | `mask.brushSettings.pressure` | Disabled if no pen input detected (`navigator.maxTouchPoints === 0` and no pointer events with `pointerType === 'pen'`). |
+| Default Brush | `Select` | — | `mask.brushSettings.defaultBrush` | "Soft Round" (default), "Hard Round", "Airbrush". |
+
+All controls use `sx={{}}`. Colors from theme palette. The panel reads `activeTool` to show context-appropriate settings (e.g., gradient tool shows start/end color pickers instead of hardness).
+
+**Pressure sensitivity**: If a tablet/pen is detected, the `pressure` checkbox enables pressure-based opacity and size scaling. The brush stroke handler (Plan 11 `useMaskBrushPointerEvents`) reads `e.pressure` and scales `brushOpacity` and `brushSize` accordingly. The settings panel shows a status indicator: "Pressure sensitivity: Active" / "Not detected" (i18n keys `mask.brushSettings.pressureActive` / `.notDetected`).
+
+### R5.6 Quick Mask Options Panel
+
+The Quick Mask options are accessible from the toolbar popover (Plan 10) and also mirrored in the property panel when Quick Mask is active.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/QuickMaskPanel.tsx`
+
+```tsx
+interface QuickMaskPanelProps {
+  options: QuickMaskOptions;
+  onModeChange: (mode: QuickMaskMode) => void;
+  onColorChange: (color: string) => void;
+  onOpacityChange: (opacity: number) => void;
+}
+```
+
+**Controls**:
+
+| Control | Type | i18n key | Notes |
+|---------|------|----------|-------|
+| Mode | `ToggleButtonGroup` (exclusive) | `mask.quickMask.maskedAreas` / `.selectedAreas` | "Masked Areas" = paint to hide (default). "Selected Areas" = paint to select. |
+| Color | `ColorPicker` (reuse existing) | `mask.quickMask.color` | Default: `theme.palette.error.main` (red). Never hardcoded. |
+| Opacity | `Slider` 0-100 | `mask.quickMask.opacity` | Default: 50%. `aria-valuetext={`${value}%`}`. |
+
+### R5.7 i18n Keys (Plan 12 Round 5 — Masking & Clipping)
+
+All keys under the `certificateEditor` namespace, `mask.*` subtree (extends Plan 10's mask keys):
+
+```typescript
+mask: {
+  // ... Plan 10 keys inherited ...
+  // Mask property panel
+  typeIndicator: {
+    pixel: string;
+    vector: string;
+    clipping: string;
+  };
+  density: string;
+  feather: string;
+  smooth: string;
+  contrast: string;
+  shiftEdge: string;
+  viewMode: {
+    marchingAnts: string;
+    overlay: string;
+    onBlack: string;
+    onWhite: string;
+    onLayers: string;
+    maskOnly: string;
+  };
+  invert: string;
+  apply: string;
+  delete: string;
+  enable: string;
+  disable: string;
+  // Refine Edge dialog
+  refineEdge: {
+    title: string;
+    smooth: string;
+    feather: string;
+    contrast: string;
+    shiftEdge: string;
+    decontaminate: string;
+    decontaminateAmount: string;
+    output: {
+      layerMask: string;
+      newDocument: string;
+      newLayerWithMask: string;
+      newSelection: string;
+    };
+    apply: string;
+  };
+  // Opacity mask editor
+  opacityMask: {
+    title: string;
+    link: string;
+    unlink: string;
+    clip: string;
+    invert: string;
+    editMask: string;
+    transformIndependent: string;
+  };
+  // Clipping mask properties
+  clipping: {
+    description: string;
+    clippedTo: string;       // "Clipped to: {name}"
+    clippedToName: (name: string) => string; // interpolation
+    baseFor: string;          // "Clipping base for:"
+    baseForList: (names: string) => string; // interpolation
+    release: string;
+    editShape: string;
+    vectorType: string;
+    rasterType: string;
+  };
+  // Mask brush settings
+  brushSettings: {
+    title: string;
+    size: string;
+    hardness: string;
+    opacity: string;
+    flow: string;
+    pressure: string;
+    pressureActive: string;
+    notDetected: string;
+    defaultBrush: string;
+    softRound: string;
+    hardRound: string;
+    airbrush: string;
+  };
+  // Quick Mask panel
+  quickMaskPanel: {
+    title: string;
+  };
+  // Confirmation dialogs
+  confirm: {
+    applyTitle: string;
+    applyMessage: string;
+    deleteTitle: string;
+    deleteMessage: string;
+    rasterizeTitle: string;
+    rasterizeMessage: string;
+  };
+}
+```
+
+Each key implemented in both `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts`. Interpolation keys (`clippedToName`, `baseForList`) use the `(param: string) => string` pattern per AGENTS.md i18n rules.
+
+### R5.8 Element Schema Extension for Masks
+
+The `CanvasElement` type (extending earlier rounds) gains `MaskElementExtension` fields:
+
+```typescript
+import type { MaskElementExtension } from '@/frontend/common/stores/cert/maskTypes';
+
+interface CanvasElement {
+  // ... existing fields from Rounds 1-4 and R5 (path, fill, stroke, effects) ...
+  // R5: Masks
+  layerMask?: LayerMaskData;
+  vectorMask?: LayerMaskData;
+  clippingMaskBaseId?: string;
+  clippingMaskClippedIds?: string[];
+  opacityMask?: OpacityMaskData;
+}
+```
+
+These are all optional — present only when masks are applied. They do NOT affect the existing element rendering pipeline; the mask renderers (Plan 11) wrap/modify the element's SVG output.
+
+### R5.9 Store Actions for Masks
+
+The `certTemplateEditorStore` (or `templateElementEditorStore`) gains mask-specific actions:
+
+```typescript
+// Mask management
+addLayerMask: (elementId: string, type: 'pixel' | 'vector') => void;
+addVectorMask: (elementId: string) => void;
+deleteMask: (elementId: string, maskType?: 'layer' | 'vector' | 'opacity' | 'clipping') => void;
+applyMask: (elementId: string, maskType?: 'layer' | 'vector') => void;  // destructive
+toggleMaskEnabled: (elementId: string, enabled?: boolean) => void;
+toggleMaskVisibility: (elementId: string) => void;
+invertMask: (elementId: string, maskType?: 'layer' | 'vector' | 'opacity') => void;
+commitMaskStroke: (elementId: string, dataUri: string) => void;
+setMaskProperty: (elementId: string, partial: Partial<LayerMaskData>) => void;
+setMaskViewMode: (mode: MaskViewMode) => void;
+setMaskMode: (mode: MaskEditMode) => void;
+setActiveMaskTarget: (elementId: string, maskType: 'layer' | 'vector', targetPath?: 'layerMask' | 'vectorMask' | 'opacityMask') => void;
+
+// Clipping masks
+createClippingMask: (topElementId: string, baseElementId: string) => void;
+releaseClippingMask: (topElementId: string) => void;
+
+// Quick mask
+toggleQuickMask: () => void;
+setQuickMaskOptions: (partial: Partial<QuickMaskOptions>) => void;
+convertQuickMaskToSelection: () => void;
+
+// Refine edge
+setRefineEdgeSettings: (partial: Partial<RefineEdgeSettings>) => void;
+applyRefineEdge: (settings: RefineEdgeSettings) => void;
+
+// Opacity mask
+addOpacityMask: (elementId: string) => void;
+deleteOpacityMask: (elementId: string) => void;
+toggleOpacityMaskClip: (elementId: string) => void;
+invertOpacityMask: (elementId: string) => void;
+toggleOpacityMaskLink: (elementId: string) => void;
+
+// Vector mask
+rasterizeVectorMask: (elementId: string) => void;  // converts vector mask to pixel mask
+```
+
+**Persistence**: Mask pixel data (`MaskPixelData.dataUri`) is persisted to the store (it's a base64 string — safe for serialization). The `OffscreenCanvas` buffers are NOT persisted (they're `useRef` in the canvas component). On save, the backend (Plan 5) stores `layerMask`, `vectorMask`, `clippingMaskBaseId`, `opacityMask` as JSONB. Ephemeral state (`maskMode`, `activeMaskTarget`, `quickMaskActive`, `quickMaskOptions`, `maskViewMode`, `refineSettings`) is NOT persisted (session-only — excluded from the `persist` partializer).
+
+### R5.10 Cross-Plan Contracts
+
+| Consumer Plan | Contract |
+|---------------|----------|
+| **Plan 10** | `MaskPropertyPanel`, `OpacityMaskEditor`, `RefineEdgeDialog`, `MaskBrushSettings`, `ClippingMaskProperties`, `QuickMaskPanel` import `maskMode`, `activeMaskTarget`, `maskViewMode`, `quickMaskActive`, `refineSettings` from `certTemplateEditorStore` to decide visibility. |
+| **Plan 11** | `RefineEdgeDialog` writes `refineSettings` to the store — Plan 11's `RefineEdgePreviewOverlay` reads it for live preview. `MaskPropertyPanel` writes `density`/`feather`/`smooth`/`contrast`/`shiftEdge` — Plan 11's `LayerMaskRenderer` reads these for rendering. |
+| **Plan 11** | `OpacityMaskEditor` sets `activeMaskTarget` with `targetPath: 'opacityMask'` — Plan 11's `MaskEditingOverlay` reads this to render the opacity mask buffer for editing. |
+| **Plan 10** | All mask actions (`addLayerMask`, `applyMask`, etc.) are defined in the store — Plan 10's toolbar buttons and menu items call them; Plan 12's panels also call them. Single source of truth in `certTemplateEditorStore`. |
+| **Plan 5** | `MaskElementExtension` fields (`layerMask`, `vectorMask`, `clippingMaskBaseId`, `opacityMask`) must be accepted by `createTemplateElement` / `updateTemplateElement` mutations and stored as JSONB. `MaskPixelData.dataUri` is a base64 PNG string — stored directly. |
+| **Plan 6** | PDF rendering reads `layerMask` (apply as soft mask), `vectorMask` (apply as clip path), `clippingMaskBaseId` (resolve and apply as clip path), `opacityMask` (apply as opacity mask). Refine Edge settings baked before export. Mask `density`/`feather`/`contrast`/`shiftEdge` baked into the mask pixel/clip data. |
+| **Plan 15** | Publishing serializes mask data in `renderData`. Public preview renders `<clipPath>`, SVG `<mask>`, and SVG `<filter>` elements. Opacity masks as SVG `<mask mask-type="luminance">`. Clipping masks as SVG `<clipPath>`. |
+
+### R5.11 Performance Considerations
+
+- **Mask property panel re-renders**: `MaskPropertyPanel` subscribes to only `mask.density`, `mask.feather`, etc. for the selected element (via `useShallow` selector) — not the entire element. Slider changes commit on `onChangeCommitted`, not `onChange` (avoids per-pixel store updates during drag).
+- **Refine Edge live preview**: Slider changes in `RefineEdgeDialog` update `refineSettings` in the store — Plan 11 debounces the preview render 100ms. The dialog itself is stateless (reads from store, writes to store); no local state to sync.
+- **Opacity mask editor**: The dual thumbnails use `React.memo` with version-based comparison — re-render only when the mask version changes. The element thumbnail reuses the existing element thumbnail component from the layers panel.
+- **Mask brush settings**: Brush settings are read once on mount and stored in local component state — the canvas reads them from the store via a selector, but the settings panel doesn't cause canvas re-renders on every slider move (the canvas reads brush size via `useStore` selector, which is fine — it's a primitive number).
+- **Dialog rendering**: `RefineEdgeDialog` uses `keepMounted` on the `Dialog` so the live preview state persists across open/close. The canvas preview overlay is always mounted but hidden when the dialog is closed (`sx={{ display: 'none' }}` when inactive).
+
+## Round 5: Pro Zoom & Navigation
+
+### Zoom Property Panel
+
+**Component**: `ZoomPropertyPanel`
+**Location**: Right panel, Properties tab (when no element selected)
+**Features**:
+- Zoom level display (editable text field — type custom percentage)
+- Zoom slider (5% to 1600%)
+- Preset zoom buttons (25%, 50%, 75%, 100%, 150%, 200%, 400%)
+- "Fit to Screen" button
+- "Actual Size" button
+- "Zoom to Selection" button (disabled if no selection)
+- "Zoom to All" button
+
+### Navigation Properties
+
+**Component**: `NavigationPropertyPanel`
+**Features**:
+- Scroll position display (X, Y in canvas coordinates)
+- Viewport size display (width × height in canvas coordinates)
+- Pan speed slider (1x to 10x for keyboard panning)
+- "Center on Canvas" button
+- "Center on Selection" button (disabled if no selection)
+- Scroll-to-element dropdown (list of all elements, click to scroll to it)
+
+### Zoom Settings
+
+**Component**: `ZoomSettingsPanel`
+**Features**:
+- Zoom with mouse wheel toggle (enable/disable)
+- Zoom modifier key selector (Ctrl / Alt / Shift / None)
+- Smooth zoom transitions toggle
+- Smooth transition duration slider (0ms to 500ms)
+- Zoom step size slider (5% to 25%)
+- Pixel grid at high zoom toggle (show pixel grid at 800%+)
+- Show scrollbars toggle
+
+### Navigator Panel Properties
+
+**Component**: `NavigatorPropertyPanel`
+**Features**:
+- Navigator preview size selector (Small 150px, Medium 200px, Large 300px)
+- Viewport rectangle color picker
+- Preview quality selector (Draft / Standard / High)
+- Auto-update toggle (real-time vs on-release)
+- Show ruler markings on preview toggle
+
+### Mini-Map Properties
+
+**Component**: `MiniMapPropertyPanel`
+**Features**:
+- Mini-map size selector (Small 120px, Medium 180px, Large 240px)
+- Mini-map position selector (Bottom-Right, Bottom-Left, Top-Right, Top-Left)
+- Thumbnail scale selector (10%, 15%, 25%, 50%)
+- Viewport rectangle color picker
+- Show element names toggle
+- Opacity slider (30% to 100%)
+
+### Keyboard Navigation Settings
+
+| Setting | Control | Default |
+|---------|---------|---------|
+| Pan speed | Slider (1x–10x) | 3x |
+| Zoom step | Slider (5%–25%) | 10% |
+| Smooth scroll | Toggle | On |
+| Scroll duration | Slider (0–500ms) | 200ms |
+| Overscroll bounce | Toggle | Off |
+| Arrow key pan | Toggle | On |
+| Page key scroll | Toggle | On |
+
+## Round 5: Context Menus & Right-Click Actions
+
+> Round 5 design for Plan 12 — layers panel right-click, properties panel right-click (element-level), element-specific right-click actions. Plan 12 consumes the context menu primitives (`contextMenuService`, `<ContextMenuHost>`, `SubmenuTrigger`, `filterMenuItems`, `useMenuContextDescriptor`, `outside-click close`, theme adapter) authored in Plan 10 §R5 and the canvas/element builders from Plan 11 §R5. Plan 12 owns three new builder modules and three new store-action family additions. Total R5 scope for Plan 12: 11 subsections.
+
+### R5.1: Layers Panel Context Menu — `layersPanelContextMenu.ts`
+
+Path: `@/frontend/views/dashboard/cert/templates/editor/contextMenus/layersPanelContextMenu.ts` (new).
+
+**Purpose**: Provides the right-click menu shown when the user clicks on a layer row in the Editor Layers panel. The single builder produces a `ContextMenuItem[]` array that the `<ContextMenuHost>` (Plan 10 §R5.7) renders.
+
+**Signature**:
+```ts
+buildLayersPanelContextMenu(opts: {
+  layerId: string;
+  layerIndex: number;
+  totalLayers: number;
+  layerType: 'text' | 'image' | 'shape' | 'group' | 'compound' | 'background';
+  isSelected: boolean;
+  selectionCount: number;
+  isLocked: boolean;
+  isHidden: boolean;
+  hasClippingMask: boolean;
+  isSmartObject: boolean;
+  canRasterize: boolean;
+  hasMergeTarget: boolean;   // layer below exists and is visible
+  visibleHiddenLayers: number;
+}): ContextMenuItem[]
+```
+
+**Item list (in order)**:
+1. `layers.properties...` (opens `LayerPropertiesDialog` — R5.2 below)
+2. ——— separator
+3. `layers.duplicate` (Ctrl+J) — `disabled` when `layerType === 'background'`
+4. `layers.delete` (Del) — `isDangerous: true`, `disabled` when `layerType === 'background'`; integrate with Mini Confirm pattern from Plan 10 (warning text uses singular/plural key)
+5. ——— separator
+6. `layers.mergeDown` (Ctrl+E) — `hidden` when `!hasMergeTarget` or `layerType === 'background'`
+7. `layers.mergeVisible` (Ctrl+Shift+E) — `hidden` when `visibleHiddenLayers < 2` (count excludes hidden + background)
+8. `layers.flattenImage` — `hidden` when `totalLayers < 2`; `isDangerous: true`; Mini Confirm text warns "Flattens all layers into one"
+9. ——— separator
+10. `layers.bringToFront` (Ctrl+Shift+]) — `hidden` when `layerIndex === 0`
+11. `layers.bringForward` (Ctrl+])
+12. `layers.sendBackward` (Ctrl+[)
+13. `layers.sendToBack` (Ctrl+Shift+[) — `hidden` when `layerIndex === totalLayers - 1`
+14. ——— separator
+15. `layers.group` (Ctrl+G) — `disabled` when `selectionCount < 2`
+16. `layers.ungroup` (Ctrl+Shift+G) — `hidden` when `layerType !== 'group'`
+17. ——— separator
+18. `layers.lock` / `layers.unlock` (Ctrl+L toggle) — toggles based on `isLocked`; shortcut is Ctrl+L for lock, Alt+Ctrl+L for unlock (use `isLocked` to choose label and `shortcut`)
+19. ——— separator
+20. `layers.hide` / `layers.show` (Ctrl+, toggle) — toggles based on `isHidden`
+21. ——— separator
+22. `layers.convertToSmartObject` — `hidden` when `isSmartObject || layerType === 'background'`
+23. `layers.rasterize` — `hidden` when `!canRasterize` (only text, shape, smart object, or group layers can rasterize)
+24. ——— separator
+25. `layers.createClippingMask` (Alt+click between layers equivalent) — `hidden` when `!hasMergeTarget` or `hasClippingMask` already set
+26. `layers.releaseClippingMask` — `hidden` when `!hasClippingMask`
+27. ——— separator
+28. `layers.selectSimilar` — `hidden` when there are no other layers of same `layerType` in the document
+29. `layers.findLayer` — scrolls the layers panel to show this layer row (no selection change)
+
+**Disabled vs hidden rules** (inherited from `filterMenuItems` semantics — Plan 10 §R5.3):
+- Items marked `hidden` are not rendered at all
+- Items marked `disabled` are rendered greyed out — only used when the user could reasonably expect the item to be present but it isn't actionable in the current state
+- Background layer cannot be deleted, duplicated, or reordered — its `Send to Back` is disabled (not hidden) so the user understands the background stays at the back
+
+**Plan 12 Reuse note**: `layerType` matches the type union from `@/backend/types/certificate.types.ts` — already used by the canvas (Plan 11 §R5). `selectionCount` comes from `useCanvasStore(state => state.selectedElementIds.length)`.
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.2: Layer Properties Dialog — `LayerPropertiesDialog.tsx`
+
+Path: `@/frontend/views/dashboard/cert/templates/editor/dialogs/LayerPropertiesDialog.tsx` (new).
+
+**Purpose**: Lightweight modal invoked from the layers panel context menu (`layers.properties...`). Edits name, color tag, and opacity for the chosen layer.
+
+**Layout** (MUI v9 `Dialog` with `sx={{}}` — no style props):
+- `DialogTitle` with i18n key `layerProperties.title`
+- Layer Name `TextField` (required; defaults to current `element.name`); helper text key `layerProperties.nameHelper`
+- Color Tag picker — 12 swatch buttons in a `Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)' }}`. Colors from `theme.palette` subsets (`primary`, `secondary`, `error`, `warning`, `info`, `success`, plus 6 monochrome steps). Selected swatch shows a check icon (uses `IconButton` + `sx={{ border: 2, borderColor: 'primary.main' }}` for selected, transparent border for unselected). The color tag is used to colour the layer's row in the layers panel eye icon column.
+- Opacity `Slider` 0-100 with `valueLabelDisplay="auto"`; `sx={{ color: 'primary.main' }}`; live preview debounced 100ms via `useCanvasStore.updateLayerOpacity(layerId, value)`
+- `DialogActions` with Cancel (revert snapshot) and OK (commit) `Button`s
+
+**Intent flow**: `layers.properties...` → `contextMenuStore.lastAction.layerId` (Plan 10 stores action payload) → `LayerPropertiesDialog` reads the layerId → renders.
+
+**No hardcoded colors** — all swatches come from `theme.palette`. The 6 monochrome steps use `theme.palette.grey[100]` through `grey[900]` (step of 200).
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.3: Properties Panel Right-Click (Element-Level) — `propertiesPanelContextMenu.ts`
+
+Path: `@/frontend/views/dashboard/cert/templates/editor/contextMenus/propertiesPanelContextMenu.ts` (new).
+
+**Purpose**: Right-click menu shown when the user clicks anywhere in the Properties panel body (not the panel header — header has its own context menu specific to window docking, not in scope). Options here operate on the currently selected element via the `useCanvasStore.selectedElementIds`.
+
+**Signature**:
+```ts
+buildPropertiesPanelContextMenu(ctx: MenuContextDescriptor): ContextMenuItem[]
+```
+
+**Item list**:
+1. `propertiesPanel.copyProperties` — Copies all property values (transform, fill, stroke, shadow, opacity, font, font-size, text-align) of the first selected element to clipboard (internal `contextMenuStore.copiedProperties`)
+2. `propertiesPanel.pasteProperties` — `disabled` when `!contextMenuStore.copiedProperties`; applies the copied properties to all currently selected elements (preserves locked/hidden flags on target)
+3. `propertiesPanel.resetToDefaults` — `isDangerous: true`; resets all properties of selected elements to the default values (posX = canvas center, posY = canvas center, width = default, font = `"Inter"`, fontSize = 48 for text, fill = `theme.palette.primary.main` for shape). Mini Confirm pattern from Plan 10 with key `propertiesPanel.resetConfirm`.
+4. ——— separator
+5. `propertiesPanel.options...` — opens a `PropertiesPanelOptionsDialog` (small — toggles which property groups are shown collapsed by default, saves to `uiStore.propertyPanelCollapsedGroups`)
+
+**Filter rules** (delegate to `filterMenuItems` on the returned list):
+- `copyProperties` disabled when `selectionCount === 0`
+- `pasteProperties` disabled when `!contextMenuStore.copiedProperties`
+- `resetToDefaults` disabled when `selectionCount === 0`
+- `options...` always enabled
+
+**Properties copy/paste protocol** — `contextMenuStore` (Plan 10) extends with:
+```ts
+copiedProperties: Partial<CanvasElementProperties> | null;
+copyProperties: (source: CanvasElement) => void;
+pasteProperties: (targets: string[]) => void;  // IDs
+```
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.4: Properties Panel Options Dialog — `PropertiesPanelOptionsDialog.tsx`
+
+Path: `@/frontend/views/dashboard/cert/templates/editor/dialogs/PropertiesPanelOptionsDialog.tsx` (new).
+
+**Purpose**: Toggles which property groups are shown collapsed by default in the Properties panel.
+
+**Layout** (MUI v9 `Dialog` with `DialogActions`):
+- Group toggles in a `Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}`:
+  - Transform (checkbox, default expanded)
+  - Appearance (checkbox, default expanded)
+  - Fill & Stroke (checkbox, default expanded)
+  - Effects (checkbox, default collapsed)
+  - Typography (checkbox, only visible when at least one text element selected, default expanded)
+- OK saves to `uiStore.propertyPanelCollapsedGroups`; Cancel reverts
+
+**No hardcoded colors** — uses `Checkbox` defaults from theme.
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.5: Element-Specific Right-Click Actions (Composer Hook)
+
+Path: `@/frontend/views/dashboard/cert/templates/editor/contextMenus/composeElementMenu.ts` (new).
+
+**Purpose**: Single entry point used by Plan 12's components (properties panel header kebab menu, layers panel context menu) that composes the full menu by combining the **base element context menu** (from Plan 11 §R5 `buildElementContextMenu`) with **element-type additions** (from Plan 11 §R5 `elementTypeMenuItems`). Plan 12 imports and orchestrates the existing Plan 11 builders.
+
+**Implementation**:
+```ts
+import { buildElementContextMenu } from './elementContextMenu';
+import { elementTypeMenuItems } from './elementTypeMenuItems';
+
+export function composeElementMenu(ctx: MenuContextDescriptor): ContextMenuItem[] {
+  const base = buildElementContextMenu(ctx);
+  // Get unique element types in selection
+  const types = uniqueSelectedTypes(ctx.selection);
+  const additions: ContextMenuItem[] = [{ id: 'sep.elementType', separator: true }];
+  for (const type of types) {
+    additions.push(...elementTypeMenuItems(type, ctx));
+  }
+  return [...base, ...additions];
+}
+```
+
+**Why Plan 12 owns this**: While Plan 11 provides both builders, only Plan 12 has the layers panel and properties panel use cases that need the composed menu. The canvas itself uses the raw `buildElementContextMenu` (no element-type additions on canvas — those are only shown when right-clicking in the layers panel or from the properties panel kebab menu).
+
+**Reuse constraint**: Plan 12 must NOT modify Plan 11's `elementContextMenu.ts` or `elementTypeMenuItems.ts`. Instead, it imports and composes. If a new element type is added in future rounds, only `elementTypeMenuItems.ts` changes — the composer stays stable.
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.6: Layers Panel Component Integration
+
+Path: `@/frontend/views/dashboard/cert/templates/editor/EditorLayersPanel.tsx` (modify — existing from Plan 11 R4).
+
+**Modifications**:
+- Attach `onContextMenu` to each layer row `<Box>` wrapper:
+  ```tsx
+  <Box
+    onContextMenu={(e) => {
+      e.preventDefault();
+      const items = buildLayersPanelContextMenu({
+        layerId: layer.id,
+        layerIndex,
+        totalLayers,
+        layerType: layer.type,
+        isSelected: selectedIds.includes(layer.id),
+        selectionCount: selectedIds.length,
+        isLocked: layer.isLocked,
+        isHidden: layer.isHidden,
+        hasClippingMask: !!layer.clippingMaskParentId,
+        isSmartObject: layer.isSmartObject,
+        canRasterize: ['text', 'shape', 'group'].includes(layer.type) || layer.isSmartObject,
+        hasMergeTarget: layerIndex < totalLayers - 1 && !layers[layerIndex + 1].isHidden,
+        visibleHiddenLayers: layers.filter(l => !l.isHidden && l.type !== 'background').length,
+      });
+      contextMenuService.openMenu('layers', { x: e.clientX, y: e.clientY }, items);
+    }}
+  >
+  ```
+- No new store subscriptions needed — the existing panel already subscribes to `useCanvasStore` via `useShallow`
+
+**All MUI v9 `sx={{}}` — no style props; no hardcoded colors**. Row highlight when selected uses `theme.palette.action.selected`.
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.7: Properties Panel Component Integration
+
+Path: `@/frontend/views/dashboard/cert/templates/editor/EditorPropertiesPanel.tsx` (modify — existing from Plan 11 R4).
+
+**Modifications**:
+- Attach `onContextMenu` to the panel root `Box`:
+  ```tsx
+  <Box
+    onContextMenu={(e) => {
+      e.preventDefault();
+      const ctx = useMenuContextDescriptor();  // Plan 10 §R5.8
+      const items = buildPropertiesPanelContextMenu(ctx);
+      contextMenuService.openMenu('properties', { x: e.clientX, y: e.clientY }, items);
+    }}
+  >
+  ```
+- Add kebab `IconButton` in the panel header (top-right) that opens a `Menu` (MUI `Menu`) with the same `buildPropertiesPanelContextMenu` items — provides discoverability for users who don't know about right-click
+- No new store subscriptions — reuses `useCanvasStore` via existing panel wiring
+
+**All MUI v9 — `IconButton` uses `sx={{ color: 'text.secondary' }}`; `Menu` uses `Paper` with `sx={{}}` from `contextMenuPaperSx` (Plan 10 §R5.7)**
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.8: Store Additions — `canvasStore.ts` & `uiStore.ts` & `contextMenuStore.ts`
+
+Path: `@/frontend/common/stores/cert/canvasStore.ts` (modify — Plan 10 owns `contextMenuStore`; layer/merge actions go here).
+
+**Add to `canvasStore`** (immer-style setters, immutable updates):
+- `mergeLayersDown(topId: string, bottomId: string)` — comment: Merges the top layer into the bottom by creating a new group element containing both, then deleting the originals. Returns the new group's id. Honors `isolationDepth === 0` (no merges when isolation active).
+- `mergeVisibleLayers()` — collects all visible (not hidden) element IDs (excluding background), groups them under a new group element at the lowest visible z-index. Returns the new group's id.
+- `flattenImage()` — Merges all elements (including background if visible) into a single image element using HTML5 Canvas bitmap rendering: creates an offscreen canvas at template dimensions, iterates elements in z-order calling each element's `drawToContext(ctx)` (from R3), then exports `canvas.toDataURL('image/png')` and inserts a single image element. All other elements are deleted. The result is a flattened canvas with one background image element. History entry `isDangerous: true`.
+- `groupLayers(ids: string[])` — already exists from R2; verified to update parent-child relationship without breaking isolation mode.
+- `ungroupLayers(groupId: string)` — already exists from R2.
+- `toggleLayerLock(id: string)` — already exists from R2.
+- `toggleLayerVisibility(id: string)` — already exists from R2.
+- `reorderLayer(id: string, direction: 'front' | 'forward' | 'backward' | 'back')` — already exists from R2 z-order actions.
+- `convertToSmartObject(id: string)` — Promotes a text/shape/group element to `isSmartObject: true`; stores a serialized snapshot of the source elements in `element.smartObjectData` for re-editing (double-click on the smart object re-enters an isolation-like editing mode to modify the source).
+- `rasterizeLayer(id: string)` — Renders the element to a bitmap and replaces the element record with an image element (`type: 'image'`) preserving the transform, opacity, and clipping path. Text loses its font info (no longer editable as text). Shape becomes an image. Smart object's source data discarded.
+- `createClippingMask(childId: string, parentId: string)` — Sets `clippingMaskParentId` on the child layer; preserves z-order adjacency (child must be immediately above the parent — auto reorders if needed).
+- `releaseClippingMask(id: string)` — Clears `clippingMaskParentId`.
+- `selectSimilarLayers(referenceLayerId: string)` — Computes the layer type of the reference, scans the elements array for all matching-type, and sets `selectedElementIds` to the matched set.
+- `findLayer(layerId: string)` — Sets `uiStore.scrollToLayerId` (consumed by layers panel via an effect that scrolls the row into view via `scrollIntoView({ block: 'center', behavior: 'smooth' })`).
+
+**Add to `uiStore`**:
+- `propertyPanelCollapsedGroups: Record<string, boolean>` (Persisted per user)
+- `scrollToLayerId: string | null` + `clearScrollToLayerId()` self-clearing after consumption
+- `setCollapsedGroup(groupKey: string, collapsed: boolean)` mutator
+
+**No changes to `contextMenuStore`** beyond Plan 10 §R5.11 — Plan 12 reuses `copiedProperties`, `copyProperties`, `pasteProperties` (defined there for clarity even if they could live in canvasStore — the rationale: properties are a UI-level clipboard concept, owned by Plan 10).
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.9: i18n Keys (Plan 12 Round 5)
+
+Add the following keys to `@/shared/locale/` for the `certificateEditor` namespace.
+
+**`contextMenu.layers.*`**:
+- `properties`, `duplicate`, `delete`, `deleteConfirm`, `deleteConfirmPlural`
+- `mergeDown`, `mergeVisible`, `flattenImage`, `flattenConfirm`
+- `bringToFront`, `bringForward`, `sendBackward`, `sendToBack`
+- `group`, `ungroup`
+- `lock`, `unlock`
+- `hide`, `show`
+- `convertToSmartObject`, `rasterize`
+- `createClippingMask`, `releaseClippingMask`
+- `selectSimilar`, `findLayer`
+
+**`contextMenu.propertiesPanel.*`**:
+- `copyProperties`, `pasteProperties`, `resetToDefaults`, `resetConfirm`, `options`
+
+**`layerProperties.*`** (dialog):
+- `title`, `nameHelper`, `colorTag`, `opacity`
+
+**`propertiesPanelOptions.*`** (dialog):
+- `title`, `transform`, `appearance`, `fillStroke`, `effects`, `typography`
+
+**Implementation notes** — Round 5 keys are added to the existing `certificateEditor` namespace type schema (in `shared/locale/types/certificateTemplateEditor.ts`). Each locale file (`en.ts`, `ar.ts`, etc.) provides values. Pluralization uses the `(count: number) => string` type signature for `deleteConfirmPlural` / `flattenConfirm`. Interpolation uses `(name: string) => string` for `layerProperties.title` (e.g., `Layer Properties: ${name}`).
+
+**Quality verification**: tsgo + biome + lint queue client.
+
+### R5.10: Context Menu Behavior Rules — Recap
+
+The context menu behavior rules are owned by Plan 10 §R5 and Plan 11 §R5.9. Plan 12 inherits them without modification. The key behaviors for Plan 12's menus:
+
+- **Contextual**: Item visibility and enabled state depend on the layer's `type`, `isLocked`, `isHidden`, `isSmartObject`, `hasClippingMask`, position, and the document's `visibleHiddenLayers`, `selectionCount`. Builders compute these from `ctx`/`opts` and rely on `filterMenuItems`.
+- **Disabled items** are shown greyed out — never removed silently. Plan 12's `Layer Properties` is always enabled (even on background); `Delete` is `disabled` (greyed) on background so the user learns the background layer is non-deletable.
+- **Submenu delay** — 200ms hover on parent before expansion; 150ms rollback delay when cursor leaves. Plan 10's `SubmenuTrigger` handles this; Plan 12 surfaces no submenus of its own (everything Plan 12 adds is flat top-level; submenus the user sees come from Plan 11's reused `elementTypeMenuItems`).
+- **Keyboard navigation** — arrow keys, Enter, Esc. Plan 10 owns the hook; Plan 12's items inherit the behavior.
+- **Menu position** — Opens at cursor location; kept on screen via clamp logic in Plan 10's host. Plan 12 reuses without modification.
+- **Dark theme** — Plan 10's theme adapter applies. Plan 12 has no menu-specific theme overrides.
+- **Persistence** — Click outside or Esc closes. Plan 10's outside-click close hook handles this.
+- **Smart filtering** — Plan 12's layers panel builder hides items not applicable to a given layer type entirely (e.g., `Rasterize` is hidden for an already-rasterized image, not greyed out). `filterMenuItems` is the canonical filter.
+
+### R5.11: Editor Layers/Properties Integration & Component Additions
+
+In addition to the integrations in R5.6 and R5.7, the Editor Layers Panel is extended to consume `uiStore.scrollToLayerId`:
+
+```tsx
+// EditorLayersPanel.tsx (modify)
+const scrollToLayerId = useUIStore(s => s.scrollToLayerId);
+const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+useEffect(() => {
+  if (scrollToLayerId && rowRefs.current[scrollToLayerId]) {
+    rowRefs.current[scrollToLayerId]?.scrollIntoView({
+      block: 'center',
+      behavior: 'smooth',
+    });
+    useUIStore.getState().clearScrollToLayerId();
+  }
+}, [scrollToLayerId]);
+```
+
+**Double-click layer row** enters isolation mode for groups (matching Illustrator's behavior). Existing double-click behavior in Plan 11's R4 layers panel (which renames the layer) is preserved by checking the element's `type`:
+- `type === 'group'` → enters isolation mode (calls `canvasStore.enterIsolationMode(id)`)
+- other types → falls through to rename behavior (existing R4)
+
+**Alt+click between two layer rows** creates a clipping mask (matching the layers panel context menu item `Create Clipping Mask`). A small click target is added between rows; the hit test for which two layers are involved is via the `data-above-layer-id` and `data-below-layer-id` attributes on a 4px-tall divider `Box sx={{ height: 4 }}`.
+
+**All MUI v9 `sx={{}}` — no style props; no hardcoded colors**. Divider highlight on hover uses `theme.palette.action.hover`.
+
+**Quality verification (final Plan 12 R5)**: tsgo + biome + lint queue client on all created/modified files in R5.1 - R5.11.
+
+## Round 5: Pro Keyboard Shortcuts
+
+### Element-Level Shortcut Properties
+
+**Component**: `ShortcutPropertiesPanel`
+**Location**: Properties panel, when element selected, "Shortcuts" sub-section
+**Features**:
+- Shows all shortcuts applicable to the selected element type
+- Displays shortcut binding in read-only format
+- "Customize" link opens KeyboardShortcutsDialog filtered to current element type
+- Shows contextual help for each shortcut
+
+### Text Element Shortcuts
+
+| Key | Context | Action |
+|-----|---------|--------|
+| `Ctrl+B` | Text editing | Toggle bold |
+| `Ctrl+I` | Text editing | Toggle italic |
+| `Ctrl+U` | Text editing | Toggle underline |
+| `Ctrl+Shift+>` | Text editing | Increase font size by 1 |
+| `Ctrl+Shift+<` | Text editing | Decrease font size by 1 |
+| `Ctrl+Alt+Shift+>` | Text editing | Increase font size by 10 |
+| `Ctrl+Alt+Shift+<` | Text editing | Decrease font size by 10 |
+| `Alt+Arrow Left` | Text editing | Decrease kerning |
+| `Alt+Arrow Right` | Text editing | Increase kerning |
+| `Alt+Shift+Arrow Up` | Text editing | Increase leading |
+| `Alt+Shift+Arrow Down` | Text editing | Decrease leading |
+| `Ctrl+Arrow Left` | Text editing | Previous word |
+| `Ctrl+Arrow Right` | Text editing | Next word |
+| `Home` | Text editing | Line start |
+| `End` | Text editing | Line end |
+| `Ctrl+A` | Text editing | Select all text in element |
+| `Shift+Arrow` | Text editing | Extend selection by one char |
+
+### Shape Element Shortcuts
+
+| Key | Context | Action |
+|-----|---------|--------|
+| `[` | Shape selected | Corner radius -1 (rounded rect) |
+| `]` | Shape selected | Corner radius +1 (rounded rect) |
+| `Alt+[` | Polygon selected | Decrease sides by 1 |
+| `Alt+]` | Polygon selected | Increase sides by 1 |
+| `Alt+Shift+[` | Star selected | Decrease points by 1 |
+| `Alt+Shift+]` | Star selected | Increase points by 1 |
+
+### Layer Panel Keyboard Navigation
+
+| Key | Context | Action |
+|-----|---------|--------|
+| `Arrow Up` | Layer panel | Select previous layer |
+| `Arrow Down` | Layer panel | Select next layer |
+| `Shift+Arrow Up` | Layer panel | Extend selection upward |
+| `Shift+Arrow Down` | Layer panel | Extend selection downward |
+| `Ctrl+Arrow Up` | Layer panel | Move layer up |
+| `Ctrl+Arrow Down` | Layer panel | Move layer down |
+| `Space` | Layer panel | Toggle visibility |
+| `Ctrl+Space` | Layer panel | Toggle lock |
+| `Enter` | Layer panel | Rename layer |
+| `Delete` | Layer panel | Remove layer |
+
+### Properties Panel Shortcut Hints
+
+Each property field shows a small shortcut hint badge when a keyboard shortcut applies:
+- Position X field: `←→` nudges by 1
+- Position Y field: `↑↓` nudges by 1
+- Rotation field: `R+drag` rotate
+- Width/Height: `Shift+drag` for proportional
+
+### Typography Shortcut Panel
+
+**Component**: `TypographyShortcutsPanel`
+**Location**: Properties panel, Text element, "Typography Shortcuts" expandable section
+- Shows all text editing shortcuts in a grid
+- Each row: action name | key combination | applicable context
+- "Learn More" link opens full shortcut overlay filtered to typography
+
+## Round 5: Effects & Filter Engine — Element Properties Panel
+
+### Effects Properties in Property Panel
+
+**Component**: `EffectsPropertyPanel`
+**Location**: Properties panel, "Effects" expandable section when element selected
+**Features**:
+- Shadow (Drop Shadow): offset X/Y, blur radius, spread, color, opacity, blend mode
+- Inner Shadow: offset X/Y, blur, color, opacity
+- Outer Glow: blur, color, opacity, spread
+- Inner Glow: blur, color, opacity, spread
+- Blur: Gaussian blur radius
+- Sharpen: amount
+- Grayscale: percentage
+- Sepia: percentage
+- Invert: percentage
+- Brightness: percentage
+- Contrast: percentage
+- Hue Rotate: degrees
+- Saturate: percentage
+
+Each effect has:
+- Toggle on/off via checkbox
+- Expand/collapse to show controls
+- "Reset" button per effect
+- Previews show live on canvas element
+
+### Effects Stack Ordering
+- Effects rendered in order (top to bottom = outer to inner)
+- Drag to reorder effects priority
+- Each effect row has: drag handle | enable checkbox | name | settings expand | delete
+
+### CSS Filter String Generation
+Effects compile to CSS `filter` property string:
+```
+filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.5)) blur(2px) brightness(1.1) contrast(1.2)
+```
+
+### Shadow Presets
+- "Soft Shadow", "Hard Shadow", "Inner Shadow", "Glow", "Text Shadow"
+- One-click apply with customizable preset defaults
+
+### Blend Mode Selector
+Dropdown in effects section:
+- Normal, Multiply, Screen, Overlay, Darken, Lighten, Color Dodge, Color Burn, Hard Light, Soft Light, Difference, Exclusion, Hue, Saturation, Color, Luminosity
+
+### Opacity Control
+- Slider 0-100%
+- Number input for precise value
+- Linked to element opacity (not effect opacity)
+
+## Round 5: Advanced Layers Panel — Element Properties Integration
+
+### Layers Panel in Properties Panel
+
+**Component**: `LayersPanelEnhanced`
+**Location**: Right sidebar, below properties, "Layers" tab
+**Features**:
+- Tree view showing all elements + groups in z-order
+- Drag to reorder layers (z-index)
+- Group/Ungroup layers
+- Lock/Unlock toggle per layer
+- Show/Hide toggle per layer
+- Rename layer (double-click)
+- Layer thumbnails with mini preview
+- Layer color tag for identification
+- Layer opacity slider per layer
+- Layer blend mode dropdown per layer
+- Layer effects count badge
+- Layer search/filter bar
+- Flatten layers option
+- Merge down option
+- Merge visible option
+- Duplicate layer
+- Delete layer
+- Layer isolation mode (only see one layer)
+- Layer clipping toggle (clip to layer below)
+
+### Layer Panel Keyboard Navigation
+- Arrow Up/Down to navigate layers
+- Enter to rename
+- Space to toggle visibility
+- Ctrl+Space to toggle lock
+- Delete to remove selected layer
+- Ctrl+Arrow Up/Down to reorder
+- Shift+Arrow for multi-select
+
+### Layer Panel Context Menu
+- Duplicate, Delete, Merge Down, Flatten, Group, Ungroup
+- Lock/Unlock, Show/Hide, Isolate
+- Properties (focus in property panel)
+- Copy Style, Paste Style
+- Create Clipping Mask
+- Release Clipping Mask
+- Convert to Smart Object (group with non-destructive transforms)
+- Rasterize (flatten groups)
+- Export As (SVG/PNG)
+
+### Layer Panel Toolbar
+- New Layer button (adds empty layer)
+- New Group button
+- Delete button (remove selected)
+- Duplicate button
+- Lock toggle
+- Show/Hide toggle
+- Search bar
+- Filter dropdown (All, Visible, Locked, Effects)
+- Panel settings (thumbnail size, panel position)
+
+## Round 5: Asset Library Panel — Properties Integration
+
+### Asset Properties Section
+
+**Component**: `AssetPropertiesSection`
+**Location**: Properties panel, "Asset" expandable section
+**Features**:
+- Shows asset metadata: name, type, dimensions, file size, source
+- For image assets: resolution, DPI, color space, transparency
+- For SVG assets: viewBox, path count, groups, layers
+- For icon assets: icon name, tags, collection
+- For QR/barcode assets: encoding type, error correction level, Module size
+
+### Replace Asset Action
+- "Replace Asset" button opens Asset Library dialog filtered to same type
+- Replacing preserves element position, size, and effects
+- Only the asset source is swapped
+
+### Asset Variations
+- Show available variations of the asset (e.g., different sizes of same image)
+- Select variation to swap in
+- Auto-fit checkboxes (maintain aspect ratio, cover, contain)
+
+### Asset Usage Indicator
+- Badge showing number of times this asset is used across the template
+- "Find All Uses" button highlights elements using same asset
+
+### Asset Export Options
+- Export selected element as asset to library
+- Set asset name, tags, category
+- Auto-crop transparent borders option
+
+## Round 5: Advanced History & States — Properties Panel
+
+### Per-Element History
+- Properties panel shows recent changes for selected element
+- Mini history dropdown with last 10 changes to this element
+- Click any change to revert element to that state
+- "Element History" expandable section in properties panel
+
+### Properties Snapshot on Change
+- Snapshot element properties before any property edit
+- Creates undo checkpoint per property change (debounced 500ms)
+- Group rapid property changes (e.g., dragging slider) into single undo step
+- "Revert to Previous" button undoes last property change
+
+### History Brush for Properties
+- Selective undo: undo only one property without affecting others
+- e.g., undo font size change without undoing position change
+- History brush toggle in properties panel
+- When enabled, dragging on a property slider shows previous values
+
+### State Comparison in Properties
+- "Compare with Previous State" toggle
+- Shows diff of current vs previous element state in properties panel
+- Changed properties highlighted in amber
+- Unchanged properties shown in normal color
+
+### Batch Property History
+- When multiple elements selected:
+  - Property changes apply to all selected elements
+  - History entry covers all elements as batch
+  - Undo reverts all elements simultaneously
+
+## Round 5: Canvas Pro Features — Element Properties
+
+### DPI-Aware Property Display
+- Properties show dimensions in document DPI unit
+- Toggle between px, mm, in, cm for display
+- Actual rendered size shown in parenthesis at export DPI
+- "Print Size Preview" shows element at physical print dimensions
+
+### Artboard Context Properties
+- When element is on an artboard, show artboard-relative position
+- Toggle between artboard-relative and canvas-absolute coordinates
+- Show which page the element belongs to
+- "Move to Page" dropdown to move element to different page
+
+### CMYK Property Values
+- Color picker shows CMYK values alongside RGB/HEX/HSL
+- CMYK fields editable (C%, M%, Y%, K%)
+- Gamut warning on CMYK fields if color is out of gamut
+- "Nearest CMYK" button snaps out-of-gamut color to closest
+
+### Bleed Awareness in Properties
+- Properties panel shows warning if element extends beyond bleed area
+- "Fit to Bleed" button resizes element to stay within safe area
+- Distance indicators showing how far element is from margins
+
+### Export Resolution Properties
+- Per-element export resolution override
+- "Export at resolution" dropdown: inherit from document, 72, 150, 300 DPI
+- High-res elements marked with badge
+- Export validation: warn if element below 300 DPI at print size
+
+## Round 5: Workspace & Panel System — Properties Panel Layout
+
+### Properties Panel Tab System
+- Properties panel uses tabs: Properties, Transform, Effects, History, Asset
+- Tab order customizable
+- Tabs can be torn off into floating panels
+- Tabs reorderable by drag
+- Active tab remembered per workspace
+
+### Properties Panel Auto-Collapse
+- When element deselected, properties panel auto-collapses
+- When canvas space is low, properties panel reduces to icon-only
+- Expand on hover (if collapsed to icons)
+- Pin button to keep panel expanded
+
+### Contextual Properties
+- Properties panel adapts to selection type:
+  - Text element: Character + Paragraph tabs shown
+  - Shape element: Fill + Stroke + Path tabs shown
+  - Image element: Asset + Effects + Mask tabs shown
+  - Group element: Layer + Blend + Transform tabs shown
+- No irrelevant tabs shown
+
+### Properties Panel Size Modes
+- Compact mode (show 3 properties per section)
+- Standard mode (show 5 properties per section)
+- Expanded mode (show all properties)
+- Size mode toggle in panel header
+- Saved per workspace
+
+### Quick Properties Access
+- Right-click element on canvas → Quick Properties
+- Shows compact mini-properties near cursor
+- Compact dialog with position, size, rotation, fill, opacity
+- Dismisses on Escape or clicking elsewhere
+- Quick switch to full properties panel from mini-properties
+
+### Properties Panel Persistence
+- Last active tab saved per element type
+- Expanded sections saved per element instance
+- Custom layout saved per workspace
+- File: `frontend/views/certificate-editor/components/panels/PropertiesPanelLayout.tsx`

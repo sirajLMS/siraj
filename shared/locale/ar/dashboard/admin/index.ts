@@ -102,5 +102,9 @@ export const dashboardAdminAr: AdminDashboardLabels = {
     ACTIVATED: "مفعّل",
     RUNNING: "جارٍ",
     COMPLETED: "مكتمل",
+    ON_DEMAND_CONFLICT_HELD: "معلقة بسبب تعارض",
+    ON_DEMAND_NO_CREDITS_ABSENT: "بدون رصيد (غائب)",
+    ON_DEMAND_NO_CREDITS_CANCELLED: "بدون رصيد (ملغاة)",
+    ON_DEMAND_PENDING_CREDITS: "في انتظار الرصيد",
   },
 };

@@ -7,7 +7,7 @@ import {
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { parseIanaTimezone } from "@/backend/lib/enum";
 import type {
-  AdminDashboardScheduleInput,
+  AdminDashboardScheduleRepoInput,
   AdminDashboardScheduleResult,
   DailyScheduleResult,
 } from "@/backend/types/scheduling/scheduling.types";
@@ -17,7 +17,7 @@ import {
 } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 export const getAdminDashboardSchedule = async (
-  input: AdminDashboardScheduleInput,
+  input: AdminDashboardScheduleRepoInput,
   tx?: DBTransaction
 ): Promise<AdminDashboardScheduleResult> => {
   if (!tx) {

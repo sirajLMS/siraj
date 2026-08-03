@@ -1,0 +1,1728 @@
+# Plan 17 — Certificate Generation Dialog: Tasks
+
+> **Plan #**: 17
+> **Dependencies**: Plan 1 (enums — `certificate_batch_job_status_enum`), Plan 2 (types — `studentId` UUID, `TemplateVariable.id`, `CertificateBatchGenerate` permission), Plan 4 (services — `CertificateGenerationService` batch loop, idempotency keys, expiry/numbering/QR), Plan 5 (GraphQL API — `generateBatch` mutation, `certificateBatchJob` poll query, `pauseBatchJob`/`resumeBatchJob`/`cancelBatchJob` mutations), Plan 6 (templates with elements, variables, `expiryEnabled` flag), Plan 7 (template detail page — launch point), Plan 14 (recipient groups), Plan 16 (certificate list — launch point), Plan 18 (certificate detail — link target from report), Plan 19 (QR verification — `verificationCode` consumer), Plan 22 (cron worker for async batch processing)
+> **Scope**: Multi-step wizard dialog (6 steps: Template → Recipients → Variable Mapping → Generation Options → Review → Progress & Report), async job polling, per-certificate retry, pause/resume/cancel, ZIP download
+> **Execution**: Sequential through phases below; tasks within a phase may be parallelizable where noted
+> **Permission**: `AppPermission.CertificateBatchGenerate` (string: `certificates.batch_generate` per INTER_PLAN_CONTRACTS §1)
+
+---
+
+## Dependency Graph
+
+```
+Phase 1: Foundation (sequential)
+  T01 (Types) ──► T02 (Store) ──► T03 (GraphQL Docs) ──► T04 (i18n)
+
+Phase 2: Step Components (T05–T10 — partially parallel after T04)
+  T04 ──► T05 (StepTemplateSelect)
+  T04 ──► T06 (StepRecipientSelect + CSVUploadPicker + ClassRecipientPicker)
+  T05 ──► T07 (StepVariableMapping)
+  T06 ──► T07
+  T04 ──► T08 (GenerationOptionsStep)
+  T07, T08 ──► T09 (ReviewStep)
+  T04 ──► T10 (ProgressStep)
+
+Phase 3: Tier Views + ViewModel + Container (T11–T14)
+  T09, T10 ──► T11 (DesktopView)
+  T09, T10 ──► T12 (MobileView)
+  T03, T04 ──► T13 (ViewModel — depends on ALL step components + store + GraphQL docs + i18n)
+  T11, T12, T13 ──► T14 (Container + Switcher + DialogLauncher)
+
+Phase 4: Integration + Testing + Knowledge (T15–T19)
+  T14 ──► T15 (Wire launch points into cert list + template detail)
+  T14 ──► T16 (Component tests)
+  T14 ──► T17 (E2E tests)
+  T15, T16, T17 ──► T18 (Accessibility audit)
+  T18 ──► T19 (Knowledge propagation + outcome)
+```
+
+---
+
+## Phase 1: Foundation — Types, Store, GraphQL Documents, i18n (T01–T04)
+
+### T01: Create certGenerationStore (Zustand)
+
+- [ ] Create `frontend/common/stores/certGenerationStore.ts` — Zustand store for ALL wizard state
+- [ ] **State fields** (per design.md §5):
+  - `isOpen: boolean` — dialog visibility
+  - `activeStep: number` — current step (0-5, 6-step wizard)
+  - `stepsCompleted: Record<number, boolean>` — which steps have been completed
+  - `selectedTemplate: TemplateSummary | null` — Step 0 selection (id, name, thumbnail, category, variableCount, variables)
+  - `recipientMode: 'individual' | 'group' | 'class' | 'csv'` — Step 1 mode
+  - `selectedRecipients: Record<string, StudentSummary>` — individual mode selections (keyed by studentId)
+  - `selectedGroupId: string | null` — group mode selection
+  - `selectedClassId: string | null` — class mode selection
+  - `csvFile: null` — CSV file object stored in `useRef`, NOT in store (per AGENTS.md)
+  - `csvPreview: CsvPreviewRow[] | null` — parsed CSV preview data
+  - `variableOverrides: Record<string, string | number | Date>` — Step 2 overrides keyed by variable name
+  - `useDefaultVariables: boolean` — checkbox to skip overrides
+  - `generationOptions: GenerationOptions` — Step 3 options (issueDate, expiryDate, expiryEnabled, numberingPrefix, numberingStart, pdfQuality, sendEmail, generateQr)
+  - `isGenerating: boolean` — generation in progress
+  - `batchJobId: string | null` — async job ID from server
+  - `batchJobStatus: BatchJobStatus | null` — current job status from polling
+  - `generationResults: CertificateResult[]` — per-certificate results
+  - `generationStats: { succeeded: number; failed: number; total: number }` — summary stats
+  - `error: string | null` — global error state
+- [ ] **Actions** (per design.md §5.4):
+  - `openDialog(preselectedTemplateId?: string)` — set isOpen=true, reset state, optionally pre-select template
+  - `closeDialog()` — set isOpen=false, reset all state to initial
+  - `setActiveStep(step: number)` — navigate to step (validates step completion)
+  - `nextStep()` — advance to next step (validates current step)
+  - `prevStep()` — go back to previous step
+  - `selectTemplate(template: TemplateSummary)` — set selectedTemplate, load its variables
+  - `setRecipientMode(mode)` — toggle recipient selection mode, clear mode-specific selections
+  - `toggleRecipient(student: StudentSummary)` — add/remove from selectedRecipients
+  - `clearRecipients()` — clear all individual selections
+  - `selectGroup(groupId: string)` — set selectedGroupId
+  - `selectClass(classId: string)` — set selectedClassId
+  - `setCsvPreview(rows: CsvPreviewRow[])` — set CSV preview data
+  - setVariableOverride(key: string, value: string | number | Date)
+  - `clearVariableOverrides()` — reset all overrides
+  - `setGenerationOptions(options: Partial<GenerationOptions>)` — merge partial options
+  - `startGeneration()` — set isGenerating=true, call mutation (delegated to ViewModel)
+  - `setBatchJob(jobId: string, status: BatchJobStatus)` — set job tracking
+  - `updateBatchStatus(status: BatchJobStatus)` — update from polling
+  - `addResult(result: CertificateResult)` — append to generationResults
+  - `setGenerationStats(stats)` — update stats
+  - `setError(error: string | null)` — set/clear error
+  - `resetGeneration()` — clear generation state (results, stats, job, error)
+- [ ] **Store creation pattern** (per frontend/common/stores/AGENTS.md):
+  - Use curried `create<T>()(persist(...))` if persistence needed (likely not — wizard state is ephemeral)
+  - Use `create<T>()(...)` without persist for ephemeral wizard state
+  - Export typed `CertGenerationStore` interface
+  - Export selector hooks: `useIsGenerationOpen()`, `useGenerationStep()`, `useSelectedTemplate()`, etc.
+- [ ] **No File/Blob in store**: CSV file stored in `useRef` in component, only parsed preview in store
+- [ ] Run quality loop: `bun tsgo`, `bun biome:check`, lint queue
+- [ ] Verify against: `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
+- **Requirements**: REQ-17.9 (state preservation across navigation)
+- **Files created**: `frontend/common/stores/certGenerationStore.ts`
+- **Dependencies**: Plan 2 (types — StudentSummary, TemplateSummary, GenerationOptions, CertificateResult, BatchJobStatus)
+- **Estimated**: 4h
+
+### T02: Create GraphQL Documents
+
+- [ ] Create `frontend/common/graphql/sharedDocuments/certificates/generation.documents.ts`
+- [ ] **Queries** (per design.md §4.1):
+  - `PublishedTemplatesForGenerationQueryDocument` — fetch published templates for Step 0 selection (id, name, thumbnailUrl, category, variableCount, variables { id, name, type, defaultValue, previewValue })
+  - `StudentSearchForGenerationQueryDocument` — cursor-paginated student search for Step 1 individual mode (id, name, email, grade, $search, $first, $after)
+  - `RecipientGroupsForTemplateQueryDocument` — fetch groups available for selected template (id, name, memberCount)
+  - `ClassesForRecipientPickerQueryDocument` — fetch classes for Step 1 class mode (id, name, studentCount)
+  - `CertificateBatchJobStatusQueryDocument` — poll batch job status for Step 5 progress (id, status, processedCount, totalCount, failedCount, results { studentName, status, error, certificateId })
+- [ ] **Mutations** (per design.md §4.2):
+  - `GenerateCertificatesBatchMutationDocument` — start batch generation (input: { templateId, recipientIds[] | groupId | classId | csvData, variableOverrides, generationOptions }) → returns { batchJobId, estimatedTime }
+  - `RetryCertificateGenerationMutationDocument` — retry single failed certificate (input: { batchJobId, certificateId }) → returns { certificateId, status }
+  - `PauseBatchJobMutationDocument` — pause running batch (input: { batchJobId }) → returns { status }
+  - `ResumeBatchJobMutationDocument` — resume paused batch (input: { batchJobId }) → returns { status }
+  - `CancelBatchJobMutationDocument` — cancel running batch (input: { batchJobId }) → returns { status, processedCount }
+  - `DownloadGeneratedCertificatesMutationDocument` — request ZIP download (input: { batchJobId }) → returns { downloadUrl }
+- [ ] **Document conventions** (per frontend/common/graphql/AGENTS.md):
+  - All documents include `id` field on every object type for Apollo cache normalization
+  - Use `codegen` naming: `FooQueryDocument`, `BarMutationDocument`
+  - Export from barrel: also add to `certificates/index.ts`
+- [ ] **Fetch policies** (per design.md §4.3):
+  - Template list: `cache-and-network` (fresh data, instant cache)
+  - Student search: `network-only` (search results must be fresh)
+  - Batch job status: `network-only` (polling — must be fresh)
+- [ ] **Cache updates** (per design.md §4.4):
+  - After batch generation completes: evict `CertificateGenerationDialog` query, refetch `CertificateList` query
+  - Use `update` function on mutations for optimistic UI
+- [ ] Run quality loop + verify against `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md`
+- **Requirements**: REQ-17.10 (template list), REQ-17.14 (recipient search), REQ-17.26 (generation progress)
+- **Files created**: `frontend/common/graphql/sharedDocuments/certificates/generation.documents.ts`
+- **Files modified**: `frontend/common/graphql/sharedDocuments/certificates/index.ts` (barrel export)
+- **Dependencies**: Plan 5 (GraphQL API — schema types), T01 (store types)
+- **Estimated**: 4h
+
+### T03: Create i18n Namespace & Translation Files
+
+- [ ] Create `shared/locale/namespaces/dashboard/certificates/generation.namespace.ts` — namespace export `DashboardCertificateGeneration`
+- [ ] Create `shared/locale/types/dashboard/certificates/generation.ts` — typed translation keys interface `CertificateGenerationLabels`
+- [ ] **Translation keys** (per design.md §10):
+  - `certificates.generation.dialog.title` — "Generate Certificates"
+  - `certificates.generation.dialog.close` — "Close"
+  - `certificates.generation.stepper.step1` — "Select Template"
+  - `certificates.generation.stepper.step2` — "Select Recipients"
+  - `certificates.generation.stepper.step3` — "Variable Mapping"
+  - `certificates.generation.stepper.step4` — "Generation Options"
+  - `certificates.generation.stepper.step5` — "Review"
+  - `certificates.generation.stepper.step6` — "Progress & Report"
+  - `certificates.generation.step1.searchPlaceholder` — "Search templates..."
+  - `certificates.generation.step1.empty` — "No published templates available"
+  - `certificates.generation.step1.error` — "Failed to load templates"
+  - `certificates.generation.step2.mode.individual` — "Individual"
+  - `certificates.generation.step2.mode.group` — "Group"
+  - `certificates.generation.step2.mode.class` — "Class"
+  - `certificates.generation.step2.mode.csv` — "CSV Upload"
+  - `certificates.generation.step2.searchStudents` — "Search students..."
+  - `certificates.generation.step2.selectGroup` — "Select a group"
+  - `certificates.generation.step2.selectClass` — "Select a class"
+  - `certificates.generation.step2.csvUpload` — "Upload CSV file"
+  - `certificates.generation.step2.csvPreview` — "CSV Preview"
+  - `certificates.generation.step2.memberCount` — (count: number) => string (pluralized)
+  - `certificates.generation.step2.selectedCount` — (count: number) => string (pluralized)
+  - `certificates.generation.step2.validation.minRecipients` — "Select at least 1 recipient"
+  - `certificates.generation.step3.useDefaults` — "Use template defaults"
+  - `certificates.generation.step3.overrideHint` — "Override default variable values for this generation"
+  - `certificates.generation.step3.appliesToAll` — "Values apply to all selected recipients"
+  - `certificates.generation.step4.issueDate` — "Issue Date"
+  - `certificates.generation.step4.expiryEnabled` — "Enable expiry"
+  - `certificates.generation.step4.expiryDate` — "Expiry Date"
+  - `certificates.generation.step4.numberingPrefix` — "Certificate number prefix"
+  - `certificates.generation.step4.numberingStart` — "Starting number"
+  - `certificates.generation.step4.pdfQuality` — "PDF Quality"
+  - `certificates.generation.step4.sendEmail` — "Email certificates to recipients"
+  - `certificates.generation.step4.generateQr` — "Generate QR verification codes"
+  - `certificates.generation.step5.summary.template` — "Template"
+  - `certificates.generation.step5.summary.recipients` — "Recipients"
+  - `certificates.generation.step5.summary.variables` — "Variable Overrides"
+  - `certificates.generation.step5.summary.options` — "Generation Options"
+  - `certificates.generation.step5.summary.totalCertificates` — (count: number) => string (pluralized)
+  - `certificates.generation.step5.warning.largeBatch` — "Large batch: this may take several minutes"
+  - `certificates.generation.step5.estimatedTime` — (minutes: number) => string (interpolated)
+  - `certificates.generation.step5.generate` — "Generate Certificates"
+  - `certificates.generation.step6.progress.rendering` — (current: number, total: number) => string (interpolated)
+  - `certificates.generation.step6.progress.succeeded` — (count: number) => string (pluralized)
+  - `certificates.generation.step6.progress.failed` — (count: number) => string (pluralized)
+  - `certificates.generation.step6.progress.remaining` — (count: number) => string (pluralized)
+  - `certificates.generation.step6.actions.pause` — "Pause"
+  - `certificates.generation.step6.actions.resume` — "Resume"
+  - `certificates.generation.step6.actions.cancel` — "Cancel"
+  - `certificates.generation.step6.actions.retry` — "Retry"
+  - `certificates.generation.step6.actions.retryAll` — "Retry All Failed"
+  - `certificates.generation.step6.actions.downloadAll` — "Download All (ZIP)"
+  - `certificates.generation.step6.actions.done` — "Done"
+  - `certificates.generation.step6.actions.exportReport` — "Export Report (CSV)"
+  - `certificates.generation.step6.report.totalSucceeded` — (count: number) => string (pluralized)
+  - `certificates.generation.step6.report.totalFailed` — (count: number) => string (pluralized)
+  - `certificates.generation.step6.report.totalAttempted` — (count: number) => string (pluralized)
+  - `certificates.generation.step6.report.viewCertificate` — "View Certificate"
+  - `certificates.generation.step6.report.errorTitle` — "Error"
+  - `certificates.generation.step6.confirmCancel` — "Cancel generation? {processed} certificates already rendered."
+  - `certificates.generation.step6.confirmClose` — "Generation in progress. Are you sure you want to close?"
+- [ ] **Pluralization** (per shared/AGENTS.md): Use `(count: number) => string` pattern. Arabic uses dual/plural rules.
+- [ ] **Interpolation**: Use `(param: string, ...) => string` pattern with template literals
+- [ ] Create `shared/locale/en/dashboard/certificates/generation.ts` — English translations
+- [ ] Create `shared/locale/ar/dashboard/certificates/generation.ts` — Arabic translations with proper RTL, dual/plural forms
+- [ ] Run quality loop + verify against `shared/AGENTS.md`
+- **Requirements**: All REQ-17.* (i18n keys referenced by all step components)
+- **Files created**: 5 files under `shared/locale/`
+- **Dependencies**: None (can be done in parallel with T01, T02)
+- **Estimated**: 4h
+
+---
+
+## Phase 2: Step Components (T04–T08)
+
+### T04: Create TemplateSelectionStep (Step 1)
+- [ ] Create `frontend/common/views/dashboard/certificates/generation/TemplateSelectionStep.tsx`
+- [ ] Fetch published templates via Apollo `certTemplateList` query with pagination
+- [ ] Template search: debounced TextField (300ms), server-side search by name
+- [ ] Template grid: MUI Grid of `TemplateCard` components
+- [ ] `TemplateCard`: thumbnail (background image preview), name, category badge, variable count
+- [ ] Card click: selects template (`store.selectTemplate(template)`) → highlights card border
+- [ ] Template pre-selection support: if dialog opened with `preselectedTemplateId`, auto-select that template and scroll to it
+- [ ] Loading state: skeleton placeholders
+- [ ] Error state: error message + "Retry" button
+- [ ] Empty state: illustration + "No published templates available" message
+- [ ] Desktop: 3-column grid; Mobile: 1-column list with thumbnails
+- [ ] i18n keys: `certificates.generation.step1.*`
+- [ ] Run quality loop
+- **Requirements**: REQ-17.10–17.13 (template list, loading, error, empty states)
+- **Files created**: `TemplateSelectionStep.tsx`, `TemplateCard.tsx`
+- **Dependencies**: T03
+- **Estimated**: 4h
+
+### T05: Create RecipientSelectionStep (Step 2)
+- [ ] Create `frontend/common/views/dashboard/certificates/generation/RecipientSelectionStep.tsx`
+- [ ] Selection mode toggle: MUI Tabs — "Individual" | "Group"
+- [ ] **Individual mode**:
+  - `IndividualRecipientPicker` — student search (debounced TextField), `RecipientList` with cursor pagination ("Load More" button)
+  - `RecipientListItem`: checkbox, student name, email, grade
+  - Selected students show as removable chips above the list
+  - Server-side search by name/student ID
+- [ ] **Group mode**:
+  - `GroupRecipientPicker` — MUI Select dropdown of available recipient groups for the selected template
+  - Group selection shows member count (pluralized) + preview list (up to 50 students, "Show all" expansion)
+  - Group member count uses Arabic pluralization rules
+- [ ] Validation: at least 1 recipient (individual) or 1 group (group mode) required to proceed
+- [ ] Mobile: single-column scrollable list, chips wrap to new lines
+- [ ] GraphQL documents: `StudentSearchQueryDocument`, `RecipientGroupListForTemplateQueryDocument`
+- [ ] i18n keys: `certificates.generation.step2.*` including pluralization for member counts
+- [ ] Run quality loop
+- **Requirements**: REQ-17.14–17.20 (recipient selection, individual vs group, search, selection validation)
+- **Files created**: `RecipientSelectionStep.tsx`, `IndividualRecipientPicker.tsx`, `GroupRecipientPicker.tsx`
+- **Dependencies**: T04
+- **Estimated**: 4h
+
+### T06: Create VariableMappingStep (Step 3)
+- [ ] Create `frontend/common/views/dashboard/certificates/generation/VariableMappingStep.tsx`
+- [ ] Fetch template variables via Apollo (already in store from Step 1 selection)
+- [ ] For each variable, render override input:
+  - `text` → MUI TextField with default value pre-filled
+  - `number` → MUI TextField (type=number, decimalPlaces constraint)
+  - `date` → MUI DatePicker
+  - `select` → MUI Select with selectOptions
+- [ ] "Use template defaults" checkbox — clears all overrides
+- [ ] Info banner: "Override default variable values for this generation. Leave blank to use template defaults."
+- [ ] Per-recipient overrides note if in individual mode: values apply to all selected recipients (display warning)
+- [ ] Step is skipped entirely if template has no variables (store detects empty variable list)
+- [ ] i18n keys: `certificates.generation.step3.*`
+- [ ] Run quality loop
+- **Requirements**: REQ-17.21–17.25 (variable mapping, override, defaults)
+- **Files created**: `VariableMappingStep.tsx`
+- **Dependencies**: T05
+- **Estimated**: 3h
+
+### T07: Create ReviewGenerateStep (Step 4)
+- [ ] Create `frontend/common/views/dashboard/certificates/generation/ReviewGenerateStep.tsx`
+- [ ] Summary display before generation:
+  - Template name + thumbnail
+  - Recipient count (individual) or group name + member count (group mode)
+  - Variable override summary (key → value, or "Using defaults")
+  - Total certificates to generate
+- [ ] "Generate" button (primary action, full width on mobile)
+- [ ] Button click triggers `store.startGeneration()` → calls `generateCertificate` mutation (individual) or `generateCertificatesBatch` mutation (group)
+- [ ] After generation starts: step transitions to "Generation in Progress" state
+- [ ] **Generation progress UI**:
+  - Progress bar (MUI LinearProgress with determinate mode)
+  - Per-certificate status list: "Rendering certificate 1 of 30..." with checkmark/error/X icons
+  - Live-updating count: "{succeeded} succeeded, {failed} failed, {remaining} remaining"
+  - Counts use Arabic pluralization rules
+- [ ] Server-side batch generation: GraphQL subscription or polling for progress (design decision: polling at 2-second intervals via `certificateBatchStatus` query)
+- [ ] i18n keys: `certificates.generation.step4.*` including pluralization for progress counts
+- [ ] Run quality loop
+- **Requirements**: REQ-17.26–17.30 (review summary, generate trigger, live progress, per-certificate status)
+- **Files created**: `ReviewGenerateStep.tsx`, `GenerationProgressDisplay.tsx`
+- **Dependencies**: T06
+- **Estimated**: 4h
+
+### T08: Create GenerationReport Component
+- [ ] Create `frontend/common/views/dashboard/certificates/generation/GenerationReport.tsx`
+- [ ] Displayed after generation completes (all certificates processed)
+- [ ] Summary card: total succeeded, total failed, total attempted
+- [ ] Success list: certificate names with "View Certificate" link (navigates to Plan 18 detail page)
+- [ ] Failure list: certificate/student name + error message (translated) + "Retry" button per failed certificate
+- [ ] "Done" button: closes dialog and refreshes certificate list (Plan 16) via Apollo `refetchQueries`
+- [ ] "Export Report" button: downloads CSV of generation results
+- [ ] Desktop: two-column layout (success left, failures right); Mobile: stacked sections
+- [ ] i18n keys: `certificates.generation.report.*` including pluralization
+- [ ] Run quality loop
+- **Requirements**: REQ-17.31–17.35 (generation report, per-certificate errors, retry, Done button)
+- **Files created**: `GenerationReport.tsx`
+- **Dependencies**: T07
+- **Estimated**: 3h
+
+---
+
+## Phase 3: Integration & Knowledge Propagation (T09–T11)
+
+### T09: Wire GenerationDialog into Certificate List Page
+- [ ] Add "Generate" button to Certificate List page toolbar (Plan 16's `CertificateTableToolbar`)
+- [ ] Button visibility: `CERTIFICATES_GENERATE` permission check
+- [ ] Button click: `certGenerationStore.openDialog()`
+- [ ] Add "Generate from Template" button to Template Detail page (Plan 10/15)
+- [ ] Template detail button: `certGenerationStore.openDialog(templateId)` — pre-selects template
+- [ ] Run quality loop on modified files
+- **Requirements**: REQ-17.1 (launch from cert list), REQ-17.2 (launch from template detail), REQ-17.4 (permission check)
+- **Files modified**: Certificate List page (Plan 16), Template Detail page (Plan 10/15)
+- **Dependencies**: T08
+- **Estimated**: 2h
+
+### T10: Accessibility & Keyboard Navigation
+- [ ] Verify dialog keyboard navigation:
+  - Tab cycles through actionable elements in logical order
+  - Enter on "Next" advances step (if valid)
+  - Enter on "Back" returns to previous step
+  - Escape on dialog close (disabled during generation)
+  - Arrow keys on stepper: navigate between steps (with validation)
+- [ ] Screen reader announcements:
+  - Step changes announced: "Step 2 of 4: Select Recipients"
+  - Generation progress announced: "Certificate 5 of 30 rendered"
+  - Generation complete announced: "Generation complete: 28 succeeded, 2 failed"
+- [ ] Focus management: focus moves to first actionable element when step changes
+- [ ] Trap focus within dialog while open
+- [ ] i18n for all ARIA labels
+- [ ] Run accessibility audit (browser inspector) on dialog
+- **Requirements**: REQ-17.36 (WCAG 2.1 AA compliance)
+- **Files modified**: All step components, GenerationDialog shell
+- **Dependencies**: T09
+- **Estimated**: 3h
+
+### T11: Knowledge Propagation & Documentation
+- [ ] Read all outcome files in `.ai/plans/cert-generation-dialog/outcome/`
+- [ ] Create canonical reference doc under `docs/frontend/certificate-generation-dialog.md` consolidating:
+  - Multi-step wizard dialog pattern with Zustand store
+  - Server-side batch generation with polling progress
+  - Per-certificate error reporting and retry workflow
+  - Accessibility patterns for wizard dialogs
+  - Variable override form patterns
+- [ ] Update `frontend/AGENTS.md` with generation dialog patterns and document reference
+- [ ] Update `frontend/views/AGENTS.md` with wizard dialog component patterns
+- [ ] Update root `AGENTS.md` Important References with new doc
+- [ ] Update `.agents/instructions/frontend.instructions.md` if new frontend conventions emerged
+- [ ] Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+- [ ] Write outcome file: `.ai/plans/cert-generation-dialog/outcome/T11-knowledge-propagation-outcome.md`
+- [ ] Update progress: Mark all tasks as `[x]` in this file
+- **Requirements**: Feature 6 (Outcome Knowledge Base)
+- **Files created**: `docs/frontend/certificate-generation-dialog.md`, outcome file
+- **Files modified**: `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, root `AGENTS.md`
+- **Dependencies**: T10
+- **Estimated**: 3h
+
+---
+
+## Execution Order
+
+```
+Phase 1: T01 → T02 → T03              (dialog shell + store + stepper)
+Phase 2: T04 → T05 → T06 → T07 → T08  (4 step components + report)
+Phase 3: T09 → T10 → T11              (integration + accessibility + knowledge)
+```
+
+Total: 11 tasks, ~38 hours estimated
+
+---
+
+## Quality Loop (Per File)
+
+After creating/modifying ANY file, run:
+
+```bash
+bun tsgo
+bun biome:check
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"verify-17","files":["<the-file>"]}'
+```
+
+Fix all errors before proceeding to next task.
+
+---
+
+## Instruction Verification (Per Subtask)
+
+| Layer | AGENTS.md | Instruction File |
+|---|---|---|
+| Frontend Views | `frontend/views/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend General | `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend Stores | `frontend/common/stores/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| App Router | `app/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Shared | `shared/AGENTS.md` | — |
+
+---
+
+## Acceptance Criteria Mapping
+
+| AC | Task(s) | Description |
+|---|---|---|
+| AC-17.1 | T09 | Dialog launches from Certificate List "Generate" button |
+| AC-17.2 | T09 | Dialog launches from Template Detail "Generate from Template" with pre-selection |
+| AC-17.3 | T02 | Step 1 active on dialog open, steps 2-4 disabled |
+| AC-17.4 | T09 | Generate button hidden without CERTIFICATES_GENERATE permission |
+| AC-17.5–17.8 | T03 | Wizard navigation (Next/Back/Cancel/step navigation) |
+| AC-17.9 | T01 | State preservation across step navigation |
+| AC-17.10–17.13 | T04 | Template selection list, loading, error, empty states |
+| AC-17.14–17.20 | T05 | Recipient selection (individual + group), search, validation |
+| AC-17.21–17.25 | T06 | Variable mapping with override and defaults |
+| AC-17.26–17.30 | T07 | Review summary, generate trigger, live progress |
+| AC-17.31–17.35 | T08 | Generation report, per-certificate errors, retry, Done button |
+| AC-17.36 | T10 | WCAG 2.1 AA accessibility compliance |
+| AC-17.37–17.56 | T11–T13 | Round 2: Enhanced wizard UX, accessibility, mobile, error handling |
+
+---
+
+## Phase 5: Testing & Knowledge Propagation (Round 2)
+
+### T11: Component Tests
+- [ ] Test wizard step navigation (forward/backward)
+- [ ] Test template selection state
+- [ ] Test recipient selection (individual, group, CSV modes)
+- [ ] Test CSV upload and preview parsing
+- [ ] Test variable mapping
+- [ ] Test options form
+- [ ] Test progress tracker display
+- [ ] Test cancel confirmation
+- [ ] Test partial failure retry
+- [ ] Test download all (ZIP)
+- File: `test/ui/components/cert-generation-dialog.test.tsx`
+- _Requirements: AC-17.37 through AC-17.56_
+- Quality Loop: `bun tsgo && bun biome:check && bun run lint --files test/ui/components/cert-generation-dialog.test.tsx`
+
+### T12: E2E Tests
+- [ ] Test full generation flow: select template → select recipients → map variables → set options → generate
+- [ ] Test CSV upload flow end-to-end
+- [ ] Test generation cancellation
+- [ ] Test partial failure and retry
+- File: `test/ui/e2e/cert-generation.spec.ts`
+- _Requirements: AC-17.37 through AC-17.56_
+- Quality Loop: `bun tsgo && bun biome:check`
+
+### T13: Knowledge Propagation
+- [ ] Create `docs/certificates/generation-pipeline.md` documenting:
+  - Puppeteer PDF rendering pipeline
+  - Arabic font handling via @sparticuz/chromium /tmp/fonts workaround
+  - QR code generation and placement
+  - Certificate numbering patterns
+  - Generation job lifecycle
+- [ ] Write outcome file
+- [ ] Update AGENTS.md Important References section
+- File: `docs/certificates/generation-pipeline.md`
+- _Requirements: AC-17.45, AC-17.46, AC-17.47, AC-17.48, AC-17.49, AC-17.50_
+
+---
+
+## Phase 6: V2 4-Step Wizard Components (T14–T21)
+
+> These tasks implement the alternative 4-step wizard design from design.md §11 (sections A–D). They may be executed as a parallel track to Phase 2, or as a replacement if the 4-step wizard is chosen as the canonical implementation.
+
+### Dependency Graph (Phase 6)
+
+```
+T14 (Store V2) ──► T15 (Wizard Shell + Step 1)
+T15 ──► T16 (Step 2: Recipients)
+T16 ──► T17 (Step 3: Variable Mapping)
+T15 ──► T18 (CsvUploadZone — needed by T16)
+T17 ──► T19 (Step 4: Review & Generate)
+T19 ──► T20 (GenerationProgressView)
+T20 ──► T21 (Integration: wire wizard into cert list)
+```
+
+### T14: Create useGenerationStore (Zustand V2)
+
+- [ ] Create `frontend/stores/useGenerationStore.ts` — Zustand store implementing the `GenerationState` interface from design.md §11C
+- [ ] **State fields**:
+  - `step: number` — current step (0–3)
+  - `selectedTemplateId: string | null`
+  - `recipients: Recipient[]` — array of recipient objects `{ id, name, email, phone? }`
+  - `recipientMode: 'individual' | 'group'`
+  - `selectedGroupId: string | null`
+  - `variableMapping: Record<string, { source: 'auto' | 'manual' | 'static'; value: string }>`
+  - `options: GenerationOptions` — language, paperSize, watermark, watermarkText, sendEmail, emailTemplateId, concurrentGenerations, pdfQuality, retryFailed, generateVerificationPage
+  - `isGenerating: boolean`
+  - `progress: { total: number; completed: number; failed: number; current: string }`
+  - `logEntries: GenerationLogEntry[]`
+- [ ] **Actions**:
+  - `nextStep()` — advance step (0→1→2→3), validates current step via step-specific validator
+  - `prevStep()` — go back one step
+  - `setStep(step: number)` — jump to a specific step
+  - `selectTemplate(templateId: string)` — set selectedTemplateId, reset variableMapping
+  - `setRecipients(recipients: Recipient[])` — replace recipients array
+  - `setRecipientMode(mode: 'individual' | 'group')` — switch mode, clear mode-specific state
+  - `selectGroup(groupId: string)` — set selectedGroupId
+  - `setVariableMapping(mapping)` — set full mapping object
+  - `setOptions(options: Partial<GenerationOptions>)` — merge partial options
+  - `startGeneration()` — set isGenerating=true, initialize progress, delegate mutation to ViewModel
+  - `cancelGeneration()` — set isGenerating=false, fire cancel mutation
+  - `addLogEntry(entry: GenerationLogEntry)` — append to logEntries array
+  - `updateProgress(progress: Partial<GenerationProgress>)` — merge partial progress
+- [ ] **Reset on close**: `reset()` action that clears all state to initial defaults
+- [ ] Store creation pattern: `create<GenerationState>()(...)` without persist (ephemeral wizard state)
+- [ ] Export typed selector hooks: `useGenerationStep()`, `useSelectedTemplateId()`, `useRecipients()`, `useVariableMapping()`, `useGenerationOptions()`, `useIsGenerating()`, `useGenerationProgress()`, `useGenerationLog()`
+- [ ] Run quality loop
+- [ ] Verify against: `frontend/stores/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- **Requirements**: REQ-17.9 (state preservation across navigation)
+- **Files created**: `frontend/stores/useGenerationStore.ts`
+- **Dependencies**: Plan 2 (types — TemplateVariable, Recipient)
+- **Estimated**: 3h
+
+### T15: Create CertificateGenerationWizard (Shell) + Step 1: Template Selection
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/CertificateGenerationWizard.tsx`
+- [ ] **Dialog shell**:
+  - MUI `Dialog` with `open` / `onClose` props
+  - `fullScreen` on mobile (via `useMediaQuery('(max-width:600px)')`)
+  - `maxWidth="lg"` + `fullWidth` on desktop
+  - `DialogTitle` with wizard title + close button (`IconButton` with `CloseOutlined`)
+  - `DialogContent` containing `Stepper` (desktop) or `MobileStepper` (mobile) + active step content
+  - `DialogActions` with Back / Next buttons
+  - Back button disabled on Step 0; Next button disabled on Step 3 (Generate button appears instead)
+- [ ] **Stepper labels**: "Select Template", "Select Recipients", "Map Variables", "Review & Generate"
+- [ ] **Step routing**: switch on `store.step` to render the active step component
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/Step1TemplateSelection.tsx`
+- [ ] **Step 1: Select Template**:
+  - Template gallery: horizontal scroll of published templates (MUI `Stack` with `direction="row"`, `overflowX: auto`)
+  - Each template card: thumbnail (background image), name, category badge (`Chip`), variable count text
+  - Single selection (radio-style): card border highlights (`sx={{ border: 2, borderColor: selected ? 'primary.main' : 'divider' }}`)
+  - Search bar (MUI `TextField`, debounced 300ms) filtering templates by name
+  - Refresh button (MUI `IconButton` with `RefreshOutlined`) to reload templates via Apollo `refetch`
+  - Loading state: skeleton placeholders (MUI `Skeleton`)
+  - Empty state: illustration + "No published templates available"
+  - Error state: `Alert` with "Failed to load templates" + retry button
+  - Below gallery: selected template's variables list with "Required" / "Optional" badges
+- [ ] **Validation**: must select a template to proceed — Next button disabled otherwise
+- [ ] i18n keys: `certificates.generation.step1.*`
+- [ ] Run quality loop on both files
+- **Requirements**: REQ-17.10–17.13
+- **Files created**: `CertificateGenerationWizard.tsx`, `Step1TemplateSelection.tsx`
+- **Dependencies**: T14
+- **Estimated**: 5h
+
+### T16: Create Step 2: Recipient Selection (Individual + Group)
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/Step2RecipientSelection.tsx`
+- [ ] **MUI `Tabs`** with two modes: "Individual Recipients" | "Recipient Group"
+- [ ] **Individual mode**:
+  - Recipient table (MUI `Table` or `DataGrid`): Name, Email, Phone columns + remove action column
+  - "Add Recipient" button → opens nested `Dialog` with Name, Email, Phone fields
+  - "Bulk Paste" button → opens nested `Dialog` with multiline `TextField` (one recipient per line, "Name, Email" format); parse button populates table
+  - CSV upload zone → embeds `CsvUploadZone` component (T18) with preview of first 5 rows
+- [ ] **Group mode**:
+  - MUI `Select` dropdown of existing recipient groups (from Plan 14)
+  - Selected group shows member count (pluralized) + member list preview (up to 50, expandable `Collapse`)
+  - GraphQL: `RecipientGroupsQueryDocument` to fetch available groups
+- [ ] **Header badge**: MUI `Chip` showing recipient count (pluralized) — "5 recipients selected"
+- [ ] **Variable preview**: expandable panel per recipient showing which template variables will be auto-filled from recipient data
+- [ ] **Validation**: at least 1 recipient required — Next button disabled if zero
+- [ ] i18n keys: `certificates.generation.step2.*` including pluralization for counts
+- [ ] Run quality loop
+- **Requirements**: REQ-17.14–17.20
+- **Files created**: `Step2RecipientSelection.tsx`
+- **Dependencies**: T15, T18 (CsvUploadZone)
+- **Estimated**: 5h
+
+### T17: Create Step 3: Variable Mapping with Live Preview
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/Step3VariableMapping.tsx`
+- [ ] **Three-column layout** (MUI `Grid` container with `spacing={3}`, `columns={12}`):
+- [ ] **Column 1: Template Variables** (`Grid` item `xs={12} md={4}`):
+  - Read-only list of all template variables
+  - Each row: variable name, type icon, Required/Optional badge
+- [ ] **Column 2: Data Source Mapping** (`Grid` item `xs={12} md={4}`):
+  - For each variable, a mapping row:
+  - Auto-mapped variables: highlighted green background (`sx={{ bgcolor: 'success.light' }}`) + "Auto-mapped" chip
+  - Manual mapping: MUI `Select` with options: recipient data fields, CSV columns, "Static value"
+  - Static value inputs (conditionally rendered when "Static value" selected):
+    - `text` → MUI `TextField`
+    - `number` → MUI `TextField` with `type="number"`
+    - `date` → MUI `DatePicker`
+    - `select` → MUI `Select` with template options
+  - Variable resolution status icon per row: ✅ Resolved (green `CheckCircle`), ⚠️ Partial (yellow `Warning`), ❌ Missing (red `Cancel`)
+- [ ] **Column 3: Live Preview** (`Grid` item `xs={12} md={4}`):
+  - Renders certificate using first recipient's data applied to template
+  - "Previous recipient" / "Next recipient" buttons to cycle through recipients
+  - Uses template renderer component (Plan 6)
+- [ ] **Validation**: all required variables must be mapped — Next button disabled if any required variable is unmapped
+- [ ] **Warning**: MUI `Alert` `severity="warning"` — "N optional variables are unmapped. Continue?" — shows confirmation dialog on Next
+- [ ] Auto-mapping logic: match variable name (case-insensitive) to recipient data fields
+- [ ] i18n keys: `certificates.generation.step3.*`
+- [ ] Run quality loop
+- **Requirements**: REQ-17.21–17.25
+- **Files created**: `Step3VariableMapping.tsx`
+- **Dependencies**: T16
+- **Estimated**: 5h
+
+### T18: Create CsvUploadZone Component
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/CsvUploadZone.tsx`
+- [ ] **Props**: `{ onParsed: (data: CsvParseResult) => void; onError: (error: string) => void; templateVariables: TemplateVariable[] }`
+- [ ] **Drag-and-drop zone** (MUI `Box` with `border: '2px dashed grey.400'`, hover state):
+  - Accepts `.csv` files only
+  - Click to browse (hidden `<input type="file" accept=".csv" />`)
+  - Dropped/selected file shows filename + size + "Remove" button
+  - Drag-over visual feedback (border color change to `primary.main`)
+- [ ] **Parsing pipeline** (on file select):
+  1. Validate file size (max 5MB) — inline `Alert` error if exceeded
+  2. Parse CSV client-side
+  3. Validate row count (max 1000 rows) — inline `Alert` error if exceeded
+  4. Show preview table (MUI `Table`) with first 5 rows
+  5. Open column mapping `Dialog`
+- [ ] **Column mapping dialog** (`Dialog`):
+  - Auto-detect columns by header name (case-insensitive): name→name, email→email, phone→phone
+  - For each CSV column header, MUI `Select` with options: Name, Email, Phone, Custom field, Ignore
+  - Manual remapping allowed (override auto-detection)
+  - Validation: name + email columns required — inline `FormHelperText` error if missing
+  - "Apply Mapping" button → calls `onParsed` with mapped data
+- [ ] **Template download**: "Download CSV template" link (`Link`) — generates sample CSV with headers matching template variables
+- [ ] **Error states** (inline `Alert`):
+  - File too large, too many rows, parse error, missing name/email columns
+- [ ] Define `CsvParseResult` interface (headers, rows, columnMapping, totalRows)
+- [ ] Run quality loop
+- **Requirements**: REQ-17.16 (CSV upload), REQ-17.17 (CSV preview)
+- **Files created**: `CsvUploadZone.tsx`
+- **Dependencies**: T14 (types), T16 (consumer)
+- **Estimated**: 4h
+
+### T19: Create Step 4: Review & Generate
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/Step4ReviewGenerate.tsx`
+- [ ] **Summary card** (MUI `Card` with `CardContent`):
+  - Template: name + thumbnail image (displayed in `Box` with `component="img"`, max width 120px)
+  - Recipients: count + expandable list (MUI `Collapse` — expand to see all names/emails)
+  - Variable mapping: summary text — "X auto-mapped, Y manual, Z static"
+  - Options section (MUI `FormControl` components):
+    - Language: MUI `Select` — Auto-detect, English, Arabic
+    - Paper Size: MUI `Select` — A4, Letter
+    - Watermark: MUI `Switch` + conditional `TextField` for watermark text
+    - Send Email: MUI `Switch` + conditional `Select` for email template
+- [ ] **"Generate Certificates" button** (MUI `LoadingButton`):
+  - `loading` prop bound to `store.isGenerating`
+  - `onClick` → `store.startGeneration()` → transitions wizard to progress view
+  - `loadingPosition="start"` with `LoadingButton` icon
+- [ ] **Generation options card** (collapsible MUI `Accordion`):
+  - Concurrent generations: MUI `Slider` (min=1, max=10, marks, default=3)
+  - PDF quality: MUI `Select` — Standard, High
+  - Retry failed: MUI `Switch`
+  - Generate verification page: MUI `Switch`
+- [ ] i18n keys: `certificates.generation.step5.*` (review summary)
+- [ ] Run quality loop
+- **Requirements**: REQ-17.26–17.30
+- **Files created**: `Step4ReviewGenerate.tsx`
+- **Dependencies**: T17
+- **Estimated**: 4h
+
+### T20: Create GenerationProgressView with Live Log
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx`
+- [ ] **Props**: `{ batchJobId: string; onComplete: (result: GenerationResult) => void; onCancel: () => void }`
+- [ ] **Progress bar**: MUI `LinearProgress` `variant="determinate"` — value = `(completed / total) * 100` — label "X of Y certificates generated"
+- [ ] **Live log panel** (auto-scroll container):
+  - `sx={{ fontFamily: 'monospace', maxHeight: 300, overflowY: 'auto' }}`
+  - Each line: `[HH:MM:SS] {emoji} Certificate #{NNN}: {RecipientName} — {message}`
+  - Emoji status: ✅ generated, ❌ failed, ⏳ in progress, 🔄 retrying
+  - Auto-scroll to bottom on new entries (use `useRef` + `useEffect` scrolling to bottom)
+- [ ] **Stats cards** (Grid with 4 `Card` items):
+  - Generated (green, `sx={{ borderColor: 'success.main' }}`) — success count
+  - Failed (red, `sx={{ borderColor: 'error.main' }}`) — failure count
+  - Pending (blue, `sx={{ borderColor: 'info.main' }}`) — not-yet-started
+  - In Progress (orange, `sx={{ borderColor: 'warning.main' }}`) — currently generating
+- [ ] **Cancel button**: MUI `Button` with `color="error"`
+  - Confirms with MUI `Dialog`: "Cancel generation? N certificates already generated."
+  - On confirm → `store.cancelGeneration()` → fires `cancelBatchJob` mutation
+- [ ] **Result screen** (rendered when generation completes — `progress.completed + progress.failed === progress.total`):
+  - Success count with 🎉 emoji + green `CheckCircleOutlined` icon
+  - Failed count (if > 0): "Retry Failed" `LoadingButton` that re-submits only failed certificateIds
+  - "View Certificates" button → `router.push('/certificates')` (Plan 16)
+  - "Generate More" button → `store.reset()` + return to Step 1
+- [ ] Polling: `useQuery(CertificateBatchJobStatusQueryDocument, { variables: { id: batchJobId }, pollInterval: 2000, fetchPolicy: 'network-only' })`
+- [ ] On each poll result: `store.updateProgress()` + `store.addLogEntry()` for any new entries since last poll
+- [ ] i18n keys: `certificates.generation.step6.*` (progress + report)
+- [ ] Run quality loop
+- **Requirements**: REQ-17.26–17.35 (progress, live status, cancel, retry, result screen)
+- **Files created**: `GenerationProgressView.tsx`
+- **Dependencies**: T19
+- **Estimated**: 5h
+
+### T21: Wire CertificateGenerationWizard into Certificate List Page
+
+- [ ] Add "Generate" button to Certificate List page toolbar (Plan 16's `CertificateTableToolbar`)
+- [ ] Button visibility: `CERTIFICATES_BATCH_GENERATE` permission check (via `RequirePermission`)
+- [ ] Button click: open `CertificateGenerationWizard` dialog (`setWizardOpen(true)`)
+- [ ] Render `CertificateGenerationWizard` in the Certificate List page with `open` state controlled by local `useState`
+- [ ] `onClose`: close dialog, do NOT reset store (store resets internally)
+- [ ] `onCompleted`: navigate to certificate list or show toast with success message
+- [ ] Add "Generate from Template" button to Template Detail page (Plan 6/7) — pre-selects template
+- [ ] Run quality loop on modified files
+- **Requirements**: REQ-17.1 (launch from cert list), REQ-17.2 (launch from template detail), REQ-17.4 (permission check)
+- **Files modified**: Certificate List page (Plan 16), Template Detail page (Plan 6/7)
+- **Dependencies**: T20
+- **Estimated**: 2h
+
+---
+
+## Phase 7: V2 Testing (T22–T25)
+
+### T22: Component Tests (6 test files)
+
+- [ ] **Test file 1**: `test/ui/components/cert-generation/wizard/CertificateGenerationWizard.test.tsx`
+  - Test wizard opens/closes
+  - Test step navigation (Next/Back, disabled states)
+  - Test step validation gating (Next disabled when invalid)
+- [ ] **Test file 2**: `test/ui/components/cert-generation/wizard/Step1TemplateSelection.test.tsx`
+  - Test template gallery rendering
+  - Test search filtering
+  - Test template selection (radio single-select)
+  - Test refresh button
+  - Test loading/empty/error states
+  - Test variable list display with Required/Optional badges
+- [ ] **Test file 3**: `test/ui/components/cert-generation/wizard/Step2RecipientSelection.test.tsx`
+  - Test individual mode: add/remove recipient, bulk paste
+  - Test group mode: group selection + member preview
+  - Test recipient count badge
+  - Test validation (min 1 recipient)
+  - Test variable preview expansion
+- [ ] **Test file 4**: `test/ui/components/cert-generation/wizard/Step3VariableMapping.test.tsx`
+  - Test three-column layout
+  - Test auto-mapping (matched by name)
+  - Test manual mapping (select source)
+  - Test static value inputs (text, number, date, select)
+  - Test live preview cycling (next/prev recipient)
+  - Test validation (required variables must be mapped)
+  - Test optional unmapped warning
+  - Test resolution status icons (resolved/partial/missing)
+- [ ] **Test file 5**: `test/ui/components/cert-generation/wizard/Step4ReviewGenerate.test.tsx`
+  - Test summary card (template, recipients, mapping summary)
+  - Test options form (language, paper size, watermark, send email)
+  - Test advanced settings accordion (concurrent, quality, retry, verification page)
+  - Test generate button loading state
+- [ ] **Test file 6**: `test/ui/components/cert-generation/wizard/GenerationProgressView.test.tsx`
+  - Test progress bar (determinate value)
+  - Test live log panel rendering + auto-scroll
+  - Test stats cards (generated/failed/pending/in-progress)
+  - Test cancel button + confirmation dialog
+  - Test result screen (success, failed retry, view certificates, generate more)
+- [ ] All tests use Happy DOM + mocked Apollo + mocked store
+- [ ] Quality Loop per file: `bun tsgo && bun biome:check && curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"verify-17-test","files":["<test-file>"]}'`
+- **Requirements**: AC-17.37 through AC-17.56
+- **Files created**: 6 test files under `test/ui/components/cert-generation/wizard/`
+- **Dependencies**: T21
+- **Estimated**: 8h
+
+### T23: CsvUploadZone Component Tests
+
+- [ ] Create `test/ui/components/cert-generation/wizard/CsvUploadZone.test.tsx`
+- [ ] Test drag-and-drop file acceptance
+- [ ] Test file size validation (reject > 5MB)
+- [ ] Test row count validation (reject > 1000 rows)
+- [ ] Test CSV parsing + preview table (first 5 rows)
+- [ ] Test column mapping dialog auto-detection (name, email, phone)
+- [ ] Test manual column remapping
+- [ ] Test validation (name + email required)
+- [ ] Test template download link
+- [ ] Test error states (invalid CSV, missing columns)
+- [ ] Quality Loop: `bun tsgo && bun biome:check`
+- **Requirements**: REQ-17.16, REQ-17.17
+- **Files created**: `test/ui/components/cert-generation/wizard/CsvUploadZone.test.tsx`
+- **Dependencies**: T18, T22
+- **Estimated**: 3h
+
+### T24: E2E Tests (6 tests)
+
+- [ ] Create `test/ui/e2e/cert-generation-wizard.spec.ts`
+- [ ] **E2E Test 1: Full generation flow**
+  - Navigate to certificate list → click "Generate"
+  - Step 1: select a template → Next
+  - Step 2: add 2 individual recipients → Next
+  - Step 3: verify auto-mapped variables, leave defaults → Next
+  - Step 4: review summary → click "Generate Certificates"
+  - Progress view: wait for completion → verify success result screen
+  - Click "View Certificates" → verify navigation to certificate list
+- [ ] **E2E Test 2: CSV upload flow**
+  - Step 1: select template → Next
+  - Step 2: switch to individual tab → CSV upload
+  - Drag a test CSV file → verify preview table
+  - Complete column mapping → Apply
+  - Verify recipients populated from CSV → Next → complete generation
+- [ ] **E2E Test 3: Group selection**
+  - Step 1: select template → Next
+  - Step 2: switch to "Recipient Group" tab
+  - Select a group from dropdown → verify member count + preview
+  - Next → map variables → generate → verify success
+- [ ] **E2E Test 4: Variable mapping**
+  - Step 1: select a template with many variables → Next
+  - Step 2: add recipients (individual) → Next
+  - Step 3: verify auto-mapped variables (green)
+  - Manually map an unmapped variable to a recipient field
+  - Set a static value for another variable
+  - Use Next/Prev recipient to verify live preview
+  - Verify warning for unmapped optional variables → continue → generate
+- [ ] **E2E Test 5: Failed retry**
+  - Mock partial failure (some certificates fail during generation)
+  - Progress view: verify log shows ❌ entries
+  - Result screen: verify failed count
+  - Click "Retry Failed" → verify retry log entries → verify completion
+- [ ] **E2E Test 6: Cancel generation**
+  - Start generation (large batch)
+  - Progress view: wait for some certificates to process
+  - Click "Cancel" → verify confirmation dialog
+  - Confirm cancel → verify generation stops
+  - Verify partial result state
+- [ ] All E2E tests require `bun run build:test` first (production server)
+- [ ] Quality Loop: `bun tsgo && bun biome:check`
+- **Requirements**: AC-17.37 through AC-17.56
+- **Files created**: `test/ui/e2e/cert-generation-wizard.spec.ts`
+- **Dependencies**: T21, T22, T23
+- **Estimated**: 8h
+
+### T25: Quality Loop Per File (V2)
+
+- [ ] For **every file** created in Phase 6 + Phase 7, run the per-file verification loop:
+  ```bash
+  bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
+  ```
+- [ ] Fix any tsgo, biome, lint, or codescene errors before proceeding to next task
+- [ ] Progressive enforcement: no skipping ahead (tsgo → biome → lint → codescene)
+- [ ] Files to validate (all Phase 6 + Phase 7 files):
+  - `frontend/stores/useGenerationStore.ts`
+  - `frontend/views/dashboard/cert/certificates/generate/CertificateGenerationWizard.tsx`
+  - `frontend/views/dashboard/cert/certificates/generate/Step1TemplateSelection.tsx`
+  - `frontend/views/dashboard/cert/certificates/generate/Step2RecipientSelection.tsx`
+  - `frontend/views/dashboard/cert/certificates/generate/Step3VariableMapping.tsx`
+  - `frontend/views/dashboard/cert/certificates/generate/Step4ReviewGenerate.tsx`
+  - `frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx`
+  - `frontend/views/dashboard/cert/certificates/generate/CsvUploadZone.tsx`
+  - All 6 component test files
+  - 1 E2E test file
+- [ ] Run full quality gate at end: `bun quality-gate`
+- **Requirements**: All quality requirements
+- **Dependencies**: T14–T24
+- **Estimated**: 4h
+
+### T26: Knowledge Propagation (V2)
+
+- [ ] Create `docs/frontend/certificate-generation-wizard.md` documenting:
+  - 4-step wizard dialog pattern with MUI Dialog + Stepper
+  - Zustand store design for ephemeral wizard state (`useGenerationStore`)
+  - Three-column variable mapping with live preview
+  - CSV upload with drag-drop + column mapping
+  - Generation progress with live log + auto-scroll + stat cards
+  - Polling-based progress tracking (2-second interval)
+  - Cancel + retry patterns for async batch generation
+- [ ] Write outcome file: `.ai/plans/cert-generation-dialog/outcome/T26-knowledge-v2-outcome.md`
+- [ ] Update `frontend/AGENTS.md` with 4-step wizard pattern reference
+- [ ] Update `frontend/views/AGENTS.md` with variable mapping + CSV upload patterns
+- [ ] Update root `AGENTS.md` Important References section with new doc
+- [ ] Update `.github/instructions/frontend.instructions.md` if new conventions emerged (e.g., drag-drop zone pattern, auto-scroll log pattern)
+- [ ] Mark all Phase 6 + Phase 7 tasks as `[x]` in this file
+- **Requirements**: Feature 6 (Outcome Knowledge Base)
+- **Files created**: `docs/frontend/certificate-generation-wizard.md`, outcome file
+- **Files modified**: `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, root `AGENTS.md`
+- **Dependencies**: T25
+- **Estimated**: 3h
+
+---
+
+## Execution Order (Full — Phases 1–7)
+
+```
+Phase 1 (Foundation): T01 → T02 → T03              (store + GraphQL + i18n)
+Phase 2 (6-step steps): T04 → T05 → T06 → T07 → T08 (4 step components + report)
+Phase 3 (6-step integration): T09 → T10 → T11        (integration + accessibility + knowledge)
+Phase 5 (6-step testing R2): T11–T13                 (component tests + E2E + knowledge)
+Phase 6 (V2 4-step): T14 → T15 → T16 → T17 → T18 → T19 → T20 → T21 (store + 4 steps + progress + CSV + integration)
+Phase 7 (V2 testing): T22 → T23 → T24 → T25 → T26   (component tests + CSV tests + E2E + quality + knowledge)
+```
+
+Total: 26 tasks, ~88 hours estimated (Phases 1–3: 38h, Phases 5–7: 50h)
+
+---
+
+## Round 4 Enhancement Tasks
+
+Round 4 tasks implement the production hardening features described in the Round 4 design section. Tasks are organized into 8 phases (R4-P1 through R4-P8) with dependencies on Phase 6/7 tasks (T14–T26). Each task includes file paths, component specifications with MUI v9 `sx` prop usage, Zustand store slice additions, quality loop per file, and instruction verification.
+
+### Phase R4-P1: CSV Column Mapping (R4-1)
+
+#### T-R4-01: CsvColumnMapperDialog Component
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx`
+- [ ] Props interface: `{ open: boolean; onClose: () => void; csvHeaders: string[]; templateVariables: TemplateVariable[]; onApply: (mapping: ColumnMapping[]) => void; lastMapping?: ColumnMapping[] | null }`
+- [ ] Three-section layout within MUI `Dialog` (`fullWidth`, `maxWidth="lg"`):
+  - Section A — Source Columns (draggable chips): MUI `Chip` elements with `draggable` attribute, label = header name, color via `sx={{ bgcolor: 'success.light' }}` when mapped, `sx={{ bgcolor: 'primary.light' }}` when unmapped
+  - Section B — Template Variable Slots (drop targets): MUI `Paper` rows with `sx={{ p: 1.5, mb: 1, border: '2px dashed', borderColor: dropTarget ? 'primary.main' : 'divider' }}`
+  - Section C — Preview & Validation: MUI `Box` showing first 3 rows of mapped data + `LinearProgress variant="determinate"` showing mapping coverage
+- [ ] Implement HTML5 Drag-and-Drop API:
+  - `handleDragStart`: sets `dataTransfer` payload to column name
+  - `handleDragOver`: `e.preventDefault()`, sets drop target highlight
+  - `handleDrop`: reads `dataTransfer`, calls `updateMapping()`
+- [ ] Auto-detection logic:
+  - Case-insensitive header matching with alias maps:
+    - name ← `name`, `full_name`, `full name`, `recipient_name`, `student_name`
+    - email ← `email`, `e-mail`, `mail`, `email_address`
+    - phone ← `phone`, `tel`, `mobile`, `phone_number`
+    - date ← `date`, `completion_date`, `issue_date`
+  - Fuzzy match: Levenshtein distance ≤ 2 for unmatched headers
+  - Runs on `csvHeaders` prop change via `useEffect`
+- [ ] Manual mapping override: MUI `Select` per variable with options — all CSV headers + "Static value" + "Ignore"
+  - Static value inputs: `TextField` (text/number), `DatePicker` (date), `Select` (select)
+- [ ] Mapping validation:
+  - All `required: true` variables must be mapped (blocking)
+  - No duplicate CSV column mappings (error message)
+  - Static values must be non-empty for required variables
+  - Date static values validated as ISO date strings
+- [ ] Mapping persistence:
+  - On Apply: save to `localStorage` key `cert-gen-csv-mapping-{templateId}`
+  - On open: load last mapping as `lastMapping` prop
+  - "Reset to auto-detect" clears persisted mapping
+  - "Remember this mapping" MUI `Switch` (default on) controls persistence
+- [ ] Unmapped variable warnings: MUI `Alert severity="warning"` — "3 optional variables are unmapped"
+- [ ] i18n keys: `certificates.generation.csvMapping.*` in `shared/locale/{en,ar}/certificates/generation-r4.ts`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md` before coding
+- [ ] **Quality Loop** (per file, progressive):
+  ```bash
+  # tsgo first
+  ~/.bun/bin/bun tsgo
+  # If pass: biome
+  ~/.bun/bin/bun biome:check --files=frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx
+  # If pass: lint via queue client
+  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+    -H "Content-Type: application/json" \
+    -d '{"id":"r4-t01","files":["frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx"]}'
+  # If pass: codescene
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md` and verify all rules followed
+- [ ] Import types from `backend/types/csvMapping.types.ts` — create this file with `ColumnMapping`, `CsvMappingValidation` interfaces
+- [ ] **Dependencies**: T-R4-08 (store slice), T18 (CsvUploadZone from Phase 6)
+- [ ] **Estimated**: 8h
+
+#### T-R4-02: CsvColumnMapperDialog Tests
+
+- [ ] Create `test/ui/components/cert-generation/wizard/CsvColumnMapperDialog.test.tsx`
+- [ ] Test drag-and-drop mapping (simulate drag start + drop events)
+- [ ] Test auto-detection by header name (name, email, phone aliases)
+- [ ] Test fuzzy matching (Levenshtein ≤ 2)
+- [ ] Test manual override via `Select`
+- [ ] Test static value inputs (text, number, date, select variants)
+- [ ] Test mapping validation — required variables must be mapped
+- [ ] Test duplicate column detection (error when same column mapped twice)
+- [ ] Test unmapped optional variable warning (non-blocking)
+- [ ] Test mapping persistence (localStorage save/load)
+- [ ] Test "Reset to auto-detect" clears persisted mapping
+- [ ] Test preview rendering (first 3 rows)
+- [ ] Use Happy DOM + mocked Apollo + mocked store
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
+- [ ] **Dependencies**: T-R4-01
+- [ ] **Estimated**: 4h
+
+### Phase R4-P2: Duplicate Detection (R4-2)
+
+#### T-R4-03: DuplicateDetectionPanel Component
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/DuplicateDetectionPanel.tsx`
+- [ ] Props: `{ onResolve: (action: DuplicateResolution) => void }` — reads duplicates from store directly
+- [ ] Renders as MUI `Accordion` within Step 2 (Step2RecipientSelection), shown only when `hasDuplicates === true`
+- [ ] Duplicate count banner: MUI `Alert severity="info"` — "5 duplicate recipients detected (3 groups). Click to review."
+- [ ] Per-group display: MUI `Table` with duplicate rows highlighted via `sx={{ bgcolor: 'warning.light', '&:hover': { bgcolor: 'warning.main' } }}`
+  - Columns: `#`, `Name`, `Email`, `Source Row`, `Action`
+  - Action: MUI `Select` — "Keep This" / "Keep First" / "Keep Last" / "Keep All"
+- [ ] Bulk actions bar: MUI `Box` with `sx={{ display: 'flex', gap: 1, mt: 1 }}`
+  - "Keep First (All Groups)" `Button` variant="outlined"
+  - "Keep Last (All Groups)" `Button` variant="outlined"
+  - "Keep All (No Dedup)" `Button` variant="outlined"
+  - "Export Duplicates" `Button` variant="text" — triggers CSV download
+- [ ] Detection algorithm: map by normalized email (lowercase, trimmed) or recipient ID; groups with > 1 entry are duplicates
+- [ ] i18n keys: `certificates.generation.duplicates.*`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md` before coding
+- [ ] **Quality Loop**: same progressive pattern as T-R4-01
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/views/dashboard/cert/certificates/generate/DuplicateDetectionPanel.tsx --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] Create `backend/types/duplicateDetection.types.ts` with `DuplicateGroup`, `DuplicateResolution` types
+- [ ] **Dependencies**: T-R4-09 (store slice), T17 (Step2RecipientSelection)
+- [ ] **Estimated**: 5h
+
+#### T-R4-04: DuplicateDetectionPanel Tests
+
+- [ ] Create `test/ui/components/cert-generation/wizard/DuplicateDetectionPanel.test.tsx`
+- [ ] Test detection: 2 recipients with same email → 1 group detected
+- [ ] Test detection by ID (no email)
+- [ ] Test bulk "Keep First" — removes all but first in each group
+- [ ] Test bulk "Keep Last" — removes all but last in each group
+- [ ] Test bulk "Keep All" — no removal
+- [ ] Test per-group resolution via `Select`
+- [ ] Test export duplicates CSV download
+- [ ] Test panel hidden when no duplicates
+- [ ] Test panel shown when duplicates exist
+- [ ] Use Happy DOM + mocked store
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
+- [ ] **Dependencies**: T-R4-03
+- [ ] **Estimated**: 3h
+
+### Phase R4-P3: Recipient Validation (R4-3)
+
+#### T-R4-05: RecipientValidationPanel Component
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/RecipientValidationPanel.tsx`
+- [ ] Props: `{ onExportErrors: () => void; onFixRow: (rowIndex: number) => void }` — reads validation results from store
+- [ ] Summary banner: MUI `Alert` with dynamic severity:
+  - `severity="error"`: "12 rows have errors and must be fixed before generation"
+  - `severity="warning"`: "5 rows have warnings"
+  - `severity="success"`: "All recipients validated successfully"
+- [ ] Error table (expandable via MUI `Collapse`):
+  - MUI `Table` with columns: `Row #`, `Name`, `Email`, `Errors`, `Action`
+  - Error cell: `Typography` with `sx={{ color: 'error.main', fontSize: 'caption.fontSize' }}`
+  - Action: "Edit Row" `IconButton` (`EditOutlined`)
+- [ ] Export errors button: "Export Error Report (CSV)" — columns: `row_number, name, email, error_field, error_type, error_message`
+- [ ] Validation settings (`Accordion`):
+  - "Strict email validation" `Switch` (default on)
+  - "No special characters in names" `Switch` (default off)
+  - "Phone number format" `Select` — E.164 / Local / None
+  - "Block generation on warnings" `Switch` (default off)
+- [ ] Validation pipeline:
+  - Email: RFC 5322 simplified `^[^\s@]+@[^\s@]+\.[^\s@]+$`
+  - Required fields: non-empty for `required: true` template variables
+  - Phone: E.164 `^\+?[1-9]\d{1,14}$`
+  - Name: `^[a-zA-Z\u0600-\u06FF\s]+$` (Latin + Arabic + spaces)
+- [ ] Debounced validation: `useEffect` with `setTimeout` 500ms on recipient list change
+- [ ] i18n keys: `certificates.generation.validation.*`
+- [ ] Integration: Step 3 "Next" disabled if any `severity: 'error'` exists (unless `blockOnWarnings` off and only warnings)
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md` before coding
+- [ ] **Quality Loop**: progressive per file
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/views/dashboard/cert/certificates/generate/RecipientValidationPanel.tsx --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] Create `backend/types/recipientValidation.types.ts` with `RowValidation`, `ValidationError` types
+- [ ] **Dependencies**: T-R4-10 (store slice), T17
+- [ ] **Estimated**: 6h
+
+#### T-R4-06: RecipientValidationPanel Tests
+
+- [ ] Create `test/ui/components/cert-generation/wizard/RecipientValidationPanel.test.tsx`
+- [ ] Test email format validation (valid + invalid emails)
+- [ ] Test required field check (missing name → error)
+- [ ] Test phone validation in E.164 mode
+- [ ] Test name validation with "no special chars" enabled
+- [ ] Test error table rendering with row numbers
+- [ ] Test "Edit Row" button triggers `onFixRow`
+- [ ] Test export errors CSV download
+- [ ] Test validation settings (`Switch` toggles change validation behavior)
+- [ ] Test "Block generation on warnings" toggle
+- [ ] Test debounced validation (500ms delay)
+- [ ] Test summary banner severity changes (error/warning/success)
+- [ ] Use Happy DOM + mocked store
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
+- [ ] **Dependencies**: T-R4-05
+- [ ] **Estimated**: 4h
+
+### Phase R4-P4: Progress Cancellation + Partial Failure (R4-4, R4-5)
+
+#### T-R4-07: Progress Cancellation Enhancement
+
+- [ ] Modify `frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx`
+- [ ] Enhance Cancel button: integrate into progress bar container (MUI `Box` with `sx={{ display: 'flex', alignItems: 'center', gap: 2 }}`)
+  - `LinearProgress` (flex-grow)
+  - "N / M" `Typography`
+  - Cancel `IconButton` (`CancelOutlined`) with `sx={{ color: 'error.main' }}`
+- [ ] Confirmation dialog: MUI `Dialog` — "Cancel Certificate Generation?" with partial progress info
+  - Body: "N of M certificates generated. Cancelling stops remaining and cleans up partial PDFs."
+  - Inline `LinearProgress` showing current progress
+  - Buttons: "Keep Generating" (secondary) / "Cancel Generation" (`sx={{ color: 'error.main' }}`)
+- [ ] During cancellation: `LinearProgress variant="indeterminate"`, cancel button shows `LoadingButton` spinner
+- [ ] Post-cancel state: "Cancelled — N of M completed" + "Resume Generation" `Button`
+- [ ] WebSocket integration:
+  - Subscribe to `cert:generation:{batchJobId}` channel on generation start
+  - Handle message types: `progress`, `log`, `cancelled`, `completed`, `error`
+  - Polling fallback: if WS connected, poll interval = 10s; if disconnected, poll interval = 2s
+- [ ] Create `frontend/stores/generationWebSocket.ts` — WebSocket connection manager:
+  ```typescript
+  export class GenerationWebSocket {
+    connect(batchJobId: string): void;
+    disconnect(): void;
+    onMessage(handler: (msg: GenerationWebSocketMessage) => void): void;
+    onConnect(handler: () => void): void;
+    onDisconnect(handler: () => void): void;
+  }
+  ```
+- [ ] Import `GenerationWebSocketMessage` type from `backend/types/generationWebSocket.types.ts` (create this)
+- [ ] i18n keys: `certificates.generation.cancellation.*`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/stores/AGENTS.md` before coding
+- [ ] **Quality Loop**: progressive per file on both modified + new files
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx --lifecycle codescene
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/stores/generationWebSocket.ts --lifecycle codescene
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    backend/types/generationWebSocket.types.ts --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `frontend/stores/AGENTS.md`
+- [ ] **Dependencies**: T19, T-R4-11 (store slice)
+- [ ] **Estimated**: 6h
+
+#### T-R4-08: Partial Failure Recovery Panel
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/FailureRecoveryPanel.tsx`
+- [ ] Failure summary card: MUI `Card` with `sx={{ borderColor: 'error.main' }}`
+  - "N recipients failed" header
+  - Category breakdown: MUI `Chip` per category — `template_error`, `pdf_render`, `email_send`, `storage`, `unknown`
+  - Each chip with count: `sx={{ bgcolor: 'error.light' }}` + label "template_error: 2"
+- [ ] Failed recipients table: MUI `Table` with `sx={{ maxHeight: 400, overflowY: 'auto' }}`
+  - Columns: `#`, `Name`, `Email`, `Category`, `Reason`, `Retry Count`, `Actions`
+  - Actions: "Retry This" `IconButton` (`ReplayOutlined`)
+- [ ] Bulk recovery actions: MUI `Stack` with `direction="row"`, `spacing={2}`
+  - "Retry All Failed" `LoadingButton` — new batch job with only failed recipients
+  - "Export Failed as CSV" `Button` — columns: `name, email, failure_category, failure_reason, retry_count`
+  - "Resume from Last Success" `Button` — re-submit with pending + failed (skip generated)
+  - "Skip Failed & Complete" `Button` — mark job complete with partial results
+- [ ] Retry logic:
+  - Max 3 retries (configurable)
+  - After max: status → `failed_final`, excluded from retry buttons
+  - Retry creates new `batchJobId`
+- [ ] Create `backend/types/failureRecovery.types.ts` with:
+  - `RecipientGenerationResult` — status, certificateId, failureReason, failureCategory, retryCount
+  - `FailureCategory` — union type
+- [ ] i18n keys: `certificates.generation.failures.*`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `backend/types/AGENTS.md`
+- [ ] **Quality Loop**: progressive per file
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/views/dashboard/cert/certificates/generate/FailureRecoveryPanel.tsx --lifecycle codescene
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    backend/types/failureRecovery.types.ts --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `backend/types/AGENTS.md`
+- [ ] **Dependencies**: T-R4-07, T-R4-12 (store slice)
+- [ ] **Estimated**: 5h
+
+#### T-R4-09: Cancellation + Failure Recovery Tests
+
+- [ ] Modify `test/ui/components/cert-generation/wizard/GenerationProgressView.test.tsx`
+- [ ] Test cancel button integrated in progress bar
+- [ ] Test confirmation dialog shows partial progress
+- [ ] Test "Keep Generating" dismisses dialog
+- [ ] Test "Cancel Generation" calls `cancelGeneration()` + WebSocket cancel
+- [ ] Test post-cancel state shows "Cancelled — N of M"
+- [ ] Test "Resume Generation" button
+- [ ] Test WebSocket message handling (progress, log, cancelled, completed, error)
+- [ ] Test polling fallback when WS disconnected
+- [ ] Create `test/ui/components/cert-generation/wizard/FailureRecoveryPanel.test.tsx`
+- [ ] Test failure summary card with category breakdown
+- [ ] Test failed recipients table rendering
+- [ ] Test "Retry This" per row
+- [ ] Test "Retry All Failed"
+- [ ] Test "Export Failed as CSV"
+- [ ] Test "Resume from Last Success"
+- [ ] Test "Skip Failed & Complete"
+- [ ] Test max retry limit (3 → `failed_final`)
+- [ ] Use Happy DOM + mocked Apollo + mocked store
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
+- [ ] **Dependencies**: T-R4-07, T-R4-08
+- [ ] **Estimated**: 5h
+
+### Phase R4-P5: Generation Queue (R4-6)
+
+#### T-R4-10: GenerationQueueDialog Component
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/GenerationQueueDialog.tsx`
+- [ ] MUI `Dialog` (`fullWidth`, `maxWidth="md"`) accessible from wizard footer: "Queue" `Button` with MUI `Badge` showing queue count
+- [ ] Queue list: MUI `Table` with columns: `#` (position), `Template`, `Recipients`, `Status`, `Priority`, `Est. Time`, `Actions`
+- [ ] Status chips (MUI `Chip` with color by status):
+  - `queued` → `sx={{ bgcolor: 'info.light' }}` + "Queued"
+  - `running` → `sx={{ bgcolor: 'warning.light' }}` + spinner icon
+  - `paused` → `sx={{ bgcolor: 'grey.300' }}` + "Paused"
+  - `completed` → `sx={{ bgcolor: 'success.light' }}` + "Completed"
+  - `failed` → `sx={{ bgcolor: 'error.light' }}` + "Failed"
+  - `cancelled` → `sx={{ bgcolor: 'grey.200' }}` + "Cancelled"
+- [ ] Priority selector: inline MUI `Select` per row — `low`, `normal`, `high`, `urgent`
+  - Change triggers re-sort + `updateJobPriority` mutation
+- [ ] Estimated time display: MUI `Typography` with `sx={{ fontStyle: 'italic' }}` — "~3 min"
+- [ ] Actions per row (`IconButton`s):
+  - `running` → `PauseOutlined`
+  - `paused` → `PlayArrowOutlined`
+  - `queued` → `DeleteOutlined`
+  - `completed`/`failed` → `VisibilityOutlined` (view results)
+  - Any → `ArrowUpwardOutlined` / `ArrowDownwardOutlined` (reorder)
+- [ ] "Start Now" `Button` — moves selected job to position 1 (urgent priority)
+- [ ] Create GraphQL documents in `frontend/common/graphql/sharedDocuments/generationQueue.documents.ts`:
+  - `GenerationQueueQueryDocument` — query all jobs
+  - `UpdateJobPriorityMutationDocument`
+  - `PauseJobMutationDocument`
+  - `ResumeJobMutationDocument`
+  - `RemoveJobMutationDocument`
+  - `ReorderJobMutationDocument`
+- [ ] Backend GraphQL definitions in `backend/graphql/pothos/generationQueue.ts`:
+  - `certificateGenerationQueue` query
+  - `updateJobPriority`, `pauseJob`, `resumeJob`, `removeJob`, `reorderJob` mutations
+- [ ] WebSocket: subscribe to queue updates for real-time position/status changes
+- [ ] i18n keys: `certificates.generation.queue.*`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `backend/graphql/AGENTS.md`
+- [ ] **Quality Loop**: progressive per file for all created/modified files
+  ```bash
+  for f in frontend/views/dashboard/cert/certificates/generate/GenerationQueueDialog.tsx \
+           frontend/common/graphql/sharedDocuments/generationQueue.documents.ts \
+           backend/graphql/pothos/generationQueue.ts; do
+    ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
+  done
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `backend.instructions.md`
+- [ ] After GraphQL schema changes: `bun run generate:gqlSchema && bun codegen`
+- [ ] Create `backend/types/generationQueue.types.ts` with `GenerationJob`, `JobStatus`, `JobPriority` types
+- [ ] **Dependencies**: T-R4-13 (store slice), T19, T-R4-07
+- [ ] **Estimated**: 8h
+
+#### T-R4-11: GenerationQueueDialog Tests
+
+- [ ] Create `test/ui/components/cert-generation/wizard/GenerationQueueDialog.test.tsx`
+- [ ] Test queue list rendering with multiple jobs
+- [ ] Test status chip colors per status
+- [ ] Test priority change triggers mutation + re-sort
+- [ ] Test pause/resume actions
+- [ ] Test remove job action
+- [ ] Test reorder (up/down arrows)
+- [ ] Test "Start Now" moves to position 1
+- [ ] Test estimated time display
+- [ ] Test queueBadge count in wizard footer
+- [ ] Test WebSocket queue update handling
+- [ ] Use Happy DOM + mocked Apollo + mocked store
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
+- [ ] **Dependencies**: T-R4-10
+- [ ] **Estimated**: 4h
+
+### Phase R4-P6: Email Notification (R4-7)
+
+#### T-R4-12: Email Notification Enhancement
+
+- [ ] Modify `frontend/views/dashboard/cert/certificates/generate/Step4ReviewGenerate.tsx`
+- [ ] When "Send Email" `Switch` is on, show new section:
+  - Email template selector: MUI `Select` populated from `emailTemplates` query (filtered by `type = 'certificate_notification'`)
+  - Email preview: `Dialog` or inline `Paper` showing rendered HTML with first recipient's data
+  - "Preview with recipient X" `Select` — cycle through recipients
+  - "Send test email to me" `Button` — calls `sendTestEmail` mutation
+  - "Send Later" `Switch` → when on: MUI `DateTimePicker` for `scheduledSendAt`
+  - "Track delivery" `Switch` (default on)
+- [ ] Create GraphQL documents in `frontend/common/graphql/sharedDocuments/emailNotification.documents.ts`:
+  - `EmailTemplatesQueryDocument` — query by type
+  - `SendTestEmailMutationDocument`
+  - `ResendEmailMutationDocument`
+- [ ] Backend GraphQL definitions in `backend/graphql/pothos/emailNotification.ts`
+- [ ] Email delivery tracking: `EmailDeliveryStatus` interface in `backend/types/emailNotification.types.ts`
+- [ ] Bounce handling: on bounce webhook, update recipient result with `emailStatus: 'bounced'`
+  - "Re-send email" `Button` for bounced recipients (calls `resendEmail` mutation)
+- [ ] i18n keys: `certificates.generation.email.*`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `backend/graphql/AGENTS.md`
+- [ ] **Quality Loop**: progressive per file
+  ```bash
+  for f in frontend/views/dashboard/cert/certificates/generate/Step4ReviewGenerate.tsx \
+           frontend/common/graphql/sharedDocuments/emailNotification.documents.ts \
+           backend/graphql/pothos/emailNotification.ts \
+           backend/types/emailNotification.types.ts; do
+    ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
+  done
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `backend.instructions.md`
+- [ ] After GraphQL schema changes: `bun run generate:gqlSchema && bun codegen`
+- [ ] **Dependencies**: T-R4-14 (store slice), T19
+- [ ] **Estimated**: 6h
+
+#### T-R4-13: Email Notification Tests
+
+- [ ] Modify `test/ui/components/cert-generation/wizard/Step4ReviewGenerate.test.tsx`
+- [ ] Test "Send Email" switch toggles email section visibility
+- [ ] Test email template selector populates from query
+- [ ] Test email preview renders HTML
+- [ ] Test preview recipient cycling
+- [ ] Test "Send test email" calls mutation
+- [ ] Test "Send Later" switch shows `DateTimePicker`
+- [ ] Test "Track delivery" toggle
+- [ ] Test bounce handling: "Re-send email" appears for bounced recipients
+- [ ] Use Happy DOM + mocked Apollo
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
+- [ ] **Dependencies**: T-R4-12
+- [ ] **Estimated**: 3h
+
+### Phase R4-P7: Pre-Flight + Batch Control + Accessibility + Errors + Performance (R4-8 through R4-12)
+
+#### T-R4-14: Pre-Flight Validation Component
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/PreFlightCheckDialog.tsx`
+- [ ] MUI `Dialog` titled "Pre-Generation Validation"
+- [ ] Checklist of checks with pass/fail icons:
+  - Template status check (verify `active`)
+  - Variable coverage check (all recipients have data for mapped variables)
+  - Image availability check (HEAD request to image URLs)
+  - Font availability check (verify server-side font files)
+- [ ] Pre-flight runs when "Generate Certificates" clicked, before actual generation
+- [ ] On `severity: 'error'` failure: "Generate" disabled, "Fix Issues" highlighted
+- [ ] On pass with warnings: "Generate" enabled, warnings as non-blocking `Alert`
+- [ ] "Preview First 3 Certificates" `Button` after pre-flight passes
+  - Renders 3 certificate thumbnails (MUI `Card` with template renderer)
+  - Clickable → full-size preview `Dialog`
+  - "Looks good — proceed to full generation" `Button`
+- [ ] i18n keys: `certificates.generation.preFlight.*`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
+- [ ] **Quality Loop**: progressive per file
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/views/dashboard/cert/certificates/generate/PreFlightCheckDialog.tsx --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] Create `backend/types/preFlight.types.ts` with `PreFlightCheck` interface
+- [ ] **Dependencies**: T-R4-15 (store slice), T19
+- [ ] **Estimated**: 5h
+
+#### T-R4-15: Batch Control Enhancement
+
+- [ ] Modify `frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx`
+- [ ] Add batch control panel to advanced settings `Accordion` (Step 4):
+  - `ToggleButtonGroup` — "Auto" / "Manual"
+  - `Slider` for manual batch size (min 10, max 1000, step 10)
+  - `TextField type="number"` for throttle (ms, default 100)
+  - `TextField type="number"` for memory limit (MB, default 500) + `LinearProgress` showing current
+  - `TextField type="number"` for batch timeout (ms, default 60000)
+  - `Switch` for "Pause between batches"
+- [ ] Auto-batch sizing: ≤100 → 100; 101–500 → 100; 501–1000 → 500; >1000 → 500
+- [ ] Dual-level progress: overall `LinearProgress` + current batch `LinearProgress variant="determinate" color="secondary"`
+- [ ] Batch log panel (separate from main log): batch-level entries with `📦` icons
+- [ ] "Continue to next batch?" dialog when `pauseBetweenBatches` is on
+- [ ] Memory monitoring: poll `performance.memory?.usedJSHeapSize` every 5s; auto-pause if > `maxMemoryMB`
+- [ ] WebSocket: handle `cert:generation:memory` events from server
+- [ ] i18n keys: `certificates.generation.batch.*`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
+- [ ] **Quality Loop**: progressive per file
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] Create `backend/types/batchControl.types.ts` with `BatchConfig`, `BatchGroup` types
+- [ ] **Dependencies**: T-R4-07, T-R4-16 (store slice)
+- [ ] **Estimated**: 5h
+
+#### T-R4-16: Accessibility Enhancement
+
+- [ ] Modify all wizard step components + `CertificateGenerationWizard.tsx`
+- [ ] Wizard container: `role="dialog"`, `aria-modal="true"`, `aria-labelledby="cert-gen-dialog-title"`
+- [ ] Stepper: `role="tablist"`, each `StepButton` has `role="tab"`, `aria-selected`, `aria-controls`
+- [ ] Step content: `role="tabpanel"`, `id`, `aria-labelledby`
+- [ ] Step labels: `aria-label` — "Step 1 of 4: Select Template"
+- [ ] Progress indicator: `aria-label="Certificates generated: N of M"`, updated on progress change
+- [ ] CSV preview table keyboard nav:
+  - `tabindex="0"` on `<table>`, arrow keys navigate cells
+  - `aria-rowcount`, `aria-colcount`, `aria-rowindex`, `aria-colindex`
+  - `aria-label` on column headers
+- [ ] Screen reader announcements:
+  - `aria-live="polite"` region for step changes
+  - `aria-live="assertive"` for progress milestones (every 10%)
+  - `aria-live="assertive"` for blocking errors
+  - MUI `Snackbar` with `role="status"` for major events
+- [ ] Focus management:
+  - Step change → focus to step content heading (`h2`)
+  - Dialog open → focus to first interactive element (Step 1 search field)
+  - Dialog close → focus to triggering button
+  - Focus trap within dialog (MUI `Dialog` default)
+- [ ] Ctrl+Left / Ctrl+Right keyboard shortcut for Back/Next
+- [ ] Visually-hidden `Box` for aria-live region: `sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
+- [ ] **Quality Loop**: per file for all modified step components
+  ```bash
+  for f in frontend/views/dashboard/cert/certificates/generate/CertificateGenerationWizard.tsx \
+           frontend/views/dashboard/cert/certificates/generate/Step1TemplateSelection.tsx \
+           frontend/views/dashboard/cert/certificates/generate/Step2RecipientSelection.tsx \
+           frontend/views/dashboard/cert/certificates/generate/Step3VariableMapping.tsx \
+           frontend/views/dashboard/cert/certificates/generate/Step4ReviewGenerate.tsx \
+           frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx; do
+    ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
+  done
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Dependencies**: T14–T21 (all wizard + step components), T-R4-07
+- [ ] **Estimated**: 6h
+
+#### T-R4-17: Error States Enhancement
+
+- [ ] Modify `CsvUploadZone.tsx` — CSV parse error with line number:
+  - MUI `Alert severity="error"` — "CSV Parse Error: malformed quoted field on line 47"
+  - Code block showing problematic line with line number prefix
+  - "Download error log" `Button`
+- [ ] Modify `Step1TemplateSelection.tsx` — template not found:
+  - `Alert severity="error"` — "Template not found. Go back and select another." + "Back to Step 1" `Button`
+- [ ] Modify `GenerationProgressView.tsx`:
+  - Disk space error: `Alert severity="error"` — "Insufficient disk space (need ~500MB, 200MB available)"
+  - API rate limit: `Alert severity="warning"` with countdown timer — "Rate limited — auto-retrying in 60s" (MUI `Typography` with `sx={{ fontVariantNumeric: 'tabular-nums' }}`)
+  - WebSocket disconnected: `Alert severity="warning"` — "Connection lost — falling back to polling"
+  - Network error: `Alert severity="warning"` — "Network error — auto-retrying connection"
+- [ ] Recipient limit: in `Step2RecipientSelection.tsx` — `Alert severity="error"` when > 10000 recipients
+- [ ] Wrap wizard in React Error Boundary:
+  - Create `frontend/views/dashboard/cert/certificates/generate/GenerationErrorBoundary.tsx`
+  - Fallback UI: "Something went wrong. Your generation has been saved." + "Reload" `Button`
+  - Log error via `logFrontendError` GraphQL mutation
+- [ ] i18n keys: `certificates.generation.errors.*` (expanded from R1 error catalog)
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
+- [ ] **Quality Loop**: progressive per file
+  ```bash
+  for f in frontend/views/dashboard/cert/certificates/generate/CsvUploadZone.tsx \
+           frontend/views/dashboard/cert/certificates/generate/Step1TemplateSelection.tsx \
+           frontend/views/dashboard/cert/certificates/generate/Step2RecipientSelection.tsx \
+           frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx \
+           frontend/views/dashboard/cert/certificates/generate/GenerationErrorBoundary.tsx; do
+    ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
+  done
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Dependencies**: T14–T21, T-R4-07
+- [ ] **Estimated**: 5h
+
+#### T-R4-18: Performance Monitor + CSV Web Worker
+
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/PerformanceMonitor.tsx`
+  - Invisible component (renders `null`)
+  - Wraps critical operations, reports timing to store
+  - Records `PerformanceMetric` per operation
+- [ ] Create `frontend/views/dashboard/cert/certificates/generate/csvParseWorker.ts`
+  - Web Worker for CSV parsing (offloads from main thread)
+  - `postMessage` parse result back to main thread
+  - Prevents UI freeze on large files
+- [ ] Budget violations: non-blocking `Snackbar` — "⚠️ Performance: CSV parse took 3.2s (budget: 2s)"
+- [ ] Repeated violations (3+): persistent `Alert` in step header
+- [ ] Auto-optimization rules:
+  - CSV parse > 2s → auto-enable batch mode (size 500)
+  - Generation avg > 100ms/cert → auto-increase throttle to 200ms
+  - PDF render > 3s → reduce DPI from 300 to 150
+  - Memory > 400MB → preemptive pause before next batch
+- [ ] i18n keys: `certificates.generation.performance.*`
+- [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
+- [ ] **Quality Loop**: progressive per file
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/views/dashboard/cert/certificates/generate/PerformanceMonitor.tsx --lifecycle codescene
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts \
+    frontend/views/dashboard/cert/certificates/generate/csvParseWorker.ts --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] Create `backend/types/performance.types.ts` with `PerformanceMetric` interface
+- [ ] **Dependencies**: T-R4-18 (store slice), T18 (CSV)
+- [ ] **Estimated**: 5h
+
+#### T-R4-19: Pre-Flight + Batch + Performance Tests
+
+- [ ] Create `test/ui/components/cert-generation/wizard/PreFlightCheckDialog.test.tsx`
+  - Test template status check (active/archived)
+  - Test variable coverage check
+  - Test image availability check (mock HEAD requests)
+  - Test font availability check
+  - Test "Preview First 3 Certificates"
+  - Test generate disabled on error
+- [ ] Create `test/ui/components/cert-generation/wizard/BatchControl.test.tsx` (can be in ProgressView test)
+  - Test auto-batch sizing for various recipient counts
+  - Test manual batch size via `Slider`
+  - Test dual-level progress bar
+  - Test batch log panel
+  - Test "Continue to next batch?" dialog
+  - Test memory monitoring + auto-pause
+- [ ] Create `test/ui/components/cert-generation/wizard/PerformanceMonitor.test.tsx`
+  - Test metric recording
+  - Test budget check
+  - Test budget violation snackbar
+  - Test repeated violations → persistent alert
+  - Test auto-optimization rules
+- [ ] Create `test/ui/components/cert-generation/wizard/csvParseWorker.test.ts`
+  - Test worker parses CSV correctly
+  - Test worker handles malformed CSV (reports line number)
+  - Test worker performance under load (mock large file)
+- [ ] Use Happy DOM + mocked Apollo + mocked store
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
+- [ ] **Dependencies**: T-R4-14, T-R4-15, T-R4-18
+- [ ] **Estimated**: 6h
+
+### Phase R4-P8: Zustand Store Slices + Knowledge Propagation
+
+#### T-R4-20: Zustand Store — Round 4 Slices
+
+- [ ] Modify `frontend/stores/useGenerationStore.ts`
+- [ ] Add slices using Zustand slice composition pattern:
+  - `createCsvMappingSlice` — R4-1 state: `csvMappings`, `mappingValidation`, `lastUsedMapping`, `rememberMapping` + actions
+  - `createDuplicateSlice` — R4-2 state: `duplicateGroups`, `duplicateResolution`, `hasDuplicates`, `showDuplicatePanel` + actions
+  - `createValidationSlice` — R4-3 state: `validationResults`, `validationSettings`, `hasErrors`, `hasWarnings` + actions
+  - `createCancellationSlice` — R4-4 state: `isCancelling`, `cancelConfirmationOpen`, `webSocketConnected`, `partialCleanupComplete` + actions
+  - `createFailureRecoverySlice` — R4-5 state: `recipientResults`, `failureBreakdown`, `maxRetries`, `isRetrying` + actions
+  - `createQueueSlice` — R4-6 state: `queue`, `queueDialogOpen`, `currentJobId` + actions
+  - `createEmailNotificationSlice` — R4-7 state: `sendEmail`, `emailTemplateId`, `sendLater`, `scheduledSendAt`, `trackDelivery`, `emailDeliveryStatuses` + actions
+  - `createPreFlightSlice` — R4-8 state: `preFlightChecks`, `preFlightRunning`, `preFlightPassed`, `previewCertificates` + actions
+  - `createBatchControlSlice` — R4-9 state: `batchConfig`, `batchGroups`, `currentBatchIndex`, `batchMemoryMB`, `batchPaused` + actions
+  - `createPerformanceSlice` — R4-12 state: `metrics`, `budgetViolations` + actions
+- [ ] All slices in the same file (single-store-same-file convention)
+- [ ] Slices access shared state via `get()` and mutate via `set()`
+- [ ] Store composition:
+  ```typescript
+  export const useGenerationStore = create<GenerationState>()((...args) => ({
+    ...createBaseSlice(...args),
+    ...createWizardSlice(...args),
+    ...createCsvMappingSlice(...args),
+    ...createDuplicateSlice(...args),
+    ...createValidationSlice(...args),
+    ...createCancellationSlice(...args),
+    ...createFailureRecoverySlice(...args),
+    ...createQueueSlice(...args),
+    ...createEmailNotificationSlice(...args),
+    ...createPreFlightSlice(...args),
+    ...createBatchControlSlice(...args),
+    ...createPerformanceSlice(...args),
+  }));
+  ```
+- [ ] Read `frontend/stores/AGENTS.md` before coding
+- [ ] **Quality Loop**: progressive
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts frontend/stores/useGenerationStore.ts --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `frontend/stores/AGENTS.md`
+- [ ] **Dependencies**: T14 (store from Phase 6), all T-R4-01 through T-R4-18
+- [ ] **Estimated**: 4h
+
+#### T-R4-21: Mock Store for Storybook
+
+- [ ] Create `frontend/stores/mock/useGenerationStoreMock.ts`
+- [ ] Mock implementation of all Round 4 slices with sample data:
+  - Mock CSV mappings with 3 matched, 2 manual
+  - Mock duplicate groups (1 group of 2)
+  - Mock validation results (2 valid, 1 error, 1 warning)
+  - Mock recipient results (5 generated, 2 failed with different categories)
+  - Mock queue (3 jobs: queued, running, completed)
+  - Mock email delivery statuses (sent, delivered, bounced)
+  - Mock pre-flight checks (3 pass, 1 warning)
+  - Mock batch groups (3 groups, 2 completed, 1 processing)
+  - Mock performance metrics (within budget)
+- [ ] Used by Storybook stories + component tests
+- [ ] Read `frontend/stores/AGENTS.md`
+- [ ] **Quality Loop**:
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts frontend/stores/mock/useGenerationStoreMock.ts --lifecycle codescene
+  ```
+- [ ] **Dependencies**: T-R4-20
+- [ ] **Estimated**: 3h
+
+#### T-R4-22: E2E Tests — Round 4 Flows
+
+- [ ] Modify `test/ui/e2e/cert-generation-wizard.spec.ts` — add Round 4 E2E tests:
+- [ ] **E2E Test 7: CSV column mapping**
+  - Step 1: select template → Next
+  - Step 2: switch to CSV upload → drag test CSV with misnamed columns
+  - Column mapping dialog: drag "full_name" → "name" variable, drag "e-mail" → "email"
+  - Apply mapping → verify recipients populated → complete generation
+- [ ] **E2E Test 8: Duplicate detection**
+  - Step 2: upload CSV with duplicate emails (3 rows, 2 duplicates)
+  - Verify duplicate panel appears with group
+  - Click "Keep First (All Groups)" → verify 1 recipient removed
+  - Complete generation
+- [ ] **E2E Test 9: Recipient validation**
+  - Step 2: add recipient with invalid email "not-an-email"
+  - Verify validation error banner appears
+  - Verify "Export Error Report" downloads CSV
+  - Fix email → verify error clears
+- [ ] **E2E Test 10: Cancel + resume**
+  - Start generation with 50 recipients
+  - Wait for ~10 to complete → click Cancel → confirm
+  - Verify "Cancelled — 10 of 50" state
+  - Click "Resume Generation" → verify remaining 40 processed
+- [ ] **E2E Test 11: Partial failure + retry**
+  - Mock 5 failures across categories
+  - Verify failure recovery panel with breakdown
+  - Click "Retry All Failed" → verify retry log entries → completion
+  - Click "Export Failed as CSV" → verify download
+- [ ] **E2E Test 12: Queue management**
+  - Queue 3 generation jobs (different templates)
+  - Open queue dialog → verify 3 jobs listed
+  - Change priority of job 2 to "urgent" → verify re-sort
+  - Pause running job → verify status change
+  - Resume job → verify completion
+- [ ] **E2E Test 13: Pre-flight + batch**
+  - Select template with missing image → verify pre-flight shows image warning
+  - Fix image → pre-flight passes → "Preview First 3"
+  - Set manual batch size to 10 → generate 30 recipients → verify 3 batches in log
+- [ ] **E2E Test 14: Email notification**
+  - Step 4: enable "Send Email" → select email template
+  - Click "Preview" → verify rendered email
+  - Click "Send test email" → verify toast
+  - Complete generation → verify email delivery status tracked
+- [ ] All E2E tests require `bun run build:test` first
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
+- [ ] **Dependencies**: T24 (existing E2E), all T-R4-01 through T-R4-19
+- [ ] **Estimated**: 10h
+
+#### T-R4-23: i18n — Round 4 Translations
+
+- [ ] Create `shared/locale/en/certificates/generation-r4.ts`
+  - All Round 4 keys: csvMapping, duplicates, validation, cancellation, failures, queue, email, preFlight, batch, accessibility, errors, performance
+  - Pluralization functions where applicable
+  - Type-safe — matches schema in `shared/locale/schema/`
+- [ ] Create `shared/locale/ar/certificates/generation-r4.ts`
+  - Arabic translations for all same keys
+  - RTL-aware string construction (no direction-specific formatting in strings)
+- [ ] Update schema in `shared/locale/schema/` to include new namespace types
+- [ ] Read `shared/AGENTS.md` before coding — enforce compile-time type safety
+- [ ] **Quality Loop**:
+  ```bash
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts shared/locale/en/certificates/generation-r4.ts --lifecycle codescene
+  ~/.bun/bin/bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/generation-r4.ts --lifecycle codescene
+  ```
+- [ ] **Instruction verification**: read `shared/AGENTS.md`
+- [ ] **Dependencies**: All T-R4-01 through T-R4-19 (keys referenced by components)
+- [ ] **Estimated**: 4h
+
+#### T-R4-24: Knowledge Propagation — Round 4
+
+- [ ] Update `docs/frontend/certificate-generation-wizard.md` with Round 4 sections:
+  - CSV column mapping with drag-and-drop + auto-detection
+  - Duplicate detection + resolution patterns
+  - Recipient validation pipeline
+  - WebSocket-based progress + cancellation
+  - Partial failure recovery with retry strategies
+  - Generation queue management patterns
+  - Email notification with delivery tracking + bounce handling
+  - Pre-flight validation checklist
+  - Batch size control + memory monitoring
+  - Accessibility (ARIA roles, keyboard nav, screen reader announcements)
+  - Error states catalog
+  - Performance budgets + auto-optimization
+- [ ] Write outcome file: `.ai/plans/cert-generation-dialog/outcome/T-R4-24-knowledge-r4-outcome.md`
+- [ ] Update `frontend/AGENTS.md` with:
+  - Drag-drop mapping pattern reference
+  - WebSocket generation pattern reference
+  - Batch control + memory monitoring pattern
+- [ ] Update `frontend/views/AGENTS.md` with:
+  - Duplicate detection panel pattern
+  - Pre-flight validation pattern
+  - Failure recovery panel pattern
+  - Performance monitor pattern
+- [ ] Update `frontend/stores/AGENTS.md` with:
+  - Zustand slice composition pattern for large stores
+  - Mock store pattern for Round 4 state
+- [ ] Update root `AGENTS.md` Important References section with Round 4 additions
+- [ ] Update `.github/instructions/frontend.instructions.md` with new conventions:
+  - HTML5 Drag-and-Drop API pattern (no external library)
+  - Web Worker for CPU-intensive parsing pattern
+  - aria-live region pattern for progress announcements
+- [ ] Mark all Phase R4-P1 through R4-P8 tasks as `[x]` in this file
+- [ ] **Quality Loop**: `bun tsgo && bun biome:check` on all modified doc + AGENTS files
+- [ ] **Dependencies**: T-R4-20 through T-R4-23
+- [ ] **Estimated**: 4h
+
+#### T-R4-25: Quality Gate — Round 4 Full Pass
+
+- [ ] Run full quality gate for all Round 4 files:
+  ```bash
+  bun quality-gate:fresh
+  ```
+- [ ] Fix any tsgo, biome, lint, codescene, or sonar results issues
+- [ ] Run all tests:
+  ```bash
+  bun run test:ui:components   # Component tests
+  bun run build:test && bun run test:ui:e2e  # E2E tests
+  ```
+- [ ] Verify all Round 4 files pass progressive sub-loop:
+  ```bash
+  for f in $(find frontend/ -path "*certificates/generate/*" -name "*.tsx" -o -name "*.ts" | sort) \
+           $(find backend/types/ -name "*r4*.types.ts" -o -name "*csvMapping*" -o -name "*duplicate*" -o -name "*batchControl*" -o -name "*preFlight*" -o -name "*performance*" -o -name "*failureRecovery*" -o -name "*generationQueue*" -o -name "*emailNotification*" -o -name "*generationWebSocket*" | sort) \
+           $(find shared/locale/ -path "*generation-r4*" | sort); do
+    if [ -f "$f" ]; then
+      echo "Checking: $f"
+      ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
+    fi
+  done
+  ```
+- [ ] Verify generation queue GraphQL schema: `bun run generate:gqlSchema && bun codegen`
+- [ ] **Dependencies**: T-R4-01 through T-R4-24
+- [ ] **Estimated**: 4h
+
+---
+
+## Execution Order (Full — Phases 1–7 + Round 4)
+
+```
+Phase 1 (Foundation): T01 → T02 → T03
+Phase 2 (Steps): T04 → T05 → T06 → T07 → T08
+Phase 3 (Integration): T09 → T10 → T11
+Phase 5 (Testing R2): T11–T13
+Phase 6 (V2 4-step): T14 → T15 → T16 → T17 → T18 → T19 → T20 → T21
+Phase 7 (V2 Testing): T22 → T23 → T24 → T25 → T26
+
+Round 4 (Production Hardening):
+  R4-P1 (CSV Mapping):       T-R4-01 → T-R4-02
+  R4-P2 (Duplicates):       T-R4-03 → T-R4-04
+  R4-P3 (Validation):       T-R4-05 → T-R4-06
+  R4-P4 (Cancel + Failure): T-R4-07 → T-R4-08 → T-R4-09
+  R4-P5 (Queue):            T-R4-10 → T-R4-11
+  R4-P6 (Email):            T-R4-12 → T-R4-13
+  R4-P7 (Preflight+Batch+   T-R4-14 → T-R4-15 → T-R4-16 → T-R4-17 → T-R4-18 → T-R4-19
+         A11y+Errors+Perf):
+  R4-P8 (Store+Knowledge):  T-R4-20 → T-R4-21 → T-R4-22 → T-R4-23 → T-R4-24 → T-R4-25
+```
+
+Round 4 Total: 25 tasks, ~121 hours estimated
+
+Grand Total (all phases + Round 4): 51 tasks, ~209 hours

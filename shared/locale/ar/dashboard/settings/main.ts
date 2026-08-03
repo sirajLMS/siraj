@@ -16,6 +16,7 @@ const auditEntityTypes = {
   PERMISSION_GROUP: "مجموعة صلاحيات",
   USER_PERMISSION: "صلاحية المستخدم",
   EXCHANGE_RATE: "سعر الصرف",
+  WHATSAPP_ACCOUNT: "حساب واتساب",
   USER: "مستخدم",
   STUDENT: "طالب",
   TEACHER: "معلم",

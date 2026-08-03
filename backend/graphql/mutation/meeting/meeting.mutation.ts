@@ -17,6 +17,7 @@ import {
 } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 import { handleMeetingChannelError } from "@/backend/graphql/utils/handle-meeting-channel-error";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { withAuthResult, withAuthVoid } from "@/backend/graphql/utils";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   ClassMeetingConfigService,
@@ -30,29 +31,7 @@ import type {
   MeetingProviderFieldSchema,
   MeetingProviderSubmitInput,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types";
-
-function withAuthResult<TArgs, TResult>(
-  fn: (actorUserId: string, args: TArgs, tErrors: ErrorsLabels, locale: string) => Promise<TResult>
-) {
-  return async (_parent: unknown, args: TArgs, ctx: BaseContext): Promise<TResult> => {
-    const actorUserId = await requireAuth(ctx);
-    const tErrors = ctx.t().errorsTranslations;
-    return fn(actorUserId, args, tErrors, ctx.locale);
-  };
-}
-
-function withAuthVoid<TArgs>(
-  fn: (actorUserId: string, args: TArgs, tErrors: ErrorsLabels, locale: string) => Promise<unknown>
-) {
-  return async (_parent: unknown, args: TArgs, ctx: BaseContext): Promise<boolean> => {
-    const actorUserId = await requireAuth(ctx);
-    const tErrors = ctx.t().errorsTranslations;
-    await fn(actorUserId, args, tErrors, ctx.locale);
-    return true;
-  };
-}
 
 function normalizeFieldSchema(input: {
   readonly requiresMeetingUrl: boolean;

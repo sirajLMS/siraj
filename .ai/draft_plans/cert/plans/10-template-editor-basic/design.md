@@ -1,0 +1,7917 @@
+# Design — Plan 10: Template Editor — Basic Info & Dimensions
+
+> **Plan**: 10 — Template Editor — Basic Info & Dimensions
+> **Depends On**: Plan 5 (GraphQL API), Plan 7 (Storage), Plan 9 (Categories)
+> **Related**: MASTER_ARCHITECTURE.md; INTER_PLAN_CONTRACTS.md; cgvs_analysis/01-generation-logic.md §2, §4; cgvs_analysis/04-template-ui.md §2, §7; siraj_analysis/05-frontend-patterns.md; siraj_analysis/06-i18n-system.md
+
+> **Canonical permission keys** (per INTER_PLAN_CONTRACTS.md): `CertificateTemplateManage` = `certificates.templates.manage`, `CertificateTemplateView` = `certificates.templates.view`. This plan uses `CertificateTemplateManage` for all editor operations.
+
+---
+
+## 1. Architecture Overview
+
+### Layer Position
+
+Plan 10 is a **frontend-only plan** that consumes the GraphQL API from Plan 5 and storage service from Plan 7. It does not create backend schema, repo, or service files. It creates:
+
+- **App Router page** (server component) — permission guard, metadata, renders Container
+- **Container + ViewModel** — Apollo hooks, Zustand store, save/discard logic, upload flow
+- **Desktop presentation** — tab-based section navigation, form fields, dimension preview
+- **Mobile presentation** — accordion-based section navigation, stacked form fields
+- **GraphQL documents** — template by-ID query, update template mutation
+- **Zustand store** — local editing state, dirty flag, active section, save/upload indicators
+- **i18n** — translation namespace, type schema, AR/EN implementations
+
+### Data Flow
+
+```
+App Router page (server)
+  → getLocale() + generateMetadata()
+  → getServerUserContext() + requirePermissionForPage(AppPermission.CertificateTemplateManage)
+  → render <TemplateEditorContainer templateId={params.templateId} />
+
+Container (client)
+  → useTemplateEditorViewModel(templateId)
+    → useQuery(templateEditorQueryDocument, { variables: { id: templateId } })
+    → useMutation(updateTemplateEditorMutationDocument)
+    → useTemplateEditorStore (Zustand)
+    → useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)
+    → useUserStore().hasPermission(CertificateTemplateManage)
+    → useRouter() for navigation guard
+  → <RequirePermission>
+  → <ResponsiveViewSwitch desktop / mobile>
+
+Desktop Tier (presentation)
+  → TemplateEditorDesktopView
+    → DesktopPageContainer
+    → EditorHeader (back button, template name, status badge, save/discard actions, auto-save indicator)
+    → Tab navigation (BasicInfo / Dimensions / Background / FontSettings)
+    → Active section form panel
+    → DimensionPreview (in Dimensions section only)
+
+Mobile Tier (presentation)
+  → TemplateEditorMobileView
+    → MobilePageContainer
+    → MobilePageHeader (back, name, status)
+    → Accordion sections (expandable, one open at a time)
+    → Active section form (stacked, single column)
+    → Save/discard FAB or bottom bar
+```
+
+### Data Model References
+
+| Table / Entity | Fields Used | Usage |
+|----------------|-------------|-------|
+| `certificate_templates` | `id`, `name`, `description`, `categoryId`, `width`, `height`, `orientation`, `paperSize`, `backgroundImageUrl`, `backgroundColor`, `fontFamily`, `fontSize`, `textColor`, `status`, `version` | Editor data load + save |
+| `certificate_categories` | `id`, `name`, `parentCategoryId` | Category autocomplete options in Basic Info |
+
+> **Note**: This plan only reads and updates `certificate_templates` fields via GraphQL mutations. Backend schema, repos, and services are owned by Plans 1-4. The `updateTemplate` mutation signature is defined in Plan 5.
+
+### Complete File Scaffold (All Files to Create/Modify)
+
+| File Path | Layer | Description | Created/Modified |
+|-----------|-------|-------------|------------------|
+| `app/(dashboard)/certificates/templates/[templateId]/page.tsx` | App Router | Server page with permission guard, `generateMetadata()` | Create |
+| `frontend/common/views/dashboard/cert-template-editor/templateEditorContainer.tsx` | Container | `RequirePermission` wrapper, `useTemplateEditorViewModel()`, `createLazyView` + `ResponsiveViewSwitch` | Create |
+| `frontend/common/views/dashboard/cert-template-editor/useTemplateEditorViewModel.ts` | ViewModel | Apollo hooks, Zustand sync, RHF `useForm` + `zodResolver`, all handlers, labels | Create |
+| `frontend/common/views/dashboard/cert-template-editor/templateEditorView.tsx` | Switcher | Receives ViewModel, passes to `ResponsiveViewSwitch` lazy mobile/desktop views | Create |
+| `frontend/common/views/dashboard/cert-template-editor/schema/templateEditorSchema.ts` | Schema | Zod schema factory `templateEditorSchema(messages)` + `TemplateFormData` export | Create |
+| `frontend/common/views/dashboard/cert-template-editor/types/templateEditor.types.ts` | Types | `TemplateEditorViewModelProps`, `EditorSection` type, `CategoryOption`, `FontOption` | Create |
+| `frontend/common/views/dashboard/cert-template-editor/components/EditorHeader.tsx` | Shared | Header with back, name, status badge, save/discard, auto-save indicator | Create |
+| `frontend/common/views/dashboard/cert-template-editor/components/DiscardDialog.tsx` | Shared | Discard/navigation guard confirmation dialog | Create |
+| `frontend/common/views/dashboard/cert-template-editor/components/DimensionPreview.tsx` | Shared | Aspect-ratio preview box with width×height label | Create |
+| `shared/components/ui/ColorPickerField.tsx` | Shared UI | `react-color` `SketchPicker` in MUI `Popover` + hex `TextField` (a11y-safe) | Create |
+| `shared/components/ui/BackgroundUploadZone.tsx` | Shared UI | Drag-drop / click upload area with preview, progress, error states | Create |
+| `frontend/desktop/views/dashboard/cert-template-editor/templateEditor.desktop.tsx` | Desktop | Tab layout, sections, renders EditorHeader + tab content | Create |
+| `frontend/desktop/views/dashboard/cert-template-editor/components/BasicInfoSection.desktop.tsx` | Desktop | Basic Info form fields (2-column grid) | Create |
+| `frontend/desktop/views/dashboard/cert-template-editor/components/DimensionsSection.desktop.tsx` | Desktop | Dimensions form + DimensionPreview (split layout) | Create |
+| `frontend/desktop/views/dashboard/cert-template-editor/components/BackgroundSection.desktop.tsx` | Desktop | Background upload + color picker | Create |
+| `frontend/desktop/views/dashboard/cert-template-editor/components/FontSettingsSection.desktop.tsx` | Desktop | Font settings form | Create |
+| `frontend/mobile/views/dashboard/cert-template-editor/templateEditor.mobile.tsx` | Mobile | Accordion layout, bottom sticky bar | Create |
+| `frontend/mobile/views/dashboard/cert-template-editor/components/BasicInfoSection.mobile.tsx` | Mobile | Basic Info fields (stacked) | Create |
+| `frontend/mobile/views/dashboard/cert-template-editor/components/DimensionsSection.mobile.tsx` | Mobile | Dimensions + preview (stacked) | Create |
+| `frontend/mobile/views/dashboard/cert-template-editor/components/BackgroundSection.mobile.tsx` | Mobile | Background upload + color picker (mobile) | Create |
+| `frontend/mobile/views/dashboard/cert-template-editor/components/FontSettingsSection.mobile.tsx` | Mobile | Font settings (stacked) | Create |
+| `frontend/common/stores/certTemplateEditorStore.ts` | Store | Zustand store (`useCertTemplateEditorStore`) — non-persisted | Create |
+| `frontend/common/graphql/sharedDocuments/certificates/templateEditor.documents.ts` | GraphQL | `templateEditorQueryDocument`, `updateTemplateEditorMutationDocument`, `certificateCategoriesQueryDocument`, `TemplateEditorFragment` | Create |
+| `frontend/common/graphql/sharedDocuments/certificates/index.ts` | GraphQL barrel | Export template editor documents | Create |
+| `shared/locale/types/dashboard/certificates/templateEditor.ts` | i18n types | `TemplateEditorLabels` interface | Create |
+| `shared/locale/namespaces/dashboard/certificates/templateEditor.namespace.ts` | i18n namespace | `defineNamespace("dashboard.certificateTemplateEditor", ...)` | Create |
+| `shared/locale/ar/dashboard/certificates/templateEditor.ts` | i18n AR | `dashboardCertificateTemplateEditorAr` | Create |
+| `shared/locale/en/dashboard/certificates/templateEditor.ts` | i18n EN | `dashboardCertificateTemplateEditorEn` | Create |
+
+### Modified Files
+
+| File Path | Modification |
+|-----------|-------------|
+| `shared/locale/namespaces/translation.ts` | Add `CertificateTemplateEditor: DashboardCertificateTemplateEditor` to `Translation.Dashboard` |
+| `shared/locale/types/message.ts` | Add `certificateTemplateEditor: TemplateEditorLabels` to `DashboardTranslations` |
+| `shared/locale/ar/messages.ts` | Import + include `dashboardCertificateTemplateEditorAr` |
+| `shared/locale/en/messages.ts` | Import + include `dashboardCertificateTemplateEditorEn` |
+| `frontend/common/graphql/sharedDocuments/index.ts` | Re-export from `certificates/` barrel |
+| `shared/constants/certificate.constants.ts` | Add `CERT_CANVAS_DPI = 72`, `CERT_PAPER_SIZES` preset map (A4/Letter dimensions at 72 DPI), `CERT_ALLOWED_FONTS` array |
+| `shared/constants/certificate.constants.ts` | Add `CERT_MAX_FILE_SIZE = 5 * 1024 * 1024`, `CERT_ALLOWED_FILE_TYPES = ["image/png", "image/jpeg", "image/webp"]` |
+
+---
+
+## 2. Design Decisions
+
+### DD-01: Tab Navigation (Desktop) vs Accordion (Mobile)
+
+**Decision**: Desktop uses MUI `Tab` components for section switching. Mobile uses MUI `Accordion` for collapsible sections.
+
+**Rationale**: Desktop has horizontal space for a tab bar with all sections visible. Mobile has limited width — accordions allow expanding one section at a time, keeping the form compact. Both persist `activeSection` in Zustand so switching tiers (resize) preserves the active section.
+
+**Alternative Considered**: Same navigation for both tiers. Rejected — tabs are cramped on mobile, accordions waste vertical space on desktop.
+
+### DD-02: Per-Section vs Global Save
+
+**Decision**: Global save bar in the editor header, not per-section. All sections share one `updateTemplate` mutation call.
+
+**Rationale**: The template is a single entity; saving individual sections would require partial update semantics and could leave the template in an inconsistent state (e.g., dimensions saved but background not). A single save bar with a dirty indicator is simpler and matches the CGVS BasicInfoTab pattern (single save button). The `updateTemplate` mutation accepts a partial input (all fields optional), so the mutation sends only changed fields.
+
+**Alternative Considered**: Per-section save buttons. Rejected for state consistency risk and UX complexity.
+
+### DD-03: Local State in Zustand, File in useRef
+
+**Decision**: All form field values live in the Zustand store (`localTemplate`). The `File`/`Blob` object for background upload is kept in a `useRef` in the ViewModel hook, not in the store.
+
+**Rationale**: Per Siraj store serialization rules, non-serializable objects (`File`, `Blob`, `Promise`) must not be stored in Zustand (even non-persisted). The store holds the resulting URL string after upload. The `File` ref is in the ViewModel hook, which lives above the tier-switch unmount boundary, so the ref survives resize.
+
+**Alternative Considered**: `useState` for all form fields in the ViewModel. Rejected — Zustand state survives tier switching on resize; `useState` resets on remount.
+
+### DD-04: Dirty Flag Computation
+
+**Decision**: Dirty flag is computed by deep-diffing `localTemplate` against `serverTemplate` on each field update in the store.
+
+**Rationale**: Simple boolean comparison would not detect reverts (user changes a field then changes it back to the original value). Deep-diff on each update ensures `dirty` accurately reflects unsaved changes. The diff is shallow (top-level field comparison) since `localTemplate` is a flat object.
+
+**Implementation**: `updateLocalField` action sets the field, then compares each top-level key in `localTemplate` vs `serverTemplate`. Sets `dirty = true` if any differ, `dirty = false` if all match.
+
+### DD-05: Auto-Save Strategy
+
+**Decision**: Optional debounced auto-save — OFF by default with a toolbar toggle to enable. When enabled and `dirty` becomes true, a 30-second debounce timer starts. If the timer fires (no further changes for 30s), auto-save triggers via the same `handleSave()` function as manual save (single-flight guarded — per SWE Review §B and §12.6).
+
+**Rationale**: Auto-save prevents data loss if a user forgets to save. The 30-second delay avoids frequent mutations. The auto-save indicator gives feedback. Manual save/discard always takes precedence. If auto-save is OFF (default), only manual save is available — this prevents the race condition where both fire simultaneously. The single-flight guard (`saveInFlight` ref) ensures only one mutation is in flight at any time.
+
+**Alternative Considered**: Save-on-blur per field. Rejected — too many mutation calls; disruptive for users in the middle of editing.
+
+### DD-06: Background Image Upload via Storage API
+
+**Decision**: Background upload uses the storage mutation/query from Plan 7. The ViewModel calls a `uploadFile` mutation (or API route) that returns a signed URL. The URL is stored in the local form state.
+
+**Rationale**: Plan 7 defines the storage and file management service. This plan consumes it. The upload flow is: (1) validate file client-side, (2) call upload mutation with the file, (3) receive signed URL, (4) store URL in `localTemplate.backgroundImageUrl`, (5) set dirty flag. The `File` object is in a `useRef` but is discarded after upload — only the URL persists.
+
+**Alternative Considered**: Direct browser upload to storage provider (presigned PUT). Considered for future optimization but requires Plan 7 to support presigned URLs. This plan uses the mutation-based flow for simplicity.
+
+### DD-07: Navigation Guard Implementation
+
+**Decision**: In-app navigation guard via `useGuardedNavigation` hook that wraps `next/navigation`'s `useRouter`. Browser-level guard via `beforeunload` event for tab close/hard refresh only (per SWE Review §C and §12.5).
+
+**Rationale**: Next.js App Router does not expose `router.events.beforeEach`. The `popstate` approach is fragile (does not intercept `<Link prefetch>` or programmatic `router.push`). Instead, the ViewModel maintains a `pendingNavigation: string | null` ref and wraps all in-app navigations (back button, sidebar links, breadcrumb links) via a guarded handler that checks `dirty`. When dirty, the handler sets `pendingNavigation` to the target route and opens the DiscardDialog. On confirm, it calls `resetLocalFromServer()` then `router.push(pendingNavigation)`. The `beforeunload` handler covers scenarios the SPA guard cannot (tab close, external navigation, hard refresh).
+
+**Implementation**: A `useNavigationGuard(dirty, onAttempt)` hook in the ViewModel layer adds `beforeunload` listener when dirty and provides a `guardedNavigate(path)` function for in-app routing.
+
+---
+
+## 3. Component Hierarchy
+
+### App Router Page
+
+```
+app/(dashboard)/certificates/templates/[templateId]/page.tsx
+  → generateMetadata()
+    → getTranslations(locale).dashboardTranslations.certificateTemplateEditor.pageTitle
+  → default async function TemplateEditorPage({ params })
+    → getLocale()
+    → getServerUserContext() → redirect login if no userId
+    → requirePermissionForPage(userId, [AppPermission.CertificateTemplateManage], locale, context)
+    → <TemplateEditorContainer templateId={params.templateId} />
+```
+
+### Container Layer
+
+```
+frontend/common/views/dashboard/cert-template-editor/
+  templateEditorContainer.tsx
+    → useTemplateEditorViewModel({ templateId })
+    → <RequirePermission permissions={[AppPermission.CertificateTemplateManage]}>
+      → <ResponsiveViewSwitch desktop / mobile props={viewModel} />
+  useTemplateEditorViewModel.ts
+    → useQuery(templateEditorQueryDocument)
+    → useMutation(updateTemplateEditorMutationDocument)
+    → useTemplateEditorStore()
+    → useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)
+    → useUserStore().hasPermission()
+    → useRouter()
+    → backgroundFileRef = useRef<File | null>(null)
+    → useNavigationGuard(dirty)
+    → handleSave() / handleDiscard() / handleFieldChange() / handleUploadBackground()
+  templateEditorView.tsx
+    → createLazyView() → ResponsiveViewSwitch (desktop + mobile)
+  types/
+    templateEditor.types.ts (ViewModel interface, ViewProps, Section enum, FormDataType, etc.)
+  schema/
+    templateEditorSchema.ts (Zod schema factory)
+  components/
+    EditorHeader.tsx (shared header — back button, template name, status, save/discard)
+    DiscardDialog.tsx (shared dialog — reused for both discard and nav guard)
+    DimensionPreview.tsx (shared component — aspect-ratio visual)
+    ColorPickerField.tsx (shared — react-color + MUI Popover + hex TextField)
+    BackgroundUploadZone.tsx (shared — drag-drop / click upload area)
+```
+
+### Desktop Layer
+
+```
+frontend/desktop/views/dashboard/cert-template-editor/
+  templateEditor.desktop.tsx
+    → DesktopPageContainer
+    → EditorHeader (desktop variant)
+    → Tab bar (MUI Tabs with Tab components for 4 sections)
+    → Render active section:
+      → BasicInfoSection.desktop.tsx
+        → SectionPanel with form fields (Grid layout, 2-column)
+        → TextField (name), TextField multiline (description), Autocomplete (category)
+      → DimensionsSection.desktop.tsx
+        → Grid (2-column): left = form fields, right = DimensionPreview
+        → Select (paperSize), TextField (width), TextField (height)
+        → RadioGroup (orientation: portrait/landscape)
+      → BackgroundSection.desktop.tsx
+        → Grid (2-column): left = upload area, right = preview
+        → Drop zone (dashed border Box) or thumbnail preview
+        → ColorPickerField (backgroundColor)
+      → FontSettingsSection.desktop.tsx
+        → SectionPanel with form fields
+        → Select (fontFamily), TextField numeric (fontSize), ColorPickerField (textColor)
+```
+
+### Mobile Layer
+
+```
+frontend/mobile/views/dashboard/cert-template-editor/
+  templateEditor.mobile.tsx
+    → MobilePageContainer
+    → MobilePageHeader (back, name, status)
+    → Accordion sections (4 Accordions, one open at a time):
+      → BasicInfoSection.mobile.tsx
+        → Stacked fields (full width, single column)
+        → TextField (name), TextField multiline (description), Select/Autocomplete (category)
+      → DimensionsSection.mobile.tsx
+        → Stacked fields: Select (paperSize), TextField (width), TextField (height)
+        → RadioGroup (orientation)
+        → DimensionPreview (below fields)
+      → BackgroundSection.mobile.tsx
+        → Drop zone (full width, tap-to-select primary) or thumbnail
+        → ColorPickerField
+      → FontSettingsSection.mobile.tsx
+        → Stacked: Select, TextField, ColorPickerField
+    → Bottom sticky bar: Save + Discard buttons
+```
+
+### Shared Components
+
+```
+frontend/common/views/dashboard/cert-template-editor/components/
+  EditorHeader.tsx
+    Props: { templateName, status, dirty, autoSaveStatus, saving, onSave, onDiscard, onBack, labels }
+    Renders: Back button (IconButton with ArrowBack), template name (Typography headlineLg), StatusBadge, auto-save indicator, Save (Button variant=contained) + Discard (Button variant=outlined)
+    Disabled states: Save disabled when !dirty || saving; Discard disabled when !dirty || saving
+  DiscardDialog.tsx
+    Props: { open, title, message, confirmLabel, cancelLabel, onConfirm, onCancel }
+    Renders: MUI Dialog with title, message, confirm/cancel buttons
+    Accessibility: focus trap on open, Escape closes (calls onCancel)
+  DimensionPreview.tsx
+    Props: { width: number, height: number, labels: { dimensions: (w,h) => string, noDimensions: string } }
+    Renders: Box container with scaled rectangle, dimension labels
+    Logic: Computes scale factor using min(scaleW, scaleH) to fit within max dimensions while preserving aspect ratio
+    Sx: border 2px dashed theme.palette.primary.main, background theme.palette.primaryContainer
+  ColorPickerField.tsx (located in shared/components/ui/ for reuse by Plans 11/12)
+    Props: { label: string, value: string | null, onChange: (hex: string) => void, disabled?: boolean, error?: string }
+    Renders: Box with hex TextField (keyboard accessible) + MUI Popover wrapping react-color <SketchPicker>
+    Logic: Popover opens on TextField or color swatch click; selection updates TextField and swatch preview
+    A11y: TextField is the primary input; picker is mouse/touch enhancement; hex value is always LTR
+    Mobile variant: opens as full-screen Dialog instead of Popover (detected via tier prop or responsive)
+  BackgroundUploadZone.tsx
+    Props: { imageUrl: string | null, uploading: boolean, error: string | null, onUpload: (file: File) => void, onRemove: () => void, labels }
+    Renders: Dashed border drop zone (empty state), LinearProgress (uploading), thumbnail + remove button (has image), error message (upload failed)
+    Mobile: Tap-to-select is primary — renders an appropriate touch-friendly upload prompt
+```
+
+---
+
+## 4. State Management (Zustand Store)
+
+### Store Definition
+
+```
+Location: frontend/common/stores/certTemplateEditorStore.ts
+Store: useCertTemplateEditorStore
+Persistence: None (in-memory only — no persist middleware)
+```
+
+### State Shape
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `templateId` | `string \| null` | Currently loaded template ID |
+| `activeSection` | `EditorSection` enum | `basicInfo` \| `dimensions` \| `background` \| `fontSettings` |
+| `localTemplate` | `TemplateFormData` | Local editing state |
+| `serverTemplate` | `TemplateFormData` | Last-saved server state |
+| `dirty` | `boolean` | Unsaved changes flag |
+| `saving` | `boolean` | Save mutation in progress |
+| `autoSaveStatus` | `AutoSaveStatus` enum | `idle` \| `saving` \| `saved` \| `error` |
+| `uploadingBackground` | `boolean` | Upload in progress |
+| `validationErrors` | `Record<string, string>` | Field key → error message |
+
+### TemplateFormData Type
+
+| Field | Type | Source |
+|-------|------|--------|
+| `name` | `string` | Template name |
+| `description` | `string \| null` | Template description |
+| `categoryId` | `string \| null` | Category ID |
+| `width` | `number` | Canvas width (px) |
+| `height` | `number` | Canvas height (px) |
+| `orientation` | `Orientation` enum | `portrait` \| `landscape` |
+| `paperSize` | `PaperSize` enum | `A4` \| `letter` \| `custom` |
+| `backgroundImageUrl` | `string \| null` | Signed URL |
+| `backgroundColor` | `string \| null` | Hex color |
+| `fontFamily` | `string \| null` | Font name |
+| `fontSize` | `number \| null` | Font size in px |
+| `textColor` | `string \| null` | Hex color |
+
+### Actions
+
+| Action | Parameters | Purpose |
+|--------|------------|---------|
+| `setTemplateId` | `(id: string)` | Set current template ID |
+| `initFromServer` | `(data: TemplateFormData) => void` | Initialize both `localTemplate` and `serverTemplate` from fetched data, set `dirty = false`, `autoSaveStatus = 'idle'` |
+| `setActiveSection` | `(section: EditorSection) => void` | Switch active section |
+| `updateLocalField` | `<K extends keyof TemplateFormData>(field: K, value: TemplateFormData[K]) => void` | Update one field, recompute dirty via shallow diff |
+| `resetLocalFromServer` | `() => void` | Discard: copy `serverTemplate` → `localTemplate`, set `dirty = false`, `autoSaveStatus = 'idle'`, clear `validationErrors` |
+| `commitServerFromLocal` | `() => void` | After save success: copy `localTemplate` → `serverTemplate`, set `dirty = false`, set `autoSaveStatus = 'saved'` |
+| `setSaving` | `(saving: boolean) => void` | Set saving flag |
+| `setAutoSaveStatus` | `(status: AutoSaveStatus) => void` | Set auto-save indicator |
+| `setUploadingBackground` | `(uploading: boolean) => void` | Set upload flag |
+| `setValidationError` | `(field: string, message: string) => void` | Set field validation error |
+| `clearValidationError` | `(field: string) => void` | Clear single field error |
+| `clearAllValidationErrors` | `() => void` | Clear all errors |
+| `reset` | `() => void` | Reset entire store to initial state (used on unmount) |
+
+### Dirty Flag Computation
+
+The `updateLocalField` action recomputes `dirty` by comparing each top-level key of `localTemplate` against `serverTemplate`. If all keys match, `dirty = false`; otherwise `dirty = true`. This correctly detects reverts (changing a field back to the server value).
+
+---
+
+## 5. ViewModel Interface
+
+### `useTemplateEditorViewModel` Return Type
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `labels` | `TemplateEditorLabels` | Translated strings from `useAppTranslation` |
+| `templateId` | `string` | Current template ID from props |
+| `loading` | `boolean` | Template query loading |
+| `error` | `ApolloError \| null` | Template query error |
+| `notFound` | `boolean` | Template not found (query returned null) |
+| `localTemplate` | `TemplateFormData` | Local editing state from store |
+| `dirty` | `boolean` | Unsaved changes flag |
+| `saving` | `boolean` | Save in progress |
+| `autoSaveStatus` | `AutoSaveStatus` | Auto-save indicator |
+| `uploadingBackground` | `boolean` | Background upload in progress |
+| `validationErrors` | `Record<string, string>` | Field validation errors |
+| `activeSection` | `EditorSection` | Current active section |
+| `hasPermission` | `boolean` | User has `CertificateTemplateManage` |
+| `categories` | `CategoryOption[]` | Category autocomplete options (from `certificateCategoriesQueryDocument` — declared in this plan's documents or imported from Plan 9) |
+| `setActiveSection` | `(section: EditorSection) => void` | Switch section |
+| `handleFieldChange` | `<K>(field: K, value: TemplateFormData[K]) => void` | Update field + validate |
+| `handleSave` | `() => Promise<void>` | Save mutation (single-flight guarded) |
+| `handleDiscard` | `() => void` | Discard changes (opens dialog if dirty) |
+| `handleBack` | `() => void` | Navigate back (with guard if dirty) |
+| `handleUploadBackground` | `(file: File) => Promise<void>` | Upload file → signed URL |
+| `handleRemoveBackground` | `() => void` | Clear background image |
+| `handleRemoveOrphanBackground` | `() => void` | Delete orphan uploaded file on discard (Plan 7 `deleteFile` mutation) |
+| `discardDialogOpen` | `boolean` | Discard/nav-guard dialog open |
+| `discardDialogTitle` | `string` | Dialog title (discard or nav guard) |
+| `discardDialogMessage` | `string` | Dialog message |
+| `handleDiscardConfirm` | `() => void` | Confirm discard (in dialog) |
+| `handleDiscardCancel` | `() => void` | Cancel discard (in dialog) |
+| `previewDimensions` | `{ scaledWidth: number; scaledHeight: number } \| null` | Computed preview size |
+| `register` | `UseFormRegister<TemplateFormData>` | RHF register function (pass-through for tier views) |
+| `handleSubmit` | `UseFormHandleSubmit<TemplateFormData>` | RHF submit handler (pass-through) |
+| `control` | `Control<TemplateFormData>` | RHF control (for `Controller`-wrapped components) |
+| `errors` | `FieldErrors<TemplateFormData>` | RHF validation errors (from Zod resolver) |
+| `setValue` | `UseFormSetValue<TemplateFormData>` | RHF programmatic setter (for paper size preset, orientation swap) |
+| `watch` | `UseFormWatch<TemplateFormData>` | RHF watch (for dimension preview live updates) |
+
+---
+
+## 6. GraphQL Document Design
+
+All documents live in `frontend/common/graphql/sharedDocuments/certificates/templateEditor.documents.ts` and follow the `TypedDocumentNode<Operations.X, Types.QueryXArgs>` typing pattern. All object types include `id` for Apollo cache normalization. The barrel file `frontend/common/graphql/sharedDocuments/certificates/index.ts` must be created to export these documents.
+
+### Query: `templateEditorQueryDocument`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `ID!` | Template ID (cache normalization) |
+| `name` | `String!` | Template name |
+| `description` | `String` | Description (nullable) |
+| `categoryId` | `String` | Category ID (nullable) |
+| `category` | `Category` object | `{ id, name, parentCategory { id, name } }` — for breadcrumb display |
+| `width` | `Int!` | Canvas width |
+| `height` | `Int!` | Canvas height |
+| `orientation` | `Orientation!` | `portrait` | `landscape` |
+| `paperSize` | `PaperSize!` | `A4` | `letter` | `custom` |
+| `backgroundImageUrl` | `String` | Signed URL (nullable) |
+| `backgroundColor` | `String` | Hex color (nullable) |
+| `fontFamily` | `String` | Font name (nullable) |
+| `fontSize` | `Int` | Font size px (nullable) |
+| `textColor` | `String` | Hex color (nullable) |
+| `status` | `TemplateStatus!` | `draft` | `published` | `archived` |
+| `version` | `Int!` | Version number (for optimistic locking) |
+| `updatedAt` | `String!` | Last update timestamp (for optimistic locking) |
+
+### Query: `certificateCategoriesQueryDocument`
+
+> Import from Plan 9's documents if available. If Plan 9 does not export a reusable document, declare a minimal one here that fetches `{ id, name, parentCategory { id, name } }` for the autocomplete.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `ID!` | Category ID |
+| `name` | `String!` | Category name |
+| `parentCategory` | `Category` object (nullable) | `{ id, name }` for breadcrumb display |
+
+### Mutation: `updateTemplateEditorMutationDocument`
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `id` | `ID!` | Template ID |
+| `input` | `TemplateEditorUpdateInput!` | Partial update |
+| `expectedVersion` | `Int` | Optimistic lock — backend rejects if `version` mismatch (per SWE Review §A) |
+
+**`TemplateEditorUpdateInput` fields** (all optional — partial update):
+
+| Field | Type |
+|-------|------|
+| `name` | `String` |
+| `description` | `String` |
+| `categoryId` | `String` |
+| `width` | `Int` |
+| `height` | `Int` |
+| `orientation` | `Orientation` |
+| `paperSize` | `PaperSize` |
+| `backgroundImageUrl` | `String` |
+| `backgroundColor` | `String` |
+| `fontFamily` | `String` |
+| `fontSize` | `Int` |
+| `textColor` | `String` |
+
+**Return type**: `{ id, name, ...updatedAt, version }` — updated template fields for cache update + new version for next optimistic lock cycle.
+
+### Fragment
+
+Define `TemplateEditorFragment` to be spread in both the query and the mutation return, ensuring consistent field selection and cache normalization.
+
+---
+
+## 7. Form Section Design
+
+### Paper Size Preset Behavior
+
+> **DPI Standard (per INTER_PLAN_CONTRACTS.md & SWE Review §D)**: Use **72 DPI** for all canvas dimensions to match Plan 11 and Plan 6 (Puppeteer PDF rendering). A4 at 72 DPI = 595×842 px, Letter at 72 DPI = 612×792 px. A shared constant `CERT_CANVAS_DPI = 72` should be defined in `shared/constants/certificate.constants.ts` and consumed by Plans 10, 11, and 6.
+
+| Preset | Auto-fill Width | Auto-fill Height | Fields Editable |
+|--------|----------------|------------------|-----------------|
+| A4 (72 DPI) | 595 | 842 | No (read-only) |
+| Letter (72 DPI) | 612 | 792 | No (read-only) |
+| Custom | Previous values | Previous values | Yes (editable) |
+
+- Switching from Custom to A4/Letter: overwrite width/height, set orientation based on which is larger
+- Switching from A4/Letter to Custom: unlock fields, keep current values
+- Orientations: Portrait = height > width, Landscape = width > height. Selecting an orientation swaps width/height if needed
+
+### Validation Rules
+
+> **RHF + Zod integration**: Validation is handled by `react-hook-form` with a `zodResolver` (from `@hookform/resolvers/zod`). The Zod schema is defined as a factory function `templateEditorSchema(messages)` that accepts localized error messages, following the pattern in `recurringClassSchema.ts`. The resolver runs validation on `onBlur` per field and on `handleSubmit`. Validation errors surface via RHF's `formState.errors` and are displayed below each field using MUI `TextField` `error` and `helperText` props.
+
+| Field | Rule | Error Key |
+|-------|------|-----------|
+| `name` | Non-empty after trim, ≤255 chars | `validation.nameRequired`, `validation.nameTooLong(255)` |
+| `categoryId` | Must be a string from category list (optional) | `validation.categoryRequired` |
+| `width` | Positive integer, 100–10000 | `validation.widthRequired`, `validation.dimensionsRange(100, 10000)` |
+| `height` | Positive integer, 100–10000 | `validation.heightRequired`, `validation.dimensionsRange(100, 10000)` |
+| `orientation` | Must be `portrait` or `landscape` | `validation.orientationRequired` |
+| `fontSize` | Integer 8–72 | `validation.fontSizeRange(8, 72)` |
+| `backgroundColor` | Valid hex (`#RRGGBB` or `#RGB`) | `validation.invalidColor` |
+| `textColor` | Valid hex | `validation.invalidColor` |
+
+### Zod Schema Definition (templateEditorSchema.ts)
+
+The schema factory accepts a `messages` object with all localized error strings and returns a Zod object:
+
+| Schema Field | Zod Type | Validation |
+|---|---|---|
+| `name` | `z.string()` | `.min(1, messages.nameRequired).max(255, messages.nameTooLong)` |
+| `description` | `z.string().nullable()` | `.optional()` — no min/max beyond max 500 chars |
+| `categoryId` | `z.string().nullable()` | `.optional()` |
+| `width` | `z.number()` | `.int().min(100, messages.dimensionsRange).max(10000, messages.dimensionsRange)` |
+| `height` | `z.number()` | `.int().min(100, messages.dimensionsRange).max(10000, messages.dimensionsRange)` |
+| `orientation` | `z.enum(["portrait", "landscape"])` | Required |
+| `paperSize` | `z.enum(["A4", "letter", "custom"])` | Required |
+| `backgroundImageUrl` | `z.string().nullable()` | `.optional()` |
+| `backgroundColor` | `z.string().nullable()` | `.refine(isValidHex, messages.invalidColor).optional()` |
+| `fontFamily` | `z.string().nullable()` | `.optional()` |
+| `fontSize` | `z.number().nullable()` | `.int().min(8, messages.fontSizeRange).max(72, messages.fontSizeRange).optional()` |
+| `textColor` | `z.string().nullable()` | `.refine(isValidHex, messages.invalidColor).optional()` |
+
+Export `TemplateFormData = z.infer<ReturnType<typeof templateEditorSchema>>`.
+
+> **RHF usage in ViewModel**: `useForm<TemplateFormData>({ resolver: zodResolver(schema), mode: 'onBlur', defaultValues })`. The ViewModel passes `register`, `handleSubmit`, `control`, `errors`, `setValue`, `watch` through to the tier views via the ViewModel return type. Tier views call `register('name')` etc. for simple TextFields and use `<Controller>` wrapping for Autocomplete, Select, ColorPickerField, and RadioGroup.
+
+---
+
+## 8. Background Upload Flow
+
+### Step-by-Step
+
+1. User drags a file onto the drop zone OR clicks to open the file picker
+2. ViewModel validates: MIME type (PNG/JPEG/WebP), file size (≤ max from config)
+3. Client-side validation failures show error in the upload area, no server call
+4. Valid file: `setUploadingBackground(true)`, `backgroundFileRef.current = file`
+5. ViewModel calls storage upload mutation (from Plan 7) or `useMutation(uploadFileDocument)` with the file
+6. Mutation returns `{ signedUrl: string }`
+7. ViewModel calls `updateLocalField('backgroundImageUrl', signedUrl)` (sets dirty flag)
+8. `setUploadingBackground(false)`, upload area replaced by thumbnail preview
+9. Remove button: `handleRemoveBackground()` → `updateLocalField('backgroundImageUrl', null)`, `backgroundFileRef.current = null` (sets dirty flag)
+10. On save: the `backgroundImageUrl` is included in the `updateTemplate` mutation input. The actual file persistence is handled by Plan 7's storage service — this plan only stores the URL reference.
+
+### Upload Area States
+
+| State | Visual |
+|-------|--------|
+| Empty (no image) | Dashed border drop zone with icon, "Drag & drop" text, "or click to browse" |
+| Dragging | Border solid, bg highlights (`primaryContainer`) |
+| Uploading | Linear progress bar or spinner in drop zone |
+| Has image | Thumbnail of background image, remove button |
+| Upload error | Error icon, "Upload failed" text, try-again prompt |
+
+---
+
+## 9. Error Handling Strategy
+
+| Scenario | Handling |
+|----------|----------|
+| Template fetch loading | Skeleton loading state in editor body |
+| Template fetch error | Error message with retry button |
+| Template not found | "Template not found" message with back button |
+| Save mutation error | Error snackbar with localized message, dirty flag remains true |
+| Upload error | Error message in upload area, no state change |
+| Validation error on save | Scroll to first error, display all errors inline |
+| Permission denied | `RequirePermission` shows forbidden state (handled by Container) |
+
+---
+
+## 10. i18n Design
+
+### Namespace Registration
+
+- Type file: `shared/locale/types/dashboard/certificates/templateEditor.ts` — defines `TemplateEditorLabels` interface
+- Namespace: `shared/locale/namespaces/dashboard/certificates/templateEditor.namespace.ts` — `defineNamespace("dashboard.certificateTemplateEditor", ...)`
+- AR impl: `shared/locale/ar/dashboard/certificates/templateEditor.ts` — exports `dashboardCertificateTemplateEditorAr`
+- EN impl: `shared/locale/en/dashboard/certificates/templateEditor.ts` — exports `dashboardCertificateTemplateEditorEn`
+- Registry: Add `CertificateTemplateEditor: DashboardCertificateTemplateEditor` to `Translation.Dashboard` in `shared/locale/namespaces/translation.ts`
+- Schema: Add to `DashboardTranslations` in `shared/locale/types/message.ts` as `certificateTemplateEditor: TemplateEditorLabels`
+
+### Usage Patterns
+
+- **Client Components** (ViewModel, tier views): `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)`
+- **Server Components** (page.tsx): `getTranslations(locale).dashboardTranslations.certificateTemplateEditor`
+- **GraphQL Resolvers** (error messages): `ctx.t().errorsTranslations.certificates.*` (if certificate error keys are added to ErrorsLabels by Plan 2)
+
+## 10. i18n Design
+
+### Namespace Registration
+
+- Type file: `shared/locale/types/dashboard/certificates/templateEditor.ts` — defines `TemplateEditorLabels` interface
+- Namespace: `shared/locale/namespaces/dashboard/certificates/templateEditor.namespace.ts` — `defineNamespace("dashboard.certificateTemplateEditor", ...)`
+- AR impl: `shared/locale/ar/dashboard/certificates/templateEditor.ts` — exports `dashboardCertificateTemplateEditorAr`
+- EN impl: `shared/locale/en/dashboard/certificates/templateEditor.ts` — exports `dashboardCertificateTemplateEditorEn`
+- Registry: Add `CertificateTemplateEditor: DashboardCertificateTemplateEditor` to `Translation.Dashboard` in `shared/locale/namespaces/translation.ts`
+- Schema: Add to `DashboardTranslations` in `shared/locale/types/message.ts` as `certificateTemplateEditor: TemplateEditorLabels`
+
+### Usage Patterns
+
+- **Client Components** (ViewModel, tier views): `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)`
+- **Server Components** (page.tsx): `getTranslations(locale).dashboardTranslations.certificateTemplateEditor`
+- **GraphQL Resolvers** (error messages): `ctx.t().errorsTranslations.certificates.*` (if certificate error keys are added to ErrorsLabels by Plan 2)
+
+### Complete Translation Key Schema
+
+**`TemplateEditorLabels` interface fields** (all keys the namespace must define):
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `title` | `string` | Page title / browser tab title |
+| `tabLabel.basicInfo` | `string` | Tab/accordion label for Basic Info |
+| `tabLabel.dimensions` | `string` | Tab/accordion label for Dimensions |
+| `tabLabel.background` | `string` | Tab/accordion label for Background |
+| `tabLabel.fontSettings` | `string` | Tab/accordion label for Font Settings |
+| `field.name` | `string` | Label for name field |
+| `field.description` | `string` | Label for description field |
+| `field.category` | `string` | Label for category autocomplete |
+| `field.paperSize` | `string` | Label for paper size select |
+| `field.width` | `string` | Label for width field |
+| `field.height` | `string` | Label for height field |
+| `field.orientation` | `string` | Label for orientation radio group |
+| `field.orientation.portrait` | `string` | Portrait option label |
+| `field.orientation.landscape` | `string` | Landscape option label |
+| `field.paperSize.a4` | `string` | A4 option label |
+| `field.paperSize.letter` | `string` | Letter option label |
+| `field.paperSize.custom` | `string` | Custom option label |
+| `field.backgroundImage` | `string` | Label for background image upload |
+| `field.backgroundColor` | `string` | Label for background color picker |
+| `field.fontFamily` | `string` | Label for font family select |
+| `field.fontSize` | `string` | Label for font size field |
+| `field.textColor` | `string` | Label for text color picker |
+| `action.save` | `string` | Save button text |
+| `action.discard` | `string` | Discard button text |
+| `action.back` | `string` | Back button tooltip |
+| `action.removeImage` | `string` | Remove background image button |
+| `action.upload` | `string` | Upload button text |
+| `action.browse` | `string` | "or click to browse" text |
+| `action.dragDrop` | `string` | "Drag & drop" text |
+| `action.tapToSelect` | `string` | "Tap to select" (mobile upload) |
+| `status.draft` | `string` | Draft status badge |
+| `status.published` | `string` | Published status badge |
+| `status.archived` | `string` | Archived status badge |
+| `autoSave.saving` | `string` | "Saving…" indicator |
+| `autoSave.saved` | `string` | "Saved" indicator |
+| `autoSave.unsaved` | `string` | "Unsaved changes" indicator |
+| `autoSave.error` | `string` | "Save failed" indicator |
+| `dialog.discardTitle` | `string` | Discard dialog title |
+| `dialog.discardMessage` | `string` | Discard dialog message |
+| `dialog.navGuardTitle` | `string` | Navigation guard dialog title |
+| `dialog.navGuardMessage` | `string` | Navigation guard dialog message |
+| `dialog.conflictTitle` | `string` | Optimistic lock conflict dialog title |
+| `dialog.conflictMessage` | `string` | Conflict dialog message |
+| `dialog.conflictReload` | `string` | Conflict dialog "Reload" button |
+| `dialog.conflictOverwrite` | `string` | Conflict dialog "Overwrite" button |
+| `dialog.confirm` | `string` | Confirm button (shared) |
+| `dialog.cancel` | `string` | Cancel button (shared) |
+| `error.loadFailed` | `string` | Template fetch error message |
+| `error.notFound` | `string` | Template not found message |
+| `error.saveFailed` | `string` | Save mutation error message |
+| `error.uploadFailed` | `string` | Upload error message |
+| `error.invalidFileType` | `string` | Invalid file type error |
+| `error.fileTooLarge` | `(maxSize: string) => string` | File size exceeds limit (interpolated) |
+| `validation.nameRequired` | `string` | Name required error |
+| `validation.nameTooLong` | `(max: number) => string` | Name too long (interpolated) |
+| `validation.dimensionsRange` | `(min: number, max: number) => string` | Dimensions out of range (interpolated) |
+| `validation.fontSizeRange` | `(min: number, max: number) => string` | Font size out of range (interpolated) |
+| `validation.invalidColor` | `string` | Invalid hex color error |
+| `descriptionCounter` | `(current: number, max: number) => string` | Character counter for description field |
+| `preview.dimensions` | `(width: number, height: number) => string` | Dimension preview label (e.g. "{width} × {height} px") |
+
+### EN Translations (excerpts)
+
+| Key | EN Value |
+|-----|----------|
+| `title` | `"Template Editor"` |
+| `tabLabel.basicInfo` | `"Basic Info"` |
+| `tabLabel.dimensions` | `"Dimensions"` |
+| `tabLabel.background` | `"Background"` |
+| `tabLabel.fontSettings` | `"Font Settings"` |
+| `field.name` | `"Template Name"` |
+| `field.description` | `"Description"` |
+| `field.category` | `"Category"` |
+| `field.paperSize` | `"Paper Size"` |
+| `field.width` | `"Width (px)"` |
+| `field.height` | `"Height (px)"` |
+| `field.orientation` | `"Orientation"` |
+| `field.orientation.portrait` | `"Portrait"` |
+| `field.orientation.landscape` | `"Landscape"` |
+| `field.paperSize.a4` | `"A4 (595 × 842)"` |
+| `field.paperSize.letter` | `"Letter (612 × 792)"` |
+| `field.paperSize.custom` | `"Custom"` |
+| `field.backgroundImage` | `"Background Image"` |
+| `field.backgroundColor` | `"Background Color"` |
+| `field.fontFamily` | `"Font Family"` |
+| `field.fontSize` | `"Font Size (px)"` |
+| `field.textColor` | `"Text Color"` |
+| `action.save` | `"Save"` |
+| `action.discard` | `"Discard Changes"` |
+| `action.back` | `"Back to Templates"` |
+| `action.removeImage` | `"Remove Image"` |
+| `action.dragDrop` | `"Drag & drop image here"` |
+| `action.browse` | `"or click to browse"` |
+| `action.tapToSelect` | `"Tap to select image"` |
+| `status.draft` | `"Draft"` |
+| `status.published` | `"Published"` |
+| `status.archived` | `"Archived"` |
+| `autoSave.saving` | `"Saving…"` |
+| `autoSave.saved` | `"All changes saved"` |
+| `autoSave.unsaved` | `"Unsaved changes"` |
+| `autoSave.error` | `"Save failed"` |
+| `dialog.discardTitle` | `"Discard Changes?"` |
+| `dialog.discardMessage` | `"You have unsaved changes. Are you sure you want to discard them?"` |
+| `dialog.navGuardTitle` | `"Leave this page?"` |
+| `dialog.navGuardMessage` | `"You have unsaved changes. They will be lost if you leave."` |
+| `dialog.conflictTitle` | `"Template Modified Elsewhere"` |
+| `dialog.conflictMessage` | `"This template was modified by another user. Reload to see their changes or overwrite with your changes."` |
+| `dialog.conflictReload` | `"Reload"` |
+| `dialog.conflictOverwrite` | `"Overwrite"` |
+| `error.loadFailed` | `"Failed to load template. Please try again."` |
+| `error.notFound` | `"Template not found."` |
+| `error.saveFailed` | `"Failed to save template. Please try again."` |
+| `error.uploadFailed` | `"Failed to upload image. Please try again."` |
+| `validation.nameRequired` | `"Template name is required"` |
+| `validation.invalidColor` | `"Invalid hex color (e.g. #FF5733)"` |
+| `preview.dimensions` | `(w, h) => \`\${w} × \${h} px\`` |
+
+### AR Translations (excerpts)
+
+| Key | AR Value |
+|-----|----------|
+| `title` | `"محرر القالب"` |
+| `tabLabel.basicInfo` | `"المعلومات الأساسية"` |
+| `tabLabel.dimensions` | `"الأبعاد"` |
+| `tabLabel.background` | `"الخلفية"` |
+| `tabLabel.fontSettings` | `"إعدادات الخط"` |
+| `field.name` | `"اسم القالب"` |
+| `field.description` | `"الوصف"` |
+| `field.category` | `"الفئة"` |
+| `field.paperSize` | `"حجم الورق"` |
+| `field.width` | `"العرض (بكسل)"` |
+| `field.height` | `"الارتفاع (بكسل)"` |
+| `field.orientation` | `"الاتجاه"` |
+| `field.orientation.portrait` | `"عمودي"` |
+| `field.orientation.landscape` | `"أفقي"` |
+| `field.paperSize.a4` | `"A4 (595 × 842)"` |
+| `field.paperSize.letter` | `"Letter (612 × 792)"` |
+| `field.paperSize.custom` | `"مخصص"` |
+| `field.backgroundImage` | `"صورة الخلفية"` |
+| `field.backgroundColor` | `"لون الخلفية"` |
+| `field.fontFamily` | `"نوع الخط"` |
+| `field.fontSize` | `"حجم الخط (بكسل)"` |
+| `field.textColor` | `"لون النص"` |
+| `action.save` | `"حفظ"` |
+| `action.discard` | `"تجاهل التغييرات"` |
+| `action.back` | `"العودة إلى القوالب"` |
+| `action.dragDrop` | `"اسحب وأفلت الصورة هنا"` |
+| `action.tapToSelect` | `"اضغط لاختيار صورة"` |
+| `status.draft` | `"مسودة"` |
+| `status.published` | `"منشور"` |
+| `status.archived` | `"مؤرشف"` |
+| `autoSave.saving` | `"جاري الحفظ…"` |
+| `autoSave.saved` | `"تم حفظ جميع التغييرات"` |
+| `autoSave.unsaved` | `"تغييرات غير محفوظة"` |
+| `autoSave.error` | `"فشل الحفظ"` |
+| `dialog.discardTitle` | `"تجاهل التغييرات؟"` |
+| `dialog.discardMessage` | `"لديك تغييرات غير محفوظة. هل أنت متأكد من تجاهلها؟"` |
+| `dialog.navGuardTitle` | `"مغادرة الصفحة؟"` |
+| `dialog.navGuardMessage` | `"لديك تغييرات غير محفوظة. ستفقد إذا غادرت."` |
+| `error.notFound` | `"القالب غير موجود."` |
+
+### RTL Considerations
+
+- Tab/accordion labels render RTL automatically via MUI + Emotion RTL cache
+- Form fields: RTL text direction handled by MUI `dir` attribute
+- Dimension preview: width × height label uses `×` character (not word "by") for RTL/LTR neutrality
+- Color picker: hex value is LTR regardless of locale
+
+---
+
+## 11. Permission & Security
+
+> **Canonical permission keys** (per INTER_PLAN_CONTRACTS.md §Permission Keys): `CertificateTemplateManage` = `certificates.templates.manage` (for editor operations), `CertificateTemplateView` = `certificates.templates.view` (for read-only access). These are values of the `AppPermission` enum. NOT `CERTIFICATES_TEMPLATES_MANAGE` (no SCREAMING_SNAKE in the codebase).
+
+| Aspect | Implementation |
+|--------|---------------|
+| Page access | `requirePermissionForPage(userId, [AppPermission.CertificateTemplateManage], locale, context)` in server page (editor requires manage, not just view) |
+| Container gate | `<RequirePermission permissions={[AppPermission.CertificateTemplateManage]}>` in Container |
+| ViewModel gate | `useUserStore().hasPermission(AppPermission.CertificateTemplateManage)` for conditional rendering of save/discard buttons (read-only users see fields but no actions) |
+| Read-only fallback | If user has only `CertificateTemplateView`, show template fields in read-only mode (all fields disabled, no save/discard) |
+| Mutation | GraphQL mutation resolver in Plan 5 enforces `certificates.templates.manage` scope |
+| Upload | Background upload mutation enforces same permission server-side |
+| Optimistic locking | Mutation includes `expectedVersion: Int` — backend rejects on mismatch with localized `conflict` error (per SWE Review §A) |
+| Conflict handling | On `CONFLICT` error code, show "Template was modified elsewhere" dialog with "Reload" (discard local, refetch) and "Overwrite" (retry without version guard) options |
+
+---
+
+## 12. Desktop vs Mobile Differences
+
+### 12.1 Desktop View Specification
+
+**File**: `frontend/desktop/views/dashboard/cert-template-editor/templateEditor.desktop.tsx`
+
+**Complete layout structure** (top to bottom):
+
+1. **EditorHeader** (shared component, sticky top):
+   - Left: Back button (`IconButton` with `ArrowBackOutlined`), Template name (`Typography` variant h6, editable inline on double-click), Status badge (`Chip` with `draft`/`published`/`archived` color from theme)
+   - Center: Auto-save indicator (`autoSaveStatus === 'saving'` → spinner + "Saving…"; `'saved'` → checkmark + "Saved"; `'idle' && dirty` → "Unsaved changes"; `error` → red dot + "Save failed")
+   - Right: Discard button (`Button` variant text, disabled when `!dirty || saving`), Save button (`Button` variant contained, disabled when `!dirty || saving`, with `CircularProgress` spinner when `saving`)
+
+2. **Tab bar** (`Tabs` component, `value={activeSection}`, `onChange={setActiveSection}`):
+   - Tab 0: Basic Info (`tabLabel.basicInfo`)
+   - Tab 1: Dimensions (`tabLabel.dimensions`)
+   - Tab 2: Background (`tabLabel.background`)
+   - Tab 3: Font Settings (`tabLabel.fontSettings`)
+
+3. **Tab content** (`Box` with `padding: 3`), conditionally rendered by `activeSection`:
+
+   **Basic Info tab** (2-column `Grid` container, spacing 2):
+   - `name` field: Grid item xs=12 md=6, `TextField` with `register('name')`, label `field.name`, error from `errors.name?.message`
+   - `categoryId` field: Grid item xs=12 md=6, `Autocomplete` with `Controller` wrapping, options from `categories`, label `field.category`, `getOptionLabel={(o) => o.name}`, `isOptionEqualToValue={(a,b) => a.id === b.id}`
+   - `description` field: Grid item xs=12, `TextField` with `multiline rows={4}`, `register('description')`, label `field.description`, counter `{length}/500`
+
+   **Dimensions tab** (2-column `Grid` container, `DimensionPreview` on right):
+   - Left column (Grid item xs=12 md=7): `paperSize` select (`FormControl` + `Select` with `Controller`), `orientation` radio group (`RadioGroup` with `Controller`, 2 options: portrait/landscape), `width` + `height` `TextField`s side by side (Grid xs=6 each, `type="number"`, `register('width')`/`register('height')`, disabled when `paperSize !== 'custom'`)
+   - Right column (Grid item xs=12 md=5): `DimensionPreview` component showing scaled canvas outline with width×height label
+
+   **Background tab** (single column):
+   - `BackgroundUploadZone` component (full width), `backgroundColor` `ColorPickerField` side by side (Grid xs=12 md=6 each)
+
+   **Font Settings tab** (2-column grid):
+   - `fontFamily` select (Grid xs=12 md=6, `Select` with `Controller`, options from `fontOptions`), `fontSize` number field (Grid xs=12 md=6, `TextField type="number"`), `textColor` `ColorPickerField` (Grid xs=12)
+
+4. **DiscardDialog** — rendered at Desktop root level, open state from `discardDialogOpen`
+
+### 12.2 Mobile View Specification
+
+**File**: `frontend/mobile/views/dashboard/cert-template-editor/templateEditor.mobile.tsx`
+
+**Complete layout structure** (top to bottom):
+
+1. **EditorHeader** (shared component, sticky top, simplified for mobile):
+   - Left: Back button (`IconButton` with `ArrowBackOutlined`)
+   - Center: Template name (`Typography` variant subtitle1, `noWrap`), Status badge (`Chip` size small) below name
+   - Right: Save icon button (`IconButton` with `SaveOutlined`, disabled when `!dirty || saving`), Discard icon button (`IconButton` with `UndoOutlined`, disabled when `!dirty || saving`)
+   - Auto-save indicator: single small text below header bar (not in header itself, due to space constraints)
+
+2. **Accordion** (`Accordion` components, one per section — `expanded` controlled by `activeSection` from store, `onChange` calls `setActiveSection`):
+   - Accordion 0: Summary text `tabLabel.basicInfo`, details = Basic Info fields
+   - Accordion 1: Summary text `tabLabel.dimensions`, details = Dimensions fields + preview
+   - Accordion 2: Summary text `tabLabel.background`, details = Background fields
+   - Accordion 3: Summary text `tabLabel.fontSettings`, details = Font Settings fields
+   - Only one accordion expanded at a time (store stores single `activeSection`)
+
+3. **Accordion content** (single column, stacked fields, full width):
+
+   **Basic Info section** (single column `Stack` spacing 2):
+   - `name` field: `TextField` with `register('name')`, label `field.name`, fullWidth
+   - `categoryId` field: `Autocomplete` with `Controller`, fullWidth
+   - `description` field: `TextField multiline rows={3}`, `register('description')`, fullWidth, counter `{length}/500`
+
+   **Dimensions section** (single column `Stack` spacing 2):
+   - `paperSize` select: `FormControl fullWidth` + `Select` with `Controller`
+   - `orientation` radio: `RadioGroup` with `Controller` (2 options: portrait/landscape), row layout on mobile
+   - `width` + `height`: `TextField type="number"` side by side (use `Stack direction="row"` spacing 1, each `flex: 1`), disabled when `paperSize !== 'custom'`
+   - `DimensionPreview`: below fields, full width, scaled to screen width
+
+   **Background section** (single column `Stack` spacing 2):
+   - `BackgroundUploadZone` — tap-to-select primary action (not drag-and-drop), full width
+   - `backgroundColor` `ColorPickerField` — full screen modal picker on mobile (not Popover)
+
+   **Font Settings section** (single column `Stack` spacing 2):
+   - `fontFamily` select: `FormControl fullWidth` + `Select` with `Controller`
+   - `fontSize`: `TextField type="number"`, fullWidth
+   - `textColor` `ColorPickerField`: full screen modal picker on mobile
+
+4. **Bottom sticky bar** (`AppBar position="sticky"` at bottom, visible only when `dirty`):
+   - Discard button (`Button` variant text, `flex: 1`), Save button (`Button` variant contained, `flex: 2`, with spinner when saving)
+   - Alternatively: FAB Save button (bottom right) when `dirty`, with discard in an overflow menu
+
+5. **DiscardDialog** — rendered at Mobile root level, open state from `discardDialogOpen`
+
+### 12.3 Summary Comparison Table
+
+| Aspect | Desktop | Mobile |
+|--------|---------|--------|
+| Section navigation | Tab bar (all section labels visible) | Accordion (one expanded at a time) |
+| Form layout | 2-column Grid (fields side by side) | Single column (stacked) |
+| Save/discard | Header buttons (top right, text + icon) | Bottom sticky bar (icon-only header, text buttons bottom) |
+| Dimension preview | Right side of Dimensions tab | Below form fields, full width |
+| Upload area | Drag-and-drop + click (side-by-side) | Tap-to-select primary (stacked) |
+| Color picker | Popover with react-color `<SketchPicker>` | Full screen modal with react-color `<SketchPicker>` |
+| Navigation | Auto-breadcrumbs in `DesktopPageHeader` | Back button in `MobilePageHeader` |
+| Auto-save indicator | In header bar | Below header bar (separate strip) |
+
+---
+
+### 12.4 Interaction States
+
+| State | Trigger | Visual |
+|-------|---------|--------|
+| **Loading** | Template fetch in progress ( Apollo `loading`) | Skeleton: tab bar with grey placeholders, form body with 6–8 `Skeleton` rows (height 56px, rounded) |
+| **Error** | Template fetch failed ( Apollo `error`) | `Alert severity="error"` with `error.loadFailed` message + retry button. No form rendered |
+| **Not Found** | Query returns null/deleted | `Alert severity="warning"` with `error.notFound` message + back button. No form rendered |
+| **Saving** | Save mutation in flight | Save button shows `CircularProgress` (size 20, `color="inherit"`), disabled. Auto-save indicator shows `autoSave.saving` with spinner |
+| **Saved** | Save mutation success | Auto-save indicator shows `autoSave.saved` with checkmark for 3s, then reverts to idle. Dirty flag resets to false |
+| **Save Error** | Save mutation error | Error snackbar (`error.saveFailed`), dirty flag remains true. Auto-save indicator shows `autoSave.error` |
+| **Conflict** | `expectedVersion` mismatch | Conflict dialog (`dialog.conflictTitle`/`Message`) with "Reload" (refetch + discard local) or "Overwrite" (retry without version guard) |
+| **Unsaved/Dirty** | Any field differs from serverTemplate | Dirty indicator: `autoSave.unsaved` text in header. Save/discard buttons enabled |
+| **Upload in progress** | Background image uploading | Linear progress bar in upload area, area disabled for further drops |
+| **Upload error** | Upload mutation fails | Error icon + `error.uploadFailed` in upload area, retry available |
+| **Validation error** | RHF `onBlur` validation fails | Field `error={true}`, `helperText` = localized error message from Zod schema |
+| **Permission denied** | User lacks `CertificateTemplateManage` | All form fields `disabled`, no save/discard buttons rendered (read-only mode if `CertificateTemplateView` present, forbidden page if neither) |
+| **Discard dialog** | User clicks Discard with dirty=true | `DiscardDialog` opens with `dialog.discardTitle`/`Message`, Confirm = reset form to serverTemplate + close, Cancel = close dialog |
+| **Navigation guard** | User clicks any in-app navigation with dirty=true | `DiscardDialog` opens with `dialog.navGuardTitle`/`Message`, Confirm = navigate to target, Cancel = stay on page. `beforeunload` handles hard refresh/tab close |
+
+### 12.5 Navigation & Route Specification
+
+**Route**: `/certificates/templates/[templateId]` — dynamic segment under the dashboard group.
+
+**App Router page**: `app/(dashboard)/certificates/templates/[templateId]/page.tsx`:
+- `generateMetadata({ params })` returns `{ title: t.title }` using `getTranslations(locale).dashboardTranslations.certificateTemplateEditor`
+- Server component calls `getServerUserContext()` → `requirePermissionForPage(userId, [AppPermission.CertificateTemplateManage], locale, context)` → `<TemplateEditorContainer templateId={params.templateId} />`
+- `redirectToLogin` from `@/frontend/common/lib/redirectToLogin` for unauthenticated users
+
+**Sidebar entry** (under existing "Certificates" section):
+- Label: `sidebar.certificates.templates` (i18n key — add to sidebar translations)
+- Route: `/certificates/templates` (list page, Plan 9) — individual editor page is accessed from list row click
+- Icon: `CertificateOutlined` or `DescriptionOutlined`
+
+**Breadcrumbs** (desktop auto-breadcrumbs from `DesktopPageHeader`):
+- `Home / Certificates / Templates / [Template Name]`
+- Last segment is dynamic from fetched template name, not route param
+
+**Navigation guard pattern** (per SWE Review §C):
+- ViewModel maintains `pendingNavigation: string | null` (route target)
+- `handleBack()` checks `dirty` — if dirty, opens `DiscardDialog` with `navGuard` labels and sets `pendingNavigation = router.back target`
+- All in-app navigations (sidebar links, breadcrumb links) are wrapped via a `useGuardedNavigation` hook that intercepts `dirty` state
+- `beforeunload` event listener added when `dirty === true` (for tab close / hard refresh only — not SPA navigation)
+- On dialog confirm: `resetLocalFromServer()`, then `router.push(pendingNavigation)`, clear pending
+- On dialog cancel: clear `pendingNavigation`, stay on page
+
+### 12.6 Single-Flight Save Guard (per SWE Review §B)
+
+The ViewModel implements a single-flight save guard to prevent auto-save and manual-save races:
+- `saveInFlight: boolean` ref in ViewModel (not in Zustand — ephemeral)
+- `handleSave()` checks `saveInFlight.current` — if true, awaits the existing promise (single-flight)
+- Auto-save (when enabled) uses the same `handleSave()` function, never a separate path
+- After save completes (success or error), `saveInFlight.current = false`
+- Manual save button is disabled during in-flight save (visual feedback via `saving` state)
+
+### 12.7 Orphan Background Cleanup (per SWE Review §H)
+
+On discard with a newly uploaded (unsaved) background image:
+- `handleDiscardConfirm()` checks if `backgroundFileRef.current` is non-null AND `backgroundImageUrl` was changed but not saved to server
+- If so, calls `deleteFile` mutation (from Plan 7 storage) with the signed URL to prevent orphan files
+- Then calls `resetLocalFromServer()` and clears `backgroundFileRef.current`
+
+### 12.8 Font List Source (per SWE Review §D)
+
+The allowed font list is defined as a shared constant in `shared/constants/certificate.constants.ts`:
+- `CERT_ALLOWED_FONTS`: array of `{ value: string; labelKey: string }` objects (Cairo, Tajawal, Amiri, Inter, Roboto)
+- Consumed by the editor's font family select and by Plan 6's PDF engine (ensures editor cannot pick a font the renderer lacks)
+- Labels are i18n keys resolved at render time via the labels object
+
+### 12.9 Editor Toolbar Component (per UI Layer Spec §A)
+
+**Component**: `TemplateEditorToolbar`
+
+**Props** (all callbacks are optional except `onSave`; toolbar is a controlled component — all state lives in the Zustand store or parent):
+
+```typescript
+interface TemplateEditorToolbarProps {
+  // Actions
+  onSave: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onZoomReset: () => void;
+  onToggleGrid: () => void;
+  onToggleSnap: () => void;
+  // State flags (reflect store; toolbar renders badges/icons only)
+  isDirty: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
+  zoomLevel: number;
+  snapEnabled: boolean;
+  gridVisible: boolean;
+}
+```
+
+**Layout** — MUI `AppBar` (`position="sticky"`, `color="default"`, `elevation={1}`) containing a single `Toolbar`:
+
+| Region | Contents |
+|--------|----------|
+| **Left** | Template name as readonly `Typography` (read from store `currentTemplate.name`); `Badge`/`Chip` "Edited" shown when `isDirty === true` |
+| **Center** | `IconButton`s in order: Save (`SaveOutlined`, tooltip "Save (Ctrl+S)"), Undo (`UndoOutlined`, disabled when `!canUndo`), Redo (`RedoOutlined`, disabled when `!canRedo`), `Divider` (orientation vertical, flexItem), Zoom Out (`ZoomOutOutlined`), `Typography` displaying `${zoomLevel}%` (min-width 48px, center-aligned), Zoom In (`ZoomOutlined`), Reset (`CenterFocusStrongOutlined`, tooltip "Reset Zoom (Ctrl+0)"), `Divider`, Grid Toggle (`GridOnOutlined` / `GridOffOutlined` — toggle icon based on `gridVisible`), Snap Toggle (`SnapOutlined` — filled when `snapEnabled`, outlined when disabled) |
+| **Right** | Preview button (`Button` variant="outlined", `VisibilityOutlined` icon, label "Preview" — opens Plan 11 preview overlay), Publish button (`Button` variant="contained", `PublishOutlined` icon, label "Publish" — opens Plan 15 publish dialog; disabled when `isDirty === true` with tooltip "Save before publishing") |
+
+- Every `IconButton` must have an `aria-label` and a `Tooltip` for accessibility.
+- Keyboard shortcuts are handled by the `useEditorShortcuts` hook (§12.13), not by the toolbar itself — the toolbar only wires `onClick` to the action callbacks.
+
+**Responsive behavior**:
+- **Desktop** (≥ `lg` breakpoint, 1280px+): Full toolbar as above, single row.
+- **Tablet** (`md`, 768–1279px): Toolbar remains single row but Publish button icon-only (label hidden) to save width.
+- **Mobile** (< `md`, < 768px): Toolbar wraps to a second row via ` Toolbar` `flexWrap="wrap"`. Less-used buttons (Grid, Snap, Reset) collapse into a `More` overflow menu (`IconButton` with `MoreVertOutlined` opening a `Menu`). Save, Undo, Redo, Zoom always visible. Preview/Publish move to the second row.
+
+### 12.10 Editor Layout Component (per UI Layer Spec §B)
+
+**Component**: `TemplateEditorLayout`
+
+3-panel resizable split layout using MUI `Box`/`Stack` + `react-resizable-panels` (`Panel`, `PanelGroup`, `PanelResizeHandle`).
+
+```typescript
+interface TemplateEditorLayoutProps {
+  // Children are injected to keep the layout component pure/testable
+  leftPanelContent: React.ReactNode;   // Elements/Layers/Variables tabs
+  centerPanelContent: React.ReactNode; // Canvas wrapper (Plan 11 owns canvas impl)
+  rightPanelContent: React.ReactNode;  // Properties/Style/History tabs
+}
+```
+
+**Panel configuration**:
+
+| Panel | Default Size | Min | Max | Content |
+|-------|-------------|-----|-----|---------|
+| Left | 280px (`defaultSize={20}` percentage-based) | 200px | 400px | Tabbed: **Elements** \| **Layers** \| **Variables** |
+| Center | flex 1 (`defaultSize={60}`, `minSize` auto) | — | — | Editor canvas wrapper (Plan 11 handles canvas) |
+| Right | 320px (`defaultSize={20}`) | 240px | 500px | Tabbed: **Properties** \| **Style** \| **History** |
+
+- `PanelResizeHandle` from `react-resizable-panels` styled via `sx` to a 4px-wide vertical bar with `cursor="col-resize"`; on hover, background changes to `theme.palette.action.hover`.
+- The left and right panels each render a MUI `Tabs` with three `Tab` buttons; the active tab state is stored in the Zustand store (`activeLeftPanel`, `activeRightPanel`) so it survives panel collapse/expand and tier switches.
+- Panel sizes (pixel widths) are persisted to store (`leftPanelWidth`, `rightPanelWidth`) on resize so they survive re-mounts within a session (session-only — no `localStorage` persistence per store serialization rules).
+
+**Responsive behavior**:
+
+| Tier | Behavior |
+|------|----------|
+| **Desktop** (≥ `md`) | 3-panel horizontal split as above. All panels visible and resizable. |
+| **Tablet** (`sm`–`md`) | Left panel is collapsible (toggle button in the `AppBar` or a `IconButton ChevronLeft/Right` at the panel's edge collapses to 0 width). Right panel becomes a `Drawer` (`anchor="right"`, `variant="temporary"`) opened by a Properties button in the toolbar. Center panel takes remaining width. |
+| **Mobile** (< `sm`) | Panels stack vertically. Left and right panels become `Accordion`-style collapsible sections (default collapsed for right, expanded for left). Center panel (canvas) is always visible. No `PanelGroup` — use a vertical `Stack`. |
+
+- The tier check uses `useMediaQuery(theme.breakpoints)` at the layout level (permitted — `frontend/views/AGENTS.md` forbids `useMediaQuery` **inside** tier views, but the layout switch itself is the tier boundary and uses it correctly).
+
+### 12.11 Editor Status Bar Component (per UI Layer Spec §C)
+
+**Component**: `TemplateEditorStatusBar`
+
+```typescript
+interface TemplateEditorStatusBarProps {
+  selectedElementType: string | null;   // e.g. "Text", "Image", "Shape"
+  selectedElementName: string | null;    // element's display name
+  cursorX: number | null;                // canvas coordinate system
+  cursorY: number | null;
+  zoomLevel: number;
+  gridSize: number;
+  snapEnabled: boolean;
+}
+```
+
+- **Height**: 28px, `position: "fixed"`, `bottom: 0`, `left: 0`, `right: 0`, `zIndex` above canvas but below dialogs.
+- **Background**: `theme.palette.background.default`, top border `1px solid theme.palette.divider`.
+- **Typography**: `variant="caption"`, `color="text.secondary"`.
+
+| Region | Content |
+|--------|---------|
+| **Left** | If `selectedElementId` is null: "No selection" (or empty). If selected: `${selectedElementType}: ${selectedElementName}` |
+| **Center** | Cursor coordinates — `x: ${cursorX.toFixed(1)}, y: ${cursorY.toFixed(1)}` (canvas coordinate system from Plan 11; null when cursor is outside canvas) |
+| **Right** | `${zoomLevel}%  ·  Grid ${gridSize}px  ·  Snap: ${snapEnabled ? "On" : "Off"}` |
+
+- **Hidden on mobile** (`useMediaQuery(theme.breakpoints.down('md'))` returns `null`). On tablet, hidden when keyboard is open (detected via `visualViewport` resize listener) to reclaim screen space.
+- The status bar reads directly from the Zustand store via `useEditorStore` selectors (cursor coordinates are updated by Plan 11's canvas mouse-move handler writing to store).
+
+### 12.12 Zustand Editor Store Shape (per State Spec §D)
+
+The editor store extends the existing `useCertTemplateEditorStore` (T06) with editor-chrome state. The complete `EditorState` interface (added fields bolded; existing fields from T06 remain):
+
+```typescript
+interface EditorState {
+  // === Existing fields (from T06 base store) ===
+  currentTemplate: TemplateReturn | null;
+  isDirty: boolean;
+  lastSavedAt: string | null;
+  saving: boolean;
+  serverTemplate: TemplateReturn | null;
+  autoSaveStatus: 'idle' | 'saving' | 'saved' | 'error';
+
+  // === Undo / Redo (new) ===
+  undoStack: TemplateSnapshot[];
+  redoStack: TemplateSnapshot[];
+  maxHistorySize: 50;   // constant; hardcoded default
+
+  // === Viewport (new) ===
+  zoomLevel: number;        // percentage, default 100, range [minZoom, maxZoom]
+  minZoom: number;          // constant 25
+  maxZoom: number;          // constant 400
+
+  // === Grid (new) ===
+  gridVisible: boolean;     // default false
+  gridSize: number;          // default 20 (px in canvas units)
+  snapEnabled: boolean;      // default true
+  snapThreshold: number;     // default 5 (px — elements snap when within this distance of grid/canvas edges)
+
+  // === Panels (new) ===
+  activeLeftPanel: 'elements' | 'layers' | 'variables';     // default 'elements'
+  activeRightPanel: 'properties' | 'style' | 'history';     // default 'properties'
+  leftPanelWidth: number;    // default 280
+  rightPanelWidth: number;   // default 320
+
+  // === Selection (new) ===
+  selectedElementId: string | null;   // null = no selection
+
+  // === Actions (existing + new) ===
+  // Existing
+  setTemplate: (tpl: TemplateReturn) => void;
+  markDirty: () => void;
+  save: () => Promise<void>;
+  // New — undo/redo
+  pushUndo: (snapshot: TemplateSnapshot) => void;
+  undo: () => void;
+  redo: () => void;
+  // New — viewport
+  setZoom: (level: number) => void;   // clamps to [minZoom, maxZoom]
+  // New — grid
+  toggleGrid: () => void;
+  toggleSnap: () => void;
+  // New — panels
+  setActiveLeftPanel: (panel: 'elements' | 'layers' | 'variables') => void;
+  setActiveRightPanel: (panel: 'properties' | 'style' | 'history') => void;
+  setLeftPanelWidth: (width: number) => void;
+  setRightPanelWidth: (width: number) => void;
+  // New — selection
+  setSelectedElement: (id: string | null) => void;
+}
+```
+
+Where `TemplateSnapshot` is a deep-cloned immutable record of the template state at the time of an edit:
+```typescript
+type TemplateSnapshot = Readonly<{
+  template: TemplateReturn;   // deep clone via structuredClone or a freeze helper
+  timestamp: string;           // ISO string of when the snapshot was taken
+  actionLabel: string;         // human-readable label for the History panel (e.g. "Move element", "Change font")
+}>;
+```
+
+**Store invariants enforced by actions**:
+
+| Invariant | Enforcement |
+|-----------|-------------|
+| `undoStack.length <= maxHistorySize` | `pushUndo` shifts the oldest entry when at capacity |
+| `undo` pops `undoStack` → pushes current state to `redoStack`; `redo` is the reverse | `undo`: `redoStack.push(currentSnapshot); currentTemplate = undoStack.pop()`. `redo`: inverse. |
+| `zoomLevel ∈ [minZoom, maxZoom]` | `setZoom` clamps: `Math.max(minZoom, Math.min(maxZoom, level))` |
+| `selectedElementId` refers to a real element in `currentTemplate.elements` | `setSelectedElement` validates the id exists; `null` always allowed (deselect). If the selected element is deleted, selection auto-clears. |
+| After `save()`, `isDirty = false`, `lastSavedAt = new Date().toISOString()` | `save` action clears dirty and stamps timestamp on success |
+
+**Non-persisted** — the store uses default Zustand (no `persist` middleware). Panel widths and tabs are session-only, deliberately not surviving a page reload (matches `frontend/common/stores/AGENTS.md` — File objects live in `useRef`, not store).
+
+### 12.13 Keyboard Shortcuts (per Interaction Spec §E)
+
+Handled by a dedicated hook `useEditorShortcuts` (file: `frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts`) that registers a single `keydown` listener on `window` (or the editor container `ref`) and dispatches to store actions.
+
+| Shortcut | Action | Store Method | Description |
+|----------|--------|---------------|-------------|
+| `Ctrl+S` | Save | `save()` | Save template, clear `isDirty`. Prevent default browser save. |
+| `Ctrl+Z` | Undo | `undo()` | Pop `undoStack`, push current to `redoStack`. No-op if stack empty. |
+| `Ctrl+Y` / `Ctrl+Shift+Z` | Redo | `redo()` | Pop `redoStack`, push current to `undoStack`. No-op if stack empty. |
+| `Ctrl++` (Ctrl and `=`) | Zoom In | `setZoom(zoomLevel + 10)` | Increase `zoomLevel` by 10%. Clamped by `setZoom`. |
+| `Ctrl+-` | Zoom Out | `setZoom(zoomLevel - 10)` | Decrease `zoomLevel` by 10%. Clamped. |
+| `Ctrl+0` | Zoom Reset | `setZoom(100)` | Set `zoomLevel` to 100%. |
+| `Ctrl+G` | Toggle Grid | `toggleGrid()` | Toggle `gridVisible`. |
+| `Ctrl+Shift+S` | Toggle Snap | `toggleSnap()` | Toggle `snapEnabled`. (Note: `Ctrl+S` is save; `Shift` distinguishes.) |
+| `Escape` | Deselect | `setSelectedElement(null)` | Clear `selectedElementId`. If a dialog is open, close the dialog instead of deselecting (dialog close takes priority — check dialog state first). |
+| `Delete` / `Backspace` | Delete Element | (calls delete handler from Plan 11) | Remove selected element. Opens a confirmation dialog ("Delete this element?") unless `userSettings.confirmOnDelete === false`. If no element selected or focus is in a text field, `Delete` does default behavior (does NOT delete element — prevents accidental deletion while typing). |
+
+**Implementation notes**:
+- The hook returns nothing; it's a side-effect hook called once at the top of the editor container: `useEditorShortcuts({ onSave, onDeleteElement })`.
+- `preventDefault()` is called for all handled Ctrl+ combos to suppress browser defaults (especially `Ctrl+S` save-page dialog).
+- When the active element is an `input`, `textarea`, or `[contenteditable]`, only `Escape` and `Ctrl+S` are active; typing shortcuts (Delete, etc.) are suppressed to avoid clobbering text editing.
+- The hook cleans up its listener on unmount.
+- Shortcuts are disabled when a modal dialog (`DiscardDialog`, conflict dialog, publish dialog) is open — checked via a `isModalOpen` ref passed into the hook.
+
+---
+
+## 13. Files to Create/Modify
+
+### New Files
+
+| File | Layer | Description |
+|------|-------|-------------|
+| `app/(dashboard)/certificates/templates/[templateId]/page.tsx` | App Router | Server page with permission guard, `generateMetadata` |
+| `frontend/common/views/dashboard/cert-template-editor/templateEditorContainer.tsx` | Container | `RequirePermission` wrapper, `useTemplateEditorViewModel()`, `createLazyView` + `ResponsiveViewSwitch` |
+| `frontend/common/views/dashboard/cert-template-editor/useTemplateEditorViewModel.ts` | ViewModel | Apollo hooks, Zustand sync, RHF `useForm` + `zodResolver`, all handlers, labels |
+| `frontend/common/views/dashboard/cert-template-editor/templateEditorView.tsx` | Switcher | Receives ViewModel, passes to `ResponsiveViewSwitch` lazy mobile/desktop views |
+| `frontend/common/views/dashboard/cert-template-editor/schema/templateEditorSchema.ts` | Schema | Zod schema factory `templateEditorSchema(messages)` + `TemplateFormData` export |
+| `frontend/common/views/dashboard/cert-template-editor/types/templateEditor.types.ts` | Types | `TemplateEditorViewModelProps`, `EditorSection` type, `CategoryOption`, `FontOption` |
+| `frontend/common/views/dashboard/cert-template-editor/components/EditorHeader.tsx` | Shared | Header with back, name, status badge, save/discard, auto-save indicator |
+| `frontend/common/views/dashboard/cert-template-editor/components/DiscardDialog.tsx` | Shared | Discard/navigation guard confirmation dialog |
+| `frontend/common/views/dashboard/cert-template-editor/components/DimensionPreview.tsx` | Shared | Aspect-ratio preview box with width×height label |
+| `shared/components/ui/ColorPickerField.tsx` | Shared UI | `react-color` `SketchPicker` in MUI `Popover` + hex `TextField` (a11y-safe, reusable by Plans 11/12) |
+| `frontend/desktop/views/dashboard/cert-template-editor/templateEditor.desktop.tsx` | Desktop | Tab layout, sections, renders EditorHeader + tab content |
+| `frontend/desktop/views/dashboard/cert-template-editor/components/BasicInfoSection.desktop.tsx` | Desktop | Basic Info form fields (2-column grid) |
+| `frontend/desktop/views/dashboard/cert-template-editor/components/DimensionsSection.desktop.tsx` | Desktop | Dimensions form + DimensionPreview (split layout) |
+| `frontend/desktop/views/dashboard/cert-template-editor/components/BackgroundSection.desktop.tsx` | Desktop | Background upload + color picker |
+| `frontend/desktop/views/dashboard/cert-template-editor/components/FontSettingsSection.desktop.tsx` | Desktop | Font settings form |
+| `frontend/mobile/views/dashboard/cert-template-editor/templateEditor.mobile.tsx` | Mobile | Accordion layout, bottom sticky bar |
+| `frontend/mobile/views/dashboard/cert-template-editor/components/BasicInfoSection.mobile.tsx` | Mobile | Basic Info fields (stacked) |
+| `frontend/mobile/views/dashboard/cert-template-editor/components/DimensionsSection.mobile.tsx` | Mobile | Dimensions + preview (stacked) |
+| `frontend/mobile/views/dashboard/cert-template-editor/components/BackgroundSection.mobile.tsx` | Mobile | Background upload + color picker (mobile) |
+| `frontend/mobile/views/dashboard/cert-template-editor/components/FontSettingsSection.mobile.tsx` | Mobile | Font settings (stacked) |
+| `frontend/common/stores/certTemplateEditorStore.ts` | Store | Zustand store (`useCertTemplateEditorStore`) — non-persisted |
+| `frontend/common/graphql/sharedDocuments/certificates/templateEditor.documents.ts` | GraphQL | `templateEditorQueryDocument`, `updateTemplateEditorMutationDocument`, `certificateCategoriesQueryDocument`, `TemplateEditorFragment` |
+| `frontend/common/graphql/sharedDocuments/certificates/index.ts` | GraphQL barrel | Export template editor documents |
+| `shared/locale/types/dashboard/certificates/templateEditor.ts` | i18n types | `TemplateEditorLabels` interface |
+| `shared/locale/namespaces/dashboard/certificates/templateEditor.namespace.ts` | i18n namespace | `defineNamespace("dashboard.certificateTemplateEditor", ...)` |
+| `shared/locale/ar/dashboard/certificates/templateEditor.ts` | i18n AR | `dashboardCertificateTemplateEditorAr` |
+| `shared/locale/en/dashboard/certificates/templateEditor.ts` | i18n EN | `dashboardCertificateTemplateEditorEn` |
+
+### Modified Files
+
+| File | Modification |
+|------|-------------|
+| `shared/locale/namespaces/translation.ts` | Add `CertificateTemplateEditor: DashboardCertificateTemplateEditor` to `Translation.Dashboard` |
+| `shared/locale/types/message.ts` | Add `certificateTemplateEditor: TemplateEditorLabels` to `DashboardTranslations` |
+| `shared/locale/ar/messages.ts` | Import + include `dashboardCertificateTemplateEditorAr` |
+| `shared/locale/en/messages.ts` | Import + include `dashboardCertificateTemplateEditorEn` |
+| `frontend/common/graphql/sharedDocuments/index.ts` | Re-export from `certificates/` barrel (if barrel re-export pattern is used) |
+| `shared/constants/certificate.constants.ts` | Add `CERT_CANVAS_DPI = 72`, `CERT_PAPER_SIZES` preset map (A4/Letter dimensions at 72 DPI) |
+
+---
+
+## 14. Outcome & Knowledge Transfer Protocol
+
+### Patterns Documented for Future Plans
+
+| Pattern | Reuse Plans | Location |
+|---------|------------|----------|
+| Editor shell with tabs/accordion + dirty state | Plans 11, 12, 13, 15 | Documented in design (this file) |
+| Background upload flow (file → signed URL) | Plan 17 (generation dialog) | `docs/certificates/background-upload-flow.md` |
+| Navigation guard with dirty state | Plans 11-15 (all editor plans) | `docs/certificates/navigation-guard.md` |
+| Dimension preview component | Plan 11 (visual canvas), Plan 15 (preview) | `docs/certificates/live-dimension-preview.md` |
+| Form validation in Zustand store | Plans 13 (variables), 14 (recipients) | Documented in design (this file) |
+
+### Knowledge Transfer Items
+
+1. **Dirty-state management pattern**: `localTemplate` vs `serverTemplate` with deep-diff in Zustand — reused by Plans 11-15 for their editor sections
+2. **Auto-save debounce pattern**: 30s debounce + auto-save indicator — reusable by Plans 11-12
+3. **Discard dialog + navigation guard**: `useNavigationGuard` hook pattern — reusable by all editor plans
+4. **Background upload flow**: upload mutation → signed URL → local state — reusable by Plan 17
+5. **Section-based form layout**: tabs (desktop) + accordion (mobile) — reusable by Plans 11-14 for their sections
+6. **DimensionPreview component**: exported as shared component from `frontend/common/views/.../components/` — directly imported by Plan 11
+
+---
+
+## Reality Check Notes
+
+Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on the date of this edit.
+
+### Verified as accurate (matches codebase)
+- **Store location & naming**: `frontend/common/stores/certTemplateEditorStore.ts` with `useCertTemplateEditorStore` hook — `frontend/common/stores/` is where stores live (confirmed via dir listing; e.g. `adminBillingStore.ts`, `dashboardStore.ts`). camelCase file naming confirmed.
+- **Store AGENTS.md**: `frontend/common/stores/AGENTS.md` exists and was consulted (Zustand, no `File`/`Blob` in `persist` stores, `useRef` in ViewModel for `File`). Confirmed the serialization rule the plan relies on (DD-03).
+- **ViewModel / Container / tier-view split**: Aligns with `frontend/views/AGENTS.md` (now `frontend/common/views/AGENTS.md`) — `useXxViewModel.ts` + `XxContainer.tsx` + tier switcher using `createLazyView()` + `ResponsiveViewSwitch`, mobile/desktop views are pure presentation. Confirmed by examining `frontend/common/views/dashboard/billing/` (BillingPageContainer, BillingView, billing.desktop.tsx, billing.mobile.tsx).
+- **GraphQL documents**: `frontend/common/graphql/sharedDocuments/certificates/` barrel pattern matches `sharedDocuments/AGENTS.md` (domain sub-dirs with `index.ts`, `TypedDocumentNode<Operations.X, Types.QueryXArgs>`, `id` on all objects, no `useLazyQuery`). The `certificates/` sub-dir follows existing plural-naming convention (e.g. `billing/`, `classes/`).
+- **App Router page pattern**: The `getServerUserContext()` + `requirePermissionForPage(userId, [AppPermission.X], locale, context)` + `generateMetadata()` using `getTranslations(locale).dashboardTranslations.X` + `<RequirePermission>` pattern matches existing pages (verified `app/(dashboard)/permissions/page.tsx`, `app/(dashboard)/staff/page.tsx`). `redirectToLogin` from `@/frontend/common/lib/redirectToLogin` is the correct login-redirect helper.
+- **i18n directory layout**: `shared/locale/{types,namespaces,ar,en}/dashboard/<subdomain>/` is the correct structure (verified against `dashboard/billing/`, `dashboard/meeting-providers/`). `defineNamespace` signature in `shared/locale/namespaces/define-namespace.ts` matches the plan usage.
+
+### Corrections made
+1. **i18n `Translation` enum is FLAT, not nested** — The actual `Translation` const (in `shared/locale/namespaces/translation.ts`) and `DashboardTranslations` interface (in `shared/locale/types/message.ts`) use **flat top-level keys** (e.g. `Translation.Dashboard.Billing`, `dashboardTranslations.billing`, `dashboardTranslations.classDetails`). There is NO `Certificates` subgroup under `Dashboard`. The plan originally referenced `Translation.Dashboard.Certificate.TemplateEditor` and `dashboardTranslations.certificates.templateEditor` — corrected to `Translation.Dashboard.CertificateTemplateEditor` and `dashboardTranslations.certificateTemplateEditor`. Same correction applied to registration-line guidance in `shared/locale/namespaces/translation.ts` (`CertificateTemplateEditor: DashboardCertificateTemplateEditor` under `Translation.Dashboard`) and `shared/locale/types/message.ts` (`certificateTemplateEditor: TemplateEditorLabels` under `DashboardTranslations`).
+2. **Namespace ID + loader export names**: Namespace ID corrected to `dashboard.certificateTemplateEditor` to match the existing `dashboard.<domain>` convention (e.g. `dashboard.billing.main`). AR/EN loader export identifiers corrected from `templateEditorAr`/`templateEditorEn` to `dashboardCertificateTemplateEditorAr`/`En` to match the existing `dashboardBillingAr`/`dashboardClassDetailsAr` naming (verified in `shared/locale/ar/messages.ts`).
+3. **`frontend/stores/AGENTS.md` → `frontend/common/stores/AGENTS.md`** (referenced in `tasks.md`); `frontend/stores/` does NOT exist.
+
+### Known internal spec drift (not a codebase-alignment issue, flagged for human review)
+- `tasks.md` (especially T05, T06, T13/T14) references fields not present in `requirements.md`/`design.md` §6 GraphQL design — e.g. `certificateTitle`, `certificateTitleFontSize`, `certificateTitleFontFamily`, `certificateTitleColor`, `defaultValidityPeriodDays`, `defaultValidityExpiryType`, plus a "Certificate Title" (T13) and "Validity Period" (T14) section that are out of scope for Plan 10 (Basic Info / Dimensions / Background / Font Settings). Also the store action names in `tasks.md` (`loadTemplate`, `updateField`, `discardChanges`) differ from `design.md` §4 (`initFromServer`, `updateLocalField`, `resetLocalFromServer`). These are inconsistencies between the plan's own documents rather than deviations from the codebase, but they should be reconciled before implementation.
+- `tasks.md` T05 names the document file `templateEditor-documents.ts` (kebab) while `design.md`/`requirements.md` reference `templateEditor.documents.ts` — the sharedDocuments dir uses different conventions across domains; use `templateEditor.documents.ts` (camelCase + dot, matching `design.md`).
+
+
+---
+
+## SWE Expert Review Notes
+
+> Added during expert architectural review. These notes augment (do not replace) the existing "Reality Check Notes" above. They flag risks, gaps, and recommended refinements before implementation.
+
+### A. Architectural Soundness
+
+- **Sound:** The four-section editor (Basic Info / Dimensions / Background / Font Settings) with a shared global save is the correct decomposition. The `localTemplate` vs `serverTemplate` shallow-diff dirty model (DD-04) is appropriate for a flat form entity and correctly handles revert-to-original.
+- **Draft vs Published state — GAP.** The `certificate_templates` entity has `status` (draft/published/archived) and a `version` chain (per MASTER_ARCHITECTURE.md §Entity Model). This plan treats the editor as editing the live row only. It does NOT specify: (a) whether edits to a *published* template mutate the published row or fork a new draft version; (b) what `status` transitions are allowed from the editor (e.g. can you edit a published template in place, or must you create a draft?); (c) how `version` increments on save. **Recommendation:** Add an explicit decision — likely "editing a published template creates/updates a draft version; the published row is immutable until Plan 15 publishes." The editor header status badge is defined but no save→status semantics are. This is a cross-plan contract with Plan 15 that must be pinned here.
+- **Conflict resolution / optimistic locking — MISSING.** Two admins editing the same template is a real scenario. The mutation sends a partial update with no `version`/`updatedAt` guard. The query selects `updatedAt` but it is not threaded into the mutation as an `expectedVersion`/`ifMatch` token. **Recommendation:** Add optimistic-lock field to `updateTemplateEditorMutationDocument` (e.g. `expectedVersion: Int` or `updatedAt: String`); backend (Plan 4/5) rejects on mismatch with a localized `conflict` error; frontend shows a "template was modified elsewhere — reload / discard" dialog. Without this, last-save-wins silently clobbering is likely.
+- **Category autocomplete data source — UNOWNED.** The Basic Info form needs the category tree, but this plan does not list a `certificateCategories` query document (only `templateEditorQueryDocument` + `updateTemplateEditorMutationDocument`). Plan 9 owns category CRUD but the *consumer query* must be declared here or in a shared documents file. **Recommendation:** Either add `certificateCategoriesQueryDocument` to this plan's documents, or explicitly declare the import from Plan 9's documents and add it to the ViewModel dependency list.
+
+### B. State Management
+
+- **Zustand store design — GOOD.** In-memory (non-persisted), `File` in `useRef` (matches `frontend/common/stores/AGENTS.md` serialization rules, mitigation option 3). State shape matches existing stores (camelCase, typed, no exotic types). Verified no existing editor-like store; this is the first multi-section editor store — patterns established here propagate to Plans 11-15.
+- **Auto-save vs manual save interaction — UNDERSPECIFIED.** DD-05 makes auto-save "optional." If both auto-save (30s debounce) and manual save can fire, a manual save during an in-flight auto-save (or vice versa) can race and produce a stale `serverTemplate`. **Recommendation:** Specify a single-flight save guard (in-flight mutation cancels/awaited before next) and clarify auto-save is OFF by default with a toolbar toggle, never both racing.
+- **Auto-save indicator semantics — AMBIGUOUS vs dirty flag.** `autoSaveStatus` (`idle|saving|saved|error`) overlaps with `dirty` and `saving`. Define the truth table: `dirty && !saving && autoSaveStatus==='idle'` = "Unsaved", etc. Currently three booleans/enums that can contradict.
+
+### C. UX Quality
+
+- **Navigation guard on App Router — RISK.** DD-07 acknowledges App Router lacks `router.events`. The proposed `popstate` + intercept-link-click approach is fragile (does not intercept `<Link prefetch>` programmatic `router.push`, and `beforeunload` does not fire on client-side route changes). **Recommendation:** Use the `next/navigation` `useRouter` + a confirmed-pending-navigation pattern: on `dirty`, set a module-level pending-route target, call `router.push` only after dialog confirmation; intercept via a wrapper around in-app navigations (back button uses the guarded handler; sidebar links opt into the same guard). Document that hard refresh / tab close rely on `beforeunload` only. This is the single biggest UX correctness risk in Plan 10.
+- **Dimension preview min-size for extreme aspect ratios — GOOD** (already noted). Confirm the scale fit uses `min(scaleW, scaleH)` not `max`.
+- **Keyboard navigation — PARTIAL.** No spec for Tab order across the tab bar + form fields, no focus-trap on dialogs beyond MUI defaults, no `Escape` to close DiscardDialog semantics defined. Add explicit focus management for the two dialogs.
+
+### D. Completeness
+
+- **Font list source — UNOWNED.** REQ-10-06 lists Cairo/Tajawal/Amiri/Inter/Roboto but does not say where the list comes from (hardcoded enum? config? backend query?). Given Arabic font rendering is critical for PDF output (Plan 6), the canonical allowed-fonts list must be a single source. **Recommendation:** Define it as a backend enum/constant exposed via GraphQL (or a shared `shared/` constants file consumed by both editor and Plan 6 PDF engine) so the editor cannot pick a font the renderer lacks.
+- **Paper size DPI assumption — INCONSISTENT ACROSS PLANS.** Plan 10 uses **96 DPI** (A4 = 794×1123 px) in REQ-10-04, while Plan 11 uses **72 DPI** (A4 = 595×842 px) in REQ-11-01. Same template, two pixel dimensions → canvas and preview disagree and PDF output is wrong. **Recommendation (cross-plan):** Pin a single DPI constant (recommend 72 DPI for print fidelity, matching Plan 11/Plan 6 Puppeteer) and convert Plan 10's preset values (A4→595×842, Letter→612×792). Add this to MASTER_ARCHITECTURE as a shared constant `CERT_CANVAS_DPI`.
+
+### E. Performance
+
+- Not a concern for Plan 10 (forms only). Live dimension preview is a single scaled `Box` — trivial.
+
+### F. Accessibility
+
+- **Color picker — RISK.** REQ-10-05/06 say "MUI `ColorPicker` or hex input." MUI v9 does NOT ship a `ColorPicker` component. The installed `react-color` (verified in `package.json`) is the actual lib. **Recommendation:** Specify `react-color` (`<SketchPicker>`/`<ChromePicker>`) wrapped in a MUI `Popover`, with a hex `TextField` for keyboard input (pickers are mouse-only → a11y requires the hex field as the keyboard-accessible path). Add this wrapper to a shared `frontend/common/components/ui/` component so Plans 11/12 reuse it.
+
+### G. Mobile/Desktop Split
+
+- **Sound.** Tabs (desktop) vs Accordion (mobile) with shared `activeSection` in Zustand surviving tier switch is the right pattern and matches the codebase's mobile/desktop isolation rule (no `useMediaQuery` in tier views — confirmed `frontend/common/views/AGENTS.md`).
+- **Mobile background upload — GAP.** Drag-and-drop is impractical on mobile; the drop zone should degrade to a "Tap to select" file picker on mobile. REQ-10-12 mentions click-to-open but the mobile component must guarantee the tap path is primary.
+
+### H. Data Flow
+
+- **Save granularity — GOOD** (single partial `updateTemplate` mutation, partial input).
+- **Background image lifecycle — GAP.** Upload produces a signed URL stored in `localTemplate.backgroundImageUrl`, but if the user uploads then *discards* (not saves), the orphan file in storage is never cleaned. **Recommendation:** Either (a) Plan 7 storage marks uploads as "unreferenced" with TTL cleanup (cross-plan), or (b) the discard handler calls a `deleteFile` mutation. Declare which here.
+
+### Reality-Check Corrections (codebase `/home/ahmed/Projects/siraj-cert`)
+
+1. **`MUI ColorPicker` does not exist** — use installed `react-color` (confirmed present) wrapped in MUI Popover + a hex `TextField` for a11y.
+2. **i18n key shape (dot-nested strings in type tables) vs flat `DashboardTranslations`** — Confirmed `shared/locale/types/message.ts` `DashboardTranslations` is flat (`billing: BillingLabels`, `classDetails: ...`). The type table in §f uses dot-path keys like `sections.basicInfo`, `fields.name` which is fine **inside** the `TemplateEditorLabels` interface as nested object fields, but the loaders/namespace IDs and the `Translation.Dashboard.CertificateTemplateEditor` handle must stay flat (the existing Reality Check Notes already fixed the handle; just keep nested keys as nested TS object fields, not literal dotted strings).
+3. **`cert/` barrel dir** — confirmed `frontend/common/graphql/sharedDocuments/` uses flat domain dirs (`billing/`, `classes/`, …). A new `certificates/` (not `cert/`) dir is correct and must be added to the top-level `index.ts`. Plan 10 uses `cert/` in REQ-10-10/design §6 — **normalize to `certificates/`** to match Plan 12 and the dir convention (consistent plural naming).
+4. **No existing Set/undo/redo store precedent** — Plan 11 introduces both; Plan 10 does not. No change needed here, but the dirty-diff utility should be a shared `frontend/common/views/dashboard/certificates/templates/editor/utils/` helper reused by Plans 11-15.
+
+### Key Architectural Fixes (action items)
+
+1. Add **draft-vs-published + version** semantics (coordinate with Plan 15).
+2. Add **optimistic locking** (`expectedVersion`/`updatedAt`) to the update mutation.
+3. Resolve the **96 vs 72 DPI** contradiction with Plan 11; pin one value in MASTER_ARCHITECTURE.
+4. Replace **`MUI ColorPicker`** with `react-color` + hex `TextField` (a11y-safe).
+5. Specify **single-flight save** to prevent auto-save vs manual-save races.
+6. Strengthen the **navigation guard** beyond `popstate` (wrap in-app router calls).
+7. Declare **orphan background-image cleanup** ownership on discard.
+
+### Remaining Risks
+
+- The `cert/` vs `certificates/` barrel naming drift between this plan and Plan 12 will cause import breakage if not normalized.
+- Font-list and allowed-upload-types sources are unowned; risk of editor/render mismatch if defined in two places.
+- Auto-save race conditions if both auto and manual save paths are active without a single-flight guard.
+
+---
+
+## Round 4 Enhancement — Production Hardening
+
+> Added as part of the Round 4 production-hardening pass. These enhancements take the basic Plan 10 editor chrome (built in Rounds 1-3 and the SWE expert-review fixes) from "functionally complete" to "production-grade": toolbar overflow, panel animations, shortcut conflict resolution, unsaved-change warnings, auto-save with conflict detection, loading/skeleton states, error boundaries, accessibility, responsive design, performance budgets, multi-tab management, and an enriched status bar. Each sub-section maps to one or more tasks in `tasks.md` §"Round 4 Enhancement Tasks" (T29-T44).
+
+### R4.1 Toolbar Overflow Menu
+
+The `EditorToolbar` (created in T22) renders all action buttons in a single row. on narrow viewports (especially the tablet portrait and smaller-desktop range between 768px and 1024px), the row overflows horizontally and either clips or pushes the More (`…`) button off-screen.
+
+**Design:**
+
+- Introduce a `ToolbarOverflow` wrapper component (`frontend/views/dashboard/cert/templates/editor/ToolbarOverflow.tsx`) that uses a `useMediaQuery` hook (in the container, not in a tier view — the container is allowed `useMediaQuery` per `frontend/common/views/AGENTS.md`) to measure available width and collapse low-priority items into an MUI `Menu` (the `MoreVertOutlined` icon triggers it).
+- Each toolbar item declares a numeric `priority` (lower = more important, stays visible longer). Save = 0, Undo = 10, Redo = 20, Zoom In = 30, Zoom Out = 40, Zoom Reset = 50, Grid Toggle = 60, Snap Toggle = 70, Publish = 5. Items with priority >= the computed cutoff are moved to the overflow menu.
+- The overflow trigger button (`IconButton` with `MoreVertOutlined` icon) is keyboard accessible: `Tab` moves focus to it, `Enter`/`Space` opens the menu, `Escape` closes it. Each overflow menu item is focusable (`MenuItem` with `role="menuitem"`).
+- A MUI `Tooltip` wraps both visible and overflow items, showing the item label + its keyboard shortcut (e.g. "Save (Ctrl+S)"). Tooltips appear on hover (`enterDelay={500}`) and on keyboard focus.
+- The overflow cutoff is computed via a `ResizeObserver` on the toolbar container, comparing `scrollWidth` to `clientWidth`. When `scrollWidth > clientWidth`, items are pulled into overflow one-by-one (highest priority first out) until `scrollWidth <= clientWidth`. The computation is debounced (50ms) to avoid layout thrash.
+
+**zustand store additions** (`templateEditorStore.ts`):
+
+```ts
+interface ToolbarItemConfig { id: string; priority: number; }
+toolbarOverflowOrder: ToolbarItemConfig[]; // static config array
+```
+
+No per-item visibility state in the store — the overflow component derives visibility from `ResizeObserver` measurements (ephemeral, not persisted).
+
+**File additions:**
+
+| File | Description |
+|------|-------------|
+| `frontend/views/dashboard/cert/templates/editor/ToolbarOverflow.tsx` | Overflow wrapper + `useToolbarOverflow` hook |
+| `test/ui/components/editor/ToolbarOverflow.test.tsx` | Unit tests (see R4 tests) |
+
+### R4.2 Panel Collapse/Expand Animations
+
+The three-panel `EditorLayout` (created in T21) uses `react-resizable-panels` which does not animate panel collapse by default. Collapsing a panel (via the double-click divider or a collapse button) causes an instant layout snap that feels jarring.
+
+**Design:**
+
+- Use Framer Motion (`motion.div` with `initial`/`animate`/`exit`) for panel collapse/expand animation. The animation uses a spring transition `{ type: 'spring', stiffness: 300, damping: 30 }`. The animated width is interpolated from `collapsed ? 0 : panelWidth`.
+- Panel collapse state (`leftCollapsed`, `rightCollapsed`, `bottomCollapsed: boolean`) is added to `templateEditorStore`. The toggle action (`togglePanel(panel: 'left' | 'right' | 'bottom')`) flips the boolean.
+- Panel collapse state is persisted to `localStorage` via a Zustand `persist` middleware **partializer** — only the three `_collapsed` booleans and the three `panelWidth` numbers are persisted; the rest of the store remains non-persisted. The persist key is `cert-template-editor-layout`. The storage is `createJSONStorage(() => localStorage)`.
+- Panel resize drag: the `react-resizable-panels` `PanelResizeHandle` already supports drag. Min/max constraints are set via `minSize`/`maxSize` props (percentage-based). The store enforces pixel-based min/max in the `setPanelWidth` action: `Math.max(minPanelWidth, Math.min(maxPanelWidth, width))` where `minPanelWidth = 200` and `maxPanelWidth = 600`.
+- Double-click on the divider toggles the panel collapse: the `PanelResizeHandle`'s `onDoubleClick` handler calls `togglePanel`. This is the convention users expect from IDE-like panels.
+
+**Store additions:**
+
+```ts
+leftCollapsed: boolean;
+rightCollapsed: boolean;
+bottomCollapsed: boolean;
+leftPanelWidth: number;   // pixels
+rightPanelWidth: number;
+bottomPanelHeight: number;
+togglePanel: (panel: 'left' | 'right' | 'bottom') => void;
+setPanelWidth: (panel: 'left' | 'right' | 'bottom', width: number) => void;
+```
+
+### R4.3 Keyboard Shortcut Conflict Resolution
+
+The `useEditorShortcuts` hook (created in T23) registers shortcuts globally on `window`. If Plan 11-15 register their own shortcuts on the canvas or element panels, conflicts arise (e.g. `Delete` could mean "delete element" in the canvas or "delete text" in a text field).
+
+**Design:**
+
+- Introduce a `ShortcutManager` (`frontend/views/dashboard/cert/templates/editor/ShortcutManager.ts`) — a module-level singleton that maintains a registry of shortcut handlers, each tagged with a `scope` (`'editor' | 'canvas' | 'panel'`) and a `priority` (number; higher wins). When two handlers match the same key combo, the higher-priority handler fires and the lower is suppressed.
+- Conflict detection on registration: `registerShortcut(combo, handler, scope, priority)` checks the registry for an existing handler with the same `combo` and same or overlapping `scope`. If found and `priority` is equal, a `logger.warn` is emitted and the newer registration is rejected (returns `false`). If the new priority is higher, it replaces the old.
+- Scope activation: the `useEditorShortcuts` hook accepts an `activeScope` prop. Only shortcuts whose scope matches the active scope (or scope `'editor'` which is always active) are active. The active scope is stored in `templateEditorStore.activeShortcutScope` and set by focus handlers (e.g. canvas `onFocus` sets `'canvas'`, panel `onFocus` sets `'panel'`).
+- Shortcut customization UI: a `ShortcutSettings` dialog (`frontend/views/dashboard/cert/templates/editor/ShortcutSettingsDialog.tsx`) accessible from the toolbar overflow "Settings" item. Users can rebind any shortcut by pressing a new key combo. Custom bindings are stored in `templateEditorStore.customShortcuts: Record<string, string>` (combo → action id) and persisted to localStorage with the same partializer as panel layout.
+- Disabled shortcuts list: the dialog also shows a list of shortcuts the user has disabled (`disabledShortcuts: string[]`). Disabled shortcuts are skipped during dispatch.
+- Combo key support: the matcher supports `Ctrl`, `Shift`, `Alt`, and `Cmd` (Meta). Combo strings use `+`-separated tokens, e.g. `"ctrl+shift+s"`. Normalization handles mac `Cmd` vs windows `Ctrl` via `navigator.platform` detection.
+
+**Store additions:**
+
+```ts
+activeShortcutScope: 'editor' | 'canvas' | 'panel';
+customShortcuts: Record<string, string>; // combo → actionId
+disabledShortcuts: string[];            // actionId[]
+setActiveShortcutScope: (scope) => void;
+setCustomShortcut: (actionId, combo) => void;
+disableShortcut: (actionId) => void;
+enableShortcut: (actionId) => void;
+```
+
+### R4.4 Unsaved Changes Warning
+
+The dirty state tracking in the store (`isDirty`/`canPublish`) is already present from Round 2. However, there is no navigation guard or beforeunload handler for the App Router, and the "Save changes?" dialog does not exist.
+
+**Design:**
+
+- **Dirty state tracking**: the existing `isDirty` flag in the store suffices. The `setLocalField` action sets `isDirty = true`; `save()` sets `isDirty = false`. No change needed.
+- **beforeunload handler**: a `useUnsavedChangesGuard` hook (`frontend/views/dashboard/cert/templates/editor/useUnsavedChangesGuard.ts`) registers a `beforeunload` event listener that calls `event.preventDefault()` and sets `event.returnValue = ''` when `isDirty` is true. This triggers the browser's native "Leave site?" dialog.
+- **Route change interceptor**: the hook also wraps `useRouter().push` and `useRouter().replace` via a module-level patch. When `isDirty` and the user attempts an in-app navigation, the "Save changes?" dialog (`UnsavedChangesDialog.tsx`) is shown. The dialog has three options:
+  - **Save** — calls `save()`, then proceeds with the navigation.
+  - **Don't Save** — calls `resetLocalFromServer()` (discard), then proceeds with the navigation.
+  - **Cancel** — aborts the navigation (stays on the page).
+- The navigation is stored in a ref (`pendingNavigation: string | null`) while the dialog is open. On Save/Don't Save, the original `router.push` call is replayed.
+- **Auto-save status indicator**: a small `AutosaveIndicator` component (`frontend/views/dashboard/cert/templates/editor/AutosaveIndicator.tsx`) placed in the toolbar and status bar. It shows one of four states based on `saving` and `autoSaveStatus`:
+  - `idle && isDirty` → "Unsaved" (amber color, `EditOutlined` icon)
+  - `saving` → "Saving…" (blue color, `CircularProgress` size 16)
+  - `!isDirty && autoSaveStatus === 'saved'` → "Saved" (green, `CheckCircleOutlined`)
+  - `autoSaveStatus === 'error'` → "Save failed" (red, `ErrorOutlined`)
+
+**File additions:**
+
+| File | Description |
+|------|-------------|
+| `frontend/views/dashboard/cert/templates/editor/useUnsavedChangesGuard.ts` | beforeunload + route change interceptor hook |
+| `frontend/views/dashboard/cert/templates/editor/UnsavedChangesDialog.tsx` | Dialog with Save / Don't Save / Cancel |
+| `frontend/views/dashboard/cert/templates/editor/AutosaveIndicator.tsx` | Toolbar + status bar indicator |
+
+### R4.5 Auto-Save System
+
+Round 2 introduced a 30s auto-save debounce. Production hardening upgrades this to a configurable system (3s default), with save status indicator, retry with exponential backoff, conflict detection, and a save queue to ensure serial saves.
+
+**Design:**
+
+- **Debounced auto-save**: 3s after the last `setLocalField` call, the `useAutosave` hook (`frontend/views/dashboard/cert/templates/editor/useAutosave.ts`) calls `save()`. The debounce is implemented via a `useRef<ReturnType<typeof setTimeout>>` that is cleared on each field change and re-set after 3s. The debounce delay is configurable via `autoSaveDelay` in the store (default `3000`).
+- **Save indicator**: the `AutosaveIndicator` from R4.4 reflects the save state. No new component; it already reads `saving` + `autoSaveStatus`.
+- **Save failure retry with exponential backoff**: inside the `save()` action, if the mutation fails with a network error (not a conflict), the store schedules a retry. The retry count and delay are tracked as `autoSaveRetryCount` and `autoSaveRetryDelay`. The delay grows as `min(baseDelay * 2^retryCount, maxDelay)` where `baseDelay = 1000` and `maxDelay = 30000`. After 5 retries, `autoSaveStatus = 'error'` and no further auto-save attempts until the next manual edit (which resets `retryCount = 0`). The retry uses `setTimeout` and is cancelled if a manual save succeeds first.
+- **Conflict detection (version number)**: the `updateTemplateEditorMutationDocument` already includes `expectedVersion` (per the SWE expert review fix). The server returns a `conflict` error code if the version mismatches. The store catches this and sets `conflictDialogOpen = true`, pausing auto-save. The `ConflictDialog` shows the diff (server version vs local version) and offers: "Keep mine (overwrite)", "Use theirs (reload)", "Cancel (keep editing, no save)".
+- **Save queue**: a module-level `saveQueue` array in the hook ensures only one save mutation is in-flight at a time. If a save is triggered while one is in-flight, it is queued and executed when the first completes. This replaces the single-flight guard from the expert review (which only cancelled; now we queue instead of dropping). The queue is FIFO and max length 1 (if a second save is queued while one is already waiting, it replaces the pending one — always the latest state).
+
+**Store additions:**
+
+```ts
+autoSaveDelay: number;         // ms, default 3000
+autoSaveRetryCount: number;
+autoSaveRetryDelay: number;
+conflictDialogOpen: boolean;
+setAutoSaveDelay: (ms: number) => void;
+clearConflictDialog: () => void;
+```
+
+### R4.6 Loading & Skeleton States
+
+The editor page loads template data via Apollo `useQuery`. While loading, the page shows nothing (blank). Production hardening adds skeleton placeholders for a smoother perceived-load experience.
+
+**Design:**
+
+- **Canvas loading skeleton**: an MUI `Skeleton` (`variant="rectangular"`) with dimensions matching the canvas panel. Placed in the canvas area while `loading === true`.
+- **Panel loading placeholders**: each panel (left: layers, right: properties, bottom: timeline) shows a `Skeleton` variant appropriate to its content type (left: `variant="rounded"` list rows, right: `variant="text"` form fields, bottom: `variant="rectangular"` strip).
+- **Template metadata loading**: the toolbar shows a `Skeleton` (`variant="text"` width 120px) for the template name and status badge while `loading === true`.
+- **Toolbar disabled during load**: all toolbar buttons are `disabled` while `loading === true`. The `EditorToolbar` already supports `disabled` props per button; the container passes `loading` down and `disabled={loading}` is applied to all.
+
+**Store additions:**
+
+```ts
+loading: boolean;  // set by the ViewModel when Apollo query is in-flight
+setLoading: (b: boolean) => void;
+```
+
+### R4.7 Error States
+
+Without error boundaries, a render error in the canvas (e.g. a malformed template element from the server) crashes the entire editor page. Production hardening adds granular error boundaries and error notifications.
+
+**Design:**
+
+- **Canvas render error boundary**: a `CanvasErrorBoundary` class component (`frontend/views/dashboard/cert/templates/editor/CanvasErrorBoundary.tsx`) wraps the canvas. On error, it shows a fallback UI with "Something went wrong rendering the canvas" + a "Retry" button that calls `this.setState({ hasError: false })` to re-render.
+- **Panel load error with retry**: each panel is wrapped in an `ErrorBoundary` that shows "Failed to load this panel" + "Retry" + "Report" buttons. The "Retry" triggers a re-render; "Report" logs the error to the backend via the logger.
+- **Autosave error notification**: when `autoSaveStatus === 'error'`, an MUI `Snackbar` (severity `error`) appears at the bottom of the editor: "Auto-save failed. Your changes are not saved." with a "Retry now" action button that calls `save()`.
+- **Network error indicator in status bar**: the status bar shows a small icon + text ("Offline" / "Connection lost") when `navigator.onLine === false` or when a GraphQL mutation returns a network error. The indicator uses `WifiOffOutlined` icon and amber color.
+- **Offline mode with queue**: edits made while offline are queued in `templateEditorStore.offlineQueue: Array<{ field: string; value: unknown; timestamp: string }>`. When connectivity is restored (`window.addEventListener('online', ...)`), the queue is flushed by calling `save()` with the latest accumulated state. The offline queue is persisted to localStorage so edits survive a page reload while offline.
+
+**Store additions:**
+
+```ts
+networkOnline: boolean;
+offlineQueue: Array<{ field: string; value: unknown; timestamp: string }>;
+setNetworkOnline: (b: boolean) => void;
+queueOfflineChange: (field: string, value: unknown) => void;
+flushOfflineQueue: () => void;
+```
+
+### R4.8 Accessibility
+
+MUI v9 provides baseline accessibility, but the editor's custom panel/toolbar/canvas structure requires explicit ARIA roles, labels, focus management, and screen-reader announcements.
+
+**Design:**
+
+- **Editor region roles**: the `EditorLayout` root container has `role="application"` (it's a complex interactive region). The toolbar has `role="toolbar"` with `aria-label="Template editor toolbar"`. The left panel has `role="complementary"` with `aria-label="Layers panel"`. The right panel has `role="complementary"` with `aria-label="Properties panel"`. The canvas has `role="main"` with `aria-label="Certificate canvas"`. The status bar has `role="contentinfo"` with `aria-label="Editor status bar"`.
+- **ARIA labels for all buttons**: every `IconButton` in the toolbar has `aria-label` matching its tooltip text (e.g. `aria-label="Save template (Ctrl+S)"`). The overflow trigger has `aria-label="More actions"`.
+- **Focus management on panel toggle**: when a panel is collapsed via `togglePanel`, focus moves to the next visible panel's container (or the canvas if both side panels are collapsed). When a panel is expanded, focus moves into the panel's first focusable element. This uses a `useEffect` watching `leftCollapsed`/`rightCollapsed`/`bottomCollapsed` in the `EditorLayout`.
+- **Screen reader announcement for save status**: an `aria-live="polite"` `div` (visually hidden, `sr-only` class) is placed in the layout. When `autoSaveStatus` changes, the div's text content is updated to "Saving…", "Saved", or "Save failed". This is read aloud by screen readers without interrupting.
+- **Keyboard trap prevention in panels**: panels use MUI `TrapFocus` (or a manual focus trap that allows Tab to escape to the next panel). The trap cycles within the panel when the panel is the active region, but `Escape` exits to the canvas. This prevents the user from getting stuck in a panel.
+
+**File additions:**
+
+| File | Description |
+|------|-------------|
+| `frontend/views/dashboard/cert/templates/editor/SrLiveRegion.tsx` | Visually-hidden `aria-live` region for announcements |
+| `frontend/views/dashboard/cert/templates/editor/CanvasErrorBoundary.tsx` | Error boundary for canvas |
+| `frontend/views/dashboard/cert/templates/editor/PanelErrorBoundary.tsx` | Error boundary wrapper for panels |
+
+### R4.9 Responsive Design
+
+The existing mobile/desktop tier split (from the original Plan 10) handles the form-based basic editor. Round 4 adds editor chrome responsiveness for the three-panel canvas layout.
+
+**Design:**
+
+- **Mobile (< 768px)**: single panel with swipe navigation. The `EditorLayout` renders only one panel at a time (the active panel, stored in `activeMobilePanel: 'layers' | 'canvas' | 'properties'`). Navigation between panels is via MUI `SwipeableDrawer` (left edge swipe → layers, right edge swipe → properties) or a bottom `BottomNavigation` with three tabs. The toolbar is simplified to: Save, Undo, Redo, More (everything else in overflow). A bottom action bar replaces the status bar and shows: Save button (primary), element count, zoom controls.
+- **Tablet (768px–1024px)**: two-panel layout — canvas (left, 60%) + a collapsible sidebar (right, 40% or collapsed). The sidebar toggles between Layers and Properties via a `ToggleButtonGroup` at the top of the sidebar. The status bar is visible but condensed (no word count, no connection status — shown only on desktop).
+- **Desktop (> 1024px)**: three-panel resizable layout (from T21, no change). The `ResizeObserver` from R4.1 drives the toolbar overflow.
+
+**Store additions:**
+
+```ts
+activeMobilePanel: 'layers' | 'canvas' | 'properties';
+setActiveMobilePanel: (panel) => void;
+sidebarPanelMode: 'layers' | 'properties'; // for tablet
+setSidebarPanelMode: (mode) => void;
+```
+
+### R4.10 Performance Budgets
+
+Establish measurable performance targets for the editor chrome to prevent regressions as Plans 11-15 add features.
+
+**Design:**
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Panel toggle latency | < 50ms from click to panel visible | `performance.now()` delta in `togglePanel` |
+| Tool switch latency | < 100ms from click to tool active | `performance.now()` delta in `setActiveTool` |
+| Auto-save round-trip | < 500ms (mutation network time, excluding debounce) | Apollo `onCompleted` timestamp - mutation start |
+| Editor chrome bundle size | < 80KB gzipped | Bundle analyzer on `editor/` dir |
+
+- The store wraps `togglePanel` and `setActiveTool` with `performance.now()` timing and logs the delta via `logger.debug` if it exceeds the budget.
+- The bundle size budget is enforced via a CI check (not in this plan, but the 80KB number is documented here for Plan 15+ to reference).
+- No new files; the timing is added inline to the store actions and the `useAutosave` hook.
+
+### R4.11 Tab Management
+
+If a user edits multiple templates (e.g. in Plan 15's batch-template flow), they need tabs. This is the foundation.
+
+**Design:**
+
+- **Multiple template tabs**: the `EditorLayout` renders a tab bar above the toolbar (`EditorTabBar.tsx`). Each tab corresponds to an open template (`openTemplates: Array<{ id: string; name: string; isDirty: boolean; lastSavedAt: string | null }>`). Switching tabs swaps the canvas/data context.
+- **Tab close with unsaved warning**: the `onClose` handler checks `isDirty` for that tab. If dirty, the `UnsavedChangesDialog` from R4.4 is shown. On "Save", the tab is saved then closed. On "Don't Save", the tab is closed without saving. On "Cancel", the close is aborted.
+- **Tab drag reorder**: the tab bar uses `@dnd-kit/sortable` (already a dependency in the project) for drag-to-reorder. The `openTemplates` array is reordered in the store.
+- **Recent templates list**: when no templates are open, the editor shows a "Recent templates" list (last 10, from localStorage). Clicking one opens it in a new tab.
+
+**Store additions:**
+
+```ts
+openTemplates: Array<{ id: string; name: string; isDirty: boolean; lastSavedAt: string | null }>;
+activeTemplateId: string | null;
+recentTemplateIds: string[];
+openTemplate: (id: string, name: string) => void;
+closeTemplate: (id: string) => void;
+reorderTemplates: (fromIndex: number, toIndex: number) => void;
+setActiveTemplate: (id: string) => void;
+```
+
+**File additions:**
+
+| File | Description |
+|------|-------------|
+| `frontend/views/dashboard/cert/templates/editor/EditorTabBar.tsx` | Tab bar with drag reorder |
+| `frontend/views/dashboard/cert/templates/editor/RecentTemplatesList.tsx` | Shown when no tabs open |
+
+### R4.12 Status Bar Enhancements
+
+The `EditorStatusBar` (from T24) currently shows: selected element info, cursor coordinates, zoom level, grid/snap state. Production hardening adds: template name + version, word/element count, last saved timestamp, connection status, branch/tag info.
+
+**Design:**
+
+- **Template name + version display**: left-most cell in the status bar shows `"{templateName} v{version}"` with a small version badge. Clipped with `textOverflow: 'ellipsis'` if too long.
+- **Word count / element count**: shows `"N elements"` where N is `currentTemplate.elements.length`. For text elements, also shows word count of the selected text element.
+- **Zoom level**: already present; enhanced to show the percentage with a zoom slider popover on click.
+- **Last saved timestamp**: shows `"Saved {relativeTime}"` (e.g. "Saved 2 min ago") via a `formatRelativeTime` utility. Updates every 30s via a `setInterval`.
+- **Connection status**: shows online/offline icon (from R4.7 `networkOnline` state). On hover, tooltip shows "Connected" / "Offline — changes will be saved when connection returns".
+- **Branch/tag info**: shows the current Git branch (useful in staging/dev environments). Fetched from a `getEditorEnvironment` query (or a static config). Only shown in non-production environments.
+
+**Store additions:**
+
+```ts
+lastSavedAt: string | null; // already exists from Round 2
+environmentBranch: string | null; // from env query
+setEnvironmentBranch: (branch: string | null) => void;
+```
+
+### R4.13 Store Consolidation Summary
+
+All Round 4 store additions to `templateEditorStore.ts` (consolidated for the implementation task):
+
+```ts
+// R4.2 Panel animations
+leftCollapsed: boolean;
+rightCollapsed: boolean;
+bottomCollapsed: boolean;
+leftPanelWidth: number;
+rightPanelWidth: number;
+bottomPanelHeight: number;
+togglePanel: (panel: 'left' | 'right' | 'bottom') => void;
+setPanelWidth: (panel: 'left' | 'right' | 'bottom', width: number) => void;
+
+// R4.3 Shortcut conflicts
+activeShortcutScope: 'editor' | 'canvas' | 'panel';
+customShortcuts: Record<string, string>;
+disabledShortcuts: string[];
+setActiveShortcutScope: (scope: 'editor' | 'canvas' | 'panel') => void;
+setCustomShortcut: (actionId: string, combo: string) => void;
+disableShortcut: (actionId: string) => void;
+enableShortcut: (actionId: string) => void;
+
+// R4.5 Auto-save system
+autoSaveDelay: number;
+autoSaveRetryCount: number;
+autoSaveRetryDelay: number;
+conflictDialogOpen: boolean;
+setAutoSaveDelay: (ms: number) => void;
+clearConflictDialog: () => void;
+
+// R4.6 Loading state
+loading: boolean;
+setLoading: (b: boolean) => void;
+
+// R4.7 Error states
+networkOnline: boolean;
+offlineQueue: Array<{ field: string; value: unknown; timestamp: string }>;
+setNetworkOnline: (b: boolean) => void;
+queueOfflineChange: (field: string, value: unknown) => void;
+flushOfflineQueue: () => void;
+
+// R4.9 Responsive
+activeMobilePanel: 'layers' | 'canvas' | 'properties';
+setActiveMobilePanel: (panel: 'layers' | 'canvas' | 'properties') => void;
+sidebarPanelMode: 'layers' | 'properties';
+setSidebarPanelMode: (mode: 'layers' | 'properties') => void;
+
+// R4.11 Tab management
+openTemplates: Array<{ id: string; name: string; isDirty: boolean; lastSavedAt: string | null }>;
+activeTemplateId: string | null;
+recentTemplateIds: string[];
+openTemplate: (id: string, name: string) => void;
+closeTemplate: (id: string) => void;
+reorderTemplates: (fromIndex: number, toIndex: number) => void;
+setActiveTemplate: (id: string) => void;
+
+// R4.12 Status bar
+environmentBranch: string | null;
+setEnvironmentBranch: (branch: string | null) => void;
+```
+
+**Persistence partializer** (for localStorage via Zustand `persist`):
+
+```ts
+partialize: (state) => ({
+  leftCollapsed: state.leftCollapsed,
+  rightCollapsed: state.rightCollapsed,
+  bottomCollapsed: state.bottomCollapsed,
+  leftPanelWidth: state.leftPanelWidth,
+  rightPanelWidth: state.rightPanelWidth,
+  bottomPanelHeight: state.bottomPanelHeight,
+  customShortcuts: state.customShortcuts,
+  disabledShortcuts: state.disabledShortcuts,
+  recentTemplateIds: state.recentTemplateIds,
+  offlineQueue: state.offlineQueue, // survive reload while offline
+})
+```
+
+### R4.14 Performance & Accessibility Budget Audit
+
+- All new components use `React.memo` where props are stable to prevent unnecessary re-renders when the store updates an unrelated slice.
+- The `AutosaveIndicator` subscribes to only `saving` and `autoSaveStatus` via a selector (`useCertTemplateEditorStore(s => ({ saving: s.saving, autoSaveStatus: s.autoSaveStatus }))`) to avoid re-rendering on every field change.
+- The `EditorTabBar` subscribes to only `openTemplates` and `activeTemplateId`.
+- The `SrLiveRegion` updates via a `useEffect` on `autoSaveStatus` — it does not re-render on every store change.
+- Panel animations use the `AnimatePresence` from Framer Motion with `mode="wait"` to avoid layout thrash.
+
+### R4.15 Cross-Plan Impact
+
+| Enhancement | Plans Affected | Impact |
+|-------------|---------------|--------|
+| Toolbar overflow | 11, 12, 13, 15 | They add buttons; priorities must be coordinated via `toolbarOverflowOrder` |
+| Panel animations | 11 (canvas main panel), 12, 14 | They consume the same `leftCollapsed`/`rightCollapsed` state |
+| Shortcut manager | 11, 12, 13, 14, 15 | They register canvas/element/variable shortcuts via the manager |
+| Unsaved changes guard | 11-15 | They reuse `useUnsavedChangesGuard` + `UnsavedChangesDialog` |
+| Auto-save system | 11, 12 | They extend `useAutosave` with their own field-level debounce |
+| Loading skeletons | 11-15 | They add panel-specific skeletons via the same pattern |
+| Error boundaries | 11-15 | They wrap their content in `PanelErrorBoundary` |
+| Accessibility roles | 11-15 | They inherit the role structure; canvas `role="main"` is centralized |
+| Responsive | 11-15 | They consume `activeMobilePanel` and `sidebarPanelMode` |
+| Tab management | 15 (batch flow) | Plan 15 opens multiple templates using `openTemplate()` |
+| Status bar | 11-15 | They add domain-specific info cells (element counts, variable counts, recipient counts) |
+
+### R4.16 Files to Create/Modify (Round 4 Summary)
+
+**New files:**
+
+| File | Layer | Description |
+|------|-------|-------------|
+| `frontend/views/dashboard/cert/templates/editor/ToolbarOverflow.tsx` | View | Overflow wrapper + `useToolbarOverflow` hook |
+| `frontend/views/dashboard/cert/templates/editor/ShortcutManager.ts` | View | Singleton shortcut registry + conflict detection |
+| `frontend/views/dashboard/cert/templates/editor/ShortcutSettingsDialog.tsx` | View | Shortcut customization UI |
+| `frontend/views/dashboard/cert/templates/editor/useUnsavedChangesGuard.ts` | View | beforeunload + route change interceptor |
+| `frontend/views/dashboard/cert/templates/editor/UnsavedChangesDialog.tsx` | View | Save / Don't Save / Cancel dialog |
+| `frontend/views/dashboard/cert/templates/editor/AutosaveIndicator.tsx` | View | Save status indicator |
+| `frontend/views/dashboard/cert/templates/editor/useAutosave.ts` | View | Debounced auto-save hook with retry + queue |
+| `frontend/views/dashboard/cert/templates/editor/ConflictDialog.tsx` | View | Version conflict resolution |
+| `frontend/views/dashboard/cert/templates/editor/SrLiveRegion.tsx` | View | Screen-reader `aria-live` region |
+| `frontend/views/dashboard/cert/templates/editor/CanvasErrorBoundary.tsx` | View | Canvas error boundary |
+| `frontend/views/dashboard/cert/templates/editor/PanelErrorBoundary.tsx` | View | Panel error boundary wrapper |
+| `frontend/views/dashboard/cert/templates/editor/EditorTabBar.tsx` | View | Tab bar with drag reorder |
+| `frontend/views/dashboard/cert/templates/editor/RecentTemplatesList.tsx` | View | Recent templates screen |
+| `frontend/views/dashboard/cert/templates/editor/EditorSkeletons.tsx` | View | Loading skeleton components |
+| `test/ui/components/editor/ToolbarOverflow.test.tsx` | Test | Overflow tests |
+| `test/ui/components/editor/UnsavedChangesDialog.test.tsx` | Test | Dialog tests |
+| `test/ui/components/editor/AutosaveIndicator.test.tsx` | Test | Indicator tests |
+| `test/ui/components/editor/useAutosave.test.ts` | Test | Auto-save hook tests |
+| `test/ui/components/editor/ShortcutManager.test.ts` | Test | Shortcut conflict tests |
+| `test/ui/components/editor/ConflictDialog.test.tsx` | Test | Conflict dialog tests |
+| `test/ui/components/editor/EditorTabBar.test.tsx` | Test | Tab bar tests |
+| `test/ui/components/editor/ErrorBoundaries.test.tsx` | Test | Error boundary tests |
+| `test/ui/components/editor/SrLiveRegion.test.tsx` | Test | SR live region tests |
+| `test/ui/e2e/editor-prod-hardening.spec.ts` | Test | E2E for overflow, autosave, unsaved guard |
+
+**Modified files:**
+
+| File | Modification |
+|------|-------------|
+| `frontend/stores/cert/templateEditorStore.ts` | Add all R4 state + actions, add `persist` middleware with partializer |
+| `frontend/views/dashboard/cert/templates/editor/EditorToolbar.tsx` | Wrap in `ToolbarOverflow`, add priorities, add `aria-label` to all buttons |
+| `frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx` | Add Framer Motion panel animations, ARIA roles, focus management, wrap panels in `PanelErrorBoundary` |
+| `frontend/views/dashboard/cert/templates/editor/EditorStatusBar.tsx` | Add template name+version, element count, last saved, connection status, branch info |
+| `frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts` | Refactor to use `ShortcutManager` singleton, add scope + priority + conflict detection |
+| `shared/locale/types/dashboard/certificates/templateEditor.ts` | Add R4 translation keys (overflow labels, dialog texts, status messages, error texts) |
+| `shared/locale/ar/dashboard/certificates/templateEditor.ts` | Arabic translations for R4 keys |
+| `shared/locale/en/dashboard/certificates/templateEditor.ts` | English translations for R4 keys |
+
+### R4.17 i18n Keys Added (Round 4)
+
+New keys added to `TemplateEditorLabels` (nested under existing interface, prefix `r4.`):
+
+```ts
+// R4.1 Toolbar overflow
+toolbar: {
+  moreActions: string;
+  overflowPriority: string;
+}
+// R4.3 Shortcuts
+shortcuts: {
+  settingsTitle: string;
+  conflictWarning: string;
+  rebindPrompt: string;
+  disabled: string;
+  scopeEditor: string;
+  scopeCanvas: string;
+  scopePanel: string;
+}
+// R4.4 Unsaved changes
+unsavedChanges: {
+  title: string;
+  message: string;
+  save: string;
+  dontSave: string;
+  cancel: string;
+  indicatorUnsaved: string;
+  indicatorSaving: string;
+  indicatorSaved: string;
+  indicatorError: string;
+}
+// R4.5 Auto-save
+autosave: {
+  retryFailed: string;
+  retrying: (count: number) => string;
+  conflictTitle: string;
+  conflictKeepMine: string;
+  conflictUseTheirs: string;
+  conflictCancel: string;
+  savedRelative: (time: string) => string;
+}
+// R4.6 Loading
+loading: {
+  canvas: string;
+  panels: string;
+  metadata: string;
+}
+// R4.7 Errors
+errors: {
+  canvasRender: string;
+  panelLoad: string;
+  autosaveFailed: string;
+  retryNow: string;
+  reportError: string;
+  offlineMode: string;
+  backOnline: string;
+}
+// R4.11 Tabs
+tabs: {
+  closeTabWarning: string;
+  recentTitle: string;
+  noOpenTabs: string;
+}
+// R4.12 Status bar
+statusBar: {
+  elementCount: (count: number) => string;
+  wordCount: (count: number) => string;
+  savedAt: string;
+  connected: string;
+  disconnected: string;
+  branch: string;
+}
+```
+
+Each key must be implemented in both `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts`. Pluralization functions (`(count: number) => string`) follow the compile-time i18n system patterns (see `shared/AGENTS.md`). Interpolation functions (`(param: string) => string`) use template literals in each locale file.
+
+---
+
+## Round 5: Advanced Fill & Stroke System
+
+> Added as Round 5 to extend the Plan 10 editor toolbar with Photoshop/Illustrator-grade fill and stroke quick controls. These toolbar controls complement the full fill/stroke property panel in Plan 12 (§R5.3–§R5.7) and the canvas-layer rendering in Plan 11 (§R5.8–§R5.12). The toolbar provides one-click access to the most common fill/stroke operations without requiring the user to open the property panel — mirroring the toolbar swatches in Adobe Illustrator and Figma's top toolbar.
+
+### R5.1 Fill Color Swatch Toolbar Control
+
+**Component**: `ToolbarFillSwatch`
+
+**Files**:
+- `frontend/views/dashboard/cert/templates/editor/ToolbarFillSwatch.tsx` (new)
+- `frontend/common/stores/cert/fillStrokeStore.ts` (new — shared between toolbar, panel, and canvas)
+- `shared/locale/types/dashboard/certificates/templateEditor.ts` (modify — add R5 keys, see §R5.13)
+
+**Design**:
+
+A compact swatch button rendered in the editor toolbar (next to the existing zoom/grid toggles from T22). The swatch displays the **currently-selected element's** fill color (or a checkerboard pattern when fill is `none`). Clicking opens a `Popover` containing a mini color picker with a 12-color swatch row (from `fillStrokeStore.quickSwatches`), the current hex input, an opacity slider, and a "More options…" link that deep-links into the property panel's fill section (calls `templateElementEditorStore.setLastEditedSection('fill')` and expands the fill accordion).
+
+```typescript
+interface ToolbarFillSwatchProps {
+  elementId: string | null; // null = no selection → swatch is disabled
+  fill: FillConfig;         // from the selected element's data
+  onFillChange: (fill: FillConfig) => void;
+}
+```
+
+**Mini color picker modes**: The popover shows a compact grid of 12 quick-swatches (Material Design primary colors, loaded from `fillStrokeStore.quickSwatches` — default `['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#FFC107', '#FF9800']`). Below the grid: a hex `TextField` (validated, 6-digit hex), an opacity `Slider` (0–100%), and a `Button` labeled "Open Fill Panel" that calls `setLastEditedSection('fill') + setPanelExpanded('fill', true)`.
+
+**Disabled state**: When `elementId` is null (no selection), the swatch is disabled with `sx={{ opacity: 0.38 }}` and a `Tooltip` reading "Select an element to edit fill". When the selected element type does not support fills (e.g. a `Group` element), the swatch shows a crossed-out icon.
+
+**No-fill indicator**: When `fill.type === 'none'`, the swatch renders a red diagonal slash over a checkerboard SVG pattern (10×10 px squares, alternating `theme.palette.action.disabledBackground` and transparent) — the universal "no fill" visual from Illustrator.
+
+**Gradient indicator**: When `fill.type === 'linear' | 'radial' | 'conic'`, the swatch renders the gradient as a 20×20 px thumbnail via a CSS gradient string computed by `fillStrokeUtils.fillToCss(fill, elementWidth, elementHeight)`.
+
+**Pattern indicator**: When `fill.type === 'pattern'`, the swatch renders a small tiled thumbnail of the active pattern at 25% scale.
+
+**Image indicator**: When `fill.type === 'image'`, the swatch shows the image thumbnail (32×32 px, `objectFit: cover`).
+
+### R5.2 Stroke Color Swatch Toolbar Control
+
+**Component**: `ToolbarStrokeSwatch`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/ToolbarStrokeSwatch.tsx` (new)
+
+**Design**:
+
+Identical structure to `ToolbarFillSwatch` but bound to the selected element's `stroke` config. The swatch shows the stroke color (or the no-stroke slash overlay when `stroke.type === 'none'`). The mini popover additionally shows a stroke-width `TextField` (type: number, 0–50, step 0.5) since the most common stroke operation besides color is changing width.
+
+```typescript
+interface ToolbarStrokeSwatchProps {
+  elementId: string | null;
+  stroke: StrokeConfig;
+  onStrokeChange: (stroke: StrokeConfig) => void;
+}
+```
+
+**Stroke width quick presets**: Below the color swatch grid, a row of 5 `Chip` components with preset widths: `0px, 1px, 2px, 5px, 10px`. Clicking a chip sets `stroke.width` and sets `stroke.type` to `'solid'` if it was `'none'`.
+
+### R5.3 Fill/Stroke Toggle & Swap Controls
+
+**Component**: `ToolbarFillStrokeToggle`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/ToolbarFillStrokeToggle.tsx` (new)
+
+**Design**:
+
+A compact cluster of three `IconButton`s placed between the fill and stroke swatches:
+
+| Button | Icon | Action | Shortcut |
+|--------|------|--------|----------|
+| Toggle Fill | `FormatColorFillOutlined` (active) / `FormatColorFillOutlined` with `sx={{ opacity: 0.3 }}` (inactive) | Toggles `fill.enabled` (preserves fill config but sets `enabled: false` without losing settings) | `Shift+F` |
+| Toggle Stroke | `BorderColorOutlined` (active) / `BorderColorOutlined` with `sx={{ opacity: 0.3 }}` (inactive) | Toggles `stroke.enabled` | `Shift+S` |
+| Swap Fill/Stroke | `SwapHorizOutlined` | Swaps fill color ↔ stroke color (only swaps the primary solid color; gradient/pattern fills are not swapped — only the `solidColor` field) | `Shift+X` |
+| Reset to Default | `RestartAltOutlined` | Resets fill to `none` and stroke to `solid` black 1px | `Shift+R` |
+
+**Swap behavior**: The swap button exchanges `fill.solidColor` and `stroke.solidColor`. If the fill is a gradient/pattern/image, the swap only affects the stroke — the fill's gradient/pattern remains but the stroke takes the fill's previous solid color (if any). If fill has no solid color (pure gradient), swap is disabled with a `Tooltip`: "Swap requires a solid fill color".
+
+**Default fill/stroke per element type** (used by the Reset button and new element creation):
+
+| Element Type | Default Fill | Default Stroke |
+|---|---|---|
+| Shape (rectangle, ellipse, polygon) | `{ type: 'none', enabled: false }` | `{ type: 'solid', color: '#000000', width: 1, enabled: true }` |
+| Text | `{ type: 'solid', color: '#000000', enabled: true }` | `{ type: 'none', enabled: false }` |
+| Image | `{ type: 'none', enabled: false }` (image is the fill) | `{ type: 'none', enabled: false }` |
+| QR Code | `{ type: 'none', enabled: false }` | `{ type: 'none', enabled: false }` |
+| Signature | `{ type: 'none', enabled: false }` | `{ type: 'none', enabled: false }` |
+| Background | `{ type: 'solid', color: '#FFFFFF', enabled: true }` | `{ type: 'none', enabled: false }` |
+
+### R5.4 Stroke Width Quick Input
+
+**Component**: `ToolbarStrokeWidthInput`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/ToolbarStrokeWidthInput.tsx` (new)
+
+**Design**:
+
+A numeric `TextField` (type: number, width: 48px) with a stepper `<` `>` pair. Range: 0–50, step: 0.5. When the value is 0, the stroke is effectively disabled (`stroke.enabled = false` is NOT set — the user may have width 0 but still want the config). The input is disabled when no element is selected or the selected element has `stroke.enabled === false`.
+
+### R5.5 Toolbar Layout & Responsive Behavior
+
+Both fill and stroke swatches are placed in the `EditorToolbar` (from T22) in a dedicated `Box` cluster between the alignment tools and the zoom controls:
+
+```tsx
+<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1, mr: 1 }}>
+  <ToolbarFillSwatch elementId={selectedId} fill={selectedFill} onFillChange={handleFillChange} />
+  <ToolbarFillStrokeToggle
+    fillEnabled={fill.enabled}
+    strokeEnabled={stroke.enabled}
+    onToggleFill={toggleFill}
+    onToggleStroke={toggleStroke}
+    onSwap={swapColors}
+    onReset={resetDefaults}
+  />
+  <ToolbarStrokeSwatch elementId={selectedId} stroke={selectedStroke} onStrokeChange={handleStrokeChange} />
+  <ToolbarStrokeWidthInput elementId={selectedId} width={stroke.width} onWidthChange={handleWidthChange} />
+</Box>
+```
+
+**Overflow behavior**: The fill/stroke cluster has a `priority` of 25 in the `ToolbarOverflow` system (from R4.1) — lower than Save (0) but higher than Grid Toggle (60). On tablet widths, the fill/stroke cluster collapses into the overflow menu and renders as two `MenuItem`s ("Fill: #RRGGBB" and "Stroke: #RRGGBB · 2px").
+
+**Tooltip labels**: Each control shows a `Tooltip` on hover (enterDelay 500ms) with the i18n label + shortcut:
+- Fill swatch: `t("certificateTemplateEditor.toolbar.fillSwatch") + " (Shift+F)"`
+- Stroke swatch: `t("certificateTemplateEditor.toolbar.strokeSwatch") + " (Shift+S)"`
+- Swap: `t("certificateTemplateEditor.toolbar.swapFillStroke") + " (Shift+X)"`
+- Reset: `t("certificateTemplateEditor.toolbar.resetFillStroke") + " (Shift+R)"`
+
+### R5.6 Fill/Stroke Store (Zustand)
+
+**File**: `frontend/common/stores/cert/fillStrokeStore.ts` (new)
+
+A Zustand store (non-persisted) that manages fill/stroke-related UI state shared between the toolbar (Plan 10), the canvas editing overlay (Plan 11), and the property panel (Plan 12).
+
+```typescript
+interface FillStrokeState {
+  // Quick swatches
+  quickSwatches: string[];                    // 12 quick-access hex colors
+  setQuickSwatches: (colors: string[]) => void;
+
+  // Gradient presets library
+  gradientPresets: GradientPreset[];
+  addGradientPreset: (preset: GradientPreset) => void;
+  removeGradientPreset: (id: string) => void;
+  importGradientPreset: (css: string) => void;
+
+  // Pattern library
+  patternLibrary: PatternDef[];
+  addCustomPattern: (pattern: PatternDef) => void;
+  removePattern: (id: string) => void;
+
+  // Active gradient editor state (for on-canvas editing)
+  gradientEditorActive: boolean;
+  gradientEditorElementId: string | null;
+  setGradientEditorActive: (active: boolean, elementId: string | null) => void;
+
+  // Blend mode rendering
+  globalBlendModeEnabled: boolean;            // master toggle for mix-blend-mode rendering
+  setGlobalBlendModeEnabled: (enabled: boolean) => void;
+
+  // Fill/stroke caching for drag performance
+  fillStrokeCache: Map<string, CachedFillStroke>; // keyed by elementId
+  setCachedFillStroke: (elementId: string, cache: CachedFillStroke) => void;
+  clearCache: (elementId: string) => void;
+  clearAllCache: () => void;
+}
+```
+
+### R5.7 Toolbar Keyboard Shortcuts Integration
+
+The new shortcuts (`Shift+F`, `Shift+S`, `Shift+X`, `Shift+R`) are registered with the `ShortcutManager` (from R4.3) under scope `'editor'` (always active) at priority 15 (between Undo at 10 and Zoom at 30).
+
+**File**: `frontend/views/dashboard/cert/templates/editor/useFillStrokeShortcuts.ts` (new)
+
+The hook reads the current selection from `templateElementEditorStore.selectedElementIds` and the element's fill/stroke from the canvas store, then dispatches the toggle/swap/reset via Apollo `useMutation`.
+
+### R5.8 Type Definitions
+
+**File**: `frontend/common/stores/cert/fillStrokeTypes.ts` (new)
+
+This file holds the shared TypeScript types for fill, stroke, gradient, pattern, and blend-mode configurations. All three plans (10, 11, 12) import from here to avoid circular dependencies.
+
+```typescript
+export type FillType =
+  | 'none' | 'solid' | 'linear-gradient' | 'radial-gradient'
+  | 'conic-gradient' | 'pattern' | 'image' | 'gradient-mesh';
+
+export type StrokeType = 'none' | 'solid' | 'gradient' | 'pattern';
+
+export type BlendMode =
+  | 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten'
+  | 'color-dodge' | 'color-burn' | 'hard-light' | 'soft-light'
+  | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity';
+
+export type StrokePosition = 'inside' | 'center' | 'outside';
+export type StrokeCapStyle = 'butt' | 'round' | 'square';
+export type StrokeJoinStyle = 'miter' | 'round' | 'bevel';
+export type StrokeDashStyle = 'solid' | 'dashed' | 'dotted' | 'custom';
+export type ImageFillMode = 'fill' | 'fit' | 'stretch' | 'tile';
+
+export interface ColorStop {
+  id: string;
+  position: number;          // 0-100 (percentage along the gradient axis)
+  color: string;             // hex8 "#rrggbbaa"
+  opacity: number;            // 0-100 (separate from hex8 alpha for finer control)
+}
+
+export interface GradientValue {
+  type: 'linear' | 'radial' | 'conic';
+  stops: ColorStop[];
+  angle?: number;            // 0-360 degrees (linear & conic)
+  centerX?: number;           // 0-100 percentage (radial & conic)
+  centerY?: number;
+  radius?: number;            // 0-200 percentage (radial)
+  focalOffsetX?: number;      // -100 to 100 (radial)
+  focalOffsetY?: number;      // -100 to 100 (radial)
+  rotation?: number;           // 0-360 (conic, separate from angle)
+}
+
+export interface MeshPoint {
+  id: string;
+  x: number;    // 0-100 percentage
+  y: number;    // 0-100 percentage
+  color: string; // hex8
+}
+
+export interface GradientMeshValue {
+  points: MeshPoint[];
+  smoothing: number; // 0-100
+}
+
+export interface PatternDef {
+  id: string;
+  name: string;
+  category: 'basic' | 'geometric' | 'organic' | 'custom';
+  svgData: string;           // inline SVG pattern definition
+  repeatType: 'square' | 'hex' | 'custom';
+  repeatWidth: number;       // base tile width in px
+  repeatHeight: number;
+}
+
+export interface PatternFillConfig {
+  patternId: string;
+  scale: number;              // 10-200 (%)
+  angle: number;              // 0-360
+  offsetX: number;            // px
+  offsetY: number;            // px
+}
+
+export interface ImageFillConfig {
+  url: string;                // GraphQL asset URL (Plan 7 storage)
+  mode: ImageFillMode;
+  opacity: number;             // 0-100
+  positionX: number;            // px offset
+  positionY: number;
+  scale: number;                // 10-200 (%)
+}
+
+export interface FillConfig {
+  type: FillType;
+  enabled: boolean;
+  solidColor?: string;                 // hex8 (when type === 'solid')
+  solidOpacity?: number;                // 0-100 (when type === 'solid')
+  globalOpacity: number;                // 0-100 (applies to all fill types)
+  blendMode: BlendMode;                 // default 'normal'
+  gradient?: GradientValue;             // when type === '*-gradient'
+  pattern?: PatternFillConfig;          // when type === 'pattern'
+  image?: ImageFillConfig;              // when type === 'image'
+  mesh?: GradientMeshValue;             // when type === 'gradient-mesh'
+}
+
+export interface StrokeLayer {
+  id: string;
+  type: StrokeType;
+  enabled: boolean;
+  color?: string;                       // hex8 (solid)
+  gradient?: GradientValue;             // gradient stroke
+  pattern?: PatternFillConfig;          // pattern stroke
+  width: number;                         // 0-50 px
+  opacity: number;                       // 0-100
+  position: StrokePosition;              // default 'center'
+  dashStyle: StrokeDashStyle;
+  dashLength?: number;                   // when dashStyle === 'custom'
+  gapLength?: number;                    // when dashStyle === 'custom'
+  dashOffset: number;                    // 0-100 px
+  cap: StrokeCapStyle;                   // default 'butt'
+  join: StrokeJoinStyle;                 // default 'miter'
+  miterLimit: number;                     // 1-20 (when join === 'miter')
+  blendMode: BlendMode;                  // default 'normal'
+}
+
+export interface StrokeConfig {
+  enabled: boolean;
+  layers: StrokeLayer[];                // multiple stroke layers (Photoshop layer styles)
+}
+
+export interface GradientPreset {
+  id: string;
+  name: string;
+  gradient: GradientValue;
+}
+
+export interface CachedFillStroke {
+  fillCss: string;                       // computed CSS string for fill
+  strokeSvgAttrs: Record<string, string>; // computed SVG attributes for stroke
+  strokeLayerElements: string[];          // serialized SVG <use>/<path> for multi-stroke
+  timestamp: number;
+}
+```
+
+### R5.9 Quality & Verification (Plan 10 R5)
+
+**Per-file verification** (per AGENTS.md §"Verification Loop"):
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+
+**Cross-plan contracts**:
+- **Plan 11**: Canvas must render all `FillType` and `StrokeConfig` variants from §R5.8 types. See Plan 11 §R5 for rendering details.
+- **Plan 12**: Property panel imports `FillConfig`/`StrokeConfig` from `@/frontend/common/stores/cert/fillStrokeTypes`. See Plan 12 §R5 for panel details.
+- **Plan 5**: Backend schema must accept the new fill/stroke/gradient/pattern/mesh fields on the element type. The GraphQL input types mirror §R5.8.
+- **Plan 6**: PDF rendering must emulate `mix-blend-mode`, multi-stroke layers, conic gradients, and gradient meshes — none of which have native PDF equivalents.
+
+**Performance**:
+- The toolbar swatches must not re-render on every canvas drag. They subscribe to `templateElementEditorStore.selectedElementIds` (a string array) — only the swatch content updates when selection changes, not on position drag. Use `useShallow` from `zustand/react/shallow` to pick only `selectedElementIds`.
+- The `fillStrokeUtils.fillToCss` computation is memoized per `(fill, width, height)` triple via `useMemo`.
+- The gradient/pattern/image thumbnails in the swatch are rendered at 20×20 px (CSS downscale) — no per-pixel computation.
+
+## Round 5: Pen Tool & Vector Path Drawing
+
+> Added as part of Round 5, enhancing the Plan 10 editor chrome with Photoshop/Illustrator-level pen tool capabilities. This section specifies pen tool toolbar integration, tool group organization, tool options bar, and keyboard shortcuts. The canvas rendering and path interaction logic is specified in Plan 11 §"Round 5". The path property panel and path operations are specified in Plan 12 §"Round 5". Each sub-section maps to tasks in `tasks.md` §"Round 5: Pen Tool Tasks".
+
+### R5.1 Pen Tool Toolbar Integration
+
+The `EditorToolbar` (created in T22, enhanced in R4-T30) currently contains action buttons (Save, Undo, Redo, Zoom, Grid, Snap, Publish). A new **tool group** section is added to the toolbar for vector drawing tools, positioned after the zoom controls and before the grid/snap toggles.
+
+**Tool group**: `PenToolGroup` — an MUI `ToggleButtonGroup` that renders a flyout of pen-related tools. The first visible button shows the currently active pen tool variant; clicking the dropdown arrow (a `IconButton` with `ArrowDropDownOutlined`) opens a `Menu` listing all pen tool variants.
+
+**File**: `frontend/views/dashboard/certificates/template-editor/toolbar/PenToolGroup.tsx`
+
+```tsx
+interface PenToolGroupProps {
+  activeTool: PenToolType;
+  onToolChange: (tool: PenToolType) => void;
+  disabled?: boolean;
+}
+```
+
+**Pen tool variants** (`PenToolType` enum):
+
+| Tool | Enum value | Icon | Tooltip (i18n key) | Shortcut |
+|------|-----------|------|---------------------|----------|
+| Pen Tool | `'pen'` | `CreateOutlined` | `penTool.pen` | `P` |
+| Curvature Pen Tool | `'curvaturePen'` | `GestureOutlined` | `penTool.curvaturePen` | `Shift+P` |
+| Freeform Pen Tool | `'freeformPen'` | `BrushOutlined` | `penTool.freeformPen` | `Ctrl+P` (or `Cmd+P` on macOS) |
+| Add Anchor Point | `'addAnchor'` | `ControlPointOutlined` | `penTool.addAnchor` | `+` |
+| Delete Anchor Point | `'deleteAnchor'` | `RemoveCircleOutlineOutlined` | `penTool.deleteAnchor` | `-` |
+| Convert Point | `'convertPoint'` | `TimelineOutlined` | `penTool.convertPoint` | `Shift+C` |
+
+> **Icon note**: MUI v9 icon names use `*Outlined` suffix. The icons above are MUI v9 compliant. `CreateOutlined` is the pen-nib analog. If a dedicated pen nib icon is needed, use a custom `SvgIcon` component (`PenNibIcon.tsx`) with an inline SVG path — see R5.1.3.
+
+**Custom pen nib icon** (`frontend/views/dashboard/certificates/template-editor/toolbar/PenNibIcon.tsx`):
+
+```tsx
+import SvgIcon from '@mui/material/SvgIcon';
+
+export function PenNibIcon(props: React.ComponentProps<typeof SvgIcon>) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 24 24">
+      <path d="M12 2 L7 17 L12 22 L17 17 Z M12 2 L12 22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <circle cx="12" cy="17" r="1.5" fill="currentColor" />
+    </SvgIcon>
+  );
+}
+```
+
+The icon uses `currentColor` so it inherits theme palette colors — never hardcoded.
+
+### R5.2 Tool Options Bar
+
+When any pen tool variant is active, a **tool options bar** appears below the main toolbar (between the toolbar and the canvas area). This bar is contextual — it shows different controls depending on the active pen tool variant. The bar is collapsible and its visibility is toggled by the pen tool group button (enabled when a pen tool is active, auto-hidden when switched to a non-pen tool).
+
+**File**: `frontend/views/dashboard/certificates/template-editor/toolbar/PenToolOptionsBar.tsx`
+
+```tsx
+interface PenToolOptionsBarProps {
+  activeTool: PenToolType;
+  drawingMode: PenDrawingMode;
+  onModeChange: (mode: PenDrawingMode) => void;
+  autoAddDelete: boolean;
+  onAutoAddDeleteChange: (value: boolean) => void;
+  rubberBandPreview: boolean;
+  onRubberBandChange: (value: boolean) => void;
+  pathOperation: PathOperation;
+  onPathOperationChange: (op: PathOperation) => void;
+  hasActivePath: boolean;
+}
+```
+
+**Drawing mode toggle** (`PenDrawingMode` enum — shown when `activeTool` is `'pen'` or `'curvaturePen'`):
+
+| Mode | Enum value | Icon | Tooltip (i18n key) |
+|------|-----------|------|---------------------|
+| Shape | `'shape'` | `CategoryOutlined` | `penTool.modeShape` |
+| Path | `'path'` | `TimelineOutlined` | `penTool.modePath` |
+| Selection | `'selection'` | `HighlightAltOutlined` | `penTool.modeSelection` |
+
+Rendered as an MUI `ToggleButtonGroup` with `exclusive` selection. In `'shape'` mode, drawn paths auto-create a shape element with fill + stroke. In `'path'` mode, drawn paths create a path element with stroke only. In `'selection'` mode, drawn paths convert to a selection marquee (marching ants) without creating an element.
+
+**Auto-add/delete toggle**: MUI `Switch` with label from `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` key `penTool.autoAddDelete`. When enabled, the pen tool automatically adds anchor points when hovering near a path segment and removes redundant anchor points when dragging handles over neighbors (Photoshop's "Auto Add/Delete" feature). Default: `true`.
+
+**Rubber band preview toggle**: MUI `Switch` with label key `penTool.rubberBand`. When enabled, a rubber band line renders from the last anchor point to the cursor while drawing, providing visual feedback of the next segment's trajectory. Default: `true`.
+
+**Path operations dropdown**: MUI `Select` (or `Menu` with `MenuItems`) shown only when `hasActivePath === true`. Options:
+
+| Operation | Enum value | i18n key |
+|-----------|-----------|----------|
+| Stroke Path | `'stroke'` | `penTool.opStroke` |
+| Fill Path | `'fill'` | `penTool.opFill` |
+| Path to Selection | `'toSelection'` | `penTool.opToSelection` |
+| Stroke to Shape | `'strokeToShape'` | `penTool.opStrokeToShape` |
+| Path to Shape | `'toShape'` | `penTool.opToShape` |
+
+### R5.3 Keyboard Shortcuts
+
+**File**: `frontend/views/dashboard/certificates/template-editor/hooks/usePenToolShortcuts.ts`
+
+Pen tool shortcuts are registered via the `ShortcutManager` (created in R4-T32) with scope `'canvas'` and priority `200` (higher than canvas selection shortcuts at priority `100`).
+
+| Shortcut | Action | Condition |
+|----------|--------|-----------|
+| `P` | Activate Pen Tool | When editor is open and canvas focused |
+| `Shift+P` | Cycle to next pen variant (pen → curvaturePen → freeformPen → pen) | Pen tool group active |
+| `A` | Activate Direct Selection Tool (anchor manipulation) | Whenever a path element is selected |
+| `Shift+C` | Activate Convert Point Tool | When anchor point(s) selected |
+| `+` (Numpad or keyboard) | Activate Add Anchor Point Tool | When pen tool or direct selection active |
+| `-` (Numpad or keyboard) | Activate Delete Anchor Point Tool | When anchor point(s) selected |
+| `Escape` | Cancel current drawing session / deactivate pen tool | When drawing in progress |
+| `Enter` | Close current path (join end to start) | When path has ≥ 2 anchors and drawing in progress |
+| `Ctrl+Click` (or `Cmd+Click`) | Close path at cursor position | When drawing near first anchor |
+| `Alt+Drag` on anchor | Break handle symmetry (convert smooth to corner) | When direct selection tool active and handle dragged |
+| `Alt+Click` on smooth anchor | Convert to corner point (collapse handles) | When direct selection tool active |
+| `Delete` | Delete selected anchor point(s) | When anchor point(s) selected via direct selection |
+| `Backspace` | Delete last anchor point (during drawing) | When drawing in progress |
+
+> **Shortcut conflict note**: The `P` key is currently unregistered in the editor (verified: R4-T32 registers `Ctrl+S`, `Ctrl+Z`, `Ctrl+Shift+Z`, `Delete`, `Escape` at various scopes/priorities). The `A` key is also free. `Delete` is registered at scope `'canvas'` priority `100` for element deletion — the pen tool's anchor deletion registers at priority `200` and fires only when `selectedAnchorIds` is non-empty, otherwise falls through to the element deletion handler.
+
+### R5.4 Store Additions for Pen Tool State
+
+**File**: `frontend/common/stores/certTemplateEditorStore.ts` (modify — add R5 state and actions)
+
+```typescript
+// R5: Pen tool state
+activeTool: EditorTool;                    // 'select' | 'pen' | 'curvaturePen' | 'freeformPen' | 'addAnchor' | 'deleteAnchor' | 'convertPoint' | 'directSelection' | 'pathSelection' | 'text' | 'image' | etc.
+                                     // Default: 'select'
+penDrawingMode: PenDrawingMode;     // 'shape' | 'path' | 'selection' — Default: 'path'
+autoAddDelete: boolean;             // Default: true
+rubberBandPreview: boolean;        // Default: true
+isDrawingPath: boolean;            // true while pen tool drawing session active
+drawingPathId: string | null;      // ID of the path element being drawn (null when not drawing)
+selectedAnchorIds: string[];        // IDs of selected anchor points within the active path element
+activePathElementId: string | null; // ID of the path element being edited (for anchor manipulation)
+pathOperationPending: PathOperation | null; // pending path operation to apply
+
+// R5: Pen tool actions
+setActiveTool: (tool: EditorTool) => void;
+setPenDrawingMode: (mode: PenDrawingMode) => void;
+setAutoAddDelete: (value: boolean) => void;
+setRubberBandPreview: (value: boolean) => void;
+startDrawingPath: (elementId: string) => void;
+finishDrawingPath: () => void;
+cancelDrawingPath: () => void;
+setSelectedAnchorIds: (ids: string[]) => void;
+addSelectedAnchor: (id: string) => void;
+removeSelectedAnchor: (id: string) => void;
+clearSelectedAnchors: () => void;
+setActivePathElement: (id: string | null) => void;
+setPathOperation: (op: PathOperation | null) => void;
+```
+
+**Type definitions** added to `frontend/views/dashboard/certificates/template-editor/types/penTool.types.ts`:
+
+```typescript
+export type EditorTool =
+  | 'select' | 'pen' | 'curvaturePen' | 'freeformPen'
+  | 'addAnchor' | 'deleteAnchor' | 'convertPoint'
+  | 'directSelection' | 'pathSelection'
+  | 'text' | 'image' | 'shape' | 'qrCode' | 'signature';
+
+export type PenToolType =
+  | 'pen' | 'curvaturePen' | 'freeformPen'
+  | 'addAnchor' | 'deleteAnchor' | 'convertPoint';
+
+export type PenDrawingMode = 'shape' | 'path' | 'selection';
+
+export type PathOperation =
+  | 'stroke' | 'fill' | 'toSelection'
+  | 'strokeToShape' | 'toShape';
+
+export type AnchorType = 'corner' | 'smooth';
+
+export interface AnchorPoint {
+  id: string;
+  x: number;
+  y: number;
+  type: AnchorType;
+  // Bezier handle control points (null for corner points with no handles)
+  handleIn: { x: number; y: number } | null;
+  handleOut: { x: number; y: number } | null;
+}
+
+export interface PathData {
+  anchors: AnchorPoint[];
+  closed: boolean;
+  fillRule: 'evenodd' | 'nonzero';
+  subpaths: Subpath[];
+}
+
+export interface Subpath {
+  id: string;
+  anchors: AnchorPoint[];
+  closed: boolean;
+}
+
+export interface PathElement extends CanvasElement {
+  type: 'path';
+  pathData: PathData;
+  stroke: PathStrokeConfig;
+  fill: PathFillConfig;
+}
+
+export interface PathStrokeConfig {
+  enabled: boolean;
+  color: string;       // theme palette color reference, never hardcoded hex
+  width: number;       // 1-50px
+  opacity: number;     // 0-1
+  dashArray: string;   // SVG stroke-dasharray, e.g. "4,2" or "none"
+  linecap: 'butt' | 'round' | 'square';
+  linejoin: 'miter' | 'round' | 'bevel';
+}
+
+export interface PathFillConfig {
+  enabled: boolean;
+  color: string;
+  opacity: number;      // 0-1
+}
+```
+
+### R5.5 i18n Keys for Pen Tool
+
+Added to `shared/locale/types/dashboard/certificates/templateEditor.ts`:
+
+```typescript
+// R5: Pen tool
+penTool: {
+  pen: string;
+  curvaturePen: string;
+  freeformPen: string;
+  addAnchor: string;
+  deleteAnchor: string;
+  convertPoint: string;
+  modeShape: string;
+  modePath: string;
+  modeSelection: string;
+  autoAddDelete: string;
+  rubberBand: string;
+  opStroke: string;
+  opFill: string;
+  opToSelection: string;
+  opStrokeToShape: string;
+  opToShape: string;
+  tooltipPenGroup: string;
+  drawingHint: string;           // shown in status bar: "Click to add anchor, drag for curve"
+  drawingHintCurvature: string;
+  drawingHintFreeform: string;
+  pathClosed: string;
+  pathOpen: string;
+  anchorCount: (count: number) => string;
+  cancelDrawing: string;
+  closePath: string;
+}
+```
+
+Each key implemented in both `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts`. The `anchorCount` pluralization function follows the compile-time i18n system: `(count: number) => string`.
+
+### R5.6 Plan 10 Cross-Plan Contracts
+
+| Consumer Plan | Contract |
+|---------------|----------|
+| Plan 11 | `activeTool` state from `certTemplateEditorStore` — canvas must check `activeTool` to switch between selection-mode and pen-tool-mode pointer handling. `setActiveTool` action must be called when the user clicks a non-pen toolbar tool. |
+| Plan 11 | `PenToolType` and `EditorTool` types from `penTool.types.ts` — canvas imports these for pen tool pointer event routing. |
+| Plan 11 | `isDrawingPath`, `drawingPathId` state — canvas reads these to render the rubber band preview and path overlay. |
+| Plan 11 | Keyboard shortcuts (`P`, `A`, `Shift+C`, `+`, `-`) registered via `ShortcutManager` — canvas-level handlers only fire when `activeTool` is a pen variant. |
+| Plan 12 | `PathElement`, `PathData`, `AnchorPoint`, `PathStrokeConfig`, `PathFillConfig` types from `penTool.types.ts` — property panel renders path-specific controls when `element.type === 'path'`. |
+| Plan 12 | `selectedAnchorIds`, `activePathElementId` state — property panel reads anchor selection to show anchor-level info (coordinates, handle positions). |
+| Plan 12 | `pathOperationPending` — property panel calls `setPathOperation` to trigger path-to-shape, stroke-to-shape, etc. |
+| Plan 5 | `PathElement` schema fields (`pathData`, `stroke`, `fill`) must be added to the backend element schema and exposed via GraphQL mutations. |
+| Plan 6 | PDF rendering must support SVG path elements with stroke, fill, dash patterns, and fill rules. |
+
+---
+## Round 5: Effects & Filter Engine
+
+> Added as part of the effects engine round, extending the Plan 10 editor chrome with a Photoshop/Illustrator-level quick effects toolbar entry point. The canvas rendering and preview logic is specified in Plan 11 §"Round 5: Effects & Filter Engine". The effects property panel, filter controls, and preset library are specified in Plan 12 §"Round 5: Effects & Filter Engine". Each sub-section maps to tasks in `tasks.md` §"Round 5: Effects & Filter Engine Tasks".
+
+There is already a "Round 5: Advanced Fill & Stroke System" and a "Round 5: Pen Tool & Vector Path Drawing" in the design — "Round 5" is reused across independent feature domains (Fill, Pen, Effects). This is the third Round 5 domain: **Effects & Filter Engine**.
+
+### R5.1 Quick Effects Toolbar Button
+
+The `EditorToolbar` (created in T22, enhanced in R4-T30, further enhanced in the Fill/Stroke R5 and Pen Tool R5) is extended with a new **Effects** button. This sits in the toolbar after the Pen Tool group and before the zoom controls. It opens a "Quick Effects" dropdown — a `Menu with a custom `QuickEffectsMenu` popover component so the preset buffer has enough width to show 3-column preset previews.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/QuickEffectsButton.tsx`
+
+```tsx
+interface QuickEffectsButtonProps {
+  selectedElementId: string | null;
+  disabled?: boolean;
+  // adidas from the parent toolbar so it only enables when an element is selected
+}
+```
+
+The button is `IconButton with `sx={(theme) => ({ color: theme.palette.text.primary })}`. The tooltip key is `certificateEditor.toolbar.effects`. The button is disabled (greyed, `sx={{ opacity: 0.38 }}`) when no element is selected (`selectedElementId === null`). The badge on the button shows the count of applied effects (dot badge, not a number, to keep the UI clean) — a small 6px circle at the top-left corner using `theme.palette.primary.main`.
+
+**Keyboard shortcuts**: `Ctrl+Shift+E` opens the Quick Effects menu. `E` alone (when not in text-edit mode) is a reserved-only shortcut — the effects button itself.
+
+### R5.2 Quick Effects Dropdown Menu
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/QuickEffectsMenu.tsx`
+
+```tsx
+interface QuickEffectsMenuProps {
+  anchorEl: HTMLElement | null;
+  open: boolean;
+  onClose: () => void;
+  selectedElementId: string | null;
+}
+```
+
+The dropdown is a custom popup (don't use the standard MUI `Menu` — custom because of the 3-section layout and the preset preview tiles). It uses a `Paper` with `sx={{ width: 360, p: 2 }}` containing three vertical sections separated by `Divider`:
+
+| Section | Title (i18n key) | Contents |
+|---|---|---|
+| Preset Shadows | `effects.quick.presetShadows` | 2×2 grid of preset tiles |
+| Preset Glows | `effects.quick.presetGlows` | 2×1 row of preset tiles |
+| Preset Adjustments | `effects.quick.presetAdjustments` | 2×2 grid of preset tiles |
+| More | — | `"More Effects…"` text button (full width) |
+
+**Preset shadow tiles** (in the dropdown — statically defined, not user-castable):
+
+| Preset | Config to apply |
+|---|---|
+| Soft Drop | `[{ type: 'dropShadow', color: '#000000', opacity: 35, angle: 135, distance: 8, blur: 20, spread: 0, useGlobalLight: true }]` |
+| Hard Drop | `[{ type: 'dropShadow', color: '#000000', opacity: 75, angle: 135, distance: 4, blur: 2, spread: 0, useGlobalLight: true }]` |
+| Long Shadow | `[{ type: 'dropShadow', color: '#000000', opacity: 40, angle: 135, distance: 30, blur: 6, spread: 0, useGlobalLight: true }, { type: 'dropShadow', color: '#000000', opacity: 30, angle: 135, distance: 60, blur: 12, spread: 0, useGlobalLight: true }]` |
+| Inner Shadow | `[{ type: 'innerShadow', color: '#000000', opacity: 50, angle: 135, distance: 5, blur: 10, choke: 0, useGlobalLight: true }]` |
+
+**Preset glow tiles**:
+
+| Preset | Config |
+|---|---|
+| Soft Glow | `[{ type: 'outerGlow', color: '#FFFFFF', opacity: 60, blur: 24, spread: 0, blendMode: 'screen' }]`a
+
+(needs review — colors should be theme-driven, not hardcoded white)
+
+> **Important sheep rule** — hardcoded colors: The original user spec listed default colors (white, black). Per AGENTS.md: **NEVER hardcode colors**. Defaults that need to be black or white use `theme.palette.common.black` / `theme.palette.common.white`. If a more "design-y" default is needed, use `theme.palette.primary.main` or `theme.palette.warning.main` (for warm defaults). The preset configs should be functions that take a theme: `createSoftDropPreset(theme: Theme): EffectConfig[]`. The bar above violates the project color rules. **Fix**: All preset factories accept `theme` and pull colors from `theme.palette.common.*` or `theme.palette.primary.main`. No literal hex strings in source code. The only acceptable literal hex is in a single constants file that maps to theme tokens for internal use.
+
+**Preset adjustment tiles**:
+
+| Preset | Config |
+|---|---|
+| Auto-Enhance | `[{ type: 'brightnessContrast', brightness: +15, contrast: +15 }, { type: 'vibrance', vibrance: +40, saturation: +10 }]` |
+| B&W | `[{ type: 'grayscale', enabled: true }]` |
+| Vintage | `[{ type: 'sepia', enabled: true }, { type: 'filmGrain', grainAmount: 25, highlightArea: 50, intensity: 3 }, { type: 'colorOverlay', color: theme.palette.warning.light, opacity: 20, blendMode: 'overlay' }]` |
+| Vivid | `[{ type: 'vibrance', vibrance: +60, saturation: 0 }, { type: 'brightnessContrast', brightness: +5, contrast: +20 }]` |
+
+**"More Effects…"**: Opens the full effects panel. In the pocket layout, this calls `useTemplateElementEditorStore.getState().setRightPanelTab('effects')` (Plan 12 interface). If the effects tab is not registered (e.g., the state was loaded from Plan 10 alone), fall back to `null` with a one-line warning toast: "Effects panel available in the element editor" (i18n: `effects.quick.notAvailable`).
+
+### R5.3 Quick Toggle Buffer
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/useQuickToggleEffects.ts`
+
+```typescript
+export interface QuickToggleState {
+  lastShadowPreset: string | null;     // preset ID
+  lastGlowPreset: string | null;
+}
+export function rememberShadowPreset(presetId: string): void;
+export function rememberGlowPreset(presetId: string): void;
+export function toggleLastShadow(): void;
+export function toggleLastGlow(): void;
+```
+
+The buffer is stored in the Zustand store (session-only, not persisted). Two buttons on the toolbar — `ShadowToggle` and `GlowToggle` — quick-toggle the most recently applied shadow/glow preset. If no preset has been applied yet, the toggle applies the first preset in its category (Soft Drop for shadow, Soft Glow for glow) and remembers it. On unpress, the most recently applied shadow/glow effect of that preset category is removed from the selected element's effects list.
+
+### R5.4 i18n Keys Added (Effects Engine — Plan 10 portion)
+
+New keys in the `certificateEditor` namespace under `effects.*`:
+
+```typescript
+effects: {
+  toolbar: string;           // "Effects"
+  quick: string;             // "Quick Effects"
+  quickPresetShadows: string;
+  quickPresetGlows: string;
+  quickPresetAdjustments: string;
+  quickMoreEffects: string;
+  quickNotAvailable: string;
+  quickSoftDrop: string;
+  quickHardDrop: string;
+  quickLongShadow: string;
+  quickInnerShadow: string;
+  quickSoftGlow: string;
+  quickNeonGlow: string;
+  quickAutoEnhance: string;
+  quickBW: string;
+  quickVintage: string;
+  quickVivid: string;
+  toggleShadow: string;
+  toggleGlow: string;
+  presetApplied: (name: string) => string;   // "{name} preset applied"
+  presetRemoved: (name: string) => string;
+}
+```
+
+Each key must be implemented in both AR and EN locale files under `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts` (extending the existing `CertificateTemplateEditorLabels`). See Plan 12 §R5 for the full i18n addition covering the property panel portion (the bulk of the keys, ~200, live there).
+
+### R5.5 Type Definitions (Plan 10 portion)
+
+**File**: `frontend/common/stores/cert/effectTypes.ts`
+
+This file is shared with Plans 11 and 12. It exports the canonical `EffectConfig`, `EffectLayer`, and supporting types. Plan 10 imports only `EffectCategory` and the preset-factory helpers. Plan 12 §R5.13 contains the full type listing (so there is a single canonical source — Plan 10 just imports from `@/frontend/common/stores/cert/effectTypes`). Here we reproduce the top-level umbrella type for Plan 10's interface contract:
+
+```typescript
+import type { EffectConfig, EffectLayer } from '@/frontend/common/stores/cert/effectTypes';
+
+export type EffectCategory =
+  | 'shadow'
+  | 'glow'
+  | 'blur'
+  | 'colorAdjust'
+  | 'stylize'
+  | 'overlay';
+
+export interface QuickEffectPreset {
+  id: string;
+  labelKey: string;
+  category: EffectCategory;
+  factory: (theme: Theme) => EffectLayer;
+}
+```
+
+### R5.6 Quality & Verification (Plan 10 R5 — Effects Engine)
+
+**Per-file verification loop** (per AGENTS.md §"Verification Loop"):
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5fx-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+
+**Cross-plan contracts**:
+- **Plan 11**: Canvas must render all CSS and SVG effect filters specified in Plan 11 §R5. The Quick Effects button must dispatch preset application via `useTemplateElementEditorStore.getState().applyPresetToSelected(presetId)` — the store owner is Plan 11/12 shared canvas module.
+- **Plan 12**: The `"More Effects…"` action depends on `setRightPanelTab('effects')` existing on the element editor store. See Plan 12 §R5.2 for the property panel layout that registers the `'effects'` tab.
+- **Plan 5**: The new `effects` array on the element must be accepted by the template element mutations. See Plan 12 §R5.1 for the GraphQL input shape.
+- **Plan 6**: PDF must emulate filter chains (blur, shadow, levels, curves) — there is no PDF primitive for SVG filters, so this is emulated via rasterized layers in the export pipeline (Plan 6 §"Effects emulation" — out of this plan's scope).
+
+**Performance**:
+- The Quick Effects dropdown renders ~10 preset tiles. Each tile's preview is a memoized `Box` (no per-pixel computation) showing the effect applied to a static white-dot-on-grey-background sample. Pre-renders are capped at 50ms for the dropdown — do not preview the actual selected element in the dropdown (only generic swatches).
+- The badge count subscriptions use `useShallow` so toolbar + badge update only when the effects array length changes, not during slider drag.
+- `applyPresetToSelected` must short-circuit if no element is selected — silently no-op. The dispatcher that opens the menu gates the button behind `selectedElementId != null`, so this is defensive only.
+
+---
+
+## Round 5: Transform Engine — Toolbar, Menu & Shortcut Surface
+
+> **Round**: 6 · **Topic**: Transform Engine (Control Surface)
+> **Depends on**: Plan 11 R6 (canvas handles + live transform math), Plan 12 R6 (property panel + numeric dialog)
+> **PredecessorRound**: Round 5 (Effects + Fill/Stroke + Pen tool — defines `TransformConfig` baseline in Plan 12 §3.x and `certificateEditor` namespace root)
+> **Goal**: Add a Photoshop/Illustrator-grade transform **control surface** to the editor shell: Free Transform button, Rotate/Flip submenus, Numeric transform dialog launcher, and the Transform Again (Ctrl+Shift+T) command. Plan 10 owns only the **toolbar + menu items + keyboard shortcut registrations + the last-transform record**; the actual handle rendering and live transform math live in Plan 11, and the property panel/numeric dialog live in Plan 12.
+
+### R6.1 Scope Boundary (Plan 10 vs Plan 11 vs Plan 12)
+
+Plan 10's transform work is intentionally thin — it is the **dispatch layer**. The handle/overlay rendering, the transform math (matrix composition, perspective solve, warp mesh), and the numeric input UIs are owned by the other two plans so that the toolbar never imports canvas math and the canvas never imports toolbar chrome:
+
+| Concern | Owner Plan | File(s) |
+|---|---|---|
+| Free Transform button + Ctrl+T shortcut registration | **Plan 10** | `EditorToolbar.tsx` (modify), `useEditorShortcuts.ts` (modify) |
+| Rotate / Flip / Numeric / Warp submenu items in the Edit menu | **Plan 10** | `EditorEditMenu.tsx` (create) |
+| Transform Again (Ctrl+Shift+T) — last-transform record | **Plan 10** | `useLastTransformRecord.ts` (create) |
+| Free Transform options bar (mode toggles Scale/Rotate/Skew/Distort/Perspective, ref-point grid, numeric W/H/angle inputs) | **Plan 11** | `FreeTransformOptionsBar.tsx` |
+| Bounding box + 8 handles + rotation handle + skew/distort/perspective handle behavior | **Plan 11** | `FreeTransformOverlay.tsx` |
+| Live transform math (scale, rotate, skew, distort, perspective, warp) | **Plan 11** | `transformEngine/` directory |
+| Transform property panel section (Position/Size/Rotation/Skew/Flip + reset) | **Plan 12** | `TransformPropertyPanelSection.tsx` |
+| Numeric Transform Input dialog (Edit → Transform → Numeric…) | **Plan 12** | `NumericTransformDialog.tsx` |
+
+**Rule**: `EditorToolbar.tsx` may read `activeTool === 'freeTransform'` from the shared `certTemplateEditorStore` (Plan 10 R5 already created this store) to toggle the Free Transform button's `color="primary"` active state, but it must NOT import `transformEngine/*` — that would invert the dependency. Plan 10 only sets `activeTool` and dispatches; Plan 11 renders the overlay when it observes `activeTool === 'freeTransform'`.
+
+### R6.2 Free Transform Toolbar Button
+
+**Component**: `ToolbarFreeTransformButton`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/ToolbarFreeTransformButton.tsx`
+
+A single `IconButton` with `Tooltip`. On click, if exactly one element is selected, it sets `certTemplateEditorStore.getState().setActiveTool('freeTransform')`. If zero or multiple elements are selected, the button is disabled (`disabled` prop) and the tooltip reads "Select a single element to free-transform" via `t("certificateTemplateEditor.transform.freeTransform.disabledHint")`.
+
+```tsx
+import { IconButton, Tooltip } from '@mui/material';
+import { CropFreeOutlined } from '@mui/icons-material';
+import { useAppTranslation } from '@/shared/locale/client';
+import { useCertTemplateEditorStore } from '@/frontend/common/stores/cert/certTemplateEditorStore';
+import { useShallow } from 'zustand/react/shallow';
+
+export function ToolbarFreeTransformButton() {
+  const t = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const { activeTool, selectedElementIds, setActiveTool } = useCertTemplateEditorStore(
+    useShallow((s) => ({ activeTool: s.activeTool, selectedElementIds: s.selectedElementIds, setActiveTool: s.setActiveTool })),
+  );
+  const singleSelection = selectedElementIds.length === 1;
+  const isActive = activeTool === 'freeTransform';
+  return (
+    <Tooltip title={singleSelection ? t('certificateTemplateEditor.transform.freeTransform.tooltip') : t('certificateTemplateEditor.transform.freeTransform.disabledHint')}>
+      <span>
+        <IconButton
+          size="small"
+          disabled={!singleSelection || isActive}
+          onClick={() => setActiveTool('freeTransform')}
+          sx={{ color: isActive ? 'primary.main' : 'text.secondary' }}
+          aria-label={t('certificateTemplateEditor.transform.freeTransform.ariaLabel')}
+          aria-pressed={isActive}
+        >
+          <CropFreeOutlined />
+        </IconButton>
+      </span>
+    </Tooltip>
+  );
+}
+```
+
+MUI v9 note: `color` and `size` are valid `IconButton` props; `aria-label`/`aria-pressed` are valid HTML attributes. No style props used (the active state uses `sx={{ color: ... }}` per AGENTS.md "no hardcoded colors + theme palette" rule).
+
+### R6.3 Editor Edit Menu (Transform Submenu)
+
+**Component**: `EditorEditMenu`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/EditorEditMenu.tsx`
+
+A `Menu` (anchored to an "Edit" `Button` in the toolbar) with a nested `MenuItem` → submenu structure mirroring Photoshop's `Edit → Transform` menu. Each leaf calls a store action on `certTemplateEditorStore`; the actual element mutation is delegated to Plan 11's `transformEngine` via a shared action surface (see R6.6).
+
+```
+Edit
+ ├─ Free Transform              Ctrl+T          → setActiveTool('freeTransform')
+ ├─ ──────────────
+ ├─ Transform ▶
+ │   ├─ Scale                   (active mode toggle)  → setFreeTransformMode('scale')
+ │   ├─ Rotate                  (active mode toggle)  → setFreeTransformMode('rotate')
+ │   ├─ Skew                    (active mode toggle)  → setFreeTransformMode('skew')
+ │   ├─ Distort                 (active mode toggle)  → setFreeTransformMode('distort')
+ │   ├─ Perspective             (active mode toggle)  → setFreeTransformMode('perspective')
+ │   ├─ Warp                                          → setFreeTransformMode('warp')
+ │   ├─ ──────────────
+ │   ├─ Rotate 90° CW           Shift+Ctrl+]         → applyRotate九十({ degrees: 90, direction: 'cw' })
+ │   ├─ Rotate 90° CCW          Shift+Ctrl+[         → applyRotate九十({ degrees: 90, direction: 'ccw' })
+ │   ├─ Rotate 180°                                  → applyRotate九十({ degrees: 180, direction: 'cw' })
+ │   ├─ Flip Horizontal                              → applyFlip('horizontal')
+ │   ├─ Flip Vertical                                → applyFlip('vertical')
+ │   ├─ ──────────────
+ │   └─ Numeric…                                     → openNumericTransformDialog()
+ ├─ ──────────────
+ ├─ Transform Again             Ctrl+Shift+T         → repeatLastTransform()
+ └─ ──────────────
+```
+
+```tsx
+export function EditorEditMenu() {
+  const t = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [transformAnchor, setTransformAnchor] = useState<HTMLElement | null>(null);
+  const store = useCertTemplateEditorStore();
+  const open = Boolean(anchorEl);
+  return (
+    <>
+      <Button onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ textTransform: 'none' }}>
+        {t('certificateTemplateEditor.editMenu.label')}
+      </Button>
+      <Menu open={open} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+        <MenuItem onClick={() => { store.setActiveTool('freeTransform'); setAnchorEl(null); }}>
+          <ListItemText>{t('certificateTemplateEditor.transform.freeTransform')}</ListItemText>
+          <Typography variant="caption" sx={{ color: 'text.disabled', ml: 2 }}>Ctrl+T</Typography>
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          ref={(node) => node && setTransformAnchor(node)}
+          onClick={() => setTransformAnchor(transformAnchor ?? null)}
+        >
+          <ListItemText>{t('certificateTemplateEditor.transform.submenuLabel')}</ListItemText>
+          <ChevronRightOutlined fontSize="small" />
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={() => { store.repeatLastTransform(); setAnchorEl(null); }}>
+          <ListItemText>{t('certificateTemplateEditor.transform.again')}</ListItemText>
+          <Typography variant="caption" sx={{ color: 'text.disabled', ml: 2 }}>Ctrl+Shift+T</Typography>
+        </MenuItem>
+      </Menu>
+      <Menu
+        open={Boolean(transformAnchor)}
+        anchorEl={transformAnchor}
+        onClose={() => setTransformAnchor(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      >
+        {/* Scale/Rotate/Skew/Distort/Perspective/Warp toggles */}
+        {/* Rotate 90° CW/CCW, 180°, Flip H/V — all gated by singleSelection */}
+        {/* Numeric… — opens dialog owned by Plan 12 */}
+      </Menu>
+    </>
+  );
+}
+```
+
+Gating: every transform action is `disabled` (`MenuItem disabled` prop) when `selectedElementIds.length === 0`. Mode-toggle items (Scale/Rotate/Skew/Distort/Perspective/Warp) are only enabled when `activeTool === 'freeTransform'` (Photoshop only lets you switch modes inside Free Transform). Rotate/Flip/Again items are enabled whenever ≥1 element is selected.
+
+### R6.4 Keyboard Shortcut Registrations (Transform)
+
+**File**: `frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts` (modify — appends to existing hook)
+
+| Shortcut | Action | Condition |
+|---|---|---|
+| `Ctrl+T` | `setActiveTool('freeTransform')` | exactly one element selected; if already active → no-op |
+| `Ctrl+Shift+T` | `repeatLastTransform()` | last transform record exists; ≥1 element selected |
+| `Shift+Ctrl+]` | `applyRotate九十({ degrees: 90, direction: 'cw' })` | ≥1 element selected |
+| `Shift+Ctrl+[` | `applyRotate九十({ degrees: 90, direction: 'ccw' })` | ≥1 element selected |
+
+> Esc/Enter while in Free Transform are owned by **Plan 11** (canvas-level, since the overlay needs to commit/cancel). Plan 10 only registers the Ctrl+T *entry* shortcut. If `activeTool === 'freeTransform'` and Ctrl+T is pressed again, Plan 10 no-ops; Plan 11 handles Esc to cancel.
+
+Shortcut registration uses the existing `ShortcutManager` (created in Round 5 for the pen tool). Each binding is a `ShortcutBinding` with `key`, `modifiers` (ctrl/shift/alt arrays), `handler`, and a `predicate` that reads the store. Avoid `metaKey` on Linux (Siraj ships on Linux/AWS); use `ctrlKey` only. Per AGENTS.md, never use `eval` or dynamic shell-style expansion in handler strings — handlers are function references.
+
+### R6.5 Last Transform Record (Transform Again Support)
+
+**Hook**: `useLastTransformRecord`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/useLastTransformRecord.ts`
+
+A Zustand-backed accessor (reads from `certTemplateEditorStore.lastTransform`) that exposes `getLastTransform(): TransformOperationRecord | null` so the toolbar can enable/disable Transform Again, and `commitTransform(record)` so any plan (10/11/12) that finalizes a transform pushes the record.
+
+```typescript
+export interface TransformOperationRecord {
+  type: 'scale' | 'rotate' | 'skew' | 'distort' | 'perspective' | 'warp' | 'flip' | 'rotate九十';
+  mode: 'absolute' | 'relative';          // absolute = set to value; relative = apply delta
+  applyTo: 'selection' | 'duplicate';      // Transform Again respects the original's applyTo
+  matrix: DOMMatrixReadOnly;                // post-transform matrix (for replay on new selection)
+  delta: Record<string, number>;            // human-readable params (angle, scaleX, etc.) for logging
+  scope: 'single' | 'multi';                // Transform Again only replays on matching scope
+}
+```
+
+`repeatLastTransform()` (Plan 12 implements the actual numeric replay; Plan 10 only **gates** the toolbar button and dispatches `store.repeatLastTransform()`) applies the `matrix` of the last record to the current selection. If `applyTo === 'duplicate'`, it duplicates each selected element first (delegated to Plan 12's `duplicateSelection()`), then applies the matrix — matching Photoshop's "Transform Again on a duplicated layer" behavior.
+
+### R6.6 Shared Store Action Surface (Cross-Plan Contract)
+
+`certTemplateEditorStore` (already created in Plan 10 R5) gains these transform-dispatch actions. **Plan 10 declares the interface + dispatch shims; Plan 11/12 implement the bodies via a registered handler pattern** so the store file stays free of canvas math:
+
+```typescript
+// Added to CertTemplateEditorStore interface (Plan 10 declares; Plan 11/12 assign bodies)
+setFreeTransformMode: (mode: FreeTransformMode) => void;
+applyRotate九十: (args: { degrees: 90 | 180; direction: 'cw' | 'ccw' }) => void;
+applyFlip: (axis: 'horizontal' | 'vertical') => void;
+openNumericTransformDialog: () => void;
+repeatLastTransform: () => void;
+lastTransform: TransformOperationRecord | null;
+```
+
+`FreeTransformMode` lives in `frontend/common/stores/cert/transformTypes.ts` (Plan 11 R6.1 owns this file — Plan 10 imports the **type only**). Plan 10's store shims call `get().transformHandlers?.[actionName]?.(args)` — Plan 11's `FreeTransformController` registers handlers on mount via `useCertTemplateEditorStore.getState().registerTransformHandlers({...})`. This keeps Plan 10's store file import-clean of `transformEngine/*`.
+
+### R6.7 i18n Keys Added (Plan 10 R6)
+
+Append to `shared/locale/types/dashboard/certificates/templateEditor.ts` (the `certificateEditor` namespace) — Plan 10 owns these because they live on the toolbar/menu (not the canvas overlay or property panel):
+
+```typescript
+// transform submenu (toolbar/menu surface)
+'certificateEditor.transform.freeTransform': string;
+'certificateEditor.transform.freeTransform.tooltip': string;
+'certificateEditor.transform.freeTransform.disabledHint': string;
+'certificateEditor.transform.freeTransform.ariaLabel': string;
+'certificateEditor.transform.submenuLabel': string;
+'certificateEditor.transform.scale': string;
+'certificateEditor.transform.rotate': string;
+'certificateEditor.transform.skew': string;
+'certificateEditor.transform.distort': string;
+'certificateEditor.transform.perspective': string;
+'certificateEditor.transform.warp': string;
+'certificateEditor.transform.rotate九十Cw': string;
+'certificateEditor.transform.rotate九十Ccw': string;
+'certificateEditor.transform.rotate180': string;
+'certificateEditor.transform.flipHorizontal': string;
+'certificateEditor.transform.flipVertical': string;
+'certificateEditor.transform.numeric': string;
+'certificateEditor.transform.again': string;
+'certificateEditor.editMenu.label': string;
+```
+
+AR/EN implementations go in `shared/locale/{ar,en}/dashboard/certificates/templateEditor.ts` — each key gets a function stub (most are plain strings, no interpolation). Per `shared/AGENTS.md`, interpolation functions take string params and use template literals; none needed here. Pluralization keys use `(count: number) => string` — none needed.
+
+### R6.8 Quality & Verification (Plan 10 R6)
+
+**Per-file verification loop** (per AGENTS.md §"Verification Loop"):
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r6tr-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+
+**Cross-plan contracts**:
+- **Plan 11**: The `FreeTransformController` (Plan 11 R6.2) registers handler bodies for `setFreeTransformMode`, `applyRotate九十`, `applyFlip`, `repeatLastTransform` via `registerTransformHandlers`. Plan 10's store shim must tolerate `transformHandlers === undefined` (defensive no-op + `logger.warn`).
+- **Plan 12**: `openNumericTransformDialog` sets `numericTransformDialogOpen = true` on the element editor store (Plan 12 R6.1 renders the dialog).
+- **Plan 5**: The `lastTransform.matrix` is not persisted to the backend — it is session-only (Zustand, non-persisted). Element-level transforms persist via the existing `updateElement` mutation already extended in Rounds 4-5.
+
+**Performance**:
+- The toolbar `/transformAgain` button's `disabled` state subscribes via `useShallow` on `[lastTransform, selectedElementIds]` so re-render only fires on those two slices.
+- The Edit menu's submenu is lazily mounted (`<Menu>` with `keepMounted={false}` — default) to avoid rendering ~15 `MenuItem`s on first paint.
+
+**Accessibility**:
+- The Free Transform button exposes `aria-label` and `aria-pressed`.
+- Each menu item exposes its shortcut via `aria-keyshortcuts` (e.g., `aria-keyshortcuts="Control+T"`).
+- Submenu navigation: `ArrowRight` opens the Transform submenu when focused on the parent `MenuItem`; `ArrowLeft`/`Esc` closes it (MUI v9 default behavior — no custom code needed).
+
+## Round 5: Advanced Layers Panel
+
+> Added as a fourth Round 5 domain to extend the Plan 10 editor workspace with Photoshop/Illustrator/Figma-grade **layers panel** management capabilities. This section specifies where the layers panel sits in the workspace, how the panel header is composed (title, options menu ≡, search/filter bar, quick filter buttons, layer count badge, thumbnail size toggle), how the panel is docked/floating/collapsed, and how the panel resizes. The per-layer row anatomy, layer operations, grouping, blending, clipping, and layer properties are specified in Plan 12 §"Round 5: Advanced Layers Panel" (canonical component owner). The canvas-layer rendering order and on-canvas visibility behavior live in Plan 11 §"Round 5: Advanced Layers Panel". Each sub-section maps to tasks in `tasks.md` §"Round 5: Advanced Layers Tasks".
+>
+> **Relationship to existing R4-T7 Layer Panel**: Plan 12's R4-T7 `LayerPanel.tsx` (basic z-index `@dnd-kit/sortable` list + visibility/lock/inline-name) becomes the **base layer**. The Round 5 Advanced Layers Panel **builds on top of** it — every R5 component listed here lives beside or wraps the R4-T7 component; it does NOT duplicate the existing kind/visibility/lock primitives. Where an R5 task absolutely needs to mutate the R4-T7 file, the task is marked "modify — extend". Both panels share the same store (`useTemplateElementEditorStore` extended in Plan 12 §R5.15).
+
+### R5.1 Layers Panel Workspace Placement (Plan 10)
+
+The Plan 10 editor workspace (created in T22/`TemplateEditorDesktopView`) currently has a left sidebar (Page palette + LayerPanel from Plans 12/R4-T7) and a right sidebar (Properties panel from Plan 12). Round 5 promotes the layers panel to a first-class **dockable workspace panel** modelled on the Photoshop Panels system.
+
+**Panel position (default)**: Right sidebar, **above** the Properties panel. The default desktop layout becomes: Palette (left, 240px) | Canvas (center) | Layers Panel (right, 300px, top) → Properties Panel (right, below layers).
+
+**Dock positions** (4 states — toggled via the panel options menu ≡ → "Dock Position" submenu):
+
+| Position | Layout slot | Width | Notes |
+|---|---|---|---|
+| Right (default) | Right sidebar, above Properties | 300px | Default; mirrors Photoshop Layers panel placement |
+| Left | Left sidebar, below the element palette | 300px | Useful for right-handed stylus users; canvas shifts right |
+| Floating | Overlaid `Draggable` window (MUI `Paper` with elevation 6) on canvas | 280px × h=auto (clamp 360–720) | Draggable by header; `sx={{ position: 'absolute', backdropFilter: 'blur(2px)', bgcolor: (theme) => theme.palette.background.paper + 'CC' }}` |
+| Collapsed | Icon-only vertical strip docked against the active dock edge (right/left) | 48px | `LayersOutlined` icon button; tooltip `t("layersPanel.expand")`; clicking restores previous position |
+
+**File**: `frontend/views/dashboard/certificates/template-editor/workspace/LayersWorkspacePanel.tsx` (new) — the outer panel shell that owns dock state, resize handle, and renders `AdvancedLayersPanel` (Plan 12 §R5) inside.
+
+**State owner**: `useTemplateElementEditorStore.panelDock` (extend store — see Plan 12 §R5.15). The dock state persists per-editor-session (NOT persisted to localStorage — consistent with the "session-only" guidance in `frontend/common/stores/AGENTS.md`).
+
+```typescript
+type PanelDock = 'right' | 'left' | 'floating' | 'collapsed';
+
+interface LayersWorkspacePanelProps {
+  dock: PanelDock;
+  // provided by store, not props (kept here as documentation of the contract)
+}
+```
+
+**Transition animation**: MUI `Grow`/`Slide` transitions on dock change. `Slide` `direction` derives from `dock` (left→right slide-out, right→left slide-in).
+
+### R5.2 Panel Header (Plan 10)
+
+**File**: `frontend/views/dashboard/certificates/template-editor/layersPanel/AdvancedLayersPanelHeader.tsx` (new — replaces the R4-T7 `LayerPanelHeader.desktop.tsx` label as the controlling header; the R4 header stays for the basic variant until both plans merge, but the Advanced header is the new default).
+
+**Header anatomy** (top-to-bottom inside the panel):
+
+1. **Title row**: `"Layers"` + layer count badge on the right
+   - Title i18n key: `t("certificateTemplateEditor.layersPanel.title")` → "Layers" / "الطبقات"
+   - Layer count badge: MUI `Box` rendered as `sx={{ borderRadius: '50%', minWidth: 20, height: 20, px: 0.5, bgcolor: (theme) => theme.palette.primary.main, color: (theme) => theme.palette.primary.contrastText, typography: 'caption', display: 'flex', alignItems: 'center', justifyContent: 'center' }}`. The count is the total number of top-level layer rows (groups collapse to 1 row each; nested groups do not increment).
+   - Layer count is `useTemplateElementEditorStore(useShallow(s => s.topLevelLayerCount))` (derived selector in Plan 12 §R5.15) so badge text updates only on structural change, not per drag.
+
+2. **Panel options menu (≡)**: MUI `IconButton` (`MoreVertOutlined`) in the top-right of the header. Opens a `Menu` with these items (`MenuItem`s + dividers):
+
+   | Item | Icon | Action | Plan 12 §R5.x |
+   |---|---|---|---|
+   | Panel Options… | `TuneOutlined` | Opens `LayerPanelOptionsDialog` (thumbnail size, blend-color previews, panel dock) | §R5.4 |
+   | — divider — | | | |
+   | Merge Visible | `LayersOutlined` | `mergeVisibleLayers()` | §R5.6 |
+   | Flatten Image | `FlattenOutlined` | `flattenImage()` | §R5.6 |
+   | Delete Hidden Layers | `DeleteOutlineOutlined` | `deleteHiddenLayers()` (confirm dialog) | §R5.6 |
+   | — divider — | | | |
+   | Dock → submenu (Right/Left/Floating/Collapsed) | `DockToRightOutlined` etc. | `setPanelDock(pos)` | §R5.1 |
+   | — divider — | | | |
+   | Close Panel | `CloseOutlined` | `setPanelDock('collapsed')` | §R5.1 |
+
+3. **Search/filter bar**: `OutFilledInputBase`-based search field; placeholder `t("certificateTemplateEditor.layersPanel.searchPlaceholder")` → "Filter by name…". `value`/`onChange` bound to `useTemplateElementEditorStore.layerFilterText`. Resets on `Escape` key. `StartAdornment` = `SearchOutlined` icon; `EndAdornment` = clear (`X`) button appears only when `layerFilterText !== ''`.
+
+4. **Quick filter buttons**: A `ToggleButtonGroup` (MUI v9, `exclusive`) with the following filter buttons (icons + tooltips; the active filter toggles row visibility in the list):
+
+   | Button | Icon | Tooltip key | Filter predicate |
+   |---|---|---|---|
+   | All | `SelectAllOutlined` | `layersPanel.filterAll` | no filter (default) |
+   | Visible (`VisibilityOutlined`) | `VisibilityOutlined` | `layersPanel.filterVisible` | `layer.visible === true` |
+   | Locked | `LockOutlined` | `layersPanel.filterLocked` | `layer.locked !== 'none'` |
+   | Text | `TextFieldsOutlined` | `layersPanel.filterText` | `layer.type === 'text'` |
+   | Shapes | `CategoryOutlined` | `layersPanel.filterShapes` | `layer.type === 'shape'` |
+   | Selected | `CheckCircleOutlined` | `layersPanel.filterSelected` | `layer.selected === true` |
+
+   Selected state: MUI `ToggleButton` `selected` prop sets `sx={{ bgcolor: (theme) => theme.palette.primary.main, color: (theme) => theme.palette.primary.contrastText }}` — never hardcoded colors.
+
+The four header regions wrap in a `Stack` (`direction="column"`, `spacing={0}`), each region a `Box` with a bottom border `sx={{ borderBottom: 1, borderColor: 'divider' }}` to visually delineate the bands — matching Photoshop's panel chrome.
+
+### R5.3 Layer List (Plan 10)
+
+**File**: `frontend/views/dashboard/certificates/template-editor/layersPanel/AdvancedLayersList.tsx` (new) — the scrollable body of the panel. The list is **virtualized** when the row count exceeds 50 to keep 100–500-layer templates responsive (per Plan 12 §R5 §"Layer Panel Interactions — Scroll performance"). Implement using `@tanstack/react-virtual` (`useVirtualizer`, dynamic row heights via `measureElement`) gated behind a count threshold.
+
+**Top layer = top of canvas z-order**: The list is sorted by `zIndex` **descending** (highest z-index = visually on top = first row). This matches the R4-T7 base convention.
+
+**Empty state**: When `topLevelLayerCount === 0`, render an empty-state `Box` (`sx={{ p: 3, textAlign: 'center' }}`) with `LayersOutlined` icon (48px, `sx={{ color: 'text.disabled' }}`) + `Typography` `t("certificateTemplateEditor.layersPanel.emptyState")` → "No layers yet. Add an element to begin." The empty state is full-width below the header (filters/search are disabled in this state with `disabled` prop so users see the chrome is ready).
+
+**Indentation model**: Each row uses `sx={{ pl: layer.depth * 2 }}` (where `lander.depth` is the nesting depth — root = 0, inside-group = 1, inside-group-in-group = 2, etc.). Indentation is the visual cue for hierarchical group nesting; it is NOT a measurement on z-index.
+
+### R5.4 Panel Options — Thumbnail Size Toggle (Plan 10)
+
+**File**: `frontend/views/dashboard/certificates/template-editor/layersPanel/LayerPanelOptionsDialog.tsx` (new).
+
+The `Panel Options…` menu item opens a `Dialog` with the following controls:
+
+- **Thumbnail size** `ToggleButtonGroup` (exclusive):
+  | Size | Thumbnail | Row height (approx) |
+  |---|---|---|
+  | Small | 24×24 px | 36 px |
+  | Medium (default) | 40×40 px | 56 px |
+  | Large | 64×64 px | 80 px |
+- **Panel dock**: same 4 `Radio` choices as the ≡ menu (Right/Left/Floating/Collapsed) — redundant access path to `setPanelDock`
+- **Show thumbnails on group rows**: `Switch` (default `true`). When off, group rows show only the folder icon + a count "Group (3)" instead of a composite thumbnail (saves compositing on templates with many large groups)
+- **Sort order**: `Radio` — `Top-to-bottom` (default; top layer first) or `Bottom-to-top` (reversed list, like Illustrator's Layers panel option)
+
+**Persisted state**: All four options live in `useTemplateElementEditorStore.layerPanelOptions` (`{ thumbnailSize, showGroupThumbnails, sortOrder }`) — see §R5.15 store additions in Plan 12.
+
+### R5.5 Panel Resize Bar (Plan 10)
+
+The panel has a drag-to-resize bar on the edge between the dock supply and the canvas. It is a 6px-wide `Box` with `sx={{ cursor: 'col-resize', bgcolor: 'transparent', '&:hover': { bgcolor: 'action.hover' } }}` and an `onMouseDown` that starts a one-time pointer-move listener updating `useTemplateElementEditorStore.panelWidth`.
+
+- **Range**: 240–480 px (right/left dock); 280–440 px width and 360–720 height (floating dock). Clamped to keep at least the 240 px palette + 240 px panel + canvas padding.
+- **Collapsed dock**: non-resizable (48 px pinned); resizing is disabled and the cursor becomes `default`.
+- **Recent changes via keyboard** are out of scope — Resize via a precise mouse handle only is the production-grade minimum (key remap can be added as Wes 508 enhancement later).
+
+### R5.6 Layer Panel Interactions (Plan 10 + Plan 11)
+
+These are the **panel-level** interactions (per-row interactions live in Plan 12). The list- and panel-level rules are summarised here; Plan 11 §R5 H owns the canvas-side sync.
+
+- **Scroll performance (virtualization)**: Already noted in §R5.3. The virtualizer is installed for `len(topLevelLayers) >= 50`; below the threshold, a flat `List` is used (simpler accessibility semantics for the common case).
+- **Layer selection sync (canvas ↔ panel)**: `useTemplateElementEditorStore.selectedElementIds` is the single source of truth (per Plan 12 §R5.15 consolidation). Selecting in the panel sets `selectedElementIds`; selecting on canvas updates `selectedElementIds`; both views subscribe via `useShallow`. No second selection state is introduced.
+- **Scroll-to-selected**: When `selectedElementIds` changes and the new selection is NOT visible in the current scroll window, the list calls `virtualizer.scrollToIndex(idx, { align: 'center' })`. The scroll is one-shot (not animated by default — animated scroll on every canvas click is disorienting); add a 120 ms debounce so a multi-shift marquee selection does not trigger a scroll storm.
+- **Panel filter (by name)**: `layerFilterText` is matched against `layer.name` (case-insensitive; both English and Arabic usernames are supported — Unicode casefold via `layer.name.normalize('NFC').toLocaleLowerCase(rootLocale)` where `rootLocale` derives from `useAppTranslation`'s resolved locale). Matching rows stay; non-matching rows are hidden via the virtualizer's `measureElement` filter hook (not unmounted — preserves row identity for `@dnd-kit`).
+- **Filter by type**: Same mechanism (filter predicates from §R5.2 quick filter buttons). Text + Shape filters run on `layer.type`. Group filters run on `layer.isGroup`. Locked/Visible/Selected filters run on the corresponding effective properties (Plan 12 §R5 — `getEffectiveVisibility`, `getEffectiveLock`).
+- **Filter by modified**: An additional option in the panel ≡ menu — "Show Recently Modified". Sets `layerFilterModified = true` (timestamp window = last 5 minutes since editor open OR last save). Uses the same filter hook as §R5.6.
+
+### R5.7 i18n Keys (Plan 10 R5 — Advanced Layers Panel)
+
+Add the following keys to the `certificateEditor` namespace. Plan 10 owns the namespace file extension (see Round 5 Effects §R5.13). The type schema gains a `layersPanel` nested object.
+
+```typescript
+// in shared/locale/namespaces/dashboard/certificates/templateEditor.namespace.ts → labels interface
+layersPanel: {
+  title: string;             // "Layers" / "الطبقات"
+  expand: string;            // "Expand layers panel"
+  collapse: string;          // "Collapse layers panel"
+  searchPlaceholder: string; // "Filter by name…"
+  filterAll: string;
+  filterVisible: string;
+  filterLocked: string;
+  filterText: string;
+  filterShapes: string;
+  filterSelected: string;
+  filterModified: string;
+  emptyState: string;
+  panelOptions: {
+    title: string;
+    thumbnailSize: string;
+    thumbnailSmall: string;
+    thumbnailMedium: string;
+    thumbnailLarge: string;
+    showGroupThumbnails: string;
+    sortOrder: string;
+    sortTopToBottom: string;
+    sortBottomToTop: string;
+    dockPosition: string;
+    dockRight: string;
+    dockLeft: string;
+    dockFloating: string;
+    dockCollapsed: string;
+    closePanel: string;
+  };
+  menu: {
+    mergeVisible: string;
+    flattenImage: string;
+    deleteHidden: string;
+    deleteHiddenConfirm: string;
+    showRecentlyModified: string;
+  };
+};
+```
+
+**EN locale values** (default):
+
+| Key | EN |
+|---|---|
+| `layersPanel.title` | "Layers" |
+| `layersPanel.searchPlaceholder` | "Filter by name…" |
+| `layersPanel.filterAll` | "All" |
+| `layersPanel.filterVisible` | "Visible only" |
+| `layersPanel.filterLocked` | "Locked only" |
+| `layersPanel.filterText` | "Text layers" |
+| `layersPanel.filterShapes` | "Shape layers" |
+| `layersPanel.filterSelected` | "Selected layers" |
+| `layersPanel.filterModified` | "Recently modified" |
+| `layersPanel.emptyState` | "No layers yet. Add an element to begin." |
+| `layersPanel.panelOptions.thumbnailSize` | "Thumbnail size" |
+| `layersPanel.panelOptions.thumbnailSmall` | "Small (24 px)" |
+| `layersPanel.panelOptions.thumbnailMedium` | "Medium (40 px)" |
+| `layersPanel.panelOptions.thumbnailLarge` | "Large (64 px)" |
+| `layersPanel.panelOptions.showGroupThumbnails` | "Show group thumbnails" |
+| `layersPanel.panelOptions.sortOrder` | "Sort order" |
+| `layersPanel.panelOptions.sortTopToBottom` | "Top-to-bottom" |
+| `layersPanel.panelOptions.sortBottomToTop` | "Bottom-to-top" |
+| `layersPanel.panelOptions.dockPosition` | "Dock position" |
+| `layersPanel.panelOptions.dockRight` | "Right" |
+| `layersPanel.panelOptions.dockLeft` | "Left" |
+| `layersPanel.panelOptions.dockFloating` | "Floating" |
+| `layersPanel.panelOptions.dockCollapsed` | "Collapsed" |
+| `layersPanel.panelOptions.closePanel` | "Close panel" |
+| `layersPanel.menu.mergeVisible` | "Merge Visible" |
+| `layersPanel.menu.flattenImage` | "Flatten Image" |
+| `layersPanel.menu.deleteHidden` | "Delete Hidden Layers" |
+| `layersPanel.menu.deleteHiddenConfirm` | "Delete all hidden layers? This cannot be undone." |
+| `layersPanel.menu.showRecentlyModified` | "Show Recently Modified" |
+
+**AR locale values**:
+
+| Key | AR |
+|---|---|
+| `layersPanel.title` | "الطبقات" |
+| `layersPanel.searchPlaceholder` | "تصفية بالاسم…" |
+| `layersPanel.filterAll` | "الكل" |
+| `layersPanel.filterVisible` | "المرئية فقط" |
+| `layersPanel.filterLocked` | "المقفلة فقط" |
+| `layersPanel.filterText` | "طبقات النص" |
+| `layersPanel.filterShapes` | "طبقات الأشكال" |
+| `layersPanel.filterSelected` | "الطبقات المحددة" |
+| `layersPanel.filterModified` | "المعدلة مؤخرًا" |
+| `layersPanel.emptyState` | "لا توجد طبقات بعد. أضف عنصرًا للبدء." |
+| `layersPanel.panelOptions.thumbnailSize` | "حجم المصغرة" |
+| `layersPanel.panelOptions.thumbnailSmall` | "صغير (24 بكسل)" |
+| `layersPanel.panelOptions.thumbnailMedium` | "متوسط (40 بكسل)" |
+| `layersPanel.panelOptions.thumbnailLarge` | "كبير (64 بكسل)" |
+| `layersPanel.panelOptions.showGroupThumbnails` | "إظهار مصغرات المجموعات" |
+| `layersPanel.panelOptions.sortOrder` | "ترتيب الفرز" |
+| `layersPanel.panelOptions.sortTopToBottom` | "من الأعلى إلى الأسفل" |
+| `layersPanel.panelOptions.sortBottomToTop` | "من الأسفل إلى الأعلى" |
+| `layersPanel.panelOptions.dockPosition` | "موضع الإرساء" |
+| `layersPanel.panelOptions.dockRight` | "يمين" |
+| `layersPanel.panelOptions.dockLeft` | "يسار" |
+| `layersPanel.panelOptions.dockFloating` | "عائم" |
+| `layersPanel.panelOptions.dockCollapsed` | "مطوي" |
+| `layersPanel.panelOptions.closePanel` | "إغلاق اللوحة" |
+| `layersPanel.menu.mergeVisible` | "دمج المرئية" |
+| `layersPanel.menu.flattenImage` | "تسطيح الصورة" |
+| `layersPanel.menu.deleteHidden` | "حذف الطبقات المخفية" |
+| `layersPanel.menu.deleteHiddenConfirm` | "حذف جميع الطبقات المخفية؟ لا يمكن التراجع عن هذا." |
+| `layersPanel.menu.showRecentlyModified` | "إظهار المعدلة مؤخرًا" |
+
+### R5.8 Store Additions (Plan 10 R5 — Advanced Layers Panel)
+
+Extend `useTemplateElementEditorStore` (canonical owner: Plan 12 §R5.15). Plan 10 only **consumes** the panel-state fields; Plan 12 owns the layer data + actions. The fields Plan 10 introduces (panel chrome only):
+
+```typescript
+// shared with Plan 12 §R5.15 — this is the panel-chrome slice
+layerPanelOptions: {
+  thumbnailSize: 'small' | 'medium' | 'large';  // default 'medium'
+  showGroupThumbnails: boolean;                  // default true
+  sortOrder: 'top-to-bottom' | 'bottom-to-top';  // default 'top-to-bottom'
+};
+setLayerPanelOption: <K extends keyof LayerPanelOptions>(key: K, value: LayerPanelOptions[K]) => void;
+
+panelDock: PanelDock;        // 'right' | 'left' | 'floating' | 'collapsed' — default 'right'
+setPanelDock: (dock: PanelDock) => void;
+
+panelWidth: number;          // px, clamped 240–480 — default 300
+setPanelWidth: (width: number) => void;
+
+panelHeight: number;         // px, floating only, clamped 360–720 — default 480
+setPanelHeight: (height: number) => void;
+
+layerFilterText: string;     // name filter — default ''
+setLayerFilterText: (text: string) => void;
+
+layerQuickFilter: 'all' | 'visible' | 'locked' | 'text' | 'shapes' | 'selected';
+setLayerQuickFilter: (filter: LayerQuickFilter) => void;
+
+layerFilterModified: boolean; // default false
+setLayerFilterModified: (enabled: boolean) => void;
+
+// Derived selector (selector, not stored state):
+selectFilteredLayerIds: (state) => string[];  // resolves fChain: name + quick + modified filters
+```
+
+The derived layer data (`layers`, `groups`, `topLevelLayerCount`, layer actions) live in Plan 12 §R5.15.
+
+### R5.9 Accessibility (Plan 10 R5 — Advanced Layers Panel)
+
+- **Header buttons**: all `IconButton`s have `aria-label` from i18n keys (`layersPanel.expand`, `layersPanel.menu.mergeVisible`, etc.).
+- **Quick filters**: `ToggleButton` `value` attribute carries the filter id; `aria-pressed` is automatic from MUI; the SR announcement comes from the tooltip (`title`).
+- **Search field**: `aria-label` from `layersPanel.searchPlaceholder`; `Escape` is handled via `onKeyDown`.
+- **Options dialog**: `DialogTitle` carries `t("certificateTemplateEditor.layersPanel.panelOptions.title")`; all radio/toggle groups inside are labelled; `aria-labelledby` chains dialog → form group.
+- **Collapsed state**: the icon-strip dock shows `aria-label`="Layers" and `aria-expanded` reflecting the panel state; keyboard `Enter`/`Space` collapses/expands (handled by MUI `IconButton`).
+
+### R5.10 Quality & Verification (Plan 10 R5 — Advanced Layers Panel)
+
+**Per-file verification loop** (per AGENTS.md §"Verification Loop"):
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client:
+   ```bash
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+     -H "Content-Type: application/json" \
+     -d '{"id":"r5layers-plan10-<file>","files":["<path>"]}'
+   ```
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+
+**Cross-plan contracts**:
+- **Plan 11**: Plan 11 §R5 H owns the canvas-side layer rendering order + visibility behaviour; the panel surfaces the visibility toggle that Plan 11 applies.
+- **Plan 12**: Plan 12 §R5 owns the canonical `AdvancedLayersPanel` (per-row rendering, operations, groups, blending, clipping, properties). Plan 10's `LayersWorkspacePanel` is the **outer chrome**; Plan 12's `AdvancedLayersPanel` is the **inner content**. They compose: `<LayersWorkspacePanel><AdvancedLayersPanel /></LayersWorkspacePanel>`.
+- **Plan 5**: The persisted template layer model (groups, layer metadata: `name`, `colorTag`, `lockType`, `clippedTo`, `blendMode`, `fillOpacity`, `knockout`, `blendIf`) is the GraphQL input shape; see Plan 12 §R5 for field definitions.
+
+**Performance**:
+- `topLevelLayerCount` is a potted selector that returns `ayı = groups.filter(g => g.parentGroupId === null).length + elements.filter(e => !e.groupId).length`. The badge subscribes via `useShallow` so it updates only on a structural change (group add/remove/reparent), NOT during a drag.
+- The virtualizer's `measureElement` cache persists across filter toggles — changing filters does NOT remount rows (just hides via `display: none` on the wrapper); this preserves `@dnd-kit`'s DnD-context and keyboard-focus state.
+
+**Accessibility**: All header controls are keyboard-reachable via `Tab`; the panel root has `role="region"` and `aria-label={t("certificateTemplateEditor.layersPanel.title")}`.
+
+---
+
+## Round 5: Asset Library Panel
+
+> **Scope addition (Plan 10 portion)**: Library panel shell, tab system, search, view modes, panel toolbar, symbols/logos/icons panel UI, template library UI, and shared asset store. The canvas drag-drop receivers and element rendering belong to Plan 11 §R5 (Asset Library). The asset properties, import dialog, color palettes, and text-style library belong to Plan 12 §R5 (Asset Library).
+
+### R5.1 Asset Library Panel — Workspace Integration
+
+**Decision**: The Library panel is the **left sidebar** of the desktop template editor, dockable and collapsible. On mobile it becomes a full-screen bottom sheet triggered by a FAB. This mirrors the convention in Photoshop (Libraries panel) and Illustrator (Assets panel) without crowding the right-side property panel owned by Plan 12.
+
+**Panel position states**:
+| State | Width (desktop) | Trigger |
+|---|---|---|
+| Expanded (default) | 280px | Click library toggle in `EditorHeader` |
+| Collapsed | 56px (icon rail) | Click collapse chevron at panel top |
+| Floating (undocked) | 280px, draggable | Drag title bar out of dock |
+| Hidden | 0px | Toggle from View menu |
+
+**Component**: `AssetLibraryPanel`
+
+**File**: `frontend/views/dashboard/certificates/template-editor/library/AssetLibraryPanel.tsx` (new)
+
+```tsx
+import { useAppTranslation } from '@/shared/locale/client';
+import { useAssetLibraryStore } from '@/frontend/common/stores/cert/assetLibraryStore';
+import { AssetLibraryTabs } from './AssetLibraryTabs';
+import { AssetLibraryToolbar } from './AssetLibraryToolbar';
+import { AssetSearchBar } from './AssetSearchBar';
+import { AssetGrid } from './AssetGrid';
+import { AssetList } from './AssetList';
+
+export function AssetLibraryPanel() {
+  const t = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const { activeTab, viewMode, collapsed } = useAssetLibraryStore();
+
+  if (collapsed) {
+    return <CollapsedAssetRail />;
+  }
+
+  return (
+    <Box
+      sx={{
+        width: 280,
+        flexShrink: 0,
+        borderRight: 1,
+        borderColor: 'divider',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      <AssetLibraryTabs />
+      <AssetLibraryToolbar />
+      <AssetSearchBar />
+      <Box sx={{ flex: 1, overflow: 'auto' }}>
+        {viewMode === 'grid' ? <AssetGrid /> : <AssetList />}
+      </Box>
+    </Box>
+  );
+}
+```
+
+**Collapsed rail**: 56px vertical strip of tab icons. Clicking an icon expands the panel to that tab.
+
+### R5.2 Library Panel Tabs
+
+**Component**: `AssetLibraryTabs`
+
+**File**: `frontend/views/dashboard/certificates/template-editor/library/AssetLibraryTabs.tsx` (new)
+
+Eight tabs in a horizontally scrollable `Tabs` bar at the top of the panel:
+
+| Tab | Icon | Label key | Content component |
+|---|---|---|---|
+| Symbols | `ShapesOutlined` | `certificateEditor.library.tabs.symbols` | `SymbolsTabContent` |
+| Logos | `BusinessOutlined` | `certificateEditor.library.tabs.logos` | `LogosTabContent` |
+| Icons | `EmojiObjectsOutlined` | `certificateEditor.library.tabs.icons` | `IconsTabContent` |
+| Photos | `PhotoLibraryOutlined` | `certificateEditor.library.tabs.photos` | `PhotosTabContent` |
+| Patterns | `PatternOutlined` | `certificateEditor.library.tabs.patterns` | `PatternsTabContent` |
+| Gradients | `GradientOutlined` | `certificateEditor.library.tabs.gradients` | `GradientsTabContent` |
+| Color Swatches | `PaletteOutlined` | `certificateEditor.library.tabs.colorSwatches` | `ColorSwatchesTabContent` |
+| Text Styles | `TextFieldsOutlined` | `certificateEditor.library.tabs.textStyles` | `TextStylesTabContent` |
+
+**Tab switching**: Click a tab → `activeTab` updates in `useAssetLibraryStore` → content area swaps. Active tab gets `theme.palette.primary.main` underline indicator. Tabs scroll horizontally when panel width < 8 × 56px.
+
+```tsx
+<Tabs
+  value={activeTab}
+  onChange={(_, value) => setActiveTab(value)}
+  variant="scrollable"
+  scrollButtons="auto"
+  sx={{ minHeight: 48, '& .MuiTab-root': { minWidth: 56 } }}
+>
+  <Tab icon={<ShapesOutlined />} value="symbols" aria-label={t('certificateTemplateEditor.library.tabs.symbols')} />
+  {/* …remaining tabs */}
+</Tabs>
+```
+
+### R5.3 Panel Search Bar
+
+**Component**: `AssetSearchBar`
+
+**File**: `frontend/views/dashboard/certificates/template-editor/library/AssetSearchBar.tsx` (new)
+
+A `TextField` (size: small, fullWidth) with a leading `SearchOutlined` adornment and a trailing clear button (`CloseOutlined`) that appears only when the query is non-empty.
+
+```tsx
+<TextField
+  size="small"
+  fullWidth
+  placeholder={t('certificateTemplateEditor.library.search.placeholder')}
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  sx={{ px: 1, py: 0.5 }}
+  slotProps={{
+    htmlInput: { autoComplete: 'off' },
+  }}
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        <SearchOutlined fontSize="small" />
+      </InputAdornment>
+    ),
+    endAdornment: searchQuery ? (
+      <InputAdornment position="end">
+        <IconButton size="small" onClick={handleClear} aria-label={t('common.clear')}>
+          <CloseOutlined fontSize="small" />
+        </IconButton>
+      </InputAdornment>
+    ) : null,
+  }}
+/>
+```
+
+**Search modes**:
+- **Per-tab** (default): Filters only the active tab's assets by name (case-insensitive substring).
+- **Global** (toggle via panel menu ≡ → "Search All Tabs"): Searches all tabs; results show in a unified grid grouped by type.
+
+### R5.4 View Modes
+
+**Three view modes** toggled by a `ToggleButtonGroup` in `AssetLibraryToolbar`:
+
+| Mode | Columns | Thumbnail size | Rows show |
+|---|---|---|---|
+| Thumbnail grid | 4 | 64px | Thumbnail + name below |
+| List | 1 | 24px icon | Icon + name + metadata (type, size, date added) |
+| Small thumbnails | 6 | 32px | Thumbnail only, name in tooltip |
+
+**Component**: `AssetGrid` (thumbnail + small), `AssetList` (list)
+
+**Files**: `frontend/views/dashboard/certificates/template-editor/library/AssetGrid.tsx`, `AssetList.tsx` (both new)
+
+```tsx
+// AssetGrid.tsx
+<Grid container spacing={0.5} columns={viewMode === 'grid' ? 4 : 6}>
+  {filteredAssets.map((asset) => (
+    <Grid item xs={1} key={asset.id}>
+      <AssetThumbnail
+        asset={asset}
+        size={viewMode === 'grid' ? 64 : 32}
+        onPlace={handlePlaceAsset}
+        onDragStart={handleDragStart}
+      />
+    </Grid>
+  ))}
+</Grid>
+```
+
+### R5.5 Asset Panel Toolbar
+
+**Component**: `AssetLibraryToolbar`
+
+**File**: `frontend/views/dashboard/certificates/template-editor/library/AssetLibraryToolbar.tsx` (new)
+
+A compact `Stack direction="row"` between the tabs and the search bar:
+
+```tsx
+<Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.5, gap: 0.5 }}>
+  <ToggleButtonGroup
+    size="small"
+    exclusive
+    value={viewMode}
+    onChange={(_, v) => v && setViewMode(v)}
+  >
+    <ToggleButton value="grid" aria-label={t('certificateTemplateEditor.library.view.grid')}>
+      <GridViewOutlined fontSize="small" />
+    </ToggleButton>
+    <ToggleButton value="small" aria-label={t('certificateTemplateEditor.library.view.small')}>
+      <AppsOutlined fontSize="small" />
+    </ToggleButton>
+    <ToggleButton value="list" aria-label={t('certificateTemplateEditor.library.view.list')}>
+      <ViewListOutlined fontSize="small" />
+    </ToggleButton>
+  </ToggleButtonGroup>
+
+  <Stack direction="row" sx={{ gap: 0.5 }}>
+    <TextField
+      select
+      size="small"
+      value={sortBy}
+      onChange={(e) => setSortBy(e.target.value)}
+      sx={{ width: 100 }}
+      slotProps={{ select: { IconComponent: SortOutlined } }}
+    >
+      <MenuItem value="name">{t('...sort.name')}</MenuItem>
+      <MenuItem value="date">{t('...sort.date')}</MenuItem>
+      <MenuItem value="size">{t('...sort.size')}</MenuItem>
+      <MenuItem value="type">{t('...sort.type')}</MenuItem>
+    </TextField>
+
+    <IconButton size="small" onClick={handleAddAsset} aria-label={t('...add')}>
+      <AddOutlined fontSize="small" />
+    </IconButton>
+
+    <IconButton size="small" onClick={handlePanelMenu} aria-label={t('...menu')}>
+      <MenuOutlined fontSize="small" />
+    </IconButton>
+  </Stack>
+</Stack>
+```
+
+**Sort dropdown**: Name (A→Z), Date Added (newest first), Size (largest first), Type (grouped by asset type).
+
+**Add button (+)**: Opens `AddAssetDialog` (Plan 12 §R5 — Asset Import Dialog).
+
+**Panel menu (≡)** options:
+1. Import Asset → opens import dialog
+2. Export Assets → exports current tab's assets as JSON
+3. Manage Library → opens `ManageLibraryDialog` (rename, delete, reorder assets)
+4. Search All Tabs → toggles global search mode
+5. Refresh → reloads library assets from store/cache
+
+### R5.6 Symbols Library — Panel UI
+
+**Component**: `SymbolsTabContent`
+
+**File**: `frontend/views/dashboard/certificates/template-editor/library/tabs/SymbolsTabContent.tsx` (new)
+
+**Symbol categories** rendered as collapsible `Accordion` sections inside the tab content:
+
+| Category | Label key | Symbols included |
+|---|---|---|
+| Basic | `...symbols.basic` | Rectangle, Circle, Triangle, Star, Hexagon, Arrow |
+| Ornaments | `...symbols.ornaments` | Flourishes, dividers, decorative corners, borders |
+| Banners | `...symbols.banners` | Ribbon banners, scroll banners, certificate banners |
+| Seals & Emblems | `...symbols.seals` | Circular seals, stamp designs, laurel wreaths, crests |
+| Badges | `...symbols.badges` | Achievement badges, award ribbons, medal icons |
+| Frames | `...symbols.frames` | Decorative frames, oval frames, scalloped frames |
+| Lines | `...symbols.lines` | Decorative dividers, flourishes, break lines |
+| Custom | `...symbols.custom` | User-saved symbols (drag any element → "Save as Symbol") |
+
+Each symbol is a `<svg>` thumbnail in the grid. **Symbol data model** (see `assetLibraryStore` §R5.9):
+
+```typescript
+interface SymbolAsset {
+  id: string;
+  name: string;
+  category: SymbolCategory;
+  svgPath: string;         // inline SVG path data (the master definition)
+  defaultSize: { width: number; height: number };
+  defaultColors: string[]; // fill colors referenced in the SVG
+  isCustom: boolean;
+  sourceElementId?: string; // element it was "Saved as Symbol" from
+  createdAt: string;        // ISO date for sorting
+}
+```
+
+**Symbol insertion UI**:
+- **Click** in panel → enters "symbol placement cursor" mode (cursor shows symbol ghost following pointer). Click on canvas → places at default size at click position.
+- **Drag** from panel → drag to canvas, release to place at drop position.
+- **Shift+click** → places at 2× default size.
+
+**Symbol editing UI**:
+- Right-click a placed symbol on canvas → context menu shows "Edit Symbol" → opens `SymbolEditor` (modal overlay with SVG editor).
+- "Break Link" → makes the instance independent (copies master SVG to instance, removes `masterId` link).
+
+### R5.7 Logo Library — Panel UI
+
+**Component**: `LogosTabContent`
+
+**File**: `frontend/views/dashboard/certificates/template-editor/library/tabs/LogosTabContent.tsx` (new)
+
+**Logo categories**: Organization, Department, Course, Award, Custom.
+
+**Logo management**:
+- **Drag-drop logos into panel**: HTML5 drag-drop uploads (PNG, SVG, JPG) — handled by a `DropZone` overlay.
+- **Upload button**: Opens file picker (same accept types).
+- **Logo search**: Uses the panel search bar (§R5.3).
+
+**Logo data model**:
+
+```typescript
+interface LogoAsset {
+  id: string;
+  name: string;
+  category: LogoCategory;
+  imageUrl: string;          // stored URL (from Plan 7 storage)
+  fileType: 'png' | 'svg' | 'jpg';
+  aspectRatio: number;       // width / height (for maintaining ratio on resize)
+  variants: {
+    fullColor?: string;     // imageUrl for full color (default)
+    white?: string;         // white version (for dark backgrounds)
+    black?: string;         // black version (for light backgrounds)
+    monochrome?: string;    // single-color tinted (custom color applied)
+  };
+  uploadedAt: string;
+}
+```
+
+**Logo placement**:
+- Drag to canvas → placed at 200×200px (adjustable), maintaining aspect ratio.
+- Default size multiplied by `1 / aspectRatio` for the height if width is the basis.
+
+### R5.8 Icon Library — Panel UI
+
+**Component**: `IconsTabContent`
+
+**File**: `frontend/views/dashboard/certificates/template-editor/library/tabs/IconsTabContent.tsx` (new)
+
+**Icon categories**: Education, Achievement, Award, Star, Trophy, Book, Scroll, Hat, Medal, Certificate, Seal, Crown, Flag, Fire, Lightning, Heart, etc.
+
+**Icon styles** (filterable via a `ToggleButtonGroup` at the top of the tab):
+| Style | Description |
+|---|---|
+| Filled | Solid fill icons |
+| Outline | Stroke-only icons |
+| Two-tone | Two-color fill |
+| Rounded | Rounded corner variants |
+| Sharp | Sharp corner variants |
+
+**Icon data model**:
+
+```typescript
+interface IconAsset {
+  id: string;
+  name: string;
+  category: IconCategory;
+  style: IconStyle;
+  svgPath: string;
+  defaultSize: number;     // 48px default
+  defaultColor?: string;   // if undefined, inherits from theme
+}
+```
+
+### R5.9 Asset Library Store (Zustand)
+
+**File**: `frontend/common/stores/cert/assetLibraryStore.ts` (new)
+
+A non-persisted Zustand store managing all asset library UI state and cached asset data. Non-serializable values (uploaded `File` objects) stay in `useRef` on the ViewModel hook, not in the store.
+
+```typescript
+import { create } from 'zustand';
+
+export type LibraryTab =
+  | 'symbols' | 'logos' | 'icons' | 'photos'
+  | 'patterns' | 'gradients' | 'colorSwatches' | 'textStyles';
+
+export type ViewMode = 'grid' | 'list' | 'small';
+
+export type SortBy = 'name' | 'date' | 'size' | 'type';
+
+interface AssetLibraryState {
+  // Panel state
+  activeTab: LibraryTab;
+  setActiveTab: (tab: LibraryTab) => void;
+
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+
+  floating: boolean;
+  setFloating: (floating: boolean) => void;
+
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
+
+  sortBy: SortBy;
+  setSortBy: (sort: SortBy) => void;
+
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+
+  globalSearch: boolean;
+  setGlobalSearch: (global: boolean) => void;
+
+  // Asset collections
+  symbols: SymbolAsset[];
+  logos: LogoAsset[];
+  icons: IconAsset[];
+  photos: PhotoAsset[];
+  patterns: PatternAssetType[];
+  gradients: GradientAsset[];
+  colorSwatches: ColorSwatchAsset[];
+  textStyles: TextStyleAsset[];
+  templates: TemplateAsset[];
+
+  // Symbol masters & instances
+  symbolMasters: Record<string, SymbolAsset>;   // id → master definition
+  symbolInstances: Record<string, string>;       // instanceId → masterId
+
+  saveSymbolMaster: (asset: SymbolAsset) => void;
+  updateSymbolMaster: (id: string, patch: Partial<SymbolAsset>) => void;
+  breakSymbolLink: (instanceId: string) => void;
+  getSymbolUsageCount: (masterId: string) => number;
+
+  // Asset CRUD
+  addLogo: (logo: LogoAsset) => void;
+  removeLogo: (id: string) => void;
+  addIcon: (icon: IconAsset) => void;
+  removeIcon: (id: string) => void;
+  addPhoto: (photo: PhotoAsset) => void;
+  removePhoto: (id: string) => void;
+  addCustomSymbol: (symbol: SymbolAsset) => void;
+  removeCustomSymbol: (id: string) => void;
+  addTextStyle: (style: TextStyleAsset) => void;
+  removeTextStyle: (id: string) => void;
+  addColorPalette: (palette: ColorPalette) => void;
+  removeColorPalette: (id: string) => void;
+  addTemplate: (template: TemplateAsset) => void;
+  removeTemplate: (id: string) => void;
+
+  // Import state
+  importDialogOpen: boolean;
+  setImportDialogOpen: (open: boolean) => void;
+
+  // Placement cursor mode
+  placementMode: {
+    active: boolean;
+    assetId: string | null;
+    assetType: LibraryTab | null;
+    scale: number;
+  };
+  setPlacementMode: (mode: { active: boolean; assetId: string | null; assetType: LibraryTab | null; scale: number }) => void;
+
+  // Usage tracking (asset → canvas element count)
+  usageMap: Record<string, number>;
+  incrementUsage: (assetId: string) => void;
+  decrementUsage: (assetId: string) => void;
+  resetUsage: () => void;
+}
+```
+
+### R5.10 Template Library — Panel UI
+
+**Component**: `TemplateLibraryTab`
+
+**File**: `frontend/views/dashboard/certificates/template-editor/library/TemplateLibraryTab.tsx` (new)
+
+An additional tab accessible via the panel menu "(≡) → Templates" (not in the main tab row — it's a modal overlay triggered from the menu, since it replaces the entire canvas).
+
+**Pre-designed templates**:
+
+| Category | Templates |
+|---|---|
+| Academic | Academic Certificate, Diploma, Course Completion, Honor Roll |
+| Sports | Sports Achievement, Tournament Winner, Participation |
+| Corporate | Employee of the Month, Excellence Award, Training Completion |
+| Creative | Art Competition, Music Recital, Creative Workshop |
+| Religious | Quran Memorization, Islamic Studies Completion |
+| Custom | User-saved templates |
+
+**Template thumbnails**: Preview image (rendered server-side or cached) showing the full template design at 120×80px.
+
+**Template placement**: Double-click a template → dialog:
+> "Replace current document? Unsaved changes will be lost."
+> [Cancel] [Replace]
+
+Confirming → dispatches `useCanvasStore.getState().loadTemplate(templateAsset)` (Plan 11 §R5 — Asset Library).
+
+**Template data model**:
+
+```typescript
+interface TemplateAsset {
+  id: string;
+  name: string;
+  category: TemplateCategory;
+  thumbnailUrl: string;
+  templateJSON: SerializedCanvasState;  // full canvas state snapshot
+  placeholderFields: {
+    title?: string;
+    logoPlacement?: { x: number; y: number; width: number; height: number };
+    nameField?: { x: number; y: number; dataVariableId: string };
+    descriptionField?: { x: number; y: number; dataVariableId: string };
+    dateField?: { x: number; y: number; dateFormat: string };
+    signatureLine?: { x: number; y: number; label: string };
+  };
+}
+```
+
+### R5.11 i18n Keys (Plan 10 R5 — Asset Library)
+
+All keys are added under the `certificateEditor` namespace (`shared/locale/types/dashboard/certificates/templateEditor.ts`):
+
+**Library panel**:
+- `library.title`, `library.collapsed.label`, `library.tabs.symbols`, `library.tabs.logos`, `library.tabs.icons`, `library.tabs.photos`, `library.tabs.patterns`, `library.tabs.gradients`, `library.tabs.colorSwatches`, `library.tabs.textStyles`, `library.tabs.templates`
+- `library.search.placeholder`, `library.search.clear`, `library.search.global`
+- `library.view.grid`, `library.view.small`, `library.view.list`
+- `library.sort.name`, `library.sort.date`, `library.sort.size`, `library.sort.type`
+- `library.add`, `library.menu`, `library.menu.import`, `library.menu.export`, `library.menu.manage`, `library.menu.refresh`, `library.menu.templates`, `library.menu.searchAllTabs`
+- `library.usage.count` (interpolation `(count: number) => string`)
+
+**Symbols**:
+- `library.symbols.basic`, `library.symbols.ornaments`, `library.symbols.banners`, `library.symbols.seals`, `library.symbols.badges`, `library.symbols.frames`, `library.symbols.lines`, `library.symbols.custom`
+- `library.symbols.saveAsSymbol` (interpolation `(name: string) => string`)
+- `library.symbols.editSymbol`, `library.symbols.breakLink`, `library.symbols.instance`, `library.symbols.master`
+- `library.symbols.placementHint` (interpolation `(name: string) => string`)
+
+**Logos**:
+- `library.logos.organization`, `library.logos.department`, `library.logos.course`, `library.logos.award`, `library.logos.custom`
+- `library.logos.upload`, `library.logos.dragDrop`, `library.logos.variants.fullColor`, `library.logos.variants.white`, `library.logos.variants.black`, `library.logos.variants.monochrome`
+- `library.logos.flipH`, `library.logos.flipV`, `library.logos.opacity`
+- `library.logos.colorMode.original`, `library.logos.colorMode.monochrome`, `library.logos.colorMode.grayscale`, `library.logos.colorMode.custom`
+
+**Icons**:
+- `library.icons.filled`, `library.icons.outline`, `library.icons.twoTone`, `library.icons.rounded`, `library.icons.sharp`
+- `library.categories.education`, `library.categories.achievement`, `library.categories.award`, `library.categories.star`, `library.categories.trophy`, `library.categories.book`, `library.categories.scroll`, `library.categories.hat`, `library.categories.medal`, `library.categories.certificate`, `library.categories.seal`, `library.categories.crown`, `library.categories.flag`, `library.categories.fire`, `library.categories.lightning`, `library.categories.heart`
+
+**Templates**:
+- `library.templates.academic`, `library.templates.sports`, `library.templates.corporate`, `library.templates.creative`, `library.templates.religious`, `library.templates.custom`
+- `library.templates.replaceWarning`, `library.templates.replace`, `library.templates.cancel`
+
+Each key must be defined in the type schema and implemented in both AR and EN locale files.
+
+### R5.12 Type Definitions (Plan 10 R5 — Asset Library)
+
+**File**: `frontend/common/stores/cert/assetTypes.ts` (new)
+
+Shared types imported by Plans 10, 11, and 12 to avoid circular dependencies:
+
+```typescript
+// Symbol master/instance types
+export type SymbolCategory =
+  | 'basic' | 'ornaments' | 'banners' | 'seals'
+  | 'badges' | 'frames' | 'lines' | 'custom';
+
+export interface SymbolAsset {
+  id: string;
+  name: string;
+  category: SymbolCategory;
+  svgPath: string;
+  defaultSize: { width: number; height: number };
+  defaultColors: string[];
+  isCustom: boolean;
+  sourceElementId?: string;
+  createdAt: string;
+}
+
+export interface SymbolInstance {
+  id: string;
+  masterId: string;
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+  colorOverride?: string[];
+  linked: boolean;          // false = broken link (independent copy)
+}
+
+// Logo types
+export type LogoCategory =
+  | 'organization' | 'department' | 'course' | 'award' | 'custom';
+
+export type LogoColorMode =
+  | 'original' | 'monochrome' | 'grayscale' | 'custom';
+
+export type LogoFileType = 'png' | 'svg' | 'jpg';
+
+export interface LogoVariant {
+  fullColor?: string;
+  white?: string;
+  black?: string;
+  monochrome?: string;
+}
+
+export interface LogoAsset {
+  id: string;
+  name: string;
+  category: LogoCategory;
+  imageUrl: string;
+  fileType: LogoFileType;
+  aspectRatio: number;
+  variants: LogoVariant;
+  uploadedAt: string;
+}
+
+// Icon types
+export type IconStyle = 'filled' | 'outline' | 'twoTone' | 'rounded' | 'sharp';
+
+export type IconCategory =
+  | 'education' | 'achievement' | 'award' | 'star' | 'trophy'
+  | 'book' | 'scroll' | 'hat' | 'medal' | 'certificate'
+  | 'seal' | 'crown' | 'flag' | 'fire' | 'lightning' | 'heart';
+
+export interface IconAsset {
+  id: string;
+  name: string;
+  category: IconCategory;
+  style: IconStyle;
+  svgPath: string;
+  defaultSize: number;
+  defaultColor?: string;
+}
+
+// Photo types
+export interface PhotoAsset {
+  id: string;
+  name: string;
+  thumbnailUrl: string;
+  fullUrl: string;
+  width: number;
+  height: number;
+  source: 'unsplash' | 'upload' | 'url';
+  createdAt: string;
+}
+
+// Pattern & Gradient (asset-library versions — applied as fills)
+export interface PatternAssetType {
+  id: string;
+  name: string;
+  category: string;
+  svgPattern: string;
+  thumbnailDataUrl?: string;
+}
+
+export interface GradientAsset {
+  id: string;
+  name: string;
+  gradientCSS: string;  // CSS gradient string
+  isCustom: boolean;
+}
+
+// Color swatch & palette types
+export interface ColorSwatchAsset {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface ColorPalette {
+  id: string;
+  name: string;
+  colors: string[];
+  tags: string[];
+  isCustom: boolean;
+}
+
+// Text style types
+export interface TextStyleAsset {
+  id: string;
+  name: string;
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: number;
+  italic: boolean;
+  underline: boolean;
+  strikethrough: boolean;
+  letterSpacing: number;
+  lineHeight: number;
+  paragraphSpacing: number;
+  alignment: 'left' | 'center' | 'right' | 'justify';
+  color: string;
+  textCase: 'normal' | 'upper' | 'lower' | 'title';
+}
+
+// Template type
+export type TemplateCategory =
+  | 'academic' | 'sports' | 'corporate' | 'creative' | 'religious' | 'custom';
+
+export interface TemplatePlaceholderFields {
+  title?: string;
+  logoPlacement?: { x: number; y: number; width: number; height: number };
+  nameField?: { x: number; y: number; dataVariableId: string };
+  descriptionField?: { x: number; y: number; dataVariableId: string };
+  dateField?: { x: number; y: number; dateFormat: string };
+  signatureLine?: { x: number; y: number; label: string };
+}
+
+export interface TemplateAsset {
+  id: string;
+  name: string;
+  category: TemplateCategory;
+  thumbnailUrl: string;
+  templateJSON: string;    // serialized canvas state
+  placeholderFields: TemplatePlaceholderFields;
+}
+
+// Asset origin tracking
+export interface AssetPlacement {
+  assetId: string;
+  assetType: LibraryTab;
+  elementId: string;
+  placedAt: string;
+  source: 'library' | 'upload' | 'url' | 'clipboard' | 'stock';
+}
+
+// Asset import dialog types
+export type ImportSource = 'file' | 'url' | 'clipboard' | 'stock';
+
+export type ImportMode = 'smartObject' | 'rasterized' | 'linked';
+
+export interface ImportSettings {
+  source: ImportSource;
+  mode: ImportMode;
+  resizeToFit: boolean;
+  centerOnCanvas: boolean;
+  fitToSelection: boolean;
+}
+```
+
+### R5.13 Quality & Verification (Plan 10 R5 — Asset Library)
+
+**Per-file verification loop** (per AGENTS.md §"Verification Loop"):
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5al-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+
+**Cross-plan contracts**:
+- **Plan 11**: Canvas must accept drag-drop from the library panel and render placed assets. `useCanvasStore.getState().placeAsset(asset, position)` is the receiver. Plan 11 §R5 defines the canvas drop zone handlers and `AssetElementRenderer`.
+- **Plan 12**: The "Add" button opens `AddAssetDialog` (Plan 12 §R5). The "Manage Library" menu item opens `ManageLibraryDialog` (Plan 12 §R5). Color palette operations and text-style application are owned by Plan 12 §R5.
+- **Plan 5**: Backend schema must accept `assetPlacements[]` on the template for origin tracking. The shape matches `AssetPlacement` JSON.
+- **Plan 7**: Uploaded logos/photos use the storage service from Plan 7 for file upload and URL generation.
+
+**Performance**:
+- The library panel renders up to 200 assets per tab. `AssetGrid` and `AssetList` use `React.memo` on individual `AssetThumbnail`/`AssetListItem` with `areEqual` comparing only `asset.id`, `asset.name`, and `viewMode`.
+- Symbol master SVGs are cached in `symbolMasters` record; instances reference masters by ID — no SVG duplication in the canvas store.
+- Search is debounced 200ms; filtering happens client-side (no server round-trip for the panel).
+- Template thumbnails are lazy-loaded via `IntersectionObserver` — only visible thumbnails fetch their preview image.
+- The `usageMap` record is updated on every `placeAsset` and `deleteElement` call; the count badge in the panel header updates via `useShallow` subscription.
+
+**Accessibility**:
+- All tabs have `aria-label` from i18n strings.
+- View mode `ToggleButtonGroup` buttons have `aria-label`.
+- Search field has `aria-label` and `autoComplete="off"`.
+- Asset thumbnails are keyboard-focusable (`tabindex={0}`); `Enter` places at canvas center; `Shift+Enter` places at 2× size.
+- Panel collapse toggle has `aria-expanded` and `aria-controls`.
+
+## Round 5: Context Menus & Right-Click Actions
+
+> Added as Round 5 to extend the Plan 10 editor chrome with Photoshop/Illustrator-grade context menu systems for the menu bar, toolbar, and panels. This section defines the panel-level context menus (swatches, properties, color), toolbar context menu, and the context-menu keyboard shortcut integration. The canvas right-click menu is owned by Plan 11 §R5; the layers panel and element-specific right-click actions are owned by Plan 12 §R5.
+
+### R5.1 Context Menu Service Architecture
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/contextMenuService.ts` (new)
+
+**Design**:
+
+A central service that manages the lifecycle of context menus across the editor. It is not a React component itself — it is a Zustand-backed store + a render-host pattern. A single `<ContextMenuHost>` component mounts once near the editor root (in `EditorChrome.tsx`) and renders whichever menu the service currently has open. This avoids the cost of mounting `Menu` components inside every potential right-click target.
+
+```typescript
+interface ContextMenuState {
+  openMenuId: string | null;
+  anchorPosition: { x: number; y: number } | null;
+  menuItems: ContextMenuItem[];
+  closeOnBlur: boolean;
+  openMenu: (id: string, position: { x: number; y: number }, items: ContextMenuItem[]) => void;
+  closeMenu: () => void;
+  updateItems: (items: ContextMenuItem[]) => void;
+}
+
+export interface ContextMenuItem {
+  id: string;
+  labelKey?: string;                      // i18n key in certificateTemplateEditor namespace
+  label?: string;                         // literal (rare — prefer labelKey)
+  shortcut?: string;                      // display string like "Ctrl+Shift+]"
+  icon?: React.ReactNode;                 // leading icon
+  disabled?: boolean;
+  hidden?: boolean;
+  checked?: boolean;                      // for toggle items (show check)
+  submenu?: ContextMenuItem[];            // nested submenu
+  submenuDelayMs?: number;                // default 200
+  onSelect?: () => void;                  // action on click
+  separator?: boolean;                    // render as divider (no label)
+  isDangerous?: boolean;                  // red text + confirm
+  confirmMessageKey?: string;             // i18n for confirm dialog
+}
+```
+
+**Menu position safety**: The `<ContextMenuHost>` measures the menu dimensions post-mount and flips it (openUp / openLeft) if it would overflow the viewport — matching Photoshop's "stays on screen" behavior. The `anchorPosition` is the cursor location in viewport coordinates (from `event.clientX/Y`).
+
+**Keyboard navigation** (matches §R5.15): Arrow keys move focus between enabled items, Enter triggers `onSelect`, Esc closes, Right opens a submenu, Left collapses back to parent. The host captures these via a `onKeyDown` on the `Menu` `Paper` container and uses `tabIndex={-1}` so the `Menu` retains keyboard focus while open.
+
+### R5.2 Context Menu Host Component
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/ContextMenuHost.tsx` (new)
+
+**Design**:
+
+A single React component mounted once in `EditorChrome.tsx`. It subscribes to `contextMenuService` via `useSyncExternalStore`. When `openMenuId !== null`, it renders an MUI v9 `Menu` (not `Popover`) with `anchorReference="anchorPosition"` and `anchorPosition={{ top: position.y, left: position.x }}`.
+
+```typescript
+export function ContextMenuHost(): JSX.Element | null {
+  const openMenuId = useContextMenuService(s => s.openMenuId);
+  const anchorPosition = useContextMenuService(s => s.anchorPosition);
+  const menuItems = useContextMenuService(s => s.menuItems);
+  // ... renders <Menu> with Paper sx={{}} — dark mode aware via theme.palette.mode
+}
+```
+
+**Submenu rendering**: Submenus are rendered as nested `Menu` components that open on `onMouseEnter` (after `submenuDelayMs`, default 200ms — matches Photoshop). The hover delay prevents flicker when the user moves the cursor diagonally across the parent item into the submenu. The delay is implemented via a `useRef` timer that fires `submenu.open()` after the delay, and is cleared on `onMouseLeave` if the user leaves before the delay elapses.
+
+**Dark theme**: `sx={(theme) => ({ backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary })}` — no hardcoded colors.
+
+### R5.3 Shared Menu Item Builders
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/menuItemBuilders.ts` (new)
+
+**Design**:
+
+A set of pure builder functions that produce `ContextMenuItem[]` for each menu context. Builder functions live here so that menu composition is declarative and testable in isolation (separate from the React render). Each builder receives the relevant store state (selection, clipboard, etc.) and returns the disabled/hidden flags for context-aware greying (§R5.16 — Smart item filtering).
+
+```typescript
+export function buildToolbarContextMenu(opts: {
+  showToolNames: boolean;
+  iconSize: 'small' | 'medium' | 'large';
+}): ContextMenuItem[];
+
+export function buildSwatchesContextMenu(opts: {
+  hasSwatchSelected: boolean;
+  swatchCount: number;
+}): ContextMenuItem[];
+
+export function buildPropertiesContextMenu(opts: {
+  hasSelection: boolean;
+  canPaste: boolean;
+}): ContextMenuItem[];
+
+export function buildColorContextMenu(opts: {
+  canAddToSwatches: boolean;
+  swatchLimitReached: boolean;
+}): ContextMenuItem[];
+```
+
+Each builder uses i18n keys from the `certificateEditor` namespace (added in §R5.18). Item IDs are namespaced (`'toolbar.editToolbar'`, `'swatches.new'`, etc.) so keyboard navigation's `aria-activedescendant` is unique across nested menus.
+
+### R5.4 Toolbar Context Menu
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/ToolbarContextMenu.tsx` (new)
+
+**Design**:
+
+Attached via `onContextMenu={(e) => { e.preventDefault(); openToolbarContextMenu(e.clientX, e.clientY); }}` on the toolbar root `Box`. The menu items:
+
+- **Edit Toolbar...** — opens the toolbar customize dialog (§R5.4.1 below)
+- ——— separator
+- **Show Tool Names** — toggle (check state mirrors `uiStore.toolbarShowToolNames`), no shortcut
+- **Icon Size → submenu**: Small / Medium / Large (selectable, radio-like — use a `checkedStyle` (filled circle or check icon) on the active entry)
+- ——— separator
+- **Reset Toolbar** — restores default toolbar layout
+
+Customize dialog file: `frontend/views/dashboard/cert/templates/editor/dialogs/CustomizeToolbarDialog.tsx` (new). It lists all available tools (with checkboxes) plus a column for "current toolbar" so users drag tools between available/current (like Adobe's "Customize Toolbar" panel). Mock UI: two `List` columns side-by-side inside a `Dialog` with `maxWidth="md"`. State lives in `uiStore.toolbarCustomization` and is applied to the rendered toolbar on dialog close.
+
+### R5.5 Swatches Panel Context Menu
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/SwatchesContextMenu.tsx` (new)
+
+**Design**:
+
+Attached to each swatch tile and to the empty area of the swatches panel. Right-click on a swatch shows full menu (with Edit/Delete/Become-target). Right-click on empty panel area shows only the "create/ import" items (no Edit/Delete — matching Photoshop behavior).
+
+Menu items:
+
+- **New Swatch** — opens a color picker popover at the cursor and adds to swatch library on confirm
+- **Edit Swatch** — disabled if no swatch selected; opens the same color picker loaded with the selected swatch's color
+- **Delete Swatch** — disabled if no swatch selected or only one swatch remains; removes from library
+- ——— separator
+- **Import Swatches** — opens a file picker accepting `.ase` (Adobe Swatch Exchange), `.aco` (Adobe Color), and JSON. Parsed colors are appended (deduped by hex value)
+- **Export Swatches** — opens a "save as" dialog offering `.ase`, `.aco`, and JSON formats
+- ——— separator
+- **Swatch View → submenu**: Small / Medium / Large (affects the swatch tile sizing in the panel)
+
+**Parsing**: ASE/ACO parsers are pure TypeScript functions in `frontend/views/dashboard/cert/templates/editor/utils/swatchImportExport.ts` (new). They return `{name: string, hex: string}[]`. JSON format is `{name: string, color: string}[]` where color is a CSS color string (hex or `rgb()`). The store (`swatchStore`) holds the canonical list and is the single source of truth — swatches panel right-click actions mutate this store only.
+
+### R5.6 Properties Panel Context Menu
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/PropertiesPanelContextMenu.tsx` (new)
+
+**Design**:
+
+Attached to the properties panel root (the panel itself, not individual fields). Right-click anywhere in the panel shows:
+
+- **Copy Properties** — disabled if no selection; copies the full property bag of the selected element(s) to an internal clipboard (separate from OS clipboard — typed, not text)
+- **Paste Properties** — disabled if no selection or the typed clipboard is empty
+- **Reset to Defaults** — disabled if no selection; restores the per-element-type defaults (per Plan 10 §R5 default config factories, shared with Plan 11)
+- ——— separator
+- **Properties Panel Options...** — opens a dialog for panel config (which sections are visible, section collapsed-by-default, panel width). State persists per-user in `uiStore.propertiesPanelPrefs`
+
+The typed properties clipboard lives in `clipboardStore` (same store as the canvas element clipboard from Plan 11 §R5) under a separate key. This avoids mixing typed element data with string clipboard contents.
+
+### R5.7 Color Panel Context Menu
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/ColorPanelContextMenu.tsx` (new)
+
+**Design**:
+
+Attached to the color panel (wherever a swatch/color preview lives). Right-click shows:
+
+- **Add to Swatches** — disabled if the current color is already in swatch library; adds the current color as a new swatch with an auto-generated name
+- **Copy Color as Hex** — copies `#RRGGBB` to OS clipboard via `navigator.clipboard.writeText`
+- **Copy Color as RGB** — copies `rgb(r, g, b)` (0-255 each)
+- **Copy Color as HSL** — copies `hsl(h, s%, l%)`
+- ——— separator
+- **Color Picker Mode → submenu**: HSL / RGB / HSV / CMYK (selects the input mode of the color picker; affects which sliders/fields show). CMYK is a display/transcription mode — the underlying stored value is still RGB; CMYK is converted on edit/commit.
+
+**Color conversion utilities**: `frontend/views/dashboard/cert/templates/editor/utils/colorFormatUtils.ts` (new) — `rgbToHex`, `rgbToHsl`, `rgbToHsv`, `rgbToCmyk`, `hslToRgb`, `hsvToRgb`, `cmykToRgb`. Pure functions, no React.
+
+The Cmyk conversion uses the standard formula (`K = 1 - max(R,G,B); C = (1-R-K)/(1-K)` etc.) — pure math, no dependency on `cmyk-to-rgb`/`rgb-to-cmyk` packages (keep external deps minimal per frontend conventions).
+
+### R5.8 Menu Bar Context Menus (Dropdown Replacements)
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/MenuBarContextMenu.tsx` (new)
+
+**Design**:
+
+The editor's menu bar (File / Edit / View / Object / Type / Select / Filter / Window / Help) currently uses standard `Menu` dropdowns. The "context menu" version of these appears when the user right-clicks the menu bar itself (not a top-level menu name) and offers quick customization:
+
+- **Customize Menu Bar...** — opens a dialog to hide/show top-level menus (so a power user can collapse one they never use)
+- ——— separator
+- **Show Full Menus** (toggle) — if off, hides rarely-used items (matches the "Compact Menus" preference in Photoshop)
+- ——— separator
+- **Reset Menu Bar** — restores defaults
+
+This is a lightweight menu — the heavy lifting lives in the standard dropdown menus (already in Plan 10 §1 design). The context menu is for chrome customization only.
+
+### R5.9 Toolbar Context Menu — Customization Hook
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/useToolbarContextMenu.ts` (new)
+
+**Design**:
+
+A hook that returns an `onContextMenu` handler plus the customization state (visible tools array). It reads `uiStore.toolbarCustomization` and writes to it. The hook is consumed by `EditorToolbar.tsx` (Plan 10 §1).
+
+```typescript
+interface UseToolbarContextMenu {
+  onContextMenu: (e: React.MouseEvent) => void;
+  visibleTools: ToolbarToolId[];
+  iconSize: 'small' | 'medium' | 'large';
+  showToolNames: boolean;
+  resetToolbar: () => void;
+}
+```
+
+`uiStore.toolbarCustomization` persists per-user (server-side via the user prefs mutation from Plan 5, or local-only — TBD). Falls back to default tool list if not set.
+
+### R5.10 Keyboard Shortcuts for Context Menu Invocation
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/useContextMenuShortcuts.ts` (new)
+
+**Design**:
+
+A hook that registers global editor keyboard shortcuts for invoking context menus without right-click:
+
+- **Shift+F10** — opens the context menu for the focused element. Uses `document.activeElement` to determine "focus". The focusable regions of the editor (canvas, layers panel, properties panel, toolbar) each register a `data-context-menu-target` attribute on their root element; the hook reads this and calls the appropriate builder.
+- **Context Menu key (ContextMenu / "Menu" key, `key="ContextMenu"`)** — opens the context menu for the selected element (or the focused region if no selection). On Mac keyboards lacking this key, Shift+F10 is the equivalent.
+- **Right-click** is not implemented by this hook — it remains a native `onContextMenu` per-region.
+
+The hook attaches its keyboard listener at the editor root (`EditorChrome.tsx`) so it can target all regions. It uses `event.preventDefault()` on Shift+F10 and the Context Menu key to suppress the OS browser default context menu where possible.
+
+### R5.11 Smart Item Filtering Helper
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/menuItemFilter.ts` (new)
+
+**Design**:
+
+A pure function that takes a proposed `ContextMenuItem[]` plus a "context descriptor" (selection state, element types in selection, panel state) and returns the same array with `disabled`/`hidden` flags resolved.
+
+```typescript
+export interface MenuContextDescriptor {
+  selectionTypes: CanvasElementType[];   // empty if no selection
+  selectionCount: number;
+  clipboardHasContent: boolean;
+  clipboardHasImage: boolean;
+  clipboardHasText: boolean;
+  panelMode: 'idle' | 'editing';
+  hasChildren: boolean;                    // for group/ungroup
+  isGroup: boolean;
+}
+export function filterMenuItems(items: ContextMenuItem[], ctx: MenuContextDescriptor): ContextMenuItem[];
+```
+
+Examples of filtering rules:
+- "Cut", "Copy" are disabled when `selectionCount === 0` (but still visible — matching Adobe behavior where they show greyed)
+- "Paste" is hidden (not just disabled) when `clipboardHasContent === false` — Photoshop hides paste when clipboard is empty
+- Image-only items ("Edit in Photoshop", "Replace Image", "Reset Adjustments") are hidden when the selection doesn't include an image element
+- "Group" is disabled when `selectionCount <= 1` or when `isGroup === true` for all selected
+- "Ungroup" is disabled when none of the selected items are groups
+- "Lock" toggle is checked when all selected are locked
+
+The filter is called in the builder functions in `menuItemBuilders.ts` (§R5.3) before returning items to the host.
+
+### R5.12 Submenu Delay Implementation
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/SubmenuTrigger.tsx` (new)
+
+**Design**:
+
+A small shared component used by `ContextMenuHost` for any item with a `submenu` array. It renders the parent row + handles open/close via:
+
+```typescript
+interface SubmenuTriggerProps {
+  item: ContextMenuItem;
+  onParentSelect: () => void;       // when user clicks the parent itself (with no submenu activation)
+  parentMenuId: string;
+  closeAllMenus: () => void;
+}
+```
+
+Logic:
+1. `onMouseEnter` starts a 200ms timer (`submenuDelayMs`)
+2. If the timer fires before `onMouseLeave`, open the submenu `Menu` anchored to the parent row
+3. `onMouseLeave` clears the timer; if the submenu is already open, start a secondary "rollback" timer (150ms) — this handles the user moving down/right out of the parent row diagonally into the submenu
+4. If the user enters the submenu, cancel the rollback timer
+5. Keyboard: Right arrow opens the submenu immediately (no delay), Left collapses
+
+This is the same pattern as native Photoshop / VS Code submenu handling.
+
+### R5.13 Dark Theme & Theme Adapter
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/contextMenuTheme.ts` (new)
+
+**Design**:
+
+A helper that returns the `sx` prop for the `Menu` `Paper` based on the current theme mode. It does not hardcode colors — everything is sourced from `theme.palette`:
+
+```typescript
+export function contextMenuPaperSx(theme: Theme): SxProps<Theme> {
+  return {
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    boxShadow: theme.shadows[8],
+    border: `1px solid ${theme.palette.divider}`,
+    // Disable MUI v9 default padding so we can use our own consistent item heights
+    '& .MuiMenuItem-root': {
+      minHeight: 32,
+      fontSize: '0.8125rem',           // 13px — Adobe-like compactness
+      paddingInline: theme.spacing(1.5),
+    },
+    '& .MuiMenuItem-root.Mui-disabled': {
+      opacity: 0.35,                   // greyed out — not invisible
+    },
+    '& .MuiMenuItem-root.Mui-selected': {
+      backgroundColor: theme.palette.action.selected,
+    },
+  };
+}
+```
+
+**Dangerous item** styling (e.g. "Delete Element"): `sx={{ color: theme.palette.error.main }}` and a `DeleteOutlined` icon. Confirmed via a follow-up Mini Confirm `Dialog` before invoking `onSelect`.
+
+### R5.14 Context Menu Persistence & Dismissal
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/useOutsideClickClose.ts` (new)
+
+**Design**:
+
+A hook used by `ContextMenuHost` that listens to `pointerdown` events outside the open menu, and `keydown` for Escape. On either, calls `contextMenuService.closeMenu()`. Also closes on:
+
+- Window blur (matches Adobe behavior — clicking outside the app closes the menu)
+- Scroll on the editor canvas (to avoid an orphan menu)
+- Any keyboard shortcut that begins a new command (otherwise the menu would consume the shortcut)
+
+The hook uses `useEffect` for the lifecycle — attach on menu `open`, detach on close.
+
+### R5.15 Keyboard Navigation within Context Menu
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/useMenuKeyboardNav.ts` (new)
+
+**Design**:
+
+A hook that implements arrow-key navigation within a single menu (no submenu). It tracks the currently highlighted item index in `contextMenuService`.
+
+```typescript
+interface UseMenuKeyboardNavOpts {
+  items: ContextMenuItem[];
+}
+export function useMenuKeyboardNav(opts: UseMenuKeyboardNavOpts): {
+  activeIndex: number;
+  setActiveIndex: (i: number) => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+};
+```
+
+Behavior:
+- `ArrowDown` — move to next enabled, visible item (wraps to top from last)
+- `ArrowUp` — move to previous enabled item (wraps to bottom from first)
+- `Home` — first enabled item; `End` — last
+- `Enter` — invoke `onSelect` of the active item (close menu after)
+- `Escape` — close
+- `ArrowRight` — if active item has submenu, open it (handled by `SubmenuTrigger`)
+- `ArrowLeft` — if inside a submenu, collapse back to parent
+- `Tab` — disabled inside menus (Adobe does not use Tab for menu nav)
+
+The hook is consumed by the row-rendering logic in `ContextMenuHost`. The host's root `Paper` has `tabIndex={-1}` and `onKeyDown={onKeyDown}` so it receives all keyboard events while open.
+
+### R5.16 Smart Item Filtering — Context Descriptor
+
+**File**: `frontend/views/dashboard/cert/templates/editor/contextMenus/useMenuContextDescriptor.ts` (new)
+
+**Design**:
+
+A hook that subscribes to `useCanvasStore` and `clipboardStore` and returns the `MenuContextDescriptor` for the current editor state. This is the input to `filterMenuItems` (§R5.11).
+
+```typescript
+export function useMenuContextDescriptor(panelMode?: 'idle' | 'editing'): MenuContextDescriptor;
+```
+
+It uses `useShallow` from `zustand/react/shallow` so that re-renders only happen on selection/clipboard changes — not on every property edit.
+
+### R5.17 Editor Chrome Integration
+
+**File**: `frontend/views/dashboard/cert/templates/editor/EditorChrome.tsx` (modify)
+
+**Design**:
+
+Mounts the `<ContextMenuHost />` once, right above the editor layout `<Stack>`. Also registers the `useContextMenuShortcuts` hook (§R5.10) so Shift+F10 and the Context Menu key are handled editor-wide. The toolbar / panels attach their own `onContextMenu` handlers; this is the bottom-of-the-tree host that renders whichever menu was opened.
+
+### R5.18 i18n Keys (Plan 10 R5 — Context Menus)
+
+**File**: `shared/locale/types/dashboard/certificates/templateEditor.ts` (modify — extend `CertificateTemplateEditorLabels`)
+
+New keys in the `certificateEditor` namespace under `contextMenu.*`:
+
+```typescript
+contextMenu: {
+  // Generic
+  separator: string;                        // normally unused (separator renders no text)
+  close: string;                            // "Close Menu"
+
+  // Toolbar
+  toolbar: {
+    editToolbar: string;                    // "Edit Toolbar..."
+    showToolNames: string;                  // "Show Tool Names"
+    iconSize: string;                       // "Icon Size"
+    iconSizeSmall: string;
+    iconSizeMedium: string;
+    iconSizeLarge: string;
+    resetToolbar: string;                   // "Reset Toolbar"
+  };
+
+  // Swatches
+  swatches: {
+    new: string;                            // "New Swatch"
+    edit: string;                           // "Edit Swatch"
+    delete: string;                         // "Delete Swatch"
+    deleteConfirm: string;                  // "Delete this swatch?"
+    import: string;                         // "Import Swatches..."
+    export: string;                         // "Export Swatches..."
+    view: string;                           // "Swatch View"
+    viewSmall: string;
+    viewMedium: string;
+    viewLarge: string;
+    swatchLimitReached: string;             // "Swatch limit reached"
+    swatchAlreadyExists: string;            // "This color is already in your swatches"
+  };
+
+  // Properties panel
+  properties: {
+    copyProperties: string;                // "Copy Properties"
+    pasteProperties: string;               // "Paste Properties"
+    resetToDefaults: string;              // "Reset to Defaults"
+    panelOptions: string;                  // "Properties Panel Options..."
+    noSelection: string;                   // "Make a selection first"
+    emptyClipboard: string;                // "Nothing to paste"
+  };
+
+  // Color panel
+  color: {
+    addToSwatches: string;                  // "Add to Swatches"
+    copyAsHex: string;                      // "Copy Color as Hex"
+    copyAsRgb: string;                      // "Copy Color as RGB"
+    copyAsHsl: string;                      // "Copy Color as HSL"
+    pickerMode: string;                     // "Color Picker Mode"
+    modeHsl: string;
+    modeRgb: string;
+    modeHsv: string;
+    modeCmyk: string;
+    copiedToClipboard: (format: string) => string;  // "{format} color copied to clipboard"
+  };
+
+  // Menu bar
+  menuBar: {
+    customizeMenuBar: string;              // "Customize Menu Bar..."
+    showFullMenus: string;                 // "Show Full Menus"
+    resetMenuBar: string;                  // "Reset Menu Bar"
+  };
+
+  // Shortcuts display
+  shortcuts: {
+    shiftF10: string;                       // "Shift+F10"
+    contextMenuKey: string;                 // "Menu"
+    rightClick: string;                     // "Right-Click"
+  };
+};
+```
+
+All keys must be defined in both `shared/locale/ar/dashboard/certificates/templateEditor.ts` (RTL-aware — shortcut strings like "Ctrl+Shift+]" should NOT be mirrored in RTL since modifiers are physical keys) and `shared/locale/en/dashboard/certificates/templateEditor.ts`.
+
+### R5.19 Store Additions (Plan 10 R5 — Context Menus)
+
+The `uiStore` (existing or new in `frontend/common/stores/cert/uiStore.ts`) gains:
+
+```typescript
+toolbarShowToolNames: boolean;              // default false
+toolbarIconSize: 'small' | 'medium' | 'large';  // default 'medium'
+toolbarCustomization: ToolbarToolId[];     // null/empty → default layout
+setToolbarShowToolNames: (v: boolean) => void;
+setToolbarIconSize: (s: 'small' | 'medium' | 'large') => void;
+setToolbarCustomization: (ids: ToolbarToolId[]) => void;
+resetToolbarCustomization: () => void;
+
+propertiesPanelPrefs: {
+  visibleSections: string[];               // which collapsible sections show
+  defaultCollapsed: string[];              // sections collapsed on panel open
+  panelWidth: number;                     // px
+};
+setPropertiesPanelPrefs: (p: Partial<PropertiesPanelPrefs>) => void;
+
+menuBarShowFullMenus: boolean;
+setMenuBarShowFullMenus: (v: boolean) => void;
+```
+
+The `contextMenuService` store (new — see §R5.1) is created in `frontend/common/stores/cert/contextMenuStore.ts`. The `swatchStore` (existing if created in earlier rounds, else new in this round) lives in `frontend/common/stores/cert/swatchStore.ts` — check the existing scaffold before creating.
+
+### R5.20 Quality & Verification (Plan 10 R5 — Context Menus)
+
+**Per-file verification** (per AGENTS.md §"Verification Loop"):
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5ctx-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+
+**Cross-plan contracts**:
+- **Plan 11**: The canvas right-click menu, element right-click menus, and ruler right-click menu live in Plan 11 §R5. Plan 11 imports the `contextMenuService` store, `ContextMenuItem` type, and `<ContextMenuHost>` (created here) — it does not redefine them.
+- **Plan 12**: The layers panel right-click, properties panel right-click (element-level), and element-specific right-click additions live in Plan 12 §R5. Plan 12 imports `menuItemBuilders`, `filterMenuItems`, and `useMenuContextDescriptor` from this plan.
+- **Plan 5**: No backend changes — context menus are presentation-only.
+
+**Performance**:
+- The `<ContextMenuHost>` is mounted once and never unmounts; it only changes `open` state. No menu component is mounted per-target.
+- `useShallow` is used on `useMenuContextDescriptor` to avoid re-renders during property drag.
+- Submenu open delay (200ms) is implemented with a `useRef` timer — not a state-driven `setTimeout` (avoiding re-renders).
+- Item builders are pure functions and memoized: `useMemo(() => buildToolbarContextMenu(opts), [opts.toolbarShowToolNames, opts.iconSize])`.
+
+**Accessibility**:
+- `Menu` items get `role="menuitem"`, `aria-disabled` when disabled, `aria-haspopup="menu"` for items with submenu, and `aria-checked="true"` for toggle items.
+- Active menu item tracked via `aria-activedescendant` on the menu root, not DOM focus movement (avoids `scrollIntoView` jank).
+- `Shift+F10` invokes the context menu; on Mac keyboards lacking a dedicated key, this is the documented substitute (Surface keyboards have Fn+Menu).
+
+## Round 5: Snap & Align Engine — Align Toolbar, Distribute Toolbar, View Menu
+
+This is the **fourth** Round 5 domain in Plan 10 (after Fill/Stroke, Pen Tool, and Effects). Round 5 is reused across independent feature domains per the convention established in §R5.5 (Notes). This round adds the Photoshop/Illustrator-level snap, alignment, and distribution tooling that lives in the editor chrome (toolbar, View menu, alignment/distribution panel entry points).
+
+The **snap calculations**, **smart-guide rendering**, and **interactive transform handles** are specified in Plan 11 §"Round 5: Snap & Align Engine". The **Align Panel**, **Distribute Panel**, **Spacing Controls**, and **Match-Size Panel** are specified in Plan 12 §"Round 5: Snap & Align Engine". Plan 10 only owns the **toolbar/View-menu entry points** that host these capabilities.
+
+### R5S.1 Align Toolbar (≥2 Element Selection)
+
+The `EditorToolbar` is extended with a new **Align Toolbar Cluster** that appears (renders visible, non-collapsed) when ≥ 2 elements are selected. When < 2 elements are selected, the cluster is **hidden** (display:none, not disabled-greyed — per Photoshop behavior, align requires a multi-selection target).
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/AlignToolbarCluster.tsx`
+
+```tsx
+import type { Theme } from '@mui/material/styles';
+
+interface AlignToolbarClusterProps {
+  selectedElementIds: readonly string[];
+  // The dispatcher lives in the store (Plan 12); Plan 10 only routes the action.
+  onAlign: (alignment: AlignAxis, alignTo: AlignTarget) => void;
+  disabled?: boolean;
+}
+
+type AlignAxis =
+  | 'left'
+  | 'horizontalCenter'
+  | 'right'
+  | 'top'
+  | 'verticalCenter'
+  | 'bottom';
+
+type AlignTarget =
+  | 'selection'      // align to bounding box of selection (default)
+  | 'canvas'         // align to document / artboard bounds
+  | 'firstSelected'  // align to the first-picked element (by current selection order)
+  | 'key';           // align to the explicitly designated key object
+```
+
+**Buttons** (all `IconButton` with `Tooltip`, MUI v9 — `sx` for colors, never style props):
+
+| Button | Icon | Tooltip key | Disabled condition |
+|---|---|---|---|
+| Align Left Edges | `HorizontalAlignLeftOutlined` | `align.leftEdges` | `disabled` prop true |
+| Align Horizontal Centers | `HorizontalAlignCenterOutlined` | `align.horizontalCenters` | " |
+| Align Right Edges | `HorizontalAlignRightOutlined` | `align.rightEdges` | " |
+| Align Top Edges | `VerticalAlignTopOutlined` | `align.topEdges` | " |
+| Align Vertical Centers | `VerticalAlignCenterOutlined` | `align.verticalCenters` | " |
+| Align Bottom Edges | `VerticalAlignBottomOutlined` | `align.bottomEdges` | " |
+
+Each button colour is theme-driven: `sx={(theme) => ({ color: theme.palette.text.primary })}`, active/hover uses `theme.palette.action.hover`. **No hardcoded colors** (per AGENTS.md).
+
+A small `Tooltip` with the **keyboard shortcut** is appended after the label, e.g., `i18n('align.leftEdges') + ' (' + i18n('align.shortcut.alignLeft') + ')'`.
+
+### R5S.2 Align To Selector
+
+Beside the align buttons, a compact `Select` (`Select` from MUI v9, native `<select>` fallback list) lets the user pick the alignment reference.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/AlignToSelect.tsx`
+
+```tsx
+interface AlignToSelectProps {
+  value: AlignTarget;
+  onChange: (value: AlignTarget) => void;
+  selectedElementIds: readonly string[];
+  keyObjectId: string | null; // from store when a key object is set
+  disabled?: boolean;
+}
+```
+
+**Options**:
+
+| Value | Label key | Enabled condition |
+|---|---|---|
+| `selection` | `alignTo.selection` | always |
+| `canvas` | `alignTo.canvas` | always |
+| `firstSelected` | `alignTo.firstSelected` | always |
+| `key` | `alignTo.keyObject` | only when `keyObjectId !== null` (user shift-clicked to mark a key object) |
+
+Default value: `selection`. When the user clears the key object (e.g. clicks empty canvas), `alignTo` automatically resets to `selection` to avoid a dangling reference.
+
+Option ordering uses `MenuItem` with `sx={{ py: 0.5 }}` for compact size — no style props on `ListItem`/`Typography`.
+
+### R5S.3 Distribute Toolbar (≥3 Element Selection)
+
+The distribute cluster appears only when `selectedElementIds.length >= 3`. This cluster reused the same selector state for `distributeFrom`.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/DistributeToolbarCluster.tsx`
+
+```tsx
+interface DistributeToolbarClusterProps {
+  selectedElementIds: readonly string[];
+  onDistribute: (mode: DistributeMode, from: DistributeFrom) => void;
+  onDistributeSpacing: (gapPx: number, axis: 'horizontal' | 'vertical') => void;
+  gapValue: number;          // current gap input value (controlled)
+  onGapValueChange: (v: number) => void;
+  disabled?: boolean;
+}
+
+type DistributeMode =
+  | 'horizontalCenters'
+  | 'verticalCenters'
+  | 'leftEdges'
+  | 'rightEdges'
+  | 'topEdges'
+  | 'bottomEdges'
+  | 'spacingHorizontal'  // equal gap horizontally (not center-to-center)
+  | 'spacingVertical';   // equal gap vertically
+
+type DistributeFrom = 'edge' | 'center' | 'spacing';
+```
+
+**Buttons**: 4 distribute buttons + a gap `TextField` + a "Distribute with gap" button:
+
+| Button | Icon | Tooltip key |
+|---|---|---|
+| Distribute Horizontal | `HorizontalDistributeOutlined` | `distribute.horizontal` |
+| Distribute Vertical | `VerticalDistributeOutlined` | `distribute.vertical` |
+| Distribute Horizontal Spacing | custom icon `HorizontalSpaceBetweenOutlined` | `distribute.horizontalSpacing` |
+| Distribute Vertical Spacing | custom icon `VerticalSpaceBetweenOutlined` | `distribute.verticalSpacing` |
+
+Each icon uses `sx={{ color: theme.palette.text.primary }}`. **Auto-distribute icons** are small (20×20) showing the *intended* effect: position dots drawn via `Box` with `sx` theme strokes.
+
+The **gap input**:
+
+```tsx
+<TextField
+  size="small"
+  type="number"
+  value={gapValue}
+  onChange={(e) => onGapValueChange(Number(e.target.value))}
+  InputProps={{ endAdornment: 'px' }}
+  sx={{ width: 80 }}
+  slotProps={{ htmlInput: { min: 0, max: 1000, 'aria-label': i18n('distribute.gap') } }}
+  label={i18n('distribute.gap')}
+  // disabled unless distributeFrom === 'spacing'
+/>
+```
+
+Pressing Enter in the gap field triggers `onDistributeSpacing(gapValue, 'horizontal' or 'vertical')` depending on the last-touched axis (tracked via local state in the toolbar).
+
+### R5S.4 View Menu — Snap & Smart Guide Toggles
+
+The existing `ViewMenu` dropdown (created in earlier rounds) is extended with two top-level options and a `Snap To ▸` submenu.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/ViewMenuSnapSection.tsx` (new) — bound into the existing `ViewMenu.tsx`.
+
+**Top-level options**:
+
+| Label key | Icon | Type | Accelerator |
+|---|---|---|---|
+| `view.snap` | `GridOnOutlined` turned-OFF variant | toggle checkbox | `Ctrl+Shift+;` |
+| `view.smartGuides` | `AutoFixHighOutlined` | toggle checkbox | `Ctrl+Shift+Alt+;` (editor-local only, no global) |
+
+**`Snap To ▸` submenu** — individual target checkboxes:
+
+| Key | Setting | Default |
+|---|---|---|
+| `snapTo.grid` | `snapSettings.snapToGrid` | `true` (when grid enabled) |
+| `snapTo.guides` | `snapSettings.snapToGuides` | `true` |
+| `snapTo.pixels` | `snapSettings.snapToPixels` | `true` |
+| `snapTo.elements` | `snapSettings.snapToElements` | `true` |
+| `snapTo.artboard` | `snapSettings.snapToArtboard` | `true` |
+| `snapTo.documentBounds` | `snapSettings.snapToDocumentBounds` | `true` |
+
+Disabling the top-level snap toggle (`view.snap` unchecked) disables all sub-toggles (greyed, no `onChange`). Re-enabling re-enables whatever sub-toggles were previously on. This maps 1:1 to the `snapEnabled` umbrella flag in the canvas store that Plan 11 reads.
+
+Every `MenuItem` (submenu level) uses MUI v9 `ListItemIcon` for the icon and `ListItemText` for the label, with the shortcut baked into `ListItemText.secondary` if any. **No style props** — `ListItem` spacing comes via `sx={{ py: 0.5 }}`.
+
+### R5S.5 Snap Settings Dialog (Edit Snap Threshold & Smart Guide Color)
+
+A small dialog accessible from the bottom of the `Snap To ▸` submenu ("Snap Settings…"):
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/SnapSettingsDialog.tsx`
+
+```tsx
+interface SnapSettingsDialogProps {
+  open: boolean;
+  onClose: () => void;
+  snapThreshold: number;       // 2-20, default 6
+  onSnapThresholdChange: (v: number) => void;
+  smartGuideColor: string;     // theme palette token (NOT a hex literal)
+  onSmartGuideColorChange: (token: SmartGuideColorToken) => void;
+  smartGuideSensitivity: number; // pixels, default 6
+  onSmartGuideSensitivityChange: (v: number) => void;
+}
+
+type SmartGuideColorToken =
+  | 'primary'  // theme.palette.primary.main (default — magenta-like)
+  | 'secondary'
+  | 'warning'
+  | 'error';
+```
+
+> **Important**: per AGENTS.md, smart guide color must NEVER be a hardcoded hex literal. The dialog exposes one of four **theme palette tokens** (the canonical magenta look is `primary.main` if the project theme is set to magenta, or the user picks `secondary`/`warning`/`error`). The dialog never renders a hex color picker; the user picks a swatch row, and the engine reads `theme.palette[token].main` at paint time. The popular Photoshop/Illustrator "magenta smart guides" are achieved via `theme.palette.primary.main` when the theme ships a magenta primary — see `frontend/THEME_PALETTE.md` for existing tokens.
+
+The dialog has:
+
+- `Slider` for `snapThreshold`: `min={2} max={20} step={1}`, value badge shows current px.
+- `Slider` for `smartGuideSensitivity`: `min={2} max={20} step={1}`.
+- A group of 4 `Box` swatches (each `sx={{ width: 28, height: 28, bgcolor: (theme) => theme.palette[token].main }}`) shown in a `RadioGroup` for color token choice.
+
+All inputs announce themselves via `aria-label` from the `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` keys (§R5S.7).
+
+### R5S.6 Align & Distribute Keyboard Shortcuts
+
+A dedicated hook for keyboard shortcuts (registered via the `ShortcutManager` introduced in R4.3):
+
+**File**: `frontend/views/dashboard/cert/templates/editor/useAlignShortcuts.ts` (new — distinct from `useFillStrokeShortcuts.ts` to avoid bundle bloat)
+
+```typescript
+export function useAlignShortcuts(): void;
+```
+
+Registered accelerators (scope: `'editor'`, priority: 12 — must not collide with `useFillStrokeShortcuts` at priority 15):
+
+| Shortcut | Action |
+|---|---|
+| `Alt+A` | Open align panel (focuses the toolbar cluster — toggles the panel popover if implemented) |
+| `Ctrl+Shift+Left` | `alignElements('left', currentAlignTarget)` |
+| `Ctrl+Shift+C` | `alignElements('horizontalCenter', currentAlignTarget)` |
+| `Ctrl+Shift+Right` | `alignElements('right', currentAlignTarget)` |
+| `Ctrl+Shift+Up` | `alignElements('top', currentAlignTarget)` |
+| `Ctrl+Shift+M` | `alignElements('verticalCenter', currentAlignTarget)` |
+| `Ctrl+Shift+Down` | `alignElements('bottom', currentAlignTarget)` |
+| `Ctrl+Shift+Alt+H` | `distributeElements('horizontalCenters', currentDistributeFrom)` |
+| `Ctrl+Shift+Alt+V` | `distributeElements('verticalCenters', currentDistributeFrom)` |
+
+Each shortcut reads the **current** selection and target from `useCanvasStore` via `getState()` (not reactive — only fires on key).
+
+Shortcuts do **not** fire while a text input has focus (the existing `ShortcutManager` scope-switches to `'panel'` for inputs per R4.3 — the align-shortcut hook checks `document.activeElement` for `INPUT`/`TEXTAREA` and bails).
+
+### R5S.7 i18n Keys Added (Plan 10 — Snap & Align portion)
+
+New keys in the `certificateEditor` namespace (extension of the `CertificateTemplateEditorLabels` type schema):
+
+```typescript
+// R5S: Snap & Align Engine — Plan 10 portion (toolbar / view menu)
+align: {
+  section: string;                       // "Align"
+  leftEdges: string;
+  horizontalCenters: string;
+  rightEdges: string;
+  topEdges: string;
+  verticalCenters: string;
+  bottomEdges: string;
+  shortcut: {
+    alignLeft: string;     // "Ctrl+Shift+Left"
+    alignCenterH: string;   // "Ctrl+Shift+C"
+    alignRight: string;
+    alignTop: string;
+    alignCenterV: string;   // "Ctrl+Shift+M"
+    alignBottom: string;
+    openPanel: string;      // "Alt+A"
+  };
+}
+alignTo: {
+  section: string;
+  selection: string;
+  canvas: string;
+  firstSelected: string;
+  keyObject: string;
+  keyObjectHint: string;     // "Shift-click an element to set as key object"
+}
+distribute: {
+  section: string;
+  horizontal: string;
+  vertical: string;
+  horizontalSpacing: string;
+  verticalSpacing: string;
+  gap: string;
+  distributeWithGap: (gap: number) => string;  // "Distribute with {gap}px gap"
+  distributeFrom: string;
+  from: {
+    edge: string;
+    center: string;
+    spacing: string;
+  }
+  requiresThree: string;    // "Distribute requires at least 3 selected elements"
+}
+view: {
+  snap: string;             // "Snap"
+  smartGuides: string;      // "Smart Guides"
+  snapTo: string;           // "Snap To"
+  snapToSettings: string;   // "Snap Settings…"
+}
+snapTo: {
+  grid: string;
+  guides: string;
+  pixels: string;
+  elements: string;
+  artboard: string;
+  documentBounds: string;
+}
+snapSettings: {
+  title: string;
+  thresholdLabel: string;
+  sensitivityLabel: string;
+  smartGuideColorLabel: string;
+  colorTokens: {
+    primary: string;
+    secondary: string;
+    warning: string;
+    error: string;
+  }
+}
+```
+
+Each key MUST be implemented in both:
+- `shared/locale/ar/.../templateEditor.ts`
+- `shared/locale/en/.../templateEditor.ts`
+
+Pluralization (`distributeWithGap`) is the compile-time pattern `(count: number) => string` (e.g. EN: `(gap) => \`Distribute with ${gap}px gap\``, AR: `(gap) => \`توزيع بفجوة ${gap}px\``).
+
+### R5S.8 Type Definitions (Plan 10 — Snap & Align portion)
+
+**File**: `frontend/common/stores/cert/snapAlignTypes.ts` (new — shared between Plans 10, 11, 12)
+
+```typescript
+export type AlignAxis =
+  | 'left' | 'horizontalCenter' | 'right'
+  | 'top'  | 'verticalCenter'    | 'bottom';
+
+export type AlignTarget = 'selection' | 'canvas' | 'firstSelected' | 'key';
+
+export type DistributeMode =
+  | 'horizontalCenters' | 'verticalCenters'
+  | 'leftEdges' | 'rightEdges' | 'topEdges' | 'bottomEdges'
+  | 'spacingHorizontal' | 'spacingVertical';
+
+export type DistributeFrom = 'edge' | 'center' | 'spacing';
+
+export type SnapTargetKind =
+  | 'grid' | 'guides' | 'pixels' | 'elements' | 'artboard' | 'documentBounds';
+
+export interface SnapSettings {
+  snapEnabled: boolean;          // umbrella — top-level toggle
+  snapToGrid: boolean;
+  snapToGuides: boolean;
+  snapToPixels: boolean;
+  snapToElements: boolean;
+  snapToArtboard: boolean;
+  snapToDocumentBounds: boolean;
+  snapThreshold: number;         // 2-20 px, default 6
+  smartGuideColor: SmartGuideColorToken;
+  smartGuideSensitivity: number; // 2-20 px, default 6
+  smartGuidesEnabled: boolean;   // separate toggle for smart guides
+}
+
+export type SmartGuideColorToken = 'primary' | 'secondary' | 'warning' | 'error';
+
+export const DEFAULT_SNAP_SETTINGS: SnapSettings = {
+  snapEnabled: true,
+  snapToGrid: true,
+  snapToGuides: true,
+  snapToPixels: true,
+  snapToElements: true,
+  snapToArtboard: true,
+  snapToDocumentBounds: true,
+  snapThreshold: 6,
+  smartGuideColor: 'primary',
+  smartGuideSensitivity: 6,
+  smartGuidesEnabled: true,
+};
+```
+
+Plan 10 imports only `AlignAxis`, `AlignTarget`, `DistributeMode`, `DistributeFrom`, `SnapSettings`, `SmartGuideColorToken` from `@/frontend/common/stores/cert/snapAlignTypes` — the bulk of the snap engine types (`SnapCandidate`, `SnapResult`, `SmartGuide`, `MeasurementLabel`) lives in Plan 11 §R5S (single canonical source).
+
+### R5S.9 Watcher State: Key Object
+
+The toolbar enables a **"key object"** designation: the user Shift-clicks one element among the multi-selection to lock it as the alignment/distribution reference. This state lives in the canvas store (Plan 11 owns the store mutation), but Plan 10 owns the toolbar's *reflection* of it.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/KeyObjectBadge.tsx` (new) — renders a small floating chip above the toolbar showing the key element's icon + name, with an `IconButton` to clear (Esc).
+
+```tsx
+interface KeyObjectBadgeProps {
+  keyObjectId: string | null;
+  keyObjectName: string | null;
+  onClear: () => void;
+}
+```
+
+Badge colour: `sx={(theme) => ({ bgcolor: theme.palette.primary.main, color: theme.palette.onPrimary })}`.
+
+### R5S.10 Plan 10 Cross-Plan Contracts (Snap & Align)
+
+| Consumer Plan | Contract |
+|---|---|
+| Plan 11 | `SnapSettings` state in `useCanvasStore` — Canvas must read `snapEnabled`, `snapToGrid`, … to gate snap logic. Plan 10's `ViewMenuSnapSection` calls the store mutators. |
+| Plan 11 | `ALIGN_*`, `DISTRIBUTE_*`, `MATCH_*` keyboard shortcuts — registered via `ShortcutManager` here; Plan 11's canvas handlers must not capture these (scope `'editor'` vs. `'canvas'`). |
+| Plan 11 | `keyObjectId`, `alignTarget`, `distributeFrom` state — toolbar persists user choice; Plan 11's snap engine reads them. |
+| Plan 12 | Plan 12 imports the **same** `snapAlignTypes.ts` (canonical source) for the Align Panel, Distribute Panel, Spacing Controls. Plan 10 must NOT redefine these types. |
+| Plan 12 | `AlignToolbarCluster` option labels must match Plan 12's `AlignPanel` radio labels — share the same i18n keys. |
+| Plan 5 | No backend changes for snap/align state — purely client-side. Persisted in the template's `editorSettings` JSON column (Plant 5 §"Editor settings") only if the snapshot feature (Plan 5 §"Editor snapsnap state") is enabled. |
+| Plan 6 | PDF export ignores snap settings — they are editor-only. |
+
+### R5S.11 Quality & Verification (Plan 10 R5S — Snap & Align)
+
+**Per-file verification loop** (per AGENTS.md §"Verification Loop"):
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client:
+   ```bash
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
+     -H "Content-Type: application/json" \
+     -d '{"id":"r5s-plan10-<file>","files":["<path>"]}'
+   ```
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all frontend files).
+
+**Lint queue server**: must be running (`bun run scripts/lint-queue-server.ts` as a detached background process) before any lint call. See `AGENTS.md` §"Lint Queue Server".
+
+**Performance budgets**:
+- The align/distribute toolbar cluster re-renders only on `selectedElementIds` change — wrap with `useShallow` selector to keep re-render count at 0 during drag.
+- Snap Settings dialog's `Slider` commits via throttle (no per-move Apollo mutation).
+
+**Accessibility**:
+- `Tooltip` text on every toolbar button includes the keyboard shortcut.
+- The `AlignToSelect` opens with `Space` and closes with `Esc` (MUI v9 native).
+- All `MenuItem`/`MenuItem` submenu items have `aria-checked` reflecting the toggle state.
+
+**Backwards-compat**:
+- Plan 10's pre-R5S `EditorToolbar` layout already had an alignment cluster per "Multi selection" context note in §R4 — R5S replaces that minimal cluster with the full `AlignToolbarCluster` (the old cluster had no distribution, no Align To selector, no key object). The replacement is a non-breaking swap because the old cluster dispatched `alignElements('left' | 'center' | 'right')`; the new one uses the same action with an extended axis enum (the union `'left' | 'horizontalCenter' | 'right' | 'top' | 'verticalCenter' | 'bottom'` accepts the old 3 values).
+
+## Round 5: Advanced Typography Engine
+
+Round 5 introduces Photoshop/Illustrator-grade typography control to the certificate template editor. This plan (10) owns the **Rich Text Editor** (inline per-character styling within a text element) and the **Font Management** subsystem (loading, previewing, pairing, and licensing fonts). Plan 12 owns the character/paragraph property panels; Plan 11 owns canvas text rendering fidelity. All three plans share the `TypographyState` slice in the Zustand store and the `typography` i18n namespace defined here.
+
+### R5.1 Architecture Overview
+
+The typography engine is split across three plans by ownership:
+
+| Concern | Plan | Root Directory |
+|---------|------|----------------|
+| Rich Text Editor (inline editing, per-character spans, toolbar) | Plan 10 | `frontend/common/views/dashboard/certificates/template-editor/typography/` |
+| Font Management (loading, upload, preview, pairing, licensing) | Plan 10 | `frontend/common/views/dashboard/certificates/template-editor/fonts/` |
+| Character/Paragraph property panels | Plan 12 | `frontend/desktop/views/dashboard/certificates/template-editor/elements/panels/` |
+| Canvas text rendering, text-on-path, measurement, caching | Plan 11 | `frontend/common/views/dashboard/certificates/template-editor/canvas/text/` |
+
+### R5.2 Rich Text Editor
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/typography/RichTextToolbar.tsx`
+
+A floating toolbar that appears above a text element when the user enters inline edit mode (double-click → edit, see Plan 11 §R5). The toolbar provides per-character styling — not just whole-element styling. It operates on the current text selection within the inline editor.
+
+**Component contract:**
+
+```tsx
+interface RichTextToolbarProps {
+  /** The text element ID being edited */
+  elementId: string;
+  /** Current selection range {start, end} within the text content */
+  selection: { start: number; end: number } | null;
+  /** Span styles applied to the current selection (merged for display) */
+  activeStyles: SpanStyles;
+  /** Dispatched when a toolbar button toggles a style on the selection */
+  onApplySpan: (style: Partial<SpanStyles>) => void;
+  /** Dispatched when font family changes for the selection */
+  onFontFamilyChange: (family: string) => void;
+  /** Dispatched when font size changes for the selection */
+  onFontSizeChange: (size: number) => void;
+  /** Dispatched when text color changes for the selection */
+  onTextColorChange: (hex: string) => void;
+  /** Dispatched when alignment changes (paragraph-level, affects whole paragraph) */
+  onTextAlignChange: (align: "left" | "center" | "right" | "justify") => void;
+}
+```
+
+**Span styles model** (stored in `shared/types/certificates/typography.types.ts`):
+
+```ts
+export type FontWeightValue = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+export type FontStyleValue = "normal" | "italic" | "oblique";
+export type TextTransformValue = "none" | "uppercase" | "lowercase" | "capitalize";
+export type TextDecorationValue =
+  | "none"
+  | "underline"
+  | "underline-double"
+  | "underline-dotted"
+  | "underline-dashed"
+  | "underline-wavy"
+  | "strikethrough"
+  | "overline";
+export type TextDirectionValue = "ltr" | "rtl" | "auto";
+
+export interface SpanStyles {
+  fontFamily: string;
+  fontWeight: FontWeightValue;
+  fontStyle: FontStyleValue;
+  fontSize: number;
+  textColor: string;
+  textTransform: TextTransformValue;
+  textDecoration: TextDecorationValue;
+  kerning: number;       // em, -5 to +5
+  tracking: number;      // -10 to +10
+  leading: number;       // 0.8 to 3.0
+  baselineShift: number; // -50px to +50px
+  horizontalScale: number;  // 50% to 200%
+  verticalScale: number;    // 50% to 200%
+  characterRotation: number; // 0-360°
+}
+
+export interface RichTextSpan {
+  id: string;              // unique span id
+  start: number;           // character offset in text content
+  end: number;             // character offset (exclusive)
+  styles: Partial<SpanStyles>;  // only overridden style keys
+}
+
+export interface RichTextContent {
+  text: string;
+  spans: RichTextSpan[];  // ordered by start; non-overlapping; can cover full text or subset
+  // Paragraph-level styles (per-paragraph, keyed by paragraph index)
+  paragraphs: ParagraphStyles[];
+}
+
+export interface ParagraphStyles {
+  alignment: "left" | "center" | "right" | "justify";
+  justificationMethod: "words" | "characters" | "auto";
+  spacingBefore: number;   // 0-100px
+  spacingAfter: number;    // 0-100px
+  firstLineIndent: number; // 0-200px
+  leftIndent: number;       // 0-500px
+  rightIndent: number;      // 0-500px
+  hangingIndent: number;    // 0-200px
+  textWrap: "none" | "shape" | "bounds" | "custom";
+  columns: number;          // 1-10
+  columnGutter: number;     // 0-50px
+  columnWidth: "auto" | number;
+  listType: "none" | "bullet" | "numbered";
+  bulletStyle: "disc" | "circle" | "square" | "custom";
+  bulletChar?: string;      // custom bullet character
+  numberingFormat: "1." | "1)" | "(1)" | "a." | "A." | "i." | "I.";
+  hyphenation: boolean;
+  hyphenationLanguage: string;
+  hyphenationMinWordLength: number;
+  hyphenationMinFragments: number;
+  orphanControl: boolean;
+  widowControl: boolean;
+}
+```
+
+**Toolbar buttons** (left-to-right):
+1. **Bold** — `IconButton` toggle, sets `fontWeight` to 700 (or restores previous weight)
+2. **Italic** — `IconButton` toggle, sets `fontStyle` to `"italic"`
+3. **Underline** — `IconButton` toggle, sets `textDecoration` to `"underline"`
+4. **Strikethrough** — `IconButton` toggle, sets `textDecoration` to `"strikethrough"`
+5. **Divider** — MUI `Divider` orientation vertical
+6. **Font family** — `Autocomplete` dropdown with live preview (each option rendered in its own font)
+7. **Font size** — numeric `TextField` (1–400px) + dropdown with presets (8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72, 96, 128)
+8. **Text color** — `ColorPickerField` (reuses Plan 12's R5 component)
+9. **Divider**
+10. **Align left/center/right/justify** — `ToggleButtonGroup` (paragraph-level, affects the paragraph containing the caret)
+11. **Divider**
+12. **Bullet list / numbered list** — `IconButton` toggle (paragraph-level)
+
+All buttons use `sx={{}}` for styling (no style props). Icons use `*Outlined` naming (e.g., `FormatBoldOutlined`, `FormatItalicOutlined`, `FormatUnderlinedOutlined`, `FormatStrikethroughOutlined`, `FormatAlignLeftOutlined`, `FormatListBulletedOutlined`, `FormatListNumberedOutlined`).
+
+**i18n keys** (from `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)`):
+- `typography.toolbar.bold`, `typography.toolbar.italic`, `typography.toolbar.underline`, `typography.toolbar.strikethrough`
+- `typography.toolbar.fontFamily`, `typography.toolbar.fontSize`, `typography.toolbar.textColor`
+- `typography.toolbar.alignLeft`, `typography.toolbar.alignCenter`, `typography.toolbar.alignRight`, `typography.toolbar.alignJustify`
+- `typography.toolbar.bulletList`, `typography.toolbar.numberedList`
+
+**Performance**: The toolbar is rendered inside a `Popover` that anchors to the text element's bounding box. It uses `React.memo` with a custom comparator that checks only `activeStyles` (not the full element). On style change, only the affected span is re-rendered — not the full text content.
+
+### R5.3 Per-Character Styling & Mixed Content
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/typography/RichTextRenderer.tsx`
+
+Renders `RichTextContent` as an HTML structure with `<span>` elements per style range. The renderer maps non-overlapping `RichTextSpan[]` to inline `<span style="...">` blocks.
+
+**Rendering algorithm:**
+1. Sort spans by `start` ascending.
+2. Merge adjacent spans with identical styles (optimization for export).
+3. Walk the text string, emitting `<span>` elements between span boundaries.
+4. Unstyled text between spans uses the element's base `SpanStyles`.
+5. Each `<span>` sets CSS properties: `font-family`, `font-weight`, `font-style`, `font-size`, `color`, `letter-spacing`, `line-height`, `vertical-align` (for baseline shift), `transform` (for character rotation/scale), `text-transform`, `text-decoration`.
+
+**CSS property mapping:**
+```ts
+function spanStylesToCSS(styles: Partial<SpanStyles>, theme: Theme): CSSProperties {
+  return {
+    fontFamily: styles.fontFamily,
+    fontWeight: styles.fontWeight,
+    fontStyle: styles.fontStyle,
+    fontSize: styles.fontSize ? `${styles.fontSize}px` : undefined,
+    color: styles.textColor,
+    letterSpacing: styles.kerning ? `${styles.kerning}em` : undefined,
+    lineHeight: styles.leading ? String(styles.leading) : undefined,
+    verticalAlign: styles.baselineShift ? `${styles.baselineShift}px` : undefined,
+    textTransform: styles.textTransform !== "none" ? styles.textTransform : undefined,
+    textDecoration: textDecorationToCSS(styles.textDecoration),
+    transform: [
+      styles.horizontalScale && styles.horizontalScale !== 100 ? `scaleX(${styles.horizontalScale / 100})` : null,
+      styles.verticalScale && styles.verticalScale !== 100 ? `scaleY(${styles.verticalScale / 100})` : null,
+      styles.characterRotation ? `rotate(${styles.characterRotation}deg)` : null,
+    ].filter(Boolean).join(" ") || undefined,
+    transformOrigin: "center center",
+  };
+}
+```
+
+**Mixed content example**: The user types a certificate title:
+```
+Certificate of Achievement
+Awarded to {recipientName}
+```
+They select "Certificate of" → bold 32px, "Achievement" → italic 32px gold (#D4AF37), "Awarded to" → 18px regular, "{recipientName}" → 18px bold underline. Each selection creates a `RichTextSpan` with the overridden styles. The renderer emits 4 `<span>` elements.
+
+### R5.4 Inline Edit Mode
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/typography/InlineTextEditor.tsx`
+
+A `contentEditable`-based inline editor that replaces the static text renderer when the user double-clicks a text element (Plan 11 handles the double-click → edit mode transition; this component is the editor itself).
+
+**Key behaviors:**
+- On focus, the `RichTextToolbar` appears (anchored above the element bounding box).
+- Selection: `window.getSelection()` → `{start, end}` offsets within the text content.
+- Double-click → select word; triple-click → select paragraph; Shift+Arrow → extend/reduce selection.
+- Typing updates `RichTextContent.text` and shifts span offsets accordingly.
+- Backspace/Delete merges adjacent spans when the deletion crosses a span boundary.
+- Enter → inserts `\n` and creates a new `ParagraphStyles` entry.
+- Escape → exits edit mode, commits changes to the store.
+- The caret is rendered as a 2px-wide blinking `div` positioned at the caret offset (computed via `Range.getBoundingClientRect()`).
+
+**Clipboard integration:**
+- **Copy** (`Ctrl/Cmd+C`): serializes the selected spans to a clipboard payload `{ type: "rich-text", text: string, spans: RichTextSpan[] }` and also writes plain text to `text/plain` as fallback.
+- **Paste** (`Ctrl/Cmd+V`): if clipboard has `application/x-rich-text` → deserializes spans (adjusts offsets to insertion point). If only `text/plain` → inserts as plain text with the element's base styles.
+- **Paste as plain text** (`Ctrl/Cmd+Shift+V`): always inserts `text/plain` content, stripping all span styles.
+
+### R5.5 Find & Replace
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/typography/FindReplaceDialog.tsx`
+
+A modal dialog (MUI `Dialog`) triggered from the toolbar overflow menu or `Ctrl/Cmd+F` while editing a text element.
+
+**Features:**
+- Find input (`TextField`) + Replace input (`TextField`) + Replace All button.
+- Options: case-sensitive (`Checkbox`), match whole word (`Checkbox`), regex (`Checkbox`).
+- Navigation: Previous/Next match buttons, match counter "3 of 12".
+- Highlighting: matched ranges are wrapped in `<mark>` elements with `sx={{ backgroundColor: theme.palette.warning.light }}`.
+- Replace: replaces the current match and advances to the next. Replace All replaces all matches and updates span offsets.
+- Regex validation: invalid regex shows `FormErrorSnackbar` with the regex error message.
+
+**i18n keys**: `typography.findReplace.title`, `typography.findReplace.find`, `typography.findReplace.replace`, `typography.findReplace.replaceAll`, `typography.findReplace.caseSensitive`, `typography.findReplace.wholeWord`, `typography.findReplace.regex`, `typography.findReplace.matchCount: (count: number, total: number) => string`, `typography.findReplace.noMatches`, `typography.findReplace.invalidRegex`.
+
+### R5.6 Emoji & Special Characters Picker
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/typography/SpecialCharPicker.tsx`
+
+A dialog with categorized emoji and special character insertion.
+
+**Categories** (left sidebar `List`, right grid of characters):
+- Arrows (→ ← ↑ ↓ ↔ ↕ ⇒ ⇐ ⇑ ⇓)
+- Math (∑ ∏ ∫ √ ∞ ≈ ≠ ≤ ≥ ± × ÷)
+- Currency ($ € £ ¥ ₹ ₽ ¢)
+- Symbols (© ® ™ ° µ ¶ § † ‡)
+- Emoji (smileys, objects, nature — subset relevant to certificates: ★ ✦ ✧ ❖ ❀ ❁ ✿ ❅)
+- Custom (user-defined characters stored in localStorage)
+
+**Interaction**: Click a character → inserts at caret position in the inline editor. Recently used characters appear in a "Recent" section at the top.
+
+### R5.7 Spell Check
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/typography/useSpellCheck.ts`
+
+A custom hook that integrates with the browser's `TextSpellCheck` / `navigator.clipboard` / custom spell-check API.
+
+**Features:**
+- Uses `contentEditable`'s built-in `spellcheck` attribute → browser underlines misspelled words.
+- Right-click on a misspelled word → custom context menu with:
+  - Suggestions list (from browser API or fallback dictionary)
+  - "Ignore" → adds to session ignore list
+  - "Add to dictionary" → stores in localStorage `cert-dictionary-<locale>`
+  - "Ignore all" → adds to session ignore list
+- Toggle spell check on/off from toolbar overflow menu.
+- Language selector: Arabic (`ar`), English (`en`), auto-detect (based on RTL/LTR content ratio).
+
+### R5.8 Font Management Subsystem
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/fonts/FontManager.tsx`
+
+A full-featured font management panel that appears as a collapsible section in the left sidebar (below the element library from Plan 11). It handles font loading, upload, preview, pairing, and licensing.
+
+#### R5.8.1 Font Loading Pipeline
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/fonts/useFontLoader.ts`
+
+```ts
+interface LoadedFont {
+  family: string;
+  displayName: string;
+  category: FontCategory;
+  weights: FontWeightValue[];
+  styles: FontStyleValue[];
+  variableAxes?: VariableFontAxis[];
+  license: FontLicense;
+  source: "google" | "custom" | "system";
+  status: "unloaded" | "loading" | "loaded" | "error";
+  error?: string;
+  blob?: Blob;  // for custom fonts
+}
+
+type FontCategory = "serif" | "sans-serif" | "display" | "handwriting" | "monospace" | "arabic";
+type FontLicense = "open-source" | "free-commercial" | "commercial" | "unknown";
+
+interface VariableFontAxis {
+  tag: string;       // e.g., "wght", "wdth", "ital", "opsz"
+  name: string;     // e.g., "Weight", "Width"
+  min: number;
+  max: number;
+  default: number;
+}
+```
+
+**Google Fonts integration:**
+- The font list is fetched from a static manifest in `shared/constants/certificates/googleFontsManifest.ts` (compiled at build time — NOT a runtime network call to Google).
+- Fonts are loaded on demand via the CSS Font Loading API: `document.fonts.load("16px ${family}")`.
+- `font-display: swap` is set on all `@font-face` declarations so text renders immediately with fallback and re-renders when the font arrives.
+- Lazy loading: fonts are loaded only when a text element references them or when the user previews them in the font dropdown.
+- Pre-loading: fonts used by the template's current elements are pre-loaded when the editor opens (via `useFontLoader.preloadTemplateFonts(elementIds: string[])`).
+
+**Custom font upload:**
+- Supported formats: TTF, OTF, WOFF, WOFF2.
+- File is sent to the storage API (Plan 7) via the `uploadFont` mutation (`UploadFontDocument` in `frontend/common/graphql/sharedDocuments/font.documents.ts`).
+- The server returns a CDN URL; the font is registered via a dynamically injected `@font-face` rule.
+- Uploaded fonts are cached in IndexedDB (`cert-fonts-cache` database, `fonts` object store) keyed by family name → `Blob`. On editor open, cached fonts are re-registered from IndexedDB without a network round-trip.
+- File size limit: 10MB per font file. Validation: reject non-font MIME types.
+
+#### R5.8.2 Font Category Collections
+
+The font manager shows fonts grouped by category tabs:
+- **Serif** — Times New Roman, Georgia, Playfair Display, Merriweather
+- **Sans-serif** — Inter, Roboto, Open Sans, Montserrat, Lato
+- **Display** — Bebas Neue, Anton, Oswald, Pacifico
+- **Handwriting** — Dancing Script, Caveat, Sacramento
+- **Monospace** — Roboto Mono, Source Code Pro, JetBrains Mono
+- **Arabic** — Amiri, Cairo, Tajawal, Noto Naskh Arabic, Reem Kufi (RTL-aware, with shaping engine support)
+
+Each tab is a `Tab` in MUI `Tabs`. The font grid inside each tab shows font cards.
+
+#### R5.8.3 Font Preview Card
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/fonts/FontCard.tsx`
+
+```tsx
+interface FontCardProps {
+  font: LoadedFont;
+  sampleText?: string;  // default "The quick brown fox 123"
+  onApply: (family: string) => void;
+  onRemove?: (family: string) => void;  // for custom fonts only
+}
+```
+
+Each card renders:
+- Font family display name (in the font itself, loaded on hover via `document.fonts.load`)
+- Sample text preview: "The quick brown fox 123" (default), or custom text from a "Preview text" `TextField` at the top of the font manager.
+- Available weights: row of `Chip` components (e.g., "Thin", "Light", "Regular", "Medium", "SemiBold", "Bold", "ExtraBold", "Black") — only weights the font actually supports are shown.
+- Variable font badge: if `variableAxes` is non-empty, a "Variable" `Chip` is shown.
+- License badge: small `Chip` with license type and tooltip with full license text.
+- "Apply" `IconButton` (check icon) → calls `onApply(family)` which sets the selected text element's `fontFamily`.
+- "Remove" `IconButton` (trash icon, custom fonts only) → calls `onRemove(family)`.
+
+#### R5.8.4 Variable Font Support
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/fonts/VariableFontControls.tsx`
+
+When a variable font is selected, the character panel (Plan 12) shows additional axis sliders:
+- **Weight** (if `wght` axis): slider 100–900, numeric display.
+- **Width** (if `wdth` axis): slider 50–200 (%), numeric display.
+- **Italic** (if `ital` axis): slider 0–1, toggle.
+- **Optical size** (if `opsz` axis): slider 8–144, numeric display.
+
+The axis values are stored in `SpanStyles` as a `variableAxes: Record<string, number>` map and applied via `font-variation-settings` CSS property:
+```css
+font-variation-settings: "wght" 450, "wdth" 120;
+```
+
+#### R5.8.5 Fallback Font Chain
+
+Each font family has a fallback chain stored in `SpanStyles.fontFamilyFallback: string[]`:
+```json
+{
+  "fontFamily": "Amiri",
+  "fontFamilyFallback": ["Times New Roman", "serif"]
+}
+```
+
+The CSS `font-family` is rendered as: `font-family: "Amiri", "Times New Roman", serif`.
+This ensures missing glyphs (e.g., Latin chars in an Arabic font) fall back gracefully.
+
+The font manager UI allows editing the fallback chain via a drag-to-reorder list in the font card's advanced settings.
+
+#### R5.8.6 Font Pairing Suggestions
+
+**File**: `frontend/common/views/dashboard/certificates/template-editor/fonts/FontPairingSuggestions.tsx`
+
+A curated list of font pairings for certificates, stored in `shared/constants/certificates/fontPairings.ts`:
+```ts
+export const FONT_PAIRINGS: FontPairing[] = [
+  {
+    id: "classic-serif",
+    heading: { family: "Playfair Display", weight: 700 },
+    body: { family: "Inter", weight: 400 },
+    label: "Classic Serif",
+    description: "Elegant serif heading + clean sans-serif body",
+    suitableFor: ["formal", "academic", "professional"],
+  },
+  {
+    id: "arabic-formal",
+    heading: { family: "Amiri", weight: 700 },
+    body: { family: "Cairo", weight: 400 },
+    label: "Arabic Formal",
+    description: "Traditional Arabic naskh heading + modern Arabic body",
+    suitableFor: ["arabic", "formal"],
+  },
+  // ... more pairings
+];
+```
+
+The UI shows pairing cards with a preview of the heading font and body font side-by-side. Clicking "Apply pairing" sets the heading text element's font to the heading font and body text elements' font to the body font (based on element role tags).
+
+#### R5.8.7 Font Performance
+
+- **Lazy-load**: All fonts load on first reference (not on editor startup). A loading indicator (MUI `CircularProgress` at 16px) shows in the font dropdown while a font is loading.
+- **Pre-load critical fonts**: The template's primary heading font and body font are pre-loaded on editor open.
+- **Font cache**: IndexedDB cache (see R5.8.1) persists across sessions.
+- **Render fallback**: `font-display: swap` → text renders immediately with system fallback, re-renders on font load. No invisible text (no `font-display: block`).
+- **Batch loading**: When the font dropdown opens, visible fonts (first 20 in the scroll viewport) are batch-loaded via `Promise.all` with a concurrency limit of 4.
+
+### R5.9 Typography Zustand Store Slice
+
+**File**: `frontend/common/stores/certificates/typographyStore.ts`
+
+A Zustand store slice (merged into `useTemplateElementEditorStore` from Plan 12, or a standalone store if the architecture team decides to separate it per AGENTS.md §store conventions).
+
+```ts
+interface TypographyState {
+  // Rich text editing
+  editingElementId: string | null;
+  caretPosition: number;
+  selection: { start: number; end: number } | null;
+
+  // Font management
+  loadedFonts: Record<string, LoadedFont>;
+  fontSearchQuery: string;
+  fontCategoryFilter: FontCategory | "all";
+  fontPreviewText: string;
+
+  // Actions
+  enterEditMode: (elementId: string) => void;
+  exitEditMode: () => void;
+  setSelection: (start: number, end: number) => void;
+  setCaretPosition: (pos: number) => void;
+
+  applySpanStyles: (elementId: string, start: number, end: number, styles: Partial<SpanStyles>) => void;
+  updateRichTextContent: (elementId: string, content: RichTextContent) => void;
+  applyParagraphStyles: (elementId: string, paragraphIndex: number, styles: Partial<ParagraphStyles>) => void;
+
+  loadFont: (family: string) => Promise<void>;
+  preloadTemplateFonts: (elementIds: string[]) => Promise<void>;
+  uploadFont: (file: File) => Promise<void>;
+  removeCustomFont: (family: string) => Promise<void>;
+  setFontSearchQuery: (query: string) => void;
+  setFontCategoryFilter: (category: FontCategory | "all") => void;
+  setFontPreviewText: (text: string) => void;
+}
+```
+
+The store is **non-persisted** (session-only), matching `frontend/common/stores/AGENTS.md` (no `File`/`Blob` serialization). The `loadedFonts` map stores `Blob` objects for custom fonts but these are never serialized — the IndexedDB cache handles persistence.
+
+### R5.10 i18n Namespace Extension
+
+All new keys are added to the existing `certificateEditor` translation namespace in:
+- `shared/locale/ar/.../templateEditor.ts`
+- `shared/locale/en/.../templateEditor.ts`
+
+```ts
+// Round 5 Typography
+typography: {
+  toolbar: {
+    bold: string;
+    italic: string;
+    underline: string;
+    strikethrough: string;
+    fontFamily: string;
+    fontSize: string;
+    fontSizePresets: string;
+    textColor: string;
+    alignLeft: string;
+    alignCenter: string;
+    alignRight: string;
+    alignJustify: string;
+    bulletList: string;
+    numberedList: string;
+    findReplace: string;
+    specialChars: string;
+    spellCheck: string;
+    spellCheckOn: string;
+    spellCheckOff: string;
+    pasteAsPlainText: string;
+  };
+  findReplace: {
+    title: string;
+    find: string;
+    replace: string;
+    replaceAll: string;
+    caseSensitive: string;
+    wholeWord: string;
+    regex: string;
+    matchCount: (count: number, total: number) => string;
+    noMatches: string;
+    invalidRegex: string;
+    previous: string;
+    next: string;
+  };
+  specialChars: {
+    title: string;
+    categories: {
+      arrows: string;
+      math: string;
+      currency: string;
+      symbols: string;
+      emoji: string;
+      custom: string;
+      recent: string;
+    };
+    preview: string;
+  };
+  spellCheck: {
+    suggestions: string;
+    ignore: string;
+    ignoreAll: string;
+    addToDictionary: string;
+    noSuggestions: string;
+  };
+  fonts: {
+    title: string;
+    previewText: string;
+    previewPlaceholder: string;
+    searchPlaceholder: string;
+    categories: {
+      all: string;
+      serif: string;
+      sansSerif: string;
+      display: string;
+      handwriting: string;
+      monospace: string;
+      arabic: string;
+    };
+    weights: {
+      100: string;  // Thin
+      200: string;  // ExtraLight
+      300: string;  // Light
+      400: string;  // Regular
+      500: string;  // Medium
+      600: string;  // SemiBold
+      700: string;  // Bold
+      800: string;  // ExtraBold
+      900: string;  // Black
+    };
+    styles: {
+      normal: string;
+      italic: string;
+      oblique: string;
+    };
+    license: {
+      openSource: string;
+      freeCommercial: string;
+      commercial: string;
+      unknown: string;
+    };
+    variable: string;
+    apply: string;
+    remove: string;
+    upload: string;
+    uploadError: string;
+    pairing: {
+      title: string;
+      heading: string;
+      body: string;
+      apply: string;
+      suitableFor: string;
+    };
+    fallbackChain: string;
+    addFallback: string;
+    preloadWarning: string;
+  };
+};
+```
+
+### R5.11 Desktop vs Mobile Differences
+
+| Feature | Desktop | Mobile |
+|---------|---------|--------|
+| Rich Text Toolbar | Floating popover above text element, full button set visible | Collapsed bottom sheet with scrollable horizontal button row |
+| Find & Replace | Full modal dialog | Full-screen dialog with simplified layout |
+| Special Characters | Dialog with sidebar categories | Full-screen dialog with category dropdown selector |
+| Spell Check | Context menu on right-click | Long-press → bottom sheet with suggestions |
+| Font Manager | Left sidebar collapsible section | Push navigations to a full Font Manager screen (separate route) |
+| Font Card Grid | 3-column grid | 1-column list |
+| Variable Font Controls | Inline axis sliders in character panel | Expandable card with sliders |
+
+### R5.12 Cross-Plan Contracts
+
+- **Plan 02 (Types)**: `RichTextContent`, `RichTextSpan`, `SpanStyles`, `ParagraphStyles`, `LoadedFont`, `FontCategory`, `FontPairing` types must be added to the backend schema and the generated GraphQL types. The `RichTextContent` replaces the previous `textContent: string` on text element types.
+- **Plan 03 (Repository)**: The repository must serialize `RichTextContent` as JSONB (stored as a JSON column). No schema migration is needed for JSONB — just a column type if not already JSON.
+- **Plan 05 (GraphQL)**: The element mutations must accept `RichTextContent` as a JSON input type. A custom GraphQL scalar `JSON` or a dedicated `RichTextContentInput` input type.
+- **Plan 06 (PDF)**: The PDF renderer must parse `RichTextContent.spans` and emit per-span styled text runs (using the PDF library's text run API). Variable font axes must map to the PDF engine's font variation settings.
+- **Plan 07 (Storage)**: Font upload uses the storage API (mutation + CDN URL return).
+- **Plan 11 (Canvas)**: Canvas renders `RichTextContent` via `RichTextRenderer`. Text-on-path, measurement, caching, and inline edit mode entry are defined in Plan 11 §R5.
+- **Plan 12 (Panels)**: The character and paragraph panels consume `SpanStyles` and `ParagraphStyles` from the shared types. The `ColorPickerField` and `GradientPickerField` from Plan 12 R4 are reused for text color and text fill.
+
+### R5.13 Quality & Verification
+
+**Per-file verification loop** (per AGENTS.md): Each new file created in Round 5 must pass:
+1. `bun run tsgo` — zero type errors
+2. `bun biome:check` — zero formatting/lint issues
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read** before working on Round 5 files:
+- `.github/instructions/frontend.instructions.md` (all frontend files)
+- `.github/instructions/tests.instructions.md` (test files)
+- `frontend/views/AGENTS.md`, `frontend/AGENTS.md` (view components)
+- `frontend/common/stores/AGENTS.md` (store modifications)
+- `shared/AGENTS.md` (shared types and constants)
+
+**Performance considerations**:
+- The rich text renderer must use `React.memo` on each `<span>` to prevent full re-render on single-character edits. The memo comparator checks `span.id` and `span.styles` only.
+- The inline editor must batch store updates (debounce 16ms = one frame) to avoid store thrashing on rapid typing.
+- Font loading is async — the editor must show the system fallback while loading, then trigger a re-render of only affected elements (not the full canvas) when the font arrives.
+- The `useFontLoader` hook must use `AbortController` to cancel pending font loads when the user switches fonts rapidly (prevents race conditions where an earlier font load resolves after a later one).
+
+---
+
+## Round 5: Rulers, Guides & Grid System
+
+> Added as a distinct Round 5 topic (Rulers/Guides/Grid) to extend the Plan 10 template editor shell with the View menu entries, toolbar toggles, and i18n keys for the ruler, guide, and grid system. The canvas-side rendering and interaction logic is owned by Plan 11 §R5 (Rulers, Guides & Grid System) and the settings/preset-management UI by Plan 12 §R5. Plan 10 owns the editor chrome: the View menu structure, toolbar toggle buttons, keyboard shortcut registration, and the i18n namespace additions. All state lives in the shared `guideGridStore` (Zustand, `frontend/common/stores/cert/guideGridStore.ts`, created in Plan 11 §R5-G.13) — Plan 10 components read/write via selector hooks.
+
+### R5-G.1 View Menu — Ruler/Guide/Grid Entries
+
+**File**: `frontend/desktop/views/dashboard/cert-template-editor/components/ViewMenu.tsx` (extend existing — or new if the View menu does not exist yet)
+
+The template editor's menu bar gains a "View" menu (MUI `Menu` anchored from a `MenuItem`-style toolbar button or a `Menu` in the `EditorHeader`). Plan 10 owns this menu's structure; the items toggle `guideGridStore` flags.
+
+**Menu structure** (with keyboard shortcuts):
+
+```
+View
+├─ ✓ Rulers                      Ctrl+R
+├─ ✓ Guides                     Ctrl+;
+├─ ✓ Grid                        Ctrl+'
+├─ ─────────────
+├─ Lock Guides                  Ctrl+Shift+;
+├─ Clear Guides
+├─ New Guide…                    Ctrl+Shift+;
+├─ ─────────────
+├─ Snap To ▶
+│   ├─ ✓ Grid                    Shift+Ctrl+'
+│   ├─ ✓ Guides
+│   ├─ ✓ Layers
+│   ├─ ✓ Pixels
+│   └─ ✓ Artboard
+├─ ─────────────
+├─ Smart Guides                  Ctrl+Alt+;
+├─ ─────────────
+├─ Guide Presets ▶
+│   ├─ Safe Area
+│   ├─ Bleed
+│   ├─ Thirds
+│   ├─ Golden Ratio
+│   ├─ Center Cross
+│   ├─ Regular Grid…
+│   ├─ ─────────────
+│   ├─ Print Presets ▶
+│   │   ├─ A4 Portrait
+│   │   ├─ A4 Landscape
+│   │   ├─ Letter Portrait
+│   │   ├─ Letter Landscape
+│   │   └─ Custom Certificate…
+│   ├─ ─────────────
+│   ├─ Save Current as Preset…
+│   ├─ Manage Presets…
+│   ├─ Import Presets…
+│   └─ Export Presets…
+├─ ─────────────
+├─ Grid Settings…               Ctrl+Alt+'
+└─ Guide & Grid Settings…
+```
+
+**Component** (MUI v9 — `sx` prop only):
+
+```tsx
+interface ViewMenuProps {
+  // From guideGridStore (passed via ViewModel or useGuideGridStore selectors)
+  rulersVisible: boolean;
+  guidesVisible: boolean;
+  gridVisible: boolean;
+  guidesLocked: boolean;
+  snapConfig: SnapConfig;
+  smartGuidesEnabled: boolean;
+  onToggleRulers: () => void;
+  onToggleGuides: () => void;
+  onToggleGrid: () => void;
+  onToggleGuidesLock: () => void;
+  onClearGuides: () => void;
+  onOpenNewGuideDialog: () => void;
+  onSetSnapTarget: (target: SnapTarget, value: boolean) => void;
+  onToggleSmartGuides: () => void;
+  onApplyGuidePreset: (presetId: string) => void;
+  onOpenGridSettings: () => void;
+  onOpenGuideGridSettings: () => void;
+  onOpenPresetManager: () => void;
+  onSaveCurrentAsPreset: () => void;
+  onImportPresets: () => void;
+  onExportPresets: () => void;
+}
+```
+
+Each `MenuItem` uses a `ListItemIcon` with a check icon (`CheckOutlined`) for toggle items and the MUI `ListItemIcon` for action items. Shortcuts are shown as `Typography` in the `MenuItem`'s secondary text — use the i18n key `viewMenu.shortcuts.*`.
+
+The "Snap To" submenu is a nested `Menu` with five checkbox `MenuItem`s (Grid, Guides, Layers, Pixels, Artboard). The "Guide Presets" submenu is a nested `Menu` with the preset actions. The "Print Presets" submenu is a doubly-nested `Menu`.
+
+### R5-G.2 Toolbar Toggle Buttons
+
+**File**: `frontend/desktop/views/dashboard/cert-template-editor/components/EditorHeader.tsx` (extend existing) or a new `CanvasToolbarToggles.tsx`
+
+The editor header or canvas toolbar gains three toggle `IconButton`s:
+
+| Button | Icon | Tooltip (i18n) | Shortcut | Toggles |
+|---|---|---|---|---|
+| Rulers | `StraightenOutlined` | `t('toolbar.rulers')` | `Ctrl+R` | `guideGridStore.rulersVisible` |
+| Guides | `RuleOutlined` | `t('toolbar.guides')` | `Ctrl+;` | `guideGridStore.guidesVisible` |
+| Grid | `GridOnOutlined` | `t('toolbar.grid')` | `Ctrl+'` | `guideGridStore.gridVisible` |
+
+Each button uses `aria-pressed={value}` for accessibility and `color={value ? 'primary' : 'default'}`. The tooltip shows the shortcut via `Tooltip` with `title={t('toolbar.rulers') + ' (Ctrl+R)'}`.
+
+```tsx
+<Tooltip title={t('toolbar.rulers') + ' (Ctrl+R)'}>
+  <IconButton
+    onClick={onToggleRulers}
+    aria-pressed={rulersVisible}
+    sx={{ color: rulersVisible ? 'primary.main' : 'text.secondary' }}
+  >
+    <StraightenOutlined />
+  </IconButton>
+</Tooltip>
+```
+
+### R5-G.3 Keyboard Shortcut Registration
+
+**File**: `frontend/common/views/dashboard/cert-template-editor/useTemplateEditorViewModel.ts` (extend existing ViewModel, or the canvas keyboard handler in Plan 11)
+
+Register the ruler/guide/grid shortcuts in the template editor's keyboard handler:
+
+| Shortcut | Action | Store call |
+|---|---|---|
+| `Ctrl+R` | Toggle rulers | `guideGridStore.toggleRulers()` |
+| `Ctrl+;` | Toggle guides (and smart guides) | `guideGridStore.toggleGuides()` |
+| `Ctrl+'` | Toggle grid | `guideGridStore.toggleGrid()` |
+| `Ctrl+Shift+;` | Lock guides | `guideGridStore.toggleGuidesLock()` |
+| `Ctrl+Shift+Alt+;` | New guide dialog | Opens `NewGuideDialog` (set `newGuideDialogOpen = true`) |
+| `Ctrl+Alt+;` | Toggle smart guides | `guideGridStore.setSmartGuides({ enabled: !current })` |
+| `Ctrl+Alt+'` | Open grid settings | Opens `GridSettingsDialog` |
+| `Shift+Ctrl+'` | Toggle snap to grid | `guideGridStore.toggleSnapToGrid()` |
+| `Delete` (guide selected) | Delete selected guide | `guideGridStore.removeGuide(selectedGuideId)` |
+| `Escape` (guide selected) | Deselect guide | `guideGridStore.selectGuide(null)` |
+
+These shortcuts are registered alongside the existing canvas shortcuts (Plan 11 §10). The handler checks the `guideGridStore` flags and the canvas interaction state to avoid conflicts (e.g., `Delete` on a guide vs. on an element — check `selectedGuideId` first).
+
+### R5-G.4 i18n Namespace Additions
+
+**File**: `shared/locale/types/dashboard/certificates/templateEditor.ts` (extend existing type schema)
+
+Add the following keys to the `CertificateTemplateEditorLabels` (or the relevant namespace type) for the ruler/guide/grid system:
+
+```typescript
+// Add to the existing label type:
+interface RulerLabels {
+  units: {
+    px: string;
+    mm: string;
+    cm: string;
+    in: string;
+    pica: string;
+    pt: string;
+  };
+  contextMenu: {
+    title: string;
+    changeUnit: string;
+  };
+}
+
+interface GuideLabels {
+  create: {
+    horizontal: string;
+    vertical: string;
+  };
+  newGuideDialog: {
+    title: string;
+    orientation: string;
+    horizontal: string;
+    vertical: string;
+    position: string;
+    create: string;
+    cancel: string;
+  };
+  lock: string;
+  unlock: string;
+  clear: string;
+  clearConfirm: string;
+  clearConfirmTitle: string;
+  delete: string;
+  tooltip: {
+    position: (axis: string, value: string) => string; // "X: 500px"
+  };
+  presets: {
+    safeArea: string;
+    bleed: string;
+    thirds: string;
+    goldenRatio: string;
+    centerCross: string;
+    regularGrid: string;
+    custom: string;
+    saveAsPreset: string;
+    presetName: string;
+    manage: string;
+    manageDialogTitle: string;
+    import: string;
+    export: string;
+    delete: string;
+    rename: string;
+    noPresets: string;
+  };
+  printPresets: {
+    a4Portrait: string;
+    a4Landscape: string;
+    letterPortrait: string;
+    letterLandscape: string;
+    customCertificate: string;
+  };
+  infoBar: {
+    cursor: string;
+    selection: string;
+    position: string;
+    zoom: string;
+    document: string;
+    dragMove: (dx: string, dy: string) => string;
+    dragResize: (w: string, h: string) => string;
+    dragRotate: (angle: string) => string;
+    dragGuide: (axis: string, pos: string) => string;
+  };
+}
+
+interface GridLabels {
+  settings: {
+    title: string;
+    type: string;
+    square: string;
+    baseline: string;
+    modular: string;
+    isometric: string;
+    dot: string;
+    size: string;
+    subdivisions: string;
+    color: string;
+    opacity: string;
+    showAboveElements: string;
+    snapToGrid: string;
+    convertToGuides: string;
+    // Modular
+    columns: string;
+    rows: string;
+    gutterWidth: string;
+    alignment: string;
+    // Baseline
+    baselineSpacing: string;
+    baselineStart: string;
+    relativeTo: string;
+    // Isometric
+    isoAngle: string;
+    isoAngleHint: string;
+  };
+}
+
+interface SmartGuideLabels {
+  toggle: string;
+  snapSensitivity: string;
+  showDistance: string;
+  showEqualSpacing: string;
+  showEqualSize: string;
+}
+
+interface SnapLabels {
+  snapTo: string;
+  grid: string;
+  guides: string;
+  layers: string;
+  pixels: string;
+  artboard: string;
+  threshold: string;
+  priority: string;
+}
+
+interface ViewMenuLabels {
+  title: string;
+  rulers: string;
+  guides: string;
+  grid: string;
+  lockGuides: string;
+  clearGuides: string;
+  newGuide: string;
+  smartGuides: string;
+  guidePresets: string;
+  printPresets: string;
+  gridSettings: string;
+  guideGridSettings: string;
+  snapTo: string;
+  shortcuts: {
+    rulers: string;
+    guides: string;
+    grid: string;
+    lockGuides: string;
+    newGuide: string;
+    smartGuides: string;
+    gridSettings: string;
+    snapToGrid: string;
+  };
+}
+```
+
+**AR/EN implementations**:
+
+- `shared/locale/en/dashboard/certificates/templateEditor.ts` — English strings
+- `shared/locale/ar/dashboard/certificates/templateEditor.ts` — Arabic strings (RTL-aware; note that horizontal/vertical labels may need RTL mirroring for guide orientation, but X/Y axes remain in physical coordinates)
+
+All keys must use the compile-time i18n system (no `next-intl`). Prefix interpolation functions in the type schema (`(dx: string, dy: string) => string`) and implement them with template literals in each locale file.
+
+### R5-G.5 Guide Presets Menu Integration
+
+**File**: `frontend/desktop/views/dashboard/cert-template-editor/components/GuidePresetsMenu.tsx` (new)
+
+A nested `Menu` component that lists the built-in and custom presets from `guideGridStore.presets`. Built-in presets are non-deletable; custom presets support rename/delete via the "Manage Presets" dialog (owned by Plan 12 §R5).
+
+```tsx
+interface GuidePresetsMenuProps {
+  presets: readonly GuidePreset[];
+  onApplyPreset: (presetId: string) => void;
+  onSaveCurrentAsPreset: () => void;
+  onOpenPresetManager: () => void;
+  onImportPresets: () => void;
+  onExportPresets: () => void;
+  anchorEl: HTMLElement | null;
+  onClose: () => void;
+}
+```
+
+Built-in preset IDs: `safe-area`, `bleed`, `thirds`, `golden-ratio`, `center-cross`. Print preset IDs: `a4-portrait`, `a4-landscape`, `letter-portrait`, `letter-landscape`, `custom-certificate`.
+
+Each preset `MenuItem` shows the preset name and a small icon indicating the guide layout it creates.
+
+### R5-G.6 Keyboard Shortcut Display
+
+The View menu items and toolbar tooltips must display the keyboard shortcuts. Since the shortcuts use modifier keys (`Ctrl`, `Shift`, `Alt`), and these may differ on macOS (`Cmd`, `Shift`, `Option`), the display logic detects the platform via `navigator.platform` and renders the appropriate modifier symbols. This is a shared utility:
+
+**File**: `frontend/common/views/dashboard/cert-template-editor/utils/shortcutDisplay.ts` (new)
+
+```typescript
+export const isMac = (): boolean => navigator.platform.toLowerCase().includes('mac');
+
+export const mod = (key: string): string => isMac() ? `⌘${key}` : `Ctrl+${key}`;
+export const shiftMod = (key: string): string => isMac() ? `⌘⇧${key}` : `Ctrl+Shift+${key}`;
+export const altMod = (key: string): string => isMac() ? `⌘⌥${key}` : `Ctrl+Alt+${key}`;
+```
+
+### R5-G.7 Bleed/Slug Visual Indicator
+
+**File**: `frontend/common/views/dashboard/cert-canvas/components/BleedIndicator.tsx` (new — rendered by the canvas, but the toggle lives in Plan 10's View menu)
+
+The "Bleed" guide preset also enables a visual bleed area indicator — a semi-transparent overlay outside the trim line showing the bleed margin (default 3mm or 0.125in). The indicator is a `Box` with `sx={{ position: 'absolute', ... backgroundColor: theme.palette.warning.main, opacity: 0.08 }}` rendered around the canvas bounds, extending outward by the bleed margin (converted to template-px via the unit conversion from Plan 11 §R5-G.1).
+
+The toggle for bleed display: `guideGridStore.showBleed` boolean, set to `true` when the "Bleed" preset is applied and `false` otherwise. The View menu shows "✓ Bleed Indicator" under the Guide Presets submenu.
+
+### R5-G.8 Design Decisions
+
+**DD-R5G-1: GuideGrid Store Location**
+
+`guideGridStore` lives in `frontend/common/stores/cert/guideGridStore.ts` (co-located with the canvas store). Both the template editor (Plan 10) and the canvas (Plan 11) read from it. The store is non-persisted (session-only).
+
+**DD-R5G-2: Shortcuts Shared with Canvas**
+
+The keyboard shortcuts (`Ctrl+;`, `Ctrl+'`, etc.) are registered in the canvas's keyboard handler (Plan 11 §10) because they need to work even when the canvas has focus. The View menu items trigger the same store actions.
+
+**DD-R5G-3: View Menu is Desktop-Only**
+
+The View menu is part of the desktop editor's menu bar. Mobile does not have a menu bar — mobile users access ruler/guide/grid toggles via a settings sheet in the mobile element editor (Plan 12 §R5 mobile). This follows the existing tier isolation (Plan 10 DD-2: mobile is fundamentally different).
+
+
+## Round 5: Custom Shapes & Boolean Operations
+
+> Added as Round 5. Extends the editor shell with a production-grade shape tool system: toolbar shape tools, a custom shape preset library panel (akin to Photoshop's Custom Shapes), SVG/URL import, shape search, recently used shapes, and the i18n/store contracts that Plans 11 and 12 build upon. This plan covers the **editor shell, toolbar, and left panel** portions; canvas rendering and property controls are defined in Plans 11 and 12 respectively.
+
+### R5.1 Shape Tool Toolbar Group
+
+**Component**: `ShapeToolGroup`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/ShapeToolGroup.tsx`
+
+**Design**:
+
+A dedicated `ToggleButtonGroup` in the main `EditorToolbar` that hosts all shape-drawing tools. Only one shape tool is active at a time. Selecting a tool enters "shape drawing mode" — the cursor becomes a crosshair and the next canvas click+drag creates a new shape element of the selected type. Selecting the same tool again (or pressing `Esc`) exits drawing mode and returns to the default select cursor.
+
+```tsx
+<ToggleButtonGroup
+  value={activeShapeTool}
+  exclusive
+  onChange={(_, tool) => setActiveShapeTool(tool)}
+  size="small"
+>
+  <ToggleButton value="rectangle" title={t("tool.rectangle")}>
+    <CropSquareOutlined sx={{ fontSize: 20 }} />
+  </ToggleButton>
+  <ToggleButton value="roundedRectangle" title={t("tool.roundedRectangle")}>
+    <RoundedCornerOutlined sx={{ fontSize: 20 }} />
+  </ToggleButton>
+  <ToggleButton value="ellipse" title={t("tool.ellipse")}>
+    <CircleOutlined sx={{ fontSize: 20 }} />
+  </ToggleButton>
+  <ToggleButton value="polygon" title={t("tool.polygon")}>
+    <HexagonOutlined sx={{ fontSize: 20 }} />
+  </ToggleButton>
+  <ToggleButton value="star" title={t("tool.star")}>
+    <StarBorderOutlined sx={{ fontSize: 20 }} />
+  </ToggleButton>
+  <ToggleButton value="triangle" title={t("tool.triangle")}>
+    <TriangleOutlined sx={{ fontSize: 20 }} />
+  </ToggleButton>
+  <ToggleButton value="line" title={t("tool.line")}>
+    <RemoveOutlined sx={{ fontSize: 20 }} />
+  </ToggleButton>
+  <ToggleButton value="custom" title={t("tool.customShape")}>
+    <CategoryOutlined sx={{ fontSize: 20 }} />
+  </ToggleButton>
+</ToggleButtonGroup>
+```
+
+**Keyboard shortcuts** (registered in `useEditorShortcuts`, requiring no conflicting text-focus state):
+
+| Shortcut | Tool | Action |
+|---|---|---|
+| `R` | Rectangle | Enter rectangle draw mode |
+| `Shift+R` | Rounded Rectangle | Enter rounded rectangle draw mode |
+| `E` | Ellipse | Enter ellipse draw mode |
+| `L` | Line | Enter line draw mode |
+| `P` | Polygon | Enter polygon draw mode |
+| `S` | Star | Enter star draw mode |
+| `T` | Triangle | Enter triangle draw mode |
+| `C` | Custom Shape | Activate custom shape picker |
+| `Esc` | — | Exit shape draw mode, restore select tool |
+
+Shortcuts are disabled when a text element or `TextField`/`TextArea` has focus, same mechanism as Round 4's `ShortcutManager` scope-resolution.
+
+**Proportional drawing modifier**: During an active click+drag, holding `Shift` constrains the shape to proportional dimensions (perfect square for rectangle/rounded-rectangle, perfect circle for ellipse, equilateral triangle, equilateral polygon, uniform star). The proportional constraint logic lives in the canvas layer (Plan 11) — the toolbar merely communicates the active tool to the store.
+
+**Draw-from-center modifier**: Holding `Alt` during click+drag draws the shape from the center outward instead of from the top-left corner. The origin point becomes the center of the bounding box.
+
+**Store additions** (`templateEditorStore.ts`):
+```typescript
+type ShapeTool = 'select' | 'rectangle' | 'roundedRectangle' | 'ellipse' | 'polygon' | 'star' | 'triangle' | 'line' | 'custom';
+
+activeShapeTool: ShapeTool;              // default 'select'
+shapeToolConfig: Partial<ShapeToolConfig>; // defaults carried into newly drawn shapes
+setActiveShapeTool: (tool: ShapeTool) => void;
+setShapeToolConfig: (config: Partial<ShapeToolConfig>) => void;
+```
+
+```typescript
+interface ShapeToolConfig {
+  defaultCornerRadius: number;   // for roundedRectangle — default 12
+  defaultPolygonSides: number;   // for polygon — default 6
+  defaultStarPoints: number;      // for star — default 5
+  defaultStarInnerRadius: number; // for star — default 40 (percent of outer)
+  defaultLineThickness: number;   // for line — default 2
+  defaultFillEnabled: boolean;    // default true
+  defaultStrokeEnabled: boolean;   // default false
+}
+```
+
+This config is edited in the shape properties panel (Plan 12) but seeded here so the toolbar can carry global defaults.
+
+### R5.2 Custom Shape Library Panel
+
+**Component**: `ShapeLibraryPanel`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/ShapeLibraryPanel.tsx`
+
+**Design**:
+
+A left-sidebar panel (toggle-able alongside the existing Layers panel) that displays a scrollable thumbnail grid of preset shapes, organized by category. This mirrors Photoshop's Custom Shape Picker panel but supports a richer category taxonomy tailored for certificate design.
+
+```
+┌─────────────────────────────────┐
+│ [Search bar.............] [⊞] │
+│ ▼ Basic                         │
+│   ▦ ▢ ○ ⬡ ★ △ — ✎              │
+│ ▼ Arrows                        │
+│   → ↗ ⇉ » ✋ ✏                   │
+│ ▼ Banners                       │
+│   ▔▔▔ ╱ ╲ ◳ ◴ ◵ ◶ ◷              │
+│ ▼ Ornaments                     │
+│   ❀ ❧ ❦ ⸙ ⟐ ⟡                   │
+│ ▼ Borders                       │
+│   □ ◯ ⌒ ⌒ ⌒                     │
+│ ▼ Certificates                  │
+│   🏅 🎖 🏵 ☘ ☂                    │
+│ ▼ Recently Used                 │
+│   ★ ▦ → ❀                       │
+│ ▼ Custom (User Saved)           │
+│   + Import SVG                   │
+└─────────────────────────────────┘
+```
+
+```typescript
+interface ShapeLibraryPanelProps {
+  onSelectShape: (shapeId: string, category: ShapeCategory) => void;
+  onImportSvg: () => void;
+  onImportUrl: () => void;
+  onSaveCustomShape: (elementId: string) => void;
+}
+```
+
+**Categories** (defined in `shared/constants/cert/shapeCategories.ts` — shared between frontend and backend for server-side validation):
+
+| Category ID | Label Key | Content |
+|---|---|---|
+| `basic` | `shapeCategory.basic` | Rectangle, Rounded Rect, Ellipse, Polygon (3–12 sides), Star (3–20 pts), Triangle, Line, Heart |
+| `arrows` | `shapeCategory.arrows` | Straight arrow, Curved arrow, Double arrow, Chevron arrow, Hand-drawn arrow, Callout arrow |
+| `banners` | `shapeCategory.banners` | Scroll banner, Ribbon banner, Flag banner, Decorative banner, Pennant |
+| `ornaments` | `shapeCategory.ornaments` | Flourish, Divider, Corner ornament, Fleur-de-lis, Scrollwork, Vine, Filigree |
+| `borders` | `shapeCategory.borders` | Rectangular border, Oval border, Scalloped border, Decorative border, Rope border |
+| `certificates` | `shapeCategory.certificates` | Seal, Ribbon medallion, Laurel wreath, Medal, Rosette, Crest, Crown |
+| `custom` | `shapeCategory.custom` | User-saved shapes (persisted to backend via Plan 7 storage) |
+
+**Shape definition schema** (`shared/types/cert/shapeLibrary.types.ts`):
+```typescript
+interface ShapePreset {
+  id: string;                    // unique preset ID, e.g., "banner-scroll-01"
+  category: ShapeCategory;
+  labelKey: string;              // i18n key: "shapePreset.bannerScroll"
+  pathData: string;              // SVG path "d" attribute
+  viewBox: { width: number; height: number };  // original design dimensions
+  defaultSize: { width: number; height: number }; // suggested placement size
+  tags: string[];                 // search keywords (also localized via labelKey)
+  thumbnail: string;              // pre-rendered SVG string for 64px preview
+}
+```
+
+Preset definitions are static constants in `shared/constants/cert/shapePresets/` — one file per category — loaded lazily by the panel (each category fetched on first expand, not upfront).
+
+**Shape search bar**: An MUI `TextField` with `InputProps` containing a `SearchOutlined` icon. Filters shapes across all categories in real-time using `tags` matching. The search is case-insensitive and supports partial match. When searching, the category headers collapse and results are shown in a flat grid. Clearing the search restores the category-grouped view.
+
+**Recently used shapes**: A `recentShapeIds: string[]` in the store (capped at 12, most-recent-first). Updated whenever a shape is placed on the canvas (either via library click or tool draw). Displayed as a collapsible section at the top of the panel when non-empty. Persisted to `localStorage` via Zustand persist (not backend — this is a per-user-per-browser preference).
+
+**Custom shapes section**: Shows user-saved shapes (persisted to backend via Plan 7 storage API). Each custom shape has a delete button (small `IconButton` with `DeleteOutlined`). The section header includes two action buttons:
+- **Import SVG** — opens a file dialog, accepts `.svg` files, parses the SVG to extract all `<path>` elements' `d` attributes, creates a new `ShapePreset` with the merged path data.
+- **Import from URL** — opens a dialog with a `TextField` for URL input. Validates CORS (preflight `fetch` with `mode: 'cors'`), fetches the SVG content, parses identically to file import. Shows an error toast if CORS fails or the URL is not a valid SVG.
+
+**SVG import parsing** (`frontend/views/dashboard/cert/templates/editor/utils/svgImport.ts`):
+```typescript
+export async function parseSvgToShapePreset(
+  svgContent: string,
+  label: string,
+  category: ShapeCategory,
+): Promise<ShapePreset> {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+  const svgEl = doc.documentElement;
+  const viewBox = svgEl.getAttribute('viewBox');
+  const width = parseFloat(svgEl.getAttribute('width') ?? '100');
+  const height = parseFloat(svgEl.getAttribute('height') ?? '100');
+  const paths = Array.from(svgEl.querySelectorAll('path'));
+  const pathData = paths.map(p => p.getAttribute('d') ?? '').join(' ');
+  // Validate path data is non-empty
+  if (!pathData.trim()) throw new Error('NoPathDataFound');
+  return {
+    id: `custom-${Date.now()}`,
+    category,
+    labelKey: label,
+    pathData,
+    viewBox: { width, height },
+    defaultSize: { width: Math.min(width, 200), height: Math.min(height, 200) },
+    tags: [label.toLowerCase()],
+    thumbnail: svgContent,  // store original SVG as thumbnail
+  };
+}
+```
+
+**URL import with CORS validation** (`frontend/views/dashboard/cert/templates/editor/utils/svgUrlImport.ts`):
+```typescript
+export async function importShapeFromUrl(url: string): Promise<ShapePreset> {
+  // Preflight CORS check
+  const response = await fetch(url, { mode: 'cors', headers: { 'Accept': 'image/svg+xml' } });
+  if (!response.ok) throw new Error('fetchFailed');
+  const content = await response.text();
+  if (!content.includes('<svg')) throw new Error('InvalidSvg');
+  const fileName = url.split('/').pop()?.replace('.svg', '') ?? 'imported';
+  return parseSvgToShapePreset(content, fileName, 'custom');
+}
+```
+
+**Thumbnail rendering**: Each shape preset renders as a 64×64px preview using an inline `<svg>` with the preset's `pathData` scaled to fit the 64px box while maintaining aspect ratio. Uses `theme.palette.text.primary` for fill with `theme.palette.action.hover` background on hover. The grid uses MUI `ImageList` with `cols={4}` and `gap={4}`.
+
+```tsx
+<ImageList cols={4} gap={4} sx={{ width: '100%' }}>
+  {shapes.map(shape => (
+    <ImageListItem
+      key={shape.id}
+      onClick={() => onSelectShape(shape.id, shape.category)}
+      sx={{
+        cursor: 'pointer',
+        borderRadius: 1,
+        '&:hover': { bgcolor: 'action.hover' },
+        border: selectedShapeId === shape.id ? 1 : 0,
+        borderColor: 'primary.main',
+      }}
+    >
+      <Box sx={{ width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width="56" height="56" viewBox={`0 0 ${shape.viewBox.width} ${shape.viewBox.height}`}>
+          <path d={shape.pathData} fill={theme.palette.text.primary} />
+        </svg>
+      </Box>
+    </ImageListItem>
+  ))}
+</ImageList>
+```
+
+### R5.3 Boolean Operation Toolbar
+
+**Component**: `BooleanToolbar`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/BooleanToolbar.tsx`
+
+**Design**:
+
+A contextual toolbar that appears (animated via `Collapse` from MUI) when **≥2 shape elements** are selected simultaneously. It slides in below the main toolbar. When fewer than 2 shapes are selected, it slides out of view with a `Collapse` transition.
+
+```tsx
+<Collapse in={selectedShapeCount >= 2} timeout={200}>
+  <Paper sx={{ display: 'flex', gap: 0.5, p: 0.5, borderRadius: 1 }}>
+    <Tooltip title={t("boolean.unite")}>
+      <IconButton onClick={() => applyBooleanOp('unite')}>
+        <JoinFullOutlined sx={{ fontSize: 20 }} />
+      </IconButton>
+    </Tooltip>
+    <IconButton onClick={() => applyBooleanOp('subtract')}><JoinLeftOutlined /></IconButton>
+    <IconButton onClick={() => applyBooleanOp('intersect')}><JoinInnerOutlined /></IconButton>
+    <IconButton onClick={() => applyBooleanOp('exclude')}><OpacityOutlined /></IconButton>
+    <Divider orientation="vertical" flexItem />
+    <IconButton onClick={() => applyBooleanOp('divide')}><CallSplitOutlined /></IconButton>
+    <IconButton onClick={() => applyBooleanOp('trim')}><ContentCutOutlined /></IconButton>
+    <IconButton onClick={() => applyBooleanOp('merge')}><MergeOutlined /></IconButton>
+    <Divider orientation="vertical" flexItem />
+    <Tooltip title={t("boolean.flatten")}>
+      <IconButton onClick={flattenBoolean}><LayersClearOutlined /></IconButton>
+    </Tooltip>
+  </Paper>
+</Collapse>
+```
+
+**Boolean operation types** (`shared/types/cert/booleanOp.types.ts`):
+```typescript
+type BooleanOperation =
+  | 'unite'      // Union — sum of all visible areas
+  | 'subtract'   // Difference — top shape minus bottom shapes
+  | 'intersect'  // Only overlapping area remains
+  | 'exclude'    // XOR — non-overlapping areas only
+  | 'divide'     // Split into separate pieces at intersection lines
+  | 'trim'       // Cut at intersection points, keep separate pieces
+  | 'merge';     // Compound path (non-destructive, editable)
+```
+
+**Operation visualization icons**: Each boolean operation has a distinctive MUI icon that visually represents its effect:
+- Unite: `JoinFullOutlined` — two overlapping circles merged
+- Subtract: `JoinLeftOutlined` — one shape minus another
+- Intersect: `JoinInnerOutlined` — intersection lens
+- Exclude: `OpacityOutlined` — XOR appearance
+- Divide: `CallSplitOutlined` — splitting paths
+- Trim: `ContentCutOutlined` — scissors cutting
+- Merge: `MergeOutlined` — compound path merge
+- Flatten: `LayersClearOutlined` — bake to single shape
+
+**Boolean operation keyboard shortcuts**:
+
+| Shortcut | Operation | ToggleGroup Value |
+|---|---|---|
+| `Ctrl+Shift+U` | Unite (Union) | `unite` |
+| `Ctrl+Shift+S` | Subtract (Difference) | `subtract` |
+| `Ctrl+I` | Intersect | `intersect` |
+| `Ctrl+Shift+X` | Exclude (XOR) | `exclude` |
+
+Keyboard shortcuts are only active when `selectedShapeCount >= 2`. They are registered in `ShortcutManager` under a `boolean-ops` scope that activates contextually.
+
+**Non-destructive boolean storage**: Boolean results are stored as a compound element referencing the original shape IDs, not as a baked path. This allows editing the result later — re-ordering operands, changing the operation type, or flattening.
+
+```typescript
+interface BooleanResultElement extends BaseCanvasElement {
+  type: 'shape';
+  shapeType: 'boolean';
+  booleanConfig: {
+    operation: BooleanOperation;
+    operandIds: string[];          // ordered list of source shape element IDs
+    operands: ShapeOperand[];     // cached copies of original shapes for rendering
+  };
+}
+```
+
+**Flatten**: Converts a non-destructive boolean result into a single baked shape element. The `pathData` is computed from the boolean operation's combined geometry (Plan 11's boolean path math) and stored as a `shapeType: 'custom'` element with the flattened path. The original operand shapes are removed from the canvas. This is a **destructive** operation — the undo stack (R3) is the only path back.
+
+**Store additions** (`templateEditorStore.ts`):
+```typescript
+booleanOperationsActive: boolean;        // computed: selectedShapeCount >= 2
+applyBooleanOperation: (op: BooleanOperation, operandIds: string[]) => string; // returns new element ID
+flattenBoolean: (elementId: string) => void;
+getBooleanOperands: (elementId: string) => ShapeOperand[];
+```
+
+### R5.4 Shape Tool Settings Dialog
+
+**Component**: `ShapeToolSettingsDialog`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/dialogs/ShapeToolSettingsDialog.tsx`
+
+**Design**:
+
+A settings dialog accessible from the shape tool toolbar via a dropdown arrow next to the active shape tool. It allows configuring the default properties that newly drawn shapes inherit — these are the `shapeToolConfig` values from the store.
+
+```typescript
+interface ShapeToolSettingsDialogProps {
+  open: boolean;
+  onClose: () => void;
+  config: ShapeToolConfig;
+  onChange: (config: Partial<ShapeToolConfig>) => void;
+}
+```
+
+**Dialog content** (MUI `Dialog` with `maxWidth="sm"`):
+- Default corner radius slider (for rounded rectangles): MUI `Slider` 0–100px
+- Default polygon sides: `TextField` type="number" min=3 max=12
+- Default star points: `TextField` type="number" min=3 max=20
+- Default star inner radius: `Slider` 10–90 (percent of outer radius)
+- Default line thickness: `Slider` 1–20px
+- Default fill enabled: `Switch`
+- Default stroke enabled: `Switch`
+- Tags preview: small canvas showing a shape drawn with current defaults
+
+### R5.5 i18n Keys for Round 5
+
+All Round 5 user-facing strings use `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` from `@/shared/locale/client`.
+
+```typescript
+// R5: Custom Shapes & Boolean Operations
+shapes: {
+  toolGroup: string;
+  tool: {
+    rectangle: string;
+    roundedRectangle: string;
+    ellipse: string;
+    polygon: string;
+    star: string;
+    triangle: string;
+    line: string;
+    customShape: string;
+    select: string;
+  };
+  drawMode: {
+    active: string;
+    proportionalHint: string;     // "Hold Shift for proportional"
+    fromCenterHint: string;        // "Hold Alt to draw from center"
+  };
+  settings: {
+    title: string;
+    defaultCornerRadius: string;
+    defaultPolygonSides: string;
+    defaultStarPoints: string;
+    defaultStarInnerRadius: string;
+    defaultLineThickness: string;
+    defaultFill: string;
+    defaultStroke: string;
+  };
+}
+shapeCategory: {
+  basic: string;
+  arrows: string;
+  banners: string;
+  ornaments: string;
+  borders: string;
+  certificates: string;
+  custom: string;
+}
+shapeLibrary: {
+  panelTitle: string;
+  searchPlaceholder: string;
+  recentlyUsed: string;
+  customShapes: string;
+  importSvg: string;
+  importUrl: string;
+  deleteCustomShape: string;
+  emptyCustomShapes: string;
+  noSearchResults: string;
+  corsError: string;
+  invalidSvgError: string;
+}
+boolean: {
+  toolbarTitle: string;
+  unite: string;
+  subtract: string;
+  intersect: string;
+  exclude: string;
+  divide: string;
+  trim: string;
+  merge: string;
+  flatten: string;
+  flattenConfirmTitle: string;
+  flattenConfirmMessage: string;
+  flattenConfirm: string;
+  cancel: string;
+  requiresTwoShapes: string;
+  nonDestructiveLabel: string;
+  destructiveLabel: string;
+}
+```
+
+Each key must be implemented in both `shared/locale/ar/.../certificateTemplateEditor.ts` and `shared/locale/en/.../certificateTemplateEditor.ts`.
+
+### R5.6 Store Contract for Round 5
+
+All Round 5 store additions are in `frontend/common/stores/templateEditorStore.ts` (the main editor store from Round 1):
+
+```typescript
+// Active shape tool
+activeShapeTool: ShapeTool;
+shapeToolConfig: ShapeToolConfig;
+setActiveShapeTool: (tool: ShapeTool) => void;
+setShapeToolConfig: (config: Partial<ShapeToolConfig>) => void;
+
+// Shape library
+shapeLibraryPanelOpen: boolean;           // default false
+toggleShapeLibraryPanel: () => void;
+recentShapeIds: string[];                  // cap 12
+addRecentShape: (shapeId: string) => void;
+customShapePresets: ShapePreset[];          // user-saved shapes
+addCustomShapePreset: (preset: ShapePreset) => void;
+deleteCustomShapePreset: (id: string) => void;
+
+// Boolean operations
+booleanOperationsActive: boolean;
+applyBooleanOperation: (op: BooleanOperation, operandIds: string[]) => string;
+flattenBoolean: (elementId: string) => void;
+```
+
+**Persist fields** (added to the existing `partialize` in the Zustand `persist` middleware):
+- `shapeToolConfig` — user's default shape settings
+- `shapeLibraryPanelOpen` — panel open state
+- `recentShapeIds` — recently used shapes
+
+Custom shape presets are **not** persisted to `localStorage` — they are fetched from the backend via Plan 7's storage API (the shapes are stored server-side per user).
+
+### R5.7 Cross-Plan Contracts
+
+- **Plan 11 (Canvas)**: Canvas must render shape elements with the `shapeType` field. Plan 10 provides the toolbar/store contract for `activeShapeTool`, `shapeToolConfig`, and the shape library panel. Plan 11 implements the actual drawing interaction (click+drag, Shift/Alt modifiers), SVG rendering of shape elements, and boolean operation path math.
+- **Plan 12 (Elements)**: Plan 12 implements the shape properties panel sections that edit individual shape properties (corner radius, polygon sides, star points, etc.) and the boolean operation controls (operation dropdown, flatten button). Plan 10 provides the `shapeToolConfig` default values and the `ShapePreset` schema that Plan 12's import/save features depend on.
+- **Plan 7 (Storage)**: Custom shape presets are stored server-side per user. Plan 10 defines the `ShapePreset` schema; Plan 7 provides the upload/fetch/delete API. The URL import CORS validation is client-side (Plan 10); the SVG content is saved to Plan 7 storage after parsing.
+- **Plan 5 (GraphQL API)**: The `element.shapeType`, `element.booleanConfig`, and `element.pathData` fields must be added to the backend schema (Plan 5) and exposed via shape element mutations.
+- **Plan 6 (PDF Rendering)**: PDF rendering must support SVG path-based shapes and boolean operation results (flattened path data). Non-destructive booleans should be flattened at PDF export time.
+
+## Round 5: Professional Color System
+
+> Added as Round 5 to extend the Plan 10 editor toolbar and left sidebar with Photoshop/Illustrator-grade color management foundations. Plan 10 owns the shared color system types, the swatches Zustand store, the color conversion utility module, and the toolbar color cluster (fill/stroke swatches, eyedropper tool, quick swatches dropdown, swatches panel in the left sidebar). The property-panel-embedded color picker dialog belongs to Plan 12 R5-CS, but the shared utilities and store it consumes are created here. This keeps the contract clean: Plan 10 = color modalities (primitive types, store, toolbar), Plan 11 = canvas color sampling (eyedropper, loupe, pixel reading), Plan 12 = color picker dialog + swatches panel in properties.
+
+### R5-CS1 Color System Type Definitions
+
+**Module**: `colorSystemTypes.ts`
+
+**File**: `frontend/common/stores/cert/colorSystemTypes.ts` (new)
+
+The canonical type definitions for the entire color system. All plans (10, 11, 12) import from this file.
+
+```typescript
+/**
+ * Color space identifier — used in mode tabs, conversions, and store persistence.
+ */
+export type ColorSpace = 'hsl' | 'rgb' | 'hsv' | 'hex' | 'cmyk';
+
+/**
+ * The color picker's invocation context — determines dialog title and commit target.
+ */
+export type ColorPickerContext =
+  | 'fill'
+  | 'stroke'
+  | 'shadow'
+  | 'gradientStop'
+  | 'swatch'
+  | 'backgroundColor';
+
+/**
+ * The canonical color value. Hex is always the master representation; HSL/RGB/HSV/CMYK
+ * are derived display views. Alpha is a separate [0, 1] float.
+ */
+export interface ColorValue {
+  hex: string;       // "#RRGGBB" — uppercase, 6 digits, always prefixed with "#"
+  alpha: number;     // [0, 1]
+  space: ColorSpace; // which mode tab is currently active in the picker
+}
+
+/**
+ * Color management profile — affects CMYK conversion math and gamut warnings.
+ */
+export type ColorProfile =
+  | 'sRGB'
+  | 'AdobeRGB'
+  | 'CMYK-SWOP-v2'    // U.S. Web Coated (SWOP) v2
+  | 'CMYK-FOGRA39'   // Coated FOGRA39
+  | 'CMYK-Japan2001' // Japan Color 2001 Coated
+  | 'CMYK-Sheetfed';  // U.S. Sheetfed Coated v2
+
+/**
+ * A single saved swatch (custom palette or harmony group export).
+ */
+export interface Swatch {
+  id: string;
+  name: string;
+  color: ColorValue;
+}
+
+/**
+ * A named group of swatches — used by the swatches panel (Document, Custom, Recent, and imported groups).
+ */
+export interface SwatchGroup {
+  id: string;
+  name: string;
+  swatches: Swatch[];
+}
+
+/**
+ * The harmony algorithm identifier.
+ */
+export type HarmonyScheme =
+  | 'complementary'
+  | 'analogous'
+  | 'triadic'
+  | 'tetradic'
+  | 'splitComplementary'
+  | 'monochromatic'
+  | 'square';
+
+/**
+ * A single color entry in a computed harmony scheme, with a label role.
+ */
+export interface HarmonyColor {
+  color: ColorValue;
+  role: string;  // 'base' | 'complement' | 'analogous1' | ...
+}
+
+/**
+ * Eyedropper sample source — which layers to read pixel colors from.
+ */
+export type EyedropperSampleSource =
+  | 'currentLayer'
+  | 'allLayers'
+  | 'currentLayerBelow';
+
+/**
+ * Eyedropper sample size — the area averaged to compute a pixel color.
+ */
+export type EyedropperSampleSize =
+  | 'point'       // 1×1
+  | '3x3'         // 3×3 average
+  | '5x5'         // 5×5 average
+  | '11x11'       // 11×11 average
+  | '51x51';      // 51×51 average
+
+/**
+ * The active paint target — which slot a picked color goes into.
+ */
+export type ActivePaintSlot = 'fill' | 'stroke';
+
+/**
+ * Entities for JSON swatch export/import.
+ */
+export interface SwatchExportFormat {
+  version: 1;
+  groups: Array<{
+    name: string;
+    swatches: Array<{
+      name: string;
+      hex: string;
+      alpha: number;
+    }>;
+  }>;
+}
+
+/**
+ * Web-safe palette color entries (216 colors).
+ */
+export interface WebSafeSwatch {
+  hex: string;
+  r: number;
+  g: number;
+  b: number;
+}
+```
+
+### R5-CS2 Color Conversion Utilities
+
+**Module**: `colorConversionUtils.ts`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/elements/utils/colorConversionUtils.ts` (new — shared via `@/` alias)
+
+**Pure functions** (no React, no side effects). The single source of truth for color math. Plan 12 imports these for its Color Picker Dialog; the store imports them for swatch serialization.
+
+```typescript
+import type { ColorValue, ColorProfile } from '@/frontend/common/stores/cert/colorSystemTypes';
+
+// Hex ↔ RGB
+export function hexToRGB(hex: string): { r: number; g: number; b: number };
+export function rgbToHex(r: number, g: number, b: number): string;
+export function hexShorthandToFull(hex: string): string;  // "F0A" → "FF00AA"
+export function normalizeHex(input: string): string | null; // returns "#RRGGBB" or null
+
+// RGB ↔ HSL
+export function rgbToHSL(r: number, g: number, b: number): { h: number; s: number; l: number };
+export function hslToRGB(h: number, s: number, l: number): { r: number; g: number; b: number };
+
+// RGB ↔ HSV
+export function rgbToHSV(r: number, g: number, b: number): { h: number; s: number; v: number };
+export function hsvToRGB(h: number, s: number, v: number): { r: number; g: number; b: number };
+
+// RGB ↔ CMYK (profile-dependent)
+export function rgbToCMYK(
+  r: number, g: number, b: number,
+  profile?: ColorProfile,
+): { c: number; m: number; y: number; k: number };
+export function cmykToRGB(
+  c: number, m: number, y: number, k: number,
+  profile?: ColorProfile,
+): { r: number; g: number; b: number };
+
+// Convenience
+export function hexToRgba(hex: string, alpha: number): string;  // "rgba(R, G, B, A)"
+export function hexToHSL(hex: string): { h: number; s: number; l: number };
+export function hslToHex(h: number, s: number, l: number): string;
+export function rotateHue(color: ColorValue, degrees: number): ColorValue;
+export function adjustLightness(color: ColorValue, delta: number): ColorValue;
+export function adjustSaturation(color: ColorValue, delta: number): ColorValue;
+
+// Gamut check — color round-trips cleanly through the target space?
+export function isOutOfGamut(color: ColorValue, targetProfile: ColorProfile): boolean;
+
+// Utility
+export function clamp(value: number, min: number, max: number): number;
+```
+
+All functions accept numbers where possible (HSL/HSV: 0-360° for hue, 0-100 for S/V/L; RGB: 0-255; CMYK: 0-100). The canonical `ColorValue` is `{ hex, alpha }` — derived views are display-only and don't mutate the stored color.
+
+### R5-CS3 Color System Zustand Store
+
+**Module**: `colorSystemStore.ts`
+
+**File**: `frontend/common/stores/cert/colorSystemStore.ts` (new)
+
+```typescript
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import type {
+  ColorValue, ColorSpace, ColorPickerContext, ColorProfile,
+  Swatch, SwatchGroup, ActivePaintSlot,
+} from '@/frontend/common/stores/cert/colorSystemTypes';
+
+interface ColorSystemState {
+  // Active paint slot — which target (fill/stroke) a picked color goes into.
+  activePaintSlot: ActivePaintSlot;
+
+  // Active fill & stroke colors (the toolbar swatches read these).
+  fillColor: ColorValue;
+  strokeColor: ColorValue;
+  hasFill: boolean;
+  hasStroke: boolean;
+
+  // Quick swatches — 10 most recent colors (toolbar dropdown).
+  quickSwatches: ColorValue[];
+
+  // Color history — last 20 colors used in the picker dialog.
+  colorHistory: ColorValue[];
+
+  // Custom swatches (user-saved, persists).
+  customSwatches: Swatch[];
+  swatchGroups: SwatchGroup[];     // Imported + preset groups, persists.
+
+  // Color picker last-active mode tab.
+  lastColorMode: ColorSpace;
+
+  // Active color profile (sRGB default).
+  activeProfile: ColorProfile;
+
+  // Color dialog coordination.
+  colorPickerOpen: boolean;
+  colorPickerContext: ColorPickerContext;
+  colorPickerColor: ColorValue | null;
+  colorPickerPreviousColor: ColorValue | null;
+
+  // Swatch display size.
+  swatchDisplaySize: 'small' | 'medium' | 'large';
+
+  // Actions
+  setActivePaintSlot: (slot: ActivePaintSlot) => void;
+  setFillColor: (c: ColorValue) => void;
+  setStrokeColor: (c: ColorValue) => void;
+  setHasFill: (v: boolean) => void;
+  setHasStroke: (v: boolean) => void;
+  swapFillStroke: () => void;        // Shift+X — swap fill/stroke colors
+  resetColors: () => void;            // D — black stroke, white fill
+  addToQuickSwatches: (c: ColorValue) => void;
+  addToColorHistory: (c: ColorValue) => void;
+  addCustomSwatch: (name: string, color: ColorValue) => void;
+  removeCustomSwatch: (id: string) => void;
+  updateCustomSwatchColor: (id: string, color: ColorValue) => void;
+  addSwatchGroup: (name: string, colors: ColorValue[]) => void;
+  removeSwatchGroup: (id: string) => void;
+  setLastColorMode: (m: ColorSpace) => void;
+  setActiveProfile: (p: ColorProfile) => void;
+  openColorPicker: (ctx: ColorPickerContext, initial: ColorValue, previous: ColorValue | null) => void;
+  closeColorPicker: (color: ColorValue | null) => void; // null = cancel, value = apply
+  setSwatchDisplaySize: (s: 'small' | 'medium' | 'large') => void;
+  importSwatches: (groups: SwatchGroup[]) => void;
+}
+
+export const useColorSystemStore = create<ColorSystemState>()(
+  persist(
+    (set, get) => ({
+      // initial state ...
+      activePaintSlot: 'fill',
+      fillColor: { hex: '#FFFFFF', alpha: 1, space: 'hsl' },
+      strokeColor: { hex: '#000000', alpha: 1, space: 'hsl' },
+      hasFill: true,
+      hasStroke: true,
+      quickSwatches: [],
+      colorHistory: [],
+      customSwatches: [],
+      swatchGroups: [],
+      lastColorMode: 'hsl',
+      activeProfile: 'sRGB',
+      colorPickerOpen: false,
+      colorPickerContext: 'fill',
+      colorPickerColor: null,
+      colorPickerPreviousColor: null,
+      swatchDisplaySize: 'medium',
+
+      // actions ...
+      swapFillStroke: () => set((s) => ({
+        fillColor: s.strokeColor,
+        strokeColor: s.fillColor,
+        hasFill: s.hasStroke,
+        hasStroke: s.hasFill,
+      })),
+      resetColors: () => set({
+        fillColor: { hex: '#FFFFFF', alpha: 1, space: 'hsl' },
+        strokeColor: { hex: '#000000', alpha: 1, space: 'hsl' },
+        hasFill: true,
+        hasStroke: true,
+      }),
+      addToQuickSwatches: (c) => set((s) => {
+        const filtered = s.quickSwatches.filter((q) => q.hex !== c.hex || q.alpha !== c.alpha);
+        return { quickSwatches: [c, ...filtered].slice(0, 10) };
+      }),
+      addToColorHistory: (c) => set((s) => {
+        const filtered = s.colorHistory.filter((h) => h.hex !== c.hex || h.alpha !== c.alpha);
+        return { colorHistory: [c, ...filtered].slice(0, 20) };
+      }),
+      // ... remaining action implementations
+    }),
+    {
+      name: 'certEditor.colorSystem',
+      storage: createJSONStorage(() => localStorage),
+      // Persist a subset — dialog open state and active slot are session-only.
+      partialize: (s) => ({
+        fillColor: s.fillColor,
+        strokeColor: s.strokeColor,
+        customSwatches: s.customSwatches,
+        swatchGroups: s.swatchGroups,
+        lastColorMode: s.lastColorMode,
+        activeProfile: s.activeProfile,
+        colorHistory: s.colorHistory,
+        swatchDisplaySize: s.swatchDisplaySize,
+      }),
+    },
+  ),
+);
+```
+
+**Store rules**: Persistent fields go through `partialize`. Session-only fields (`colorPickerOpen`, `activePaintSlot`, `quickSwatches` — recent session colors) are not persisted. The store is a Zustand `persist`-wrapped store (falls under `frontend/common/stores/` per `frontend/stores/AGENTS.md` rules — it's a domain store, not a screen store).
+
+### R5-CS4 Editor Toolbar Color Cluster
+
+**Component**: `ToolbarColorCluster`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/ToolbarColorCluster.tsx` (new)
+
+ThePlan 10 toolbar color cluster — replaces the existing single `ToolbarFillStrokeToggle` with a richer arrangement: fill swatch, stroke swatch, swap button, default-colors button, eyedropper button, quick swatches dropdown.
+
+```tsx
+<Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+  {/* Fill color swatch */}
+  <ToolbarColorSwatch
+    slot="fill"
+    color={fillColor}
+    active={activePaintSlot === 'fill'}
+    hasColor={hasFill}
+    onClick={() => setActivePaintSlot('fill')}
+    onOpenColorPicker={handleOpenColorPickerForFill}
+  />
+  {/* Stroke color swatch (overlapping behind fill, classic design tool stack) */}
+  <ToolbarColorSwatch
+    slot="stroke"
+    color={strokeColor}
+    active={activePaintSlot === 'stroke'}
+    hasColor={hasStroke}
+    onClick={() => setActivePaintSlot('stroke')}
+    onOpenColorPicker={handleOpenColorPickerForStroke}
+    sx={{ marginLeft: '-8px', marginTop: '8px' }}
+  />
+  {/* Swap colors */}
+  <HtmlTooltip title={t("certificateTemplateEditor.toolbarColors.swapTooltip")}>
+    <IconButton size="small" onClick={swapFillStroke} sx={{ ml: 0.5 }}>
+      <SwapHorizontalOutlined fontSize="small" />
+    </IconButton>
+  </HtmlTooltip>
+  {/* Default colors (D key) */}
+  <HtmlTooltip title={t("certificateTemplateEditor.toolbarColors.resetTooltip")}>
+    <IconButton size="small" onClick={resetColors}>
+      <DefaultColorsOutlined fontSize="small" />
+    </IconButton>
+  </HtmlTooltip>
+  {/* Eyedropper (I key) */}
+  <ToolbarEyedropperButton />
+  {/* Quick swatches dropdown */}
+  <ToolbarQuickSwatchesDropdown />
+</Stack>
+```
+
+The fill and stroke swatches are stacked at an offset (stroke behind, fill in front) — the classic Illustrator "two overlapping squares" layout. Clicking the front (fill) swatch sets `activePaintSlot='fill'`; clicking the back-left (stroke) sets `activePaintSlot='stroke'`. Clicking either opens the color picker for that slot.
+
+**Quick swatches dropdown**: `Menu` shows the 10 most-recent colors as small swatches in a grid (`Grid container` with 5 columns × 2 rows). Clicking a swatch applies it to the active paint slot (fill or stroke — whichever has `activePaintSlot===true`).
+
+### R5-CS5 Toolbar Color Swatch
+
+**Component**: `ToolbarColorSwatch`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/ToolbarColorSwatch.tsx` (new)
+
+```tsx
+interface ToolbarColorSwatchProps {
+  slot: ActivePaintSlot;        // 'fill' | 'stroke'
+  color: ColorValue;
+  active: boolean;
+  hasColor: boolean;             // false = no fill/stroke (diagonal red line overlay)
+  onClick: () => void;
+  onOpenColorPicker: () => void;
+}
+
+// Renders a 24×24 swatch with checkerboard behind (for alpha), rounded corners,
+// and a diagonal red line (CSS pseudo-element / inline svg) when hasColor === false.
+<Box
+  onClick={(e) => {
+    if (!hasColor) {
+      onOpenColorPicker();
+    } else if (e.detail === 2) {
+      onOpenColorPicker();
+    } else {
+      onClick();
+    }
+  }}
+  sx={{
+    width: 24, height: 24, borderRadius: 0.5,
+    border: '1px solid', borderColor: active ? theme.palette.primary.main : theme.palette.divider,
+    position: 'relative', cursor: 'pointer',
+    backgroundImage: CHECKERBOARD_PATTERN,
+    backgroundColor: hexToRgba(color.hex, color.alpha),
+    backgroundBlendMode: 'multiply',
+    '&::after': hasColor ? {} : {
+      content: '""',
+      position: 'absolute',
+      top: '10%', left: '-5%',
+      width: '110%', height: 0,
+      borderTop: '2px solid',
+      borderColor: theme.palette.error.main,
+      transform: 'rotate(-45deg)',
+      transformOrigin: 'center',
+    },
+  }}
+/>
+```
+
+The "no color" indicator is the diagonal red line — drawn via a CSS border line rotated at -45°, color from `theme.palette.error.main` (no hardcoding).
+
+### R5-CS6 Toolbar Eyedropper Button (Plan 10 toolbar portion)
+
+**Component**: `ToolbarEyedropperButton`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/ToolbarEyedropperButton.tsx` (new — toolbar integrates with canvas handled in Plan 11)
+
+```tsx
+const isActive = useCanvasStore((s) => s.activeTool === 'eyedropper');
+
+return (
+  <HtmlTooltip title={`${t("certificateTemplateEditor.toolbarEyedropper.tooltip")} (I)`}>
+    <ToggleButton
+      value="eyedropper"
+      selected={isActive}
+      onChange={() => {
+        if (isActive) {
+          useCanvasStore.getState().setActiveTool('select');
+          useEyedropperStore.getState().deactivate();
+        } else {
+          useCanvasStore.getState().setActiveTool('eyedropper');
+          useEyedropperStore.getState().activate(useColorSystemStore.getState().activePaintSlot);
+        }
+      }}
+      size="small"
+    >
+      <ColorizeOutlined fontSize="small" />
+    </ToggleButton>
+  </HtmlTooltip>
+);
+```
+
+Keyboard shortcut: `I` (lowercase or uppercase). Activating the eyedropper sets the cursor to a crosshair and shows the loupe overlay (Plan 11 R5-CS handles the canvas rendering; this component only toggles the toolbar state and the canvas store `activeTool='eyedropper'`).
+
+### R5-CS7 Toolbar Quick Swatches Dropdown
+
+**Component**: `ToolbarQuickSwatchesDropdown`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/ToolbarQuickSwatchesDropdown.tsx` (new)
+
+```tsx
+const quickSwatches = useColorSystemStore((s) => s.quickSwatches, useShallow);
+const activePaintSlot = useColorSystemStore((s) => s.activePaintSlot);
+const setFill = useColorSystemStore((s) => s.setFillColor);
+const setStroke = useColorSystemStore((s) => s.setStrokeColor);
+
+const handleApply = (c: ColorValue) => {
+  if (activePaintSlot === 'fill') setFill(c);
+  else setStroke(c);
+  useColorSystemStore.getState().addToQuickSwatches(c);
+};
+
+return (
+  <HtmlTooltip title={t("certificateTemplateEditor.toolbarColors.quickSwatches")}>
+    <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
+      <PaletteOutlined fontSize="small" />
+    </IconButton>
+    <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
+      <Grid container spacing={0.5} sx={{ p: 1, width: 168 }}>
+        {quickSwatches.map((c, i) => (
+          <Grid item key={i}>
+            <ColorSwatchTile
+              color={c}
+              size="small"
+              onClick={() => { handleApply(c); setAnchorEl(null); }}
+              tooltip={`${c.hex} (${Math.round(c.alpha * 100)}%)`}
+            />
+          </Grid>
+        ))}
+        {quickSwatches.length === 0 && (
+          <Grid item>
+            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, p: 1 }}>
+              {t("certificateTemplateEditor.toolbarColors.noRecent")}
+            </Typography>
+          </Grid>
+        )}
+      </Grid>
+    </Menu>
+  </HtmlTooltip>
+);
+```
+
+### R5-CS8 Swatches Panel (Left Sidebar — Plan 10 portion)
+
+**Component**: `SwatchesPanel`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/panels/SwatchesPanel.tsx` (new — left sidebar, NOT the properties panel)
+
+The left-sidebar swatches panel (vs the properties-panel swatches in Plan 12 R5-CS12 — a different component for a different sidebar). The left sidebar shows Default, Custom, Recent, and Document swatches as grouped tabs:
+
+```tsx
+<CollapsiblePanelShell sectionId="swatches" title={t("certificateTemplateEditor.swatches.sectionTitle")} icon={<PaletteOutlined />}>
+  {/* Display size toggle */}
+  <ToggleButtonGroup
+    exclusive size="small" value={displaySize}
+    onChange={(_, v) => v && setDisplaySize(v)}
+    sx={{ mb: 1 }}
+  >
+    <ToggleButton value="small">{t("certificateTemplateEditor.swatches.displaySize.small")}</ToggleButton>
+    <ToggleButton value="medium">{t("certificateTemplateEditor.swatches.displaySize.medium")}</ToggleButton>
+    <ToggleButton value="large">{t("certificateTemplateEditor.swatches.displaySize.large")}</ToggleButton>
+  </ToggleButtonGroup>
+  {/* Default palette preset dropdown */}
+  <FormControl size="small" sx={{ mb: 1, minWidth: 160 }}>
+    <InputLabel>{t("certificateTemplateEditor.swatches.presetLabel")}</InputLabel>
+    <Select value={activePreset} onChange={handlePresetSelect} label={t("certificateTemplateEditor.swatches.presetLabel")}>
+      <MenuItem value="material">{t("certificateTemplateEditor.swatches.presetMaterial")}</MenuItem>
+      <MenuItem value="pantone">{t("certificateTemplateEditor.swatches.presetPantone")}</MenuItem>
+      <MenuItem value="webStandard">{t("certificateTemplateEditor.swatches.presetWebStandard")}</MenuItem>
+      <MenuItem value="custom">{t("certificateTemplateEditor.swatches.presetCustom")}</MenuItem>
+    </Select>
+  </FormControl>
+  {/* Swatch groups */}
+  <Tabs value={activeGroup} onChange={(_, v) => setActiveGroup(v)} variant="scrollable" scrollButtons="auto">
+    <Tab value="document" label={t("certificateTemplateEditor.swatches.groups.document")} />
+    <Tab value="custom" label={t("certificateTemplateEditor.swatches.groups.custom")} />
+    <Tab value="recent" label={t("certificateTemplateEditor.swatches.groups.recent")} />
+  </Tabs>
+  <Box sx={{ mt: 1, maxHeight: 280, overflowY: 'auto' }}>
+    {activeGroup === 'document' && <DocumentSwatchesGrid size={displaySize} onPick={handlePickColor} />}
+    {activeGroup === 'custom' && <CustomSwatchesGrid
+      size={displaySize}
+      onPick={handlePickColor}
+      onAdd={() => handleAddCustomSwatch()}
+      onDelete={handleDeleteSwatch}
+      onEdit={handleEditSwatch}
+      onRename={handleRenameSwatch}
+    />}
+    {activeGroup === 'recent' && <RecentSwatchesGrid size={displaySize} onPick={handlePickColor} />}
+  </Box>
+  <Stack direction="row" spacing={1} sx={{ mt: 1, justifyContent: 'space-between' }}>
+    <Button size="small" startIcon={<DownloadOutlined />} onClick={handleExport}>
+      {t("certificateTemplateEditor.swatches.export")}
+    </Button>
+    <Button size="small" startIcon={<UploadOutlined />} onClick={handleImport}>
+      {t("certificateTemplateEditor.swatches.import")}
+    </Button>
+  </Stack>
+</CollapsiblePanelShell>
+```
+
+**Sub-grids**: `DocumentSwatchesGrid`, `CustomSwatchesGrid`, `RecentSwatchesGrid` each render a wrap-aware `Stack` of `ColorSwatchTile` components. The grid auto-calculates column count based on `displaySize` + panel width (small: 10 cols, medium: 8 cols, large: 6 cols in a 240px panel).
+
+**Presets loader**: Each preset palette (Material Design, Pantone Coatone, Web Standard 216) is a module-level constant array of `{ hex, name }` tuples declared in `swatchPresets.ts` (see §R5-CS9 below). Selecting a preset replaces the Default group's swatches in the panel.
+
+**Add custom swatch**: The "+" button (only in Custom group) calls `useColorSystemStore.getState().addCustomSwatch(autoName, currentColor)` where `currentColor` is the active fill (or stroke) and `autoName` defaults to `"Color N"` (N = customSwatches.length + 1). Prompting for a custom name is optional — the swatch is created, and the user can rename via double-click later.
+
+**Right-click menu**: When a swatch is right-clicked, a `Menu` appears with "Edit", "Delete", "Duplicate" (in Custom group only — Document and Recent entries are not user-managed). "Edit" calls `handleEditSwatch(id)` which opens `ColorPickerDialog` (Plan 12 R5-CS) with `colorContext='swatch'`.
+
+### R5-CS9 Swatch Presets Constants
+
+**Module**: `swatchPresets.ts`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/utils/swatchPresets.ts` (new)
+
+```typescript
+// Material Design colors — the 19 Material Design 500-shade palette entries.
+export const MATERIAL_PRESET: Array<{ hex: string; name: string }> = [
+  { hex: '#F44336', name: 'Red 500' },
+  { hex: '#E91E63', name: 'Pink 500' },
+  { hex: '#9C27B0', name: 'Purple 500' },
+  // ... 19 entries total
+];
+
+// Web-safe palette — 216 colors (216 = 6³), generated programmatically.
+export const WEB_SAFE_PRESET: Array<{ hex: string; name: string }> = generateWebSafePalette();
+
+// Pantone Coatone subset — curated subset of commonly-used Pantone colors (~36 entries).
+export const PANTONE_PRESET: Array<{ hex: string; name: string }> = [
+  { hex: '#F74445', name: 'Pantone 185 C' },
+  { hex: '#FFC200', name: 'Pantone 116 C' },
+  // ... 34 more entries
+];
+
+function generateWebSafePalette(): Array<{ hex: string; name: string }> {
+  const steps = [0x00, 0x33, 0x66, 0x99, 0xCC, 0xFF];
+  const result: Array<{ hex: string; name: string }> = [];
+  for (const r of steps) {
+    for (const g of steps) {
+      for (const b of steps) {
+        const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
+        result.push({ hex, name: `Web Safe ${hex}` });
+      }
+    }
+  }
+  return result;  // 216 entries
+}
+```
+
+### R5-CS10 ASE/ACO Swatch Import/Export
+
+**Module**: `swatchImportExport.ts`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/utils/swatchImportExport.ts` (new)
+
+```typescript
+import type { SwatchGroup, SwatchExportFormat, ColorValue } from '@/frontend/common/stores/cert/colorSystemTypes';
+
+// JSON export — primary format.
+export function exportGroupsToJSON(groups: SwatchGroup[]): string;
+export function parseJSONToGroups(json: string): SwatchGroup[];
+
+// ASE (Adobe Swatch Exchange) parser — supports basic ASE v1 format.
+// Spec: header ("ASEF" magic, version 1.0), block count, per-block color entry.
+export function parseASE(buffer: ArrayBuffer): SwatchGroup[];
+
+// ACO (Adobe Color) parser — supports ACO v1 (RGB-only) and v2.
+export function parseACO(buffer: ArrayBuffer): SwatchGroup[];
+
+// ASE export — produces ArrayBuffer for download.
+export function exportGroupsToASE(groups: SwatchGroup[]): ArrayBuffer;
+
+// File dispatcher
+export async function exportSwatches(groups: SwatchGroup[], format: 'json' | 'ase'): Promise<void>;
+export async function importSwatches(file: File): Promise<SwatchGroup[]>;
+```
+
+Each parser is a pure `(buffer) → SwatchGroup[]` function. The File API driver uses `file.arrayBuffer()` then dispatches to `parseASE`/`parseACO`/`parseJSONToGroups` based on file extension.
+
+### R5-CS11 Toolbar Keyboard Shortcuts for Color System
+
+**Hook**: `useColorSystemShortcuts`
+
+**File**: `frontend/desktop/views/dashboard/certificates/template-editor/hooks/useColorSystemShortcuts.ts` (new)
+
+```typescript
+/**
+ * Hooks keyboard shortcuts for the color system. Registered at the editor screen level.
+ * Shortcuts:
+ *   I         — activate eyedropper tool
+ *   D         — reset colors (black stroke, white fill)
+ *   Shift+X   — swap fill/stroke colors
+ *   X         — switch active paint slot (fill → stroke, or stroke → fill)
+ *   ,         — quick-apply fill color: black
+ *   .         — quick-apply fill color: white
+ *   /         — toggle hasFill/hasStroke on active slot
+ *   Esc       — close color picker dialog (cancel) or deactivate eyedropper
+ */
+export function useColorSystemShortcuts(): void;
+```
+
+Implementation uses a `useEffect` that binds `keydown` listener on `window`, checks `event.key` + modifiers (`shiftKey`, `metaKey`, `ctrlKey`), and dispatches the corresponding store action. The hook is mounted in the `Editor` component alongside the existing `useCanvasShortcuts` hook (Plan 10 R5.6).
+
+### R5-CS12 i18n Keys (Plan 10 portion — Color System)
+
+**Type additions to** `shared/locale/types/dashboard/certificates/templateEditor.ts`:
+
+```typescript
+// Toolbar colors
+toolbarColors: {
+  swapTooltip: string;
+  resetTooltip: string;
+  quickSwatches: string;
+  noRecent: string;
+  fillActive: string;
+  strokeActive: string;
+  noFill: string;
+  noStroke: string;
+};
+// Eyedropper
+toolbarEyedropper: {
+  tooltip: string;
+  shortcut: string;
+  sampleSize: {
+    point: string; _3x3: string; _5x5: string; _11x11: string; _51x51: string;
+  };
+  sampleFrom: {
+    currentLayer: string; allLayers: string; currentLayerBelow: string;
+  };
+  cancelHint: string;
+};
+// Swatches
+swatches: {
+  sectionTitle: string;
+  groups: {
+    document: string; custom: string; recent: string; preset: string;
+  };
+  displaySize: { small: string; medium: string; large: string; };
+  displaySizeLabel: string;
+  presetLabel: string;
+  presetMaterial: string;
+  presetPantone: string;
+  presetWebStandard: string;
+  presetCustom: string;
+  export: string;
+  import: string;
+  edit: string;
+  delete: string;
+  duplicate: string;
+  rename: string;
+  addSwatch: string;
+  emptySwatches: string;
+  importError: string;
+  exportFormat: {
+    json: string; ase: string;
+  };
+};
+```
+
+All keys live under `certificateEditor.*` (defined by Plan 12 §R5-CS15 for the picker dialog portion). Plan 10's portion covers toolbar + swatches panel labels; Plan 12's portion covers the color picker dialog labels.
+
+### R5-CS13 Quality & Verification (Plan 10 R5 — Color System)
+
+**Per-file verification loop** (per AGENTS.md §"Verification Loop"):
+1. `bun run tsgo`
+2. `bun biome:check`
+3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5cs-<file>","files":["<path>"]}'`
+4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
+
+**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+
+**Cross-plan contracts**:
+- **Plan 11**: The eyedropper tool's `activeTool='eyedropper'` flag in the canvas store is read by Plan 11's `useEyedropperOverlay` (Plan 11 R5-CS) to render the loupe overlay on the canvas. The Plan 11 overlay reads from the same store but does not create the tool state.
+- **Plan 12**: All color picker dialog imports `ColorValue`, `ColorSpace`, `ColorPickerContext`, `HarmonyScheme`, `ColorProfile`, `Swatch`, and `SwatchGroup` from `@/frontend/common/stores/cert/colorSystemTypes.ts`. Plan 12 also imports `useColorSystemStore` to read history, custom swatches, and `openColorPicker`/`closeColorPicker` actions.
+- **Plan 5**: No GraphQL changes — color values are stored as JSONB `{ hex, alpha }` in the existing element `fill` and `stroke` JSON, not new fields.
+
+**Performance**:
+- The `colorSystemStore` is a flat Zustand persist store. The swatch arrays are small (<50 entries total). No memoization needed at the store level — selectors with `useShallow` handle re-render limits.
+- The toolbar cluster re-renders only when `fillColor`/`strokeColor`/`activePaintSlot`/`hasFill`/`hasStroke` change. The `useShallow` selector on the cluster returns a stable tuple so unrelated store changes (e.g., dialog state churn) don't trigger a re-render.
+- ASE/ACO parsing is synchronous (small files, <1MB) — no Web Worker needed.
+- Web-safe palette generation is `useMemo`-ed at module load (computed once, ~5KB serialized).
+
+## Round 5: Pro Zoom & Navigation
+
+### Zoom Controls Toolbar
+
+**Component**: `ZoomControlsToolbar`
+**Location**: Bottom-right of canvas viewport, floating overlay
+**Zustand Store**: `useZoomStore` in `frontend/common/stores/cert/zoomStore.ts`
+
+```tsx
+import { IconButton, Typography, Box, Slider, Menu, MenuItem } from '@mui/material';
+import { useAppTranslation } from '@/shared/locale/client';
+import { useZoomStore } from '@/frontend/common/stores/cert/zoomStore';
+
+export const ZoomControlsToolbar = () => {
+  const { t } = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const { zoom, setZoom, zoomIn, zoomOut, resetZoom, fitToScreen, actualSize, scrollToCenter } = useZoomStore();
+
+  const zoomLevels = [25, 50, 75, 100, 150, 200, 400, 800];
+
+  return (
+    <Box sx={{ position: 'absolute', bottom: 16, right: 16, display: 'flex', alignItems: 'center', gap: 0.5, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 3, px: 1, py: 0.5, zIndex: 1200 }}>
+      <IconButton size="small" onClick={() => { zoomOut(); scrollToCenter(); }}><ZoomOutOutlined /></IconButton>
+      <Typography sx={{ minWidth: 60, textAlign: 'center', fontSize: '0.75rem', fontWeight: 600 }}>{Math.round(zoom * 100)}%</Typography>
+      <IconButton size="small" onClick={zoomIn}><ZoomInOutlined /></IconButton>
+      <IconButton size="small" onClick={fitToScreen}><FitScreenOutlined /></IconButton>
+      <IconButton size="small" onClick={actualSize}><CenterFocusStrongOutlined /></IconButton>
+      <IconButton size="small" onClick={resetZoom}><RefreshOutlined /></IconButton>
+    </Box>
+  );
+};
+```
+
+### Zoom Methods
+
+| Method | Keyboard | Action |
+|--------|----------|--------|
+| Zoom In | `Ctrl`+`+` | Increase zoom to next level (25%, 50%, 75%, 100%, 150%, 200%, 400%, 800%) |
+| Zoom Out | `Ctrl`+`-` | Decrease zoom to previous level |
+| Actual Size | `Ctrl`+`1` | Set zoom to 100% |
+| Fit to Screen | `Ctrl`+`0` | Fit entire certificate in viewport |
+| Reset Zoom | `Ctrl`+`Shift`+`0` | Reset to default zoom level |
+| Zoom to Selection | `Ctrl`+`Shift`+`+` | Zoom to fit selected elements |
+| Zoom to All | `Ctrl`+`Alt`+`0` | Zoom to fit all elements on canvas |
+
+### Pan & Navigation
+
+**Pan Modes**:
+- **Spacebar + Drag**: Temporary pan mode — hold spacebar, drag to pan canvas
+- **Middle Mouse Button**: Pan by clicking and dragging with middle mouse button
+- **Hand Tool**: Select hand tool from toolbar, click and drag to pan
+- **Scroll Bars**: Horizontal and vertical scroll bars on canvas edges
+- **Trackpad**: Two-finger drag to pan on trackpad devices
+
+**Navigation Shortcuts**:
+| Shortcut | Action |
+|----------|--------|
+| `Home` | Scroll to top-left of canvas |
+| `End` | Scroll to bottom-right of canvas |
+| `Page Up` | Scroll up by one viewport height |
+| `Page Down` | Scroll down by one viewport height |
+| `Ctrl`+`Arrow Up` | Scroll up |
+| `Ctrl`+`Arrow Down` | Scroll down |
+| `Ctrl`+`Arrow Left` | Scroll left |
+| `Ctrl`+`Arrow Right` | Scroll right |
+
+### Zoom-to-Point
+
+When zooming via mouse wheel, zoom toward cursor position — the point under the cursor stays fixed during zoom. This is critical for precise navigation.
+
+```tsx
+const handleWheelZoom = (event: WheelEvent) => {
+  const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
+  const newZoom = Math.max(0.05, Math.min(16, zoom * zoomFactor));
+  // Keep point under cursor stable
+  const rect = canvasRef.current.getBoundingClientRect();
+  const cursorX = event.clientX - rect.left;
+  const cursorY = event.clientY - rect.top;
+  const scrollLeft = (cursorX + scrollOffset.x) * (newZoom / zoom) - cursorX;
+  const scrollTop = (cursorY + scrollOffset.y) * (newZoom / zoom) - cursorY;
+  setZoom(newZoom);
+  setScrollOffset({ x: scrollLeft, y: scrollTop });
+};
+```
+
+### Mini-Map / Overview Panel
+
+**Component**: `MiniMapPanel`
+**Location**: Bottom-right corner of canvas viewport (toggleable)
+**Features**:
+- Shows entire certificate as a thumbnail (25% scale)
+- Highlights current viewport rectangle in blue
+- Click to navigate — moves viewport to clicked position
+- Drag viewport rectangle to pan
+- Updates in real-time during pan/zoom
+
+### Zoom Indicator & Slider
+
+**Component**: `ZoomIndicator`
+**Location**: Inside `ZoomControlsToolbar`
+**Features**:
+- Click percentage label to open dropdown with preset zoom levels
+- Drag slider for continuous zoom (5% to 1600%)
+- Shows zoom percentage with decimal for precise values (>200%)
+
+### Navigator Panel (Photoshop-style)
+
+**Component**: `NavigatorPanel`
+**Location**: Right panel dock, collapsible
+**Features**:
+- Red viewport rectangle over certificate thumbnail
+- Drag rectangle to navigate
+- Zoom slider at bottom of panel
+- "Zoom Out" and "Zoom In" buttons flanking slider
+- Shows zoom percentage
+- Pannable certificate preview
+
+### Keyboard-Triggered Zoom Modes
+
+| Mode | Activation | Behavior |
+|------|-----------|----------|
+| Temporary Zoom In | `Z` (hold) | Zoom to preset 200% while held |
+| Temporary Zoom Out | `Alt`+`Z` (hold) | Zoom to 50% while held |
+| Scrubby Zoom | `Space`+`Z`+drag | Drag right to zoom in, left to zoom out (CS-style) |
+| Pixel-Peeking | `X` (hold) | Toggle between 100% and previous zoom |
+
+### Scroll Bar Enhancements
+
+- **Overscroll behavior**: Canvas stops scrolling at document bounds
+- **Smooth scrolling**: Animated scroll transitions (200ms)
+- **Scroll-to-element**: Right-click element → "Scroll to Element" centers it in viewport
+- **Scroll position indicator**: Shows position percentage in scroll bar thumb
+
+---
+
+## Round 5: Masking & Clipping System
+
+> Added as part of Round 5, enhancing the Plan 10 editor shell with Photoshop/Illustrator-level mask and clipping controls. This section specifies the **control surface**: mask buttons on the toolbar, Mask/Layer submenu items in the menubar, keyboard shortcut registrations for mask operations, and the quick-mask toolbar entry. The canvas rendering of masks (clipping paths, layer mask thumbnails, mask editing mode, vector mask paths, clip-group rendering) is specified in Plan 11 §"Round 5: Masking & Clipping System". The mask properties panel, mask brush tools, opacity mask editor, and Refine Edge dialog are specified in Plan 12 §"Round 5: Masking & Clipping System". Each sub-section maps to tasks in `tasks.md` §"Round 5: Mask & Clipping Tasks".
+
+### R5.1 Scope Boundary (Plan 10 vs Plan 11 vs Plan 12)
+
+Plan 10's mask work is the **dispatch + chrome layer** — it owns toolbar buttons, menubar items, shortcut registrations, and the Quick Mask mode toggle. The actual mask pixel/vector data, mask rendering on canvas, and mask property UI live in Plans 11 and 12:
+
+| Concern | Owner Plan | File(s) |
+|---|---|---|
+| Add Layer Mask button (pixel mask) + Add Vector Mask button in layers panel toolbar | **Plan 10** | `LayersPanelMaskAddButtons.tsx` (create), `EditorToolbar.tsx` (modify) |
+| Mask menu items in Layer menubar (Create/Release Clipping Mask, Add/Remove Layer Mask, Enable/Disable Mask, Apply Mask, Rasterize Vector Mask) | **Plan 10** | `EditorLayerMenu.tsx` (create) |
+| Mask keyboard shortcuts (Q = Quick Mask, Ctrl+Alt+G = Create/Release Clipping Mask, Alt+click between layers, Shift+click mask thumbnail = toggle visibility, Alt+Shift+click = show mask only) | **Plan 10** | `useMaskShortcuts.ts` (create) |
+| Quick Mask mode toggle button + options popover | **Plan 10** | `ToolbarQuickMaskButton.tsx` (create), `QuickMaskOptionsPopover.tsx` (create) |
+| Mask brush tool group (Brush/Pencil/Gradient/Eraser in mask mode) — toolbar tool selection only | **Plan 10** | `ToolbarMaskBrushTools.tsx` (create) |
+| Clipping mask creation via Alt+click between layers in layers panel | **Plan 10** | `LayersPanelAltClickHandler.tsx` (create) |
+| Mask thumbnail rendering in layers panel (miniature canvas) | **Plan 11** | `MaskThumbnailCanvas.tsx` |
+| Clipping path SVG rendering, layer mask SVG/CSS rendering, mask editing mode canvas overlay, vector mask path editing overlay, clip-group compositing, Quick Mask channel overlay, Refine Edge on-canvas preview | **Plan 11** | `maskRendering/` directory |
+| Mask properties panel (density, feather, smooth, contrast, view modes, invert/apply/delete/disable), opacity mask editor, Refine Edge dialog, mask brush settings | **Plan 12** | `MaskPropertyPanel.tsx`, `OpacityMaskEditor.tsx`, `RefineEdgeDialog.tsx`, `MaskBrushSettings.tsx` |
+
+**Rule**: `EditorToolbar.tsx` and the layers panel may read `maskMode`, `activeMaskTarget`, `quickMaskActive` from `certTemplateEditorStore` to toggle button active states, but must NOT import `maskRendering/*` or compute mask pixel data — that inverts the dependency. Plan 10 only sets mask mode flags and dispatches actions; Plan 11 renders the mask overlays when it observes those flags; Plan 12 renders the property controls.
+
+### R5.2 Mask Toolbar Buttons
+
+The `EditorToolbar` (created in T22, enhanced in R4-T30, R5) gains a **mask button cluster** positioned after the pen tool group and before the align/distribute cluster.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/ToolbarMaskButtons.tsx`
+
+```tsx
+interface ToolbarMaskButtonsProps {
+  selectedElementIds: string[];
+  hasActiveMask: boolean;
+  maskDisabled: boolean;
+  onAddLayerMask: () => void;
+  onAddVectorMask: () => void;
+  onToggleMaskVisibility: () => void;
+  onEnterMaskMode: () => void;
+  disabled?: boolean;
+}
+```
+
+**Buttons** (MUI v9 `IconButton` + `Tooltip`, all `sx={{}}` — no style props):
+
+| Button | Icon (MUI v9) | Tooltip (i18n key) | Shortcut hint | Behavior |
+|--------|---------------|---------------------|---------------|----------|
+| Add Layer Mask | `AddCircleOutlineOutlined` | `mask.addLayerMask` | — | Calls `addLayerMask(elementId, 'pixel')` on store. Disabled if no selection. |
+| Add Vector Mask | `GestureOutlined` (shape analogy) | `mask.addVectorMask` | — | Calls `addLayerMask(elementId, 'vector')`. Disabled if no selection or no active path. |
+| Toggle Mask Visibility | `VisibilityOutlined` / `VisibilityOffOutlined` | `mask.toggleVisibility` | `Shift+click thumbnail` | Calls `toggleMaskVisibility(elementId)`. Toggles icon. |
+| Enter Mask Mode | `BrushOutlined` | `mask.enterMaskMode` | — | Calls `setMaskMode('edit')` + `setActiveMaskTarget(elementId, 'layer')`. Sets `activeTool='brushMask'`. |
+
+```tsx
+import { IconButton, Tooltip } from '@mui/material';
+import { AddCircleOutlineOutlined, GestureOutlined, VisibilityOutlined, VisibilityOffOutlined, BrushOutlined } from '@mui/icons-material';
+import { useAppTranslation } from '@/shared/locale/client';
+import { useShallow } from 'zustand/react/shallow';
+
+export function ToolbarMaskButtons() {
+  const t = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const { selectedElementIds, hasActiveMask, maskDisabled, addLayerMask, addVectorMask, toggleMaskVisibility, setMaskMode, setActiveMaskTarget, setActiveTool } = useCertTemplateEditorStore(
+    useShallow((s) => ({
+      selectedElementIds: s.selectedElementIds,
+      hasActiveMask: s.hasActiveMask,
+      maskDisabled: s.maskDisabled,
+      addLayerMask: s.addLayerMask,
+      addVectorMask: s.addVectorMask,
+      toggleMaskVisibility: s.toggleMaskVisibility,
+      setMaskMode: s.setMaskMode,
+      setActiveMaskTarget: s.setActiveMaskTarget,
+      setActiveTool: s.setActiveTool,
+    })),
+  );
+  const hasSelection = selectedElementIds.length === 1;
+  return (
+    <>
+      <Tooltip title={t('mask.addLayerMask')}>
+        <span>
+          <IconButton size="small" disabled={!hasSelection} onClick={() => addLayerMask(selectedElementIds[0], 'pixel')} sx={{ color: 'text.secondary' }} aria-label={t('mask.addLayerMask')}>
+            <AddCircleOutlineOutlined />
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip title={t('mask.addVectorMask')}>
+        <span>
+          <IconButton size="small" disabled={!hasSelection} onClick={() => addVectorMask(selectedElementIds[0])} sx={{ color: 'text.secondary' }} aria-label={t('mask.addVectorMask')}>
+            <GestureOutlined />
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip title={t('mask.toggleVisibility')}>
+        <span>
+          <IconButton size="small" disabled={!hasActiveMask} onClick={() => toggleMaskVisibility(selectedElementIds[0])} sx={{ color: 'text.secondary' }} aria-label={t('mask.toggleVisibility')}>
+            {maskDisabled ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip title={t('mask.enterMaskMode')}>
+        <span>
+          <IconButton
+            size="small"
+            disabled={!hasActiveMask}
+            onClick={() => {
+              setMaskMode('edit');
+              setActiveMaskTarget(selectedElementIds[0], 'layer');
+              setActiveTool('brushMask');
+            }}
+            sx={{ color: 'text.secondary' }}
+            aria-label={t('mask.enterMaskMode')}
+          >
+            <BrushOutlined />
+          </IconButton>
+        </span>
+      </Tooltip>
+    </>
+  );
+}
+```
+
+MUI v9 note: `IconButton` accepts `color`, `size`, `disabled`, `aria-label` as valid props. The active/disabled visual state uses `sx={{ color: ... }}` — no style props, no hardcoded colors.
+
+### R5.3 Mask Menu in Layer Menubar
+
+**Component**: `EditorLayerMenu`
+
+**File**: `frontend/views/dashboard/cert/templates/editor/menubar/EditorLayerMenu.tsx`
+
+A `Menu` anchored to a "Layer" `Button` in the editor menubar. Contains the mask and clipping submenus mirroring Photoshop's `Layer → Mask` and `Layer → Create Clipping Mask`:
+
+```
+Layer
+ ├─ Create Clipping Mask        Ctrl+Alt+G   → createClippingMask()
+ ├─ Release Clipping Mask       Ctrl+Alt+G   → releaseClippingMask()  (context-sensitive label)
+ ├─ ──────────────
+ ├─ Layer Mask ▶
+ │   ├─ Add Pixel Mask                       → addLayerMask(sel[0], 'pixel')
+ │   ├─ Add Vector Mask                      → addLayerMask(sel[0], 'vector')
+ │   ├─ ──────────────
+ │   ├─ Enable                               → toggleMaskEnabled(sel[0], true)
+ │   ├─ Disable                   Shift+click → toggleMaskEnabled(sel[0], false)
+ │   ├─ Apply                                → applyMask(sel[0])  (destructive)
+ │   ├─ Delete                               → deleteMask(sel[0])
+ │   ├─ ──────────────
+ │   ├─ Rasterize Vector Mask                → rasterizeVectorMask(sel[0])
+ │   └─ Invert                               → invertMask(sel[0])
+ ├─ ──────────────
+ ├─ Quick Mask Mode             Q            → toggleQuickMask()
+ └─ Quick Mask Options…                      → openQuickMaskOptions()
+```
+
+Each `MenuItem` uses MUI v9 `ListItemIcon` + `ListItemText` (shortcut baked into `ListItemText.secondary`). No style props — spacing via `sx={{ py: 0.5 }}`. Item visibility/disabled state is context-sensitive:
+
+- "Create Clipping Mask" is enabled when ≥2 elements are selected (or one element is selected and a base shape exists below it). "Release Clipping Mask" replaces the label when the top selected element is already clipped (its `clippingMaskBaseId` is set).
+- "Add Pixel/Vector Mask" enabled when exactly one element is selected and it doesn't already have that mask type.
+- "Enable/Disable" toggles label based on `maskDisabled`.
+- "Apply" and "Rasterize Vector Mask" show a confirmation `Dialog` (destructive operations).
+
+### R5.4 Quick Mask Toolbar Button + Options
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/ToolbarQuickMaskButton.tsx`
+
+A single `IconButton` with `Tooltip`. On click, toggles `quickMaskActive` in the store. When active, the button shows `color="primary"` (active). Double-click opens the Quick Mask Options popover.
+
+```tsx
+export function ToolbarQuickMaskButton() {
+  const t = useAppTranslation(Translation.Dashboard.CertificateTemplateEditor);
+  const { quickMaskActive, toggleQuickMask } = useCertTemplateEditorStore(
+    useShallow((s) => ({ quickMaskActive: s.quickMaskActive, toggleQuickMask: s.toggleQuickMask })),
+  );
+  return (
+    <Tooltip title={t('mask.quickMask.tooltip')}>
+      <IconButton
+        size="small"
+        onClick={() => toggleQuickMask()}
+        sx={{ color: quickMaskActive ? 'primary.main' : 'text.secondary' }}
+        aria-label={t('mask.quickMask.ariaLabel')}
+        aria-pressed={quickMaskActive}
+      >
+        <GradientOutlined />
+      </IconButton>
+    </Tooltip>
+  );
+}
+```
+
+**Quick Mask Options popover**:
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/QuickMaskOptionsPopover.tsx`
+
+```tsx
+interface QuickMaskOptionsPopoverProps {
+  open: boolean;
+  anchorEl: HTMLElement | null;
+  onClose: () => void;
+}
+```
+
+Contains:
+- **Mode toggle** (`ToggleButtonGroup`): "Masked Areas" (paint = hidden, default) vs "Selected Areas" (paint = selected/visible). Binds to `quickMaskOptions.mode`.
+- **Color picker** (`ColorPicker` reusing Plan 10's existing color picker): default `theme.palette.error.main` (red) — stored as `quickMaskOptions.color`. Never hardcoded — default reads theme.
+- **Opacity slider** (`Slider` 0-100, default 50): binds to `quickMaskOptions.opacity`.
+
+All controls use `sx={{}}` and theme palette colors. The popover is keyboard-accessible: `Tab` cycles controls, `Enter` applies, `Esc` closes.
+
+### R5.5 Mask Brush Tool Group (Toolbar Selection Only)
+
+When `maskMode === 'edit'` (entered via mask thumbnail click or toolbar "Enter Mask Mode" button), the toolbar shows a **mask brush tool group** — these are tool selectors that set `activeTool`; the actual brush rendering on the mask canvas is Plan 11's responsibility.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/toolbar/ToolbarMaskBrushTools.tsx`
+
+```tsx
+interface ToolbarMaskBrushToolsProps {
+  activeTool: string;
+  onToolChange: (tool: string) => void;
+  disabled?: boolean;
+}
+```
+
+A `ToggleButtonGroup` flyout (same pattern as `PenToolGroup` from Pen Tool Round 5):
+
+| Tool | Enum value | Icon (MUI v9) | Tooltip (i18n key) | Shortcut |
+|------|-----------|---------------|---------------------|----------|
+| Brush Tool (mask) | `'brushMask'` | `BrushOutlined` | `mask.brush` | `B` |
+| Pencil Tool (mask) | `'pencilMask'` | `EditOutlined` (hard-edged analogy) | `mask.pencil` | `N` |
+| Gradient Tool (mask) | `'gradientMask'` | `GradientOutlined` | `mask.gradient` | `G` |
+| Eraser Tool (mask) | `'eraserMask'` | `AutoFixOffOutlined` | `mask.eraser` | `E` |
+
+Each tool is only enabled when `maskMode === 'edit'` AND `activeMaskTarget` is set. Otherwise the whole group is `disabled`.
+
+### R5.6 Layers Panel Mask Add Buttons
+
+The layers panel (created in Plan 10 R5 "Advanced Layers Panel") gains mask-related buttons in its panel footer toolbar (next to the existing add/duplicate/delete buttons):
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/layers/LayersPanelMaskAddButtons.tsx`
+
+```tsx
+interface LayersPanelMaskAddButtonsProps {
+  selectedElementId: string | null;
+  hasLayerMask: boolean;
+  hasVectorMask: boolean;
+  onAddLayerMask: () => void;
+  onAddVectorMask: () => void;
+}
+```
+
+Two `IconButton`s:
+- **Add Layer Mask** (`AddCircleOutlineOutlined`) — adds a white (fully visible) pixel mask. Disabled if the element already has a pixel mask.
+- **Add Vector Mask** (`GestureOutlined`) — adds a vector mask from the current shape path. Disabled if no active path or element already has a vector mask.
+
+These buttons are positioned left of the existing delete/trash button in the layers panel footer. `sx={{}}` for all styling. The mask icon in the layers panel footer is the standard Photoshop "rectangle with circle" metaphor — implemented as a custom `SvgIcon`:
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/layers/MaskIcon.tsx`
+
+```tsx
+import SvgIcon from '@mui/material/SvgIcon';
+
+export function MaskIcon(props: React.ComponentProps<typeof SvgIcon>) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="6" fill="currentColor" opacity="0.5" />
+      <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </SvgIcon>
+  );
+}
+```
+
+Uses `currentColor` — inherits theme palette. Never hardcoded.
+
+### R5.7 Alt+Click Clipping Mask in Layers Panel
+
+The layers panel supports **Alt+click between two layers** to create/release a clipping mask — the top layer clips to the bottom layer's shape.
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/layers/LayersPanelAltClickHandler.tsx`
+
+```tsx
+interface LayersPanelAltClickHandlerProps {
+  topElementId: string;
+  bottomElementId: string;
+  isAltPressed: boolean;
+  onClippingMaskToggle: (topId: string, baseId: string) => void;
+}
+```
+
+This is a hit-area overlay placed in the **gap between two layer rows** in the layers panel. When `isAltPressed` is true (detected via a global `keydown`/`keyup` listener on `Alt`), a thin highlight bar appears between the rows. Clicking it toggles the clipping mask relationship:
+
+- If `topElementId` is NOT currently clipped → `createClippingMask(topElementId, bottomElementId)`
+- If `topElementId` IS currently clipped to `bottomElementId` → `releaseClippingMask(topElementId)`
+
+The cursor changes to `pointer` when the Alt-Click gap is hoverable. The visual indicator for clipped layers (indent + down arrow) is handled in the layer row rendering (Plan 10's existing `LayerRow` component modification — see R5.8).
+
+### R5.8 Clipped Layer Visual Indicator in Layers Panel
+
+Each `LayerRow` in the layers panel is modified to show the clipping mask relationship:
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/layers/LayerRow.tsx` (modify)
+
+- If `element.clippingMaskBaseId` is set, the layer row is **indented** by 24px (`sx={{ pl: 3 }}` relative to base) and a `ArrowDownwardOutlined` icon (MUI v9, `sx={{ fontSize: 16, color: 'text.secondary' }}`) appears to the left of the thumbnail.
+- The base shape layer (the one being clipped TO, i.e. `clippingMaskBaseId === this.id` from some other element) shows an **underline** on its name (`sx={{ textDecoration: 'underline' }}`).
+- Multiple layers clipping to the same base all show the down-arrow indent.
+
+### R5.9 Mask Thumbnail + Link Icon in Layers Panel
+
+Each `LayerRow` that has a mask shows:
+
+**File**: `frontend/views/dashboard/cert/templates/editor/panels/layers/LayerRowMaskThumbnail.tsx` (create)
+
+- A **mask thumbnail** (32×32 px miniature canvas) rendered by Plan 11's `MaskThumbnailCanvas` — shows the mask in grayscale (white = visible, black = hidden).
+- A **link icon** (`LinkOutlined` / `LinkOffOutlined` from MUI v9) between the layer thumbnail and mask thumbnail. Clicking toggles `maskLinked` — when linked, moving the layer moves the mask; when unlinked, mask stays in place.
+- **Mask selection**: clicking the mask thumbnail sets `activeMaskTarget = { elementId, maskType: 'layer' | 'vector' }` and `maskMode = 'edit'` — the mask is now "active" for brush editing.
+- **Layer selection**: clicking the layer thumbnail sets `activeMaskTarget = null` and `maskMode = 'none'` — the layer content is active.
+- **Alt+click mask thumbnail**: sets `maskViewMode = 'maskOnly'` — Plan 11 shows the mask in black/white on canvas. Alt+click again restores.
+- **Shift+click mask thumbnail**: toggles `maskDisabled` — shows a red X overlay over the thumbnail (`sx={{ '&::after': { content: '"✕"', color: 'error.main', position: 'absolute', ... } }}`).
+
+```tsx
+interface LayerRowMaskThumbnailProps {
+  elementId: string;
+  maskType: 'layer' | 'vector';
+  maskLinked: boolean;
+  maskDisabled: boolean;
+  onMaskClick: () => void;
+  onLayerThumbnailClick: () => void;
+  onToggleLink: () => void;
+  onAltClick: () => void;
+  onShiftClick: () => void;
+}
+```
+
+### R5.10 Keyboard Shortcuts for Masks
+
+**File**: `frontend/views/dashboard/cert/templates/editor/shortcuts/useMaskShortcuts.ts`
+
+Registered via the existing `ShortcutManager` (from Plan 10 R4). All shortcuts are context-gated — only active when the editor canvas has focus.
+
+| Shortcut | Action | Condition |
+|----------|--------|-----------|
+| `Q` | `toggleQuickMask()` | Always (editor focus) |
+| `Ctrl+Alt+G` (Win) / `Cmd+Option+G` (Mac) | `createClippingMask()` or `releaseClippingMask()` (context toggle) | ≥1 element selected |
+| `Alt+click` (layers panel gap) | `toggleClippingMask(topId, baseId)` | Pointer event, not keyboard |
+| `\\` (backslash) | `toggleMaskVisibility(selElementId)` | Has mask |
+| `Alt+\\` | `invertMask(selElementId)` | Has mask |
+| `Shift+\\` | `toggleMaskDisabled(selElementId)` | Has mask |
+| `Enter` (in mask mode) | `exitMaskMode()` then `applyMask()` (confirm) | `maskMode === 'edit'` |
+| `Esc` (in mask mode) | `exitMaskMode()` without applying | `maskMode === 'edit'` |
+| `B` | `setActiveTool('brushMask')` | `maskMode === 'edit'` |
+| `N` | `setActiveTool('pencilMask')` | `maskMode === 'edit'` |
+| `G` | `setActiveTool('gradientMask')` | `maskMode === 'edit'` |
+| `E` | `setActiveTool('eraserMask')` | `maskMode === 'edit'` |
+
+macOS detection uses `navigator.platform.includes('Mac')` to swap `Ctrl` → `Cmd`, `Alt` → `Option`. The hook returns a cleanup function that unregisters all shortcuts on unmount.
+
+### R5.11 i18n Keys (Plan 10 Round 5 — Masking & Clipping)
+
+All keys under the `certificateEditor` namespace, `mask.*` subtree:
+
+```typescript
+mask: {
+  addLayerMask: string;
+  addVectorMask: string;
+  toggleVisibility: string;
+  enterMaskMode: string;
+  // Layer menu
+  createClippingMask: string;
+  releaseClippingMask: string;
+  layerMask: string;
+  addPixelMask: string;
+  addVectorMaskMenu: string;
+  enableMask: string;
+  disableMask: string;
+  applyMask: string;
+  applyMaskConfirm: string; // "This will permanently bake the mask into the element. Continue?"
+  applyMaskTitle: string;
+  deleteMask: string;
+  rasterizeVectorMask: string;
+  rasterizeVectorMaskConfirm: string;
+  rasterizeVectorMaskTitle: string;
+  invertMask: string;
+  // Quick Mask
+  quickMask: {
+    tooltip: string;
+    ariaLabel: string;
+    mode: string;
+    maskedAreas: string;
+    selectedAreas: string;
+    color: string;
+    opacity: string;
+  };
+  // Mask brush tools
+  brush: string;
+  pencil: string;
+  gradient: string;
+  eraser: string;
+  // Mask modes (shown in status bar)
+  maskModeActive: string;
+  maskOnlyView: string;
+  // Refine Edge dialog (launched from toolbar but i18n shared — Plan 12 owns the dialog)
+  refineEdge: string;
+  // Layers panel
+  maskThumbnail: string;
+  linkMask: string;
+  unlinkMask: string;
+  maskDisabledOverlay: string;
+  clippedIndicator: string;
+}
+```
+
+Each key implemented in both `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts`.
+
+### R5.12 Type Definitions
+
+**File**: `frontend/common/stores/cert/maskTypes.ts` (create — shared types to avoid circular deps between plans)
+
+```typescript
+export type MaskType = 'pixel' | 'vector' | 'clipping';
+export type MaskViewMode = 'normal' | 'maskOnly' | 'overlay' | 'onBlack' | 'onWhite' | 'onLayers';
+export type MaskEditMode = 'none' | 'edit';
+export type QuickMaskMode = 'maskedAreas' | 'selectedAreas';
+
+export interface LayerMaskData {
+  id: string;
+  type: MaskType;
+  enabled: boolean;
+  linked: boolean;            // true = mask moves with layer; false = independent
+  density: number;           // 0-100, overall mask opacity
+  feather: number;           // 0-250px, edge softness
+  smooth: number;             // 0-100, reduces mask noise
+  contrast: number;           // -100 to +100, sharpens edge transition
+  shiftEdge: number;          // -100 to +100, moves mask boundary in/out
+  decontaminate: boolean;
+  decontamineAmount: number;  // 0-100
+  // Pixel mask: grayscale image data (stored as ImageData / offscreen canvas reference)
+  pixelData?: MaskPixelData;
+  // Vector mask: path data (reuses PathData from penTool.types.ts)
+  vectorPath?: import('./penTool.types').PathData;
+  // Inversion flag
+  inverted: boolean;
+}
+
+export interface MaskPixelData {
+  width: number;
+  height: number;
+  // Base64-encoded grayscale PNG or a reference to an OffscreenCanvas
+  dataUri: string;
+  // Or direct pixel buffer for in-memory editing
+  /** @internal */ buffer?: Uint8ClampedArray;
+}
+
+export interface ClippingMaskData {
+  baseElementId: string;  // the shape that clips
+  clippedElementIds: string[];  // elements clipped to this base
+}
+
+export interface QuickMaskOptions {
+  mode: QuickMaskMode;
+  color: string;   // theme palette reference or hex — default from theme
+  opacity: number;  // 0-100
+}
+
+export interface ActiveMaskTarget {
+  elementId: string;
+  maskType: 'layer' | 'vector';  // which mask is being edited
+}
+
+export interface RefineEdgeSettings {
+  smooth: number;
+  feather: number;
+  contrast: number;
+  shiftEdge: number;
+  decontaminate: boolean;
+  decontamineAmount: number;
+  output: 'layerMask' | 'newDocument' | 'newLayerWithMask' | 'newSelection';
+}
+
+// Element schema extension (appended to CanvasElement in the store)
+export interface MaskElementExtension {
+  layerMask?: LayerMaskData;        // pixel or vector layer mask
+  vectorMask?: LayerMaskData;       // can coexist with layer mask
+  clippingMaskBaseId?: string;      // set when THIS element is clipped to a base shape
+  clippingMaskClippedIds?: string[]; // set when THIS element is the base shape others clip to
+  opacityMask?: OpacityMaskData;    // Illustrator-style opacity mask
+}
+
+export interface OpacityMaskData {
+  id: string;
+  // Two thumbnails: content (left) and mask (right) — like Illustrator
+  clip: boolean;  // if true, masks out content outside original bounds
+  inverted: boolean;
+  // Mask content: grayscale image, gradient, or shape
+  maskContent: MaskPixelData | { type: 'gradient'; gradientId: string } | { type: 'shape'; shapeId: string };
+  // Independent transform from element
+  transform?: { translateX: number; translateY: number; scaleX: number; scaleY: number; rotation: number };
+}
+```
+
+The `CanvasElement` type in `certTemplateEditorStore` is extended with `MaskElementExtension` fields. These are optional (present only when masks are applied). The `ElementType` enum does NOT gain a new value — masks are attributes of existing elements, not new element types.
+
+### R5.13 Cross-Plan Contracts
+
+| Consumer Plan | Contract |
+|---------------|----------|
+| **Plan 11** | `maskMode`, `activeMaskTarget`, `quickMaskActive`, `quickMaskOptions`, `maskViewMode`, and all `addLayerMask`/`addVectorMask`/`toggleMaskVisibility`/`createClippingMask`/`releaseClippingMask`/`invertMask`/`applyMask`/`deleteMask`/`setMaskProperties` actions in `certTemplateEditorStore` — Plan 11's canvas reads `maskMode` to conditionally render mask overlays and route pointer events to mask brush handlers. |
+| **Plan 11** | `LayerMaskData`, `ClippingMaskData`, `OpacityMaskData`, `MaskType`, `MaskViewMode`, `RefineEdgeSettings` types — Plan 11 imports these from `maskTypes.ts` for canvas rendering. `MaskPixelData` (grayscale buffer/DataURI) is the pixel data contract. |
+| **Plan 12** | `LayerMaskData`, `OpacityMaskData`, `RefineEdgeSettings`, `QuickMaskOptions` — Plan 12 imports these for the mask properties panel, opacity mask editor, and Refine Edge dialog. Plan 12 calls `setMaskProperties(elementId, partial)` to update density/feather/smooth/contrast/shiftEdge. |
+| **Plan 10** | Mask brush tools (`brushMask`, `pencilMask`, `gradientMask`, `eraserMask`) are added to `activeTool` union — Plan 10's toolbar reads this; Plan 11's canvas routes pointer events based on it. |
+| **Plan 5** | `MaskElementExtension` fields (`layerMask`, `vectorMask`, `clippingMaskBaseId`, `opacityMask`) must be serialized in the backend schema as JSONB columns on `template_element`. GraphQL mutations must accept these fields. |
+| **Plan 6** | PDF rendering must apply clipping masks (clip content to base shape path), layer masks (apply grayscale alpha channel), and vector masks (clip to vector path). Opacity masks must be composited. Mask density/feather/contrast must be baked into the PDF mask. |
+| **Plan 15** | Publishing serializes mask data in `renderData`. Public preview renders masks as SVG `clipPath` (clipping), `mask` elements (layer masks), or rasterized alpha (pixel masks with feather). |
+
+### R5.14 Performance Considerations
+
+- **Mask thumbnail rendering**: `MaskThumbnailCanvas` (Plan 11) renders at 32×32 — a `useMemo` keyed on `(element.id, mask.version)` prevents re-render on every element change. Only re-renders when the mask itself changes (tracked via a mask version counter in the store).
+- **Alt-key listener**: The global `keydown`/`keyup` Alt listener is passive and debounced — only updates `isAltPressed` state, doesn't trigger re-renders of the entire layers panel.
+- **Quick mask channel**: When `quickMaskActive`, the canvas renders an overlay channel — this is a separate SVG/PNG layer, not a re-render of all elements. Use CSS `pointer-events: none` on the overlay so it doesn't intercept canvas interactions.
+- **Mask brush stroke throttling**: Brush strokes on the mask (Plan 11) are throttled via `requestAnimationFrame` and committed to the store on `pointerup` (not on every `pointermove`), to avoid store churn.
+
+## Round 5: Pro Keyboard Shortcuts
+
+### Keyboard Shortcut System Overview
+
+A comprehensive keyboard shortcut system with customizable bindings, conflict detection, contextual shortcuts, and a visual shortcut editor dialog.
+
+### Shortcut Categories
+
+| Category | Purpose | Examples |
+|----------|---------|---------|
+| File | Document operations | `Ctrl+N` new, `Ctrl+S` save, `Ctrl+Shift+S` save as |
+| Edit | Edit operations | `Ctrl+Z` undo, `Ctrl+Shift+Z` redo, `Ctrl+X` cut, `Ctrl+C` copy, `Ctrl+V` paste |
+| View | Zoom/pan/navigation | `Ctrl++` zoom in, `Ctrl+-` zoom out, `Ctrl+1` actual size, `Ctrl+0` fit screen |
+| Tools | Tool selection | `V` select, `T` text, `P` pen, `R` rectangle, `E` ellipse, `L` line |
+| Elements | Element manipulation | `Ctrl+D` duplicate, `Ctrl+G` group, `Ctrl+Shift+G` ungroup, `Delete` remove |
+| Layers | Layer operations | `Ctrl+]` bring forward, `Ctrl+[` send backward, `Ctrl+Shift+]` front, `Ctrl+Shift+[` back |
+| Arrange | Alignment | `Ctrl+Alt+L` left, `Ctrl+Alt+R` right, `Ctrl+Alt+C` center H, `Ctrl+Alt+T` top, `Ctrl+Alt+B` bottom |
+| Typography | Text formatting | `Ctrl+B` bold, `Ctrl+I` italic, `Ctrl+U` underline, `Ctrl+Shift+>` increase font |
+| Workspace | Panel management | `F8` layers, `F7` color, `F6` swatches, `Tab` toggle all panels |
+| History | Undo/redo | `Ctrl+Z` undo, `Ctrl+Y` or `Ctrl+Shift+Z` redo, `Ctrl+Alt+Z` step backward |
+
+### Shortcut Customization Dialog
+
+**Component**: `KeyboardShortcutsDialog`
+**Location**: Edit menu → "Keyboard Shortcuts..."
+**Features**:
+- Searchable list of all shortcuts grouped by category
+- Each row shows: action name, current binding, editable shortcut field
+- Click a row to remap — next key press captures as new binding
+- Conflict detection — if another action uses the same binding, highlight in red
+- "Reset to Default" button per row and globally
+- Import/export shortcut presets as JSON
+- Context filter (show all / global / per-tool / canvas-only)
+
+### Shortcut Display in Menus
+
+All menu items display their shortcut binding on the right side:
+```tsx
+<MenuItem>
+  <ListItemText primary={t('undo')} />
+  <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary', fontFamily: 'monospace' }}>Ctrl+Z</Typography>
+</MenuItem>
+```
+
+### Context-Aware Shortcuts
+
+Shortcuts behave differently based on current context:
+- **Canvas focused**: Tool shortcuts active (V, T, P, R, E, L)
+- **Text editing**: Typography shortcuts active (Ctrl+B, Ctrl+I, Ctrl+U)
+- **Panel focused**: Navigation shortcuts active (arrows, Page Up/Down)
+- **Dialog open**: Only global shortcuts active (Esc to close, Enter to confirm)
+- **Drag operation**: Transform shortcuts (Shift for constrain, Alt for duplicate)
+
+### Shift to Constrain & Alt to Duplicate
+
+- **Shift during drag (move)**: Constrains to horizontal/vertical/45° angles
+- **Shift during resize**: Constrains to uniform (proportional)
+- **Shift during rotate**: Snaps to 15° increments
+- **Alt during drag**: Duplicates element on release
+- **Alt+Shift during drag**: Duplicates constrained to axis
+
+### Modifier Key Reference Guide
+
+**Component**: `ShortcutHelpOverlay`
+**Location**: Help menu → "Show Shortcuts" or `?` key
+- Full-screen overlay with all shortcuts organized by category
+- Toggle with `?` key
+- Searchable filter
+- Shows context-aware active shortcuts highlighted
+
+## Round 5: Advanced History & States — Toolbar & Menu Integration
+
+### History Panel Integration in Editor Shell
+- **View ▸ History** menu item toggles History panel visibility
+- History panel docks in left sidebar (tabbed with Layers)
+- Panel shows linear list of history states with icons
+
+### Toolbar Undo/Redo Buttons
+- Undo button in editor toolbar (icon: ArrowBack)
+- Redo button in editor toolbar (icon: ArrowForward)
+- Tooltip shows action description + keyboard shortcut
+- Button disabled state when no more undo/redo available
+
+### Edit Menu History Items
+- **Edit ▸ Undo** (Ctrl+Z) — undo last action
+- **Edit ▸ Redo** (Ctrl+Shift+Z) — redo last undone action
+- **Edit ▸ Step Forward** (Ctrl+Shift+Y) — alternative redo
+- **Edit ▸ Step Backward** (Alt+Ctrl+Z) — alternative undo
+- Menu items show action name dynamically (e.g., "Undo Move Element")
+
+### History States Management
+- **Edit ▸ History Settings** opens dialog to configure:
+  - Max history states (default 50, range 10-200)
+  - Auto-flush threshold (default 25 states)
+  - Non-linear history toggle (allow branching)
+  - Snapshot interval (every N states)
+
+### Snapshots
+- **Edit ▸ New Snapshot** creates named state snapshot
+- Snapshots visible in History panel with camera icon
+- Click snapshot to restore without losing current state
+- Snapshots persist across history truncation
+
+### History Options in Edit Menu
+- **Edit ▸ Clear History** — removes all states except current
+- **Edit ▸ Purge History** — removes all states and frees memory
+- **Edit ▸ Step Forward One** — advance one state
+- **Edit ▸ Step Backward One** — go back one state
+
+## Round 5: Canvas Pro Features — Editor Shell & Multi-Page
+
+### Artboards System
+- **File ▸ New Artboard** — adds a new artboard to the canvas
+- Each artboard has independent dimensions, background, margin/bleed
+- Artboards tab in left sidebar to switch between them
+- Export each artboard independently or all together
+- Artboard presets: A4 Landscape, A4 Portrait, Letter, Certificate (various sizes)
+
+### Multi-Page Support
+- Pages tab in left sidebar
+- Add/delete/duplicate/reorder pages
+- Each page can contain multiple artboards
+- Page numbering and naming
+- Navigate pages via Page Up/Page Down
+- Export all pages or specific page range
+
+### Document Setup Dialog
+- **File ▸ Document Setup** opens dialog:
+  - Document dimensions and unit
+  - DPI (72, 150, 300, custom)
+  - Color mode (RGB, CMYK, Grayscale)
+  - Bleed settings
+  - Background color
+  - Margin/padding guides
+
+### CMYK Preview Toggle
+- **View ▸ CMYK Preview** toggles CMYK color space simulation
+- Shows soft-proof of RGB colors in CMYK
+- Gamut warning highlights out-of-gamut colors
+- CMYK profile selection (Coated FOGRA27, Uncoated, etc.)
+
+### Export Options Dialog
+- **File ▸ Export As** opens dialog:
+  - PNG, JPG, SVG, PDF formats
+  - DPI selection (72, 150, 300)
+  - Quality slider for JPG
+  - Area selection (current artboard, all artboards, custom range)
+  - Color profile embedding
+  - Background transparency toggle
+
+## Round 5: Workspace & Panel System — Editor Shell
+
+### Window Presets
+- **Window ▸ Workspace ▸ Default** — standard layout (toolbar + properties + layers)
+- **Window ▸ Workspace ▸ Design** — more panels (color, character, paragraph, layers, history)
+- **Window ▸ Workspace ▸ Minimal** — only canvas + toolbar
+- **Window ▸ Workspace ▸ Save Current** — save current layout as custom preset
+- **Window ▸ Workspace ▸ Reset** — reset to default layout
+
+### Panel System
+- **Window ▸ Properties** — toggle properties panel
+- **Window ▸ Layers** — toggle layers panel
+- **Window ▸ History** — toggle history panel
+- **Window ▸ Colors** — toggle color panel
+- **Window ▸ Character** — toggle character panel
+- **Window ▸ Paragraph** — toggle paragraph panel
+- **Window ▸ Assets** — toggle asset library panel
+- **Window ▸ Guides** — toggle guides & grid panel
+- **Window ▸ Navigator** — toggle navigator panel
+
+### Panel Drag & Dock
+- All panels are draggable and can dock to edges
+- Tab panels to group them
+- Float panels (drag outside dock zones)
+- Collapse/expand panels
+- Resize panel areas with drag dividers
+- Panel state saved in user preferences (Zustand persist)
+
+### Application Frame
+- Full-screen toggle (F11)
+- Tabbed document interface (multiple templates open)
+- Title bar with document name, save status (*)
+- Menu bar with full application menus
+- Status bar at bottom: zoom level, document size, cursor coordinates, element count
+
+### Customizable Toolbar
+- Toolbar buttons can be added/removed/_reordered
+- **Edit ▸ Customize Toolbar** opens customization dialog
+- Choose which tool icons show in toolbar
+- Choose toolbar icon size (small, large)
+- Choose toolbar position (top, left, right, floating)
+
+### Workspace Persistence
+- Custom workspace layouts saved per user
+- Panes resize states persisted (Zustand persist)
+- Last used workspace auto-loads on template open
+- Multiple named workspaces (e.g., "Design Mode", "Layout Mode")

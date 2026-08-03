@@ -13,11 +13,18 @@ export const profileNotificationsEn: ProfileNotificationsLabels = {
     booking: "Booking — a fresh URL is generated when a meeting is booked",
     learnMore: "Learn more",
   },
+  categories: {
+    info: "Informational",
+    reminder: "Reminders",
+    urgent: "Urgent",
+    digest: "Digests",
+  },
   channels: {
     EMAIL: "Email",
     SMS: "SMS",
     PUSH: "Push Notifications",
     ON_APP: "In-App",
+    WHATSAPP: "WhatsApp",
   },
   events: {
     CLASS_REMINDER: "Class Reminders",
@@ -40,6 +47,13 @@ export const profileNotificationsEn: ProfileNotificationsLabels = {
     CLASS_RESET: "Class Reset",
     LESSON_REPORT_SUBMITTED: "Lesson Report Submitted",
     LESSON_REPORT_REVIEWED: "Lesson Report Reviewed",
+    QUOTA_EXPIRING_SOON: "Quota Expiring Soon",
+    QUOTA_EXPIRED: "Quota Expired",
+    QUOTA_LOW_BALANCE: "Quota Low Balance",
+    ON_DEMAND_INSTANCE_PENDING_CREDIT: "On-Demand Credit Pending",
+    ON_DEMAND_INSTANCE_REMINDER_T3: "On-Demand Reminder (3 days)",
+    ON_DEMAND_INSTANCE_REMINDER_T1: "On-Demand Reminder (1 day)",
+    ON_DEMAND_TEACHER_DAILY_DIGEST: "Teacher Daily On-Demand Digest",
   },
   connectAccount: {
     connectButton: "Connect",

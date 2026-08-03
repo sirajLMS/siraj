@@ -23,7 +23,7 @@ export type ClassSessionMetrics = {
   leave: number;
 };
 
-export type RescheduleClassInputType = {
+export type RescheduleClassInput = {
   scheduledStartAt: string;
   scheduledEndAt: string;
   durationMinutes: number;
@@ -60,8 +60,8 @@ export type FutureClassReturnType = {
   meetingJoinUrl?: string | null;
   effectiveMeeting?: EffectiveMeetingReturnType | null;
   avatarUrl?: string | null;
-  executionState?: string | null;
-  outcome?: string | null;
+  executionState?: ClassExecutionState | null;
+  outcome?: ClassOutcome | null;
 };
 
 export type TeacherFutureScheduleReturnType = {
@@ -135,7 +135,7 @@ export type DailyScheduleListReturnType = {
   effectiveMeeting?: EffectiveMeetingReturnType | null;
 };
 
-export type AdminDashboardScheduleInputType = {
+export type AdminDashboardScheduleInput = {
   date: string;
   teacherId?: string | null;
   search?: string | null;
@@ -158,24 +158,14 @@ export type AdminDashboardScheduleReturnType = {
   pageInfo: import("@/backend/types/shared/pagination.types").PageInfo | null;
 };
 
-export type StatusTrackingScheduleRow = {
-  id: string;
-  studentId: string;
-  studentName: string;
-  studentInitials: string;
-  studentAvatarUrl?: string | null;
-  studentStatus: import("@/backend/enum").StudentStatus;
+// Canonical definition lives in ./scheduling.types.ts as StatusTrackingRow.
+// This alias preserves the GraphQL-facing name (StatusTrackingScheduleRow)
+// used by the Pothos layer and frontend codegen without duplicating fields.
+export type StatusTrackingScheduleRow = import("./scheduling.types").StatusTrackingRow;
+
+export type AvailableClassSlot = {
   teacherId: string;
-  teacherName: string;
-  teacherAvatarUrl?: string | null;
-  courseName?: string | null;
-  avatarUrl?: string | null;
-  scheduledStartAt: Date;
-  scheduledEndAt: Date;
-  durationMinutes: number;
-  executionState: ClassExecutionState;
-  outcome: ClassOutcome;
-  isFrozen: boolean;
-  meetingJoinUrl?: string | null;
-  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
+  startAt: Date;
+  endAt: Date;
+  available: boolean;
 };

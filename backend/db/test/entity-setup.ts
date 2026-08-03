@@ -31,15 +31,15 @@ import {
 } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
-  ClassInstanceEntity,
+  ClassInstanceSelectType,
   ClassMeetingConfigSelectType,
   CreditTransactionSelectType,
   LessonReportSelectType,
   MeetingProviderSelectType,
   ParentEntity,
-  StudentEntity,
+  StudentSelectType,
   TeacherDueSelectType,
-  TeacherEntity,
+  TeacherSelectType,
   UserMeetingConfigSelectType,
   UserSelectType,
 } from "@/backend/types";
@@ -134,7 +134,7 @@ export async function createTestTeacher(
   tx: DBTransaction,
   userId: string,
   overrides: Partial<typeof teachers.$inferInsert> = {}
-): Promise<TeacherEntity> {
+): Promise<TeacherSelectType> {
   const now = new Date();
   const [teacher] = (await tx
     .insert(teachers)
@@ -144,7 +144,7 @@ export async function createTestTeacher(
       updatedAt: now,
       ...overrides,
     })
-    .returning()) as [TeacherEntity];
+    .returning()) as [TeacherSelectType];
   return teacher;
 }
 
@@ -171,7 +171,7 @@ export async function createTestStudent(
   tx: DBTransaction,
   parentId: string,
   overrides: Partial<typeof students.$inferInsert> = {}
-): Promise<StudentEntity> {
+): Promise<StudentSelectType> {
   const now = new Date();
   // LMS — students.userId IS NOT NULL: every student must have a login account.
   // If the caller did not provide a userId (most tests don't need a specific user),
@@ -197,7 +197,7 @@ export async function createTestStudent(
       updatedAt: now,
       ...remainingOverrides,
     })
-    .returning()) as [StudentEntity];
+    .returning()) as [StudentSelectType];
   return student;
 }
 
@@ -209,7 +209,7 @@ export async function setupTeacher(
   tx: DBTransaction,
   userOverrides: Partial<typeof users.$inferInsert> = {},
   teacherOverrides: TeacherSetupOverrides = {}
-): Promise<{ user: UserSelectType; teacher: TeacherEntity }> {
+): Promise<{ user: UserSelectType; teacher: TeacherSelectType }> {
   const { status: accountStatus, ...teacherOnly } = teacherOverrides;
   const user = await createTestUser(tx, {
     ...userOverrides,
@@ -224,7 +224,7 @@ export async function setupStudent(
   userOverrides: Partial<typeof users.$inferInsert> = {},
   parentOverrides: Partial<typeof parents.$inferInsert> = {},
   studentOverrides: Partial<typeof students.$inferInsert> = {}
-): Promise<{ user: UserSelectType; parent: ParentEntity; student: StudentEntity }> {
+): Promise<{ user: UserSelectType; parent: ParentEntity; student: StudentSelectType }> {
   const user = await createTestUser(tx, userOverrides);
   const parent = await createTestParent(tx, user.id, parentOverrides);
   const student = await createTestStudent(tx, parent.id, studentOverrides);
@@ -236,7 +236,7 @@ export async function createMockClassInstance(
   studentId: string,
   teacherId: string,
   overrides: Partial<typeof classInstances.$inferInsert> = {}
-): Promise<ClassInstanceEntity> {
+): Promise<ClassInstanceSelectType> {
   const now = new Date();
   const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
   const [instance] = await tx
@@ -270,11 +270,11 @@ export async function setupTestEntities(
 ): Promise<{
   parentUser: UserSelectType;
   parent: ParentEntity;
-  student: StudentEntity;
+  student: StudentSelectType;
   teacherUser: UserSelectType;
-  teacher: TeacherEntity;
+  teacher: TeacherSelectType;
   assignment: typeof teacherAssignments.$inferSelect;
-  instance: ClassInstanceEntity | null;
+  instance: ClassInstanceSelectType | null;
   now: Date;
 }> {
   const now = new Date();
@@ -548,7 +548,7 @@ export async function createCompletedClassInstance(
   studentId: string,
   teacherId: string,
   overrides: Partial<typeof classInstances.$inferInsert> = {}
-): Promise<ClassInstanceEntity> {
+): Promise<ClassInstanceSelectType> {
   return createMockClassInstance(tx, studentId, teacherId, {
     executionState: ClassExecutionState.COMPLETED,
     outcome: ClassOutcome.TAKEN,

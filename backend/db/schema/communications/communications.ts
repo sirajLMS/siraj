@@ -128,7 +128,9 @@ export const notificationDeliveries = pgTable(
     index("notification_deliveries_event_type_idx").on(table.eventType),
     index("notification_deliveries_channel_idx").on(table.channel),
     index("notification_deliveries_created_at_idx").on(table.createdAt),
-    index("notification_deliveries_provider_message_id_idx").on(table.providerMessageId),
+    uniqueIndex("notification_deliveries_provider_message_id_unique")
+      .on(table.providerMessageId)
+      .where(sql`${table.providerMessageId} IS NOT NULL`),
     index("notification_deliveries_device_token_id_idx").on(table.deviceTokenId),
     index("notification_deliveries_sent_at_idx").on(table.sentAt),
     index("notification_deliveries_delivered_at_idx").on(table.deliveredAt),

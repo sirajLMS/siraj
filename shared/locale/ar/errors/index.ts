@@ -178,6 +178,18 @@ export const errorsAr: ErrorsLabels = {
     ttlOutOfRange: "يجب أن تكون مدة الجلسة بين 60 و 2,419,200 ثانية.",
     maxConcurrentOutOfRange: "يجب أن يكون الحد الأقصى للجلسات المتزامنة بين 1 و 50.",
   },
+  quota: {
+    insufficientRemaining: (requested: number, available: number) => `المتبقي ${available} حصة فقط — طُلب ${requested}`,
+    exceedsCreditBalance: (requested: number, available: number) =>
+      `رصيد غير كافٍ. المتاح: ${available}، المطلوب: ${requested}`,
+    periodicRefreshFailed: (quotaName: string, reason: string) => `فشل تحديث الحصة الدورية ${quotaName}: ${reason}`,
+    invalidPeriod: (quotaName: string) => `الحصة ${quotaName} منتهية الصلاحية أو فترتها غير صالحة`,
+    alreadyExpired: (quotaName: string) => `الحصة ${quotaName} منتهية الصلاحية بالفعل`,
+    earmarkExceedsRemaining: (requested: number, available: number) =>
+      `حجز ${requested} يتجاوز الحصة المتبقية (${available})`,
+    slotConflict: (startTime: string, endTime: string) => `الفترة الزمنية ${startTime}–${endTime} تتعارض مع حجز قائم`,
+    onDemandNoCredits: (studentName: string) => `لا توجد أرصدة كافية للحجز الفوري لـ ${studentName}`,
+  },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
   duplicateRequest: "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
@@ -253,6 +265,9 @@ export const errorsAr: ErrorsLabels = {
   cannotRescheduleCompleted: "لا يمكن إعادة جدولة جلسة مكتملة.",
   cannotRescheduleAlreadyRescheduled: "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
   outOfQuota: "نفدت الحصة.",
+  quotaExpired: "انتهت صلاحية الحصة.",
+  quotaNotFound: "الحصة غير موجودة.",
+  invalidQuotaState: "حالة الحصة غير صالحة.",
   leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
     `تم تجاوز حصة الإجازة: الحد الأقصى ${maxLeaves} إجازات مسموح بها.`,
   classInstanceNotFound: ({ id }: { id: string }) => `مثيل الفصل غير موجود: ${id}`,
@@ -277,4 +292,37 @@ export const errorsAr: ErrorsLabels = {
   resourceNotFound: "مورد التعلم غير موجود.",
   currencyInUse:
     "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
+
+  // ─── Communication / suggestion / complaint errors ─────────────────────
+  complaintNotFound: "الشكوى غير موجودة.",
+  suggestionNotFound: "الاقتراح غير موجود.",
+  complaintTooManyFiles: (maxFiles: number) => `يمكنك رفع ${maxFiles} ملفات كحد أقصى لكل شكوى.`,
+  complaintFileTooLarge: (maxSizeMb: number) => `يجب ألا يتجاوز حجم الملف ${maxSizeMb} ميجابايت.`,
+  suggestionCannotMarkSelfAsDuplicate: "لا يمكن وضع علامة على الاقتراح كنسخة مكررة من نفسه.",
+  suggestionCircularDuplicate: "لا يمكن إنشاء سلسلة نسخ مكررة دائرية.",
+  suggestionTargetIsAlreadyDuplicate: "الاقتراح الهدف مُعلَّم بالفعل كنسخة مكررة لاقتراح آخر.",
+
+  // ─── Communication dispatch errors ──────────────────────────────────────
+  unknownCommunicationChannel: (channel: string) => `قناة تواصل غير معروفة: ${channel}`,
+  unknownError: "حدث خطأ غير معروف.",
+  unknownDispatchError: "حدث خطأ غير معروف أثناء الإرسال.",
+  whatsappTemplateMissing: "تكوين قالب واتساب مفقود لهذا الإشعار.",
+
+  // ─── WhatsApp account management errors ─────────────────────────────────
+  whatsappAccountNotFound: (id: string) => `حساب واتساب غير موجود: ${id}`,
+  whatsappAccessTokenNotConfigured: "رمز الوصول لواتساب غير مُهيأ.",
+  whatsappWabaIdNotConfigured: "معرف حساب واتساب التجاري غير مُهيأ.",
+
+  // ─── Delivery failure messages ───────────────────────────────────────────
+  emailChannelLabel: "البريد الإلكتروني",
+  smsChannelLabel: "رسائل SMS",
+  pushChannelLabel: "إشعارات الدفع",
+  whatsappChannelLabel: "واتساب",
+  onAppChannelLabel: "داخل التطبيق",
+  deliveryFailed: (channelLabel: string) => `فشل تسليم ${channelLabel}. يرجى المحاولة مرة أخرى لاحقاً.`,
+
+  // Quota errors accessible via quota.* — see QuotaErrors
+
+  // ─── Offline resolver / notification fallbacks ──────────────────────
+  studentNameFallback: "طالب",
 };

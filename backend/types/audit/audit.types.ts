@@ -38,7 +38,8 @@ export type AuditEntityType =
   | "LEARNING_RESOURCE"
   | "SUGGESTION"
   | "BOOK"
-  | "MEETING_PROVIDER_TOKEN";
+  | "MEETING_PROVIDER_TOKEN"
+  | "WHATSAPP_ACCOUNT";
 
 /**
  * Action types for audit logs
@@ -59,7 +60,8 @@ export type AuditAction =
   | "ACTIVATE"
   | "DEACTIVATE"
   | "RESTORE"
-  | "TEACHER_SUPPORT_REQUEST";
+  | "TEACHER_SUPPORT_REQUEST"
+  | "WHATSAPP_OPT_IN";
 
 /**
  * Input for creating an audit log entry

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { NotificationEventType } from "@/backend/enum";
+import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { OnAppChannel } from "@/backend/services";
 import { emailChannel } from "@/backend/services/communication/channels/email";
 import { pushChannel } from "@/backend/services/communication/channels/push";
@@ -12,7 +12,7 @@ const MOCK_USER_ID = "user-uuid-0001";
 function createTestPayload(overrides?: Partial<CommunicationPayload>): CommunicationPayload {
   return {
     userId: MOCK_USER_ID,
-    channel: "on_app",
+    channel: NotificationChannel.ON_APP,
     eventType: NotificationEventType.COMPLAINT_RESPONSE,
     title: "Test",
     body: "Test body",
@@ -56,7 +56,7 @@ describe("CommunicationService", () => {
     test("routes on_app payload to OnAppChannel", async () => {
       const result = await CommunicationService.dispatch(createTestPayload());
 
-      expectDispatchSuccess(result, "on_app");
+      expectDispatchSuccess(result, NotificationChannel.ON_APP);
       expect(onAppSendSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -64,10 +64,10 @@ describe("CommunicationService", () => {
       emailSendSpy.mockResolvedValue({ success: true, providerMessageId: "email-001" });
 
       const result = await CommunicationService.dispatch(
-        createTestPayload({ channel: "email", metadata: { to: "user@test.com" } })
+        createTestPayload({ channel: NotificationChannel.EMAIL, metadata: { to: "user@test.com" } })
       );
 
-      expectDispatchSuccess(result, "email");
+      expectDispatchSuccess(result, NotificationChannel.EMAIL);
       expect(result.providerMessageId).toBe("email-001");
     });
 
@@ -75,17 +75,17 @@ describe("CommunicationService", () => {
       smsSendSpy.mockResolvedValue({ success: true, providerMessageId: "sms-001" });
 
       const result = await CommunicationService.dispatch(
-        createTestPayload({ channel: "sms", metadata: { to: "+1234567890" } })
+        createTestPayload({ channel: NotificationChannel.SMS, metadata: { to: "+1234567890" } })
       );
 
-      expectDispatchSuccess(result, "sms");
+      expectDispatchSuccess(result, NotificationChannel.SMS);
       expect(result.providerMessageId).toBe("sms-001");
     });
 
     test("routes push payload to pushChannel", async () => {
-      const result = await CommunicationService.dispatch(createTestPayload({ channel: "push" }));
+      const result = await CommunicationService.dispatch(createTestPayload({ channel: NotificationChannel.PUSH }));
 
-      expectDispatchSuccess(result, "push");
+      expectDispatchSuccess(result, NotificationChannel.PUSH);
     });
   });
 
@@ -95,7 +95,12 @@ describe("CommunicationService", () => {
 
       const payloads: CommunicationPayload[] = [
         createTestPayload({ title: "Response", body: "Body" }),
-        createTestPayload({ channel: "email", title: "Response", body: "Body", metadata: { to: "user@test.com" } }),
+        createTestPayload({
+          channel: NotificationChannel.EMAIL,
+          title: "Response",
+          body: "Body",
+          metadata: { to: "user@test.com" },
+        }),
       ];
 
       const results = await CommunicationService.dispatchMulti(payloads);
@@ -113,7 +118,7 @@ describe("CommunicationService", () => {
 
       const payloads: CommunicationPayload[] = [
         createTestPayload({ body: "Body" }),
-        createTestPayload({ channel: "email", body: "Body", metadata: { to: "user@test.com" } }),
+        createTestPayload({ channel: NotificationChannel.EMAIL, body: "Body", metadata: { to: "user@test.com" } }),
       ];
 
       const results = await CommunicationService.dispatchMulti(payloads);
@@ -131,7 +136,7 @@ describe("CommunicationService", () => {
 
       const payloads: CommunicationPayload[] = [
         createTestPayload({ body: "Body" }),
-        createTestPayload({ channel: "sms", body: "Body", metadata: { to: "+1234567890" } }),
+        createTestPayload({ channel: NotificationChannel.SMS, body: "Body", metadata: { to: "+1234567890" } }),
       ];
 
       const results = await CommunicationService.dispatchMulti(payloads);
@@ -153,7 +158,12 @@ describe("CommunicationService", () => {
 
   describe("exhaustive switch check", () => {
     test("dispatch handles all known channel types without falling through", async () => {
-      const channels: Array<CommunicationPayload["channel"]> = ["on_app", "email", "sms", "push"];
+      const channels: Array<CommunicationPayload["channel"]> = [
+        NotificationChannel.ON_APP,
+        NotificationChannel.EMAIL,
+        NotificationChannel.SMS,
+        NotificationChannel.PUSH,
+      ];
 
       for (const channel of channels) {
         const result = await CommunicationService.dispatch(

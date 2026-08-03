@@ -33,6 +33,24 @@ export interface TeacherCreateRecurringClassLabels {
     readonly removeOverride: string;
     readonly label: (day: string) => string;
   };
+  readonly scheduling: {
+    readonly mode: string;
+    readonly quotaId: string;
+    readonly earmarkedClasses: string;
+    readonly generationHorizon: string;
+    readonly ondemandNoCreditsOutcome: string;
+    readonly noMode: string;
+    readonly ondemandNoCredits: {
+      readonly AutoCancel: string;
+      readonly AutoAbsentNoCredits: string;
+      readonly RemindOnly: string;
+    };
+    readonly modes: {
+      readonly NumberOfClasses: string;
+      readonly OnDemand: string;
+      readonly Quota: string;
+    };
+  };
   readonly actions: {
     readonly create: string;
     readonly cancel: string;

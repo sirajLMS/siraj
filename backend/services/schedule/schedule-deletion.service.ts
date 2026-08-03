@@ -6,6 +6,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
+import { QuotaService } from "@/backend/services/billing/quota.service";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -100,8 +101,29 @@ export namespace ScheduleDeletionService {
         return deleted !== null;
       }
 
-      const idempotencyKey = `credit-refund:${deleted.id}`;
-      await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
+      // Release quota if this class was deducted from a quota.
+      // On failure we log AND throw so the transaction rolls back consistently
+      // — matching the credit-backed refund path which also throws. This
+      // prevents the soft-delete from committing while the quota balance stays
+      // over-decremented, which would be a silent data inconsistency.
+      if (deleted.quotaId) {
+        try {
+          await QuotaService.releaseForInstance(deleted.studentId, deleted.id, deleted.quotaId, actorUserId, tx);
+        } catch (error) {
+          logger.error("Quota release failed during class deletion — rolling back transaction", {
+            classInstanceId: deleted.id,
+            quotaId: deleted.quotaId,
+            studentId: deleted.studentId,
+            actorUserId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          throw error;
+        }
+      } else {
+        // Credit-backed instance — refund credits
+        const idempotencyKey = `credit-refund:${deleted.id}`;
+        await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
+      }
       return true;
     });
   }
@@ -160,9 +182,37 @@ export namespace ScheduleDeletionService {
       const cleared = await SchedulingRepository.clearWeeklySchedule(teacherId, tx);
       if (!cleared) return false;
 
+      // Sequential per-instance credit refunds (credit-backed classes).
+      // Running these in parallel would issue concurrent async DB ops on the
+      // same shared single-connection transaction, which is not safe.
       for (const instance of cleared.refundedInstances) {
         const idempotencyKey = `credit-refund:${instance.id}`;
         await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
+      }
+
+      // Sequential per-schedule quota releases (quota-backed classes).
+      // Quota release failures abort the transaction (rethrown) so class
+      // deletion and quota release are atomic — no silent over-decrement.
+      for (const schedule of cleared.quotaSchedules) {
+        try {
+          await QuotaService.releaseForRecurringSchedule(
+            schedule.studentId,
+            schedule.id,
+            schedule.quotaId,
+            schedule.earmarkedClasses,
+            actorUserId,
+            tx
+          );
+        } catch (error) {
+          logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
+            recurringScheduleId: schedule.id,
+            quotaId: schedule.quotaId,
+            studentId: schedule.studentId,
+            actorUserId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          throw error;
+        }
       }
 
       return true;

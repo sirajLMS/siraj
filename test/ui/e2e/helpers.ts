@@ -2,12 +2,19 @@ import { expect } from "bun:test";
 import type { BrowserContext, Cookie, Page } from "playwright";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { getTestBaseUrl } from "@/frontend/common/graphql/test/testPort";
-import { academyAdmins, parents, staff, students, supervisors, teachers } from "@/shared/demo-users";
+import { isTestServerRunning, startTestServer } from "@/frontend/common/graphql/test/testServer";
+import { academyAdmins, parents, staff, students, superAdmins, supervisors, teachers } from "@/shared/demo-users";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 const PWD = "12345678";
 const REQUIRED_AUTH_COOKIES = ["session_id", "refresh_token", "access_token"] as const;
 
 export const DEMO_USERS = {
+  superAdmin: {
+    email: superAdmins[0].email,
+    password: PWD,
+    groupSlug: SystemPermissionGroupSlug.SUPER_ADMIN,
+  },
   academyAdmin: {
     email: academyAdmins[0].email,
     password: PWD,
@@ -113,66 +120,97 @@ function assertRequiredAuthCookies(cookies: Cookie[]): void {
   }
 }
 
+async function attemptDemoLogin(graphqlUrl: string, groupSlug: string, fetchFn: typeof fetch): Promise<Response> {
+  return fetchFn(graphqlUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        mutation demoLogin($input: DemoLoginInput!) {
+          demoLogin(input: $input) {
+            token
+          }
+        }
+      `,
+      variables: { input: { groupSlug } },
+    }),
+  });
+}
+
+async function processDemoLoginResponse(
+  response: Response,
+  context: BrowserContext,
+  baseUrl: string
+): Promise<boolean> {
+  if (!response.ok) return false;
+
+  const body = (await response.json()) as {
+    data?: { demoLogin?: { token?: string } };
+    errors?: unknown[];
+  };
+  const token = body.data?.demoLogin?.token;
+  if (!token) return false;
+
+  const authCookies = getSetCookieHeaders(response)
+    .map(raw => parseSetCookieHeader(raw, baseUrl))
+    .filter((cookie): cookie is Cookie => cookie !== null);
+
+  assertRequiredAuthCookies(authCookies);
+  await context.addCookies(authCookies);
+  return true;
+}
+
+async function handleDemoLoginRetry(
+  attempt: number,
+  maxAttempts: number,
+  isDevMode: boolean,
+  is429 = false
+): Promise<boolean> {
+  if (attempt >= maxAttempts) return false;
+  const delay = is429 ? 2_000 * attempt : isDevMode ? 10_000 * attempt : 1_000 * attempt;
+  await new Promise(resolve => setTimeout(resolve, delay));
+  return true;
+}
+
+async function executeDemoLoginAttempt(
+  graphqlUrl: string,
+  groupSlug: string,
+  fetchFn: typeof fetch,
+  context: BrowserContext,
+  baseUrl: string
+): Promise<{ success: boolean; is429?: boolean; error?: unknown }> {
+  try {
+    const response = await attemptDemoLogin(graphqlUrl, groupSlug, fetchFn);
+    if (response.status === 429) {
+      return { success: false, is429: true };
+    }
+    const success = await processDemoLoginResponse(response, context, baseUrl);
+    if (success) return { success: true };
+    return {
+      success: false,
+      error: new Error(`Failed to login demo user with groupSlug: ${groupSlug}. Status: ${response.status}`),
+    };
+  } catch (err) {
+    return { success: false, error: err };
+  }
+}
+
 export async function authenticateDemoUser(context: BrowserContext, groupSlug: string): Promise<void> {
   const baseUrl = getTestBaseUrl();
   const graphqlUrl = `${baseUrl}/api/graphql`;
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
-  const maxAttempts = 5;
+  const isDevMode = process.env.TEST_SERVER_MODE === "dev";
+  const maxAttempts = isDevMode ? 10 : 5;
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const response = await fetchFn(graphqlUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `
-          mutation demoLogin($input: DemoLoginInput!) {
-            demoLogin(input: $input) {
-              token
-            }
-          }
-        `,
-        variables: { input: { groupSlug } },
-      }),
-    });
+    const result = await executeDemoLoginAttempt(graphqlUrl, groupSlug, fetchFn, context, baseUrl);
+    if (result.success) return;
 
-    if (response.status === 429 && attempt < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 2_000 * attempt));
-      continue;
-    }
-
-    if (!response.ok) {
-      lastError = new Error(`demoLogin request failed with status ${response.status}`);
-      if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 1_000 * attempt));
-        continue;
-      }
-      throw lastError;
-    }
-
-    const body = (await response.json()) as {
-      data?: { demoLogin?: { token?: string } };
-      errors?: unknown[];
-    };
-    const token = body.data?.demoLogin?.token;
-    if (!token) {
-      lastError = new Error(
-        `Failed to login demo user with groupSlug: ${groupSlug}. Response: ${JSON.stringify(body)}`
-      );
-      if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 1_000 * attempt));
-        continue;
-      }
-      throw lastError;
-    }
-
-    const authCookies = getSetCookieHeaders(response)
-      .map(raw => parseSetCookieHeader(raw, baseUrl))
-      .filter((cookie): cookie is Cookie => cookie !== null);
-
-    assertRequiredAuthCookies(authCookies);
-    await context.addCookies(authCookies);
-    return;
+    lastError = result.error ?? lastError;
+    const isRetryable = await handleDemoLoginRetry(attempt, maxAttempts, isDevMode, result.is429);
+    if (isRetryable) continue;
+    throw lastError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);
   }
 
   throw lastError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);
@@ -183,16 +221,20 @@ export async function waitForDashboardReady(page: Page): Promise<void> {
     throw new Error(`Login failed: redirected to ${page.url()}`);
   }
 
-  await page.locator("main, [role='main']").first().waitFor({ state: "visible", timeout: 30_000 });
+  const isDevMode = process.env.TEST_SERVER_MODE === "dev";
+  const timeout = isDevMode ? 180_000 : 30_000;
+  await page.locator("main, [role='main']").first().waitFor({ state: "visible", timeout });
 }
 
 async function gotoWithRetry(page: Page, path: string): Promise<void> {
   const maxAttempts = 3;
+  const isDevMode = process.env.TEST_SERVER_MODE === "dev";
+  const gotoTimeout = isDevMode ? 180_000 : 30_000;
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await page.goto(path, { waitUntil: "commit", timeout: 30_000 });
+      await page.goto(path, { waitUntil: "commit", timeout: gotoTimeout });
       return;
     } catch (error) {
       lastError = error;
@@ -225,6 +267,30 @@ export async function loginAsDemoUser(page: Page, context: BrowserContext, group
   }
 
   throw lastError;
+}
+
+/**
+ * Authenticate a demo user and navigate directly to a specific route,
+ * skipping the /dashboard warmup that can OOM in memory-constrained dev mode.
+ * In dev mode, restarts the test server if it crashed during a previous test.
+ */
+export async function loginAsDemoUserAtRoute(
+  page: Page,
+  context: BrowserContext,
+  groupSlug: string,
+  path: string
+): Promise<void> {
+  // In dev mode, the server may have crashed (OOM) during a previous test's
+  // page compilation. Check and restart if needed before authenticating.
+  if (process.env.TEST_SERVER_MODE === "dev") {
+    if (!(await isTestServerRunning())) {
+      testLogger.info("Dev server not running; restarting...");
+      await startTestServer();
+    }
+  }
+  await authenticateDemoUser(context, groupSlug);
+  // Use absolute URL with current port (server may have been restarted on a new port)
+  await gotoWithRetry(page, `${getTestBaseUrl()}${path}`);
 }
 
 export async function loginAsDemoUserAt(

@@ -7,7 +7,7 @@ import { lessonReports } from "@/backend/db/schema";
 import { createTestLessonReport, createTestUser, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
-import type { ClassInstanceEntity, LessonReportSelectType } from "@/backend/types";
+import type { ClassInstanceSelectType, LessonReportSelectType } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
@@ -21,7 +21,7 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
-function requireInstance(instance: ClassInstanceEntity | null): ClassInstanceEntity {
+function requireInstance(instance: ClassInstanceSelectType | null): ClassInstanceSelectType {
   if (!instance) {
     throw new Error("setupTestEntities returned a null instance — pass skipInstance:false");
   }
@@ -41,7 +41,7 @@ async function setupReportChain(tx: DBTransaction): Promise<ReportChain> {
 /** Sets up the entities, ensures a class instance, and creates a lesson report in one step. */
 async function setupReportCreated(tx: DBTransaction): Promise<{
   chain: ReportChain;
-  inst: ClassInstanceEntity;
+  inst: ClassInstanceSelectType;
   report: LessonReportSelectType;
 }> {
   const chain = await setupReportChain(tx);
@@ -58,7 +58,7 @@ async function createReportFromChain(tx: DBTransaction, chain: ReportChain): Pro
 
 /** Builds a standard lesson report insert payload (used by `create` tests). */
 function buildReportInsert(
-  inst: ClassInstanceEntity,
+  inst: ClassInstanceSelectType,
   chain: ReportChain,
   overrides: { idempotencyKey: string; now: Date }
 ) {

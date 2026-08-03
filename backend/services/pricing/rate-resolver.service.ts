@@ -1,7 +1,8 @@
 import { CurrencyCode, RateSource } from "@/backend/enum";
+import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
 import type { ClassSubjectSelectType } from "@/backend/types/classes/class-subject.types";
-import type { ClassInstanceEntity, RecurringScheduleEntity } from "@/backend/types/scheduling/scheduling.types";
-import type { TeacherEntity } from "@/backend/types/teachers/teacher.types";
+import type { RecurringScheduleSelectType } from "@/backend/types/scheduling/scheduling.types";
+import type { TeacherSelectType } from "@/backend/types/teachers/teacher.types";
 
 /**
  * Input shape for {@link resolveClassRate}. All four tiers are optional; the
@@ -14,13 +15,13 @@ import type { TeacherEntity } from "@/backend/types/teachers/teacher.types";
  */
 export interface ResolveClassRateInput {
   /** The class instance row (carries the optional admin override snapshot). */
-  readonly classInstance: Pick<ClassInstanceEntity, "rateAmount" | "rateCurrency" | "isRateOverridden">;
+  readonly classInstance: Pick<ClassInstanceSelectType, "rateAmount" | "rateCurrency" | "isRateOverridden">;
   /** The parent recurring schedule (nullable for ad-hoc bookings). */
-  readonly recurringSchedule?: Pick<RecurringScheduleEntity, "hourlyRate" | "rateCurrency"> | null;
+  readonly recurringSchedule?: Pick<RecurringScheduleSelectType, "hourlyRate" | "rateCurrency"> | null;
   /** The subject row. */
   readonly subject?: Pick<ClassSubjectSelectType, "hourlyRate" | "rateCurrency"> | null;
   /** The teacher row (lowest-precedence fallback). */
-  readonly teacher: Pick<TeacherEntity, "hourlyRate" | "rateCurrency">;
+  readonly teacher: Pick<TeacherSelectType, "hourlyRate" | "rateCurrency">;
 }
 
 export interface ResolvedClassRate {

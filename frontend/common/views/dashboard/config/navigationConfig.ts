@@ -33,6 +33,7 @@ export const SIDEBAR_END_NAV_ITEM_KEYS = new Set(["teacher-rules", "parent-rules
  * grp_feedback              | complaints-manage, suggestions-manage | ComplaintsRespond|ComplaintsList / SuggestionsList
  * grp_reports               | reports, monthly-reports, teacher-dues, lesson-reports | per-item
  * grp_admin                 | permissions, settings, dst-migration, user-profile | PermissionGroupsManage / SettingsView* / SystemBulkUpdateDst
+ * grp_integrations          | whatsapp-settings                   | WhatsappView / WhatsappConfigManage
  * grp_resources             | resources, books-and-bags, subjects   | ResourcesList / SubjectsList
  * grp_classes               | (Phase 2) new teacher-class-details   | ClassViewDetails
  * footer_account            | own-profile, logout                   | AuthViewOwnProfile / —
@@ -89,9 +90,12 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.PaymentMethodsManageCatalogs,
       AppPermission.MeetingProvidersManageCatalog,
       AppPermission.TeacherDuesView,
+      AppPermission.QuotasView,
+      AppPermission.QuotasManage,
     ],
     separator: true,
   },
+
   {
     id: "grp_reports",
     labelKey: "navGroupReports",
@@ -124,6 +128,14 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.SystemBulkUpdateDst,
       AppPermission.SettingsEditMeetingIntegrations,
     ],
+    separator: true,
+  },
+  {
+    id: "grp_integrations",
+    labelKey: "navGroupIntegrations",
+    iconKey: "hub",
+    section: "main",
+    permission: [AppPermission.WhatsappView, AppPermission.WhatsappConfigManage],
     separator: true,
   },
 ] as const;
@@ -441,6 +453,52 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     groupId: "grp_finance",
   },
   {
+    key: "quotas",
+    labelKey: "quotas",
+    iconKey: "accountBalanceWallet",
+    href: "/quotas",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotas,
+    groupId: "grp_finance",
+  },
+  {
+    key: "quotas-create",
+    labelKey: "quotasCreate",
+    iconKey: "accountBalanceWallet",
+    href: "/quotas/new",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotasCreate,
+    groupId: "grp_finance",
+  },
+
+  {
+    key: "quotas-insights",
+    labelKey: "quotasInsights",
+    iconKey: "assessment",
+    href: "/quotas/insights",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotasInsights,
+    groupId: "grp_finance",
+  },
+  {
+    key: "quotas-view",
+    labelKey: "quotasView",
+    iconKey: "visibility",
+    href: "/quotas/[id]",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotasView,
+    groupId: "grp_finance",
+  },
+  {
+    key: "quotas-edit",
+    labelKey: "quotasEdit",
+    iconKey: "edit",
+    href: "/quotas/[id]/edit",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotasEdit,
+    groupId: "grp_finance",
+  },
+  {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",
     iconKey: "accountBalanceWallet",
@@ -449,6 +507,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.paymentCatalogsParent,
     groupId: "grp_finance",
   },
+
   {
     key: "feedback-manage",
     labelKey: "feedbackManage",
@@ -502,6 +561,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.settings,
     groupId: "grp_admin",
+  },
+  {
+    key: "whatsapp-settings",
+    labelKey: "whatsappSettings",
+    iconKey: "hub",
+    href: "/settings/whatsapp",
+    section: "main",
+    permission: PAGE_PERMISSIONS.whatsappSettings,
+    groupId: "grp_integrations",
   },
 ] as const;
 
@@ -613,6 +681,15 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
   },
+  {
+    key: "quotas",
+    labelKey: "quotas",
+    iconKey: "accountBalanceWallet",
+    href: "/quotas",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotas,
+  },
+
   {
     key: "payment-catalogs",
     labelKey: "paymentCatalogs",
@@ -927,6 +1004,7 @@ export function applyParentNavOverrides(items: readonly NavItem[], permissions: 
     "billing-admin",
     "suggestions-submit",
     "schedule",
+    "whatsapp-settings",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
@@ -943,7 +1021,7 @@ export function applyTeacherNavOverrides(items: readonly NavItem[], permissions:
     return [...items];
   }
 
-  const hiddenKeys = new Set(["home", "books-and-bags"]);
+  const hiddenKeys = new Set(["home", "books-and-bags", "whatsapp-settings"]);
   // Hide the admin grouped "classes" item only when the teacher-portal
   // "teacher-class-details" entry is also available (same /classes route).
   if (items.some(item => item.key === "teacher-class-details")) {
@@ -964,7 +1042,7 @@ export function applyStudentNavOverrides(items: readonly NavItem[], permissions:
     return [...items];
   }
   // Student portal: hide admin-focused items
-  const hiddenKeys = new Set(["home", "search-schedule", "schedule-tracking", "own-profile"]);
+  const hiddenKeys = new Set(["home", "search-schedule", "schedule-tracking", "own-profile", "whatsapp-settings"]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
 
@@ -1004,6 +1082,7 @@ export function applySupervisorNavOverrides(
     "dst-migration",
     "permissions",
     "settings",
+    "whatsapp-settings",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }

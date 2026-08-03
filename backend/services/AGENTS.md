@@ -54,6 +54,19 @@ Each integration file gets **one** smoke test (single API call) to confirm the a
 - **Booking-time generation is non-blocking**: `maybeGenerateUrl` runs adapter calls outside the booking DB transaction; a class booking must never fail because a provider API is down.
 - See `docs/services/meeting-providers.md` for the complete pattern reference (interface, factory, adapter examples, deployment prerequisites, rollout summary).
 
+## WhatsApp Cloud API Integration
+
+- **Canonical reference**: `docs/services/whatsapp-cloud-api.md` — covers the full integration (adapter, factory, webhook, dispatch, schema, opt-in, frontend).
+- **Service modules**: `backend/services/whatsapp/` — `WhatsappChannelFactory.ts` (lazy singleton + `resetWhatsappChannel()`), `MetaCloudApiAdapter.ts`, `whatsapp-account.service.ts`, `whatsapp-template.service.ts`.
+- **Channel dispatch**: WhatsApp has its **own dispatch branch** (`dispatchWhatsapp` in `notification-dispatch.helpers.ts`) — never routed through email/SMS-shaped `dispatchRecipientChannel`. Extracts `whatsappTemplate` from `payload.metadata`, fails fast if absent.
+- **Template-only sends (B1)**: `WhatsappPayload` has no free-text `body` field — only `template` + `components[]`. Free-text deferred to v2.
+- **Rate limiting**: Pair-rate-limit via Redis (`whatsapp:pair:<e164>`, TTL 60s, 6s min interval). Concurrency cap (P1) via `activeCalls` semaphore (max 10). Never marks FAILED on guard hit — only defers.
+- **Credentials**: `encryptedAccessToken`/`encryptedTwoStepPin` use `encryptedText` Drizzle type (auto-encrypt/decrypt). `ReturnType` types `Omit` encrypted columns — never leak to API. `resolveCredentials()` decrypts per-send; never holds plaintext on singleton.
+- **Q4 Budget accounting**: `sendAttempted: boolean` on `WhatsappSendResult` — `true` whenever a Graph API fetch was executed (including errors). `dispatchMulti` counts these for `whatsappBudgetConsumed`.
+- **Webhook**: Route at `app/api/webhooks/whatsapp` — GET verification (timingSafeEqual, S5), POST with HMAC-SHA256 body validation (S2). Returns 200 immediately, defers via `after()` (C3, not `queueMicrotask`). Strips `messages[]` defensively (S3).
+- **B3 Forward-only status**: `STATUS_RANK` enforces monotonic transitions. `tryB3Resurrection()` for edge-case FAILED→DELIVERED.
+- **Opt-in (REQ-10)**: Per-user via existing `userNotificationPreferences` table across all `NotificationEventType` values with `NotificationChannel.WHATSAPP`. Gate applied in `dispatchWithPreferences`, not in builders (builders are pure/no I/O).
+
 ## Hot-resolver & Read Caching (`EntityCacheService`)
 
 - **Cache Keys**: Always use identity+role-scoped key formats:
@@ -67,5 +80,34 @@ Each integration file gets **one** smoke test (single API call) to confirm the a
 - **Fail-Open Contract**: All cache reads and invalidation calls MUST wrap provider errors in `try/catch` and fall through gracefully to the underlying data source / database without crashing caller requests.
 - **Permission Checking**: Keep permission gating (e.g. `assertDirectoryAccess`, `hasPermission`) OUTSIDE `cachedRead` — authorization checks must execute before cache lookups so unauthorized users never receive cached payloads or execute cache queries.
 - **Tag Invalidation**: Use named helpers (`invalidateParentWrite`, `invalidateTeacherWrite`, `invalidateClassLifecycle`, `invalidateRoleChange`) in mutation write paths.
+
+## Quota System Integration
+
+The Quota System (`QuotaService`, `QuotaNotificationService`, `AvailabilityService`) is an append-only ledger-based class credit tracking system. See `docs/billing/quota-system.md` for the complete architecture reference. Key service-level rules:
+
+### QuotaService (`backend/services/billing/quota.service.ts`)
+
+- **All methods are permission-gated**: `QUOTAS_VIEW` for reads, `QUOTAS_MANAGE` for writes via `requireManagePermission` / `requireViewPermission`
+- **Single-writer principle**: QuotaService is the ONLY service authorized to call `QuotaRepository` write methods. Other services (CreditService, RecurringClassService, ClassSessionService) call QuotaService — never QuotaRepository directly.
+- **FIFO auto-selection**: `selectQuotaForBooking(studentId, tx?)` uses `QuotaRepository.selectQuotaForBookingFIFO` internally
+- **On-demand refresh**: `refreshStudentOndemandInstances(studentId, tx)` must be called by CreditService after ANY credit change
+
+### AvailabilityService (`backend/services/scheduling/availability.service.ts`)
+
+- Provides point-in-time slot availability checks using `class_instances` lookups + `TeacherAvailabilityRepository.validateBookingAvailability`
+- Used by: RecurringClassService (create/update schedule), on-demand instance generator script
+
+### QuotaNotificationService (`backend/services/billing/quota-notification.service.ts`)
+
+- 7 notification methods: `sendQuotaExpiringSoon`, `sendQuotaExpired`, `sendQuotaLowBalance`, `sendOndemandInstancePendingCredit`, `sendOndemandInstanceReminderT3`, `sendOndemandInstanceReminderT1`, `sendOndemandTeacherDailyDigest`
+- All dispatch via `dispatchWithPreferences`, not raw `CommunicationService.dispatch`
+- Each event has a `NotificationEventCategory` tag (info/reminder/urgent/digest)
+
+### Service Integration Rules
+
+- **CancelSchedule**: `RecurringClassService.cancelSchedule` releases quota reservations via `QuotaService.releaseForRecurringSchedule`
+- **Mode Switch**: `switchSchedulingMode` adjusts quota reservations based on mode transitions (SCHEDULED → ON_DEMAND releases; ON_DEMAND → SCHEDULED reverts)
+- **Session Start**: `ClassSessionService` calls `QuotaService.redeemForInstance` for ON_DEMAND PENDING_CREDIT instances
+- **Manual Entry**: `TeacherDashboardService.createManualEntry` delegates to `QuotaService.redeemForInstance` when quota-backed (prevents double deduction)
 
 

@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { and, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
+import { and, asc, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
@@ -76,6 +76,67 @@ export namespace UserRepository {
     }
     for (const row of results) {
       map.set(row.id, row);
+    }
+    return map;
+  };
+
+  export const findByPhone = async (phone: string, tx?: DBTransaction): Promise<UserSelectType | null> => {
+    const q = queryDb(tx);
+    // Order by createdAt for deterministic first-match when multiple users share a phone.
+    const result = await q.select().from(users).where(eq(users.phone, phone)).orderBy(asc(users.createdAt)).limit(1);
+    return result[0] ?? null;
+  };
+
+  /**
+   * Batch-fetch contact info (email/phone) for multiple users in a single
+   * query. Returns a `Map<userId, UserSelectType | null>` — pre-initialized
+   * with all requested keys mapped to `null`, then filled from query results.
+   * Users not found (or soft-deleted / RLS-excluded) remain `null`.
+   */
+  export const findSafeByIds = async (
+    ids: string[],
+    tx?: DBTransaction
+  ): Promise<Map<string, UserSelectType | null>> => {
+    const map = new Map<string, UserSelectType | null>();
+    if (ids.length === 0) {
+      return map;
+    }
+    for (const id of ids) {
+      map.set(id, null);
+    }
+    try {
+      const q = queryDb(tx);
+      const results = await q
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          emailVerifiedAt: users.emailVerifiedAt,
+          password: users.password,
+          rememberTokenHash: users.rememberTokenHash,
+          avatarFilePath: users.avatarFilePath,
+          avatarUrl: users.avatarUrl,
+          phone: users.phone,
+          status: users.status,
+          isSuperAdmin: users.isSuperAdmin,
+          timezone: users.timezone,
+          displayCurrency: users.displayCurrency,
+          lastLoginAt: users.lastLoginAt,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+          deletedAt: users.deletedAt,
+        })
+        .from(users)
+        .where(inArray(users.id, ids));
+
+      for (const row of results) {
+        map.set(row.id, row);
+      }
+    } catch (error) {
+      logger.error("Error finding safe users by ids:", error);
+    }
+    return map;
+  };
     }
     return map;
   };

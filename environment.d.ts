@@ -63,6 +63,15 @@ declare global {
       /** Valid FCM device token for test/live-comm runs (loaded from .env.test) */
       FCM_TEST_DEVICE_TOKEN?: string;
 
+      // WhatsApp Cloud API Configuration
+      WHATSAPP_ACCESS_TOKEN?: string;
+      WHATSAPP_PHONE_NUMBER_ID?: string;
+      WHATSAPP_WABA_ID?: string;
+      WHATSAPP_API_VERSION?: string;
+      WHATSAPP_TEST_TO_PHONE?: string;
+      WHATSAPP_TEST_TEMPLATE_NAME?: string;
+      WHATSAPP_TEST_TEMPLATE_LANGUAGE?: string;
+
       // SMS Configuration
       SMS_PROVIDER?: "twilio";
       TWILIO_ACCOUNT_SID?: string;
@@ -162,6 +171,13 @@ declare global {
        * via `next start` on http://localhost).
        */
       AUTH_COOKIE_SECURE?: string;
+
+      // WhatsApp Configuration
+      WHATSAPP_PROVIDER?: "cloud_api";
+      WHATSAPP_APP_ID?: string;
+      WHATSAPP_APP_SECRET?: string;
+      WHATSAPP_VERIFY_TOKEN?: string;
+      WHATSAPP_WEBHOOK_BASE_URL?: string;
 
       // Logging
       // ENABLE_LOGGING gates the server-side BaseLogger (shared/lib/logger/base-logger.ts)

@@ -8,7 +8,7 @@ import {
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import logger from "@/backend/lib/logger";
 import { TeacherPaymentSeedService } from "@/backend/services/seed/teacher-payment-seed.service";
-import type { PaymentMethodTransactionSnapshot, TeacherEntity, UserSelectType } from "@/backend/types";
+import type { PaymentMethodTransactionSnapshot, TeacherSelectType, UserSelectType } from "@/backend/types";
 
 function buildBankTransferSnapshot(
   userPaymentMethodId: string | null,
@@ -44,7 +44,7 @@ function buildSnapshotFromPayoutMethod(
   };
 }
 
-export async function seedOrGet(teachersList: TeacherEntity[], _usersList: UserSelectType[], config?: SeedConfig) {
+export async function seedOrGet(teachersList: TeacherSelectType[], _usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding teacher payments...");
   const now = new Date();
   const snapshottedAt = now.toISOString();

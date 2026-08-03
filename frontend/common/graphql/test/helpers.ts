@@ -4,6 +4,7 @@ import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   ClassType,
   type CreateRecurringClassInput,
+  type DayOfWeek,
   IanaTimezone,
   type ManagerAccountType,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -29,12 +30,20 @@ import {
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
+import { isTestServerRunning } from "@/frontend/common/graphql/test/testServer";
 
 /** Shared test password — all provisioned test users use this value. */
 // eslint-disable-next-line sonarjs/no-hardcoded-passwords
 const TEST_USER_PASSWORD = "Test_Pass1!";
 
 let demoUsersReadyPromise: Promise<void> | null = null;
+
+async function waitForServerRecovery(): Promise<void> {
+  for (let wait = 0; wait < 60; wait++) {
+    if (await isTestServerRunning()) break;
+    await new Promise(resolve => setTimeout(resolve, 3_000));
+  }
+}
 
 /**
  * Idempotently provisions canonical demo login users via the test-helper mutation.
@@ -43,16 +52,27 @@ let demoUsersReadyPromise: Promise<void> | null = null;
 export async function ensureDemoUsersForTests(): Promise<void> {
   if (!demoUsersReadyPromise) {
     demoUsersReadyPromise = (async () => {
-      const result = await testClient.mutate({
-        mutation: ensureDemoUsersMutationDocument,
-      });
-      if (result.error) {
-        const messages = result.error.message ?? "unknown GraphQL error";
-        throw new Error(`ensureDemoUsers failed: ${messages}`);
+      const maxAttempts = 5;
+      let lastError: unknown;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const result = await testClient.mutate({
+          mutation: ensureDemoUsersMutationDocument,
+        });
+        if (result.error) {
+          lastError = new Error(`ensureDemoUsers failed: ${result.error.message ?? "unknown GraphQL error"}`);
+          if (attempt < maxAttempts) {
+            await waitForServerRecovery();
+            await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
+            continue;
+          }
+          throw lastError;
+        }
+        if (!result.data?.ensureDemoUsers) {
+          throw new Error("ensureDemoUsers returned false");
+        }
+        return;
       }
-      if (!result.data?.ensureDemoUsers) {
-        throw new Error("ensureDemoUsers returned false");
-      }
+      throw lastError ?? new Error("ensureDemoUsers failed after all retries");
     })();
   }
   await demoUsersReadyPromise;
@@ -327,13 +347,18 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,
-    days: [{ dayOfWeek, startTime: "10:00:00", isActive: true }],
-    classType: "REGULAR",
+    days: [{ dayOfWeek: dayOfWeek as DayOfWeek, startTime: "10:00:00", isActive: true }],
+    classType: ClassType.Regular,
     generateInstancesForWeeks: 2,
     effectiveFrom: date,
     effectiveUntil: null,
     hourlyRate: null,
     rateCurrency: null,
+    quotaId: null,
+    earmarkedClasses: null,
+    schedulingMode: null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: null,
   });
 
   const gridResult = await testClient.query({
@@ -601,7 +626,7 @@ export async function cleanupTestSuperAdmin(superAdminToken: string, userId: str
 
 export async function assertRecurringClassDenied(
   token: string,
-  days: { dayOfWeek: string; startTime: string; isActive: boolean }[]
+  days: { dayOfWeek: DayOfWeek; startTime: string; isActive: boolean }[]
 ): Promise<void> {
   const subjectId = await ensureTestSubjectId(token).catch(() => "00000000-0000-0000-0000-000000000000");
   const result = await mutateCreateRecurringClass(token, {
@@ -612,12 +637,18 @@ export async function assertRecurringClassDenied(
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,
     days,
-    classType: "REGULAR",
+    classType: ClassType.Regular,
     generateInstancesForWeeks: 4,
     effectiveFrom: null,
     effectiveUntil: null,
     hourlyRate: null,
     rateCurrency: null,
+    quotaId: null,
+    earmarkedClasses: null,
+    schedulingMode: null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: null,
   });
+
   expect(result.error).toBeDefined();
 }

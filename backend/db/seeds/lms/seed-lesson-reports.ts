@@ -4,15 +4,15 @@ import { AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@
 import logger from "@/backend/lib/logger";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 import type {
-  ClassInstanceEntity,
+  ClassInstanceSelectType,
   LessonReportReturnType,
-  StudentEntity,
-  TeacherEntity,
+  StudentSelectType,
+  TeacherSelectType,
   UserSelectType,
 } from "@/backend/types";
 
 type LessonReportSpec = {
-  classInstance: ClassInstanceEntity;
+  classInstance: ClassInstanceSelectType;
   attendanceEvaluation: AttendanceEvaluation;
   completionPercentage: number;
   status: LessonReportStatus;
@@ -48,9 +48,9 @@ function pickStatus(index: number): {
 }
 
 function buildReportSpecs(
-  completedInstances: ClassInstanceEntity[],
-  studentById: Map<string, StudentEntity>,
-  teacherById: Map<string, TeacherEntity>
+  completedInstances: ClassInstanceSelectType[],
+  studentById: Map<string, StudentSelectType>,
+  teacherById: Map<string, TeacherSelectType>
 ): LessonReportSpec[] {
   const specs: LessonReportSpec[] = [];
 
@@ -89,9 +89,9 @@ function buildReportSpecs(
 }
 
 export async function seedOrGet(
-  classInstancesList: ClassInstanceEntity[],
-  teachersList: TeacherEntity[],
-  studentsList: StudentEntity[],
+  classInstancesList: ClassInstanceSelectType[],
+  teachersList: TeacherSelectType[],
+  studentsList: StudentSelectType[],
   users: UserSelectType[],
   _config?: SeedConfig
 ): Promise<LessonReportReturnType[]> {

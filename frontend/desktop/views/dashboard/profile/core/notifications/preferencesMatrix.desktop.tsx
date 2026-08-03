@@ -1,11 +1,12 @@
 "use client";
 
-import { Switch, Typography } from "@mui/material";
+import { Box, Switch, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel, type NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
-  NOTIFICATION_CHANNELS,
+  type CategoryRow,
+  type NotificationEventCategory,
   type PreferenceMatrixRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
@@ -13,11 +14,13 @@ import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 interface PreferencesMatrixDesktopViewProps {
   readonly labels: ProfileNotificationsLabels;
-  // NEW FOR PLAN v5: pre-shaped matrix rows lifted out of the desktop tier
-  // (data-shaping belongs in the ViewModel — specs.md §6.1). The tier view
-  // only consumes them.
+  // Pre-shaped matrix rows lifted out of the desktop tier — data-shaping
+  // belongs in the ViewModel. The tier view only consumes them.
   readonly matrixRows: readonly PreferenceMatrixRow[];
+  /** Category grouping rows — one per category for master mute toggles above the grid. */
+  readonly categoryRows?: readonly CategoryRow[];
   readonly onToggle: (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => void;
+  readonly onCategoryToggle?: (category: NotificationEventCategory, enabled: boolean) => void;
   readonly disabled?: boolean;
   readonly loading?: boolean;
 }
@@ -62,7 +65,9 @@ function EventTypeCell({ label }: Readonly<EventTypeCellProps>) {
 export function PreferencesMatrixDesktopView({
   labels,
   matrixRows,
+  categoryRows,
   onToggle,
+  onCategoryToggle,
   disabled = false,
   loading = false,
 }: Readonly<PreferencesMatrixDesktopViewProps>) {
@@ -71,7 +76,7 @@ export function PreferencesMatrixDesktopView({
     const eventLabels = labels.events as Record<string, string>;
     const getEventLabel = (eventType: NotificationEventType): string => eventLabels[eventType] ?? eventType;
 
-    const channelColumns: GridColDef<PreferenceMatrixRow>[] = NOTIFICATION_CHANNELS.map(channel => ({
+    const channelColumns: GridColDef<PreferenceMatrixRow>[] = Object.values(NotificationChannel).map(channel => ({
       field: channel,
       headerName: labels.channels[channel],
       width: 120,
@@ -110,14 +115,39 @@ export function PreferencesMatrixDesktopView({
   }, [labels, disabled, onToggle]);
 
   return (
-    <DesktopAppDataGrid<PreferenceMatrixRow>
-      rows={matrixRows}
-      columns={columns}
-      getRowId={row => row.id}
-      loading={loading && matrixRows.length === 0}
-      paginationOptions={false}
-      autoHeight
-      ariaLabel={labels.title}
-    />
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {/* Category-level master toggles */}
+      {categoryRows?.length ? (
+        <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+          {categoryRows.map(catRow => {
+            const categoryLabel = labels.categories?.[catRow.category] ?? catRow.category;
+            return (
+              <Box key={catRow.id} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <Switch
+                  checked={catRow.anyEnabled}
+                  disabled={disabled}
+                  onChange={(_, checked) => {
+                    onCategoryToggle?.(catRow.category, checked);
+                  }}
+                  slotProps={{
+                    input: { "aria-label": categoryLabel },
+                  }}
+                />
+                <Typography sx={{ typography: "labelMd", fontWeight: 600 }}>{categoryLabel}</Typography>
+              </Box>
+            );
+          })}
+        </Box>
+      ) : null}
+      <DesktopAppDataGrid<PreferenceMatrixRow>
+        rows={matrixRows}
+        columns={columns}
+        getRowId={row => row.id}
+        loading={loading && matrixRows.length === 0}
+        paginationOptions={false}
+        autoHeight
+        ariaLabel={labels.title}
+      />
+    </Box>
   );
 }

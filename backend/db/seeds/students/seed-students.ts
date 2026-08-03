@@ -14,7 +14,7 @@ import {
 import { StudentStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
-import type { ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
+import type { ParentEntity, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 
 const DEMO_STUDENTS = [
   { name: "Demo Student", idempotencyKey: "demo_student_1", timezoneOverride: null as string | null, avatarIndex: 1 },
@@ -49,7 +49,7 @@ async function prepareStudentSeedContext(
   users: UserSelectType[],
   seedConfig: SeedConfig,
   parentsList: ParentEntity[],
-  teachersList: TeacherEntity[]
+  teachersList: TeacherSelectType[]
 ): Promise<StudentSeedContext> {
   if (!parentsList?.length) {
     throw new Error("No parents available to link to students.");
@@ -95,7 +95,7 @@ function buildStudentRowSpec(
   index: number,
   ctx: StudentSeedContext,
   parentsList: ParentEntity[],
-  teachersList: TeacherEntity[]
+  teachersList: TeacherSelectType[]
 ): StudentRowSpec {
   const parent = parentsList[index % parentsList.length];
   const teacher = teachersList[index % teachersList.length];
@@ -131,7 +131,7 @@ function buildStudentRowSpec(
   };
 }
 
-async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Promise<StudentEntity> {
+async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Promise<StudentSelectType> {
   const student = await StudentSeedService.seedStudentByKey({
     parentId: spec.parentId,
     userId: spec.userId,
@@ -151,7 +151,7 @@ async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Pro
 
 export async function seedOrGet(
   parentsList: ParentEntity[],
-  teachersList: TeacherEntity[],
+  teachersList: TeacherSelectType[],
   config?: SeedConfig,
   users: UserSelectType[] = []
 ) {
@@ -160,7 +160,7 @@ export async function seedOrGet(
 
   const ctx = await prepareStudentSeedContext(users, seedConfig, parentsList, teachersList);
 
-  const results: StudentEntity[] = [];
+  const results: StudentSelectType[] = [];
   const assignmentDate = new Date("2020-01-01");
 
   for (let i = 0; i < ctx.totalStudents; i++) {

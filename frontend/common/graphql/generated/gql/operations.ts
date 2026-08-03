@@ -141,6 +141,8 @@ export type AppPermission =
   | 'PROFILE_TEACHER_STUDENTS_EDIT_OWN'
   | 'PROFILE_TEACHER_STUDENTS_VIEW_OTHER'
   | 'PROFILE_TEACHER_STUDENTS_VIEW_OWN'
+  | 'QUOTAS_MANAGE'
+  | 'QUOTAS_VIEW'
   | 'REPORTS_GENERATE'
   | 'REPORT_GENERATE_CUSTOM'
   | 'REPORT_VIEW_FINANCIALS'
@@ -252,7 +254,10 @@ export type AppPermission =
   | 'TEACHER_VIEW_STUDENTS'
   | 'TEST_CUSTOM_ALT'
   | 'TEST_CUSTOM_ONLY'
-  | 'TEST_SYSTEM_ONLY';
+  | 'TEST_SYSTEM_ONLY'
+  | 'WHATSAPP_CONFIG_MANAGE'
+  | 'WHATSAPP_TEMPLATES_MANAGE'
+  | 'WHATSAPP_VIEW';
 
 export type AssignPermissionGroupToUserInput = {
   groupId: string;
@@ -338,6 +343,10 @@ export type ClassExecutionState =
   | 'ACTIVATED'
   | 'COMPLETED'
   | 'NOT_ACTIVATED'
+  | 'ON_DEMAND_CONFLICT_HELD'
+  | 'ON_DEMAND_NO_CREDITS_ABSENT'
+  | 'ON_DEMAND_NO_CREDITS_CANCELLED'
+  | 'ON_DEMAND_PENDING_CREDITS'
   | 'RUNNING';
 
 export type ClassMeetingConfigCreateInput = {
@@ -704,15 +713,20 @@ export type CreatePermissionGroupInput = {
 };
 
 export type CreateRecurringClassInput = {
-  classType: string | null | undefined;
+  classType: ClassType | null | undefined;
   days: Array<RecurringClassDayInput>;
   defaultStartTime: string;
   durationMinutes: number;
+  earmarkedClasses: number | null | undefined;
   effectiveFrom: string | null | undefined;
   effectiveUntil: string | null | undefined;
   generateInstancesForWeeks: number | null | undefined;
+  generationHorizonWeeks: number | null | undefined;
   hourlyRate: string | null | undefined;
+  ondemandNoCreditsOutcome: OnDemandNoCreditsOutcome | null | undefined;
+  quotaId: string | null | undefined;
   rateCurrency: CurrencyCode | null | undefined;
+  schedulingMode: SchedulingMode | null | undefined;
   studentId: string;
   subjectId: string;
   teacherId: string;
@@ -1408,7 +1422,8 @@ export type NotificationChannel =
   | 'EMAIL'
   | 'ON_APP'
   | 'PUSH'
-  | 'SMS';
+  | 'SMS'
+  | 'WHATSAPP';
 
 export type NotificationEventType =
   | 'CLASS_ACTIVATED'
@@ -1429,7 +1444,14 @@ export type NotificationEventType =
   | 'LESSON_REPORT_SUBMITTED'
   | 'NEW_COMPLAINT'
   | 'NEW_SUGGESTION'
+  | 'ON_DEMAND_INSTANCE_PENDING_CREDIT'
+  | 'ON_DEMAND_INSTANCE_REMINDER_T1'
+  | 'ON_DEMAND_INSTANCE_REMINDER_T3'
+  | 'ON_DEMAND_TEACHER_DAILY_DIGEST'
   | 'PAYMENT_METHOD_CHANGED'
+  | 'QUOTA_EXPIRED'
+  | 'QUOTA_EXPIRING_SOON'
+  | 'QUOTA_LOW_BALANCE'
   | 'STUDENT_QUOTA_OVERRIDDEN'
   | 'STUDENT_STATUS_CHANGED'
   | 'STUDENT_TEACHER_REASSIGNED'
@@ -1441,6 +1463,11 @@ export type NotificationPreferenceInput = {
   enabled: boolean;
   eventType: NotificationEventType;
 };
+
+export type OnDemandNoCreditsOutcome =
+  | 'AUTO_ABSENT_NO_CREDITS'
+  | 'AUTO_CANCEL'
+  | 'REMIND_ONLY';
 
 export type OrderSortDirection =
   | 'ASC'
@@ -1548,6 +1575,65 @@ export type ProfileScope =
   | 'OTHER'
   | 'OWN';
 
+export type QuotaKind =
+  | 'PACKAGE'
+  | 'PERIODIC';
+
+export type QuotaLedgerReason =
+  | 'ADJUST'
+  | 'EXPIRE'
+  | 'GRANT'
+  | 'REDEEM'
+  | 'RELEASE'
+  | 'RESERVE';
+
+/** Filter options for querying quotas */
+export type QuotaPaginatedFilterInput = {
+  kind: QuotaKind | null | undefined;
+  search: string | null | undefined;
+  status: QuotaStatus | null | undefined;
+  studentId: string | null | undefined;
+};
+
+export type QuotaPeriodType =
+  | 'CUSTOM'
+  | 'MONTHLY'
+  | 'WEEKLY';
+
+/** Rollover policy configuration for periodic quotas */
+export type QuotaRolloverPolicyInput = {
+  accumulationCap: number | null | undefined;
+  maxRolloverPercent: number | null | undefined;
+};
+
+export type QuotaStatus =
+  | 'ACTIVE'
+  | 'ARCHIVED'
+  | 'EXPIRED';
+
+/** Input for creating a new student quota */
+export type QuotaSubmitInput = {
+  idempotencyKey: string | null | undefined;
+  kind: QuotaKind;
+  name: string;
+  periodDays: number | null | undefined;
+  periodType: QuotaPeriodType | null | undefined;
+  priority: number | null | undefined;
+  rolloverPolicy: QuotaRolloverPolicyInput | null | undefined;
+  studentId: string;
+  totalClasses: number;
+  validFrom: string | null | undefined;
+  validUntil: string | null | undefined;
+};
+
+/** Input for updating an existing quota */
+export type QuotaUpdateInput = {
+  name: string | null | undefined;
+  priority: number | null | undefined;
+  status: QuotaStatus | null | undefined;
+  validUntil: string | null | undefined;
+};
+
 export type RateSource =
   | 'OVERRIDE'
   | 'RECURRING'
@@ -1555,7 +1641,7 @@ export type RateSource =
   | 'TEACHER';
 
 export type RecurringClassDayInput = {
-  dayOfWeek: string;
+  dayOfWeek: DayOfWeek;
   isActive: boolean;
   startTime: string;
 };
@@ -1598,6 +1684,11 @@ export type RevokePermissionGroupFromUserInput = {
   groupId: string;
   userId: string;
 };
+
+export type SchedulingMode =
+  | 'NUMBER_OF_CLASSES'
+  | 'ON_DEMAND'
+  | 'QUOTA';
 
 /** Input for creating or updating a per-role session configuration. */
 export type SessionConfigUpsertInput = {
@@ -2047,6 +2138,58 @@ export type UserPaymentMethodUpdateInput = {
   isDefault: boolean | null | undefined;
   label: string | null | undefined;
 };
+
+export type WhatsappAccountCreateInput = {
+  displayName: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  /** Display phone number (max 32 chars) */
+  displayPhoneNumber: string | null | undefined;
+  isActive: boolean | null | undefined;
+  /** Phone number ID (max 64 chars) */
+  phoneNumberId: string;
+  portfolioMessagingLimitTier: WhatsappLimitTier | null | undefined;
+  qualityRating: WhatsappQualityRating | null | undefined;
+  throughputLevel: string | null | undefined;
+  /** WhatsApp Business Account ID (max 64 chars) */
+  wabaId: string;
+};
+
+export type WhatsappAccountUpdateInput = {
+  displayName: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  displayPhoneNumber: string | null | undefined;
+  isActive: boolean | null | undefined;
+  portfolioMessagingLimitTier: WhatsappLimitTier | null | undefined;
+  qualityRating: WhatsappQualityRating | null | undefined;
+  throughputLevel: string | null | undefined;
+};
+
+export type WhatsappLimitTier =
+  | 'TIER_1K'
+  | 'TIER_10K'
+  | 'TIER_50'
+  | 'TIER_100K'
+  | 'TIER_250'
+  | 'TIER_NOT_SET'
+  | 'TIER_UNLIMITED'
+  | 'UNTIERED';
+
+export type WhatsappQualityRating =
+  | 'GREEN'
+  | 'RED'
+  | 'UNKNOWN'
+  | 'YELLOW';
+
+export type WhatsappTemplateCategory =
+  | 'AUTHENTICATION'
+  | 'MARKETING'
+  | 'UTILITY';
+
+export type WhatsappTemplateStatus =
+  | 'APPROVED'
+  | 'DISABLED'
+  | 'PAUSED'
+  | 'PENDING'
+  | 'PENDING_DELETION'
+  | 'REJECTED';
 
 export type MeQuery_me_User = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
@@ -2899,6 +3042,125 @@ export type DeactivateSupportedOnlineAccountMutationVariables = Exact<{
 
 
 export type DeactivateSupportedOnlineAccountMutation = DeactivateSupportedOnlineAccountMutation_Mutation;
+
+export type QuotaFieldsFragment = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotaQuery_quota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotaQuery_Query = { quota: QuotaQuery_quota_Quota | null };
+
+
+export type QuotaQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type QuotaQuery = QuotaQuery_Query;
+
+export type QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotasQuery_quotas_QuotaPaginatedResult = { totalCount: number | null, rows: Array<QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota> | null };
+
+export type QuotasQuery_Query = { quotas: QuotasQuery_quotas_QuotaPaginatedResult | null };
+
+
+export type QuotasQueryVariables = Exact<{
+  filter: Types.QuotaPaginatedFilterInput | null | undefined;
+  pagination: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type QuotasQuery = QuotasQuery_Query;
+
+export type QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult_rows_QuotaLedger = { id: string | null, quotaId: string | null, studentId: string | null, recurringScheduleId: string | null, classInstanceId: string | null, delta: number | null, reason: Types.QuotaLedgerReason | null, reasonNote: string | null, actorUserId: string | null, createdAt: string | null };
+
+export type QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult = { totalCount: number | null, rows: Array<QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult_rows_QuotaLedger> | null };
+
+export type QuotaLedgerQuery_Query = { quotaLedger: QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult | null };
+
+
+export type QuotaLedgerQueryVariables = Exact<{
+  quotaId: string | number;
+  pagination: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type QuotaLedgerQuery = QuotaLedgerQuery_Query;
+
+export type CreateQuotaMutation_createQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateQuotaMutation_Mutation = { createQuota: CreateQuotaMutation_createQuota_Quota | null };
+
+
+export type CreateQuotaMutationVariables = Exact<{
+  input: Types.QuotaSubmitInput;
+}>;
+
+
+export type CreateQuotaMutation = CreateQuotaMutation_Mutation;
+
+export type UpdateQuotaMutation_updateQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpdateQuotaMutation_Mutation = { updateQuota: UpdateQuotaMutation_updateQuota_Quota | null };
+
+
+export type UpdateQuotaMutationVariables = Exact<{
+  id: string | number;
+  input: Types.QuotaUpdateInput;
+}>;
+
+
+export type UpdateQuotaMutation = UpdateQuotaMutation_Mutation;
+
+export type DeleteQuotaMutation_deleteQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, status: Types.QuotaStatus | null };
+
+export type DeleteQuotaMutation_Mutation = { deleteQuota: DeleteQuotaMutation_deleteQuota_Quota | null };
+
+
+export type DeleteQuotaMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteQuotaMutation = DeleteQuotaMutation_Mutation;
+
+export type StudentQuotasQuery_studentQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentQuotasQuery_Query = { studentQuotas: Array<StudentQuotasQuery_studentQuotas_Quota> | null };
+
+
+export type StudentQuotasQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentQuotasQuery = StudentQuotasQuery_Query;
+
+export type StudentOpenQuotasQuery_studentOpenQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentOpenQuotasQuery_Query = { studentOpenQuotas: Array<StudentOpenQuotasQuery_studentOpenQuotas_Quota> | null };
+
+
+export type StudentOpenQuotasQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentOpenQuotasQuery = StudentOpenQuotasQuery_Query;
+
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown = { quotaId: string | null, quotaName: string | null, remaining: number | null, validUntil: string | null };
+
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance = { id: string | null, studentId: string | null, totalActiveClasses: number | null, totalRemaining: number | null, totalReserved: number | null, breakdownByExpiration: Array<QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown> | null };
+
+export type QuotaBalanceQuery_Query = { quotaBalance: QuotaBalanceQuery_quotaBalance_QuotaBalance | null };
+
+
+export type QuotaBalanceQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type QuotaBalanceQuery = QuotaBalanceQuery_Query;
 
 export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_nextUnpaidInvoice_NextUnpaidInvoiceSummary = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, dueDate: string | null, studentName: string | null };
 
@@ -4335,6 +4597,21 @@ export type SearchTeacherAvailabilityQueryVariables = Exact<{
 
 export type SearchTeacherAvailabilityQuery = SearchTeacherAvailabilityQuery_Query;
 
+export type AvailableClassSlotsQuery_availableClassSlots_AvailableClassSlot = { id: string | null, teacherId: string | null, startAt: string | null, endAt: string | null, available: boolean | null };
+
+export type AvailableClassSlotsQuery_Query = { availableClassSlots: Array<AvailableClassSlotsQuery_availableClassSlots_AvailableClassSlot> | null };
+
+
+export type AvailableClassSlotsQueryVariables = Exact<{
+  studentId: string | number;
+  date: string;
+  teacherId: string | number | null | undefined;
+  durationMinutes: number | null | undefined;
+}>;
+
+
+export type AvailableClassSlotsQuery = AvailableClassSlotsQuery_Query;
+
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
@@ -5510,7 +5787,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 
 export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
 
-export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
 
@@ -5686,7 +5963,7 @@ export type DeleteTeacherImportantNoteMutationVariables = Exact<{
 
 export type DeleteTeacherImportantNoteMutation = DeleteTeacherImportantNoteMutation_Mutation;
 
-export type CreateTeacherMutation_createTeacher_TeacherOnboarding = { userId: string | null, id: string | null, name: string | null, email: string | null, status: string | null, gender: Types.Gender | null, timezoneDisplay: string | null };
+export type CreateTeacherMutation_createTeacher_TeacherOnboarding = { userId: string | null, id: string | null, name: string | null, email: string | null, phone: string | null, status: string | null, gender: Types.Gender | null, timezoneDisplay: string | null };
 
 export type CreateTeacherMutation_Mutation = { createTeacher: CreateTeacherMutation_createTeacher_TeacherOnboarding | null };
 
@@ -5750,3 +6027,118 @@ export type TeachersQueryVariables = Exact<{
 export type TeachersQuery = TeachersQuery_Query;
 
 export type UserFieldsFragmentFragment = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
+
+export type WhatsappAccountFieldsFragment = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type WhatsappTemplateSnapshotFieldsFragment = { id: string | null, name: string | null, language: string | null, status: Types.WhatsappTemplateStatus | null, category: Types.WhatsappTemplateCategory | null, lastSyncedAt: string | null };
+
+export type WhatsappAccountsQuery_whatsappAccounts_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type WhatsappAccountsQuery_Query = { whatsappAccounts: Array<WhatsappAccountsQuery_whatsappAccounts_WhatsappAccount> | null };
+
+
+export type WhatsappAccountsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type WhatsappAccountsQuery = WhatsappAccountsQuery_Query;
+
+export type IsUserWhatsappOptInQuery_Query = { isUserWhatsappOptIn: boolean };
+
+
+export type IsUserWhatsappOptInQueryVariables = Exact<{
+  userId: string;
+}>;
+
+
+export type IsUserWhatsappOptInQuery = IsUserWhatsappOptInQuery_Query;
+
+export type CreateWhatsappAccountMutation_createWhatsappAccount_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateWhatsappAccountMutation_Mutation = { createWhatsappAccount: CreateWhatsappAccountMutation_createWhatsappAccount_WhatsappAccount | null };
+
+
+export type CreateWhatsappAccountMutationVariables = Exact<{
+  input: Types.WhatsappAccountCreateInput;
+}>;
+
+
+export type CreateWhatsappAccountMutation = CreateWhatsappAccountMutation_Mutation;
+
+export type UpdateWhatsappAccountMutation_updateWhatsappAccount_WhatsappAccount = { id: string | null };
+
+export type UpdateWhatsappAccountMutation_Mutation = { updateWhatsappAccount: UpdateWhatsappAccountMutation_updateWhatsappAccount_WhatsappAccount | null };
+
+
+export type UpdateWhatsappAccountMutationVariables = Exact<{
+  id: string;
+  input: Types.WhatsappAccountUpdateInput;
+}>;
+
+
+export type UpdateWhatsappAccountMutation = UpdateWhatsappAccountMutation_Mutation;
+
+export type DeleteWhatsappAccountMutation_deleteWhatsappAccount_WhatsappAccount = { id: string | null };
+
+export type DeleteWhatsappAccountMutation_Mutation = { deleteWhatsappAccount: DeleteWhatsappAccountMutation_deleteWhatsappAccount_WhatsappAccount | null };
+
+
+export type DeleteWhatsappAccountMutationVariables = Exact<{
+  id: string;
+}>;
+
+
+export type DeleteWhatsappAccountMutation = DeleteWhatsappAccountMutation_Mutation;
+
+export type SetWhatsappAccessTokenMutation_setWhatsappAccessToken_WhatsappAccount = { id: string | null };
+
+export type SetWhatsappAccessTokenMutation_Mutation = { setWhatsappAccessToken: SetWhatsappAccessTokenMutation_setWhatsappAccessToken_WhatsappAccount | null };
+
+
+export type SetWhatsappAccessTokenMutationVariables = Exact<{
+  id: string;
+  accessToken: string;
+}>;
+
+
+export type SetWhatsappAccessTokenMutation = SetWhatsappAccessTokenMutation_Mutation;
+
+export type SetWhatsappTwoStepPinMutation_setWhatsappTwoStepPin_WhatsappAccount = { id: string | null };
+
+export type SetWhatsappTwoStepPinMutation_Mutation = { setWhatsappTwoStepPin: SetWhatsappTwoStepPinMutation_setWhatsappTwoStepPin_WhatsappAccount | null };
+
+
+export type SetWhatsappTwoStepPinMutationVariables = Exact<{
+  id: string;
+  twoStepPin: string;
+}>;
+
+
+export type SetWhatsappTwoStepPinMutation = SetWhatsappTwoStepPinMutation_Mutation;
+
+export type SetUserWhatsappOptInMutation_setUserWhatsappOptIn_WhatsappAccount = { id: string | null };
+
+export type SetUserWhatsappOptInMutation_Mutation = { setUserWhatsappOptIn: SetUserWhatsappOptInMutation_setUserWhatsappOptIn_WhatsappAccount | null };
+
+
+export type SetUserWhatsappOptInMutationVariables = Exact<{
+  userId: string;
+  enabled: boolean;
+  source: string | null | undefined;
+}>;
+
+
+export type SetUserWhatsappOptInMutation = SetUserWhatsappOptInMutation_Mutation;
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_accounts_WhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_templates_WhatsappTemplateSnapshot = { id: string | null, name: string | null, language: string | null, status: Types.WhatsappTemplateStatus | null, category: Types.WhatsappTemplateCategory | null, lastSyncedAt: string | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult = { id: string | null, accounts: Array<SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_accounts_WhatsappAccount> | null, templates: Array<SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult_templates_WhatsappTemplateSnapshot> | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_Mutation = { syncWhatsappAccountsFromMeta: SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_WhatsappSyncFromMetaResult | null };
+
+
+export type SyncWhatsappAccountsFromMetaMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SyncWhatsappAccountsFromMetaMutation = SyncWhatsappAccountsFromMetaMutation_Mutation;

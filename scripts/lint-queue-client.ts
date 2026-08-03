@@ -25,7 +25,7 @@
  *   const r2 = await requestFullRepoLint("phase8");
  */
 
-import { BASE_URL } from "./lint-queue-config";
+import { BASE_URL } from "@/scripts/lint-queue-config";
 
 /** Shape of the lint execution result returned by the queue server. */
 export type LintResult = { success: boolean; output: string; exitCode: number };

@@ -53,6 +53,36 @@
 - **Admin Meeting Integrations tab**: The admin "Meeting Integrations" tab (mirrors `EnvironmentConfigTab`) uses the standard `createLazyView` + `ResponsiveViewSwitch` pattern. See `frontend/common/views/dashboard/settings/tabs/meetingIntegrations/MeetingIntegrationsTab.tsx` (switcher), `useMeetingIntegrationsViewModel.ts` (view model), and `frontend/common/stores/meetingIntegrationsSettingsStore.ts` (Zustand store). Components live in `frontend/common/views/dashboard/settings/components/meetingIntegrations/` (`MeetingProviderCredentialForm`, `TestConnectionResultPanel`, `ConnectedAccountsTable`, `RevokeTokenDialog`, `MeetingIntegrationsHealthHeaders`).
 - See `docs/services/meeting-providers.md` for backend adapter/factory details.
 
+## Quota Views
+
+The Quota System frontend follows the standard ViewModel pattern. See `docs/billing/quota-system.md` for the complete reference. Key quota-specific view conventions:
+
+### ViewModel Location
+
+All quota views live under `frontend/common/views/dashboard/billing/quota/`:
+- `useQuotaViewModel.ts` — list/filter/pagination logic
+- `useQuotaDetailViewModel.ts` — detail view logic
+- `useQuotaFormViewModel.ts` — create/edit form logic
+- `QuotaInsightsContainer.tsx` — insights dashboard
+
+Student quota tab views live under `frontend/common/views/dashboard/students/quota/`:
+- `StudentQuotaContainer.tsx` — Container (calls ViewModel)
+- `useStudentQuotaViewModel.ts` — ViewModel hook
+- `QuotaFormAccessProvider.tsx` — permission gating
+- `frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema.ts` — Zod schema
+
+### State Management
+
+- `frontend/common/stores/quotaStore.ts` — Zustand store for form state that survives viewport tier switching
+- Never store non-serializable values (File, Blob) in persist-enabled stores
+
+### Permissions
+
+- All quota views require `QUOTAS_VIEW` permission
+- Administrative views (create/edit) require `QUOTAS_MANAGE`
+- Student quota tab is registered in `studentProfileTabs.ts` with `QUOTA_TAB_GROUPS`
+- Tab shows per-audience rendering: student/parent see PENDING_CREDIT prominently; teacher sees CONFLICT_HELD
+
 ## Storybook Best Practices
 
 - **Permission Seeding**: Components wrapped in `<RequirePermission>` will default to admin permissions in Storybook via the global `StoryWrapper`. If you need to test a specific permission state (e.g., Parent vs Teacher), use `useUserStore.setState()` within the story or a local decorator to seed the required permissions.

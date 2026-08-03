@@ -179,6 +179,21 @@ export const errorsEn: ErrorsLabels = {
     ttlOutOfRange: "TTL must be between 60 and 2,419,200 seconds.",
     maxConcurrentOutOfRange: "Max concurrent sessions must be between 1 and 50.",
   },
+  quota: {
+    insufficientRemaining: (requested: number, available: number) =>
+      `Only ${available} quota remaining — requested ${requested}`,
+    exceedsCreditBalance: (requested: number, available: number) =>
+      `Insufficient credit balance. Available: ${available}, needed: ${requested}`,
+    periodicRefreshFailed: (quotaName: string, reason: string) =>
+      `Failed to refresh periodic quota ${quotaName}: ${reason}`,
+    invalidPeriod: (quotaName: string) => `Quota ${quotaName} has expired or its period is invalid`,
+    alreadyExpired: (quotaName: string) => `Quota ${quotaName} has already expired`,
+    earmarkExceedsRemaining: (requested: number, available: number) =>
+      `Earmark of ${requested} exceeds remaining quota (${available})`,
+    slotConflict: (startTime: string, endTime: string) =>
+      `Time slot ${startTime}–${endTime} conflicts with existing booking`,
+    onDemandNoCredits: (studentName: string) => `Not enough credits for on-demand booking for ${studentName}`,
+  },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "Too many requests. Please try again later.",
   duplicateRequest: "Duplicate request detected. This operation has already been processed.",
@@ -254,6 +269,9 @@ export const errorsEn: ErrorsLabels = {
   cannotRescheduleCompleted: "Cannot reschedule a completed session.",
   cannotRescheduleAlreadyRescheduled: "Cannot reschedule a session that has already been rescheduled.",
   outOfQuota: "Out of quota.",
+  quotaExpired: "Quota has expired.",
+  quotaNotFound: "Quota not found.",
+  invalidQuotaState: "Invalid quota state.",
   leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
     `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
   classInstanceNotFound: ({ id }: { id: string }) => `Class instance not found: ${id}`,
@@ -278,4 +296,37 @@ export const errorsEn: ErrorsLabels = {
   resourceNotFound: "Learning resource not found.",
   currencyInUse:
     "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
+
+  // ─── Communication / suggestion / complaint errors ─────────────────────
+  complaintNotFound: "Complaint not found.",
+  suggestionNotFound: "Suggestion not found.",
+  complaintTooManyFiles: (maxFiles: number) => `You can upload a maximum of ${maxFiles} files per complaint.`,
+  complaintFileTooLarge: (maxSizeMb: number) => `File size must not exceed ${maxSizeMb} MB.`,
+  suggestionCannotMarkSelfAsDuplicate: "A suggestion cannot be marked as a duplicate of itself.",
+  suggestionCircularDuplicate: "Cannot create a circular duplicate chain.",
+  suggestionTargetIsAlreadyDuplicate: "The target suggestion is already marked as a duplicate of another suggestion.",
+
+  // ─── Communication dispatch errors ──────────────────────────────────────
+  unknownCommunicationChannel: (channel: string) => `Unknown communication channel: ${channel}`,
+  unknownError: "An unknown error occurred.",
+  unknownDispatchError: "An unknown dispatch error occurred.",
+  whatsappTemplateMissing: "WhatsApp template configuration is missing for this notification.",
+
+  // ─── WhatsApp account management errors ─────────────────────────────────
+  whatsappAccountNotFound: (id: string) => `WhatsApp account not found: ${id}`,
+  whatsappAccessTokenNotConfigured: "WhatsApp access token is not configured.",
+  whatsappWabaIdNotConfigured: "WhatsApp Business Account ID is not configured.",
+
+  // ─── Delivery failure messages ───────────────────────────────────────────
+  emailChannelLabel: "Email",
+  smsChannelLabel: "SMS",
+  pushChannelLabel: "Push notification",
+  whatsappChannelLabel: "WhatsApp",
+  onAppChannelLabel: "In-app",
+  deliveryFailed: (channelLabel: string) => `${channelLabel} delivery failed. Please try again later.`,
+
+  // Quota errors accessible via quota.* — see QuotaErrors
+
+  // ─── Offline resolver / notification fallbacks ──────────────────────
+  studentNameFallback: "Student",
 };
