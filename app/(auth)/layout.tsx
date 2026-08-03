@@ -4,9 +4,11 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
 import { getAuthenticatedAuthBounceHref } from "@/frontend/common/lib/redirectToLogin";
 import { AppClientProviders } from "@/frontend/common/providers/AppClientProviders";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 export default async function AuthLayout({ children }: { readonly children: ReactNode }) {
   const { userId, context, isImpersonating, isSimulatingGroup } = await getServerUserContext();
+  const locale = await getLocale();
 
   if (userId && context) {
     const targetHref = await getAuthenticatedAuthBounceHref();
@@ -22,5 +24,5 @@ export default async function AuthLayout({ children }: { readonly children: Reac
     return;
   }
 
-  return <AppClientProviders>{children}</AppClientProviders>;
+  return <AppClientProviders locale={locale}>{children}</AppClientProviders>;
 }

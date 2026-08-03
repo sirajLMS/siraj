@@ -16,6 +16,7 @@ import { dashboardClassAuditAr } from "@/shared/locale/ar/dashboard/classes/audi
 import { dashboardCreateRecurringClassAr } from "@/shared/locale/ar/dashboard/classes/createRecurringClass.ts";
 import { dashboardClassDetailsAr } from "@/shared/locale/ar/dashboard/classes/details.ts";
 import { dashboardClassesMainAr } from "@/shared/locale/ar/dashboard/classes/main.ts";
+import { recurringSchedulesList as dashboardRecurringSchedulesListAr } from "@/shared/locale/ar/dashboard/classes/recurringSchedulesList.ts";
 import { dashboardRescheduleFormAr } from "@/shared/locale/ar/dashboard/classes/rescheduleForm.ts";
 import { dashboardRescheduleTrackingAr } from "@/shared/locale/ar/dashboard/classes/rescheduleTracking.ts";
 import { dashboardComplaintsAr } from "@/shared/locale/ar/dashboard/complaints/main.ts";
@@ -180,6 +181,7 @@ export const arMessages: Translations = {
     classAudit: dashboardClassAuditAr,
     classDetails: dashboardClassDetailsAr,
     createRecurringClass: dashboardCreateRecurringClassAr,
+    recurringSchedulesList: dashboardRecurringSchedulesListAr,
     rescheduleForm: dashboardRescheduleFormAr,
     rescheduleTracking: dashboardRescheduleTrackingAr,
     scheduleTrackingParent: dashboardScheduleTrackingParentAr,

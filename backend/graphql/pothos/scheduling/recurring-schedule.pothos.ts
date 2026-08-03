@@ -1,8 +1,11 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
   RecurringScheduleDayDetailReturnType,
   RecurringScheduleDetailReturnType,
+  RecurringScheduleListItem,
+  RecurringSchedulesPaginatedResult,
 } from "@/backend/types/scheduling/recurring-schedule-detail.types";
 
 const RecurringScheduleDayDetailRef =
@@ -36,6 +39,38 @@ export const RecurringScheduleDetailPothosObject = RecurringScheduleDetailRef.im
   }),
 });
 
+const RecurringScheduleListItemRef = gqlSchemaBuilder.objectRef<RecurringScheduleListItem>("RecurringScheduleListItem");
+
+export const RecurringScheduleListItemPothosObject = RecurringScheduleListItemRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    studentId: t.exposeString("studentId"),
+    studentName: t.exposeString("studentName"),
+    teacherId: t.exposeString("teacherId"),
+    teacherName: t.exposeString("teacherName"),
+    durationMinutes: t.exposeInt("durationMinutes"),
+    defaultStartTime: t.exposeString("defaultStartTime"),
+    timezone: t.exposeString("timezone"),
+    hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
+    rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
+    createdAt: t.expose("createdAt", { type: "DateTime" }),
+    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+  }),
+});
+
+const RecurringSchedulesPaginatedResultRef = gqlSchemaBuilder.objectRef<RecurringSchedulesPaginatedResult>(
+  "RecurringSchedulesPaginatedResult"
+);
+
+export const RecurringSchedulesPaginatedResultPothosObject = RecurringSchedulesPaginatedResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    rows: t.expose("rows", { type: [RecurringScheduleListItemRef] }),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
 export const UpdateRecurringClassRateInputPothos = gqlSchemaBuilder.inputType("UpdateRecurringClassRateInput", {
   fields: t => ({
     recurringScheduleId: t.string({ required: true }),
@@ -43,3 +78,61 @@ export const UpdateRecurringClassRateInputPothos = gqlSchemaBuilder.inputType("U
     rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
   }),
 });
+
+// ─── Recurring Schedules Query ──────────────────────────────────────────────────
+
+gqlSchemaBuilder.queryField("recurringSchedules", t =>
+  t.field({
+    type: RecurringSchedulesPaginatedResultRef,
+    args: {
+      pagination: t.arg({ type: PaginationArgsObject, required: false }),
+      search: t.arg.string({ required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const tErrors = ctx.t().errorsTranslations;
+      const userId = ctx.user?.id ?? "";
+
+      const { RecurringScheduleDetailService } = await import(
+        "@/backend/services/schedule/recurring-schedule-detail.service"
+      );
+
+      const page = args.pagination?.page ?? 1;
+      const pageSize = args.pagination?.first ?? 20;
+
+      const result = await RecurringScheduleDetailService.listAll(userId, tErrors, {
+        page,
+        pageSize,
+        search: args.search ?? undefined,
+      });
+
+      return {
+        id: "recurring-schedules-list",
+        rows: result.rows.map(row => ({
+          id: row.id,
+          studentId: row.studentId,
+          studentName: row.studentName,
+          teacherId: row.teacherId,
+          teacherName: row.teacherUserName,
+          durationMinutes: row.durationMinutes,
+          defaultStartTime: String(row.defaultStartTime).slice(0, 5),
+          timezone: row.timezone,
+          hourlyRate: row.hourlyRate,
+          rateCurrency: row.rateCurrency,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+        })),
+        totalCount: result.totalCount,
+        pageInfo: {
+          count: result.rows.length,
+          currentPage: page,
+          firstItem: result.totalCount > 0 ? (page - 1) * pageSize + 1 : null,
+          hasMorePages: page * pageSize < result.totalCount,
+          lastItem: result.totalCount > 0 ? Math.min(page * pageSize, result.totalCount) : null,
+          lastPage: Math.ceil(result.totalCount / pageSize),
+          perPage: pageSize,
+          total: result.totalCount,
+        },
+      };
+    },
+  })
+);

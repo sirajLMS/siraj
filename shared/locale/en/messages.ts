@@ -16,6 +16,7 @@ import { dashboardClassAuditEn } from "@/shared/locale/en/dashboard/classes/audi
 import { dashboardCreateRecurringClassEn } from "@/shared/locale/en/dashboard/classes/createRecurringClass.ts";
 import { dashboardClassDetailsEn } from "@/shared/locale/en/dashboard/classes/details.ts";
 import { dashboardClassesMainEn } from "@/shared/locale/en/dashboard/classes/main.ts";
+import { recurringSchedulesList as dashboardRecurringSchedulesListEn } from "@/shared/locale/en/dashboard/classes/recurringSchedulesList.ts";
 import { dashboardRescheduleFormEn } from "@/shared/locale/en/dashboard/classes/rescheduleForm.ts";
 import { dashboardRescheduleTrackingEn } from "@/shared/locale/en/dashboard/classes/rescheduleTracking.ts";
 import { dashboardComplaintsEn } from "@/shared/locale/en/dashboard/complaints/main.ts";
@@ -180,6 +181,7 @@ export const enMessages: Translations = {
     classAudit: dashboardClassAuditEn,
     classDetails: dashboardClassDetailsEn,
     createRecurringClass: dashboardCreateRecurringClassEn,
+    recurringSchedulesList: dashboardRecurringSchedulesListEn,
     rescheduleForm: dashboardRescheduleFormEn,
     rescheduleTracking: dashboardRescheduleTrackingEn,
     scheduleTrackingParent: dashboardScheduleTrackingParentEn,

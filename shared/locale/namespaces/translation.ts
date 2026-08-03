@@ -16,6 +16,7 @@ import { DashboardClassAudit } from "@/shared/locale/namespaces/dashboard/classe
 import { DashboardCreateRecurringClass } from "@/shared/locale/namespaces/dashboard/classes/createRecurringClass.namespace";
 import { DashboardClassDetails } from "@/shared/locale/namespaces/dashboard/classes/details.namespace";
 import { DashboardClassesMain } from "@/shared/locale/namespaces/dashboard/classes/main.namespace";
+import { DashboardRecurringSchedulesList } from "@/shared/locale/namespaces/dashboard/classes/recurringSchedulesList.namespace";
 import { DashboardRescheduleForm } from "@/shared/locale/namespaces/dashboard/classes/rescheduleForm.namespace";
 import { DashboardRescheduleTracking } from "@/shared/locale/namespaces/dashboard/classes/rescheduleTracking.namespace";
 import { DashboardComplaints } from "@/shared/locale/namespaces/dashboard/complaints/main.namespace";
@@ -160,6 +161,7 @@ export const Translation = {
     CoreParentDashboard: DashboardCoreParentDashboard,
     Cron: DashboardCron,
     CreateRecurringClass: DashboardCreateRecurringClass,
+    RecurringSchedulesList: DashboardRecurringSchedulesList,
     FeedbackManageParent: DashboardFeedbackManageParent,
     LmsCredit: DashboardLmsCredit,
     LmsLessonReports: DashboardLmsLessonReports,

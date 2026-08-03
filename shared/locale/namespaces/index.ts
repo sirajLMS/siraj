@@ -16,6 +16,7 @@ export { DashboardClassAudit } from "@/shared/locale/namespaces/dashboard/classe
 export { DashboardCreateRecurringClass } from "@/shared/locale/namespaces/dashboard/classes/createRecurringClass.namespace";
 export { DashboardClassDetails } from "@/shared/locale/namespaces/dashboard/classes/details.namespace";
 export { DashboardClassesMain } from "@/shared/locale/namespaces/dashboard/classes/main.namespace";
+export { DashboardRecurringSchedulesList } from "@/shared/locale/namespaces/dashboard/classes/recurringSchedulesList.namespace";
 export { DashboardRescheduleForm } from "@/shared/locale/namespaces/dashboard/classes/rescheduleForm.namespace";
 export { DashboardRescheduleTracking } from "@/shared/locale/namespaces/dashboard/classes/rescheduleTracking.namespace";
 export { DashboardComplaints } from "@/shared/locale/namespaces/dashboard/complaints/main.namespace";

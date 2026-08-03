@@ -28,7 +28,7 @@ export async function DashboardLayoutContainer({
   const enableUsersDirectory = await isUsersDirectoryEnabled();
 
   return (
-    <DashboardClientProviders>
+    <DashboardClientProviders locale={locale}>
       <DashboardClientBridge
         userProfile={userProfile}
         isSuperAdmin={isSuperAdmin}

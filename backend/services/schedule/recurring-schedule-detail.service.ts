@@ -3,8 +3,14 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { AppPermission } from "@/backend/enum";
 import { parseIanaTimezone } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { RecurringScheduleSelectType } from "@/backend/types";
 import type { RecurringScheduleDetailReturnType } from "@/backend/types/scheduling/recurring-schedule-detail.types";
 import type { ErrorsLabels } from "@/shared/locale";
+
+type RecurringScheduleListRow = RecurringScheduleSelectType & {
+  studentName: string;
+  teacherUserName: string;
+};
 
 export namespace RecurringScheduleDetailService {
   async function assertViewAccess(userId: string, teacherId: string, tErrors: ErrorsLabels) {
@@ -55,5 +61,27 @@ export namespace RecurringScheduleDetailService {
       hourlyRate: row.schedule.hourlyRate,
       rateCurrency: row.schedule.rateCurrency,
     };
+  }
+
+  export async function listAll(
+    userId: string,
+    tErrors: ErrorsLabels,
+    options?: {
+      page?: number;
+      pageSize?: number;
+      search?: string;
+    }
+  ): Promise<{ rows: RecurringScheduleListRow[]; totalCount: number }> {
+    const canViewList = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_LIST);
+    const canViewAll = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_ALL);
+
+    if (!canViewList && !canViewAll) {
+      throw new Error(tErrors.unauthorizedAction);
+    }
+
+    return RecurringScheduleRepository.findAll(undefined, options) as Promise<{
+      rows: RecurringScheduleListRow[];
+      totalCount: number;
+    }>;
   }
 }
