@@ -102,7 +102,7 @@ After Wave 2 lands and whole-tree `bun tsgo` exits 0:
 bun tsgo                          # Whole-tree — MUST exit 0
 ~/.bun/bin/bun run scripts/lint-queue-server.ts &   # start queue (if not already running)
 # per-changed-file via queue client:
-curl -s -X POST http://localhost:4777/lint -H "Content-Type: application/json" \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" \
   -d '{"id":"verify","files":["<each changed file>"]}'
 bun biome:check                   # whole tree
 bun run build                     # Next.js production build — MUST succeed

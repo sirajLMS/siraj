@@ -135,10 +135,23 @@ export class PostgresCacheAdapter implements ICacheService {
 
   /**
    * Execute a pipeline of commands (for atomic operations)
-   * Uses database transactions for atomicity
+   * Uses database transactions for atomicity when needed.
+   * For del-only pipelines, skips the transaction to avoid deadlocks between
+   * the transaction connection and the global db connection used by CacheDbRepository.
    */
   async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
     try {
+      // del and set(NX) commands use CacheDbRepository which uses the global db
+      // connection — skip transaction to avoid deadlocks
+      const isDelOrSetOnly = commands.every(cmd => cmd.command === "del" || cmd.command === "set");
+      if (isDelOrSetOnly) {
+        const results: unknown[] = [];
+        for (const cmd of commands) {
+          results.push(await this.executePipelineCommand(cmd));
+        }
+        return results;
+      }
+
       return await db.transaction(async () => {
         const results = await Promise.all(commands.map(cmd => this.executePipelineCommand(cmd)));
         return results;
@@ -156,6 +169,25 @@ export class PostgresCacheAdapter implements ICacheService {
     switch (cmd.command) {
       // PERF: These 4 pipeline commands (zremrangebyscore + zadd + zcard + expire) could be combined
       // into a single SQL CTE for the rate-limit pattern. Current implementation issues 4 separate queries.
+      case "del": {
+        const keys = cmd.args as string[];
+        for (const key of keys) {
+          await CacheDbRepository.del(key);
+        }
+        return keys.length;
+      }
+
+      case "set": {
+        const [setKey, setValue, , , flag] = cmd.args as [string, string, string, number, string];
+        if (flag === "NX") {
+          const expiresAt = new Date(Date.now() + (cmd.args[3] as number) * 1000);
+          return await CacheDbRepository.insertIfNotExists(setKey, setValue, expiresAt);
+        }
+        const expiresAt = new Date(Date.now() + (cmd.args[3] as number) * 1000);
+        await CacheDbRepository.set(setKey, setValue, expiresAt);
+        return "OK";
+      }
+
       case "zremrangebyscore": {
         // For rate limiting: remove old entries outside the sliding window
         // Redis: ZREMRANGEBYSCORE key min max — removes members with score between min and max
@@ -191,17 +223,6 @@ export class PostgresCacheAdapter implements ICacheService {
         const [expKey, expSeconds] = cmd.args as [string, number];
         await CacheDbRepository.updateExpiryByPrefix(expKey, expSeconds);
         return 1;
-      }
-
-      case "del": {
-        // Cache invalidation: delete one or more keys by exact match
-        const args = cmd.args as string[];
-        if (args && args.length > 0) {
-          for (const key of args) {
-            await CacheDbRepository.del(key);
-          }
-        }
-        return null;
       }
 
       default:

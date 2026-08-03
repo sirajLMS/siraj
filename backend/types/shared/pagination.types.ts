@@ -67,6 +67,20 @@ export class PaginationArgs {
   get offset(): number {
     return this.skip ?? (this.currentPage - 1) * this.perPage;
   }
+
+  /** Build a PaginationArgs from a Pothos resolver's pagination input (all fields optional). */
+  static fromArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
+    if (!input) return null;
+    return new PaginationArgs({
+      first: input.first ?? null,
+      skip: input.skip ?? null,
+      after: input.after ?? null,
+      before: input.before ?? null,
+      last: input.last ?? null,
+      page: input.page ?? null,
+      maxCount: input.maxCount ?? null,
+    });
+  }
 }
 
 /**

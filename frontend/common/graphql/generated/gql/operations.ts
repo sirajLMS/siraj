@@ -136,6 +136,8 @@ export type AppPermission =
   | 'PROFILE_TEACHER_STUDENTS_EDIT_OWN'
   | 'PROFILE_TEACHER_STUDENTS_VIEW_OTHER'
   | 'PROFILE_TEACHER_STUDENTS_VIEW_OWN'
+  | 'QUOTAS_MANAGE'
+  | 'QUOTAS_VIEW'
   | 'REPORTS_GENERATE'
   | 'REPORT_GENERATE_CUSTOM'
   | 'REPORT_VIEW_FINANCIALS'
@@ -335,6 +337,10 @@ export type ClassExecutionState =
   | 'ACTIVATED'
   | 'COMPLETED'
   | 'NOT_ACTIVATED'
+  | 'ON_DEMAND_CONFLICT_HELD'
+  | 'ON_DEMAND_NO_CREDITS_ABSENT'
+  | 'ON_DEMAND_NO_CREDITS_CANCELLED'
+  | 'ON_DEMAND_PENDING_CREDITS'
   | 'RUNNING';
 
 export type ClassMeetingConfigCreateInput = {
@@ -696,15 +702,20 @@ export type CreatePermissionGroupInput = {
 };
 
 export type CreateRecurringClassInput = {
-  classType: string | null | undefined;
+  classType: ClassType | null | undefined;
   days: Array<RecurringClassDayInput>;
   defaultStartTime: string;
   durationMinutes: number;
+  earmarkedClasses: number | null | undefined;
   effectiveFrom: string | null | undefined;
   effectiveUntil: string | null | undefined;
   generateInstancesForWeeks: number | null | undefined;
+  generationHorizonWeeks: number | null | undefined;
   hourlyRate: string | null | undefined;
+  ondemandNoCreditsOutcome: OnDemandNoCreditsOutcome | null | undefined;
+  quotaId: string | null | undefined;
   rateCurrency: CurrencyCode | null | undefined;
+  schedulingMode: SchedulingMode | null | undefined;
   studentId: string;
   subjectId: string;
   teacherId: string;
@@ -1393,7 +1404,14 @@ export type NotificationEventType =
   | 'LESSON_REPORT_SUBMITTED'
   | 'NEW_COMPLAINT'
   | 'NEW_SUGGESTION'
+  | 'ON_DEMAND_INSTANCE_PENDING_CREDIT'
+  | 'ON_DEMAND_INSTANCE_REMINDER_T1'
+  | 'ON_DEMAND_INSTANCE_REMINDER_T3'
+  | 'ON_DEMAND_TEACHER_DAILY_DIGEST'
   | 'PAYMENT_METHOD_CHANGED'
+  | 'QUOTA_EXPIRED'
+  | 'QUOTA_EXPIRING_SOON'
+  | 'QUOTA_LOW_BALANCE'
   | 'STUDENT_QUOTA_OVERRIDDEN'
   | 'STUDENT_STATUS_CHANGED'
   | 'STUDENT_TEACHER_REASSIGNED'
@@ -1405,6 +1423,11 @@ export type NotificationPreferenceInput = {
   enabled: boolean;
   eventType: NotificationEventType;
 };
+
+export type OnDemandNoCreditsOutcome =
+  | 'AUTO_ABSENT_NO_CREDITS'
+  | 'AUTO_CANCEL'
+  | 'REMIND_ONLY';
 
 export type OrderSortDirection =
   | 'ASC'
@@ -1512,6 +1535,65 @@ export type ProfileScope =
   | 'OTHER'
   | 'OWN';
 
+export type QuotaKind =
+  | 'PACKAGE'
+  | 'PERIODIC';
+
+export type QuotaLedgerReason =
+  | 'ADJUST'
+  | 'EXPIRE'
+  | 'GRANT'
+  | 'REDEEM'
+  | 'RELEASE'
+  | 'RESERVE';
+
+/** Filter options for querying quotas */
+export type QuotaPaginatedFilterInput = {
+  kind: QuotaKind | null | undefined;
+  search: string | null | undefined;
+  status: QuotaStatus | null | undefined;
+  studentId: string | null | undefined;
+};
+
+export type QuotaPeriodType =
+  | 'CUSTOM'
+  | 'MONTHLY'
+  | 'WEEKLY';
+
+/** Rollover policy configuration for periodic quotas */
+export type QuotaRolloverPolicyInput = {
+  accumulationCap: number | null | undefined;
+  maxRolloverPercent: number | null | undefined;
+};
+
+export type QuotaStatus =
+  | 'ACTIVE'
+  | 'ARCHIVED'
+  | 'EXPIRED';
+
+/** Input for creating a new student quota */
+export type QuotaSubmitInput = {
+  idempotencyKey: string | null | undefined;
+  kind: QuotaKind;
+  name: string;
+  periodDays: number | null | undefined;
+  periodType: QuotaPeriodType | null | undefined;
+  priority: number | null | undefined;
+  rolloverPolicy: QuotaRolloverPolicyInput | null | undefined;
+  studentId: string;
+  totalClasses: number;
+  validFrom: string | null | undefined;
+  validUntil: string | null | undefined;
+};
+
+/** Input for updating an existing quota */
+export type QuotaUpdateInput = {
+  name: string | null | undefined;
+  priority: number | null | undefined;
+  status: QuotaStatus | null | undefined;
+  validUntil: string | null | undefined;
+};
+
 export type RateSource =
   | 'OVERRIDE'
   | 'RECURRING'
@@ -1519,7 +1601,7 @@ export type RateSource =
   | 'TEACHER';
 
 export type RecurringClassDayInput = {
-  dayOfWeek: string;
+  dayOfWeek: DayOfWeek;
   isActive: boolean;
   startTime: string;
 };
@@ -1562,6 +1644,11 @@ export type RevokePermissionGroupFromUserInput = {
   groupId: string;
   userId: string;
 };
+
+export type SchedulingMode =
+  | 'NUMBER_OF_CLASSES'
+  | 'ON_DEMAND'
+  | 'QUOTA';
 
 /** Input for creating or updating a per-role session configuration. */
 export type SessionConfigUpsertInput = {
@@ -2909,6 +2996,125 @@ export type DeactivateSupportedOnlineAccountMutationVariables = Exact<{
 
 
 export type DeactivateSupportedOnlineAccountMutation = DeactivateSupportedOnlineAccountMutation_Mutation;
+
+export type QuotaFieldsFragment = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotaQuery_quota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotaQuery_Query = { quota: QuotaQuery_quota_Quota | null };
+
+
+export type QuotaQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type QuotaQuery = QuotaQuery_Query;
+
+export type QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotasQuery_quotas_QuotaPaginatedResult = { totalCount: number | null, rows: Array<QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota> | null };
+
+export type QuotasQuery_Query = { quotas: QuotasQuery_quotas_QuotaPaginatedResult | null };
+
+
+export type QuotasQueryVariables = Exact<{
+  filter: Types.QuotaPaginatedFilterInput | null | undefined;
+  pagination: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type QuotasQuery = QuotasQuery_Query;
+
+export type QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult_rows_QuotaLedger = { id: string | null, quotaId: string | null, studentId: string | null, recurringScheduleId: string | null, classInstanceId: string | null, delta: number | null, reason: Types.QuotaLedgerReason | null, reasonNote: string | null, actorUserId: string | null, createdAt: string | null };
+
+export type QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult = { totalCount: number | null, rows: Array<QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult_rows_QuotaLedger> | null };
+
+export type QuotaLedgerQuery_Query = { quotaLedger: QuotaLedgerQuery_quotaLedger_QuotaLedgerPaginatedResult | null };
+
+
+export type QuotaLedgerQueryVariables = Exact<{
+  quotaId: string | number;
+  pagination: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type QuotaLedgerQuery = QuotaLedgerQuery_Query;
+
+export type CreateQuotaMutation_createQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateQuotaMutation_Mutation = { createQuota: CreateQuotaMutation_createQuota_Quota | null };
+
+
+export type CreateQuotaMutationVariables = Exact<{
+  input: Types.QuotaSubmitInput;
+}>;
+
+
+export type CreateQuotaMutation = CreateQuotaMutation_Mutation;
+
+export type UpdateQuotaMutation_updateQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpdateQuotaMutation_Mutation = { updateQuota: UpdateQuotaMutation_updateQuota_Quota | null };
+
+
+export type UpdateQuotaMutationVariables = Exact<{
+  id: string | number;
+  input: Types.QuotaUpdateInput;
+}>;
+
+
+export type UpdateQuotaMutation = UpdateQuotaMutation_Mutation;
+
+export type DeleteQuotaMutation_deleteQuota_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, status: Types.QuotaStatus | null };
+
+export type DeleteQuotaMutation_Mutation = { deleteQuota: DeleteQuotaMutation_deleteQuota_Quota | null };
+
+
+export type DeleteQuotaMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteQuotaMutation = DeleteQuotaMutation_Mutation;
+
+export type StudentQuotasQuery_studentQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentQuotasQuery_Query = { studentQuotas: Array<StudentQuotasQuery_studentQuotas_Quota> | null };
+
+
+export type StudentQuotasQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentQuotasQuery = StudentQuotasQuery_Query;
+
+export type StudentOpenQuotasQuery_studentOpenQuotas_Quota = { id: string | null, studentId: string | null, name: string | null, kind: Types.QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: Types.QuotaStatus | null, periodType: Types.QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentOpenQuotasQuery_Query = { studentOpenQuotas: Array<StudentOpenQuotasQuery_studentOpenQuotas_Quota> | null };
+
+
+export type StudentOpenQuotasQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentOpenQuotasQuery = StudentOpenQuotasQuery_Query;
+
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown = { quotaId: string | null, quotaName: string | null, remaining: number | null, validUntil: string | null };
+
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance = { id: string | null, studentId: string | null, totalActiveClasses: number | null, totalRemaining: number | null, totalReserved: number | null, breakdownByExpiration: Array<QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown> | null };
+
+export type QuotaBalanceQuery_Query = { quotaBalance: QuotaBalanceQuery_quotaBalance_QuotaBalance | null };
+
+
+export type QuotaBalanceQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type QuotaBalanceQuery = QuotaBalanceQuery_Query;
 
 export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_nextUnpaidInvoice_NextUnpaidInvoiceSummary = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, dueDate: string | null, studentName: string | null };
 
@@ -4299,6 +4505,21 @@ export type SearchTeacherAvailabilityQueryVariables = Exact<{
 
 export type SearchTeacherAvailabilityQuery = SearchTeacherAvailabilityQuery_Query;
 
+export type AvailableClassSlotsQuery_availableClassSlots_AvailableClassSlot = { id: string | null, teacherId: string | null, startAt: string | null, endAt: string | null, available: boolean | null };
+
+export type AvailableClassSlotsQuery_Query = { availableClassSlots: Array<AvailableClassSlotsQuery_availableClassSlots_AvailableClassSlot> | null };
+
+
+export type AvailableClassSlotsQueryVariables = Exact<{
+  studentId: string | number;
+  date: string;
+  teacherId: string | number | null | undefined;
+  durationMinutes: number | null | undefined;
+}>;
+
+
+export type AvailableClassSlotsQuery = AvailableClassSlotsQuery_Query;
+
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null };
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
@@ -5420,7 +5641,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 
 export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
 
-export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
 
@@ -5596,7 +5817,7 @@ export type DeleteTeacherImportantNoteMutationVariables = Exact<{
 
 export type DeleteTeacherImportantNoteMutation = DeleteTeacherImportantNoteMutation_Mutation;
 
-export type CreateTeacherMutation_createTeacher_TeacherOnboarding = { userId: string | null, id: string | null, name: string | null, email: string | null, status: string | null, gender: Types.Gender | null, timezoneDisplay: string | null };
+export type CreateTeacherMutation_createTeacher_TeacherOnboarding = { userId: string | null, id: string | null, name: string | null, email: string | null, phone: string | null, status: string | null, gender: Types.Gender | null, timezoneDisplay: string | null };
 
 export type CreateTeacherMutation_Mutation = { createTeacher: CreateTeacherMutation_createTeacher_TeacherOnboarding | null };
 

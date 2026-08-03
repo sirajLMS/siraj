@@ -45,6 +45,7 @@ const ICON_LOADERS: Record<NavIconKey, () => Promise<IconModule>> = {
   timeline: () => import("@mui/icons-material/TimelineOutlined"),
   update: () => import("@mui/icons-material/UpdateOutlined"),
   videocam: () => import("@mui/icons-material/VideocamOutlined"),
+  visibility: () => import("@mui/icons-material/VisibilityOutlined"),
 };
 
 const LAZY_ICONS = (Object.keys(ICON_LOADERS) as NavIconKey[]).reduce(

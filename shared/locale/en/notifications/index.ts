@@ -148,7 +148,42 @@ export const notificationsEn: NotificationsLabels = {
     body: ({ duplicateId }) =>
       `Your suggestion has been marked as a duplicate of suggestion #${duplicateId.slice(0, 8)}`,
   },
+  quotaExpiringSoon: {
+    title: "Quota Expiring Soon",
+    body: ({ quotaName, validUntil, remaining }) =>
+      `Quota "${quotaName}" expires on ${validUntil}. You have ${remaining} classes remaining.`,
+  },
+  quotaExpired: {
+    title: "Quota Expired",
+    body: ({ quotaName }) => `Quota "${quotaName}" has expired.`,
+  },
+  quotaLowBalance: {
+    title: "Quota Low Balance",
+    body: ({ studentName, remaining, totalClasses }) =>
+      `Low quota balance for ${studentName}: ${remaining} of ${totalClasses} classes remaining.`,
+  },
+  onDemandInstancePendingCredit: {
+    title: "Class Pending Credit",
+    body: ({ studentName, scheduledStartAt }) =>
+      `On-demand class for ${studentName} on ${scheduledStartAt} needs additional credits.`,
+  },
+  onDemandInstanceReminderT3: {
+    title: "Upcoming On-Demand Class",
+    body: ({ studentName, scheduledStartAt }) =>
+      `On-demand class for ${studentName} is scheduled in 3 days on ${scheduledStartAt}.`,
+  },
+  onDemandInstanceReminderT1: {
+    title: "Upcoming On-Demand Class Tomorrow",
+    body: ({ studentName, scheduledStartAt }) =>
+      `On-demand class for ${studentName} is scheduled tomorrow on ${scheduledStartAt}.`,
+  },
+  onDemandTeacherDailyDigest: {
+    title: "Daily On-Demand Classes Digest",
+    body: ({ teacherName, pendingCount }) =>
+      `Hello ${teacherName}, you have ${pendingCount} on-demand classes pending credit resolution today.`,
+  },
   drawerTitle: "Notifications",
+
   managePreferences: "Manage preferences",
   markAllRead: "Mark all as read",
   markAsRead: "Mark as read",

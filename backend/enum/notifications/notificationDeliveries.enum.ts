@@ -14,6 +14,14 @@ export enum NotificationDeliveryStatus {
   FAILED = "FAILED",
 }
 
+// NOTE: Uses lowercase values for DB compatibility — other notification enums use SCREAMING_SNAKE_CASE
+export enum NotificationEventCategory {
+  INFO = "info",
+  REMINDER = "reminder",
+  URGENT = "urgent",
+  DIGEST = "digest",
+}
+
 export enum NotificationEventType {
   CLASS_REMINDER = "CLASS_REMINDER",
   INVOICE_GENERATED = "INVOICE_GENERATED",
@@ -39,4 +47,46 @@ export enum NotificationEventType {
   STUDENT_QUOTA_OVERRIDDEN = "STUDENT_QUOTA_OVERRIDDEN",
   LESSON_REPORT_SUBMITTED = "LESSON_REPORT_SUBMITTED",
   LESSON_REPORT_REVIEWED = "LESSON_REPORT_REVIEWED",
+  QUOTA_EXPIRING_SOON = "QUOTA_EXPIRING_SOON",
+  QUOTA_EXPIRED = "QUOTA_EXPIRED",
+  QUOTA_LOW_BALANCE = "QUOTA_LOW_BALANCE",
+  ON_DEMAND_INSTANCE_PENDING_CREDIT = "ON_DEMAND_INSTANCE_PENDING_CREDIT",
+  ON_DEMAND_INSTANCE_REMINDER_T3 = "ON_DEMAND_INSTANCE_REMINDER_T3",
+  ON_DEMAND_INSTANCE_REMINDER_T1 = "ON_DEMAND_INSTANCE_REMINDER_T1",
+  ON_DEMAND_TEACHER_DAILY_DIGEST = "ON_DEMAND_TEACHER_DAILY_DIGEST",
 }
+
+export const NOTIFICATION_EVENT_CATEGORY: Readonly<Record<NotificationEventType, NotificationEventCategory>> =
+  Object.freeze({
+    [NotificationEventType.CLASS_REMINDER]: NotificationEventCategory.REMINDER,
+    [NotificationEventType.INVOICE_GENERATED]: NotificationEventCategory.INFO,
+    [NotificationEventType.COMPLAINT_RESPONSE]: NotificationEventCategory.INFO,
+    [NotificationEventType.PAYMENT_METHOD_CHANGED]: NotificationEventCategory.INFO,
+    [NotificationEventType.NEW_COMPLAINT]: NotificationEventCategory.INFO,
+    [NotificationEventType.NEW_SUGGESTION]: NotificationEventCategory.INFO,
+    [NotificationEventType.SUGGESTION_ACKNOWLEDGED]: NotificationEventCategory.INFO,
+    [NotificationEventType.SUGGESTION_DUPLICATE_MARKED]: NotificationEventCategory.INFO,
+    [NotificationEventType.INVOICE_STATUS_CHANGED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_SCHEDULED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_ACTIVATED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_STARTED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_COMPLETED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_MARKED_ABSENT]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_MARKED_MISSED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_LEAVE_REQUESTED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_RESCHEDULED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_CANCELLED]: NotificationEventCategory.INFO,
+    [NotificationEventType.CLASS_RESET]: NotificationEventCategory.INFO,
+    [NotificationEventType.STUDENT_TEACHER_REASSIGNED]: NotificationEventCategory.INFO,
+    [NotificationEventType.STUDENT_STATUS_CHANGED]: NotificationEventCategory.INFO,
+    [NotificationEventType.STUDENT_QUOTA_OVERRIDDEN]: NotificationEventCategory.INFO,
+    [NotificationEventType.LESSON_REPORT_SUBMITTED]: NotificationEventCategory.INFO,
+    [NotificationEventType.LESSON_REPORT_REVIEWED]: NotificationEventCategory.INFO,
+    [NotificationEventType.QUOTA_EXPIRING_SOON]: NotificationEventCategory.REMINDER,
+    [NotificationEventType.QUOTA_EXPIRED]: NotificationEventCategory.INFO,
+    [NotificationEventType.QUOTA_LOW_BALANCE]: NotificationEventCategory.REMINDER,
+    [NotificationEventType.ON_DEMAND_INSTANCE_PENDING_CREDIT]: NotificationEventCategory.URGENT,
+    [NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T3]: NotificationEventCategory.REMINDER,
+    [NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T1]: NotificationEventCategory.URGENT,
+    [NotificationEventType.ON_DEMAND_TEACHER_DAILY_DIGEST]: NotificationEventCategory.DIGEST,
+  });

@@ -39,26 +39,26 @@ type PayloadMetadata = NotificationMetadata & Record<string, unknown>;
 
 // ─── Helpers ───────────────────────────────────────────────────────────
 
-const ALL_CHANNELS: readonly NotificationChannel[] = [
+/**
+ * Maps `NotificationChannel` enum members to their lowercase string identifiers
+ * used in channel comparison and routing. WhatsApp joins the existing four.
+ * Exported for downstream consumers (dispatch helpers, tests).
+ */
+export const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, string>> = Object.freeze({
+  [NotificationChannel.ON_APP]: "on_app",
+  [NotificationChannel.EMAIL]: "email",
+  [NotificationChannel.SMS]: "sms",
+  [NotificationChannel.PUSH]: "push",
+  [NotificationChannel.WHATSAPP]: "whatsapp",
+});
+
+export const ALL_CHANNELS: readonly NotificationChannel[] = [
   NotificationChannel.ON_APP,
   NotificationChannel.EMAIL,
   NotificationChannel.SMS,
   NotificationChannel.PUSH,
   NotificationChannel.WHATSAPP,
 ] as const;
-
-/**
- * Maps `NotificationChannel` enum values to their lowercase string identifiers
- * used in channel comparison and routing.  WhatsApp joins the existing four.
- * Exported for downstream consumers (dispatch helpers, tests).
- */
-export const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, string>> = {
-  [NotificationChannel.ON_APP]: "on_app",
-  [NotificationChannel.EMAIL]: "email",
-  [NotificationChannel.SMS]: "sms",
-  [NotificationChannel.PUSH]: "push",
-  [NotificationChannel.WHATSAPP]: "whatsapp",
-};
 
 /**
  * Per-event canonical WhatsApp template mapping (B1).
@@ -139,12 +139,12 @@ function labelsFor(locale: string | undefined): NotificationsLabels {
  * the templated send. Events without a template mapping get no
  * `whatsappTemplate` — the dispatch layer skips the send in that case.
  */
-function buildPerChannel(
+export function buildPerChannel(
   userId: string,
   eventType: NotificationEventType,
   title: string,
   body: string,
-  metadata: PayloadMetadata
+  metadata: Record<string, unknown>
 ): CommunicationPayload[] {
   if (!userId) return [];
   const payloads: CommunicationPayload[] = [];
@@ -185,12 +185,12 @@ function buildPerChannel(
  * `for (const userId of affectedUserIds) { ... buildPerChannel(...) }`
  * shape lives in exactly one place.
  */
-function fanOutToUsers(
+export function fanOutToUsers(
   affectedUserIds: readonly string[],
   eventType: NotificationEventType,
   title: string,
   body: string,
-  sharedMetadata: PayloadMetadata
+  sharedMetadata: Record<string, unknown>
 ): CommunicationPayload[] {
   const payloads: CommunicationPayload[] = [];
   for (const userId of affectedUserIds) {
@@ -350,6 +350,22 @@ function renderStudentLifecycle(
       return null;
   }
 }
+
+// ─── Quota & on-demand event builder registry ─────────────────────────
+//
+// The quota/on-demand notification builders live in `quota-notification.builders.ts`
+// to keep the pure three-arg thousand-line file from growing further. They are
+// re-exported here so every notification builder shares a single import surface
+// (`notification-payloads.builders`) — resolving task 11.4 "register new builders".
+export {
+  buildOndemandInstancePendingCreditPayloads,
+  buildOndemandInstanceReminderT1Payloads,
+  buildOndemandInstanceReminderT3Payloads,
+  buildOndemandTeacherDailyDigestPayloads,
+  buildQuotaExpiredPayloads,
+  buildQuotaExpiringSoonPayloads,
+  buildQuotaLowBalancePayloads,
+} from "@/backend/services/notification/quota-notification.builders";
 
 // ─── Invoice event builders ───────────────────────────────────────────
 

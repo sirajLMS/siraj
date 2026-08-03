@@ -15,9 +15,13 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import type {
-  NotificationPreferencesTabVariantProps,
-  NotificationPrefRow,
+import {
+  buildCategoryRows,
+  type NotificationEventCategory,
+  type NotificationPreferencesTabVariantProps,
+  type NotificationPrefRow,
+  NOTIFICATION_CHANNELS,
+  NOTIFICATION_EVENT_TYPES_BY_CATEGORY,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import {
   buildDefaultPreferences,
@@ -66,7 +70,8 @@ function useDerivedState(localPreferences: NotificationPrefRow[], eventTypes: re
     () => buildPreferenceMatrixRows(preferenceMap, eventTypes, CHANNEL_ORDER),
     [preferenceMap, eventTypes]
   );
-  return { preferenceMap, matrixRows };
+  const categoryRows = useMemo(() => buildCategoryRows(eventTypes, preferenceMap), [eventTypes, preferenceMap]);
+  return { preferenceMap, matrixRows, categoryRows };
 }
 
 function useFlushPendingChanges(
@@ -135,6 +140,36 @@ function useHandleSnackbarClose(setSnackbarOpen: React.Dispatch<React.SetStateAc
   }, [setSnackbarOpen]);
 }
 
+function useHandleCategoryToggle(
+  debouncedSave: () => void,
+  pendingChangesRef: React.MutableRefObject<Map<string, PendingChange>>,
+  setLocalPreferences: React.Dispatch<React.SetStateAction<NotificationPrefRow[]>>
+) {
+  return useCallback(
+    (category: NotificationEventCategory, enabled: boolean) => {
+      const catEventTypes = NOTIFICATION_EVENT_TYPES_BY_CATEGORY[category] ?? [];
+
+      setLocalPreferences(current =>
+        current.map(pref => {
+          if (pref.eventType && catEventTypes.includes(pref.eventType as NotificationEventType)) {
+            return { ...pref, enabled };
+          }
+          return pref;
+        })
+      );
+
+      for (const channel of NOTIFICATION_CHANNELS) {
+        for (const eventType of catEventTypes) {
+          const key = preferenceKey(channel, eventType);
+          pendingChangesRef.current.set(key, { channel, eventType, enabled });
+        }
+      }
+      debouncedSave();
+    },
+    [debouncedSave, pendingChangesRef, setLocalPreferences]
+  );
+}
+
 function useHandleChannelChange(
   previousChannelIndexRef: React.MutableRefObject<number>,
   setSlideDirection: React.Dispatch<React.SetStateAction<"left" | "right">>,
@@ -185,7 +220,7 @@ export function useNotificationPreferencesTabViewModel(
 
   usePreferenceSync(data, eventTypes, setLocalPreferences, pendingChangesRef);
 
-  const { preferenceMap, matrixRows } = useDerivedState(localPreferences, eventTypes);
+  const { preferenceMap, matrixRows, categoryRows } = useDerivedState(localPreferences, eventTypes);
 
   const flushPendingChanges = useFlushPendingChanges(
     labels,
@@ -201,6 +236,7 @@ export function useNotificationPreferencesTabViewModel(
   }, 500);
 
   const handleToggle = useHandleToggle(debouncedSave, pendingChangesRef, setLocalPreferences);
+  const handleCategoryToggle = useHandleCategoryToggle(debouncedSave, pendingChangesRef, setLocalPreferences);
   const handleSnackbarClose = useHandleSnackbarClose(setSnackbarOpen);
   const handleChannelChange = useHandleChannelChange(previousChannelIndexRef, setSlideDirection, setActiveChannel);
 
@@ -209,8 +245,10 @@ export function useNotificationPreferencesTabViewModel(
     preferences: localPreferences,
     preferenceMap,
     matrixRows,
+    categoryRows,
     eventTypes,
     onToggle: handleToggle,
+    onCategoryToggle: handleCategoryToggle,
     disabled: saving,
     loading,
     snackbarOpen,

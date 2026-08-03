@@ -6,6 +6,12 @@ export const profileNotificationsEn: ProfileNotificationsLabels = {
   saved: "Notification preferences saved.",
   errorLoading: "Failed to load notification preferences.",
   errorSaving: "Failed to save notification preferences.",
+  categories: {
+    info: "Informational",
+    reminder: "Reminders",
+    urgent: "Urgent",
+    digest: "Digests",
+  },
   channels: {
     EMAIL: "Email",
     SMS: "SMS",
@@ -34,5 +40,12 @@ export const profileNotificationsEn: ProfileNotificationsLabels = {
     CLASS_RESET: "Class Reset",
     LESSON_REPORT_SUBMITTED: "Lesson Report Submitted",
     LESSON_REPORT_REVIEWED: "Lesson Report Reviewed",
+    QUOTA_EXPIRING_SOON: "Quota Expiring Soon",
+    QUOTA_EXPIRED: "Quota Expired",
+    QUOTA_LOW_BALANCE: "Quota Low Balance",
+    ON_DEMAND_INSTANCE_PENDING_CREDIT: "On-Demand Credit Pending",
+    ON_DEMAND_INSTANCE_REMINDER_T3: "On-Demand Reminder (3 days)",
+    ON_DEMAND_INSTANCE_REMINDER_T1: "On-Demand Reminder (1 day)",
+    ON_DEMAND_TEACHER_DAILY_DIGEST: "Teacher Daily On-Demand Digest",
   },
 };

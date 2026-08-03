@@ -11,7 +11,6 @@ import {
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
 import type {
-  AdminDashboardScheduleInputType,
   AdminDashboardScheduleReturnType,
   ClassSessionMetrics,
   DailyScheduleListReturnType,
@@ -22,6 +21,7 @@ import type {
   RescheduleTrackingRow,
   StatusTrackingScheduleRow,
 } from "@/backend/types";
+import type { AdminDashboardScheduleInput } from "@/backend/types/scheduling/schedule.types";
 
 const DailyScheduleMetricsObjectRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("DailyScheduleMetrics");
 
@@ -79,7 +79,7 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
 });
 
 export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
-  .inputRef<AdminDashboardScheduleInputType>("AdminDashboardScheduleInput")
+  .inputRef<AdminDashboardScheduleInput>("AdminDashboardScheduleInput")
   .implement({
     fields: t => ({
       date: t.string({ required: true }),

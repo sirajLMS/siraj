@@ -2,12 +2,11 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
+import { STATUS_URL as LINT_QUEUE_STATUS_URL } from "@/scripts/lint-queue-config";
 
 type BunSubprocess = ReturnType<typeof Bun.spawn>;
 
 const BUN_BIN = join(homedir(), ".bun", "bin", "bun");
-const LINT_QUEUE_PORT = 4777;
-const LINT_QUEUE_STATUS_URL = `http://localhost:${LINT_QUEUE_PORT}/status`;
 const LINT_QUEUE_SCRIPT = "scripts/lint-queue-server.ts";
 const DEV_SERVER_ARGS = ["next", "dev", "--turbopack", "-p", "3000", "-H", "0.0.0.0"];
 

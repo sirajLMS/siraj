@@ -2,7 +2,7 @@ import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import logger from "@/backend/lib/logger";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
-import type { TeacherEntity, UserSelectType } from "@/backend/types";
+import type { TeacherSelectType, UserSelectType } from "@/backend/types";
 
 type TeacherNoteSeedSpec = {
   title: string;
@@ -18,7 +18,7 @@ const NOTE_SPECS: readonly Pick<TeacherNoteSeedSpec, "title" | "body">[] = [
   { title: "Ramadan Schedule", body: "Class times shift during Ramadan — check your dashboard for updates." },
 ];
 
-export async function seedOrGet(teachersList: TeacherEntity[], usersList: UserSelectType[], config?: SeedConfig) {
+export async function seedOrGet(teachersList: TeacherSelectType[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding teacher important notes...");
   const seedConfig = config ?? loadSeedConfig();
 

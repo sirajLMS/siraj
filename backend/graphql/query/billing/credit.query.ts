@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { mapQuotaErrorToGraphQLError } from "@/backend/graphql/mutation/billing/quota.mutation";
 import {
   CreditBalancePothosObject,
   CreditTransactionPothosObject,
@@ -19,7 +20,11 @@ gqlSchemaBuilder.queryField("studentCreditBalance", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return CreditService.getStudentBalance(actorUserId, args.studentId, tErrors);
+      try {
+        return await CreditService.getStudentBalance(actorUserId, args.studentId, tErrors);
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );
@@ -49,8 +54,12 @@ gqlSchemaBuilder.queryField("studentCreditTransactions", t =>
         });
       }
 
-      const result = await CreditService.getStudentTransactions(actorUserId, args.studentId, pagination, tErrors);
-      return result.rows;
+      try {
+        const result = await CreditService.getStudentTransactions(actorUserId, args.studentId, pagination, tErrors);
+        return result.rows;
+      } catch (error) {
+        throw mapQuotaErrorToGraphQLError(error);
+      }
     },
   })
 );

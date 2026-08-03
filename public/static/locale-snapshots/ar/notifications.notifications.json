@@ -188,6 +188,48 @@
       "__fn": "({ duplicateId }) => `\\u062A\\u0645 \\u062A\\u0639\\u0644\\u064A\\u0645 \\u0627\\u0642\\u062A\\u0631\\u0627\\u062D\\u0643 \\u0643\\u0645\\u0643\\u0631\\u0631 \\u0644\\u0644\\u0627\\u0642\\u062A\\u0631\\u0627\\u062D \\u0631\\u0642\\u0645 #${duplicateId.slice(0, 8)}`"
     }
   },
+  "quotaExpiringSoon": {
+    "title": "حصة تنتهي قريبًا",
+    "body": {
+      "__fn": "({ quotaName, validUntil, remaining }) => `\\u062A\\u0646\\u062A\\u0647\\u064A \\u0627\\u0644\\u062D\\u0635\\u0629 \"${quotaName}\" \\u0641\\u064A ${validUntil}. \\u0644\\u062F\\u064A\\u0643 ${remaining} \\u062D\\u0635\\u0635 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629.`"
+    }
+  },
+  "quotaExpired": {
+    "title": "انتهت صلاحية الحصة",
+    "body": {
+      "__fn": "({ quotaName }) => `\\u0627\\u0646\\u062A\\u0647\\u062A \\u0635\\u0644\\u0627\\u062D\\u064A\\u0629 \\u0627\\u0644\\u062D\\u0635\\u0629 \"${quotaName}\".`"
+    }
+  },
+  "quotaLowBalance": {
+    "title": "رصيد حصة منخفض",
+    "body": {
+      "__fn": "({ studentName, remaining, totalClasses }) => `\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0645\\u0646\\u062E\\u0641\\u0636 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName}: \\u0645\\u062A\\u0628\\u0642\\u064A ${remaining} \\u0645\\u0646 \\u0623\\u0635\\u0644 ${totalClasses} \\u062D\\u0635\\u0635.`"
+    }
+  },
+  "onDemandInstancePendingCredit": {
+    "title": "حصة بانتظار الرصيد",
+    "body": {
+      "__fn": "({ studentName, scheduledStartAt }) => `\\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt} \\u062A\\u062D\\u062A\\u0627\\u062C \\u0625\\u0644\\u0649 \\u0631\\u0635\\u064A\\u062F \\u0625\\u0636\\u0627\\u0641\\u064A.`"
+    }
+  },
+  "onDemandInstanceReminderT3": {
+    "title": "تذكير بحصة حسب الطلب قادمة",
+    "body": {
+      "__fn": "({ studentName, scheduledStartAt }) => `\\u062D\\u0635\\u0629 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0628\\u0639\\u062F 3 \\u0623\\u064A\\u0627\\u0645 \\u0641\\u064A ${scheduledStartAt}.`"
+    }
+  },
+  "onDemandInstanceReminderT1": {
+    "title": "تذكير بحصة حسب الطلب غداً",
+    "body": {
+      "__fn": "({ studentName, scheduledStartAt }) => `\\u062D\\u0635\\u0629 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u063A\\u062F\\u0627\\u064B \\u0641\\u064A ${scheduledStartAt}.`"
+    }
+  },
+  "onDemandTeacherDailyDigest": {
+    "title": "ملخص الحصص حسب الطلب اليومي",
+    "body": {
+      "__fn": "({ teacherName, pendingCount }) => `\\u0645\\u0631\\u062D\\u0628\\u0627\\u064B ${teacherName}\\u060C \\u0644\\u062F\\u064A\\u0643 ${pendingCount} \\u062D\\u0635\\u0635 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0628\\u0627\\u0646\\u062A\\u0638\\u0627\\u0631 \\u062A\\u0633\\u0648\\u064A\\u0629 \\u0627\\u0644\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u064A\\u0648\\u0645.`"
+    }
+  },
   "drawerTitle": "الإشعارات",
   "managePreferences": "إدارة التفضيلات",
   "markAllRead": "تعليم الكل كمقروء",

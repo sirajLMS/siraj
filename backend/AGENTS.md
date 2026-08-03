@@ -85,3 +85,37 @@ The backend follows a consistent pattern for defining and using types across all
 - **Permissions**: `WHATSAPP_VIEW`, `WHATSAPP_CONFIG_MANAGE`, `WHATSAPP_TEMPLATES_MANAGE` (no `WHATSAPP_DISPATCH` in v1 — no send mutation).
 - **Migrations**: Two-phase (enum ALTER TYPE + data INSERT) with idempotent `IF NOT EXISTS` / `ON CONFLICT` clauses.
 - **Partial unique index**: `notification_deliveries_provider_message_id_unique WHERE provider_message_id IS NOT NULL` (B5) — enables P3 ON CONFLICT upsert by `provider_message_id`.
+
+## Quota System (Billing Domain)
+
+The Quota System is an append-only ledger-based class credit tracking system. See `docs/billing/quota-system.md` for the complete architecture reference. Key rules for backend code interacting with quotas:
+
+### Ledger & Cached Columns
+
+- **Single Writer**: Only `QuotaRepository` writes to `quota_ledger` and updates `quotas` cached columns (`remaining`, `reservedClasses`, `usedThisPeriod`). No other code — including `CreditService`, `state-changes.ts`, or recurring-class flows — directly modifies quota columns. All quota state changes go through `QuotaService` → `QuotaRepository`.
+- **Ledger Transaction**: Ledger inserts and cache updates MUST share the same Drizzle transaction (`tx`). Idempotency keys are checked within the same tx.
+- **Foreign Key Constraint**: `quota_ledger.quotaId` uses `ON DELETE RESTRICT`. Quotas cannot be hard-deleted while ledger entries exist — use soft-delete (`deletedAt`) or archive.
+
+### FIFO Selection
+
+- Always use `QuotaRepository.selectQuotaForBookingFIFO` for automatic quota assignment. Sorts by priority DESC, then validUntil ASC.
+- Idempotency keys: All ledger writes require a deterministic idempotency key (SHA-256). See `QuotaRepository` for the 6 key derivation helpers.
+
+### Permissions
+
+- `QUOTAS_VIEW` (`"quotas.view"`) — read access to quotas, balances, ledger
+- `QUOTAS_MANAGE` (`"quotas.manage"`) — create, update, delete, manage reservations
+- All `QuotaService` methods gate on these via `requireManagePermission` / `requireViewPermission`
+
+### Integration Points
+
+- `AvailabilityService`: slot availability checks that integrate with `class_instances`
+- `RecurringClassService`: `cancelSchedule` + `switchSchedulingMode` interact with `QuotaService`
+- `CreditService`: after any credit change, call `QuotaService.refreshStudentOndemandInstances(studentId, tx)` in same transaction
+- `Notification`: 7 quota event types registered in `NotificationEventCategory` + `NOTIFICATION_EVENT_CATEGORY`
+
+### Testing
+
+- Always use `runInRollback` wrapper for DB tests involving quotas
+- Always pass `tx` to ALL repository methods inside transactions
+- Race condition tests for quota reservation/redeem are NOT yet implemented

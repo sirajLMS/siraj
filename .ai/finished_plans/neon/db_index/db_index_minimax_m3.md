@@ -479,7 +479,7 @@ For each of the 34 edited schema files, run:
 ```bash
 bun tsgo
 bun biome:check
-curl -s -X POST http://localhost:4777/lint \
+curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"4.1-verify","files":["<file-path>"]}'
 ```

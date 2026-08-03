@@ -6,7 +6,7 @@ import type {
   PaginationArgs,
   PaginationInput,
   SettingsTimezonesPaginatedResult,
-  TimezoneEntity,
+  TimezoneSelectType,
 } from "@/backend/types";
 import { PaginationArgs as PaginationArgsClass } from "@/backend/types";
 
@@ -25,7 +25,7 @@ function parsePaginationArgs(input: PaginationInput | null | undefined): Paginat
   });
 }
 
-const SettingsTimezoneRef = gqlSchemaBuilder.objectRef<TimezoneEntity>("SettingsTimezone");
+const SettingsTimezoneRef = gqlSchemaBuilder.objectRef<TimezoneSelectType>("SettingsTimezone");
 
 export const SettingsTimezonePothosObject = SettingsTimezoneRef.implement({
   fields: t => ({
@@ -60,6 +60,7 @@ gqlSchemaBuilder.queryField("settingsTimezones", t =>
   t.field({
     type: SettingsTimezonesResultPothosObject,
     authScopes: { permission: AppPermission.SETTINGS_TIMEZONES_VIEW },
+
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },

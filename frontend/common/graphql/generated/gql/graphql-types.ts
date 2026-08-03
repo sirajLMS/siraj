@@ -200,6 +200,8 @@ export enum AppPermission {
   ProfileTeacherStudentsEditOwn = 'PROFILE_TEACHER_STUDENTS_EDIT_OWN',
   ProfileTeacherStudentsViewOther = 'PROFILE_TEACHER_STUDENTS_VIEW_OTHER',
   ProfileTeacherStudentsViewOwn = 'PROFILE_TEACHER_STUDENTS_VIEW_OWN',
+  QuotasManage = 'QUOTAS_MANAGE',
+  QuotasView = 'QUOTAS_VIEW',
   ReportsGenerate = 'REPORTS_GENERATE',
   ReportGenerateCustom = 'REPORT_GENERATE_CUSTOM',
   ReportViewFinancials = 'REPORT_VIEW_FINANCIALS',
@@ -467,6 +469,16 @@ export enum AvailabilityStatus {
   OutOfStock = 'OUT_OF_STOCK'
 }
 
+/** An available class slot for a student on a given date */
+export type AvailableClassSlot = {
+  __typename?: 'AvailableClassSlot';
+  available: Maybe<Scalars['Boolean']['output']>;
+  endAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  startAt: Maybe<Scalars['DateTime']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+};
+
 export type BillingCurrencyTotal = {
   __typename?: 'BillingCurrencyTotal';
   amount: Maybe<Scalars['String']['output']>;
@@ -558,6 +570,10 @@ export enum ClassExecutionState {
   Activated = 'ACTIVATED',
   Completed = 'COMPLETED',
   NotActivated = 'NOT_ACTIVATED',
+  OnDemandConflictHeld = 'ON_DEMAND_CONFLICT_HELD',
+  OnDemandNoCreditsAbsent = 'ON_DEMAND_NO_CREDITS_ABSENT',
+  OnDemandNoCreditsCancelled = 'ON_DEMAND_NO_CREDITS_CANCELLED',
+  OnDemandPendingCredits = 'ON_DEMAND_PENDING_CREDITS',
   Running = 'RUNNING'
 }
 
@@ -1112,15 +1128,20 @@ export type CreatePermissionGroupInput = {
 };
 
 export type CreateRecurringClassInput = {
-  classType: InputMaybe<Scalars['String']['input']>;
+  classType: InputMaybe<ClassType>;
   days: Array<RecurringClassDayInput>;
   defaultStartTime: Scalars['String']['input'];
   durationMinutes: Scalars['Int']['input'];
+  earmarkedClasses: InputMaybe<Scalars['Int']['input']>;
   effectiveFrom: InputMaybe<Scalars['String']['input']>;
   effectiveUntil: InputMaybe<Scalars['String']['input']>;
   generateInstancesForWeeks: InputMaybe<Scalars['Int']['input']>;
+  generationHorizonWeeks: InputMaybe<Scalars['Int']['input']>;
   hourlyRate: InputMaybe<Scalars['String']['input']>;
+  ondemandNoCreditsOutcome: InputMaybe<OnDemandNoCreditsOutcome>;
+  quotaId: InputMaybe<Scalars['String']['input']>;
   rateCurrency: InputMaybe<CurrencyCode>;
+  schedulingMode: InputMaybe<SchedulingMode>;
   studentId: Scalars['String']['input'];
   subjectId: Scalars['String']['input'];
   teacherId: Scalars['String']['input'];
@@ -2543,6 +2564,8 @@ export type Mutation = {
   /** Create a new parent account with billing configuration */
   createParent: Maybe<ParentOnboardingResult>;
   createPermissionGroup: Maybe<PermissionGroup>;
+  /** Create a new quota allocation for a student */
+  createQuota: Maybe<Quota>;
   createRecurringClass: Maybe<CreateRecurringClassResult>;
   /** Create a new student profile under an existing parent */
   createStudent: Maybe<StudentOnboardingResult>;
@@ -2584,6 +2607,8 @@ export type Mutation = {
   deleteLearningResource: Maybe<Scalars['Boolean']['output']>;
   deleteMeetingProvider: Maybe<Scalars['Boolean']['output']>;
   deletePermissionGroup: Maybe<Scalars['Boolean']['output']>;
+  /** Soft delete a student quota allocation */
+  deleteQuota: Maybe<Quota>;
   deleteRecurringClass: Maybe<Scalars['Boolean']['output']>;
   /** Deletes a per-role session configuration. */
   deleteSessionConfig: Maybe<Scalars['Boolean']['output']>;
@@ -2681,6 +2706,8 @@ export type Mutation = {
   updateNotificationPreferences: Maybe<Array<NotificationPreference>>;
   updateOwnProfile: Maybe<UnifiedProfile>;
   updatePermissionGroup: Maybe<PermissionGroup>;
+  /** Update an existing student quota allocation */
+  updateQuota: Maybe<Quota>;
   updateRecurringClassRate: Maybe<RecurringScheduleDetail>;
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
@@ -2876,6 +2903,11 @@ export type MutationCreatePermissionGroupArgs = {
 };
 
 
+export type MutationCreateQuotaArgs = {
+  input: QuotaSubmitInput;
+};
+
+
 export type MutationCreateRecurringClassArgs = {
   input: CreateRecurringClassInput;
 };
@@ -3050,6 +3082,11 @@ export type MutationDeleteMeetingProviderArgs = {
 
 export type MutationDeletePermissionGroupArgs = {
   groupId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteQuotaArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3438,6 +3475,12 @@ export type MutationUpdatePermissionGroupArgs = {
 };
 
 
+export type MutationUpdateQuotaArgs = {
+  id: Scalars['ID']['input'];
+  input: QuotaUpdateInput;
+};
+
+
 export type MutationUpdateRecurringClassRateArgs = {
   input: UpdateRecurringClassRateInput;
 };
@@ -3613,7 +3656,14 @@ export enum NotificationEventType {
   LessonReportSubmitted = 'LESSON_REPORT_SUBMITTED',
   NewComplaint = 'NEW_COMPLAINT',
   NewSuggestion = 'NEW_SUGGESTION',
+  OnDemandInstancePendingCredit = 'ON_DEMAND_INSTANCE_PENDING_CREDIT',
+  OnDemandInstanceReminderT1 = 'ON_DEMAND_INSTANCE_REMINDER_T1',
+  OnDemandInstanceReminderT3 = 'ON_DEMAND_INSTANCE_REMINDER_T3',
+  OnDemandTeacherDailyDigest = 'ON_DEMAND_TEACHER_DAILY_DIGEST',
   PaymentMethodChanged = 'PAYMENT_METHOD_CHANGED',
+  QuotaExpired = 'QUOTA_EXPIRED',
+  QuotaExpiringSoon = 'QUOTA_EXPIRING_SOON',
+  QuotaLowBalance = 'QUOTA_LOW_BALANCE',
   StudentQuotaOverridden = 'STUDENT_QUOTA_OVERRIDDEN',
   StudentStatusChanged = 'STUDENT_STATUS_CHANGED',
   StudentTeacherReassigned = 'STUDENT_TEACHER_REASSIGNED',
@@ -3634,6 +3684,21 @@ export type NotificationPreferenceInput = {
   enabled: Scalars['Boolean']['input'];
   eventType: NotificationEventType;
 };
+
+export enum OnDemandNoCreditsOutcome {
+  AutoAbsentNoCredits = 'AUTO_ABSENT_NO_CREDITS',
+  AutoCancel = 'AUTO_CANCEL',
+  RemindOnly = 'REMIND_ONLY'
+}
+
+export enum OnDemandStatus {
+  Available = 'AVAILABLE',
+  Cancelled = 'CANCELLED',
+  Converted = 'CONVERTED',
+  NoCreditsAbsent = 'NO_CREDITS_ABSENT',
+  NoCreditsCancelled = 'NO_CREDITS_CANCELLED',
+  PendingCredit = 'PENDING_CREDIT'
+}
 
 /** Summary metrics for the staff onboarding process */
 export type OnboardingMetrics = {
@@ -4145,6 +4210,8 @@ export type Query = {
   adminInvoices: Maybe<AdminInvoiceHistoryResult>;
   /** Returns the paginated admin suggestion list with metrics. */
   adminSuggestions: Maybe<AdminSuggestionResult>;
+  /** Find available class slots for a student on a given date */
+  availableClassSlots: Maybe<Array<AvailableClassSlot>>;
   /** Lists all books and bags available to the academy. */
   booksAndBags: Maybe<Array<Book>>;
   classCategories: Maybe<Array<ClassCategory>>;
@@ -4223,6 +4290,14 @@ export type Query = {
   /** List all permission catalog entries. */
   permissions: Maybe<Array<Permission>>;
   profileByUserId: Maybe<UnifiedProfile>;
+  /** Get a specific quota by ID */
+  quota: Maybe<Quota>;
+  /** Get aggregated quota balance summary for a student */
+  quotaBalance: Maybe<QuotaBalance>;
+  /** Get paginated audit ledger history for a quota */
+  quotaLedger: Maybe<QuotaLedgerPaginatedResult>;
+  /** List quotas with optional filters and pagination */
+  quotas: Maybe<QuotaPaginatedResult>;
   /** Get paginated recently approved lesson reports for the supervisor dashboard */
   recentApprovedLessonReports: Maybe<PendingLessonReportsPayload>;
   recurringMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
@@ -4262,7 +4337,11 @@ export type Query = {
   studentDirectory: Maybe<StudentDirectoryPayload>;
   /** Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity. */
   studentMonthlyReport: Maybe<StudentMonthlyReport>;
+  /** List only active/open quotas (status ACTIVE, remaining > 0) for a student */
+  studentOpenQuotas: Maybe<Array<Quota>>;
   studentProfile: Maybe<StudentProfile>;
+  /** List all quotas for a student */
+  studentQuotas: Maybe<Array<Quota>>;
   /** Paginated lesson reports for the logged-in student (student portal dashboard) */
   studentRecentLessonReports: Maybe<PendingLessonReportsPayload>;
   studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
@@ -4332,6 +4411,14 @@ export type QueryAdminInvoicesArgs = {
 
 export type QueryAdminSuggestionsArgs = {
   filter: SuggestionFilter;
+};
+
+
+export type QueryAvailableClassSlotsArgs = {
+  date: Scalars['DateTime']['input'];
+  durationMinutes: InputMaybe<Scalars['Int']['input']>;
+  studentId: Scalars['ID']['input'];
+  teacherId: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -4561,6 +4648,28 @@ export type QueryProfileByUserIdArgs = {
 };
 
 
+export type QueryQuotaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryQuotaBalanceArgs = {
+  studentId: Scalars['ID']['input'];
+};
+
+
+export type QueryQuotaLedgerArgs = {
+  pagination: InputMaybe<PaginationArgs>;
+  quotaId: Scalars['ID']['input'];
+};
+
+
+export type QueryQuotasArgs = {
+  filter: InputMaybe<QuotaPaginatedFilterInput>;
+  pagination: InputMaybe<PaginationArgs>;
+};
+
+
 export type QueryRecentApprovedLessonReportsArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
 };
@@ -4688,11 +4797,21 @@ export type QueryStudentMonthlyReportArgs = {
 };
 
 
+export type QueryStudentOpenQuotasArgs = {
+  studentId: Scalars['ID']['input'];
+};
+
+
 export type QueryStudentProfileArgs = {
   includeUpcomingClasses: InputMaybe<Scalars['Boolean']['input']>;
   month: InputMaybe<Scalars['Int']['input']>;
   studentId: InputMaybe<Scalars['String']['input']>;
   year: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryStudentQuotasArgs = {
+  studentId: Scalars['ID']['input'];
 };
 
 
@@ -4853,6 +4972,139 @@ export type QueryUsersArgs = {
   search: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A class quota allocation for a student */
+export type Quota = {
+  __typename?: 'Quota';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  kind: Maybe<QuotaKind>;
+  name: Maybe<Scalars['String']['output']>;
+  periodDays: Maybe<Scalars['Int']['output']>;
+  periodType: Maybe<QuotaPeriodType>;
+  priority: Maybe<Scalars['Int']['output']>;
+  remaining: Maybe<Scalars['Int']['output']>;
+  reservedClasses: Maybe<Scalars['Int']['output']>;
+  status: Maybe<QuotaStatus>;
+  studentId: Maybe<Scalars['String']['output']>;
+  totalClasses: Maybe<Scalars['Int']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  validFrom: Maybe<Scalars['DateTime']['output']>;
+  validUntil: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** Aggregated quota balance summary for a student */
+export type QuotaBalance = {
+  __typename?: 'QuotaBalance';
+  breakdownByExpiration: Maybe<Array<QuotaExpirationBreakdown>>;
+  id: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  totalActiveClasses: Maybe<Scalars['Int']['output']>;
+  totalRemaining: Maybe<Scalars['Int']['output']>;
+  totalReserved: Maybe<Scalars['Int']['output']>;
+};
+
+/** Per-quota breakdown of remaining classes by expiration date */
+export type QuotaExpirationBreakdown = {
+  __typename?: 'QuotaExpirationBreakdown';
+  id: Maybe<Scalars['String']['output']>;
+  quotaId: Maybe<Scalars['String']['output']>;
+  quotaName: Maybe<Scalars['String']['output']>;
+  remaining: Maybe<Scalars['Int']['output']>;
+  validUntil: Maybe<Scalars['DateTime']['output']>;
+};
+
+export enum QuotaKind {
+  Package = 'PACKAGE',
+  Periodic = 'PERIODIC'
+}
+
+/** An append-only transaction ledger row for a quota */
+export type QuotaLedger = {
+  __typename?: 'QuotaLedger';
+  actorUserId: Maybe<Scalars['String']['output']>;
+  classInstanceId: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  delta: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  quotaId: Maybe<Scalars['String']['output']>;
+  reason: Maybe<QuotaLedgerReason>;
+  reasonNote: Maybe<Scalars['String']['output']>;
+  recurringScheduleId: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+};
+
+/** Paginated result set of quota ledger entries */
+export type QuotaLedgerPaginatedResult = {
+  __typename?: 'QuotaLedgerPaginatedResult';
+  rows: Maybe<Array<QuotaLedger>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export enum QuotaLedgerReason {
+  Adjust = 'ADJUST',
+  Expire = 'EXPIRE',
+  Grant = 'GRANT',
+  Redeem = 'REDEEM',
+  Release = 'RELEASE',
+  Reserve = 'RESERVE'
+}
+
+/** Filter options for querying quotas */
+export type QuotaPaginatedFilterInput = {
+  kind: InputMaybe<QuotaKind>;
+  search: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<QuotaStatus>;
+  studentId: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Paginated result set of quotas */
+export type QuotaPaginatedResult = {
+  __typename?: 'QuotaPaginatedResult';
+  rows: Maybe<Array<Quota>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export enum QuotaPeriodType {
+  Custom = 'CUSTOM',
+  Monthly = 'MONTHLY',
+  Weekly = 'WEEKLY'
+}
+
+/** Rollover policy configuration for periodic quotas */
+export type QuotaRolloverPolicyInput = {
+  accumulationCap: InputMaybe<Scalars['Int']['input']>;
+  maxRolloverPercent: InputMaybe<Scalars['Float']['input']>;
+};
+
+export enum QuotaStatus {
+  Active = 'ACTIVE',
+  Archived = 'ARCHIVED',
+  Expired = 'EXPIRED'
+}
+
+/** Input for creating a new student quota */
+export type QuotaSubmitInput = {
+  idempotencyKey: InputMaybe<Scalars['String']['input']>;
+  kind: QuotaKind;
+  name: Scalars['String']['input'];
+  periodDays: InputMaybe<Scalars['Int']['input']>;
+  periodType: InputMaybe<QuotaPeriodType>;
+  priority: InputMaybe<Scalars['Int']['input']>;
+  rolloverPolicy: InputMaybe<QuotaRolloverPolicyInput>;
+  studentId: Scalars['String']['input'];
+  totalClasses: Scalars['Int']['input'];
+  validFrom: InputMaybe<Scalars['DateTime']['input']>;
+  validUntil: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+/** Input for updating an existing quota */
+export type QuotaUpdateInput = {
+  name: InputMaybe<Scalars['String']['input']>;
+  priority: InputMaybe<Scalars['Int']['input']>;
+  status: InputMaybe<QuotaStatus>;
+  validUntil: InputMaybe<Scalars['DateTime']['input']>;
+};
+
 export enum RateSource {
   Override = 'OVERRIDE',
   Recurring = 'RECURRING',
@@ -4883,7 +5135,7 @@ export type RecordPurchaseInput = {
 };
 
 export type RecurringClassDayInput = {
-  dayOfWeek: Scalars['String']['input'];
+  dayOfWeek: DayOfWeek;
   isActive: Scalars['Boolean']['input'];
   startTime: Scalars['String']['input'];
 };
@@ -5006,6 +5258,12 @@ export type RevokePermissionGroupFromUserInput = {
   groupId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
 };
+
+export enum SchedulingMode {
+  NumberOfClasses = 'NUMBER_OF_CLASSES',
+  OnDemand = 'ON_DEMAND',
+  Quota = 'QUOTA'
+}
 
 export type SendPaymentReminderResult = {
   __typename?: 'SendPaymentReminderResult';
@@ -6081,6 +6339,8 @@ export type TeacherOnboarding = {
   id: Maybe<Scalars['String']['output']>;
   /** Resolved teacher display name */
   name: Maybe<Scalars['String']['output']>;
+  /** Teacher phone number */
+  phone: Maybe<Scalars['String']['output']>;
   /** Current teacher account status */
   status: Maybe<Scalars['String']['output']>;
   /** Formatted timezone display string */

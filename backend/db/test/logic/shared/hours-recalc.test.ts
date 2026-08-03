@@ -6,7 +6,7 @@ import { SoftDeleteRepository } from "@/backend/db/repo";
 import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import type { ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
+import type { ParentEntity, StudentSelectType, TeacherSelectType } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -15,8 +15,8 @@ describe("hoursPerWeek Recalculation Triggers", () => {
   let teacherUser: Pick<UserReturnType, "id"> | null = null;
   let studentUser: Pick<UserReturnType, "id"> | null = null;
   let testParent: ParentEntity | null = null;
-  let testTeacher: TeacherEntity | null = null;
-  let testStudent: StudentEntity | null = null;
+  let testTeacher: TeacherSelectType | null = null;
+  let testStudent: StudentSelectType | null = null;
 
   let scheduleId: string;
   let dayMondayId: string;

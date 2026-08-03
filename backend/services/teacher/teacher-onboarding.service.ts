@@ -1,10 +1,10 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { TeacherRepository } from "@/backend/db/repo";
-import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, type Gender, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
-import type { TeacherCreateResult } from "@/backend/types/teachers/teacher.types";
+import type { TeacherCreateReturnType } from "@/backend/types/teachers/teacher.types";
 import type {
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
@@ -39,6 +39,8 @@ export interface TeacherOnboardingResult {
   readonly name: string;
   readonly email: string;
   readonly status: string;
+  readonly phone?: string | null;
+  readonly gender?: Gender | null;
 }
 
 export namespace TeacherOnboardingService {
@@ -49,7 +51,7 @@ export namespace TeacherOnboardingService {
     locale?: string,
     tx?: DBTransaction
   ): Promise<TeacherOnboardingResult> {
-    const { user, extension: teacher } = await UserOnboardingService.createUserOfType<TeacherCreateResult>(
+    const { user, extension: teacher } = await UserOnboardingService.createUserOfType<TeacherCreateReturnType>(
       {
         actorUserId,
         permission: AppPermission.TEACHERS_CREATE,
@@ -86,7 +88,7 @@ export namespace TeacherOnboardingService {
             locale
           );
         },
-        afterExtension: async (_user: UserReturnType, _teacher: TeacherCreateResult, txObj: DBTransaction) => {
+        afterExtension: async (_user: UserReturnType, _teacher: TeacherCreateReturnType, txObj: DBTransaction) => {
           if (input.initialPayoutMethod) {
             await PaymentMethodService.createUserPaymentMethodInternal(
               { ...input.initialPayoutMethod, userId: _user.id },
@@ -106,6 +108,8 @@ export namespace TeacherOnboardingService {
       teacherId: teacher.id,
       name: user.name,
       email: user.email,
+      phone: teacher.phone,
+      gender: teacher.gender as Gender | null,
       status: teacher.status,
     };
   }

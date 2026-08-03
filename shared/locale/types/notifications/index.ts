@@ -14,6 +14,9 @@
  * `@/backend/enum` — but to keep `shared/` free of `@/backend/**` imports, the
  * event-type keys are reproduced as plain string-literal unions and validated by
  * the consuming layer (specs.md §1 forbids `@/backend/**` in `shared/`).
+ *
+ * NOTE: Notification event types are also defined in backend/enum/notifications/ and
+ * shared/constants/ — keep in sync.
  */
 
 // ─── Invoice event keys ────────────────────────────────────────────────
@@ -186,6 +189,41 @@ export interface SuggestionMarkedDuplicateLabels {
   readonly body: (params: { duplicateId: string }) => string;
 }
 
+export interface QuotaExpiringSoonLabels {
+  readonly title: string;
+  readonly body: (params: { quotaName: string; validUntil: string; remaining: number }) => string;
+}
+
+export interface QuotaExpiredLabels {
+  readonly title: string;
+  readonly body: (params: { quotaName: string }) => string;
+}
+
+export interface QuotaLowBalanceLabels {
+  readonly title: string;
+  readonly body: (params: { studentName: string; remaining: number; totalClasses: number }) => string;
+}
+
+export interface OnDemandInstancePendingCreditLabels {
+  readonly title: string;
+  readonly body: (params: { studentName: string; scheduledStartAt: string }) => string;
+}
+
+export interface OnDemandInstanceReminderT3Labels {
+  readonly title: string;
+  readonly body: (params: { studentName: string; scheduledStartAt: string }) => string;
+}
+
+export interface OnDemandInstanceReminderT1Labels {
+  readonly title: string;
+  readonly body: (params: { studentName: string; scheduledStartAt: string }) => string;
+}
+
+export interface OnDemandTeacherDailyDigestLabels {
+  readonly title: string;
+  readonly body: (params: { teacherName: string; pendingCount: number }) => string;
+}
+
 // ─── Top-level namespace ────────────────────────────────────────────────
 
 /**
@@ -217,6 +255,13 @@ export interface NotificationsLabels {
   readonly newSuggestion: NewSuggestionLabels;
   readonly suggestionResponse: SuggestionResponseLabels;
   readonly suggestionMarkedDuplicate: SuggestionMarkedDuplicateLabels;
+  readonly quotaExpiringSoon: QuotaExpiringSoonLabels;
+  readonly quotaExpired: QuotaExpiredLabels;
+  readonly quotaLowBalance: QuotaLowBalanceLabels;
+  readonly onDemandInstancePendingCredit: OnDemandInstancePendingCreditLabels;
+  readonly onDemandInstanceReminderT3: OnDemandInstanceReminderT3Labels;
+  readonly onDemandInstanceReminderT1: OnDemandInstanceReminderT1Labels;
+  readonly onDemandTeacherDailyDigest: OnDemandTeacherDailyDigestLabels;
 
   // Drawer UI keys
   readonly drawerTitle: string;

@@ -1,7 +1,5 @@
-import { CacheDbRepository } from "@/backend/db/repo/shared/cache.repository";
 import logger from "@/backend/lib/logger";
-import { cacheService, getCacheService } from "@/backend/services/cache/CacheServiceFactory";
-import { PostgresCacheAdapter } from "@/backend/services/cache/PostgresCacheAdapter";
+import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
 
 export const CACHE_VERSION = 1;
 
@@ -207,11 +205,6 @@ export async function cachedRead<T>(
 
 async function setSingleFlight(key: string, value: string, ttlSeconds: number): Promise<boolean> {
   try {
-    const service = await getCacheService();
-    if (service instanceof PostgresCacheAdapter) {
-      const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
-      return await CacheDbRepository.insertIfNotExists(key, value, expiresAt);
-    }
     const res = await cacheService.pipeline([{ command: "set", args: [key, value, "EX", ttlSeconds, "NX"] }]);
     return Array.isArray(res) && (res[0] === "OK" || res[0] === true);
   } catch (err) {

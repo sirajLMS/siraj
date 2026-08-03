@@ -137,7 +137,42 @@ export const notificationsAr: NotificationsLabels = {
     title: "تم تعليم الاقتراح كمكرر",
     body: ({ duplicateId }) => `تم تعليم اقتراحك كمكرر للاقتراح رقم #${duplicateId.slice(0, 8)}`,
   },
+  quotaExpiringSoon: {
+    title: "حصة تنتهي قريبًا",
+    body: ({ quotaName, validUntil, remaining }) =>
+      `تنتهي الحصة "${quotaName}" في ${validUntil}. لديك ${remaining} حصص متبقية.`,
+  },
+  quotaExpired: {
+    title: "انتهت صلاحية الحصة",
+    body: ({ quotaName }) => `انتهت صلاحية الحصة "${quotaName}".`,
+  },
+  quotaLowBalance: {
+    title: "رصيد حصة منخفض",
+    body: ({ studentName, remaining, totalClasses }) =>
+      `رصيد الحصة منخفض للطالب ${studentName}: متبقي ${remaining} من أصل ${totalClasses} حصص.`,
+  },
+  onDemandInstancePendingCredit: {
+    title: "حصة بانتظار الرصيد",
+    body: ({ studentName, scheduledStartAt }) =>
+      `الحصة الحسب الطلب للطالب ${studentName} في ${scheduledStartAt} تحتاج إلى رصيد إضافي.`,
+  },
+  onDemandInstanceReminderT3: {
+    title: "تذكير بحصة حسب الطلب قادمة",
+    body: ({ studentName, scheduledStartAt }) =>
+      `حصة حسب الطلب للطالب ${studentName} مجدولة بعد 3 أيام في ${scheduledStartAt}.`,
+  },
+  onDemandInstanceReminderT1: {
+    title: "تذكير بحصة حسب الطلب غداً",
+    body: ({ studentName, scheduledStartAt }) =>
+      `حصة حسب الطلب للطالب ${studentName} مجدولة غداً في ${scheduledStartAt}.`,
+  },
+  onDemandTeacherDailyDigest: {
+    title: "ملخص الحصص حسب الطلب اليومي",
+    body: ({ teacherName, pendingCount }) =>
+      `مرحباً ${teacherName}، لديك ${pendingCount} حصص حسب الطلب بانتظار تسوية الرصيد اليوم.`,
+  },
   drawerTitle: "الإشعارات",
+
   managePreferences: "إدارة التفضيلات",
   markAllRead: "تعليم الكل كمقروء",
   markAsRead: "تعليم كمقروء",

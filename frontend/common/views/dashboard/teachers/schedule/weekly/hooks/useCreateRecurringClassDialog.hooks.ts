@@ -14,7 +14,11 @@
 import type { useNotifications } from "@toolpad/core/useNotifications";
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  ClassType,
+  type OnDemandNoCreditsOutcome,
+  type SchedulingMode,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
   emptyRecurringMeetingConfigState,
@@ -50,6 +54,16 @@ export interface CreateRecurringClassDialogFormState {
   readonly setClassType: Dispatch<SetStateAction<ClassType>>;
   readonly meetingConfig: RecurringMeetingConfigFormState;
   readonly setMeetingConfig: Dispatch<SetStateAction<RecurringMeetingConfigFormState>>;
+  readonly schedulingMode: SchedulingMode | null;
+  readonly setSchedulingMode: Dispatch<SetStateAction<SchedulingMode | null>>;
+  readonly quotaId: string | null;
+  readonly setQuotaId: Dispatch<SetStateAction<string | null>>;
+  readonly earmarkedClasses: number | null;
+  readonly setEarmarkedClasses: Dispatch<SetStateAction<number | null>>;
+  readonly generationHorizonWeeks: number | null;
+  readonly setGenerationHorizonWeeks: Dispatch<SetStateAction<number | null>>;
+  readonly ondemandNoCreditsOutcome: OnDemandNoCreditsOutcome | null;
+  readonly setOndemandNoCreditsOutcome: Dispatch<SetStateAction<OnDemandNoCreditsOutcome | null>>;
   readonly meetingConfigWarning: boolean;
   readonly setMeetingConfigWarning: Dispatch<SetStateAction<boolean>>;
   readonly createdClassInstanceId: string | null;
@@ -68,6 +82,11 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
   const [timezone, setTimezone] = useState("Africa/Cairo");
   const [classType, setClassType] = useState<ClassType>(ClassType.Regular);
   const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(emptyRecurringMeetingConfigState);
+  const [schedulingMode, setSchedulingMode] = useState<SchedulingMode | null>(null);
+  const [quotaId, setQuotaId] = useState<string | null>(null);
+  const [earmarkedClasses, setEarmarkedClasses] = useState<number | null>(null);
+  const [generationHorizonWeeks, setGenerationHorizonWeeks] = useState<number | null>(null);
+  const [ondemandNoCreditsOutcome, setOndemandNoCreditsOutcome] = useState<OnDemandNoCreditsOutcome | null>(null);
   const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const [createdClassInstanceId, setCreatedClassInstanceId] = useState<string | null>(null);
 
@@ -80,6 +99,11 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
       setTimezone("Africa/Cairo");
       setClassType(ClassType.Regular);
       setMeetingConfig(emptyRecurringMeetingConfigState());
+      setSchedulingMode(null);
+      setQuotaId(null);
+      setEarmarkedClasses(null);
+      setGenerationHorizonWeeks(null);
+      setOndemandNoCreditsOutcome(null);
       setMeetingConfigWarning(false);
       setCreatedClassInstanceId(null);
       resetDays();
@@ -101,6 +125,16 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
     setClassType,
     meetingConfig,
     setMeetingConfig,
+    schedulingMode,
+    setSchedulingMode,
+    quotaId,
+    setQuotaId,
+    earmarkedClasses,
+    setEarmarkedClasses,
+    generationHorizonWeeks,
+    setGenerationHorizonWeeks,
+    ondemandNoCreditsOutcome,
+    setOndemandNoCreditsOutcome,
     meetingConfigWarning,
     setMeetingConfigWarning,
     createdClassInstanceId,

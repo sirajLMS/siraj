@@ -175,6 +175,18 @@ export const errorsAr: ErrorsLabels = {
     ttlOutOfRange: "يجب أن تكون مدة الجلسة بين 60 و 2,419,200 ثانية.",
     maxConcurrentOutOfRange: "يجب أن يكون الحد الأقصى للجلسات المتزامنة بين 1 و 50.",
   },
+  quota: {
+    insufficientRemaining: (requested: number, available: number) => `المتبقي ${available} حصة فقط — طُلب ${requested}`,
+    exceedsCreditBalance: (requested: number, available: number) =>
+      `رصيد غير كافٍ. المتاح: ${available}، المطلوب: ${requested}`,
+    periodicRefreshFailed: (quotaName: string, reason: string) => `فشل تحديث الحصة الدورية ${quotaName}: ${reason}`,
+    invalidPeriod: (quotaName: string) => `الحصة ${quotaName} منتهية الصلاحية أو فترتها غير صالحة`,
+    alreadyExpired: (quotaName: string) => `الحصة ${quotaName} منتهية الصلاحية بالفعل`,
+    earmarkExceedsRemaining: (requested: number, available: number) =>
+      `حجز ${requested} يتجاوز الحصة المتبقية (${available})`,
+    slotConflict: (startTime: string, endTime: string) => `الفترة الزمنية ${startTime}–${endTime} تتعارض مع حجز قائم`,
+    onDemandNoCredits: (studentName: string) => `لا توجد أرصدة كافية للحجز الفوري لـ ${studentName}`,
+  },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
   duplicateRequest: "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
@@ -250,6 +262,9 @@ export const errorsAr: ErrorsLabels = {
   cannotRescheduleCompleted: "لا يمكن إعادة جدولة جلسة مكتملة.",
   cannotRescheduleAlreadyRescheduled: "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
   outOfQuota: "نفدت الحصة.",
+  quotaExpired: "انتهت صلاحية الحصة.",
+  quotaNotFound: "الحصة غير موجودة.",
+  invalidQuotaState: "حالة الحصة غير صالحة.",
   leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
     `تم تجاوز حصة الإجازة: الحد الأقصى ${maxLeaves} إجازات مسموح بها.`,
   classInstanceNotFound: ({ id }: { id: string }) => `مثيل الفصل غير موجود: ${id}`,
@@ -302,4 +317,9 @@ export const errorsAr: ErrorsLabels = {
   whatsappChannelLabel: "واتساب",
   onAppChannelLabel: "داخل التطبيق",
   deliveryFailed: (channelLabel: string) => `فشل تسليم ${channelLabel}. يرجى المحاولة مرة أخرى لاحقاً.`,
+
+  // Quota errors accessible via quota.* — see QuotaErrors
+
+  // ─── Offline resolver / notification fallbacks ──────────────────────
+  studentNameFallback: "طالب",
 };

@@ -250,6 +250,9 @@ export enum AppPermission {
   WHATSAPP_VIEW = "whatsapp.view",
   WHATSAPP_CONFIG_MANAGE = "whatsapp.config_manage",
   WHATSAPP_TEMPLATES_MANAGE = "whatsapp.templates_manage",
+  // Quota Management
+  QUOTAS_VIEW = "quotas.view",
+  QUOTAS_MANAGE = "quotas.manage",
 }
 
 let knownAppPermissionsCache: Set<string> | undefined;

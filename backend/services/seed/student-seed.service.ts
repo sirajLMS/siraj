@@ -24,7 +24,7 @@ import {
 import type { StudentStatus } from "@/backend/enum";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { StudentEntity, StudentProgressSelectType } from "@/backend/types";
+import type { StudentProgressSelectType, StudentSelectType } from "@/backend/types";
 
 export type SeedStudentInput = {
   parentId: string;
@@ -41,12 +41,12 @@ export type SeedStudentInput = {
 
 export namespace StudentSeedService {
   /** Read helper — find seed students by stable idempotency keys. */
-  export async function findByIdempotencyKeys(keys: string[], tx?: DBTransaction): Promise<StudentEntity[]> {
+  export async function findByIdempotencyKeys(keys: string[], tx?: DBTransaction): Promise<StudentSelectType[]> {
     return StudentRepository.findByIdempotencyKeys(keys, tx);
   }
 
   /** Idempotently upsert one demo student row (seed / test-helper). */
-  export async function seedStudentByKey(input: SeedStudentInput, tx?: DBTransaction): Promise<StudentEntity> {
+  export async function seedStudentByKey(input: SeedStudentInput, tx?: DBTransaction): Promise<StudentSelectType> {
     assertSeedWriteAllowed("Student seed writes");
     try {
       return await StudentRepository.upsertByIdempotencyKey(input, tx);
@@ -62,9 +62,9 @@ export namespace StudentSeedService {
   export async function seedManyStudentsByKey(
     inputs: readonly SeedStudentInput[],
     tx?: DBTransaction
-  ): Promise<StudentEntity[]> {
+  ): Promise<StudentSelectType[]> {
     assertSeedWriteAllowed("Student seed writes");
-    const results: StudentEntity[] = [];
+    const results: StudentSelectType[] = [];
     for (const input of inputs) {
       results.push(await seedStudentByKey(input, tx));
     }

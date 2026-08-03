@@ -58,5 +58,23 @@
   },
   "errors": {
     "invalidId": "Invalid student ID"
+  },
+  "audience": {
+    "studentTitle": "My Quotas",
+    "parentTitle": "Children Quotas",
+    "teacherTitle": "Class Quota Usage",
+    "supervisorTitle": "Quota Oversight",
+    "activeQuotas": "Active Quotas",
+    "remainingCredits": "Remaining Credits",
+    "onDemandPending": "On-Demand Pending",
+    "noChildren": "No children found",
+    "quotaSummary": "Quota Summary",
+    "classQuotaUsage": "Class Quota Usage",
+    "onDemandPendingQueue": "On-Demand Pending Queue",
+    "classAnalytics": "Class Analytics",
+    "lowBalanceAlerts": "Low-Balance Alerts",
+    "conflictHeld": "Conflicts Held",
+    "analyticsOverview": "Analytics Overview",
+    "noData": "No data available"
   }
 }

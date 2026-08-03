@@ -123,6 +123,10 @@ const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
   [ClassExecutionState.Activated]: "Activated",
   [ClassExecutionState.Running]: "Running",
   [ClassExecutionState.Completed]: "Completed",
+  [ClassExecutionState.OnDemandConflictHeld]: "Conflict Held",
+  [ClassExecutionState.OnDemandNoCreditsAbsent]: "No Credits (Absent)",
+  [ClassExecutionState.OnDemandNoCreditsCancelled]: "No Credits (Cancelled)",
+  [ClassExecutionState.OnDemandPendingCredits]: "Pending Credit",
 };
 
 const createMockProps = (overrides: Partial<UseScheduleOverviewViewModelProps> = {}): ScheduleOverviewViewModel => {

@@ -3,7 +3,7 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherPayments } from "@/backend/db/schema/teachers/teacher-payments";
-import type { TeacherPaymentInsertInput, TeacherPaymentSelectType } from "@/backend/types";
+import type { TeacherPaymentInsertType, TeacherPaymentSelectType } from "@/backend/types";
 
 export namespace TeacherPaymentRepository {
   export async function findByTeacherAndPaymentDates(
@@ -20,7 +20,7 @@ export namespace TeacherPaymentRepository {
   }
 
   export async function createManyIfMissing(
-    inputs: readonly TeacherPaymentInsertInput[],
+    inputs: readonly TeacherPaymentInsertType[],
     tx?: DBTransaction
   ): Promise<TeacherPaymentSelectType[]> {
     if (inputs.length === 0) return [];

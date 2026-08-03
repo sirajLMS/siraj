@@ -12,9 +12,9 @@ import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
-import type { TimezoneEntity, UserSelectType } from "@/backend/types";
+import type { TimezoneSelectType, UserSelectType } from "@/backend/types";
 
-function resolveTimezone(timezones: TimezoneEntity[], ianaId: string): TimezoneEntity {
+function resolveTimezone(timezones: TimezoneSelectType[], ianaId: string): TimezoneSelectType {
   const match = timezones.find(t => t.ianaId === ianaId);
   if (!match) {
     throw new Error(`Timezone not found: ${ianaId}`);
@@ -22,7 +22,7 @@ function resolveTimezone(timezones: TimezoneEntity[], ianaId: string): TimezoneE
   return match;
 }
 
-export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEntity[], config?: SeedConfig) {
+export async function seedOrGet(users: UserSelectType[], timezones: TimezoneSelectType[], config?: SeedConfig) {
   logger.info("Seeding system teachers...");
   const seedConfig = config ?? loadSeedConfig();
 

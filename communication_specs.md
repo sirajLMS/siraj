@@ -69,7 +69,7 @@
    with `git status --porcelain` afterward that only the 5 expected
    files appear as new/modified (R-self-check, see §5).
 
-5. **Subagents don't bypass the lint queue**. The AGENTS.md "Lint Queue Server" rule is binding: `bun run lint` IS the lint queue client now (it calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the queue), so subagents MAY run `bun run lint` directly. What they MUST NOT do is run raw eslint or otherwise bypass the queue server. For file-scoped lint, submit through the lint-queue client (`http://localhost:4777/lint`) — the orchestrator does this for all 5 files in Wave 2. Subagents MAY run `bun tsgo` (read-only type check — safe to run concurrently). The `bun run test:live-comm` real-API run is performed ONCE by the
+5. **Subagents don't bypass the lint queue**. The AGENTS.md "Lint Queue Server" rule is binding: `bun run lint` IS the lint queue client now (it calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the queue), so subagents MAY run `bun run lint` directly. What they MUST NOT do is run raw eslint or otherwise bypass the queue server. For file-scoped lint, submit through the lint-queue client (`http://localhost:${LINT_QUEUE_PORT}/lint`) — the orchestrator does this for all 5 files in Wave 2. Subagents MAY run `bun tsgo` (read-only type check — safe to run concurrently). The `bun run test:live-comm` real-API run is performed ONCE by the
    orchestrator in Wave 2; subagents MUST NOT run it (costs money).
 
 If you find yourself about to: edit an adapter source, add a
@@ -641,7 +641,7 @@ The orchestrator:
 - WILL run the lint-queue client ONCE with all 5 files in a single
   POST request:
   ```bash
-  curl -s -X POST http://localhost:4777/lint \
+  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
     -H "Content-Type: application/json" \
     -d '{"id":"wave1-verify","files":["backend/services/communication/channels/email/resend/resend.integration.test.ts","backend/services/communication/channels/sms/twilio/twilio.integration.test.ts","backend/services/communication/channels/push/fcm/fcm.integration.test.ts","backend/services/communication/test/live-comm-preload.ts","package.json"]}'
   ```

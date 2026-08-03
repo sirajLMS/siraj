@@ -42,12 +42,12 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while SONAR fix s
 
 1. **`bun run lint` IS the lint queue client.** The `package.json` `lint` script is a thin wrapper around `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so running it directly is safe — requests serialize through the lint queue server. Make sure the server is running first:
    ```bash
-   curl -s http://localhost:4777/status  # Check server is running
+   curl -s http://localhost:${LINT_QUEUE_PORT}/status  # Check server is running
    ~/.bun/bin/bun run scripts/lint-queue-server.ts &  # Start it if not running
    ```
    For file-scoped lint (faster), call the lint queue client directly:
    ```bash
-   curl -s -X POST http://localhost:4777/lint \
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
      -H "Content-Type: application/json" \
      -d '{"id":"quality-gate","files":["file1.ts","file2.ts"]}'
    ```
@@ -232,7 +232,7 @@ in one file breaks another file.
 
 1. Submit all files to lint queue to get the list of files with lint errors:
    ```bash
-   curl -s -X POST http://localhost:4777/lint \
+   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
      -H "Content-Type: application/json" \
      -d '{"id":"quality-gate-discover","files":["<all-affected-files>"]}'
    ```
