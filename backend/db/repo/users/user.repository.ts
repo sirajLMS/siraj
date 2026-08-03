@@ -137,9 +137,6 @@ export namespace UserRepository {
     }
     return map;
   };
-    }
-    return map;
-  };
 
   export const findSafeById = async (id: string, tx?: DBTransaction): Promise<UserSelectType | null> => {
     const q = queryDb(tx);
