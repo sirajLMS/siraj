@@ -48,54 +48,29 @@ function makeAdapterMock(): IMeetingChannel {
 
 // --- Adapter static ENDPOINTS (service reads these for listIntegrationProviders)
 mock.module("@/backend/services/meeting/channels/zoom/ZoomMeetingAdapter", () => ({
-  ZoomMeetingAdapter: Object.assign(
-    class {
-      static readonly ENDPOINTS: readonly string[] = [
-        "https://zoom.us/oauth/token",
-        "https://api.zoom.us/v2/users/me",
-        "https://api.zoom.us/v2/meetings",
-      ];
-    },
-    { ENDPOINTS: ["https://zoom.us/oauth/token", "https://api.zoom.us/v2/users/me", "https://api.zoom.us/v2/meetings"] }
-  ),
+  ZoomMeetingAdapter: {
+    ENDPOINTS: ["https://zoom.us/oauth/token", "https://api.zoom.us/v2/users/me", "https://api.zoom.us/v2/meetings"],
+  },
 }));
 
 mock.module("@/backend/services/meeting/channels/google-meet/GoogleMeetAdapter", () => ({
-  GoogleMeetAdapter: Object.assign(
-    class {
-      static readonly ENDPOINTS: readonly string[] = [
-        "https://oauth2.googleapis.com/token",
-        "https://www.googleapis.com/auth/meetings.space.created",
-        "https://meet.googleapis.com/v2/spaces",
-      ];
-    },
-    {
-      ENDPOINTS: [
-        "https://oauth2.googleapis.com/token",
-        "https://www.googleapis.com/auth/meetings.space.created",
-        "https://meet.googleapis.com/v2/spaces",
-      ],
-    }
-  ),
+  GoogleMeetAdapter: {
+    ENDPOINTS: [
+      "https://oauth2.googleapis.com/token",
+      "https://www.googleapis.com/auth/meetings.space.created",
+      "https://meet.googleapis.com/v2/spaces",
+    ],
+  },
 }));
 
 mock.module("@/backend/services/meeting/channels/microsoft-teams/MicrosoftTeamsAdapter", () => ({
-  MicrosoftTeamsAdapter: Object.assign(
-    class {
-      static readonly ENDPOINTS: readonly string[] = [
-        "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
-        "https://graph.microsoft.com/v1.0/users/{organizer}/onlineMeetings",
-        "https://graph.microsoft.com/.default",
-      ];
-    },
-    {
-      ENDPOINTS: [
-        "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
-        "https://graph.microsoft.com/v1.0/users/{organizer}/onlineMeetings",
-        "https://graph.microsoft.com/.default",
-      ],
-    }
-  ),
+  MicrosoftTeamsAdapter: {
+    ENDPOINTS: [
+      "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
+      "https://graph.microsoft.com/v1.0/users/{organizer}/onlineMeetings",
+      "https://graph.microsoft.com/.default",
+    ],
+  },
 }));
 
 // --- MeetingChannelFactory (getMeetingChannel / resetMeetingChannel)
