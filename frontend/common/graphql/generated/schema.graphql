@@ -3624,6 +3624,9 @@ type Query {
 
   """Check if a user has opted in to WhatsApp notifications (REQ-10/BL1)."""
   isUserWhatsappOptIn(userId: String!): Boolean!
+
+  """Check if WhatsApp Cloud API is configured and credentials are valid."""
+  isWhatsappConfigured: Boolean!
   latestExchangeRates(paginationArgs: PaginationArgs): [ExchangeRate!]
   latestFxSyncRun: FxSyncRun
 
@@ -3714,6 +3717,7 @@ type Query {
   recentApprovedLessonReports(paginationArgs: PaginationArgs): PendingLessonReportsPayload
   recurringMeetingConfigs(recurringScheduleId: ID!): [ClassMeetingConfig!]
   recurringSchedule(id: ID!): RecurringScheduleDetail
+  recurringSchedules(pagination: PaginationArgs, search: String): RecurringSchedulesPaginatedResult
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
   rescheduleTrackingRows(paginationArgs: PaginationArgs, search: String, status: LeaveRequestStatus): RescheduleTrackingResult
   searchFiles(
@@ -4042,6 +4046,28 @@ type RecurringScheduleDetail {
   teacherId: String
   teacherName: String
   timezone: IanaTimezone
+}
+
+type RecurringScheduleListItem {
+  createdAt: DateTime
+  defaultStartTime: String
+  durationMinutes: Int
+  hourlyRate: String
+  id: String
+  rateCurrency: CurrencyCode
+  studentId: String
+  studentName: String
+  teacherId: String
+  teacherName: String
+  timezone: String
+  updatedAt: DateTime
+}
+
+type RecurringSchedulesPaginatedResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [RecurringScheduleListItem!]
+  totalCount: Int
 }
 
 type RefreshExchangeRatesResult {

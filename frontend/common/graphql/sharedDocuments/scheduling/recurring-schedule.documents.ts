@@ -28,6 +28,42 @@ export const recurringScheduleQueryDocument: TypedDocumentNode<
   }
 `;
 
+export const recurringSchedulesQueryDocument: TypedDocumentNode<
+  Operations.RecurringSchedulesQuery,
+  Types.QueryRecurringSchedulesArgs
+> = gql`
+  query recurringSchedules($pagination: PaginationArgs, $search: String) {
+    recurringSchedules(pagination: $pagination, search: $search) {
+      id
+      rows {
+        id
+        studentId
+        studentName
+        teacherId
+        teacherName
+        durationMinutes
+        defaultStartTime
+        timezone
+        hourlyRate
+        rateCurrency
+        createdAt
+        updatedAt
+      }
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
 export const updateRecurringClassRateMutationDocument: TypedDocumentNode<
   Operations.UpdateRecurringClassRateMutation,
   Types.MutationUpdateRecurringClassRateArgs

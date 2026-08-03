@@ -19,6 +19,7 @@ export function WhatsappConfigMobileView(props: Readonly<WhatsappConfigViewShare
     syncing,
     optInLoading,
     isOptedIn,
+    isConfigured,
     snackbar,
     onDeleteAccount,
     onSyncFromMeta,
@@ -49,6 +50,7 @@ export function WhatsappConfigMobileView(props: Readonly<WhatsappConfigViewShare
               onSetTwoStepPin={props.onSetTwoStepPin}
               onSyncFromMeta={onSyncFromMeta}
               onDismissSnackbar={onDismissSnackbar}
+              isConfigured={isConfigured}
             />
           );
         }
@@ -61,6 +63,7 @@ export function WhatsappConfigMobileView(props: Readonly<WhatsappConfigViewShare
               loading={loading}
               syncing={syncing}
               onSyncFromMeta={onSyncFromMeta}
+              isConfigured={isConfigured}
             />
           );
         }

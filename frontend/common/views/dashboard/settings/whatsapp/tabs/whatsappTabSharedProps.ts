@@ -16,6 +16,7 @@ export interface NumbersTabSharedProps {
   readonly onSetTwoStepPin: (id: string, twoStepPin: string) => Promise<void>;
   readonly onSyncFromMeta: () => Promise<void>;
   readonly onDismissSnackbar: () => void;
+  readonly isConfigured: boolean;
 }
 
 export interface TemplatesTabSharedProps {
@@ -24,6 +25,7 @@ export interface TemplatesTabSharedProps {
   readonly loading: boolean;
   readonly syncing: boolean;
   readonly onSyncFromMeta: () => Promise<void>;
+  readonly isConfigured: boolean;
 }
 
 export interface OptInTabSharedProps {

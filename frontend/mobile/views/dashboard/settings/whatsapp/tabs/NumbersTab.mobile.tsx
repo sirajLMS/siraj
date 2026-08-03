@@ -21,6 +21,7 @@ export function NumbersTabMobile({
   onSyncFromMeta,
   onDeleteAccount,
   onDismissSnackbar,
+  isConfigured,
 }: Readonly<NumbersTabSharedProps>) {
   const t = labels.page;
 
@@ -40,7 +41,7 @@ export function NumbersTabMobile({
           size="small"
           variant="outlined"
           startIcon={<CloudSyncOutlined />}
-          disabled={syncing}
+          disabled={syncing || !isConfigured}
           onClick={onSyncFromMeta}
         >
           {t.syncFromMeta}

@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   deleteWhatsappAccountMutationDocument,
   isUserWhatsappOptInQueryDocument,
+  isWhatsappConfiguredQueryDocument,
   setUserWhatsappOptInMutationDocument,
   setWhatsappAccessTokenMutationDocument,
   setWhatsappTwoStepPinMutationDocument,
@@ -32,6 +33,7 @@ export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
   const optInQuery = useQuery(isUserWhatsappOptInQueryDocument, {
     variables: { userId: CURRENT_USER },
   });
+  const configuredQuery = useQuery(isWhatsappConfiguredQueryDocument);
 
   const [deleteAccount] = useMutation(deleteWhatsappAccountMutationDocument);
   const [setAccessToken] = useMutation(setWhatsappAccessTokenMutationDocument);
@@ -65,6 +67,7 @@ export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
   const templates = syncResult.data?.syncWhatsappAccountsFromMeta?.templates ?? [];
   const loading = accountsQuery.loading;
   const isOptedIn = optInQuery.data?.isUserWhatsappOptIn ?? false;
+  const isConfigured = configuredQuery.data?.isWhatsappConfigured ?? false;
 
   const showSnackbar = useCallback((message: string, severity: "success" | "error") => {
     setSnackbar({ open: true, message, severity });
@@ -167,6 +170,7 @@ export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
     syncing,
     optInLoading,
     isOptedIn,
+    isConfigured,
     snackbar,
     onDeleteAccount,
     onSetAccessToken,

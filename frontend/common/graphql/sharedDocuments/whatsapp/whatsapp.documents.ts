@@ -135,3 +135,9 @@ export const syncWhatsappAccountsFromMetaMutationDocument: TypedDocumentNode<Ope
     }
   }
 `;
+
+export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<Operations.IsWhatsappConfiguredQuery> = gql`
+  query isWhatsappConfigured {
+    isWhatsappConfigured
+  }
+`;

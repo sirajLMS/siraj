@@ -1,6 +1,7 @@
 "use client";
 
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { StudentStatusLabelsProvider } from "@/frontend/common/views/dashboard/students/status/studentStatusLabelsContext";
 import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page/MobilePageContainer";
 import { UpcomingClassesTableMobile } from "@/frontend/mobile/views/dashboard/students/status/components/upcomingClassesTable.mobile";
@@ -25,7 +26,11 @@ export function StudentClassesMobileView({
     return null;
   }
 
-  const body = <UpcomingClassesTableMobile classes={student.upcomingClasses} studentId={student.id} />;
+  const body = (
+    <StudentStatusLabelsProvider labels={t}>
+      <UpcomingClassesTableMobile classes={student.upcomingClasses} studentId={student.id} />
+    </StudentStatusLabelsProvider>
+  );
 
   if (embedded) {
     return body;

@@ -4597,6 +4597,8 @@ export type Query = {
   invoicePayments: Maybe<Array<Payment>>;
   /** Check if a user has opted in to WhatsApp notifications (REQ-10/BL1). */
   isUserWhatsappOptIn: Scalars['Boolean']['output'];
+  /** Check if WhatsApp Cloud API is configured and credentials are valid. */
+  isWhatsappConfigured: Scalars['Boolean']['output'];
   latestExchangeRates: Maybe<Array<ExchangeRate>>;
   latestFxSyncRun: Maybe<FxSyncRun>;
   /** Lists all learning resources available to the academy. */
@@ -4659,6 +4661,7 @@ export type Query = {
   recentApprovedLessonReports: Maybe<PendingLessonReportsPayload>;
   recurringMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
   recurringSchedule: Maybe<RecurringScheduleDetail>;
+  recurringSchedules: Maybe<RecurringSchedulesPaginatedResult>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
   rescheduleTrackingRows: Maybe<RescheduleTrackingResult>;
   searchFiles: Maybe<StorageObjectList>;
@@ -5064,6 +5067,12 @@ export type QueryRecurringMeetingConfigsArgs = {
 
 export type QueryRecurringScheduleArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryRecurringSchedulesArgs = {
+  pagination: InputMaybe<PaginationArgs>;
+  search: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -5543,6 +5552,30 @@ export type RecurringScheduleDetail = {
   teacherId: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
   timezone: Maybe<IanaTimezone>;
+};
+
+export type RecurringScheduleListItem = {
+  __typename?: 'RecurringScheduleListItem';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  defaultStartTime: Maybe<Scalars['String']['output']>;
+  durationMinutes: Maybe<Scalars['Int']['output']>;
+  hourlyRate: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  rateCurrency: Maybe<CurrencyCode>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type RecurringSchedulesPaginatedResult = {
+  __typename?: 'RecurringSchedulesPaginatedResult';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<RecurringScheduleListItem>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 export type RefreshExchangeRatesResult = {

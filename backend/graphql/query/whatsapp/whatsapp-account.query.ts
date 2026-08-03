@@ -30,4 +30,11 @@ gqlSchemaBuilder.queryFields(t => ({
       return WhatsappAccountService.isUserWhatsappOptIn(userId);
     }),
   }),
+
+  isWhatsappConfigured: t.boolean({
+    nullable: false,
+    description: "Check if WhatsApp Cloud API is configured and credentials are valid.",
+    authScopes: { permission: AppPermission.WHATSAPP_VIEW },
+    resolve: withAuthResult((_actorUserId, _args, _tErrors) => WhatsappAccountService.isConfigured()),
+  }),
 }));

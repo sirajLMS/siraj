@@ -75,8 +75,10 @@ export function ProfileFieldRow({
           >
             {displayValue}
           </Link>
-        ) : (
+        ) : typeof displayValue === "string" || typeof displayValue === "number" ? (
           <Typography sx={{ typography: "bodyMd" }}>{displayValue}</Typography>
+        ) : (
+          displayValue
         )}
       </Stack>
     </Stack>

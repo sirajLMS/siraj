@@ -1,6 +1,7 @@
 "use client";
 
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { StudentStatusLabelsProvider } from "@/frontend/common/views/dashboard/students/status/studentStatusLabelsContext";
 import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page/DesktopPageContainer";
 import { UpcomingClassesTableDesktop } from "@/frontend/desktop/views/dashboard/students/status/components/upcomingClassesTable.desktop";
@@ -25,7 +26,11 @@ export function StudentClassesDesktopView({
     return null;
   }
 
-  const body = <UpcomingClassesTableDesktop classes={student.upcomingClasses} studentId={student.id} />;
+  const body = (
+    <StudentStatusLabelsProvider labels={t}>
+      <UpcomingClassesTableDesktop classes={student.upcomingClasses} studentId={student.id} />
+    </StudentStatusLabelsProvider>
+  );
 
   if (embedded) {
     return body;

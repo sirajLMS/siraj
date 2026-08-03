@@ -240,6 +240,7 @@ type Documents = {
     "\n  mutation executeDstBulkUpdate($offsetMinutes: Int!, $description: String!) {\n    executeDstBulkUpdate(offsetMinutes: $offsetMinutes, description: $description) {\n      id\n      runId\n      updated\n      conflicts\n      unchanged\n      total\n      status\n      updatedSessions {\n        id\n        studentId\n        teacherId\n        studentName\n        teacherName\n        fromTime\n        toTime\n      }\n      conflictGroups {\n        id\n        teacherName\n        conflicts {\n          id\n          studentName\n          message\n        }\n      }\n      checkedEmptyItems {\n        id\n        studentName\n        reason\n      }\n    }\n  }\n": typeof types.ExecuteDstBulkUpdateDocument,
     "\n  mutation createRecurringClass($input: CreateRecurringClassInput!) {\n    createRecurringClass(input: $input) {\n      id\n      recurringScheduleId\n      classInstanceIds\n      classInstanceCount\n    }\n  }\n": typeof types.CreateRecurringClassDocument,
     "\n  query recurringSchedule($id: ID!) {\n    recurringSchedule(id: $id) {\n      id\n      studentId\n      studentName\n      teacherId\n      teacherName\n      durationMinutes\n      defaultStartTime\n      timezone\n      hourlyRate\n      rateCurrency\n      days {\n        id\n        dayOfWeek\n        startTime\n        isActive\n      }\n    }\n  }\n": typeof types.RecurringScheduleDocument,
+    "\n  query recurringSchedules($pagination: PaginationArgs, $search: String) {\n    recurringSchedules(pagination: $pagination, search: $search) {\n      id\n      rows {\n        id\n        studentId\n        studentName\n        teacherId\n        teacherName\n        durationMinutes\n        defaultStartTime\n        timezone\n        hourlyRate\n        rateCurrency\n        createdAt\n        updatedAt\n      }\n      totalCount\n      pageInfo {\n        count\n        currentPage\n        firstItem\n        hasMorePages\n        lastItem\n        lastPage\n        perPage\n        total\n      }\n    }\n  }\n": typeof types.RecurringSchedulesDocument,
     "\n  mutation updateRecurringClassRate($input: UpdateRecurringClassRateInput!) {\n    updateRecurringClassRate(input: $input) {\n      id\n      hourlyRate\n      rateCurrency\n    }\n  }\n": typeof types.UpdateRecurringClassRateDocument,
     "\n  mutation deleteRecurringClass($classInstanceId: ID!) {\n    deleteRecurringClass(classInstanceId: $classInstanceId)\n  }\n": typeof types.DeleteRecurringClassDocument,
     "\n  mutation clearWeeklySchedule($teacherId: ID!) {\n    clearWeeklySchedule(teacherId: $teacherId)\n  }\n": typeof types.ClearWeeklyScheduleDocument,
@@ -360,6 +361,7 @@ type Documents = {
     "\n  mutation setWhatsappTwoStepPin($id: String!, $twoStepPin: String!) {\n    setWhatsappTwoStepPin(id: $id, twoStepPin: $twoStepPin) {\n      id\n    }\n  }\n": typeof types.SetWhatsappTwoStepPinDocument,
     "\n  mutation setUserWhatsappOptIn($userId: String!, $enabled: Boolean!, $source: String) {\n    setUserWhatsappOptIn(userId: $userId, enabled: $enabled, source: $source) {\n      id\n    }\n  }\n": typeof types.SetUserWhatsappOptInDocument,
     "\n  \n  \n  mutation syncWhatsappAccountsFromMeta {\n    syncWhatsappAccountsFromMeta {\n      id\n      accounts {\n        ...WhatsappAccountFields\n      }\n      templates {\n        ...WhatsappTemplateSnapshotFields\n      }\n    }\n  }\n": typeof types.SyncWhatsappAccountsFromMetaDocument,
+    "\n  query isWhatsappConfigured {\n    isWhatsappConfigured\n  }\n": typeof types.IsWhatsappConfiguredDocument,
 };
 const documents: Documents = {
     "\n  \n  query me {\n    me {\n      ...UserFieldsFragment\n    }\n  }\n": types.MeDocument,
@@ -588,6 +590,7 @@ const documents: Documents = {
     "\n  mutation executeDstBulkUpdate($offsetMinutes: Int!, $description: String!) {\n    executeDstBulkUpdate(offsetMinutes: $offsetMinutes, description: $description) {\n      id\n      runId\n      updated\n      conflicts\n      unchanged\n      total\n      status\n      updatedSessions {\n        id\n        studentId\n        teacherId\n        studentName\n        teacherName\n        fromTime\n        toTime\n      }\n      conflictGroups {\n        id\n        teacherName\n        conflicts {\n          id\n          studentName\n          message\n        }\n      }\n      checkedEmptyItems {\n        id\n        studentName\n        reason\n      }\n    }\n  }\n": types.ExecuteDstBulkUpdateDocument,
     "\n  mutation createRecurringClass($input: CreateRecurringClassInput!) {\n    createRecurringClass(input: $input) {\n      id\n      recurringScheduleId\n      classInstanceIds\n      classInstanceCount\n    }\n  }\n": types.CreateRecurringClassDocument,
     "\n  query recurringSchedule($id: ID!) {\n    recurringSchedule(id: $id) {\n      id\n      studentId\n      studentName\n      teacherId\n      teacherName\n      durationMinutes\n      defaultStartTime\n      timezone\n      hourlyRate\n      rateCurrency\n      days {\n        id\n        dayOfWeek\n        startTime\n        isActive\n      }\n    }\n  }\n": types.RecurringScheduleDocument,
+    "\n  query recurringSchedules($pagination: PaginationArgs, $search: String) {\n    recurringSchedules(pagination: $pagination, search: $search) {\n      id\n      rows {\n        id\n        studentId\n        studentName\n        teacherId\n        teacherName\n        durationMinutes\n        defaultStartTime\n        timezone\n        hourlyRate\n        rateCurrency\n        createdAt\n        updatedAt\n      }\n      totalCount\n      pageInfo {\n        count\n        currentPage\n        firstItem\n        hasMorePages\n        lastItem\n        lastPage\n        perPage\n        total\n      }\n    }\n  }\n": types.RecurringSchedulesDocument,
     "\n  mutation updateRecurringClassRate($input: UpdateRecurringClassRateInput!) {\n    updateRecurringClassRate(input: $input) {\n      id\n      hourlyRate\n      rateCurrency\n    }\n  }\n": types.UpdateRecurringClassRateDocument,
     "\n  mutation deleteRecurringClass($classInstanceId: ID!) {\n    deleteRecurringClass(classInstanceId: $classInstanceId)\n  }\n": types.DeleteRecurringClassDocument,
     "\n  mutation clearWeeklySchedule($teacherId: ID!) {\n    clearWeeklySchedule(teacherId: $teacherId)\n  }\n": types.ClearWeeklyScheduleDocument,
@@ -708,6 +711,7 @@ const documents: Documents = {
     "\n  mutation setWhatsappTwoStepPin($id: String!, $twoStepPin: String!) {\n    setWhatsappTwoStepPin(id: $id, twoStepPin: $twoStepPin) {\n      id\n    }\n  }\n": types.SetWhatsappTwoStepPinDocument,
     "\n  mutation setUserWhatsappOptIn($userId: String!, $enabled: Boolean!, $source: String) {\n    setUserWhatsappOptIn(userId: $userId, enabled: $enabled, source: $source) {\n      id\n    }\n  }\n": types.SetUserWhatsappOptInDocument,
     "\n  \n  \n  mutation syncWhatsappAccountsFromMeta {\n    syncWhatsappAccountsFromMeta {\n      id\n      accounts {\n        ...WhatsappAccountFields\n      }\n      templates {\n        ...WhatsappTemplateSnapshotFields\n      }\n    }\n  }\n": types.SyncWhatsappAccountsFromMetaDocument,
+    "\n  query isWhatsappConfigured {\n    isWhatsappConfigured\n  }\n": types.IsWhatsappConfiguredDocument,
 };
 
 /**
@@ -1631,6 +1635,10 @@ export function graphql(source: "\n  query recurringSchedule($id: ID!) {\n    re
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  query recurringSchedules($pagination: PaginationArgs, $search: String) {\n    recurringSchedules(pagination: $pagination, search: $search) {\n      id\n      rows {\n        id\n        studentId\n        studentName\n        teacherId\n        teacherName\n        durationMinutes\n        defaultStartTime\n        timezone\n        hourlyRate\n        rateCurrency\n        createdAt\n        updatedAt\n      }\n      totalCount\n      pageInfo {\n        count\n        currentPage\n        firstItem\n        hasMorePages\n        lastItem\n        lastPage\n        perPage\n        total\n      }\n    }\n  }\n"): (typeof documents)["\n  query recurringSchedules($pagination: PaginationArgs, $search: String) {\n    recurringSchedules(pagination: $pagination, search: $search) {\n      id\n      rows {\n        id\n        studentId\n        studentName\n        teacherId\n        teacherName\n        durationMinutes\n        defaultStartTime\n        timezone\n        hourlyRate\n        rateCurrency\n        createdAt\n        updatedAt\n      }\n      totalCount\n      pageInfo {\n        count\n        currentPage\n        firstItem\n        hasMorePages\n        lastItem\n        lastPage\n        perPage\n        total\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  mutation updateRecurringClassRate($input: UpdateRecurringClassRateInput!) {\n    updateRecurringClassRate(input: $input) {\n      id\n      hourlyRate\n      rateCurrency\n    }\n  }\n"): (typeof documents)["\n  mutation updateRecurringClassRate($input: UpdateRecurringClassRateInput!) {\n    updateRecurringClassRate(input: $input) {\n      id\n      hourlyRate\n      rateCurrency\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -2108,6 +2116,10 @@ export function graphql(source: "\n  mutation setUserWhatsappOptIn($userId: Stri
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  \n  \n  mutation syncWhatsappAccountsFromMeta {\n    syncWhatsappAccountsFromMeta {\n      id\n      accounts {\n        ...WhatsappAccountFields\n      }\n      templates {\n        ...WhatsappTemplateSnapshotFields\n      }\n    }\n  }\n"): (typeof documents)["\n  \n  \n  mutation syncWhatsappAccountsFromMeta {\n    syncWhatsappAccountsFromMeta {\n      id\n      accounts {\n        ...WhatsappAccountFields\n      }\n      templates {\n        ...WhatsappTemplateSnapshotFields\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query isWhatsappConfigured {\n    isWhatsappConfigured\n  }\n"): (typeof documents)["\n  query isWhatsappConfigured {\n    isWhatsappConfigured\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

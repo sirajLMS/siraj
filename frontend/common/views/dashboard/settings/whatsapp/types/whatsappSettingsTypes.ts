@@ -87,6 +87,7 @@ export interface WhatsappSettingsViewModel {
   readonly syncing: boolean;
   readonly optInLoading: boolean;
   readonly isOptedIn: boolean;
+  readonly isConfigured: boolean;
   readonly snackbar: WhatsappSnackbarState;
   readonly onDeleteAccount: (id: string) => Promise<void>;
   readonly onSetAccessToken: (id: string, accessToken: string) => Promise<void>;

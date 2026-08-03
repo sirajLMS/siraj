@@ -27,6 +27,7 @@ import {
 } from "recharts";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
+import { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import { useAppLocale } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
@@ -127,12 +128,8 @@ function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.DateTime
   });
 }
 
-export interface QuotaInsightsContainerProps {
-  quotas: QuotaItem[];
-  loading: boolean;
-}
-
-export function QuotaInsightsContainer({ quotas, loading }: QuotaInsightsContainerProps) {
+export function QuotaInsightsContainer() {
+  const { quotas, loading } = useQuotaViewModel();
   const t = useAppTranslation(DashboardBillingQuota);
   const theme = useTheme();
   const locale = useAppLocale();
