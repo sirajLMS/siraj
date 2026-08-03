@@ -3,15 +3,18 @@ import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-me
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { AppPermission } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
+import { isMeetingChannelError, maybeGenerateUrl } from "@/backend/services/meeting/utils/maybe-generate-url";
 import type {
   ClassMeetingConfigInsertType,
   ClassMeetingConfigSelectType,
 } from "@/backend/types/meeting/class-meeting-config.types";
 import type {
+  MeetingConfigDetails,
   UpdateUserMeetingConfigInput,
   UserMeetingConfigReturnType,
   UserMeetingConfigSelectType,
@@ -25,6 +28,50 @@ async function resolveProvidersForConfigs(
 ): Promise<Map<string, MeetingProviderSelectType>> {
   const ids = [...new Set(configs.map(c => c.providerId))];
   return MeetingProviderCatalogService.getProvidersByIds(ids);
+}
+
+/**
+ * Wraps `maybeGenerateUrl` with typed error handling.
+ *
+ * - `MeetingChannelError` subclasses (typed adapter errors) are logged at `warn`
+ *   and re-thrown as-is so the caller can surface the provider-specific message.
+ * - Unexpected errors are logged at `error` and re-thrown as a user-friendly
+ *   generic error so internal details don't leak to the client.
+ */
+async function safeMaybeGenerateUrl(
+  provider: MeetingProviderSelectType,
+  details: MeetingConfigDetails,
+  options: {
+    readonly topic: string;
+    readonly startDateTime?: string;
+    readonly durationMinutes?: number;
+    readonly actorUserId?: string;
+  },
+  friendlyMessage: string
+): Promise<{
+  details: MeetingConfigDetails;
+  providerMetadata: Record<string, unknown> | null;
+  encryptedSecret?: string | null;
+}> {
+  try {
+    return await maybeGenerateUrl(provider, details, options);
+  } catch (error) {
+    if (isMeetingChannelError(error)) {
+      logger.warn("safeMaybeGenerateUrl: typed adapter error", {
+        providerKind: provider.providerKind,
+        slug: provider.slug,
+        code: error.code,
+        message: error.message,
+      });
+      throw error;
+    }
+    logger.error("safeMaybeGenerateUrl: unexpected error during URL generation", {
+      providerKind: provider.providerKind,
+      slug: provider.slug,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw new Error(friendlyMessage, { cause: error });
+  }
 }
 
 export namespace MeetingConfigService {
@@ -101,7 +148,16 @@ export namespace MeetingConfigService {
       throw new Error(tErrors.meetingProviderInactive);
     }
 
-    const details = parseMeetingConfigDetails(provider, input.details);
+    const parsedDetails = parseMeetingConfigDetails(provider, input.details);
+    const { details, providerMetadata, encryptedSecret } = await safeMaybeGenerateUrl(
+      provider,
+      parsedDetails,
+      {
+        topic: input.label ?? "Personal Meeting",
+        actorUserId,
+      },
+      tErrors.meetingConfigCreateFailed
+    );
 
     const created = await UserMeetingConfigRepository.create(
       {
@@ -110,7 +166,8 @@ export namespace MeetingConfigService {
         label: input.label ?? null,
         isDefault: input.isDefault,
         details,
-        encryptedSecret: input.password ?? null,
+        encryptedSecret: input.password ?? encryptedSecret ?? null,
+        providerMetadata,
       },
       tErrors
     );
@@ -136,10 +193,50 @@ export namespace MeetingConfigService {
     }
 
     const detailsSource = input.details ?? existing.details;
-    const details =
-      input.details !== undefined || (input.providerId && input.providerId !== existing.providerId)
-        ? parseMeetingConfigDetails(provider, detailsSource)
-        : undefined;
+    const providerChanged = input.providerId && input.providerId !== existing.providerId;
+    const detailsChanged = input.details !== undefined;
+
+    let details: MeetingConfigDetails | undefined;
+    let providerMetadata: Record<string, unknown> | null | undefined;
+
+    if (detailsChanged || providerChanged) {
+      const parsed = parseMeetingConfigDetails(provider, detailsSource);
+
+      // If details Changed AND meetingUrl is absent (omitted or explicitly null),
+      // it means "regenerate" for auto providers. For manual providers Zod requires
+      // a URL, so parsed.meetingUrl will always be a non-empty string.
+      const shouldRegenerate =
+        (input.forceRegenerate && provider.providerKind !== "manual") ||
+        (!parsed.meetingUrl && provider.providerKind !== "manual" && detailsChanged);
+
+      if (shouldRegenerate) {
+        const { details: generatedDetails, providerMetadata: generatedMeta } = await safeMaybeGenerateUrl(
+          provider,
+          parsed,
+          { topic: input.label ?? existing.label ?? "Personal Meeting", actorUserId },
+          tErrors.meetingConfigUpdateFailed
+        );
+        details = generatedDetails;
+        providerMetadata = generatedMeta;
+      } else {
+        const result = await safeMaybeGenerateUrl(
+          provider,
+          parsed,
+          {
+            topic: input.label ?? existing.label ?? "Personal Meeting",
+            actorUserId,
+          },
+          tErrors.meetingConfigUpdateFailed
+        );
+        details = result.details;
+        providerMetadata = result.providerMetadata;
+
+        // If generation didn't run (manual/override), preserve existing metadata on updates.
+        if (providerMetadata === null && !detailsChanged) {
+          providerMetadata = existing.providerMetadata ?? null;
+        }
+      }
+    }
 
     const updated = await UserMeetingConfigRepository.update(
       id,
@@ -149,6 +246,7 @@ export namespace MeetingConfigService {
         isDefault: input.isDefault,
         details,
         encryptedSecret: input.password,
+        providerMetadata,
       },
       tErrors
     );
@@ -188,29 +286,56 @@ export namespace MeetingConfigService {
   ): Promise<UserMeetingConfigReturnType[]> {
     if (inputs.length === 0) return [];
 
-    const results: UserMeetingConfigSelectType[] = [];
+    // Batch-fetch all providers in a single query instead of N sequential calls
+    const providerIds = [...new Set(inputs.map(i => i.providerId))];
+    const providerRows = await MeetingProviderRepository.getByIds(providerIds, tx);
+    const providerMap = new Map(providerRows.map(p => [p.id, p]));
+
     for (const input of inputs) {
-      const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tErrors, tx);
-      const details = parseMeetingConfigDetails(provider, input.details);
-      const upserted = await UserMeetingConfigRepository.upsertMany(
-        [
-          {
-            userId: input.userId,
-            providerId: input.providerId,
-            label: input.label ?? null,
-            isDefault: input.isDefault,
-            details,
-            encryptedSecret: input.password ?? null,
-          },
-        ],
-        tErrors,
-        tx
-      );
-      results.push(...upserted);
+      if (!providerMap.has(input.providerId)) {
+        throw new Error(tErrors.meetingProviderNotFound(input.providerId));
+      }
     }
 
-    const providerMap = await resolveProvidersForConfigs(results);
-    return buildMaskedMeetingConfigs(results, true, providerMap);
+    // Parallelize adapter URL generation across all inputs
+    const prepared = await Promise.all(
+      inputs.map(async input => {
+        const provider = providerMap.get(input.providerId);
+        if (!provider) {
+          throw new Error(tErrors.meetingProviderNotFound(input.providerId));
+        }
+        const parsedDetails = parseMeetingConfigDetails(provider, input.details);
+        const { details, providerMetadata, encryptedSecret } = await safeMaybeGenerateUrl(
+          provider,
+          parsedDetails,
+          {
+            topic: input.label ?? "Personal Meeting",
+          },
+          tErrors.meetingConfigCreateFailed
+        );
+        return {
+          input,
+          details,
+          providerMetadata,
+          encryptedSecret,
+        };
+      })
+    );
+
+    // Collect upsert payloads
+    const upsertInputs = prepared.map(({ input, details, providerMetadata, encryptedSecret }) => ({
+      userId: input.userId,
+      providerId: input.providerId,
+      label: input.label ?? null,
+      isDefault: input.isDefault,
+      details,
+      encryptedSecret: input.password ?? encryptedSecret ?? null,
+      providerMetadata,
+    }));
+
+    const results = await UserMeetingConfigRepository.upsertMany(upsertInputs, tErrors, tx);
+    const resolvedProviderMap = await resolveProvidersForConfigs(results);
+    return buildMaskedMeetingConfigs(results, true, resolvedProviderMap);
   }
 
   export async function upsertManyClassMeetingConfigs(
@@ -220,15 +345,41 @@ export namespace MeetingConfigService {
   ): Promise<ClassMeetingConfigSelectType[]> {
     if (inputs.length === 0) return [];
 
-    const prepared: ClassMeetingConfigInsertType[] = [];
+    // Batch-fetch all providers in a single query instead of N sequential calls
+    const providerIds = [...new Set(inputs.map(i => i.providerId))];
+    const providerRows = await MeetingProviderRepository.getByIds(providerIds, tx);
+    const providerMap = new Map(providerRows.map(p => [p.id, p]));
+
     for (const input of inputs) {
-      const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tErrors, tx);
-      prepared.push({
-        ...input,
-        details: parseMeetingConfigDetails(provider, input.details),
-        encryptedSecret: input.encryptedSecret ?? null,
-      });
+      if (!providerMap.has(input.providerId)) {
+        throw new Error(tErrors.meetingProviderNotFound(input.providerId));
+      }
     }
+
+    // Parallelize adapter URL generation across all inputs
+    const prepared = await Promise.all(
+      inputs.map(async input => {
+        const provider = providerMap.get(input.providerId);
+        if (!provider) {
+          throw new Error(tErrors.meetingProviderNotFound(input.providerId));
+        }
+        const parsedDetails = parseMeetingConfigDetails(provider, input.details);
+        const { details, providerMetadata } = await safeMaybeGenerateUrl(
+          provider,
+          parsedDetails,
+          {
+            topic: input.label ?? "Class Meeting",
+          },
+          tErrors.meetingConfigCreateFailed
+        );
+        return {
+          ...input,
+          details,
+          encryptedSecret: input.encryptedSecret ?? null,
+          providerMetadata: providerMetadata ?? null,
+        };
+      })
+    );
 
     return ClassMeetingConfigRepository.upsertMany(prepared, tErrors, tx);
   }

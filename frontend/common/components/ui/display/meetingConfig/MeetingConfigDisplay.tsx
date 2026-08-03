@@ -15,7 +15,9 @@ import { type MeetingConfigDisplayLabels, Translation, useAppTranslation } from 
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
   return (
     <Box sx={{ display: "flex", gap: 1, alignItems: "baseline", flexWrap: "wrap" }}>
-      <Typography sx={{ typography: "labelMd", color: "text.secondary", minWidth: 96 }}>{label}</Typography>
+      <Typography sx={theme => ({ typography: "labelMd", color: theme.palette.text.secondary, minWidth: 96 })}>
+        {label}
+      </Typography>
       <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
     </Box>
   );
@@ -110,7 +112,11 @@ export function MeetingConfigDisplay({
     : (config.providerSlug ?? config.label ?? "");
 
   if (!details.meetingUrl && !providerTitle) {
-    return <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{tDisplay.noMeeting}</Typography>;
+    return (
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+        {tDisplay.noMeeting}
+      </Typography>
+    );
   }
 
   return (

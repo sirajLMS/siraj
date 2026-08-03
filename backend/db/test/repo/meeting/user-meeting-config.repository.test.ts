@@ -208,4 +208,28 @@ describe("UserMeetingConfigRepository", () => {
     expect(defaultConfig?.id).toBe(second.id);
     expect(defaults).toHaveLength(1);
   });
+
+  configTest("create and retrieve providerMetadata round-trip", async (tx, tErrors) => {
+    const user = await createTestUser(tx, { email: `umc-pm-${randomUUID()}@test.com` });
+    const provider = await createTestMeetingProvider(tx);
+    const metadata = { meetingId: "zoom-123", hostEmail: "host@example.com" };
+
+    const created = await UserMeetingConfigRepository.create(
+      {
+        userId: user.id,
+        providerId: provider.id,
+        label: "Auto config",
+        isDefault: false,
+        details: { meetingUrl: "https://zoom.us/j/999999999" },
+        providerMetadata: metadata,
+      },
+      tErrors,
+      tx
+    );
+
+    expect(created.providerMetadata).toEqual(metadata);
+
+    const found = await UserMeetingConfigRepository.getById(created.id, tx);
+    expect(found?.providerMetadata).toEqual(metadata);
+  });
 });

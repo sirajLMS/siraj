@@ -330,6 +330,13 @@
     "saved": "Notification preferences saved.",
     "errorLoading": "Failed to load notification preferences.",
     "errorSaving": "Failed to save notification preferences.",
+    "autoGeneration": {
+      "title": "Auto-generation modes",
+      "onSave": "On save — a meeting URL is generated automatically when you enable auto-generation",
+      "preview": "Preview — generate a test URL to see what your meeting will look like",
+      "booking": "Booking — a fresh URL is generated when a meeting is booked",
+      "learnMore": "Learn more"
+    },
     "categories": {
       "info": "Informational",
       "reminder": "Reminders",
@@ -371,6 +378,20 @@
       "ON_DEMAND_INSTANCE_REMINDER_T3": "On-Demand Reminder (3 days)",
       "ON_DEMAND_INSTANCE_REMINDER_T1": "On-Demand Reminder (1 day)",
       "ON_DEMAND_TEACHER_DAILY_DIGEST": "Teacher Daily On-Demand Digest"
+    },
+    "connectAccount": {
+      "connectButton": "Connect",
+      "connectingLabel": "Connecting...",
+      "connectedAs": {
+        "__fn": "(email) => `Connected as ${email}`"
+      },
+      "disconnectButton": "Disconnect",
+      "disconnectConfirmTitle": "Disconnect meeting provider",
+      "disconnectConfirm": "Are you sure you want to disconnect this meeting provider? You will need to re-connect to use it again.",
+      "confirmDisconnect": "Disconnect",
+      "cancel": "Cancel",
+      "reconnectButton": "Reconnect",
+      "reconnectCallout": "Reconnect your account"
     }
   },
   "changePassword": {

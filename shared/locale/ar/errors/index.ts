@@ -94,6 +94,9 @@ export const errorsAr: ErrorsLabels = {
     meetingProviderCreateFailed: "فشل إنشاء موفر الاجتماعات.",
     meetingProviderUpdateFailed: "فشل تحديث موفر الاجتماعات.",
     meetingProviderInUse: "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
+    invalidReturnPath: "مسار الإرجاع غير صالح. يجب أن يكون مسار الإرجاع ارتباطاً نسبياً.",
+    missingSubject: "مطلوب موضوع الانتحال لتفويض النطاق الكامل",
+    dwdNotEnabled: "تفويض النطاق الكامل غير مفعّل لحساب الخدمة هذا. اتصل بمسؤول Google Workspace لديك.",
   },
   parent: {
     alreadyExists: "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",

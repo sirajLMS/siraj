@@ -25,6 +25,9 @@ import {
   LeaveRequestStatus,
   LessonReportStatus,
   ManagerAccountType,
+  MeetingConnectionTestMode,
+  MeetingIntegrationConnectedAccountStatus,
+  MeetingIntegrationProviderSlug,
   NotificationChannel,
   NotificationEventType,
   OnDemandNoCreditsOutcome,
@@ -262,6 +265,19 @@ export const FxProviderConfigSourcePothosEnum = gqlSchemaBuilder.enumType(FxProv
 
 export const TeacherProgressFeedEventKindPothosEnum = gqlSchemaBuilder.enumType(TeacherProgressFeedEventKind, {
   name: "TeacherProgressFeedEventKind",
+});
+
+export const MeetingConnectionTestModePothosEnum = gqlSchemaBuilder.enumType(MeetingConnectionTestMode, {
+  name: "MeetingConnectionTestMode",
+});
+
+export const MeetingIntegrationConnectedAccountStatusPothosEnum = gqlSchemaBuilder.enumType(
+  MeetingIntegrationConnectedAccountStatus,
+  { name: "MeetingIntegrationConnectedAccountStatus" }
+);
+
+export const MeetingIntegrationProviderSlugPothosEnum = gqlSchemaBuilder.enumType(MeetingIntegrationProviderSlug, {
+  name: "MeetingIntegrationProviderSlug",
 });
 
 export const WhatsappQualityRatingPothosEnum = gqlSchemaBuilder.enumType(WhatsappQualityRating, {

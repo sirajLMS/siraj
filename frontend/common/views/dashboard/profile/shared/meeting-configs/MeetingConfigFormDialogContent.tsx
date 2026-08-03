@@ -24,6 +24,9 @@ export type MeetingConfigFormDialogContentProps = {
   readonly onClose: () => void;
   readonly onSave: () => void;
   readonly providerSelectDisabled?: boolean;
+  readonly onGenerateUrl?: () => void;
+  readonly generating?: boolean;
+  readonly generationError?: string | null;
 };
 
 export function MeetingConfigFormDialogContent({
@@ -33,6 +36,9 @@ export function MeetingConfigFormDialogContent({
   onClose,
   onSave,
   providerSelectDisabled,
+  onGenerateUrl,
+  generating,
+  generationError,
 }: MeetingConfigFormDialogContentProps) {
   const {
     t,
@@ -51,6 +57,9 @@ export function MeetingConfigFormDialogContent({
     providerChanged,
     instructions,
   } = state;
+
+  const supportsAutoGeneration = provider?.fieldSchema?.supportsAutoGeneration === true;
+  const canSave = !!provider && (supportsAutoGeneration || details.meetingUrl.trim() !== "");
 
   return (
     <>
@@ -86,8 +95,15 @@ export function MeetingConfigFormDialogContent({
               setUrlError(null);
             }}
             passwordHelperText={hasSecretOnEdit ? t.passwordLeaveBlank : undefined}
+            onGenerateUrl={onGenerateUrl}
+            generating={generating}
+            generationError={generationError}
           />
-          {urlError ? <Typography sx={{ typography: "bodySm", color: "error.main" }}>{urlError}</Typography> : null}
+          {urlError ? (
+            <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>
+              {urlError}
+            </Typography>
+          ) : null}
           {saveError ? <Alert severity="error">{saveError}</Alert> : null}
           <FormControlLabel
             control={<Checkbox checked={isDefault} onChange={event => setIsDefault(event.target.checked)} />}
@@ -99,7 +115,7 @@ export function MeetingConfigFormDialogContent({
         <Button onClick={onClose} disabled={saving}>
           {t.cancel}
         </Button>
-        <Button variant="contained" disabled={saving || !provider || !details.meetingUrl.trim()} onClick={onSave}>
+        <Button variant="contained" disabled={saving || !canSave} onClick={onSave}>
           {t.save}
         </Button>
       </DialogActions>

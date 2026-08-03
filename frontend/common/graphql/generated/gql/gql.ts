@@ -130,8 +130,8 @@ type Documents = {
     "\n  mutation SubmitComplaint($input: ComplaintSubmitInput!) {\n    submitComplaint(input: $input) {\n      id\n      category\n      body\n      status\n      createdAt\n    }\n  }\n": typeof types.SubmitComplaintDocument,
     "\n  mutation RespondToComplaint($input: RespondToComplaintInput!) {\n    respondToComplaint(input: $input) {\n      id\n      body\n      emailSent\n      createdAt\n      responderName\n    }\n  }\n": typeof types.RespondToComplaintDocument,
     "\n  mutation DeleteComplaint($complaintId: String!) {\n    deleteComplaint(complaintId: $complaintId)\n  }\n": typeof types.DeleteComplaintDocument,
-    "\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    isActive\n    createdAt\n    updatedAt\n  }\n": typeof types.MeetingProviderFieldsFragmentDoc,
-    "\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": typeof types.UserMeetingConfigFieldsFragmentDoc,
+    "\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsAutoGeneration\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    providerKind\n    isActive\n    createdAt\n    updatedAt\n  }\n": typeof types.MeetingProviderFieldsFragmentDoc,
+    "\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    oauthTokenExpiresAt\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": typeof types.UserMeetingConfigFieldsFragmentDoc,
     "\n  \n  query meetingProviders($activeOnly: Boolean) {\n    meetingProviders(activeOnly: $activeOnly) {\n      ...MeetingProviderFields\n    }\n  }\n": typeof types.MeetingProvidersDocument,
     "\n  \n  query meetingProvider($id: ID!) {\n    meetingProvider(id: $id) {\n      ...MeetingProviderFields\n    }\n  }\n": typeof types.MeetingProviderDocument,
     "\n  \n  query userMeetingConfigs($userId: ID!) {\n    userMeetingConfigs(userId: $userId) {\n      ...UserMeetingConfigFields\n    }\n  }\n": typeof types.UserMeetingConfigsDocument,
@@ -143,14 +143,18 @@ type Documents = {
     "\n  \n  mutation updateUserMeetingConfig($id: ID!, $input: UserMeetingConfigUpdateInput!) {\n    updateUserMeetingConfig(id: $id, input: $input) {\n      ...UserMeetingConfigFields\n    }\n  }\n": typeof types.UpdateUserMeetingConfigDocument,
     "\n  mutation deleteUserMeetingConfig($id: ID!) {\n    deleteUserMeetingConfig(id: $id)\n  }\n": typeof types.DeleteUserMeetingConfigDocument,
     "\n  \n  mutation setDefaultMeetingConfig($id: ID!) {\n    setDefaultMeetingConfig(id: $id) {\n      ...UserMeetingConfigFields\n    }\n  }\n": typeof types.SetDefaultMeetingConfigDocument,
-    "\n  fragment ClassMeetingConfigFields on ClassMeetingConfig {\n    id\n    classInstanceId\n    recurringScheduleId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": typeof types.ClassMeetingConfigFieldsFragmentDoc,
-    "\n  fragment EffectiveMeetingFields on EffectiveMeeting {\n    joinUrl\n    providerSlug\n    providerName\n    logoUrl\n    meetingId\n    source\n    configId\n    providerId\n  }\n": typeof types.EffectiveMeetingFieldsFragmentDoc,
+    "\n  fragment ClassMeetingConfigFields on ClassMeetingConfig {\n    id\n    classInstanceId\n    recurringScheduleId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": typeof types.ClassMeetingConfigFieldsFragmentDoc,
+    "\n  fragment EffectiveMeetingFields on EffectiveMeeting {\n    joinUrl\n    providerSlug\n    providerName\n    logoUrl\n    meetingId\n    source\n    configId\n    providerId\n    supportsAutoGeneration\n  }\n": typeof types.EffectiveMeetingFieldsFragmentDoc,
     "\n  \n  query classMeetingConfigs($classInstanceId: ID!) {\n    classMeetingConfigs(classInstanceId: $classInstanceId) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": typeof types.ClassMeetingConfigsDocument,
     "\n  \n  query recurringMeetingConfigs($recurringScheduleId: ID!) {\n    recurringMeetingConfigs(recurringScheduleId: $recurringScheduleId) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": typeof types.RecurringMeetingConfigsDocument,
     "\n  \n  mutation createClassMeetingConfig($input: ClassMeetingConfigCreateInput!) {\n    createClassMeetingConfig(input: $input) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": typeof types.CreateClassMeetingConfigDocument,
     "\n  \n  mutation updateClassMeetingConfig($id: ID!, $input: ClassMeetingConfigUpdateInput!) {\n    updateClassMeetingConfig(id: $id, input: $input) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": typeof types.UpdateClassMeetingConfigDocument,
     "\n  mutation deleteClassMeetingConfig($id: ID!) {\n    deleteClassMeetingConfig(id: $id)\n  }\n": typeof types.DeleteClassMeetingConfigDocument,
     "\n  \n  mutation setDefaultClassMeetingConfig($id: ID!) {\n    setDefaultClassMeetingConfig(id: $id) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": typeof types.SetDefaultClassMeetingConfigDocument,
+    "\n  mutation generateMeetingUrl($input: GenerateMeetingUrlInput!) {\n    generateMeetingUrl(input: $input) {\n      joinUrl\n      meetingId\n      expiresAt\n    }\n  }\n": typeof types.GenerateMeetingUrlDocument,
+    "\n  mutation connectMeetingProviderOAuth($input: ConnectMeetingProviderOAuthInput!) {\n    connectMeetingProviderOAuth(input: $input) {\n      id\n      authorizeUrl\n      state\n    }\n  }\n": typeof types.ConnectMeetingProviderOAuthDocument,
+    "\n  mutation disconnectMeetingProviderOAuth($input: DisconnectMeetingProviderOAuthInput!) {\n    disconnectMeetingProviderOAuth(input: $input) {\n      id\n      ok\n      providerSlug\n    }\n  }\n": typeof types.DisconnectMeetingProviderOAuthDocument,
+    "\n  query myConnectedMeetingProviders {\n    myConnectedMeetingProviders {\n      id\n      providerSlug\n      email\n      connectedAt\n      expiresAt\n    }\n  }\n": typeof types.MyConnectedMeetingProvidersDocument,
     "\n  query notificationAlerts {\n    notificationAlerts {\n      id\n      totalCount\n      unreadCount\n      alerts {\n        id\n        deliveryId\n        type\n        eventType\n        channel\n        metadata\n        title\n        body\n        createdAt\n        severity\n        readAt\n      }\n    }\n  }\n": typeof types.NotificationAlertsDocument,
     "\n  mutation MarkNotificationsRead {\n    markNotificationsRead\n  }\n": typeof types.MarkNotificationsReadDocument,
     "\n  mutation MarkNotificationRead($deliveryId: ID!) {\n    markNotificationRead(deliveryId: $deliveryId)\n  }\n": typeof types.MarkNotificationReadDocument,
@@ -246,6 +250,14 @@ type Documents = {
     "\n  \n  query systemSetting($key: String!) {\n    systemSetting(key: $key) {\n      ...SystemSettingFields\n    }\n  }\n": typeof types.SystemSettingDocument,
     "\n  \n  mutation upsertSystemSetting($input: SystemSettingUpsertInput!) {\n    upsertSystemSetting(input: $input) {\n      ...SystemSettingFields\n    }\n  }\n": typeof types.UpsertSystemSettingDocument,
     "\n  mutation deleteSystemSetting($key: String!) {\n    deleteSystemSetting(key: $key)\n  }\n": typeof types.DeleteSystemSettingDocument,
+    "\n  fragment MeetingIntegrationProviderFields on MeetingIntegrationProvider {\n    id\n    slug\n    kind\n    credentialsHealthy\n    lastTestedAt\n    connectedTeacherCount\n    reauthNeededCount\n    endpoints\n  }\n": typeof types.MeetingIntegrationProviderFieldsFragmentDoc,
+    "\n  fragment MeetingIntegrationConnectedAccountFields on MeetingIntegrationConnectedAccount {\n    id\n    userId\n    name\n    email\n    connectedAt\n    expiresAt\n    lastRefreshedAt\n    status\n    scopes\n  }\n": typeof types.MeetingIntegrationConnectedAccountFieldsFragmentDoc,
+    "\n  fragment TestMeetingConnectionResultFields on TestMeetingConnectionResult {\n    ok\n    latencyMs\n    mode\n    testJoinUrl\n    deleted\n    upstreamResponseSummary\n    errorCode\n    errorMessage\n    rawUpstreamPayload\n    requiredScopes\n    grantedScopes\n  }\n": typeof types.TestMeetingConnectionResultFieldsFragmentDoc,
+    "\n  fragment AdminRevokeTokenResultFields on AdminRevokeTokenResult {\n    id\n    providerSlug\n    userId\n    revoked\n  }\n": typeof types.AdminRevokeTokenResultFieldsFragmentDoc,
+    "\n  \n  query meetingIntegrationProviders {\n    meetingIntegrationProviders {\n      ...MeetingIntegrationProviderFields\n    }\n  }\n": typeof types.MeetingIntegrationProvidersDocument,
+    "\n  \n  query meetingIntegrationConnectedAccounts($providerSlug: String!) {\n    meetingIntegrationConnectedAccounts(providerSlug: $providerSlug) {\n      ...MeetingIntegrationConnectedAccountFields\n    }\n  }\n": typeof types.MeetingIntegrationConnectedAccountsDocument,
+    "\n  \n  mutation testMeetingProviderConnection($input: TestMeetingConnectionInput!) {\n    testMeetingProviderConnection(input: $input) {\n      ...TestMeetingConnectionResultFields\n    }\n  }\n": typeof types.TestMeetingProviderConnectionDocument,
+    "\n  \n  mutation adminRevokeMeetingProviderToken($input: AdminRevokeTokenInput!) {\n    adminRevokeMeetingProviderToken(input: $input) {\n      ...AdminRevokeTokenResultFields\n    }\n  }\n": typeof types.AdminRevokeMeetingProviderTokenDocument,
     "\n  fragment SessionConfigFields on SessionConfig {\n    id\n    roleName\n    ttlSeconds\n    maxConcurrentSessions\n    createdAt\n    updatedAt\n  }\n": typeof types.SessionConfigFieldsFragmentDoc,
     "\n  \n  query sessionConfigs {\n    sessionConfigs {\n      ...SessionConfigFields\n    }\n  }\n": typeof types.SessionConfigsDocument,
     "\n  \n  query sessionConfig($roleName: String!) {\n    sessionConfig(roleName: $roleName) {\n      ...SessionConfigFields\n    }\n  }\n": typeof types.SessionConfigDocument,
@@ -454,8 +466,8 @@ const documents: Documents = {
     "\n  mutation SubmitComplaint($input: ComplaintSubmitInput!) {\n    submitComplaint(input: $input) {\n      id\n      category\n      body\n      status\n      createdAt\n    }\n  }\n": types.SubmitComplaintDocument,
     "\n  mutation RespondToComplaint($input: RespondToComplaintInput!) {\n    respondToComplaint(input: $input) {\n      id\n      body\n      emailSent\n      createdAt\n      responderName\n    }\n  }\n": types.RespondToComplaintDocument,
     "\n  mutation DeleteComplaint($complaintId: String!) {\n    deleteComplaint(complaintId: $complaintId)\n  }\n": types.DeleteComplaintDocument,
-    "\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    isActive\n    createdAt\n    updatedAt\n  }\n": types.MeetingProviderFieldsFragmentDoc,
-    "\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": types.UserMeetingConfigFieldsFragmentDoc,
+    "\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsAutoGeneration\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    providerKind\n    isActive\n    createdAt\n    updatedAt\n  }\n": types.MeetingProviderFieldsFragmentDoc,
+    "\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    oauthTokenExpiresAt\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": types.UserMeetingConfigFieldsFragmentDoc,
     "\n  \n  query meetingProviders($activeOnly: Boolean) {\n    meetingProviders(activeOnly: $activeOnly) {\n      ...MeetingProviderFields\n    }\n  }\n": types.MeetingProvidersDocument,
     "\n  \n  query meetingProvider($id: ID!) {\n    meetingProvider(id: $id) {\n      ...MeetingProviderFields\n    }\n  }\n": types.MeetingProviderDocument,
     "\n  \n  query userMeetingConfigs($userId: ID!) {\n    userMeetingConfigs(userId: $userId) {\n      ...UserMeetingConfigFields\n    }\n  }\n": types.UserMeetingConfigsDocument,
@@ -467,14 +479,18 @@ const documents: Documents = {
     "\n  \n  mutation updateUserMeetingConfig($id: ID!, $input: UserMeetingConfigUpdateInput!) {\n    updateUserMeetingConfig(id: $id, input: $input) {\n      ...UserMeetingConfigFields\n    }\n  }\n": types.UpdateUserMeetingConfigDocument,
     "\n  mutation deleteUserMeetingConfig($id: ID!) {\n    deleteUserMeetingConfig(id: $id)\n  }\n": types.DeleteUserMeetingConfigDocument,
     "\n  \n  mutation setDefaultMeetingConfig($id: ID!) {\n    setDefaultMeetingConfig(id: $id) {\n      ...UserMeetingConfigFields\n    }\n  }\n": types.SetDefaultMeetingConfigDocument,
-    "\n  fragment ClassMeetingConfigFields on ClassMeetingConfig {\n    id\n    classInstanceId\n    recurringScheduleId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": types.ClassMeetingConfigFieldsFragmentDoc,
-    "\n  fragment EffectiveMeetingFields on EffectiveMeeting {\n    joinUrl\n    providerSlug\n    providerName\n    logoUrl\n    meetingId\n    source\n    configId\n    providerId\n  }\n": types.EffectiveMeetingFieldsFragmentDoc,
+    "\n  fragment ClassMeetingConfigFields on ClassMeetingConfig {\n    id\n    classInstanceId\n    recurringScheduleId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n": types.ClassMeetingConfigFieldsFragmentDoc,
+    "\n  fragment EffectiveMeetingFields on EffectiveMeeting {\n    joinUrl\n    providerSlug\n    providerName\n    logoUrl\n    meetingId\n    source\n    configId\n    providerId\n    supportsAutoGeneration\n  }\n": types.EffectiveMeetingFieldsFragmentDoc,
     "\n  \n  query classMeetingConfigs($classInstanceId: ID!) {\n    classMeetingConfigs(classInstanceId: $classInstanceId) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": types.ClassMeetingConfigsDocument,
     "\n  \n  query recurringMeetingConfigs($recurringScheduleId: ID!) {\n    recurringMeetingConfigs(recurringScheduleId: $recurringScheduleId) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": types.RecurringMeetingConfigsDocument,
     "\n  \n  mutation createClassMeetingConfig($input: ClassMeetingConfigCreateInput!) {\n    createClassMeetingConfig(input: $input) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": types.CreateClassMeetingConfigDocument,
     "\n  \n  mutation updateClassMeetingConfig($id: ID!, $input: ClassMeetingConfigUpdateInput!) {\n    updateClassMeetingConfig(id: $id, input: $input) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": types.UpdateClassMeetingConfigDocument,
     "\n  mutation deleteClassMeetingConfig($id: ID!) {\n    deleteClassMeetingConfig(id: $id)\n  }\n": types.DeleteClassMeetingConfigDocument,
     "\n  \n  mutation setDefaultClassMeetingConfig($id: ID!) {\n    setDefaultClassMeetingConfig(id: $id) {\n      ...ClassMeetingConfigFields\n    }\n  }\n": types.SetDefaultClassMeetingConfigDocument,
+    "\n  mutation generateMeetingUrl($input: GenerateMeetingUrlInput!) {\n    generateMeetingUrl(input: $input) {\n      joinUrl\n      meetingId\n      expiresAt\n    }\n  }\n": types.GenerateMeetingUrlDocument,
+    "\n  mutation connectMeetingProviderOAuth($input: ConnectMeetingProviderOAuthInput!) {\n    connectMeetingProviderOAuth(input: $input) {\n      id\n      authorizeUrl\n      state\n    }\n  }\n": types.ConnectMeetingProviderOAuthDocument,
+    "\n  mutation disconnectMeetingProviderOAuth($input: DisconnectMeetingProviderOAuthInput!) {\n    disconnectMeetingProviderOAuth(input: $input) {\n      id\n      ok\n      providerSlug\n    }\n  }\n": types.DisconnectMeetingProviderOAuthDocument,
+    "\n  query myConnectedMeetingProviders {\n    myConnectedMeetingProviders {\n      id\n      providerSlug\n      email\n      connectedAt\n      expiresAt\n    }\n  }\n": types.MyConnectedMeetingProvidersDocument,
     "\n  query notificationAlerts {\n    notificationAlerts {\n      id\n      totalCount\n      unreadCount\n      alerts {\n        id\n        deliveryId\n        type\n        eventType\n        channel\n        metadata\n        title\n        body\n        createdAt\n        severity\n        readAt\n      }\n    }\n  }\n": types.NotificationAlertsDocument,
     "\n  mutation MarkNotificationsRead {\n    markNotificationsRead\n  }\n": types.MarkNotificationsReadDocument,
     "\n  mutation MarkNotificationRead($deliveryId: ID!) {\n    markNotificationRead(deliveryId: $deliveryId)\n  }\n": types.MarkNotificationReadDocument,
@@ -570,6 +586,14 @@ const documents: Documents = {
     "\n  \n  query systemSetting($key: String!) {\n    systemSetting(key: $key) {\n      ...SystemSettingFields\n    }\n  }\n": types.SystemSettingDocument,
     "\n  \n  mutation upsertSystemSetting($input: SystemSettingUpsertInput!) {\n    upsertSystemSetting(input: $input) {\n      ...SystemSettingFields\n    }\n  }\n": types.UpsertSystemSettingDocument,
     "\n  mutation deleteSystemSetting($key: String!) {\n    deleteSystemSetting(key: $key)\n  }\n": types.DeleteSystemSettingDocument,
+    "\n  fragment MeetingIntegrationProviderFields on MeetingIntegrationProvider {\n    id\n    slug\n    kind\n    credentialsHealthy\n    lastTestedAt\n    connectedTeacherCount\n    reauthNeededCount\n    endpoints\n  }\n": types.MeetingIntegrationProviderFieldsFragmentDoc,
+    "\n  fragment MeetingIntegrationConnectedAccountFields on MeetingIntegrationConnectedAccount {\n    id\n    userId\n    name\n    email\n    connectedAt\n    expiresAt\n    lastRefreshedAt\n    status\n    scopes\n  }\n": types.MeetingIntegrationConnectedAccountFieldsFragmentDoc,
+    "\n  fragment TestMeetingConnectionResultFields on TestMeetingConnectionResult {\n    ok\n    latencyMs\n    mode\n    testJoinUrl\n    deleted\n    upstreamResponseSummary\n    errorCode\n    errorMessage\n    rawUpstreamPayload\n    requiredScopes\n    grantedScopes\n  }\n": types.TestMeetingConnectionResultFieldsFragmentDoc,
+    "\n  fragment AdminRevokeTokenResultFields on AdminRevokeTokenResult {\n    id\n    providerSlug\n    userId\n    revoked\n  }\n": types.AdminRevokeTokenResultFieldsFragmentDoc,
+    "\n  \n  query meetingIntegrationProviders {\n    meetingIntegrationProviders {\n      ...MeetingIntegrationProviderFields\n    }\n  }\n": types.MeetingIntegrationProvidersDocument,
+    "\n  \n  query meetingIntegrationConnectedAccounts($providerSlug: String!) {\n    meetingIntegrationConnectedAccounts(providerSlug: $providerSlug) {\n      ...MeetingIntegrationConnectedAccountFields\n    }\n  }\n": types.MeetingIntegrationConnectedAccountsDocument,
+    "\n  \n  mutation testMeetingProviderConnection($input: TestMeetingConnectionInput!) {\n    testMeetingProviderConnection(input: $input) {\n      ...TestMeetingConnectionResultFields\n    }\n  }\n": types.TestMeetingProviderConnectionDocument,
+    "\n  \n  mutation adminRevokeMeetingProviderToken($input: AdminRevokeTokenInput!) {\n    adminRevokeMeetingProviderToken(input: $input) {\n      ...AdminRevokeTokenResultFields\n    }\n  }\n": types.AdminRevokeMeetingProviderTokenDocument,
     "\n  fragment SessionConfigFields on SessionConfig {\n    id\n    roleName\n    ttlSeconds\n    maxConcurrentSessions\n    createdAt\n    updatedAt\n  }\n": types.SessionConfigFieldsFragmentDoc,
     "\n  \n  query sessionConfigs {\n    sessionConfigs {\n      ...SessionConfigFields\n    }\n  }\n": types.SessionConfigsDocument,
     "\n  \n  query sessionConfig($roleName: String!) {\n    sessionConfig(roleName: $roleName) {\n      ...SessionConfigFields\n    }\n  }\n": types.SessionConfigDocument,
@@ -1143,11 +1167,11 @@ export function graphql(source: "\n  mutation DeleteComplaint($complaintId: Stri
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    isActive\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    isActive\n    createdAt\n    updatedAt\n  }\n"];
+export function graphql(source: "\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsAutoGeneration\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    providerKind\n    isActive\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment MeetingProviderFields on MeetingProvider {\n    id\n    slug\n    name\n    description\n    instructions\n    urlAllowlist\n    urlExample\n    logoUrl\n    fieldSchema {\n      requiresMeetingUrl\n      supportsAutoGeneration\n      supportsUsername\n      supportsPassword\n      supportsTenantId\n    }\n    providerKind\n    isActive\n    createdAt\n    updatedAt\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n"): (typeof documents)["\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n"];
+export function graphql(source: "\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    oauthTokenExpiresAt\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n"): (typeof documents)["\n  fragment UserMeetingConfigFields on UserMeetingConfig {\n    id\n    userId\n    providerId\n    label\n    isDefault\n    hasSecret\n    oauthTokenExpiresAt\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1195,11 +1219,11 @@ export function graphql(source: "\n  \n  mutation setDefaultMeetingConfig($id: I
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment ClassMeetingConfigFields on ClassMeetingConfig {\n    id\n    classInstanceId\n    recurringScheduleId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n"): (typeof documents)["\n  fragment ClassMeetingConfigFields on ClassMeetingConfig {\n    id\n    classInstanceId\n    recurringScheduleId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n"];
+export function graphql(source: "\n  fragment ClassMeetingConfigFields on ClassMeetingConfig {\n    id\n    classInstanceId\n    recurringScheduleId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n"): (typeof documents)["\n  fragment ClassMeetingConfigFields on ClassMeetingConfig {\n    id\n    classInstanceId\n    recurringScheduleId\n    providerId\n    label\n    isDefault\n    hasSecret\n    details {\n      meetingUrl\n      username\n      tenantId\n    }\n    providerMetadata\n    provider {\n      ...MeetingProviderFields\n    }\n    createdAt\n    updatedAt\n  }\n  \n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment EffectiveMeetingFields on EffectiveMeeting {\n    joinUrl\n    providerSlug\n    providerName\n    logoUrl\n    meetingId\n    source\n    configId\n    providerId\n  }\n"): (typeof documents)["\n  fragment EffectiveMeetingFields on EffectiveMeeting {\n    joinUrl\n    providerSlug\n    providerName\n    logoUrl\n    meetingId\n    source\n    configId\n    providerId\n  }\n"];
+export function graphql(source: "\n  fragment EffectiveMeetingFields on EffectiveMeeting {\n    joinUrl\n    providerSlug\n    providerName\n    logoUrl\n    meetingId\n    source\n    configId\n    providerId\n    supportsAutoGeneration\n  }\n"): (typeof documents)["\n  fragment EffectiveMeetingFields on EffectiveMeeting {\n    joinUrl\n    providerSlug\n    providerName\n    logoUrl\n    meetingId\n    source\n    configId\n    providerId\n    supportsAutoGeneration\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1224,6 +1248,22 @@ export function graphql(source: "\n  mutation deleteClassMeetingConfig($id: ID!)
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  \n  mutation setDefaultClassMeetingConfig($id: ID!) {\n    setDefaultClassMeetingConfig(id: $id) {\n      ...ClassMeetingConfigFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation setDefaultClassMeetingConfig($id: ID!) {\n    setDefaultClassMeetingConfig(id: $id) {\n      ...ClassMeetingConfigFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation generateMeetingUrl($input: GenerateMeetingUrlInput!) {\n    generateMeetingUrl(input: $input) {\n      joinUrl\n      meetingId\n      expiresAt\n    }\n  }\n"): (typeof documents)["\n  mutation generateMeetingUrl($input: GenerateMeetingUrlInput!) {\n    generateMeetingUrl(input: $input) {\n      joinUrl\n      meetingId\n      expiresAt\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation connectMeetingProviderOAuth($input: ConnectMeetingProviderOAuthInput!) {\n    connectMeetingProviderOAuth(input: $input) {\n      id\n      authorizeUrl\n      state\n    }\n  }\n"): (typeof documents)["\n  mutation connectMeetingProviderOAuth($input: ConnectMeetingProviderOAuthInput!) {\n    connectMeetingProviderOAuth(input: $input) {\n      id\n      authorizeUrl\n      state\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation disconnectMeetingProviderOAuth($input: DisconnectMeetingProviderOAuthInput!) {\n    disconnectMeetingProviderOAuth(input: $input) {\n      id\n      ok\n      providerSlug\n    }\n  }\n"): (typeof documents)["\n  mutation disconnectMeetingProviderOAuth($input: DisconnectMeetingProviderOAuthInput!) {\n    disconnectMeetingProviderOAuth(input: $input) {\n      id\n      ok\n      providerSlug\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query myConnectedMeetingProviders {\n    myConnectedMeetingProviders {\n      id\n      providerSlug\n      email\n      connectedAt\n      expiresAt\n    }\n  }\n"): (typeof documents)["\n  query myConnectedMeetingProviders {\n    myConnectedMeetingProviders {\n      id\n      providerSlug\n      email\n      connectedAt\n      expiresAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -1604,6 +1644,38 @@ export function graphql(source: "\n  \n  mutation upsertSystemSetting($input: Sy
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation deleteSystemSetting($key: String!) {\n    deleteSystemSetting(key: $key)\n  }\n"): (typeof documents)["\n  mutation deleteSystemSetting($key: String!) {\n    deleteSystemSetting(key: $key)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment MeetingIntegrationProviderFields on MeetingIntegrationProvider {\n    id\n    slug\n    kind\n    credentialsHealthy\n    lastTestedAt\n    connectedTeacherCount\n    reauthNeededCount\n    endpoints\n  }\n"): (typeof documents)["\n  fragment MeetingIntegrationProviderFields on MeetingIntegrationProvider {\n    id\n    slug\n    kind\n    credentialsHealthy\n    lastTestedAt\n    connectedTeacherCount\n    reauthNeededCount\n    endpoints\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment MeetingIntegrationConnectedAccountFields on MeetingIntegrationConnectedAccount {\n    id\n    userId\n    name\n    email\n    connectedAt\n    expiresAt\n    lastRefreshedAt\n    status\n    scopes\n  }\n"): (typeof documents)["\n  fragment MeetingIntegrationConnectedAccountFields on MeetingIntegrationConnectedAccount {\n    id\n    userId\n    name\n    email\n    connectedAt\n    expiresAt\n    lastRefreshedAt\n    status\n    scopes\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment TestMeetingConnectionResultFields on TestMeetingConnectionResult {\n    ok\n    latencyMs\n    mode\n    testJoinUrl\n    deleted\n    upstreamResponseSummary\n    errorCode\n    errorMessage\n    rawUpstreamPayload\n    requiredScopes\n    grantedScopes\n  }\n"): (typeof documents)["\n  fragment TestMeetingConnectionResultFields on TestMeetingConnectionResult {\n    ok\n    latencyMs\n    mode\n    testJoinUrl\n    deleted\n    upstreamResponseSummary\n    errorCode\n    errorMessage\n    rawUpstreamPayload\n    requiredScopes\n    grantedScopes\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment AdminRevokeTokenResultFields on AdminRevokeTokenResult {\n    id\n    providerSlug\n    userId\n    revoked\n  }\n"): (typeof documents)["\n  fragment AdminRevokeTokenResultFields on AdminRevokeTokenResult {\n    id\n    providerSlug\n    userId\n    revoked\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query meetingIntegrationProviders {\n    meetingIntegrationProviders {\n      ...MeetingIntegrationProviderFields\n    }\n  }\n"): (typeof documents)["\n  \n  query meetingIntegrationProviders {\n    meetingIntegrationProviders {\n      ...MeetingIntegrationProviderFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query meetingIntegrationConnectedAccounts($providerSlug: String!) {\n    meetingIntegrationConnectedAccounts(providerSlug: $providerSlug) {\n      ...MeetingIntegrationConnectedAccountFields\n    }\n  }\n"): (typeof documents)["\n  \n  query meetingIntegrationConnectedAccounts($providerSlug: String!) {\n    meetingIntegrationConnectedAccounts(providerSlug: $providerSlug) {\n      ...MeetingIntegrationConnectedAccountFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation testMeetingProviderConnection($input: TestMeetingConnectionInput!) {\n    testMeetingProviderConnection(input: $input) {\n      ...TestMeetingConnectionResultFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation testMeetingProviderConnection($input: TestMeetingConnectionInput!) {\n    testMeetingProviderConnection(input: $input) {\n      ...TestMeetingConnectionResultFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation adminRevokeMeetingProviderToken($input: AdminRevokeTokenInput!) {\n    adminRevokeMeetingProviderToken(input: $input) {\n      ...AdminRevokeTokenResultFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation adminRevokeMeetingProviderToken($input: AdminRevokeTokenInput!) {\n    adminRevokeMeetingProviderToken(input: $input) {\n      ...AdminRevokeTokenResultFields\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

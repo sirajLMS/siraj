@@ -16,6 +16,7 @@ import { DomainError, NotFoundError, UnauthorizedError, ValidationError } from "
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
@@ -254,6 +255,18 @@ export namespace RecurringClassService {
       const result = await createScheduleAndDeductCredits(userId, input, tErrors);
 
       await dispatchClassScheduledNotifications(result.classInstanceIds, input.studentId, input.locale);
+
+      // Best-effort meeting URL generation — never fails the booking.
+      for (const instanceId of result.classInstanceIds) {
+        try {
+          await MeetingConfigSnapshotService.generateAndAttachForClassInstance(instanceId);
+        } catch (error) {
+          logger.error("Booking-time meeting URL generation failed for class instance", {
+            classInstanceId: instanceId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
 
       return {
         id: result.recurringScheduleId,

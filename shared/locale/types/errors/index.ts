@@ -106,6 +106,9 @@ export interface MeetingProviderErrors {
   readonly meetingProviderCreateFailed: string;
   readonly meetingProviderUpdateFailed: string;
   readonly meetingProviderInUse: string;
+  readonly invalidReturnPath: string;
+  readonly missingSubject: string;
+  readonly dwdNotEnabled: string;
 }
 
 /**

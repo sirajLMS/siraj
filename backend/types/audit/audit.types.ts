@@ -38,6 +38,7 @@ export type AuditEntityType =
   | "LEARNING_RESOURCE"
   | "SUGGESTION"
   | "BOOK"
+  | "MEETING_PROVIDER_TOKEN"
   | "WHATSAPP_ACCOUNT";
 
 /**

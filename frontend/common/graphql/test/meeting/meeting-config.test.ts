@@ -23,10 +23,12 @@ function buildProviderInput(slug: string) {
     urlExample: "https://zoom.us/j/123456789",
     fieldSchema: {
       requiresMeetingUrl: true,
+      supportsAutoGeneration: false,
       supportsPassword: true,
       supportsUsername: null,
       supportsTenantId: null,
     },
+    providerKind: "manual",
     isActive: true,
   };
 }

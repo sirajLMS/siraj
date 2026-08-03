@@ -1,7 +1,10 @@
+import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 import type {
   MeetingConfigClassScopeLabels,
   MeetingConfigDisplayLabels,
+  MeetingConfigLinkedClassInstancesLabels,
   MeetingConfigManagerLabels,
+  MeetingConfigReauthNeededLabels,
   MeetingConfigSummaryLabels,
 } from "@/shared/locale/types/ui";
 
@@ -10,4 +13,8 @@ export type MeetingConfigProfileLabels = {
   readonly classScope: MeetingConfigClassScopeLabels;
   readonly display: MeetingConfigDisplayLabels;
   readonly summary: MeetingConfigSummaryLabels;
+  readonly reauthNeeded: MeetingConfigReauthNeededLabels;
+  readonly linkedClassInstances: MeetingConfigLinkedClassInstancesLabels;
+  readonly autoGeneration: ProfileNotificationsLabels["autoGeneration"];
+  readonly connectAccount: ProfileNotificationsLabels["connectAccount"];
 };

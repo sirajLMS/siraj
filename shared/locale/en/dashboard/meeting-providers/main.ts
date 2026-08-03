@@ -53,6 +53,11 @@ export const dashboardMeetingProvidersEn: MeetingProvidersLabels = {
     supportsUsername: "Supports Username",
     supportsPassword: "Supports Password",
     supportsTenantId: "Supports Tenant ID",
+    providerKind: "Provider Type",
+    providerKindManual: "Manual (user enters URL)",
+    providerKindZoom: "Zoom (auto-generate)",
+    providerKindGoogleMeet: "Google Meet (auto-generate)",
+    providerKindTeams: "Microsoft Teams (auto-generate)",
   },
   validation: {
     slugRequired: "ID is required",

@@ -10,6 +10,7 @@ export * from "./books/book.enum";
 export * from "./classes";
 export * from "./complaints";
 export * from "./fx";
+export * from "./meeting";
 export * from "./notifications";
 export * from "./parents";
 export * from "./permissions";

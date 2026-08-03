@@ -581,6 +581,163 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
   },
 
   // ---------------------------------------------------------------------------
+  // Meeting Integrations (Zoom S2S, Google Meet DWD, Microsoft Teams Graph)
+  // ---------------------------------------------------------------------------
+  {
+    key: "ZOOM_ACCOUNT_ID",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Zoom Server-to-Server OAuth account ID.",
+      ar: "معرّف حساب Zoom لمصادقة Server-to-Server OAuth.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "ZOOM_CLIENT_ID",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Zoom Server-to-Server OAuth client ID.",
+      ar: "معرّف العميل لـ Zoom Server-to-Server OAuth.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "ZOOM_CLIENT_SECRET",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Zoom Server-to-Server OAuth client secret.",
+      ar: "سرّ العميل لـ Zoom Server-to-Server OAuth.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "GOOGLE_MEET_SERVICE_ACCOUNT_JSON",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Google service-account JSON key for Google Meet (Domain-Wide Delegation).",
+      ar: "مفتاح JSON لحساب خدمة Google لـ Google Meet (تفويض على مستوى النطاق).",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "ZOOM_REQUIRED_SCOPES",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Comma-separated OAuth scopes required for Zoom Server-to-Server OAuth.",
+      ar: "نطاقات OAuth المطلوبة لـ Zoom Server-to-Server OAuth مفصولة بفواصل.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "GOOGLE_MEET_IMPERSONATE_SUBJECT",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Google Workspace user email to impersonate for Meet space creation.",
+      ar: "بريد مستخدم Google Workspace لانتحال صلاحياته لإنشاء مساحات Meet.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "GOOGLE_MEET_CLIENT_ID",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Google Meet OAuth client ID.",
+      ar: "معرّف عميل OAuth لـ Google Meet.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "GOOGLE_MEET_CLIENT_SECRET",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Google Meet OAuth client secret.",
+      ar: "سرّ عميل OAuth لـ Google Meet.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_TENANT_ID",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Microsoft Teams (Entra ID) tenant ID for client-credentials OAuth.",
+      ar: "معرّف مستأجر Microsoft Teams (Entra ID) لمصادقة client-credentials.",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_CLIENT_ID",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Microsoft Teams (Entra ID) app registration client ID.",
+      ar: "معرّف العميل لتسجيل تطبيق Microsoft Teams (Entra ID).",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_CLIENT_SECRET",
+    category: "meeting",
+    displayStrategy: "db_with_mask_only",
+    description: {
+      en: "Microsoft Teams (Entra ID) app registration client secret.",
+      ar: "سرّ العميل لتسجيل تطبيق Microsoft Teams (Entra ID).",
+    },
+    isSecret: true,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_ORGANIZER_USER_ID",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Entra user object ID of the Teams meeting organizer.",
+      ar: "معرّف كائن مستخدم Entra لمنظّم اجتماع Teams.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "MS_TEAMS_REQUIRED_SCOPES",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Comma-separated OAuth scopes required for Microsoft Teams client-credentials OAuth.",
+      ar: "نطاقات OAuth المطلوبة لـ Microsoft Teams client-credentials مفصولة بفواصل.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "OAUTH_REDIRECT_BASE_URL",
+    category: "meeting",
+    displayStrategy: "plain",
+    description: {
+      en: "Base URL for per-teacher OAuth callback redirects.",
+      ar: "الرابط الأساسي لإعادة توجيه OAuth لكل معلّم.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+
   // WhatsApp
   // ---------------------------------------------------------------------------
   {

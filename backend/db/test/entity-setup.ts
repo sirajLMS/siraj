@@ -328,6 +328,7 @@ export async function createTestMeetingProvider(
       urlAllowlist: ["zoom.us", "*.zoom.us"],
       urlExample: "https://zoom.us/j/123456789",
       fieldSchema: { requiresMeetingUrl: true, supportsPassword: true },
+      providerKind: "manual",
       isActive: true,
       createdAt: now,
       updatedAt: now,

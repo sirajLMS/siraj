@@ -5,6 +5,29 @@ import type {
 } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 
+/** Sensitive keys within providerMetadata that must be masked for non-admin users. */
+export const SENSITIVE_METADATA_KEYS = new Set(["password", "token", "refreshToken", "accessToken"]);
+
+/**
+ * Masks sensitive fields (password, token, refreshToken, accessToken)
+ * within a providerMetadata object for non-admin viewers.
+ * Returns a shallow copy with sensitive top-level keys replaced by `"***"`.
+ */
+export function maskProviderMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+  isAdminScope: boolean
+): Record<string, unknown> | null {
+  if (!metadata || isAdminScope) {
+    return metadata ?? null;
+  }
+
+  const masked: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(metadata)) {
+    masked[key] = SENSITIVE_METADATA_KEYS.has(key) ? "***" : value;
+  }
+  return masked;
+}
+
 export function buildMaskedMeetingConfig(
   config: UserMeetingConfigSelectType,
   isAdminScope: boolean,
@@ -14,6 +37,7 @@ export function buildMaskedMeetingConfig(
     ...config,
     hasSecret: Boolean(config.encryptedSecret),
     encryptedSecret: isAdminScope ? config.encryptedSecret : null,
+    providerMetadata: maskProviderMetadata(config.providerMetadata, isAdminScope),
     provider: providerMap?.get(config.providerId),
   };
 }
@@ -34,5 +58,6 @@ export function buildMeetingProviderCatalogSnapshot(
     catalogSlug: provider.slug,
     catalogName: provider.name,
     logoUrl: provider.logoUrl,
+    supportsAutoGeneration: Boolean(provider.fieldSchema?.supportsAutoGeneration),
   };
 }

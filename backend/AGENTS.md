@@ -78,6 +78,10 @@ The backend follows a consistent pattern for defining and using types across all
 - Use a single canonical GraphQL object type per entity, extending it with resolved properties as needed
 - Never create local type definitions in Pothos files; always use types from `backend/types/`
 
+## Important References
+
+- `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference (auto URL generation for Zoom, Google Meet, Microsoft Teams)
+
 ## WhatsApp Cloud API Integration
 
 - **Canonical reference**: `docs/services/whatsapp-cloud-api.md` — covers the full integration (adapter, factory, webhook, dispatch, schema, opt-in, frontend).

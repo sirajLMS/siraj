@@ -6,9 +6,11 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
+import { logger } from "@/backend/lib/logger";
 import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
+import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
@@ -109,7 +111,7 @@ export namespace TeacherDashboardService {
       idempotencyKey,
     };
 
-    return db.transaction(async tx => {
+    const created = await db.transaction(async tx => {
       const created = await SchedulingRepository.createClassInstance(entry, tx);
 
       const openQuota = await QuotaService.selectQuotaForBooking(input.studentId, tx, userId);
@@ -122,6 +124,18 @@ export namespace TeacherDashboardService {
 
       return created;
     });
+
+    // Best-effort meeting URL generation — never fails the manual booking.
+    try {
+      await MeetingConfigSnapshotService.generateAndAttachForClassInstance(created.id);
+    } catch (error) {
+      logger.error("Booking-time meeting URL generation failed for manual class instance", {
+        classInstanceId: created.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return created;
   }
 
   export interface SupportRequestInput {

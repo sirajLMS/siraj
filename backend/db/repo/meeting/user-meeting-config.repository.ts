@@ -85,6 +85,7 @@ export namespace UserMeetingConfigRepository {
           isDefault: input.isDefault,
           details: input.details,
           encryptedSecret: input.encryptedSecret ?? null,
+          providerMetadata: input.providerMetadata ?? null,
           createdAt: now,
           updatedAt: now,
         })
@@ -109,6 +110,7 @@ export namespace UserMeetingConfigRepository {
     input: UpdateUserMeetingConfigInput & {
       details?: UserMeetingConfigInsertType["details"];
       encryptedSecret?: string | null;
+      providerMetadata?: Record<string, unknown> | null;
     },
     tErrors: ErrorsLabels,
     tx?: DBTransaction
@@ -126,6 +128,7 @@ export namespace UserMeetingConfigRepository {
         isDefault: boolean;
         details: UserMeetingConfigInsertType["details"];
         encryptedSecret: string | null;
+        providerMetadata: Record<string, unknown> | null;
         updatedAt: Date;
       }> = {
         updatedAt: new Date(),
@@ -145,6 +148,9 @@ export namespace UserMeetingConfigRepository {
       }
       if (input.encryptedSecret !== undefined) {
         updateData.encryptedSecret = input.encryptedSecret;
+      }
+      if (input.providerMetadata !== undefined) {
+        updateData.providerMetadata = input.providerMetadata;
       }
 
       const [result] = await t
@@ -235,6 +241,7 @@ export namespace UserMeetingConfigRepository {
             details: input.details,
             encryptedSecret: input.encryptedSecret,
             providerId: input.providerId,
+            providerMetadata: input.providerMetadata,
           },
           tErrors,
           t

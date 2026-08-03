@@ -19,9 +19,11 @@ export const meetingProviderFormSchema = (labels: MeetingProvidersLabels["valida
     urlAllowlist: z.array(z.string().min(1)).min(1, labels.urlAllowlistRequired),
     urlExample: z.string().optional().default(""),
     logoUrl: z.string().nullable().optional().default(null),
+    supportsAutoGeneration: z.boolean().default(false),
     supportsUsername: z.boolean().default(false),
     supportsPassword: z.boolean().default(false),
     supportsTenantId: z.boolean().default(false),
+    providerKind: z.string().optional().default("manual"),
     isActive: z.boolean().default(true),
   });
 

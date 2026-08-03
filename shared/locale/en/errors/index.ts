@@ -94,6 +94,10 @@ export const errorsEn: ErrorsLabels = {
     meetingProviderCreateFailed: "Failed to create meeting provider.",
     meetingProviderUpdateFailed: "Failed to update meeting provider.",
     meetingProviderInUse: "Meeting provider is in use and cannot be deleted.",
+    invalidReturnPath: "Invalid return path. The return path must be a relative URL.",
+    missingSubject: "Impersonation subject is required for domain-wide delegation",
+    dwdNotEnabled:
+      "Domain-Wide Delegation is not enabled for this service account. Contact your Google Workspace admin.",
   },
   parent: {
     alreadyExists: "Parent profile for this user already exists.",

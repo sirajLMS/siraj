@@ -69,6 +69,7 @@ export type JoinContext = {
   readonly t: MeetingConfigJoinLabels;
   readonly tDisplay: MeetingConfigDisplayLabels;
   readonly hasUrl: boolean;
+  readonly supportsAutoGeneration: boolean;
   readonly resolvedUrl: string | null;
   readonly buttonLabel: string;
   readonly tooltip: string;

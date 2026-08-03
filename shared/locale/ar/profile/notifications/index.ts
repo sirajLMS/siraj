@@ -6,6 +6,13 @@ export const profileNotificationsAr: ProfileNotificationsLabels = {
   saved: "تم حفظ تفضيلات الإشعارات.",
   errorLoading: "تعذر تحميل تفضيلات الإشعارات.",
   errorSaving: "تعذر حفظ تفضيلات الإشعارات.",
+  autoGeneration: {
+    title: "أوضاع التوليد التلقائي",
+    onSave: "عند الحفظ — يتم توليد رابط الاجتماع تلقائيًا عند تفعيل التوليد التلقائي",
+    preview: "معاينة — ولّد رابطًا تجريبيًا لمعرفة شكل اجتماعك",
+    booking: "الحجز — يتم توليد رابط جديد عند حجز اجتماع",
+    learnMore: "اعرف المزيد",
+  },
   categories: {
     info: "معلومات",
     reminder: "تذكيرات",
@@ -47,5 +54,17 @@ export const profileNotificationsAr: ProfileNotificationsLabels = {
     ON_DEMAND_INSTANCE_REMINDER_T3: "تذكير بالحصة (3 أيام)",
     ON_DEMAND_INSTANCE_REMINDER_T1: "تذكير بالحصة (يوم واحد)",
     ON_DEMAND_TEACHER_DAILY_DIGEST: "ملخص يومي للمعلم",
+  },
+  connectAccount: {
+    connectButton: "ربط",
+    connectingLabel: "جارٍ الربط...",
+    connectedAs: email => `مرتبط باسم ${email}`,
+    disconnectButton: "إلغاء الربط",
+    disconnectConfirmTitle: "إلغاء ربط مزود الاجتماعات",
+    disconnectConfirm: "هل أنت متأكد من إلغاء ربط هذا المزود؟ ستحتاج إلى إعادة الربط لاستخدامه مرة أخرى.",
+    confirmDisconnect: "إلغاء الربط",
+    cancel: "إلغاء",
+    reconnectButton: "إعادة الربط",
+    reconnectCallout: "أعد ربط حسابك",
   },
 };

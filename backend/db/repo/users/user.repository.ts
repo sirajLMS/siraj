@@ -61,6 +61,25 @@ export namespace UserRepository {
     return result[0] ?? null;
   };
 
+  export const findByIds = async (ids: string[], tx?: DBTransaction): Promise<Map<string, UserSelectType | null>> => {
+    if (ids.length === 0) {
+      return new Map();
+    }
+
+    const uniqueIds = [...new Set(ids)];
+    const q = queryDb(tx);
+    const results = await q.select().from(users).where(inArray(users.id, uniqueIds));
+
+    const map = new Map<string, UserSelectType | null>();
+    for (const id of uniqueIds) {
+      map.set(id, null);
+    }
+    for (const row of results) {
+      map.set(row.id, row);
+    }
+    return map;
+  };
+
   export const findByPhone = async (phone: string, tx?: DBTransaction): Promise<UserSelectType | null> => {
     const q = queryDb(tx);
     // Order by createdAt for deterministic first-match when multiple users share a phone.

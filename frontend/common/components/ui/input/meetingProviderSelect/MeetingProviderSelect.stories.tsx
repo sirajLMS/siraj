@@ -12,10 +12,12 @@ const mockProvider = {
   logoUrl: null,
   fieldSchema: {
     requiresMeetingUrl: true,
+    supportsAutoGeneration: false,
     supportsUsername: true,
     supportsPassword: true,
     supportsTenantId: null,
   },
+  providerKind: "manual",
   isActive: true,
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",

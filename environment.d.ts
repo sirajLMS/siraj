@@ -138,6 +138,22 @@ declare global {
        */
       BLOB_READ_WRITE_TOKEN?: string;
 
+      // Meeting Integrations (auto-generation)
+      ZOOM_ACCOUNT_ID?: string;
+      ZOOM_CLIENT_ID?: string;
+      ZOOM_CLIENT_SECRET?: string;
+      ZOOM_REQUIRED_SCOPES?: string;
+      GOOGLE_MEET_SERVICE_ACCOUNT_JSON?: string;
+      GOOGLE_MEET_IMPERSONATE_SUBJECT?: string;
+      GOOGLE_MEET_CLIENT_ID?: string;
+      GOOGLE_MEET_CLIENT_SECRET?: string;
+      MS_TEAMS_TENANT_ID?: string;
+      MS_TEAMS_CLIENT_ID?: string;
+      MS_TEAMS_CLIENT_SECRET?: string;
+      MS_TEAMS_REQUIRED_SCOPES?: string;
+      MS_TEAMS_ORGANIZER_USER_ID?: string;
+      OAUTH_REDIRECT_BASE_URL?: string;
+
       // Demo Site Configuration
       // NEXT_PUBLIC_IS_DEMO controls the client-side demo UI (fast-login buttons).
       // IS_DEMO is the authoritative server-side gate for the demoLogin mutation.
