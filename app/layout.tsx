@@ -103,6 +103,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         {process.env.NODE_ENV === "production" ? (
           <script
             nonce={nonce}
+            // Browsers hide nonce from the DOM after parse; suppress expected SSR/client mismatch.
+            suppressHydrationWarning
             // biome-ignore lint/security/noDangerouslySetInnerHtml: Service worker registration script
             dangerouslySetInnerHTML={{
               __html:
@@ -114,6 +116,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         ) : (
           <script
             nonce={nonce}
+            // Browsers hide nonce from the DOM after parse; suppress expected SSR/client mismatch.
+            suppressHydrationWarning
             // biome-ignore lint/security/noDangerouslySetInnerHtml: Unregister stale SW left over from prod-mode caching of Turbopack chunks
             dangerouslySetInnerHTML={{
               __html:

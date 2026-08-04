@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
@@ -210,5 +210,59 @@ export namespace RecurringScheduleRepository {
       .update(recurringSchedules)
       .set({ schedulingMode: mode, updatedAt: now })
       .where(eq(recurringSchedules.id, id));
+  }
+
+  export async function findAll(
+    tx?: DBTransaction,
+    options?: {
+      page?: number;
+      pageSize?: number;
+      search?: string;
+    }
+  ): Promise<{ rows: RecurringScheduleSelectType[]; totalCount: number }> {
+    const q = queryDb(tx);
+    const page = options?.page ?? 1;
+    const pageSize = options?.pageSize ?? 20;
+    const offset = (page - 1) * pageSize;
+
+    const whereConditions = [isNull(recurringSchedules.deletedAt)];
+
+    if (options?.search) {
+      const searchPattern = `%${options.search}%`;
+      whereConditions.push(sql`(${students.name} ILIKE ${searchPattern} OR ${users.name} ILIKE ${searchPattern})`);
+    }
+
+    const [rows, [{ count: totalCount }]] = await Promise.all([
+      q
+        .select({
+          schedule: recurringSchedules,
+          studentName: students.name,
+          teacherUserName: users.name,
+        })
+        .from(recurringSchedules)
+        .innerJoin(students, eq(recurringSchedules.studentId, students.id))
+        .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))
+        .innerJoin(users, eq(teachers.userId, users.id))
+        .where(and(...whereConditions))
+        .orderBy(desc(recurringSchedules.createdAt))
+        .limit(pageSize)
+        .offset(offset),
+      q
+        .select({ count: sql<number>`count(*)` })
+        .from(recurringSchedules)
+        .innerJoin(students, eq(recurringSchedules.studentId, students.id))
+        .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))
+        .innerJoin(users, eq(teachers.userId, users.id))
+        .where(and(...whereConditions)),
+    ]);
+
+    return {
+      rows: rows.map(row => ({
+        ...row.schedule,
+        studentName: row.studentName,
+        teacherUserName: row.teacherUserName,
+      })) as RecurringScheduleSelectType[],
+      totalCount: Number(totalCount),
+    };
   }
 }

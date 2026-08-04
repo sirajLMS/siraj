@@ -12,6 +12,7 @@ export function TemplatesTabContent({
   loading,
   syncing,
   onSyncFromMeta,
+  isConfigured,
 }: Readonly<TemplatesTabSharedProps>) {
   const t = labels.page;
 
@@ -32,7 +33,12 @@ export function TemplatesTabContent({
             {t.templatesSubtitle}
           </Typography>
         </Box>
-        <Button variant="outlined" startIcon={<CloudSyncOutlined />} disabled={syncing} onClick={onSyncFromMeta}>
+        <Button
+          variant="outlined"
+          startIcon={<CloudSyncOutlined />}
+          disabled={syncing || !isConfigured}
+          onClick={onSyncFromMeta}
+        >
           {syncing ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
           {t.syncTemplates}
         </Button>

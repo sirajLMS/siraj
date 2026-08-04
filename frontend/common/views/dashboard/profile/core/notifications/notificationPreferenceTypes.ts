@@ -50,6 +50,52 @@ export const NOTIFICATION_EVENT_CATEGORY: Record<NotificationEventType, Notifica
   [NotificationEventType.OnDemandTeacherDailyDigest]: "digest",
 };
 
+export const NOTIFICATION_CHANNELS = [
+  NotificationChannel.Email,
+  NotificationChannel.Sms,
+  NotificationChannel.Push,
+  NotificationChannel.OnApp,
+  NotificationChannel.Whatsapp,
+] as const;
+
+/** Full event catalog — staff/parent/teacher/admin matrices use this when allowlist is ALL. */
+export const NOTIFICATION_EVENT_TYPES = [
+  NotificationEventType.ClassReminder,
+  NotificationEventType.InvoiceGenerated,
+  NotificationEventType.ComplaintResponse,
+  NotificationEventType.PaymentMethodChanged,
+  NotificationEventType.NewComplaint,
+  NotificationEventType.NewSuggestion,
+  NotificationEventType.SuggestionAcknowledged,
+  NotificationEventType.SuggestionDuplicateMarked,
+  // Notification Wiring v5 — 14 new event types (specs.md §4.1)
+  NotificationEventType.InvoiceStatusChanged,
+  NotificationEventType.ClassScheduled,
+  NotificationEventType.ClassActivated,
+  NotificationEventType.ClassStarted,
+  NotificationEventType.ClassCompleted,
+  NotificationEventType.ClassMarkedAbsent,
+  NotificationEventType.ClassMarkedMissed,
+  NotificationEventType.ClassLeaveRequested,
+  NotificationEventType.ClassRescheduled,
+  NotificationEventType.ClassCancelled,
+  NotificationEventType.ClassReset,
+  NotificationEventType.StudentTeacherReassigned,
+  NotificationEventType.StudentStatusChanged,
+  NotificationEventType.StudentQuotaOverridden,
+  // Student/supervisor notification integration
+  NotificationEventType.LessonReportSubmitted,
+  NotificationEventType.LessonReportReviewed,
+  // Quota & on-demand notification events
+  NotificationEventType.QuotaExpiringSoon,
+  NotificationEventType.QuotaExpired,
+  NotificationEventType.QuotaLowBalance,
+  NotificationEventType.OnDemandInstancePendingCredit,
+  NotificationEventType.OnDemandInstanceReminderT3,
+  NotificationEventType.OnDemandInstanceReminderT1,
+  NotificationEventType.OnDemandTeacherDailyDigest,
+] as const;
+
 /** Reverse lookup: category → event types (for category-level toggles). */
 export const NOTIFICATION_EVENT_TYPES_BY_CATEGORY: Record<NotificationEventCategory, readonly NotificationEventType[]> =
   (["urgent", "reminder", "info", "digest"] as NotificationEventCategory[]).reduce(
@@ -146,51 +192,6 @@ export interface NotificationPreferencesTabVariantProps {
   /** Toggle all events in a category — called from category-level switch. */
   readonly onCategoryToggle?: (category: NotificationEventCategory, enabled: boolean) => void;
 }
-export const NOTIFICATION_CHANNELS = [
-  NotificationChannel.Email,
-  NotificationChannel.Sms,
-  NotificationChannel.Push,
-  NotificationChannel.OnApp,
-  NotificationChannel.Whatsapp,
-] as const;
-
-/** Full event catalog — staff/parent/teacher/admin matrices use this when allowlist is ALL. */
-export const NOTIFICATION_EVENT_TYPES = [
-  NotificationEventType.ClassReminder,
-  NotificationEventType.InvoiceGenerated,
-  NotificationEventType.ComplaintResponse,
-  NotificationEventType.PaymentMethodChanged,
-  NotificationEventType.NewComplaint,
-  NotificationEventType.NewSuggestion,
-  NotificationEventType.SuggestionAcknowledged,
-  NotificationEventType.SuggestionDuplicateMarked,
-  // Notification Wiring v5 — 14 new event types (specs.md §4.1)
-  NotificationEventType.InvoiceStatusChanged,
-  NotificationEventType.ClassScheduled,
-  NotificationEventType.ClassActivated,
-  NotificationEventType.ClassStarted,
-  NotificationEventType.ClassCompleted,
-  NotificationEventType.ClassMarkedAbsent,
-  NotificationEventType.ClassMarkedMissed,
-  NotificationEventType.ClassLeaveRequested,
-  NotificationEventType.ClassRescheduled,
-  NotificationEventType.ClassCancelled,
-  NotificationEventType.ClassReset,
-  NotificationEventType.StudentTeacherReassigned,
-  NotificationEventType.StudentStatusChanged,
-  NotificationEventType.StudentQuotaOverridden,
-  // Student/supervisor notification integration
-  NotificationEventType.LessonReportSubmitted,
-  NotificationEventType.LessonReportReviewed,
-  // Quota & on-demand notification events
-  NotificationEventType.QuotaExpiringSoon,
-  NotificationEventType.QuotaExpired,
-  NotificationEventType.QuotaLowBalance,
-  NotificationEventType.OnDemandInstancePendingCredit,
-  NotificationEventType.OnDemandInstanceReminderT3,
-  NotificationEventType.OnDemandInstanceReminderT1,
-  NotificationEventType.OnDemandTeacherDailyDigest,
-] as const;
 
 /**
  * Maps viewer `UserRole` / `ProfileAudience` to the shared prefs allowlist role.

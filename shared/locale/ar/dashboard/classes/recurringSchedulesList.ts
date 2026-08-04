@@ -1,0 +1,28 @@
+import type { RecurringSchedulesListLabels } from "@/shared/locale/types/dashboard/classes/recurringSchedulesList";
+
+export const recurringSchedulesList: RecurringSchedulesListLabels = {
+  shell: {
+    pageTitle: "الجداول المتكررة",
+    subtitle: "إدارة جداول الفصول المتكررة",
+    breadcrumbDashboard: "لوحة التحكم",
+    breadcrumbClasses: "الفصول",
+    emptyMessage: "لم يتم العثور على جداول متكررة",
+    loadError: "فشل تحميل الجداول المتكررة",
+  },
+  columns: {
+    student: "الطالب",
+    teacher: "المعلم",
+    schedule: "الجدول",
+    duration: "المدة",
+    rate: "السعر",
+    actions: "الإجراءات",
+  },
+  actions: {
+    view: "عرض",
+    edit: "تعديل",
+  },
+  filters: {
+    searchPlaceholder: "البحث حسب الطالب أو المعلم...",
+    searchLabel: "بحث",
+  },
+};

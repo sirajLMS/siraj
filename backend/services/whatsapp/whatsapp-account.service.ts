@@ -686,6 +686,11 @@ export namespace WhatsappAccountService {
 
   // REQ-10/BL1: Per-user opt-in helpers
 
+  export async function isConfigured(): Promise<boolean> {
+    const { whatsappChannel } = await import("@/backend/services/communication/channels/whatsapp");
+    return whatsappChannel.validateConfig();
+  }
+
   export async function isUserWhatsappOptIn(userId: string, tx?: DBTransaction): Promise<boolean> {
     const prefs = await NotificationPreferencesRepository.getByUserId(userId, tx);
     // REQ-10: WhatsApp defaults to OFF — only return true if explicit WHATSAPP prefs exist and all are enabled

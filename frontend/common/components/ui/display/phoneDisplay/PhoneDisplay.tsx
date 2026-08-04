@@ -33,7 +33,7 @@ export const PhoneDisplay: React.FC<PhoneDisplayProps> = ({
   const display = masked ? maskPhone(phone, defaultRegion) : formatPhoneDisplay(phone, locale);
 
   return (
-    <Typography variant={typographyVariant} dir="ltr" sx={{ whiteSpace: "nowrap", ...sx }}>
+    <Typography component="span" variant={typographyVariant} dir="ltr" sx={{ whiteSpace: "nowrap", ...sx }}>
       {display}
     </Typography>
   );

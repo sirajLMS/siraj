@@ -155,6 +155,7 @@ export function NumbersTabDesktop({
   onSyncFromMeta,
   onDeleteAccount,
   onDismissSnackbar,
+  isConfigured,
 }: Readonly<NumbersTabSharedProps>) {
   const t = labels.page;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -229,7 +230,12 @@ export function NumbersTabDesktop({
             {t.numbersSubtitle}
           </Typography>
         </Box>
-        <Button variant="outlined" startIcon={<CloudSyncOutlined />} disabled={syncing} onClick={onSyncFromMeta}>
+        <Button
+          variant="outlined"
+          startIcon={<CloudSyncOutlined />}
+          disabled={syncing || !isConfigured}
+          onClick={onSyncFromMeta}
+        >
           {syncing ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
           {t.syncFromMeta}
         </Button>

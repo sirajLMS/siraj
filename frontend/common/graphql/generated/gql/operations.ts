@@ -5014,6 +5014,23 @@ export type RecurringScheduleQueryVariables = Exact<{
 
 export type RecurringScheduleQuery = RecurringScheduleQuery_Query;
 
+export type RecurringSchedulesQuery_recurringSchedules_RecurringSchedulesPaginatedResult_rows_RecurringScheduleListItem = { id: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, durationMinutes: number | null, defaultStartTime: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, createdAt: string | null, updatedAt: string | null };
+
+export type RecurringSchedulesQuery_recurringSchedules_RecurringSchedulesPaginatedResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type RecurringSchedulesQuery_recurringSchedules_RecurringSchedulesPaginatedResult = { id: string | null, totalCount: number | null, rows: Array<RecurringSchedulesQuery_recurringSchedules_RecurringSchedulesPaginatedResult_rows_RecurringScheduleListItem> | null, pageInfo: RecurringSchedulesQuery_recurringSchedules_RecurringSchedulesPaginatedResult_pageInfo_PageInfo | null };
+
+export type RecurringSchedulesQuery_Query = { recurringSchedules: RecurringSchedulesQuery_recurringSchedules_RecurringSchedulesPaginatedResult | null };
+
+
+export type RecurringSchedulesQueryVariables = Exact<{
+  pagination: Types.PaginationArgs | null | undefined;
+  search: string | null | undefined;
+}>;
+
+
+export type RecurringSchedulesQuery = RecurringSchedulesQuery_Query;
+
 export type UpdateRecurringClassRateMutation_updateRecurringClassRate_RecurringScheduleDetail = { id: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null };
 
 export type UpdateRecurringClassRateMutation_Mutation = { updateRecurringClassRate: UpdateRecurringClassRateMutation_updateRecurringClassRate_RecurringScheduleDetail | null };
@@ -6341,3 +6358,11 @@ export type SyncWhatsappAccountsFromMetaMutationVariables = Exact<{ [key: string
 
 
 export type SyncWhatsappAccountsFromMetaMutation = SyncWhatsappAccountsFromMetaMutation_Mutation;
+
+export type IsWhatsappConfiguredQuery_Query = { isWhatsappConfigured: boolean };
+
+
+export type IsWhatsappConfiguredQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type IsWhatsappConfiguredQuery = IsWhatsappConfiguredQuery_Query;

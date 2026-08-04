@@ -18,6 +18,7 @@ import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/a
 import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass.ts";
 import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details.ts";
 import type { MainLabels as ClassesMainLabels } from "@/shared/locale/types/dashboard/classes/main.ts";
+import type { RecurringSchedulesListLabels } from "@/shared/locale/types/dashboard/classes/recurringSchedulesList.ts";
 import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm.ts";
 import type { RescheduleTrackingLabels } from "@/shared/locale/types/dashboard/classes/rescheduleTracking.ts";
 import type { ComplaintsLabels } from "@/shared/locale/types/dashboard/complaints";
@@ -149,6 +150,7 @@ export interface DashboardTranslations {
   classAudit: ClassAuditLabels;
   classDetails: ClassDetailsLabels;
   createRecurringClass: CreateRecurringClassLabels;
+  recurringSchedulesList: RecurringSchedulesListLabels;
   rescheduleForm: RescheduleFormLabels;
   rescheduleTracking: RescheduleTrackingLabels;
   complaints: ComplaintsLabels;
