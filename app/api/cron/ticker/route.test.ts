@@ -74,6 +74,29 @@ async function parseJson(response: Response): Promise<Record<string, unknown>> {
   return await response.json();
 }
 
+function expectNoServiceCalls() {
+  expect(mockDispatchDue).toHaveBeenCalledTimes(0);
+  expect(mockDrainLoop).toHaveBeenCalledTimes(0);
+  expect(mockReconcile).toHaveBeenCalledTimes(0);
+}
+
+const DEFAULT_TICKER_BODY = {
+  dispatchedCount: 2,
+  skippedCount: 1,
+  processedCount: 3,
+  failedCount: 0,
+  retriedCount: 0,
+  stuckRunsReconciled: 0,
+  nextTickInMs: 60_000,
+} as const;
+
+function expectTickerBody(
+  body: Record<string, unknown>,
+  expected: Record<string, unknown> = { ...DEFAULT_TICKER_BODY }
+) {
+  expect(body).toEqual(expected);
+}
+
 // --- Tests ---
 
 describe("GET /api/cron/ticker", () => {
@@ -91,9 +114,7 @@ describe("GET /api/cron/ticker", () => {
     expect(response.status).toBe(401);
 
     // Service methods should NOT have been called
-    expect(mockDispatchDue).toHaveBeenCalledTimes(0);
-    expect(mockDrainLoop).toHaveBeenCalledTimes(0);
-    expect(mockReconcile).toHaveBeenCalledTimes(0);
+    expectNoServiceCalls();
   });
 
   test("returns 405 for non-GET methods", async () => {
@@ -103,9 +124,7 @@ describe("GET /api/cron/ticker", () => {
     const response = await GET(request);
     expect(response.status).toBe(405);
 
-    expect(mockDispatchDue).toHaveBeenCalledTimes(0);
-    expect(mockDrainLoop).toHaveBeenCalledTimes(0);
-    expect(mockReconcile).toHaveBeenCalledTimes(0);
+    expectNoServiceCalls();
   });
 
   test("happy path: calls dispatch, drain, reconcile and returns 200 with correct JSON", async () => {
@@ -120,15 +139,7 @@ describe("GET /api/cron/ticker", () => {
     expect(mockReconcile).toHaveBeenCalledTimes(1);
 
     const body = await parseJson(response);
-    expect(body).toEqual({
-      dispatchedCount: 2,
-      skippedCount: 1,
-      processedCount: 3,
-      failedCount: 0,
-      retriedCount: 0,
-      stuckRunsReconciled: 0,
-      nextTickInMs: 60_000,
-    });
+    expectTickerBody(body);
   });
 
   test("happy path with NOOP schedules: dispatch returns NOOP-kinded schedules processed correctly", async () => {
@@ -145,7 +156,7 @@ describe("GET /api/cron/ticker", () => {
     expect(mockDrainLoop).toHaveBeenCalledTimes(1);
 
     const body = await parseJson(response);
-    expect(body).toEqual({
+    expectTickerBody(body, {
       dispatchedCount: 1,
       skippedCount: 0,
       processedCount: 1,
@@ -192,15 +203,7 @@ describe("GET /api/cron/ticker", () => {
 
     const body1 = await parseJson(response1 as Response);
     const body2 = await parseJson(response2 as Response);
-    expect(body1).toEqual({
-      dispatchedCount: 2,
-      skippedCount: 1,
-      processedCount: 3,
-      failedCount: 0,
-      retriedCount: 0,
-      stuckRunsReconciled: 0,
-      nextTickInMs: 60_000,
-    });
+    expectTickerBody(body1);
     expect(body2).toEqual(body1);
   });
 
@@ -216,9 +219,7 @@ describe("GET /api/cron/ticker", () => {
       const response = await GET(request);
 
       expect(response.status).toBe(500);
-      expect(mockDispatchDue).toHaveBeenCalledTimes(0);
-      expect(mockDrainLoop).toHaveBeenCalledTimes(0);
-      expect(mockReconcile).toHaveBeenCalledTimes(0);
+      expectNoServiceCalls();
     } finally {
       (process.env as Record<string, string | undefined>).NODE_ENV = originalNodeEnv;
       if (originalCronSecret !== undefined) {

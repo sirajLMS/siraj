@@ -405,25 +405,48 @@ export namespace TeacherAvailabilityRepository {
     return tx ? runner(tx) : db.transaction(runner);
   }
 
+  async function addWindowWithLock<
+    TTable extends typeof teacherAvailabilityWindows | typeof teacherRecurringUnavailability,
+  >(
+    teacherId: string,
+    input: Types.AvailabilityWindowInput,
+    insertValues: Record<string, unknown>,
+    insertTable: TTable,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<
+    TTable extends typeof teacherAvailabilityWindows
+      ? Types.TeacherAvailabilityWindowSelectType
+      : Types.TeacherRecurringUnavailabilitySelectType
+  > {
+    const runner = async (t: DBTransaction) => {
+      await acquireAvailabilityLock(t, teacherId);
+      await assertValidTimeRange(input.startTime, input.endTime, locale);
+
+      const [created] = await t
+        .insert(insertTable)
+        .values(insertValues as never)
+        .returning();
+      return created as never;
+    };
+
+    return withTransaction(runner, tx);
+  }
+
   export const addAvailabilityWindow = async (
     teacherId: string,
     input: Types.AvailabilityWindowInput,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherAvailabilityWindowSelectType> => {
-    const runner = async (t: DBTransaction) => {
-      await acquireAvailabilityLock(t, teacherId);
-      await assertValidTimeRange(input.startTime, input.endTime, locale);
-
-      const [created] = await t
-        .insert(teacherAvailabilityWindows)
-        .values(buildCommonWindowValues(teacherId, input))
-        .returning();
-
-      return created;
-    };
-
-    return withTransaction(runner, tx);
+    return addWindowWithLock(
+      teacherId,
+      input,
+      buildCommonWindowValues(teacherId, input),
+      teacherAvailabilityWindows,
+      tx,
+      locale
+    );
   };
 
   export const addRecurringUnavailability = async (
@@ -432,22 +455,17 @@ export namespace TeacherAvailabilityRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherRecurringUnavailabilitySelectType> => {
-    const runner = async (t: DBTransaction) => {
-      await acquireAvailabilityLock(t, teacherId);
-      await assertValidTimeRange(input.startTime, input.endTime, locale);
-
-      const [created] = await t
-        .insert(teacherRecurringUnavailability)
-        .values({
-          ...buildCommonWindowValues(teacherId, input),
-          reason: input.reason ?? null,
-        })
-        .returning();
-
-      return created;
-    };
-
-    return withTransaction(runner, tx);
+    return addWindowWithLock(
+      teacherId,
+      input,
+      {
+        ...buildCommonWindowValues(teacherId, input),
+        reason: input.reason ?? null,
+      },
+      teacherRecurringUnavailability,
+      tx,
+      locale
+    );
   };
 
   export const submitVacationRequest = async (
@@ -767,6 +785,40 @@ export namespace TeacherAvailabilityRepository {
     }
   };
 
+  type BatchAvailabilityRows = [
+    { startAt: Date; endAt: Date }[],
+    (typeof teacherRecurringUnavailability.$inferSelect)[],
+    (typeof teacherAvailabilityWindows.$inferSelect)[],
+  ];
+
+  function computeSlotBounds(slots: { startTime: Date; endTime: Date }[]): { earliestStart: Date; latestEnd: Date } {
+    const earliestStart = slots.reduce((min, s) => (s.startTime < min ? s.startTime : min), slots[0].startTime);
+    const latestEnd = slots.reduce((max, s) => (s.endTime > max ? s.endTime : max), slots[0].endTime);
+    return { earliestStart, latestEnd };
+  }
+
+  async function fetchBatchAvailabilityRows(
+    t: DBTransaction | typeof db,
+    teacherId: string,
+    earliestStart: Date,
+    latestEnd: Date
+  ): Promise<BatchAvailabilityRows> {
+    return Promise.all([
+      t
+        .select({ startAt: teacherVacationRequests.startAt, endAt: teacherVacationRequests.endAt })
+        .from(teacherVacationRequests)
+        .where(
+          and(
+            eq(teacherVacationRequests.teacherId, teacherId),
+            eq(teacherVacationRequests.status, VacationRequestStatus.APPROVED),
+            sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${earliestStart}, ${latestEnd})`
+          )
+        ),
+      t.select().from(teacherRecurringUnavailability).where(eq(teacherRecurringUnavailability.teacherId, teacherId)),
+      t.select().from(teacherAvailabilityWindows).where(eq(teacherAvailabilityWindows.teacherId, teacherId)),
+    ]);
+  }
+
   /**
    * Batched validation of a teacher's availability for multiple occurrences.
    *
@@ -786,23 +838,13 @@ export namespace TeacherAvailabilityRepository {
     if (slots.length === 0) return;
     const t = tx ?? db;
 
-    const earliestStart = slots.reduce((min, s) => (s.startTime < min ? s.startTime : min), slots[0].startTime);
-    const latestEnd = slots.reduce((max, s) => (s.endTime > max ? s.endTime : max), slots[0].endTime);
-
-    const [vacationsRows, unavailabilityRows, windowRows] = await Promise.all([
-      t
-        .select({ startAt: teacherVacationRequests.startAt, endAt: teacherVacationRequests.endAt })
-        .from(teacherVacationRequests)
-        .where(
-          and(
-            eq(teacherVacationRequests.teacherId, teacherId),
-            eq(teacherVacationRequests.status, VacationRequestStatus.APPROVED),
-            sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${earliestStart}, ${latestEnd})`
-          )
-        ),
-      t.select().from(teacherRecurringUnavailability).where(eq(teacherRecurringUnavailability.teacherId, teacherId)),
-      t.select().from(teacherAvailabilityWindows).where(eq(teacherAvailabilityWindows.teacherId, teacherId)),
-    ]);
+    const { earliestStart, latestEnd } = computeSlotBounds(slots);
+    const [vacationsRows, unavailabilityRows, windowRows] = await fetchBatchAvailabilityRows(
+      t,
+      teacherId,
+      earliestStart,
+      latestEnd
+    );
 
     for (const slot of slots) {
       validateSlotInMemory(slot, vacationsRows, unavailabilityRows, windowRows, locale);
@@ -827,23 +869,13 @@ export namespace TeacherAvailabilityRepository {
     if (slots.length === 0) return [];
     const t = tx ?? db;
 
-    const earliestStart = slots.reduce((min, s) => (s.startTime < min ? s.startTime : min), slots[0]?.startTime);
-    const latestEnd = slots.reduce((max, s) => (s.endTime > max ? s.endTime : max), slots[0]?.endTime);
-
-    const [vacationsRows, unavailabilityRows, windowRows] = await Promise.all([
-      t
-        .select({ startAt: teacherVacationRequests.startAt, endAt: teacherVacationRequests.endAt })
-        .from(teacherVacationRequests)
-        .where(
-          and(
-            eq(teacherVacationRequests.teacherId, teacherId),
-            eq(teacherVacationRequests.status, VacationRequestStatus.APPROVED),
-            sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${earliestStart}, ${latestEnd})`
-          )
-        ),
-      t.select().from(teacherRecurringUnavailability).where(eq(teacherRecurringUnavailability.teacherId, teacherId)),
-      t.select().from(teacherAvailabilityWindows).where(eq(teacherAvailabilityWindows.teacherId, teacherId)),
-    ]);
+    const { earliestStart, latestEnd } = computeSlotBounds(slots);
+    const [vacationsRows, unavailabilityRows, windowRows] = await fetchBatchAvailabilityRows(
+      t,
+      teacherId,
+      earliestStart,
+      latestEnd
+    );
 
     return slots.map(slot => {
       try {

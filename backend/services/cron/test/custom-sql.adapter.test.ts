@@ -43,6 +43,39 @@ function makeJob(overrides?: Partial<CronJobPayload>): CronJobPayload {
   };
 }
 
+/**
+ * Creates and inits a fresh adapter.
+ * Mocks are reset between tests by the `beforeEach` hook, so this must NOT
+ * reset them here — callers set up query return values (mockQueryEmpty /
+ * mockQueryReturn) before calling this, and a reset would wipe that.
+ */
+async function setupAdapter() {
+  const adapter = createCustomSqlAdapter();
+  await adapter.init();
+  return adapter;
+}
+
+/**
+ * Finds a query mock call by searching for a substring in the SQL text.
+ */
+function findQueryCall(searchText: string) {
+  return queryMock.mock.calls.find(c => typeof c[0] === "string" && (c[0] as string).includes(searchText));
+}
+
+/**
+ * Sets up the query mock to return the given rows for all calls.
+ */
+function mockQueryReturn(rows: unknown[]) {
+  queryMock.mockImplementation(() => Promise.resolve({ rows, rowCount: rows.length }));
+}
+
+/**
+ * Sets up the query mock to return empty rows with the given rowCount.
+ */
+function mockQueryEmpty(rowCount = 0) {
+  queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount }));
+}
+
 describe("custom-sql.adapter", () => {
   beforeEach(() => {
     queryMock.mockReset();
@@ -52,16 +85,14 @@ describe("custom-sql.adapter", () => {
   // ── init / start ──
 
   test("init creates the cron_queue table on first call", async () => {
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    await setupAdapter();
 
     const firstCall = queryMock.mock.calls[0];
     expect(firstCall?.[0]).toContain("CREATE TABLE IF NOT EXISTS cron_queue");
   });
 
   test("init is lazy — subsequent calls do not re-run CREATE TABLE", async () => {
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    const adapter = await setupAdapter();
     const callsAfterFirstInit = queryMock.mock.calls.length;
     await adapter.init();
     expect(queryMock.mock.calls).toHaveLength(callsAfterFirstInit);
@@ -70,18 +101,15 @@ describe("custom-sql.adapter", () => {
   // ── send ──
 
   test("send inserts a pending row and returns a queue id", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     const job = makeJob();
     const id = await adapter.send(job);
 
     expect(id).toMatch(/^cq_/);
 
-    const insertCall = queryMock.mock.calls.find(
-      c => typeof c[0] === "string" && (c[0] as string).includes("INSERT INTO cron_queue")
-    );
+    const insertCall = findQueryCall("INSERT INTO cron_queue");
     expect(insertCall).toBeDefined();
     const values = insertCall?.[1] as unknown[];
     expect(values).toContain(job.runId);
@@ -92,9 +120,8 @@ describe("custom-sql.adapter", () => {
   });
 
   test("send stores the mapping from runId to queueId internally", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     const job = makeJob({ runId: "run-mapped" });
     const id = await adapter.send(job);
@@ -128,9 +155,8 @@ describe("custom-sql.adapter", () => {
         timeout_seconds: 240,
       },
     ];
-    queryMock.mockImplementation(() => Promise.resolve({ rows, rowCount: rows.length }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryReturn(rows);
+    const adapter = await setupAdapter();
 
     const result = await adapter.fetch({ count: 5 });
 
@@ -156,23 +182,19 @@ describe("custom-sql.adapter", () => {
   });
 
   test("fetch uses FOR UPDATE SKIP LOCKED and LIMIT $1", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 0 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(0);
+    const adapter = await setupAdapter();
 
     await adapter.fetch({ count: 10 });
 
-    const fetchCall = queryMock.mock.calls.find(
-      c => typeof c[0] === "string" && (c[0] as string).includes("FOR UPDATE SKIP LOCKED")
-    );
+    const fetchCall = findQueryCall("FOR UPDATE SKIP LOCKED");
     expect(fetchCall).toBeDefined();
     expect(fetchCall?.[1]).toEqual([10]);
   });
 
   test("fetch returns empty array when no rows are available", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 0 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(0);
+    const adapter = await setupAdapter();
 
     const result = await adapter.fetch({ count: 1 });
     expect(result).toEqual([]);
@@ -181,23 +203,19 @@ describe("custom-sql.adapter", () => {
   // ── complete ──
 
   test("complete deletes the queue row", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     await adapter.complete("cq_complete_1");
 
-    const deleteCall = queryMock.mock.calls.find(
-      c => typeof c[0] === "string" && (c[0] as string).includes("DELETE FROM cron_queue")
-    );
+    const deleteCall = findQueryCall("DELETE FROM cron_queue");
     expect(deleteCall).toBeDefined();
     expect(deleteCall?.[1]).toEqual(["cq_complete_1"]);
   });
 
   test("complete is idempotent when called with an unknown id", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 0 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(0);
+    const adapter = await setupAdapter();
 
     await expect(adapter.complete("nonexistent")).resolves.toBeUndefined();
   });
@@ -205,15 +223,12 @@ describe("custom-sql.adapter", () => {
   // ── fail ──
 
   test("fail updates status to failed and stores error info", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     await adapter.fail("cq_fail_1", "something went wrong", "stack-trace");
 
-    const failCall = queryMock.mock.calls.find(
-      c => typeof c[0] === "string" && (c[0] as string).includes("UPDATE cron_queue SET status = 'failed'")
-    );
+    const failCall = findQueryCall("UPDATE cron_queue SET status = 'failed'");
     expect(failCall).toBeDefined();
     const values = failCall?.[1] as unknown[];
     expect(values[0]).toBe("cq_fail_1");
@@ -222,24 +237,20 @@ describe("custom-sql.adapter", () => {
   });
 
   test("fail with no stack passes null", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     await adapter.fail("cq_fail_2", "err");
 
-    const failCall = queryMock.mock.calls.find(
-      c => typeof c[0] === "string" && (c[0] as string).includes("UPDATE cron_queue SET status = 'failed'")
-    );
+    const failCall = findQueryCall("UPDATE cron_queue SET status = 'failed'");
     expect(failCall?.[1]?.[2]).toBeNull();
   });
 
   // ── retry ──
 
   test("retry resets status to pending with a delay", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     await adapter.retry("cq_retry_1", 30, 2);
 
@@ -257,15 +268,12 @@ describe("custom-sql.adapter", () => {
   });
 
   test("retry with no newAttempt passes null", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     await adapter.retry("cq_retry_2", 15);
 
-    const retryCall = queryMock.mock.calls.find(
-      c => typeof c[0] === "string" && (c[0] as string).includes("SET status = 'pending'")
-    );
+    const retryCall = findQueryCall("SET status = 'pending'");
     expect(retryCall?.[1]?.[2]).toBe(0);
   });
 
@@ -278,9 +286,8 @@ describe("custom-sql.adapter", () => {
       { job_kind: "NOOP", status: "failed", count: "2" },
       { job_kind: "REPORT", status: "pending", count: "5" },
     ];
-    queryMock.mockImplementation(() => Promise.resolve({ rows, rowCount: rows.length }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryReturn(rows);
+    const adapter = await setupAdapter();
 
     const stats: CronQueueStats = await adapter.getQueueStats();
 
@@ -297,9 +304,8 @@ describe("custom-sql.adapter", () => {
   });
 
   test("getQueueStats returns zeroes when table is empty", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 0 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(0);
+    const adapter = await setupAdapter();
 
     const stats = await adapter.getQueueStats();
     expect(stats).toEqual({
@@ -314,9 +320,8 @@ describe("custom-sql.adapter", () => {
   // ── shutdown ──
 
   test("shutdown closes the pool and clears maps", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     // Send a job so maps are populated.
     await adapter.send(makeJob());
@@ -344,9 +349,8 @@ describe("custom-sql.adapter", () => {
   // ── retry / complete map cleanup ──
 
   test("complete cleans up internal runId→queueId mapping", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     const job = makeJob({ runId: "run-cleanup" });
     const queueId = await adapter.send(job);
@@ -354,25 +358,20 @@ describe("custom-sql.adapter", () => {
     await adapter.complete(queueId);
 
     // The DELETE query should have been issued with the queue id.
-    const deleteCall = queryMock.mock.calls.find(
-      c => typeof c[0] === "string" && (c[0] as string).includes("DELETE FROM cron_queue")
-    );
+    const deleteCall = findQueryCall("DELETE FROM cron_queue");
     expect(deleteCall?.[1]).toEqual([queueId]);
   });
 
   test("fail cleans up internal runId→queueId mapping", async () => {
-    queryMock.mockImplementation(() => Promise.resolve({ rows: [], rowCount: 1 }));
-    const adapter = createCustomSqlAdapter();
-    await adapter.init();
+    mockQueryEmpty(1);
+    const adapter = await setupAdapter();
 
     const job = makeJob({ runId: "run-fail-cleanup" });
     const queueId = await adapter.send(job);
 
     await adapter.fail(queueId, "error");
 
-    const failCall = queryMock.mock.calls.find(
-      c => typeof c[0] === "string" && (c[0] as string).includes("status = 'failed'")
-    );
+    const failCall = findQueryCall("status = 'failed'");
     expect(failCall?.[1]?.[0]).toBe(queueId);
   });
 

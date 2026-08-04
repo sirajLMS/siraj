@@ -67,6 +67,26 @@ async function parseJson(response: Response): Promise<Record<string, unknown>> {
 
 const VALID_UUID = "550e8400-e29b-41d4-a716-446655440000".toLowerCase();
 
+const BASE_URL = "http://localhost:3000/api/cron/execute";
+
+function makeAuthedRequest(scheduleId?: string): InstanceType<typeof NextRequestImpl> {
+  const url = scheduleId ? `${BASE_URL}?scheduleId=${scheduleId}` : BASE_URL;
+  return makeRequest(url, "GET", { authorization: `Bearer ${TEST_SECRET}` });
+}
+
+async function expectDispatchNotCalled(response: Response): Promise<void> {
+  expect(response.status).toBe(400);
+  const body = await parseJson(response);
+  expect(body).toHaveProperty("error");
+  expect(mockDispatchById).toHaveBeenCalledTimes(0);
+}
+
+async function expectErrorResponse(response: Response, status: number): Promise<void> {
+  expect(response.status).toBe(status);
+  const body = await parseJson(response);
+  expect(body).toHaveProperty("error");
+}
+
 // --- Tests ---
 
 describe("GET /api/cron/execute", () => {
@@ -75,41 +95,24 @@ describe("GET /api/cron/execute", () => {
   });
 
   test("returns 401 without valid auth", async () => {
-    const request = makeRequest(`http://localhost:3000/api/cron/execute?scheduleId=${VALID_UUID}`, "GET", {
-      authorization: null,
-    });
+    const request = makeRequest(`${BASE_URL}?scheduleId=${VALID_UUID}`, "GET", { authorization: null });
     const response = await GET(request);
     expect(response.status).toBe(401);
     expect(mockDispatchById).toHaveBeenCalledTimes(0);
   });
 
   test("returns 400 when scheduleId is missing", async () => {
-    const request = makeRequest("http://localhost:3000/api/cron/execute", "GET", {
-      authorization: `Bearer ${TEST_SECRET}`,
-    });
-    const response = await GET(request);
-    expect(response.status).toBe(400);
-    const body = await parseJson(response);
-    expect(body).toHaveProperty("error");
-    expect(mockDispatchById).toHaveBeenCalledTimes(0);
+    const response = await GET(makeAuthedRequest());
+    await expectDispatchNotCalled(response);
   });
 
   test("returns 400 when scheduleId is not a valid UUID", async () => {
-    const request = makeRequest("http://localhost:3000/api/cron/execute?scheduleId=not-a-uuid", "GET", {
-      authorization: `Bearer ${TEST_SECRET}`,
-    });
-    const response = await GET(request);
-    expect(response.status).toBe(400);
-    const body = await parseJson(response);
-    expect(body).toHaveProperty("error");
-    expect(mockDispatchById).toHaveBeenCalledTimes(0);
+    const response = await GET(makeAuthedRequest("not-a-uuid"));
+    await expectDispatchNotCalled(response);
   });
 
   test("happy path: calls dispatchScheduleById and returns 200 with runId + queueJobId", async () => {
-    const request = makeRequest(`http://localhost:3000/api/cron/execute?scheduleId=${VALID_UUID}`, "GET", {
-      authorization: `Bearer ${TEST_SECRET}`,
-    });
-    const response = await GET(request);
+    const response = await GET(makeAuthedRequest(VALID_UUID));
 
     expect(response.status).toBe(200);
     expect(mockDispatchById).toHaveBeenCalledTimes(1);
@@ -124,27 +127,13 @@ describe("GET /api/cron/execute", () => {
 
   test("returns 404 when schedule not found", async () => {
     mockDispatchById.mockRejectedValueOnce(new NotFoundError("SCHEDULE", "Schedule not found"));
-
-    const request = makeRequest(`http://localhost:3000/api/cron/execute?scheduleId=${VALID_UUID}`, "GET", {
-      authorization: `Bearer ${TEST_SECRET}`,
-    });
-    const response = await GET(request);
-
-    expect(response.status).toBe(404);
-    const body = await parseJson(response);
-    expect(body).toHaveProperty("error");
+    const response = await GET(makeAuthedRequest(VALID_UUID));
+    await expectErrorResponse(response, 404);
   });
 
   test("returns 500 for other errors", async () => {
     mockDispatchById.mockRejectedValueOnce(new Error("Unexpected DB failure"));
-
-    const request = makeRequest(`http://localhost:3000/api/cron/execute?scheduleId=${VALID_UUID}`, "GET", {
-      authorization: `Bearer ${TEST_SECRET}`,
-    });
-    const response = await GET(request);
-
-    expect(response.status).toBe(500);
-    const body = await parseJson(response);
-    expect(body).toHaveProperty("error");
+    const response = await GET(makeAuthedRequest(VALID_UUID));
+    await expectErrorResponse(response, 500);
   });
 });

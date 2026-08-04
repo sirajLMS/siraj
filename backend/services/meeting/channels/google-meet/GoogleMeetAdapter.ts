@@ -302,10 +302,28 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       },
     };
 
+    const response = await this.executeSpaceRequest(accessToken, spaceBody);
+    await this.assertSpaceResponseOk(response);
+
+    const space = (await response.json()) as GoogleMeetSpaceResponse;
+    return {
+      joinUrl: space.meetingUri,
+      meetingId: space.name,
+      providerMetadata: {
+        meetingCode: space.meetingCode,
+        spaceName: space.name,
+        accessType: space.config?.accessType ?? this.defaultAccessType,
+      },
+    };
+  }
+
+  private async executeSpaceRequest(
+    accessToken: string,
+    spaceBody: { config: { accessType: number } }
+  ): Promise<Response> {
     const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
-    let response: Response;
     try {
-      response = await fetch(GOOGLE_MEET_SPACES_URL, {
+      return await fetch(GOOGLE_MEET_SPACES_URL, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -315,51 +333,25 @@ export class GoogleMeetAdapter implements IMeetingChannel {
         signal,
       });
     } catch (error) {
-      cancel();
       throw new ProviderUnavailableError(
         "google_meet",
         undefined,
         error instanceof Error ? error.message : String(error)
       );
+    } finally {
+      cancel();
     }
-    cancel();
+  }
 
+  private async assertSpaceResponseOk(response: Response): Promise<void> {
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
       throw new RateLimitedError("google_meet", retryAfter ? parseInt(retryAfter, 10) : undefined);
     }
 
     if (response.status === 403) {
-      const errorBody = await this.parseErrorBody(response);
-      const upstreamMessage = errorBody?.error?.message ?? `Google Meet space creation forbidden (${response.status})`;
-      const combinedText = `${upstreamMessage} ${errorBody?.error?.status ?? ""}`.toLowerCase();
-
-      // DWD (Domain-Wide Delegation) and service-account issues produce
-      // specific error keywords in the Google API response.  Only those
-      // should be mapped to PermissionDeniedError.
-      const isDwdIssue =
-        combinedText.includes("domain-wide") ||
-        combinedText.includes("delegation") ||
-        combinedText.includes("service account");
-
-      if (isDwdIssue) {
-        logger.warn("GoogleMeetAdapter: 403 from spaces endpoint — DWD misconfiguration", {
-          upstreamMessage,
-          upstreamStatus: errorBody?.error?.status,
-        });
-        throw new PermissionDeniedError(upstreamMessage, response.status);
-      }
-
-      logger.warn("GoogleMeetAdapter: 403 from spaces endpoint — permission denied", {
-        upstreamMessage,
-        upstreamStatus: errorBody?.error?.status,
-      });
-      throw new MeetingChannelError(
-        `Permission denied by Google Meet: ${upstreamMessage}`,
-        "PERMISSION_DENIED",
-        upstreamMessage,
-        response.status
-      );
+      await this.handleSpace403(response);
+      return;
     }
 
     if (response.status >= 500) {
@@ -375,17 +367,39 @@ export class GoogleMeetAdapter implements IMeetingChannel {
         response.status
       );
     }
+  }
 
-    const space = (await response.json()) as GoogleMeetSpaceResponse;
-    return {
-      joinUrl: space.meetingUri,
-      meetingId: space.name,
-      providerMetadata: {
-        meetingCode: space.meetingCode,
-        spaceName: space.name,
-        accessType: space.config?.accessType ?? this.defaultAccessType,
-      },
-    };
+  private async handleSpace403(response: Response): Promise<void> {
+    const errorBody = await this.parseErrorBody(response);
+    const upstreamMessage = errorBody?.error?.message ?? `Google Meet space creation forbidden (${response.status})`;
+    const combinedText = `${upstreamMessage} ${errorBody?.error?.status ?? ""}`.toLowerCase();
+
+    // DWD (Domain-Wide Delegation) and service-account issues produce
+    // specific error keywords in the Google API response.  Only those
+    // should be mapped to PermissionDeniedError.
+    const isDwdIssue =
+      combinedText.includes("domain-wide") ||
+      combinedText.includes("delegation") ||
+      combinedText.includes("service account");
+
+    if (isDwdIssue) {
+      logger.warn("GoogleMeetAdapter: 403 from spaces endpoint — DWD misconfiguration", {
+        upstreamMessage,
+        upstreamStatus: errorBody?.error?.status,
+      });
+      throw new PermissionDeniedError(upstreamMessage, response.status);
+    }
+
+    logger.warn("GoogleMeetAdapter: 403 from spaces endpoint — permission denied", {
+      upstreamMessage,
+      upstreamStatus: errorBody?.error?.status,
+    });
+    throw new MeetingChannelError(
+      `Permission denied by Google Meet: ${upstreamMessage}`,
+      "PERMISSION_DENIED",
+      upstreamMessage,
+      response.status
+    );
   }
 
   private async importPrivateKey(pem: string): Promise<CryptoKey> {

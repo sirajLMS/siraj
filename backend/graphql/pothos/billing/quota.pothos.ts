@@ -65,10 +65,7 @@ const QuotaPaginatedResultRef = gqlSchemaBuilder.objectRef<QuotaPaginatedResult>
 export const QuotaPaginatedResultPothosObject = QuotaPaginatedResultRef.implement({
   description: "Paginated result set of quotas",
   fields: t => ({
-    rows: t.field({
-      type: [QuotaPothosObject],
-      resolve: parent => parent.rows,
-    }),
+    rows: t.expose("rows", { type: [QuotaPothosObject] }),
     totalCount: t.exposeInt("totalCount"),
   }),
 });
@@ -79,10 +76,7 @@ const QuotaLedgerPaginatedResultRef =
 export const QuotaLedgerPaginatedResultPothosObject = QuotaLedgerPaginatedResultRef.implement({
   description: "Paginated result set of quota ledger entries",
   fields: t => ({
-    rows: t.field({
-      type: [QuotaLedgerPothosObject],
-      resolve: parent => parent.rows,
-    }),
+    rows: t.expose("rows", { type: [QuotaLedgerPothosObject] }),
     totalCount: t.exposeInt("totalCount"),
   }),
 });

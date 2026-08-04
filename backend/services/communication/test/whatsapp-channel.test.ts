@@ -161,58 +161,52 @@ describe("WhatsApp Channel Factory", () => {
       fetchSpy?.mockRestore();
     });
 
-    test("returns success when fetch responds 200 with a message id", async () => {
-      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(JSON.stringify({ messages: [{ id: "wamid.test.001" }], messaging_product: "whatsapp" }), {
-          status: 200,
-        })
-      );
+    function mockFetchResponse(body: Record<string, unknown>, status: number) {
+      return spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(body), { status }));
+    }
 
-      const result = await whatsappChannel.send(sendParams());
+    async function sendWithMockedFetch(body: Record<string, unknown>, status: number) {
+      fetchSpy = mockFetchResponse(body, status);
+      return whatsappChannel.send(sendParams());
+    }
+
+    function expectDeliveryStatus(status: NotificationDeliveryStatus) {
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(expect.objectContaining({ status }));
+    }
+
+    function expectNoDeliveryStatus(status: NotificationDeliveryStatus) {
+      expect(updateDeliveryStatusSpy).not.toHaveBeenCalledWith(expect.objectContaining({ status }));
+    }
+
+    test("returns success when fetch responds 200 with a message id", async () => {
+      const result = await sendWithMockedFetch(
+        { messages: [{ id: "wamid.test.001" }], messaging_product: "whatsapp" },
+        200
+      );
 
       expect(result.success).toBe(true);
       expect(result.providerMessageId).toBe("wamid.test.001");
       expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: NotificationDeliveryStatus.SENT,
-        })
-      );
+      expectDeliveryStatus(NotificationDeliveryStatus.SENT);
     });
 
     test("returns failure when fetch responds non-2xx (500)", async () => {
-      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(JSON.stringify({ error: { message: "Internal server error", code: 500 } }), { status: 500 })
-      );
-
-      const result = await whatsappChannel.send(sendParams());
+      const result = await sendWithMockedFetch({ error: { message: "Internal server error", code: 500 } }, 500);
 
       expect(result.success).toBe(false);
       expect(result.sendAttempted).toBe(true);
       expect(result.rateLimited).not.toBe(true);
-      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: NotificationDeliveryStatus.FAILED,
-        })
-      );
+      expectDeliveryStatus(NotificationDeliveryStatus.FAILED);
     });
 
     test("returns rate-limited result when Meta error code 131056 is received", async () => {
-      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(JSON.stringify({ error: { message: "Rate limit hit", code: 131056 } }), { status: 429 })
-      );
-
-      const result = await whatsappChannel.send(sendParams());
+      const result = await sendWithMockedFetch({ error: { message: "Rate limit hit", code: 131056 } }, 429);
 
       expect(result.success).toBe(false);
       expect(result.sendAttempted).toBe(true);
       expect(result.rateLimited).toBe(true);
       // B2: Meta 131056 must NOT mark delivery as FAILED — caller should deferred-retry
-      expect(updateDeliveryStatusSpy).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: NotificationDeliveryStatus.FAILED,
-        })
-      );
+      expectNoDeliveryStatus(NotificationDeliveryStatus.FAILED);
     });
 
     test("returns failure with sendAttempted=false when credentials are missing", async () => {

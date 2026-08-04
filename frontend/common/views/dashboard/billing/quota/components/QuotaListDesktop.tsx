@@ -28,7 +28,123 @@ import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/
 import type { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import { buildQuotaColumns } from "@/frontend/common/views/dashboard/billing/quota/utils/buildQuotaColumns";
 
-export function QuotaListDesktop(props: ReturnType<typeof useQuotaViewModel>) {
+type QuotaViewModelReturn = ReturnType<typeof useQuotaViewModel>;
+
+interface FilterControlsProps {
+  readonly t: QuotaViewModelReturn["t"];
+  readonly searchQuery: string;
+  readonly filterStatus: QuotaStatus | null;
+  readonly filterKind: QuotaKind | null;
+  readonly setSearchQuery: (query: string) => void;
+  readonly setFilterStatus: (status: QuotaStatus | null) => void;
+  readonly setFilterKind: (kind: QuotaKind | null) => void;
+}
+
+function FilterControls(props: FilterControlsProps) {
+  const { t, searchQuery, filterStatus, filterKind, setSearchQuery, setFilterStatus, setFilterKind } = props;
+
+  return (
+    <Stack direction="row" spacing={2} sx={{ flex: 1 }}>
+      <TextField
+        size="small"
+        placeholder={t.listTitle}
+        value={searchQuery}
+        onChange={e => setSearchQuery(e.target.value)}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchOutlinedIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          },
+        }}
+        sx={{ maxWidth: 300 }}
+      />
+
+      <FormControl size="small" sx={{ minWidth: 140 }}>
+        <InputLabel>{t.fields.status}</InputLabel>
+        <Select
+          value={filterStatus ?? ""}
+          label={t.fields.status}
+          onChange={e => setFilterStatus((e.target.value as QuotaStatus) || null)}
+        >
+          <MenuItem value="">{t.fields.all}</MenuItem>
+          <MenuItem value={QuotaStatus.Active}>{t.statuses.ACTIVE}</MenuItem>
+          <MenuItem value={QuotaStatus.Expired}>{t.statuses.EXPIRED}</MenuItem>
+          <MenuItem value={QuotaStatus.Archived}>{t.statuses.ARCHIVED}</MenuItem>
+        </Select>
+      </FormControl>
+
+      <FormControl size="small" sx={{ minWidth: 140 }}>
+        <InputLabel>{t.fields.kind}</InputLabel>
+        <Select
+          value={filterKind ?? ""}
+          label={t.fields.kind}
+          onChange={e => setFilterKind((e.target.value as QuotaKind) || null)}
+        >
+          <MenuItem value="">{t.fields.all}</MenuItem>
+          <MenuItem value={QuotaKind.Package}>{t.kinds.PACKAGE}</MenuItem>
+          <MenuItem value={QuotaKind.Periodic}>{t.kinds.PERIODIC}</MenuItem>
+        </Select>
+      </FormControl>
+    </Stack>
+  );
+}
+
+interface ActionButtonsProps {
+  readonly t: QuotaViewModelReturn["t"];
+}
+
+function ActionButtons(props: ActionButtonsProps) {
+  const { t } = props;
+
+  return (
+    <Stack direction="row" spacing={1.5}>
+      <Button variant="outlined" startIcon={<InsightsOutlinedIcon />} component={Link} href="/quotas/insights">
+        {t.insights}
+      </Button>
+      <Button variant="contained" startIcon={<AddOutlinedIcon />} component={Link} href="/quotas/new">
+        {t.newQuota}
+      </Button>
+    </Stack>
+  );
+}
+
+interface QuotaGridProps {
+  readonly quotas: readonly QuotaItem[];
+  readonly columns: GridColDef<QuotaItem>[];
+  readonly loading: boolean;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly setPage: (page: number) => void;
+  readonly setPageSize: (pageSize: number) => void;
+}
+
+function QuotaGrid(props: QuotaGridProps) {
+  const { quotas, columns, loading, page, pageSize, totalCount, setPage, setPageSize } = props;
+
+  return (
+    <Box sx={{ width: "100%", height: 600 }}>
+      <AppDataGrid<QuotaItem>
+        rows={quotas}
+        columns={columns}
+        loading={loading}
+        paginationOptions={{
+          mode: "server",
+          page: page + 1,
+          pageSize,
+          totalCount,
+          onPageChange: (newPage: number) => setPage(newPage - 1),
+          onPageSizeChange: (newPageSize: number) => setPageSize(newPageSize),
+        }}
+      />
+    </Box>
+  );
+}
+
+export function QuotaListDesktop(props: QuotaViewModelReturn) {
   const {
     t,
     quotas,
@@ -84,77 +200,28 @@ export function QuotaListDesktop(props: ReturnType<typeof useQuotaViewModel>) {
         spacing={2}
         sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
       >
-        <Stack direction="row" spacing={2} sx={{ flex: 1 }}>
-          <TextField
-            size="small"
-            placeholder={t.listTitle}
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlinedIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{ maxWidth: 300 }}
-          />
-
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <InputLabel>{t.fields.status}</InputLabel>
-            <Select
-              value={filterStatus ?? ""}
-              label={t.fields.status}
-              onChange={e => setFilterStatus((e.target.value as QuotaStatus) || null)}
-            >
-              <MenuItem value="">{t.fields.all}</MenuItem>
-              <MenuItem value={QuotaStatus.Active}>{t.statuses.ACTIVE}</MenuItem>
-              <MenuItem value={QuotaStatus.Expired}>{t.statuses.EXPIRED}</MenuItem>
-              <MenuItem value={QuotaStatus.Archived}>{t.statuses.ARCHIVED}</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <InputLabel>{t.fields.kind}</InputLabel>
-            <Select
-              value={filterKind ?? ""}
-              label={t.fields.kind}
-              onChange={e => setFilterKind((e.target.value as QuotaKind) || null)}
-            >
-              <MenuItem value="">{t.fields.all}</MenuItem>
-              <MenuItem value={QuotaKind.Package}>{t.kinds.PACKAGE}</MenuItem>
-              <MenuItem value={QuotaKind.Periodic}>{t.kinds.PERIODIC}</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
-
-        <Stack direction="row" spacing={1.5}>
-          <Button variant="outlined" startIcon={<InsightsOutlinedIcon />} component={Link} href="/quotas/insights">
-            {t.insights}
-          </Button>
-          <Button variant="contained" startIcon={<AddOutlinedIcon />} component={Link} href="/quotas/new">
-            {t.newQuota}
-          </Button>
-        </Stack>
+        <FilterControls
+          t={t}
+          searchQuery={searchQuery}
+          filterStatus={filterStatus}
+          filterKind={filterKind}
+          setSearchQuery={setSearchQuery}
+          setFilterStatus={setFilterStatus}
+          setFilterKind={setFilterKind}
+        />
+        <ActionButtons t={t} />
       </Stack>
 
-      <Box sx={{ width: "100%", height: 600 }}>
-        <AppDataGrid<QuotaItem>
-          rows={quotas}
-          columns={columns}
-          loading={loading}
-          paginationOptions={{
-            mode: "server",
-            page: page + 1,
-            pageSize,
-            totalCount,
-            onPageChange: (newPage: number) => setPage(newPage - 1),
-            onPageSizeChange: (newPageSize: number) => setPageSize(newPageSize),
-          }}
-        />
-      </Box>
+      <QuotaGrid
+        quotas={quotas}
+        columns={columns}
+        loading={loading}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        setPage={setPage}
+        setPageSize={setPageSize}
+      />
     </Stack>
   );
 }

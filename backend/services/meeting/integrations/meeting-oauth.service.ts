@@ -117,28 +117,36 @@ const ZOOM_SCOPES = ["meeting:write:meeting", "user:read:user"] as const;
 const GOOGLE_SCOPES = ["https://www.googleapis.com/auth/meetings.space.created"] as const;
 const MS_TEAMS_SCOPES = ["https://graph.microsoft.com/OnlineMeetings.ReadWrite", "User.Read"] as const;
 
-function buildZoomAuthorizeUrl(redirectUri: string, state: string): string {
-  const config = getEnvironmentConfig();
-  const clientId = config.zoomClientId ?? "";
-  const params = new URLSearchParams({
+/**
+ * Builds the common `URLSearchParams` shared by all meeting-provider OAuth
+ * authorize endpoints, then layers provider-specific extras on top.
+ */
+function buildOAuthParams(
+  redirectUri: string,
+  state: string,
+  clientId: string,
+  scope: string,
+  extraParams?: Record<string, string>
+): URLSearchParams {
+  return new URLSearchParams({
     response_type: "code",
     client_id: clientId,
     redirect_uri: redirectUri,
     state,
-    scope: ZOOM_SCOPES.join(" "),
+    scope,
+    ...extraParams,
   });
+}
+
+function buildZoomAuthorizeUrl(redirectUri: string, state: string): string {
+  const config = getEnvironmentConfig();
+  const params = buildOAuthParams(redirectUri, state, config.zoomClientId ?? "", ZOOM_SCOPES.join(" "));
   return `https://zoom.us/oauth/authorize?${params.toString()}`;
 }
 
 function buildGoogleMeetAuthorizeUrl(redirectUri: string, state: string): string {
   const config = getEnvironmentConfig();
-  const clientId = config.googleMeetClientId ?? "";
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    state,
-    scope: GOOGLE_SCOPES.join(" "),
+  const params = buildOAuthParams(redirectUri, state, config.googleMeetClientId ?? "", GOOGLE_SCOPES.join(" "), {
     access_type: "offline",
     prompt: "consent",
   });
@@ -148,13 +156,7 @@ function buildGoogleMeetAuthorizeUrl(redirectUri: string, state: string): string
 function buildMicrosoftTeamsAuthorizeUrl(redirectUri: string, state: string): string {
   const config = getEnvironmentConfig();
   const tenantId = config.msTeamsTenantId ?? "common";
-  const clientId = config.msTeamsClientId ?? "";
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    state,
-    scope: MS_TEAMS_SCOPES.join(" "),
+  const params = buildOAuthParams(redirectUri, state, config.msTeamsClientId ?? "", MS_TEAMS_SCOPES.join(" "), {
     response_mode: "query",
   });
   return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params.toString()}`;

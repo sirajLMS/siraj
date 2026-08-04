@@ -77,37 +77,24 @@ describe("send-template-message — buildRequest", () => {
     expect(body.template.components[0].type).toBe("body");
   });
 
-  test("throws on invalid phoneNumberId (empty)", () => {
-    expect(() =>
-      buildSendTemplateRequest(CTX, {
-        phoneNumberId: "",
-        to: "971501234567",
-        templateName: "hello_world",
-        languageCode: "en_US",
-      })
-    ).toThrow("Invalid phoneNumberId");
-  });
-
-  test("throws on invalid recipient (non-numeric)", () => {
-    expect(() =>
-      buildSendTemplateRequest(CTX, {
-        phoneNumberId: "123456789",
-        to: "+971501234567",
-        templateName: "hello_world",
-        languageCode: "en_US",
-      })
-    ).toThrow("Invalid recipient");
-  });
-
-  test("throws on template name with special characters", () => {
-    expect(() =>
-      buildSendTemplateRequest(CTX, {
-        phoneNumberId: "123456789",
-        to: "971501234567",
-        templateName: "hello world!",
-        languageCode: "en_US",
-      })
-    ).toThrow("must contain only alphanumeric");
+  test.each([
+    {
+      description: "invalid phoneNumberId (empty)",
+      params: { phoneNumberId: "", to: "971501234567", templateName: "hello_world", languageCode: "en_US" },
+      expectedError: "Invalid phoneNumberId",
+    },
+    {
+      description: "invalid recipient (non-numeric)",
+      params: { phoneNumberId: "123456789", to: "+971501234567", templateName: "hello_world", languageCode: "en_US" },
+      expectedError: "Invalid recipient",
+    },
+    {
+      description: "template name with special characters",
+      params: { phoneNumberId: "123456789", to: "971501234567", templateName: "hello world!", languageCode: "en_US" },
+      expectedError: "must contain only alphanumeric",
+    },
+  ])("throws on $description", ({ params, expectedError }) => {
+    expect(() => buildSendTemplateRequest(CTX, params)).toThrow(expectedError);
   });
 });
 

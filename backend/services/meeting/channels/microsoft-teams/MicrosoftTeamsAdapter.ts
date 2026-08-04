@@ -280,11 +280,11 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
     return refreshed.accessToken;
   }
 
-  private async createOnlineMeeting(
-    accessToken: string,
-    organizerUserId: string,
-    input: GenerateMeetingInput
-  ): Promise<GenerateMeetingResult> {
+  private buildMeetingRequestBody(input: GenerateMeetingInput): {
+    subject: string;
+    startDateTime: string;
+    endDateTime: string;
+  } {
     const now = new Date();
     const startISO = input.startDateTime ?? now.toISOString();
     const durationMinutes = input.durationMinutes ?? 60;
@@ -292,20 +292,27 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
       ? new Date(new Date(input.startDateTime).getTime() + durationMinutes * 60_000).toISOString()
       : new Date(now.getTime() + durationMinutes * 60_000).toISOString();
 
-    const meetingBody = {
+    return {
       subject: input.topic,
       startDateTime: startISO,
       endDateTime: endISO,
     };
+  }
 
-    const url =
-      organizerUserId === "me"
-        ? `${MS_GRAPH_BASE}/me/onlineMeetings`
-        : `${MS_GRAPH_BASE}/users/${organizerUserId}/onlineMeetings`;
+  private buildMeetingUrl(organizerUserId: string): string {
+    return organizerUserId === "me"
+      ? `${MS_GRAPH_BASE}/me/onlineMeetings`
+      : `${MS_GRAPH_BASE}/users/${organizerUserId}/onlineMeetings`;
+  }
+
+  private async postMeetingRequest(
+    url: string,
+    accessToken: string,
+    meetingBody: { subject: string; startDateTime: string; endDateTime: string }
+  ): Promise<Response> {
     const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
-    let response: Response;
     try {
-      response = await fetch(url, {
+      return await fetch(url, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -315,15 +322,17 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
         signal,
       });
     } catch (error) {
-      cancel();
       throw new ProviderUnavailableError(
         "microsoft_teams",
         undefined,
         error instanceof Error ? error.message : String(error)
       );
+    } finally {
+      cancel();
     }
-    cancel();
+  }
 
+  private async assertMeetingResponseOk(response: Response): Promise<void> {
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
       throw new RateLimitedError("microsoft_teams", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
@@ -356,8 +365,9 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
         response.status
       );
     }
+  }
 
-    const meeting = (await response.json()) as MicrosoftTeamsMeetingResponse;
+  private mapMeetingResponse(meeting: MicrosoftTeamsMeetingResponse): GenerateMeetingResult {
     return {
       joinUrl: meeting.joinWebUrl,
       meetingId: meeting.id,
@@ -368,6 +378,19 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
         subject: meeting.subject,
       },
     };
+  }
+
+  private async createOnlineMeeting(
+    accessToken: string,
+    organizerUserId: string,
+    input: GenerateMeetingInput
+  ): Promise<GenerateMeetingResult> {
+    const meetingBody = this.buildMeetingRequestBody(input);
+    const url = this.buildMeetingUrl(organizerUserId);
+    const response = await this.postMeetingRequest(url, accessToken, meetingBody);
+    await this.assertMeetingResponseOk(response);
+    const meeting = (await response.json()) as MicrosoftTeamsMeetingResponse;
+    return this.mapMeetingResponse(meeting);
   }
 
   private async parseErrorBody(response: Response): Promise<MicrosoftTeamsErrorResponse | null> {

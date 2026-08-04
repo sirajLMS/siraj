@@ -78,13 +78,26 @@ function mapConnectedAccount(
   };
 }
 
-export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel {
-  const labels = useAppTranslation(
-    Translation.Dashboard.SettingsMeetingIntegrations
-  ) as SettingsMeetingIntegrationsLabels;
-  const locale = useAppLocale();
-  const notifications = useNotifications();
+interface UseMeetingIntegrationsStoreAccess {
+  expandedSlug: ViewModelProviderSlug | null;
+  loadingAccountsFor: ViewModelProviderSlug | null;
+  connectedAccountsByProvider: Readonly<Record<ViewModelProviderSlug, readonly MeetingIntegrationConnectedAccount[]>>;
+  testingFor: ViewModelProviderSlug | null;
+  lastTestResultByProvider: Readonly<Record<ViewModelProviderSlug, TestMeetingConnectionResult | null>>;
+  revokingFor: { userId: string; providerSlug: ViewModelProviderSlug } | null;
+  metadataDialogAccount: MeetingIntegrationConnectedAccount | null;
+  metadataDialogProviderSlug: ViewModelProviderSlug | null;
+  setExpandedSlug: (slug: ViewModelProviderSlug | null) => void;
+  setLoadingAccountsFor: (slug: ViewModelProviderSlug | null) => void;
+  setConnectedAccounts: (slug: ViewModelProviderSlug, accounts: readonly MeetingIntegrationConnectedAccount[]) => void;
+  setTestingFor: (slug: ViewModelProviderSlug | null) => void;
+  setLastTestResult: (slug: ViewModelProviderSlug, result: TestMeetingConnectionResult | null) => void;
+  setRevokingFor: (value: { userId: string; providerSlug: ViewModelProviderSlug } | null) => void;
+  setMetadataDialogAccount: (account: MeetingIntegrationConnectedAccount | null) => void;
+  setMetadataDialogProviderSlug: (slug: ViewModelProviderSlug | null) => void;
+}
 
+function useMeetingIntegrationsStoreValues(): UseMeetingIntegrationsStoreAccess {
   const expandedSlug = useMeetingIntegrationsSettingsStore(state => state.expandedSlug);
   const loadingAccountsFor = useMeetingIntegrationsSettingsStore(state => state.loadingAccountsFor);
   const connectedAccountsByProvider = useMeetingIntegrationsSettingsStore(state => state.connectedAccountsByProvider);
@@ -104,11 +117,118 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
     state => state.setMetadataDialogProviderSlug
   );
 
-  const { data, loading, error, refetch } = useMeetingIntegrationProvidersQuery();
+  return {
+    expandedSlug,
+    loadingAccountsFor,
+    connectedAccountsByProvider,
+    testingFor,
+    lastTestResultByProvider,
+    revokingFor,
+    metadataDialogAccount,
+    metadataDialogProviderSlug,
+    setExpandedSlug,
+    setLoadingAccountsFor,
+    setConnectedAccounts,
+    setTestingFor,
+    setLastTestResult,
+    setRevokingFor,
+    setMetadataDialogAccount,
+    setMetadataDialogProviderSlug,
+  };
+}
 
-  const providers = useMemo(() => (data?.meetingIntegrationProviders ?? []).map(mapProviderSummary), [data]);
+interface RunTestDeps {
+  testConnection: ReturnType<typeof useMutation>[0];
+  notifications: ReturnType<typeof useNotifications>;
+  labels: SettingsMeetingIntegrationsLabels;
+}
 
-  // Fire one connected-accounts query for the currently-expanded provider (stateful useQuery, skip until expanded).
+function buildRunTest(
+  deps: RunTestDeps,
+  store: Pick<UseMeetingIntegrationsStoreAccess, "setTestingFor" | "setLastTestResult">
+) {
+  const { testConnection, notifications, labels } = deps;
+
+  return async (providerSlug: ViewModelProviderSlug, mode: MeetingConnectionTestMode) => {
+    store.setTestingFor(providerSlug);
+
+    try {
+      const { data: testData } = await testConnection({
+        variables: {
+          input: {
+            providerSlug: providerSlug as MeetingIntegrationProviderSlug,
+            mode: mode as MeetingConnectionTestMode,
+          },
+        },
+      });
+
+      const result = mapTestResult(testData?.testMeetingProviderConnection);
+      store.setLastTestResult(providerSlug, result);
+
+      if (result?.ok) {
+        notifications.show(labels.notifications.testSuccess, { severity: "success" });
+      } else {
+        notifications.show(labels.notifications.testError, { severity: "error" });
+      }
+    } catch (testError) {
+      logger.error("Failed to test meeting provider connection", { providerSlug, error: testError });
+      store.setLastTestResult(providerSlug, {
+        ok: false,
+        latencyMs: 0,
+        mode,
+        testJoinUrl: null,
+        deleted: null,
+        upstreamResponseSummary: "",
+        errorCode: "TEST_FAILED",
+        errorMessage: testError instanceof Error ? testError.message : String(testError),
+        rawUpstreamPayload: null,
+        requiredScopes: null,
+        grantedScopes: null,
+      });
+      notifications.show(labels.notifications.testError, { severity: "error" });
+    } finally {
+      store.setTestingFor(null);
+    }
+  };
+}
+
+interface RevokeAccountDeps {
+  revokeToken: ReturnType<typeof useMutation>[0];
+  notifications: ReturnType<typeof useNotifications>;
+  labels: SettingsMeetingIntegrationsLabels;
+  refetch: () => Promise<unknown>;
+}
+
+function buildRevokeAccount(deps: RevokeAccountDeps, store: Pick<UseMeetingIntegrationsStoreAccess, "setRevokingFor">) {
+  const { revokeToken, notifications, labels, refetch } = deps;
+
+  return async (userId: string, providerSlug: ViewModelProviderSlug) => {
+    store.setRevokingFor({ userId, providerSlug });
+
+    try {
+      await revokeToken({
+        variables: {
+          input: {
+            providerSlug: providerSlug as MeetingIntegrationProviderSlug,
+            userId,
+          },
+        },
+      });
+      await refetch();
+      notifications.show(labels.notifications.revokeSuccess, { severity: "success" });
+    } catch (revokeError) {
+      logger.error("Failed to revoke meeting provider token", { userId, providerSlug, error: revokeError });
+      notifications.show(labels.notifications.revokeError, { severity: "error" });
+    } finally {
+      store.setRevokingFor(null);
+    }
+  };
+}
+
+function useConnectedAccountsSync(
+  expandedSlug: ViewModelProviderSlug | null,
+  store: Pick<UseMeetingIntegrationsStoreAccess, "setLoadingAccountsFor" | "setConnectedAccounts">
+): void {
   const { data: connectedAccountsData, loading: connectedAccountsLoading } = useQuery(
     meetingIntegrationConnectedAccountsQueryDocument,
     {
@@ -124,7 +244,7 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
     }
 
     if (connectedAccountsLoading) {
-      setLoadingAccountsFor(expandedSlug);
+      store.setLoadingAccountsFor(expandedSlug);
       return;
     }
 
@@ -132,115 +252,53 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
       .filter((account): account is Operations.MeetingIntegrationConnectedAccountFieldsFragment => account != null)
       .map(mapConnectedAccount);
 
-    setConnectedAccounts(expandedSlug, accounts);
-    setLoadingAccountsFor(null);
-  }, [
-    connectedAccountsData?.meetingIntegrationConnectedAccounts,
-    connectedAccountsLoading,
-    expandedSlug,
-    setLoadingAccountsFor,
-    setConnectedAccounts,
-  ]);
+    store.setConnectedAccounts(expandedSlug, accounts);
+    store.setLoadingAccountsFor(null);
+  }, [connectedAccountsData?.meetingIntegrationConnectedAccounts, connectedAccountsLoading, expandedSlug, store]);
+}
+
+export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel {
+  const labels = useAppTranslation(
+    Translation.Dashboard.SettingsMeetingIntegrations
+  ) as SettingsMeetingIntegrationsLabels;
+  const locale = useAppLocale();
+  const notifications = useNotifications();
+
+  const store = useMeetingIntegrationsStoreValues();
+
+  const { data, loading, error, refetch } = useMeetingIntegrationProvidersQuery();
+
+  const providers = useMemo(() => (data?.meetingIntegrationProviders ?? []).map(mapProviderSummary), [data]);
+
+  useConnectedAccountsSync(store.expandedSlug, store);
 
   const [testConnection] = useMutation(testMeetingProviderConnectionMutationDocument);
   const [revokeToken] = useMutation(adminRevokeMeetingProviderTokenMutationDocument);
 
   const runTest = useCallback(
-    async (providerSlug: ViewModelProviderSlug, mode: MeetingConnectionTestMode) => {
-      setTestingFor(providerSlug);
-
-      try {
-        const { data: testData } = await testConnection({
-          variables: {
-            input: {
-              providerSlug: providerSlug as MeetingIntegrationProviderSlug,
-              mode: mode as MeetingConnectionTestMode,
-            },
-          },
-        });
-
-        const result = mapTestResult(testData?.testMeetingProviderConnection);
-        setLastTestResult(providerSlug, result);
-
-        if (result?.ok) {
-          notifications.show(labels.notifications.testSuccess, { severity: "success" });
-        } else {
-          notifications.show(labels.notifications.testError, { severity: "error" });
-        }
-      } catch (testError) {
-        logger.error("Failed to test meeting provider connection", { providerSlug, error: testError });
-        setLastTestResult(providerSlug, {
-          ok: false,
-          latencyMs: 0,
-          mode,
-          testJoinUrl: null,
-          deleted: null,
-          upstreamResponseSummary: "",
-          errorCode: "TEST_FAILED",
-          errorMessage: testError instanceof Error ? testError.message : String(testError),
-          rawUpstreamPayload: null,
-          requiredScopes: null,
-          grantedScopes: null,
-        });
-        notifications.show(labels.notifications.testError, { severity: "error" });
-      } finally {
-        setTestingFor(null);
-      }
-    },
-    [
-      labels.notifications.testError,
-      labels.notifications.testSuccess,
-      notifications,
-      setLastTestResult,
-      setTestingFor,
-      testConnection,
-    ]
+    (providerSlug: ViewModelProviderSlug, mode: MeetingConnectionTestMode) =>
+      buildRunTest({ testConnection, notifications, labels }, store)(providerSlug, mode),
+    [testConnection, notifications, labels, store]
   );
 
   const revokeAccount = useCallback(
-    async (userId: string, providerSlug: ViewModelProviderSlug) => {
-      setRevokingFor({ userId, providerSlug });
-
-      try {
-        await revokeToken({
-          variables: {
-            input: {
-              providerSlug: providerSlug as MeetingIntegrationProviderSlug,
-              userId,
-            },
-          },
-        });
-        await refetch();
-        notifications.show(labels.notifications.revokeSuccess, { severity: "success" });
-      } catch (revokeError) {
-        logger.error("Failed to revoke meeting provider token", { userId, providerSlug, error: revokeError });
-        notifications.show(labels.notifications.revokeError, { severity: "error" });
-      } finally {
-        setRevokingFor(null);
-      }
-    },
-    [
-      labels.notifications.revokeError,
-      labels.notifications.revokeSuccess,
-      notifications,
-      refetch,
-      revokeToken,
-      setRevokingFor,
-    ]
+    (userId: string, providerSlug: ViewModelProviderSlug) =>
+      buildRevokeAccount({ revokeToken, notifications, labels, refetch }, store)(userId, providerSlug),
+    [revokeToken, notifications, labels, refetch, store]
   );
 
   const onMetadataDialogOpen = useCallback(
     (account: MeetingIntegrationConnectedAccount, providerSlug: ViewModelProviderSlug) => {
-      setMetadataDialogAccount(account);
-      setMetadataDialogProviderSlug(providerSlug);
+      store.setMetadataDialogAccount(account);
+      store.setMetadataDialogProviderSlug(providerSlug);
     },
-    [setMetadataDialogAccount, setMetadataDialogProviderSlug]
+    [store]
   );
 
   const onMetadataDialogClose = useCallback(() => {
-    setMetadataDialogAccount(null);
-    setMetadataDialogProviderSlug(null);
-  }, [setMetadataDialogAccount, setMetadataDialogProviderSlug]);
+    store.setMetadataDialogAccount(null);
+    store.setMetadataDialogProviderSlug(null);
+  }, [store]);
 
   const refresh = useCallback(async () => {
     await refetch();
@@ -252,15 +310,15 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
     loading,
     error: error ?? undefined,
     providers,
-    expandedSlug,
-    onExpandedSlugChange: setExpandedSlug,
-    connectedAccountsByProvider,
-    loadingAccountsFor,
-    testingFor,
-    lastTestResultByProvider,
-    revokingFor,
-    metadataDialogAccount,
-    metadataDialogProviderSlug,
+    expandedSlug: store.expandedSlug,
+    onExpandedSlugChange: store.setExpandedSlug,
+    connectedAccountsByProvider: store.connectedAccountsByProvider,
+    loadingAccountsFor: store.loadingAccountsFor,
+    testingFor: store.testingFor,
+    lastTestResultByProvider: store.lastTestResultByProvider,
+    revokingFor: store.revokingFor,
+    metadataDialogAccount: store.metadataDialogAccount,
+    metadataDialogProviderSlug: store.metadataDialogProviderSlug,
     runTest,
     revokeAccount,
     onMetadataDialogOpen,

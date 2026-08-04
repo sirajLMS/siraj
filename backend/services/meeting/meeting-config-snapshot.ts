@@ -15,7 +15,7 @@ import {
 } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { getMeetingChannel, providerKindToSlug } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
-import type { MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails, MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const MAX_RETRY_ATTEMPTS = 3;
@@ -26,12 +26,11 @@ function sleep(ms: number): Promise<void> {
 }
 
 export namespace MeetingConfigSnapshotService {
-  export async function buildSessionSnapshot(
-    configId: string,
+  async function assembleSnapshot(
+    config: { id: string; providerId: string; label: string | null; details: MeetingConfigDetails },
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<MeetingConfigSnapshot> {
-    const config = await UserMeetingConfigRepository.getByIdOrThrow(configId, tErrors, tx);
     const provider = await MeetingProviderRepository.getByIdOrThrow(config.providerId, tErrors, tx);
     const details = parseMeetingConfigDetails(provider, config.details);
 
@@ -45,23 +44,22 @@ export namespace MeetingConfigSnapshotService {
     };
   }
 
+  export async function buildSessionSnapshot(
+    configId: string,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<MeetingConfigSnapshot> {
+    const config = await UserMeetingConfigRepository.getByIdOrThrow(configId, tErrors, tx);
+    return assembleSnapshot(config, tErrors, tx);
+  }
+
   export async function buildClassSessionSnapshot(
     configId: string,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<MeetingConfigSnapshot> {
     const config = await ClassMeetingConfigRepository.getByIdOrThrow(configId, tErrors, tx);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(config.providerId, tErrors, tx);
-    const details = parseMeetingConfigDetails(provider, config.details);
-
-    return {
-      userMeetingConfigId: config.id,
-      providerId: config.providerId,
-      label: config.label,
-      details,
-      provider: buildMeetingProviderCatalogSnapshot(provider),
-      snapshottedAt: new Date().toISOString(),
-    };
+    return assembleSnapshot(config, tErrors, tx);
   }
 
   // ─── Booking-time generation (post-commit dispatch) ───────────────────

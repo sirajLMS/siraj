@@ -23,23 +23,195 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 
 const DEFAULT_SNACKBAR: WhatsappSnackbarState = { open: false, message: "", severity: "success" };
 
-export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
-  const whatsappLabels = useAppTranslation(Translation.Whatsapp);
-  const [snackbar, setSnackbar] = useState<WhatsappSnackbarState>(DEFAULT_SNACKBAR);
-  const [syncing, setSyncing] = useState(false);
-  const [optInLoading, setOptInLoading] = useState(false);
+type SnackbarShow = (message: string, severity: "success" | "error") => void;
 
+async function deleteAccountAction(
+  id: string,
+  deleteAccount: (opts: { variables: { id: string } }) => Promise<unknown>,
+  refetchAccounts: () => Promise<unknown>,
+  labels: WhatsappSettingsLabels["notifications"],
+  showSnackbar: SnackbarShow
+): Promise<void> {
+  try {
+    await deleteAccount({ variables: { id } });
+    await refetchAccounts();
+    showSnackbar(labels.deleteSuccess, "success");
+  } catch (error) {
+    logger.error("Failed to delete WhatsApp account", { error });
+    showSnackbar(labels.deleteError, "error");
+  }
+}
+
+async function setAccessTokenAction(
+  id: string,
+  accessToken: string,
+  setAccessToken: (opts: { variables: { id: string; accessToken: string } }) => Promise<unknown>,
+  refetchAccounts: () => Promise<unknown>,
+  labels: WhatsappSettingsLabels["notifications"],
+  showSnackbar: SnackbarShow
+): Promise<void> {
+  try {
+    await setAccessToken({ variables: { id, accessToken } });
+    await refetchAccounts();
+    showSnackbar(labels.saveSuccess, "success");
+  } catch (error) {
+    logger.error("Failed to set WhatsApp access token", { error });
+    showSnackbar(labels.saveError, "error");
+  }
+}
+
+async function setTwoStepPinAction(
+  id: string,
+  twoStepPin: string,
+  setTwoStepPin: (opts: { variables: { id: string; twoStepPin: string } }) => Promise<unknown>,
+  refetchAccounts: () => Promise<unknown>,
+  labels: WhatsappSettingsLabels["notifications"],
+  showSnackbar: SnackbarShow
+): Promise<void> {
+  try {
+    await setTwoStepPin({ variables: { id, twoStepPin } });
+    await refetchAccounts();
+    showSnackbar(labels.saveSuccess, "success");
+  } catch (error) {
+    logger.error("Failed to set WhatsApp two-step PIN", { error });
+    showSnackbar(labels.saveError, "error");
+  }
+}
+
+async function syncFromMetaAction(
+  syncFromMeta: () => Promise<unknown>,
+  refetchAccounts: () => Promise<unknown>,
+  setSyncing: (value: boolean) => void,
+  labels: WhatsappSettingsLabels["notifications"],
+  showSnackbar: SnackbarShow
+): Promise<void> {
+  setSyncing(true);
+  try {
+    const result = (await syncFromMeta()) as {
+      data?: { syncWhatsappAccountsFromMeta?: { accounts?: unknown[] | null } };
+    };
+    const accountsResult = result.data?.syncWhatsappAccountsFromMeta?.accounts;
+    await refetchAccounts();
+    if (accountsResult && accountsResult.length > 0) {
+      showSnackbar(labels.syncSuccess, "success");
+    } else {
+      showSnackbar(labels.syncNoChange, "success");
+    }
+  } catch (error) {
+    logger.error("Failed to sync from Meta", { error });
+    showSnackbar(labels.syncError, "error");
+  } finally {
+    setSyncing(false);
+  }
+}
+
+async function toggleOptInAction(
+  enabled: boolean,
+  setOptIn: (opts: { variables: { userId: string; enabled: boolean; source: string } }) => Promise<unknown>,
+  refetchOptIn: () => Promise<unknown>,
+  setOptInLoading: (value: boolean) => void,
+  labels: WhatsappSettingsLabels["notifications"],
+  showSnackbar: SnackbarShow
+): Promise<void> {
+  setOptInLoading(true);
+  try {
+    await setOptIn({ variables: { userId: CURRENT_USER, enabled, source: "graphql" } });
+    await refetchOptIn();
+    showSnackbar(labels.optInSuccess, "success");
+  } catch (error) {
+    logger.error("Failed to toggle WhatsApp opt-in", { error });
+    showSnackbar(labels.optInError, "error");
+  } finally {
+    setOptInLoading(false);
+  }
+}
+
+function useWhatsappQueries() {
   const accountsQuery = useQuery(whatsappAccountsQueryDocument);
   const optInQuery = useQuery(isUserWhatsappOptInQueryDocument, {
     variables: { userId: CURRENT_USER },
   });
   const configuredQuery = useQuery(isWhatsappConfiguredQueryDocument);
 
+  return { accountsQuery, optInQuery, configuredQuery };
+}
+
+function useWhatsappMutations() {
   const [deleteAccount] = useMutation(deleteWhatsappAccountMutationDocument);
   const [setAccessToken] = useMutation(setWhatsappAccessTokenMutationDocument);
   const [setTwoStepPin] = useMutation(setWhatsappTwoStepPinMutationDocument);
   const [syncFromMeta, syncResult] = useMutation(syncWhatsappAccountsFromMetaMutationDocument);
   const [setOptIn] = useMutation(setUserWhatsappOptInMutationDocument);
+
+  return { deleteAccount, setAccessToken, setTwoStepPin, syncFromMeta, syncResult, setOptIn };
+}
+
+function useDerivedWhatsappData(
+  queries: ReturnType<typeof useWhatsappQueries>,
+  mutations: ReturnType<typeof useWhatsappMutations>
+) {
+  const { accountsQuery, optInQuery, configuredQuery } = queries;
+  const { syncResult } = mutations;
+
+  const accounts = accountsQuery.data?.whatsappAccounts ?? [];
+  const templates = syncResult.data?.syncWhatsappAccountsFromMeta?.templates ?? [];
+  const loading = accountsQuery.loading;
+  const isOptedIn = optInQuery.data?.isUserWhatsappOptIn ?? false;
+  const isConfigured = configuredQuery.data?.isWhatsappConfigured ?? false;
+
+  return { accounts, templates, loading, isOptedIn, isConfigured };
+}
+
+function useWhatsappCallbacks(
+  queries: ReturnType<typeof useWhatsappQueries>,
+  mutations: ReturnType<typeof useWhatsappMutations>,
+  labels: WhatsappSettingsLabels,
+  showSnackbar: SnackbarShow,
+  setSyncing: (value: boolean) => void,
+  setOptInLoading: (value: boolean) => void
+) {
+  const { accountsQuery, optInQuery } = queries;
+  const { deleteAccount, setAccessToken, setTwoStepPin, syncFromMeta, setOptIn } = mutations;
+
+  const onDeleteAccount = useCallback(
+    (id: string) => deleteAccountAction(id, deleteAccount, accountsQuery.refetch, labels.notifications, showSnackbar),
+    [deleteAccount, accountsQuery, labels.notifications, showSnackbar]
+  );
+
+  const onSetAccessToken = useCallback(
+    (id: string, accessToken: string) =>
+      setAccessTokenAction(id, accessToken, setAccessToken, accountsQuery.refetch, labels.notifications, showSnackbar),
+    [setAccessToken, accountsQuery, labels.notifications, showSnackbar]
+  );
+
+  const onSetTwoStepPin = useCallback(
+    (id: string, twoStepPin: string) =>
+      setTwoStepPinAction(id, twoStepPin, setTwoStepPin, accountsQuery.refetch, labels.notifications, showSnackbar),
+    [setTwoStepPin, accountsQuery, labels.notifications, showSnackbar]
+  );
+
+  const onSyncFromMeta = useCallback(
+    () => syncFromMetaAction(syncFromMeta, accountsQuery.refetch, setSyncing, labels.notifications, showSnackbar),
+    [syncFromMeta, accountsQuery, labels.notifications, showSnackbar, setSyncing]
+  );
+
+  const onToggleOptIn = useCallback(
+    (enabled: boolean) =>
+      toggleOptInAction(enabled, setOptIn, optInQuery.refetch, setOptInLoading, labels.notifications, showSnackbar),
+    [setOptIn, optInQuery, labels.notifications, showSnackbar, setOptInLoading]
+  );
+
+  return { onDeleteAccount, onSetAccessToken, onSetTwoStepPin, onSyncFromMeta, onToggleOptIn };
+}
+
+export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
+  const whatsappLabels = useAppTranslation(Translation.Whatsapp);
+  const [snackbar, setSnackbar] = useState<WhatsappSnackbarState>(DEFAULT_SNACKBAR);
+  const [syncing, setSyncing] = useState(false);
+  const [optInLoading, setOptInLoading] = useState(false);
+
+  const queries = useWhatsappQueries();
+  const mutations = useWhatsappMutations();
 
   const labels = useMemo<WhatsappSettingsLabels>(
     () => ({
@@ -59,17 +231,9 @@ export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
     [whatsappLabels]
   );
 
-  const accounts = accountsQuery.data?.whatsappAccounts ?? [];
-  // Templates are only available after calling `syncWhatsappAccountsFromMeta`.
-  // There is no separate GraphQL query for persisted templates — `whatsappAccountsQueryDocument`
-  // fetches accounts only. This is a backend limitation: templates from a prior sync are not
-  // persisted in a queryable form. Call `onSyncFromMeta` to populate templates.
-  const templates = syncResult.data?.syncWhatsappAccountsFromMeta?.templates ?? [];
-  const loading = accountsQuery.loading;
-  const isOptedIn = optInQuery.data?.isUserWhatsappOptIn ?? false;
-  const isConfigured = configuredQuery.data?.isWhatsappConfigured ?? false;
+  const { accounts, templates, loading, isOptedIn, isConfigured } = useDerivedWhatsappData(queries, mutations);
 
-  const showSnackbar = useCallback((message: string, severity: "success" | "error") => {
+  const showSnackbar = useCallback<SnackbarShow>((message, severity) => {
     setSnackbar({ open: true, message, severity });
   }, []);
 
@@ -77,89 +241,13 @@ export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
     setSnackbar(DEFAULT_SNACKBAR);
   }, []);
 
-  const onDeleteAccount = useCallback(
-    async (id: string) => {
-      try {
-        await deleteAccount({ variables: { id } });
-        await accountsQuery.refetch();
-        showSnackbar(labels.notifications.deleteSuccess, "success");
-      } catch (error) {
-        logger.error("Failed to delete WhatsApp account", { error });
-        showSnackbar(labels.notifications.deleteError, "error");
-      }
-    },
-    [deleteAccount, accountsQuery, labels.notifications.deleteSuccess, labels.notifications.deleteError, showSnackbar]
-  );
-
-  const onSetAccessToken = useCallback(
-    async (id: string, accessToken: string) => {
-      try {
-        await setAccessToken({ variables: { id, accessToken } });
-        await accountsQuery.refetch();
-        showSnackbar(labels.notifications.saveSuccess, "success");
-      } catch (error) {
-        logger.error("Failed to set WhatsApp access token", { error });
-        showSnackbar(labels.notifications.saveError, "error");
-      }
-    },
-    [setAccessToken, accountsQuery, labels.notifications.saveSuccess, labels.notifications.saveError, showSnackbar]
-  );
-
-  const onSetTwoStepPin = useCallback(
-    async (id: string, twoStepPin: string) => {
-      try {
-        await setTwoStepPin({ variables: { id, twoStepPin } });
-        await accountsQuery.refetch();
-        showSnackbar(labels.notifications.saveSuccess, "success");
-      } catch (error) {
-        logger.error("Failed to set WhatsApp two-step PIN", { error });
-        showSnackbar(labels.notifications.saveError, "error");
-      }
-    },
-    [setTwoStepPin, accountsQuery, labels.notifications.saveSuccess, labels.notifications.saveError, showSnackbar]
-  );
-
-  const onSyncFromMeta = useCallback(async () => {
-    setSyncing(true);
-    try {
-      const result = await syncFromMeta();
-      const accountsResult = result.data?.syncWhatsappAccountsFromMeta?.accounts;
-      await accountsQuery.refetch();
-      if (accountsResult && accountsResult.length > 0) {
-        showSnackbar(labels.notifications.syncSuccess, "success");
-      } else {
-        showSnackbar(labels.notifications.syncNoChange, "success");
-      }
-    } catch (error) {
-      logger.error("Failed to sync from Meta", { error });
-      showSnackbar(labels.notifications.syncError, "error");
-    } finally {
-      setSyncing(false);
-    }
-  }, [
-    syncFromMeta,
-    accountsQuery,
-    labels.notifications.syncSuccess,
-    labels.notifications.syncNoChange,
-    labels.notifications.syncError,
+  const { onDeleteAccount, onSetAccessToken, onSetTwoStepPin, onSyncFromMeta, onToggleOptIn } = useWhatsappCallbacks(
+    queries,
+    mutations,
+    labels,
     showSnackbar,
-  ]);
-
-  const onToggleOptIn = useCallback(
-    async (enabled: boolean) => {
-      setOptInLoading(true);
-      try {
-        await setOptIn({ variables: { userId: CURRENT_USER, enabled, source: "graphql" } });
-        await optInQuery.refetch();
-        showSnackbar(labels.notifications.optInSuccess, "success");
-      } catch (error) {
-        logger.error("Failed to toggle WhatsApp opt-in", { error });
-        showSnackbar(labels.notifications.optInError, "error");
-      } finally {
-        setOptInLoading(false);
-      }
-    },
-    [setOptIn, optInQuery, labels.notifications.optInSuccess, labels.notifications.optInError, showSnackbar]
+    setSyncing,
+    setOptInLoading
   );
 
   return {

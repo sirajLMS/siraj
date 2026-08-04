@@ -46,6 +46,118 @@ function emptyDraftValues(entries: readonly EnvConfigEntryFieldsFragment[]): Rec
   return drafts;
 }
 
+function CredentialFormTitle({
+  labels,
+  marginBottom,
+}: {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly marginBottom: number;
+}) {
+  return (
+    <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: marginBottom }}>
+      {labels.credentialForm.title}
+    </Typography>
+  );
+}
+
+function CredentialFormLoadingState({ labels }: { readonly labels: SettingsMeetingIntegrationsLabels }) {
+  return (
+    <Box>
+      <CredentialFormTitle labels={labels} marginBottom={0.5} />
+      <Stack direction="row" sx={{ alignItems: "center", gap: 1, py: 1 }}>
+        <CircularProgress size={20} />
+        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.loading}</Typography>
+      </Stack>
+    </Box>
+  );
+}
+
+function CredentialFormErrorState({ labels }: { readonly labels: SettingsMeetingIntegrationsLabels }) {
+  return (
+    <Box>
+      <CredentialFormTitle labels={labels} marginBottom={0.5} />
+      <Typography sx={{ typography: "bodySm", color: "error.main" }}>{labels.loadError}</Typography>
+    </Box>
+  );
+}
+
+function CredentialFormEmptyState({ labels }: { readonly labels: SettingsMeetingIntegrationsLabels }) {
+  return (
+    <Box>
+      <CredentialFormTitle labels={labels} marginBottom={0.5} />
+      <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.credentialForm.noFields}</Typography>
+    </Box>
+  );
+}
+
+function CredentialEntryRow({
+  entry,
+  draftValue,
+  isSaving,
+  labels,
+  onDraftChange,
+  onSave,
+  onRevert,
+}: {
+  readonly entry: EnvConfigEntryFieldsFragment;
+  readonly draftValue: string;
+  readonly isSaving: boolean;
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly onDraftChange: (key: string, value: string) => void;
+  readonly onSave: (key: string) => void;
+  readonly onRevert: (key: string) => void;
+}) {
+  const key = entry.key ?? "";
+  const isSecret = isEnvConfigSecretEntry(entry);
+  const hasDbOverride = entry.hasDbOverride === true;
+  const isDirty = isSecret ? draftValue.trim().length > 0 : draftValue !== (entry.value ?? "");
+
+  return (
+    <Stack key={key} sx={{ gap: 1 }}>
+      <EnvSecretField
+        configKey={key}
+        label={key}
+        value={draftValue}
+        onChange={value => {
+          onDraftChange(key, value);
+        }}
+        disabled={isSaving}
+        isSecret={isSecret}
+        placeholder={entry.value ? labels.credentialForm.emptyValue : undefined}
+        showValueLabel={labels.credentialForm.showValue}
+        hideValueLabel={labels.credentialForm.hideValue}
+      />
+      <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
+        <Button
+          size="small"
+          variant="contained"
+          startIcon={<SaveOutlined />}
+          disabled={!isDirty || isSaving}
+          onClick={() => {
+            onSave(key);
+          }}
+        >
+          {isSaving ? labels.credentialForm.saving : labels.credentialForm.save}
+        </Button>
+        {hasDbOverride ? (
+          <Button
+            size="small"
+            variant="outlined"
+            color="secondary"
+            startIcon={<DeleteOutlined />}
+            disabled={isSaving}
+            onClick={() => {
+              onRevert(key);
+            }}
+          >
+            {labels.credentialForm.revert}
+          </Button>
+        ) : null}
+      </Stack>
+    </Stack>
+  );
+}
+
 export function MeetingProviderCredentialForm({
   provider,
   labels,
@@ -120,101 +232,42 @@ export function MeetingProviderCredentialForm({
     [deleteEntry, labels.notifications.saveError, labels.notifications.saveSuccess, notifications, router]
   );
 
+  const onDraftChange = useCallback((key: string, value: string) => {
+    setDraftValues(prev => ({ ...prev, [key]: value }));
+  }, []);
+
   if (loading && providerEntries.length === 0) {
-    return (
-      <Box>
-        <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
-          {labels.credentialForm.title}
-        </Typography>
-        <Stack direction="row" sx={{ alignItems: "center", gap: 1, py: 1 }}>
-          <CircularProgress size={20} />
-          <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.loading}</Typography>
-        </Stack>
-      </Box>
-    );
+    return <CredentialFormLoadingState labels={labels} />;
   }
 
   if (error && providerEntries.length === 0) {
-    return (
-      <Box>
-        <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
-          {labels.credentialForm.title}
-        </Typography>
-        <Typography sx={{ typography: "bodySm", color: "error.main" }}>{labels.loadError}</Typography>
-      </Box>
-    );
+    return <CredentialFormErrorState labels={labels} />;
   }
 
   if (providerEntries.length === 0) {
-    return (
-      <Box>
-        <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
-          {labels.credentialForm.title}
-        </Typography>
-        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.credentialForm.noFields}</Typography>
-      </Box>
-    );
+    return <CredentialFormEmptyState labels={labels} />;
   }
 
   return (
     <Box>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 1 }}>
-        {labels.credentialForm.title}
-      </Typography>
+      <CredentialFormTitle labels={labels} marginBottom={1} />
       <Stack sx={{ gap: 2 }}>
-        {providerEntries.map(entry => {
-          const key = entry.key ?? "";
-          const isSecret = isEnvConfigSecretEntry(entry);
-          const hasDbOverride = entry.hasDbOverride === true;
-          const draftValue = draftValues[key] ?? "";
-          const isDirty = isSecret ? draftValue.trim().length > 0 : draftValue !== (entry.value ?? "");
-          const isSaving = savingKey === key;
-
-          return (
-            <Stack key={key} sx={{ gap: 1 }}>
-              <EnvSecretField
-                configKey={key}
-                label={key}
-                value={draftValue}
-                onChange={value => {
-                  setDraftValues(prev => ({ ...prev, [key]: value }));
-                }}
-                disabled={isSaving}
-                isSecret={isSecret}
-                placeholder={entry.value ? labels.credentialForm.emptyValue : undefined}
-                showValueLabel={labels.credentialForm.showValue}
-                hideValueLabel={labels.credentialForm.hideValue}
-              />
-              <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
-                <Button
-                  size="small"
-                  variant="contained"
-                  startIcon={<SaveOutlined />}
-                  disabled={!isDirty || isSaving}
-                  onClick={() => {
-                    void onSave(key);
-                  }}
-                >
-                  {isSaving ? labels.credentialForm.saving : labels.credentialForm.save}
-                </Button>
-                {hasDbOverride ? (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="secondary"
-                    startIcon={<DeleteOutlined />}
-                    disabled={isSaving}
-                    onClick={() => {
-                      void onRevert(key);
-                    }}
-                  >
-                    {labels.credentialForm.revert}
-                  </Button>
-                ) : null}
-              </Stack>
-            </Stack>
-          );
-        })}
+        {providerEntries.map(entry => (
+          <CredentialEntryRow
+            key={entry.key ?? ""}
+            entry={entry}
+            draftValue={draftValues[entry.key ?? ""] ?? ""}
+            isSaving={savingKey === entry.key}
+            labels={labels}
+            onDraftChange={onDraftChange}
+            onSave={key => {
+              void onSave(key);
+            }}
+            onRevert={key => {
+              void onRevert(key);
+            }}
+          />
+        ))}
       </Stack>
     </Box>
   );

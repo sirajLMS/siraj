@@ -288,6 +288,54 @@ function useCompleteSuccessfulCreate(args: {
   );
 }
 
+async function executeRecurringClassSubmit(params: {
+  readonly teacherId: string;
+  readonly formState: CreateRecurringClassDialogFormState;
+  readonly days: readonly DayScheduleConfig[];
+  readonly createClassMutation: CreateClassFn;
+  readonly completeSuccessfulCreate: (result: CreateRecurringClassResult) => Promise<void>;
+  readonly notifications: ReturnType<typeof useNotifications>;
+  readonly creationFailedLabel: TeacherCreateRecurringClassLabels["errors"]["creationFailed"];
+}): Promise<void> {
+  const {
+    teacherId,
+    formState,
+    days,
+    createClassMutation,
+    completeSuccessfulCreate,
+    notifications,
+    creationFailedLabel,
+  } = params;
+
+  try {
+    const input = buildCreateRecurringClassInput({
+      studentId: formState.studentId,
+      teacherId,
+      subjectId: formState.subjectId,
+      duration: formState.duration,
+      defaultStartTime: formState.defaultStartTime,
+      timezone: formState.timezone,
+      classType: formState.classType,
+      days,
+      schedulingMode: formState.schedulingMode,
+      quotaId: formState.quotaId,
+      earmarkedClasses: formState.earmarkedClasses,
+      generationHorizonWeeks: formState.generationHorizonWeeks,
+      ondemandNoCreditsOutcome: formState.ondemandNoCreditsOutcome,
+    });
+
+    const { data } = await createClassMutation({ variables: { input } });
+
+    if (data?.createRecurringClass) {
+      await completeSuccessfulCreate(data.createRecurringClass);
+    }
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error("Failed to create recurring class", { err: error });
+    notifications.show(creationFailedLabel, { severity: "error" });
+  }
+}
+
 function useHandleSubmit(args: {
   readonly teacherId: string;
   readonly formState: CreateRecurringClassDialogFormState;
@@ -308,10 +356,7 @@ function useHandleSubmit(args: {
     notifications,
     creationFailedLabel,
   } = args;
-  // NEW FOR PLAN v5: handleSubmit — the previously inline submit handler
-  // (with `buildCreateRecurringClassInput` + `createClassMutation` +
-  // `logger.error` + `useNotifications` error toast) lifted out of BOTH
-  // tier dialog files (specs §6.2 + N1 + N17).
+
   return useCallback(
     async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -320,48 +365,20 @@ function useHandleSubmit(args: {
         return;
       }
 
-      try {
-        const input = buildCreateRecurringClassInput({
-          studentId: formState.studentId,
-          teacherId,
-          subjectId: formState.subjectId,
-          duration: formState.duration,
-          defaultStartTime: formState.defaultStartTime,
-          timezone: formState.timezone,
-          classType: formState.classType,
-          days,
-          schedulingMode: formState.schedulingMode,
-          quotaId: formState.quotaId,
-          earmarkedClasses: formState.earmarkedClasses,
-          generationHorizonWeeks: formState.generationHorizonWeeks,
-          ondemandNoCreditsOutcome: formState.ondemandNoCreditsOutcome,
-        });
-
-        const { data } = await createClassMutation({ variables: { input } });
-
-        if (data?.createRecurringClass) {
-          await completeSuccessfulCreate(data.createRecurringClass);
-        }
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        logger.error("Failed to create recurring class", { err: error });
-        notifications.show(creationFailedLabel, { severity: "error" });
-      }
+      await executeRecurringClassSubmit({
+        teacherId,
+        formState,
+        days,
+        createClassMutation,
+        completeSuccessfulCreate,
+        notifications,
+        creationFailedLabel,
+      });
     },
     [
       validateBeforeSubmit,
-      formState.studentId,
-      formState.subjectId,
-      formState.duration,
-      formState.defaultStartTime,
-      formState.timezone,
-      formState.classType,
-      formState.schedulingMode,
-      formState.quotaId,
-      formState.earmarkedClasses,
-      formState.generationHorizonWeeks,
-      formState.ondemandNoCreditsOutcome,
       teacherId,
+      formState,
       days,
       createClassMutation,
       completeSuccessfulCreate,

@@ -45,35 +45,44 @@ async function waitForServerRecovery(): Promise<void> {
   }
 }
 
+async function attemptEnsureDemoUsers(attempt: number, maxAttempts: number): Promise<boolean> {
+  const result = await testClient.mutate({
+    mutation: ensureDemoUsersMutationDocument,
+  });
+
+  if (!result.error) {
+    if (!result.data?.ensureDemoUsers) {
+      throw new Error("ensureDemoUsers returned false");
+    }
+    return true;
+  }
+
+  const errorMsg = `ensureDemoUsers failed: ${result.error.message ?? "unknown GraphQL error"}`;
+  if (attempt >= maxAttempts) {
+    throw new Error(errorMsg);
+  }
+
+  await waitForServerRecovery();
+  await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
+  return false;
+}
+
+async function provisionDemoUsers(): Promise<void> {
+  const maxAttempts = 5;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const success = await attemptEnsureDemoUsers(attempt, maxAttempts);
+    if (success) return;
+  }
+  throw new Error("ensureDemoUsers failed after all retries");
+}
+
 /**
  * Idempotently provisions canonical demo login users via the test-helper mutation.
  * Safe to call from every suite's beforeAll — concurrent callers share one in-flight request.
  */
 export async function ensureDemoUsersForTests(): Promise<void> {
   if (!demoUsersReadyPromise) {
-    demoUsersReadyPromise = (async () => {
-      const maxAttempts = 5;
-      let lastError: unknown;
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        const result = await testClient.mutate({
-          mutation: ensureDemoUsersMutationDocument,
-        });
-        if (result.error) {
-          lastError = new Error(`ensureDemoUsers failed: ${result.error.message ?? "unknown GraphQL error"}`);
-          if (attempt < maxAttempts) {
-            await waitForServerRecovery();
-            await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
-            continue;
-          }
-          throw lastError;
-        }
-        if (!result.data?.ensureDemoUsers) {
-          throw new Error("ensureDemoUsers returned false");
-        }
-        return;
-      }
-      throw lastError ?? new Error("ensureDemoUsers failed after all retries");
-    })();
+    demoUsersReadyPromise = provisionDemoUsers();
   }
   await demoUsersReadyPromise;
 }

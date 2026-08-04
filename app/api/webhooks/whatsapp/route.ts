@@ -152,6 +152,35 @@ export async function POST(request: NextRequest) {
     return new NextResponse("Payload Too Large", { status: 413 });
   }
 
+  const hmacResult = await verifyHmacSignature(request, ip, contentLength, rawBody);
+  if (hmacResult) {
+    return hmacResult;
+  }
+
+  const parseResult = parseWebhookBody(rawBody, ip);
+  if (parseResult.response) {
+    return parseResult.response;
+  }
+
+  // S3: Strip inbound `value.messages[]` from every change entry before anything else
+  const stripped = stripInboundMessages(parseResult.body);
+
+  deferWebhookProcessing(stripped);
+
+  return NextResponse.json({ status: "ok" }, { status: 200 });
+}
+
+/**
+ * Verify HMAC-SHA256 signature of the incoming webhook payload.
+ * Returns a NextResponse if verification fails (caller should return it),
+ * or `null` if the signature is valid.
+ */
+async function verifyHmacSignature(
+  request: NextRequest,
+  ip: string,
+  contentLength: number,
+  rawBody: string
+): Promise<NextResponse | null> {
   // HMAC-SHA256 signature verification
   const signatureHeader = request.headers.get("x-hub-signature-256") ?? "";
   const appSecret = await resolveEnvConfig("WHATSAPP_APP_SECRET");
@@ -188,13 +217,20 @@ export async function POST(request: NextRequest) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  // Parse the verified body
+  return null;
+}
+
+/**
+ * Parse and validate the webhook body JSON.
+ * Returns `{ body, response: null }` on success, or `{ body: null, response }` on failure.
+ */
+function parseWebhookBody(rawBody: string, ip: string): { body: unknown; response: NextResponse | null } {
   let body: unknown;
   try {
     body = JSON.parse(rawBody);
   } catch {
     logger.warn("whatsapp-webhook: invalid JSON body", { ip });
-    return new NextResponse("Bad Request", { status: 400 });
+    return { body: null, response: new NextResponse("Bad Request", { status: 400 }) };
   }
 
   // Validate top-level object field
@@ -203,42 +239,41 @@ export async function POST(request: NextRequest) {
       ip,
       object: (body as { object?: string })?.object,
     });
-    return new NextResponse("Not Found", { status: 404 });
+    return { body: null, response: new NextResponse("Not Found", { status: 404 }) };
   }
 
-  // S3: Strip inbound `value.messages[]` from every change entry before anything else
-  const stripped = stripInboundMessages(body);
+  return { body, response: null };
+}
 
-  /**
-   * C3: Defer event processing via `after()` from `next/server`.
-   *
-   * ⚠️ Best-effort on serverless (r7-048):
-   * On Vercel serverless, `after()` runs after the response is sent but is NOT
-   * guaranteed to complete — the serverless function may be frozen or terminated
-   * before the deferred work finishes. This means webhook processing can be
-   * silently dropped.
-   *
-   * Reliability is ensured by two mechanisms:
-   * - Meta retries unacknowledged webhooks (exponential backoff up to ~24h).
-   * - `WhatsappWebhookHandler.processEvent` is idempotent — the B3 forward-only
-   *   rank guard handles duplicate deliveries safely.
-   *
-   * Together, these guarantee that dropped deferred work is retried by Meta and
-   * that retries do not cause duplicate side-effects. The `after()` call itself
-   * is still preferred because it returns 200 immediately, reducing webhook
-   * timeout risk and Meta retry pressure.
-   */
+/**
+ * C3: Defer event processing via `after()` from `next/server`.
+ *
+ * ⚠️ Best-effort on serverless (r7-048):
+ * On Vercel serverless, `after()` runs after the response is sent but is NOT
+ * guaranteed to complete — the serverless function may be frozen or terminated
+ * before the deferred work finishes. This means webhook processing can be
+ * silently dropped.
+ *
+ * Reliability is ensured by two mechanisms:
+ * - Meta retries unacknowledged webhooks (exponential backoff up to ~24h).
+ * - `WhatsappWebhookHandler.processEvent` is idempotent — the B3 forward-only
+ *   rank guard handles duplicate deliveries safely.
+ *
+ * Together, these guarantee that dropped deferred work is retried by Meta and
+ * that retries do not cause duplicate side-effects. The `after()` call itself
+ * is still preferred because it returns 200 immediately, reducing webhook
+ * timeout risk and Meta retry pressure.
+ */
+function deferWebhookProcessing(strippedBody: unknown): void {
   after(async () => {
     try {
-      await WhatsappWebhookHandler.processEvent(stripped);
+      await WhatsappWebhookHandler.processEvent(strippedBody);
     } catch (error) {
       logger.error("whatsapp-webhook: deferred handler error", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
   });
-
-  return NextResponse.json({ status: "ok" }, { status: 200 });
 }
 
 /**

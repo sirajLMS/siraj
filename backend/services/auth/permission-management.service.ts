@@ -63,6 +63,39 @@ export namespace PermissionManagementService {
     await requireGroupExists(groupId, tErrors);
   }
 
+  /**
+   * Shared fail-open cache invalidation helper. Wraps {@link invalidateRoleChange}
+   * in a try/catch so cache provider errors never crash the calling request.
+   * Returns the same `userIds` it was given so batch callers can chain inline.
+   */
+  async function invalidateRoleChangeFailOpen(userIds: string | string[], context: string): Promise<void> {
+    const ids = Array.isArray(userIds) ? userIds : [userIds];
+    try {
+      for (const uid of ids) {
+        await invalidateRoleChange(uid);
+      }
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate role change cache", { userIds: ids, context, error: cacheErr });
+    }
+  }
+
+  /**
+   * Toggles the `trg_protect_system_permissions` trigger on the `permissions`
+   * table. The DO $$ block swallows concurrent / missing-table errors so the
+   * call is safe to run even when the trigger does not exist.
+   */
+  async function setSystemPermissionTrigger(enabled: boolean): Promise<void> {
+    const action = enabled ? "ENABLE" : "DISABLE";
+    await db.execute(sql`
+      DO $$
+      BEGIN
+        ALTER TABLE permissions ${sql.raw(action)} TRIGGER trg_protect_system_permissions;
+      EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not ${sql.raw(action.toLowerCase())} trigger: %', SQLERRM;
+      END $$;
+    `);
+  }
+
   async function requireUserSetup(
     actorUserId: string,
     userId: string,
@@ -261,12 +294,7 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "assign", "existsFull", tErrors);
     await PermissionManagementRepository.bulkAssignUsersToGroup([input.userId], input.groupId, actorUserId);
-
-    try {
-      await invalidateRoleChange(input.userId);
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache", { userId: input.userId, error: cacheErr });
-    }
+    await invalidateRoleChangeFailOpen(input.userId, "assignGroupToUser");
   }
 
   export async function revokeGroupFromUser(
@@ -276,12 +304,7 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "assign", "nonSuperAdmin", tErrors);
     await PermissionManagementRepository.bulkRevokeUsersFromGroup([input.userId], input.groupId);
-
-    try {
-      await invalidateRoleChange(input.userId);
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache", { userId: input.userId, error: cacheErr });
-    }
+    await invalidateRoleChangeFailOpen(input.userId, "revokeGroupFromUser");
   }
 
   export async function listGroupsForUser(
@@ -310,17 +333,7 @@ export namespace PermissionManagementService {
     if (foundUsers.length !== input.userIds.length) throw new Error(tErrors.permissionManagement.userNotFound(""));
 
     await PermissionManagementRepository.bulkAssignUsersToGroup(input.userIds, input.groupId, actorUserId);
-
-    try {
-      for (const uid of input.userIds) {
-        await invalidateRoleChange(uid);
-      }
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache for bulk assign", {
-        userIds: input.userIds,
-        error: cacheErr,
-      });
-    }
+    await invalidateRoleChangeFailOpen(input.userIds, "bulkAssignUsersToGroup");
   }
 
   export async function bulkRevokeUsersFromGroup(
@@ -340,17 +353,7 @@ export namespace PermissionManagementService {
     if (nonSuperAdminUserIds.length === 0) return;
 
     await PermissionManagementRepository.bulkRevokeUsersFromGroup(nonSuperAdminUserIds, input.groupId);
-
-    try {
-      for (const uid of nonSuperAdminUserIds) {
-        await invalidateRoleChange(uid);
-      }
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache for bulk revoke", {
-        userIds: nonSuperAdminUserIds,
-        error: cacheErr,
-      });
-    }
+    await invalidateRoleChangeFailOpen(nonSuperAdminUserIds, "bulkRevokeUsersFromGroup");
   }
 
   export async function listUserOverrides(
@@ -369,15 +372,7 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "manage", "nonSuperAdmin", tErrors);
     await PermissionManagementRepository.setUserOverrides(input.userId, input.overrides, actorUserId);
-
-    try {
-      await invalidateRoleChange(input.userId);
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache for user overrides", {
-        userId: input.userId,
-        error: cacheErr,
-      });
-    }
+    await invalidateRoleChangeFailOpen(input.userId, "updateUserOverrides");
   }
 
   export async function getEffectiveUserPermissions(
@@ -417,25 +412,11 @@ export namespace PermissionManagementService {
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
 
   async function disableSystemPermissionTrigger(): Promise<void> {
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
-      EXCEPTION WHEN OTHERS THEN
-        RAISE NOTICE 'Could not disable trigger: %', SQLERRM;
-      END $$;
-    `);
+    await setSystemPermissionTrigger(false);
   }
 
   async function enableSystemPermissionTrigger(): Promise<void> {
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
-      EXCEPTION WHEN OTHERS THEN
-        RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
-      END $$;
-    `);
+    await setSystemPermissionTrigger(true);
   }
 
   /**

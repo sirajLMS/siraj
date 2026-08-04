@@ -8,28 +8,25 @@ import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType 
 const redisGetMock = mock(async (_key: string): Promise<string | null> => null);
 const redisSetMock = mock(async (): Promise<void> => {});
 
-mock.module("@/backend/services/redis", () => ({
-  redisService: {
-    get: redisGetMock,
-    set: redisSetMock,
-  },
-  getRedisService: async () => ({
-    get: redisGetMock,
-    set: redisSetMock,
-  }),
-}));
+function makeRedisModuleFactory(extras?: Record<string, unknown>) {
+  return () => {
+    const base = {
+      redisService: {
+        get: redisGetMock,
+        set: redisSetMock,
+      },
+      getRedisService: async () => ({
+        get: redisGetMock,
+        set: redisSetMock,
+      }),
+    };
+    return extras ? { ...base, ...extras } : base;
+  };
+}
 
-mock.module("@/backend/services/redis/index", () => ({
-  redisService: {
-    get: redisGetMock,
-    set: redisSetMock,
-  },
-  getRedisService: async () => ({
-    get: redisGetMock,
-    set: redisSetMock,
-  }),
-  SessionRedisService: class {},
-}));
+mock.module("@/backend/services/redis", makeRedisModuleFactory());
+
+mock.module("@/backend/services/redis/index", makeRedisModuleFactory({ SessionRedisService: class {} }));
 
 mock.module("@/backend/lib/logger", () => ({
   logger: {
@@ -150,6 +147,20 @@ function makeOkResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), { status: 200 });
 }
 
+interface AdapterSendScenario {
+  adapter: InstanceType<Awaited<ReturnType<typeof importAdapter>>["MetaCloudApiAdapter"]>;
+  fetchSpy: ReturnType<typeof spyOn>;
+}
+
+async function setupAdapterAndFetchSpy(wamid: string): Promise<AdapterSendScenario> {
+  const { MetaCloudApiAdapter } = await importAdapter();
+  const adapter = new MetaCloudApiAdapter();
+  const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
+    makeOkResponse({ messages: [{ id: wamid }], messaging_product: "whatsapp" })
+  );
+  return { adapter, fetchSpy };
+}
+
 function resetRedisMocks() {
   redisGetMock.mockReset();
   redisGetMock.mockResolvedValue(null);
@@ -254,13 +265,8 @@ describe("B2: Pair-Rate-Limit GET guard path", () => {
   });
 
   test("when redis has a recent timestamp, adapter returns rateLimited without sending", async () => {
-    const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const { adapter, fetchSpy } = await setupAdapterAndFetchSpy("wamid.deferred");
     redisGetMock.mockResolvedValueOnce(String(Date.now()));
-
-    const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-      makeOkResponse({ messages: [{ id: "wamid.deferred" }], messaging_product: "whatsapp" })
-    );
 
     const result = await adapter.send({ ...sendPayload });
 
@@ -274,13 +280,8 @@ describe("B2: Pair-Rate-Limit GET guard path", () => {
   });
 
   test("when redis GET returns a stale timestamp, adapter proceeds and sends", async () => {
-    const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const { adapter, fetchSpy } = await setupAdapterAndFetchSpy("wamid.stale");
     redisGetMock.mockResolvedValueOnce(String(Date.now() - PAIR_RATE_LIMIT_MS - 1000));
-
-    const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-      makeOkResponse({ messages: [{ id: "wamid.stale" }], messaging_product: "whatsapp" })
-    );
 
     const result = await adapter.send({ ...sendPayload });
 
@@ -294,13 +295,8 @@ describe("B2: Pair-Rate-Limit GET guard path", () => {
 
 describe("B2: Pair-Rate-Limit adapter behavior (guard hit / fail-open)", () => {
   test("when redis returns null, no rate-limit — proceed to send, set written", async () => {
-    const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const { adapter, fetchSpy } = await setupAdapterAndFetchSpy("wamid.456");
     redisGetMock.mockResolvedValueOnce(null);
-
-    const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-      makeOkResponse({ messages: [{ id: "wamid.456" }], messaging_product: "whatsapp" })
-    );
 
     await adapter.send({ ...sendPayload });
 
@@ -313,14 +309,9 @@ describe("B2: Pair-Rate-Limit adapter behavior (guard hit / fail-open)", () => {
   });
 
   test("when redis throws, adapter uses local fallback and still proceeds on first send", async () => {
-    const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const { adapter, fetchSpy } = await setupAdapterAndFetchSpy("wamid.789");
 
     redisGetMock.mockRejectedValueOnce(new Error("Redis down"));
-
-    const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-      makeOkResponse({ messages: [{ id: "wamid.789" }], messaging_product: "whatsapp" })
-    );
 
     const result = await adapter.send({ ...sendPayload });
 

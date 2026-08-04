@@ -53,6 +53,31 @@ function enrichCurrencyTotalsWithDisplay(
   }));
 }
 
+async function enrichSummaryWithDisplayAmounts<T>(
+  result: T,
+  ctx: import("@/backend/graphql/gqlContext").BaseContext,
+  firstArrayKey: keyof T,
+  secondArrayKey: keyof T
+): Promise<T> {
+  const firstArray = result[firstArrayKey] as unknown as readonly BillingCurrencyTotal[];
+  const secondArray = result[secondArrayKey] as unknown as readonly BillingCurrencyTotal[];
+  const allCurrencyTotals = [...firstArray, ...secondArray];
+
+  const displayAmounts = await resolveDisplayAmountFields(
+    allCurrencyTotals,
+    ctx,
+    "amount",
+    "currency",
+    "subjectUserId"
+  );
+
+  return {
+    ...result,
+    [firstArrayKey]: enrichCurrencyTotalsWithDisplay(firstArray, displayAmounts),
+    [secondArrayKey]: enrichCurrencyTotalsWithDisplay(secondArray, displayAmounts),
+  };
+}
+
 interface ParentScopedResolverArgs {
   parentId?: string | null;
   userId?: string | null;
@@ -273,20 +298,7 @@ gqlSchemaBuilder.queryField("adminBillingSummary", t =>
       const tErrors = ctx.t().errorsTranslations;
       const result = await BillingHistoryService.getAdminBillingSummary(userId, tErrors);
 
-      const allCurrencyTotals = [...result.outstandingByCurrency, ...result.mtdRevenueByCurrency];
-      const displayAmounts = await resolveDisplayAmountFields(
-        allCurrencyTotals,
-        ctx,
-        "amount",
-        "currency",
-        "subjectUserId"
-      );
-
-      return {
-        ...result,
-        outstandingByCurrency: enrichCurrencyTotalsWithDisplay(result.outstandingByCurrency, displayAmounts),
-        mtdRevenueByCurrency: enrichCurrencyTotalsWithDisplay(result.mtdRevenueByCurrency, displayAmounts),
-      };
+      return enrichSummaryWithDisplayAmounts(result, ctx, "outstandingByCurrency", "mtdRevenueByCurrency");
     },
   })
 );
@@ -321,20 +333,7 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
         tErrors
       );
 
-      const allCurrencyTotals = [...result.outstandingByCurrency, ...result.paidThisTermByCurrency];
-      const displayAmounts = await resolveDisplayAmountFields(
-        allCurrencyTotals,
-        ctx,
-        "amount",
-        "currency",
-        "subjectUserId"
-      );
-
-      return {
-        ...result,
-        outstandingByCurrency: enrichCurrencyTotalsWithDisplay(result.outstandingByCurrency, displayAmounts),
-        paidThisTermByCurrency: enrichCurrencyTotalsWithDisplay(result.paidThisTermByCurrency, displayAmounts),
-      };
+      return enrichSummaryWithDisplayAmounts(result, ctx, "outstandingByCurrency", "paidThisTermByCurrency");
     },
   })
 );

@@ -123,6 +123,46 @@ export function useMeetingProviderFormViewModel({
     router.push("/meeting-providers");
   }, [router]);
 
+  const buildFieldSchema = (values: MeetingProviderFormData) => ({
+    requiresMeetingUrl: !values.supportsAutoGeneration,
+    supportsAutoGeneration: values.supportsAutoGeneration ?? false,
+    supportsUsername: values.supportsUsername,
+    supportsPassword: values.supportsPassword,
+    supportsTenantId: values.supportsTenantId,
+  });
+
+  const sanitizeLocalizedText = (loc?: { en?: string; ar?: string }) => {
+    const en = (loc?.en ?? "").trim();
+    const ar = (loc?.ar ?? "").trim();
+    if (!en && !ar) return null;
+    return { en: en || ar, ar: ar || en };
+  };
+
+  const sanitizeName = (name?: { en?: string; ar?: string }) => ({
+    en: (name?.en ?? "").trim() || (name?.ar ?? "").trim(),
+    ar: (name?.ar ?? "").trim() || (name?.en ?? "").trim(),
+  });
+
+  const buildProviderInput = (values: MeetingProviderFormData) => {
+    const fieldSchema = buildFieldSchema(values);
+    const nameSanitized = sanitizeName(values.name);
+    const descriptionSanitized = sanitizeLocalizedText(values.description);
+    const instructionsSanitized = sanitizeLocalizedText(values.instructions);
+
+    return {
+      slug: values.slug.trim(),
+      name: nameSanitized,
+      description: descriptionSanitized,
+      instructions: instructionsSanitized,
+      urlAllowlist: values.urlAllowlist,
+      urlExample: values.urlExample?.trim() || null,
+      logoUrl: values.logoUrl?.trim() || null,
+      fieldSchema,
+      providerKind: values.providerKind,
+      isActive: values.isActive,
+    };
+  };
+
   const handleFormSubmit = handleSubmit(async (values: MeetingProviderFormData) => {
     if (!isUrlExampleValid) {
       setErrorMsg(t.validation.urlAllowlistInvalid);
@@ -130,66 +170,14 @@ export function useMeetingProviderFormViewModel({
     }
     setErrorMsg(null);
 
-    const fieldSchema = {
-      requiresMeetingUrl: !values.supportsAutoGeneration,
-      supportsAutoGeneration: values.supportsAutoGeneration ?? false,
-      supportsUsername: values.supportsUsername,
-      supportsPassword: values.supportsPassword,
-      supportsTenantId: values.supportsTenantId,
-    };
-
-    const nameSanitized = {
-      en: (values.name?.en ?? "").trim() || (values.name?.ar ?? "").trim(),
-      ar: (values.name?.ar ?? "").trim() || (values.name?.en ?? "").trim(),
-    };
-
-    const sanitizeLoc = (loc?: { en?: string; ar?: string }) => {
-      const en = (loc?.en ?? "").trim();
-      const ar = (loc?.ar ?? "").trim();
-      if (!en && !ar) return null;
-      return { en: en || ar, ar: ar || en };
-    };
-
-    const descriptionSanitized = sanitizeLoc(values.description);
-    const instructionsSanitized = sanitizeLoc(values.instructions);
+    const input = buildProviderInput(values);
 
     try {
       if (mode === "create") {
-        await createProvider({
-          variables: {
-            input: {
-              slug: values.slug.trim(),
-              name: nameSanitized,
-              description: descriptionSanitized,
-              instructions: instructionsSanitized,
-              urlAllowlist: values.urlAllowlist,
-              urlExample: values.urlExample?.trim() || null,
-              logoUrl: values.logoUrl?.trim() || null,
-              fieldSchema,
-              providerKind: values.providerKind,
-              isActive: values.isActive,
-            },
-          },
-        });
+        await createProvider({ variables: { input } });
         notifications.show(t.createSuccess, { severity: "success", autoHideDuration: 3000 });
       } else if (mode === "edit" && providerId) {
-        await updateProvider({
-          variables: {
-            id: providerId,
-            input: {
-              slug: values.slug.trim(),
-              name: nameSanitized,
-              description: descriptionSanitized,
-              instructions: instructionsSanitized,
-              urlAllowlist: values.urlAllowlist,
-              urlExample: values.urlExample?.trim() || null,
-              logoUrl: values.logoUrl?.trim() || null,
-              fieldSchema,
-              providerKind: values.providerKind,
-              isActive: values.isActive,
-            },
-          },
-        });
+        await updateProvider({ variables: { id: providerId, input } });
         notifications.show(t.updateSuccess, { severity: "success", autoHideDuration: 3000 });
       }
       router.push("/meeting-providers");

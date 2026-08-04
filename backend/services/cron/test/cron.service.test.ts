@@ -13,6 +13,7 @@ import type {
   CronScheduleListResult,
   CronScheduleReturnType,
   CronScheduleSelectType,
+  CronScheduleSubmitInput,
 } from "@/backend/types/cron/cron.types";
 
 // ── Mutable mock call recording state ──
@@ -142,6 +143,27 @@ function makeRunReturnRow(overrides: Partial<CronRunReturnType> = {}): CronRunRe
   return { ...mockRunReturnRow, ...overrides } as CronRunReturnType;
 }
 
+interface CreateScheduleInputOverrides {
+  name?: string;
+  cronExpression?: string;
+  timezone?: string;
+}
+
+function makeCreateScheduleInput(overrides: CreateScheduleInputOverrides = {}): CronScheduleSubmitInput {
+  return {
+    name: "test-schedule",
+    cronExpression: "0 9 * * *",
+    timezone: "UTC",
+    jobKind: "NOOP",
+    concurrencyPolicy: "ALLOW",
+    payload: null,
+    timeoutSeconds: 300,
+    maxRetries: 3,
+    retryBackoffSeconds: 60,
+    ...overrides,
+  } as CronScheduleSubmitInput;
+}
+
 function resetState() {
   createScheduleCalls = [];
   getScheduleByIdResult = mockScheduleRow;
@@ -171,6 +193,21 @@ function resetState() {
   adapterSendResult = "queue-job-id";
   adapterGetQueueStatsCalls = 0;
   adapterGetQueueStatsResult = { pending: 0, inFlight: 0, failed: 0, byJobKind: {} };
+}
+
+interface UpdateScheduleIfStatusCallExpectation {
+  status: CronScheduleStatus;
+  nextRunAt: Date | null;
+}
+
+function expectUpdateScheduleIfStatusCall(
+  index: number,
+  expectedId: string,
+  expectedInput: UpdateScheduleIfStatusCallExpectation
+): void {
+  const call = updateScheduleIfStatusCalls[index];
+  expect(call.id).toBe(expectedId);
+  expect(call.input).toEqual(expectedInput as unknown as Record<string, unknown>);
 }
 
 // ── Mock factory implementations ──
@@ -331,17 +368,7 @@ describe("CronService", () => {
 
   describe("createSchedule", () => {
     test("calls repo.createSchedule with computed nextRunAt", async () => {
-      const input = {
-        name: "my-schedule",
-        cronExpression: "0 9 * * *",
-        timezone: "UTC",
-        jobKind: "NOOP",
-        concurrencyPolicy: "ALLOW",
-        payload: null,
-        timeoutSeconds: 300,
-        maxRetries: 3,
-        retryBackoffSeconds: 60,
-      };
+      const input = makeCreateScheduleInput({ name: "my-schedule", cronExpression: "0 9 * * *" });
 
       const result = await CronService.createSchedule(input, "en", SERVICE_USER_ID);
 
@@ -356,17 +383,7 @@ describe("CronService", () => {
     });
 
     test("throws error for invalid cron expression", async () => {
-      const input = {
-        name: "bad-cron",
-        cronExpression: "not-a-cron",
-        timezone: "UTC",
-        jobKind: "NOOP",
-        concurrencyPolicy: "ALLOW",
-        payload: null,
-        timeoutSeconds: 300,
-        maxRetries: 3,
-        retryBackoffSeconds: 60,
-      };
+      const input = makeCreateScheduleInput({ name: "bad-cron", cronExpression: "not-a-cron" });
 
       await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Invalid cron: not-a-cron"
@@ -377,17 +394,7 @@ describe("CronService", () => {
     test("throws error when name already exists", async () => {
       getScheduleByNameResult = mockScheduleRow;
 
-      const input = {
-        name: "test-schedule",
-        cronExpression: "*/5 * * * *",
-        timezone: "UTC",
-        jobKind: "NOOP",
-        concurrencyPolicy: "ALLOW",
-        payload: null,
-        timeoutSeconds: 300,
-        maxRetries: 3,
-        retryBackoffSeconds: 60,
-      };
+      const input = makeCreateScheduleInput({ name: "test-schedule", cronExpression: "*/5 * * * *" });
 
       await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Schedule exists: test-schedule"
@@ -398,17 +405,7 @@ describe("CronService", () => {
     });
 
     test("throws error for invalid timezone", async () => {
-      const input = {
-        name: "bad-tz-schedule",
-        cronExpression: "0 9 * * *",
-        timezone: "Not/A real timezone",
-        jobKind: "NOOP",
-        concurrencyPolicy: "ALLOW",
-        payload: null,
-        timeoutSeconds: 300,
-        maxRetries: 3,
-        retryBackoffSeconds: 60,
-      };
+      const input = makeCreateScheduleInput({ name: "bad-tz-schedule", timezone: "Not/A real timezone" });
 
       await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Invalid timezone: Not/A real timezone"
@@ -497,13 +494,11 @@ describe("CronService", () => {
 
       expect(getScheduleByIdCalls).toContain("sched-1");
       expect(updateScheduleIfStatusCalls).toHaveLength(1);
-      const call = updateScheduleIfStatusCalls[0];
-      expect(call.id).toBe("sched-1");
-      expect(call.input).toEqual({
+      expectUpdateScheduleIfStatusCall(0, "sched-1", {
         status: CronScheduleStatus.PAUSED,
         nextRunAt: null,
       });
-      expect(call.expectedStatus).toBe(CronScheduleStatus.ACTIVE);
+      expect(updateScheduleIfStatusCalls[0].expectedStatus).toBe(CronScheduleStatus.ACTIVE);
       expect(result).toBeDefined();
     });
 
@@ -534,11 +529,10 @@ describe("CronService", () => {
 
       expect(getScheduleByIdCalls).toContain("sched-1");
       expect(updateScheduleIfStatusCalls).toHaveLength(1);
-      const call = updateScheduleIfStatusCalls[0];
-      expect(call.id).toBe("sched-1");
-      expect(call.input.status).toBe(CronScheduleStatus.ACTIVE);
-      expect(call.input.nextRunAt).toBeInstanceOf(Date);
-      expect(call.expectedStatus).toBe(CronScheduleStatus.PAUSED);
+      expect(updateScheduleIfStatusCalls[0].id).toBe("sched-1");
+      expect(updateScheduleIfStatusCalls[0].input.status).toBe(CronScheduleStatus.ACTIVE);
+      expect(updateScheduleIfStatusCalls[0].input.nextRunAt).toBeInstanceOf(Date);
+      expect(updateScheduleIfStatusCalls[0].expectedStatus).toBe(CronScheduleStatus.PAUSED);
       expect(result).toBeDefined();
     });
 

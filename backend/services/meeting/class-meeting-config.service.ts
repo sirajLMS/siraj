@@ -81,15 +81,28 @@ export namespace ClassMeetingConfigService {
     return MeetingProviderCatalogService.getProvidersByIds(ids);
   }
 
+  async function resolveAndMaskConfig(config: ClassMeetingConfigSelectType): Promise<ClassMeetingConfigReturnType> {
+    const providerMap = await resolveProvidersForClassConfigs([config]);
+    return buildMaskedClassMeetingConfig(config, true, providerMap);
+  }
+
+  async function listScopedConfigs(
+    actorUserId: string,
+    scope: { classInstanceId: string } | { recurringScheduleId: string },
+    tErrors: ErrorsLabels
+  ): Promise<ClassMeetingConfigReturnType[]> {
+    await assertCanManageClass(actorUserId, tErrors);
+    const rows = await ClassMeetingConfigRepository.listByScope(scope);
+    const providerMap = await resolveProvidersForClassConfigs(rows);
+    return buildMaskedClassMeetingConfigs(rows, true, providerMap);
+  }
+
   export async function listClassMeetingConfigs(
     actorUserId: string,
     classInstanceId: string,
     tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType[]> {
-    await assertCanManageClass(actorUserId, tErrors);
-    const rows = await ClassMeetingConfigRepository.listByScope({ classInstanceId });
-    const providerMap = await resolveProvidersForClassConfigs(rows);
-    return buildMaskedClassMeetingConfigs(rows, true, providerMap);
+    return listScopedConfigs(actorUserId, { classInstanceId }, tErrors);
   }
 
   export async function listRecurringMeetingConfigs(
@@ -97,10 +110,7 @@ export namespace ClassMeetingConfigService {
     recurringScheduleId: string,
     tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType[]> {
-    await assertCanManageClass(actorUserId, tErrors);
-    const rows = await ClassMeetingConfigRepository.listByScope({ recurringScheduleId });
-    const providerMap = await resolveProvidersForClassConfigs(rows);
-    return buildMaskedClassMeetingConfigs(rows, true, providerMap);
+    return listScopedConfigs(actorUserId, { recurringScheduleId }, tErrors);
   }
 
   async function loadConfigForActor(actorUserId: string, id: string, tErrors: ErrorsLabels) {
@@ -115,8 +125,7 @@ export namespace ClassMeetingConfigService {
     tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
     const config = await loadConfigForActor(actorUserId, id, tErrors);
-    const providerMap = await resolveProvidersForClassConfigs([config]);
-    return buildMaskedClassMeetingConfig(config, true, providerMap);
+    return resolveAndMaskConfig(config);
   }
 
   export async function createClassMeetingConfig(
@@ -156,8 +165,7 @@ export namespace ClassMeetingConfigService {
       tErrors
     );
 
-    const providerMap = await resolveProvidersForClassConfigs([created]);
-    return buildMaskedClassMeetingConfig(created, true, providerMap);
+    return resolveAndMaskConfig(created);
   }
 
   export async function updateClassMeetingConfig(
@@ -182,34 +190,20 @@ export namespace ClassMeetingConfigService {
 
       const shouldRegenerate = !parsed.meetingUrl && provider.providerKind !== "manual" && detailsChanged;
 
-      if (shouldRegenerate) {
-        const result = await safeClassMaybeGenerateUrl(
-          provider,
-          parsed,
-          {
-            topic: input.label ?? existing.label ?? "Class Meeting",
-            actorUserId,
-          },
-          tErrors.meetingProvider.meetingConfigUpdateFailed
-        );
-        details = result.details;
-        providerMetadata = result.providerMetadata;
-      } else {
-        const result = await safeClassMaybeGenerateUrl(
-          provider,
-          parsed,
-          {
-            topic: input.label ?? existing.label ?? "Class Meeting",
-            actorUserId,
-          },
-          tErrors.meetingProvider.meetingConfigUpdateFailed
-        );
-        details = result.details;
-        providerMetadata = result.providerMetadata;
+      const result = await safeClassMaybeGenerateUrl(
+        provider,
+        parsed,
+        {
+          topic: input.label ?? existing.label ?? "Class Meeting",
+          actorUserId,
+        },
+        tErrors.meetingProvider.meetingConfigUpdateFailed
+      );
+      details = result.details;
+      providerMetadata = result.providerMetadata;
 
-        if (providerMetadata === null && !detailsChanged) {
-          providerMetadata = existing.providerMetadata ?? null;
-        }
+      if (!shouldRegenerate && providerMetadata === null && !detailsChanged) {
+        providerMetadata = existing.providerMetadata ?? null;
       }
     }
 
@@ -226,8 +220,7 @@ export namespace ClassMeetingConfigService {
       tErrors
     );
 
-    const providerMap = await resolveProvidersForClassConfigs([updated]);
-    return buildMaskedClassMeetingConfig(updated, true, providerMap);
+    return resolveAndMaskConfig(updated);
   }
 
   export async function deleteClassMeetingConfig(
@@ -247,8 +240,7 @@ export namespace ClassMeetingConfigService {
   ): Promise<ClassMeetingConfigReturnType> {
     await loadConfigForActor(actorUserId, id, tErrors);
     const updated = await ClassMeetingConfigRepository.setDefault(id, tErrors);
-    const providerMap = await resolveProvidersForClassConfigs([updated]);
-    return buildMaskedClassMeetingConfig(updated, true, providerMap);
+    return resolveAndMaskConfig(updated);
   }
 }
 

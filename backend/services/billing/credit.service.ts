@@ -328,89 +328,140 @@ export namespace CreditService {
   ): Promise<number> {
     if (refunds.length === 0) return 0;
 
-    // Build the full set of ledger keys + caller keys for all refunds.
-    const allKeys: string[] = [];
-    const ledgerKeyByRefund = new Map<number, string>();
-
-    refunds.forEach((refund, idx) => {
-      const ledgerKey = deriveBookingIdempotencyKey({
-        studentId: refund.studentId,
-        classInstanceId: refund.classInstanceId,
-        operation: "refund",
-      });
-      ledgerKeyByRefund.set(idx, ledgerKey);
-      allKeys.push(ledgerKey, refund.idempotencyKey);
-    });
-
-    // ONE SELECT to find all existing rows for any of the keys.
-    const existing = await CreditRepository.findByIdempotencyKeys([...new Set(allKeys)].sort(), tx);
-    const existingKeys = new Set(existing.map(r => r.idempotencyKey));
-
-    // Filter unseen refunds — a refund is unseen if BOTH its ledger key
-    // and its caller key are absent.
-    const toInsert: Array<{
-      studentId: string;
-      classInstanceId: string;
-      creditedByUserId: string;
-      idempotencyKey: string;
-    }> = [];
-
-    refunds.forEach((refund, idx) => {
-      const ledgerKey = ledgerKeyByRefund.get(idx);
-      if (ledgerKey !== undefined && !existingKeys.has(ledgerKey) && !existingKeys.has(refund.idempotencyKey)) {
-        // For the batch insert we use the deterministic ledger key as the
-        // idempotencyKey (same as the single-instance path uses via
-        // runIdempotentBookingLedgerOp.applyLedgerChange).
-        toInsert.push({
-          studentId: refund.studentId,
-          classInstanceId: refund.classInstanceId,
-          creditedByUserId: refund.creditedByUserId,
-          idempotencyKey: ledgerKey,
-        });
-      }
-    });
+    const { ledgerKeyByRefund, allKeys } = buildRefundIdempotencyKeys(refunds);
+    const toInsert = await filterUnseenRefunds(refunds, ledgerKeyByRefund, allKeys, tx);
 
     if (toInsert.length === 0) return 0;
 
-    // ONE multi-row INSERT.
-    const insertRows = toInsert.map(r => ({
-      studentId: r.studentId,
-      changeAmount: 1,
-      reason: CreditReason.REFUND,
-      sourcePaymentId: null,
-      classInstanceId: r.classInstanceId,
-      notes: null,
-      creditedByUserId: r.creditedByUserId,
-      idempotencyKey: r.idempotencyKey,
-    }));
-
-    await CreditRepository.insertBatch(tx, insertRows);
-
-    // Group inserted refunds by studentId for batch student updates.
-    const byStudent = new Map<string, number>();
-    for (const r of toInsert) {
-      byStudent.set(r.studentId, (byStudent.get(r.studentId) ?? 0) + 1);
-    }
-
-    // ONE addClasses call per unique student (amount = count for that student).
-    // ONE refreshStudentOndemandInstances call per unique student.
-    // Each student's addClasses → refresh is kept sequential (same student, same tx),
-    // but independent students are processed in parallel via Promise.all.
-    await Promise.all(
-      [...byStudent].map(async ([studentId, count]) => {
-        await StudentRepository.addClasses(studentId, tErrors, count, undefined, tx);
-        await QuotaService.refreshStudentOndemandInstances(studentId, tx);
-      })
-    );
+    await insertRefundLedgerRows(toInsert, tx);
+    await updateStudentBalances(toInsert, tx, tErrors);
 
     logger.info("Batch credit refund completed", {
       totalRequested: refunds.length,
       totalInserted: toInsert.length,
-      uniqueStudents: byStudent.size,
+      uniqueStudents: new Set(toInsert.map(r => r.studentId)).size,
     });
 
     return toInsert.length;
   }
+}
+
+/**
+ * Builds ledger idempotency keys for batch refunds.
+ */
+function buildRefundIdempotencyKeys(
+  refunds: Array<{
+    studentId: string;
+    classInstanceId: string;
+    creditedByUserId: string;
+    idempotencyKey: string;
+  }>
+): { ledgerKeyByRefund: Map<number, string>; allKeys: string[] } {
+  const allKeys: string[] = [];
+  const ledgerKeyByRefund = new Map<number, string>();
+  refunds.forEach((refund, idx) => {
+    const ledgerKey = deriveBookingIdempotencyKey({
+      studentId: refund.studentId,
+      classInstanceId: refund.classInstanceId,
+      operation: "refund",
+    });
+    ledgerKeyByRefund.set(idx, ledgerKey);
+    allKeys.push(ledgerKey, refund.idempotencyKey);
+  });
+  return { ledgerKeyByRefund, allKeys };
+}
+
+/**
+ * Filters refunds to only those not already persisted (idempotency check).
+ */
+async function filterUnseenRefunds(
+  refunds: Array<{
+    studentId: string;
+    classInstanceId: string;
+    creditedByUserId: string;
+    idempotencyKey: string;
+  }>,
+  ledgerKeyByRefund: Map<number, string>,
+  allKeys: string[],
+  tx: DBTransaction
+): Promise<
+  Array<{
+    studentId: string;
+    classInstanceId: string;
+    creditedByUserId: string;
+    idempotencyKey: string;
+  }>
+> {
+  const existing = await CreditRepository.findByIdempotencyKeys([...new Set(allKeys)].sort(), tx);
+  const existingKeys = new Set(existing.map(r => r.idempotencyKey));
+  const toInsert: Array<{
+    studentId: string;
+    classInstanceId: string;
+    creditedByUserId: string;
+    idempotencyKey: string;
+  }> = [];
+  refunds.forEach((refund, idx) => {
+    const ledgerKey = ledgerKeyByRefund.get(idx);
+    if (ledgerKey !== undefined && !existingKeys.has(ledgerKey) && !existingKeys.has(refund.idempotencyKey)) {
+      toInsert.push({
+        studentId: refund.studentId,
+        classInstanceId: refund.classInstanceId,
+        creditedByUserId: refund.creditedByUserId,
+        idempotencyKey: ledgerKey,
+      });
+    }
+  });
+  return toInsert;
+}
+
+/**
+ * Inserts refund ledger rows for the filtered batch.
+ */
+async function insertRefundLedgerRows(
+  toInsert: Array<{
+    studentId: string;
+    classInstanceId: string;
+    creditedByUserId: string;
+    idempotencyKey: string;
+  }>,
+  tx: DBTransaction
+): Promise<void> {
+  const insertRows = toInsert.map(r => ({
+    studentId: r.studentId,
+    changeAmount: 1,
+    reason: CreditReason.REFUND,
+    sourcePaymentId: null,
+    classInstanceId: r.classInstanceId,
+    notes: null,
+    creditedByUserId: r.creditedByUserId,
+    idempotencyKey: r.idempotencyKey,
+  }));
+  await CreditRepository.insertBatch(tx, insertRows);
+}
+
+/**
+ * Groups refunds by student and updates each student's balance + on-demand instances.
+ */
+async function updateStudentBalances(
+  toInsert: Array<{
+    studentId: string;
+    classInstanceId: string;
+    creditedByUserId: string;
+    idempotencyKey: string;
+  }>,
+  tx: DBTransaction,
+  tErrors: ErrorsLabels
+): Promise<void> {
+  const byStudent = new Map<string, number>();
+  for (const r of toInsert) {
+    byStudent.set(r.studentId, (byStudent.get(r.studentId) ?? 0) + 1);
+  }
+  await Promise.all(
+    [...byStudent].map(async ([studentId, count]) => {
+      await StudentRepository.addClasses(studentId, tErrors, count, undefined, tx);
+      await QuotaService.refreshStudentOndemandInstances(studentId, tx);
+    })
+  );
 }
 
 interface IdempotentBookingLedgerOp {

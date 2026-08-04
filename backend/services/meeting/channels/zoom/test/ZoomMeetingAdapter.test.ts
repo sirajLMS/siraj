@@ -107,52 +107,51 @@ describe("ZoomMeetingAdapter", () => {
       expect(fetchSpy).toHaveBeenCalledTimes(3);
     });
 
-    test("throws RateLimitedError on 429 token response", async () => {
+    function setupAdapterWithFetchMock(...responses: Response[]): void {
       fetchSpy.mockRestore();
-      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(null, {
-          status: 429,
-          headers: { "Retry-After": "60" },
-        })
-      );
+      if (responses.length === 1) {
+        fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(responses[0]);
+      } else {
+        fetchSpy = spyOn(globalThis, "fetch");
+        for (const res of responses) {
+          fetchSpy.mockResolvedValueOnce(res);
+        }
+      }
+    }
 
+    function rateLimitedResponse(retryAfter = "60"): Response {
+      return new Response(null, {
+        status: 429,
+        headers: { "Retry-After": retryAfter },
+      });
+    }
+
+    async function expectMeetingError(mockResponses: Response[], expectedError: unknown): Promise<void> {
+      setupAdapterWithFetchMock(...mockResponses);
       const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(RateLimitedError);
+      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(expectedError);
+    }
+
+    test("throws RateLimitedError on 429 token response", async () => {
+      await expectMeetingError([rateLimitedResponse("60")], RateLimitedError);
     });
 
     test("throws ZoomApiError on non-ok token response", async () => {
-      fetchSpy.mockRestore();
-      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        createMockResponse({ code: 124, message: "Invalid client credentials" }, 401)
+      await expectMeetingError(
+        [createMockResponse({ code: 124, message: "Invalid client credentials" }, 401)],
+        ZoomApiError
       );
-
-      const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(ZoomApiError);
     });
 
     test("throws RateLimitedError on 429 meeting response", async () => {
-      fetchSpy.mockRestore();
-      fetchSpy = spyOn(globalThis, "fetch")
-        .mockResolvedValueOnce(createMockResponse(MOCK_TOKEN_RESPONSE))
-        .mockResolvedValueOnce(
-          new Response(null, {
-            status: 429,
-            headers: { "Retry-After": "30" },
-          })
-        );
-
-      const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(RateLimitedError);
+      await expectMeetingError([createMockResponse(MOCK_TOKEN_RESPONSE), rateLimitedResponse("30")], RateLimitedError);
     });
 
     test("throws ZoomApiError on non-ok meeting response", async () => {
-      fetchSpy.mockRestore();
-      fetchSpy = spyOn(globalThis, "fetch")
-        .mockResolvedValueOnce(createMockResponse(MOCK_TOKEN_RESPONSE))
-        .mockResolvedValueOnce(createMockResponse({ code: 300, message: "Invalid topic" }, 400));
-
-      const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(ZoomApiError);
+      await expectMeetingError(
+        [createMockResponse(MOCK_TOKEN_RESPONSE), createMockResponse({ code: 300, message: "Invalid topic" }, 400)],
+        ZoomApiError
+      );
     });
 
     test("retries on 5xx then succeeds", async () => {

@@ -345,6 +345,62 @@ export namespace RecurringClassService {
     quotaDeducted: boolean;
   };
 
+  type UpcomingInstance = { id: string; studentId: string; quotaDeducted: boolean };
+
+  /**
+   * Shared permission gate for recurring-schedule management mutations.
+   * Throws a localized `UnauthorizedError` when the user lacks
+   * `SCHEDULE_CREATE_CLASS`.
+   */
+  async function requireManageAccess(userId: string, tErrors: ErrorsLabels): Promise<void> {
+    const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
+    if (!hasManageAccess) {
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
+    }
+  }
+
+  /**
+   * Load a recurring schedule row by id and return its snapshot, throwing a
+   * localized `NotFoundError` when it does not exist. Shared by
+   * `cancelSchedule` and `switchSchedulingMode`.
+   */
+  async function loadScheduleOrThrow(
+    recurringScheduleId: string,
+    tErrors: ErrorsLabels,
+    t: DBTransaction
+  ): Promise<RecurringScheduleSelectType> {
+    const row = await RecurringScheduleRepository.findById(recurringScheduleId, t);
+    if (!row) {
+      throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
+    }
+    return row.schedule;
+  }
+
+  /**
+   * Find all non-deleted upcoming instances for a schedule and soft-delete
+   * them in a single batch. Returns the ids of the archived instances plus
+   * the loaded instance rows (for downstream refund/quota release logic).
+   * Shared by `cancelSchedule` and `switchSchedulingMode`.
+   */
+  async function archiveUpcomingInstances(
+    recurringScheduleId: string,
+    t: DBTransaction
+  ): Promise<{ archivedInstanceIds: string[]; instances: UpcomingInstance[] }> {
+    const upcomingInstances = await SchedulingRepository.findUpcomingInstancesByScheduleId(
+      recurringScheduleId,
+      new Date(),
+      t
+    );
+
+    const archivedInstanceIds: string[] = [];
+    if (upcomingInstances.length > 0) {
+      const instanceIds = upcomingInstances.map(i => i.id);
+      await SchedulingRepository.softDeleteBatch(instanceIds, t);
+      archivedInstanceIds.push(...instanceIds);
+    }
+    return { archivedInstanceIds, instances: upcomingInstances };
+  }
+
   /**
    * Release quota (earmark or pool mode) when a recurring schedule is cancelled.
    * Returns true if any quota was released.
@@ -420,42 +476,24 @@ export namespace RecurringClassService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<{ cancelledInstanceIds: string[]; quotaReleased: boolean }> {
-    const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
-    if (!hasManageAccess) {
-      throw new UnauthorizedError(tErrors.unauthorizedAction);
-    }
+    await requireManageAccess(userId, tErrors);
 
     const runner = async (t: DBTransaction) => {
-      const row = await RecurringScheduleRepository.findById(recurringScheduleId, t);
-      if (!row) {
-        throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
-      }
-      const schedule = row.schedule;
-
-      const now = new Date();
+      const schedule = await loadScheduleOrThrow(recurringScheduleId, tErrors, t);
 
       // 1. Soft-delete the schedule (V3-021: delegated to repository)
       await RecurringScheduleRepository.softDelete(recurringScheduleId, t);
 
       // 2. Soft-delete all non-deleted upcoming instances (via repository)
-      const upcomingInstances = await SchedulingRepository.findUpcomingInstancesByScheduleId(
+      const { archivedInstanceIds, instances: upcomingInstances } = await archiveUpcomingInstances(
         recurringScheduleId,
-        now,
         t
       );
-
-      const cancelledInstanceIds: string[] = [];
-      if (upcomingInstances.length > 0) {
-        const instanceIds = upcomingInstances.map(i => i.id);
-        // V3-021: delegated to repository
-        await SchedulingRepository.softDeleteBatch(instanceIds, t);
-        cancelledInstanceIds.push(...instanceIds);
-      }
 
       // 3. Release quota if applicable
       const quotaReleased = await releaseQuotaOnCancel(schedule, upcomingInstances, recurringScheduleId, userId, t);
 
-      return { cancelledInstanceIds, quotaReleased };
+      return { cancelledInstanceIds: archivedInstanceIds, quotaReleased };
     };
 
     return tx ? runner(tx) : db.transaction(runner);
@@ -556,46 +594,28 @@ export namespace RecurringClassService {
     creditsRefunded: number;
     quotaReleased: boolean;
   }> {
-    const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
-    if (!hasManageAccess) {
-      throw new UnauthorizedError(tErrors.unauthorizedAction);
-    }
+    await requireManageAccess(userId, tErrors);
 
     const runner = async (t: DBTransaction) => {
-      const row = await RecurringScheduleRepository.findById(recurringScheduleId, t);
-      if (!row) {
-        throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
-      }
-      const schedule = row.schedule;
+      const schedule = await loadScheduleOrThrow(recurringScheduleId, tErrors, t);
 
-      const now = new Date();
-
-      // 1. Find all non-deleted, upcoming instances (via repository)
-      const upcomingInstances = await SchedulingRepository.findUpcomingInstancesByScheduleId(
+      // 1. Find all non-deleted, upcoming instances and soft-delete them
+      const { archivedInstanceIds, instances: upcomingInstances } = await archiveUpcomingInstances(
         recurringScheduleId,
-        now,
         t
       );
 
-      // 2. Soft-delete all upcoming instances (V3-021: delegated to repository)
-      const archivedInstanceIds: string[] = [];
-      if (upcomingInstances.length > 0) {
-        const instanceIds = upcomingInstances.map(i => i.id);
-        await SchedulingRepository.softDeleteBatch(instanceIds, t);
-        archivedInstanceIds.push(...instanceIds);
-      }
-
-      // 3. Refund credits or release quota
+      // 2. Refund credits or release quota
       const { quotaReleased, creditsRefunded } = await refundOrReleaseForInstances(
         schedule,
-        upcomingInstances as ScheduledInstanceInfo[],
+        upcomingInstances,
         recurringScheduleId,
         userId,
         tErrors,
         t
       );
 
-      // 4. Update the schedule mode (V3-021: delegated to repository)
+      // 3. Update the schedule mode (V3-021: delegated to repository)
       await RecurringScheduleRepository.updateSchedulingMode(recurringScheduleId, newMode, t);
 
       return { archivedInstanceIds, quotaReleased, creditsRefunded };

@@ -375,6 +375,30 @@ export async function findUpcomingInstancesByScheduleId(
 }
 
 /**
+ * Builds the shared WHERE conditions for overlap detection queries.
+ * Both `hasOverlappingInstance` and `findOverlappingInstancesForRange`
+ * use this to avoid code duplication.
+ */
+function buildOverlapConditions(
+  studentId: string,
+  teacherId: string,
+  rangeStart: Date,
+  rangeEnd: Date,
+  ignoreInstanceIds: string[] = []
+) {
+  const conditions = [
+    isNull(classInstances.deletedAt),
+    sql`${classInstances.scheduledStartAt} < ${rangeEnd}`,
+    sql`${classInstances.scheduledEndAt} > ${rangeStart}`,
+    sql`(${classInstances.studentId} = ${studentId} OR ${classInstances.teacherId} = ${teacherId})`,
+  ];
+  if (ignoreInstanceIds.length > 0) {
+    conditions.push(notInArray(classInstances.id, ignoreInstanceIds));
+  }
+  return conditions;
+}
+
+/**
  * Point-checks whether any non-deleted class instance overlaps the given
  * time range for `studentId` or `teacherId`. Returns `true` if a conflict
  * exists (slot NOT available), `false` otherwise.
@@ -388,15 +412,7 @@ export async function hasOverlappingInstance(
   tx?: DBTransaction
 ): Promise<boolean> {
   const q = queryDb(tx);
-  const conditions = [
-    isNull(classInstances.deletedAt),
-    sql`${classInstances.scheduledStartAt} < ${endAt}`,
-    sql`${classInstances.scheduledEndAt} > ${startAt}`,
-    sql`(${classInstances.studentId} = ${studentId} OR ${classInstances.teacherId} = ${teacherId})`,
-  ];
-  if (ignoreInstanceIds.length > 0) {
-    conditions.push(notInArray(classInstances.id, ignoreInstanceIds));
-  }
+  const conditions = buildOverlapConditions(studentId, teacherId, startAt, endAt, ignoreInstanceIds);
   const conflicts = await q
     .select({ id: classInstances.id })
     .from(classInstances)
@@ -420,15 +436,7 @@ export async function findOverlappingInstancesForRange(
   tx?: DBTransaction
 ): Promise<{ scheduledStartAt: Date; scheduledEndAt: Date }[]> {
   const q = queryDb(tx);
-  const conditions = [
-    isNull(classInstances.deletedAt),
-    sql`${classInstances.scheduledStartAt} < ${rangeEnd}`,
-    sql`${classInstances.scheduledEndAt} > ${rangeStart}`,
-    sql`(${classInstances.studentId} = ${studentId} OR ${classInstances.teacherId} = ${teacherId})`,
-  ];
-  if (ignoreInstanceIds.length > 0) {
-    conditions.push(notInArray(classInstances.id, ignoreInstanceIds));
-  }
+  const conditions = buildOverlapConditions(studentId, teacherId, rangeStart, rangeEnd, ignoreInstanceIds);
   return q
     .select({
       scheduledStartAt: classInstances.scheduledStartAt,

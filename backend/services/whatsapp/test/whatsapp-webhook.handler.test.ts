@@ -148,6 +148,115 @@ function makeTestAccount(overrides: Partial<WhatsappAccountReturnType> = {}): Wh
   };
 }
 
+/**
+ * Process a single status-update webhook event and assert handleDeliveryWebhook
+ * was called with the expected delivery status (and optional failureReason).
+ * Extracted to eliminate duplication across status-transition tests.
+ */
+async function processStatusAndAssert(
+  wamid: string,
+  rawStatus: string,
+  expectedStatus: NotificationDeliveryStatus,
+  options?: {
+    errors?: unknown[];
+    expectedFailureReason?: string | null;
+    expectedUserId?: string;
+  }
+) {
+  const { WhatsappWebhookHandler } = await importHandler();
+  if (options?.expectedUserId !== undefined) {
+    mockResolvedUser(options.expectedUserId);
+  } else {
+    mockResolvedUser();
+  }
+
+  const update =
+    options?.errors !== undefined
+      ? makeStatusUpdateWithRecipient(wamid, rawStatus, "[PHONE_REDACTED]", options.errors)
+      : makeStatusUpdateWithRecipient(wamid, rawStatus, "[PHONE_REDACTED]");
+
+  await WhatsappWebhookHandler.processEvent(makeWebhookBody([makeStatusChange([update])]));
+
+  expect(handleDeliveryWebhookMock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      providerMessageId: wamid,
+      status: expectedStatus,
+      channel: NotificationChannel.WHATSAPP,
+    })
+  );
+
+  const arg = getMockCallArg(handleDeliveryWebhookMock, 0);
+  const expectedUserId = options?.expectedUserId ?? "user-resolved-1";
+  expect(arg.userId).toBe(expectedUserId);
+  if (options?.expectedFailureReason !== undefined) {
+    expect(arg.failureReason).toBe(options.expectedFailureReason);
+  } else {
+    expect(arg.failureReason).toBeNull();
+  }
+}
+
+/**
+ * Process a status-update webhook where handleDeliveryWebhook is expected to
+ * reject, then assert processEvent resolves gracefully and
+ * getDeliveriesByProviderMessageIdsMock was queried for the wamid.
+ * Extracted to eliminate duplication across error-handling tests.
+ */
+async function processStatusExpectRejection(wamid: string, rawStatus: string, rejectError: string) {
+  const { WhatsappWebhookHandler } = await importHandler();
+  mockResolvedUser();
+  handleDeliveryWebhookMock.mockRejectedValueOnce(new Error(rejectError));
+
+  await expect(
+    WhatsappWebhookHandler.processEvent(
+      makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient(wamid, rawStatus, "[PHONE_REDACTED]")])])
+    )
+  ).resolves.toBeUndefined();
+
+  expect(getDeliveriesByProviderMessageIdsMock).toHaveBeenCalledWith([wamid]);
+}
+
+/**
+ * Extract the first audit-log input object from createManyAuditLogsMock.
+ */
+function getFirstAuditInput(): Record<string, unknown> {
+  return (createManyAuditLogsMock.mock.calls as unknown as unknown[][][])[0][0][0] as Record<string, unknown>;
+}
+
+/**
+ * Process a template-change webhook event and assert the audit-log entry was
+ * created with the expected entityType, metadata fields, and that
+ * handleDeliveryWebhook was NOT called.
+ * Extracted to eliminate duplication across template-lifecycle tests.
+ */
+async function processTemplateChangeAndAssertAudit(
+  event: Record<string, unknown>,
+  field: string,
+  expectedMetadata: Record<string, unknown>,
+  expectedDescriptionContains?: string[]
+) {
+  const { WhatsappWebhookHandler } = await importHandler();
+
+  await WhatsappWebhookHandler.processEvent(makeWebhookBody([makeTemplateChange(event, field)]));
+
+  expect(createManyAuditLogsMock).toHaveBeenCalledTimes(1);
+  const auditInput = getFirstAuditInput();
+  expect(auditInput.entityType).toBe("WHATSAPP_ACCOUNT");
+
+  if (expectedDescriptionContains) {
+    for (const fragment of expectedDescriptionContains) {
+      expect(auditInput.description).toContain(fragment);
+    }
+  }
+
+  const metadata = auditInput.metadata as unknown as Record<string, unknown>;
+  for (const [key, value] of Object.entries(expectedMetadata)) {
+    expect(metadata[key]).toBe(value);
+  }
+  expect(metadata.webhookField).toBe(field);
+
+  expect(handleDeliveryWebhookMock).not.toHaveBeenCalled();
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -242,55 +351,15 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
 
   describe("R1/R2: Status transitions", () => {
     test("maps status 'sent' → SENT and calls handleDeliveryWebhook", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-      mockResolvedUser();
-
-      await WhatsappWebhookHandler.processEvent(
-        makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient("wamid.sent.1", "sent", "1234567890")])])
-      );
-
-      expect(handleDeliveryWebhookMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          providerMessageId: "wamid.sent.1",
-          status: NotificationDeliveryStatus.SENT,
-          channel: NotificationChannel.WHATSAPP,
-        })
-      );
-      const sentArg = getMockCallArg(handleDeliveryWebhookMock, 0);
-      expect(sentArg.userId).toBe("user-resolved-1");
-      expect(sentArg.failureReason).toBeNull();
+      await processStatusAndAssert("wamid.sent.1", "sent", NotificationDeliveryStatus.SENT);
     });
 
     test("maps 'delivered' → DELIVERED", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-      mockResolvedUser();
-
-      await WhatsappWebhookHandler.processEvent(
-        makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient("wamid.del.1", "delivered", "1234567890")])])
-      );
-
-      expect(handleDeliveryWebhookMock).toHaveBeenCalledWith(
-        expect.objectContaining({ status: NotificationDeliveryStatus.DELIVERED })
-      );
-      const delArg = getMockCallArg(handleDeliveryWebhookMock, 0);
-      expect(delArg.userId).toBe("user-resolved-1");
-      expect(delArg.failureReason).toBeNull();
+      await processStatusAndAssert("wamid.del.1", "delivered", NotificationDeliveryStatus.DELIVERED);
     });
 
     test("maps 'read' → OPENED", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-      mockResolvedUser();
-
-      await WhatsappWebhookHandler.processEvent(
-        makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient("wamid.read.1", "read", "1234567890")])])
-      );
-
-      expect(handleDeliveryWebhookMock).toHaveBeenCalledWith(
-        expect.objectContaining({ status: NotificationDeliveryStatus.OPENED })
-      );
-      const readArg = getMockCallArg(handleDeliveryWebhookMock, 0);
-      expect(readArg.userId).toBe("user-resolved-1");
-      expect(readArg.failureReason).toBeNull();
+      await processStatusAndAssert("wamid.read.1", "read", NotificationDeliveryStatus.OPENED);
     });
 
     test("maps 'failed' → FAILED with failureReason from errors[0].message", async () => {
@@ -329,19 +398,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
     });
 
     test("maps 'accepted' → PENDING", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-      mockResolvedUser();
-
-      await WhatsappWebhookHandler.processEvent(
-        makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient("wamid.acc.1", "accepted", "1234567890")])])
-      );
-
-      expect(handleDeliveryWebhookMock).toHaveBeenCalledWith(
-        expect.objectContaining({ status: NotificationDeliveryStatus.PENDING })
-      );
-      const accArg = getMockCallArg(handleDeliveryWebhookMock, 0);
-      expect(accArg.userId).toBe("user-resolved-1");
-      expect(accArg.failureReason).toBeNull();
+      await processStatusAndAssert("wamid.acc.1", "accepted", NotificationDeliveryStatus.PENDING);
     });
   });
 
@@ -524,18 +581,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
 
   describe("P3: Webhook before adapter row insert", () => {
     test("handleDeliveryWebhook error is caught at processChange level (does not crash processEvent)", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-      mockResolvedUser();
-      handleDeliveryWebhookMock.mockRejectedValueOnce(new Error("connection failed"));
-
-      await expect(
-        WhatsappWebhookHandler.processEvent(
-          makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient("wamid.early.1", "sent", "1234567890")])])
-        )
-      ).resolves.toBeUndefined();
-
-      // resolveEventTypeForWamid queries the delivery repo to resolve the event type
-      expect(getDeliveriesByProviderMessageIdsMock).toHaveBeenCalledWith(["wamid.early.1"]);
+      await processStatusExpectRejection("wamid.early.1", "sent", "connection failed");
     });
   });
 
@@ -560,20 +606,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
     });
 
     test("genuine DB error from handleDeliveryWebhook is re-thrown and caught at processChange", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-      mockResolvedUser();
-
-      handleDeliveryWebhookMock.mockRejectedValueOnce(new Error("DB connection lost"));
-
-      // processChange catches the error so processEvent resolves normally
-      await expect(
-        WhatsappWebhookHandler.processEvent(
-          makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient("wamid.b3.2", "sent", "1234567890")])])
-        )
-      ).resolves.toBeUndefined();
-
-      // resolveEventTypeForWamid queries the delivery repo to resolve the event type
-      expect(getDeliveriesByProviderMessageIdsMock).toHaveBeenCalledWith(["wamid.b3.2"]);
+      await processStatusExpectRejection("wamid.b3.2", "sent", "DB connection lost");
     });
   });
 
@@ -607,31 +640,18 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
 
   describe("R6: Template lifecycle events → audit log only", () => {
     test("creates audit entry with template fields", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-
-      await WhatsappWebhookHandler.processEvent(
-        makeWebhookBody([
-          makeTemplateChange({
-            message_template_id: "tmpl-123",
-            message_template_name: "welcome_template",
-            message_template_language: "en_US",
-            event: "APPROVED",
-            reason: null,
-          }),
-        ])
+      await processTemplateChangeAndAssertAudit(
+        {
+          message_template_id: "tmpl-123",
+          message_template_name: "welcome_template",
+          message_template_language: "en_US",
+          event: "APPROVED",
+          reason: null,
+        },
+        "message_template_status_update",
+        { templateId: "tmpl-123" },
+        ["welcome_template", "APPROVED"]
       );
-
-      expect(createManyAuditLogsMock).toHaveBeenCalledTimes(1);
-      const auditInput = (createManyAuditLogsMock.mock.calls as unknown as unknown[][][])[0][0][0] as Record<
-        string,
-        unknown
-      >;
-      expect(auditInput.entityType).toBe("WHATSAPP_ACCOUNT");
-      expect(auditInput.description).toContain("welcome_template");
-      expect(auditInput.description).toContain("APPROVED");
-      expect((auditInput.metadata as Record<string, unknown>).templateId).toBe("tmpl-123");
-      // r10-060: Template lifecycle events should NOT trigger delivery webhook
-      expect(handleDeliveryWebhookMock).not.toHaveBeenCalled();
     });
 
     test("skips audit when no message_template_id", async () => {
@@ -645,98 +665,45 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
     });
 
     test("template_category_update creates audit entry with category field", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-
-      await WhatsappWebhookHandler.processEvent(
-        makeWebhookBody([
-          makeTemplateChange(
-            {
-              message_template_id: "tmpl-cat-1",
-              message_template_name: "order_confirm",
-              message_template_language: "en_US",
-              event: "CATEGORY_UPDATE",
-              category: "MARKETING",
-            },
-            "template_category_update"
-          ),
-        ])
+      await processTemplateChangeAndAssertAudit(
+        {
+          message_template_id: "tmpl-cat-1",
+          message_template_name: "order_confirm",
+          message_template_language: "en_US",
+          event: "CATEGORY_UPDATE",
+          category: "MARKETING",
+        },
+        "template_category_update",
+        { templateId: "tmpl-cat-1", category: "MARKETING" },
+        ["order_confirm"]
       );
-
-      expect(createManyAuditLogsMock).toHaveBeenCalledTimes(1);
-      const auditInput = (createManyAuditLogsMock.mock.calls as unknown as unknown[][][])[0][0][0] as Record<
-        string,
-        unknown
-      >;
-      expect(auditInput.entityType).toBe("WHATSAPP_ACCOUNT");
-      expect(auditInput.description).toContain("order_confirm");
-      const metadata = auditInput.metadata as unknown as Record<string, unknown>;
-      expect(metadata.templateId).toBe("tmpl-cat-1");
-      expect(metadata.category).toBe("MARKETING");
-      expect(metadata.webhookField).toBe("template_category_update");
-      // r10-060: Template lifecycle events should NOT trigger delivery webhook
-      expect(handleDeliveryWebhookMock).not.toHaveBeenCalled();
     });
 
     test("message_template_quality_update creates audit entry", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-
-      await WhatsappWebhookHandler.processEvent(
-        makeWebhookBody([
-          makeTemplateChange(
-            {
-              message_template_id: "tmpl-qual-1",
-              message_template_name: "shipping_update",
-              message_template_language: "en_US",
-              event: "QUALITY_UPDATE",
-              reason: "quality rating dropped",
-            },
-            "message_template_quality_update"
-          ),
-        ])
+      await processTemplateChangeAndAssertAudit(
+        {
+          message_template_id: "tmpl-qual-1",
+          message_template_name: "shipping_update",
+          message_template_language: "en_US",
+          event: "QUALITY_UPDATE",
+          reason: "quality rating dropped",
+        },
+        "message_template_quality_update",
+        { templateId: "tmpl-qual-1", reason: "quality rating dropped" }
       );
-
-      expect(createManyAuditLogsMock).toHaveBeenCalledTimes(1);
-      const auditInput = (createManyAuditLogsMock.mock.calls as unknown as unknown[][][])[0][0][0] as Record<
-        string,
-        unknown
-      >;
-      expect(auditInput.entityType).toBe("WHATSAPP_ACCOUNT");
-      const metadata = auditInput.metadata as unknown as Record<string, unknown>;
-      expect(metadata.templateId).toBe("tmpl-qual-1");
-      expect(metadata.reason).toBe("quality rating dropped");
-      expect(metadata.webhookField).toBe("message_template_quality_update");
-      // r10-060: Template lifecycle events should NOT trigger delivery webhook
-      expect(handleDeliveryWebhookMock).not.toHaveBeenCalled();
     });
 
     test("message_template_components_update creates audit entry", async () => {
-      const { WhatsappWebhookHandler } = await importHandler();
-
-      await WhatsappWebhookHandler.processEvent(
-        makeWebhookBody([
-          makeTemplateChange(
-            {
-              message_template_id: "tmpl-comp-1",
-              message_template_name: "appointment_reminder",
-              message_template_language: "en_US",
-              event: "COMPONENTS_UPDATE",
-            },
-            "message_template_components_update"
-          ),
-        ])
+      await processTemplateChangeAndAssertAudit(
+        {
+          message_template_id: "tmpl-comp-1",
+          message_template_name: "appointment_reminder",
+          message_template_language: "en_US",
+          event: "COMPONENTS_UPDATE",
+        },
+        "message_template_components_update",
+        { templateId: "tmpl-comp-1" }
       );
-
-      expect(createManyAuditLogsMock).toHaveBeenCalledTimes(1);
-      const auditInput = (createManyAuditLogsMock.mock.calls as unknown as unknown[][][])[0][0][0] as Record<
-        string,
-        unknown
-      >;
-      expect(auditInput.entityType).toBe("WHATSAPP_ACCOUNT");
-      const metadata = auditInput.metadata as unknown as Record<string, unknown>;
-      expect(metadata.templateId).toBe("tmpl-comp-1");
-      expect(metadata.webhookField).toBe("message_template_components_update");
-      // r10-060: Template lifecycle events should NOT trigger delivery webhook
-      expect(handleDeliveryWebhookMock).not.toHaveBeenCalled();
     });
   });
 

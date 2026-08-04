@@ -150,12 +150,8 @@ export namespace CronService {
   }
 
   export async function pauseSchedule(id: string, locale: string = "en"): Promise<CronScheduleReturnType> {
-    const translations = getServerTranslations(locale);
-    const t = translations.dashboardTranslations.cron.errors;
-    const existing = await CronRepository.getScheduleById(id);
-    if (!existing) {
-      throw new NotFoundError("SCHEDULE", t.scheduleNotFound(id));
-    }
+    const t = getScheduleErrorTranslations(locale);
+    await assertScheduleExists(id, t);
 
     const updated = await CronRepository.updateScheduleIfStatus(
       id,
@@ -174,12 +170,8 @@ export namespace CronService {
   }
 
   export async function resumeSchedule(id: string, locale: string = "en"): Promise<CronScheduleReturnType> {
-    const translations = getServerTranslations(locale);
-    const t = translations.dashboardTranslations.cron.errors;
-    const existing = await CronRepository.getScheduleById(id);
-    if (!existing) {
-      throw new NotFoundError("SCHEDULE", t.scheduleNotFound(id));
-    }
+    const t = getScheduleErrorTranslations(locale);
+    const existing = await assertScheduleExists(id, t);
 
     const computedNextRunAt = nextRunAt(existing.cronExpression, new Date(), existing.timezone);
 
@@ -308,10 +300,7 @@ export namespace CronService {
     const t = getServerTranslations(locale).dashboardTranslations.cron.errors;
     logger.info("cron.dispatch.byId.start", { scheduleId: id, source });
 
-    const schedule = await CronRepository.getScheduleById(id);
-    if (!schedule) {
-      throw new NotFoundError("SCHEDULE", t.scheduleNotFound(id));
-    }
+    const schedule = await assertScheduleExists(id, t);
 
     if (schedule.status === CronScheduleStatus.PAUSED || schedule.status === CronScheduleStatus.DISABLED) {
       throw new ForbiddenError(t.scheduleInactive);
@@ -336,49 +325,14 @@ export namespace CronService {
       payload ?? undefined
     );
     if (!claimed) {
-      if (schedule.concurrencyPolicy === CronConcurrencyPolicy.SKIP) {
-        const runs = await CronRepository.listRuns({
-          scheduleId: id,
-          statuses: [CronRunStatus.RUNNING, CronRunStatus.PENDING, CronRunStatus.RETRYING],
-          limit: 5,
-        });
-        const inFlight = runs.rows.find(
-          r =>
-            r.status === CronRunStatus.RUNNING ||
-            r.status === CronRunStatus.PENDING ||
-            r.status === CronRunStatus.RETRYING
-        );
-        if (inFlight) {
-          logger.info("cron.dispatch.byId.skipped", { scheduleId: id, inFlightRunId: inFlight.id });
-          return { runId: inFlight.id, queueJobId: null, skipped: true };
-        }
+      const skipped = await trySkipOnInFlight(id, schedule.concurrencyPolicy);
+      if (skipped) {
+        return skipped;
       }
       throw new DomainError("CONCURRENCY_CONFLICT", t.concurrencyConflict);
     }
 
-    const adapter = await getQueueAdapter();
-
-    try {
-      const queueJobId = await adapter.send(buildCronJobPayload(schedule, claimed, payload ?? schedule.payload));
-
-      logger.info("cron.dispatch.byId.sent", { runId: claimed.runId, scheduleId: id, queueJobId });
-      return { runId: claimed.runId, queueJobId };
-    } catch (err) {
-      logger.error("cron.dispatch.byId.sendFailed", {
-        runId: claimed.runId,
-        scheduleId: id,
-        error: formatError(err),
-      });
-      await CronRepository.updateRunStatus(
-        claimed.runId,
-        CronRunStatus.FAILED,
-        {
-          errorMessage: formatError(err),
-        },
-        [CronRunStatus.PENDING]
-      );
-      throw new DomainError("DISPATCH_SEND_FAILED", t.dispatchSendFailed(id));
-    }
+    return sendDispatchToQueue(schedule, claimed, id, payload ?? schedule.payload, t);
   }
 
   // ── Run lifecycle (called by worker runtime) ──
@@ -607,5 +561,68 @@ function validateTimezone(timezone: string, errFn: (tz: string) => string): void
     new Intl.DateTimeFormat(undefined, { timeZone: timezone });
   } catch (err) {
     throw new DomainError("INVALID_TIMEZONE", errFn(timezone), { cause: err });
+  }
+}
+
+type CronScheduleErrors = ReturnType<typeof getServerTranslations>["dashboardTranslations"]["cron"]["errors"];
+
+function getScheduleErrorTranslations(locale: string): CronScheduleErrors {
+  return getServerTranslations(locale).dashboardTranslations.cron.errors;
+}
+
+async function assertScheduleExists(id: string, t: CronScheduleErrors): Promise<CronScheduleSelectType> {
+  const existing = await CronRepository.getScheduleById(id);
+  if (!existing) {
+    throw new NotFoundError("SCHEDULE", t.scheduleNotFound(id));
+  }
+  return existing;
+}
+
+const IN_FLIGHT_RUN_STATUSES = [CronRunStatus.RUNNING, CronRunStatus.PENDING, CronRunStatus.RETRYING] as const;
+
+async function trySkipOnInFlight(scheduleId: string, concurrencyPolicy: string): Promise<DispatchByIdResult | null> {
+  if (concurrencyPolicy !== CronConcurrencyPolicy.SKIP) {
+    return null;
+  }
+  const runs = await CronRepository.listRuns({
+    scheduleId,
+    statuses: [...IN_FLIGHT_RUN_STATUSES],
+    limit: 5,
+  });
+  const inFlight = runs.rows.find(r => (IN_FLIGHT_RUN_STATUSES as readonly string[]).includes(r.status));
+  if (!inFlight) {
+    return null;
+  }
+  logger.info("cron.dispatch.byId.skipped", { scheduleId, inFlightRunId: inFlight.id });
+  return { runId: inFlight.id, queueJobId: null, skipped: true };
+}
+
+async function sendDispatchToQueue(
+  schedule: CronScheduleSelectType,
+  claimed: { runId: string },
+  scheduleId: string,
+  payload: Record<string, unknown> | null,
+  t: CronScheduleErrors
+): Promise<DispatchByIdResult> {
+  const adapter = await getQueueAdapter();
+  try {
+    const queueJobId = await adapter.send(buildCronJobPayload(schedule, claimed, payload));
+    logger.info("cron.dispatch.byId.sent", { runId: claimed.runId, scheduleId, queueJobId });
+    return { runId: claimed.runId, queueJobId };
+  } catch (err) {
+    logger.error("cron.dispatch.byId.sendFailed", {
+      runId: claimed.runId,
+      scheduleId,
+      error: formatError(err),
+    });
+    await CronRepository.updateRunStatus(
+      claimed.runId,
+      CronRunStatus.FAILED,
+      {
+        errorMessage: formatError(err),
+      },
+      [CronRunStatus.PENDING]
+    );
+    throw new DomainError("DISPATCH_SEND_FAILED", t.dispatchSendFailed(scheduleId));
   }
 }

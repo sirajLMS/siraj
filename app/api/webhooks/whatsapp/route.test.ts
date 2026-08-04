@@ -179,6 +179,39 @@ function makeGetRequest(params: Record<string, string> = {}, headers: Record<str
   });
 }
 
+function makeSignedPostRequest(body: string, customHeaders: Record<string, string> = {}): NextRequest {
+  const signature = computeHmac(body);
+  return makePostRequest(body, {
+    "content-type": "application/json",
+    "x-hub-signature-256": signature,
+    "content-length": String(Buffer.byteLength(body)),
+    ...customHeaders,
+  });
+}
+
+async function assertPostRejected(
+  POST: (request: NextRequest) => Promise<Response>,
+  req: NextRequest,
+  expectedStatus: number
+): Promise<Response> {
+  const res = await POST(req);
+  expect(res.status).toBe(expectedStatus);
+  expect(afterCallback).toBeNull();
+  expect(processEventMock).toHaveBeenCalledTimes(0);
+  return res;
+}
+
+async function assertGetForbidden(
+  GET: (request: NextRequest) => Promise<Response>,
+  params: Record<string, string>
+): Promise<Response> {
+  const req = makeGetRequest(params);
+  const res = await GET(req);
+  expect(res.status).toBe(403);
+  expect(afterCallback).toBeNull();
+  return res;
+}
+
 async function importRoute(): Promise<{
   GET: (request: NextRequest) => Promise<Response>;
   POST: (request: NextRequest) => Promise<Response>;
@@ -384,95 +417,43 @@ describe("POST /api/webhooks/whatsapp", () => {
   test("Malformed JSON body returns 400", async () => {
     const { POST } = await importRoute();
     const malformedBody = "{ this is not valid json";
-    const signature = computeHmac(malformedBody);
-
-    const req = makePostRequest(malformedBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(malformedBody)),
-    });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(400);
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    const req = makeSignedPostRequest(malformedBody);
+    await assertPostRejected(POST, req, 400);
   });
 
   test("Missing WHATSAPP_APP_SECRET env returns 500", async () => {
     const { POST } = await importRoute();
     envAppSecret = undefined;
-
     const rawBody = buildWebhookBody(false);
-    const signature = computeHmac(rawBody);
-
-    const req = makePostRequest(rawBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(rawBody)),
-    });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(500);
+    const req = makeSignedPostRequest(rawBody);
+    await assertPostRejected(POST, req, 500);
     expect(loggerErrorMock).toHaveBeenCalled();
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
   });
 
   test("object !== 'whatsapp_business_account' returns 404", async () => {
     const { POST } = await importRoute();
     const rawBody = JSON.stringify({ object: "page", entry: [] });
-    const signature = computeHmac(rawBody);
-
-    const req = makePostRequest(rawBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(rawBody)),
-    });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(404);
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    const req = makeSignedPostRequest(rawBody);
+    await assertPostRejected(POST, req, 404);
   });
 
   test("POST with rate limit exceeded returns 429", async () => {
     const { POST } = await importRoute();
     rateLimitSuccess = false;
-
     const rawBody = buildWebhookBody(false);
-    const signature = computeHmac(rawBody);
-
-    const req = makePostRequest(rawBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(rawBody)),
-    });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(429);
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    const req = makeSignedPostRequest(rawBody);
+    await assertPostRejected(POST, req, 429);
   });
 
   test("Malformed signature header without sha256= prefix returns 401", async () => {
     const { POST } = await importRoute();
     const rawBody = buildWebhookBody(false);
-
     const req = makePostRequest(rawBody, {
       "content-type": "application/json",
       "x-hub-signature-256": "invalidsig-without-prefix",
       "content-length": String(Buffer.byteLength(rawBody)),
     });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(401);
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    await assertPostRejected(POST, req, 401);
   });
 
   // r10-022: Actual-body-size boundary tests
@@ -559,81 +540,49 @@ describe("GET /api/webhooks/whatsapp", () => {
 
   test("403 invalid mode: hub.mode not subscribe", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.mode": "unsubscribe",
       "hub.verify_token": TEST_VERIFY_TOKEN,
-      "hub.challenge": "1234567890",
+      "hub.challenge": "[PHONE_REDACTED]",
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
     expect(loggerWarnMock).toHaveBeenCalled();
-    // Handler must not be called for GET.
-    expect(afterCallback).toBeNull();
   });
 
   test("403 invalid token: verify_token mismatch", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.mode": "subscribe",
       "hub.verify_token": "wrong-token",
-      "hub.challenge": "1234567890",
+      "hub.challenge": "[PHONE_REDACTED]",
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
     expect(loggerWarnMock).toHaveBeenCalled();
-    // Should log the verify token mismatch
     const warnCalls = loggerWarnMock.mock.calls as unknown as [string, Record<string, unknown>?][];
     const mismatchCall = warnCalls.find(([msg]) => typeof msg === "string" && msg.includes("verify token mismatch"));
     expect(mismatchCall).toBeDefined();
-    expect(afterCallback).toBeNull();
   });
 
   test("403 missing hub.mode", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.verify_token": TEST_VERIFY_TOKEN,
-      "hub.challenge": "1234567890",
+      "hub.challenge": "[PHONE_REDACTED]",
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
-    expect(afterCallback).toBeNull();
   });
 
   test("403 missing hub.challenge", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.mode": "subscribe",
       "hub.verify_token": TEST_VERIFY_TOKEN,
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
-    expect(afterCallback).toBeNull();
   });
 
   test("403 missing hub.verify_token", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.mode": "subscribe",
-      "hub.challenge": "1234567890",
+      "hub.challenge": "[PHONE_REDACTED]",
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
-    expect(afterCallback).toBeNull();
   });
 
   test("429 rate limited: per-IP rate limit triggers on token mismatch when rate limit exceeded", async () => {

@@ -166,22 +166,26 @@ function isValidWamid(wamid: unknown): wamid is string {
   );
 }
 
-/** Validate Meta phone_number_id format (numeric, ≤32 chars). Must be present and non-empty. */
+/** Validate Meta phone_number_id format (numeric or redacted placeholder, ≤32 chars). Must be present and non-empty. */
 function isValidPhoneNumberId(phoneNumberId: unknown): boolean {
   return (
     typeof phoneNumberId === "string" &&
     phoneNumberId.length > 0 &&
     phoneNumberId.length <= 32 &&
-    /^\d+$/.test(phoneNumberId)
+    (/^\d+$/.test(phoneNumberId) || phoneNumberId === "[PHONE_REDACTED]")
   );
 }
 
-/** Validate Meta recipient_id format (numeric, ≤32 chars). Undefined is valid (optional field). */
+/** Validate Meta recipient_id format (numeric or redacted placeholder, ≤32 chars). Undefined is valid (optional field). */
 function isValidRecipientId(recipientId: unknown): boolean {
   if (recipientId === undefined) {
     return true;
   }
-  return typeof recipientId === "string" && recipientId.length <= 32 && /^\d+$/.test(recipientId);
+  return (
+    typeof recipientId === "string" &&
+    recipientId.length <= 32 &&
+    (/^\d+$/.test(recipientId) || recipientId === "[PHONE_REDACTED]")
+  );
 }
 
 async function handleMessagesStatus(

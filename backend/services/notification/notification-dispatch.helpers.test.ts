@@ -66,6 +66,22 @@ function mockUser(overrides?: Partial<Pick<UserSelectType, "email" | "phone">>):
   } as unknown as UserSelectType;
 }
 
+function mockFindSafeByIdsWithUser(userOverrides?: Partial<Pick<UserSelectType, "email" | "phone">>) {
+  findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
+    const map = new Map<string, UserSelectType | null>();
+    for (const id of ids) {
+      map.set(id, mockUser(userOverrides));
+    }
+    return map;
+  });
+}
+
+async function dispatchAndGetResults(userId: string, eventType: NotificationEventType) {
+  const payloads = buildFourChannelPayloads(userId, eventType);
+  await dispatchWithPreferences(payloads, [userId]);
+  return dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+}
+
 beforeEach(() => {
   getByUserIdsSpy = spyOn(NotificationPreferencesRepository, "getByUserIds").mockResolvedValue(new Map());
   dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockImplementation(
@@ -212,53 +228,26 @@ describe("dispatchWithPreferences — preferences filtering", () => {
 
 describe("dispatchWithPreferences — recipient resolution", () => {
   test("stamps `metadata.to` with user.email on email payloads before dispatchMulti", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ email: "parent@test.com" }));
-      }
-      return map;
-    });
-
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+    mockFindSafeByIdsWithUser({ email: "[EMAIL_REDACTED]" });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
     expect(findSafeByIdsSpy).toHaveBeenCalledWith([PARENT_USER_ID]);
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     const emailPayload = dispatched.find(p => p.channel === NotificationChannel.EMAIL);
-    expect(emailPayload?.metadata?.to).toBe("parent@test.com");
+    expect(emailPayload?.metadata?.to).toBe("[EMAIL_REDACTED]");
   });
 
   test("stamps `metadata.to` with user.phone on sms payloads before dispatchMulti", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ phone: "+15555550100" }));
-      }
-      return map;
-    });
+    mockFindSafeByIdsWithUser({ phone: "+[PHONE_REDACTED]" });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
-
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     const smsPayload = dispatched.find(p => p.channel === NotificationChannel.SMS);
-    expect(smsPayload?.metadata?.to).toBe("+15555550100");
+    expect(smsPayload?.metadata?.to).toBe("+[PHONE_REDACTED]");
   });
 
   test("drops email payload when user.email is null (no email payload reaches dispatchMulti)", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ email: null as unknown as string }));
-      }
-      return map;
-    });
+    mockFindSafeByIdsWithUser({ email: null as unknown as string });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
-
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.EMAIL);
     expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
       NotificationChannel.ON_APP,
@@ -268,18 +257,9 @@ describe("dispatchWithPreferences — recipient resolution", () => {
   });
 
   test("drops sms payload when user.phone is null", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ phone: null }));
-      }
-      return map;
-    });
+    mockFindSafeByIdsWithUser({ phone: null });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
-
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.SMS);
     expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
       NotificationChannel.EMAIL,
@@ -303,18 +283,9 @@ describe("dispatchWithPreferences — recipient resolution", () => {
   });
 
   test("does NOT stamp `to` on on_app or push payloads", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ email: "parent@test.com", phone: "+15555550100" }));
-      }
-      return map;
-    });
+    mockFindSafeByIdsWithUser({ email: "[EMAIL_REDACTED]", phone: "+[PHONE_REDACTED]" });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
-
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     const onAppPayload = dispatched.find(p => p.channel === NotificationChannel.ON_APP);
     const pushPayload = dispatched.find(p => p.channel === NotificationChannel.PUSH);
     expect(onAppPayload?.metadata?.to).toBeUndefined();

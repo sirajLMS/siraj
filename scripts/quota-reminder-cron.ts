@@ -42,110 +42,116 @@ interface ReminderCandidate {
  */
 export async function runQuotaReminderCron(): Promise<void> {
   logger.info("[QuotaReminderCron] Starting on-demand reminder dispatch...");
-
   try {
-    const now = new Date();
-    const windowMs = WINDOW_HOURS * 60 * 60 * 1000;
-
-    const t3Start = new Date(now.getTime() + T3_DAYS * 24 * 60 * 60 * 1000 - windowMs);
-    const t3End = new Date(now.getTime() + T3_DAYS * 24 * 60 * 60 * 1000 + windowMs);
-    const t1Start = new Date(now.getTime() + T1_DAYS * 24 * 60 * 60 * 1000 - windowMs);
-    const t1End = new Date(now.getTime() + T1_DAYS * 24 * 60 * 60 * 1000 + windowMs);
-
-    const [t3Candidates, t1Candidates] = await Promise.all([
-      fetchReminderCandidates(t3Start, t3End, "t3"),
-      fetchReminderCandidates(t1Start, t1End, "t1"),
-    ]);
-
+    const { t3Candidates, t1Candidates } = await fetchAllCandidates();
     logger.info(
       `[QuotaReminderCron] Found ${t3Candidates.length} T-3 and ${t1Candidates.length} T-1 reminder candidates.`
     );
-
-    // V3-007: Batch-check idempotency for all candidate keys in a single query
-    // instead of per-candidate round-trips.
-    const allCandidateKeys = [...t3Candidates, ...t1Candidates].map(c => c.reminderKey);
-    const alreadySentKeys = new Set<string>();
-
-    if (allCandidateKeys.length > 0) {
-      const sentRows = await db
-        .select({ key: systemSettings.key })
-        .from(systemSettings)
-        .where(inArray(systemSettings.key, allCandidateKeys));
-      for (const row of sentRows) {
-        alreadySentKeys.add(row.key);
-      }
-    }
-
-    let t3Sent = 0;
-    let t1Sent = 0;
-
-    // RBL2-2: Mark idempotency AFTER successful dispatch so delivery errors
-    // don't permanently skip the reminder on subsequent runs.
-    // RP2-3: Collect all successfully-dispatched candidate keys and insert
-    // their idempotency markers in a single multi-row INSERT.
-    const t3DispatchedKeys: string[] = [];
-    const t1DispatchedKeys: string[] = [];
-
-    // V3-007: Filter out already-sent candidates, then send in parallel.
-    const t3ToDispatch = t3Candidates.filter(c => !alreadySentKeys.has(c.reminderKey) && c.affectedUserIds.length > 0);
-    const t3Skipped = t3Candidates.filter(c => c.affectedUserIds.length === 0);
-    for (const s of t3Skipped) {
-      logger.warn(`[QuotaReminderCron] Skipping instance ${s.instanceId} — no resolvable parent/guardian userId.`);
-    }
-
-    await Promise.all(
-      t3ToDispatch.map(async candidate => {
-        await QuotaNotificationService.sendOndemandInstanceReminderT3({
-          affectedUserIds: candidate.affectedUserIds,
-          studentName: candidate.studentName,
-          scheduledStartAt: candidate.scheduledStartAt,
-        });
-        t3DispatchedKeys.push(candidate.reminderKey);
-        t3Sent++;
-      })
-    );
-
-    const t1ToDispatch = t1Candidates.filter(c => !alreadySentKeys.has(c.reminderKey) && c.affectedUserIds.length > 0);
-    const t1Skipped = t1Candidates.filter(c => c.affectedUserIds.length === 0);
-    for (const s of t1Skipped) {
-      logger.warn(`[QuotaReminderCron] Skipping instance ${s.instanceId} — no resolvable parent/guardian userId.`);
-    }
-
-    await Promise.all(
-      t1ToDispatch.map(async candidate => {
-        await QuotaNotificationService.sendOndemandInstanceReminderT1({
-          affectedUserIds: candidate.affectedUserIds,
-          studentName: candidate.studentName,
-          scheduledStartAt: candidate.scheduledStartAt,
-        });
-        t1DispatchedKeys.push(candidate.reminderKey);
-        t1Sent++;
-      })
-    );
-
-    // RP2-3: Single multi-row INSERT for all dispatched reminder markers.
-    const allDispatchedKeys = [...t3DispatchedKeys, ...t1DispatchedKeys];
-    if (allDispatchedKeys.length > 0) {
-      const nowIso = new Date();
-      await db
-        .insert(systemSettings)
-        .values(
-          allDispatchedKeys.map(key => ({
-            key,
-            value: nowIso.toISOString(),
-            dataType: SystemSettingDataType.String,
-            description: "On-demand reminder sent marker (auto-generated)",
-            category: SystemSettingCategory.Scheduling,
-            updatedAt: nowIso,
-          }))
-        )
-        .onConflictDoNothing();
-    }
-
+    const alreadySentKeys = await loadAlreadySentKeys(t3Candidates, t1Candidates);
+    const { t3Sent, t1Sent, allDispatchedKeys } = await dispatchReminders(t3Candidates, t1Candidates, alreadySentKeys);
+    await persistIdempotencyMarkers(allDispatchedKeys);
     logger.info(`[QuotaReminderCron] Sent ${t3Sent} T-3 and ${t1Sent} T-1 reminders.`);
   } catch (error) {
     logger.error("[QuotaReminderCron] Error running quota reminder cron:", { error });
     throw error;
+  }
+}
+
+async function fetchAllCandidates(): Promise<{
+  t3Candidates: ReminderCandidate[];
+  t1Candidates: ReminderCandidate[];
+}> {
+  const now = new Date();
+  const windowMs = WINDOW_HOURS * 60 * 60 * 1000;
+  const t3Start = new Date(now.getTime() + T3_DAYS * 24 * 60 * 60 * 1000 - windowMs);
+  const t3End = new Date(now.getTime() + T3_DAYS * 24 * 60 * 60 * 1000 + windowMs);
+  const t1Start = new Date(now.getTime() + T1_DAYS * 24 * 60 * 60 * 1000 - windowMs);
+  const t1End = new Date(now.getTime() + T1_DAYS * 24 * 60 * 60 * 1000 + windowMs);
+  const [t3Candidates, t1Candidates] = await Promise.all([
+    fetchReminderCandidates(t3Start, t3End, "t3"),
+    fetchReminderCandidates(t1Start, t1End, "t1"),
+  ]);
+  return { t3Candidates, t1Candidates };
+}
+
+async function loadAlreadySentKeys(
+  t3Candidates: ReminderCandidate[],
+  t1Candidates: ReminderCandidate[]
+): Promise<Set<string>> {
+  const allCandidateKeys = [...t3Candidates, ...t1Candidates].map(c => c.reminderKey);
+  const alreadySentKeys = new Set<string>();
+  if (allCandidateKeys.length > 0) {
+    const sentRows = await db
+      .select({ key: systemSettings.key })
+      .from(systemSettings)
+      .where(inArray(systemSettings.key, allCandidateKeys));
+    for (const row of sentRows) {
+      alreadySentKeys.add(row.key);
+    }
+  }
+  return alreadySentKeys;
+}
+
+async function dispatchReminders(
+  t3Candidates: ReminderCandidate[],
+  t1Candidates: ReminderCandidate[],
+  alreadySentKeys: Set<string>
+): Promise<{ t3Sent: number; t1Sent: number; allDispatchedKeys: string[] }> {
+  const t3DispatchedKeys: string[] = [];
+  const t1DispatchedKeys: string[] = [];
+  const t3ToDispatch = t3Candidates.filter(c => !alreadySentKeys.has(c.reminderKey) && c.affectedUserIds.length > 0);
+  const t3Skipped = t3Candidates.filter(c => c.affectedUserIds.length === 0);
+  for (const s of t3Skipped) {
+    logger.warn(`[QuotaReminderCron] Skipping instance ${s.instanceId} — no resolvable parent/guardian userId.`);
+  }
+  await Promise.all(
+    t3ToDispatch.map(async candidate => {
+      await QuotaNotificationService.sendOndemandInstanceReminderT3({
+        affectedUserIds: candidate.affectedUserIds,
+        studentName: candidate.studentName,
+        scheduledStartAt: candidate.scheduledStartAt,
+      });
+      t3DispatchedKeys.push(candidate.reminderKey);
+    })
+  );
+  const t1ToDispatch = t1Candidates.filter(c => !alreadySentKeys.has(c.reminderKey) && c.affectedUserIds.length > 0);
+  const t1Skipped = t1Candidates.filter(c => c.affectedUserIds.length === 0);
+  for (const s of t1Skipped) {
+    logger.warn(`[QuotaReminderCron] Skipping instance ${s.instanceId} — no resolvable parent/guardian userId.`);
+  }
+  await Promise.all(
+    t1ToDispatch.map(async candidate => {
+      await QuotaNotificationService.sendOndemandInstanceReminderT1({
+        affectedUserIds: candidate.affectedUserIds,
+        studentName: candidate.studentName,
+        scheduledStartAt: candidate.scheduledStartAt,
+      });
+      t1DispatchedKeys.push(candidate.reminderKey);
+    })
+  );
+  return {
+    t3Sent: t3DispatchedKeys.length,
+    t1Sent: t1DispatchedKeys.length,
+    allDispatchedKeys: [...t3DispatchedKeys, ...t1DispatchedKeys],
+  };
+}
+
+async function persistIdempotencyMarkers(allDispatchedKeys: string[]): Promise<void> {
+  if (allDispatchedKeys.length > 0) {
+    const nowIso = new Date();
+    await db
+      .insert(systemSettings)
+      .values(
+        allDispatchedKeys.map(key => ({
+          key,
+          value: nowIso.toISOString(),
+          dataType: SystemSettingDataType.String,
+          description: "On-demand reminder sent marker (auto-generated)",
+          category: SystemSettingCategory.Scheduling,
+          updatedAt: nowIso,
+        }))
+      )
+      .onConflictDoNothing();
   }
 }
 

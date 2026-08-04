@@ -229,6 +229,56 @@ function resetMocks(): void {
 }
 
 // ---------------------------------------------------------------------------
+// Shared testConnection callers — eliminate duplicated testConnection argument
+// construction and common result assertions across the VALIDATE_CONFIG and
+// GENERATE_AND_DELETE test groups.
+// ---------------------------------------------------------------------------
+
+const VALIDATE_CONFIG_INPUT = {
+  providerSlug: "zoom",
+  mode: MeetingConnectionTestMode.VALIDATE_CONFIG,
+} as const;
+
+const GENERATE_AND_DELETE_INPUT = {
+  providerSlug: "zoom",
+  mode: MeetingConnectionTestMode.GENERATE_AND_DELETE,
+} as const;
+
+async function callTestConnection(
+  mode: MeetingConnectionTestMode,
+  adapterSetup?: (adapter: ReturnType<typeof makeAdapterMock>) => void
+) {
+  const { MeetingIntegrationService } = await importService();
+  const adapter = makeAdapterMock();
+  adapterSetup?.(adapter);
+  setAdapterMock(adapter);
+
+  const input = mode === MeetingConnectionTestMode.VALIDATE_CONFIG ? VALIDATE_CONFIG_INPUT : GENERATE_AND_DELETE_INPUT;
+
+  return MeetingIntegrationService.testConnection(ACTOR_ID, input, FAKE_ERRORS);
+}
+
+/** Assert a failed testConnection result with optional errorCode / errorMessage checks. */
+function expectFailedResult(
+  result: Awaited<ReturnType<typeof callTestConnection>>,
+  opts: { errorCode?: string; errorMessage?: string }
+) {
+  expect(result.ok).toBe(false);
+  if (opts.errorCode !== undefined) expect(result.errorCode).toBe(opts.errorCode);
+  if (opts.errorMessage !== undefined) expect(result.errorMessage).toBe(opts.errorMessage);
+}
+
+/** Assert that a GENERATE_AND_DELETE result has deleted=false and a summary containing a substring. */
+function expectDeletedFalseWithSummary(
+  result: Awaited<ReturnType<typeof callTestConnection>>,
+  summarySubstring: string
+) {
+  expect(result.ok).toBe(true);
+  expect(result.deleted).toBe(false);
+  expect(result.upstreamResponseSummary).toContain(summarySubstring);
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -398,16 +448,9 @@ describe("MeetingIntegrationService", () => {
 
   describe("testConnection — VALIDATE_CONFIG mode", () => {
     test("returns ok=true when validateConfig succeeds", async () => {
-      const { MeetingIntegrationService } = await importService();
-      const adapter = makeAdapterMock();
-      adapter.validateConfig = mock(async () => true);
-      setAdapterMock(adapter);
-
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.VALIDATE_CONFIG },
-        FAKE_ERRORS
-      );
+      const result = await callTestConnection(MeetingConnectionTestMode.VALIDATE_CONFIG, adapter => {
+        adapter.validateConfig = mock(async () => true);
+      });
 
       expect(result.ok).toBe(true);
       expect(result.mode).toBe(MeetingConnectionTestMode.VALIDATE_CONFIG);
@@ -419,78 +462,46 @@ describe("MeetingIntegrationService", () => {
     });
 
     test("returns ok=false when validateConfig returns false", async () => {
-      const { MeetingIntegrationService } = await importService();
-      const adapter = makeAdapterMock();
-      adapter.validateConfig = mock(async () => false);
-      setAdapterMock(adapter);
-
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.VALIDATE_CONFIG },
-        FAKE_ERRORS
-      );
+      const result = await callTestConnection(MeetingConnectionTestMode.VALIDATE_CONFIG, adapter => {
+        adapter.validateConfig = mock(async () => false);
+      });
 
       expect(result.ok).toBe(false);
       expect(result.upstreamResponseSummary).toBe("Credentials invalid or missing");
     });
 
     test("returns error info when validateConfig throws MeetingChannelError", async () => {
-      const { MeetingIntegrationService } = await importService();
       const { MeetingChannelError } = await import("@/backend/services/meeting/channels/IMeetingChannel");
-      const adapter = makeAdapterMock();
-      adapter.validateConfig = mock(async () => {
-        throw new MeetingChannelError("bad config", "CONFIG_ERROR", "upstream msg");
+      const result = await callTestConnection(MeetingConnectionTestMode.VALIDATE_CONFIG, adapter => {
+        adapter.validateConfig = mock(async () => {
+          throw new MeetingChannelError("bad config", "CONFIG_ERROR", "upstream msg");
+        });
       });
-      setAdapterMock(adapter);
 
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.VALIDATE_CONFIG },
-        FAKE_ERRORS
-      );
-
-      expect(result.ok).toBe(false);
-      expect(result.errorCode).toBe("CONFIG_ERROR");
-      expect(result.errorMessage).toBe("upstream msg");
+      expectFailedResult(result, { errorCode: "CONFIG_ERROR", errorMessage: "upstream msg" });
     });
 
     test("returns UNKNOWN error code for non-MeetingChannelError throws", async () => {
-      const { MeetingIntegrationService } = await importService();
-      const adapter = makeAdapterMock();
-      adapter.validateConfig = mock(async () => {
-        throw new Error("generic error");
+      const result = await callTestConnection(MeetingConnectionTestMode.VALIDATE_CONFIG, adapter => {
+        adapter.validateConfig = mock(async () => {
+          throw new Error("generic error");
+        });
       });
-      setAdapterMock(adapter);
 
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.VALIDATE_CONFIG },
-        FAKE_ERRORS
-      );
-
-      expect(result.ok).toBe(false);
-      expect(result.errorCode).toBe("UNKNOWN");
-      expect(result.errorMessage).toBe("generic error");
+      expectFailedResult(result, { errorCode: "UNKNOWN", errorMessage: "generic error" });
     });
   });
 
   describe("testConnection — GENERATE_AND_DELETE mode", () => {
     test("returns ok=true with joinUrl and deleted=true when generate+delete succeed", async () => {
-      const { MeetingIntegrationService } = await importService();
-      const adapter = makeAdapterMock();
-      adapter.generateMeeting = mock(async () => ({
-        joinUrl: "https://zoom.us/j/999",
-        meetingId: "meeting-999",
-        providerMetadata: { foo: "bar" },
-      }));
-      adapter.deleteMeeting = mock(async () => undefined);
-      setAdapterMock(adapter);
-
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.GENERATE_AND_DELETE },
-        FAKE_ERRORS
-      );
+      const result = await callTestConnection(MeetingConnectionTestMode.GENERATE_AND_DELETE, adapter => {
+        adapter.generateMeeting = mock(async () => ({
+          joinUrl: "https://zoom.us/j/999",
+          meetingId: "meeting-999",
+          providerMetadata: { foo: "bar" },
+        }));
+        adapter.deleteMeeting = mock(async () => undefined);
+      });
 
       expect(result.ok).toBe(true);
       expect(result.mode).toBe(MeetingConnectionTestMode.GENERATE_AND_DELETE);
@@ -501,109 +512,64 @@ describe("MeetingIntegrationService", () => {
     });
 
     test("returns deleted=false when deleteMeeting throws", async () => {
-      const { MeetingIntegrationService } = await importService();
-      const adapter = makeAdapterMock();
-      adapter.generateMeeting = mock(async () => ({
-        joinUrl: "https://zoom.us/j/888",
-        meetingId: "meeting-888",
-        providerMetadata: {},
-      }));
-      adapter.deleteMeeting = mock(async () => {
-        throw new Error("delete failed");
+      const result = await callTestConnection(MeetingConnectionTestMode.GENERATE_AND_DELETE, adapter => {
+        adapter.generateMeeting = mock(async () => ({
+          joinUrl: "https://zoom.us/j/888",
+          meetingId: "meeting-888",
+          providerMetadata: {},
+        }));
+        adapter.deleteMeeting = mock(async () => {
+          throw new Error("delete failed");
+        });
       });
-      setAdapterMock(adapter);
 
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.GENERATE_AND_DELETE },
-        FAKE_ERRORS
-      );
-
-      expect(result.ok).toBe(true);
-      expect(result.deleted).toBe(false);
-      expect(result.upstreamResponseSummary).toContain("delete failed");
+      expectDeletedFalseWithSummary(result, "delete failed");
     });
 
     test("returns deleted=false when adapter has no deleteMeeting", async () => {
-      const { MeetingIntegrationService } = await importService();
-      const adapter = makeAdapterMock();
-      adapter.generateMeeting = mock(async () => ({
-        joinUrl: "https://zoom.us/j/777",
-        meetingId: "meeting-777",
-        providerMetadata: {},
-      }));
-      adapter.deleteMeeting = undefined;
-      setAdapterMock(adapter);
+      const result = await callTestConnection(MeetingConnectionTestMode.GENERATE_AND_DELETE, adapter => {
+        adapter.generateMeeting = mock(async () => ({
+          joinUrl: "https://zoom.us/j/777",
+          meetingId: "meeting-777",
+          providerMetadata: {},
+        }));
+        adapter.deleteMeeting = undefined;
+      });
 
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.GENERATE_AND_DELETE },
-        FAKE_ERRORS
-      );
-
-      expect(result.ok).toBe(true);
-      expect(result.deleted).toBe(false);
-      expect(result.upstreamResponseSummary).toContain("delete not supported by provider");
+      expectDeletedFalseWithSummary(result, "delete not supported by provider");
     });
 
     test("returns ok=false when generateMeeting throws MeetingChannelError", async () => {
-      const { MeetingIntegrationService } = await importService();
       const { MeetingChannelError } = await import("@/backend/services/meeting/channels/IMeetingChannel");
-      const adapter = makeAdapterMock();
-      adapter.generateMeeting = mock(async () => {
-        throw new MeetingChannelError("provider down", "PROVIDER_UNAVAILABLE", "API timeout");
+      const result = await callTestConnection(MeetingConnectionTestMode.GENERATE_AND_DELETE, adapter => {
+        adapter.generateMeeting = mock(async () => {
+          throw new MeetingChannelError("provider down", "PROVIDER_UNAVAILABLE", "API timeout");
+        });
       });
-      setAdapterMock(adapter);
 
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.GENERATE_AND_DELETE },
-        FAKE_ERRORS
-      );
-
-      expect(result.ok).toBe(false);
-      expect(result.errorCode).toBe("PROVIDER_UNAVAILABLE");
-      expect(result.errorMessage).toBe("API timeout");
+      expectFailedResult(result, { errorCode: "PROVIDER_UNAVAILABLE", errorMessage: "API timeout" });
       expect(result.upstreamResponseSummary).toContain("API timeout");
     });
 
     test("returns ok=false when generateMeeting throws generic Error", async () => {
-      const { MeetingIntegrationService } = await importService();
-      const adapter = makeAdapterMock();
-      adapter.generateMeeting = mock(async () => {
-        throw new Error("unexpected failure");
+      const result = await callTestConnection(MeetingConnectionTestMode.GENERATE_AND_DELETE, adapter => {
+        adapter.generateMeeting = mock(async () => {
+          throw new Error("unexpected failure");
+        });
       });
-      setAdapterMock(adapter);
 
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.GENERATE_AND_DELETE },
-        FAKE_ERRORS
-      );
-
-      expect(result.ok).toBe(false);
-      expect(result.errorCode).toBe("UNKNOWN");
-      expect(result.errorMessage).toBe("unexpected failure");
+      expectFailedResult(result, { errorCode: "UNKNOWN", errorMessage: "unexpected failure" });
     });
 
     test("returns deleted=false when meeting has no meetingId", async () => {
-      const { MeetingIntegrationService } = await importService();
-      const adapter = makeAdapterMock();
-      adapter.generateMeeting = mock(async () => ({
-        joinUrl: "https://zoom.us/j/no-id",
-        providerMetadata: {},
-      }));
-      setAdapterMock(adapter);
+      const result = await callTestConnection(MeetingConnectionTestMode.GENERATE_AND_DELETE, adapter => {
+        adapter.generateMeeting = mock(async () => ({
+          joinUrl: "https://zoom.us/j/no-id",
+          providerMetadata: {},
+        }));
+      });
 
-      const result = await MeetingIntegrationService.testConnection(
-        ACTOR_ID,
-        { providerSlug: "zoom", mode: MeetingConnectionTestMode.GENERATE_AND_DELETE },
-        FAKE_ERRORS
-      );
-
-      expect(result.ok).toBe(true);
-      expect(result.deleted).toBe(false);
-      expect(result.upstreamResponseSummary).toContain("delete not supported by provider");
+      expectDeletedFalseWithSummary(result, "delete not supported by provider");
     });
   });
 

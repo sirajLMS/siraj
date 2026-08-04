@@ -84,45 +84,51 @@ export function buildQuotaLowBalancePayloads(input: {
   );
 }
 
-export function buildOndemandInstancePendingCreditPayloads(input: {
+type OndemandInstanceInput = {
   affectedUserIds: string[];
   studentName: string;
   scheduledStartAt: string;
   locale?: string;
-}): CommunicationPayload[] {
+};
+
+function buildOndemandInstancePayloads<
+  L extends { readonly title: string; readonly body: (p: { studentName: string; scheduledStartAt: string }) => string },
+>(
+  labels: (translations: NotificationsLabels) => L,
+  eventType: NotificationEventType,
+  category: NotificationEventCategory,
+  input: OndemandInstanceInput
+): CommunicationPayload[] {
   return buildQuotaPayloads(
-    t => t.onDemandInstancePendingCredit,
+    labels,
     { studentName: input.studentName, scheduledStartAt: input.scheduledStartAt },
+    eventType,
+    category,
+    input
+  );
+}
+
+export function buildOndemandInstancePendingCreditPayloads(input: OndemandInstanceInput): CommunicationPayload[] {
+  return buildOndemandInstancePayloads(
+    t => t.onDemandInstancePendingCredit,
     NotificationEventType.ON_DEMAND_INSTANCE_PENDING_CREDIT,
     NotificationEventCategory.URGENT,
     input
   );
 }
 
-export function buildOndemandInstanceReminderT3Payloads(input: {
-  affectedUserIds: string[];
-  studentName: string;
-  scheduledStartAt: string;
-  locale?: string;
-}): CommunicationPayload[] {
-  return buildQuotaPayloads(
+export function buildOndemandInstanceReminderT3Payloads(input: OndemandInstanceInput): CommunicationPayload[] {
+  return buildOndemandInstancePayloads(
     t => t.onDemandInstanceReminderT3,
-    { studentName: input.studentName, scheduledStartAt: input.scheduledStartAt },
     NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T3,
     NotificationEventCategory.REMINDER,
     input
   );
 }
 
-export function buildOndemandInstanceReminderT1Payloads(input: {
-  affectedUserIds: string[];
-  studentName: string;
-  scheduledStartAt: string;
-  locale?: string;
-}): CommunicationPayload[] {
-  return buildQuotaPayloads(
+export function buildOndemandInstanceReminderT1Payloads(input: OndemandInstanceInput): CommunicationPayload[] {
+  return buildOndemandInstancePayloads(
     t => t.onDemandInstanceReminderT1,
-    { studentName: input.studentName, scheduledStartAt: input.scheduledStartAt },
     NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T1,
     NotificationEventCategory.URGENT,
     input

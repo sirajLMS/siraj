@@ -301,6 +301,40 @@ describe("ClassMeetingConfigService", () => {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // Shared helpers for createClassMeetingConfig auto-provider tests
+  // ---------------------------------------------------------------------------
+
+  function buildAutoCreateInput(label: string, meetingUrl: string | null = null): ClassMeetingConfigSubmitInput {
+    return {
+      classInstanceId: CLASS_INSTANCE_ID,
+      providerId: PROVIDER_ID,
+      label,
+      isDefault: false,
+      details: { meetingUrl },
+    };
+  }
+
+  interface AutoProviderTestSetup {
+    generateMeetingResult?: { joinUrl: string; providerMetadata: Record<string, unknown> };
+    generateMeetingError?: Error;
+  }
+
+  async function setupAutoProviderCreateTest(options: AutoProviderTestSetup = {}) {
+    providerGetByIdOrThrowMock.mockResolvedValue(buildProvider({ providerKind: "zoom_oauth" }));
+
+    const spy = spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting");
+
+    if (options.generateMeetingError) {
+      spy.mockRejectedValue(options.generateMeetingError);
+    } else if (options.generateMeetingResult) {
+      spy.mockResolvedValue(options.generateMeetingResult);
+    }
+
+    const { ClassMeetingConfigService } = await importService();
+    return { generateMeeting: spy, ClassMeetingConfigService };
+  }
+
   describe("createClassMeetingConfig", () => {
     test("creates a config with manual provider (no URL generation)", async () => {
       const { ClassMeetingConfigService } = await importService();
@@ -320,22 +354,18 @@ describe("ClassMeetingConfigService", () => {
     });
 
     test("creates a config with auto provider and generates URL", async () => {
-      providerGetByIdOrThrowMock.mockResolvedValue(buildProvider({ providerKind: "zoom_oauth" }));
-      const generateMeeting = spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockResolvedValue({
-        joinUrl: "https://zoom.us/j/generated",
-        providerMetadata: { id: "gen-123" },
+      const { generateMeeting, ClassMeetingConfigService } = await setupAutoProviderCreateTest({
+        generateMeetingResult: {
+          joinUrl: "https://zoom.us/j/generated",
+          providerMetadata: { id: "gen-123" },
+        },
       });
 
-      const { ClassMeetingConfigService } = await importService();
-      const input: ClassMeetingConfigSubmitInput = {
-        classInstanceId: CLASS_INSTANCE_ID,
-        providerId: PROVIDER_ID,
-        label: "Auto Class Config",
-        isDefault: false,
-        details: { meetingUrl: null },
-      };
-
-      const result = await ClassMeetingConfigService.createClassMeetingConfig(ACTOR_ID, input, FAKE_ERRORS);
+      const result = await ClassMeetingConfigService.createClassMeetingConfig(
+        ACTOR_ID,
+        buildAutoCreateInput("Auto Class Config"),
+        FAKE_ERRORS
+      );
 
       expect(generateMeeting).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
@@ -343,19 +373,13 @@ describe("ClassMeetingConfigService", () => {
     });
 
     test("auto provider with user-supplied URL skips generation (manual override)", async () => {
-      providerGetByIdOrThrowMock.mockResolvedValue(buildProvider({ providerKind: "zoom_oauth" }));
-      const generateMeeting = spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting");
+      const { generateMeeting, ClassMeetingConfigService } = await setupAutoProviderCreateTest({});
 
-      const { ClassMeetingConfigService } = await importService();
-      const input: ClassMeetingConfigSubmitInput = {
-        classInstanceId: CLASS_INSTANCE_ID,
-        providerId: PROVIDER_ID,
-        label: "Override Class Config",
-        isDefault: false,
-        details: { meetingUrl: "https://zoom.us/j/override-987" },
-      };
-
-      const result = await ClassMeetingConfigService.createClassMeetingConfig(ACTOR_ID, input, FAKE_ERRORS);
+      const result = await ClassMeetingConfigService.createClassMeetingConfig(
+        ACTOR_ID,
+        buildAutoCreateInput("Override Class Config", "https://zoom.us/j/override-987"),
+        FAKE_ERRORS
+      );
 
       expect(generateMeeting).not.toHaveBeenCalled();
       expect(result).toBeDefined();
@@ -363,42 +387,31 @@ describe("ClassMeetingConfigService", () => {
     });
 
     test("re-throws MeetingChannelError as-is from adapter", async () => {
-      providerGetByIdOrThrowMock.mockResolvedValue(buildProvider({ providerKind: "zoom_oauth" }));
-      const adapterError = new MeetingChannelError("Rate limited", "RATE_LIMITED");
-      spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockRejectedValue(adapterError);
+      const { ClassMeetingConfigService } = await setupAutoProviderCreateTest({
+        generateMeetingError: new MeetingChannelError("Rate limited", "RATE_LIMITED"),
+      });
 
-      const { ClassMeetingConfigService } = await importService();
-      const input: ClassMeetingConfigSubmitInput = {
-        classInstanceId: CLASS_INSTANCE_ID,
-        providerId: PROVIDER_ID,
-        label: "Auto Class Config",
-        isDefault: false,
-        details: { meetingUrl: null },
-      };
-
-      await expect(ClassMeetingConfigService.createClassMeetingConfig(ACTOR_ID, input, FAKE_ERRORS)).rejects.toThrow(
-        "Rate limited"
-      );
+      await expect(
+        ClassMeetingConfigService.createClassMeetingConfig(
+          ACTOR_ID,
+          buildAutoCreateInput("Auto Class Config"),
+          FAKE_ERRORS
+        )
+      ).rejects.toThrow("Rate limited");
     });
 
     test("wraps unexpected adapter errors in user-friendly Error", async () => {
-      providerGetByIdOrThrowMock.mockResolvedValue(buildProvider({ providerKind: "zoom_oauth" }));
-      spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockRejectedValue(
-        new Error("Unexpected internal failure")
-      );
+      const { ClassMeetingConfigService } = await setupAutoProviderCreateTest({
+        generateMeetingError: new Error("Unexpected internal failure"),
+      });
 
-      const { ClassMeetingConfigService } = await importService();
-      const input: ClassMeetingConfigSubmitInput = {
-        classInstanceId: CLASS_INSTANCE_ID,
-        providerId: PROVIDER_ID,
-        label: "Auto Class Config",
-        isDefault: false,
-        details: { meetingUrl: null },
-      };
-
-      await expect(ClassMeetingConfigService.createClassMeetingConfig(ACTOR_ID, input, FAKE_ERRORS)).rejects.toThrow(
-        "Failed to create class meeting config."
-      );
+      await expect(
+        ClassMeetingConfigService.createClassMeetingConfig(
+          ACTOR_ID,
+          buildAutoCreateInput("Auto Class Config"),
+          FAKE_ERRORS
+        )
+      ).rejects.toThrow("Failed to create class meeting config.");
     });
   });
 

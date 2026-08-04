@@ -5,7 +5,7 @@ import { Alert, Box, Snackbar, Stack } from "@mui/material";
 import { CronManualTriggerDialog } from "@/frontend/common/views/dashboard/cron/components/CronManualTriggerDialog";
 import { CronRunsDialog } from "@/frontend/common/views/dashboard/cron/components/CronRunsDialog";
 import { CronScheduleCreateEditDialog } from "@/frontend/common/views/dashboard/cron/components/CronScheduleCreateEditDialog";
-import type { CronViewProps } from "@/frontend/common/views/dashboard/cron/types";
+import type { CronNotificationState, CronViewProps } from "@/frontend/common/views/dashboard/cron/types";
 import {
   DesktopAppDataGrid,
   DesktopFormErrorSnackbar,
@@ -15,6 +15,74 @@ import {
   DesktopPrimaryPageAction,
 } from "@/frontend/desktop/components/ui";
 import { DesktopBaseDeleteDialog } from "@/frontend/desktop/components/ui/dialog/DesktopBaseDeleteDialog";
+
+function CronQueueStatsBanner({
+  labels,
+  queueStats,
+  queueStatsLoading,
+}: {
+  labels: CronViewProps["labels"];
+  queueStats: CronViewProps["queueStats"];
+  queueStatsLoading: CronViewProps["queueStatsLoading"];
+}) {
+  if (!queueStats || queueStatsLoading) {
+    return null;
+  }
+  return (
+    <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+      <Alert severity="info" sx={{ flex: 1 }}>
+        {labels.queueStatsTitle} ({queueStats.backend}): {labels.queueStatsPending} = {queueStats.pending},{" "}
+        {labels.queueStatsInFlight} = {queueStats.inFlight}, {labels.queueStatsFailed} = {queueStats.failed}
+      </Alert>
+    </Stack>
+  );
+}
+
+function CronEmptyStateBanner({
+  labels,
+  loading,
+  rowsLength,
+}: {
+  labels: CronViewProps["labels"];
+  loading: CronViewProps["loading"];
+  rowsLength: number;
+}) {
+  if (loading || rowsLength > 0) {
+    return null;
+  }
+  return (
+    <Alert severity="info" sx={{ mb: 2 }}>
+      {labels.pageSubtitle}
+    </Alert>
+  );
+}
+
+function CronNotificationToasts({ notifications }: { notifications: CronNotificationState }) {
+  return (
+    <>
+      <DesktopFormErrorSnackbar
+        open={notifications.errorOpen}
+        message={notifications.errorMsg}
+        onClose={notifications.closeError}
+      />
+      <DesktopFormSuccessSnackbar
+        open={notifications.successOpen}
+        message={notifications.successMsg}
+        onClose={notifications.closeSuccess}
+      />
+      <Snackbar
+        open={notifications.infoOpen}
+        autoHideDuration={6000}
+        onClose={notifications.closeInfo}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="info" onClose={notifications.closeInfo} sx={{ width: "100%" }}>
+          {notifications.infoMsg}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+}
 
 export function CronDesktopView({
   labels,
@@ -61,20 +129,8 @@ export function CronDesktopView({
         }
       />
 
-      {queueStats && !queueStatsLoading ? (
-        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-          <Alert severity="info" sx={{ flex: 1 }}>
-            {labels.queueStatsTitle} ({queueStats.backend}): {labels.queueStatsPending} = {queueStats.pending},{" "}
-            {labels.queueStatsInFlight} = {queueStats.inFlight}, {labels.queueStatsFailed} = {queueStats.failed}
-          </Alert>
-        </Stack>
-      ) : null}
-
-      {!loading && rows.length === 0 ? (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          {labels.pageSubtitle}
-        </Alert>
-      ) : null}
+      <CronQueueStatsBanner labels={labels} queueStats={queueStats} queueStatsLoading={queueStatsLoading} />
+      <CronEmptyStateBanner labels={labels} loading={loading} rowsLength={rows.length} />
 
       <Box sx={{ height: 600 }}>
         <DesktopAppDataGrid
@@ -125,26 +181,7 @@ export function CronDesktopView({
         onClose={onTriggerClose}
       />
 
-      <DesktopFormErrorSnackbar
-        open={notifications.errorOpen}
-        message={notifications.errorMsg}
-        onClose={notifications.closeError}
-      />
-      <DesktopFormSuccessSnackbar
-        open={notifications.successOpen}
-        message={notifications.successMsg}
-        onClose={notifications.closeSuccess}
-      />
-      <Snackbar
-        open={notifications.infoOpen}
-        autoHideDuration={6000}
-        onClose={notifications.closeInfo}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity="info" onClose={notifications.closeInfo} sx={{ width: "100%" }}>
-          {notifications.infoMsg}
-        </Alert>
-      </Snackbar>
+      <CronNotificationToasts notifications={notifications} />
     </DesktopPageContainer>
   );
 }

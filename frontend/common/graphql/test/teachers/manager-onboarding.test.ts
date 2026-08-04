@@ -34,6 +34,20 @@ const buildManagerInput = (
   timezone: overrides.timezone ?? null,
 });
 
+const assertManagerCreationDenied = async (scope: string, emailPrefix: string): Promise<boolean> => {
+  return await assertOperationDenied(scope, "mutate", createManagerMutationDocument, {
+    input: buildManagerInput({
+      name: "Denied Manager",
+      email: `${emailPrefix}_${Date.now()}@test.com`,
+      accountType: ManagerAccountType.Manager,
+      avatarUrl: null,
+      displayCurrency: null,
+      phone: null,
+      timezone: null,
+    }),
+  });
+};
+
 describe("Manager Onboarding GraphQL API", () => {
   setupTestServerLifecycle();
 
@@ -88,32 +102,12 @@ describe("Manager Onboarding GraphQL API", () => {
   });
 
   test("Admin denied creating manager", async () => {
-    const denied = await assertOperationDenied("academy_admin", "mutate", createManagerMutationDocument, {
-      input: buildManagerInput({
-        name: "Denied Manager",
-        email: `denied_admin_${Date.now()}@test.com`,
-        accountType: ManagerAccountType.Manager,
-        avatarUrl: null,
-        displayCurrency: null,
-        phone: null,
-        timezone: null,
-      }),
-    });
+    const denied = await assertManagerCreationDenied("academy_admin", "denied_admin");
     expect(denied).toBe(true);
   });
 
   test("Teacher denied creating manager", async () => {
-    const denied = await assertOperationDenied("teacher_default", "mutate", createManagerMutationDocument, {
-      input: buildManagerInput({
-        name: "Denied Manager",
-        email: `denied_teacher_${Date.now()}@test.com`,
-        accountType: ManagerAccountType.Manager,
-        avatarUrl: null,
-        displayCurrency: null,
-        phone: null,
-        timezone: null,
-      }),
-    });
+    const denied = await assertManagerCreationDenied("teacher_default", "denied_teacher");
     expect(denied).toBe(true);
   });
 
