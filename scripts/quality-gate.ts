@@ -118,6 +118,10 @@ async function performStage(stage: QualityStage): Promise<boolean> {
       return tsgo.success && biome.success && lint.success;
     }
     case "CODESCENE": {
+      if (process.argv.includes("--skip-codescene") || !process.env.CS_ACCESS_TOKEN) {
+        console.log("\n📡 Skipping CodeScene stage (requested or CS_ACCESS_TOKEN not set)...");
+        return true;
+      }
       const check = await runCommand("bun", ["codescene"]);
       if (!check.success) {
         console.warn("⚠️ CodeScene Health Warnings detected.");

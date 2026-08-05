@@ -111,7 +111,7 @@ async function runLint(files: string[]): Promise<LintResult> {
   // pull in files config would otherwise exclude.
   const fileArgs = isFullRepo ? "" : files.map(f => `"${f}"`).join(" ");
   const cmd =
-    `NODE_OPTIONS="-r ./scripts/ts6-eslint-patch.cjs" ~/.bun/bin/bun x eslint --cache --cache-location .eslintcache --concurrency=${CONCURRENCY} ${fileArgs}`.trim();
+    `NODE_OPTIONS="-r ./scripts/ts6-eslint-patch.cjs" bun x eslint --cache --cache-location .eslintcache --concurrency=${CONCURRENCY} ${fileArgs}`.trim();
   const timeout = isFullRepo ? DEFAULT_TIMEOUT_FULL_REPO_MS : DEFAULT_TIMEOUT_FILES_MS;
   return new Promise<LintResult>(resolve => {
     exec(
