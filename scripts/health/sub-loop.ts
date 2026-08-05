@@ -27,13 +27,13 @@
  * Exit codes:
  *   0 = all checks up to the lifecycle stage passed
  *   1 = stopped at a failing check (errors printed to stdout/stderr)
- *   2 = invalid arguments or lint queue server unavailable
+ *   2 = invalid arguments
  */
 
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
-import { BASE_URL as LINT_QUEUE_URL } from "@/scripts/lint-queue-config";
+import { type LintResult, requestLint } from "@/scripts/lint-service";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -187,10 +187,6 @@ function logFail(msg: string): void {
   console.error(`${RED}❌${NC} ${BOLD}${msg}${NC}`);
 }
 
-function logWarn(msg: string): void {
-  console.warn(`${YELLOW}⚠${NC}  ${msg}`);
-}
-
 /**
  * Run a command synchronously and capture its output.
  */
@@ -210,50 +206,18 @@ function runCommand(command: string, args: string[]): CheckResult {
 }
 
 /**
- * Submit a lint request to the lint queue server.
- * Returns null if the server is unavailable.
+ * Submit a lint request to the in-process lint service.
  */
-async function lintViaQueue(filePath: string): Promise<CheckResult | null> {
+async function lintViaQueue(filePath: string): Promise<CheckResult> {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
-
   try {
-    const response = await fetch(`${LINT_QUEUE_URL}/status`);
-    if (!response.ok) {
-      logWarn("Lint queue server is up but returned non-200 on /status");
-      return null;
-    }
-  } catch {
-    logWarn("Lint queue server is NOT running. Start it first:");
-    console.error(`  ~/.bun/bin/bun run scripts/lint-queue-server.ts`);
-    return null;
-  }
-
-  try {
-    const response = await fetch(`${LINT_QUEUE_URL}/lint`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: "sub-loop", files: [relPath] }),
-    });
-
-    if (!response.ok) {
-      return {
-        name: "lint-queue-client",
-        passed: false,
-        output: `Lint queue request failed: ${response.status}`,
-      };
-    }
-
-    const data = (await response.json()) as { success: boolean; output: string; exitCode: number };
-    return {
-      name: "lint-queue-client",
-      passed: data.success,
-      output: data.output,
-    };
+    const r: LintResult = await requestLint("sub-loop", [relPath]);
+    return { name: "lint-queue-client", passed: r.success, output: r.output };
   } catch (err) {
     return {
       name: "lint-queue-client",
       passed: false,
-      output: `Failed to reach lint queue server: ${(err as Error).message}`,
+      output: `In-process lint service failed: ${(err as Error).message}`,
     };
   }
 }
@@ -328,17 +292,8 @@ function checkBiome(filePath: string): CheckResult {
 }
 
 async function checkLint(filePath: string): Promise<CheckResult> {
-  logInfo(`Submitting lint via queue client for ${filePath}...`);
+  logInfo(`Submitting lint via in-process service for ${filePath}...`);
   const result = await lintViaQueue(filePath);
-
-  if (result === null) {
-    return {
-      name: "lint-queue-client",
-      passed: false,
-      output: "Lint queue server is unavailable. Start it: ~/.bun/bin/bun run scripts/lint-queue-server.ts",
-    };
-  }
-
   return result;
 }
 
@@ -476,7 +431,7 @@ ${BOLD}Check order (always strict, no skipping):${NC}
 ${BOLD}Exit codes:${NC}
   0 = all checks up to lifecycle stage passed
   1 = stopped at a failing check (errors printed)
-  2 = invalid arguments or lint queue unavailable
+  2 = invalid arguments
 
 ${BOLD}⚠️  IMPORTANT:${NC} This script NEVER runs sonar-scan or sonar-manager.
    SonarQube scan is very costly. Only the quality-gate orchestrator runs it.

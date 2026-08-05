@@ -33,31 +33,52 @@ Use this template to create actionable implementation plans that break down your
 1. **Pre-Execution Outcome Knowledge Read:**  
    Before executing ANY task, the executing agent MUST read ALL existing files in `.ai/plans/<feature-name>/outcome/` to absorb prior research, search results, docs, and pitfalls so analysis is not repeated.
 2. **Per-File Quality Verification Loop (Immediate post-edit):**  
-   Whenever a file is modified, execute per-file verification (`bun tsgo` + `bun biome:check` + lint queue for target file) BEFORE moving to another file or subtask.
-3. **Global Health Check (Completion Gate):**  
-   Before marking any subtask as complete, run full global checks: `bun tsgo`, `bun biome:check`, and `bun run lint` globally. All MUST exit with **zero errors and zero warnings**.
-4. **Post-Execution Outcome File Creation:**  
-   Upon completing the task implementation and quality checks, write a new outcome document under `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` summarizing research, analysis, changes, and carry-over knowledge.
-5. **Task Progress Tracking:**  
-   The executing agent MUST update the task checkbox `[ ]` -> `[x]` in this `tasks.md` file upon successful completion.
+   Whenever a file is modified, execute per-file verification (`bun tsgo` + `bun biome:check` + `bun run scripts/lint-service.ts -f <file> --id verify`) BEFORE moving to another file or subtask.
+3. **Semantic Review Checklist (Pre-Completion Gate):**  
+   Before marking any subtask as complete, execute agent self-review against semantic checklist (race conditions, env-config, dead code, cross-layer, enums, deferred items).
+4. **Global Health Check (Completion Gate):**  
+   Before marking any subtask as complete, run full global checks: `bun tsgo`, `bun biome:check`, and `bun run scripts/lint-service.ts --json --id global` globally. All MUST exit with **zero errors and zero warnings**.
+5. **Post-Execution Outcome File Creation:**  
+   Upon completing the task implementation and quality checks, write a new outcome document under `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` summarizing research, analysis, changes, cross-file dependencies, and carry-over knowledge.
+6. **Task Progress Tracking:**  
+   The executing agent MUST update the task checkbox `[ ]` -> `[x]` in this `trackable-tasks.md` file upon successful completion.
 
 ## MANDATORY Subtasks for Every Implementation Task
 
-**EVERY implementation task (X.Y) MUST include these subtasks:**
+**EVERY implementation task (X.Y) MUST include these subtasks in strict order:**
 
 ### Quality Loop Subtask (X.Y.QL)
 ```markdown
 - [ ] X.Y.QL **Quality Loop**: Per-file verification on `<file-path>`
   - Run: `bun tsgo`
   - Run: `bun biome:check`
-  - Run: lint queue for target file
+  - Run: `bun run scripts/lint-service.ts -f <file-path> --id verify`
   - Fix all errors before proceeding
+```
+
+### Semantic Review Subtask (X.Y.SR) — NEW
+```markdown
+- [ ] X.Y.SR **Semantic Review**: Agent self-review before marking complete
+  - [ ] No read-then-write without atomicity (SELECT FOR UPDATE / tx / advisory lock)
+  - [ ] No module-level mutable state without bounds
+  - [ ] All `resolveEnvConfig` calls registered in `env-config-keys.ts`
+  - [ ] All `resetX()` functions invalidate all resolved keys
+  - [ ] No empty-string credential acceptance
+  - [ ] No dead branches (all paths reachable)
+  - [ ] No cross-layer imports (frontend→backend, shared→frontend/backend)
+  - [ ] Enums imported as values (not `import type`) when used at runtime
+  - [ ] Schema migrations match Drizzle schema
+  - [ ] All deferred items logged in `deferred-items.md`
 ```
 
 ### Instruction Verification Subtask (X.Y.IV)
 ```markdown
 - [ ] X.Y.IV **Instruction Verification**: Validate `<file-path>` against:
-  - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/<layer>/AGENTS.md`, ...
+  - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/<layer>/AGENTS.md`
+  - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/<layer>.instructions.md`
+```
+
+**Sequence:** QL (Quality Loop) → SR (Semantic Review) → IV (Instruction Verification) → Mark `[x]`cts/siraj/<layer>/AGENTS.md`, ...
   - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, ...
   - (Use absolute paths from the Layer-to-Instructions mapping table below)
 ```
@@ -102,6 +123,24 @@ Use this template to create actionable implementation plans that break down your
 
 ## Implementation Plan
 
+### Task 0: Pre-Implementation Baseline (MANDATORY)
+
+- [ ] 0. Establish error baseline and create deferred-items ledger
+  - Record baseline error counts BEFORE any implementation:
+    ```bash
+    # Record tsgo error count
+    bun tsgo 2>&1 | grep "error TS" | wc -l > /tmp/baseline-tsgo.txt
+    
+    # Record biome warnings
+    bun biome:check 2>&1 | grep -c "warn" > /tmp/baseline-biome.txt
+    
+    # Record lint output
+    bun run scripts/lint-service.ts --json --id baseline > /tmp/baseline-lint.json
+    ```
+  - Create deferred-items ledger: `.ai/plans/<feature-name>/deferred-items.md` (use template at `.agents/spec-process-guide/templates/deferred-items-template.md`)
+  - Write outcome file: `.ai/plans/<feature-name>/outcome/0-baseline-outcome.md` documenting baseline counts
+  - _Requirements: REQ-0 (Pre-Implementation Baseline)_
+
 ### Phase 1: Foundation and Setup
 
 - [ ] 1. Set up project structure and development environment
@@ -110,7 +149,28 @@ Use this template to create actionable implementation plans that break down your
   - Set up build configuration and dependencies
   - Configure development tools and linting
   - **Quality Loop**: Run per-file verification on modified files
+  - **Semantic Review**: Check against semantic checklist
   - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - Write outcome file: `.ai/plans/<feature-name>/outcome/1-setup-outcome.md`
+  - Update progress: Mark task 1 as `[x]` in `trackable-tasks.md`
+  - _Requirements: [Reference specific requirements]_
+
+### Phase 1.5: Plan Review Gate (MANDATORY)
+
+- [ ] 1.5 Review complete plan using @plan-review skill
+  - **Input files:** `specs.md`, `implementation.md`/`design.md`, `trackable-tasks.md`
+  - **Invoke:** `@plan-review` skill on complete plan
+  - **Expected output:** "Plan passes all AGENTS.md rules" OR structured violation list
+  - If violations found:
+    - Fix all reported violations in plan files
+    - Re-run `@plan-review` 
+    - Repeat until zero violations
+  - Write outcome: `.ai/plans/<feature-name>/outcome/plan-review-R1.md` (use template)
+  - Commit patched plan files (do NOT push until implementation starts)
+  - Mark complete ONLY when plan passes all checks
+  - _Requirements: REQ-0 (Execution Protocol)_
+
+### Phase 2: Core Business Logicalidate modified files against applicable AGENTS.md and .agents/instructions
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
   - Write outcome file: `.ai/plans/<feature-name>/outcome/1.1-setup-outcome.md`
   - Update progress: Mark task 1.1 as `[x]` in `tasks.md`
@@ -156,8 +216,28 @@ Use this template to create actionable implementation plans that break down your
   - Add state management and transitions
   - Write unit tests for workflow logic
   - **Quality Loop**: Run per-file verification on modified files
+  - **Semantic Review**: Check against semantic checklist
   - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
   - _Requirements: [Reference specific requirements]_
+
+### Phase 2.5: Mid-Point Review Gate (CONDITIONAL — Multi-Phase Plans >15 Tasks)
+
+- [ ] 2.5 Backend architecture review checkpoint
+  - **When to include:** Plans with >15 total tasks AND distinct backend+frontend phases
+  - **When to skip:** Plans with <10 tasks OR single-phase plans OR frontend-only features
+  - **Scope:** All `backend/` files modified in Phases 1-2 (foundation + business logic)
+  - **Dispatch review subagents in parallel:**
+    - `review-backend` (scope: backend services, repositories, business logic)
+    - `review-types` (scope: backend/types files)
+    - `review-config` (scope: env-config, drizzle.config, migration files)
+  - **Aggregate findings:** Filter to backend-specific issues only (ignore frontend/integration issues for now)
+  - **Fix phase:** Dispatch fix subagents per file using `.agents/instructions/backend.instructions.md` as guardrails
+  - **Verify:** Run `scripts/health/sub-loop.ts` per fixed file
+  - **Re-review:** Dispatch review subagents again until zero backend-specific findings
+  - Write outcome: `.ai/plans/<feature-name>/outcome/midpoint-review-R1.md` (use template)
+  - Mark complete ONLY when backend review is clean
+  - **Evidence:** whatsapp R3 found 23 backend findings after 9 tasks — mid-point gate would have caught these after Task 6 (backend complete) before frontend propagation
+  - _Requirements: REQ-0 (Execution Protocol)_
 
 ### Phase 3: API Layer
 
@@ -269,7 +349,20 @@ Use this template to create actionable implementation plans that break down your
 
 ### Phase 7: Knowledge Propagation (MANDATORY Final Task)
 
-- [ ] 9. **Knowledge Propagation & Documentation**
+- [ ] 9. **Final Quality Gate & Deferred Items Enforcement**
+  - **Deferred Items Enforcement (BLOCKING):**
+    ```bash
+    # Count unresolved deferred items
+    grep -c "❌\|⚠️" .ai/plans/<feature-name>/deferred-items.md
+    # Expected: 0
+    # If >0: Task is BLOCKED — resolve all ❌/⚠️ items before proceeding
+    ```
+  - All deferred items MUST be resolved (status = ✅ Done) with verification references
+  - Any ❌ Blocked or ⚠️ Partial items MUST be completed or have explicit target tasks created
+  - Run full baseline comparison: compare current errors vs `/tmp/baseline-*.txt` — document new errors introduced
+  - _Requirements: REQ-0 (Execution Protocol)_
+
+- [ ] 10. **Knowledge Propagation & Documentation**
   - Read all outcome files in `.ai/plans/<feature-name>/outcome/` to synthesize all learnings
   - Create canonical reference doc under `docs/<domain>/<topic>.md` consolidating patterns, rules, and gotchas from all outcome files
     - If a matching subdirectory exists under `docs/`, create the file inside it
@@ -282,9 +375,9 @@ Use this template to create actionable implementation plans that break down your
     - Add a domain-specific section with key rules and a reference to the new doc
   - Update `.agents/instructions/<layer>.instructions.md` if new conventions should be enforced by instruction files
   - Update root `AGENTS.md` Important References section with the new doc
-  - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
-  - Write outcome file: `.ai/plans/<feature-name>/outcome/9.1-knowledge-propagation-outcome.md`
-  - Update progress: Mark task 9.1 as `[x]` in `tasks.md`
+  - Run global check: `bun tsgo`, `bun biome:check`, `bun run scripts/lint-service.ts --json --id final-check` (0 errors, 0 warnings)
+  - Write outcome file: `.ai/plans/<feature-name>/outcome/10-knowledge-propagation-outcome.md`
+  - Update progress: Mark task 10 as `[x]` in `trackable-tasks.md`
   - _Requirements: Knowledge propagation protocol_
 
 ### Domain-to-Artifacts Mapping (Reference for Knowledge Propagation)

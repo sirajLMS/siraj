@@ -43,7 +43,7 @@
       "type": "http"
     },
     "sonarqube": {
-      "command": "sonar",
+      "command": "/home/ahmed/.local/share/sonarqube-cli/bin/sonar",
       "args": [
         "run",
         "mcp",

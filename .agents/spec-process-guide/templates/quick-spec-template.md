@@ -55,22 +55,34 @@ Ready-to-use template for 1-3 day features that need requirements and tasks but 
 
 ## Implementation Plan
 
+### Phase 0: Baseline (Simplified for Quick Specs)
+- [ ] **Record error baseline** (tsgo + biome + lint counts) - document in outcome file
+- [ ] **Create deferred-items ledger** (if feature has >3 tasks) - use template
+
 ### Prerequisites
 - [ ] [Any setup or dependencies needed before starting]
 - [ ] [Access permissions or environment setup]
 
-### Core Tasks
+### Core Tasks (with Quality Loop)
 1. **[Task Name]** - [Brief description]
    - **Estimate:** [X hours]
    - **Details:** [Specific implementation notes]
+   - **Quality Loop:** `bun tsgo` + `bun biome:check` + `bun run scripts/lint-service.ts -f <file> --id verify`
+   - **Semantic Review:** Check race conditions, env-config, cross-layer, enums, deferred items
 
 2. **[Task Name]** - [Brief description]
    - **Estimate:** [X hours]
    - **Details:** [Specific implementation notes]
+   - **Quality Loop:** Per-file verification
+   - **Semantic Review:** Self-review checklist
 
 3. **[Task Name]** - [Brief description]
    - **Estimate:** [X hours]
    - **Details:** [Specific implementation notes]
+   - **Quality Loop:** Per-file verification
+   - **Semantic Review:** Self-review checklist
+
+**Note:** Quick specs skip Phase 1.5 (Plan Review) and Phase 4 (Parallel Review Waves) for speed. Use full spec process for features >3 days.
 
 ### Testing Tasks
 - [ ] **Unit Tests:** [What needs unit test coverage]

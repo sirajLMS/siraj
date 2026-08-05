@@ -20,13 +20,35 @@ This guide provides step-by-step strategies for implementing features from compl
 
 ## Pre-Implementation Setup
 
+### 0. Pre-Implementation Baseline (MANDATORY — Phase 0)
+Before ANY implementation work, establish error baseline:
+
+```bash
+# Record tsgo error count
+bun tsgo 2>&1 | grep "error TS" | wc -l > /tmp/baseline-tsgo.txt
+
+# Record biome warnings
+bun biome:check 2>&1 | grep -c "warn" > /tmp/baseline-biome.txt
+
+# Record lint output
+bun run scripts/lint-service.ts --json --id baseline > /tmp/baseline-lint.json
+```
+
+**Create deferred-items ledger:**
+```bash
+cp .agents/spec-process-guide/templates/deferred-items-template.md .ai/plans/<feature-name>/deferred-items.md
+```
+
+**Why this matters:** Distinguishes new errors (introduced by your work) from pre-existing errors. Four implementations showed baseline confusion caused wasted debugging time.
+
 ### 1. Spec Validation
 Before starting implementation, ensure your spec is complete:
 
-- **Requirements Review**: All user stories have clear acceptance criteria
-- **Design Completeness**: Architecture and components are well-defined
-- **Task Clarity**: Each task is actionable and has clear deliverables
-- **Dependency Mapping**: Task order and dependencies are understood
+- **Requirements Review**: All user stories have clear acceptance criteria (including Requirement 0 baseline + 0.5 i18n/enum compliance)
+- **Design Completeness**: Architecture, concurrency assessment, and components well-defined
+- **Task Clarity**: Each task is actionable with clear deliverables
+- **Dependency Mapping**: Task order and dependencies understood
+- **Plan Review Gate (Phase 1.5)**: Plan has passed `@plan-review` skill with zero violations
 
 ### 2. Environment Preparation
 Set up your development environment:
@@ -99,26 +121,41 @@ For complex tasks:
 
 ## Quality Maintenance Strategies
 
-### Code Quality Gates
+### Code Quality Gates (EXPANDED)
 
 #### Before Starting Each Task
+- [ ] Read ALL existing outcome files in `.ai/plans/<feature-name>/outcome/`
 - [ ] Understand the task requirements completely
 - [ ] Have a clear implementation plan
 - [ ] Know how you'll test the functionality
 - [ ] Understand how it fits with existing code
 
-#### During Implementation
-- [ ] Write clean, readable code
-- [ ] Add appropriate comments and documentation
-- [ ] Follow established coding standards
-- [ ] Test functionality as you build
+#### During Implementation (Per-File Quality Loop)
+After modifying ANY file, run immediately:
+```bash
+bun tsgo
+bun biome:check
+bun run scripts/lint-service.ts -f <file-path> --id verify
+```
+
+#### Semantic Review Checklist (Before Marking Complete)
+- [ ] **Race Conditions**: No read-then-write without atomicity (SELECT FOR UPDATE / tx / advisory lock)
+- [ ] **Env-Config**: All `resolveEnvConfig` calls registered in `env-config-keys.ts`
+- [ ] **Cache Invalidation**: All `resetX()` functions invalidate all resolved keys
+- [ ] **Dead Code**: No unreachable branches
+- [ ] **Cross-Layer**: No frontend→backend or shared→frontend/backend imports
+- [ ] **Enum Imports**: Enums used at runtime imported as values (not `import type`)
+- [ ] **Schema Sync**: Migration columns exist in Drizzle schema
+- [ ] **Deferred Items**: All deferred work logged in `deferred-items.md`
 
 #### After Completing Each Task
 - [ ] All tests pass
 - [ ] Code meets quality standards
+- [ ] Semantic review checklist complete
 - [ ] Functionality matches requirements
 - [ ] Integration with existing code works
 - [ ] Documentation is updated
+- [ ] Outcome file written: `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md`
 
 ### Continuous Integration Practices
 

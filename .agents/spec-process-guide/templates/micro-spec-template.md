@@ -34,15 +34,19 @@ Ultra-lightweight template for changes under 1 day of effort - bug fixes, copy c
 [Brief justification - why is this needed?]
 
 ## How
+- **Baseline:** Record error count before starting (tsgo + biome + lint)
 - [Implementation step 1]
 - [Implementation step 2]  
 - [Implementation step 3]
+- **Quality Loop:** Per-file verification after each change
 
 ## Acceptance
 [Simple pass/fail criteria - how do you know it worked?]
 
 ## Files
 - `[file/path]` - [what changes]
+
+**Note:** Micro specs skip all formal review phases (1.5, 2.5, 4) and knowledge propagation for speed. Use for <1 day changes only.
 
 ---
 

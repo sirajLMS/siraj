@@ -90,10 +90,116 @@ Every feature design MUST include a complete UX/Navigation section:
 | FeatureCreate | `FEATURE_MANAGE` | `requirePermissionForPage` / `<RequirePermission>` |
 | FeatureDetail | `FEATURE_VIEW` | `requirePermissionForPage` / `<RequirePermission>` |
 
+### Translation System Requirements (CRITICAL)
+
+All user-facing strings MUST use the compile-time TypeScript i18n system:
+
+**Client Components:**
+```typescript
+import { useAppTranslation } from "@/shared/locale/client";
+import { Translation } from "@/shared/locale";
+
+// ✅ CORRECT — Translation enum + property access
+const t = useAppTranslation(Translation.Dashboard.FeatureName);
+const label = t.propertyName;
+
+// ❌ WRONG — string literal
+const t = useAppTranslation("DashboardFeatureName");
+
+// ❌ WRONG — function call
+const label = t('propertyName');
+```
+
+**Server Components:**
+```typescript
+import { getTranslations } from "@/shared/locale/server";
+
+// ✅ CORRECT — single arg, property access
+const t = await getTranslations(locale);
+const labels = t.Dashboard.FeatureName;
+const label = labels.propertyName;
+
+// ❌ WRONG — two args
+const t = await getTranslations(locale, "namespace");
+```
+
+**GraphQL Resolvers:**
+```typescript
+// ✅ CORRECT — ctx.t already bound to locale
+const t = ctx.t("Dashboard.FeatureName");
+```
+
+**Enum Value Imports:**
+```typescript
+// ✅ CORRECT — value import for runtime use
+import { ClassType } from "@/backend/enum/class-type.enum";
+const type = formData.type as ClassType;  // Used in cast expression
+
+// ❌ WRONG — type import for runtime use
+import type { ClassType } from "@/backend/enum/class-type.enum";
+const type = formData.type as ClassType;  // Fails at runtime
+```
+
+**Forbidden Patterns:**
+- ❌ `useAppTranslation("stringLiteral")`
+- ❌ `t('functionCall')` or `t("functionCall")`
+- ❌ `getTranslations(locale, "twoArgs")`
+- ❌ Hardcoded strings in UI components
+- ❌ `next-intl` imports
+- ❌ String literals where enum types expected
+
+### Concurrency & Race Condition Assessment (CONDITIONAL)
+
+**Include this section if the feature involves:**
+- Shared mutable state (counters, balances, quotas)
+- Multiple concurrent actors modifying the same record
+- Optimistic locking / version fields
+- Transaction-isolation-dependent correctness
+
+**Concurrency Model:**
+[Describe how concurrent access is handled]
+
+**Race Condition Scenarios:**
+| Scenario | Actors | Risk | Mitigation |
+|----------|--------|------|------------|
+| Concurrent quota deduction | 2 teachers booking same slot | Credit leak | SELECT FOR UPDATE in `deductPendingRefresh` |
+| WABA account sync | External webhook + manual trigger | Stale data | Advisory lock on account ID |
+
+**SELECT FOR UPDATE Usage:**
+List all repository methods that require row-level locking:
+- `deductPendingRefresh(tx, accountId)` — locks account row
+- `claimNextRun(tx, scheduleId)` — locks schedule row
+
+**TOCTOU Windows:**
+Document any read-then-write sequences and their atomicity guarantees.
+
+### Drizzle SQL Template Anti-Patterns (CRITICAL)
+
+**NEVER use inline `--` comments inside `sql`` templates** — they break parameter binding.
+
+```typescript
+// ❌ WRONG — inline comment shifts parameter positions
+const query = sql`
+  SELECT * FROM table
+  WHERE status = ${status} -- filter by status
+  AND id = ${id}
+`;
+
+// ✅ CORRECT — block comment outside or no comment
+const query = sql`
+  SELECT * FROM table
+  WHERE status = ${status}
+  AND id = ${id}
+`;
+/* Filter by status and id */
+```
+
+**Evidence:** cron implementation had inline `--` comment in CASE expression that shifted parameter bindings, causing test failures.
+
 ### Outcome & Knowledge Transfer Protocol (`.ai/plans/<feature-name>/outcome/`)
 - **BEFORE Execution:** Executing agents MUST read ALL existing files in `.ai/plans/<feature-name>/outcome/` to avoid re-analysis.
-- **AFTER Execution:** Executing agents MUST write `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` with research/doc findings and implementation details.
-- **PROGRESS TRACKING:** Executing agents MUST update task checkboxes `[ ]` -> `[x]` in `tasks.md`.
+- **AFTER Execution:** Executing agents MUST write `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` with research/doc findings, implementation details, **cross-file dependencies**, and carry-over points.
+- **PROGRESS TRACKING:** Executing agents MUST update task checkboxes `[ ]` -> `[x]` in `trackable-tasks.md`.
 
 ## Architecture
 

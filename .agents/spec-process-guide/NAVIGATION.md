@@ -46,10 +46,14 @@ This comprehensive index provides multiple ways to navigate the Spec-Driven Deve
 - [Implementation Guide](execution/implementation-guide.md) - Execute the plan
 
 ### Templates & Tools
-- [Requirements Template](templates/requirements-template.md) - EARS-formatted structure
-- [Design Template](templates/design-template.md) - Comprehensive design framework
-- [Tasks Template](templates/tasks-template.md) - Implementation planning format
-- [Checklists](templates/checklists.md) - Quality validation checklists
+- [Requirements Template](templates/requirements-template.md) - EARS-formatted structure (with REQ-0 baseline, REQ-0.5 i18n/enum)
+- [Design Template](templates/design-template.md) - Comprehensive design framework (concurrency, translation, Drizzle)
+- [Tasks Template](templates/tasks-template.md) - Implementation planning format (Phase 0, 1.5, 2.5, semantic review)
+- [Plan Review Template](templates/plan-review-template.md) - Structured plan review report (NEW)
+- [Deferred Items Template](templates/deferred-items-template.md) - Technical debt ledger (NEW)
+- [Quick Spec Template](templates/quick-spec-template.md) - 1-3 day features (simplified baseline)
+- [Micro Spec Template](templates/micro-spec-template.md) - <1 day changes (minimal baseline)
+- [Checklists](templates/checklists.md) - Quality validation checklists (semantic, translation/enum, race condition, type cascade, scope boundary)
 
 ### Real Examples
 - [Simple Feature Specs](examples/simple-feature-spec.md) - Basic feature examples
@@ -176,9 +180,13 @@ This comprehensive index provides multiple ways to navigate the Spec-Driven Deve
 - **Advanced**: [AI Reasoning](ai-reasoning/README.md), [Complex Examples](examples/complex-system-spec.md), [Decision Frameworks](ai-reasoning/decision-frameworks.md)
 
 ### By Phase
-- **Requirements**: [Requirements Phase](process/requirements-phase.md), [EARS Standards](resources/standards.md), [Requirements Template](templates/requirements-template.md)
-- **Design**: [Design Phase](process/design-phase.md), [Decision Frameworks](ai-reasoning/decision-frameworks.md), [Design Template](templates/design-template.md)
-- **Tasks**: [Tasks Phase](process/tasks-phase.md), [Implementation Guide](execution/implementation-guide.md), [Tasks Template](templates/tasks-template.md)
+- **Phase 0 (Baseline)**: Record error baseline, create deferred-items ledger - [Tasks Template](templates/tasks-template.md), [Deferred Items Template](templates/deferred-items-template.md)
+- **Phase 1 (Requirements)**: [Requirements Phase](process/requirements-phase.md), [EARS Standards](resources/standards.md), [Requirements Template](templates/requirements-template.md)
+- **Phase 1.5 (Plan Review Gate)**: Invoke @plan-review skill - [Plan Review Template](templates/plan-review-template.md), [Tasks Template](templates/tasks-template.md)
+- **Phase 2 (Design)**: [Design Phase](process/design-phase.md), [Decision Frameworks](ai-reasoning/decision-frameworks.md), [Design Template](templates/design-template.md)
+- **Phase 2.5 (Mid-Point Review - Conditional)**: Backend review checkpoint - [Quality Assurance](execution/quality-assurance.md), [Tasks Template](templates/tasks-template.md)
+- **Phase 3+ (Tasks/Implementation)**: [Tasks Phase](process/tasks-phase.md), [Implementation Guide](execution/implementation-guide.md), [Tasks Template](templates/tasks-template.md)
+- **Post-Implementation (Parallel Review Waves)**: [Quality Assurance](execution/quality-assurance.md) - Multi-dimensional semantic review
 
 ### By Content Type
 - **Process**: [Process Guide](process/README.md), [Workflow Diagrams](process/workflow-diagrams.md)

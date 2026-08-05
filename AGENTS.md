@@ -180,76 +180,78 @@ After making changes:
 4. Re-run `bun quality-gate` to resume from last failed stage
 5. Use `bun quality-gate:fresh` only for clean-slate verification
 
-## Lint Queue Server (REQUIRED for parallel sub-agents)
+## Lint Service (In-Process Serialized ESLint)
 
-`bun run lint` used to be heavyweight and **MUST NOT have been run concurrently** by multiple sub-agents — it caused resource contention and intermittent failures. That prohibition is now lifted: as of the `package.json` change, `bun run lint` is no longer a raw eslint invocation — it is a thin wrapper that calls `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so every `bun run lint` invocation already goes through the queue. **You can run `bun run lint` (or `bun lint`) directly now** — it serializes behind the queue server like any other caller.
+The project uses a unified lint service (`scripts/lint-service.ts`) that provides both a CLI and programmatic API. It runs ESLint with serialized execution to prevent CPU/memory contention when multiple callers (e.g., sub-agents, quality-gate stages) lint concurrently within the same process. No HTTP server, no port binding — everything is in-process TypeScript.
 
-Sub-agents that lint specific files (instead of the whole repo) should still call `requestLint("id", [files])` from `scripts/lint-queue-client.ts` so they don't waste time linting the entire repo. The whole-repo shortcut `requestFullRepoLint` is what `bun run lint` calls under the hood.
+### Running lint from the command line
 
-### Starting the server
-
-The queue server MUST be running before any `bun run lint` / lint queue client call works. Start it as a background process:
-
+**Full-repo lint** (via `eslint.config.js` `files`/`ignores` block):
 ```bash
-~/.bun/bin/bun run scripts/lint-queue-server.ts
+bun run lint
 ```
 
-This listens on `http://localhost:${LINT_QUEUE_PORT}`.
-
-> **Port configuration**: The port is defined in `scripts/lint-queue-config.ts` (the single source of truth for both server and client). To override it for a single run, set the `LINT_QUEUE_PORT` environment variable. In all command examples below, `${LINT_QUEUE_PORT}` refers to the resolved port — set it in your shell: `export LINT_QUEUE_PORT=$(grep -oP 'LINT_QUEUE_PORT = \K\d+' scripts/lint-queue-config.ts)` or set `LINT_QUEUE_PORT=<your-port>` explicitly.
-
-### Submitting lint requests (from sub-agents)
-
-For full-repo lint, just run `bun run lint` — it goes through the queue server automatically.
-
-For file-scoped lint (faster, recommended when a sub-agent only touched a handful of files), call the lint queue client directly instead of running the whole-repo script:
-
-**PowerShell (recommended for sub-agents):**
-```powershell
-$files = @("backend/types/foo.types.ts","frontend/stores/barStore.ts")  # ALL files the sub-agent modified
-$body = @{ id = "phase8"; files = $files } | ConvertTo-Json
-Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/lint -Method POST -ContentType 'application/json' -Body $body
-```
-
-**Bash / curl (also works):**
+**File-scoped lint** (faster when you only touched specific files):
 ```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"phase8","files":["backend/types/foo.types.ts","frontend/stores/barStore.ts"]}'
+bun run scripts/lint-service.ts -f <file1> -f <file2> --id <caller-id>
 ```
 
-**Response:** `{ success: boolean, output: string, exitCode: number }`
-
-The request **blocks** until the lint run completes (the server processes requests one at a time).
-
-### Health check
-
-```powershell
-Invoke-RestMethod -Uri http://localhost:${LINT_QUEUE_PORT}/status
-# Returns: { running: true, queueLength: 2 }
+**Auto-fix mode**:
+```bash
+bun run lint:fix
 ```
+
+**JSON output** (for scripting/automation):
+```bash
+bun run scripts/lint-service.ts -f <file> --json --id <caller-id>
+# Returns: { success: boolean, output: string, exitCode: number, metrics: {...} }
+```
+
+The CLI exits with ESLint's exit code (0 = clean, 1 = lint errors, 2 = config/usage errors), so CI pipelines and quality gates detect failures correctly.
+
+### Programmatic API (from TypeScript)
+
+Import and call directly from scripts or tests:
+
+```typescript
+import { requestLint, requestFullRepoLint } from "@/scripts/lint-service";
+
+// Lint specific files
+const result = await requestLint("sub-loop", ["backend/types/foo.types.ts"]);
+// Returns: { success: boolean, output: string, exitCode: number }
+
+// Full-repo lint (empty files array)
+const fullResult = await requestFullRepoLint("cli");
+```
+
+**When to use programmatic vs CLI:**
+- Use the programmatic API when your script already runs in a Bun/Node process and can import TypeScript (e.g., `sub-loop.ts`, orchestrator scripts).
+- Use the CLI when invoking from shell commands or external tools (e.g., GitHub Actions, pre-commit hooks, extensions).
+
+### Environment Variables
+
+- `LINT_QUEUE_CONCURRENCY` — ESLint `--concurrency` value (default `4`; set to `auto` to let ESLint decide).
+- `LINT_QUEUE_TIMEOUT_MS` — Per-request timeout in milliseconds (default: 300000 for file-scoped, 1200000 for full-repo).
 
 ### Other quality commands are safe to run in parallel
 
 - `bun tsgo` — Safe to run concurrently (read-only type checker)
 - `bun biome:check` — Safe to run concurrently (lightweight formatter/linter)
 - `bun run test:*` — Safe to run concurrently (isolated test runners)
-- **`bun run lint`** — Now safe to run directly: as of the `package.json` change, this script just calls `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so it serializes through the queue server like every other caller. For file-scoped lint, call `requestLint` directly.
+- `bun run lint` — Safe to run directly; uses the in-process service (no server startup required). When multiple callers import `requestLint()` in the same process, requests serialize through an in-memory FIFO queue.
 
 ## Verification Loop (Per-File Level)
 
 When refactoring or creating code, run a per-file verification loop **BEFORE** using the result elsewhere:
 
-1. **After extracting a function** from one file to another: run tsgo + biome + lint-queue-client on the **new file containing the extracted function** BEFORE importing or using it elsewhere.
-2. **After creating a new file**: run tsgo + biome + lint-queue-client on the new file BEFORE importing it anywhere.
+1. **After extracting a function** from one file to another: run tsgo + biome + lint on the **new file containing the extracted function** BEFORE importing or using it elsewhere.
+2. **After creating a new file**: run tsgo + biome + lint on the new file BEFORE importing it anywhere.
 
 ```bash
 bun tsgo                          # Type check (safe to run concurrently)
 bun biome:check                   # Biome (safe to run concurrently)
-# Lint via queue client for the specific file:
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify","files":["<the-file>"]}'
+# Lint the specific file:
+bun run scripts/lint-service.ts -f <the-file> --id verify
 ```
 
 This catches issues early at the file level before they propagate to the full quality gate.

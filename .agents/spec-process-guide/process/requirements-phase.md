@@ -13,10 +13,12 @@
 - **➡️ Next Phase:** [Design Phase](design-phase.md) - After requirements are approved
 
 ## Phase Navigation
-- **Previous:** [Process Overview](README.md) - Three-phase workflow
-- **Current:** **Requirements Phase** - Transform ideas into structured requirements
-- **Next:** [Design Phase](design-phase.md) - Create technical architecture
-- **Final:** [Tasks Phase](tasks-phase.md) - Break down into implementation steps
+- **Previous:** [Process Overview](README.md) - Development lifecycle overview
+- **Pre-Work:** Phase 0 (Baseline) - Record error baseline before implementation
+- **Current:** **Requirements Phase (Phase 1)** - Transform ideas into structured requirements
+- **Plan Review:** Phase 1.5 - Invoke @plan-review skill on complete plan
+- **Next:** [Design Phase](design-phase.md) - Create technical architecture (Phase 2)
+- **Final:** [Tasks Phase](tasks-phase.md) - Break down into implementation steps (Phase 3+)
 
 ---
 
@@ -32,6 +34,8 @@ The requirements phase serves to:
 - Create a shared understanding between stakeholders
 - Provide a foundation for design and implementation decisions
 - Enable effective testing and validation strategies
+- **NEW: Establish baseline and deferred-items ledger (Requirement 0)**
+- **NEW: Define translation system and enum import compliance (Requirement 0.5)**
 
 ## Step-by-Step Process
 

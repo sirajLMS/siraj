@@ -552,4 +552,145 @@ Good troubleshooting makes you a better developer and improves the spec process 
 
 ---
 
+## Common Pitfalls from Real Implementations (Evidence-Based)
+
+These pitfalls emerged from four completed feature implementations (auto-meeting-url, cron, quota, whatsapp) totaling 80+ tasks.
+
+### Issue: Type Cascade Across Files
+
+**Problem:** Renaming a type (e.g., `Student` → `StudentReturnType`) breaks 8+ consumer files, but per-file `bun tsgo` misses this because it compiles against local imports only.
+
+**Symptoms:**
+- Quality loop passes ✅ for the type file
+- Downstream consumer files fail with "Cannot find name 'Student'"
+- Errors discovered late (Phase 4 or post-implementation review)
+
+**Solution:**
+- Add **Phase-Boundary Type Coherence Gate**: Run full `bun tsgo` after each major phase
+- Compare error count vs pre-phase baseline
+- Fix all new type errors before proceeding
+
+**Evidence:** quota Obs.1 (Student→StudentReturnType cascade across 8+ files)
+
+### Issue: Deferred Items Never Resolved
+
+**Problem:** Tasks defer work to "future task" without logging it. ~40% of deferred items never get resolved, accumulating as silent technical debt.
+
+**Symptoms:**
+- TODO comments in code with no tracking
+- "Will handle this in Task X" never happens
+- Incomplete cache invalidation, missing env-config keys
+
+**Solution:**
+- Create `deferred-items.md` ledger at plan start (Phase 0)
+- Log ALL deferred items immediately with source/target task
+- Final quality gate enforces: `grep -c "❌|⚠️" deferred-items.md` must equal 0
+
+**Evidence:** whatsapp §5.2 (2 of 5 never resolved), quota Obs.8 (~40% never resolved)
+
+### Issue: TOCTOU Race Conditions Pass Quality Loop
+
+**Problem:** Read-then-write sequences (SELECT + UPDATE) pass tsgo+biome+lint but cause credit leaks under concurrency.
+
+**Symptoms:**
+- Quality loop reports ✅
+- No TypeScript errors
+- Race condition discovered during load testing or production incident
+
+**Solution:**
+- Add **Semantic Review Checklist** to MANDATORY subtasks
+- Check: No read-then-write without atomicity (SELECT FOR UPDATE / tx / advisory lock)
+- Require concurrency assessment in design for shared-state features
+
+**Evidence:** whatsapp §3.1 (notification.repository, Redis pair-rate-limit), quota Obs.7 (deductPendingRefresh)
+
+### Issue: i18n String Literals vs Enum Property Access
+
+**Problem:** Plan specifies `useAppTranslation("DashboardFeature")` (string) but convention requires `Translation.Dashboard.FeatureName` (enum property).
+
+**Symptoms:**
+- Plan review finds 12+ string-literal i18n references
+- Implementation uses wrong pattern, breaks compile-time type safety
+
+**Solution:**
+- Add **Requirement 0.5: Translation System Compliance** to requirements template
+- Use `t.propertyName` NOT `t('propertyName')`
+- Include in Plan Review Gate (Phase 1.5) checks
+
+**Evidence:** quota Obs.12, whatsapp §7.3, auto-meeting-url pattern #4
+
+### Issue: Schema Drift (Migration vs Drizzle)
+
+**Problem:** Column exists in migration SQL but not in Drizzle schema (or vice versa).
+
+**Symptoms:**
+- Query fails at runtime: "column does not exist"
+- TypeScript compiles cleanly (schema out of sync with DB)
+
+**Solution:**
+- Add to Semantic Review Checklist: Schema migrations match Drizzle schema
+- Verify every migration column exists in `backend/db/schema/`
+
+**Evidence:** whatsapp §3.5 (max_phone_numbers_per_business in migration but not schema)
+
+### Issue: Drizzle Inline Comment Breaks Parameter Binding
+
+**Problem:** Inline `--` comments inside `sql`` templates shift parameter positions, causing wrong values bound.
+
+**Symptoms:**
+- Test fails with unexpected SQL behavior
+- Parameters bound to wrong placeholders
+
+**Solution:**
+- NEVER use inline `--` comments inside `sql`` templates
+- Use block comments outside or omit comments
+- Add to design template anti-patterns section
+
+**Evidence:** cron §1 (parameter binding shift from `--` comment in CASE expression)
+
+### Issue: Enum Import Type vs Value Confusion
+
+**Problem:** Enum imported as `import type` but used in runtime cast/conditional, causing "not defined" error at runtime.
+
+**Symptoms:**
+- TypeScript compiles cleanly
+- Runtime error: "ClassType is not defined"
+
+**Solution:**
+- Add to Semantic Review Checklist: Enums used at runtime imported as values (not `import type`)
+- Use `import type` ONLY for pure type annotations
+
+**Evidence:** All four implementations (quota, whatsapp, cron, auto-meeting-url) had enum import confusion
+
+### Issue: Cross-Layer Import Violations
+
+**Problem:** Frontend component imports from `@/backend/` or shared imports from `@/frontend/`, violating layer boundaries.
+
+**Symptoms:**
+- Quality loop passes (no lint rule catches it initially)
+- Post-implementation review finds violations
+
+**Solution:**
+- Add to Semantic Review Checklist: No cross-layer imports
+- Enforce: frontend → shared ✅, backend → shared ✅, frontend → backend ❌, shared → frontend/backend ❌
+
+**Evidence:** whatsapp §5.5 (DashboardProfileShell importing from @/backend/)
+
+### Issue: Lint Service Migration (HTTP → In-Process API)
+
+**Problem:** Old code uses `curl -X POST http://localhost:${LINT_QUEUE_PORT}/lint`, but lint service consolidated to in-process API.
+
+**Symptoms:**
+- Lint queue server not running → lint calls fail
+- Plan references stale HTTP endpoints
+
+**Solution:**
+- Use `bun run scripts/lint-service.ts -f <file> --id <caller-id>` (CLI)
+- Or `import { requestLint } from "@/scripts/lint-service"` (programmatic)
+- No HTTP, no server startup required
+
+**Evidence:** Plan `.kilo/plans/1785894852744-consolidate-lint-service.md` (implemented, HTTP removed)
+
+---
+
 [← Back to Execution Guide](README.md) | [Implementation Guide ←](implementation-guide.md) | [Quality Assurance ←](quality-assurance.md)
