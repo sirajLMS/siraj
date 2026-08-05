@@ -116,12 +116,18 @@ export namespace CommunicationService {
               templateName: templateRaw.name,
             });
           }
+          // Safely stringify paramValue to avoid "[object Object]" for objects
+          // (paramValue is unknown from Record<string, unknown>)
+          const textValue =
+            paramValue !== null && typeof paramValue === "object" && !Array.isArray(paramValue)
+              ? JSON.stringify(paramValue)
+              : String(paramValue ?? "");
           return {
             type: "body" as const,
             parameters: [
               {
                 type: "text" as const,
-                text: String(paramValue ?? ""),
+                text: textValue,
               },
             ],
           };

@@ -337,18 +337,32 @@ export namespace LessonReportService {
    * Generic function to transition a lesson report status (APPROVED/REJECTED).
    * Handles permission check, validation, transaction, side effects, logging, and notification.
    */
-  async function transitionReportStatus(
-    actorUserId: string,
-    reportId: string,
-    newStatus: LessonReportStatus,
-    locale: string | undefined,
-    approvePermission: AppPermission,
-    rejectPermission: AppPermission,
-    sideEffect: (tx: DBTransaction, report: LessonReportSelectType) => Promise<void>,
-    successLogMessage: string,
-    dispatchDecision: "approved" | "rejected",
-    rejectionReason?: string | null
-  ): Promise<LessonReportReturnType> {
+  interface TransitionReportStatusOptions {
+    actorUserId: string;
+    reportId: string;
+    newStatus: LessonReportStatus;
+    locale?: string;
+    approvePermission: AppPermission;
+    rejectPermission: AppPermission;
+    sideEffect: (tx: DBTransaction, report: LessonReportSelectType) => Promise<void>;
+    successLogMessage: string;
+    dispatchDecision: "approved" | "rejected";
+    rejectionReason?: string | null;
+  }
+
+  async function transitionReportStatus(options: TransitionReportStatusOptions): Promise<LessonReportReturnType> {
+    const {
+      actorUserId,
+      reportId,
+      newStatus,
+      locale,
+      approvePermission,
+      rejectPermission,
+      sideEffect,
+      successLogMessage,
+      dispatchDecision,
+      rejectionReason,
+    } = options;
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     // Check appropriate permission based on the target status
@@ -399,14 +413,14 @@ export namespace LessonReportService {
     reportId: string,
     locale?: string
   ): Promise<LessonReportReturnType> {
-    return transitionReportStatus(
+    return transitionReportStatus({
       actorUserId,
       reportId,
-      LessonReportStatus.APPROVED,
+      newStatus: LessonReportStatus.APPROVED,
       locale,
-      AppPermission.LESSON_REPORTS_APPROVE,
-      AppPermission.LESSON_REPORTS_REJECT,
-      async (tx, report) => {
+      approvePermission: AppPermission.LESSON_REPORTS_APPROVE,
+      rejectPermission: AppPermission.LESSON_REPORTS_REJECT,
+      sideEffect: async (tx, report) => {
         // Side effect (Work Stream 4): create a TeacherDue row so the teacher is
         // owed for this approved lesson. Idempotent at the DB level via the
         // unique (class_instance_id) index on teacher_dues.
@@ -419,9 +433,9 @@ export namespace LessonReportService {
           locale
         );
       },
-      "Lesson report approved and teacher due entry created",
-      "approved"
-    );
+      successLogMessage: "Lesson report approved and teacher due entry created",
+      dispatchDecision: "approved",
+    });
   }
 
   export async function rejectReport(
@@ -429,14 +443,14 @@ export namespace LessonReportService {
     input: LessonReviewInput,
     locale?: string
   ): Promise<LessonReportReturnType> {
-    return transitionReportStatus(
+    return transitionReportStatus({
       actorUserId,
-      input.reportId,
-      LessonReportStatus.REJECTED,
+      reportId: input.reportId,
+      newStatus: LessonReportStatus.REJECTED,
       locale,
-      AppPermission.LESSON_REPORTS_APPROVE,
-      AppPermission.LESSON_REPORTS_REJECT,
-      async (tx, report) => {
+      approvePermission: AppPermission.LESSON_REPORTS_APPROVE,
+      rejectPermission: AppPermission.LESSON_REPORTS_REJECT,
+      sideEffect: async (tx, report) => {
         // Side effect (Work Stream 2): refund the student's reserved credit for
         // the rejected lesson. The refund is idempotent on the booking key
         // (derived from classInstanceId), so re-running approve/reject cycles
@@ -452,10 +466,10 @@ export namespace LessonReportService {
           tErrors
         );
       },
-      "Lesson report rejected and credit refunded",
-      "rejected",
-      input.rejectionReason
-    );
+      successLogMessage: "Lesson report rejected and credit refunded",
+      dispatchDecision: "rejected",
+      rejectionReason: input.rejectionReason,
+    });
   }
 
   export async function getReportById(

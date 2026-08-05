@@ -51,26 +51,26 @@ export namespace SuggestionService {
       // `users`, so fetch via `UserRepository.findSafeById`. Legacy direct-
       // dispatch path (F1 grandfather): `metadata.to` populated inline.
       const submitter = await UserRepository.findSafeById(actorUserId);
-      const to = submitter?.email ?? "";
+      const to = submitter?.email;
       if (!to) {
         logger.warn("Suggestion email dispatch skipped: submitter has no email", {
           actorUserId,
           suggestionId: created.id,
         });
-      } else {
-        const tNotifications = getServerTranslations(locale ?? "en").notificationsTranslations;
-        await CommunicationService.dispatch(
-          {
-            userId: actorUserId,
-            title: tNotifications.newSuggestion.title,
-            body: created.body,
-            channel: NotificationChannel.EMAIL,
-            eventType: NotificationEventType.NEW_SUGGESTION,
-            metadata: { to, entityKind: "suggestion", entityId: created.id },
-          },
-          locale
-        );
+        return created;
       }
+      const tNotifications = getServerTranslations(locale ?? "en").notificationsTranslations;
+      await CommunicationService.dispatch(
+        {
+          userId: actorUserId,
+          title: tNotifications.newSuggestion.title,
+          body: created.body,
+          channel: NotificationChannel.EMAIL,
+          eventType: NotificationEventType.NEW_SUGGESTION,
+          metadata: { to, entityKind: "suggestion", entityId: created.id },
+        },
+        locale
+      );
 
       logger.info("Suggestion submitted", {
         actorUserId,

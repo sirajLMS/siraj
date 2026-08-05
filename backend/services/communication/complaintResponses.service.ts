@@ -42,12 +42,7 @@ async function dispatchResponseNotifications(
     // `metadata.to` inline at the call site.
     const responder = await UserRepository.findSafeById(responderUserId);
     const to = responder?.email ?? "";
-    if (!to) {
-      logger.warn("ComplaintResponse email dispatch skipped: responder has no email", {
-        responderUserId,
-        complaintId: complaint.id,
-      });
-    } else {
+    if (to) {
       await CommunicationService.dispatch(
         {
           userId: responderUserId,
@@ -59,6 +54,11 @@ async function dispatchResponseNotifications(
         },
         locale
       );
+    } else {
+      logger.warn("ComplaintResponse email dispatch skipped: responder has no email", {
+        responderUserId,
+        complaintId: complaint.id,
+      });
     }
   }
 

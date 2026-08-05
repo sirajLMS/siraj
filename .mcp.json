@@ -41,6 +41,15 @@
     "storybook": {
       "url": "http://localhost:6006/mcp",
       "type": "http"
+    },
+    "sonarqube": {
+      "command": "sonar",
+      "args": [
+        "run",
+        "mcp",
+        "--project",
+        "siraj"
+      ]
     }
   }
 }

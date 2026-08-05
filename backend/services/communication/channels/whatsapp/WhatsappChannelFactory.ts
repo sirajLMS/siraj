@@ -96,7 +96,7 @@ async function waitForInFlight(): Promise<void> {
     logger.info(
       `resetWhatsappChannel: awaiting ${inFlightOperations.size} in-flight WhatsApp operation(s) before reset`
     );
-    await Promise.allSettled([...inFlightOperations]);
+    await Promise.allSettled(inFlightOperations);
   }
 }
 

@@ -96,21 +96,22 @@ describe("WhatsApp Channel Factory", () => {
     });
 
     test("resetWhatsappChannel is idempotent when no instance exists", async () => {
-      await expect(resetWhatsappChannel()).resolves.toBeUndefined();
+      const result = await resetWhatsappChannel();
+      expect(result).toBeUndefined();
     });
   });
 
   describe("validateConfig", () => {
     test("returns true when an active WhatsApp account with credentials is present", async () => {
       const result = await whatsappChannel.validateConfig();
-      expect(result).toBe(true);
+      expect(result).toBeTrue();
     });
 
     test("returns false when no active WhatsApp account is configured", async () => {
       findFirstActiveForCredentialsSpy.mockResolvedValue(null);
       await resetWhatsappChannel();
       const result = await whatsappChannel.validateConfig();
-      expect(result).toBe(false);
+      expect(result).toBeFalse();
     });
 
     test("returns false when the active account has a null access token", async () => {
@@ -119,7 +120,7 @@ describe("WhatsApp Channel Factory", () => {
       );
       await resetWhatsappChannel();
       const result = await whatsappChannel.validateConfig();
-      expect(result).toBe(false);
+      expect(result).toBeFalse();
     });
   });
 
@@ -170,14 +171,6 @@ describe("WhatsApp Channel Factory", () => {
       return whatsappChannel.send(sendParams());
     }
 
-    function expectDeliveryStatus(status: NotificationDeliveryStatus) {
-      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(expect.objectContaining({ status }));
-    }
-
-    function expectNoDeliveryStatus(status: NotificationDeliveryStatus) {
-      expect(updateDeliveryStatusSpy).not.toHaveBeenCalledWith(expect.objectContaining({ status }));
-    }
-
     test("returns success when fetch responds 200 with a message id", async () => {
       const result = await sendWithMockedFetch(
         { messages: [{ id: "wamid.test.001" }], messaging_product: "whatsapp" },
@@ -187,7 +180,9 @@ describe("WhatsApp Channel Factory", () => {
       expect(result.success).toBe(true);
       expect(result.providerMessageId).toBe("wamid.test.001");
       expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expectDeliveryStatus(NotificationDeliveryStatus.SENT);
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ status: NotificationDeliveryStatus.SENT })
+      );
     });
 
     test("returns failure when fetch responds non-2xx (500)", async () => {
@@ -196,7 +191,9 @@ describe("WhatsApp Channel Factory", () => {
       expect(result.success).toBe(false);
       expect(result.sendAttempted).toBe(true);
       expect(result.rateLimited).not.toBe(true);
-      expectDeliveryStatus(NotificationDeliveryStatus.FAILED);
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ status: NotificationDeliveryStatus.FAILED })
+      );
     });
 
     test("returns rate-limited result when Meta error code 131056 is received", async () => {
@@ -206,7 +203,9 @@ describe("WhatsApp Channel Factory", () => {
       expect(result.sendAttempted).toBe(true);
       expect(result.rateLimited).toBe(true);
       // B2: Meta 131056 must NOT mark delivery as FAILED — caller should deferred-retry
-      expectNoDeliveryStatus(NotificationDeliveryStatus.FAILED);
+      expect(updateDeliveryStatusSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: NotificationDeliveryStatus.FAILED })
+      );
     });
 
     test("returns failure with sendAttempted=false when credentials are missing", async () => {

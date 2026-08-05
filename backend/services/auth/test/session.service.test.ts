@@ -73,6 +73,23 @@ function _restoreTeacherProfileMocks(): void {
   spyOn(TeacherRepository, "findByUserId").mockRestore();
 }
 
+function mockSession(userId: string): SessionSelectType {
+  return {
+    hashedId: "hashed-id",
+    userId,
+    ipAddress: null,
+    userAgent: null,
+    payload: undefined,
+    lastActivity: 100n,
+  } as unknown as SessionSelectType;
+}
+
+function restoreSessionMocks(): void {
+  spyOn(SessionRepository, "findByHmacHash").mockRestore();
+  spyOn(SessionRepository, "validate").mockRestore();
+  spyOn(SessionRepository, "deleteSessionById").mockRestore();
+}
+
 afterEach(() => {
   _restoreTeacherProfileMocks();
 });
@@ -114,31 +131,14 @@ describe("SessionService.getCurrentUserProfile nationalIdComplete flag", () => {
 });
 
 describe("SessionService.validateSession orphan session handling", () => {
-  function _mockSession(userId: string): SessionSelectType {
-    return {
-      hashedId: "hashed-id",
-      userId,
-      ipAddress: null,
-      userAgent: null,
-      payload: undefined,
-      lastActivity: 100n,
-    } as unknown as SessionSelectType;
-  }
-
-  function _restoreSessionMocks(): void {
-    spyOn(SessionRepository, "findByHmacHash").mockRestore();
-    spyOn(SessionRepository, "validate").mockRestore();
-    spyOn(SessionRepository, "deleteSessionById").mockRestore();
-  }
-
   afterEach(() => {
-    _restoreSessionMocks();
+    restoreSessionMocks();
   });
 
   test("purges and returns null when session references non-existent user", async () => {
     const fakeSessionId = "fake-raw-session-id";
     const fakeUserId = "1bba9ec0-1e51-46f9-be75-9941dcb7fd76";
-    const fakeSession = _mockSession(fakeUserId);
+    const fakeSession = mockSession(fakeUserId);
 
     spyOn(SessionRepository, "findByHmacHash").mockResolvedValue(fakeSession);
     spyOn(SessionRepository, "validate").mockResolvedValue(fakeSession);

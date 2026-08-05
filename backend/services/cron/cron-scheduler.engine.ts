@@ -111,7 +111,7 @@ export function validateCronExpression(expr: string): boolean {
  */
 export function nextRunAt(cronExpression: string, from: Date = new Date(), timezone: string = DEFAULT_TIMEZONE): Date {
   try {
-    const options = timezone !== DEFAULT_TIMEZONE ? { tz: timezone, currentDate: from } : { currentDate: from };
+    const options = timezone === DEFAULT_TIMEZONE ? { currentDate: from } : { tz: timezone, currentDate: from };
     const interval = CronExpressionParser.parse(cronExpression, options);
     const next = interval.next();
     return next.toDate();
@@ -129,7 +129,7 @@ export function nextRunAt(cronExpression: string, from: Date = new Date(), timez
  */
 function nextRuns(cronExpression: string, from: Date, count: number, timezone: string = DEFAULT_TIMEZONE): Date[] {
   try {
-    const options = timezone !== DEFAULT_TIMEZONE ? { tz: timezone, currentDate: from } : { currentDate: from };
+    const options = timezone === DEFAULT_TIMEZONE ? { currentDate: from } : { tz: timezone, currentDate: from };
     const interval = CronExpressionParser.parse(cronExpression, options);
     const results: Date[] = [];
     for (let i = 0; i < count; i++) {

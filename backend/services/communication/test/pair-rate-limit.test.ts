@@ -26,7 +26,10 @@ function makeRedisModuleFactory(extras?: Record<string, unknown>) {
 
 mock.module("@/backend/services/redis", makeRedisModuleFactory());
 
-mock.module("@/backend/services/redis/index", makeRedisModuleFactory({ SessionRedisService: class {} }));
+mock.module(
+  "@/backend/services/redis/index",
+  makeRedisModuleFactory({ SessionRedisService: class SessionRedisService {} })
+);
 
 mock.module("@/backend/lib/logger", () => ({
   logger: {
