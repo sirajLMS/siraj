@@ -1,9 +1,9 @@
 "use client";
 
 import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import {
   isTeacherAdminData,
+  type TeacherProfileViewLabels,
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import { TeacherAdminEditForm } from "@/frontend/common/views/dashboard/profile/teacher/TeacherAdminEditForm";
