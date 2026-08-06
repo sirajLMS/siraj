@@ -14,15 +14,28 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material/Select";
 import Link from "next/link";
 import { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useQuotaFormViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaFormViewModel";
 
 interface QuotaFormContainerProps {
-  quotaId?: string;
+  readonly quotaId?: string;
 }
 
-export function QuotaFormContainer({ quotaId }: QuotaFormContainerProps) {
+function toQuotaKind(value: unknown): QuotaKind | undefined {
+  if (value === QuotaKind.Package || value === QuotaKind.Periodic) return value;
+  return undefined;
+}
+
+function toQuotaPeriodType(value: unknown): QuotaPeriodType | undefined {
+  if (value === QuotaPeriodType.Weekly || value === QuotaPeriodType.Monthly || value === QuotaPeriodType.Custom) {
+    return value;
+  }
+  return undefined;
+}
+
+export function QuotaFormContainer({ quotaId }: Readonly<QuotaFormContainerProps>) {
   const {
     t,
     isEditing,
@@ -73,7 +86,7 @@ export function QuotaFormContainer({ quotaId }: QuotaFormContainerProps) {
                   <Select
                     value={formData.kind}
                     label={t.fields.kind}
-                    onChange={e => setFormData({ kind: e.target.value as QuotaKind })}
+                    onChange={(e: SelectChangeEvent) => setFormData({ kind: toQuotaKind(e.target.value) })}
                   >
                     <MenuItem value={QuotaKind.Package}>{t.kinds.PACKAGE}</MenuItem>
                     <MenuItem value={QuotaKind.Periodic}>{t.kinds.PERIODIC}</MenuItem>
@@ -106,11 +119,7 @@ export function QuotaFormContainer({ quotaId }: QuotaFormContainerProps) {
                   <Select
                     value={formData.periodType ?? ""}
                     label={t.fields.periodType}
-                    onChange={e =>
-                      setFormData({
-                        periodType: (e.target.value as QuotaPeriodType) || null,
-                      })
-                    }
+                    onChange={(e: SelectChangeEvent) => setFormData({ periodType: toQuotaPeriodType(e.target.value) })}
                   >
                     <MenuItem value={QuotaPeriodType.Weekly}>{t.periodTypes.WEEKLY}</MenuItem>
                     <MenuItem value={QuotaPeriodType.Monthly}>{t.periodTypes.MONTHLY}</MenuItem>
