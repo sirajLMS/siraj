@@ -161,11 +161,38 @@ function findRelatedFiles(_filePath: string): string[] {
   return [];
 }
 
+function isTestFile(filePath: string): boolean {
+  return filePath.includes(".test.") || filePath.includes(".spec.");
+}
+
+function getFileLanguage(filePath: string): string {
+  if (filePath.endsWith(".tsx") || filePath.endsWith(".ts")) return "typescript";
+  if (filePath.endsWith(".jsx") || filePath.endsWith(".js")) return "javascript";
+  if (filePath.endsWith(".json")) return "json";
+  if (filePath.endsWith(".sql")) return "sql";
+  if (filePath.endsWith(".css")) return "css";
+  if (filePath.endsWith(".md")) return "markdown";
+  return "";
+}
+
 function generateChatPrompt(fileIssues: FileIssues): string {
   const { filePath, issues } = fileIssues;
+  const isTest = isTestFile(filePath);
+  const lang = getFileLanguage(filePath);
+
+  let fileContentBlock = "";
+  const fullPath = join(PROJECT_ROOT, filePath);
+  if (existsSync(fullPath)) {
+    try {
+      const content = readFileSync(fullPath, "utf-8");
+      fileContentBlock = `\`\`\`${lang}\n${content}\n\`\`\``;
+    } catch {
+      fileContentBlock = `(Unable to read file content from ${filePath})`;
+    }
+  }
 
   const issuesJsonStr = JSON.stringify(
-    issues.map((i) => ({
+    issues.map(i => ({
       key: i.key,
       rule: i.rule,
       severity: i.severity,
@@ -177,43 +204,97 @@ function generateChatPrompt(fileIssues: FileIssues): string {
     2
   );
 
-  return [
-    `Please fix all SonarQube issues in file '${filePath}'.`,
+  const instructions: string[] = [
+    `Please fix all SonarQube issues in file '${filePath}' with strict adherence to high code quality, clean architecture, and project standards.`,
     ``,
     `Target File: ${filePath}`,
+    ``,
+    `File Content:`,
+    fileContentBlock,
     ``,
     `Issues to resolve (from SonarQube results):`,
     `\`\`\`json`,
     issuesJsonStr,
     `\`\`\``,
     ``,
-    `Workflow & Verification Instructions:`,
-    `1. Fix the issues in '${filePath}' according to the rules and messages listed above.`,
-    `2. Run the sub-loop verification script to ensure progressive quality checks pass (tsgo -> biome -> lint -> codescene):`,
-    `   bun run scripts/health/sub-loop.ts ${filePath} --lifecycle codescene`,
-    `3. Once verification passes clean, clear the resolved file entries from Sonar results using sonar-manager:`,
-    `   bun scripts/sonar-manager.ts delete --file ${filePath}`,
-  ].join("\n");
+    `Core Quality Directives:`,
+    `- Fix root causes cleanly without introducing hacky fallbacks, suppressing types with 'any', or masking symptoms.`,
+    `- Preserve existing architecture, layer boundaries, and API contracts.`,
+    `- Keep code readable, modular, and maintainable.`,
+    `- CRITICAL RESTRICTION: NEVER run codescene with '--reset' or '--full' flags. Only run codescene with the target file parameter (via sub-loop or direct file argument).`,
+    ``,
+    `Workflow & Verification Steps:`,
+    `1. Refactor and fix the issues in '${filePath}' listed in the JSON payload above.`,
+  ];
+
+  let stepNum = 2;
+
+  if (isTest) {
+    instructions.push(
+      `${stepNum}. Run log-captured test verification to ensure all test assertions pass cleanly without regressions:`,
+      `   bun run scripts/run-test/run-test.ts ${filePath}`
+    );
+    stepNum++;
+  }
+
+  instructions.push(
+    `${stepNum}. Run the progressive sub-loop health check to verify static analysis (tsgo -> biome -> lint -> codescene, targeted strictly to '${filePath}'):`,
+    `   bun run scripts/health/sub-loop.ts ${filePath} --lifecycle codescene`
+  );
+  stepNum++;
+
+  instructions.push(
+    `${stepNum}. Once all verification checks pass clean, remove the resolved issues from Sonar manager results:`,
+    `   bun scripts/sonar-manager.ts delete --file ${filePath}`
+  );
+
+  return instructions.join("\n");
 }
 
-function runVSCodeCommand(fileIssues: FileIssues, isDryRun: boolean): void {
+type RunnerMode = "vscode" | "copilot";
+
+function launchSession(fileIssues: FileIssues, runner: RunnerMode, isDryRun: boolean): void {
   const { filePath, relatedFiles } = fileIssues;
   const prompt = generateChatPrompt(fileIssues);
+  const isTest = isTestFile(filePath);
 
-  const addFileFlags = [
+  const contextFiles = [
     filePath,
     "scripts/health/sub-loop.ts",
     "scripts/sonar-manager.ts",
+    ...(isTest ? ["scripts/run-test/run-test.ts"] : []),
     ...relatedFiles,
   ];
 
-  const args = [
-    "chat",
-    "--mode",
-    "agent",
-    ...addFileFlags.flatMap((f) => ["--add-file", f]),
-    prompt,
-  ];
+  if (runner === "copilot") {
+    // Copilot CLI background execution:
+    // Uses non-interactive mode (-p/--prompt) with --yolo and detached background process
+    const args = ["-p", prompt, "--yolo", ...contextFiles.flatMap(f => ["--add-dir", f])];
+
+    if (isDryRun) {
+      console.log(
+        `\n${c.yellow}${c.bold}[DRY RUN]${c.reset} Executing background copilot: ${c.cyan}copilot ${args.join(" ")}${c.reset}\n`
+      );
+      console.log(`${c.gray}Generated Prompt:${c.reset}\n${prompt}\n`);
+      return;
+    }
+
+    const child = spawn("copilot", args, {
+      detached: true,
+      stdio: "ignore",
+    });
+
+    child.unref();
+
+    console.log(
+      `\n${c.green}${c.bold}🚀 Launched Copilot CLI in background (Yolo Mode)${c.reset} for ${c.cyan}${c.underline}${filePath}${c.reset}`
+    );
+    return;
+  }
+
+  // VS Code Insiders Chat:
+  // Uses code-insiders chat --mode agent --add-file <path> <prompt>
+  const args = ["chat", "--mode", "agent", ...contextFiles.flatMap(f => ["--add-file", f]), prompt];
 
   if (isDryRun) {
     console.log(
@@ -235,7 +316,12 @@ function runVSCodeCommand(fileIssues: FileIssues, isDryRun: boolean): void {
   );
 }
 
-function printHeader(totalIssues: number, totalFiles: number): void {
+function printHeader(totalIssues: number, totalFiles: number, runner: RunnerMode): void {
+  const runnerBadge =
+    runner === "copilot"
+      ? `${c.brightMagenta}${c.bold}GitHub Copilot CLI${c.reset}`
+      : `${c.brightBlue}${c.bold}VS Code Insiders${c.reset}`;
+
   console.log(
     `${c.brightCyan}${c.bold}┌──────────────────────────────────────────────────────────────────────────┐${c.reset}`
   );
@@ -246,7 +332,7 @@ function printHeader(totalIssues: number, totalFiles: number): void {
     `${c.brightCyan}${c.bold}└──────────────────────────────────────────────────────────────────────────┘${c.reset}`
   );
   console.log(
-    ` ${c.gray}Found ${c.brightYellow}${c.bold}${totalIssues}${c.gray} issues across ${c.brightYellow}${c.bold}${totalFiles}${c.gray} files${c.reset}\n`
+    ` ${c.gray}Found ${c.brightYellow}${c.bold}${totalIssues}${c.gray} issues across ${c.brightYellow}${c.bold}${totalFiles}${c.gray} files  |  Runner: ${runnerBadge}${c.reset}\n`
   );
 }
 
@@ -259,7 +345,6 @@ function printFileSummary(fileIssuesList: FileIssues[]): void {
         ? `${c.brightRed}${c.bold}${numIssues} issues${c.reset}`
         : `${c.yellow}${numIssues} issues${c.reset}`;
 
-    // Severity breakdown
     const blockers = item.issues.filter(i => i.severity.toUpperCase() === "BLOCKER").length;
     const criticals = item.issues.filter(i => i.severity.toUpperCase() === "CRITICAL").length;
     const majors = item.issues.filter(i => i.severity.toUpperCase() === "MAJOR").length;
@@ -309,19 +394,71 @@ function handleNavChoice(
   return { newIndex: currentIndex, handeled: false };
 }
 
-async function interactiveMenu(fileIssuesList: FileIssues[], isDryRun: boolean): Promise<void> {
+async function handleLaunchStep(
+  rl: readline.Interface,
+  currentFile: FileIssues,
+  runner: RunnerMode,
+  isDryRun: boolean
+): Promise<boolean> {
+  launchSession(currentFile, runner, isDryRun);
+  const nextAns = (
+    await rl.question(`\n${c.gray}Press Enter to move to next file, or 'stay' to remain here: ${c.reset}`)
+  )
+    .trim()
+    .toLowerCase();
+  return nextAns !== "stay";
+}
+
+async function handleMenuAction(
+  answer: string,
+  rl: readline.Interface,
+  currentFile: FileIssues,
+  runner: RunnerMode,
+  currentIndex: number,
+  totalFiles: number,
+  isDryRun: boolean
+): Promise<{ newIndex: number; newRunner: RunnerMode; shouldBreak: boolean }> {
+  if (answer === "q") {
+    console.log(`\n${c.gray}Exiting interactive fixer. Goodbye!${c.reset}\n`);
+    return { newIndex: currentIndex, newRunner: runner, shouldBreak: true };
+  }
+
+  if (answer === "r") {
+    const nextRunner = runner === "vscode" ? "copilot" : "vscode";
+    return { newIndex: currentIndex, newRunner: nextRunner, shouldBreak: false };
+  }
+
+  if (answer === "" || answer === "f" || answer === "launch") {
+    const shouldAdvance = await handleLaunchStep(rl, currentFile, runner, isDryRun);
+    return {
+      newIndex: shouldAdvance ? currentIndex + 1 : currentIndex,
+      newRunner: runner,
+      shouldBreak: false,
+    };
+  }
+
+  const nav = handleNavChoice(answer, currentIndex, totalFiles);
+  return { newIndex: nav.handeled ? nav.newIndex : currentIndex, newRunner: runner, shouldBreak: false };
+}
+
+async function interactiveMenu(
+  fileIssuesList: FileIssues[],
+  initialRunner: RunnerMode,
+  isDryRun: boolean
+): Promise<void> {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
   let currentIndex = 0;
+  let runner = initialRunner;
 
   try {
     while (currentIndex < fileIssuesList.length) {
       clearScreen();
       const totalIssues = fileIssuesList.reduce((acc, f) => acc + f.issues.length, 0);
-      printHeader(totalIssues, fileIssuesList.length);
+      printHeader(totalIssues, fileIssuesList.length, runner);
       printFileSummary(fileIssuesList);
 
       const currentFile = fileIssuesList[currentIndex];
@@ -334,35 +471,29 @@ async function interactiveMenu(fileIssuesList: FileIssues[], isDryRun: boolean):
       printFileIssuesDetail(currentFile);
 
       console.log(`${c.bold}${c.white}Options:${c.reset}`);
-      console.log(`  ${c.brightGreen}[Enter/f]${c.reset} Launch VS Code Chat for current file`);
+      console.log(
+        `  ${c.brightGreen}[Enter/f]${c.reset} Launch ${runner === "vscode" ? "VS Code Chat" : "Copilot CLI"} for current file`
+      );
+      console.log(`  ${c.brightBlue}[r]${c.reset} Toggle runner mode (current: ${runner})`);
       console.log(`  ${c.brightYellow}[n]${c.reset} Next file  |  ${c.brightYellow}[p]${c.reset} Previous file`);
       console.log(`  ${c.brightCyan}[<number>]${c.reset} Select specific file number (1-${fileIssuesList.length})`);
       console.log(`  ${c.brightRed}[q]${c.reset} Quit`);
 
       const answer = (await rl.question(`\n${c.bold}${c.brightGreen}Action > ${c.reset}`)).trim().toLowerCase();
 
-      if (answer === "q") {
-        console.log(`\n${c.gray}Exiting interactive fixer. Goodbye!${c.reset}\n`);
-        break;
-      }
+      const result = await handleMenuAction(
+        answer,
+        rl,
+        currentFile,
+        runner,
+        currentIndex,
+        fileIssuesList.length,
+        isDryRun
+      );
 
-      if (answer === "" || answer === "f" || answer === "launch") {
-        runVSCodeCommand(currentFile, isDryRun);
-        const nextAns = (
-          await rl.question(`\n${c.gray}Press Enter to move to next file, or 'stay' to remain here: ${c.reset}`)
-        )
-          .trim()
-          .toLowerCase();
-        if (nextAns !== "stay") {
-          currentIndex++;
-        }
-        continue;
-      }
-
-      const nav = handleNavChoice(answer, currentIndex, fileIssuesList.length);
-      if (nav.handeled) {
-        currentIndex = nav.newIndex;
-      }
+      if (result.shouldBreak) break;
+      currentIndex = result.newIndex;
+      runner = result.newRunner;
     }
 
     if (currentIndex >= fileIssuesList.length) {
@@ -376,6 +507,11 @@ async function interactiveMenu(fileIssuesList: FileIssues[], isDryRun: boolean):
 
 async function main(): Promise<void> {
   const isDryRun = process.argv.includes("--dry-run");
+
+  let runner: RunnerMode = "vscode";
+  if (process.argv.includes("--runner=copilot") || process.argv.includes("--copilot")) {
+    runner = "copilot";
+  }
 
   const sonarResult = loadSonarResults();
   if (!sonarResult) {
@@ -397,7 +533,7 @@ async function main(): Promise<void> {
     }))
     .sort((a, b) => b.issues.length - a.issues.length);
 
-  await interactiveMenu(fileIssuesList, isDryRun);
+  await interactiveMenu(fileIssuesList, runner, isDryRun);
 }
 
 if (import.meta.main) {

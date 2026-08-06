@@ -88,7 +88,7 @@ function withReportJoins(query: ReportSelectBuilder) {
 
 function reportsByIdQuery(whereClause: SQL, tx?: DBTransaction) {
   const q = queryDb(tx);
-  return withReportJoins(q.select(reportSelectFields) as never).where(whereClause);
+  return withReportJoins(q.select(reportSelectFields)).where(whereClause);
 }
 
 function buildPaginatedReportQuery(
@@ -112,7 +112,7 @@ async function findPaginatedReports(
 ): Promise<LessonReportWithNames[]> {
   const q = queryDb(tx);
   const queryBuilder = q.select(reportSelectFields);
-  const rows = await buildPaginatedReportQuery(queryBuilder as never, whereClause, orderBy, paginationArgs);
+  const rows = await buildPaginatedReportQuery(queryBuilder, whereClause, orderBy, paginationArgs);
   return rows.map(mapReportWithNames);
 }
 

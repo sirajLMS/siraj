@@ -17,5 +17,21 @@ export function safeEnum<T extends string>(value: unknown, validValues: readonly
  * used an unchecked `value as string` cast.
  */
 export function safeString(value: unknown): string {
-  return typeof value === "string" ? value : String(value ?? "");
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value == null) {
+    return "";
+  }
+  // For primitives (number, boolean, bigint, symbol), use String()
+  if (typeof value !== "object") {
+    return String(value);
+  }
+  // For objects, try to get a meaningful string representation
+  // Avoid "[object Object]" by using JSON.stringify with fallback
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return "";
+  }
 }

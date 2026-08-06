@@ -1,11 +1,4 @@
-import type {
-  Quota,
-  QuotaKind,
-  QuotaLedger,
-  QuotaLedgerReason,
-  QuotaPeriodType,
-  QuotaStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { Quota, QuotaLedger } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type QuotaItem = Pick<
   Quota,
@@ -40,4 +33,9 @@ export type QuotaLedgerItem = Pick<
   | "createdAt"
 >;
 
-export type { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus };
+export type {
+  QuotaKind,
+  QuotaLedgerReason,
+  QuotaPeriodType,
+  QuotaStatus,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";

@@ -68,7 +68,7 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
   private cachedToken: CachedToken | null = null;
 
   constructor(opts?: MicrosoftTeamsAdapterOptions) {
-    const envConfig = opts?.tenantId !== undefined ? null : getEnvironmentConfig();
+    const envConfig = opts?.tenantId != null ? null : getEnvironmentConfig();
     this.tenantId = opts?.tenantId ?? envConfig?.msTeamsTenantId;
     this.clientId = opts?.clientId ?? envConfig?.msTeamsClientId;
     this.clientSecret = opts?.clientSecret ?? envConfig?.msTeamsClientSecret;
@@ -156,7 +156,7 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
 
   async disconnect(token?: { accessToken: string; refreshToken: string | null }): Promise<void> {
     if (token) {
-      if (!this.tenantId) {
+      if (this.tenantId == null) {
         logger.warn("MicrosoftTeamsAdapter: cannot revoke token — tenantId not configured");
       } else {
         try {
@@ -232,9 +232,9 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
       const grantedScopes = tokenData.scope.split(" ");
       const normalizeScope = (scope: string): string =>
         scope.startsWith("https://graph.microsoft.com/") ? scope.slice("https://graph.microsoft.com/".length) : scope;
-      const normalizedGranted = grantedScopes.map(normalizeScope);
+      const normalizedGranted = new Set(grantedScopes.map(normalizeScope));
       const normalizedRequired = MS_TEAMS_REQUIRED_SCOPES.map(normalizeScope);
-      const missingScopes = normalizedRequired.filter(scope => !normalizedGranted.includes(scope));
+      const missingScopes = normalizedRequired.filter(scope => !normalizedGranted.has(scope));
       if (missingScopes.length > 0) {
         throw new InsufficientScopesError(
           [...MS_TEAMS_REQUIRED_SCOPES],

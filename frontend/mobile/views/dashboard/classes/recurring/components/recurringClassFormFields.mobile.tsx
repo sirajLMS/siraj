@@ -315,7 +315,7 @@ interface RateSectionMobileProps {
 
 function RateSectionMobile({ register, control, labels, isSubmitting }: RateSectionMobileProps) {
   const rateCurrency = useWatch({ control, name: "rateCurrency" });
-  const currencySymbol = rateCurrency ? getCurrencySymbol(rateCurrency as string) : "";
+  const currencySymbol = rateCurrency ? getCurrencySymbol(rateCurrency) : "";
   return (
     <Box sx={{ display: "flex", gap: 2, flexDirection: "column" }}>
       <TextField

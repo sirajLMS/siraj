@@ -28,8 +28,10 @@ function alive(pid: number): boolean {
   }
 }
 
+const HEARTBEAT_FILE_REGEX = /^worker-(\d+)\.hb$/;
+
 function heartbeatFilePid(filename: string): number | null {
-  const match = filename.match(/^worker-(\d+)\.hb$/);
+  const match = HEARTBEAT_FILE_REGEX.exec(filename);
   return match ? Number(match[1]) : null;
 }
 

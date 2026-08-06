@@ -69,7 +69,7 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
 
   async function ensureInit(): Promise<QueryablePool> {
     if (pool) return pool;
-    pool = createPool() as unknown as QueryablePool;
+    pool = createPool();
     await pool.query(CREATE_TABLE_SQL);
     logger.info("cron.customSql.initialized", {});
     return pool;
@@ -133,7 +133,7 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
           runId: r.run_id,
           scheduleId: r.schedule_id,
           jobKind: safeCronJobKind(r.job_kind),
-          payload: (r.payload as Record<string, unknown> | null) ?? null,
+          payload: r.payload ?? null,
           attempt: r.attempt,
           timeoutSeconds: r.timeout_seconds,
           queueJobId: r.id,
@@ -192,7 +192,7 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
         byJobKind: {},
       };
       for (const row of result.rows ?? []) {
-        const count = parseInt(row.count, 10);
+        const count = Number.parseInt(row.count, 10);
         if (!stats.byJobKind[row.job_kind]) {
           stats.byJobKind[row.job_kind] = { pending: 0, inFlight: 0, failed: 0 };
         }

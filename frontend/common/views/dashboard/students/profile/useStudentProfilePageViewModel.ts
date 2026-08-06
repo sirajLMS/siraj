@@ -151,9 +151,9 @@ function useStudentProfileQueryState(
   const profile = data?.studentProfile ?? undefined;
 
   let loadingState: StudentProfileLoadingState;
-  if (loading && !profile) {
+  if (loading && profile == null) {
     loadingState = "loading";
-  } else if (!profile) {
+  } else if (profile == null) {
     loadingState = "notFound";
   } else {
     loadingState = "ready";

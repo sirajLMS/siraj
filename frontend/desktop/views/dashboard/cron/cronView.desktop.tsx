@@ -20,11 +20,11 @@ function CronQueueStatsBanner({
   labels,
   queueStats,
   queueStatsLoading,
-}: {
-  labels: CronViewProps["labels"];
-  queueStats: CronViewProps["queueStats"];
-  queueStatsLoading: CronViewProps["queueStatsLoading"];
-}) {
+}: Readonly<{
+  readonly labels: CronViewProps["labels"];
+  readonly queueStats: CronViewProps["queueStats"];
+  readonly queueStatsLoading: CronViewProps["queueStatsLoading"];
+}>) {
   if (!queueStats || queueStatsLoading) {
     return null;
   }
@@ -42,11 +42,11 @@ function CronEmptyStateBanner({
   labels,
   loading,
   rowsLength,
-}: {
-  labels: CronViewProps["labels"];
-  loading: CronViewProps["loading"];
-  rowsLength: number;
-}) {
+}: Readonly<{
+  readonly labels: CronViewProps["labels"];
+  readonly loading: CronViewProps["loading"];
+  readonly rowsLength: number;
+}>) {
   if (loading || rowsLength > 0) {
     return null;
   }
@@ -57,7 +57,7 @@ function CronEmptyStateBanner({
   );
 }
 
-function CronNotificationToasts({ notifications }: { notifications: CronNotificationState }) {
+function CronNotificationToasts({ notifications }: Readonly<{ notifications: CronNotificationState }>) {
   return (
     <>
       <DesktopFormErrorSnackbar

@@ -96,7 +96,7 @@ function formatGender(
 }
 
 function resolveFieldGroupKey(field: PersonalFieldKey, props: ProfilePersonalSectionBaseProps): ProfileFieldGroupKey {
-  const override = props.fieldGroupKeys?.[field as keyof ProfilePersonalFieldGroupKeys];
+  const override = props.fieldGroupKeys?.[field];
   if (override) {
     return override;
   }

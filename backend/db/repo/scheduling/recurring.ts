@@ -380,16 +380,9 @@ async function validateInstanceBatch(
 ): Promise<void> {
   // Validate teacher assignment once with the earliest start date — if the
   // assignment covers the earliest occurrence, it covers all later ones too.
-  await validateTeacherAssignment(
-    t,
-    input.studentId,
-    input.teacherId,
-    instanceRows.reduce(
-      (min, r) => (r.scheduledStartAt < min ? r.scheduledStartAt : min),
-      instanceRows[0].scheduledStartAt
-    ),
-    tFuncErrors
-  );
+  const earliestStartMs = Math.min(...instanceRows.map(r => r.scheduledStartAt.getTime()));
+  const earliestStart = new Date(earliestStartMs);
+  await validateTeacherAssignment(t, input.studentId, input.teacherId, earliestStart, tFuncErrors);
 
   // Batched availability check: 3 queries total instead of 3 per instance.
   await TeacherAvailabilityRepository.validateBookingAvailabilityBatch(

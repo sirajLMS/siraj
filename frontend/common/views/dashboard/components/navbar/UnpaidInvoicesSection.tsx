@@ -13,8 +13,7 @@ import {
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useRouter } from "@/shared/i18n/navigation";
-import type { ErrorsLabels } from "@/shared/locale";
-import { type ProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
+import { type ErrorsLabels, type ProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function buildUnpaidInvoicesFxMessages(
   tProfile: Pick<ProfileLabels, "convertedAmount" | "convertedTotalApprox">,

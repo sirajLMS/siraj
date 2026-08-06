@@ -133,7 +133,7 @@ function RowExtra({
   providerKind,
   instances: rowInstances,
   showInstances,
-}: RowExtraProps) {
+}: Readonly<RowExtraProps>) {
   return (
     <Stack spacing={1} sx={{ mt: 1 }}>
       <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1, flexWrap: "wrap" }}>

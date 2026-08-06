@@ -157,7 +157,7 @@ export function getTestApiUrl(path: string): string {
 }
 
 function isUiTestRun(): boolean {
-  return process.argv.some(arg => arg.replace(/\\/g, "/").includes("test/ui"));
+  return process.argv.some(arg => arg.replaceAll("\\", "/").includes("test/ui"));
 }
 
 export function getTestDistDir(port: number): string {

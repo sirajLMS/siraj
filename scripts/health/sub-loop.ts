@@ -287,7 +287,8 @@ function checkTsgo(filePath: string): CheckResult {
 function checkBiome(filePath: string): CheckResult {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
   logInfo(`Running biome:check on ${relPath}...`);
-  const result = runCommand("bun", ["biome:check", relPath]);
+  // Run biome directly on the file, not via package.json script (which checks all files)
+  const result = runCommand("bunx", ["@biomejs/biome", "check", "--write", "--unsafe", relPath]);
   return { name: "biome:check", passed: result.passed, output: result.output };
 }
 

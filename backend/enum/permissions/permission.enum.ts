@@ -261,9 +261,7 @@ export enum AppPermission {
 let knownAppPermissionsCache: Set<string> | undefined;
 
 function getKnownAppPermissions(): Set<string> {
-  if (knownAppPermissionsCache === undefined) {
-    knownAppPermissionsCache = new Set(Object.values(AppPermission));
-  }
+  knownAppPermissionsCache ??= new Set(Object.values(AppPermission));
   return knownAppPermissionsCache;
 }
 

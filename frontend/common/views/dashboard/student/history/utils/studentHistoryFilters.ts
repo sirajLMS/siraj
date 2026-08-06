@@ -55,5 +55,5 @@ export function uniqueSessionSubjects(sessions: readonly StudentHistorySessionRo
 }
 
 export function uniqueSessionStatuses(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.status).filter(Boolean))].sort();
+  return [...new Set(sessions.map(s => s.status).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 }

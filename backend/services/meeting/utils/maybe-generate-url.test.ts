@@ -104,7 +104,16 @@ describe("maybeGenerateUrl", () => {
     const error = new MeetingChannelError("Rate limited", "RATE_LIMITED");
     spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockRejectedValue(error);
 
-    await expect(maybeGenerateUrl(provider, baseDetails, { topic: "Test" })).rejects.toThrow("Rate limited");
+    // Await the call directly and assert the thrown error to avoid awaiting a non-Promise
+    try {
+      await maybeGenerateUrl(provider, baseDetails, { topic: "Test" });
+      // Should not reach here
+      throw new Error("Expected maybeGenerateUrl to reject with MeetingChannelError");
+    } catch (err) {
+      expect(err).toBeInstanceOf(MeetingChannelError);
+      // Ensure message is preserved
+      expect((err as Error).message).toBe("Rate limited");
+    }
   });
 
   test("passes startDateTime and durationMinutes to adapter", async () => {

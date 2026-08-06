@@ -156,7 +156,7 @@ function TimezoneClassTypeFields({
   readonly timezone: string;
   readonly setTimezone: (value: string) => void;
   readonly classType: ClassType;
-  readonly setClassType: (value: string) => void;
+  readonly setClassType: (value: ClassType) => void;
   readonly mutationLoading: boolean;
   readonly t: TeacherCreateRecurringClassLabels;
 }) {
@@ -183,7 +183,13 @@ function TimezoneClassTypeFields({
           id="class-type-select"
           value={classType}
           label={t.fields.classType}
-          onChange={e => setClassType(e.target.value)}
+          onChange={e => {
+            const value = e.target.value;
+            const selected = CLASS_TYPE_OPTIONS.find(opt => opt === value);
+            if (selected) {
+              setClassType(selected as ClassType);
+            }
+          }}
           disabled={mutationLoading}
         >
           {CLASS_TYPE_OPTIONS.map(opt => (
@@ -235,7 +241,7 @@ function SchedulingFields({
           id="scheduling-mode-select"
           value={schedulingMode ?? ""}
           label={t.scheduling.mode}
-          onChange={e => setSchedulingMode((e.target.value || null) as SchedulingMode | null)}
+          onChange={e => setSchedulingMode(e.target.value || null)}
           disabled={mutationLoading}
           displayEmpty
         >
@@ -286,7 +292,7 @@ function SchedulingFields({
           id="ondemand-no-credits-outcome-select"
           value={ondemandNoCreditsOutcome ?? ""}
           label={t.scheduling.ondemandNoCreditsOutcome}
-          onChange={e => setOndemandNoCreditsOutcome((e.target.value || null) as OnDemandNoCreditsOutcome | null)}
+          onChange={e => setOndemandNoCreditsOutcome(e.target.value || null)}
           disabled={mutationLoading}
           displayEmpty
         >
@@ -476,7 +482,7 @@ function DialogFormContent({
           timezone={state.timezone}
           setTimezone={state.setTimezone}
           classType={state.classType}
-          setClassType={value => state.setClassType(value as ClassType)}
+          setClassType={state.setClassType}
           mutationLoading={mutationLoading}
           t={t}
         />

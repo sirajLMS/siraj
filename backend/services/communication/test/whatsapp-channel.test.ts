@@ -9,6 +9,7 @@ import {
 } from "@/backend/services/communication/channels/whatsapp";
 import { redisService } from "@/backend/services/redis";
 import type { NotificationDeliverySelectType } from "@/backend/types";
+import type { WhatsappAccountSelectType } from "@/backend/types/whatsapp/whatsapp-account.types";
 
 const MOCK_USER_ID = "user-uuid-wa-0001";
 const MOCK_DELIVERY_ID = "delivery-uuid-wa-0001";
@@ -23,14 +24,25 @@ function sendParams() {
   } as const;
 }
 
-function mockWhatsappCredentialsAccount(overrides: Record<string, unknown> = {}) {
+function mockWhatsappCredentialsAccount(overrides: Partial<WhatsappAccountSelectType> = {}): WhatsappAccountSelectType {
   return {
     id: MOCK_ACCOUNT_ID,
-    encryptedAccessToken: "test-token-abc123",
+    wabaId: "waba-0001",
     phoneNumberId: "phone-id-123",
+    displayName: { en: "Test Account" },
+    displayPhoneNumber: null,
+    qualityRating: null,
+    portfolioMessagingLimitTier: null,
+    throughputLevel: null,
+    maxPhoneNumbersPerBusiness: null,
+    encryptedAccessToken: "test-token-abc123",
+    encryptedTwoStepPin: "pin-000",
     isActive: true,
+    lastWebhookAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
     ...overrides,
-  };
+  } as WhatsappAccountSelectType;
 }
 
 const mockDelivery: NotificationDeliverySelectType = {
@@ -65,7 +77,7 @@ describe("WhatsApp Channel Factory", () => {
     findFirstActiveForCredentialsSpy = spyOn(
       WhatsappAccountRepository,
       "findFirstActiveForCredentials"
-    ).mockResolvedValue(mockWhatsappCredentialsAccount() as never);
+    ).mockResolvedValue(mockWhatsappCredentialsAccount());
     createDeliverySpy = spyOn(NotificationRepository, "createDelivery").mockResolvedValue(mockDelivery);
     updateDeliveryStatusSpy = spyOn(NotificationRepository, "updateDeliveryStatus").mockResolvedValue(mockDelivery);
   });
@@ -104,14 +116,14 @@ describe("WhatsApp Channel Factory", () => {
   describe("validateConfig", () => {
     test("returns true when an active WhatsApp account with credentials is present", async () => {
       const result = await whatsappChannel.validateConfig();
-      expect(result).toBeTrue();
+      expect(result).toBe(true);
     });
 
     test("returns false when no active WhatsApp account is configured", async () => {
       findFirstActiveForCredentialsSpy.mockResolvedValue(null);
       await resetWhatsappChannel();
       const result = await whatsappChannel.validateConfig();
-      expect(result).toBeFalse();
+      expect(result).toBe(false);
     });
 
     test("returns false when the active account has a null access token", async () => {
@@ -119,8 +131,9 @@ describe("WhatsApp Channel Factory", () => {
         mockWhatsappCredentialsAccount({ encryptedAccessToken: null }) as never
       );
       await resetWhatsappChannel();
+
       const result = await whatsappChannel.validateConfig();
-      expect(result).toBeFalse();
+      expect(result).toBe(false);
     });
   });
 
@@ -152,7 +165,7 @@ describe("WhatsApp Channel Factory", () => {
     beforeEach(() => {
       setNxSpy = spyOn(redisService, "setNx").mockResolvedValue("OK");
       getSpy = spyOn(redisService, "get").mockResolvedValue(null);
-      setSpy = spyOn(redisService, "set").mockResolvedValue(undefined as never);
+      setSpy = spyOn(redisService, "set").mockResolvedValue(undefined);
     });
 
     afterEach(() => {

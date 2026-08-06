@@ -12,9 +12,23 @@ import { CountrySelect } from "@/frontend/common/components/ui/input/countrySele
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 
-function validationMessage(translate: OnboardingSectionTranslations, message: string | undefined): string | undefined {
-  if (!message) return undefined;
-  return translate.validation[message];
+function validationMessage(translate: OnboardingSectionTranslations, fieldErrorOrMessage: unknown): string | undefined {
+  if (!fieldErrorOrMessage) return undefined;
+
+  let message: unknown;
+  if (typeof fieldErrorOrMessage === "string") {
+    message = fieldErrorOrMessage;
+  } else if (
+    typeof fieldErrorOrMessage === "object" &&
+    fieldErrorOrMessage !== null &&
+    "message" in fieldErrorOrMessage
+  ) {
+    message = (fieldErrorOrMessage as { message?: unknown }).message;
+  } else {
+    return undefined;
+  }
+
+  return typeof message === "string" ? translate.validation[message] : undefined;
 }
 
 type PersonalFieldProps<T extends UserPersonalFieldsShape & FieldValues> = {
@@ -37,7 +51,7 @@ export function UserPersonalNationalityField<T extends UserPersonalFieldsShape &
         name={nationalityField}
         control={control}
         render={({ field }) => {
-          const selectedCountry = field.value ? getCountryByCode(field.value as string) : undefined;
+          const selectedCountry = field.value ? getCountryByCode(field.value) : undefined;
 
           return (
             <CountrySelect
@@ -45,7 +59,7 @@ export function UserPersonalNationalityField<T extends UserPersonalFieldsShape &
               setCountryAction={country => field.onChange(country?.code ?? "")}
               label={translate.fields.nationality}
               error={!!errors.nationality}
-              helperText={validationMessage(translate, errors.nationality?.message as string | undefined)}
+              helperText={validationMessage(translate, errors.nationality?.message)}
               onBlurAction={field.onBlur}
               fullWidth
             />
@@ -110,7 +124,7 @@ export function UserPersonalDateOfBirthField<T extends UserPersonalFieldsShape &
                   variant: "outlined",
                   fullWidth: true,
                   error: Boolean(errors.dateOfBirth),
-                  helperText: validationMessage(translate, errors.dateOfBirth?.message as string | undefined),
+                  helperText: validationMessage(translate, errors.dateOfBirth?.message),
                   sx: outlinedInputSx,
                   slotProps: { htmlInput: { autoComplete: "off" } },
                 },
@@ -152,7 +166,9 @@ export function UserPersonalGenderField<T extends UserPersonalFieldsShape & Fiel
           )}
         />
         {errors.gender ? (
-          <FormHelperText>{validationMessage(translate, errors.gender?.message as string | undefined)}</FormHelperText>
+          <FormHelperText>
+            {validationMessage(translate, (errors.gender as { message?: string } | undefined)?.message)}
+          </FormHelperText>
         ) : null}
       </FormControl>
     </Grid>

@@ -212,14 +212,8 @@ async function assertGetForbidden(
   return res;
 }
 
-async function importRoute(): Promise<{
-  GET: (request: NextRequest) => Promise<Response>;
-  POST: (request: NextRequest) => Promise<Response>;
-}> {
-  return import("./route") as Promise<{
-    GET: (request: NextRequest) => Promise<Response>;
-    POST: (request: NextRequest) => Promise<Response>;
-  }>;
+async function importRoute() {
+  return import("./route");
 }
 
 // ---------------------------------------------------------------------------

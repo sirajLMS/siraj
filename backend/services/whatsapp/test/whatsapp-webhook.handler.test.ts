@@ -164,14 +164,14 @@ async function processStatusAndAssert(
   }
 ) {
   const { WhatsappWebhookHandler } = await importHandler();
-  if (options?.expectedUserId !== undefined) {
+  if (options?.expectedUserId != null) {
     mockResolvedUser(options.expectedUserId);
   } else {
     mockResolvedUser();
   }
 
   const update =
-    options?.errors !== undefined
+    options?.errors != null
       ? makeStatusUpdateWithRecipient(wamid, rawStatus, "[PHONE_REDACTED]", options.errors)
       : makeStatusUpdateWithRecipient(wamid, rawStatus, "[PHONE_REDACTED]");
 
@@ -188,7 +188,7 @@ async function processStatusAndAssert(
   const arg = getMockCallArg(handleDeliveryWebhookMock, 0);
   const expectedUserId = options?.expectedUserId ?? "user-resolved-1";
   expect(arg.userId).toBe(expectedUserId);
-  if (options?.expectedFailureReason !== undefined) {
+  if (options?.expectedFailureReason != null) {
     expect(arg.failureReason).toBe(options.expectedFailureReason);
   } else {
     expect(arg.failureReason).toBeNull();
@@ -206,11 +206,13 @@ async function processStatusExpectRejection(wamid: string, rawStatus: string, re
   mockResolvedUser();
   handleDeliveryWebhookMock.mockRejectedValueOnce(new Error(rejectError));
 
-  await expect(
-    WhatsappWebhookHandler.processEvent(
-      makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient(wamid, rawStatus, "[PHONE_REDACTED]")])])
-    )
-  ).resolves.toBeUndefined();
+  const maybe = WhatsappWebhookHandler.processEvent(
+    makeWebhookBody([makeStatusChange([makeStatusUpdateWithRecipient(wamid, rawStatus, "[PHONE_REDACTED]")])])
+  );
+
+  const result = await Promise.resolve(maybe);
+
+  expect(result).toBeUndefined();
 
   expect(getDeliveriesByProviderMessageIdsMock).toHaveBeenCalledWith([wamid]);
 }
@@ -248,7 +250,7 @@ async function processTemplateChangeAndAssertAudit(
     }
   }
 
-  const metadata = auditInput.metadata as unknown as Record<string, unknown>;
+  const metadata = (auditInput.metadata ?? {}) as Record<string, unknown>;
   for (const [key, value] of Object.entries(expectedMetadata)) {
     expect(metadata[key]).toBe(value);
   }
@@ -291,15 +293,21 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
     test("handles empty entry array gracefully", async () => {
       const { WhatsappWebhookHandler } = await importHandler();
 
-      await expect(
-        WhatsappWebhookHandler.processEvent({ object: "whatsapp_business_account", entry: [] })
-      ).resolves.toBeUndefined();
+      const maybe = WhatsappWebhookHandler.processEvent({ object: "whatsapp_business_account", entry: [] });
+
+      const result = await Promise.resolve(maybe);
+
+      expect(result).toBeUndefined();
     });
 
     test("handles null/undefined entry gracefully", async () => {
       const { WhatsappWebhookHandler } = await importHandler();
 
-      await expect(WhatsappWebhookHandler.processEvent({})).resolves.toBeUndefined();
+      const maybe = WhatsappWebhookHandler.processEvent({});
+
+      const result = await Promise.resolve(maybe);
+
+      expect(result).toBeUndefined();
     });
 
     test("skips changes with no field or value", async () => {
@@ -966,17 +974,17 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
         .mockResolvedValueOnce(undefined);
 
       // Should not throw — allSettled catches rejections at processChange level
-      await expect(
-        WhatsappWebhookHandler.processEvent(
-          makeWebhookBody([
-            makeStatusChange([
-              makeStatusUpdateWithRecipient("wamid.partial.1", "sent", "1234567890"),
-              makeStatusUpdateWithRecipient("wamid.partial.2", "delivered", "1234567890"),
-              makeStatusUpdateWithRecipient("wamid.partial.3", "read", "1234567890"),
-            ]),
-          ])
-        )
-      ).resolves.toBeUndefined();
+      const result = await WhatsappWebhookHandler.processEvent(
+        makeWebhookBody([
+          makeStatusChange([
+            makeStatusUpdateWithRecipient("wamid.partial.1", "sent", "[PHONE_REDACTED]"),
+            makeStatusUpdateWithRecipient("wamid.partial.2", "delivered", "[PHONE_REDACTED]"),
+            makeStatusUpdateWithRecipient("wamid.partial.3", "read", "[PHONE_REDACTED]"),
+          ]),
+        ])
+      );
+
+      expect(result).toBeUndefined();
 
       // All 3 statuses were attempted (allSettled processes all, one failure doesn't block others)
       expect(handleDeliveryWebhookMock).toHaveBeenCalledTimes(3);

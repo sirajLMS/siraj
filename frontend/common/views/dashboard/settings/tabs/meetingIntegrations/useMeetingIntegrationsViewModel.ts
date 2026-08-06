@@ -3,10 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useMemo } from "react";
-import type {
-  MeetingConnectionTestMode,
-  MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MeetingConnectionTestMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   adminRevokeMeetingProviderTokenMutationDocument,
@@ -31,7 +28,7 @@ function mapProviderSummary(
 ): MeetingIntegrationProviderSummary {
   return {
     id: provider.id ?? "",
-    slug: (provider.slug ?? "zoom") as ViewModelProviderSlug,
+    slug: (provider.slug as ViewModelProviderSlug) ?? "zoom",
     kind: provider.kind ?? "unknown",
     credentialsHealthy: provider.credentialsHealthy ?? false,
     lastTestedAt: provider.lastTestedAt ? new Date(provider.lastTestedAt) : null,
@@ -51,7 +48,7 @@ function mapTestResult(
   return {
     ok: result.ok ?? false,
     latencyMs: result.latencyMs ?? 0,
-    mode: (result.mode ?? "VALIDATE_CONFIG") as MeetingConnectionTestMode,
+    mode: (result.mode as TestMeetingConnectionResult["mode"]) ?? "VALIDATE_CONFIG",
     testJoinUrl: result.testJoinUrl,
     deleted: result.deleted,
     upstreamResponseSummary: result.upstreamResponseSummary ?? "",
@@ -74,7 +71,7 @@ function mapConnectedAccount(
     connectedAt: account.connectedAt ? new Date(account.connectedAt) : null,
     expiresAt: account.expiresAt ? new Date(account.expiresAt) : null,
     lastRefreshedAt: account.lastRefreshedAt ? new Date(account.lastRefreshedAt) : null,
-    status: (account.status ?? "CONNECTED") as MeetingIntegrationConnectedAccount["status"],
+    status: (account.status as MeetingIntegrationConnectedAccount["status"]) ?? "CONNECTED",
   };
 }
 
@@ -156,8 +153,8 @@ function buildRunTest(
       const { data: testData } = await testConnection({
         variables: {
           input: {
-            providerSlug: providerSlug as MeetingIntegrationProviderSlug,
-            mode: mode as MeetingConnectionTestMode,
+            providerSlug,
+            mode,
           },
         },
       });
@@ -209,7 +206,7 @@ function buildRevokeAccount(deps: RevokeAccountDeps, store: Pick<UseMeetingInteg
       await revokeToken({
         variables: {
           input: {
-            providerSlug: providerSlug as MeetingIntegrationProviderSlug,
+            providerSlug,
             userId,
           },
         },

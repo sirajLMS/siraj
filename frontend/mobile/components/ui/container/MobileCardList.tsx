@@ -73,6 +73,7 @@ export function MobileCardList<T>({
   sx,
 }: MobileCardListProps<T>) {
   const isEdgeToEdge = layout === "edge-to-edge";
+  const sxArray = Array.isArray(sx) ? sx : sx ? [sx] : [];
   const listSx: SxProps<Theme> = [
     {
       display: "flex",
@@ -80,7 +81,7 @@ export function MobileCardList<T>({
       gap,
       ...(isEdgeToEdge ? {} : { px: { xs: 2 } }),
     },
-    ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+    ...sxArray,
   ];
   const clientPageSize =
     paginationOptions !== false && paginationOptions.mode === "client"

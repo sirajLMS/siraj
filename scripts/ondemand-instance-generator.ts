@@ -166,15 +166,14 @@ async function tryGenerateSlotDay(
   // Falls back to the service which validates teacher availability windows, vacations, and
   // overlapping instances via SchedulingRepository + TeacherAvailabilityRepository.
   if (isAvailable) {
-    isAvailable = await AvailabilityService.isSlotAvailable(
-      schedule.studentId,
-      schedule.teacherId,
-      scheduledStartAt,
-      scheduledEndAt,
-      [],
-      undefined,
-      "en"
-    );
+    isAvailable = await AvailabilityService.isSlotAvailable({
+      studentId: schedule.studentId,
+      teacherId: schedule.teacherId,
+      startAt: scheduledStartAt,
+      endAt: scheduledEndAt,
+      ignoreInstanceIds: [],
+      locale: "en",
+    });
   }
 
   const { executionState, ondemandStatus } = determineExecutionState(isAvailable, remainingBalance > 0);

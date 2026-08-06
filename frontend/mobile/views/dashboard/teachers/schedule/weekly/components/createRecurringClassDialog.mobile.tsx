@@ -226,6 +226,10 @@ function SchedulingFields({
   readonly mutationLoading: boolean;
   readonly t: TeacherCreateRecurringClassLabels;
 }) {
+  // type guards ensure values coming from Select are valid enum members
+  const isSchedulingModeValue = (v: unknown): v is SchedulingMode =>
+    typeof v === "string" && (Object.values(SchedulingMode) as string[]).includes(v);
+
   return (
     <Stack sx={{ flexDirection: "column", gap: 2 }}>
       <FormControl fullWidth>
@@ -237,7 +241,10 @@ function SchedulingFields({
           id="scheduling-mode-select"
           value={schedulingMode ?? ""}
           label={t.scheduling.mode}
-          onChange={e => setSchedulingMode((e.target.value || null) as SchedulingMode | null)}
+          onChange={e => {
+            const val = e.target.value;
+            setSchedulingMode(isSchedulingModeValue(val) ? val : null);
+          }}
           disabled={mutationLoading}
           displayEmpty
         >
@@ -288,7 +295,7 @@ function SchedulingFields({
           id="ondemand-no-credits-outcome-select"
           value={ondemandNoCreditsOutcome ?? ""}
           label={t.scheduling.ondemandNoCreditsOutcome}
-          onChange={e => setOndemandNoCreditsOutcome((e.target.value || null) as OnDemandNoCreditsOutcome | null)}
+          onChange={e => setOndemandNoCreditsOutcome(e.target.value || null)}
           disabled={mutationLoading}
           displayEmpty
         >

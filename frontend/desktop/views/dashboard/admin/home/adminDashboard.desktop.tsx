@@ -145,7 +145,7 @@ function AdminDashboardScheduleOverview({
         )}
       />
 
-      {totalCount !== undefined ? (
+      {totalCount != null ? (
         <PaginationControls
           page={page}
           pageCount={pageCount}

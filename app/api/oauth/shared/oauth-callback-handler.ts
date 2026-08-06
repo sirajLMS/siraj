@@ -67,8 +67,9 @@ export interface OAuthCallbackConfig {
  */
 function buildRedirectUri(providerSlug: MeetingProvider): string {
   const config = getEnvironmentConfig();
-  const baseUrl = (config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "").replace(/\/$/, "");
-  const pathSlug = providerSlug.replace(/_/g, "-");
+  const baseUrlRaw = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
+  const baseUrl = baseUrlRaw.endsWith("/") ? baseUrlRaw.slice(0, -1) : baseUrlRaw;
+  const pathSlug = providerSlug.replaceAll("_", "-");
   return `${baseUrl}/api/oauth/${pathSlug}/callback`;
 }
 
@@ -89,8 +90,17 @@ async function exchangeCodeForTokens(
     redirect_uri: redirectUri,
     client_id: cfg.resolveClientId(config),
     client_secret: cfg.resolveClientSecret(config),
-    ...(cfg.extraTokenParams ?? {}),
   });
+
+  // Conditionally append provider-specific extra params to avoid creating an
+  // effectively empty object via spread when `extraTokenParams` is undefined.
+  if (cfg.extraTokenParams) {
+    for (const [key, value] of Object.entries(cfg.extraTokenParams)) {
+      // Ensure only string values are appended; the config type enforces this,
+      // but guard defensively in case of unexpected runtime values.
+      if (value != null) params.set(key, String(value));
+    }
+  }
 
   const res = await fetch(cfg.buildTokenUrl(config), {
     method: "POST",

@@ -213,7 +213,7 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
 
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("zoom", retryAfter ? parseInt(retryAfter, 10) : undefined);
+      throw new RateLimitedError("zoom", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
     }
 
     if (!response.ok) {
@@ -315,7 +315,7 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
 
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("zoom", retryAfter ? parseInt(retryAfter, 10) : undefined);
+      throw new RateLimitedError("zoom", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
     }
 
     if (response.status >= 500) {

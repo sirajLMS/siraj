@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { logger } from "@/frontend/common/utils/logger";
 import { ActivityHeatmap } from "@/frontend/common/views/dashboard/classes/details/admin/ActivityHeatmap";
 import { AdminActionsBar } from "@/frontend/common/views/dashboard/classes/details/admin/AdminActionsBar";
 import { ClassInfoCard } from "@/frontend/common/views/dashboard/classes/details/admin/ClassInfoCard";
@@ -170,7 +171,7 @@ interface OverrideRateDialogProps {
   readonly onOverrideRateAmountChange: (value: string) => void;
   readonly overrideRateCurrency: CurrencyCode | null;
   readonly onOverrideRateCurrencyChange: (value: CurrencyCode | null) => void;
-  readonly onSubmitOverride: (clearOverride: boolean) => void;
+  readonly onSubmitOverride: (clearOverride: boolean) => void | Promise<void>;
 }
 
 function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
@@ -217,8 +218,23 @@ function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{labels.rate.cancelButton}</Button>
-        <Button onClick={() => void onSubmitOverride(true)}>{labels.rate.clearOverrideButton}</Button>
-        <Button variant="contained" onClick={() => void onSubmitOverride(false)}>
+        <Button
+          onClick={() => {
+            void Promise.resolve(onSubmitOverride(true)).catch((err: Error) =>
+              logger.error("Failed to clear override rate", err)
+            );
+          }}
+        >
+          {labels.rate.clearOverrideButton}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => {
+            void Promise.resolve(onSubmitOverride(false)).catch((err: Error) =>
+              logger.error("Failed to save override rate", err)
+            );
+          }}
+        >
           {labels.rate.saveButton}
         </Button>
       </DialogActions>

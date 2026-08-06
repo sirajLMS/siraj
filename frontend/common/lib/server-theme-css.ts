@@ -64,25 +64,27 @@ function extractTokens(mode: PaletteMode): ServerThemeTokens {
   const palette = isDark ? darkPalette : lightPalette;
   const fallbacks = isDark ? DARK_FALLBACKS : LIGHT_FALLBACKS;
 
-  const bg = palette.background as { readonly default?: string; readonly paper?: string } | undefined;
-  const p = palette as Record<string, unknown>;
-  const primary = p.primary as { readonly main?: string } | undefined;
-  const border = p.border as { readonly light?: string } | undefined;
+  const bg = palette.background;
+  const primary = palette.primary;
+  const border = palette.border;
+
+  // Type guard to check if primary has the 'main' property (SimplePaletteColorOptions)
+  const hasMain = (color: typeof primary): color is { main: string } => color !== undefined && "main" in color;
 
   return {
     bgDefault: bg?.default ?? fallbacks.bgDefault,
     bgPaper: bg?.paper ?? fallbacks.bgPaper,
-    headerContainer: (p.headerContainer as string | undefined) ?? fallbacks.headerContainer,
-    onHeaderContainer: (p.onHeaderContainer as string | undefined) ?? fallbacks.onHeaderContainer,
-    sidebar: (p.sidebar as string | undefined) ?? fallbacks.sidebar,
-    onSidebar: (p.onSidebar as string | undefined) ?? fallbacks.onSidebar,
-    onBackground: (p.onBackground as string | undefined) ?? fallbacks.onBackground,
-    onSurface: (p.onSurface as string | undefined) ?? fallbacks.onSurface,
-    onSurfaceVariant: (p.onSurfaceVariant as string | undefined) ?? fallbacks.onSurfaceVariant,
-    outlineVariant: (p.outlineVariant as string | undefined) ?? fallbacks.outlineVariant,
-    surfaceContainerLow: (p.surfaceContainerLow as string | undefined) ?? fallbacks.surfaceContainerLow,
-    primaryContainer: (p.primaryContainer as string | undefined) ?? fallbacks.primaryContainer,
-    primaryMain: primary?.main ?? fallbacks.primaryMain,
+    headerContainer: palette.headerContainer ?? fallbacks.headerContainer,
+    onHeaderContainer: palette.onHeaderContainer ?? fallbacks.onHeaderContainer,
+    sidebar: palette.sidebar ?? fallbacks.sidebar,
+    onSidebar: palette.onSidebar ?? fallbacks.onSidebar,
+    onBackground: palette.onBackground ?? fallbacks.onBackground,
+    onSurface: palette.onSurface ?? fallbacks.onSurface,
+    onSurfaceVariant: palette.onSurfaceVariant ?? fallbacks.onSurfaceVariant,
+    outlineVariant: palette.outlineVariant ?? fallbacks.outlineVariant,
+    surfaceContainerLow: palette.surfaceContainerLow ?? fallbacks.surfaceContainerLow,
+    primaryContainer: palette.primaryContainer ?? fallbacks.primaryContainer,
+    primaryMain: hasMain(primary) ? primary.main : fallbacks.primaryMain,
     borderLight: border?.light ?? fallbacks.borderLight,
     textPrimaryChannel: fallbacks.textPrimaryChannel,
     skeletonBg: fallbacks.skeletonBg,

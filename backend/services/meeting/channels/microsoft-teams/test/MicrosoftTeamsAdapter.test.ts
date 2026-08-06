@@ -210,7 +210,7 @@ describe("MicrosoftTeamsAdapter", () => {
       const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-teams-token",
         refreshToken: "new-refresh-token",
-        expiresAt: new Date(Date.now() + 3600_000),
+        expiresAt: new Date(Date.now() + 3600000),
       });
 
       fetchSpy.mockRestore();

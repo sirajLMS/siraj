@@ -26,17 +26,19 @@ function getDeltaColor(value: number) {
 }
 
 interface QuotaDetailContainerProps {
-  quotaId: string;
+  readonly quotaId: string;
 }
 
 interface DetailFieldProps {
-  caption: string;
-  children: ReactNode;
-  variant?: "body1" | "h6";
-  fontWeight?: number;
+  readonly caption: string;
+  readonly children: ReactNode;
+  readonly variant?: "body1" | "h6";
+  readonly fontWeight?: number;
 }
 
-function DetailField({ caption, children, variant = "body1", fontWeight = 600 }: DetailFieldProps) {
+function DetailField(props: Readonly<DetailFieldProps>) {
+  const { caption, children, variant = "body1", fontWeight = 600 } = props;
+
   return (
     <Grid size={{ xs: 12, sm: 4 }}>
       <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -49,7 +51,8 @@ function DetailField({ caption, children, variant = "body1", fontWeight = 600 }:
   );
 }
 
-function QuotaDetailHeader({ quota, t }: { quota: QuotaItem; t: QuotaDetailT }) {
+function QuotaDetailHeader(props: Readonly<{ quota: QuotaItem; t: QuotaDetailT }>) {
+  const { quota, t } = props;
   const { label, color } = formatQuotaStatus(quota.status ?? "", t);
   return (
     <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
@@ -70,7 +73,9 @@ function QuotaDetailHeader({ quota, t }: { quota: QuotaItem; t: QuotaDetailT }) 
   );
 }
 
-function QuotaDetailFields({ quota, t }: { quota: QuotaItem; t: QuotaDetailT }) {
+function QuotaDetailFields(props: Readonly<{ quota: QuotaItem; t: QuotaDetailT }>) {
+  const { quota, t } = props;
+
   return (
     <Paper variant="outlined" sx={{ p: 3 }}>
       <Grid container spacing={3}>
@@ -87,26 +92,28 @@ function QuotaDetailFields({ quota, t }: { quota: QuotaItem; t: QuotaDetailT }) 
 }
 
 interface QuotaLedgerSectionProps {
-  t: QuotaDetailT;
-  ledgerColumns: GridColDef<QuotaLedgerItem>[];
-  ledgerEntries: readonly QuotaLedgerItem[];
-  loadingLedger: boolean;
-  ledgerPage: number;
-  setLedgerPage: (page: number) => void;
-  ledgerPageSize: number;
-  ledgerTotalCount: number;
+  readonly t: QuotaDetailT;
+  readonly ledgerColumns: GridColDef<QuotaLedgerItem>[];
+  readonly ledgerEntries: readonly QuotaLedgerItem[];
+  readonly loadingLedger: boolean;
+  readonly ledgerPage: number;
+  readonly setLedgerPage: (page: number) => void;
+  readonly ledgerPageSize: number;
+  readonly ledgerTotalCount: number;
 }
 
-function QuotaLedgerSection({
-  t,
-  ledgerColumns,
-  ledgerEntries,
-  loadingLedger,
-  ledgerPage,
-  setLedgerPage,
-  ledgerPageSize,
-  ledgerTotalCount,
-}: QuotaLedgerSectionProps) {
+function QuotaLedgerSection(props: Readonly<QuotaLedgerSectionProps>) {
+  const {
+    t,
+    ledgerColumns,
+    ledgerEntries,
+    loadingLedger,
+    ledgerPage,
+    setLedgerPage,
+    ledgerPageSize,
+    ledgerTotalCount,
+  } = props;
+
   return (
     <Stack spacing={2}>
       <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -131,7 +138,9 @@ function QuotaLedgerSection({
   );
 }
 
-export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
+export function QuotaDetailContainer(props: Readonly<QuotaDetailContainerProps>) {
+  const { quotaId } = props;
+
   const {
     t,
     quota,

@@ -38,26 +38,32 @@ const StyledStatusIndicator = styled(Box, {
 
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "role",
-})<{ role: ManagerRole }>(({ theme, role }) => ({
-  minWidth: 84,
-  fontWeight: 700,
-  textTransform: "uppercase",
-  fontSize: theme.typography.labelSm.fontSize,
-  height: 22,
-  paddingInline: theme.spacing(0.75),
-  backgroundColor:
-    role === "admin"
-      ? theme.palette.primaryContainer
-      : role === "supervisor"
-        ? theme.palette.tertiaryContainer
-        : theme.palette.secondaryContainer,
-  color:
-    role === "admin"
-      ? theme.palette.onPrimaryContainer
-      : role === "supervisor"
-        ? theme.palette.onTertiaryContainer
-        : theme.palette.onSecondaryContainer,
-}));
+})<{ role: ManagerRole }>(({ theme, role }) => {
+  let backgroundColor: string;
+  let color: string;
+
+  if (role === "admin") {
+    backgroundColor = theme.palette.primaryContainer;
+    color = theme.palette.onPrimaryContainer;
+  } else if (role === "supervisor") {
+    backgroundColor = theme.palette.tertiaryContainer;
+    color = theme.palette.onTertiaryContainer;
+  } else {
+    backgroundColor = theme.palette.secondaryContainer;
+    color = theme.palette.onSecondaryContainer;
+  }
+
+  return {
+    minWidth: 84,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    fontSize: theme.typography.labelSm.fontSize,
+    height: 22,
+    paddingInline: theme.spacing(0.75),
+    backgroundColor,
+    color,
+  };
+});
 
 const StyledContactItemBox = styled(Stack)(({ theme }) => ({
   alignItems: "center",

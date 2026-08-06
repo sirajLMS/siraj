@@ -167,17 +167,34 @@ export namespace ClassMeetingConfigRepository {
         await clearDefault(scope, t);
       }
 
+      const updateData: Record<string, unknown> = { updatedAt: new Date() };
+
+      function collectPresentKeys<T extends Record<string, unknown>>(obj: T, keys: readonly string[]): string[] {
+        const result: string[] = [];
+        for (const key of keys) {
+          if (key in obj) {
+            result.push(key);
+          }
+        }
+        return result;
+      }
+
+      const UPDATABLE_KEYS = [
+        "label",
+        "isDefault",
+        "details",
+        "encryptedSecret",
+        "providerId",
+        "providerMetadata",
+      ] as const;
+
+      for (const key of collectPresentKeys(input, UPDATABLE_KEYS)) {
+        updateData[key] = input[key as keyof typeof input];
+      }
+
       const [result] = await t
         .update(classMeetingConfigs)
-        .set({
-          ...(input.label !== undefined ? { label: input.label } : {}),
-          ...(input.isDefault !== undefined ? { isDefault: input.isDefault } : {}),
-          ...(input.details !== undefined ? { details: input.details } : {}),
-          ...(input.encryptedSecret !== undefined ? { encryptedSecret: input.encryptedSecret } : {}),
-          ...(input.providerId !== undefined ? { providerId: input.providerId } : {}),
-          ...(input.providerMetadata !== undefined ? { providerMetadata: input.providerMetadata } : {}),
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(classMeetingConfigs.id, id))
         .returning();
 
@@ -192,37 +209,6 @@ export namespace ClassMeetingConfigRepository {
       return run(tx);
     }
     return db.transaction(run);
-  }
-
-  export async function setDefault(
-    id: string,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<ClassMeetingConfigSelectType> {
-    const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
-      const existing = await getByIdOrThrow(id, tErrors, t);
-      const scope = resolveScope(existing);
-      await clearDefault(scope, t);
-      return update(id, { isDefault: true }, tErrors, t);
-    };
-
-    if (tx) {
-      return run(tx);
-    }
-    return db.transaction(run);
-  }
-
-  export async function deleteConfig(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<void> {
-    const run = async (t: DBTransaction): Promise<void> => {
-      await getByIdOrThrow(id, tErrors, t);
-      await t.delete(classMeetingConfigs).where(eq(classMeetingConfigs.id, id));
-    };
-
-    if (tx) {
-      await run(tx);
-      return;
-    }
-    await db.transaction(run);
   }
 
   function labelCondition(label: string | null | undefined) {
@@ -244,7 +230,7 @@ export namespace ClassMeetingConfigRepository {
     return row ?? null;
   }
 
-  export async function upsertMany(
+  export async function _upsertMany(
     inputs: readonly ClassMeetingConfigInsertType[],
     tErrors: ErrorsLabels,
     tx?: DBTransaction
@@ -273,5 +259,20 @@ export namespace ClassMeetingConfigRepository {
       tErrors,
       tx
     );
+  }
+
+  export const upsertMany = _upsertMany;
+
+  export async function setDefault(
+    id: string,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<ClassMeetingConfigSelectType> {
+    return update(id, { isDefault: true }, tErrors, tx);
+  }
+
+  export async function deleteConfig(id: string, _tErrors: ErrorsLabels, tx?: DBTransaction): Promise<void> {
+    const client = tx ?? db;
+    await client.delete(classMeetingConfigs).where(eq(classMeetingConfigs.id, id));
   }
 }

@@ -134,7 +134,7 @@ export namespace CronRepository {
     if (status) conditions.push(eq(cronSchedules.status, status));
     if (jobKind) conditions.push(eq(cronSchedules.jobKind, jobKind));
     if (name) {
-      const escapedName = name.replace(/%/g, "\\%").replace(/_/g, "\\_");
+      const escapedName = name.replaceAll("%", String.raw`\%`).replaceAll("_", String.raw`\_`);
       conditions.push(ilike(cronSchedules.name, `%${escapedName}%`));
     }
 
@@ -441,19 +441,23 @@ export namespace CronRepository {
 
   // ── Delete ──
 
-  export const deleteScheduleById = async (id: string, hard: boolean = false, tx?: DBTransaction): Promise<void> => {
+  /** Soft-delete a schedule by setting its status to DISABLED. */
+  export const softDeleteScheduleById = async (id: string, tx?: DBTransaction): Promise<void> => {
     const runner = async (t: DBTransaction) => {
-      if (hard) {
-        // Delete runs first (FK constraint), then delete schedule
-        await t.delete(cronRuns).where(eq(cronRuns.scheduleId, id));
-        await t.delete(cronSchedules).where(eq(cronSchedules.id, id));
-      } else {
-        // Soft-delete: set status to DISABLED
-        await t
-          .update(cronSchedules)
-          .set({ status: CronScheduleStatus.DISABLED, updatedAt: new Date() })
-          .where(eq(cronSchedules.id, id));
-      }
+      await t
+        .update(cronSchedules)
+        .set({ status: CronScheduleStatus.DISABLED, updatedAt: new Date() })
+        .where(eq(cronSchedules.id, id));
+    };
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  /** Permanently delete a schedule and its associated runs (hard delete). */
+  export const permanentlyDeleteScheduleById = async (id: string, tx?: DBTransaction): Promise<void> => {
+    const runner = async (t: DBTransaction) => {
+      // Delete runs first (FK constraint), then delete schedule
+      await t.delete(cronRuns).where(eq(cronRuns.scheduleId, id));
+      await t.delete(cronSchedules).where(eq(cronSchedules.id, id));
     };
     return tx ? runner(tx) : db.transaction(runner);
   };

@@ -111,7 +111,7 @@ export function useRecurringSchedulesListViewModel(
     labelsBySection,
     loading,
     error: error ? tCommon.loadFailed : null,
-    rows: rows as readonly RecurringScheduleListItem[],
+    rows,
     totalCount,
     currentPage,
     pageSize: initialPageSize,

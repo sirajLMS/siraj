@@ -8,7 +8,7 @@ import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
 interface EditQuotaPageProps {
-  params: Promise<{ id: string }>;
+  readonly params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: EditQuotaPageProps): Promise<Metadata> {
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: EditQuotaPageProps): Promise<
   return { title: `${t.editQuota} — ${id}` };
 }
 
-export default async function EditQuotaPage({ params }: EditQuotaPageProps) {
+export default async function EditQuotaPage({ params }: Readonly<EditQuotaPageProps>) {
   const { id } = await params;
   const locale = await getLocale();
   const { userId, context } = await getServerUserContext();

@@ -185,7 +185,7 @@ function AdminDashboardMobileScheduleList({
 
   return (
     <MobileCardList<DailyScheduleRow>
-      rows={rows as readonly DailyScheduleRow[]}
+      rows={rows}
       loading={loading}
       emptyMessage={emptyMessage}
       renderSkeleton={() => (

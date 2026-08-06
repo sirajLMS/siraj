@@ -1,7 +1,7 @@
 import { and, asc, count, desc, eq, inArray, isNull, lte, ne, or, type SQL, sql } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   currencyExchangeAuditLogs,
@@ -59,7 +59,7 @@ export namespace BillingRepository {
       return { snapshot: snapshot ?? null, source: source ?? null };
     }
 
-    const rate = await getLatestExchangeRate(currency, CurrencyCode.USD, tErrors, t as DBTransaction);
+    const rate = await getLatestExchangeRate(currency, CurrencyCode.USD, tErrors, t);
     return {
       snapshot: rate.rate,
       source: rate.source || "SYSTEM_AUTO",
@@ -108,7 +108,7 @@ export namespace BillingRepository {
     fromCurrency: CurrencyCode,
     toCurrency: CurrencyCode,
     tErrors: ErrorsLabels,
-    tx?: DBTransaction
+    tx?: DBTransaction | typeof db
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
     const q = queryDb(tx);
     const now = new Date();
@@ -331,8 +331,8 @@ export namespace BillingRepository {
   function mapExchangeRateHistoryRow(r: ExchangeRateHistorySelectRow): Types.ExchangeRateHistoryRow {
     return {
       id: r.id,
-      fromCurrency: r.fromCurrency as Types.ExchangeRateHistoryRow["fromCurrency"],
-      toCurrency: r.toCurrency as Types.ExchangeRateHistoryRow["toCurrency"],
+      fromCurrency: r.fromCurrency as CurrencyCode,
+      toCurrency: r.toCurrency as CurrencyCode,
       rate: r.rate,
       source: r.source,
       effectiveDate: r.effectiveDate,
@@ -774,16 +774,13 @@ export namespace BillingRepository {
     );
 
     if (!pagination) {
-      return fetchUnpaginatedInvoices(q as never, whereCondition, `parent-invoice-history-${parentId}`);
+      return fetchUnpaginatedInvoices(q, whereCondition, `parent-invoice-history-${parentId}`);
     }
 
-    return fetchInvoicesPaginatedData(q as never, `parent-invoice-history-${parentId}`, whereCondition, pagination);
+    return fetchInvoicesPaginatedData(q, `parent-invoice-history-${parentId}`, whereCondition, pagination);
   };
 
-  async function countInvoicesWithJoin(
-    queryDb: DBTransaction | typeof db,
-    whereCondition: SQL | undefined
-  ): Promise<number> {
+  async function countInvoicesWithJoin(queryDb: DBQueryExecutor, whereCondition: SQL | undefined): Promise<number> {
     const countResult = await queryDb
       .select({ count: count() })
       .from(invoices)
@@ -793,7 +790,7 @@ export namespace BillingRepository {
   }
 
   async function fetchUnpaginatedInvoices(
-    queryDb: DBTransaction | typeof db,
+    queryDb: DBQueryExecutor,
     whereCondition: SQL | undefined,
     resultId: string
   ): Promise<Types.InvoiceHistoryPaginatedResult> {
@@ -810,7 +807,7 @@ export namespace BillingRepository {
   }
 
   async function fetchInvoicesPaginatedData(
-    queryDb: DBTransaction | typeof db,
+    queryDb: DBQueryExecutor,
     resultId: string,
     whereCondition: SQL | undefined,
     pagination: Types.PaginationArgs
@@ -852,10 +849,10 @@ export namespace BillingRepository {
     const whereCondition = mergeWhereConditions(isNull(invoices.deletedAt), buildInvoiceSearchCondition(search));
 
     if (!pagination) {
-      return fetchUnpaginatedInvoices(q as never, whereCondition, "admin-invoice-history");
+      return fetchUnpaginatedInvoices(q, whereCondition, "admin-invoice-history");
     }
 
-    return fetchInvoicesPaginatedData(q as never, "admin-invoice-history", whereCondition, pagination);
+    return fetchInvoicesPaginatedData(q, "admin-invoice-history", whereCondition, pagination);
   };
 
   export const getAdminBillingSummary = async (tx?: DBTransaction): Promise<Types.AdminBillingSummaryResult> => {
@@ -1194,7 +1191,7 @@ export namespace BillingRepository {
     const runner = async (t: DBTransaction) => {
       const results: TOutput[] = [];
       for (const input of inputs) {
-        const inserted = (await t
+        const inserted = await t
           .insert(table)
           .values({
             ...input,
@@ -1205,8 +1202,8 @@ export namespace BillingRepository {
             target: conflictTarget,
             set: buildSetClause(input),
           })
-          .returning()) as TOutput[];
-        if (inserted[0]) results.push(inserted[0]);
+          .returning();
+        if (inserted[0]) results.push(inserted[0] as TOutput);
       }
       return results;
     };

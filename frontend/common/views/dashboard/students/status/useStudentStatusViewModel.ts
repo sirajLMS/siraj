@@ -82,7 +82,7 @@ function buildStudentFromProfile(profile: NonNullable<StudentProfileQueryData>):
     primaryTeacherId: profile.primaryTeacherId ?? null,
     teacherName: profile.teacherName ?? null,
     parentUserId: profile.parentUserId ?? null,
-    hoursPerWeek: profile.hoursPerWeek != null ? String(profile.hoursPerWeek) : null,
+    hoursPerWeek: profile.hoursPerWeek == null ? null : String(profile.hoursPerWeek),
     classesRemaining: profile.classesRemaining ?? 0,
     classesTotal: profile.classesTotal ?? 0,
     version: profile.version ?? null,

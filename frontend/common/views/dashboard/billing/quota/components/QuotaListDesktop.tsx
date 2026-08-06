@@ -15,6 +15,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  type SelectChangeEvent,
   Stack,
   TextField,
   Tooltip,
@@ -40,7 +41,7 @@ interface FilterControlsProps {
   readonly setFilterKind: (kind: QuotaKind | null) => void;
 }
 
-function FilterControls(props: FilterControlsProps) {
+function FilterControls(props: Readonly<FilterControlsProps>) {
   const { t, searchQuery, filterStatus, filterKind, setSearchQuery, setFilterStatus, setFilterKind } = props;
 
   return (
@@ -64,10 +65,13 @@ function FilterControls(props: FilterControlsProps) {
 
       <FormControl size="small" sx={{ minWidth: 140 }}>
         <InputLabel>{t.fields.status}</InputLabel>
-        <Select
+        <Select<QuotaStatus | "">
           value={filterStatus ?? ""}
           label={t.fields.status}
-          onChange={e => setFilterStatus((e.target.value as QuotaStatus) || null)}
+          onChange={(e: SelectChangeEvent<QuotaStatus | "">) => {
+            const val = e.target.value;
+            setFilterStatus(val === "" ? null : val);
+          }}
         >
           <MenuItem value="">{t.fields.all}</MenuItem>
           <MenuItem value={QuotaStatus.Active}>{t.statuses.ACTIVE}</MenuItem>
@@ -78,10 +82,13 @@ function FilterControls(props: FilterControlsProps) {
 
       <FormControl size="small" sx={{ minWidth: 140 }}>
         <InputLabel>{t.fields.kind}</InputLabel>
-        <Select
+        <Select<QuotaKind | "">
           value={filterKind ?? ""}
           label={t.fields.kind}
-          onChange={e => setFilterKind((e.target.value as QuotaKind) || null)}
+          onChange={(e: SelectChangeEvent<QuotaKind | "">) => {
+            const val = e.target.value;
+            setFilterKind(val === "" ? null : val);
+          }}
         >
           <MenuItem value="">{t.fields.all}</MenuItem>
           <MenuItem value={QuotaKind.Package}>{t.kinds.PACKAGE}</MenuItem>
@@ -122,7 +129,7 @@ interface QuotaGridProps {
   readonly setPageSize: (pageSize: number) => void;
 }
 
-function QuotaGrid(props: QuotaGridProps) {
+function QuotaGrid(props: Readonly<QuotaGridProps>) {
   const { quotas, columns, loading, page, pageSize, totalCount, setPage, setPageSize } = props;
 
   return (
@@ -144,7 +151,7 @@ function QuotaGrid(props: QuotaGridProps) {
   );
 }
 
-export function QuotaListDesktop(props: QuotaViewModelReturn) {
+export function QuotaListDesktop(props: Readonly<QuotaViewModelReturn>) {
   const {
     t,
     quotas,

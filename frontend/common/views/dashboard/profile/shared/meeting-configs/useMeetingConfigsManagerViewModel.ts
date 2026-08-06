@@ -468,7 +468,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         variables: {
           input: {
             providerSlug: providerSlug as MeetingIntegrationProviderSlug,
-            returnPath: typeof window !== "undefined" ? window.location.pathname : "/",
+            returnPath: globalThis.window?.location?.pathname ?? "/",
           },
         },
       });
@@ -480,8 +480,8 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
           next.delete(providerSlug);
           return next;
         });
-        if (typeof window !== "undefined") {
-          window.location.href = authorizeUrl;
+        if (globalThis.window) {
+          globalThis.window.location.href = authorizeUrl;
         }
         return;
       }

@@ -30,31 +30,31 @@ function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z
   const meetingUrlSchema = isAutoProvider
     ? z
         .union([z.url(), z.null()])
-        .transform(v => (v === null ? undefined : v))
+        .transform(v => v ?? undefined)
         .optional()
     : z.url();
+
   const base = z.object({
     meetingUrl: meetingUrlSchema,
     username: z.string().optional(),
     tenantId: z.string().optional(),
   });
 
-  return base.check(ctx => {
-    const data = ctx.value;
+  return base.superRefine((data, ctx) => {
     // Only enforce URL allowlist for manual providers when a meetingUrl is present.
     // Auto-generation providers' URLs bypass the allowlist (plan task 3.2) to be
     // tolerant of upstream host variations, though the Zod .url() validation above
     // still ensures it's a valid URL.
     if (!isAutoProvider && data.meetingUrl && !isUrlAllowedByProvider(data.meetingUrl, provider.urlAllowlist)) {
-      ctx.issues.push({ code: "custom", message: "meetingUrlHostNotAllowed", path: ["meetingUrl"], input: ctx.value });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "meetingUrlHostNotAllowed", path: ["meetingUrl"] });
     }
     if (provider.fieldSchema.supportsUsername && data.username?.trim() === "") {
-      ctx.issues.push({ code: "custom", message: "usernameRequired", path: ["username"], input: ctx.value });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "usernameRequired", path: ["username"] });
     }
     if (provider.fieldSchema.supportsTenantId && data.tenantId?.trim() === "") {
-      ctx.issues.push({ code: "custom", message: "tenantIdRequired", path: ["tenantId"], input: ctx.value });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "tenantIdRequired", path: ["tenantId"] });
     }
-  });
+  }) as unknown as z.ZodType<MeetingConfigDetails>;
 }
 
 export function parseMeetingConfigDetails(provider: MeetingProviderSelectType, details: unknown): MeetingConfigDetails {

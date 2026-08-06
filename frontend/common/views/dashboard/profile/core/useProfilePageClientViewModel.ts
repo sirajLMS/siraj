@@ -11,10 +11,7 @@ import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { useRefetchOnWindowFocus } from "@/frontend/common/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
-import {
-  isStudentProfileAudience,
-  PROFILE_AUDIENCE_STUDENT,
-} from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";
+import { isStudentProfileAudience } from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";
 import type {
   ProfilePageClientLabels,
   ProfilePageClientProps,
@@ -23,6 +20,18 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ProfileLabels, ProfileRoleLabels } from "@/shared/locale/types/profile";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+
+interface UseProfileDataParams {
+  isStudentAudience: boolean;
+  audience: ProfileAudience;
+  scope: ProfileScope;
+  targetUserId: string;
+  unifiedProfileData: Operations.ProfileByUserIdQuery | null | undefined;
+  user: User | null;
+  userName: string;
+  userAvatarUrl: string;
+  userEmail: string | null | undefined;
+}
 
 export interface ProfilePageClientViewModel extends ProfilePageClientProps {
   readonly labels: ProfilePageClientLabels;
@@ -46,16 +55,19 @@ export interface ProfilePageClientViewModel extends ProfilePageClientProps {
  * For student audience, returns user data from store.
  * For other audiences, returns data from GraphQL query.
  */
-function useProfileData(
-  isStudentAudience: boolean,
-  audience: ProfileAudience,
-  scope: ProfileScope,
-  targetUserId: string,
-  unifiedProfileData: Operations.ProfileByUserIdQuery | null | undefined,
-  user: User | null,
-  userName: string,
-  userAvatarUrl: string
-): ProfileData | null | undefined {
+function useProfileData(params: UseProfileDataParams): ProfileData | null | undefined {
+  const {
+    isStudentAudience,
+    audience,
+    scope,
+    targetUserId,
+    unifiedProfileData,
+    user,
+    userName,
+    userAvatarUrl,
+    userEmail,
+  } = params;
+
   return useMemo((): ProfileData | null | undefined => {
     if (isStudentAudience) {
       return {
@@ -64,7 +76,7 @@ function useProfileData(
         audience,
         scope,
         name: userName || user?.name || "",
-        email: user?.email ?? "",
+        email: userEmail ?? user?.email ?? "",
         avatarUrl: userAvatarUrl || user?.avatarUrl || null,
       } as ProfileData;
     }
@@ -78,6 +90,7 @@ function useProfileData(
     user,
     userAvatarUrl,
     userName,
+    userEmail,
   ]);
 }
 
@@ -155,7 +168,7 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
     skip: isStudentAudience,
   });
 
-  const profile = useProfileData(
+  const profile = useProfileData({
     isStudentAudience,
     audience,
     scope,
@@ -163,8 +176,9 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
     unifiedProfileData,
     user,
     userName,
-    userAvatarUrl
-  );
+    userAvatarUrl,
+    userEmail: user?.email ?? null,
+  });
 
   const loading = isStudentAudience ? false : unifiedLoading;
   const error = isStudentAudience ? undefined : unifiedError;
@@ -209,4 +223,7 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
   };
 }
 
-export { isStudentProfileAudience, PROFILE_AUDIENCE_STUDENT };
+export {
+  isStudentProfileAudience,
+  PROFILE_AUDIENCE_STUDENT,
+} from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";

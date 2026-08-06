@@ -2,7 +2,7 @@
 
 import { Chip, Dialog, DialogContent, DialogTitle, Stack, Tooltip, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { CronRunStatus, CronTriggerSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CronRunFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { safeEnum, safeString } from "@/frontend/common/views/dashboard/cron/utils";
@@ -33,6 +33,18 @@ export function CronRunsDialog({ open, scheduleName, labels, runs, loading, onCl
     return map;
   }, [runs]);
 
+  const getRowId = useCallback(
+    (row: CronRunFieldsFragment): string => {
+      const explicitId = row.id;
+      if (typeof explicitId === "string" && explicitId.length > 0) {
+        return explicitId;
+      }
+      const fallback = fallbackRowIds.get(row);
+      return typeof fallback === "string" ? fallback : "";
+    },
+    [fallbackRowIds]
+  );
+
   const columns = useMemo<GridColDef<CronRunFieldsFragment>[]>(
     () => [
       {
@@ -40,7 +52,9 @@ export function CronRunsDialog({ open, scheduleName, labels, runs, loading, onCl
         headerName: labels.colTriggerSource,
         width: 150,
         valueFormatter: (value: unknown) => {
-          if (value == null) return "—";
+          if (value == null) {
+            return "—";
+          }
           const source = safeEnum(value, Object.values(CronTriggerSource));
           return source ? getCronTriggerSourceLabel(source, labels) : safeString(value);
         },
@@ -60,19 +74,35 @@ export function CronRunsDialog({ open, scheduleName, labels, runs, loading, onCl
         field: "attempt",
         headerName: labels.colAttempt,
         width: 90,
-        valueFormatter: (value: unknown) => (value != null ? String(value) : "—"),
+        valueFormatter: (value: unknown) => {
+          if (value == null) {
+            return "—";
+          }
+          return safeString(value);
+        },
       },
       {
         field: "startedAt",
         headerName: labels.colStartedAt,
         width: 180,
-        valueFormatter: (value: unknown) => (value != null ? new Date(safeString(value)).toLocaleString() : "—"),
+        valueFormatter: (value: unknown) => {
+          if (value == null) {
+            return "—";
+          }
+          const dateStr = safeString(value);
+          return new Date(dateStr).toLocaleString();
+        },
       },
       {
         field: "durationMs",
         headerName: labels.colDuration,
         width: 110,
-        valueFormatter: (value: unknown) => (value != null ? `${value}ms` : "—"),
+        valueFormatter: (value: unknown) => {
+          if (value == null) {
+            return "—";
+          }
+          return `${safeString(value)}ms`;
+        },
       },
       {
         field: "errorMessage",
@@ -102,30 +132,38 @@ export function CronRunsDialog({ open, scheduleName, labels, runs, loading, onCl
     [labels]
   );
 
+  const dialogContent = useMemo(() => {
+    if (loading) {
+      return (
+        <Stack sx={{ py: 4, alignItems: "center" }}>
+          <Chip label={labels.runsTitle} />
+        </Stack>
+      );
+    }
+    if (runs.length === 0) {
+      return (
+        <Stack sx={{ py: 4, alignItems: "center" }}>
+          <Chip label={labels.emptyMessage} />
+        </Stack>
+      );
+    }
+    return (
+      <DataGrid<CronRunFieldsFragment>
+        rows={rowsCopy}
+        columns={columns}
+        getRowId={getRowId}
+        loading={loading}
+        autoHeight
+        hideFooter
+        disableRowSelectionOnClick
+      />
+    );
+  }, [loading, runs.length, rowsCopy, columns, labels, getRowId]);
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
       <DialogTitle>{scheduleName ? labels.dialogRunsTitle(scheduleName) : labels.runsTitle}</DialogTitle>
-      <DialogContent>
-        {loading ? (
-          <Stack sx={{ py: 4, alignItems: "center" }}>
-            <Chip label={labels.runsTitle} />
-          </Stack>
-        ) : runs.length === 0 ? (
-          <Stack sx={{ py: 4, alignItems: "center" }}>
-            <Chip label={labels.emptyMessage} />
-          </Stack>
-        ) : (
-          <DataGrid<CronRunFieldsFragment>
-            rows={rowsCopy}
-            columns={columns}
-            getRowId={row => row.id ?? fallbackRowIds.get(row) ?? ""}
-            loading={loading}
-            autoHeight
-            hideFooter
-            disableRowSelectionOnClick
-          />
-        )}
-      </DialogContent>
+      <DialogContent>{dialogContent}</DialogContent>
     </Dialog>
   );
 }

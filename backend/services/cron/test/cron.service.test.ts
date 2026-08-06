@@ -62,7 +62,8 @@ let updateScheduleIfStatusResult: CronScheduleSelectType | null = null;
 let recordHeartbeatCalls: unknown[] = [];
 let reconcileStuckRunsCalls: { now: Date; batch: number }[] = [];
 let reconcileStuckRunsResult: number = 0;
-let deleteScheduleByIdCalls: { id: string; hard: boolean }[] = [];
+let softDeleteScheduleByIdCalls: string[] = [];
+let permanentlyDeleteScheduleByIdCalls: string[] = [];
 let listRunsResult: CronRunListResult = { rows: [], totalCount: 0 };
 
 let _adapterInitCalls: number = 0;
@@ -186,7 +187,8 @@ function resetState() {
   recordHeartbeatCalls = [];
   reconcileStuckRunsCalls = [];
   reconcileStuckRunsResult = 0;
-  deleteScheduleByIdCalls = [];
+  softDeleteScheduleByIdCalls = [];
+  permanentlyDeleteScheduleByIdCalls = [];
   listRunsResult = { rows: [], totalCount: 0 };
   _adapterInitCalls = 0;
   adapterSendCalls = [];
@@ -273,8 +275,11 @@ const repoImpl = {
     reconcileStuckRunsCalls.push({ now, batch });
     return reconcileStuckRunsResult;
   },
-  deleteScheduleById: async (id: string, hard: boolean) => {
-    deleteScheduleByIdCalls.push({ id, hard });
+  softDeleteScheduleById: async (id: string) => {
+    softDeleteScheduleByIdCalls.push(id);
+  },
+  permanentlyDeleteScheduleById: async (id: string) => {
+    permanentlyDeleteScheduleByIdCalls.push(id);
   },
   getRunById: async () => getRunByIdResult,
   listRuns: async () => listRunsResult,
@@ -971,18 +976,22 @@ describe("CronService", () => {
   // ── deleteSchedule ──
 
   describe("deleteSchedule", () => {
-    test("calls repo.deleteScheduleById with hard=false by default", async () => {
+    test("calls repo.softDeleteScheduleById by default", async () => {
       await CronService.deleteSchedule({ id: "sched-1" }, "en");
 
       expect(getScheduleByIdCalls).toContain("sched-1");
-      expect(deleteScheduleByIdCalls).toHaveLength(1);
-      expect(deleteScheduleByIdCalls[0]).toEqual({ id: "sched-1", hard: false });
+      expect(softDeleteScheduleByIdCalls).toHaveLength(1);
+      expect(softDeleteScheduleByIdCalls[0]).toBe("sched-1");
+      expect(permanentlyDeleteScheduleByIdCalls).toHaveLength(0);
     });
 
-    test("calls repo.deleteScheduleById with hard=true when specified", async () => {
+    test("calls repo.permanentlyDeleteScheduleById when hard=true", async () => {
       await CronService.deleteSchedule({ id: "sched-1", hard: true }, "en");
 
-      expect(deleteScheduleByIdCalls[0]).toEqual({ id: "sched-1", hard: true });
+      expect(getScheduleByIdCalls).toContain("sched-1");
+      expect(permanentlyDeleteScheduleByIdCalls).toHaveLength(1);
+      expect(permanentlyDeleteScheduleByIdCalls[0]).toBe("sched-1");
+      expect(softDeleteScheduleByIdCalls).toHaveLength(0);
     });
 
     test("throws when schedule not found", async () => {

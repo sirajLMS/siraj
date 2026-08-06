@@ -9,17 +9,21 @@ import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { UserEntityOnboardingLabels } from "@/shared/locale/types/onboarding/userEntity";
 
 type OnboardingFields = UserEntityOnboardingFieldsShape & FieldValues;
 
-function validationMessage(labels: UserEntityOnboardingLabels, message: string | undefined): string | undefined {
+function validationMessage(
+  labels: UserEntityOnboardingLabels,
+  message: string | { message?: string } | undefined
+): string | undefined {
   if (!message) return undefined;
-  const key = message as keyof UserEntityOnboardingLabels["validation"];
-  return labels.validation[key] ?? message;
+  const msgStr = typeof message === "string" ? message : message.message;
+  if (!msgStr) return undefined;
+  const key = msgStr as keyof UserEntityOnboardingLabels["validation"];
+  return labels.validation[key] ?? msgStr;
 }
 
 interface TextFieldWrapperProps<T extends OnboardingFields> {
@@ -60,7 +64,7 @@ function TextFieldWrapper<T extends OnboardingFields>({
             error={errorKey ? !!errors[errorKey] : false}
             helperText={validationMessage(
               labels,
-              errorKey ? (errors[errorKey]?.message as string | undefined) : undefined
+              errorKey ? ((errors[errorKey] as { message?: string })?.message as string | undefined) : undefined
             )}
             fullWidth
             sx={outlinedInputSx}
@@ -102,28 +106,8 @@ interface SimpleTextFieldProps<T extends OnboardingFields> {
   readonly type?: string;
 }
 
-function SimpleTextField<T extends OnboardingFields>({
-  control,
-  errors,
-  labels,
-  fieldName,
-  labelKey,
-  placeholderKey,
-  errorKey,
-  type = "text",
-}: SimpleTextFieldProps<T>) {
-  return (
-    <TextFieldWrapper
-      control={control}
-      errors={errors}
-      labels={labels}
-      fieldName={fieldName as Path<T>}
-      labelKey={labelKey}
-      placeholderKey={placeholderKey}
-      type={type}
-      errorKey={errorKey}
-    />
-  );
+function SimpleTextField<T extends OnboardingFields>(props: SimpleTextFieldProps<T>) {
+  return <TextFieldWrapper {...props} fieldName={props.fieldName as Path<T>} />;
 }
 
 function createTextFieldComponent(
@@ -179,7 +163,7 @@ function PhoneField<T extends OnboardingFields>({ control, errors, labels, phone
         required={phoneRequired}
         placeholder={labels.placeholders.phone}
         error={!!errors.phone}
-        helperText={validationMessage(labels, errors.phone?.message as string | undefined)}
+        helperText={validationMessage(labels, (errors.phone as { message?: string })?.message)}
       />
     </Grid>
   );
@@ -200,7 +184,7 @@ function TimezoneField<T extends OnboardingFields>({ control, errors, labels }: 
         control={control}
         render={({ field }) => (
           <TimezoneSelect
-            value={field.value ? toGraphqlIanaTimezone(field.value as string) : null}
+            value={field.value ? toGraphqlIanaTimezone(field.value) : null}
             onChangeAction={value => {
               field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
             }}
@@ -208,7 +192,7 @@ function TimezoneField<T extends OnboardingFields>({ control, errors, labels }: 
             label={labels.fields.timezone}
             required
             error={!!errors.timezone}
-            helperText={validationMessage(labels, errors.timezone?.message as string | undefined)}
+            helperText={validationMessage(labels, (errors.timezone as { message?: string })?.message)}
             fullWidth
           />
         )}
@@ -230,9 +214,7 @@ function CurrencyField<T extends OnboardingFields>({ control, labels }: Currency
         name={displayCurrencyField}
         control={control}
         render={({ field, fieldState }) => {
-          const option: CurrencyOption | null = field.value
-            ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
-            : null;
+          const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
           return (
             <CurrencySelect
               currency={option}
@@ -242,7 +224,7 @@ function CurrencyField<T extends OnboardingFields>({ control, labels }: Currency
               onBlurAction={field.onBlur}
               label={labels.fields.displayCurrency}
               error={Boolean(fieldState.error)}
-              helperText={validationMessage(labels, fieldState.error?.message as string | undefined)}
+              helperText={validationMessage(labels, fieldState.error?.message)}
               fullWidth
             />
           );

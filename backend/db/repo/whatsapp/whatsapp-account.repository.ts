@@ -11,15 +11,15 @@ import type {
   WhatsappAccountSelectType,
   WhatsappAccountUpdateInput,
 } from "@/backend/types/whatsapp/whatsapp-account.types";
-import {
+import { buildReturnType as _buildReturnType } from "@/backend/types/whatsapp/whatsapp-account.types";
+
+// Re-export the type-guard helpers and buildReturnType for backward-compatible imports
+// (the webhook handler and other consumers import them from this module).
+export {
   buildReturnType,
   isValidLimitTier,
   isValidQualityRating,
 } from "@/backend/types/whatsapp/whatsapp-account.types";
-
-// Re-export the type-guard helpers for backward-compatible imports
-// (the webhook handler and other consumers import them from this module).
-export { buildReturnType, isValidLimitTier, isValidQualityRating };
 
 /**
  * Convert a SelectType row (with encrypted fields and raw enum strings)
@@ -34,7 +34,7 @@ export function toReturnType(row: WhatsappAccountSelectType): WhatsappAccountRet
     portfolioMessagingLimitTier,
     ...rest
   } = row;
-  return buildReturnType(rest, qualityRating, portfolioMessagingLimitTier);
+  return _buildReturnType(rest, qualityRating, portfolioMessagingLimitTier);
 }
 
 /**
@@ -71,7 +71,7 @@ async function findSingleRow(
   whereClause: ReturnType<typeof eq>,
   tx?: DBTransaction
 ): Promise<WhatsappAccountReturnType | null> {
-  const q = queryDb(tx);
+  const q = queryDb(tx) as unknown as typeof db;
   const rows = await q.select().from(whatsappAccounts).where(whereClause).limit(1);
   return rows[0] ? toReturnType(rows[0]) : null;
 }
@@ -99,7 +99,7 @@ async function findManyRows(
   tx?: DBTransaction,
   orderByClause?: ReturnType<typeof asc> | ReturnType<typeof desc>
 ): Promise<WhatsappAccountReturnType[]> {
-  const q = queryDb(tx);
+  const q = queryDb(tx) as unknown as typeof db;
   const rows = orderByClause
     ? await q.select().from(whatsappAccounts).where(whereClause).orderBy(orderByClause)
     : await q.select().from(whatsappAccounts).where(whereClause);
@@ -134,7 +134,7 @@ export namespace WhatsappAccountRepository {
    * never expose the return value to GraphQL clients. See `toReturnType` for why.
    */
   export async function findFirstActiveForCredentials(tx?: DBTransaction): Promise<WhatsappAccountSelectType | null> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) as unknown as typeof db;
     const rows = await q
       .select()
       .from(whatsappAccounts)
@@ -161,7 +161,7 @@ export namespace WhatsappAccountRepository {
     if (phoneNumberIds.length === 0) {
       return result;
     }
-    const q = queryDb(tx);
+    const q = queryDb(tx) as unknown as typeof db;
     const rows = await q.select().from(whatsappAccounts).where(inArray(whatsappAccounts.phoneNumberId, phoneNumberIds));
     for (const row of rows) {
       result.set(row.phoneNumberId, toReturnType(row));

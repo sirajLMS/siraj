@@ -76,25 +76,32 @@ export class GoogleMeetAdapter implements IMeetingChannel {
   private cachedToken: CachedToken | null = null;
 
   constructor(opts?: GoogleMeetAdapterOptions) {
-    const envConfig = opts?.serviceAccountJson !== undefined ? null : getEnvironmentConfig();
+    // If the caller provided a service account JSON explicitly, do not read env
+    // config; otherwise load runtime environment configuration.
+    const envConfig = opts?.serviceAccountJson != null ? null : getEnvironmentConfig();
     this.rawServiceAccountJson = opts?.serviceAccountJson ?? envConfig?.googleMeetServiceAccountJson;
     this.impersonateSubject = opts?.impersonateSubject ?? envConfig?.googleMeetImpersonateSubject;
     this.defaultAccessType = opts?.defaultAccessType ?? 1;
   }
 
   async validateConfig(): Promise<boolean> {
-    if (!this.rawServiceAccountJson) {
+    if (this.rawServiceAccountJson == null) {
       logger.warn("GoogleMeetAdapter: missing service account JSON");
       return false;
     }
-    if (!this.impersonateSubject) {
+
+    if (this.impersonateSubject == null) {
       logger.warn("GoogleMeetAdapter: missing impersonate subject");
       return false;
     }
+
     try {
       this.parsedServiceAccount = this.parseServiceAccount();
       return true;
-    } catch {
+    } catch (err: unknown) {
+      logger.warn("GoogleMeetAdapter: invalid service account JSON", {
+        message: err instanceof Error ? err.message : String(err),
+      });
       return false;
     }
   }
@@ -117,7 +124,8 @@ export class GoogleMeetAdapter implements IMeetingChannel {
         throw error;
       }
     }
-    throw lastError;
+    if (lastError instanceof Error) throw lastError;
+    throw new Error(String(lastError));
   }
 
   private async resolveAccessToken(input: GenerateMeetingInput): Promise<string> {
@@ -240,10 +248,10 @@ export class GoogleMeetAdapter implements IMeetingChannel {
 
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("google_meet", retryAfter ? parseInt(retryAfter, 10) : undefined);
+      throw new RateLimitedError("google_meet", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
     }
 
-    if (!response.ok) {
+    if (response.ok === false) {
       const errorBody = await this.parseErrorBody(response);
       throw new GoogleMeetApiError(
         errorBody?.error?.message ?? `Google token exchange failed (${response.status})`,
@@ -346,7 +354,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
   private async assertSpaceResponseOk(response: Response): Promise<void> {
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("google_meet", retryAfter ? parseInt(retryAfter, 10) : undefined);
+      throw new RateLimitedError("google_meet", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
     }
 
     if (response.status === 403) {
@@ -359,7 +367,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       throw new ProviderUnavailableError("google_meet", response.status, errorBody?.error?.message);
     }
 
-    if (!response.ok) {
+    if (response.ok === false) {
       const errorBody = await this.parseErrorBody(response);
       throw new GoogleMeetApiError(
         errorBody?.error?.message ?? `Google Meet space creation failed (${response.status})`,
@@ -407,7 +415,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       .replace("-----BEGIN PRIVATE KEY-----", "")
       .replace("-----END PRIVATE KEY-----", "")
       .replace(/\s/g, "");
-    const der = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+    const der = Uint8Array.from(atob(pemContents), c => c.codePointAt(0) ?? 0);
     return crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
   }
 

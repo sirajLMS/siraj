@@ -44,34 +44,60 @@ export function ScheduleOverviewListShell<Row>({
   pagination,
   sx,
 }: Readonly<ScheduleOverviewListShellProps<Row>>) {
+  const isLoadingWithNoRows = loading && rows.length === 0;
+  const hasNoRows = rows.length === 0;
+
+  const defaultSkeletonContent = (
+    <Stack spacing={2}>
+      <Paper
+        elevation={0}
+        sx={theme => ({
+          borderRadius: 2,
+          border: `1px solid ${theme.palette.border.light}`,
+          backgroundColor: theme.palette.surfaceContainerLowest,
+        })}
+      >
+        <ScheduleOverviewCardSkeleton />
+      </Paper>
+    </Stack>
+  );
+
+  let skeletonContent: ReactNode;
+  if (renderSkeleton) {
+    skeletonContent = renderSkeleton();
+  } else {
+    skeletonContent = defaultSkeletonContent;
+  }
+
+  let emptyStateContent: ReactNode;
+  if (renderEmptyState) {
+    emptyStateContent = renderEmptyState();
+  } else {
+    emptyStateContent = <ScheduleOverviewEmptyState message={emptyMessage} />;
+  }
+
+  const listContent = (
+    <Stack spacing={0}>
+      {rows.map(row => (
+        <Fragment key={getKey(row)}>{renderItem(row)}</Fragment>
+      ))}
+    </Stack>
+  );
+
+  let mainContent: ReactNode;
+  if (isLoadingWithNoRows) {
+    mainContent = skeletonContent;
+  } else if (hasNoRows) {
+    mainContent = emptyStateContent;
+  } else {
+    mainContent = listContent;
+  }
+
   return (
     <Stack sx={sx}>
-      {loading && rows.length === 0 ? (
-        (renderSkeleton?.() ?? (
-          <Stack spacing={2}>
-            <Paper
-              elevation={0}
-              sx={theme => ({
-                borderRadius: 2,
-                border: `1px solid ${theme.palette.border.light}`,
-                backgroundColor: theme.palette.surfaceContainerLowest,
-              })}
-            >
-              <ScheduleOverviewCardSkeleton />
-            </Paper>
-          </Stack>
-        ))
-      ) : rows.length === 0 ? (
-        (renderEmptyState?.() ?? <ScheduleOverviewEmptyState message={emptyMessage} />)
-      ) : (
-        <Stack spacing={0}>
-          {rows.map(row => (
-            <Fragment key={getKey(row)}>{renderItem(row)}</Fragment>
-          ))}
-        </Stack>
-      )}
+      {mainContent}
 
-      {pagination ? (
+      {pagination && (
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <PaginationControls
             page={pagination.page}
@@ -81,7 +107,7 @@ export function ScheduleOverviewListShell<Row>({
             onPageChange={pagination.onPageChange}
           />
         </Box>
-      ) : null}
+      )}
     </Stack>
   );
 }

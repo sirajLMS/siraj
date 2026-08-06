@@ -1,5 +1,5 @@
 import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
-import { AppPermission, type CurrencyCode, StudentStatus } from "@/backend/enum";
+import { AppPermission, StudentStatus } from "@/backend/enum";
 import { parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
@@ -27,8 +27,8 @@ type ParentProfileRepoResult = NonNullable<Awaited<ReturnType<typeof ParentRepos
 async function toParentProfileResult(profile: ParentProfileRepoResult, locale?: string): Promise<ParentProfileResult> {
   const displayAmount = await FxDisplayService.convertForDisplay(
     profile.feeAmount,
-    profile.currency as CurrencyCode | null | undefined,
-    profile.displayCurrency as CurrencyCode | null | undefined,
+    profile.currency,
+    profile.displayCurrency,
     profile.id,
     undefined,
     locale

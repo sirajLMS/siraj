@@ -24,10 +24,10 @@ const PROVIDER_KEY_PREFIXES: Record<string, readonly string[]> = {
   microsoft_teams: ["MS_TEAMS_"],
 };
 
-const SHARED_MEETING_KEYS = ["OAUTH_REDIRECT_BASE_URL"];
+const SHARED_MEETING_KEYS = new Set(["OAUTH_REDIRECT_BASE_URL"]);
 
 function isProviderKey(key: string, providerSlug: string): boolean {
-  if (SHARED_MEETING_KEYS.includes(key)) {
+  if (SHARED_MEETING_KEYS.has(key)) {
     return true;
   }
 

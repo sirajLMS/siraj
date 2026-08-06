@@ -792,8 +792,8 @@ export namespace TeacherAvailabilityRepository {
   ];
 
   function computeSlotBounds(slots: { startTime: Date; endTime: Date }[]): { earliestStart: Date; latestEnd: Date } {
-    const earliestStart = slots.reduce((min, s) => (s.startTime < min ? s.startTime : min), slots[0].startTime);
-    const latestEnd = slots.reduce((max, s) => (s.endTime > max ? s.endTime : max), slots[0].endTime);
+    const earliestStart = new Date(Math.min(...slots.map(s => s.startTime.getTime())));
+    const latestEnd = new Date(Math.max(...slots.map(s => s.endTime.getTime())));
     return { earliestStart, latestEnd };
   }
 

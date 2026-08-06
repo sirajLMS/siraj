@@ -68,7 +68,7 @@ export function isNeonHttpEligible(): boolean {
     const databaseUrl = process.env.DATABASE_URL || getEnvironmentConfig().databaseUrl;
     if (!databaseUrl) return false;
     const hostname = new URL(databaseUrl).hostname;
-    return /\.neon\.tech$/.test(hostname);
+    return hostname.endsWith(".neon.tech");
   } catch {
     return false;
   }

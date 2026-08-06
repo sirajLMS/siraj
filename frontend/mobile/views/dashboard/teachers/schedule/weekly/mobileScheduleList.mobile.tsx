@@ -385,11 +385,13 @@ function TimeSlotRow({
     );
   }
 
+  const slotMinHeight = isLunch ? 48 : slotClasses.length > 0 ? 96 : 64;
+
   return (
     <Box
       sx={theme => ({
         display: "flex",
-        minHeight: isLunch ? 48 : slotClasses.length > 0 ? 96 : 64,
+        minHeight: slotMinHeight,
         backgroundColor: theme.palette.background.paper,
       })}
     >

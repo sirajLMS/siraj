@@ -60,7 +60,7 @@ export const teacherOwnEditSchemaFactory = (labels: TeacherProfileValidationLabe
       // Enforce required: empty/whitespace/missing nationalId is invalid.
       if (!data.nationalId || data.nationalId.trim() === "") {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom" as const,
           path: ["nationalId"],
           message: labels.nationalIdRequired,
         });
@@ -68,7 +68,7 @@ export const teacherOwnEditSchemaFactory = (labels: TeacherProfileValidationLabe
       }
       if (!isValidNationalIdForCountry(data.nationalId, data.nationality)) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom" as const,
           path: ["nationalId"],
           message: labels.nationalIdInvalid,
         });

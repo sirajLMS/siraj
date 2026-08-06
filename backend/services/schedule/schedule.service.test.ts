@@ -19,8 +19,7 @@ afterEach(() => {
 describe("ScheduleService.getDailySchedule authorization", () => {
   test("allows staff with schedule.view_all only", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockImplementation(async (_userId, keys) => {
-      const list = keys as AppPermission[];
-      return list.includes(AppPermission.SCHEDULE_VIEW_ALL);
+      return keys.includes(AppPermission.SCHEDULE_VIEW_ALL);
     });
     spyOn(resolveViewerTimezoneModule, "resolveViewerTimezone").mockResolvedValue(IanaTimezone.UTC);
     spyOn(SchedulingRepository, "getDailySchedule").mockResolvedValue([]);
@@ -36,8 +35,7 @@ describe("ScheduleService.getDailySchedule authorization", () => {
 
   test("allows users with schedule.view_list", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockImplementation(async (_userId, keys) => {
-      const list = keys as AppPermission[];
-      return list.includes(AppPermission.SCHEDULE_VIEW_LIST);
+      return keys.includes(AppPermission.SCHEDULE_VIEW_LIST);
     });
     spyOn(resolveViewerTimezoneModule, "resolveViewerTimezone").mockResolvedValue(IanaTimezone.UTC);
     spyOn(SchedulingRepository, "getDailySchedule").mockResolvedValue([]);

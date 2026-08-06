@@ -99,21 +99,35 @@ export function ParentScheduleCardMobile({ row, labels }: Readonly<ParentSchedul
             emphasizeLink={Boolean(teacherProfileHref)}
           />
         </Stack>
-        {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen }) ? (
-          <MobileMeetingJoinAction
-            variant="icon"
-            joinUrl={row.meetingJoinUrl}
-            meeting={row.effectiveMeeting}
-            disabled={!row.videoEnabled}
-            label={labels.schedule.joinVideo}
-            emptyRole="parent"
-          />
-        ) : row.isFrozen ? (
-          <Tooltip title={labels.schedule.contactAdmin}>
-            <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
-          </Tooltip>
-        ) : null}
+        {renderActionArea(row, labels)}
       </Box>
     </MobileCardListItem>
   );
+}
+
+function renderActionArea(row: ParentScheduleRow, labels: ParentDashboardLabels): ReactNode {
+  const canJoin = isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen });
+
+  if (canJoin) {
+    return (
+      <MobileMeetingJoinAction
+        variant="icon"
+        joinUrl={row.meetingJoinUrl}
+        meeting={row.effectiveMeeting}
+        disabled={!row.videoEnabled}
+        label={labels.schedule.joinVideo}
+        emptyRole="parent"
+      />
+    );
+  }
+
+  if (row.isFrozen) {
+    return (
+      <Tooltip title={labels.schedule.contactAdmin}>
+        <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
+      </Tooltip>
+    );
+  }
+
+  return null;
 }

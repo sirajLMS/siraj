@@ -48,11 +48,11 @@ export function TeacherLessonReportsDesktopView({
 
         {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{shell.emptyMessage}</Typography> : null}
 
-        {!loading && !error && rows.length === 0 ? (
+        {loading || error ? null : rows.length === 0 ? (
           <Typography sx={{ color: theme => theme.palette.text.secondary }}>{shell.emptyMessage}</Typography>
         ) : null}
 
-        {!loading && !error && rows.length > 0 ? (
+        {loading || error ? null : rows.length > 0 ? (
           <Stack spacing={1}>
             {rows.map((row, index) => (
               <LessonReportCardDesktop
@@ -105,12 +105,12 @@ function LessonReportCardDesktop({ row, labels, locale, resolveStatusLabel }: Re
         ) : null}
       </Box>
       <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1 }}>
-        {row.durationMinutes != null ? (
+        {row.durationMinutes !== undefined && row.durationMinutes !== null ? (
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
             {labels.durationMinutes}: {row.durationMinutes}
           </Typography>
         ) : null}
-        {row.completionPercentage != null ? (
+        {row.completionPercentage !== undefined && row.completionPercentage !== null ? (
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
             {labels.completionPercentage}: {row.completionPercentage}%
           </Typography>

@@ -24,7 +24,7 @@ import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { AuditAction, AuditEntityType, CreateAuditLogInput } from "@/backend/types";
+import type { AuditAction, CreateAuditLogInput } from "@/backend/types";
 import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -71,10 +71,7 @@ async function emitAudit(
   const input: CreateAuditLogInput = {
     actorUserId,
     actorType: "USER",
-    // `SITE_CONTENT` / `UPSERT` are not yet members of the canonical unions;
-    // cast keeps the runtime payload the task spec requires while the types
-    // file is extended in a follow-up.
-    entityType: "SITE_CONTENT" as AuditEntityType,
+    entityType: "SITE_CONTENT",
     entityId,
     action,
   };
@@ -96,14 +93,14 @@ export namespace SiteContentService {
   }
 
   export async function listPublishedSiteContent(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
-    return SiteContentRepository.listPublished(tx);
+    return SiteContentRepository._listPublished(tx);
   }
 
   export async function listSiteContentByType(
     contentType: string,
     tx?: DBTransaction
   ): Promise<SiteContentSelectType[]> {
-    return SiteContentRepository.listByContentType(contentType, tx);
+    return SiteContentRepository._listByContentType(contentType, tx);
   }
 
   export async function getSiteContentById(id: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
@@ -128,7 +125,7 @@ export namespace SiteContentService {
 
     const result = await SiteContentRepository.upsert({ ...input, updatedByUserId: actorUserId }, tx);
 
-    await emitAudit(actorUserId, "UPSERT" as AuditAction, input.slug, tx);
+    await emitAudit(actorUserId, "UPSERT", input.slug, tx);
 
     return result;
   }
@@ -142,7 +139,7 @@ export namespace SiteContentService {
   ): Promise<SiteContentSelectType | null> {
     await assertManagePermission(actorUserId, tErrors);
 
-    const result = await SiteContentRepository.updatePublishState(id, isPublished, tx);
+    const result = await SiteContentRepository._updatePublishState(id, isPublished, tx);
 
     await emitAudit(actorUserId, "UPDATE", id, tx);
 
@@ -155,7 +152,7 @@ export namespace SiteContentService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<void> {
-    await deleteSiteContent(txn => SiteContentRepository.deleteById(id, txn), id, actorUserId, tErrors, tx);
+    await deleteSiteContent(txn => SiteContentRepository._deleteById(id, txn), id, actorUserId, tErrors, tx);
   }
 
   export async function deleteSiteContentBySlug(
@@ -164,7 +161,7 @@ export namespace SiteContentService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<void> {
-    await deleteSiteContent(txn => SiteContentRepository.deleteBySlug(slug, txn), slug, actorUserId, tErrors, tx);
+    await deleteSiteContent(txn => SiteContentRepository._deleteBySlug(slug, txn), slug, actorUserId, tErrors, tx);
   }
 
   /**

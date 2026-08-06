@@ -59,7 +59,15 @@ export const dashboardCronEn: CronLabels = {
   queueStatsFailed: "Failed",
   // Run history
   runsTitle: "Run History",
-  runsCount: count => (count === 0 ? "No runs" : count === 1 ? "1 run" : `${count} runs`),
+  runsCount: count => {
+    if (count === 0) {
+      return "No runs";
+    }
+    if (count === 1) {
+      return "1 run";
+    }
+    return `${count} runs`;
+  },
   statusPending: "Pending",
   statusRunning: "Running",
   statusCompleted: "Completed",

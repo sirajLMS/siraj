@@ -6,6 +6,16 @@ import type { ClassDetailsHeaderProps } from "@/frontend/common/views/dashboard/
 import { getLocalizedClassTypeName } from "@/frontend/common/views/dashboard/classes/details/utils/localizedClassTypeName";
 import { DesktopPageHeader } from "@/frontend/desktop/components/ui";
 
+function getSubtitle(canOverride: boolean, isStudentView: boolean, labels: ClassDetailsHeaderProps["labels"]): string {
+  if (canOverride) {
+    return labels.pageSubtitleAdmin;
+  }
+  if (isStudentView) {
+    return labels.pageSubtitleStudent;
+  }
+  return labels.pageSubtitleTeacher;
+}
+
 export function ClassDetailsHeaderDesktop({
   instance,
   canOverride,
@@ -13,11 +23,7 @@ export function ClassDetailsHeaderDesktop({
   labels,
 }: Readonly<ClassDetailsHeaderProps>) {
   const title = getLocalizedClassTypeName(instance.classType, labels.classTypes, instance.courseName);
-  const subtitle = canOverride
-    ? labels.pageSubtitleAdmin
-    : isStudentView
-      ? labels.pageSubtitleStudent
-      : labels.pageSubtitleTeacher;
+  const subtitle = getSubtitle(canOverride, isStudentView, labels);
 
   return (
     <Box sx={classDetailsContentPaddingSx}>

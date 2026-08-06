@@ -59,7 +59,20 @@ async function setupAdapter() {
  * Finds a query mock call by searching for a substring in the SQL text.
  */
 function findQueryCall(searchText: string) {
-  return queryMock.mock.calls.find(c => typeof c[0] === "string" && (c[0] as string).includes(searchText));
+  return queryMock.mock.calls.find(
+    (c: unknown) => Array.isArray(c) && typeof c[0] === "string" && (c[0] as string).includes(searchText)
+  );
+}
+
+/**
+ * Safely extract the second element (values) from a mock call if present and
+ * ensure it is returned as an array. Avoids unnecessary 'as' type assertions
+ * and keeps the test logic resilient to unexpected shapes.
+ */
+function getCallValues(call: unknown): unknown[] {
+  if (!call || !Array.isArray(call)) return [];
+  const args = (call as unknown[])[1];
+  return Array.isArray(args) ? args : [];
 }
 
 /**
@@ -111,7 +124,7 @@ describe("custom-sql.adapter", () => {
 
     const insertCall = findQueryCall("INSERT INTO cron_queue");
     expect(insertCall).toBeDefined();
-    const values = insertCall?.[1] as unknown[];
+    const values = getCallValues(insertCall);
     expect(values).toContain(job.runId);
     expect(values).toContain(job.scheduleId);
     expect(values).toContain(job.jobKind);
@@ -217,7 +230,8 @@ describe("custom-sql.adapter", () => {
     mockQueryEmpty(0);
     const adapter = await setupAdapter();
 
-    await expect(adapter.complete("nonexistent")).resolves.toBeUndefined();
+    const result = await adapter.complete("nonexistent");
+    expect(result).toBeUndefined();
   });
 
   // ── fail ──
@@ -230,7 +244,7 @@ describe("custom-sql.adapter", () => {
 
     const failCall = findQueryCall("UPDATE cron_queue SET status = 'failed'");
     expect(failCall).toBeDefined();
-    const values = failCall?.[1] as unknown[];
+    const values = getCallValues(failCall);
     expect(values[0]).toBe("cq_fail_1");
     expect(values[1]).toBe("something went wrong");
     expect(values[2]).toBe("stack-trace");
@@ -243,7 +257,7 @@ describe("custom-sql.adapter", () => {
     await adapter.fail("cq_fail_2", "err");
 
     const failCall = findQueryCall("UPDATE cron_queue SET status = 'failed'");
-    expect(failCall?.[1]?.[2]).toBeNull();
+    expect(getCallValues(failCall)[2]).toBeNull();
   });
 
   // ── retry ──
@@ -257,11 +271,11 @@ describe("custom-sql.adapter", () => {
     const retryCall = queryMock.mock.calls.find(
       c =>
         typeof c[0] === "string" &&
-        (c[0] as string).includes("SET status = 'pending'") &&
-        (c[0] as string).includes("available_at = now() + make_interval")
+        c[0].includes("SET status = 'pending'") &&
+        c[0].includes("available_at = now() + make_interval")
     );
     expect(retryCall).toBeDefined();
-    const values = retryCall?.[1] as unknown[];
+    const values = getCallValues(retryCall);
     expect(values[0]).toBe(30);
     expect(values[1]).toBe("cq_retry_1");
     expect(values[2]).toBe(2);
@@ -274,7 +288,8 @@ describe("custom-sql.adapter", () => {
     await adapter.retry("cq_retry_2", 15);
 
     const retryCall = findQueryCall("SET status = 'pending'");
-    expect(retryCall?.[1]?.[2]).toBe(0);
+    const retryValues = getCallValues(retryCall);
+    expect(retryValues[2]).toBe(0);
   });
 
   // ── getQueueStats ──
@@ -336,7 +351,7 @@ describe("custom-sql.adapter", () => {
     expect(queryMock.mock.calls.length).toBeGreaterThan(callsBeforeReinit);
     const createTableCall = queryMock.mock.calls
       .slice(callsBeforeReinit)
-      .find(c => typeof c[0] === "string" && (c[0] as string).includes("CREATE TABLE IF NOT EXISTS cron_queue"));
+      .find(c => typeof c[0] === "string" && c[0].includes("CREATE TABLE IF NOT EXISTS cron_queue"));
     expect(createTableCall).toBeDefined();
   });
 
@@ -359,7 +374,7 @@ describe("custom-sql.adapter", () => {
 
     // The DELETE query should have been issued with the queue id.
     const deleteCall = findQueryCall("DELETE FROM cron_queue");
-    expect(deleteCall?.[1]).toEqual([queueId]);
+    expect(getCallValues(deleteCall)).toEqual([queueId]);
   });
 
   test("fail cleans up internal runId→queueId mapping", async () => {
@@ -372,7 +387,7 @@ describe("custom-sql.adapter", () => {
     await adapter.fail(queueId, "error");
 
     const failCall = findQueryCall("status = 'failed'");
-    expect(failCall?.[1]?.[0]).toBe(queueId);
+    expect(getCallValues(failCall)[0]).toBe(queueId);
   });
 
   // ── race safety (two simulated workers) ──

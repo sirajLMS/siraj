@@ -488,18 +488,18 @@ describe("CronRepository", () => {
 
   // ── 10. deleteScheduleById ──
 
-  cronTest("deleteScheduleById — soft delete sets status to DISABLED", async tx => {
+  cronTest("softDeleteScheduleById — soft delete sets status to DISABLED", async tx => {
     const { schedule } = await setupSchedule(tx, "soft-delete", { nextRunAt: new Date() });
-    await CronRepository.deleteScheduleById(schedule.id, false, tx);
+    await CronRepository.softDeleteScheduleById(schedule.id, tx);
 
     const fetched = await CronRepository.getScheduleById(schedule.id, tx);
     expect(fetched).not.toBeNull();
     expect(fetched?.status).toBe(CronScheduleStatus.DISABLED);
   });
 
-  cronTest("deleteScheduleById — hard delete removes schedule and runs", async tx => {
+  cronTest("permanentlyDeleteScheduleById — hard delete removes schedule and runs", async tx => {
     const { schedule, runId } = await setupClaimedRun(tx, "hard-delete");
-    await CronRepository.deleteScheduleById(schedule.id, true, tx);
+    await CronRepository.permanentlyDeleteScheduleById(schedule.id, tx);
 
     expect(await CronRepository.getScheduleById(schedule.id, tx)).toBeNull();
     expect(await CronRepository.getRunById(runId, tx)).toBeNull();

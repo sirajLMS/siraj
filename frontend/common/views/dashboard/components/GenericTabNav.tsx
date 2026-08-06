@@ -36,9 +36,9 @@ export function GenericTabNav<TabId extends string>(props: Readonly<GenericTabNa
 
   return (
     <ResponsiveViewSwitch
-      mobile={lazyViews.mobile as never}
-      desktop={lazyViews.desktop as never}
-      props={props as never}
+      mobile={lazyViews.mobile}
+      desktop={lazyViews.desktop}
+      props={props as GenericTabNavVariantProps<string>}
     />
   );
 }

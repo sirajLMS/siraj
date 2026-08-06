@@ -5,11 +5,13 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { OverrideEditControlsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEditControls.desktop";
 import { OverrideEffectiveDisplayDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEffectiveDisplay.desktop";
+import { useAppLocale } from "@/shared/locale";
 
 export type { OverrideState };
 
@@ -45,6 +47,7 @@ export function OverridesDataGridDesktop({
   handleOverrideChange,
 }: Readonly<OverridesDataGridProps>) {
   const t = labels;
+  const locale = useAppLocale();
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
   const columns = useMemo<GridColDef<Permission>[]>(() => {
@@ -79,7 +82,9 @@ export function OverridesDataGridDesktop({
           );
           const isAllowedByGroup = baselineGroups.length > 0;
           const baselineText = isAllowedByGroup
-            ? t.allowedViaGroups(baselineGroups.map(g => g.name).join(", "))
+            ? t.allowedViaGroups(
+                baselineGroups.map(g => resolveLocalizedString(g.name, locale) || g.slug || "").join(", ")
+              )
             : t.notSet;
 
           return (
@@ -139,7 +144,7 @@ export function OverridesDataGridDesktop({
         },
       },
     ];
-  }, [t, userGroups, localOverrides, mode, isDialogLoading, handleOverrideChange, labels]);
+  }, [t, userGroups, localOverrides, mode, isDialogLoading, handleOverrideChange, labels, locale]);
 
   return (
     <DesktopAppDataGrid<Permission>

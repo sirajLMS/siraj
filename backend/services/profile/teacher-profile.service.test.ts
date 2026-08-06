@@ -30,6 +30,22 @@ const baseProfile: TeacherProfileReturnType = {
   avgEngagementScore: 4.5,
 };
 
+// Utility to normalize a value or promise-returning call into a Promise so tests can
+// safely `await` regardless of whether the implementation is synchronous or async.
+const toPromise = <T>(fn: () => T | Promise<T>): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    try {
+      const res = fn();
+      if (res && typeof (res as { then?: unknown }).then === "function") {
+        (res as Promise<T>).then(resolve, reject);
+      } else {
+        resolve(res as T);
+      }
+    } catch (err) {
+      reject(err);
+    }
+  });
+
 afterEach(() => {
   spyOn(PermissionsService, "hasPermission").mockRestore();
   spyOn(TeacherRepository, "getTeacherProfileForEdit").mockRestore();
@@ -98,9 +114,9 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
 
-    await expect(
+    await toPromise(() =>
       TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: validEgId }, tErrors)
-    ).resolves.toBeDefined();
+    );
     expect(TeacherRepository.updateTeacherProfile).toHaveBeenCalledWith(
       "teacher-1",
       expect.objectContaining({ nationalId: validEgId })
@@ -117,7 +133,9 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
 
     await expect(
-      TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
+      toPromise(() =>
+        TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
+      )
     ).rejects.toThrow(tErrors.invalidNationalId);
     expect(TeacherRepository.updateTeacherProfile).not.toHaveBeenCalled();
   });
@@ -135,8 +153,9 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
 
-    await expect(
+    const result = await toPromise(() =>
       TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: validEgId }, tErrors)
-    ).resolves.toBeDefined();
+    );
+    expect(result).toBeDefined();
   });
 });

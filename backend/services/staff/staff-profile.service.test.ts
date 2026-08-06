@@ -12,8 +12,7 @@ afterEach(() => {
 describe("StaffProfileService.getTeacherProfileForView", () => {
   test("allows staff with any profile view_other permission", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockImplementation(async (_userId, keys) => {
-      const list = keys as AppPermission[];
-      return list.includes(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER);
+      return keys.includes(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER);
     });
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue({
       id: "teacher-1",

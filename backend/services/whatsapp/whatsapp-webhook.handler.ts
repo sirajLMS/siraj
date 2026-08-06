@@ -434,30 +434,22 @@ async function handleTemplateLifecycle(
  * Build the update payload and audit changes object from webhook `value` fields.
  * Extracted from `applyPhoneNumberUpdate` to reduce cognitive complexity.
  */
-function buildPhoneNumberUpdate(
-  value: Record<string, unknown>,
-  fieldMapping: { throughput?: boolean; maxDaily?: boolean; quality?: boolean }
-): { update: WhatsappAccountUpdateInput; changes: Record<string, unknown> } {
-  const update: WhatsappAccountUpdateInput = { lastWebhookAt: new Date() };
-  const changes: Record<string, unknown> = {};
 
-  // r10-006: throughputLevel is intentionally NOT validated via coerceLimitTier.
-  // It is a raw varchar (STANDARD/COEXISTENCE/HIGH) in the DB schema and service layer,
-  // separate from portfolioMessagingLimitTier which uses the WhatsappLimitTier enum.
-  // coerceLimitTier validates WhatsappLimitTier values only; applying it here would
-  // reject valid throughput_level values. Store the raw string verbatim.
-  if (fieldMapping.throughput && typeof value.throughput_level === "string" && value.throughput_level) {
-    update.throughputLevel = value.throughput_level;
-    changes.throughputLevel = update.throughputLevel;
+function parseMaxPhoneNumbers(maxPhones: unknown): string | null {
+  if (typeof maxPhones === "number" && Number.isFinite(maxPhones)) {
+    return String(Math.trunc(maxPhones));
   }
+  if (typeof maxPhones === "string") {
+    const trimmed = maxPhones.trim();
+    if (trimmed.length > 0 && /^\d+$/.test(trimmed)) {
+      return trimmed;
+    }
+  }
+  return null;
+}
 
-  if (
-    fieldMapping.maxDaily &&
-    typeof value.max_daily_conversations_per_business === "string" &&
-    value.max_daily_conversations_per_business
-  ) {
-    // r10-042: Coerce portfolioMessagingLimitTier via coerceLimitTier to ensure
-    // only valid WhatsappLimitTier enum values are persisted (matches syncFromMeta).
+function applyMaxDailyUpdate(value: Record<string, unknown>, update: WhatsappAccountUpdateInput, changes: Record<string, unknown>) {
+  if (typeof value.max_daily_conversations_per_business === "string" && value.max_daily_conversations_per_business) {
     const coerced = coerceLimitTier(value.max_daily_conversations_per_business);
     if (coerced) {
       update.portfolioMessagingLimitTier = coerced;
@@ -468,9 +460,25 @@ function buildPhoneNumberUpdate(
       });
     }
   }
+}
+
+function buildPhoneNumberUpdate(
+  value: Record<string, unknown>,
+  fieldMapping: { throughput?: boolean; maxDaily?: boolean; quality?: boolean }
+): { update: WhatsappAccountUpdateInput; changes: Record<string, unknown> } {
+  const update: WhatsappAccountUpdateInput = { lastWebhookAt: new Date() };
+  const changes: Record<string, unknown> = {};
+
+  if (fieldMapping.throughput && typeof value.throughput_level === "string" && value.throughput_level) {
+    update.throughputLevel = value.throughput_level;
+    changes.throughputLevel = update.throughputLevel;
+  }
+
+  if (fieldMapping.maxDaily) {
+    applyMaxDailyUpdate(value, update, changes);
+  }
 
   if (fieldMapping.quality && typeof value.quality_rating === "string" && value.quality_rating) {
-    // Coerce quality_rating via the canonical helper (H4+M6) — same logic as syncFromMeta.
     const coerced = coerceQualityRating(value.quality_rating);
     if (coerced) {
       update.qualityRating = coerced;
@@ -479,8 +487,16 @@ function buildPhoneNumberUpdate(
   }
 
   const maxPhones = value.max_phone_numbers_per_business;
-  if (maxPhones !== undefined && maxPhones !== null && maxPhones !== "" && !Number.isNaN(Number(maxPhones))) {
-    update.maxPhoneNumbersPerBusiness = String(maxPhones);
+  if (maxPhones !== undefined && maxPhones !== null) {
+    const maxPhonesStr = parseMaxPhoneNumbers(maxPhones);
+    if (maxPhonesStr !== null) {
+      update.maxPhoneNumbersPerBusiness = maxPhonesStr;
+      changes.maxPhoneNumbersPerBusiness = maxPhonesStr;
+    } else {
+      logger.warn("whatsapp-webhook-handler: invalid max_phone_numbers_per_business value, skipping", {
+        rawValue: maxPhones,
+      });
+    }
   }
 
   return { update, changes };

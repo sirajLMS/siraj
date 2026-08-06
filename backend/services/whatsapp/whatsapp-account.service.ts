@@ -81,6 +81,20 @@ function assertValidId(id: string, tErrors: ErrorsLabels): void {
 }
 
 /**
+ * Extracts a safe error description from an unknown error value.
+ * Avoids leaking DB internals per r10-036.
+ */
+function getErrorDescription(error: unknown): string {
+  if (error instanceof WhatsappAccountValidationError) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.constructor.name;
+  }
+  return typeof error;
+}
+
+/**
  * Masks a phone number for safe logging (r10-012).
  *
  * Returns `"unknown"` for nullish input; otherwise exposes only the last 4
@@ -266,7 +280,7 @@ export namespace WhatsappAccountService {
       typeof input.encryptedAccessToken === "string" &&
       input.encryptedAccessToken.trim().length > 0;
     const effectiveIsActive = hasAccessToken ? input.isActive : false;
-    if (input.isActive && !hasAccessToken) {
+    if (input.isActive && hasAccessToken === false) {
       const accountIdentifier = input.displayPhoneNumber
         ? maskPhoneNumber(input.displayPhoneNumber)
         : `phoneNumberId=***${input.phoneNumberId.slice(-4)}`;
@@ -588,12 +602,7 @@ export namespace WhatsappAccountService {
         // r10-036: Avoid leaking DB internals (constraint messages reveal
         // schema/row internals). For known validation errors, log their
         // message; for unknown errors, log only the constructor name.
-        const errorDescription =
-          error instanceof WhatsappAccountValidationError
-            ? error.message
-            : error instanceof Error
-              ? error.constructor.name
-              : typeof error;
+        const errorDescription = getErrorDescription(error);
         logger.warn(
           `whatsapp-account-service: syncFromMeta failed to write account for phoneNumberId=${phone.id}: ${errorDescription}`,
           { phoneNumberId: phone.id, errorType: errorDescription }

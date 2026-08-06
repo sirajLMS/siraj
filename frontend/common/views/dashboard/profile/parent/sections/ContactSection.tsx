@@ -18,7 +18,7 @@ export function ContactSection(props: ContactSectionProps) {
 
   return (
     <CoreContactSection
-      mode="edit"
+      mode={props.mode}
       scope={props.scope}
       sectionTitle={t.sections.contact}
       phoneLabel={t.fields.phone}

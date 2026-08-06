@@ -90,15 +90,16 @@ function LinkedAvatar({
 }) {
   const avatar = <UserAvatar src={avatarUrl} label={name} size={size} />;
 
-  if (!href) {
-    return avatar;
+  // Prefer a positive condition for readability and to satisfy static analysis rules.
+  if (href) {
+    return (
+      <Box component={Link} href={href} sx={{ display: "inline-flex", textDecoration: "none", flexShrink: 0 }}>
+        {avatar}
+      </Box>
+    );
   }
 
-  return (
-    <Box component={Link} href={href} sx={{ display: "inline-flex", textDecoration: "none", flexShrink: 0 }}>
-      {avatar}
-    </Box>
-  );
+  return avatar;
 }
 
 function PersonBlock({
@@ -275,6 +276,27 @@ function PersonRow({
   readonly teacher: ClassInfoCardProps["teacher"];
   readonly labels: ClassInfoCardProps["labels"]["classInfo"];
 }) {
+  // Extract nodes before returning JSX to avoid nested/inline ternaries and improve readability.
+  const studentNameNode = student.id ? (
+    <StudentEntityLink studentId={student.id} name={student.name ?? ""} variant="bodyLg" />
+  ) : (
+    <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
+      {student.name ?? ""}
+    </Typography>
+  );
+
+  const teacherNameNode = teacher.id ? (
+    <TeacherEntityLink teacherId={teacher.id} name={teacher.name ?? ""} variant="bodyLg" />
+  ) : (
+    <Typography variant="bodyLg">{teacher.name ?? ""}</Typography>
+  );
+
+  const teacherDetail = teacher.title ? (
+    <StyledPersonDetailCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
+      {teacher.title}
+    </StyledPersonDetailCaption>
+  ) : null;
+
   return (
     <Stack
       direction={{ xs: "column", sm: "row" }}
@@ -290,15 +312,7 @@ function PersonRow({
         name={student.name ?? ""}
         avatarUrl={student.avatarUrl ?? undefined}
         roleLabel={labels.student}
-        nameNode={
-          student.id ? (
-            <StudentEntityLink studentId={student.id} name={student.name ?? ""} variant="bodyLg" />
-          ) : (
-            <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
-              {student.name ?? ""}
-            </Typography>
-          )
-        }
+        nameNode={studentNameNode}
       />
 
       <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
@@ -309,23 +323,31 @@ function PersonRow({
         name={teacher.name ?? ""}
         avatarUrl={teacher.avatarUrl ?? undefined}
         roleLabel={labels.moduleInstructor}
-        nameNode={
-          teacher.id ? (
-            <TeacherEntityLink teacherId={teacher.id} name={teacher.name ?? ""} variant="bodyLg" />
-          ) : (
-            <Typography variant="bodyLg">{teacher.name ?? ""}</Typography>
-          )
-        }
-        detail={
-          teacher.title ? (
-            <StyledPersonDetailCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {teacher.title}
-            </StyledPersonDetailCaption>
-          ) : null
-        }
+        nameNode={teacherNameNode}
+        detail={teacherDetail}
       />
     </Stack>
   );
+}
+
+function getRateSourceLabel(
+  isRateOverridden: boolean,
+  rateSource: string | null,
+  rateLabels: ClassInfoCardProps["labels"]["rate"]
+): string {
+  if (isRateOverridden) {
+    return rateLabels.rateSourceOverride;
+  }
+  switch (rateSource) {
+    case "RECURRING":
+      return rateLabels.rateSourceRecurring;
+    case "SUBJECT":
+      return rateLabels.rateSourceSubject;
+    case "TEACHER":
+      return rateLabels.rateSourceTeacher;
+    default:
+      return rateLabels.rateSourceTeacher;
+  }
 }
 
 export function ClassInfoCard({
@@ -345,13 +367,7 @@ export function ClassInfoCard({
   const studentProfileHref = student.id ? studentHref(student.id) : undefined;
   const teacherProfileHref = profileHrefForTeacher({ teacherId: teacher.id });
   const subjectHref = subjectId ? `/subjects/${subjectId}` : undefined;
-  const rateSourceLabel = isRateOverridden
-    ? labels.rate.rateSourceOverride
-    : rateSource === "RECURRING"
-      ? labels.rate.rateSourceRecurring
-      : rateSource === "SUBJECT"
-        ? labels.rate.rateSourceSubject
-        : labels.rate.rateSourceTeacher;
+  const rateSourceLabel = getRateSourceLabel(isRateOverridden, rateSource, labels.rate);
 
   return (
     <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
@@ -373,7 +389,7 @@ export function ClassInfoCard({
           courseName={courseName}
           labels={labels.classInfo}
         />
-        {isActive ? <ActiveConnectionIndicator activeConnection={labels.classInfo.activeConnection} /> : null}
+        {isActive && <ActiveConnectionIndicator activeConnection={labels.classInfo.activeConnection} />}
       </Stack>
 
       <PersonRow
@@ -384,7 +400,7 @@ export function ClassInfoCard({
         labels={labels.classInfo}
       />
 
-      {rateAmount != null ? (
+      {rateAmount !== null ? (
         <Stack sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: theme => theme.palette.border.light }}>
           <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.header, mb: 2 })}>
             {labels.rate.rateSectionTitle}

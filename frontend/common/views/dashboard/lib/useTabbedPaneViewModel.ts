@@ -96,7 +96,7 @@ export function useTabbedPaneViewModel<TabId extends string, LabelKey extends st
 
   return {
     labels: options.pageLabels as Labels,
-    activeTab: resolvedActiveTab as TabId,
+    activeTab: resolvedActiveTab,
     tabNavItems,
   };
 }

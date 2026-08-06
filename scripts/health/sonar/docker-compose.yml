@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:latest
     container_name: sonarqube-postgres
+    restart: unless-stopped
     environment:
       - POSTGRES_USER=sonarqube
       - POSTGRES_PASSWORD=sonarqube
@@ -20,6 +21,7 @@ services:
   sonarqube:
     image: sonarqube:community
     container_name: sonarqube
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy

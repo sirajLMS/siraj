@@ -1,6 +1,5 @@
 /** Flattened, dot-free top-level translation schema. */
 
-import type { AppLocale } from "@/shared/locale/AppLocale.ts";
 import type { AuthLabels } from "@/shared/locale/types/auth";
 import type { CommonLabels } from "@/shared/locale/types/common";
 // ─── dashboard/leaf interfaces (collected into DashboardTranslations) ────
@@ -130,7 +129,7 @@ import type {
 } from "@/shared/locale/types/ui";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
-export type { AppLocale };
+export type { AppLocale } from "@/shared/locale/AppLocale.ts";
 
 /** DashboardTranslations — group collector for all dashboard-domain labels. */
 export interface DashboardTranslations {

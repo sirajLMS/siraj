@@ -116,7 +116,7 @@ function ActivateCurrencyFormFields({ control, errors, isEdit, excludedCodes, t 
         render={({ field }) => (
           <CountryAutocomplete
             country={resolveCountry(field.value)}
-            onChangeAction={country => field.onChange(country.code as CountryCode)}
+            onChangeAction={country => field.onChange(country.code)}
             onClearAction={() => field.onChange("")}
             label={t.countryField}
             fullWidth

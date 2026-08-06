@@ -1,6 +1,6 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { localeJsonKey, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
@@ -12,7 +12,7 @@ import {
   userPermissionOverrides,
   users,
 } from "@/backend/db/schema";
-import { AccountStatus, OverrideState } from "@/backend/enum";
+import { AccountStatus, CurrencyCode, OverrideState } from "@/backend/enum";
 import { parseAccountStatus, parseOverrideState } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
@@ -121,6 +121,11 @@ export namespace StaffProfileRepository {
     rateCurrency: staffProfiles.rateCurrency,
   } as const;
 
+  const toCurrencyCode = (value: string | null | undefined): CurrencyCode | null => {
+    if (value == null) return null;
+    return (Object.values(CurrencyCode) as string[]).includes(value) ? (value as CurrencyCode) : null;
+  };
+
   function mapManagerDirectoryRow(
     row: {
       id: string;
@@ -148,7 +153,7 @@ export namespace StaffProfileRepository {
       roleSlug: row.roleSlug,
       roleName: row.roleNameMap ? resolveLocalized(row.roleNameMap, locale) : null,
       hourlyRate: row.hourlyRate,
-      rateCurrency: row.rateCurrency as ManagerDirectoryRow["rateCurrency"],
+      rateCurrency: toCurrencyCode(row.rateCurrency),
     };
   }
 
@@ -255,7 +260,7 @@ export namespace StaffProfileRepository {
     options: { search?: string | null; limit: number; permissionGroupFilter?: string | null },
     tx?: DBTransaction
   ): Promise<StaffDirectoryAutocompleteRow[]> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
     const filters: ManagerDirectoryFilters = {
       roleFilter: options.permissionGroupFilter ?? null,
     };
@@ -318,7 +323,7 @@ export namespace StaffProfileRepository {
   }
 
   export async function getOnboardingMetrics(tx?: DBTransaction): Promise<OnboardingMetricsResult> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
 
     const ninetyDaysAgo = sql`NOW() - INTERVAL '90 days'`;
 
@@ -345,7 +350,7 @@ export namespace StaffProfileRepository {
 
   async function findManagerDirectoryRow(
     whereCondition: ReturnType<typeof eq>,
-    queryDbInstance: typeof db | DBTransaction,
+    queryDbInstance: DBQueryExecutor,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
     const results = await queryDbInstance
@@ -365,8 +370,8 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
-    const q = queryDb(tx);
-    return findManagerDirectoryRow(eq(users.id, userId), q as never, locale);
+    const q = queryDb(tx) ?? db;
+    return findManagerDirectoryRow(eq(users.id, userId), q, locale);
   }
 
   export async function findByStaffProfileId(
@@ -374,8 +379,8 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
-    const q = queryDb(tx);
-    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), q as never, locale);
+    const q = queryDb(tx) ?? db;
+    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), q, locale);
   }
 
   export async function updateManagerProfile(
@@ -411,9 +416,7 @@ export namespace StaffProfileRepository {
           .update(staffProfiles)
           .set({
             ...(input.hourlyRateIsSet ? { hourlyRate: input.hourlyRate ?? null } : {}),
-            ...(input.rateCurrencyIsSet
-              ? { rateCurrency: input.rateCurrency as ManagerDirectoryRow["rateCurrency"] }
-              : {}),
+            ...(input.rateCurrencyIsSet ? { rateCurrency: toCurrencyCode(input.rateCurrency ?? null) } : {}),
             updatedAt: new Date(),
           })
           .where(eq(staffProfiles.id, staffProfileId));
@@ -446,7 +449,7 @@ export namespace StaffProfileRepository {
   }
 
   export async function getUserPermissionGroupSlugs(userId: string, tx?: DBTransaction): Promise<string[]> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
 
     const results = await q
       .select({ slug: permissionGroups.slug })
@@ -462,7 +465,7 @@ export namespace StaffProfileRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<StaffPermissionGroupReturnType[]> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
     const key = localeJsonKey(locale);
 
     const rows = await q
@@ -492,7 +495,7 @@ export namespace StaffProfileRepository {
     userId: string,
     tx?: DBTransaction
   ): Promise<StaffPermissionOverrideReturnType[]> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
 
     const rows = await q
       .select({

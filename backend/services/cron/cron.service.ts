@@ -199,7 +199,11 @@ export namespace CronService {
       throw new NotFoundError("SCHEDULE", t.scheduleNotFound(params.id));
     }
 
-    await CronRepository.deleteScheduleById(params.id, params.hard ?? false);
+    if (params.hard) {
+      await CronRepository.permanentlyDeleteScheduleById(params.id);
+    } else {
+      await CronRepository.softDeleteScheduleById(params.id);
+    }
     logger.info("cron.schedule.deleted", { id: params.id, hard: params.hard ?? false });
   }
 
@@ -368,12 +372,12 @@ export namespace CronService {
         [CronRunStatus.RUNNING, CronRunStatus.RETRYING],
         tx
       );
-      if (!updated) {
-        logger.warn("cron.run.completed.skipped", { runId, reason: "statusGuard" });
-        return null;
+      if (updated) {
+        await CronRepository.updateSchedule(updated.scheduleId, { lastRunAt: now }, tx);
+        return updated;
       }
-      await CronRepository.updateSchedule(updated.scheduleId, { lastRunAt: now }, tx);
-      return updated;
+      logger.warn("cron.run.completed.skipped", { runId, reason: "statusGuard" });
+      return null;
     };
 
     const updated = await db.transaction(runner);
@@ -398,12 +402,12 @@ export namespace CronService {
         [CronRunStatus.PENDING, CronRunStatus.RUNNING, CronRunStatus.RETRYING],
         tx
       );
-      if (!updated) {
-        logger.warn("cron.run.failed.skipped", { runId, reason: "statusGuard" });
-        return null;
+      if (updated) {
+        await CronRepository.updateSchedule(updated.scheduleId, { lastRunAt: now }, tx);
+        return updated;
       }
-      await CronRepository.updateSchedule(updated.scheduleId, { lastRunAt: now }, tx);
-      return updated;
+      logger.warn("cron.run.failed.skipped", { runId, reason: "statusGuard" });
+      return null;
     };
 
     const updated = await db.transaction(runner);

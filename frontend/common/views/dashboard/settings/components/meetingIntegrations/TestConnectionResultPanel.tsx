@@ -64,7 +64,7 @@ function TestResultDetails({ labels, result, marketplaceUrl }: TestResultDetails
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      globalThis.setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard not available — silently ignore
     }

@@ -11,15 +11,19 @@ import type { ErrorsLabels } from "@/shared/locale";
 // Constants
 // ---------------------------------------------------------------------------
 
-const PROVIDER_ID = "33333333-3333-4333-8333-333333333333";
-const CONFIG_ID = "44444444-4444-4444-8444-444444444444";
-const CLASS_INSTANCE_ID = "55555555-5555-4555-8555-555555555555";
+const PROVIDER_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
+const CONFIG_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
+const CLASS_INSTANCE_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const UPSTREAM_MEETING_ID = "zoom-meeting-123";
 
 const FAKE_ERRORS = {
-  meetingConfigNotFound: "Meeting config not found.",
-  meetingProviderNotFound: "Meeting provider not found.",
+  meetingConfigNotFound: (id: string) => `Meeting config not found: ${id}`,
+  meetingProviderNotFound: (id: string) => `Meeting provider not found: ${id}`,
 } as unknown as ErrorsLabels;
+
+// ---------------------------------------------------------------------------
+// Mock data builders
+// ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
 // Mock data builders
@@ -57,7 +61,7 @@ function buildUserConfig(overrides: Partial<UserMeetingConfigSelectType> = {}): 
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  } as UserMeetingConfigSelectType;
+  };
 }
 
 interface FakeClassInstance {
@@ -127,7 +131,7 @@ mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
 // --- ClassMeetingConfigRepository
 import type { ClassMeetingConfigSelectType } from "@/backend/types/meeting/class-meeting-config.types";
 
-function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {}): ClassMeetingConfigSelectType {
+function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {}) {
   return {
     id: CONFIG_ID,
     classInstanceId: CLASS_INSTANCE_ID,
@@ -141,7 +145,7 @@ function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {})
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  } as unknown as ClassMeetingConfigSelectType;
+  };
 }
 
 const classConfigGetByIdOrThrowMock = mock(async (): Promise<ClassMeetingConfigSelectType> => buildClassConfig());
@@ -319,7 +323,7 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 /** Shared snapshot object used across cancelMeetingForClassInstance tests. */
-function buildSnapshotForCancel(overrides: Record<string, unknown> = {}): MeetingConfigSnapshot {
+function buildSnapshotForCancel(overrides: Record<string, unknown> = {}) {
   return {
     userMeetingConfigId: null,
     providerId: PROVIDER_ID,
@@ -334,7 +338,7 @@ function buildSnapshotForCancel(overrides: Record<string, unknown> = {}): Meetin
     },
     snapshottedAt: new Date().toISOString(),
     ...overrides,
-  } as unknown as MeetingConfigSnapshot;
+  };
 }
 
 /** Shared assertion for failed generateAndAttach results. */

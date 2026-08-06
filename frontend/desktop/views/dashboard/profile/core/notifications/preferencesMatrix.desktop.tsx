@@ -84,7 +84,7 @@ export function PreferencesMatrixDesktopView({
       headerAlign: "center",
       sortable: false,
       renderCell: params => {
-        const row = params.row as PreferenceMatrixRow;
+        const row = params.row;
         return (
           <ChannelSwitchCell
             row={row}
@@ -106,7 +106,7 @@ export function PreferencesMatrixDesktopView({
         minWidth: 200,
         sortable: false,
         renderCell: params => {
-          const row = params.row as PreferenceMatrixRow;
+          const row = params.row;
           return <EventTypeCell label={getEventLabel(row.eventType)} />;
         },
       },

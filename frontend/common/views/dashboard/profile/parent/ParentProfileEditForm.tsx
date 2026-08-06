@@ -249,7 +249,7 @@ export function ParentProfileEditForm({
           </PrimaryPageAction>
         </Stack>
       </Box>
-      {!isAdminScope ? <ChangePasswordSection /> : null}
+      {isAdminScope ? null : <ChangePasswordSection />}
       <ParentEditFormSnackbars
         successOpen={feedback.successOpen}
         errorOpen={feedback.errorOpen}

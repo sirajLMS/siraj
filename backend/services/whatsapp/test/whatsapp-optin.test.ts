@@ -6,19 +6,19 @@ import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 // ---------------------------------------------------------------------------
 
 const getByUserIdMock = mock(async (): Promise<unknown[]> => []);
-const batchUpsertMock = mock(async (_userId: string, _inputs: unknown[]): Promise<void> => {});
+const batchUpsertMock = mock(async (_userId: string, _inputs: Array<unknown>): Promise<void> => {});
 const hasPermissionMock = mock(async (): Promise<boolean> => true);
 const getUserContextMock = mock(async () => ({
   permissions: [] as string[],
   permissionGroups: ["super_admin"] as string[],
   isSuperAdmin: true,
 }));
-const createManyAuditLogsMock = mock(async (_logs: unknown[]): Promise<void> => {});
+const createManyAuditLogsMock = mock(async (_logs: Array<unknown>): Promise<void> => {});
 
-const listActiveMock = mock(async (): Promise<unknown[]> => []);
-const findByIdMock = mock(async (_id: string): Promise<unknown | null> => null);
-const findByPhoneNumberIdMock = mock(async (_phoneNumberId: string): Promise<unknown | null> => null);
-const findFirstActiveForCredentialsMock = mock(async (_tx?: unknown): Promise<unknown | null> => null);
+const listActiveMock = mock(async (): Promise<Array<unknown>> => []);
+const findByIdMock = mock(async (_id: string): Promise<unknown> => null);
+const findByPhoneNumberIdMock = mock(async (_phoneNumberId: string): Promise<unknown> => null);
+const findFirstActiveForCredentialsMock = mock(async (_tx?: unknown): Promise<unknown> => null);
 const TEST_ACCOUNT_ID = "11111111-1111-1111-1111-111111111111";
 const createWhatsAppAccountMock = mock(async (_input: unknown): Promise<unknown> => ({ id: TEST_ACCOUNT_ID }));
 const updateWhatsAppAccountMock = mock(async (_id: string, _input: unknown): Promise<boolean> => true);

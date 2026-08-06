@@ -156,18 +156,19 @@ export namespace RecurringClassService {
       ? new Date(input.effectiveUntil)
       : new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    await AvailabilityService.assertSchedulePatternAvailable(
-      input.studentId,
-      input.teacherId,
-      activeDays,
+    await AvailabilityService.assertSchedulePatternAvailable({
+      studentId: input.studentId,
+      teacherId: input.teacherId,
+      days: activeDays,
       startDate,
       endDate,
-      [],
-      input.locale,
-      undefined,
-      input.durationMinutes,
-      input.timezone
-    );
+      options: {
+        ignoreInstanceIds: [],
+        locale: input.locale,
+        durationMinutes: input.durationMinutes,
+        timezone: input.timezone,
+      },
+    });
 
     await validateBalanceOrQuota(input, tErrors);
 

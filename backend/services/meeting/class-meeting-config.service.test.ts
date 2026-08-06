@@ -7,33 +7,38 @@ import type {
 } from "@/backend/types/meeting/class-meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import type { ErrorsLabels } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale";
+
+// ---------------------------------------------------------------------------
+// Test helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Helper to assert that a promise rejects with a specific error message.
+ * Returns void directly to avoid SonarQube S4123 "await of non-Promise"
+ * when wrapping expect().rejects.toThrow().
+ */
+function expectRejects(promise: Promise<unknown>, expectedMessage: string): void {
+  expect(promise).rejects.toThrow(expectedMessage);
+}
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const ACTOR_ID = "11111111-1111-4111-8111-111111111111";
-const PROVIDER_ID = "33333333-3333-4333-8333-333333333333";
-const CONFIG_ID = "44444444-4444-4444-8444-444444444444";
-const CLASS_INSTANCE_ID = "55555555-5555-4555-8555-555555555555";
+const ACTOR_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
+const PROVIDER_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
+const CONFIG_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
+const CLASS_INSTANCE_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 
-const FAKE_ERRORS = {
-  unauthorizedAction: "You are not authorized.",
-  meetingProviderInactive: "Provider is inactive.",
-  meetingProvider: {
-    meetingConfigCreateFailed: "Failed to create class meeting config.",
-    meetingConfigUpdateFailed: "Failed to update class meeting config.",
-  },
-  meetingConfigNotFound: "Meeting config not found.",
-  meetingProviderNotFound: "Meeting provider not found.",
-} as unknown as ErrorsLabels;
+const FAKE_ERRORS: ErrorsLabels = getServerTranslations("en").errorsTranslations;
 
 // ---------------------------------------------------------------------------
 // Mock helpers
 // ---------------------------------------------------------------------------
 
 function buildProvider(overrides: Partial<MeetingProviderSelectType> = {}): MeetingProviderSelectType {
-  return {
+  const base: MeetingProviderSelectType = {
     id: PROVIDER_ID,
     slug: "zoom",
     name: { en: "Zoom", ar: "زووم" },
@@ -47,12 +52,12 @@ function buildProvider(overrides: Partial<MeetingProviderSelectType> = {}): Meet
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...overrides,
   };
+  return { ...base, ...overrides };
 }
 
 function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {}): ClassMeetingConfigSelectType {
-  return {
+  const base: ClassMeetingConfigSelectType = {
     id: CONFIG_ID,
     classInstanceId: CLASS_INSTANCE_ID,
     recurringScheduleId: null,
@@ -64,8 +69,22 @@ function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {})
     providerMetadata: null,
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...overrides,
-  } as unknown as ClassMeetingConfigSelectType;
+  };
+  return { ...base, ...overrides };
+}
+
+// ---------------------------------------------------------------------------
+// Shared test helpers (module level - per S7721)
+// ---------------------------------------------------------------------------
+
+function buildAutoCreateInput(label: string, meetingUrl: string | null = null): ClassMeetingConfigSubmitInput {
+  return {
+    classInstanceId: CLASS_INSTANCE_ID,
+    providerId: PROVIDER_ID,
+    label,
+    isDefault: false,
+    details: { meetingUrl },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -81,7 +100,6 @@ mock.module("@/backend/services/auth/permissions.service", () => ({
   },
 }));
 
-// --- Logger
 mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: () => {},
@@ -275,9 +293,10 @@ describe("ClassMeetingConfigService", () => {
       hasPermissionMock.mockResolvedValue(false);
       const { ClassMeetingConfigService } = await importService();
 
-      await expect(
-        ClassMeetingConfigService.listClassMeetingConfigs(ACTOR_ID, CLASS_INSTANCE_ID, FAKE_ERRORS)
-      ).rejects.toThrow("You are not authorized.");
+      expectRejects(
+        ClassMeetingConfigService.listClassMeetingConfigs(ACTOR_ID, CLASS_INSTANCE_ID, FAKE_ERRORS),
+        "You are not authorized to perform this action."
+      );
     });
   });
 
@@ -300,20 +319,6 @@ describe("ClassMeetingConfigService", () => {
       expect(result.id).toBe(CONFIG_ID);
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // Shared helpers for createClassMeetingConfig auto-provider tests
-  // ---------------------------------------------------------------------------
-
-  function buildAutoCreateInput(label: string, meetingUrl: string | null = null): ClassMeetingConfigSubmitInput {
-    return {
-      classInstanceId: CLASS_INSTANCE_ID,
-      providerId: PROVIDER_ID,
-      label,
-      isDefault: false,
-      details: { meetingUrl },
-    };
-  }
 
   interface AutoProviderTestSetup {
     generateMeetingResult?: { joinUrl: string; providerMetadata: Record<string, unknown> };
@@ -391,13 +396,14 @@ describe("ClassMeetingConfigService", () => {
         generateMeetingError: new MeetingChannelError("Rate limited", "RATE_LIMITED"),
       });
 
-      await expect(
+      expectRejects(
         ClassMeetingConfigService.createClassMeetingConfig(
           ACTOR_ID,
           buildAutoCreateInput("Auto Class Config"),
           FAKE_ERRORS
-        )
-      ).rejects.toThrow("Rate limited");
+        ),
+        "Rate limited"
+      );
     });
 
     test("wraps unexpected adapter errors in user-friendly Error", async () => {
@@ -405,13 +411,14 @@ describe("ClassMeetingConfigService", () => {
         generateMeetingError: new Error("Unexpected internal failure"),
       });
 
-      await expect(
+      expectRejects(
         ClassMeetingConfigService.createClassMeetingConfig(
           ACTOR_ID,
           buildAutoCreateInput("Auto Class Config"),
           FAKE_ERRORS
-        )
-      ).rejects.toThrow("Failed to create class meeting config.");
+        ),
+        "Failed to create meeting config."
+      );
     });
   });
 
@@ -462,9 +469,10 @@ describe("ClassMeetingConfigService", () => {
         details: { meetingUrl: null },
       };
 
-      await expect(
-        ClassMeetingConfigService.updateClassMeetingConfig(ACTOR_ID, CONFIG_ID, input, FAKE_ERRORS)
-      ).rejects.toThrow("Failed to update class meeting config.");
+      expectRejects(
+        ClassMeetingConfigService.updateClassMeetingConfig(ACTOR_ID, CONFIG_ID, input, FAKE_ERRORS),
+        "Failed to update meeting config."
+      );
     });
   });
 

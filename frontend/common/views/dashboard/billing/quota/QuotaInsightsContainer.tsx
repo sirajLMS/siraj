@@ -6,7 +6,7 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import NumbersOutlinedIcon from "@mui/icons-material/NumbersOutlined";
 import { Box, Button, Card, CardContent, CardHeader, Grid, Skeleton, Stack, Typography, useTheme } from "@mui/material";
 import Link from "next/link";
-import type { ComponentType, ReactNode } from "react";
+import type { ComponentType, ReactElement, ReactNode } from "react";
 import { useMemo } from "react";
 import {
   Area,
@@ -14,8 +14,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  // biome-ignore lint/suspicious/noDeprecatedImports: recharts Cell is still the only way to style individual cells in Pie/Bar charts
-  Cell,
   Legend,
   Line,
   LineChart,
@@ -274,6 +272,14 @@ function InsightsChartRow1({
   chartLabels,
   chartColors,
 }: Readonly<InsightsChartRow1Props>) {
+  // Recharts v3: use `shape` prop on Pie/Bar for custom cell styling instead of deprecated Cell component
+  const donutShape = (props: { index: number }): ReactElement => (
+    <path {...props} fill={chartColors.donutColors[props.index % chartColors.donutColors.length]} />
+  );
+  const barShape = (props: { index: number }): ReactElement => (
+    <rect {...props} fill={chartColors.barColors[props.index % chartColors.barColors.length]} />
+  );
+
   return (
     <Grid container spacing={3}>
       {/* Quota Purchases Over Time — Area Chart */}
@@ -329,11 +335,8 @@ function InsightsChartRow1({
                     const pctNum = typeof percent === "number" ? Math.round(percent * 100) : 0;
                     return `${name} ${pctNum}%`;
                   }}
-                >
-                  {redemptionByType.map((entry, index) => (
-                    <Cell key={entry.name} fill={chartColors.donutColors[index % chartColors.donutColors.length]} />
-                  ))}
-                </Pie>
+                  shape={donutShape}
+                ></Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
@@ -352,11 +355,7 @@ function InsightsChartRow1({
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" name={chartLabels.deliveryRate}>
-                  {deliveryRate.map((entry, index) => (
-                    <Cell key={entry.name} fill={chartColors.barColors[index % chartColors.barColors.length]} />
-                  ))}
-                </Bar>
+                <Bar dataKey="count" name={chartLabels.deliveryRate} shape={barShape}></Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -383,6 +382,11 @@ function InsightsChartRow2({
   chartLabels,
   chartColors,
 }: Readonly<InsightsChartRow2Props>) {
+  // Recharts v3: use `shape` prop on Pie for custom cell styling instead of deprecated Cell component
+  const gaugeShape = (props: { index: number }): ReactElement => (
+    <path {...props} fill={props.index === 0 ? chartColors.error : "transparent"} />
+  );
+
   return (
     <Grid container spacing={2}>
       {/* PENDING_CREDIT Backlog Gauge */}
@@ -404,10 +408,8 @@ function InsightsChartRow2({
                   innerRadius="90%"
                   outerRadius="100%"
                   dataKey="value"
-                >
-                  <Cell fill={chartColors.error} />
-                  <Cell fill="transparent" />
-                </Pie>
+                  shape={gaugeShape}
+                ></Pie>
               </PieChart>
             </ResponsiveContainer>
             <Typography variant="h3" sx={{ textAlign: "center", fontWeight: 700, mt: -4 }}>

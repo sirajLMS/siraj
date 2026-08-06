@@ -43,13 +43,22 @@
       "type": "http"
     },
     "sonarqube": {
-      "command": "/home/ahmed/.local/share/sonarqube-cli/bin/sonar",
+      "command": "docker",
       "args": [
         "run",
-        "mcp",
-        "--project",
-        "siraj"
-      ]
+        "-i",
+        "--rm",
+        "--add-host=host.docker.internal:host-gateway",
+        "-e",
+        "SONARQUBE_TOKEN",
+        "-e",
+        "SONARQUBE_URL",
+        "sonarsource/sonarqube-mcp"
+      ],
+      "env": {
+        "SONARQUBE_URL": "http://host.docker.internal:9000",
+        "SONARQUBE_TOKEN": "squ_0793464c9307891b0142956e08c457581548836a"
+      }
     }
   }
 }

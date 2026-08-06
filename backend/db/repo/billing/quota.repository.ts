@@ -80,9 +80,11 @@ export namespace QuotaRepository {
   const isRichRolloverPolicy = (
     policy: unknown
   ): policy is { maxRolloverPercent: number | null; accumulationCap: number | null } => {
-    if (typeof policy !== "object" || policy === null) return false;
-    const obj = policy as Record<string, unknown>;
-    return "maxRolloverPercent" in obj && "accumulationCap" in obj;
+    if (typeof policy === "object" && policy !== null) {
+      const obj = policy as Record<string, unknown>;
+      return "maxRolloverPercent" in obj && "accumulationCap" in obj;
+    }
+    return false;
   };
 
   /**
@@ -110,11 +112,14 @@ export namespace QuotaRepository {
     if (isRichRolloverPolicy(rolloverPolicy)) {
       const percent = rolloverPolicy.maxRolloverPercent ?? 100;
       const raw = Math.floor(unused * (percent / 100));
-      const cap = rolloverPolicy.accumulationCap ?? null;
-      return cap !== null ? Math.min(raw, cap) : raw;
+      const cap = rolloverPolicy.accumulationCap;
+      return Math.min(raw, cap ?? raw);
     }
     const policyStr = (rolloverPolicy as string | null) ?? "GRANT";
-    return policyStr === "GRANT" ? unused : 0;
+    if (policyStr === "GRANT") {
+      return unused;
+    }
+    return 0;
   };
 
   /** Advances an anchor forward in whole `periodDays` increments until it sits after `now`. */
@@ -1111,7 +1116,7 @@ export namespace QuotaRepository {
     if (now <= periodEnd) return mapQuotaToReturnType(target);
 
     const periodStr = periodEnd.toISOString().slice(0, 10);
-    const unused = target.remaining > 0 ? target.remaining : 0;
+    const unused = Math.max(target.remaining, 0);
     const rolloverAmount = computeRolloverAmount(target.rolloverPolicy, unused);
 
     const newRemaining = rolloverAmount + target.totalClasses;

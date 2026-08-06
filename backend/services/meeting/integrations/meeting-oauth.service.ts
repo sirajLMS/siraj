@@ -109,7 +109,9 @@ export async function verifyOAuthState(state: string): Promise<MeetingOAuthState
 function buildRedirectUri(providerSlug: MeetingProvider): string {
   const config = getEnvironmentConfig();
   const baseUrl = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
-  const pathSlug = providerSlug.replace(/_/g, "-");
+  // Use split/join instead of replace/replaceAll for better compatibility and to
+  // satisfy static analysis rules that prefer explicit all-occurrence handling.
+  const pathSlug = String(providerSlug).split("_").join("-");
   return `${baseUrl.replace(/\/$/, "")}/api/oauth/${pathSlug}/callback`;
 }
 

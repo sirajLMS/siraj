@@ -237,7 +237,7 @@ export function createPgBossAdapter(): CronQueueAdapter {
       if (queueName !== undefined) {
         const b = await ensureStarted();
         try {
-          await b.complete(queueName, [jobId] as string[]);
+          await b.complete(queueName, [jobId]);
         } catch (err) {
           logger.warn("cron.pgboss.complete.failed", {
             jobId,
@@ -257,7 +257,7 @@ export function createPgBossAdapter(): CronQueueAdapter {
       await Promise.all(
         [...knownQueues].map(async q => {
           try {
-            await b.complete(q, [jobId] as string[]);
+            await b.complete(q, [jobId]);
           } catch (err) {
             logger.debug("cron.pgboss.complete.fallbackMiss", {
               jobId,
@@ -279,7 +279,7 @@ export function createPgBossAdapter(): CronQueueAdapter {
       const failData = { message: error, stack: stack ?? null };
       if (queueName) {
         try {
-          await b.fail(queueName, [jobId], failData as object);
+          await b.fail(queueName, [jobId], failData);
         } catch (err) {
           logger.warn("cron.pgboss.fail.failed", {
             jobId,
@@ -292,7 +292,7 @@ export function createPgBossAdapter(): CronQueueAdapter {
         await Promise.all(
           [...knownQueues].map(async q => {
             try {
-              await b.fail(q, [jobId], failData as object);
+              await b.fail(q, [jobId], failData);
             } catch (err) {
               logger.debug("cron.pgboss.fail.fallbackMiss", {
                 jobId,

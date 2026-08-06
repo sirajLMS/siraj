@@ -14,7 +14,7 @@ type HandleCache = Map<NamespaceHandle<unknown>, LocaleCache>;
 const translationCache: HandleCache = new Map();
 
 const useSnapshotFallback =
-  typeof globalThis.window !== "undefined" && !globalThis.window?.isSecureContext && "indexedDB" in globalThis.window;
+  globalThis.window !== undefined && !globalThis.window?.isSecureContext && "indexedDB" in globalThis.window;
 
 let hasWipedBuildId = false;
 

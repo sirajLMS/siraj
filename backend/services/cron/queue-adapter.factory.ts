@@ -28,7 +28,7 @@ let activeBackendResolvedAt = 0;
 
 function mapToBackend(value: string | undefined): CronQueueBackend {
   if (!value) return CronQueueBackend.PG_BOSS;
-  const normalized = value.toUpperCase().replace(/-/g, "_");
+  const normalized = value.toUpperCase().replaceAll("-", "_");
   const values = Object.values(CronQueueBackend) as string[];
   if (!values.includes(normalized)) {
     throw new CronQueueBackendUnknown(value);

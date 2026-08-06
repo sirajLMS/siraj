@@ -204,7 +204,10 @@ function stampRecipientAddress(
     }
     stamped.push({
       ...payload,
-      metadata: { ...(payload.metadata ?? {}), to: address },
+      metadata:
+        payload.metadata && Object.keys(payload.metadata).length > 0
+          ? { ...payload.metadata, to: address }
+          : { to: address },
     });
   }
 

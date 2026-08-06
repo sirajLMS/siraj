@@ -118,10 +118,33 @@ export namespace CommunicationService {
           }
           // Safely stringify paramValue to avoid "[object Object]" for objects
           // (paramValue is unknown from Record<string, unknown>)
-          const textValue =
-            paramValue !== null && typeof paramValue === "object" && !Array.isArray(paramValue)
-              ? JSON.stringify(paramValue)
-              : String(paramValue ?? "");
+          const textValue = (() => {
+            if (paramValue === null || paramValue === undefined) {
+              return "";
+            }
+            if (Array.isArray(paramValue)) {
+              // For arrays, join elements safely - each element stringified
+              // Note: we must handle each element individually to avoid "[object Object]"
+              // when an array contains objects
+              return paramValue
+                .map(v => {
+                  if (v === null || v === undefined) {
+                    return "";
+                  }
+                  if (typeof v === "object") {
+                    return JSON.stringify(v);
+                  }
+                  return String(v);
+                })
+                .join(", ");
+            }
+            if (typeof paramValue === "object") {
+              // Plain objects - use JSON.stringify
+              return JSON.stringify(paramValue);
+            }
+            // Primitives (string, number, boolean, etc.)
+            return String(paramValue);
+          })();
           return {
             type: "body" as const,
             parameters: [

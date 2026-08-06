@@ -82,6 +82,7 @@ function InvoicesSection({
 >) {
   const invoicesList = invoices;
   const loading = isSearchPending || (invoicesLoading && invoices.length === 0);
+  const invoicesLoaded = !invoicesLoading;
 
   const renderItem = (row: (typeof invoices)[number]): ReactNode => (
     <MobileCardListItem variant="edge-to-edge">
@@ -98,7 +99,7 @@ function InvoicesSection({
     </MobileCardListItem>
   );
 
-  if (invoices.length === 0 && !invoicesLoading) {
+  if (invoices.length === 0 && invoicesLoaded) {
     return (
       <MobileSectionPanel title={labels.sections.recentInvoices} contentInset={false}>
         <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.adminTable.noEntries} />

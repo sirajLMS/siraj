@@ -70,19 +70,29 @@ gqlSchemaBuilder.mutationField("updateUserPaymentMethod", t =>
       input: t.arg({ type: UserPaymentMethodUpdateInputPothos, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return PaymentMethodService.updateUserPaymentMethod(
-        actorUserId,
-        args.id,
-        {
-          ...(args.input.direction != null ? { direction: args.input.direction } : {}),
-          ...(args.input.isDefault == null ? {} : { isDefault: args.input.isDefault }),
-          ...(args.input.label !== undefined ? { label: args.input.label } : {}),
-          ...(args.input.details != null ? { details: normalizePaymentMethodDetailsInput(args.input.details) } : {}),
-        },
-        tErrors
-      );
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
+
+      const input = args.input;
+      const updatePayload: Record<string, unknown> = {};
+
+      // Use positive checks to avoid negated conditions and make intent explicit
+      if (input.direction != null) {
+        updatePayload.direction = input.direction;
+      }
+
+      if (input.isDefault != null) {
+        updatePayload.isDefault = input.isDefault;
+      }
+
+      if (input.label !== undefined) {
+        updatePayload.label = input.label;
+      }
+
+      if (input.details != null) {
+        updatePayload.details = normalizePaymentMethodDetailsInput(input.details);
+      }
+
+      return PaymentMethodService.updateUserPaymentMethod(actorUserId, args.id, updatePayload, tErrors);
     },
   })
 );

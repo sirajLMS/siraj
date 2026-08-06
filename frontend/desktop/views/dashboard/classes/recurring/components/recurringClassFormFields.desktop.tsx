@@ -254,7 +254,7 @@ interface RateSectionDesktopProps {
 
 function RateSectionDesktop({ register, control, labels, isSubmitting }: RateSectionDesktopProps) {
   const rateCurrency = useWatch({ control, name: "rateCurrency" });
-  const currencySymbol = rateCurrency ? getCurrencySymbol(rateCurrency as string) : "";
+  const currencySymbol = rateCurrency ? getCurrencySymbol(rateCurrency) : "";
   return (
     <Box sx={{ display: "flex", gap: 3, flexDirection: "row", alignItems: "flex-start" }}>
       <Box sx={{ flex: 1, minWidth: 0 }}>

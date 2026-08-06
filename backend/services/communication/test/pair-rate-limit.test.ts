@@ -28,7 +28,14 @@ mock.module("@/backend/services/redis", makeRedisModuleFactory());
 
 mock.module(
   "@/backend/services/redis/index",
-  makeRedisModuleFactory({ SessionRedisService: class SessionRedisService {} })
+  makeRedisModuleFactory({
+    SessionRedisService: class SessionRedisService {
+      // Minimal placeholder used by tests — provides a ping method to avoid an empty-class lint/sonar issue.
+      ping(): boolean {
+        return true;
+      }
+    },
+  })
 );
 
 mock.module("@/backend/lib/logger", () => ({
