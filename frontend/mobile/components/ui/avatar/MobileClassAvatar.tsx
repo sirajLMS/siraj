@@ -1,11 +1,11 @@
 "use client";
 
 import type { Theme } from "@mui/material/styles";
-import type { BaseAvatarProps } from "@/frontend/mobile/components/ui/avatar/MobileBaseAvatar";
+import type { BaseAvatarProps, BaseAvatarVariant } from "@/frontend/mobile/components/ui/avatar/MobileBaseAvatar";
 import { MobileBaseAvatar } from "@/frontend/mobile/components/ui/avatar/MobileBaseAvatar";
 
 export type ClassAvatarProps = Omit<BaseAvatarProps, "variant"> & {
-  readonly variant?: BaseAvatarProps["variant"];
+  readonly variant?: BaseAvatarVariant;
 };
 
 const FALLBACK_SX = {

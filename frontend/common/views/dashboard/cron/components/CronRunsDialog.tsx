@@ -110,7 +110,7 @@ export function CronRunsDialog({ open, scheduleName, labels, runs, loading, onCl
         flex: 1,
         minWidth: 200,
         renderCell: ({ value }) => {
-          if (value == null) return "—";
+          if (value == null) return <Typography variant="bodyMd">—</Typography>;
           const text = safeString(value);
           return (
             <Tooltip title={text}>

@@ -48,7 +48,7 @@ describe("ScheduleService.getDailySchedule authorization", () => {
   test("rejects users without schedule list or view_all permissions", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(false);
 
-    await expect(ScheduleService.getDailySchedule("restricted-user", new Date("2026-07-29"), tErrors)).rejects.toThrow(
+    return expect(ScheduleService.getDailySchedule("restricted-user", new Date("2026-07-29"), tErrors)).rejects.toThrow(
       tErrors.unauthorizedViewList
     );
   });

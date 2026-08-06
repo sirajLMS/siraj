@@ -33,7 +33,7 @@ const lazyViews = createLazyView<ParentProfileViewModel>(
  */
 export function ParentProfileView(props: Readonly<ParentProfileViewModel>) {
   if ("scope" in props && "mode" in props && "targetUserId" in props && !("parentData" in props)) {
-    return <ParentProfileContainer {...(props as unknown as UseParentProfileViewModelProps)} />;
+    return <ParentProfileContainer {...(props)} />;
   }
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }

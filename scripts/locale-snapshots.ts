@@ -62,7 +62,7 @@ async function processNamespaceExport(
   if (!exportVal || typeof exportVal !== "object") return { total: 0, written: 0 };
 
   const config = getNamespaceConfig(exportVal as Parameters<typeof getNamespaceConfig>[0]);
-  const id = getNamespaceId(exportVal as Parameters<typeof getNamespaceId>[0]);
+  const id = getNamespaceId(exportVal);
 
   if (!config || !id) return { total: 0, written: 0 };
 

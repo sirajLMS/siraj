@@ -24,9 +24,9 @@ export function SystemSettingValueField({
     setDraftValue(row.value);
   }, [row.value]);
 
-  const commitValue = (nextValue: string): void => {
+  const commitValue = (nextValue: string): Promise<void> | undefined => {
     if (nextValue === row.value) {
-      return;
+      return undefined;
     }
     void onValueChange(row.code, nextValue);
   };

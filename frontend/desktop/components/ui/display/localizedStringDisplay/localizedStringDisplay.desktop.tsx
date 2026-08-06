@@ -1,18 +1,18 @@
 "use client";
 
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { LocalizedString } from "@/shared/types";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 
 export type DesktopLocalizedStringDisplayProps = {
   readonly value?: LocalizedString | null;
   readonly locale?: string;
   readonly fallback?: React.ReactNode;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: UiTypographyVariant;
   readonly sx?: SxProps<Theme>;
   readonly onClick?: React.MouseEventHandler<HTMLElement>;
 };

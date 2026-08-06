@@ -3,6 +3,7 @@
 import { Box, Tooltip, Typography, type TypographyProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { formatDate, formatTime, parseDateInput } from "@/frontend/common/components/intl/dateFormat";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 
 type DateTimeTooltipTone = "default" | "highlight" | "meta" | "muted";
 
@@ -11,7 +12,7 @@ interface DateTimeTooltipDisplayProps {
   readonly locale: string;
   readonly emptyFallback?: string;
   readonly tone?: DateTimeTooltipTone;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: UiTypographyVariant;
 }
 
 function getDisplaySx(tone: DateTimeTooltipTone): SxProps<Theme> {

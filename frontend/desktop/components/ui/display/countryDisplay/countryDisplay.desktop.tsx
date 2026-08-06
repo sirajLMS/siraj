@@ -2,12 +2,12 @@
 
 import Stack from "@mui/material/Stack";
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { type CountryType, getCountryDisplayName, getCountryEmoji } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 
 export type DesktopCountryDisplayProps = {
   readonly code?: string | null;
@@ -15,11 +15,11 @@ export type DesktopCountryDisplayProps = {
   readonly showEmoji?: boolean;
   readonly showLabel?: boolean;
   readonly fallback?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: UiTypographyVariant;
   readonly sx?: SxProps<Theme>;
 };
 
-export const DesktopCountryDisplay: React.FC<DesktopCountryDisplayProps> = ({
+export const DesktopCountryDisplay = ({
   code,
   country,
   showEmoji = true,
@@ -27,12 +27,17 @@ export const DesktopCountryDisplay: React.FC<DesktopCountryDisplayProps> = ({
   fallback,
   typographyVariant = "bodyMd",
   sx,
-}): React.ReactNode => {
+}: DesktopCountryDisplayProps): React.JSX.Element | null => {
   const locale = useAppLocale();
+  const fallbackNode = fallback ? (
+    <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
+      {fallback}
+    </Typography>
+  ) : null;
 
   const resolvedCode = country?.code ?? code;
   if (!resolvedCode) {
-    return fallback ?? null;
+    return fallbackNode;
   }
 
   const emoji = country?.emoji ?? getCountryEmoji(resolvedCode);

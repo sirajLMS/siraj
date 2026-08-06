@@ -249,7 +249,7 @@ describe("MeetingConfigService", () => {
       hasPermissionMock.mockResolvedValue(false);
       const { MeetingConfigService } = await importService();
 
-      await expect(MeetingConfigService.listUserMeetingConfigs(ACTOR_ID, TARGET_USER_ID, FAKE_ERRORS)).rejects.toThrow(
+      return expect(MeetingConfigService.listUserMeetingConfigs(ACTOR_ID, TARGET_USER_ID, FAKE_ERRORS)).rejects.toThrow(
         "You are not authorized."
       );
     });
@@ -320,7 +320,7 @@ describe("MeetingConfigService", () => {
         details: { meetingUrl: null },
       };
 
-      await expect(MeetingConfigService.createUserMeetingConfig(ACTOR_ID, input, FAKE_ERRORS)).rejects.toThrow(
+      return expect(MeetingConfigService.createUserMeetingConfig(ACTOR_ID, input, FAKE_ERRORS)).rejects.toThrow(
         "Rate limited"
       );
     });
@@ -340,7 +340,7 @@ describe("MeetingConfigService", () => {
         details: { meetingUrl: null },
       };
 
-      await expect(MeetingConfigService.createUserMeetingConfig(ACTOR_ID, input, FAKE_ERRORS)).rejects.toThrow(
+      return expect(MeetingConfigService.createUserMeetingConfig(ACTOR_ID, input, FAKE_ERRORS)).rejects.toThrow(
         "Failed to create meeting config."
       );
     });
@@ -372,7 +372,7 @@ describe("MeetingConfigService", () => {
         details: { meetingUrl: null },
       };
 
-      await expect(
+      return expect(
         MeetingConfigService.updateUserMeetingConfig(ACTOR_ID, CONFIG_ID, input, FAKE_ERRORS)
       ).rejects.toThrow("Failed to update meeting config.");
     });

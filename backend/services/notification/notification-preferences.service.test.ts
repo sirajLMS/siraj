@@ -93,6 +93,6 @@ describe("NotificationPreferencesService.getPreferences access", () => {
   test("rejects users without profile or student own-view permissions", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(false);
 
-    await expect(NotificationPreferencesService.getPreferences("restricted-user")).rejects.toThrow();
+    return expect(NotificationPreferencesService.getPreferences("restricted-user")).rejects.toThrow();
   });
 });

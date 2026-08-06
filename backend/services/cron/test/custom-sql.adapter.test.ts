@@ -60,7 +60,7 @@ async function setupAdapter() {
  */
 function findQueryCall(searchText: string) {
   return queryMock.mock.calls.find(
-    (c: unknown) => Array.isArray(c) && typeof c[0] === "string" && (c[0] as string).includes(searchText)
+    (c: unknown) => Array.isArray(c) && typeof c[0] === "string" && (c[0]).includes(searchText)
   );
 }
 

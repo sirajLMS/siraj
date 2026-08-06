@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** biome-ignore-all lint/suspicious/noExplicitAny: bulk insert utility */
 
 import type { AnyPgTable } from "drizzle-orm/pg-core";
@@ -22,7 +21,7 @@ export async function bulkInsertOnConflictDoNothing(
     const chunk = rows.slice(i, i + chunkSize);
     await queryDb
       .insert(table)
-      .values(chunk as any)
+      .values(chunk)
       .onConflictDoNothing();
     logger.debug(`Bulk insert batch ${Math.floor(i / chunkSize) + 1} (${chunk.length} rows)`);
   }

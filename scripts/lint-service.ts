@@ -61,6 +61,7 @@ export interface LintOptions {
   fix?: boolean;
   json?: boolean;
   verbose?: boolean;
+  typeAware?: boolean;
 }
 
 export interface LintMetrics {
@@ -212,13 +213,17 @@ class LintService {
     const fixFlag = options.fix ? "--fix" : "";
 
     // Construct the command
+    const envPrefix = options.typeAware ? 'ESLINT_TYPE_AWARE="true"' : "";
+    const concurrencySetting = options.typeAware ? "1" : CONCURRENCY;
+    const nodeOptions = `${ESLINT_PATCH} --max-old-space-size=8192`;
     const cmd = [
-      `NODE_OPTIONS="${ESLINT_PATCH}"`,
+      envPrefix,
+      `NODE_OPTIONS="${nodeOptions}"`,
       ESLINT_BIN,
       "x eslint",
       "--cache",
       "--cache-location .eslintcache",
-      `--concurrency=${CONCURRENCY}`,
+      `--concurrency=${concurrencySetting}`,
       fixFlag,
       fileArgs,
     ]
@@ -328,6 +333,7 @@ async function main(): Promise<void> {
         id: { type: "string", short: "i", default: "cli" },
         fix: { type: "boolean", default: false },
         json: { type: "boolean", default: false },
+        "type-aware": { type: "boolean", default: false },
         verbose: { type: "boolean", short: "v", default: false },
         help: { type: "boolean", short: "h", default: false },
       },
@@ -340,14 +346,15 @@ async function main(): Promise<void> {
       process.exit(0);
     }
 
-    const files = (args.values.files as string[] | undefined) ?? [];
-    const id = (args.values.id as string) ?? "cli";
-    const fix = (args.values.fix as boolean) ?? false;
-    const json = (args.values.json as boolean) ?? false;
-    const verbose = (args.values.verbose as boolean) ?? false;
+    const files = (args.values.files) ?? [];
+    const id = (args.values.id) ?? "cli";
+    const fix = (args.values.fix) ?? false;
+    const json = (args.values.json) ?? false;
+    const typeAware = (args.values["type-aware"]) ?? false;
+    const verbose = (args.values.verbose) ?? false;
 
     // Execute lint
-    const result = await requestLintWithMetrics(id, files, { fix, json, verbose });
+    const result = await requestLintWithMetrics(id, files, { fix, json, verbose, typeAware });
 
     // Output
     if (json) {

@@ -1,5 +1,3 @@
-import type { NeonDatabase } from "drizzle-orm/neon-serverless";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { db, getDrizzleDbPool } from "@/backend/db/drizzleDb";
 import { applyCustomMigrations } from "@/backend/db/scripts/applyCustomMigrations";
 import { ensureIdempotentMigrations } from "@/backend/db/scripts/ensureIdempotentMigrations";
@@ -39,7 +37,7 @@ export async function runMigrations(closePool: boolean) {
   if (provider === "postgres") {
     logger.warn("⚠️  Pool will be closed after migrations complete");
   }
-  await runDrizzleMigrations(db as NodePgDatabase | NeonDatabase, {
+  await runDrizzleMigrations(db, {
     migrationsFolder: "./backend/drizzle",
   });
 

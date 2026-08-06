@@ -61,7 +61,7 @@ type QueryablePool = {
 };
 
 function asQueryablePool(pool: ResetPool): QueryablePool {
-  return pool as QueryablePool;
+  return pool;
 }
 
 async function resetNeonDatabase(pool: ResetPool, database: string): Promise<void> {

@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
-import type { TypographyProps } from "@mui/material/Typography";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { EditableTypographyDesktop } from "@/frontend/desktop/components/ui/input/editableTypography/editableTypography.desktop";
 
 type EditableTypographyStoryProps = {
   readonly initialValue?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: UiTypographyVariant;
   readonly doubleClickToEdit?: boolean;
   readonly startEditing?: boolean;
   readonly withValidation?: boolean;

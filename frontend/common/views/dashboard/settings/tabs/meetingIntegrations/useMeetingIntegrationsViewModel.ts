@@ -257,7 +257,7 @@ function useConnectedAccountsSync(
 export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel {
   const labels = useAppTranslation(
     Translation.Dashboard.SettingsMeetingIntegrations
-  ) as SettingsMeetingIntegrationsLabels;
+  );
   const locale = useAppLocale();
   const notifications = useNotifications();
 

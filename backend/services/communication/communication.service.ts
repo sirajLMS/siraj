@@ -143,7 +143,7 @@ export namespace CommunicationService {
               return JSON.stringify(paramValue);
             }
             // Primitives (string, number, boolean, etc.)
-            return String(paramValue);
+            return typeof paramValue === "string" ? paramValue : JSON.stringify(paramValue);
           })();
           return {
             type: "body" as const,

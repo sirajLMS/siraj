@@ -28,6 +28,6 @@ describe("StaffProfileService.getTeacherProfileForView", () => {
   test("rejects actors without profile view_other permissions", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(false);
 
-    await expect(StaffProfileService.getTeacherProfileForView("staff-actor", "teacher-1", "en")).rejects.toThrow();
+    return expect(StaffProfileService.getTeacherProfileForView("staff-actor", "teacher-1", "en")).rejects.toThrow();
   });
 });

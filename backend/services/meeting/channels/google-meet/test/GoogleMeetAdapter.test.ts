@@ -39,12 +39,12 @@ describe("GoogleMeetAdapter", () => {
   describe("validateConfig", () => {
     test("returns false when service account JSON is missing", async () => {
       const adapter = new GoogleMeetAdapter({ impersonateSubject: "user@example.com" });
-      await expect(adapter.validateConfig()).resolves.toBe(false);
+      return expect(adapter.validateConfig()).resolves.toBe(false);
     });
 
     test("returns false when impersonateSubject is missing", async () => {
       const adapter = new GoogleMeetAdapter({ serviceAccountJson: MOCK_SA_JSON });
-      await expect(adapter.validateConfig()).resolves.toBe(false);
+      return expect(adapter.validateConfig()).resolves.toBe(false);
     });
 
     test("returns true when all config is present", async () => {
@@ -52,7 +52,7 @@ describe("GoogleMeetAdapter", () => {
         serviceAccountJson: MOCK_SA_JSON,
         impersonateSubject: "user@example.com",
       });
-      await expect(adapter.validateConfig()).resolves.toBe(true);
+      return expect(adapter.validateConfig()).resolves.toBe(true);
     });
   });
 
@@ -144,7 +144,7 @@ describe("GoogleMeetAdapter", () => {
       });
       await adapter.disconnect();
       // After disconnect, a new generation attempt should re-parse SA
-      await expect(adapter.validateConfig()).resolves.toBe(true);
+      return expect(adapter.validateConfig()).resolves.toBe(true);
     });
   });
 
@@ -203,10 +203,11 @@ describe("GoogleMeetAdapter", () => {
       const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new GoogleMeetAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
         NoOrgCredentialsNoUserTokenError
-      );
-      expect(refreshSpy).not.toHaveBeenCalled();
+      ).then(() => {
+        expect(refreshSpy).not.toHaveBeenCalled();
+      });
     });
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {

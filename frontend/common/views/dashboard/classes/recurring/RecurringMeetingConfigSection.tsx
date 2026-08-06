@@ -242,7 +242,7 @@ export function RecurringMeetingConfigSection({
           allowEmpty={false}
           value={value.selectedConfig ? toSelectOption(value.selectedConfig) : null}
           onChangeAction={option => {
-            const match = configs.find(config => config.id === option?.id);
+            const match = configs.find(config => config.id == option?.id);
             onChangeAction({ ...value, useTeacherDefault: false, selectedConfig: match ?? null });
           }}
         />

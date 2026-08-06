@@ -116,7 +116,7 @@ function makeRunRow(overrides: Partial<CronRunSelectType> = {}): CronRunSelectTy
     createdAt: new Date("2025-01-01T00:00:00Z"),
     updatedAt: new Date("2025-01-01T00:00:00Z"),
     ...overrides,
-  } as CronRunSelectType;
+  };
 }
 
 // ── ReturnType-typed fixtures ──
@@ -141,7 +141,7 @@ const mockRunReturnRow: CronRunReturnType = {
 };
 
 function makeRunReturnRow(overrides: Partial<CronRunReturnType> = {}): CronRunReturnType {
-  return { ...mockRunReturnRow, ...overrides } as CronRunReturnType;
+  return { ...mockRunReturnRow, ...overrides };
 }
 
 interface CreateScheduleInputOverrides {
@@ -162,7 +162,7 @@ function makeCreateScheduleInput(overrides: CreateScheduleInputOverrides = {}): 
     maxRetries: 3,
     retryBackoffSeconds: 60,
     ...overrides,
-  } as CronScheduleSubmitInput;
+  };
 }
 
 function resetState() {
@@ -221,7 +221,7 @@ const repoImpl = {
       ...mockScheduleRow,
       ...(input as Partial<CronScheduleSelectType>),
       id: "sched-new",
-    } as CronScheduleSelectType;
+    };
   },
   getScheduleById: async (id: string) => {
     getScheduleByIdCalls.push(id);
@@ -390,7 +390,7 @@ describe("CronService", () => {
     test("throws error for invalid cron expression", async () => {
       const input = makeCreateScheduleInput({ name: "bad-cron", cronExpression: "not-a-cron" });
 
-      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
+      return expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Invalid cron: not-a-cron"
       );
       expect(createScheduleCalls).toHaveLength(0);
@@ -401,7 +401,7 @@ describe("CronService", () => {
 
       const input = makeCreateScheduleInput({ name: "test-schedule", cronExpression: "*/5 * * * *" });
 
-      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
+      return expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Schedule exists: test-schedule"
       );
       expect(getScheduleByNameCalls).toHaveLength(1);
@@ -412,7 +412,7 @@ describe("CronService", () => {
     test("throws error for invalid timezone", async () => {
       const input = makeCreateScheduleInput({ name: "bad-tz-schedule", timezone: "Not/A real timezone" });
 
-      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
+      return expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Invalid timezone: Not/A real timezone"
       );
       expect(createScheduleCalls).toHaveLength(0);
@@ -430,7 +430,7 @@ describe("CronService", () => {
         "sched-1",
         {
           cronExpression: "0 9 * * *",
-        } as never,
+        },
         "en",
         SERVICE_USER_ID
       );
@@ -446,8 +446,8 @@ describe("CronService", () => {
     test("throws error for invalid cron expression", async () => {
       getScheduleByIdResult = mockScheduleRow;
 
-      await expect(
-        CronService.updateSchedule("sched-1", { cronExpression: "not-a-cron" } as never, "en", SERVICE_USER_ID)
+      return expect(
+        CronService.updateSchedule("sched-1", { cronExpression: "not-a-cron" }, "en", SERVICE_USER_ID)
       ).rejects.toThrow("Invalid cron: not-a-cron");
       expect(updateScheduleCalls).toHaveLength(0);
     });
@@ -455,8 +455,8 @@ describe("CronService", () => {
     test("throws error for invalid timezone", async () => {
       getScheduleByIdResult = mockScheduleRow;
 
-      await expect(
-        CronService.updateSchedule("sched-1", { timezone: "Bogus/zone" } as never, "en", SERVICE_USER_ID)
+      return expect(
+        CronService.updateSchedule("sched-1", { timezone: "Bogus/zone" }, "en", SERVICE_USER_ID)
       ).rejects.toThrow("Invalid timezone: Bogus/zone");
       expect(updateScheduleCalls).toHaveLength(0);
     });
@@ -469,7 +469,7 @@ describe("CronService", () => {
         "sched-1",
         {
           maxRetries: 5,
-        } as never,
+        },
         "en",
         SERVICE_USER_ID
       );
@@ -510,7 +510,7 @@ describe("CronService", () => {
     test("throws scheduleNotActive when updateScheduleIfStatus returns null", async () => {
       updateScheduleIfStatusResult = null;
 
-      await expect(CronService.pauseSchedule("sched-1", "en")).rejects.toThrow("Schedule is not active");
+      return expect(CronService.pauseSchedule("sched-1", "en")).rejects.toThrow("Schedule is not active");
       expect(updateScheduleIfStatusCalls).toHaveLength(1);
     });
   });
@@ -548,7 +548,7 @@ describe("CronService", () => {
       });
       updateScheduleIfStatusResult = null;
 
-      await expect(CronService.resumeSchedule("sched-1", "en")).rejects.toThrow("Schedule is not paused");
+      return expect(CronService.resumeSchedule("sched-1", "en")).rejects.toThrow("Schedule is not paused");
       expect(updateScheduleIfStatusCalls).toHaveLength(1);
     });
   });
@@ -676,7 +676,7 @@ describe("CronService", () => {
     test("throws when schedule not found", async () => {
       getScheduleByIdResult = null;
 
-      await expect(
+      return expect(
         CronService.dispatchScheduleById({
           id: "nonexistent",
           source: CronTriggerSource.MANUAL,
@@ -688,7 +688,7 @@ describe("CronService", () => {
       getScheduleByIdResult = makeScheduleRow({ id: "sched-claim-fail" });
       claimNextRunResult = null;
 
-      await expect(
+      return expect(
         CronService.dispatchScheduleById({
           id: "sched-claim-fail",
           source: CronTriggerSource.MANUAL,
@@ -705,7 +705,7 @@ describe("CronService", () => {
       });
       claimNextRunResult = null;
 
-      await expect(
+      return expect(
         CronService.dispatchScheduleById({
           id: "sched-skip-1",
           source: CronTriggerSource.MANUAL,
@@ -997,7 +997,7 @@ describe("CronService", () => {
     test("throws when schedule not found", async () => {
       getScheduleByIdResult = null;
 
-      await expect(CronService.deleteSchedule({ id: "missing" }, "en")).rejects.toThrow("Not found: missing");
+      return expect(CronService.deleteSchedule({ id: "missing" }, "en")).rejects.toThrow("Not found: missing");
     });
   });
 

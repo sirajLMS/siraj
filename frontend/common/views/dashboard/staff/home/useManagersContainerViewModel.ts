@@ -56,7 +56,7 @@ const EMPTY_METRICS: NonNullableManagerDirectoryMetrics = {
 };
 
 function buildManagerRows(rawRows: readonly ManagerDirectoryRow[] | null | undefined): Manager[] {
-  if (!rawRows) return [] as Manager[];
+  if (!rawRows) return [];
   return rawRows.map(row => ({
     userId: row.id ?? "",
     staffProfileId: row.staffProfileId ?? "",
@@ -67,7 +67,7 @@ function buildManagerRows(rawRows: readonly ManagerDirectoryRow[] | null | undef
     phone: row.phone ?? "",
     avatarUrl: row.avatarUrl ?? "",
     targetIsSuperAdmin: row.roleSlug === "super_admin",
-  })) as Manager[];
+  }));
 }
 
 function buildManagerMetrics(

@@ -19,12 +19,12 @@ export interface ScheduleInstanceDisplayInput {
   readonly durationMinutes?: number | null;
 }
 
-function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): DateStringNullable | undefined {
+function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): Date | null {
   if (input.scheduledEndAt) {
-    return input.scheduledEndAt;
+    return input.scheduledEndAt instanceof Date ? input.scheduledEndAt : new Date(input.scheduledEndAt);
   }
   if (!input.scheduledStartAt || !input.durationMinutes) {
-    return undefined;
+    return null;
   }
   const startAt = input.scheduledStartAt instanceof Date ? input.scheduledStartAt : new Date(input.scheduledStartAt);
   return new Date(startAt.getTime() + input.durationMinutes * 60_000);

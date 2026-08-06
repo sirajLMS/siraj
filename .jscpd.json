@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/kettanaito/jscpd/master/packages/jscpd/src/schema.json",
+  "threshold": 100,
+  "minTokens": 75,
+  "minLines": 8,
+  "format": ["typescript", "tsx"],
+  "path": [
+    "app",
+    "backend",
+    "frontend",
+    "shared",
+    "scripts"
+  ],
+  "ignore": [
+    "**/.*/**",
+    "!.storybook/**",
+    "node_modules/**",
+    "out/**",
+    "build/**",
+    "dist/**",
+    "logs/**",
+    "storage/**",
+    "scratch/**",
+    "draft/**",
+    "public/**",
+    "storybook-static/**",
+    "docs/**",
+    "**/*.d.ts",
+    "**/generated/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/seeds/**",
+    "**/migration/**",
+    "**/unRefactored_tests/**"
+  ]
+}

@@ -27,7 +27,7 @@ export function ProfileFieldRow({
   const displayValue: React.ReactNode = valueIsEmptyString ? fallback : value;
 
   // Render the value based on whether it's a link, plain text/number, or a React node
-  const renderValue = () => {
+  const renderValue = (): React.ReactNode => {
     if (hasLink) {
       return (
         <Link

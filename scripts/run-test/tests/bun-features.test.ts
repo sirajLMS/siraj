@@ -199,11 +199,11 @@ describe("Bun test features", () => {
     });
 
     test("expect().resolves", async () => {
-      await expect(Promise.resolve(42)).resolves.toBe(42);
+      return expect(Promise.resolve(42)).resolves.toBe(42);
     });
 
     test("expect().rejects", async () => {
-      await expect(Promise.reject(new Error("fail"))).rejects.toThrow("fail");
+      return expect(Promise.reject(new Error("fail"))).rejects.toThrow("fail");
     });
   });
 

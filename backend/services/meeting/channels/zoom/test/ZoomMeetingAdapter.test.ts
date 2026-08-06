@@ -229,7 +229,7 @@ describe("ZoomMeetingAdapter", () => {
 
     test("throws NoOrgCredentialsNoUserTokenError when org creds missing", async () => {
       const adapter = new ZoomMeetingAdapter({});
-      await expect(adapter.deleteMeeting("123456789")).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
+      return expect(adapter.deleteMeeting("123456789")).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
     });
   });
 
@@ -292,10 +292,11 @@ describe("ZoomMeetingAdapter", () => {
       const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new ZoomMeetingAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
         NoOrgCredentialsNoUserTokenError
-      );
-      expect(refreshSpy).not.toHaveBeenCalled();
+      ).then(() => {
+        expect(refreshSpy).not.toHaveBeenCalled();
+      });
     });
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {
@@ -305,7 +306,7 @@ describe("ZoomMeetingAdapter", () => {
       );
 
       const adapter = new ZoomMeetingAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
         ProviderReauthRequiredError
       );
     });

@@ -1,31 +1,36 @@
 "use client";
 
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 
 export type TimezoneDisplayProps = {
   readonly timezone?: string | null;
   readonly showOffset?: boolean;
   readonly fallback?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: UiTypographyVariant;
   readonly sx?: SxProps<Theme>;
 };
 
-export const TimezoneDisplay: React.FC<TimezoneDisplayProps> = ({
+export const TimezoneDisplay = ({
   timezone,
   showOffset = true,
   fallback,
   typographyVariant,
   sx,
-}): React.ReactNode => {
+}: TimezoneDisplayProps): React.JSX.Element | null => {
   const locale = useAppLocale();
+  const fallbackNode = fallback ? (
+    <Typography component="span" variant={typographyVariant} sx={{ whiteSpace: "nowrap", ...sx }}>
+      {fallback}
+    </Typography>
+  ) : null;
 
   if (!timezone) {
-    return fallback ?? null;
+    return fallbackNode;
   }
 
   const normalizedTimezone = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);

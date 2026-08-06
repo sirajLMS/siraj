@@ -261,7 +261,7 @@ export namespace RecurringScheduleRepository {
         ...row.schedule,
         studentName: row.studentName,
         teacherUserName: row.teacherUserName,
-      })) as RecurringScheduleSelectType[],
+      })),
       totalCount: Number(totalCount),
     };
   }

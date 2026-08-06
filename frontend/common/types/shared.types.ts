@@ -7,6 +7,7 @@
  */
 
 import type { SvgIconComponent } from "@mui/icons-material";
+import type { TypographyProps } from "@mui/material/Typography";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import type {
   ClassExecutionState,
@@ -59,6 +60,10 @@ export interface MetricItem {
   readonly subLabel?: string;
   readonly variant?: "default" | "error" | "highlight" | "danger";
 }
+
+export type MetricItemVariant = NonNullable<MetricItem["variant"]>;
+export type UiTypographyVariant = NonNullable<TypographyProps["variant"]>;
+export type UiTypographyVariantLoose = UiTypographyVariant | (string & {});
 
 export interface TeacherFilterItem {
   readonly id: string;

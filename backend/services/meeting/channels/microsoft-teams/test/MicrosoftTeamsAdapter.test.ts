@@ -77,7 +77,7 @@ describe("MicrosoftTeamsAdapter", () => {
 
     test("throws NoOrgCredentialsNoUserTokenError when credentials missing", async () => {
       const adapter = new MicrosoftTeamsAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
     });
 
     test("creates a meeting successfully", async () => {
@@ -114,7 +114,7 @@ describe("MicrosoftTeamsAdapter", () => {
       fetchSpy.mockResolvedValue(new Response(null, { status: 429 }));
 
       const adapter = new MicrosoftTeamsAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(RateLimitedError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(RateLimitedError);
     });
 
     test("throws NoAppAccessPolicyError on 403 with access policy message", async () => {
@@ -127,7 +127,7 @@ describe("MicrosoftTeamsAdapter", () => {
       );
 
       const adapter = new MicrosoftTeamsAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(NoAppAccessPolicyError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(NoAppAccessPolicyError);
     });
 
     test("throws RateLimitedError on 429 meeting response", async () => {
@@ -135,7 +135,7 @@ describe("MicrosoftTeamsAdapter", () => {
       fetchSpy.mockResolvedValueOnce(new Response(null, { status: 429 }));
 
       const adapter = new MicrosoftTeamsAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(RateLimitedError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(RateLimitedError);
     });
 
     test("throws MicrosoftTeamsApiError on non-ok meeting response", async () => {
@@ -145,7 +145,7 @@ describe("MicrosoftTeamsAdapter", () => {
       );
 
       const adapter = new MicrosoftTeamsAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
     });
 
     test("retries on 5xx then succeeds", async () => {
@@ -171,7 +171,7 @@ describe("MicrosoftTeamsAdapter", () => {
       fetchSpy.mockRejectedValue(new Error("Network error"));
 
       const adapter = new MicrosoftTeamsAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
     });
   });
 
@@ -237,10 +237,11 @@ describe("MicrosoftTeamsAdapter", () => {
       const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new MicrosoftTeamsAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
         NoOrgCredentialsNoUserTokenError
-      );
-      expect(refreshSpy).not.toHaveBeenCalled();
+      ).then(() => {
+        expect(refreshSpy).not.toHaveBeenCalled();
+      });
     });
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {
@@ -250,7 +251,7 @@ describe("MicrosoftTeamsAdapter", () => {
       );
 
       const adapter = new MicrosoftTeamsAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
         ProviderReauthRequiredError
       );
     });

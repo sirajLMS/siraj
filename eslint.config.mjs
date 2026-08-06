@@ -2,6 +2,7 @@ import eslint from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import eslintPluginImportX from "eslint-plugin-import-x";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import sonarjs from "eslint-plugin-sonarjs";
@@ -12,6 +13,8 @@ import tseslint from "typescript-eslint";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  eslintPluginImportX.flatConfigs.recommended,
+  eslintPluginImportX.flatConfigs.typescript,
   // import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended";
   // Override default ignores of eslint-config-next.
   globalIgnores([
@@ -74,6 +77,14 @@ const eslintConfig = defineConfig([
       globals: globals.browser,
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
+        ...(process.env.ESLINT_TYPE_AWARE === "true"
+          ? {
+              projectService: {
+                allowDefaultProject: ["*.ts", "*.mjs", "scripts/*.ts"],
+                defaultProject: "tsconfig.json",
+              },
+            }
+          : {}),
       },
     },
     rules: {
@@ -118,6 +129,15 @@ const eslintConfig = defineConfig([
 
       // SonarJS rules
       "sonarjs/no-nested-conditional": "off",
+
+      ...(process.env.ESLINT_TYPE_AWARE === "true"
+        ? {
+            "@typescript-eslint/await-thenable": "error",
+            "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+            "@typescript-eslint/no-base-to-string": "warn",
+            "sonarjs/deprecation": "warn",
+          }
+        : {}),
 
       // `sonarjs/no-unused-vars` (S1481) is hardcoded with `defaultOptions: []`
       // and accepts no ignore patterns — it does NOT honor the `^_` underscore

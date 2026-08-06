@@ -819,9 +819,9 @@ export namespace ProfileService {
   }
 
   type RoleSpecificUpdateInput = {
-    readonly teacher?: UpdateOwnProfileInput["teacher"] | UpdateUserProfileInput["teacher"];
-    readonly parent?: UpdateOwnProfileInput["parent"] | UpdateUserProfileInput["parent"];
-    readonly staff?: UpdateOwnProfileInput["staff"] | UpdateUserProfileInput["staff"];
+    readonly teacher?: Exclude<UpdateOwnProfileInput["teacher"] | UpdateUserProfileInput["teacher"], undefined>;
+    readonly parent?: Exclude<UpdateOwnProfileInput["parent"] | UpdateUserProfileInput["parent"], undefined>;
+    readonly staff?: Exclude<UpdateOwnProfileInput["staff"] | UpdateUserProfileInput["staff"], undefined>;
   };
 
   async function applyTeacherUpdate(

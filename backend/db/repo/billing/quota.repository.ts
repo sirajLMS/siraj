@@ -423,9 +423,9 @@ export namespace QuotaRepository {
       updatedAt: now,
     };
 
-    if (input.name !== undefined && input.name !== null) updateData.name = input.name;
-    if (input.priority !== undefined && input.priority !== null) updateData.priority = input.priority;
-    if (input.status !== undefined && input.status !== null) updateData.status = input.status;
+    if (input.name !== undefined && input.name != null) updateData.name = input.name;
+    if (input.priority !== undefined && input.priority != null) updateData.priority = input.priority;
+    if (input.status !== undefined && input.status != null) updateData.status = input.status;
     if (input.validUntil !== undefined) {
       updateData.validUntil = input.validUntil ? new Date(input.validUntil).toISOString().slice(0, 10) : null;
     }

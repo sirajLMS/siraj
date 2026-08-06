@@ -2,8 +2,8 @@
 
 import { ChevronRightOutlined } from "@mui/icons-material";
 import { Box, Breadcrumbs, Link, type SxProps, type Theme, Typography } from "@mui/material";
-import type { TypographyProps } from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import {
   type UsePageBreadcrumbsOptions,
   usePageBreadcrumbs,
@@ -18,7 +18,7 @@ export interface MobilePageHeaderBreadcrumb {
 export interface MobilePageHeaderProps {
   readonly title: string;
   readonly subtitle?: string;
-  readonly titleVariant?: TypographyProps["variant"];
+  readonly titleVariant?: UiTypographyVariant;
   /** Explicit crumbs override auto-generation from the sidebar nav config. */
   readonly breadcrumbs?: readonly MobilePageHeaderBreadcrumb[];
   /** Options for auto-generated crumbs when `breadcrumbs` is omitted. */

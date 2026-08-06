@@ -2,7 +2,6 @@
 
 import Stack from "@mui/material/Stack";
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import {
@@ -15,6 +14,7 @@ import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 
 export type CurrencyDisplayProps = {
   readonly code?: CurrencyCode | string | null;
@@ -26,22 +26,27 @@ export type CurrencyDisplayProps = {
    */
   readonly parts?: readonly CurrencyDisplayPartValue[];
   readonly fallback?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: UiTypographyVariant;
   readonly sx?: SxProps<Theme>;
 };
 
-export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
+export const CurrencyDisplay = ({
   code,
   parts,
   fallback,
   typographyVariant,
   sx,
-}): React.ReactNode => {
+}: CurrencyDisplayProps): React.JSX.Element | null => {
   const locale = useAppLocale();
   const visibleParts = resolveCurrencyDisplayParts(parts);
+  const fallbackNode = fallback ? (
+    <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
+      {fallback}
+    </Typography>
+  ) : null;
 
   if (!code) {
-    return (fallback ?? null) as React.ReactNode;
+    return fallbackNode;
   }
 
   const flag = getCurrencyFlag(code);

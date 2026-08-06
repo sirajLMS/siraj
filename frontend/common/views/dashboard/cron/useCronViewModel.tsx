@@ -10,7 +10,7 @@ import {
   PauseOutlined,
   PlayArrowOutlined,
 } from "@mui/icons-material";
-import { Chip, IconButton, Stack } from "@mui/material";
+import { Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { CronExpressionParser } from "cron-parser";
 import { useCallback, useMemo, useState } from "react";
@@ -178,7 +178,7 @@ function buildColumns(
       width: 140,
       renderCell: ({ value }) => {
         const policy = safeEnum(value, Object.values(CronConcurrencyPolicy));
-        if (!policy) return "—";
+        if (!policy) return <Typography variant="bodyMd">—</Typography>;
         let label: string;
         let color: "default" | "warning" | "secondary";
         if (policy === CronConcurrencyPolicy.Allow) {

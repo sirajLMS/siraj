@@ -31,7 +31,7 @@ const IANA_TIMEZONE_TERRITORY_CODES_MAP: Record<string, string | null> = (() => 
 // Use string type to avoid massive union type inference from IanaTimezone enum
 const IANA_TIMEZONE_TO_GRAPHQL_ENUM: Readonly<Record<string, string>> = Object.fromEntries(
   IANA_TIMEZONE_IDS_STRINGS.map(id => [id, id.replaceAll("/", "_")])
-) as Readonly<Record<string, string>>;
+);
 
 export type TimezoneOption = {
   readonly id: string;

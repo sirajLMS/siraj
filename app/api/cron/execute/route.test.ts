@@ -27,7 +27,7 @@ mock.module("@/backend/lib/cron-auth", () => {
     return async (request: { method: string; headers: Headers }) => {
       const result = verifyCronSecretAuth(request);
       if (!result.authorized) return result.response;
-      return handler(request as unknown);
+      return handler(request);
     };
   };
 

@@ -30,7 +30,7 @@ mock.module("@/backend/lib/cron-auth", () => {
     return async (request: { method: string; headers: Headers }) => {
       const result = verifyCronSecretAuth(request);
       if (!result.authorized) return result.response;
-      return handler(request as unknown);
+      return handler(request);
     };
   };
 
@@ -90,7 +90,9 @@ const DEFAULT_TICKER_BODY = {
   nextTickInMs: 60_000,
 } as const;
 
-function expectTickerBody(_body: Record<string, unknown>, _expected: Record<string, unknown> = DEFAULT_TICKER_BODY) {}
+function expectTickerBody(_body: Record<string, unknown>, _expected: Record<string, unknown> = DEFAULT_TICKER_BODY) {
+  // Intentionally empty assertion placeholder
+}
 
 // --- Tests ---
 

@@ -102,7 +102,7 @@ export function UserPersonalDateOfBirthField<T extends UserPersonalFieldsShape &
         control={control}
         name={dateOfBirthField}
         render={({ field }) => {
-          const dateValue = field.value ? new Date(field.value as string) : null;
+          const dateValue = field.value ? new Date(field.value) : null;
           const validDate = dateValue && !Number.isNaN(dateValue.getTime()) ? dateValue : null;
 
           return (

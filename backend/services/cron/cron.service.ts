@@ -382,7 +382,7 @@ export namespace CronService {
 
     const updated = await db.transaction(runner);
     if (updated) {
-      const durationMs = updated.startedAt != null ? now.getTime() - new Date(updated.startedAt).getTime() : undefined;
+      const durationMs = updated.startedAt ? now.getTime() - new Date(updated.startedAt).getTime() : undefined;
       logger.info("cron.run.completed", { runId, durationMs });
     }
   }
@@ -412,7 +412,7 @@ export namespace CronService {
 
     const updated = await db.transaction(runner);
     if (updated) {
-      const durationMs = updated.startedAt != null ? now.getTime() - new Date(updated.startedAt).getTime() : undefined;
+      const durationMs = updated.startedAt ? now.getTime() - new Date(updated.startedAt).getTime() : undefined;
       logger.error("cron.run.failed", { runId, errorMessage, durationMs });
     }
   }

@@ -46,15 +46,15 @@ function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z
     // tolerant of upstream host variations, though the Zod .url() validation above
     // still ensures it's a valid URL.
     if (!isAutoProvider && data.meetingUrl && !isUrlAllowedByProvider(data.meetingUrl, provider.urlAllowlist)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "meetingUrlHostNotAllowed", path: ["meetingUrl"] });
+      ctx.addIssue({ code: "custom", message: "meetingUrlHostNotAllowed", path: ["meetingUrl"] });
     }
     if (provider.fieldSchema.supportsUsername && data.username?.trim() === "") {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "usernameRequired", path: ["username"] });
+      ctx.addIssue({ code: "custom", message: "usernameRequired", path: ["username"] });
     }
     if (provider.fieldSchema.supportsTenantId && data.tenantId?.trim() === "") {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "tenantIdRequired", path: ["tenantId"] });
+      ctx.addIssue({ code: "custom", message: "tenantIdRequired", path: ["tenantId"] });
     }
-  }) as unknown as z.ZodType<MeetingConfigDetails>;
+  });
 }
 
 export function parseMeetingConfigDetails(provider: MeetingProviderSelectType, details: unknown): MeetingConfigDetails {

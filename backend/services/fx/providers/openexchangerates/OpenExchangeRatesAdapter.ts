@@ -67,7 +67,7 @@ export class OpenExchangeRatesAdapter implements IFxRateProvider {
 
     const parsed = (await response.json()) as OpenExchangeRatesResponse;
 
-    if (!parsed || typeof parsed.rates !== "object" || parsed.rates === null) {
+    if (!parsed || typeof parsed.rates !== "object" || parsed.rates == null) {
       throw new Error("OpenExchangeRates response missing rates object");
     }
 

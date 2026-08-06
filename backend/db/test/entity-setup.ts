@@ -202,7 +202,7 @@ export async function createTestStudent(
 }
 
 type TeacherSetupOverrides = Partial<typeof teachers.$inferInsert> & {
-  status?: (typeof users.$inferInsert)["status"];
+  status?: Exclude<(typeof users.$inferInsert)["status"], undefined>;
 };
 
 export async function setupTeacher(

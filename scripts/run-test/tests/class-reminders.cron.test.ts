@@ -94,7 +94,7 @@ beforeEach(() => {
   } as never);
   // "all enabled" — so dispatch isn't filtered down by prefs.
   getPrefsSpy = spyOn(NotificationPreferencesRepository, "getByUserId").mockResolvedValue(
-    [] as unknown as UserNotificationPreferenceSelectType[]
+    []
   );
   dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockResolvedValue([]);
 });

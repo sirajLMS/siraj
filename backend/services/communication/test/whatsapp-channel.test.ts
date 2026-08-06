@@ -21,7 +21,7 @@ function sendParams() {
     eventType: NotificationEventType.COMPLAINT_RESPONSE,
     userId: MOCK_USER_ID,
     template: { name: "test_template", languageCode: "en" },
-  } as const;
+  };
 }
 
 function mockWhatsappCredentialsAccount(overrides: Partial<WhatsappAccountSelectType> = {}): WhatsappAccountSelectType {
@@ -42,7 +42,7 @@ function mockWhatsappCredentialsAccount(overrides: Partial<WhatsappAccountSelect
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  } as WhatsappAccountSelectType;
+  };
 }
 
 const mockDelivery: NotificationDeliverySelectType = {
@@ -128,7 +128,7 @@ describe("WhatsApp Channel Factory", () => {
 
     test("returns false when the active account has a null access token", async () => {
       findFirstActiveForCredentialsSpy.mockResolvedValue(
-        mockWhatsappCredentialsAccount({ encryptedAccessToken: null }) as never
+        mockWhatsappCredentialsAccount({ encryptedAccessToken: null })
       );
       await resetWhatsappChannel();
 

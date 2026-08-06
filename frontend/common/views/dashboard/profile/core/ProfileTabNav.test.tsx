@@ -9,7 +9,7 @@ const mockRouterPush = mock(() => {});
 const mockRouterReplace = mock(() => {});
 const mockRouterBack = mock(() => {});
 
-function mockNavigation(moduleOverrides = {}) {
+function mockNavigation(moduleOverrides: Record<string, unknown> = {}) {
   mock.module("next/navigation", () => ({
     useRouter: () => ({
       push: mockRouterPush,
@@ -30,7 +30,7 @@ type TabNavOptions = {
   permissions: AppPermission[];
   currentTab?: string;
   onTabChange?: (tab: string) => void;
-  moduleOverrides?: Parameters<typeof mockNavigation>[0];
+  moduleOverrides?: Record<string, unknown>;
 };
 
 function renderTabNav({

@@ -22,8 +22,8 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
 }
 
 type ParentSetupOptions = {
-  userOverrides?: Parameters<typeof createTestUser>[1];
-  parentOverrides?: Parameters<typeof createTestParent>[2];
+  userOverrides?: Exclude<Parameters<typeof createTestUser>[1], undefined>;
+  parentOverrides?: Exclude<Parameters<typeof createTestParent>[2], undefined>;
 };
 
 async function setupParent(tx: DBTransaction, label: string, emailPrefix: string, options: ParentSetupOptions = {}) {
@@ -57,7 +57,7 @@ function testParentRepoError(
 }
 
 type StudentSetupOptions = ParentSetupOptions & {
-  studentOverrides?: Parameters<typeof createTestStudent>[2];
+  studentOverrides?: Exclude<Parameters<typeof createTestStudent>[2], undefined>;
 };
 
 async function setupParentWithStudent(

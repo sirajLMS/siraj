@@ -537,7 +537,7 @@ describe("MeetingConfigSnapshotService", () => {
       const { MeetingConfigSnapshotService } = await importService();
 
       // Should not throw — cancel is best-effort
-      await expect(
+      return expect(
         MeetingConfigSnapshotService.cancelMeetingForClassInstance(CLASS_INSTANCE_ID)
       ).resolves.toBeUndefined();
     });

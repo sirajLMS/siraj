@@ -1,7 +1,7 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { RescheduleTrackingRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
+import type { MetricItem, MetricItemVariant } from "@/frontend/common/types/shared.types";
 
 export type TrackingRow = Readonly<Omit<RescheduleTrackingRow, "__typename">> & {
   readonly teacherInitials: string;
@@ -20,7 +20,7 @@ export interface MetricDefinition {
   readonly key: string;
   readonly labelKey: string;
   readonly icon: SvgIconComponent;
-  readonly variant?: MetricItem["variant"];
+  readonly variant?: MetricItemVariant;
 }
 
 export interface RawMetrics {

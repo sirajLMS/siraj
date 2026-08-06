@@ -97,7 +97,7 @@ export const getStudentFutureClasses = async (
     id: r.id,
     executionState: r.executionState,
     scheduledStartAt: r.scheduledStartAt,
-  })) as { id: string; executionState: string; scheduledStartAt: Date }[];
+  }));
 };
 
 export const getUpcomingClassesForStudent = async (

@@ -39,7 +39,7 @@ const toPromise = <T>(fn: () => T | Promise<T>): Promise<T> =>
       if (res && typeof (res as { then?: unknown }).then === "function") {
         (res as Promise<T>).then(resolve, reject);
       } else {
-        resolve(res as T);
+        resolve(res);
       }
     } catch (err) {
       reject(err);
@@ -132,7 +132,7 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     } as never);
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
 
-    await expect(
+    return expect(
       toPromise(() =>
         TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
       )
