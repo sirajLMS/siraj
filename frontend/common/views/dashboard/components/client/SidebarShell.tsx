@@ -421,6 +421,7 @@ function SidebarAccountFooter({
   readonly activeKey: string | null;
 }) {
   const isProfileActive = activeKey === PROFILE_NAV_KEY;
+  const isExpanded = !isCollapsed;
 
   const profileButton = (
     <ListItemButton
@@ -437,7 +438,7 @@ function SidebarAccountFooter({
       <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40, color: "inherit" }}>
         <UserAvatar src={avatarUrl} sx={{ width: 32, height: 32 }} />
       </ListItemIcon>
-      {!isCollapsed ? (
+      {isExpanded && (
         <ListItemText
           primary={userName}
           slotProps={{
@@ -452,7 +453,7 @@ function SidebarAccountFooter({
             },
           }}
         />
-      ) : null}
+      )}
     </ListItemButton>
   );
 
@@ -497,7 +498,7 @@ function SidebarAccountFooter({
         ) : (
           profileButton
         )}
-        {!isCollapsed ? logoutButton : null}
+        {isExpanded && logoutButton}
       </Box>
     </Box>
   );
