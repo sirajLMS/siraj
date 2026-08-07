@@ -51,7 +51,9 @@ async function main(): Promise<void> {
 
   logger.info("cron.worker.script.start", { batchSize, maxDurationMs, workerConcurrency });
 
-  while (running) {
+  async function drainCycle(): Promise<void> {
+    if (!running) return;
+
     const result = await runDrainLoop({ batchSize, maxDurationMs });
 
     logger.info("cron.worker.script.drain", {
@@ -60,9 +62,12 @@ async function main(): Promise<void> {
       retried: result.retried,
     });
 
-    if (!running) break;
+    if (!running) return;
     await Bun.sleep(1000);
+    return drainCycle();
   }
+
+  await drainCycle();
 
   logger.info("cron.worker.script.shutdown", {});
 }

@@ -27,8 +27,8 @@ export interface ParsedPage<T> {
 /**
  * Generic collector that aggregates all items across cursor-paginated pages.
  *
- * @typeParam T           Item type accumulated across pages.
- * @typeParam R           Raw response body type returned by `fetchPage` and consumed by `parseResponse`.
+ * @template T           Item type accumulated across pages.
+ * @template R           Raw response body type returned by `fetchPage` and consumed by `parseResponse`.
  * @param buildRequest    Builds a `GraphApiRequestInit` for a given cursor (or `undefined` for the first page).
  * @param fetchPage       Executes the fetch and returns the raw JSON body.
  * @param parseResponse   Extracts the items array and next cursor from a raw page body.

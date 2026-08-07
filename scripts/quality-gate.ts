@@ -114,7 +114,7 @@ async function performStage(stage: QualityStage): Promise<boolean> {
     case "BASIC_CHECKS": {
       const tsgo = await runCommand("bun", ["tsgo"]);
       const biome = await runCommand("bun", ["biome:check"]);
-      const lint = await runCommand("bun", ["lint"]);
+      const lint = await runCommand("bun", ["lint:type-aware"]);
       return tsgo.success && biome.success && lint.success;
     }
     case "CODESCENE": {
@@ -181,8 +181,10 @@ async function recoverOwnership(state: QualityState): Promise<void> {
 }
 
 async function executeStages(startIndex: number, lifecycle: QualityLifecycle): Promise<void> {
-  for (let i = startIndex; i < STAGES.length; i++) {
-    const currentStage = STAGES[i];
+  async function executeFromIndex(index: number): Promise<void> {
+    if (index >= STAGES.length) return;
+
+    const currentStage = STAGES[index];
     saveState(currentStage, "quality-gate", lifecycle);
 
     const success = await performStage(currentStage);
@@ -195,7 +197,11 @@ async function executeStages(startIndex: number, lifecycle: QualityLifecycle): P
       console.error(`\n❌ Stage ${currentStage} failed. Fix the issues and rerun.`);
       process.exit(1);
     }
+
+    return executeFromIndex(index + 1);
   }
+
+  await executeFromIndex(startIndex);
 }
 
 async function runQualityGate(): Promise<void> {

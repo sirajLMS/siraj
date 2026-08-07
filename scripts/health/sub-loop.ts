@@ -4,7 +4,7 @@
  * This script is called by subagents dispatched by the quality-gate skill. It runs a progressive
  * quality loop on a single file, checking in strict order:
  *
- *   tsgo → biome:check → lint (via queue client) → codescene --file
+ *   tsgo → biome:check → lint:type-aware (via lint service) → codescene --file
  *
  * It SHORT-CIRCUITS at the first failing check — stops and prints the errors for the subagent
  * to fix. The subagent fixes the errors and re-runs this script until it passes all checks.
@@ -20,7 +20,7 @@
  * Lifecycle stages (controls how deep the loop goes):
  *   tsgo          → only run tsgo (type checking only)
  *   biome         → run tsgo, then biome:check (stop if tsgo fails)
- *   lint          → run tsgo, biome, then lint via queue client (stop if earlier check fails)
+ *   lint          → run tsgo, biome, then lint:type-aware via lint service (stop if earlier check fails)
  *   codescene     → run tsgo, biome, lint, then codescene --file (stop if earlier check fails)
  *   sonar-results → same as codescene (subagents verify file is clean before orchestrator handles sonar)
  *
@@ -211,13 +211,13 @@ function runCommand(command: string, args: string[]): CheckResult {
 async function lintViaQueue(filePath: string): Promise<CheckResult> {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
   try {
-    const r: LintResult = await requestLint("sub-loop", [relPath]);
-    return { name: "lint-queue-client", passed: r.success, output: r.output };
+    const r: LintResult = await requestLint("sub-loop", [relPath], { typeAware: true });
+    return { name: "lint:type-aware", passed: r.success, output: r.output };
   } catch (err) {
     return {
-      name: "lint-queue-client",
+      name: "lint:type-aware",
       passed: false,
-      output: `In-process lint service failed: ${(err as Error).message}`,
+      output: `In-process lint service (type-aware) failed: ${(err as Error).message}`,
     };
   }
 }
@@ -293,7 +293,7 @@ function checkBiome(filePath: string): CheckResult {
 }
 
 async function checkLint(filePath: string): Promise<CheckResult> {
-  logInfo(`Submitting lint via in-process service for ${filePath}...`);
+  logInfo(`Submitting lint:type-aware via in-process service for ${filePath}...`);
   const result = await lintViaQueue(filePath);
   return result;
 }
@@ -387,10 +387,10 @@ async function runProgressiveChecks(
     process.exit(0);
   }
 
-  // Step 3: lint via queue client (file-level)
+  // Step 3: lint:type-aware via lint service (file-level)
   const lintResult = await checkLint(filePath);
-  failOnResult(lintResult, "lint FAILED — stopping here. Fix lint errors before proceeding.");
-  logPass("lint passed (via queue client)");
+  failOnResult(lintResult, "lint:type-aware FAILED — stopping here. Fix lint errors before proceeding.");
+  logPass("lint:type-aware passed");
 
   if (targetDepth <= LIFECYCLE_ORDER.lint) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "lint" passed.${NC}`);
@@ -419,14 +419,14 @@ ${BOLD}Usage:${NC}
 ${BOLD}Lifecycle stages (controls depth of checks):${NC}
   tsgo          Only run tsgo (type checking)
   biome         Run tsgo, then biome:check
-  lint          Run tsgo, biome, then lint via queue client
-  codescene     Run tsgo, biome, lint, then codescene --file
+  lint          Run tsgo, biome, then lint:type-aware via lint service
+  codescene     Run tsgo, biome, lint:type-aware, then codescene --file
   sonar-results Same as codescene (no sonar for subagents — EVER)
 
 ${BOLD}Check order (always strict, no skipping):${NC}
   1. tsgo (project-wide, filtered for this file)
   2. biome:check (file-level)
-  3. lint via queue client (file-level)
+  3. lint:type-aware via lint service (file-level)
   4. codescene --file (file-level)
 
 ${BOLD}Exit codes:${NC}

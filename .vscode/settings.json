@@ -9,5 +9,8 @@
     }
   },
   "chat.utilitySmallModel": "customendpoint/nvidia/nvidia/nemotron-3-ultra-550b-a55b",
-  "chat.permissions.default": "autopilot"
+  "chat.permissions.default": "autopilot",
+   "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "always"
+  }
 }

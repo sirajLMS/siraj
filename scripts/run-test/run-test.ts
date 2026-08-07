@@ -96,7 +96,7 @@ function parseArgs(args: string[]): ParsedArgs {
   let focus: string | null = null;
   let feedback: string | null = null;
   let context: string | null = null;
-  let listFeedback = false;
+  let shouldListFeedback = false;
   let testPath: string | null = null;
 
   let i = 0;
@@ -116,7 +116,7 @@ function parseArgs(args: string[]): ParsedArgs {
       context = requireStringArg(args, i, "--context");
       i++;
     } else if (arg === "--list-feedback") {
-      listFeedback = true;
+      shouldListFeedback = true;
     } else if (!arg.startsWith("-")) {
       testPath = arg;
     } else {
@@ -126,7 +126,7 @@ function parseArgs(args: string[]): ParsedArgs {
     i++;
   }
 
-  return { help, last, focus, feedback, context, listFeedback, testPath };
+  return { help, last, focus, feedback, context, listFeedback: shouldListFeedback, testPath };
 }
 
 async function runTest(testPath: string): Promise<number> {

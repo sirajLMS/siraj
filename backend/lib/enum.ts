@@ -25,7 +25,7 @@ type StringEnum = Record<string, string>;
 /**
  * Parses a string value against a string enum object.
  *
- * @typeParam T - The enum object type
+ * @template T - The enum object type
  * @param enumObject - The enum object to validate against
  * @param value - The string value to parse (can be null or undefined)
  * @param fallback - Optional fallback value to return if value is invalid

@@ -199,12 +199,11 @@ async function runSingleTestFile(file: string): Promise<void> {
   }
 }
 
-async function worker() {
-  while (queue.length > 0) {
-    const file = queue.shift();
-    if (!file) break;
-    await runSingleTestFile(file);
-  }
+async function worker(): Promise<void> {
+  const file = queue.shift();
+  if (!file) return;
+  await runSingleTestFile(file);
+  return worker();
 }
 
 // Start workers up to the concurrency limit

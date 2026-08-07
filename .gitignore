@@ -107,3 +107,4 @@ scripts/run-test/feedback/feedback*.md
 .graphql-test-heartbeats/
 
 .eslintcache-type-aware
+.oxlint-baseline.json

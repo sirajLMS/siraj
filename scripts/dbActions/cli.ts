@@ -84,20 +84,23 @@ export async function interactiveLoop(): Promise<void> {
   try {
     await selectAndApplyEnv(rl);
 
-    let active = true;
-    while (active) {
+    async function runMenu(): Promise<void> {
       displayMenu();
       const choice = (await askQuestion(rl, "\nChoice: ")).trim();
       if (choice === "0") {
-        active = false;
-      } else if (choice === RESELECT_ENV_CHOICE) {
+        return;
+      }
+      if (choice === RESELECT_ENV_CHOICE) {
         await selectAndApplyEnv(rl);
       } else if (ACTIONS[choice]) {
         await executeAction(choice, rl);
       } else {
         globalThis.console.error(`Invalid choice: ${choice}`);
       }
+      return runMenu();
     }
+
+    await runMenu();
   } catch (error) {
     if (error instanceof Error && error.message === "Cancelled.") {
       globalThis.console.log("Exiting.");

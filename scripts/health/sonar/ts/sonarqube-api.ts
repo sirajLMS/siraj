@@ -6,7 +6,14 @@ export async function waitForSonarQube(): Promise<void> {
   logInfo("Waiting for SonarQube to be ready...");
 
   const maxAttempts = 60;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+
+  async function attempt(attemptIndex: number): Promise<void> {
+    if (attemptIndex >= maxAttempts) {
+      globalThis.console.log("");
+      logError("SonarQube failed to start within expected time");
+      process.exit(1);
+    }
+
     try {
       const response = await fetch(`${CONFIG.SONAR_HOST}/api/system/status`);
       if (response.ok) {
@@ -17,16 +24,15 @@ export async function waitForSonarQube(): Promise<void> {
         }
       }
     } catch (e) {
-      logWarning(`Connection attempt ${attempt + 1} failed: ${e instanceof Error ? e.message : String(e)}`);
+      logWarning(`Connection attempt ${attemptIndex + 1} failed: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     process.stdout.write(".");
     await new Promise(resolve => setTimeout(resolve, 2000));
+    return attempt(attemptIndex + 1);
   }
 
-  globalThis.console.log("");
-  logError("SonarQube failed to start within expected time");
-  process.exit(1);
+  await attempt(0);
 }
 
 export async function changeAdminPassword(): Promise<void> {
