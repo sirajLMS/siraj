@@ -17,7 +17,7 @@ const neonTestUrl = process.env.NEON_TEST_DATABASE_URL;
 const hasNeonTestUrl = (() => {
   if (!neonTestUrl || neonTestUrl.includes("ep-example")) return false;
   try {
-    return /\.neon\.tech$/.test(new URL(neonTestUrl).hostname);
+    return new URL(neonTestUrl).hostname.endsWith('.neon.tech');
   } catch {
     return false;
   }
