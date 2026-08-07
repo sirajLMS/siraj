@@ -49,7 +49,7 @@ function groupQuotasByMonth<T>(
     accum(existing, q);
     monthMap.set(key, existing);
   }
-  return Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  return Array.from(monthMap.entries()).toSorted((a, b) => a[0].localeCompare(b[0]));
 }
 
 function buildPurchasesOverTime(quotas: QuotaItem[], monthFormatter: Intl.DateTimeFormat) {

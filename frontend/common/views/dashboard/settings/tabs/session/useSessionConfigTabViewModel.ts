@@ -63,7 +63,7 @@ export function useSessionConfigTabViewModel(
     return configs
       .map((config, index) => toSessionConfigRow(config, index))
       .filter((row): row is SessionConfigRow => row != null)
-      .sort((left, right) => left.roleName.localeCompare(right.roleName));
+      .toSorted((left, right) => left.roleName.localeCompare(right.roleName));
   }, [data?.sessionConfigs]);
 
   const onSaved = async (): Promise<void> => {

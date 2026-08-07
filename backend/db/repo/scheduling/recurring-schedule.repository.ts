@@ -257,11 +257,10 @@ export namespace RecurringScheduleRepository {
     ]);
 
     return {
-      rows: rows.map(row => ({
-        ...row.schedule,
-        studentName: row.studentName,
-        teacherUserName: row.teacherUserName,
-      })),
+      rows: rows.map(row => (Object.assign(row.schedule, {
+	studentName: row.studentName,
+	teacherUserName: row.teacherUserName
+}))),
       totalCount: Number(totalCount),
     };
   }

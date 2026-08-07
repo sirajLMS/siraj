@@ -138,7 +138,7 @@ function LeaveDialog({ open, reason, isProcessing, onReasonChange, onClose, onSu
       <DialogTitle>{labels.title}</DialogTitle>
       <DialogContent>
         <TextField
-          autoFocus
+          
           margin="dense"
           label={labels.reasonLabel}
           type="text"

@@ -393,7 +393,7 @@ async function filterUnseenRefunds(
   }>
 > {
   const existing = await CreditRepository.findByIdempotencyKeys(
-    [...new Set(allKeys)].sort((a, b) => a.localeCompare(b)),
+    [...new Set(allKeys)].toSorted((a, b) => a.localeCompare(b)),
     tx
   );
   const existingKeys = new Set(existing.map(r => r.idempotencyKey));

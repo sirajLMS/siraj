@@ -143,7 +143,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     expect(results).toHaveLength(4);
 
     // Sort results by groupKey to make tests deterministic
-    const sorted = [...results].sort((a, b) => a.groupKey.localeCompare(b.groupKey));
+    const sorted = [...results].toSorted((a, b) => a.groupKey.localeCompare(b.groupKey));
 
     // date1: TAKEN, 1.0 hour, 100 EGP
     expect(sorted[0].takenClasses).toBe(1);

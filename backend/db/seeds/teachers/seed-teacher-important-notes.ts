@@ -30,13 +30,12 @@ export async function seedOrGet(teachersList: TeacherSelectType[], usersList: Us
   }
 
   const selectedNotes = seedConfig.profile === "standard" ? NOTE_SPECS : NOTE_SPECS.slice(0, 1);
-  const specs: TeacherNoteSeedSpec[] = selectedNotes.map(note => ({
-    ...note,
-    teacherId: teacher.id,
-    createdByUserId: adminUser.id,
-    isPublished: true,
-    priority: 1,
-  }));
+  const specs: TeacherNoteSeedSpec[] = selectedNotes.map(note => (Object.assign(note, {
+	teacherId: teacher.id,
+	createdByUserId: adminUser.id,
+	isPublished: true,
+	priority: 1
+})));
 
   const results = await orchestrateSeedMany({
     specs,

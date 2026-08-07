@@ -216,10 +216,7 @@ export namespace UserRepository {
       })
       .from(users)
       .limit(500);
-    return rows.map(row => ({
-      ...row,
-      status: parseAccountStatus(row.status),
-    }));
+    return rows.map(row => (Object.assign(row, { status: parseAccountStatus(row.status) })));
   };
 
   export const findUsers = async (opts: {

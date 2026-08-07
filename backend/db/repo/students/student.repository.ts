@@ -491,11 +491,10 @@ export namespace StudentRepository {
     return {
       rows: rows.map(
         r =>
-          ({
-            ...r,
-            status: r.status as StudentStatus,
-            hoursPerWeek: r.hoursPerWeek ? Number.parseFloat(r.hoursPerWeek) : 0,
-          }) satisfies Types.StudentDirectory
+          (Object.assign(r, {
+	status: r.status as StudentStatus,
+	hoursPerWeek: r.hoursPerWeek ? Number.parseFloat(r.hoursPerWeek) : 0
+})) satisfies Types.StudentDirectory
       ),
       totalCount,
     };

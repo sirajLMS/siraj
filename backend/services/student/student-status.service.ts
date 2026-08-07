@@ -30,13 +30,12 @@ export namespace StudentStatusService {
     const enrichedClasses = await Promise.all(
       classes.map(async c => {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(c.id, tErrors);
-        return {
-          ...c,
-          executionState: parseClassExecutionState(c.executionState),
-          outcome: parseClassOutcome(c.outcome) ?? ClassOutcome.PENDING,
-          meetingJoinUrl: effectiveMeeting.joinUrl,
-          effectiveMeeting,
-        };
+        return Object.assign(c, {
+	executionState: parseClassExecutionState(c.executionState),
+	outcome: parseClassOutcome(c.outcome) ?? ClassOutcome.PENDING,
+	meetingJoinUrl: effectiveMeeting.joinUrl,
+	effectiveMeeting
+});
       })
     );
 

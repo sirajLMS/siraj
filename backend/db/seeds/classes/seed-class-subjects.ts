@@ -17,7 +17,7 @@ export async function seedOrGet() {
     if (!category) {
       throw new Error(`Missing class category for subject seed: ${spec.categorySlug}`);
     }
-    return { ...spec, categoryId: category.id };
+    return Object.assign(spec, { categoryId: category.id });
   });
 
   const results = await orchestrateSeedMany({

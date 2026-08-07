@@ -54,7 +54,7 @@ function EditableTypographyEditFieldMobile({
       error={!!error}
       helperText={error}
       onKeyDown={onKeyDown}
-      autoFocus
+      
       inputRef={inputRef}
       slotProps={{
         input: {

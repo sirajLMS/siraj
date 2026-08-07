@@ -19,7 +19,7 @@ export namespace ReferenceDataService {
   export async function listTimezonesPaginated(
     pagination: PaginationArgs | null
   ): Promise<SettingsTimezonesPaginatedResult> {
-    const sorted = [...(await TimezoneRepository.listAll())].sort((left, right) =>
+    const sorted = [...(await TimezoneRepository.listAll())].toSorted((left, right) =>
       left.ianaId.localeCompare(right.ianaId)
     );
     const totalCount = sorted.length;

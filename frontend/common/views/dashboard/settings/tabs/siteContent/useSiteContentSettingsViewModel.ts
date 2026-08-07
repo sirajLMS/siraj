@@ -73,7 +73,7 @@ export function useSiteContentSettingsViewModel(
     return entries
       .map((entry, index) => toSiteContentRow(entry, index))
       .filter((row): row is SiteContentRow => row != null)
-      .sort((left, right) => left.slug.localeCompare(right.slug));
+      .toSorted((left, right) => left.slug.localeCompare(right.slug));
   }, [data?.siteContentEntries]);
 
   const onSaved = async (): Promise<void> => {

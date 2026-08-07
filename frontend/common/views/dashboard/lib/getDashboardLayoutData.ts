@@ -39,7 +39,7 @@ export function getActiveNavKey(pathname: string, sidebarItems: readonly NavItem
   }
   const match = sidebarItems
     .filter(item => stripped.startsWith(item.href))
-    .sort((a, b) => b.href.length - a.href.length)[0];
+    .toSorted((a, b) => b.href.length - a.href.length)[0];
 
   return match?.key ?? null;
 }

@@ -142,7 +142,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     expect(dispatchMultiSpy).toHaveBeenCalledTimes(1);
     const dispatched = getDispatchedPayloads();
     expect(dispatched).toHaveLength(4);
-    const dispatchedChannels = dispatched.map(p => p.channel).sort(compareChannels);
+    const dispatchedChannels = dispatched.map(p => p.channel).toSorted(compareChannels);
     expect(dispatchedChannels).toEqual([
       NotificationChannel.EMAIL,
       NotificationChannel.ON_APP,
@@ -167,7 +167,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     expect(results).toHaveLength(3);
     const dispatchedChannels = getDispatchedPayloads()
       .map(p => p.channel)
-      .sort(compareChannels);
+      .toSorted(compareChannels);
     expect(dispatchedChannels).toEqual([NotificationChannel.ON_APP, NotificationChannel.PUSH, NotificationChannel.SMS]);
     expect(dispatchedChannels).not.toContain(NotificationChannel.EMAIL);
     expect(results.every(r => r.success)).toBe(true);
@@ -178,7 +178,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     const allowedLower = allowed.map(c =>
       c === NotificationChannel.ON_APP ? NotificationChannel.ON_APP : NotificationChannel.EMAIL
     );
-    expect([...allowedLower].sort(compareChannels)).toEqual([NotificationChannel.EMAIL, NotificationChannel.ON_APP]);
+    expect([...allowedLower].toSorted(compareChannels)).toEqual([NotificationChannel.EMAIL, NotificationChannel.ON_APP]);
 
     const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.CLASS_SCHEDULED);
     const results = await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
@@ -186,7 +186,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     expect(results).toHaveLength(2);
     const dispatched = getDispatchedPayloads();
     expect(dispatched).toHaveLength(2);
-    const dispatchedChannels = dispatched.map(p => p.channel).sort(compareChannels);
+    const dispatchedChannels = dispatched.map(p => p.channel).toSorted(compareChannels);
     expect(dispatchedChannels).toEqual([NotificationChannel.EMAIL, NotificationChannel.ON_APP]);
   });
 
@@ -263,7 +263,7 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
     expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.EMAIL);
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+    expect(dispatched.map(p => p.channel).toSorted(compareChannels)).toEqual([
       NotificationChannel.ON_APP,
       NotificationChannel.PUSH,
       NotificationChannel.SMS,
@@ -275,7 +275,7 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
     expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.SMS);
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+    expect(dispatched.map(p => p.channel).toSorted(compareChannels)).toEqual([
       NotificationChannel.EMAIL,
       NotificationChannel.ON_APP,
       NotificationChannel.PUSH,
@@ -289,7 +289,7 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
     const dispatched = getDispatchedPayloads();
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+    expect(dispatched.map(p => p.channel).toSorted(compareChannels)).toEqual([
       NotificationChannel.ON_APP,
       NotificationChannel.PUSH,
     ]);

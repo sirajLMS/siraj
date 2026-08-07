@@ -76,7 +76,7 @@ function DeleteConfirmDialog({
       </DialogContent>
       <DialogActions>
         <MuiButton onClick={onClose}>{cancelLabel}</MuiButton>
-        <MuiButton onClick={onConfirm} color="error" variant="contained" autoFocus>
+        <MuiButton onClick={onConfirm} color="error" variant="contained" >
           {confirmLabel}
         </MuiButton>
       </DialogActions>

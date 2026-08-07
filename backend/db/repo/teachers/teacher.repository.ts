@@ -172,10 +172,7 @@ export namespace TeacherRepository {
 
     const [rawRows, countResult] = await Promise.all([rowsQuery, countQuery]);
 
-    const rows = rawRows.map(row => ({
-      ...row,
-      status: parseAccountStatus(row.status),
-    }));
+    const rows = rawRows.map(row => (Object.assign(row, { status: parseAccountStatus(row.status) })));
 
     const totalCount = countResult[0]?.count ?? 0;
 

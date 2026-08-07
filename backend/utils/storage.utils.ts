@@ -307,7 +307,7 @@ export namespace StorageUtils {
     sortBy: Types.FileSortField,
     direction: OrderSortDirection
   ): Array<Types.FileInfo | Types.DirectoryInfo> => {
-    const sorted = [...items].sort((a, b) => {
+    const sorted = [...items].toSorted((a, b) => {
       let comparison = 0;
 
       switch (sortBy) {

@@ -531,7 +531,7 @@ async function main(): Promise<void> {
       relatedFiles: findRelatedFiles(filePath),
       issues,
     }))
-    .sort((a, b) => b.issues.length - a.issues.length);
+    .toSorted((a, b) => b.issues.length - a.issues.length);
 
   await interactiveMenu(fileIssuesList, runner, isDryRun);
 }

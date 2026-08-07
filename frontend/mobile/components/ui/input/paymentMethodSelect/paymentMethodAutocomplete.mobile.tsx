@@ -116,7 +116,7 @@ const AutocompleteTextField: React.FC<{
       error={showError}
       helperText={resolvedHelperText}
       onBlur={onBlur}
-      autoFocus={autoFocus}
+      
       slotProps={{
         ...restSlotProps,
         input: {
@@ -302,7 +302,7 @@ const renderAutocompleteInput = ({
     showError={showError}
     resolvedHelperText={resolvedHelperText}
     onBlur={onBlur}
-    autoFocus={autoFocus}
+    
     autoComplete={autoComplete}
     option={option}
   />

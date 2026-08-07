@@ -146,7 +146,7 @@ function ClearScheduleDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>{labels.dialogs.cancel}</Button>
-        <Button onClick={onConfirm} color="error" variant="contained" autoFocus>
+        <Button onClick={onConfirm} color="error" variant="contained" >
           {labels.actions.clearSchedule}
         </Button>
       </DialogActions>

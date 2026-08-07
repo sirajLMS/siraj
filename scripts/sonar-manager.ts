@@ -113,7 +113,7 @@ function listFiles(result: SonarResult) {
     console.log("No files with issues found.");
     return;
   }
-  const files = [...new Set(result.issues.map(i => i.component))].sort((a, b) => a.localeCompare(b));
+  const files = [...new Set(result.issues.map(i => i.component))].toSorted((a, b) => a.localeCompare(b));
   console.log("Files with issues:");
   for (const f of files) {
     console.log(`- ${f}`);

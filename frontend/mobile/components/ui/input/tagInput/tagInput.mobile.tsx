@@ -98,7 +98,7 @@ function TagInputChipListMobile({
         onChange={onEditInputChange}
         onKeyDown={e => onEditKeyDown(e, index)}
         onBlur={() => onEditBlur(index)}
-        autoFocus
+        
       />
     ) : (
       <Chip

@@ -87,7 +87,7 @@ function getIanaTimezoneIds(): string[] {
   }
   return [...Intl.supportedValuesOf("timeZone")]
     .filter(id => !isExcludedIanaTimezoneId(id))
-    .sort((a, b) => a.localeCompare(b));
+    .toSorted((a, b) => a.localeCompare(b));
 }
 
 function loadCldrZoneTree(): CldrZoneTree {

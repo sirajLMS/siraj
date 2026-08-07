@@ -165,7 +165,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
         </DialogContent>
         <DialogActions>
           <Button onClick={closeDialog}>{t.dialogs.cancel}</Button>
-          <Button onClick={handleConfirm} color="error" variant="contained" autoFocus>
+          <Button onClick={handleConfirm} color="error" variant="contained" >
             {t.dialogs.confirmYes}
           </Button>
         </DialogActions>

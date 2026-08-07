@@ -39,7 +39,7 @@ export const PhoneCountryPickerMobile: React.FC<PhoneCountryPickerMobileProps> =
         label={t.selectCountry}
         fullWidth
         open
-        autoFocus
+        
         showPhonePrefix
         matchAnchorWidth
         listAttached

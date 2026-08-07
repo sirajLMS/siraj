@@ -53,7 +53,7 @@ function EditableTypographyEditField({
       error={!!error}
       helperText={error}
       onKeyDown={onKeyDown}
-      autoFocus
+      
       inputRef={inputRef}
       slotProps={{
         input: {

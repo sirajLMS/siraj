@@ -124,7 +124,7 @@ function CredentialEditDialog({
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <TextField
-          autoFocus
+          
           fullWidth
           type="password"
           label={fieldLabel}

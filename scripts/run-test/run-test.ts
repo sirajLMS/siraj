@@ -187,8 +187,8 @@ function findLatestLog(testPath: string): string | null {
       const fullPath = join(LOGS_DIR, entry);
       return existsSync(fullPath) && existsSync(`${fullPath}${sep}`) ? true : existsSync(fullPath);
     })
-    .sort((a, b) => a.localeCompare(b))
-    .reverse();
+    .toSorted((a, b) => a.localeCompare(b))
+    .toReversed();
 
   for (const tsDir of timestampDirs) {
     const candidate = join(LOGS_DIR, tsDir, expectedLogName);
@@ -322,7 +322,7 @@ function parseTestLog(logContent: string, logFilePath: string, focusStr: string 
 
   const { passes, fails, failEntries, resultLineIndices } = scanLines(lines);
 
-  const sortedResultIndices = [...resultLineIndices].sort((a, b) => a - b);
+  const sortedResultIndices = [...resultLineIndices].toSorted((a, b) => a - b);
   computeErrorStartLines(failEntries, sortedResultIndices);
 
   const failedTests: string[] = [];
@@ -454,8 +454,8 @@ function getFeedbackFiles(): string[] {
 
   return readdirSync(FEEDBACK_DIR)
     .filter(f => f.startsWith("feedback-") && f.endsWith(".md"))
-    .sort((a, b) => a.localeCompare(b))
-    .reverse();
+    .toSorted((a, b) => a.localeCompare(b))
+    .toReversed();
 }
 
 function listFeedback(): void {

@@ -154,7 +154,7 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
       error={showError}
       helperText={helperText}
       onBlur={handleBlur}
-      autoFocus={autoFocus}
+      
       slotProps={{
         ...params.slotProps,
         input: {

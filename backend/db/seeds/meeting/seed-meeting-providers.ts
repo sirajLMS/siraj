@@ -15,11 +15,10 @@ export async function seedOrGet() {
 
   const tErrors = getServerTranslations("en").errorsTranslations;
   const results = await MeetingProviderCatalogService.upsertManyProviders(
-    MEETING_PROVIDER_CATALOG_SEEDS.map((spec: MeetingProviderCatalogSeed) => ({
-      ...spec,
-      logoUrl: logoUrls.get(spec.slug) ?? null,
-      isActive: true,
-    })),
+    MEETING_PROVIDER_CATALOG_SEEDS.map((spec: MeetingProviderCatalogSeed) => (Object.assign(spec, {
+	logoUrl: logoUrls.get(spec.slug) ?? null,
+	isActive: true
+}))),
     tErrors
   );
 

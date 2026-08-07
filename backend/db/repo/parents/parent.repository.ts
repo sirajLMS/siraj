@@ -215,10 +215,7 @@ export namespace ParentRepository {
       ),
     ]);
 
-    const rowsWithUnpaid = rows.map(r => ({
-      ...r,
-      unpaidInvoices: unpaidMap.get(r.id) ?? 0,
-    }));
+    const rowsWithUnpaid = rows.map(r => (Object.assign(r, { unpaidInvoices: unpaidMap.get(r.id) ?? 0 })));
 
     const total = totalCount[0]?.count ?? 0;
     const pageInfo = PaginationUtils.buildPageInfoFromArgs(options.pagination ?? null, rowsWithUnpaid.length, total);

@@ -86,7 +86,7 @@ function listCustomSqlFiles(): string[] {
   if (!existsSync(MIGRATIONS_SRC_DIR)) return [];
   return readdirSync(MIGRATIONS_SRC_DIR)
     .filter(f => f.endsWith(".sql") && !isExcluded(f))
-    .sort((a, b) => a.localeCompare(b));
+    .toSorted((a, b) => a.localeCompare(b));
 }
 
 /** Builds the manifest: one entry per custom SQL file with its SHA-256. */

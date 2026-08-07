@@ -147,7 +147,7 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
       offsetMinutes: getTimezoneOffsetMinutes(id, date),
       emoji: getTimezoneEmoji(id),
     };
-  }).sort((left, right) => {
+  }).toSorted((left, right) => {
     if (left.offsetMinutes !== right.offsetMinutes) {
       return left.offsetMinutes - right.offsetMinutes;
     }

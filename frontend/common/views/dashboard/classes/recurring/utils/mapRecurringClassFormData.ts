@@ -64,10 +64,7 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
     durationMinutes: calculateDurationMinutes(data),
     defaultStartTime: data.defaultStartTime,
     timezone: data.timezone,
-    days: activeDays.map(day => ({
-      ...day,
-      dayOfWeek: day.dayOfWeek as unknown as BackendDayOfWeek,
-    })),
+    days: activeDays.map(day => (Object.assign(day, { dayOfWeek: (day.dayOfWeek as unknown) as BackendDayOfWeek }))),
     classType: data.classType as BackendClassType | null | undefined,
     effectiveFrom: data.effectiveFrom || undefined,
     effectiveUntil: data.effectiveUntil || undefined,

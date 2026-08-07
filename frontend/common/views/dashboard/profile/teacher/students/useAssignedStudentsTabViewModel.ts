@@ -53,7 +53,7 @@ function buildClassOptions(rows: readonly AssignedStudentsRow[], t: ProfileStude
       rows
         .map(row => row.className)
         .filter(className => className !== t.classUnknown)
-        .sort((a, b) => a.localeCompare(b))
+        .toSorted((a, b) => a.localeCompare(b))
     )
   );
   return [t.allClasses, ...options];

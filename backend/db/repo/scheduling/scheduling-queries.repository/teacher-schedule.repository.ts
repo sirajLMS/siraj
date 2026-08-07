@@ -52,11 +52,10 @@ export async function getTeacherFutureClasses(
     )
     .orderBy(classInstances.scheduledStartAt);
 
-  return rows.map(row => ({
-    ...row,
-    executionState: row.executionState as ClassExecutionState,
-    outcome: row.outcome as ClassOutcome | null,
-  }));
+  return rows.map(row => (Object.assign(row, {
+	executionState: row.executionState as ClassExecutionState,
+	outcome: row.outcome as ClassOutcome | null
+})));
 }
 
 export const getWeeklyScheduleGrid = async (
@@ -107,12 +106,11 @@ export const getWeeklyScheduleGrid = async (
       DayOfWeek.FRIDAY,
       DayOfWeek.SATURDAY,
     ];
-    return {
-      ...row,
-      executionState: row.executionState as ClassExecutionState,
-      outcome: row.outcome as ClassOutcome | null,
-      dayOfWeek: dayNames[dayIndex],
-    };
+    return Object.assign(row, {
+	executionState: row.executionState as ClassExecutionState,
+	outcome: row.outcome as ClassOutcome | null,
+	dayOfWeek: dayNames[dayIndex]
+});
   });
 };
 
@@ -183,9 +181,8 @@ export const getTeacherAssignedClasses = async (
     .orderBy(classInstances.scheduledStartAt)
     .limit(200);
 
-  return rows.map(row => ({
-    ...row,
-    executionState: row.executionState as ClassExecutionState,
-    outcome: row.outcome as ClassOutcome | null,
-  }));
+  return rows.map(row => (Object.assign(row, {
+	executionState: row.executionState as ClassExecutionState,
+	outcome: row.outcome as ClassOutcome | null
+})));
 };

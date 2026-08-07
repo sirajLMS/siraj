@@ -50,13 +50,12 @@ export namespace StudentHistoryService {
     const sessions = await Promise.all(
       rawSessions.map(async session => {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id, tErrors);
-        return {
-          ...session,
-          status: session.status as ClassExecutionState,
-          outcome: (session.outcome as ClassOutcome | null) ?? null,
-          meetingJoinUrl: effectiveMeeting.joinUrl,
-          effectiveMeeting,
-        };
+        return Object.assign(session, {
+	status: session.status as ClassExecutionState,
+	outcome: session.outcome as ClassOutcome | null ?? null,
+	meetingJoinUrl: effectiveMeeting.joinUrl,
+	effectiveMeeting
+});
       })
     );
 

@@ -410,7 +410,7 @@ function printIssues(issues: SonarIssue[]): void {
   }
 
   const grouped = groupIssuesByFile(issues);
-  const sortedFiles = Array.from(grouped.keys()).sort((a, b) => a.localeCompare(b));
+  const sortedFiles = Array.from(grouped.keys()).toSorted((a, b) => a.localeCompare(b));
 
   globalThis.console.log(
     `\n${COLORS.CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLORS.NC}`

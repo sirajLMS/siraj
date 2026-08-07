@@ -133,7 +133,7 @@ export function discoverEnvFilesWithDatabaseUrl(rootDir = process.cwd()): EnvFil
     options.push({ fileName: entry, databaseUrl });
   }
 
-  return options.sort((a, b) => compareEnvFileNames(a.fileName, b.fileName));
+  return options.toSorted((a, b) => compareEnvFileNames(a.fileName, b.fileName));
 }
 
 /**

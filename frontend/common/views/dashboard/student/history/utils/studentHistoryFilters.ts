@@ -51,9 +51,9 @@ export function filterHistorySessions(
 }
 
 export function uniqueSessionSubjects(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.title).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  return [...new Set(sessions.map(s => s.title).filter(Boolean))].toSorted((a, b) => a.localeCompare(b));
 }
 
 export function uniqueSessionStatuses(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.status).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  return [...new Set(sessions.map(s => s.status).filter(Boolean))].toSorted((a, b) => a.localeCompare(b));
 }

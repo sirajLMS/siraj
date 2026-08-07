@@ -686,7 +686,7 @@ for (const ns of namespaces) {
 }
 legacyToHandle.set("settings.audit", "DashboardSettings");
 
-const sortedLegacyKeys = [...legacyToHandle.keys()].sort((a, b) => b.length - a.length);
+const sortedLegacyKeys = [...legacyToHandle.keys()].toSorted((a, b) => b.length - a.length);
 
 function ensureTranslationImport(content: string): string {
   if (!content.includes("Translation.Dashboard.")) return content;

@@ -71,7 +71,7 @@ export function useSubjectDetailViewModel(props: Readonly<UseSubjectDetailViewMo
 
   const resources = useMemo<readonly SubjectResourceItem[]>(() => {
     if (!subject?.resources) return [];
-    return [...subject.resources].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    return [...subject.resources].toSorted((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }, [subject?.resources]);
 
   const breadcrumbs = useMemo<readonly PageHeaderBreadcrumb[]>(
