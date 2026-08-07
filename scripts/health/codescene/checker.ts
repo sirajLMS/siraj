@@ -32,10 +32,30 @@ interface QualityState {
   lastRun: string;
 }
 
+function isQualityState(value: unknown): value is QualityState {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  return (
+    "stage" in value &&
+    typeof value.stage === "string" &&
+    "owner" in value &&
+    typeof value.owner === "string" &&
+    "lifecycle" in value &&
+    typeof value.lifecycle === "string" &&
+    "lastRun" in value &&
+    typeof value.lastRun === "string"
+  );
+}
+
 function updateQualityStateIfOwned(results: CheckResults) {
   if (results.warningCount === 0 && results.errorCount === 0 && fs.existsSync(STATE_FILE)) {
     try {
-      const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf-8")) as QualityState;
+      const parsed: unknown = JSON.parse(fs.readFileSync(STATE_FILE, "utf-8"));
+      if (!isQualityState(parsed)) {
+        return;
+      }
+      const state = parsed;
       if (state.owner === "codescene") {
         state.owner = "quality-gate";
         state.stage = "SONAR_SCAN";
@@ -76,8 +96,8 @@ function getTsConfigIgnores(): string[] {
         return excludeItems.map((e: string) => `**/${e}/**`);
       }
     }
-  } catch (error) {
-    logError(`Failed to parse tsconfig.json: ${error}`);
+  } catch (error: unknown) {
+    logError(`Failed to parse tsconfig.json: ${error instanceof Error ? error.message : String(error)}`);
   }
   return [];
 }
@@ -126,17 +146,23 @@ export function checkSingleFile(filePath: string): void {
 
 // Concurrency pool handler
 async function pool<T>(items: T[], concurrency: number, fn: (item: T) => Promise<void>): Promise<void> {
-  const workers = new Set<Promise<void>>();
-  for (const item of items) {
-    if (workers.size >= concurrency) {
-      await Promise.race(workers);
-    }
-    const p = fn(item).then(() => {
-      workers.delete(p);
-    });
-    workers.add(p);
+  const workerCount = Math.min(concurrency, items.length);
+  if (workerCount === 0) {
+    return;
   }
-  await Promise.all(workers);
+
+  let nextIndex = 0;
+  const schedule = async (): Promise<void> => {
+    const index = nextIndex;
+    nextIndex += 1;
+    if (index >= items.length) {
+      return;
+    }
+    await fn(items[index]);
+    return schedule();
+  };
+
+  await Promise.all(Array.from({ length: workerCount }, () => schedule()));
 }
 
 export async function runHealthCheck(forceFull = false): Promise<void> {
@@ -271,17 +297,15 @@ async function runSingleCodeSceneExecution(
 async function executeCodeScene(
   csBin: string,
   file: string,
-  maxRetries = 3
+  maxRetries = 3,
+  attempt = 1
 ): Promise<{ output: string; exitCode: number; errorMsg: string }> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const result = await runSingleCodeSceneExecution(csBin, file);
-    if (isLicenseOrNetworkError(result.output, result.errorMsg) && attempt < maxRetries) {
-      await new Promise(res => setTimeout(res, attempt * 400));
-      continue;
-    }
-    return result;
+  const result = await runSingleCodeSceneExecution(csBin, file);
+  if (isLicenseOrNetworkError(result.output, result.errorMsg) && attempt < maxRetries) {
+    await new Promise(res => setTimeout(res, attempt * 400));
+    return executeCodeScene(csBin, file, maxRetries, attempt + 1);
   }
-  return runSingleCodeSceneExecution(csBin, file);
+  return result;
 }
 
 function parseCodeSceneIssues(output: string): string[] {
@@ -299,6 +323,14 @@ function parseCodeSceneIssues(output: string): string[] {
       line.includes("unauthorized")
     );
   });
+}
+
+/** True when CodeScene CLI output indicates errors or warnings (not just non-zero exit). */
+export function isCodeSceneOutputFailed(output: string, exitCode: number | null): boolean {
+  const issues = parseCodeSceneIssues(output);
+  const hasError = exitCode !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
+  const hasWarning = issues.some(i => /^(warn|arn|info|nfo)/i.test(i));
+  return hasError || hasWarning;
 }
 
 function handleFileErrorResult(

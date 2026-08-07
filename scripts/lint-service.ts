@@ -62,6 +62,8 @@ export interface LintOptions {
   json?: boolean;
   verbose?: boolean;
   typeAware?: boolean;
+  /** ESLint --max-warnings (e.g. 0 to fail on any warning). */
+  maxWarnings?: number;
 }
 
 export interface LintMetrics {
@@ -211,6 +213,7 @@ class LintService {
 
     // Append --fix if requested
     const fixFlag = options.fix ? "--fix" : "";
+    const maxWarningsFlag = options.maxWarnings !== undefined ? `--max-warnings ${options.maxWarnings}` : "";
 
     // Construct the command
     const envPrefix = options.typeAware ? 'ESLINT_TYPE_AWARE="true"' : "";
@@ -228,6 +231,7 @@ class LintService {
       "--cache",
       `--cache-location ${cacheLocation}`,
       `--concurrency=${concurrencySetting}`,
+      maxWarningsFlag,
       fixFlag,
       fileArgs,
     ]
@@ -246,8 +250,18 @@ class LintService {
         },
         (error, stdout, stderr) => {
           const output = (stdout || "") + (stderr || "");
-          const exitCode = error ? (error.code ?? 1) : 0;
-          resolve({ success: exitCode === 0, output, exitCode: exitCode as number });
+          const rawCode = error?.code;
+          let exitCode = 0;
+          if (error) {
+            if (typeof rawCode === "number") {
+              exitCode = rawCode;
+            } else if (typeof rawCode === "string") {
+              exitCode = Number.parseInt(rawCode, 10) || 1;
+            } else {
+              exitCode = 1;
+            }
+          }
+          resolve({ success: exitCode === 0, output, exitCode });
         }
       );
     });
@@ -299,6 +313,14 @@ export async function requestLintWithMetrics(
 
 // ─── CLI Entrypoint ─────────────────────────────────────────────────────────
 
+function getUnknownErrorCode(err: unknown): string | undefined {
+  if (typeof err !== "object" || err === null || !("code" in err)) {
+    return undefined;
+  }
+  const code = Reflect.get(err, "code");
+  return typeof code === "string" ? code : undefined;
+}
+
 function printHelp(): void {
   console.log(`
 Lint Service — Unified In-Process ESLint CLI
@@ -329,6 +351,34 @@ Examples:
 `);
 }
 
+function writeLintResult(result: LintExecutionResult, json: boolean, verbose: boolean): void {
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  process.stdout.write(result.output || "");
+  if (verbose) {
+    console.error(`\n[lint-service] Duration: ${result.metrics.durationMs}ms`);
+    console.error(`[lint-service] Queue depth at enqueue: ${result.metrics.queueDepthAtEnqueue}`);
+  }
+}
+
+function handleCliError(err: unknown): never {
+  if (getUnknownErrorCode(err) === "ERR_PARSE_ARGS_UNKNOWN_OPTION") {
+    console.error("Error: Invalid arguments\n");
+    printHelp();
+    process.exit(2);
+  }
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(`Error: ${message}`);
+  if (process.argv.includes("--verbose") || process.argv.includes("-v")) {
+    const stack = err instanceof Error ? err.stack : undefined;
+    if (stack) console.error(stack);
+  }
+  process.exit(2);
+}
+
 async function main(): Promise<void> {
   try {
     const args = parseArgs({
@@ -357,34 +407,11 @@ async function main(): Promise<void> {
     const typeAware = args.values["type-aware"] ?? false;
     const verbose = args.values.verbose ?? false;
 
-    // Execute lint
     const result = await requestLintWithMetrics(id, files, { fix, json, verbose, typeAware });
-
-    // Output
-    if (json) {
-      console.log(JSON.stringify(result, null, 2));
-    } else {
-      process.stdout.write(result.output || "");
-      if (verbose) {
-        console.error(`\n[lint-service] Duration: ${result.metrics.durationMs}ms`);
-        console.error(`[lint-service] Queue depth at enqueue: ${result.metrics.queueDepthAtEnqueue}`);
-      }
-    }
-
-    // Exit with eslint's exit code
+    writeLintResult(result, json, verbose);
     process.exit(result.exitCode);
-  } catch (err) {
-    const error = err as Error;
-    if ((err as { code?: string }).code === "ERR_PARSE_ARGS_UNKNOWN_OPTION") {
-      console.error("Error: Invalid arguments\n");
-      printHelp();
-      process.exit(2);
-    }
-    console.error(`Error: ${error.message}`);
-    if (process.argv.includes("--verbose") || process.argv.includes("-v")) {
-      console.error(error.stack);
-    }
-    process.exit(2);
+  } catch (err: unknown) {
+    handleCliError(err);
   }
 }
 
