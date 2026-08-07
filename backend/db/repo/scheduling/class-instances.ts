@@ -48,9 +48,7 @@ export const getClassInstancesByIds = async (
   const studentIds = [...new Set(rows.map(r => r.studentId))];
   const teacherIds = [...new Set(rows.map(r => r.teacherId))];
   const subjectIds = [...new Set(rows.map(r => r.subjectId).filter((s): s is string => s != null))];
-  const recurringScheduleIds = [
-    ...new Set(rows.map(r => r.recurringScheduleId).filter((s): s is string => s != null)),
-  ];
+  const recurringScheduleIds = [...new Set(rows.map(r => r.recurringScheduleId).filter((s): s is string => s != null))];
 
   const [studentsData, teachersData, subjectsData, recurringData] = await Promise.all([
     q.select().from(students).where(inArray(students.id, studentIds)),

@@ -9,13 +9,6 @@ import {
 import { setAuthCookies } from "@/backend/lib/auth/cookies";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 
-export {
-  EndPermissionGroupSimulationResponsePothosObject,
-  PermissionGroupSimulationStatusPothosObject,
-  SimulatablePermissionGroupPothosObject,
-  StartPermissionGroupSimulationResponsePothosObject,
-};
-
 gqlSchemaBuilder.queryFields(t => ({
   permissionGroupSimulationStatus: t.field({
     type: PermissionGroupSimulationStatusPothosObject,

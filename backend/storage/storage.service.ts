@@ -112,5 +112,3 @@ export const resetStorageService = (): void => {
 
 export * from "@/backend/storage/disk/storage.service.interface";
 export * from "@/backend/types/storage/storage.types";
-// Re-export types for convenience
-export type { StorageService };

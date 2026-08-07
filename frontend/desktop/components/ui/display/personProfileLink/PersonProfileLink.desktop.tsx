@@ -3,9 +3,9 @@
 import { Avatar, Stack, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { avatarInitials } from "@/frontend/common/utils/avatar";
 import { Link } from "@/shared/i18n";
-import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 
 export type DesktopPersonProfileLinkProps = {
   readonly href?: string | null;

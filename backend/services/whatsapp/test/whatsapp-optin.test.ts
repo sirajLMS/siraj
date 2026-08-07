@@ -232,7 +232,7 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
         isSuperAdmin: false,
       });
 
-      return expect(
+      await expect(
         WhatsappAccountService.setUserWhatsappOptIn(MOCK_ACTOR_ID, mockErrors, MOCK_USER_ID, true, "graphql")
       ).rejects.toThrow(mockErrors.insufficientPermissions);
 
@@ -347,7 +347,7 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       const upsertError = new Error("batchUpsert database failure");
       batchUpsertMock.mockRejectedValueOnce(upsertError);
 
-      return expect(
+      await expect(
         WhatsappAccountService.setUserWhatsappOptIn(MOCK_ACTOR_ID, mockErrors, MOCK_USER_ID, true, "graphql")
       ).rejects.toThrow("batchUpsert database failure");
 
@@ -363,7 +363,7 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       const { WhatsappAccountService } = await importService();
       hasPermissionMock.mockResolvedValueOnce(false);
 
-      return expect(WhatsappAccountService.listAccounts(MOCK_ACTOR_ID, mockErrors)).rejects.toThrow(
+      await expect(WhatsappAccountService.listAccounts(MOCK_ACTOR_ID, mockErrors)).rejects.toThrow(
         mockErrors.insufficientPermissions
       );
 
@@ -388,8 +388,8 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       const { WhatsappAccountService } = await importService();
       hasPermissionMock.mockResolvedValueOnce(false);
 
-      return expect(
-        WhatsappAccountService.getAccount(MOCK_ACTOR_ID, mockErrors, "11111111-1111-1111-1111-111111111111")
+      await expect(
+        WhatsappAccountService.getAccount(MOCK_ACTOR_ID, mockErrors, "[CARD_REDACTED]-[CARD_REDACTED]")
       ).rejects.toThrow(mockErrors.insufficientPermissions);
 
       expect(findByIdMock).not.toHaveBeenCalled();
@@ -425,7 +425,7 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       const { WhatsappAccountService } = await importService();
       hasPermissionMock.mockResolvedValueOnce(false);
 
-      return expect(WhatsappAccountService.syncFromMeta(MOCK_ACTOR_ID, mockErrors)).rejects.toThrow(
+      await expect(WhatsappAccountService.syncFromMeta(MOCK_ACTOR_ID, mockErrors)).rejects.toThrow(
         mockErrors.insufficientPermissions
       );
 

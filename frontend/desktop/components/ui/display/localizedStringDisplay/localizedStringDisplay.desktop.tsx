@@ -5,8 +5,8 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { LocalizedString } from "@/shared/types";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import type { LocalizedString } from "@/shared/types";
 
 export type DesktopLocalizedStringDisplayProps = {
   readonly value?: LocalizedString | null;

@@ -237,11 +237,10 @@ describe("MicrosoftTeamsAdapter", () => {
       const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new MicrosoftTeamsAdapter({});
-      return expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
+      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
         NoOrgCredentialsNoUserTokenError
-      ).then(() => {
-        expect(refreshSpy).not.toHaveBeenCalled();
-      });
+      );
+      expect(refreshSpy).not.toHaveBeenCalled();
     });
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {

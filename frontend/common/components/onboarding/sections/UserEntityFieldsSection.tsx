@@ -64,7 +64,7 @@ function TextFieldWrapper<T extends OnboardingFields>({
             error={errorKey ? !!errors[errorKey] : false}
             helperText={validationMessage(
               labels,
-              errorKey ? ((errors[errorKey] as { message?: string })?.message) : undefined
+              errorKey ? (errors[errorKey] as { message?: string })?.message : undefined
             )}
             fullWidth
             sx={outlinedInputSx}

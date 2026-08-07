@@ -7,7 +7,6 @@ import { ClassReminderService } from "@/backend/services/notification/class-remi
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
 import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
-import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
 
 // ─── Test fixtures ─────────────────────────────────────────────────────
 
@@ -93,9 +92,7 @@ beforeEach(() => {
     name: "Ahmed Test-Student",
   } as never);
   // "all enabled" — so dispatch isn't filtered down by prefs.
-  getPrefsSpy = spyOn(NotificationPreferencesRepository, "getByUserId").mockResolvedValue(
-    []
-  );
+  getPrefsSpy = spyOn(NotificationPreferencesRepository, "getByUserId").mockResolvedValue([]);
   dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockResolvedValue([]);
 });
 

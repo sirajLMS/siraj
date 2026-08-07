@@ -39,7 +39,7 @@ async function auditNav(page: Page): Promise<void> {
     .catch(() => "<no nav>");
   logger.info("URL after login:", page.url());
   logger.info("nav visible:", navVisible);
-  logger.info("nav text (first 800):", (navText).slice(0, 800));
+  logger.info("nav text (first 800):", navText.slice(0, 800));
 
   logger.info("=== Checking 'بحث الجدول' nav item ===");
   const item = page.getByText("بحث الجدول");

@@ -4,13 +4,7 @@
   "minTokens": 75,
   "minLines": 8,
   "format": ["typescript", "tsx"],
-  "path": [
-    "app",
-    "backend",
-    "frontend",
-    "shared",
-    "scripts"
-  ],
+  "path": ["app", "backend", "frontend", "shared", "scripts"],
   "ignore": [
     "**/.*/**",
     "!.storybook/**",

@@ -448,7 +448,11 @@ function parseMaxPhoneNumbers(maxPhones: unknown): string | null {
   return null;
 }
 
-function applyMaxDailyUpdate(value: Record<string, unknown>, update: WhatsappAccountUpdateInput, changes: Record<string, unknown>) {
+function applyMaxDailyUpdate(
+  value: Record<string, unknown>,
+  update: WhatsappAccountUpdateInput,
+  changes: Record<string, unknown>
+) {
   if (typeof value.max_daily_conversations_per_business === "string" && value.max_daily_conversations_per_business) {
     const coerced = coerceLimitTier(value.max_daily_conversations_per_business);
     if (coerced) {

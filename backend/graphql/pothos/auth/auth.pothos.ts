@@ -8,8 +8,6 @@ import type {
   RefreshTokenResponse,
 } from "@/backend/types";
 
-export { UserPothosObject };
-
 export const LoginInputPothosObject = gqlSchemaBuilder.inputRef<LoginInput>("LoginInput").implement({
   fields: t => ({
     email: t.field({

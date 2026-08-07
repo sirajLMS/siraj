@@ -19,10 +19,7 @@ export async function bulkInsertOnConflictDoNothing(
 
   for (let i = 0; i < rows.length; i += chunkSize) {
     const chunk = rows.slice(i, i + chunkSize);
-    await queryDb
-      .insert(table)
-      .values(chunk)
-      .onConflictDoNothing();
+    await queryDb.insert(table).values(chunk).onConflictDoNothing();
     logger.debug(`Bulk insert batch ${Math.floor(i / chunkSize) + 1} (${chunk.length} rows)`);
   }
 }

@@ -59,8 +59,8 @@ function setupProfileReposSpies(
 ) {
   spyOn(TeacherRepository, "findByUserId").mockResolvedValue(overrides.teacher ?? (null as never));
   spyOn(ParentRepository, "findByUserId").mockResolvedValue(overrides.parent ?? (null as never));
-  spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue(overrides.staff ?? (null));
-  spyOn(StudentRepository, "getStudentIdByUserId").mockResolvedValue(overrides.student ?? (null));
+  spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue(overrides.staff ?? null);
+  spyOn(StudentRepository, "getStudentIdByUserId").mockResolvedValue(overrides.student ?? null);
 }
 
 function setupPermissionSpies(

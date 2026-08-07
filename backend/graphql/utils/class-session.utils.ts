@@ -87,8 +87,7 @@ export async function buildClassInstanceDetail(
   const end = instance.scheduledEndAt;
   const studentTimezone = parseIanaTimezone(await SchedulingRepository.resolveStudentTimezone(instance.studentId));
   const teacherTimezone = parseIanaTimezoneOrNull(instance.teacher?.user?.timezone ?? null);
-  const hasTimezoneMismatch =
-    teacherTimezone != null && studentTimezone != null && teacherTimezone !== studentTimezone;
+  const hasTimezoneMismatch = teacherTimezone != null && studentTimezone != null && teacherTimezone !== studentTimezone;
 
   const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(instance.id, tErrors);
 

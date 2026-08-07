@@ -19,7 +19,11 @@ import type {
   TeacherProfileUpdateInputType,
 } from "@/backend/types/teachers/teacher.types";
 
-export type { ProfileAudience, ProfileMode, ProfileScope, TeacherOwnProfileUpdateInput };
+// Re-surface the profile enums from @/backend/enum so type-layer consumers
+// importing via `@/backend/types` can resolve them. TeacherOwnProfileUpdateInput
+// is NOT re-exported here — it is owned by the teachers domain and reached via
+// `@/backend/types` through the teachers barrel.
+export type { ProfileAudience, ProfileMode, ProfileScope };
 
 export type ProfilePageContext = {
   readonly scope: ProfileScope;

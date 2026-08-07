@@ -13,8 +13,8 @@ import {
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 
 export type DesktopCurrencyDisplayProps = {
   readonly code?: CurrencyCode | string | null;

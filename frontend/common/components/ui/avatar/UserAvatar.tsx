@@ -1,7 +1,11 @@
 "use client";
 
 import type { Theme } from "@mui/material/styles";
-import { BaseAvatar, type BaseAvatarProps, type BaseAvatarVariant } from "@/frontend/common/components/ui/avatar/BaseAvatar";
+import {
+  BaseAvatar,
+  type BaseAvatarProps,
+  type BaseAvatarVariant,
+} from "@/frontend/common/components/ui/avatar/BaseAvatar";
 
 export type UserAvatarProps = Omit<BaseAvatarProps, "variant"> & {
   readonly variant?: BaseAvatarVariant;

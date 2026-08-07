@@ -31,7 +31,7 @@ export const PhoneDisplay = ({
         {fallback}
       </Typography>
     ) : (
-      <>{fallback}</>
+      fallback
     );
 
   if (!phone) {

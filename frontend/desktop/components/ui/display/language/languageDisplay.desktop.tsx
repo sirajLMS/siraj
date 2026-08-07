@@ -6,8 +6,8 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 
 export type DesktopLanguageDisplayProps = {
   readonly code?: string | null;

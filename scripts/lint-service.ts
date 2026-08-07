@@ -346,12 +346,12 @@ async function main(): Promise<void> {
       process.exit(0);
     }
 
-    const files = (args.values.files) ?? [];
-    const id = (args.values.id) ?? "cli";
-    const fix = (args.values.fix) ?? false;
-    const json = (args.values.json) ?? false;
-    const typeAware = (args.values["type-aware"]) ?? false;
-    const verbose = (args.values.verbose) ?? false;
+    const files = args.values.files ?? [];
+    const id = args.values.id ?? "cli";
+    const fix = args.values.fix ?? false;
+    const json = args.values.json ?? false;
+    const typeAware = args.values["type-aware"] ?? false;
+    const verbose = args.values.verbose ?? false;
 
     // Execute lint
     const result = await requestLintWithMetrics(id, files, { fix, json, verbose, typeAware });

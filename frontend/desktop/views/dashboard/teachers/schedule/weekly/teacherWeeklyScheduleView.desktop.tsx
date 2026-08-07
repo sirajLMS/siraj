@@ -13,7 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui/container";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";

@@ -129,8 +129,6 @@ import type {
 } from "@/shared/locale/types/ui";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
-export type { AppLocale } from "@/shared/locale/AppLocale.ts";
-
 /** DashboardTranslations — group collector for all dashboard-domain labels. */
 export interface DashboardTranslations {
   admin: AdminDashboardLabels;

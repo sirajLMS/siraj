@@ -132,7 +132,7 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     } as never);
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
 
-    return expect(
+    await expect(
       toPromise(() =>
         TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
       )

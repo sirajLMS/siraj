@@ -6,37 +6,37 @@ module.exports = {
       comment: "Shared code must not depend on frontend, backend, or app layers — see shared/AGENTS.md",
       severity: "error",
       from: { path: "^shared" },
-      to: { path: "^(frontend|backend|app)" }
+      to: { path: "^(frontend|backend|app)" },
     },
     {
       name: "frontend-no-backend-deps",
       comment: "Frontend code must not depend on backend layer — use GraphQL or shared/ instead",
       severity: "error",
       from: { path: "^frontend" },
-      to: { path: "^backend" }
+      to: { path: "^backend" },
     },
     {
       name: "backend-no-frontend-deps",
       comment: "Backend code must not depend on frontend layer",
       severity: "error",
       from: { path: "^backend" },
-      to: { path: "^frontend" }
-    }
+      to: { path: "^frontend" },
+    },
   ],
   options: {
     exclude: {
-      path: "^(\\..*|node_modules|out|build|dist|logs|storage|scratch|draft|public|storybook-static|docs|.*\\.d\\.ts|frontend/common/graphql/generated|.*unRefactored_tests)"
+      path: "^(\\..*|node_modules|out|build|dist|logs|storage|scratch|draft|public|storybook-static|docs|.*\\.d\\.ts|frontend/common/graphql/generated|.*unRefactored_tests)",
     },
     doNotFollow: {
-      path: "node_modules"
+      path: "node_modules",
     },
     tsPreCompilationDeps: true,
     tsConfig: {
-      fileName: "tsconfig.json"
+      fileName: "tsconfig.json",
     },
     enhancedResolveOptions: {
       exportsFields: ["exports"],
-      conditionNames: ["import", "require", "node", "default"]
-    }
-  }
+      conditionNames: ["import", "require", "node", "default"],
+    },
+  },
 };

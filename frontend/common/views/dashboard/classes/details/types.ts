@@ -52,11 +52,6 @@ export interface SessionActionProps {
   readonly error: string | null;
 }
 
-export interface ActionFeedbackState {
-  readonly message: string;
-  readonly severity: "success" | "error";
-}
-
 export interface ClassActionHandlers {
   readonly handleForceActivate: () => Promise<void>;
   readonly handleStop: () => Promise<void>;

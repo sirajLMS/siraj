@@ -390,7 +390,7 @@ describe("CronService", () => {
     test("throws error for invalid cron expression", async () => {
       const input = makeCreateScheduleInput({ name: "bad-cron", cronExpression: "not-a-cron" });
 
-      return expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
+      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Invalid cron: not-a-cron"
       );
       expect(createScheduleCalls).toHaveLength(0);
@@ -401,7 +401,7 @@ describe("CronService", () => {
 
       const input = makeCreateScheduleInput({ name: "test-schedule", cronExpression: "*/5 * * * *" });
 
-      return expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
+      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Schedule exists: test-schedule"
       );
       expect(getScheduleByNameCalls).toHaveLength(1);
@@ -412,7 +412,7 @@ describe("CronService", () => {
     test("throws error for invalid timezone", async () => {
       const input = makeCreateScheduleInput({ name: "bad-tz-schedule", timezone: "Not/A real timezone" });
 
-      return expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
+      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
         "Invalid timezone: Not/A real timezone"
       );
       expect(createScheduleCalls).toHaveLength(0);
@@ -446,7 +446,7 @@ describe("CronService", () => {
     test("throws error for invalid cron expression", async () => {
       getScheduleByIdResult = mockScheduleRow;
 
-      return expect(
+      await expect(
         CronService.updateSchedule("sched-1", { cronExpression: "not-a-cron" }, "en", SERVICE_USER_ID)
       ).rejects.toThrow("Invalid cron: not-a-cron");
       expect(updateScheduleCalls).toHaveLength(0);
@@ -455,7 +455,7 @@ describe("CronService", () => {
     test("throws error for invalid timezone", async () => {
       getScheduleByIdResult = mockScheduleRow;
 
-      return expect(
+      await expect(
         CronService.updateSchedule("sched-1", { timezone: "Bogus/zone" }, "en", SERVICE_USER_ID)
       ).rejects.toThrow("Invalid timezone: Bogus/zone");
       expect(updateScheduleCalls).toHaveLength(0);
@@ -510,7 +510,7 @@ describe("CronService", () => {
     test("throws scheduleNotActive when updateScheduleIfStatus returns null", async () => {
       updateScheduleIfStatusResult = null;
 
-      return expect(CronService.pauseSchedule("sched-1", "en")).rejects.toThrow("Schedule is not active");
+      await expect(CronService.pauseSchedule("sched-1", "en")).rejects.toThrow("Schedule is not active");
       expect(updateScheduleIfStatusCalls).toHaveLength(1);
     });
   });
@@ -548,7 +548,7 @@ describe("CronService", () => {
       });
       updateScheduleIfStatusResult = null;
 
-      return expect(CronService.resumeSchedule("sched-1", "en")).rejects.toThrow("Schedule is not paused");
+      await expect(CronService.resumeSchedule("sched-1", "en")).rejects.toThrow("Schedule is not paused");
       expect(updateScheduleIfStatusCalls).toHaveLength(1);
     });
   });
@@ -705,7 +705,7 @@ describe("CronService", () => {
       });
       claimNextRunResult = null;
 
-      return expect(
+      await expect(
         CronService.dispatchScheduleById({
           id: "sched-skip-1",
           source: CronTriggerSource.MANUAL,
