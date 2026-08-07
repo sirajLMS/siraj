@@ -21,6 +21,12 @@ const lazyViews = createLazyView<ParentProfileViewModel>(
     }))
 );
 
+function isContainerProps(
+  props: ParentProfileViewModel | UseParentProfileViewModelProps
+): props is UseParentProfileViewModelProps {
+  return "scope" in props && "mode" in props && "targetUserId" in props && !("parentData" in props);
+}
+
 /**
  * This alias is retained so the legacy test and Storybook fixtures in this
  * package (which fabricate a full ViewModel and call
@@ -31,9 +37,9 @@ const lazyViews = createLazyView<ParentProfileViewModel>(
  * Container (which wires the identity hook); otherwise (test/story fixture
  * path) it renders the tier switcher with the precomputed ViewModel as-is.
  */
-export function ParentProfileView(props: Readonly<ParentProfileViewModel>) {
-  if ("scope" in props && "mode" in props && "targetUserId" in props && !("parentData" in props)) {
-    return <ParentProfileContainer {...(props as Parameters<typeof ParentProfileContainer>[0])} />;
+export function ParentProfileView(props: Readonly<ParentProfileViewModel | UseParentProfileViewModelProps>) {
+  if (isContainerProps(props)) {
+    return <ParentProfileContainer {...props} />;
   }
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }

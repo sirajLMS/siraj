@@ -7,7 +7,10 @@ export function registerNamespace<TLabels>(
   handle: NamespaceHandle<TLabels>,
   config: NamespaceLoaderConfig<TLabels>
 ): void {
-  const key = getNamespaceId(handle) ?? handle.toString();
+  const key = getNamespaceId(handle);
+  if (key === undefined) {
+    throw new Error("Namespace handle must have a stable id before registration");
+  }
   namespaceRegistry.set(key, config);
 }
 
@@ -20,6 +23,9 @@ function narrowConfig<TLabels>(
 export function getNamespaceConfig<TLabels>(
   handle: NamespaceHandle<TLabels>
 ): NamespaceLoaderConfig<TLabels> | undefined {
-  const key = getNamespaceId(handle) ?? handle.toString();
+  const key = getNamespaceId(handle);
+  if (key === undefined) {
+    return undefined;
+  }
   return narrowConfig(namespaceRegistry.get(key));
 }

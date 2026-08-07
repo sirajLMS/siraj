@@ -1,7 +1,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import sharp from "sharp";
+import * as sharpModule from "sharp";
 import toIco from "to-ico";
+
+const sharp = sharpModule as unknown as typeof import("sharp").default;
 
 const svgPath = process.argv[2] || "public/favicon.svg";
 const icoSizes = [16, 32, 48, 256];

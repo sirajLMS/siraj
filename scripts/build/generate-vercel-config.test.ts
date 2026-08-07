@@ -52,7 +52,10 @@ describe("generate-vercel-config", () => {
     if (!config) return;
     expect(config.fluid).toBe(true);
     expect(config.crons).toHaveLength(2);
-    expect(config.crons.map(c => c.path).sort((a, b) => a.localeCompare(b))).toEqual(["/api/cron/class-reminders", "/api/fx/refresh"]);
+    expect(config.crons.map(c => c.path).sort((a, b) => a.localeCompare(b))).toEqual([
+      "/api/cron/class-reminders",
+      "/api/fx/refresh",
+    ]);
   });
 
   test("vercel mode: generates 3 crons including ticker", () => {

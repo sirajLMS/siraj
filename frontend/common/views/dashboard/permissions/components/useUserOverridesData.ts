@@ -1,7 +1,11 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import { OverrideState, type PermissionGroup, type UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  OverrideState,
+  type PermissionGroup,
+  type UserOverride,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 
 export interface UserOverrideInfo {

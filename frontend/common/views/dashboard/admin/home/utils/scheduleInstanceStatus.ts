@@ -22,8 +22,7 @@ export interface ScheduleInstanceDisplayInput {
 function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): DateLike | undefined {
   let scheduledEndAt: DateLike | undefined = input.scheduledEndAt ?? undefined;
   if (!scheduledEndAt && input.scheduledStartAt && input.durationMinutes) {
-    const startAt =
-      input.scheduledStartAt instanceof Date ? input.scheduledStartAt : new Date(input.scheduledStartAt);
+    const startAt = input.scheduledStartAt instanceof Date ? input.scheduledStartAt : new Date(input.scheduledStartAt);
     scheduledEndAt = new Date(startAt.getTime() + input.durationMinutes * 60_000);
   }
   return scheduledEndAt;

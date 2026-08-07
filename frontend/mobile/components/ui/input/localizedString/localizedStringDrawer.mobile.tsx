@@ -15,8 +15,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui/input/localizedString/types";
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";

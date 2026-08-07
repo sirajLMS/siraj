@@ -11,6 +11,7 @@ import type {
   ParentScheduleRow,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { ParentScheduleDataGridDesktopProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
+import type { SchedulePagination } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { ParentClassStatusIndicatorDesktop } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentClassStatusIndicator.desktop";
@@ -32,13 +33,18 @@ function formatRowNumber(value: number): string {
 }
 
 function resolvePaginationOptions(
-  isServerPagination: boolean,
-  rowsLength: number,
-  serverOptions: ReturnType<typeof buildServerPaginationOptions>
+  pagination: SchedulePagination | undefined,
+  rowsLength: number
 ): ReturnType<typeof buildServerPaginationOptions> | false | { mode: "client" } {
   let result: ReturnType<typeof buildServerPaginationOptions> | false | { mode: "client" };
-  if (isServerPagination) {
-    result = serverOptions;
+  if (pagination !== undefined) {
+    result = buildServerPaginationOptions({
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      totalCount: pagination.totalCount,
+      onPageChange: pagination.onPageChange,
+      pageSizeOptions: [pagination.pageSize],
+    });
   } else if (rowsLength <= 10) {
     result = false;
   } else {
@@ -206,8 +212,6 @@ export function ParentScheduleDataGridDesktop({
     ];
   }, [labels, onHistory]);
 
-  const isServerPagination = pagination !== undefined;
-
   return (
     <DesktopAppDataGrid<ParentScheduleRow>
       rows={rows}
@@ -226,17 +230,7 @@ export function ParentScheduleDataGridDesktop({
           },
         },
       }}
-      paginationOptions={resolvePaginationOptions(
-        isServerPagination,
-        rows.length,
-        buildServerPaginationOptions({
-          page: pagination.page,
-          pageSize: pagination.pageSize,
-          totalCount: pagination.totalCount,
-          onPageChange: pagination.onPageChange,
-          pageSizeOptions: [pagination.pageSize],
-        })
-      )}
+      paginationOptions={resolvePaginationOptions(pagination, rows.length)}
     />
   );
 }

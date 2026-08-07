@@ -31,21 +31,19 @@ class ViewSwitchErrorBoundary extends Component<ViewSwitchErrorBoundaryProps, Vi
   override render(): ReactNode {
     let content: ReactNode;
     if (this.state.hasError) {
-      content =
-        this.props.errorFallback ??
-        (
-          <Alert
-            severity="error"
-            sx={{ m: 2 }}
-            action={
-              <Button color="inherit" size="small" onClick={() => globalThis.location.reload()}>
-                Retry
-              </Button>
-            }
-          >
-            <Typography variant="bodyMd">Failed to load view. Please refresh the page.</Typography>
-          </Alert>
-        );
+      content = this.props.errorFallback ?? (
+        <Alert
+          severity="error"
+          sx={{ m: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={() => globalThis.location.reload()}>
+              Retry
+            </Button>
+          }
+        >
+          <Typography variant="bodyMd">Failed to load view. Please refresh the page.</Typography>
+        </Alert>
+      );
     } else {
       content = this.props.children;
     }

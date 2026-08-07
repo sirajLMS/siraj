@@ -85,7 +85,9 @@ function getIanaTimezoneIds(): string[] {
   if (typeof Intl.supportedValuesOf !== "function") {
     throw new Error("Intl.supportedValuesOf is not available in this runtime");
   }
-  return [...Intl.supportedValuesOf("timeZone")].filter(id => !isExcludedIanaTimezoneId(id)).sort((a, b) => a.localeCompare(b));
+  return [...Intl.supportedValuesOf("timeZone")]
+    .filter(id => !isExcludedIanaTimezoneId(id))
+    .sort((a, b) => a.localeCompare(b));
 }
 
 function loadCldrZoneTree(): CldrZoneTree {

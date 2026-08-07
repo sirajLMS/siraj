@@ -20,15 +20,15 @@ export function safeString(value: unknown): string {
   if (typeof value === "string") {
     return value;
   }
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+  if (typeof value === "symbol") {
+    return value.description ?? "";
+  }
   if (value == null) {
     return "";
   }
-  // For primitives (number, boolean, bigint, symbol), use String()
-  if (typeof value !== "object") {
-    return String(value);
-  }
-  // For objects, try to get a meaningful string representation
-  // Avoid "[object Object]" by using JSON.stringify with fallback
   try {
     return JSON.stringify(value);
   } catch {
