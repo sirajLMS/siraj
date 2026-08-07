@@ -28,8 +28,9 @@ export function ProfileFieldRow({
 
   // Render the value based on whether it's a link, plain text/number, or a React node
   const renderValue = (): React.ReactNode => {
+    let content: React.ReactNode;
     if (hasLink) {
-      return (
+      content = (
         <Link
           href={linkHref}
           target="_blank"
@@ -39,11 +40,12 @@ export function ProfileFieldRow({
           {displayValue}
         </Link>
       );
+    } else if (typeof displayValue === "string" || typeof displayValue === "number") {
+      content = <Typography sx={{ typography: "bodyMd" }}>{displayValue}</Typography>;
+    } else {
+      content = displayValue;
     }
-    if (typeof displayValue === "string" || typeof displayValue === "number") {
-      return <Typography sx={{ typography: "bodyMd" }}>{displayValue}</Typography>;
-    }
-    return displayValue;
+    return content;
   };
 
   return (

@@ -51,8 +51,12 @@ function createNeonPool(connectionString: string): NeonPool {
   return new NeonPool({ connectionString });
 }
 
-function createResetPool(connectionString: string, isNeon: boolean): ResetPool {
-  return isNeon ? createNeonPool(connectionString) : createPgPool(connectionString);
+function createNeonResetPool(connectionString: string): ResetPool {
+  return createNeonPool(connectionString);
+}
+
+function createPgResetPool(connectionString: string): ResetPool {
+  return createPgPool(connectionString);
 }
 
 type QueryablePool = {
@@ -113,7 +117,9 @@ async function resetDatabase() {
 
   logger.log(`Resetting database: ${database} (provider: ${provider})`);
 
-  const pool = createResetPool(isNeon ? connectionString : buildConnectionString(connectionString, "postgres"), isNeon);
+  const pool = isNeon
+    ? createNeonResetPool(connectionString)
+    : createPgResetPool(buildConnectionString(connectionString, "postgres"));
 
   try {
     if (isNeon) {

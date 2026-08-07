@@ -549,13 +549,13 @@ export namespace WhatsappAccountService {
       // log the raw Meta enum string (which could echo arbitrary enum text
       // from the provider). Use a generic description instead.
       const qualityRating = coerceQualityRating(detail.quality_rating);
-      if (detail.quality_rating !== null && !isValidQualityRating(detail.quality_rating)) {
+      if (!isValidQualityRating(detail.quality_rating)) {
         logger.warn("whatsapp-account-service: quality rating from Meta was not recognized — falling back to UNKNOWN", {
           qualityRatingFallback: "UNKNOWN",
         });
       }
       const portfolioMessagingLimitTier = coerceLimitTier(detail.portfolio_messaging_limit_tier);
-      if (detail.portfolio_messaging_limit_tier !== null && !isValidLimitTier(detail.portfolio_messaging_limit_tier)) {
+      if (!isValidLimitTier(detail.portfolio_messaging_limit_tier)) {
         logger.warn(
           "whatsapp-account-service: messaging limit tier from Meta was not recognized — falling back to TIER_NOT_SET",
           { messagingLimitTierFallback: "TIER_NOT_SET" }

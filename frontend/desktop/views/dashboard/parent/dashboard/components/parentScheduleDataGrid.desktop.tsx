@@ -31,6 +31,22 @@ function formatRowNumber(value: number): string {
   return String(value).padStart(2, "0");
 }
 
+function resolvePaginationOptions(
+  isServerPagination: boolean,
+  rowsLength: number,
+  serverOptions: ReturnType<typeof buildServerPaginationOptions>
+): ReturnType<typeof buildServerPaginationOptions> | false | { mode: "client" } {
+  let result: ReturnType<typeof buildServerPaginationOptions> | false | { mode: "client" };
+  if (isServerPagination) {
+    result = serverOptions;
+  } else if (rowsLength <= 10) {
+    result = false;
+  } else {
+    result = { mode: "client" };
+  }
+  return result;
+}
+
 export function ParentScheduleDataGridDesktop({
   rows,
   labels,
@@ -210,20 +226,17 @@ export function ParentScheduleDataGridDesktop({
           },
         },
       }}
-      paginationOptions={
-        isServerPagination
-          ? buildServerPaginationOptions({
-              page: pagination.page,
-              pageSize: pagination.pageSize,
-              totalCount: pagination.totalCount,
-              onPageChange: pagination.onPageChange,
-              pageSizeOptions: [pagination.pageSize],
-            })
-          : (() => {
-              if (rows.length <= 10) return false;
-              return { mode: "client" };
-            })()
-      }
+      paginationOptions={resolvePaginationOptions(
+        isServerPagination,
+        rows.length,
+        buildServerPaginationOptions({
+          page: pagination.page,
+          pageSize: pagination.pageSize,
+          totalCount: pagination.totalCount,
+          onPageChange: pagination.onPageChange,
+          pageSizeOptions: [pagination.pageSize],
+        })
+      )}
     />
   );
 }

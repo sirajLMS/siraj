@@ -226,7 +226,7 @@ async function handleAuthError(error: unknown, operationName: string | undefined
     return false;
   }
 
-  if (globalThis.window === undefined) return false;
+  if (typeof globalThis.window === "undefined") return false;
 
   const pathname = globalThis.window.location.pathname;
   if (pathname === "/login" || pathname.endsWith("/login")) {

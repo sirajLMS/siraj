@@ -20,14 +20,13 @@ export interface ScheduleInstanceDisplayInput {
 }
 
 function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): DateLike | undefined {
-  if (input.scheduledEndAt) {
-    return input.scheduledEndAt;
+  let scheduledEndAt: DateLike | undefined = input.scheduledEndAt ?? undefined;
+  if (!scheduledEndAt && input.scheduledStartAt && input.durationMinutes) {
+    const startAt =
+      input.scheduledStartAt instanceof Date ? input.scheduledStartAt : new Date(input.scheduledStartAt);
+    scheduledEndAt = new Date(startAt.getTime() + input.durationMinutes * 60_000);
   }
-  if (!input.scheduledStartAt || !input.durationMinutes) {
-    return undefined;
-  }
-  const startAt = input.scheduledStartAt instanceof Date ? input.scheduledStartAt : new Date(input.scheduledStartAt);
-  return new Date(startAt.getTime() + input.durationMinutes * 60_000);
+  return scheduledEndAt;
 }
 
 export function resolveScheduleInstanceDisplayStatus(

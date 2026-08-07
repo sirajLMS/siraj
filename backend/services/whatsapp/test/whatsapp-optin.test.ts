@@ -117,19 +117,13 @@ async function importService() {
 const MOCK_USER_ID = "aaaa0001-aaaa-aaaa-aaaa-aaaa0001aaaa";
 const MOCK_ACTOR_ID = "bbbb0002-bbbb-bbbb-bbbb-bbbb0002bbbb";
 
-const mockErrors: import("@/shared/locale").ErrorsLabels = new Proxy(
-  {},
-  {
-    get: (_target, prop: string) => {
-      if (prop === "insufficientPermissions") return "Insufficient permissions";
-      if (prop === "invalidInput") return "Invalid input";
-      if (prop === "whatsappWabaIdNotConfigured") return "WhatsApp WABA ID not configured";
-      if (prop === "whatsappAccountNotFound") return (id: string) => `WhatsApp account not found: ${id}`;
-      if (prop === "whatsappAccessTokenNotConfigured") return "WhatsApp access token not configured";
-      return String(prop);
-    },
-  }
-) as import("@/shared/locale").ErrorsLabels;
+const mockErrors = {
+  insufficientPermissions: "Insufficient permissions",
+  invalidInput: "Invalid input",
+  whatsappWabaIdNotConfigured: "WhatsApp WABA ID not configured",
+  whatsappAccountNotFound: (id: string) => `WhatsApp account not found: ${id}`,
+  whatsappAccessTokenNotConfigured: "WhatsApp access token not configured",
+} as import("@/shared/locale").ErrorsLabels;
 
 function resetMocks() {
   getByUserIdMock.mockReset();
@@ -232,9 +226,14 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
         isSuperAdmin: false,
       });
 
-      await expect(
-        WhatsappAccountService.setUserWhatsappOptIn(MOCK_ACTOR_ID, mockErrors, MOCK_USER_ID, true, "graphql")
-      ).rejects.toThrow(mockErrors.insufficientPermissions);
+      let caughtErr: Error | undefined;
+      try {
+        await WhatsappAccountService.setUserWhatsappOptIn(MOCK_ACTOR_ID, mockErrors, MOCK_USER_ID, true, "graphql");
+        throw new Error("Expected setUserWhatsappOptIn to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain(mockErrors.insufficientPermissions);
 
       expect(batchUpsertMock).not.toHaveBeenCalled();
     });
@@ -347,9 +346,14 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       const upsertError = new Error("batchUpsert database failure");
       batchUpsertMock.mockRejectedValueOnce(upsertError);
 
-      await expect(
-        WhatsappAccountService.setUserWhatsappOptIn(MOCK_ACTOR_ID, mockErrors, MOCK_USER_ID, true, "graphql")
-      ).rejects.toThrow("batchUpsert database failure");
+      let caughtErr: Error | undefined;
+      try {
+        await WhatsappAccountService.setUserWhatsappOptIn(MOCK_ACTOR_ID, mockErrors, MOCK_USER_ID, true, "graphql");
+        throw new Error("Expected setUserWhatsappOptIn to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain("batchUpsert database failure");
 
       // batchUpsert was attempted exactly once
       expect(batchUpsertMock).toHaveBeenCalledTimes(1);
@@ -363,9 +367,14 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       const { WhatsappAccountService } = await importService();
       hasPermissionMock.mockResolvedValueOnce(false);
 
-      await expect(WhatsappAccountService.listAccounts(MOCK_ACTOR_ID, mockErrors)).rejects.toThrow(
-        mockErrors.insufficientPermissions
-      );
+      let caughtErr: Error | undefined;
+      try {
+        await WhatsappAccountService.listAccounts(MOCK_ACTOR_ID, mockErrors);
+        throw new Error("Expected listAccounts to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain(mockErrors.insufficientPermissions);
 
       expect(listActiveMock).not.toHaveBeenCalled();
     });
@@ -388,9 +397,14 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       const { WhatsappAccountService } = await importService();
       hasPermissionMock.mockResolvedValueOnce(false);
 
-      await expect(
-        WhatsappAccountService.getAccount(MOCK_ACTOR_ID, mockErrors, "[CARD_REDACTED]-[CARD_REDACTED]")
-      ).rejects.toThrow(mockErrors.insufficientPermissions);
+      let caughtErr: Error | undefined;
+      try {
+        await WhatsappAccountService.getAccount(MOCK_ACTOR_ID, mockErrors, "[CARD_REDACTED]-[CARD_REDACTED]");
+        throw new Error("Expected getAccount to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain(mockErrors.insufficientPermissions);
 
       expect(findByIdMock).not.toHaveBeenCalled();
     });
@@ -425,9 +439,14 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       const { WhatsappAccountService } = await importService();
       hasPermissionMock.mockResolvedValueOnce(false);
 
-      await expect(WhatsappAccountService.syncFromMeta(MOCK_ACTOR_ID, mockErrors)).rejects.toThrow(
-        mockErrors.insufficientPermissions
-      );
+      let caughtErr: Error | undefined;
+      try {
+        await WhatsappAccountService.syncFromMeta(MOCK_ACTOR_ID, mockErrors);
+        throw new Error("Expected syncFromMeta to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain(mockErrors.insufficientPermissions);
 
       // Must short-circuit before reaching repository or Graph API calls
       expect(listActiveMock).not.toHaveBeenCalled();

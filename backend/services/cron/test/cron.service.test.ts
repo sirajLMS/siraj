@@ -390,9 +390,14 @@ describe("CronService", () => {
     test("throws error for invalid cron expression", async () => {
       const input = makeCreateScheduleInput({ name: "bad-cron", cronExpression: "not-a-cron" });
 
-      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
-        "Invalid cron: not-a-cron"
-      );
+      let caughtErr: Error | undefined;
+      try {
+        await CronService.createSchedule(input, "en", SERVICE_USER_ID);
+        throw new Error("Expected createSchedule to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain("Invalid cron: not-a-cron");
       expect(createScheduleCalls).toHaveLength(0);
     });
 
@@ -401,9 +406,14 @@ describe("CronService", () => {
 
       const input = makeCreateScheduleInput({ name: "test-schedule", cronExpression: "*/5 * * * *" });
 
-      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
-        "Schedule exists: test-schedule"
-      );
+      let caughtErr: Error | undefined;
+      try {
+        await CronService.createSchedule(input, "en", SERVICE_USER_ID);
+        throw new Error("Expected createSchedule to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain("Schedule exists: test-schedule");
       expect(getScheduleByNameCalls).toHaveLength(1);
       expect(getScheduleByNameCalls[0]).toBe("test-schedule");
       expect(createScheduleCalls).toHaveLength(0);
@@ -412,9 +422,14 @@ describe("CronService", () => {
     test("throws error for invalid timezone", async () => {
       const input = makeCreateScheduleInput({ name: "bad-tz-schedule", timezone: "Not/A real timezone" });
 
-      await expect(CronService.createSchedule(input, "en", SERVICE_USER_ID)).rejects.toThrow(
-        "Invalid timezone: Not/A real timezone"
-      );
+      let caughtErr: Error | undefined;
+      try {
+        await CronService.createSchedule(input, "en", SERVICE_USER_ID);
+        throw new Error("Expected createSchedule to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain("Invalid timezone: Not/A real timezone");
       expect(createScheduleCalls).toHaveLength(0);
     });
   });
@@ -446,18 +461,28 @@ describe("CronService", () => {
     test("throws error for invalid cron expression", async () => {
       getScheduleByIdResult = mockScheduleRow;
 
-      await expect(
-        CronService.updateSchedule("sched-1", { cronExpression: "not-a-cron" }, "en", SERVICE_USER_ID)
-      ).rejects.toThrow("Invalid cron: not-a-cron");
+      let caughtErr: Error | undefined;
+      try {
+        await CronService.updateSchedule("sched-1", { cronExpression: "not-a-cron" }, "en", SERVICE_USER_ID);
+        throw new Error("Expected updateSchedule to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain("Invalid cron: not-a-cron");
       expect(updateScheduleCalls).toHaveLength(0);
     });
 
     test("throws error for invalid timezone", async () => {
       getScheduleByIdResult = mockScheduleRow;
 
-      await expect(
-        CronService.updateSchedule("sched-1", { timezone: "Bogus/zone" }, "en", SERVICE_USER_ID)
-      ).rejects.toThrow("Invalid timezone: Bogus/zone");
+      let caughtErr: Error | undefined;
+      try {
+        await CronService.updateSchedule("sched-1", { timezone: "Bogus/zone" }, "en", SERVICE_USER_ID);
+        throw new Error("Expected updateSchedule to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain("Invalid timezone: Bogus/zone");
       expect(updateScheduleCalls).toHaveLength(0);
     });
 
@@ -510,7 +535,14 @@ describe("CronService", () => {
     test("throws scheduleNotActive when updateScheduleIfStatus returns null", async () => {
       updateScheduleIfStatusResult = null;
 
-      await expect(CronService.pauseSchedule("sched-1", "en")).rejects.toThrow("Schedule is not active");
+      let caughtErr: Error | undefined;
+      try {
+        await CronService.pauseSchedule("sched-1", "en");
+        throw new Error("Expected pauseSchedule to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain("Schedule is not active");
       expect(updateScheduleIfStatusCalls).toHaveLength(1);
     });
   });
@@ -548,7 +580,14 @@ describe("CronService", () => {
       });
       updateScheduleIfStatusResult = null;
 
-      await expect(CronService.resumeSchedule("sched-1", "en")).rejects.toThrow("Schedule is not paused");
+      let caughtErr: Error | undefined;
+      try {
+        await CronService.resumeSchedule("sched-1", "en");
+        throw new Error("Expected resumeSchedule to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr?.message).toContain("Schedule is not paused");
       expect(updateScheduleIfStatusCalls).toHaveLength(1);
     });
   });
@@ -705,12 +744,18 @@ describe("CronService", () => {
       });
       claimNextRunResult = null;
 
-      await expect(
-        CronService.dispatchScheduleById({
+      let caughtErr: Error | undefined;
+      try {
+        await CronService.dispatchScheduleById({
           id: "sched-skip-1",
           source: CronTriggerSource.MANUAL,
-        })
-      ).rejects.toThrow();
+        });
+        throw new Error("Expected dispatchScheduleById to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr).toBeDefined();
+      expect(caughtErr).toBeInstanceOf(Error);
 
       // claimNextRun was called — it returned null (simulating the SKIP check)
       expect(claimNextRunCalls).toHaveLength(1);

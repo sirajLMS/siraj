@@ -72,22 +72,22 @@ function stripAnsi(str: string): string {
 function extractSummaryStats(line: string, stats: TestStats): boolean {
   const cleanLine = stripAnsi(line);
 
-  const passMatch = cleanLine.match(/^\s*(\d+)\s+pass/);
+  const passMatch = /^\s*(\d+)\s+pass/.exec(cleanLine);
   if (passMatch) {
     stats.passes = parseInt(passMatch[1], 10);
     return true;
   }
-  const failMatch = cleanLine.match(/^\s*(\d+)\s+fail/);
+  const failMatch = /^\s*(\d+)\s+fail/.exec(cleanLine);
   if (failMatch) {
     stats.fails = parseInt(failMatch[1], 10);
     return true;
   }
-  const expectMatch = cleanLine.match(/^\s*(\d+)\s+expect\(\)\s+calls/);
+  const expectMatch = /^\s*(\d+)\s+expect\(\)\s+calls/.exec(cleanLine);
   if (expectMatch) {
     stats.expects = parseInt(expectMatch[1], 10);
     return true;
   }
-  const runMatch = cleanLine.match(/^\s*Ran\s+(\d+)\s+tests?\s+across/);
+  const runMatch = /^\s*Ran\s+(\d+)\s+tests?\s+across/.exec(cleanLine);
   if (runMatch) {
     stats.tests = parseInt(runMatch[1], 10);
     return true;
@@ -99,7 +99,7 @@ function shouldSkipLine(line: string, file: string, normalizedFile: string): boo
   const cleanLine = stripAnsi(line);
   const cleanTrimmed = cleanLine.trim();
 
-  if (cleanLine.includes("bun test v") && cleanLine.match(/bun test v\d+\.\d+\.\d+/)) return true;
+  if (cleanLine.includes("bun test v") && /bun test v\d+\.\d+\.\d+/.exec(cleanLine)) return true;
   if (cleanTrimmed === `${file}:` || cleanTrimmed === `${normalizedFile}:`) return true;
   return false;
 }

@@ -21,7 +21,7 @@ export type CurrencySelectProps = {
   readonly onOpenAction?: () => void;
   readonly onCloseAction?: () => void;
   readonly autoFocus?: boolean;
-  readonly allowedCodes?: CurrencyAutocompleteProps["allowedCodes"];
-  readonly excludedCodes?: CurrencyAutocompleteProps["excludedCodes"];
+  readonly allowedCodes?: NonNullable<CurrencyAutocompleteProps["allowedCodes"]>;
+  readonly excludedCodes?: NonNullable<CurrencyAutocompleteProps["excludedCodes"]>;
   readonly showSymbol?: boolean;
 };

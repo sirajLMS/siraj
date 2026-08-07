@@ -18,11 +18,7 @@ function validationMessage(translate: OnboardingSectionTranslations, fieldErrorO
   let message: unknown;
   if (typeof fieldErrorOrMessage === "string") {
     message = fieldErrorOrMessage;
-  } else if (
-    typeof fieldErrorOrMessage === "object" &&
-    fieldErrorOrMessage !== null &&
-    "message" in fieldErrorOrMessage
-  ) {
+  } else if (typeof fieldErrorOrMessage === "object" && "message" in fieldErrorOrMessage) {
     message = (fieldErrorOrMessage as { message?: unknown }).message;
   } else {
     return undefined;

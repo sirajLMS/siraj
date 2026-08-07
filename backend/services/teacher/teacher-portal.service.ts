@@ -180,6 +180,6 @@ export namespace TeacherPortalService {
       logger.error("Failed to invalidate teacher cache tags", { teacherId, userId, error: cacheErr });
     }
 
-    return getOwnProfile(userId, tErrors, undefined, undefined);
+    return getOwnProfile(userId, tErrors);
   }
 }

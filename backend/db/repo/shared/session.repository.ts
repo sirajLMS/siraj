@@ -306,9 +306,7 @@ export namespace SessionRepository {
         } = {
           lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
         };
-        if (input.payload !== undefined) {
-          postgresUpdates.payload = input.payload;
-        }
+        postgresUpdates.payload = input.payload;
         const returning = await t
           .update(sessions)
           .set(postgresUpdates)

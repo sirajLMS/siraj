@@ -6,7 +6,7 @@ import { EditableTypography } from "@/frontend/common/components/ui/input/editab
 
 type EditableTypographyStoryProps = {
   readonly initialValue?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]>;
   readonly doubleClickToEdit?: boolean;
   readonly startEditing?: boolean;
   readonly withValidation?: boolean;

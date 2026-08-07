@@ -105,12 +105,12 @@ function LessonReportCardDesktop({ row, labels, locale, resolveStatusLabel }: Re
         ) : null}
       </Box>
       <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1 }}>
-        {row.durationMinutes !== undefined && row.durationMinutes !== null ? (
+        {row.durationMinutes != null ? (
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
             {labels.durationMinutes}: {row.durationMinutes}
           </Typography>
         ) : null}
-        {row.completionPercentage !== undefined && row.completionPercentage !== null ? (
+        {row.completionPercentage != null ? (
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
             {labels.completionPercentage}: {row.completionPercentage}%
           </Typography>

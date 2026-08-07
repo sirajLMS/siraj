@@ -77,7 +77,7 @@ function computeStartAtInTimezone(currentDate: Date, startHour: number, startMin
 
   const offsetStr = tzParts.find(p => p.type === "timeZoneName")?.value ?? "+0";
   // Parse offset strings like "GMT+5", "GMT-3:30", "GMT" (UTC)
-  const match = offsetStr.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+  const match = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(offsetStr);
   const sign = match?.[1] === "-" ? -1 : 1;
   const hours = match ? Number(match[2]) : 0;
   const minutes = match?.[3] ? Number(match[3]) : 0;

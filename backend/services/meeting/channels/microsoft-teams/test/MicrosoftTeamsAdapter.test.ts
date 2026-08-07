@@ -237,9 +237,14 @@ describe("MicrosoftTeamsAdapter", () => {
       const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new MicrosoftTeamsAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
-        NoOrgCredentialsNoUserTokenError
-      );
+      let caughtErr: Error | undefined;
+      try {
+        await adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" });
+        throw new Error("Expected generateMeeting to throw");
+      } catch (err) {
+        caughtErr = err as Error;
+      }
+      expect(caughtErr).toBeInstanceOf(NoOrgCredentialsNoUserTokenError);
       expect(refreshSpy).not.toHaveBeenCalled();
     });
 

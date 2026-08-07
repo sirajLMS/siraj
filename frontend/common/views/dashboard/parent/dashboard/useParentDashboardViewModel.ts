@@ -299,7 +299,7 @@ export function useParentDashboardViewModel(_props: UseParentDashboardViewModelP
   const schedulePagination = useSchedulePagination(page, pageSize, totalCount, handlers.handlePageChange);
 
   const pageCount =
-    schedulePagination !== undefined && schedulePagination.pageSize > 0
+    schedulePagination.pageSize > 0
       ? Math.max(1, Math.ceil(schedulePagination.totalCount / schedulePagination.pageSize))
       : 0;
 

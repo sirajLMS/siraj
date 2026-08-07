@@ -12,7 +12,7 @@ export type MobilePhoneDisplayProps = {
   readonly masked?: boolean;
   readonly defaultRegion?: string;
   readonly fallback?: React.ReactNode;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]>;
   readonly sx?: SxProps<Theme>;
 };
 
@@ -34,15 +34,16 @@ export const MobilePhoneDisplay: React.FC<MobilePhoneDisplayProps> = ({
 }): React.ReactNode => {
   const locale = useAppLocale();
 
+  let content: React.ReactNode;
   if (!phone) {
-    return fallback ?? null;
+    content = fallback ?? null;
+  } else {
+    const display = masked ? maskPhone(phone, defaultRegion) : formatPhoneDisplay(phone, locale);
+    content = (
+      <Typography variant={typographyVariant} dir="ltr" sx={{ whiteSpace: "nowrap", ...sx }}>
+        {display}
+      </Typography>
+    );
   }
-
-  const display = masked ? maskPhone(phone, defaultRegion) : formatPhoneDisplay(phone, locale);
-
-  return (
-    <Typography variant={typographyVariant} dir="ltr" sx={{ whiteSpace: "nowrap", ...sx }}>
-      {display}
-    </Typography>
-  );
+  return content;
 };

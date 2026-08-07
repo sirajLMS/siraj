@@ -86,7 +86,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
       expect(student.classesRemaining).toBeDefined();
       expect(student.classesTotal).toBeDefined();
       expect(student.hoursPerWeek).toBeDefined();
-      expect(student.teacherName !== undefined).toBeTrue();
+      expect(student.teacherName).toBeDefined();
       expect(student.createdAt).toBeDefined();
     }
   });

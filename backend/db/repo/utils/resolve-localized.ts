@@ -21,7 +21,7 @@ export function resolveLocalized(map: LocalizedString | null | undefined, locale
   }
 
   for (const value of Object.values(map)) {
-    if (value !== undefined && value !== "") {
+    if (value !== "") {
       return value;
     }
   }

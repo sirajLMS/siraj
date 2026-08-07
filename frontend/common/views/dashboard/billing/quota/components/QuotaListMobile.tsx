@@ -4,6 +4,7 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import { Button, Card, CardContent, Chip, Fab, Skeleton, Stack, Typography } from "@mui/material";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import {
   formatQuotaDate,
@@ -37,52 +38,52 @@ export function QuotaListMobile(props: Readonly<ReturnType<typeof useQuotaViewMo
     );
   }
 
-  function renderQuotaList() {
+  function renderQuotaList(): ReactNode {
     const isLoading = loading;
     const hasNoQuotas = quotas.length === 0;
 
+    let content: ReactNode;
     if (isLoading) {
-      return renderSkeletons();
+      content = renderSkeletons();
+    } else if (hasNoQuotas) {
+      content = renderEmptyState();
+    } else {
+      content = quotas.map(quota => {
+        const { label, color } = formatQuotaStatus(quota.status ?? "", t);
+        const quotaKind = formatQuotaKind(quota.kind ?? "", t);
+        return (
+          <Card key={quota.id} component={Link} href={`/quotas/${quota.id}`} sx={{ textDecoration: "none" }}>
+            <CardContent>
+              <Stack spacing={1}>
+                <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    {quota.name ?? ""}
+                  </Typography>
+                  <Chip label={label} color={color} size="small" />
+                </Stack>
+
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                  <Chip label={quotaKind} size="small" variant="outlined" />
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                    {t.fields.validUntil}: {formatQuotaDate(quota.validUntil)}
+                  </Typography>
+                </Stack>
+
+                <Stack direction="row" sx={{ justifyContent: "space-between", pt: 1 }}>
+                  <Typography variant="body2">
+                    {t.fields.remaining}: <strong>{quota.remaining ?? 0}</strong> / {quota.totalClasses ?? 0}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {t.fields.reservedClasses}: {quota.reservedClasses ?? 0}
+                  </Typography>
+                </Stack>
+              </Stack>
+            </CardContent>
+          </Card>
+        );
+      });
     }
-
-    if (hasNoQuotas) {
-      return renderEmptyState();
-    }
-
-    return quotas.map(quota => {
-      const { label, color } = formatQuotaStatus(quota.status ?? "", t);
-      const quotaKind = formatQuotaKind(quota.kind ?? "", t);
-      return (
-        <Card key={quota.id} component={Link} href={`/quotas/${quota.id}`} sx={{ textDecoration: "none" }}>
-          <CardContent>
-            <Stack spacing={1}>
-              <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                  {quota.name ?? ""}
-                </Typography>
-                <Chip label={label} color={color} size="small" />
-              </Stack>
-
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Chip label={quotaKind} size="small" variant="outlined" />
-                <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                  {t.fields.validUntil}: {formatQuotaDate(quota.validUntil)}
-                </Typography>
-              </Stack>
-
-              <Stack direction="row" sx={{ justifyContent: "space-between", pt: 1 }}>
-                <Typography variant="body2">
-                  {t.fields.remaining}: <strong>{quota.remaining ?? 0}</strong> / {quota.totalClasses ?? 0}
-                </Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {t.fields.reservedClasses}: {quota.reservedClasses ?? 0}
-                </Typography>
-              </Stack>
-            </Stack>
-          </CardContent>
-        </Card>
-      );
-    });
+    return content;
   }
 
   return (

@@ -67,9 +67,7 @@ export function TeacherAvailabilityGridDesktop({
         }}
       >
         {dateColumns.map(calendarDate => {
-          const dayGaps = (gapsByDate.get(calendarDate) ?? []).filter(
-            (gap): gap is NonNullable<typeof gap> => gap !== null
-          );
+          const dayGaps = gapsByDate.get(calendarDate) ?? [];
 
           return <TeacherAvailabilityDayPillDesktop key={calendarDate} calendarDate={calendarDate} gaps={dayGaps} />;
         })}

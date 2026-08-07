@@ -76,8 +76,8 @@ function getInstructionFiles(filePath: string): string[] {
 
   // Test files → tests.instructions.md
   if (
-    normalized.match(/\.test\.tsx?$/) ||
-    normalized.match(/\.spec\.tsx?$/) ||
+    /\.test\.tsx?$/.exec(normalized) ||
+    /\.spec\.tsx?$/.exec(normalized) ||
     normalized.includes("scripts/run-test/")
   ) {
     instructions.push(".github/instructions/tests.instructions.md");
@@ -235,7 +235,7 @@ function lineMentionsFile(line: string, relPath: string, filePath: string): bool
 function collectErrorBlock(lines: string[], startIndex: number, errorBlockRegex: RegExp): string[] {
   const block: string[] = [lines[startIndex]];
   for (let j = startIndex + 1; j < lines.length; j++) {
-    if (lines[j].match(errorBlockRegex) || lines[j].trim() === "") break;
+    if (errorBlockRegex.exec(lines[j]) || lines[j].trim() === "") break;
     block.push(lines[j]);
   }
   return block;
@@ -253,7 +253,7 @@ function filterTsgoForFile(tsgoOutput: string, filePath: string): string {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const isErrorBlock = line.match(errorBlockRegex);
+    const isErrorBlock = errorBlockRegex.exec(line);
 
     if (isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
       matchingLines.push(...collectErrorBlock(lines, i, errorBlockRegex));

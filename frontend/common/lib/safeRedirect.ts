@@ -49,7 +49,7 @@ export function buildLoginHref(returnPath: string): string {
  * Client: build login href from the current window location (pathname + search).
  */
 export function buildLoginHrefFromWindow(): string {
-  if (globalThis.window === undefined) {
+  if (typeof globalThis.window === "undefined") {
     return LOGIN_PATH;
   }
   const { pathname, search } = globalThis.window.location;

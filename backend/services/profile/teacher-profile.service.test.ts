@@ -132,11 +132,16 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     } as never);
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
 
-    await expect(
-      toPromise(() =>
+    let caughtErr: Error | undefined;
+    try {
+      await toPromise(() =>
         TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
-      )
-    ).rejects.toThrow(tErrors.invalidNationalId);
+      );
+      throw new Error("Expected updateOwnProfile to throw");
+    } catch (err) {
+      caughtErr = err as Error;
+    }
+    expect(caughtErr?.message).toContain(tErrors.invalidNationalId);
     expect(TeacherRepository.updateTeacherProfile).not.toHaveBeenCalled();
   });
 

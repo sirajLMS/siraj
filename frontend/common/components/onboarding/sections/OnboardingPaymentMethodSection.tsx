@@ -57,8 +57,8 @@ export function OnboardingPaymentMethodSection<T extends FieldValues>({
     setValue(methodFieldName, null as T[Path<T>]);
   };
 
-  const handleCheckboxChange = (_e: ChangeEvent<HTMLInputElement>, checked: boolean) => {
-    if (checked) {
+  const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
       enablePaymentMethod();
     } else {
       disablePaymentMethod();

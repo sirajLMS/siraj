@@ -20,7 +20,7 @@ export type PaymentMethodSelectProps = {
   readonly onOpenAction?: () => void;
   readonly onCloseAction?: () => void;
   readonly autoFocus?: boolean;
-  readonly allowedSlugs?: PaymentMethodAutocompleteProps["allowedSlugs"];
-  readonly type?: PaymentMethodAutocompleteProps["type"];
+  readonly allowedSlugs?: NonNullable<PaymentMethodAutocompleteProps["allowedSlugs"]>;
+  readonly type?: NonNullable<PaymentMethodAutocompleteProps["type"]>;
   readonly showSlug?: boolean;
 };

@@ -100,7 +100,7 @@ export namespace RecurringClassService {
   }
 
   async function validateBalanceOrQuota(input: CreateRecurringClassInput, tErrors: ErrorsLabels) {
-    if (input.schedulingMode === "ON_DEMAND") return;
+    if (input.schedulingMode === SchedulingMode.ON_DEMAND) return;
 
     if (input.quotaId) {
       const quota = await QuotaRepository.findById(db, input.quotaId);
@@ -184,7 +184,7 @@ export namespace RecurringClassService {
     tErrors: ErrorsLabels
   ) {
     return db.transaction(async tx => {
-      const isOndemand = input.schedulingMode === "ON_DEMAND";
+      const isOndemand = input.schedulingMode === SchedulingMode.ON_DEMAND;
       const instanceWeeks = isOndemand ? 0 : input.generateInstancesForWeeks;
 
       const created = await SchedulingRepository.createRecurringScheduleWithInstances(

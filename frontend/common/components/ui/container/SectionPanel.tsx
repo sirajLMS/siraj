@@ -78,33 +78,36 @@ export function SectionPanel({ id, title, subTitle, actions, children, edgeToEdg
     </Paper>
   );
 
-  function renderChildren() {
-    if (!children) {
-      return null;
+  function renderChildren(): ReactNode {
+    let content: ReactNode = null;
+    if (children) {
+      content = edgeToEdge ? (
+        children
+      ) : (
+        <Box
+          sx={{
+            px: { xs: 2, md: 3 },
+            py: 2.5,
+          }}
+        >
+          {children}
+        </Box>
+      );
     }
-    if (edgeToEdge) {
-      return children;
-    }
-    return (
-      <Box
-        sx={{
-          px: { xs: 2, md: 3 },
-          py: 2.5,
-        }}
-      >
-        {children}
-      </Box>
-    );
+    return content;
   }
 }
 
-function renderTitle(title: ReactNode) {
+function renderTitle(title: ReactNode): ReactNode {
+  let content: ReactNode;
   if (typeof title === "string") {
-    return (
+    content = (
       <Typography variant="titleLg" sx={{ color: theme => theme.palette.onSurface }}>
         {title}
       </Typography>
     );
+  } else {
+    content = title;
   }
-  return title;
+  return content;
 }

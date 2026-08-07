@@ -15,7 +15,7 @@ export type MobileLanguageDisplayProps = {
   readonly showEmoji?: boolean;
   readonly showLabel?: boolean;
   readonly fallback?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]>;
   readonly sx?: SxProps<Theme>;
 };
 
@@ -40,21 +40,23 @@ export const MobileLanguageDisplay: React.FC<MobileLanguageDisplayProps> = ({
   const locale = useAppLocale();
 
   const resolvedCode = language?.code ?? code;
+  let content: React.ReactNode;
   if (!resolvedCode) {
-    return fallback ?? null;
+    content = fallback ?? null;
+  } else {
+    const emoji = language?.emoji ?? getLanguageEmoji(resolvedCode);
+    const name = getLanguageDisplayName(resolvedCode, locale);
+
+    content = (
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexWrap: "nowrap", ...sx }}>
+        {showEmoji && <MobileLocaleEmoji emoji={emoji} />}
+        {showLabel && (
+          <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
+            {name}
+          </Typography>
+        )}
+      </Stack>
+    );
   }
-
-  const emoji = language?.emoji ?? getLanguageEmoji(resolvedCode);
-  const name = getLanguageDisplayName(resolvedCode, locale);
-
-  return (
-    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexWrap: "nowrap", ...sx }}>
-      {showEmoji && <MobileLocaleEmoji emoji={emoji} />}
-      {showLabel && (
-        <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
-          {name}
-        </Typography>
-      )}
-    </Stack>
-  );
+  return content;
 };

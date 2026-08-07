@@ -187,7 +187,7 @@ function findLatestLog(testPath: string): string | null {
       const fullPath = join(LOGS_DIR, entry);
       return existsSync(fullPath) && existsSync(`${fullPath}${sep}`) ? true : existsSync(fullPath);
     })
-    .sort()
+    .sort((a, b) => a.localeCompare(b))
     .reverse();
 
   for (const tsDir of timestampDirs) {
@@ -299,10 +299,10 @@ function scanLines(lines: string[]): ScanResult {
   for (let i = 0; i < lines.length; i++) {
     const trimmed = lines[i].trim();
 
-    const passMatch = trimmed.match(/^(\d+)\s+pass/);
+    const passMatch = /^(\d+)\s+pass/.exec(trimmed);
     if (passMatch) passes = Number.parseInt(passMatch[1], 10);
 
-    const failMatch = trimmed.match(/^(\d+)\s+fail/);
+    const failMatch = /^(\d+)\s+fail/.exec(trimmed);
     if (failMatch) fails = Number.parseInt(failMatch[1], 10);
 
     if (isResultOrSummaryLine(trimmed)) resultLineIndices.push(i);
@@ -454,7 +454,7 @@ function getFeedbackFiles(): string[] {
 
   return readdirSync(FEEDBACK_DIR)
     .filter(f => f.startsWith("feedback-") && f.endsWith(".md"))
-    .sort()
+    .sort((a, b) => a.localeCompare(b))
     .reverse();
 }
 
@@ -470,9 +470,9 @@ function listFeedback(): void {
 
   for (const file of files) {
     const content = readFileSync(join(FEEDBACK_DIR, file), "utf8");
-    const statusMatch = content.match(/\*\*Status\*\*:\s*(\w+)/);
+    const statusMatch = /\*\*Status\*\*:\s*(\w+)/.exec(content);
     const status = statusMatch ? statusMatch[1] : "unknown";
-    const timestampMatch = content.match(/\*\*Timestamp\*\*:\s*(.+)/);
+    const timestampMatch = /\*\*Timestamp\*\*:\s*(.+)/.exec(content);
     const timestamp = timestampMatch ? timestampMatch[1].trim() : "unknown";
     const feedbackText = extractFeedbackText(content);
 

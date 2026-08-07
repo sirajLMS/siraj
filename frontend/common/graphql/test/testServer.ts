@@ -249,9 +249,7 @@ async function startServerWithRetry(): Promise<void> {
 
     testLogger.warn(`Next.js ${mode} test server failed to become ready on port ${port}.`);
     await dumpServerLog(port);
-    if (serverRootPid !== undefined) {
-      killProcessTree(serverRootPid);
-    }
+    killProcessTree(serverRootPid);
     serverProcess = undefined;
     serverRootPid = undefined;
     logFilePath = undefined;

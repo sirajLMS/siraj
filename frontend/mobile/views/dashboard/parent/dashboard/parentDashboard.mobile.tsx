@@ -17,7 +17,7 @@ interface MobileScheduleSectionProps {
   readonly scheduleRows: readonly ParentScheduleRow[];
   readonly labels: ParentDashboardViewModel["labels"];
   readonly onViewAll: () => void;
-  readonly schedulePagination?: ParentDashboardViewModel["schedulePagination"];
+  readonly schedulePagination?: NonNullable<ParentDashboardViewModel["schedulePagination"]>;
   readonly pageCount: number;
 }
 

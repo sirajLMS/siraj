@@ -12,7 +12,7 @@ const STORAGE_KEYS = {
 } as const;
 
 function hasClientWindow() {
-  return globalThis.window !== undefined;
+  return typeof globalThis.window !== "undefined";
 }
 
 function getLocalStorageItem(key: string): string | null {

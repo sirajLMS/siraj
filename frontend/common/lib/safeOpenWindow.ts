@@ -16,7 +16,7 @@ export function safeOpenWindow(url: string | null | undefined): void {
   if (!trimmed) {
     return;
   }
-  if (globalThis.window === undefined) {
+  if (typeof globalThis.window === "undefined") {
     return;
   }
   globalThis.window?.open(trimmed, "_blank", "noopener,noreferrer");

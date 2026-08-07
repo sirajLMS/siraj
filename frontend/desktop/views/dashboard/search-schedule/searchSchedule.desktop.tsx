@@ -40,9 +40,7 @@ function SearchScheduleDesktopResults({
 
   const teachers = searchResult.teachers ?? [];
   const totalGaps = searchResult.totalGaps ?? 0;
-  const activeTeachers = teachers.filter((teacher): teacher is SearchScheduleResultItem => {
-    return teacher !== null && teacher !== undefined;
-  });
+  const activeTeachers = teachers.filter((teacher): teacher is SearchScheduleResultItem => teacher != null);
 
   if (activeTeachers.length === 0) {
     return (

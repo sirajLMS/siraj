@@ -88,16 +88,19 @@ mock.module("next/dynamic", () => {
     // Create synchronous component
     const DynamicComponent = ({ ...props }: T) => {
       const Component = moduleCache.get(cacheKey);
+      let content: React.ReactNode;
 
       if (Component) {
         // Re-cast the cached empty-props component to ComponentType<T> so
         // React.createElement receives a prop-compatible component for props: T.
         const TypedComponent = Component as unknown as React.ComponentType<T>;
-        return createElement(TypedComponent, props);
+        content = createElement(TypedComponent, props);
+      } else {
+        // Show loading or null if not loaded yet
+        content = options?.loading?.() ?? null;
       }
 
-      // Show loading or null if not loaded yet
-      return options?.loading?.() ?? null;
+      return content;
     };
 
     DynamicComponent.displayName = "DynamicComponent";
