@@ -4,7 +4,7 @@
  * This script is called by subagents dispatched by the quality-gate skill. It runs a progressive
  * quality loop on a single file, checking in strict order:
  *
- *   tsgo → biome:check → lint:type-aware (via lint service) → codescene --file
+ *   tsgo → biome:check → oxlint → lint:type-aware (via lint service) → codescene --file
  *
  * It SHORT-CIRCUITS at the first failing check — stops and prints the errors for the subagent
  * to fix. The subagent fixes the errors and re-runs this script until it passes all checks.
@@ -20,8 +20,8 @@
  * Lifecycle stages (controls how deep the loop goes):
  *   tsgo          → only run tsgo (type checking only)
  *   biome         → run tsgo, then biome:check (stop if tsgo fails)
- *   lint          → run tsgo, biome, then lint:type-aware via lint service (stop if earlier check fails)
- *   codescene     → run tsgo, biome, lint, then codescene --file (stop if earlier check fails)
+ *   lint          → run tsgo, biome, oxlint, then lint:type-aware via lint service (stop if earlier check fails)
+ *   codescene     → run tsgo, biome, oxlint, lint:type-aware, then codescene --file (stop if earlier check fails)
  *   sonar-results → same as codescene (subagents verify file is clean before orchestrator handles sonar)
  *
  * Exit codes:
@@ -292,6 +292,13 @@ function checkBiome(filePath: string): CheckResult {
   return { name: "biome:check", passed: result.passed, output: result.output };
 }
 
+function checkOxlint(filePath: string): CheckResult {
+  const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
+  logInfo(`Running oxlint on ${relPath}...`);
+  const result = runCommand("bun", ["oxlint", relPath]);
+  return { name: "oxlint", passed: result.passed, output: result.output };
+}
+
 async function checkLint(filePath: string): Promise<CheckResult> {
   logInfo(`Submitting lint:type-aware via in-process service for ${filePath}...`);
   const result = await lintViaQueue(filePath);
@@ -387,7 +394,12 @@ async function runProgressiveChecks(
     process.exit(0);
   }
 
-  // Step 3: lint:type-aware via lint service (file-level)
+  // Step 3: oxlint (file-level)
+  const oxlintResult = checkOxlint(filePath);
+  failOnResult(oxlintResult, "oxlint FAILED — stopping here. Fix oxlint errors before proceeding.");
+  logPass("oxlint passed");
+
+  // Step 4: lint:type-aware via lint service (file-level)
   const lintResult = await checkLint(filePath);
   failOnResult(lintResult, "lint:type-aware FAILED — stopping here. Fix lint errors before proceeding.");
   logPass("lint:type-aware passed");
@@ -397,7 +409,7 @@ async function runProgressiveChecks(
     process.exit(0);
   }
 
-  // Step 4: codescene --file (file-level)
+  // Step 5: codescene --file (file-level)
   const codesceneResult = checkCodescene(filePath);
   failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.");
   logPass("codescene passed");
@@ -419,15 +431,16 @@ ${BOLD}Usage:${NC}
 ${BOLD}Lifecycle stages (controls depth of checks):${NC}
   tsgo          Only run tsgo (type checking)
   biome         Run tsgo, then biome:check
-  lint          Run tsgo, biome, then lint:type-aware via lint service
-  codescene     Run tsgo, biome, lint:type-aware, then codescene --file
+  lint          Run tsgo, biome, oxlint, then lint:type-aware via lint service
+  codescene     Run tsgo, biome, oxlint, lint:type-aware, then codescene --file
   sonar-results Same as codescene (no sonar for subagents — EVER)
 
 ${BOLD}Check order (always strict, no skipping):${NC}
   1. tsgo (project-wide, filtered for this file)
   2. biome:check (file-level)
-  3. lint:type-aware via lint service (file-level)
-  4. codescene --file (file-level)
+  3. oxlint (file-level)
+  4. lint:type-aware via lint service (file-level)
+  5. codescene --file (file-level)
 
 ${BOLD}Exit codes:${NC}
   0 = all checks up to lifecycle stage passed

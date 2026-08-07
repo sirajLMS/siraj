@@ -1,6 +1,14 @@
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
+import { defineConfig } from "oxlint";
+
+const unusedVarOptions = {
+  argsIgnorePattern: "^_",
+  varsIgnorePattern: "^_",
+  caughtErrorsIgnorePattern: "^_",
+  destructuredArrayIgnorePattern: "^_",
+} as const;
+
+export default defineConfig({
+  plugins: [
     "typescript",
     "unicorn",
     "oxc",
@@ -11,54 +19,37 @@
     "node",
     "vitest",
     "jsx-a11y",
-    "jsdoc"
+    "jsdoc",
   ],
-  
-  "categories": {
-    "correctness": "error",
-    "suspicious": "warn",
-    "perf": "warn"
+  categories: {
+    correctness: "error",
+    suspicious: "warn",
+    perf: "warn",
   },
-  "rules": {
+  rules: {
     "react/react-in-jsx-scope": "off",
     "no-console": "error",
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-namespace": "off",
-    "no-unused-vars": [
-      "error",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "caughtErrorsIgnorePattern": "^_",
-        "destructuredArrayIgnorePattern": "^_"
-      }
-    ],
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "caughtErrorsIgnorePattern": "^_",
-        "destructuredArrayIgnorePattern": "^_"
-      }
-    ]
+    "no-unused-vars": ["error", unusedVarOptions],
+    "@typescript-eslint/no-unused-vars": ["error", unusedVarOptions],
   },
-  "overrides": [
+  overrides: [
     {
-      "files": [
+      files: [
         "frontend/utils/logger.ts",
         "scripts/**/*.ts",
         "backend/db/scripts/**/*.ts",
         "backend/db/test/**/*.ts",
-        "next.config.ts"
+        "next.config.ts",
       ],
-      "rules": {
-        "no-console": "off"
-      }
-    }
+      rules: {
+        "no-console": "off",
+      },
+    },
   ],
-  "ignorePatterns": [
+  ignorePatterns: [
     "**/.*/**",
     "!.storybook/**",
     "node_modules/**",
@@ -76,6 +67,7 @@
     "next-env.d.ts",
     "eslint.config.ts",
     "eslint.config.mjs",
+    "oxlint.config.mts",
     "debug-eslint.js",
     "bun.lock",
     "*.lock",
@@ -85,11 +77,15 @@
     "**/messages/**",
     "frontend/common/graphql/generated/**",
     "**/unRefactored_tests/**",
-    "*storybook.log"
+    "*storybook.log",
   ],
-  "env": {
-    "builtin": true,
-    "browser": true,
-    "node": true
-  }
-}
+  env: {
+    builtin: true,
+    browser: true,
+    node: true,
+  },
+  options: {
+    typeAware: true,
+    typeCheck: true,
+  },
+});
