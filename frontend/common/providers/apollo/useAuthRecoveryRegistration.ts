@@ -4,7 +4,7 @@ import type { ApolloClient } from "@apollo/client";
 import { useCallback, useEffect } from "react";
 import { refreshTokenMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
-import logger from "@/frontend/common/lib/logger";
+import { logger } from "@/frontend/common/lib/logger";
 import { registerAuthRecovery, unregisterAuthRecovery } from "@/frontend/common/providers/apollo/utils";
 
 /**

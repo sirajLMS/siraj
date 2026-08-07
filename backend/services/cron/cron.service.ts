@@ -17,7 +17,7 @@ import {
 } from "@/backend/enum/cron/cron.enums";
 import { resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { DomainError, ForbiddenError, NotFoundError, UnauthorizedError } from "@/backend/lib/errors";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CRON_DEFAULT_BATCH_SIZE, parsePositiveInt } from "@/backend/services/cron/cron-env";
 import {
   InvalidCronExpression,

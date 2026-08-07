@@ -10,7 +10,7 @@ import {
   CronScheduleStatusPothosEnum,
   CronTriggerSourcePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
 import type {
   CronQueueStats,

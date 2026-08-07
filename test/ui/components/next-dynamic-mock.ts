@@ -3,7 +3,8 @@
  * This preload must be registered before tests that use ResponsiveViewSwitch
  */
 import { mock } from "bun:test";
-import React from "react";
+import type React from "react";
+import { createElement } from "react";
 
 // Cache for loaded modules. The cached views have heterogeneous, view-specific prop
 // types (Readonly<ScheduleOverviewViewModel>, Readonly<PendingReviewsViewModel>, ...),
@@ -92,7 +93,7 @@ mock.module("next/dynamic", () => {
         // Re-cast the cached empty-props component to ComponentType<T> so
         // React.createElement receives a prop-compatible component for props: T.
         const TypedComponent = Component as unknown as React.ComponentType<T>;
-        return React.createElement(TypedComponent, props);
+        return createElement(TypedComponent, props);
       }
 
       // Show loading or null if not loaded yet

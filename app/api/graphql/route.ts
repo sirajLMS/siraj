@@ -20,7 +20,7 @@ import { NextResponse } from "next/server";
 import { createGraphQLContext } from "@/backend/graphql/gqlContextFactory";
 import { graphQLSchema } from "@/backend/graphql/gqlSchema";
 import { ensureEnvironmentValidated, getEnvironmentConfig } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, graphqlRateLimiter } from "@/backend/lib/ratelimit";
 import { ApolloCacheAdapter } from "@/backend/services/cache";
 import { IdempotencyService } from "@/backend/services/idempotency.service";

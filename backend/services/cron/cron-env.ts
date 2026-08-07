@@ -6,7 +6,7 @@
  * so the standalone worker script, the cron service, and the worker
  * runtime all use consistent validation and default-handling.
  */
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 /** Default batch size used by the ticker route and worker runtime. */
 export const CRON_DEFAULT_BATCH_SIZE = 25;

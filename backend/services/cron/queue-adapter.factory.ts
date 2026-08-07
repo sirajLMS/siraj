@@ -13,7 +13,7 @@
 
 import { CronQueueBackend } from "@/backend/enum/cron/cron.enums";
 import { resolveEnvConfig } from "@/backend/lib/env-config-resolver";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import {
   type CronQueueAdapter,
   CronQueueBackendNotAvailable,

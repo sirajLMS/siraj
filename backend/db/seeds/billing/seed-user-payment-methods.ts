@@ -1,5 +1,5 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type { UserPaymentMethodReturnType, UserSelectType } from "@/backend/types";
 

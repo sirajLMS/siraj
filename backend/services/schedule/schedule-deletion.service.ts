@@ -2,6 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { type ClassInstanceAffectedUsers, classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling";
 import { AppPermission, NotificationEventType } from "@/backend/enum";
+import { ForbiddenError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -95,7 +96,12 @@ export namespace ScheduleDeletionService {
     actorUserId: string,
     tErrors: ErrorsLabels
   ): Promise<boolean> {
-    return db.transaction(async tx => {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_DELETE_CLASS);
+    if (!hasPermission) {
+      throw new ForbiddenError(tErrors.insufficientPermissions);
+    }
+
+    const result = await db.transaction(async tx => {
       const deleted = await SchedulingRepository.deleteRecurringClass(classInstanceId, tx);
       if (!deleted?.deleted || !deleted.quotaDeducted) {
         return deleted !== null;
@@ -126,6 +132,8 @@ export namespace ScheduleDeletionService {
       }
       return true;
     });
+
+    return result;
   }
 
   /**
@@ -168,7 +176,7 @@ export namespace ScheduleDeletionService {
   ): Promise<boolean> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_CLEAR_WEEKLY);
     if (!hasPermission) {
-      throw new Error(tErrors.insufficientPermissions);
+      throw new ForbiddenError(tErrors.insufficientPermissions);
     }
 
     // Snapshot affected users for every about-to-be-deleted instance BEFORE

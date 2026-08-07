@@ -3,7 +3,7 @@
 import { ApolloLink, CombinedGraphQLErrors, Observable } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
 import CryptoJS from "crypto-js";
-import logger from "@/frontend/common/lib/logger";
+import { logger } from "@/frontend/common/lib/logger";
 import { buildLoginHref } from "@/frontend/common/lib/safeRedirect";
 import { isNetworkError } from "@/frontend/common/utils/errorUtils";
 

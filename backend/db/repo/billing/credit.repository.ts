@@ -6,6 +6,7 @@ import type { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
+import { DomainError } from "@/backend/lib/errors";
 import type { CreditInsertInput, CreditTransactionSelectType, PaginationArgs } from "@/backend/types";
 
 // NOTE: Overload-by-type-discrimination — tx parameter is polymorphic: string (studentId) or Transaction instance. Callers must be aware that getBalance(tx, undefined) silently targets the wrong studentId.
@@ -82,7 +83,7 @@ export namespace CreditRepository {
         updatedAt: now,
       })
       .returning();
-    if (!row) throw new Error("Credit transaction insert returned no rows");
+    if (!row) throw new DomainError("CREDIT_INSERT_FAILED", "Credit transaction insert returned no rows");
     return row;
   };
 

@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import { type FileReferenceTable, resolveAssetPath, seedEntityFile } from "@/backend/db/seeds/lib/file-seed-helper";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { UserSeedService } from "@/backend/services/seed/user-seed.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";

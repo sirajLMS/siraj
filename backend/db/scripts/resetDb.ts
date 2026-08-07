@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import ws from "ws";
 import { runMigrations } from "@/backend/db/scripts/migrate";
 import { getStringEnv, requireEnv } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { assertDestructiveDbCommandAllowed } from "@/scripts/lib/destructiveDbGuard";
 
 type ResetPool = Pool | NeonPool;

@@ -1,5 +1,5 @@
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 
 export async function seedOrGet() {

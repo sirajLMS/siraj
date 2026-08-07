@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { systemSettings } from "@/backend/db/schema";
 import { AppPermission, SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { getStorageService } from "@/backend/storage/storage.service";

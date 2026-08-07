@@ -10,7 +10,7 @@
  * utility — same formula as the pg-boss adapter's `computeHeartbeatSeconds`).
  */
 import { DomainError } from "@/backend/lib/errors";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
 import {
   CRON_DEFAULT_BATCH_SIZE,

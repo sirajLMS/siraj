@@ -1,4 +1,4 @@
-import countries from "@/frontend/common/lib/locale/country/countries";
+import { countries } from "@/frontend/common/lib/locale/country/countries";
 import { isExcludedUiCountryCode, resolveUiCountryCode } from "@/shared/lib/locale/excluded-ui-countries";
 
 const REGIONAL_INDICATOR_BASE = 0x1f1e6;

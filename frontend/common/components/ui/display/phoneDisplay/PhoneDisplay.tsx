@@ -2,7 +2,7 @@
 
 import type { SxProps, Theme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
-import type * as React from "react";
+import * as React from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { formatPhoneDisplay, maskPhone } from "@/shared/lib/phone";
@@ -25,11 +25,13 @@ export const PhoneDisplay = ({
   sx,
 }: PhoneDisplayProps): React.JSX.Element | null => {
   const locale = useAppLocale();
-  const fallbackNode =
+  const fallbackNode: React.JSX.Element | null =
     fallback == null ? null : typeof fallback === "string" || typeof fallback === "number" ? (
       <Typography component="span" variant={typographyVariant} dir="ltr" sx={{ whiteSpace: "nowrap", ...sx }}>
         {fallback}
       </Typography>
+    ) : React.isValidElement(fallback) ? (
+      fallback
     ) : (
       fallback
     );

@@ -12,6 +12,7 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, type CurrencyCode, NotificationEventType, OnDemandStatus } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
+import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -40,14 +41,14 @@ export namespace ClassSessionService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, permission);
     if (!isAuthorized) {
-      throw new Error(tErrors.unauthorizedAction);
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
   }
 
   async function getOrThrow(classInstanceId: string, tErrors: ErrorsLabels) {
     const instance = await SchedulingRepository.getClassInstanceById(classInstanceId);
     if (!instance) {
-      throw new Error(tErrors.notFound);
+      throw new NotFoundError("CLASS_INSTANCE", tErrors.notFound);
     }
     return instance;
   }
@@ -82,7 +83,7 @@ export namespace ClassSessionService {
       return;
     }
 
-    throw new Error(tErrors.unauthorizedAction);
+    throw new UnauthorizedError(tErrors.unauthorizedAction);
   }
 
   type ClassInstanceForViewAccess = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
@@ -113,13 +114,13 @@ export namespace ClassSessionService {
       }
     }
 
-    throw new Error(tErrors.unauthorizedAction);
+    throw new UnauthorizedError(tErrors.unauthorizedAction);
   }
 
   async function handleUpdate<T>(promise: Promise<T | null>, tErrors: ErrorsLabels): Promise<T> {
     const result = await promise;
     if (!result) {
-      throw new Error(tErrors.notFound);
+      throw new NotFoundError("CLASS_INSTANCE", tErrors.notFound);
     }
     return result;
   }
@@ -278,7 +279,7 @@ export namespace ClassSessionService {
   ): Promise<void> {
     const validStates = ["ACTIVATED", "RUNNING"];
     if (!validStates.includes(instance.executionState)) {
-      throw new Error(tErrors.sessionNotActivated);
+      throw new ValidationError(tErrors.sessionNotActivated);
     }
   }
 
@@ -666,7 +667,7 @@ export namespace ClassSessionService {
     const resetInstance = await db.transaction(async tx => {
       const resetResult = await SchedulingRepository.resetClassInstance(classInstanceId, userId, tx);
       if (!resetResult) {
-        throw new Error(tErrors.notFound);
+        throw new NotFoundError("CLASS_INSTANCE", tErrors.notFound);
       }
       if (instance.quotaDeducted) {
         const { quotaReleased } = await releaseQuotaIfDeducted(instance, userId, tx);
@@ -752,7 +753,7 @@ export namespace ClassSessionService {
         tx
       );
       if (!result) {
-        throw new Error(tErrors.notFound);
+        throw new NotFoundError("CLASS_INSTANCE", tErrors.notFound);
       }
     });
   }

@@ -47,7 +47,7 @@
 import crypto from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { withStatementBreakpoints } from "@/scripts/dbActions/sqlBreakpoints";
 
 const MIGRATIONS_SRC_DIR = resolve("backend/db/migration");

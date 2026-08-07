@@ -6,7 +6,7 @@
  */
 import { type CronExpression, CronExpressionParser, type CronFieldCollection } from "cron-parser";
 import { DomainError } from "@/backend/lib/errors";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { formatError } from "@/backend/services/cron/cron-utils";
 
 export class InvalidCronExpression extends DomainError {

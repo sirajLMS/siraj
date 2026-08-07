@@ -1,6 +1,6 @@
 import { copy, del, head, list } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import { getVercelBlobPath } from "@/backend/storage/disk/vercel/utils";
 import type * as Types from "@/backend/types";

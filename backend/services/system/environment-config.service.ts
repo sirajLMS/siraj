@@ -30,7 +30,7 @@ import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import type { EnvConfigKeyDescriptor } from "@/backend/lib/env-config-keys";
 import { ENV_CONFIG_KEYS, isEnvConfigKeyExposedInSettings } from "@/backend/lib/env-config-keys";
 import { invalidateEnvConfigCache } from "@/backend/lib/env-config-resolver";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { EnvConfigAuditCreateInput, EnvConfigAuditEvent } from "@/backend/types/audit/env-config-audit.types";

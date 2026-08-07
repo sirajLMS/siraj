@@ -7,7 +7,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { styled } from "@mui/material/styles";
 import TextField, { type TextFieldProps } from "@mui/material/TextField";
 import Typography, { type TypographyProps } from "@mui/material/Typography";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type EditableTypographyProps = {
   readonly typography: TypographyProps;
@@ -80,11 +81,11 @@ export const EditableTypographyMobile: React.FC<EditableTypographyProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const touchTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsEditing(startEditing);
   }, [startEditing]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setInputValue(value);
   }, [value]);
 

@@ -1,4 +1,4 @@
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
 
 export const CACHE_VERSION = 1;

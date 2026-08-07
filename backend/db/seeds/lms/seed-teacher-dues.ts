@@ -1,6 +1,6 @@
 import { findAdminUserOrFallback, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassExecutionState, CurrencyCode, LessonReportStatus, RateSource, TeacherDueStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type {
   ClassInstanceSelectType,

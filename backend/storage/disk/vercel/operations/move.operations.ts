@@ -1,6 +1,6 @@
 import { copy, del, head } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { executeBulkOperation } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import {
   loadMoveEntities,

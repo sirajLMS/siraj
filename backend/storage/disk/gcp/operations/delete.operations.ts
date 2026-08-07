@@ -1,5 +1,5 @@
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { fileInfoByPath } from "@/backend/storage/disk/gcp/operations/file.operations";
 import { directoryInfoByPath } from "@/backend/storage/disk/gcp/operations/folder.operations";
 import type { GcpContext, GenericOperationResult } from "@/backend/storage/disk/gcp/types";

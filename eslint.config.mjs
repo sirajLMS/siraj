@@ -2,19 +2,19 @@ import eslint from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-import eslintPluginImportX from "eslint-plugin-import-x";
+import { flatConfigs as importXFlatConfigs } from "eslint-plugin-import-x";
 import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
-import sonarjs from "eslint-plugin-sonarjs";
-import storybook from "eslint-plugin-storybook";
+import { reactRefresh } from "eslint-plugin-react-refresh";
+import { configs as sonarjsConfigs } from "eslint-plugin-sonarjs";
+import { configs as storybookConfigs } from "eslint-plugin-storybook";
 import globals from "globals";
-import tseslint from "typescript-eslint";
+import { configs as tseslintConfigs } from "typescript-eslint";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  eslintPluginImportX.flatConfigs.recommended,
-  eslintPluginImportX.flatConfigs.typescript,
+  importXFlatConfigs.recommended,
+  importXFlatConfigs.typescript,
   // import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended";
   // Override default ignores of eslint-config-next.
   globalIgnores([
@@ -55,13 +55,13 @@ const eslintConfig = defineConfig([
     "*storybook.log",
   ]),
   eslint.configs.recommended,
-  sonarjs.configs.recommended,
+  sonarjsConfigs.recommended,
   // cspellESLintPluginRecommended, // Disabled for performance
 
-  ...storybook.configs["flat/recommended"],
+  ...storybookConfigs["flat/recommended"],
 
   // TypeScript and React-specific configuration
-  ...tseslint.configs.recommended.map(config => ({
+  ...tseslintConfigs.recommended.map(config => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
   })),
@@ -70,7 +70,7 @@ const eslintConfig = defineConfig([
     files: ["**/*.{ts,tsx}"],
     plugins: {
       "react-hooks": reactHooks,
-      "react-refresh": reactRefresh,
+      "react-refresh": reactRefresh.plugin,
     },
     languageOptions: {
       // ecmaVersion: 2020,

@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 
 const mockLabels = {
   pageTitle: "Cron Schedules",
@@ -169,7 +169,6 @@ mock.module("@/frontend/common/views/dashboard/lib/usePageBreadcrumbs", () => ({
   usePageBreadcrumbs: () => [],
 }));
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen, waitFor } from "@testing-library/react";
 import { act } from "react";

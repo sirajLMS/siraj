@@ -60,7 +60,7 @@ import { seedOrGet as seedOrGetTeacherVacationRequests } from "@/backend/db/seed
 import { seedOrGet as seedOrGetTeachers } from "@/backend/db/seeds/teachers/seed-teachers";
 import { seedOrGet as seedOrGetUserDeviceTokens } from "@/backend/db/seeds/users/seed-user-device-tokens";
 import { seedOrGet as seedOrGetUsers } from "@/backend/db/seeds/users/seed-users";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 import type {
   ClassInstanceSelectType,

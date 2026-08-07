@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
@@ -7,7 +7,6 @@ import { useEffect } from "react";
 
 expect.extend(matchers);
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import {
   isUserWhatsappOptInQueryDocument,
   whatsappAccountsQueryDocument,

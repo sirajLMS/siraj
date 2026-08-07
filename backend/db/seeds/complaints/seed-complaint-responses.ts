@@ -5,7 +5,7 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import { ComplaintStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ComplaintService } from "@/backend/services/communication/complaint.service";
 import type { UserSelectType } from "@/backend/types";
 

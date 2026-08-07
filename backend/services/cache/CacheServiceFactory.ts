@@ -1,7 +1,7 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
 import { PostgresCacheAdapter } from "@/backend/services/cache/PostgresCacheAdapter";
 

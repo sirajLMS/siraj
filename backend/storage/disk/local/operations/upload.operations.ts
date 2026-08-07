@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { LocalContext } from "@/backend/storage/disk/local/types";
 import { calculateFileHash, ensureDirectory, getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import { prepareUploadHelper, uploadFileHelper } from "@/backend/storage/disk/shared/upload-operations.helper";

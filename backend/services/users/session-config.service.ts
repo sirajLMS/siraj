@@ -29,7 +29,7 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SessionConfigRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type { CreateAuditLogInput, SessionConfigSelectType, SessionConfigUpsertInput } from "@/backend/types";

@@ -39,6 +39,7 @@ export async function createRecurringClass(
       userId,
       {
         ...input,
+        rateCurrency: input.rateCurrency ?? undefined,
         timezone: parseIanaTimezone(toGraphqlIanaTimezone(input.timezone)),
       },
       tErrors

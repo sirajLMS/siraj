@@ -8,7 +8,7 @@ import {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import type {
   ClassInstanceInsertType,

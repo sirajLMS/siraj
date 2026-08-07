@@ -1,7 +1,7 @@
 import type { SeedConfig } from "@/backend/db/seeds/lib";
 import { findAdminUserOrFallback, findSupervisorUserOrFallback } from "@/backend/db/seeds/lib";
 import { AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 import type {
   ClassInstanceSelectType,

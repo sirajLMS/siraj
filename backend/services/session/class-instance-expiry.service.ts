@@ -1,7 +1,7 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { NotificationEventType } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";

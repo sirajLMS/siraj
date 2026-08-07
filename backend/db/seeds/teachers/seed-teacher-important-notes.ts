@@ -1,6 +1,6 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 import type { TeacherSelectType, UserSelectType } from "@/backend/types";
 

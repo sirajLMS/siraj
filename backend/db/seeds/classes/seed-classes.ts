@@ -9,7 +9,7 @@ import {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 import type { StudentSelectType, TeacherSelectType } from "@/backend/types";

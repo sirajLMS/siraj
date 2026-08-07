@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const DRIZZLE_DIR = resolve("backend/drizzle");
 

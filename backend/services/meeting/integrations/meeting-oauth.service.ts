@@ -19,7 +19,7 @@ import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meetin
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";

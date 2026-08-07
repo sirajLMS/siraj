@@ -1,5 +1,5 @@
 import { copy, head } from "@vercel/blob";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { executeBulkOperation } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import { fileExists, fileInfoByPath } from "@/backend/storage/disk/vercel/operations/file.operations";
 import { getBlobs, isDirectory } from "@/backend/storage/disk/vercel/shared";

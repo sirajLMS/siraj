@@ -3,7 +3,7 @@ import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { CacheDbRepository } from "@/backend/db/repo/shared/cache.repository";
 import { sessionCache } from "@/backend/db/schema/shared/cache";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { getEntityCacheStats } from "@/backend/services/cache/EntityCacheService";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
 import type { CacheStats } from "@/backend/services/shared/CacheInterface";

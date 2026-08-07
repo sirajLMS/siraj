@@ -18,7 +18,7 @@ import { extractTokenFromHeader, generateAccessToken, generateRefreshToken, veri
 import { setAuthCookies as applyAuthCookies, clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { comparePassword } from "@/backend/lib/auth/password";
 import { getBooleanEnv } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { AuthPasswordService } from "@/backend/services/auth/auth-password.service";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";

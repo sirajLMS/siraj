@@ -1,5 +1,5 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { createGcpAdapter } from "@/backend/storage/disk/gcp";
 import { createLocalAdapter } from "@/backend/storage/disk/local";
 import type { StorageService } from "@/backend/storage/disk/storage.service.interface";

@@ -8,7 +8,7 @@ import {
   SUPERVISOR_USER_EMAIL,
 } from "@/backend/db/seeds/lib";
 import { NotificationEventType } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
 import type { UserSelectType } from "@/backend/types";
 import {

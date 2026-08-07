@@ -1,5 +1,5 @@
 import { createHash, createHmac } from "node:crypto";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const FALLBACK_DEV_KEY = "siraj-session-hmac:fallback-dev-key";
 

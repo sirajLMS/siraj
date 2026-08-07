@@ -14,7 +14,7 @@
  *                                    default 1 — sequential in-process for safety)
  *   CRON_QUEUE_WORKER_TIMEOUT     — max worker duration in ms (default 270_000)
  */
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import {
   CRON_DEFAULT_BATCH_SIZE,
   CRON_DEFAULT_WORKER_CONCURRENCY,

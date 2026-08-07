@@ -1,5 +1,5 @@
 import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig, SITE_CONTENT_SPECS } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { StorageService } from "@/backend/services/storage/storage.service";
 import type { UserSelectType } from "@/backend/types";
 

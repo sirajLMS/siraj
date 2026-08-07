@@ -3,7 +3,7 @@
 import type { AnyPgTable } from "drizzle-orm/pg-core";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 export const DEFAULT_BULK_CHUNK_SIZE = 100;
 

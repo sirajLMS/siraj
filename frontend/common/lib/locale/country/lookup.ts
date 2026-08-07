@@ -1,4 +1,4 @@
-import countries from "@/frontend/common/lib/locale/country/countries";
+import { countries } from "@/frontend/common/lib/locale/country/countries";
 import type { CountryType } from "@/frontend/common/lib/locale/country/types";
 import { resolveUiCountryCode } from "@/shared/lib/locale/excluded-ui-countries";
 

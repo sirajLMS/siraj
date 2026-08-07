@@ -3,7 +3,7 @@ import { applyCustomMigrations } from "@/backend/db/scripts/applyCustomMigration
 import { ensureIdempotentMigrations } from "@/backend/db/scripts/ensureIdempotentMigrations";
 import { runDrizzleMigrations } from "@/backend/db/scripts/runDrizzleMigrations";
 import { getEnv } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 /**
  * Run migrations programmatically

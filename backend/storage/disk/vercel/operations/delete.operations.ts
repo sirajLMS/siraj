@@ -1,6 +1,6 @@
 import { del, head } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import {
   type DeleteFnParams,
   executeBulkDelete,

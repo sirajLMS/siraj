@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { readMigrationFiles } from "drizzle-orm/migrator";
 import { db } from "@/backend/db/drizzleDb";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const MIGRATIONS_FOLDER = "./backend/drizzle";
 const MIGRATIONS_SCHEMA = "drizzle";

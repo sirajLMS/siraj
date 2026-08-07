@@ -4,7 +4,7 @@ import { createDatabase, createPool } from "@/backend/db/factory";
 import { clearHttpClientSingleton, getNeonHttpDb } from "@/backend/db/http-client";
 import { ensureEnvironmentValidated, getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { clearGlobalSingleton, getGlobalSingleton, getGlobalSingletonIfExists } from "@/backend/lib/global-singleton";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const DB_KEY = Symbol.for("siraj.db");
 const DB_POOL_KEY = Symbol.for("siraj.dbPool");

@@ -10,7 +10,7 @@
 import { randomUUID } from "node:crypto";
 
 import { createPool } from "@/backend/db/factory";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { pruneMaps } from "@/backend/services/cron/queue-adapters/bullmq-shared";
 import type { CronJobPayload, CronQueueAdapter, CronQueueRow, CronQueueStats } from "@/backend/types/cron/cron.types";
 import { safeCronJobKind } from "@/backend/types/cron/cron.types";

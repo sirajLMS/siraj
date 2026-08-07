@@ -16,7 +16,7 @@ import type { SendOptions } from "pg-boss";
 import { PgBoss } from "pg-boss";
 import { createPool } from "@/backend/db/factory";
 import { DomainError } from "@/backend/lib/errors";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { computeHeartbeatSeconds } from "@/backend/services/cron/cron-heartbeat.utils";
 import { formatError } from "@/backend/services/cron/cron-utils";
 import { pruneMaps } from "@/backend/services/cron/queue-adapters/bullmq-shared";

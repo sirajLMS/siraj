@@ -24,7 +24,7 @@
 import { SystemSettingsRepository } from "@/backend/db/repo";
 import type { EnvConfigKeyDescriptor } from "@/backend/lib/env-config-keys";
 import { ENV_CONFIG_KEYS } from "@/backend/lib/env-config-keys";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 /** Prefix applied to env var names when reading/writing DB overrides in `system_settings`. */
 const ENV_SETTING_KEY_PREFIX = "env::";

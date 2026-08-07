@@ -10,7 +10,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
 import type { TimezoneSelectType, UserSelectType } from "@/backend/types";
 

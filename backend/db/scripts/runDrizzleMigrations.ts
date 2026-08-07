@@ -6,7 +6,7 @@ import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { upgradeIfNeeded } from "drizzle-orm/up-migrations/pg";
 import { preCommitEnumStatementsForMigrationFile } from "@/backend/db/scripts/ensureIdempotentMigrations";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const DEFAULT_MIGRATIONS_FOLDER = "./backend/drizzle";
 const MIGRATIONS_TABLE = "__drizzle_migrations";

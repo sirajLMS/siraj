@@ -1,5 +1,5 @@
 import type { File, GetFilesResponse } from "@google-cloud/storage";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { GcpContext, GcsApiResponse } from "@/backend/storage/disk/gcp/types";
 import { formatFileTypeBreakdown, updateFileTypeMap } from "@/backend/storage/disk/shared/stats-operations.helper";
 import type * as Types from "@/backend/types";

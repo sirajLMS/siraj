@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
 // Defensive mocks against bleed from earlier test files (e.g. ScheduleOverviewSection.test.tsx).
 // mock.module registrations are process-global in Bun, so a mock registered in a test file that
@@ -173,7 +173,6 @@ mock.module("@/frontend/desktop/views/dashboard/users/billing-profile/userBillin
   },
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 

@@ -6,7 +6,7 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import { SuggestionStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
 import type { ParentEntity, UserSelectType } from "@/backend/types";
 

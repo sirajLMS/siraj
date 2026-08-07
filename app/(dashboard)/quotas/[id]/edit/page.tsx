@@ -11,7 +11,7 @@ interface EditQuotaPageProps {
   readonly params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: EditQuotaPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Readonly<EditQuotaPageProps>): Promise<Metadata> {
   const { id } = await params;
   const locale = await getLocale();
   const t = getTranslations(locale).dashboardTranslations.billingQuota;

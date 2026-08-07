@@ -3,7 +3,7 @@ import {
   MOBILE_WALLET_CATALOG_SEEDS,
   type MobileWalletCatalogSeed,
 } from "@/backend/db/seeds/lib/payment-catalog-factory";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
 import { getServerTranslations } from "@/shared/locale";
 

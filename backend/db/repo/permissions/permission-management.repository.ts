@@ -11,7 +11,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { localeJsonKey, omitEmptyLocalized, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import type { AppPermission } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type {
   CreateGroupInput,
   GroupUserEntity,

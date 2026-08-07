@@ -8,7 +8,7 @@ import {
   startOfDay,
 } from "@/backend/db/seeds/lib";
 import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
 import type {
   ClassInstanceSelectType,

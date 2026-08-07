@@ -1,4 +1,4 @@
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { getEntityCacheStats } from "@/backend/services/cache/EntityCacheService";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
 import { getRedisService } from "@/backend/services/redis";

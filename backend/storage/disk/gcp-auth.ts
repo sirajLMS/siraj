@@ -2,7 +2,7 @@ import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import { Storage } from "@google-cloud/storage";
 import { GoogleAuth } from "google-auth-library";
 import { getStringEnv } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const projectId = getStringEnv("GCP_PROJECT_ID");
 const secretId = getStringEnv("GCP_SECRET_ID");

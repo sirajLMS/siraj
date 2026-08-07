@@ -9,7 +9,7 @@ import {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { type SeedDemoUserInput, UserSeedService } from "@/backend/services/seed/user-seed.service";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 import type { GroupWithPermissionIds, UserSelectType } from "@/backend/types";

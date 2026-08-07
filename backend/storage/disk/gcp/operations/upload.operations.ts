@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 import * as Types from "@/backend/types";

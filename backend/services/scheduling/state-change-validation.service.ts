@@ -2,7 +2,7 @@ import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import type { DBTransaction } from "@/backend/db/repo/scheduling/shared";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
-import { UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import { ConflictError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -66,11 +66,11 @@ export async function validateStateTransition(
 ): Promise<void> {
   if (state.executionState === "ACTIVATED") {
     if (existing.executionState !== "NOT_ACTIVATED") {
-      throw new ValidationError(tErrors.invalidTransition);
+      throw new ConflictError(tErrors.invalidTransition);
     }
   } else if (state.executionState === "RUNNING") {
     if (existing.executionState !== "ACTIVATED") {
-      throw new ValidationError(tErrors.invalidTransition);
+      throw new ConflictError(tErrors.invalidTransition);
     }
   } else if (state.executionState === "COMPLETED") {
     const isValidStandard = existing.executionState === "RUNNING";
@@ -79,7 +79,7 @@ export async function validateStateTransition(
     const isValidAutomatedLeave = existing.executionState === "NOT_ACTIVATED" && state.outcome === "LEAVE";
     const isValidAutomatedAbsent = existing.executionState === "NOT_ACTIVATED" && state.outcome === "ABSENT";
     if (!isValidStandard && !isValidEarly && !isValidAutomatedLeave && !isValidAutomatedAbsent) {
-      throw new ValidationError(tErrors.invalidTransition);
+      throw new ConflictError(tErrors.invalidTransition);
     }
   }
 }

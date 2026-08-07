@@ -257,5 +257,3 @@ class ClientLogger {
 
 // Create singleton instance
 export const logger = new ClientLogger();
-
-export default logger;

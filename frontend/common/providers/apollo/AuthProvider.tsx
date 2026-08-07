@@ -8,7 +8,7 @@ import type { MutationLoginArgs, User } from "@/frontend/common/graphql/generate
 import * as Document from "@/frontend/common/graphql/sharedDocuments";
 import { useAuthToken } from "@/frontend/common/hooks/useAuthToken";
 import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
-import logger from "@/frontend/common/lib/logger";
+import { logger } from "@/frontend/common/lib/logger";
 import { isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { Translation, useAppTranslation } from "@/shared/locale";

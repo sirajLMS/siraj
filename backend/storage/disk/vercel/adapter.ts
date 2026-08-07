@@ -1,5 +1,5 @@
 import { getStringEnv } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
 import { BaseAdapter } from "@/backend/storage/disk/base.adapter";
 import * as ops from "@/backend/storage/disk/vercel/operations";

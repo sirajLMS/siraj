@@ -6,7 +6,7 @@ import {
   startOfDay,
 } from "@/backend/db/seeds/lib";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { TeacherPaymentSeedService } from "@/backend/services/seed/teacher-payment-seed.service";
 import type { PaymentMethodTransactionSnapshot, TeacherSelectType, UserSelectType } from "@/backend/types";
 

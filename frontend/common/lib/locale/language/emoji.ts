@@ -1,5 +1,5 @@
 import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import languages from "@/frontend/common/lib/locale/language/languages";
+import { languages } from "@/frontend/common/lib/locale/language/languages";
 
 const FALLBACK_LANGUAGE_EMOJI = "🌐";
 

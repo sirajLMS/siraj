@@ -1,6 +1,6 @@
 import type { SeedConfig } from "@/backend/db/seeds/lib";
 import { findAdminUserOrFallback } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import type { CreditTransactionReturnType, StudentSelectType, UserSelectType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";

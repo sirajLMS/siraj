@@ -5,7 +5,7 @@ import {
   loadSeedConfig,
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { NotificationDeviceSeedService } from "@/backend/services/seed/notification-device-seed.service";
 import type { UserSelectType } from "@/backend/types";
 

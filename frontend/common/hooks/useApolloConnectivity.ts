@@ -2,7 +2,7 @@
 
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useRef, useState } from "react";
-import logger from "@/frontend/common/lib/logger";
+import { logger } from "@/frontend/common/lib/logger";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 // Configuration

@@ -6,7 +6,7 @@ import {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { LearningResourceService } from "@/backend/services/resource/learning-resource.service";
 import type { UserSelectType } from "@/backend/types";
 

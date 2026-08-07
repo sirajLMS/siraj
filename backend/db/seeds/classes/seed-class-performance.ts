@@ -10,7 +10,7 @@ import {
   startOfDay,
 } from "@/backend/db/seeds/lib";
 import { ClassOutcome } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import type { ClassInstancePerformanceInsertType, ClassInstanceSelectType } from "@/backend/types";
 

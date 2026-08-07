@@ -12,7 +12,7 @@ import {
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, type CurrencyCode, NotificationEventType, SchedulingMode } from "@/backend/enum";
-import { DomainError, NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -110,8 +110,7 @@ export namespace RecurringClassService {
     } else {
       const balance = await CreditRepository.getBalance(db, input.studentId);
       if (balance.classesRemaining <= 0) {
-        throw new DomainError(
-          "INSUFFICIENT_BALANCE",
+        throw new ValidationError(
           tErrors.credit.insufficientBalance({
             studentId: input.studentId,
             remaining: balance.classesRemaining,

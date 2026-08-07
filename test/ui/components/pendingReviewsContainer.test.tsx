@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
@@ -26,8 +26,6 @@ mock.module("@/shared/i18n/navigation", () => ({
   }),
   usePathname: () => "/dashboard",
 }));
-
-import { afterEach, describe, expect, test } from "bun:test";
 
 // Bypass ResponsiveViewSwitch / next/dynamic preload races (same pattern as studentDashboard).
 mock.module("@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer", () => ({

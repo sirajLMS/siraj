@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
 
 /**

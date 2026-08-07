@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "ar" }),
@@ -89,10 +89,10 @@ mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/sche
   },
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";
-import React from "react";
+import type React from "react";
+import { createElement } from "react";
 
 expect.extend(matchers);
 
@@ -229,7 +229,7 @@ const renderScheduleView = (
   props: ScheduleOverviewViewModel,
   options: { permissions?: AppPermission[]; viewport?: "desktop" | "mobile" } = {}
 ) => {
-  return renderWithWrapper(React.createElement(ScheduleOverviewView, props), {
+  return renderWithWrapper(createElement(ScheduleOverviewView, props), {
     permissions: options.permissions ?? [],
     viewport: options.viewport ?? "desktop",
   });

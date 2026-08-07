@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { CronTriggerSource } from "@/backend/enum/cron/cron.enums";
 import { withCronAuth } from "@/backend/lib/cron-auth";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
 import { formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
 import { runDrainLoop } from "@/backend/services/cron/cron-worker.runtime";

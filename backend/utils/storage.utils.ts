@@ -1,5 +1,5 @@
 import { OrderSortDirection } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { STORAGE_CONFIG } from "@/backend/storage/disk/storage.service.interface";
 import * as Types from "@/backend/types";
 import { isAllowedMimeType, validateFileName as sharedValidateFileName } from "@/shared/utils/storage.utils";

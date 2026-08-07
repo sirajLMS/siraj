@@ -3,7 +3,7 @@ import {
   MEETING_PROVIDER_CATALOG_SEEDS,
   type MeetingProviderCatalogSeed,
 } from "@/backend/db/seeds/lib/meeting-provider-factory";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import { getServerTranslations } from "@/shared/locale";
 

@@ -1,7 +1,7 @@
 import { and, eq, gt, lt, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { signedUrls } from "@/backend/db/schema/storage/storage";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 export type SignedUrlEntity = typeof signedUrls.$inferSelect;
 export type SignedUrlEntityInput = typeof signedUrls.$inferInsert;
