@@ -216,13 +216,17 @@ class LintService {
     const envPrefix = options.typeAware ? 'ESLINT_TYPE_AWARE="true"' : "";
     const concurrencySetting = options.typeAware ? "1" : CONCURRENCY;
     const nodeOptions = `${ESLINT_PATCH} --max-old-space-size=8192`;
+    // Type-aware mode toggles parserOptions/rules via ESLINT_TYPE_AWARE; sharing
+    // `.eslintcache` with non-type-aware runs can resurface stale parse errors
+    // (e.g. resolved merge conflicts). Use a dedicated cache file instead.
+    const cacheLocation = options.typeAware ? ".eslintcache-type-aware" : ".eslintcache";
     const cmd = [
       envPrefix,
       `NODE_OPTIONS="${nodeOptions}"`,
       ESLINT_BIN,
       "x eslint",
       "--cache",
-      "--cache-location .eslintcache",
+      `--cache-location ${cacheLocation}`,
       `--concurrency=${concurrencySetting}`,
       fixFlag,
       fileArgs,

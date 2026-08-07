@@ -79,8 +79,11 @@ const eslintConfig = defineConfig([
         tsconfigRootDir: import.meta.dirname,
         ...(process.env.ESLINT_TYPE_AWARE === "true"
           ? {
+              // Only files NOT covered by tsconfig.json belong here. Root/scripts
+              // `*.ts` are already in the project service via `include: ["**/*.ts"]`,
+              // so listing them in allowDefaultProject causes parse errors.
               projectService: {
-                allowDefaultProject: ["*.ts", "*.mjs", "scripts/*.ts"],
+                allowDefaultProject: ["*.mjs"],
                 defaultProject: "tsconfig.json",
               },
             }
