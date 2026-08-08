@@ -20,8 +20,8 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 interface ClassStatusEventState {
   executionState?: string;
@@ -29,30 +29,101 @@ interface ClassStatusEventState {
   deleted?: boolean;
 }
 
+/** Safely narrow an unknown jsonb value to ClassStatusEventState */
+function toEventState(value: unknown): ClassStatusEventState {
+  if (!value || typeof value !== "object") return {};
+  const executionState =
+    "executionState" in value && typeof value.executionState === "string" ? value.executionState : undefined;
+  const outcome = "outcome" in value && typeof value.outcome === "string" ? value.outcome : undefined;
+  const deleted = "deleted" in value && typeof value.deleted === "boolean" ? value.deleted : undefined;
+  return { executionState, outcome, deleted };
+}
+
+const getCreatePayload = async (
+  tx: DBTransaction,
+  studentId: string,
+  teacherId: string,
+  start: Date,
+  end: Date,
+  overrides: Partial<typeof classInstances.$inferInsert> = {}
+) => {
+  const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
+  return {
+    studentId,
+    teacherId,
+    scheduledStartAt: start,
+    scheduledEndAt: end,
+    durationMinutes: 60,
+    classType: "REGULAR" as const,
+    idempotencyKey: randomUUID(),
+    ...overrides,
+    subjectId,
+  };
+};
+
+const getReschedulePayload = async (
+  tx: DBTransaction,
+  studentId: string,
+  teacherId: string,
+  overrides: Partial<typeof classInstances.$inferInsert> = {}
+) => {
+  const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
+  return {
+    studentId,
+    teacherId,
+    scheduledStartAt: new Date(),
+    scheduledEndAt: new Date(),
+    durationMinutes: 60,
+    classType: "REGULAR" as const,
+    idempotencyKey: randomUUID(),
+    ...overrides,
+    subjectId,
+  };
+};
+
+type EntityIds = { studentId: string; teacherId: string };
+
+const setupOverlapScenario = async (
+  tx: DBTransaction,
+  firstPrefix: string,
+  secondPrefix: string,
+  variant: "teacher" | "student"
+) => {
+  const first = await setupTestEntities(tx, firstPrefix);
+  const second = await setupTestEntities(tx, secondPrefix);
+  const firstEntities: EntityIds = { studentId: first.student.id, teacherId: first.teacher.id };
+  const secondEntities: EntityIds =
+    variant === "teacher"
+      ? { studentId: second.student.id, teacherId: first.teacher.id }
+      : { studentId: first.student.id, teacherId: second.teacher.id };
+  return { first, second, firstEntities, secondEntities, now: first.now };
+};
+
+const expectOverlapError = async (
+  tx: DBTransaction,
+  firstEntities: EntityIds,
+  secondEntities: EntityIds,
+  assignedAt: Date
+) => {
+  const now = new Date(assignedAt.getTime() + 86400000);
+  const end = new Date(now.getTime() + 3600000);
+  await createMockClassInstance(tx, firstEntities.studentId, firstEntities.teacherId, {
+    scheduledStartAt: now,
+    scheduledEndAt: end,
+  });
+  await tx.insert(teacherAssignments).values({
+    studentId: secondEntities.studentId,
+    teacherId: secondEntities.teacherId,
+    assignedAt,
+  });
+  await SchedulingRepository.createClassInstance(
+    await getCreatePayload(tx, secondEntities.studentId, secondEntities.teacherId, now, end),
+    tx
+  );
+};
+
 describe("Scheduling Repository — CRUD & Queries", () => {
   describe("createClassInstance", () => {
-    const getCreatePayload = async (
-      tx: DBTransaction,
-      studentId: string,
-      teacherId: string,
-      start: Date,
-      end: Date,
-      overrides: Partial<typeof classInstances.$inferInsert> = {}
-    ) => {
-      const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
-      return {
-        studentId,
-        teacherId,
-        scheduledStartAt: start,
-        scheduledEndAt: end,
-        durationMinutes: 60,
-        classType: "REGULAR" as const,
-        idempotencyKey: randomUUID(),
-        ...overrides,
-        subjectId,
-      };
-    };
-
     test("creates successfully with valid data and handles quota deduction", async () => {
       await runInRollback(async tx => {
         const { student, teacher, now } = await setupTestEntities(tx, "Create1", { skipInstance: true });
@@ -86,45 +157,6 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         tx
       );
     });
-
-    const expectOverlapError = async (
-      tx: DBTransaction,
-      firstEntities: { studentId: string; teacherId: string },
-      secondEntities: { studentId: string; teacherId: string },
-      assignedAt: Date
-    ) => {
-      const now = new Date(assignedAt.getTime() + 86400000);
-      const end = new Date(now.getTime() + 3600000);
-      await createMockClassInstance(tx, firstEntities.studentId, firstEntities.teacherId, {
-        scheduledStartAt: now,
-        scheduledEndAt: end,
-      });
-      await tx.insert(teacherAssignments).values({
-        studentId: secondEntities.studentId,
-        teacherId: secondEntities.teacherId,
-        assignedAt,
-      });
-      await SchedulingRepository.createClassInstance(
-        await getCreatePayload(tx, secondEntities.studentId, secondEntities.teacherId, now, end),
-        tx
-      );
-    };
-
-    const setupOverlapScenario = async (
-      tx: DBTransaction,
-      firstPrefix: string,
-      secondPrefix: string,
-      variant: "teacher" | "student"
-    ) => {
-      const first = await setupTestEntities(tx, firstPrefix);
-      const second = await setupTestEntities(tx, secondPrefix);
-      const firstEntities = { studentId: first.student.id, teacherId: first.teacher.id };
-      const secondEntities =
-        variant === "teacher"
-          ? { studentId: second.student.id, teacherId: first.teacher.id }
-          : { studentId: first.student.id, teacherId: second.teacher.id };
-      return { first, second, firstEntities, secondEntities, now: first.now };
-    };
 
     testRepoError("throws on teacher overlap", async tx => {
       const { firstEntities, secondEntities, now } = await setupOverlapScenario(tx, "Create3", "Create4", "teacher");
@@ -248,26 +280,6 @@ describe("Scheduling Repository — CRUD & Queries", () => {
   });
 
   describe("rescheduleClassInstance", () => {
-    const getReschedulePayload = async (
-      tx: DBTransaction,
-      studentId: string,
-      teacherId: string,
-      overrides: Partial<typeof classInstances.$inferInsert> = {}
-    ) => {
-      const subjectId = overrides.subjectId ?? (await ensureTestSubjectId(tx));
-      return {
-        studentId,
-        teacherId,
-        scheduledStartAt: new Date(),
-        scheduledEndAt: new Date(),
-        durationMinutes: 60,
-        classType: "REGULAR" as const,
-        idempotencyKey: randomUUID(),
-        ...overrides,
-        subjectId,
-      };
-    };
-
     testRepoError("throws if original class not found", async tx => {
       const { student, teacher } = await setupTestEntities(tx, "Resched1");
       await SchedulingRepository.rescheduleClassInstance(
@@ -568,9 +580,10 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         .where(eq(classStatusEvents.classInstanceId, instanceId));
       expect(event).toBeDefined();
       expect(event.eventType).toBe("STATE_CHANGE");
-      expect((event.toState as ClassStatusEventState).executionState).toBe(expectedState.executionState);
+      const toState = toEventState(event.toState);
+      expect(toState.executionState).toBe(expectedState.executionState);
       if (expectedState.outcome !== undefined) {
-        expect((event.toState as ClassStatusEventState).outcome).toBe(expectedState.outcome);
+        expect(toState.outcome).toBe(expectedState.outcome);
       }
     };
 
@@ -661,7 +674,8 @@ describe("Scheduling Repository — CRUD & Queries", () => {
           .from(classStatusEvents)
           .where(eq(classStatusEvents.classInstanceId, instance.id));
         expect(event).toBeDefined();
-        expect((event.toState as ClassStatusEventState).deleted).toBe(true);
+        const toState = toEventState(event.toState);
+        expect(toState.deleted).toBe(true);
 
         const finalStudent = await tx
           .select()

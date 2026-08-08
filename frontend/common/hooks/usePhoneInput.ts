@@ -370,16 +370,17 @@ function useEmitChange(
   );
 }
 
-type PhoneInputHandlers = {
-  readonly selectCountry: (country: CountryType) => void;
-  readonly handlePrefixKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  readonly handleNationalKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  readonly handleNationalSelect: (event: React.SyntheticEvent<HTMLInputElement>) => void;
-  readonly resetPrefixDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
-  readonly resetNationalDisplay: (event: React.SyntheticEvent<HTMLInputElement>) => void;
-  readonly onNationalInput: (event: React.SyntheticEvent<HTMLInputElement>) => void;
-  readonly handleNationalChange: (filledValue: string) => void;
-};
+type PhoneInputHandlers = Pick<
+  UsePhoneInputResult,
+  | "selectCountry"
+  | "handlePrefixKeyDown"
+  | "handleNationalKeyDown"
+  | "handleNationalSelect"
+  | "resetPrefixDisplay"
+  | "resetNationalDisplay"
+  | "onNationalInput"
+  | "handleNationalChange"
+>;
 
 type NationalChangeDeps = {
   readonly defaultRegion: string;
@@ -421,8 +422,8 @@ function useNationalInput({ nationalDisplay, handleNationalChange, resetNational
     (event: React.SyntheticEvent<HTMLInputElement>) => {
       const target = event.currentTarget;
       const newValue = target.value;
-      const inputEvent = event.nativeEvent as InputEvent;
-      const inputType = inputEvent?.inputType;
+      const nativeEvent = event.nativeEvent;
+      const inputType = nativeEvent instanceof InputEvent ? nativeEvent.inputType : undefined;
 
       // Detect programmatic fill (Playwright .fill()) vs normal keystroke.
       // A single keystroke changes length by at most 1 and uses insertText.

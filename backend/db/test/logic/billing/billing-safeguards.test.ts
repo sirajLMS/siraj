@@ -6,7 +6,8 @@ import { BillingRepository } from "@/backend/db/repo";
 import { currencyExchangeAuditLogs, currencyExchangeRates, systemSettings } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode, SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
+import { CurrencyCode } from "@/backend/enum";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
@@ -24,7 +25,10 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) {
+    return errorCaught;
+  }
+  throw new Error("Expected an Error to be thrown");
 }
 
 async function setupBillingTestEntities(tx: DBTransaction) {

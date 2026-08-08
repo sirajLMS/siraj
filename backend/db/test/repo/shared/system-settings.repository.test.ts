@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { SystemSettingsRepository } from "@/backend/db/repo";
 import { systemSettings } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 async function createTestSetting(
   tx: DBTransaction,
@@ -263,13 +263,20 @@ describe("SystemSettingsRepository", () => {
   });
 
   it("should return false when deletion fails", async () => {
-    const fakeTx = {
-      delete: () => {
-        throw new Error("Simulated database failure");
-      },
-    } as unknown as DBTransaction;
+    await runInRollback(async realTx => {
+      const fakeTx: DBTransaction = new Proxy(realTx, {
+        get(target, prop) {
+          if (prop === "delete") {
+            return () => {
+              throw new Error("Simulated database failure");
+            };
+          }
+          return Reflect.get(target, prop);
+        },
+      });
 
-    const success = await SystemSettingsRepository.deleteSetting("some_key", fakeTx);
-    expect(success).toBe(false);
+      const success = await SystemSettingsRepository.deleteSetting("some_key", fakeTx);
+      expect(success).toBe(false);
+    });
   });
 });

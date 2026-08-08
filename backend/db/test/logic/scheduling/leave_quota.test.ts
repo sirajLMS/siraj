@@ -6,8 +6,8 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import type { LeaveQuotaUsageSelectType, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -16,12 +16,18 @@ async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
   try {
     await fn();
   } catch (error) {
-    errorCaught = error as Error;
+    if (error instanceof Error) {
+      errorCaught = error;
+    }
   }
   expect(errorCaught).not.toBeNull();
   if (errorCaught) {
-    const err = errorCaught as Error & { cause?: { message?: string } };
-    const message = err.cause?.message || err.message || "";
+    const cause = errorCaught.cause;
+    const causeMessage =
+      cause && typeof cause === "object" && "message" in cause
+        ? String((cause as Record<string, unknown>).message)
+        : undefined;
+    const message = causeMessage || errorCaught.message || "";
     expect(message).toContain("Leave quota exceeded");
   }
 }
@@ -30,7 +36,7 @@ async function insertLeaveQuota(
   tx: DBTransaction,
   params: { teacherId?: string; studentId?: string; year: number; month: number; count: number }
 ): Promise<LeaveQuotaUsageSelectType> {
-  const [quota] = (await tx
+  const result = await tx
     .insert(leaveQuotaUsage)
     .values({
       teacherId: params.teacherId,
@@ -39,7 +45,11 @@ async function insertLeaveQuota(
       periodMonth: params.month,
       usedCount: params.count,
     })
-    .returning()) as [LeaveQuotaUsageSelectType];
+    .returning();
+  const quota = result[0];
+  if (!quota) {
+    throw new Error("Failed to insert leave quota - no result returned");
+  }
   return quota;
 }
 

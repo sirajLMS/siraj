@@ -4,8 +4,8 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
 import { setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function setTeacherMaxLeaves(tx: DBTransaction, value: string) {
@@ -84,7 +84,7 @@ describe("SystemRulesService.assertLeaveQuotaAvailable", () => {
         errorThrown = error;
       }
       expect(errorThrown).not.toBeNull();
-      expect((errorThrown as Error).message).toContain("quota");
+      expect(errorThrown instanceof Error ? errorThrown.message : String(errorThrown)).toContain("quota");
     });
     testLogger.info("assertLeaveQuotaAvailable throws when usage at max.");
   });
@@ -122,7 +122,7 @@ describe("SystemRulesService.assertLeaveQuotaAvailable", () => {
         errorThrown = error;
       }
       expect(errorThrown).not.toBeNull();
-      expect((errorThrown as Error).message).toContain("quota");
+      expect(errorThrown instanceof Error ? errorThrown.message : String(errorThrown)).toContain("quota");
     });
     testLogger.info("assertLeaveQuotaAvailable respects custom max_leaves.");
   });

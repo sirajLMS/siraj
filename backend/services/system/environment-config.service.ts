@@ -26,7 +26,6 @@
  */
 
 import { SystemSettingsRepository } from "@/backend/db/repo";
-import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import type { EnvConfigKeyDescriptor } from "@/backend/lib/env-config-keys";
 import { ENV_CONFIG_KEYS, isEnvConfigKeyExposedInSettings } from "@/backend/lib/env-config-keys";
 import { invalidateEnvConfigCache } from "@/backend/lib/env-config-resolver";
@@ -42,6 +41,7 @@ import type {
   EnvConfigUpsertReturnType,
 } from "@/backend/types/shared/env-config.types";
 import { maskSecretValue } from "@/backend/types/shared/env-config.types";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 /** Prefix applied to env var names when reading/writing DB overrides in `system_settings`. */
 const ENV_SETTING_KEY_PREFIX = "env::";
@@ -110,6 +110,31 @@ interface ResolvedEntry {
   hasDbOverride: boolean;
 }
 
+const VALID_ENTRY_CATEGORIES: ReadonlySet<string> = new Set([
+  "email",
+  "sms",
+  "push",
+  "fx",
+  "cache",
+  "redis",
+  "storage",
+  "auth",
+  "app",
+  "meeting",
+  "billing",
+  "whatsapp",
+  "general",
+]);
+
+function isEntryCategory(value: string): value is EnvConfigCategory {
+  return VALID_ENTRY_CATEGORIES.has(value);
+}
+
+/** Narrows a descriptor category to the `EnvConfigEntry["category"]` union. */
+function toEntryCategory(category: string): EnvConfigCategory {
+  return isEntryCategory(category) ? category : "general";
+}
+
 /** Resolves a DB-eligible key: DB override wins, else falls back to `process.env`. */
 async function resolveDbEligibleKey(key: string): Promise<ResolvedEntry> {
   const dbKey = toDbKey(key);
@@ -142,19 +167,17 @@ async function resolveDbEligibleKey(key: string): Promise<ResolvedEntry> {
  * over `process.env`. Secret keys have their `value` masked via `maskSecretValue`.
  */
 export async function listEnvConfigEntries(): Promise<EnvConfigEntry[]> {
-  const entries: EnvConfigEntry[] = [];
+  const exposedDescriptors = ENV_CONFIG_KEYS.filter(d => isEnvConfigKeyExposedInSettings(d));
 
-  for (const descriptor of ENV_CONFIG_KEYS) {
-    if (!isEnvConfigKeyExposedInSettings(descriptor)) {
-      continue;
-    }
+  const resolvedResults = await Promise.all(exposedDescriptors.map(d => resolveDbEligibleKey(d.key)));
 
+  return exposedDescriptors.map((descriptor, i) => {
     const { key, category, description, isSecret, displayStrategy } = descriptor;
-    const resolved = await resolveDbEligibleKey(key);
+    const resolved = resolvedResults[i];
 
-    entries.push({
+    return {
       key,
-      category: category as EnvConfigCategory,
+      category: toEntryCategory(category),
       displayStrategy,
       description,
       isSecret,
@@ -163,10 +186,8 @@ export async function listEnvConfigEntries(): Promise<EnvConfigEntry[]> {
       source: resolved.source,
       hasDbOverride: resolved.hasDbOverride,
       editable: true,
-    });
-  }
-
-  return entries;
+    };
+  });
 }
 
 /**

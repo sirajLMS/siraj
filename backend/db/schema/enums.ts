@@ -1,4 +1,3 @@
-import { pgEnum } from "drizzle-orm/pg-core";
 import {
   AccountStatus,
   AppLanguage,
@@ -44,13 +43,12 @@ import {
   SchedulingMode,
   StudentStatus,
   SuggestionStatus,
-  SystemSettingCategory,
-  SystemSettingDataType,
   TeacherDueStatus,
   VacationRequestStatus,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { createPgEnumFromEnum } from "@/backend/utils/db.utils";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export const quotaKindEnum = createPgEnumFromEnum("quota_kind", QuotaKind);
 
@@ -127,10 +125,7 @@ export const dayOfWeekEnum = createPgEnumFromEnum("day_of_week", DayOfWeek);
 export const dstMigrationResultEnum = createPgEnumFromEnum("dst_migration_result", DstMigrationResult);
 
 export const availabilityStatusEnum = createPgEnumFromEnum("availability_status", AvailabilityStatus);
-export const appPermissionEnum = pgEnum(
-  "app_permission",
-  Object.values(AppPermission) as [AppPermission, ...AppPermission[]]
-);
+export const appPermissionEnum = createPgEnumFromEnum("app_permission", AppPermission);
 
 export const fxProviderEnum = createPgEnumFromEnum("fx_provider", FxProvider);
 
