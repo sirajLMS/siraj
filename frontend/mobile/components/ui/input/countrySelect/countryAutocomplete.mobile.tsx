@@ -84,7 +84,6 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
       error={showError}
       helperText={helperText}
       onBlur={handleBlur}
-      
       slotProps={{
         ...params.slotProps,
         input: {

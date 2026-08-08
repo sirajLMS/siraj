@@ -30,7 +30,7 @@ gqlSchemaBuilder.queryField("invoicePayments", t =>
 
       const payments = await BillingRepository.getPaymentsByInvoiceId(args.invoiceId);
       const displayAmounts = await resolveDisplayAmountFields(payments, ctx, "amount", "currency");
-      return payments.map(payment => (Object.assign(payment, { displayAmount: displayAmounts.get(payment.id) ?? null })));
+      return payments.map(payment => Object.assign(payment, { displayAmount: displayAmounts.get(payment.id) ?? null }));
     },
   })
 );

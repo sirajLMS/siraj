@@ -104,7 +104,11 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
   };
 
   const scheduleResult = dashboardData?.adminDashboardSchedule;
-  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null).map(metric => (Object.assign(metric, { label: labelsBySection.metrics[metric.key as keyof AdminDashboardLabels['metrics']] ?? metric.labelKey })));
+  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null).map(metric =>
+    Object.assign(metric, {
+      label: labelsBySection.metrics[metric.key as keyof AdminDashboardLabels["metrics"]] ?? metric.labelKey,
+    })
+  );
   const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 

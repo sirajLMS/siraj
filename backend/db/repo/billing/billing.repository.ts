@@ -620,7 +620,9 @@ export namespace BillingRepository {
       const parent = parentMap.get(parentId);
       if (!parent?.userId) continue;
 
-      const amountsByCurrency = groupAmountsByCurrency(invs, `unpaid-${parentId}`).map(bucket => (Object.assign(bucket, { subjectUserId: parent.userId })));
+      const amountsByCurrency = groupAmountsByCurrency(invs, `unpaid-${parentId}`).map(bucket =>
+        Object.assign(bucket, { subjectUserId: parent.userId })
+      );
       const sortedInvs = [...invs].toSorted((a, b) => a.dueDate.localeCompare(b.dueDate));
       const primaryCurrency = amountsByCurrency[0]?.currency ?? sortedInvs[0]?.currency;
       const primaryAmount = amountsByCurrency.find(bucket => bucket.currency === primaryCurrency)?.amount ?? "0.00";

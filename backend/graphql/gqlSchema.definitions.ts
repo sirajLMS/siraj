@@ -10,4 +10,3 @@
 import "@/backend/graphql/pothos";
 import "@/backend/graphql/query";
 import "@/backend/graphql/mutation";
-import "@/backend/graphql/pothos/schema.types";

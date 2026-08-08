@@ -249,7 +249,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
       const displayAmounts = await resolveDisplayAmountFields(result.rows, ctx, "amount", "currency", "parentUserId");
       return {
         ...result,
-        rows: result.rows.map(row => (Object.assign(row, { displayAmount: displayAmounts.get(row.id) ?? null }))),
+        rows: result.rows.map(row => Object.assign(row, { displayAmount: displayAmounts.get(row.id) ?? null })),
       };
     },
   })
@@ -277,7 +277,7 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
       const displayAmounts = await resolveDisplayAmountFields(result.rows, ctx, "amount", "currency", "parentUserId");
       return {
         ...result,
-        rows: result.rows.map(row => (Object.assign(row, { displayAmount: displayAmounts.get(row.id) ?? null }))),
+        rows: result.rows.map(row => Object.assign(row, { displayAmount: displayAmounts.get(row.id) ?? null })),
       };
     },
   })

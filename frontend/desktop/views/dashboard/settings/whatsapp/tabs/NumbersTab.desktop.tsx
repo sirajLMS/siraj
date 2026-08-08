@@ -124,7 +124,6 @@ function CredentialEditDialog({
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <TextField
-          
           fullWidth
           type="password"
           label={fieldLabel}

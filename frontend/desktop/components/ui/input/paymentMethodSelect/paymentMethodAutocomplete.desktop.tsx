@@ -110,7 +110,6 @@ const AutocompleteTextField: React.FC<{
       error={showError}
       helperText={resolvedHelperText}
       onBlur={onBlur}
-      
       slotProps={{
         ...params.slotProps,
         input: {
@@ -345,7 +344,6 @@ const AutocompleteContent: React.FC<{
           showError={showError}
           resolvedHelperText={resolvedHelperText}
           onBlur={onBlur}
-          
           autoComplete={autoComplete}
           option={option}
         />
@@ -418,7 +416,6 @@ export const PaymentMethodAutocompleteDesktop: React.FC<PaymentMethodAutocomplet
       required={required}
       showError={showError}
       resolvedHelperText={resolvedHelperText}
-      
       autoComplete={autoComplete}
       onChangeAction={onChangeAction}
     />

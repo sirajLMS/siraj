@@ -178,7 +178,10 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     const allowedLower = allowed.map(c =>
       c === NotificationChannel.ON_APP ? NotificationChannel.ON_APP : NotificationChannel.EMAIL
     );
-    expect([...allowedLower].toSorted(compareChannels)).toEqual([NotificationChannel.EMAIL, NotificationChannel.ON_APP]);
+    expect([...allowedLower].toSorted(compareChannels)).toEqual([
+      NotificationChannel.EMAIL,
+      NotificationChannel.ON_APP,
+    ]);
 
     const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.CLASS_SCHEDULED);
     const results = await dispatchWithPreferences(payloads, [PARENT_USER_ID]);

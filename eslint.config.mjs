@@ -1,3 +1,4 @@
+import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended";
 import eslint from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
@@ -15,7 +16,6 @@ const eslintConfig = defineConfig([
   ...nextTs,
   importXFlatConfigs.recommended,
   importXFlatConfigs.typescript,
-  // import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended";
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Ignore ALL dot-directories anywhere in the tree (e.g. .next, .git, .cursor,
@@ -56,7 +56,7 @@ const eslintConfig = defineConfig([
   ]),
   eslint.configs.recommended,
   sonarjsConfigs.recommended,
-  // cspellESLintPluginRecommended, // Disabled for performance
+  cspellESLintPluginRecommended,
 
   ...storybookConfigs["flat/recommended"],
 
@@ -157,15 +157,15 @@ const eslintConfig = defineConfig([
       "react-hooks/preserve-manual-memoization": "off",
       "@typescript-eslint/restrict-template-expressions": "off",
 
-      // Spell checking (disabled for performance - run separately if needed)
-      // "@cspell/spellchecker": [
-      //   "warn",
-      //   {
-      //     autoFix: true,
-      //     configFile: new URL("./cspell.config.yaml", import.meta.url).toString(),
-      //     cspellOptionsRoot: import.meta.url,
-      //   },
-      // ],
+      // Spell checking
+      "@cspell/spellchecker": [
+        "warn",
+        {
+          autoFix: true,
+          configFile: new URL("./cspell.config.yaml", import.meta.url).toString(),
+          cspellOptionsRoot: import.meta.url,
+        },
+      ],
     },
   },
 
@@ -198,6 +198,7 @@ const eslintConfig = defineConfig([
   {
     files: [
       "frontend/utils/logger.ts",
+      "scripts/oxlint-categorize.ts",
       "scripts/**/*.ts",
       "backend/db/scripts/**/*.ts",
       "backend/db/test/**/*.ts",
@@ -210,6 +211,7 @@ const eslintConfig = defineConfig([
       "sonarjs/no-hardcoded-ip": "off",
       "sonarjs/sql-queries": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
+      "@cspell/spellchecker": "off",
     },
   },
 

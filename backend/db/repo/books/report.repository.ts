@@ -161,10 +161,12 @@ export namespace ReportRepository {
         const paidByGroup = await fetchPaidAmountsByGroup(filters, groupKeyExpr, tx, true);
 
         logger.debug(`[ReportRepository.generateAttendanceReport] Generated ${results.length} rows.`);
-        return results.map(row => (Object.assign(row, {
-	paidAmounts: paidByGroup.get(row.groupKey) ?? [],
-	engagementGrowth: null
-})));
+        return results.map(row =>
+          Object.assign(row, {
+            paidAmounts: paidByGroup.get(row.groupKey) ?? [],
+            engagementGrowth: null,
+          })
+        );
       }
 
       const results = await q
@@ -186,10 +188,12 @@ export namespace ReportRepository {
       const paidByGroup = await fetchPaidAmountsByGroup(filters, groupKeyExpr, tx, false);
 
       logger.debug(`[ReportRepository.generateAttendanceReport] Generated ${results.length} rows.`);
-      return results.map(row => (Object.assign(row, {
-	paidAmounts: paidByGroup.get(row.groupKey) ?? [],
-	engagementGrowth: null
-})));
+      return results.map(row =>
+        Object.assign(row, {
+          paidAmounts: paidByGroup.get(row.groupKey) ?? [],
+          engagementGrowth: null,
+        })
+      );
     } catch (error) {
       logger.error("[ReportRepository.generateAttendanceReport] Fatal query execution error:", error);
       throw error;

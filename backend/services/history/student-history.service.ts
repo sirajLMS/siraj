@@ -51,11 +51,11 @@ export namespace StudentHistoryService {
       rawSessions.map(async session => {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id, tErrors);
         return Object.assign(session, {
-	status: session.status as ClassExecutionState,
-	outcome: session.outcome as ClassOutcome | null ?? null,
-	meetingJoinUrl: effectiveMeeting.joinUrl,
-	effectiveMeeting
-});
+          status: session.status as ClassExecutionState,
+          outcome: (session.outcome as ClassOutcome | null) ?? null,
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+          effectiveMeeting,
+        });
       })
     );
 

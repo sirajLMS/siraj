@@ -85,10 +85,12 @@ export namespace GroupClassRepository {
       .innerJoin(students, eq(groupClassEnrollments.studentId, students.id))
       .where(eq(groupClassEnrollments.groupClassId, groupClassId));
 
-    return rows.map(r => (Object.assign(r.enrollment, {
-	studentName: r.studentName,
-	studentAvatarUrl: r.studentAvatarUrl
-})));
+    return rows.map(r =>
+      Object.assign(r.enrollment, {
+        studentName: r.studentName,
+        studentAvatarUrl: r.studentAvatarUrl,
+      })
+    );
   }
 
   export async function createEnrollments(

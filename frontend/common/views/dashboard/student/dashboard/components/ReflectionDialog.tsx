@@ -77,7 +77,6 @@ export function ReflectionDialog({ labels, commonLabels }: Readonly<ReflectionDi
           </Alert>
         ) : null}
         <TextField
-          
           fullWidth
           multiline
           minRows={4}

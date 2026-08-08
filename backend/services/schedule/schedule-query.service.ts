@@ -61,9 +61,9 @@ export namespace ScheduleQueryService {
       rows.map(async row => {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors);
         return Object.assign(row, {
-	meetingJoinUrl: effectiveMeeting.joinUrl,
-	effectiveMeeting
-});
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+          effectiveMeeting,
+        });
       })
     );
   }

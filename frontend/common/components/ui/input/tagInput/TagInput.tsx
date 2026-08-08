@@ -96,7 +96,6 @@ function TagInputChipList({
         onChange={onEditInputChange}
         onKeyDown={e => onEditKeyDown(e, index)}
         onBlur={() => onEditBlur(index)}
-        
       />
     ) : (
       <Chip

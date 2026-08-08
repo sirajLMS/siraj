@@ -36,7 +36,6 @@ export function SuggestionRespondDialog({
       <DialogTitle>{labels.respondTitle}</DialogTitle>
       <DialogContent>
         <TextField
-          
           fullWidth
           multiline
           minRows={4}

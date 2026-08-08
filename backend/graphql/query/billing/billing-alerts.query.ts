@@ -31,7 +31,7 @@ gqlSchemaBuilder.queryFields(t => ({
 
       return {
         ...result,
-        items: result.items.map(item => (Object.assign(item, { displayAmount: displayAmounts.get(item.id) ?? null }))),
+        items: result.items.map(item => Object.assign(item, { displayAmount: displayAmounts.get(item.id) ?? null })),
       };
     },
   }),

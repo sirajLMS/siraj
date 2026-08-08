@@ -115,10 +115,14 @@ gqlSchemaBuilder.queryField("generateAttendanceReport", t =>
 
       return {
         ...result,
-        rows: result.rows.map(row => (Object.assign(row, { paidAmounts: row.paidAmounts.map((pa) => ({
-	...pa,
-	displayAmount: displayAmounts.get(pa.id) ?? null
-})) }))),
+        rows: result.rows.map(row =>
+          Object.assign(row, {
+            paidAmounts: row.paidAmounts.map(pa => ({
+              ...pa,
+              displayAmount: displayAmounts.get(pa.id) ?? null,
+            })),
+          })
+        ),
       };
     },
   })

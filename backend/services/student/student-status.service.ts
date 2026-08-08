@@ -31,11 +31,11 @@ export namespace StudentStatusService {
       classes.map(async c => {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(c.id, tErrors);
         return Object.assign(c, {
-	executionState: parseClassExecutionState(c.executionState),
-	outcome: parseClassOutcome(c.outcome) ?? ClassOutcome.PENDING,
-	meetingJoinUrl: effectiveMeeting.joinUrl,
-	effectiveMeeting
-});
+          executionState: parseClassExecutionState(c.executionState),
+          outcome: parseClassOutcome(c.outcome) ?? ClassOutcome.PENDING,
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+          effectiveMeeting,
+        });
       })
     );
 

@@ -64,7 +64,6 @@ const renderCurrencyInput = ({
       error={showError}
       helperText={resolvedHelperText}
       onBlur={onBlur}
-      
       slotProps={{
         ...params.slotProps,
         input: {
