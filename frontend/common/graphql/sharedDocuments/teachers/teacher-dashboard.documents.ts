@@ -35,7 +35,6 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
         executionState
         outcome
         isFrozen
-        meetingJoinUrl
         effectiveMeeting {
           ...EffectiveMeetingFields
         }

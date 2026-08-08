@@ -3,7 +3,7 @@
 import { useApolloClient, useQuery } from "@apollo/client/react";
 import { useEffect, useRef } from "react";
 import { meQueryDocument, userQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
-import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/fx-sync-health.documents";
+import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/profile/profile.documents";
 import { FX_SUBJECT_CURRENCY_CHANGED_KEY } from "@/frontend/common/lib/sync-subject-profile";
 import { syncViewerFromProfile } from "@/frontend/common/lib/sync-viewer-profile";

@@ -22,7 +22,7 @@ export const learningResourcesQueryDocument: TypedDocumentNode<
   ${learningResourceRowFragment}
   query learningResources($searchQuery: String) {
     learningResources(searchQuery: $searchQuery) {
-      ...LearningResourceRowFragment
+      ...LearningResourceRow
     }
   }
 `;
@@ -34,7 +34,7 @@ export const uploadLearningResourceMutationDocument: TypedDocumentNode<
   ${learningResourceRowFragment}
   mutation uploadLearningResource($input: ResourceUploadInput!) {
     uploadLearningResource(input: $input) {
-      ...LearningResourceRowFragment
+      ...LearningResourceRow
     }
   }
 `;

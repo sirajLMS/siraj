@@ -109,7 +109,7 @@ export const onboardingMetricsQueryDocument: TypedDocumentNode<Operations.Onboar
 `;
 
 export const staffDirectoryAutocompleteRowFragment = gql`
-  fragment StaffDirectoryAutocompleteRowFragment on StaffDirectoryAutocompleteRow {
+  fragment StaffDirectoryAutocompleteRow on StaffDirectoryAutocompleteRow {
     id
     name
     avatarUrl
@@ -124,7 +124,7 @@ export const staffDirectoryQueryDocument: TypedDocumentNode<
   ${staffDirectoryAutocompleteRowFragment}
   query staffDirectory($search: String, $limit: Int, $permissionGroupFilter: String) {
     staffDirectory(search: $search, limit: $limit, permissionGroupFilter: $permissionGroupFilter) {
-      ...StaffDirectoryAutocompleteRowFragment
+      ...StaffDirectoryAutocompleteRow
     }
   }
 `;

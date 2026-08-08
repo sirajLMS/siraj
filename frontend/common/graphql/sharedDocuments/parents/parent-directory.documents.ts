@@ -68,7 +68,8 @@ export const parentsDirectoryQueryDocument: TypedDocumentNode<
   ${parentDirectoryAutocompleteRowFragment}
   query parentsDirectory($search: String, $limit: Int) {
     parentsDirectory(search: $search, limit: $limit) {
-      ...ParentDirectoryAutocompleteRowFragment
+      id
+      ...ParentDirectoryAutocompleteRow
     }
   }
 `;
