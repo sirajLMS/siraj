@@ -91,17 +91,6 @@ export const refreshExchangeRatesMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const fxSyncHealthQueryDocument: TypedDocumentNode<Operations.FxSyncHealthQuery> = gql`
-  query FxSyncHealth {
-    fxSyncHealth {
-      id
-      isStale
-      status
-      finishedAt
-    }
-  }
-`;
-
 export const fxProviderConfigQueryDocument: TypedDocumentNode<Operations.FxProviderConfigQuery> = gql`
   query FxProviderConfig {
     fxProviderConfig {

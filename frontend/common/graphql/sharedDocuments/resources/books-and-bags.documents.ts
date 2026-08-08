@@ -3,7 +3,7 @@ import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-typ
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export const deleteBookMutationDocument = gql`
-  mutation DeleteBookMutation($id: ID!) {
+  mutation deleteBook($id: ID!) {
     deleteBook(id: $id)
   }
-` as TypedDocumentNode<Operations.DeleteBookMutationMutation, Types.MutationDeleteBookArgs>;
+` as TypedDocumentNode<Operations.DeleteBookMutation, Types.MutationDeleteBookArgs>;

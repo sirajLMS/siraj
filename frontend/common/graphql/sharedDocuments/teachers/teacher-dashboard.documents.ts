@@ -121,7 +121,6 @@ export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
         classType
         executionState
         outcome
-        meetingJoinUrl
         effectiveMeeting {
           ...EffectiveMeetingFields
         }

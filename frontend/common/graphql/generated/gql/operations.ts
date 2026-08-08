@@ -4720,15 +4720,15 @@ export type GenerateAttendanceReportQueryVariables = Exact<{
 
 export type GenerateAttendanceReportQuery = GenerateAttendanceReportQuery_Query;
 
-export type DeleteBookMutationMutation_Mutation = { deleteBook: boolean | null };
+export type DeleteBookMutation_Mutation = { deleteBook: boolean | null };
 
 
-export type DeleteBookMutationMutationVariables = Exact<{
+export type DeleteBookMutationVariables = Exact<{
   id: string | number;
 }>;
 
 
-export type DeleteBookMutationMutation = DeleteBookMutationMutation_Mutation;
+export type DeleteBookMutation = DeleteBookMutation_Mutation;
 
 export type LearningResourceRowFragmentFragment = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
 

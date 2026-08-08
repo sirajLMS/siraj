@@ -1,8 +1,10 @@
-import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended";
+// import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended"; disabled for performance
 import eslint from "@eslint/js";
+import graphqlPlugin from "@graphql-eslint/eslint-plugin";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import drizzle from "eslint-plugin-drizzle";
 import { flatConfigs as importXFlatConfigs } from "eslint-plugin-import-x";
 import reactHooks from "eslint-plugin-react-hooks";
 import { reactRefresh } from "eslint-plugin-react-refresh";
@@ -10,6 +12,9 @@ import { configs as sonarjsConfigs } from "eslint-plugin-sonarjs";
 import { configs as storybookConfigs } from "eslint-plugin-storybook";
 import globals from "globals";
 import { configs as tseslintConfigs } from "typescript-eslint";
+
+/** Drizzle query executors used across repos (`db`, `tx`, `t`, `q`, `queryDb`, `client`). */
+const drizzleObjectName = ["db", "tx", "t", "q", "queryDb", "client"];
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -56,7 +61,7 @@ const eslintConfig = defineConfig([
   ]),
   eslint.configs.recommended,
   sonarjsConfigs.recommended,
-  cspellESLintPluginRecommended,
+  // cspellESLintPluginRecommended, disabled for performance
 
   ...storybookConfigs["flat/recommended"],
 
@@ -157,15 +162,15 @@ const eslintConfig = defineConfig([
       "react-hooks/preserve-manual-memoization": "off",
       "@typescript-eslint/restrict-template-expressions": "off",
 
-      // Spell checking
-      "@cspell/spellchecker": [
-        "warn",
-        {
-          autoFix: true,
-          configFile: new URL("./cspell.config.yaml", import.meta.url).toString(),
-          cspellOptionsRoot: import.meta.url,
-        },
-      ],
+      // Spell checking disabled for performance;
+      // "@cspell/spellchecker": [
+      //   "warn",
+      //   {
+      //     autoFix: true,
+      //     configFile: new URL("./cspell.config.yaml", import.meta.url).toString(),
+      //     cspellOptionsRoot: import.meta.url,
+      //   },
+      // ],
     },
   },
 
@@ -372,6 +377,52 @@ const eslintConfig = defineConfig([
                 "Seeders must not import from the database layer — call backend services (bootstrap methods) instead. See backend/db/seeds/AGENTS.md",
             },
           ],
+        },
+      ],
+    },
+  },
+
+  // Drizzle: require `.where()` on delete/update to avoid wiping whole tables.
+  {
+    files: ["backend/**/*.{ts,tsx}"],
+    plugins: {
+      drizzle,
+    },
+    rules: {
+      "drizzle/enforce-delete-with-where": ["error", { drizzleObjectName }],
+      "drizzle/enforce-update-with-where": ["error", { drizzleObjectName }],
+    },
+  },
+
+  // GraphQL-ESLint: pluck `gql` operations from shared documents, then lint as virtual `.graphql`.
+  {
+    files: ["frontend/common/graphql/sharedDocuments/**/*.{ts,tsx}"],
+    processor: graphqlPlugin.processor,
+  },
+  {
+    files: ["**/*.graphql"],
+    languageOptions: {
+      parser: graphqlPlugin.parser,
+    },
+    plugins: {
+      "@graphql-eslint": graphqlPlugin,
+    },
+    rules: {
+      ...graphqlPlugin.configs["flat/operations-recommended"].rules,
+      // Repo has mixed camelCase/PascalCase operation names; enforce only anti-patterns.
+      "@graphql-eslint/naming-convention": [
+        "error",
+        {
+          VariableDefinition: "camelCase",
+          OperationDefinition: {
+            forbiddenPrefixes: ["Query", "Mutation", "Subscription", "Get"],
+            forbiddenSuffixes: ["Query", "Mutation", "Subscription"],
+          },
+          FragmentDefinition: {
+            style: "PascalCase",
+            forbiddenPrefixes: ["Fragment"],
+            forbiddenSuffixes: ["Fragment"],
+          },
         },
       ],
     },

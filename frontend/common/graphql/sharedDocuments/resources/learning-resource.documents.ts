@@ -3,7 +3,7 @@ import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-typ
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export const learningResourceRowFragment = gql`
-fragment LearningResourceRowFragment on LearningResourceRow {
+fragment LearningResourceRow on LearningResourceRow {
   id
   displayName
   filePath

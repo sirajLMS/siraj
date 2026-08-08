@@ -1,5 +1,5 @@
-schema: ["client/graphql/generated/schema.graphql"]
-documents: ["**/**/*.ts", "**/**/*.graphql"]
+schema: ["frontend/common/graphql/generated/schema.graphql"]
+documents: ["frontend/common/graphql/sharedDocuments/**/*.{ts,tsx}"]
 extensions:
   endpoints:
     default:

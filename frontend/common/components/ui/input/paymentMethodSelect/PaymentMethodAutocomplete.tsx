@@ -108,6 +108,7 @@ const AutocompleteTextField: React.FC<{
   return (
     <TextField
       {...params}
+      autoFocus={autoFocus}
       label={label}
       placeholder={placeholder}
       required={required}

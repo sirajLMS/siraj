@@ -78,6 +78,7 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
   return (
     <TextField
       {...params}
+      autoFocus={autoFocus}
       label={resolvedLabel}
       placeholder={resolvedPlaceholder}
       required={required}

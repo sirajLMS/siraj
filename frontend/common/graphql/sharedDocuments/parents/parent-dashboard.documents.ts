@@ -27,7 +27,6 @@ export const parentDashboardScheduleQueryDocument: TypedDocumentNode<
         executionState
         outcome
         isFrozen
-        meetingJoinUrl
         effectiveMeeting {
           ...EffectiveMeetingFields
         }

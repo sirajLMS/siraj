@@ -104,6 +104,7 @@ const AutocompleteTextField: React.FC<{
   return (
     <TextField
       {...params}
+      autoFocus={autoFocus}
       label={label}
       placeholder={placeholder}
       required={required}
@@ -344,6 +345,7 @@ const AutocompleteContent: React.FC<{
           showError={showError}
           resolvedHelperText={resolvedHelperText}
           onBlur={onBlur}
+          autoFocus={autoFocus}
           autoComplete={autoComplete}
           option={option}
         />
@@ -416,6 +418,7 @@ export const PaymentMethodAutocompleteDesktop: React.FC<PaymentMethodAutocomplet
       required={required}
       showError={showError}
       resolvedHelperText={resolvedHelperText}
+      autoFocus={autoFocus}
       autoComplete={autoComplete}
       onChangeAction={onChangeAction}
     />

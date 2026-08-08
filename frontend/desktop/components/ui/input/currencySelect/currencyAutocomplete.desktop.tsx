@@ -58,6 +58,7 @@ const renderCurrencyInput = ({
   return (
     <TextField
       {...params}
+      autoFocus={autoFocus}
       label={resolvedLabel}
       placeholder={resolvedPlaceholder}
       required={required}

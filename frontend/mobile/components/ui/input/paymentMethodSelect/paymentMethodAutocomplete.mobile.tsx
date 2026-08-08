@@ -110,6 +110,7 @@ const AutocompleteTextField: React.FC<{
     <TextField
       {...params}
       size="small"
+      autoFocus={autoFocus}
       label={label}
       placeholder={placeholder}
       required={required}
@@ -301,6 +302,7 @@ const renderAutocompleteInput = ({
     showError={showError}
     resolvedHelperText={resolvedHelperText}
     onBlur={onBlur}
+    autoFocus={autoFocus}
     autoComplete={autoComplete}
     option={option}
   />

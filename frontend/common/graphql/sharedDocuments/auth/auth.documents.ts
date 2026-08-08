@@ -76,6 +76,7 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
 export const impersonationStatusQueryDocument: TypedDocumentNode<Operations.ImpersonationStatusQuery> = gql`
   query impersonationStatus {
     impersonationStatus {
+      id
       isActive
       startedAt
       expiresAt
@@ -100,6 +101,7 @@ export const startImpersonationMutationDocument: TypedDocumentNode<
 > = gql`
   mutation startImpersonation($targetUserId: String!, $reason: String) {
     startImpersonation(targetUserId: $targetUserId, reason: $reason) {
+      id
       token
       expiresAt
       impersonationSessionId
