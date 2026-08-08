@@ -60,8 +60,6 @@ const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
   "sonar-results": 3, // same depth as codescene — no sonar for subagents
 };
 
-const JSCPD_SCAN_ROOTS = ["app/", "backend/", "frontend/", "shared/", "scripts/"] as const;
-
 const RED = "\x1b[31m";
 const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
@@ -347,23 +345,25 @@ function jscpdFoundIntraFileClones(output: string): boolean {
   return /Clone found/.test(output) || /Found [1-9]\d* clones/.test(output);
 }
 
+/** Paths ignored by `.jscpd.json` (keep in sync with that file). */
 function shouldSkipJscpd(filePath: string): boolean {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath)).replace(/\\/g, "/");
 
-  if (!JSCPD_SCAN_ROOTS.some(root => relPath.startsWith(root))) {
+  if (!/\.(ts|tsx)$/.test(relPath) || relPath.endsWith(".d.ts") || relPath === "next-env.d.ts") {
     return true;
   }
-  if (relPath.endsWith(".d.ts")) {
-    return true;
-  }
-  if (/\.(test|spec)\.(ts|tsx)$/.test(relPath)) {
+  if (/\.test\.(ts|tsx)$/.test(relPath)) {
     return true;
   }
   if (
-    relPath.includes("/generated/") ||
-    relPath.includes("/seeds/") ||
-    relPath.includes("/migration/") ||
-    relPath.includes("/unRefactored_tests/")
+    /(^|\/)(node_modules|out|build|dist|logs|storage|scratch|draft|storybook-static|docs|coverage)\//.test(relPath) ||
+    /(^|\/)\.(ai|agents|codescene|cursor|git|github|husky|kiro|next|next-dev|playwright-mcp|scannerwork|stakpak|vercel|vscode)\//.test(
+      relPath
+    ) ||
+    /(^|\/)\.next-test[^/]*\//.test(relPath) ||
+    /(^|\/)messages\//.test(relPath) ||
+    relPath.startsWith("frontend/common/graphql/generated/") ||
+    /(^|\/)(seeds|migration|unRefactored_tests)\//.test(relPath)
   ) {
     return true;
   }

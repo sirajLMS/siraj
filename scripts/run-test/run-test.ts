@@ -228,11 +228,11 @@ function extractTestName(trimmed: string): string {
 }
 
 function isFailResultLine(trimmed: string): boolean {
-  return trimmed.startsWith('(fail)');
+  return trimmed.startsWith("(fail)");
 }
 
 function isPassResultLine(trimmed: string): boolean {
-  return trimmed.startsWith('(pass)');
+  return trimmed.startsWith("(pass)");
 }
 
 interface FailEntry {

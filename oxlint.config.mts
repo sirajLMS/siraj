@@ -28,6 +28,8 @@ export default defineConfig({
   },
   rules: {
     "react/react-in-jsx-scope": "off",
+    // Intentional dialog/field focus is valid a11y; this rule fights modal UX.
+    "jsx-a11y/no-autofocus": "off",
     "no-console": "error",
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/no-explicit-any": "error",
