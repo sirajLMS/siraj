@@ -7,7 +7,6 @@ import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionsService } from "@/backend/services";
 import { buildMaskedTransactionSnapshot } from "@/backend/services/payment-method/payment-method-mask";
-import type { PaymentMethodTransactionSnapshot } from "@/backend/types";
 import type { PaymentReturnType } from "@/backend/types/billing/billing.types";
 import type { TeacherPaymentReturnType } from "@/backend/types/teachers/teacher.types";
 
@@ -32,19 +31,17 @@ export const PaymentPothosObject = PaymentRef.implement({
     userPaymentMethodId: t.exposeString("userPaymentMethodId", { nullable: true }),
     paymentMethodType: t.field({
       type: PaymentMethodTypePothosEnum,
-      resolve: parent => parent.paymentMethodType as PaymentMethodType,
+      resolve: parent => parent.paymentMethodType,
     }),
     paymentMethodSnapshot: t.field({
       type: PaymentMethodTransactionSnapshotPothosObject,
       nullable: true,
       resolve: async (parent, _args, ctx) => {
-        if (!parent.paymentMethodSnapshot) return null;
-        if (parent.paymentMethodType === PaymentMethodType.PROOF_UPLOAD) return null;
+        const snapshot = parent.paymentMethodSnapshot;
+        if (!snapshot) return null;
+        if ("proof" in snapshot) return null;
         const revealSensitive = await shouldRevealPaymentSnapshot(ctx);
-        return buildMaskedTransactionSnapshot(
-          parent.paymentMethodSnapshot as PaymentMethodTransactionSnapshot,
-          revealSensitive
-        );
+        return buildMaskedTransactionSnapshot(snapshot, revealSensitive);
       },
     }),
     transactionId: t.exposeString("transactionId", { nullable: true }),
@@ -68,7 +65,7 @@ export const TeacherPaymentPothosObject = TeacherPaymentRef.implement({
     userPaymentMethodId: t.exposeString("userPaymentMethodId", { nullable: true }),
     paymentMethodType: t.field({
       type: PaymentMethodTypePothosEnum,
-      resolve: parent => parent.paymentMethodType as PaymentMethodType,
+      resolve: parent => parent.paymentMethodType,
     }),
     paymentMethodSnapshot: t.field({
       type: PaymentMethodTransactionSnapshotPothosObject,
