@@ -7,19 +7,19 @@ import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/ty
 
 export namespace SiteContentRepository {
   export async function findBySlug(slug: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
-    const q = queryDb(tx) as unknown as typeof import("@/backend/db/drizzleDb").db;
+    const q = queryDb(tx);
     const [row] = await q.select().from(siteContent).where(eq(siteContent.slug, slug)).limit(1);
     return row ?? null;
   }
 
   export async function findById(id: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
-    const q = queryDb(tx) as unknown as typeof import("@/backend/db/drizzleDb").db;
+    const q = queryDb(tx);
     const [row] = await q.select().from(siteContent).where(eq(siteContent.id, id)).limit(1);
     return row ?? null;
   }
 
   export async function upsert(input: SiteContentUpsertInput, tx?: DBTransaction): Promise<SiteContentSelectType> {
-    const q = queryDb(tx) as unknown as typeof import("@/backend/db/drizzleDb").db;
+    const q = queryDb(tx);
     const now = new Date();
     const existing = await findBySlug(input.slug, tx);
 
@@ -68,7 +68,7 @@ export namespace SiteContentRepository {
   }
 
   export async function listAll(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
-    const q = queryDb(tx) as unknown as typeof import("@/backend/db/drizzleDb").db;
+    const q = queryDb(tx);
     const rows = await q.select().from(siteContent).orderBy(desc(siteContent.updatedAt));
     return rows;
   }
@@ -77,7 +77,7 @@ export namespace SiteContentRepository {
     tx: DBTransaction | undefined,
     where: SQL | undefined
   ): Promise<SiteContentSelectType[]> {
-    const q = queryDb(tx) as unknown as typeof import("@/backend/db/drizzleDb").db;
+    const q = queryDb(tx);
     const rows = await q.select().from(siteContent).where(where).orderBy(desc(siteContent.updatedAt));
     return rows;
   }
@@ -102,7 +102,7 @@ export namespace SiteContentRepository {
     isPublished: boolean,
     tx?: DBTransaction
   ): Promise<SiteContentSelectType | null> {
-    const q = queryDb(tx) as unknown as typeof import("@/backend/db/drizzleDb").db;
+    const q = queryDb(tx);
     const [updated] = await q
       .update(siteContent)
       .set({ isPublished, updatedAt: new Date() })
@@ -112,7 +112,7 @@ export namespace SiteContentRepository {
   }
 
   export async function _deleteById(id: string, tx?: DBTransaction): Promise<boolean> {
-    const q = queryDb(tx) as unknown as typeof import("@/backend/db/drizzleDb").db;
+    const q = queryDb(tx);
     try {
       const deleted = await q.delete(siteContent).where(eq(siteContent.id, id)).returning();
       return deleted.length > 0;
@@ -122,7 +122,7 @@ export namespace SiteContentRepository {
   }
 
   export async function _deleteBySlug(slug: string, tx?: DBTransaction): Promise<boolean> {
-    const q = queryDb(tx) as unknown as typeof import("@/backend/db/drizzleDb").db;
+    const q = queryDb(tx);
     try {
       const deleted = await q.delete(siteContent).where(eq(siteContent.slug, slug)).returning();
       return deleted.length > 0;
