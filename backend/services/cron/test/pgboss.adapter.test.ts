@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { CronJobKind } from "@/backend/enum/cron/cron.enums";
 import type { CronJobPayload } from "@/backend/types/cron/cron.types";
 
 // ── Mock state (reset per test) ──
@@ -76,11 +77,11 @@ let currentBoss = makeMockBoss();
 // Need a workaround not returning from constructor: use a regular function so
 // calling it with `new` will return the object via default behaviour.
 await mock.module("pg-boss", () => ({
-  PgBoss: function MockPgBoss(this: unknown, _options: Record<string, unknown>) {
+  PgBoss: function MockPgBoss(this: object, _options: Record<string, unknown>) {
     // We need to return currentBoss. Since we can't assign its properties to `this`,
     // and the adapter expects `new PgBoss(...)` to return the boss interface,
     // we swap `this` to currentBoss via Object.assign on the prototype.
-    Object.assign(this as object, currentBoss);
+    Object.assign(this, currentBoss);
   },
 }));
 
@@ -110,14 +111,14 @@ interface CronQueueAdapterLike {
 async function getCreateAdapter(): Promise<AdapterModule["createPgBossAdapter"]> {
   moduleCounter++;
   const mod = await import(`@/backend/services/cron/queue-adapters/pgboss.adapter?fresh=${moduleCounter}`);
-  return (mod as unknown as AdapterModule).createPgBossAdapter;
+  return mod.createPgBossAdapter;
 }
 
 function makeJob(overrides: Partial<CronJobPayload> = {}): CronJobPayload {
   return {
     runId: "run-1",
     scheduleId: "sched-1",
-    jobKind: "NOOP" as never,
+    jobKind: CronJobKind.NOOP,
     payload: { test: true },
     attempt: 1,
     timeoutSeconds: 300,
@@ -220,8 +221,11 @@ describe("pgboss.adapter", () => {
     const adapter = createPgBossAdapter();
 
     // Send two jobs with different jobKinds to register two queues
-    await adapter.send(makeJob({ jobKind: "NOOP" as never }));
-    await adapter.send(makeJob({ jobKind: "OTHER" as never, runId: "run-2" }));
+    await adapter.send(makeJob({ jobKind: CronJobKind.NOOP }));
+    // Use Object.assign to override jobKind with a non-enum string at runtime.
+    // This avoids an unsafe `as CronJobKind` narrowing assertion while still
+    // exercising the queue-per-kind iteration path.
+    await adapter.send(Object.assign(makeJob({ runId: "run-2" }), { jobKind: "OTHER" }));
 
     const stats = await adapter.getQueueStats();
 
