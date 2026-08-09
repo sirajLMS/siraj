@@ -48,7 +48,7 @@ export const parentOnboardingSchema = z
     }
     if (hasUrl && data.meetingUrl) {
       try {
-        new URL(data.meetingUrl);
+        void new URL(data.meetingUrl);
       } catch {
         ctx.addIssue({ code: "custom", message: "meetingUrlInvalid", path: ["meetingUrl"] });
       }

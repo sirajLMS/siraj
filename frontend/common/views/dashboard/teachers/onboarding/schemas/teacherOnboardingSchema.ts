@@ -66,7 +66,7 @@ export const teacherOnboardingSchema = (validationLabels: {
       }
       if (hasUrl && data.meetingUrl) {
         try {
-          new URL(data.meetingUrl);
+          void new URL(data.meetingUrl);
         } catch {
           ctx.addIssue({
             code: "custom",

@@ -1,5 +1,5 @@
 import { createTheme, type PaletteMode, responsiveFontSizes } from "@mui/material/styles";
-import "@mui/x-data-grid/themeAugmentation";
+import * as themeAugmentation from "@mui/x-data-grid/themeAugmentation";
 import { arEG as muiArEg, enUS as muiEnUS } from "@mui/material/locale";
 import { arSD as dataGridArSD, enUS as dataGridEnUS } from "@mui/x-data-grid/locales";
 import { components } from "@/frontend/common/providers/theme/components";
