@@ -3,8 +3,8 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import type { ClassExecutionState } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import { parseIanaTimezoneOrNull } from "@/backend/lib/enum";
 import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
+import { parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 
 export function buildDailyScheduleDayConditions(
   date: Date,

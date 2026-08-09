@@ -11,7 +11,6 @@ import {
 import { groupPermissions, invoices, permissions, userPermissionGroups } from "@/backend/db/schema";
 import { AppPermission, type CurrencyCode, InvoicePaymentSubmissionStatus } from "@/backend/enum";
 import { logger, NotFoundError } from "@/backend/lib";
-import { parseInvoiceStatus, parseInvoiceType } from "@/backend/lib/enum";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
 import {
   assertInvoiceBelongsToParentUser,
@@ -27,6 +26,7 @@ import {
   buildInvoiceStatusChangedPayloads,
 } from "@/backend/services/notification/notification-payloads.builders";
 import type * as Types from "@/backend/types";
+import { parseInvoiceStatus, parseInvoiceType } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 function deriveIdempotencyKey(input: {

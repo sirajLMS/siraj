@@ -1,10 +1,10 @@
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
 import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { parseCurrencyCode } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
 import type { OpenExchangeRatesResponse } from "@/backend/services/fx/providers/openexchangerates/openexchangerates.types";
 import type { FxProviderFetchResult } from "@/backend/types";
+import { parseCurrencyCode } from "@/shared/lib/enum";
 
 const OER_LATEST_ENDPOINT = "https://openexchangerates.org/api/latest.json";
 const REQUEST_TIMEOUT_MS = 10_000;

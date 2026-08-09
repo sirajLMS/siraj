@@ -1,10 +1,10 @@
 import { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
-import { parseIanaTimezone } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { RecurringScheduleSelectType } from "@/backend/types";
 import type { RecurringScheduleDetailReturnType } from "@/backend/types/scheduling/recurring-schedule-detail.types";
+import { parseIanaTimezone } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type RecurringScheduleListRow = RecurringScheduleSelectType & {

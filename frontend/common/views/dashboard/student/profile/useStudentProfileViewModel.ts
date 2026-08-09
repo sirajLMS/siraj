@@ -43,6 +43,7 @@ function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDra
 
 export type StudentProfileViewLabels = StudentPortalProfileLabels & {
   readonly editAvatarTitle: string;
+  readonly accountStatus: string;
 };
 
 function useStudentProfileLabels(t: StudentPortalProfileLabels, editAvatarTitle: string): StudentProfileViewLabels {
@@ -69,6 +70,7 @@ function useStudentProfileLabels(t: StudentPortalProfileLabels, editAvatarTitle:
       saveSuccess: t.saveSuccess,
       saveError: t.saveError,
       editAvatarTitle,
+      accountStatus: t.accountStatus,
     }),
     [t, editAvatarTitle]
   );

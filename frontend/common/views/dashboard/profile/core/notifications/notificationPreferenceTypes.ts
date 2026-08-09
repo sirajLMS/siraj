@@ -48,6 +48,7 @@ export const NOTIFICATION_EVENT_CATEGORY: Record<NotificationEventType, Notifica
   [NotificationEventType.OnDemandInstanceReminderT3]: "reminder",
   [NotificationEventType.OnDemandInstanceReminderT1]: "urgent",
   [NotificationEventType.OnDemandTeacherDailyDigest]: "digest",
+  [NotificationEventType.PasswordResetByAdmin]: "info",
 };
 
 export const NOTIFICATION_CHANNELS = [
@@ -94,6 +95,8 @@ export const NOTIFICATION_EVENT_TYPES = [
   NotificationEventType.OnDemandInstanceReminderT3,
   NotificationEventType.OnDemandInstanceReminderT1,
   NotificationEventType.OnDemandTeacherDailyDigest,
+  // Admin notification events
+  NotificationEventType.PasswordResetByAdmin,
 ] as const;
 
 /** Reverse lookup: category → event types (for category-level toggles). */

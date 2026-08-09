@@ -8,9 +8,9 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ALLOWED_STATUS_TRANSITIONS, OrderSortDirection, StudentStatus } from "@/backend/enum";
-import { parseStudentStatus } from "@/backend/lib/enum";
 import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
+import { parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 

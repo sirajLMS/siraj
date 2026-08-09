@@ -3,9 +3,9 @@ import type { CurrencyCode } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { parseCurrencyCode } from "@/backend/lib/enum";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
 import type { DisplayAmountReturnType } from "@/backend/types";
+import { parseCurrencyCode } from "@/shared/lib/enum";
 
 const DisplayAmountRef = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount");
 

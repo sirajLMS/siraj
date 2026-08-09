@@ -5,10 +5,10 @@ import {
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 

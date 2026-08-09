@@ -12,8 +12,8 @@
  */
 
 import { CronQueueBackend } from "@/backend/enum/cron/cron.enums";
-import { resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
+import { resolveEnvConfig } from "@/backend/services/system";
 import {
   type CronQueueAdapter,
   CronQueueBackendNotAvailable,
@@ -87,7 +87,7 @@ export async function getQueueAdapter(): Promise<CronQueueAdapter> {
       activeAdapter = await loadCustomSqlAdapter();
       break;
     default:
-      throw new CronQueueBackendNotAvailable(`backend "${backend}" has no adapter implementation`);
+      throw new CronQueueBackendNotAvailable(`backend "${String(backend)}" has no adapter implementation`);
   }
 
   await activeAdapter.init();

@@ -193,6 +193,10 @@ export enum AppPermission {
   PROFILE_MEETING_CONFIGS_VIEW_OTHER = "profile.meeting_configs.view_other",
   PROFILE_MEETING_CONFIGS_EDIT_OWN = "profile.meeting_configs.edit_own",
   PROFILE_MEETING_CONFIGS_EDIT_OTHER = "profile.meeting_configs.edit_other",
+  PROFILE_CORE_STATUS_VIEW_OWN = "profile.core_status.view_own",
+  PROFILE_CORE_STATUS_VIEW_OTHER = "profile.core_status.view_other",
+  PROFILE_CORE_STATUS_EDIT_OWN = "profile.core_status.edit_own",
+  PROFILE_CORE_STATUS_EDIT_OTHER = "profile.core_status.edit_other",
   // Student field-group ACL
   STUDENT_IDENTITY_VIEW_OWN = "student.student_identity.view_own",
   STUDENT_IDENTITY_VIEW_OTHER = "student.student_identity.view_other",
@@ -256,6 +260,8 @@ export enum AppPermission {
   QUOTAS_MANAGE = "quotas.manage",
   // Cron Management
   CRON_MANAGE = "cron.manage",
+  // User Admin Management
+  USER_ADMIN_RESET_PASSWORD = "user.admin_reset_password",
 }
 
 let knownAppPermissionsCache: Set<string> | undefined;

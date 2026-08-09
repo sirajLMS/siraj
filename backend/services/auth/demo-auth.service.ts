@@ -2,13 +2,13 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SessionRepository } from "@/backend/db/repo";
-import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import type { SafeUser, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Internal machine roles — never exposed as demo quick-login options. */
@@ -31,10 +31,10 @@ export namespace DemoAuthService {
       return groups
         .filter(group => !EXCLUDED_DEMO_LOGIN_GROUP_SLUGS.has(group.slug))
         .map(group => {
-          const description = resolveLocalized(group.description, locale);
+          const description = resolveLocalizedString(group.description, locale);
           return {
             slug: group.slug,
-            name: resolveLocalized(group.name, locale),
+            name: resolveLocalizedString(group.name, locale),
             description: description === "" ? null : description,
           };
         });

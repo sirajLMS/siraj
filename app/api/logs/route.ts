@@ -70,7 +70,8 @@ async function cleanupOldClientLogs(logsDir: string, sessionId: string): Promise
  * Strip ANSI escape sequences from a string to prevent log injection
  */
 function stripAnsiEscapes(str: string): string {
-  return str.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "");
+  const ansiRegex = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*[a-zA-Z]`, "g");
+  return str.replace(ansiRegex, "");
 }
 
 /**

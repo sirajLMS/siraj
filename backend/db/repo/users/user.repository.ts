@@ -6,13 +6,9 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { users } from "@/backend/db/schema";
 import type { AccountStatus, CurrencyCode } from "@/backend/enum";
-import {
-  isValidIanaTimezone,
-  logger,
-  normalizeIanaTimezone,
-  parseAccountStatus,
-  validatePasswordStrength,
-} from "@/backend/lib";
+import { validatePasswordStrength } from "@/backend/lib/auth/password";
+import { logger } from "@/backend/lib/logger";
+import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
 import {
   type PaginatedUsersResponseSelectType,
   PaginationArgsDefault,
@@ -22,6 +18,7 @@ import {
   type UserSelectType,
 } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
+import { parseAccountStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 // ============================================================================

@@ -24,15 +24,6 @@ import {
   StudentStatus,
 } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import {
-  parseAccountStatus,
-  parseClassExecutionState,
-  parseClassOutcome,
-  parseCurrencyCode,
-  parseIanaTimezone,
-  parseParentStatus,
-  parseStudentStatus,
-} from "@/backend/lib/enum";
 import type {
   PaginationArgs,
   ParentCreateResult,
@@ -48,6 +39,15 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
+import {
+  parseAccountStatus,
+  parseClassExecutionState,
+  parseClassOutcome,
+  parseCurrencyCode,
+  parseIanaTimezone,
+  parseParentStatus,
+  parseStudentStatus,
+} from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentRepository {

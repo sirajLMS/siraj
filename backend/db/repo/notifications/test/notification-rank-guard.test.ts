@@ -10,6 +10,7 @@ import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType 
 
 function notificationTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
+    expect(fn).toBeDefined();
     await runInRollback(fn);
   });
 }

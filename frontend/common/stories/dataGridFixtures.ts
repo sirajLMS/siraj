@@ -1,4 +1,5 @@
 import type { GridColDef } from "@mui/x-data-grid";
+import { createElement, type ReactNode } from "react";
 
 // cspell:ignore Lannister, Cersei, Targaryen, Daenerys
 
@@ -34,16 +35,5 @@ export const SAMPLE_GRID_ROWS: readonly SampleGridRow[] = [
  * The decorator that wraps a DataGrid story in the standard 400 px
  * height container — used by all three AppDataGrid stories.
  */
-interface DataGridHeightDecoratorProps {
-  readonly Story: () => React.ReactNode;
-}
-
-export function DataGridHeightDecorator({ Story }: DataGridHeightDecoratorProps) {
-  return (
-    <div style={{ height: 400, width: "100%" }}>
-      <Story />
-    </div>
-  );
-}
-
-export const dataGridHeightDecorator = (Story: () => React.ReactNode) => <DataGridHeightDecorator Story={Story} />;
+export const dataGridHeightDecorator = (Story: () => ReactNode) =>
+  createElement("div", { style: { height: 400, width: "100%" } }, createElement(Story));

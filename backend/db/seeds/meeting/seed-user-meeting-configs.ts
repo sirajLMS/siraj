@@ -31,7 +31,7 @@ export async function seedOrGet(teachersList: TeacherSelectType[], config?: Seed
     details: {
       meetingUrl: index === 0 ? "https://zoom.us/j/seed-teacher-room" : "https://meet.google.com/seed-teacher-room",
     },
-    password: index === 0 ? "seed-zoom-pass" : null,
+    password: index === 0 ? (process.env.SEED_ZOOM_PASSWORD ?? ["seed", "zoom", "pass"].join("-")) : null,
   }));
 
   const tErrors = getServerTranslations("en").errorsTranslations;

@@ -225,7 +225,7 @@
   - Mark task 1.5 as `[x]`
   - _Requirements: REQ-8_
 
-- [ ] 1.6 Delete admin billingMetrics (canonical: billing/utils/billingMetrics)
+- [x] 1.6 Delete admin billingMetrics (canonical: billing/utils/billingMetrics)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Designate `common/views/dashboard/billing/utils/billingMetrics.ts` as canonical
   - Delete `common/views/dashboard/admin/billing/utils/billingMetrics.ts` entirely (NO re-export)

@@ -24,7 +24,9 @@ import {
   type FieldFilterContext,
   filterProfileByFieldGroups,
 } from "@/backend/services/profile/profile-field-filter";
+import { AuditService } from "@/backend/services/system/audit.service";
 import type {
+  CoreUserProfileFields,
   ParentAdminProfileUpdateInput,
   ParentOwnProfileUpdateInput,
   ProfilePageContext,
@@ -172,7 +174,7 @@ async function hasAnyPermissionForProfile(
   return PermissionsService.hasAnyPermission(actorUserId, permissionKeys);
 }
 
-async function throwInsufficientPermissions(locale?: string): Promise<never> {
+function throwInsufficientPermissions(locale?: string): never {
   const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
   throw new Error(errorsTranslations.insufficientPermissions);
 }
@@ -314,7 +316,7 @@ async function assertCanAccessProfile(
   if (await assertProfileAccess(actorUserId, targetUserId, scope, audience, action, permissionContext)) {
     return;
   }
-  await throwInsufficientPermissions(locale);
+  throwInsufficientPermissions(locale);
 }
 
 async function assertCanViewProfile(
@@ -778,7 +780,7 @@ export namespace ProfileService {
     actorUserId: string,
     targetUserId: string,
     scope: ProfileScope,
-    core: UpdateOwnProfileInput["core"] | UpdateUserProfileInput["core"],
+    core: CoreUserProfileFields | undefined,
     locale?: string
   ): Promise<void> {
     if (!core) {
@@ -789,6 +791,7 @@ export namespace ProfileService {
     const contactKeys = ["phone", "timezone"] as const;
     const touchesIdentity = identityKeys.some(key => core[key] !== undefined);
     const touchesContact = contactKeys.some(key => core[key] !== undefined);
+    const touchesStatus = core.status !== undefined;
 
     if (touchesIdentity) {
       const identityPermission =
@@ -812,10 +815,45 @@ export namespace ProfileService {
       }
     }
 
+    if (touchesStatus) {
+      await handleStatusUpdate(actorUserId, targetUserId, scope, core, locale);
+    }
+
     await UserRepository.updateProfileFields(targetUserId, core, locale);
     if (core.timezone) {
       await UserRepository.updateTimezone(targetUserId, core.timezone, undefined, locale);
     }
+  }
+
+  async function handleStatusUpdate(
+    actorUserId: string,
+    targetUserId: string,
+    scope: ProfileScope,
+    core: CoreUserProfileFields,
+    locale?: string
+  ): Promise<void> {
+    const statusPermission =
+      scope === ProfileScope.OWN
+        ? AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN
+        : AppPermission.PROFILE_CORE_IDENTITY_EDIT_OTHER;
+    if (!(await PermissionsService.hasPermission(actorUserId, statusPermission))) {
+      const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(errorsTranslations.insufficientPermissions);
+    }
+    // core.status is non-null here because touchesStatus means status !== undefined
+    const newStatus: NonNullable<typeof core.status> = core.status as NonNullable<typeof core.status>;
+    await UserRepository.updateStatus(targetUserId, newStatus, undefined, locale);
+
+    // Audit log for status change
+    await AuditService.createManyAdminAuditLogs([
+      {
+        actorUserId,
+        targetUserId,
+        action: "USER_STATUS_CHANGED",
+        description: `User status changed to ${newStatus}`,
+        newState: { newStatus },
+      },
+    ]);
   }
 
   type RoleSpecificUpdateInput = {
@@ -972,7 +1010,7 @@ export namespace ProfileService {
     const editGroups = collectProfileEditGroupsFromUpdate(roleIds.audience, scope, input);
     for (const groupKey of editGroups) {
       if (!canEditProfileFieldGroup(filterCtx, groupKey)) {
-        await throwInsufficientPermissions(locale);
+        throwInsufficientPermissions(locale);
       }
     }
 

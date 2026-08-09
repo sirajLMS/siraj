@@ -4,7 +4,6 @@ import { WhatsappAccountRepository } from "@/backend/db/repo";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { AppPermission, NotificationChannel, NotificationEventType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { WhatsappTemplateCategory, WhatsappTemplateStatus } from "@/backend/enum/whatsapp/whatsapp.enum";
-import { resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
 import {
   FETCH_TIMEOUT_MS,
@@ -22,6 +21,7 @@ import {
 } from "@/backend/services/communication/channels/whatsapp/cloud-api";
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import { NOTIFICATION_TEMPLATE_MAP } from "@/backend/services/notification/notification-payloads.builders";
+import { resolveEnvConfig } from "@/backend/services/system";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type { AuditAction, CreateAuditLogInput } from "@/backend/types";
 import type { NotificationPreferenceUpdateInput } from "@/backend/types/notifications/notification-preferences.types";

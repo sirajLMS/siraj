@@ -3,7 +3,6 @@ import { queryDb } from "@/backend/db";
 import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { localeJsonKey, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import {
   permissionGroups,
   permissions,
@@ -13,7 +12,6 @@ import {
   users,
 } from "@/backend/db/schema";
 import { AccountStatus, CurrencyCode, OverrideState } from "@/backend/enum";
-import { parseAccountStatus, parseOverrideState } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   ManagerDirectoryFilters,
@@ -28,6 +26,8 @@ import type {
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
+import { parseAccountStatus, parseOverrideState } from "@/shared/lib/enum";
+import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
 import { getServerTranslations } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
@@ -151,7 +151,7 @@ export namespace StaffProfileRepository {
       phone: row.phone,
       status: parseAccountStatus(row.status),
       roleSlug: row.roleSlug,
-      roleName: row.roleNameMap ? resolveLocalized(row.roleNameMap, locale) : null,
+      roleName: row.roleNameMap ? resolveLocalizedString(row.roleNameMap, locale) : null,
       hourlyRate: row.hourlyRate,
       rateCurrency: toCurrencyCode(row.rateCurrency),
     };
@@ -481,10 +481,10 @@ export namespace StaffProfileRepository {
       .orderBy(sql`coalesce(${permissionGroups.name}->>${key}, ${permissionGroups.name}->>${DEFAULT_CONTENT_LOCALE})`);
 
     return rows.map(row => {
-      const description = resolveLocalized(row.description, locale);
+      const description = resolveLocalizedString(row.description, locale);
       return {
         id: row.id,
-        name: resolveLocalized(row.name, locale),
+        name: resolveLocalizedString(row.name, locale),
         slug: row.slug,
         description: description === "" ? null : description,
       };

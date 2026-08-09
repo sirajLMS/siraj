@@ -15,7 +15,6 @@ import {
   CronScheduleStatus,
   type CronTriggerSource,
 } from "@/backend/enum/cron/cron.enums";
-import { resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { DomainError, ForbiddenError, NotFoundError, UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { CRON_DEFAULT_BATCH_SIZE, parsePositiveInt } from "@/backend/services/cron/cron-env";
@@ -27,6 +26,7 @@ import {
 import { formatError } from "@/backend/services/cron/cron-utils";
 import { getQueueAdapter } from "@/backend/services/cron/queue-adapter.factory";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
+import { resolveEnvConfig } from "@/backend/services/system";
 import type {
   CronJobPayload,
   CronQueueStats,
@@ -132,7 +132,7 @@ export namespace CronService {
     const shouldRecompute = cronChanged || tzChanged;
 
     const updateData: CronScheduleUpdateInput = { ...input };
-    if (shouldRecompute && existing.status === CronScheduleStatus.ACTIVE) {
+    if (shouldRecompute && existing.status === (CronScheduleStatus.ACTIVE as typeof existing.status)) {
       updateData.nextRunAt = nextRunAt(
         input.cronExpression ?? existing.cronExpression,
         new Date(),
@@ -306,7 +306,10 @@ export namespace CronService {
 
     const schedule = await assertScheduleExists(id, t);
 
-    if (schedule.status === CronScheduleStatus.PAUSED || schedule.status === CronScheduleStatus.DISABLED) {
+    if (
+      schedule.status === (CronScheduleStatus.PAUSED as typeof schedule.status) ||
+      schedule.status === (CronScheduleStatus.DISABLED as typeof schedule.status)
+    ) {
       throw new ForbiddenError(t.scheduleInactive);
     }
 
@@ -562,7 +565,8 @@ async function resolveBatchSize(override: number): Promise<number> {
 
 function validateTimezone(timezone: string, errFn: (tz: string) => string): void {
   try {
-    new Intl.DateTimeFormat(undefined, { timeZone: timezone });
+    // Intl.DateTimeFormat throws if timezone is invalid; we don't need the instance
+    Intl.DateTimeFormat(undefined, { timeZone: timezone });
   } catch (err) {
     throw new DomainError("INVALID_TIMEZONE", errFn(timezone), { cause: err });
   }

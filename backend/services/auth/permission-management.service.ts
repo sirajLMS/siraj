@@ -1,7 +1,6 @@
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo";
-import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
@@ -14,6 +13,7 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
@@ -118,7 +118,7 @@ export namespace PermissionManagementService {
   }
 
   async function validateGroupName(name: LocalizedString, tErrors: ErrorsLabels) {
-    const resolvedName = resolveLocalized(name, DEFAULT_CONTENT_LOCALE);
+    const resolvedName = resolveLocalizedString(name, DEFAULT_CONTENT_LOCALE);
     const trimmedName = resolvedName.trim();
     if (!trimmedName) throw new Error(tErrors.permissionManagement.permissionGroupNameRequired);
     if (trimmedName.length > 255) throw new Error(tErrors.permissionManagement.permissionGroupNameTooLong);
@@ -385,7 +385,7 @@ export namespace PermissionManagementService {
 
     if (user.isSuperAdmin) {
       const allPerms = await PermissionManagementRepository.listAllPermissions();
-      return allPerms.map(p => p.key);
+      return allPerms.map(p => p.key as AppPermission);
     }
 
     // Resolve base group permissions
@@ -397,7 +397,7 @@ export namespace PermissionManagementService {
     if (overrides.length === 0) return [...effectiveSet];
 
     const allPerms = await PermissionManagementRepository.listAllPermissions();
-    const permMap = new Map(allPerms.map(p => [p.id, p.key]));
+    const permMap = new Map(allPerms.map(p => [p.id, p.key as AppPermission]));
 
     for (const override of overrides) {
       const key = permMap.get(override.permissionId);
@@ -436,7 +436,7 @@ export namespace PermissionManagementService {
   ): Promise<AppPermission[]> {
     if (inputs.length === 0) return [];
 
-    await ensurePermissionEnumValues(inputs.map(spec => spec.key));
+    await ensurePermissionEnumValues(inputs.map(spec => spec.key as AppPermission));
     await disableSystemPermissionTrigger();
 
     try {
@@ -460,7 +460,7 @@ export namespace PermissionManagementService {
             is_system = EXCLUDED.is_system
         `);
       }
-      return inputs.map(spec => spec.key);
+      return inputs.map(spec => spec.key as AppPermission);
     } finally {
       await enableSystemPermissionTrigger();
     }

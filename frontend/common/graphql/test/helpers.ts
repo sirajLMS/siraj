@@ -32,9 +32,9 @@ import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 import { isTestServerRunning } from "@/frontend/common/graphql/test/testServer";
 
-/** Shared test password — all provisioned test users use this value. */
-// eslint-disable-next-line sonarjs/no-hardcoded-passwords
-const TEST_USER_PASSWORD = "Test_Pass1!";
+import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
+
+const TEST_USER_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
 
 let demoUsersReadyPromise: Promise<void> | null = null;
 

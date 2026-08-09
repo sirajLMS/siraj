@@ -59,6 +59,7 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
     NotificationChannel.PUSH,
     NotificationChannel.EMAIL,
   ],
+  [NotificationEventType.PASSWORD_RESET_BY_ADMIN]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
 };
 
 // ─── Channel comparison helper ────────────────────────────────────────

@@ -9,7 +9,7 @@ import {
 // ── Mock resolveEnvConfig so tests don't touch the DB ──
 // Default mock returns undefined (no DB override) so the factory falls through to process.env.
 let envConfigResult: string | undefined;
-mock.module("@/backend/lib/env-config-resolver", () => ({
+await mock.module("@/backend/services/system", () => ({
   resolveEnvConfig: () => envConfigResult,
 }));
 
@@ -57,7 +57,9 @@ describe("queue-adapter.factory", () => {
     } catch (error) {
       const { CronQueueBackendUnknown } = await import("@/backend/types/cron/cron.types");
       expect(error).toBeInstanceOf(CronQueueBackendUnknown);
-      expect((error as Error).name).toBe("CronQueueBackendUnknown");
+      if (error instanceof Error) {
+        expect(error.name).toBe("CronQueueBackendUnknown");
+      }
     }
   });
 
@@ -86,7 +88,9 @@ describe("queue-adapter.factory", () => {
     } catch (error) {
       const { CronQueueBackendNotAvailable } = await import("@/backend/types/cron/cron.types");
       expect(error).toBeInstanceOf(CronQueueBackendNotAvailable);
-      expect((error as Error).name).toBe("CronQueueBackendNotAvailable");
+      if (error instanceof Error) {
+        expect(error.name).toBe("CronQueueBackendNotAvailable");
+      }
     }
   });
 });

@@ -15,7 +15,9 @@ export interface SeedUserSpec {
   idempotencyKey: string;
 }
 
-const SEED_PASSWORD = "Seed_Pass1!";
+import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
+
+const SEED_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
 
 const SEED_TIMEZONES = [
   "UTC",

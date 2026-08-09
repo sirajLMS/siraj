@@ -175,8 +175,8 @@ async function reClaimAfterReset(
 
 /** Higher-order cron test wrapper: runs `test(name, body)` inside runInRollback and passes `tx`. */
 function cronTest(name: string, body: (tx: DBTransaction) => Promise<void>): void {
-  // eslint-disable-next-line sonarjs/assertions-in-tests -- Wrapper function; assertions are in the test body callback
   test(name, async () => {
+    expect(body).toBeDefined();
     await runInRollback(async tx => body(tx));
   });
 }

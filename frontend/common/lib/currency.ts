@@ -21,8 +21,10 @@ export type CurrencyOption = {
 /**
  * Curated currency catalog aligned with the backend `CurrencyCode` enum.
  *
- * Each entry is keyed by the codegen enum value so the list stays
- * type-checked against the GraphQL schema. Keep this list in sync with
+ * This is the **single canonical source** for static currency data in the
+ * frontend. Use `currencies` directly for a static fallback (e.g. the
+ * `currencyStore`'s pre-load state) or `getCurrencyOptions()` for the
+ * Autocomplete picker. Keep this list in sync with
  * `backend/enum/currency.enum.ts` whenever the enum changes.
  */
 export const currencies: readonly CurrencyOption[] = [

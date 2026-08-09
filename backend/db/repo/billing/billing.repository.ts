@@ -15,8 +15,8 @@ import {
   users,
 } from "@/backend/db/schema";
 import { CurrencyCode, StudentStatus } from "@/backend/enum";
-import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/backend/lib/enum";
 import type * as Types from "@/backend/types";
+import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;

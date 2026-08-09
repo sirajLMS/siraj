@@ -322,8 +322,7 @@ export namespace TestHelperService {
     assertTestHelperAllowed();
 
     const now = new Date();
-    // eslint-disable-next-line sonarjs/no-hardcoded-passwords
-    const plainPassword = "Test_Pass1!";
+    const plainPassword = DEFAULT_SEED_ADMIN_PASSWORD;
     const hashedPassword = await hashPassword(plainPassword);
 
     return await db.transaction(async tx => {
@@ -469,8 +468,7 @@ export namespace TestHelperService {
 
     const now = new Date();
     const email = `${prefix}-sa-${randomUUID().slice(0, 8)}@example.com`;
-    // eslint-disable-next-line sonarjs/no-hardcoded-passwords
-    const plainPassword = "Test_Pass1!";
+    const plainPassword = DEFAULT_SEED_ADMIN_PASSWORD;
     const hashedPassword = await hashPassword(plainPassword);
 
     const [userRow] = await db

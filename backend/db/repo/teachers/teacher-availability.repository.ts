@@ -11,12 +11,12 @@ import {
 } from "@/backend/db/schema";
 import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { parseGender, parseIanaTimezone } from "@/backend/lib/enum";
 import { NotFoundError, ValidationError } from "@/backend/lib/errors";
 import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
+import { parseGender, parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 type TeacherGender = string | null;

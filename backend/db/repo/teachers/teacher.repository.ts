@@ -5,7 +5,6 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import { AccountStatus, type CurrencyCode, type Gender } from "@/backend/enum";
-import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/backend/lib/enum";
 import type {
   PaginationArgs,
   TeacherCreateReturnType,
@@ -17,6 +16,7 @@ import type {
   TeacherSelectType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
+import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherRepository {

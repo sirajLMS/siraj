@@ -5,9 +5,9 @@ import { db } from "@/backend/db/drizzleDb";
 import { StudentRepository } from "@/backend/db/repo";
 import { parents, students, users } from "@/backend/db/schema";
 import { AccountStatus, AppLanguage, Gender, OrderSortDirection, ParentStatus, UserRole } from "@/backend/enum";
-import { parseIanaTimezone } from "@/backend/lib";
 import type { ParentEntity, StudentFilterArgs, StudentSelectType, UserReturnType } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
+import { parseIanaTimezone } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Issue #25: Student Pagination Cursor Stability", () => {

@@ -95,7 +95,6 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
       resolve: parent => (parent as unknown as Record<string, unknown>).displayAmount as DisplayAmountReturnType | null,
     }),
   }),
@@ -188,7 +187,6 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
       const result = await ManagerDirectoryService.getManagerDirectory(userId, pagination, locale, filters);
 
       const displayAmounts = await resolveDisplayAmountFields(
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
         result.rows as unknown as Record<string, unknown>[],
         ctx,
         "hourlyRate",

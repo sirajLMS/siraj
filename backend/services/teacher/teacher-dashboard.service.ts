@@ -5,16 +5,15 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
-import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
 import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
-
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertType, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
+import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 

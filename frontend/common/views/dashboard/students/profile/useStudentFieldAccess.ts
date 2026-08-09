@@ -26,6 +26,8 @@ export function useStudentFieldAccess(options: UseStudentFieldAccessOptions = {}
   const canView = useCallback(
     (groupKey: StudentFieldGroupKey): boolean => {
       const action = isOwnStudentProfile ? "view_own" : "view_other";
+      // studentFieldGroupGraphqlPermission returns a string that maps to AppPermission enum values.
+      // The cast is safe because the function generates GraphQL permission names that exactly match AppPermission enum members.
       return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
     },
     [hasPermission, isOwnStudentProfile]
@@ -34,6 +36,8 @@ export function useStudentFieldAccess(options: UseStudentFieldAccessOptions = {}
   const canEdit = useCallback(
     (groupKey: StudentFieldGroupKey): boolean => {
       const action = isOwnStudentProfile ? "edit_own" : "edit_other";
+      // studentFieldGroupGraphqlPermission returns a string that maps to AppPermission enum values.
+      // The cast is safe because the function generates GraphQL permission names that exactly match AppPermission enum members.
       return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
     },
     [hasPermission, isOwnStudentProfile]

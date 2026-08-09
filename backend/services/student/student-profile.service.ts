@@ -1,7 +1,6 @@
 import { ParentRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
 import { type AppLanguage, AppPermission, type CurrencyCode, type Gender, StudentStatus } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 import {
@@ -12,6 +11,7 @@ import {
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
 import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types/students/student-profile.types";
+import { parseAppLanguage, parseGender, parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type GetProfileOptions = {
