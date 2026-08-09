@@ -273,7 +273,8 @@ describe("Session Scalability and Redis Integration", () => {
         );
 
         // Create 5 sessions (should keep only 3 most recent)
-        for (let i = 0; i < 5; i++) {
+        await [0, 1, 2, 3, 4].reduce(async (promise, i) => {
+          await promise;
           const sessionId = `session-${randomUUID()}`;
 
           await SessionRepository.create(
@@ -288,7 +289,7 @@ describe("Session Scalability and Redis Integration", () => {
 
           // Small delay to ensure different creation times
           await new Promise(resolve => setTimeout(resolve, 50));
-        }
+        }, Promise.resolve());
 
         // Count active sessions
         const count = await SessionRepository.countUserSessions(user.id);
@@ -394,7 +395,8 @@ describe("Session Scalability and Redis Integration", () => {
         );
 
         // Create sessions for user1 (limit 2)
-        for (let i = 0; i < 3; i++) {
+        await [0, 1, 2].reduce(async (promise, i) => {
+          await promise;
           await SessionRepository.create(
             {
               hashedId: `user1-session-${i}-${randomUUID()}`,
@@ -405,10 +407,11 @@ describe("Session Scalability and Redis Integration", () => {
             tx
           );
           await new Promise(resolve => setTimeout(resolve, 50));
-        }
+        }, Promise.resolve());
 
         // Create sessions for user2 (limit 3)
-        for (let i = 0; i < 4; i++) {
+        await [0, 1, 2, 3].reduce(async (promise, i) => {
+          await promise;
           await SessionRepository.create(
             {
               hashedId: `user2-session-${i}-${randomUUID()}`,
@@ -419,7 +422,7 @@ describe("Session Scalability and Redis Integration", () => {
             tx
           );
           await new Promise(resolve => setTimeout(resolve, 50));
-        }
+        }, Promise.resolve());
 
         const count1 = await SessionRepository.countUserSessions(user1.id);
         const count2 = await SessionRepository.countUserSessions(user2.id);
@@ -442,19 +445,20 @@ describe("Session Scalability and Redis Integration", () => {
         const user = await createTestUser(tx, `logout-everywhere-${randomUUID()}@example.com`);
 
         // Create multiple sessions
-        const sessionIds = [];
-        for (let i = 0; i < 3; i++) {
-          const sessionId = `session-${i}-${randomUUID()}`;
-          sessionIds.push(sessionId);
-          await SessionRepository.create(
-            {
-              hashedId: sessionId,
-              userId: user.id,
-              payload: JSON.stringify({ index: i }),
-            },
-            tx
-          );
-        }
+        const sessionIds = await Promise.all(
+          Array.from({ length: 3 }, async (_, i) => {
+            const sessionId = `session-${i}-${randomUUID()}`;
+            await SessionRepository.create(
+              {
+                hashedId: sessionId,
+                userId: user.id,
+                payload: JSON.stringify({ index: i }),
+              },
+              tx
+            );
+            return sessionId;
+          })
+        );
 
         // Verify sessions exist
         let count = await SessionRepository.countUserSessions(user.id);
@@ -468,8 +472,10 @@ describe("Session Scalability and Redis Integration", () => {
         count = await SessionRepository.countUserSessions(user.id);
         expect(count).toBe(0);
 
-        for (const sessionId of sessionIds) {
-          const session = await SessionRepository.findSessionById(sessionId);
+        const sessions = await Promise.all(
+          sessionIds.map(id => SessionRepository.findSessionById(id))
+        );
+        for (const session of sessions) {
           expect(session).toBeNull();
         }
 
@@ -482,17 +488,19 @@ describe("Session Scalability and Redis Integration", () => {
         const user = await createTestUser(tx, `logout-metadata-${randomUUID()}@example.com`);
 
         // Create sessions
-        for (let i = 0; i < 2; i++) {
-          await SessionRepository.create(
-            {
-              hashedId: `session-${i}-${randomUUID()}`,
-              userId: user.id,
-              payload: JSON.stringify({ index: i }),
-              deviceType: "desktop",
-            },
-            tx
-          );
-        }
+        await Promise.all(
+          Array.from({ length: 2 }, (_, i) =>
+            SessionRepository.create(
+              {
+                hashedId: `session-${i}-${randomUUID()}`,
+                userId: user.id,
+                payload: JSON.stringify({ index: i }),
+                deviceType: "desktop",
+              },
+              tx
+            )
+          )
+        );
 
         // Verify metadata exists
         let metadata = await SessionRepository.getUserSessionMetadata(user.id, tx);
@@ -526,7 +534,8 @@ describe("Session Scalability and Redis Integration", () => {
 
         // Create sessions sequentially — concurrent Redis + PG advisory locks
         // serialize within a transaction but Redis is outside tx scope
-        for (const i of [1, 2, 3]) {
+        await [1, 2, 3].reduce(async (promise, i) => {
+          await promise;
           await SessionRepository.create(
             {
               hashedId: `concurrent-session-${i}-${randomUUID()}`,
@@ -536,7 +545,7 @@ describe("Session Scalability and Redis Integration", () => {
             },
             tx
           );
-        }
+        }, Promise.resolve());
 
         // Should enforce limit correctly despite concurrent operations
         const count = await SessionRepository.countUserSessions(user.id);
