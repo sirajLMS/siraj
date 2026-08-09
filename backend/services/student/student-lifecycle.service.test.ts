@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { AppPermission, NotificationEventType, StudentStatus } from "@/backend/enum";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 // ---------------------------------------------------------------------------
 // Mocks — registered before the service module is imported.
@@ -91,13 +92,23 @@ await mock.module("@/backend/services/student/student-field-acl", () => ({
 
 // --- Notification builder + dispatch mocks ------------------------------
 
-const buildStudentLifecyclePayloadsMock = mock(() => [{ channel: "on_app" }]);
+const buildStudentLifecyclePayloadsMock = mock(
+  (
+    _studentId: string,
+    _eventType: NotificationEventType,
+    _affectedUserIds: string[],
+    _locale: string | undefined,
+    _metadata: Record<string, string>
+  ): unknown[] => [{ channel: "on_app" }]
+);
 
 await mock.module("@/backend/services/notification/notification-payloads.builders", () => ({
   buildStudentLifecyclePayloads: buildStudentLifecyclePayloadsMock,
 }));
 
-const dispatchWithPreferencesMock = mock(async () => []);
+const dispatchWithPreferencesMock = mock(
+  async (_payloads: unknown, _affectedUserIds: string[], _locale?: string): Promise<unknown[]> => []
+);
 
 await mock.module("@/backend/services/notification/notification-dispatch.helpers", () => ({
   dispatchWithPreferences: dispatchWithPreferencesMock,
@@ -189,21 +200,11 @@ describe("StudentLifecycleService — notification dispatch", () => {
     test("dispatches payloads to parent + old + new teacher via dispatchWithPreferences", async () => {
       const { StudentLifecycleService } = await importService();
 
-      const tErrorsStub = new Proxy(
-        {},
-        {
-          get: (_target, prop) => {
-            if (typeof prop === "string") return () => prop;
-            return undefined;
-          },
-        }
-      ) as Record<string, () => string>;
-
       await StudentLifecycleService.reassignTeacher(
         ACTOR_ID,
         STUDENT_ID,
         NEW_TEACHER_ID,
-        tErrorsStub as never,
+        errorsEn,
         undefined,
         "en"
       );
@@ -217,18 +218,14 @@ describe("StudentLifecycleService — notification dispatch", () => {
       // dispatchWithPreferences is called once with the aggregated fan-out set.
       expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
 
-      const dispatchCalls = dispatchWithPreferencesMock.mock.calls as unknown as Array<
-        [unknown, string[], string | undefined]
-      >;
+      const dispatchCalls = dispatchWithPreferencesMock.mock.calls;
       const affectedUserIds = dispatchCalls[0]?.[1] ?? [];
       expect(affectedUserIds).toContain(PARENT_USER_ID);
       expect(affectedUserIds).toContain(OLD_TEACHER_USER_ID);
       expect(affectedUserIds).toContain(NEW_TEACHER_USER_ID);
       expect(affectedUserIds).toHaveLength(3);
 
-      const builderCalls = buildStudentLifecyclePayloadsMock.mock.calls as unknown as Array<
-        [string, NotificationEventType, string[], string | undefined, { recipient: string }]
-      >;
+      const builderCalls = buildStudentLifecyclePayloadsMock.mock.calls;
       const recipients = builderCalls.map(c => c[4].recipient);
       expect(recipients).toContain("parent");
       expect(recipients).toContain("oldTeacher");
@@ -239,22 +236,12 @@ describe("StudentLifecycleService — notification dispatch", () => {
       const { StudentLifecycleService } = await importService();
       dispatchWithPreferencesMock.mockRejectedValueOnce(new Error("notification downstream failure"));
 
-      const tErrorsStub = new Proxy(
-        {},
-        {
-          get: (_target, prop) => {
-            if (typeof prop === "string") return () => prop;
-            return undefined;
-          },
-        }
-      ) as Record<string, () => string>;
-
       // The action must NOT throw — dispatch failures are swallowed.
       const result = await StudentLifecycleService.reassignTeacher(
         ACTOR_ID,
         STUDENT_ID,
         NEW_TEACHER_ID,
-        tErrorsStub as never,
+        errorsEn,
         undefined,
         "en"
       );
@@ -268,21 +255,11 @@ describe("StudentLifecycleService — notification dispatch", () => {
     test("dispatches a single payload set to the parent with STUDENT_STATUS_CHANGED", async () => {
       const { StudentLifecycleService } = await importService();
 
-      const tErrorsStub = new Proxy(
-        {},
-        {
-          get: (_target, prop) => {
-            if (typeof prop === "string") return () => prop;
-            return undefined;
-          },
-        }
-      ) as Record<string, () => string>;
-
       await StudentLifecycleService.changeStudentStatus(
         ACTOR_ID,
         STUDENT_ID,
         StudentStatus.SUSPENDED,
-        tErrorsStub as never,
+        errorsEn,
         undefined,
         "en"
       );
@@ -292,9 +269,7 @@ describe("StudentLifecycleService — notification dispatch", () => {
       // Single recipient (parent) → 1 builder call.
       expect(buildStudentLifecyclePayloadsMock).toHaveBeenCalledTimes(1);
 
-      const builderCalls = buildStudentLifecyclePayloadsMock.mock.calls as unknown as Array<
-        [string, NotificationEventType, string[], string | undefined, Record<string, string>]
-      >;
+      const builderCalls = buildStudentLifecyclePayloadsMock.mock.calls;
       const builderCall = builderCalls[0];
       expect(builderCall?.[0]).toBe(STUDENT_ID);
       expect(builderCall?.[1]).toBe(NotificationEventType.STUDENT_STATUS_CHANGED);
@@ -306,9 +281,7 @@ describe("StudentLifecycleService — notification dispatch", () => {
       expect(metadata.newStatus).toBe(StudentStatus.SUSPENDED);
 
       expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
-      const dispatchCalls = dispatchWithPreferencesMock.mock.calls as unknown as Array<
-        [unknown, string[], string | undefined]
-      >;
+      const dispatchCalls = dispatchWithPreferencesMock.mock.calls;
       expect(dispatchCalls[0]?.[1]).toEqual([PARENT_USER_ID]);
     });
   });
