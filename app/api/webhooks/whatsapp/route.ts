@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import { after, type NextRequest, NextResponse } from "next/server";
-import { resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
 import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
+import { resolveEnvConfig } from "@/backend/services/system";
 import { WhatsappWebhookHandler } from "@/backend/services/whatsapp/whatsapp-webhook.handler";
 
 /**
@@ -233,11 +233,16 @@ function parseWebhookBody(rawBody: string, ip: string): { body: unknown; respons
     return { body: null, response: new NextResponse("Bad Request", { status: 400 }) };
   }
 
+  const objectValue =
+    body !== null && typeof body === "object" && "object" in body && typeof body.object === "string"
+      ? body.object
+      : undefined;
+
   // Validate top-level object field
-  if (!body || typeof body !== "object" || (body as { object?: string }).object !== "whatsapp_business_account") {
+  if (objectValue !== "whatsapp_business_account") {
     logger.warn("whatsapp-webhook: unexpected object field", {
       ip,
-      object: (body as { object?: string })?.object,
+      object: objectValue,
     });
     return { body: null, response: new NextResponse("Not Found", { status: 404 }) };
   }
@@ -282,34 +287,37 @@ function deferWebhookProcessing(strippedBody: unknown): void {
  * template lifecycle events, and account-level updates are handled.
  */
 function stripInboundMessages(webhookBody: unknown): unknown {
-  if (!webhookBody || typeof webhookBody !== "object") {
-    return webhookBody;
-  }
-  const body = webhookBody as { entry?: unknown[] };
-  if (!Array.isArray(body.entry)) {
+  if (
+    !webhookBody ||
+    typeof webhookBody !== "object" ||
+    !("entry" in webhookBody) ||
+    !Array.isArray(webhookBody.entry)
+  ) {
     return webhookBody;
   }
 
-  body.entry = body.entry.map(entry => {
-    if (!entry || typeof entry !== "object") {
+  const entries = webhookBody.entry.map((entry: unknown) => {
+    if (!entry || typeof entry !== "object" || !("changes" in entry) || !Array.isArray(entry.changes)) {
       return entry;
     }
-    const e = entry as { changes?: unknown[] };
-    if (!Array.isArray(e.changes)) {
-      return e;
-    }
-    e.changes = e.changes.map(change => {
-      if (!change || typeof change !== "object") {
+    const changes = entry.changes.map((change: unknown) => {
+      if (!change || typeof change !== "object" || !("value" in change)) {
         return change;
       }
-      const c = change as { value?: { messages?: unknown[] } };
-      if (c.value && Array.isArray(c.value.messages)) {
-        delete c.value.messages;
+      const val = change.value;
+      if (val && typeof val === "object" && "messages" in val && Array.isArray(val.messages)) {
+        const valObj: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(val)) {
+          if (k !== "messages") {
+            valObj[k] = v;
+          }
+        }
+        return { ...change, value: valObj };
       }
-      return c;
+      return change;
     });
-    return e;
+    return { ...entry, changes };
   });
 
-  return body;
+  return { ...webhookBody, entry: entries };
 }

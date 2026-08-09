@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationRepository, WhatsappAccountRepository } from "@/backend/db/repo";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
-import { invalidateEnvConfigCache } from "@/backend/lib/env-config-resolver";
 import {
   getWhatsappChannel,
   resetWhatsappChannel,
   whatsappChannel,
 } from "@/backend/services/communication/channels/whatsapp";
 import { redisService } from "@/backend/services/redis";
+import { invalidateEnvConfigCache } from "@/backend/services/system";
 import type { NotificationDeliverySelectType } from "@/backend/types";
 import type { WhatsappAccountSelectType } from "@/backend/types/whatsapp/whatsapp-account.types";
 
@@ -43,6 +43,10 @@ function mockWhatsappCredentialsAccount(overrides: Partial<WhatsappAccountSelect
     updatedAt: new Date(),
     ...overrides,
   };
+}
+
+function mockFetchResponse(body: Record<string, unknown>, status: number) {
+  return spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(body), { status }));
 }
 
 const mockDelivery: NotificationDeliverySelectType = {
@@ -174,10 +178,6 @@ describe("WhatsApp Channel Factory", () => {
       setSpy.mockRestore();
       fetchSpy?.mockRestore();
     });
-
-    function mockFetchResponse(body: Record<string, unknown>, status: number) {
-      return spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(body), { status }));
-    }
 
     async function sendWithMockedFetch(body: Record<string, unknown>, status: number) {
       fetchSpy = mockFetchResponse(body, status);

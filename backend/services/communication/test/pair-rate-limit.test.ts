@@ -24,9 +24,9 @@ function makeRedisModuleFactory(extras?: Record<string, unknown>) {
   };
 }
 
-mock.module("@/backend/services/redis", makeRedisModuleFactory());
+await mock.module("@/backend/services/redis", makeRedisModuleFactory());
 
-mock.module(
+await mock.module(
   "@/backend/services/redis/index",
   makeRedisModuleFactory({
     SessionRedisService: class SessionRedisService {
@@ -38,7 +38,7 @@ mock.module(
   })
 );
 
-mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     log: () => {},
     info: () => {},
@@ -48,12 +48,13 @@ mock.module("@/backend/lib/logger", () => ({
   },
 }));
 
-mock.module("@/backend/lib/field-encryption", () => ({
+await mock.module("@/backend/lib/field-encryption", () => ({
   encryptField: (val: string) => val,
   decryptField: (val: string) => val,
 }));
 
-mock.module("@/backend/lib/env-config-resolver", () => ({
+// Mock the entire system barrel to avoid pulling in real DB services during test
+await mock.module("@/backend/services/system", () => ({
   resolveEnvConfig: async (key: string) => {
     if (key === "WHATSAPP_ACCESS_TOKEN") return "test-token";
     if (key === "WHATSAPP_PHONE_NUMBER_ID") return "phone-id-123";
@@ -94,7 +95,7 @@ const mockDelivery = {
   updatedAt: new Date(),
 };
 
-mock.module("@/backend/db/repo", () => ({
+await mock.module("@/backend/db/repo", () => ({
   NotificationRepository: {
     createDelivery: async () => mockDelivery,
     updateDeliveryStatus: async () => mockDelivery,
@@ -109,14 +110,14 @@ mock.module("@/backend/db/repo", () => ({
   },
 }));
 
-mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
+await mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
   NotificationRepository: {
     createDelivery: async () => mockDelivery,
     updateDeliveryStatus: async () => mockDelivery,
   },
 }));
 
-mock.module("@/backend/db/schema", () => ({
+await mock.module("@/backend/db/schema", () => ({
   whatsappAccounts: {
     id: "wa",
     isActive: "isActive",
@@ -131,7 +132,7 @@ const mockFromChain = () => ({ where: mockWhereChain });
 const mockSelectChain = () => ({ from: mockFromChain });
 const mockQueryDb = () => ({ select: mockSelectChain });
 
-mock.module("@/backend/db", () => ({
+await mock.module("@/backend/db", () => ({
   queryDb: mockQueryDb,
   db: {},
 }));

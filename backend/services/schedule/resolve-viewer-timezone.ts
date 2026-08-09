@@ -1,7 +1,7 @@
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { parseIanaTimezone } from "@/backend/lib/enum";
+import { parseIanaTimezone } from "@/shared/lib/enum";
 
 /**
  * Resolves the viewer's IANA timezone for schedule day-boundary calculations.

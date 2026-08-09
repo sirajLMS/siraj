@@ -1,9 +1,9 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
 import { logger } from "@/backend/lib/logger";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
 import { PostgresCacheAdapter } from "@/backend/services/cache/PostgresCacheAdapter";
+import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
 
 const CACHE_STATE_KEY = Symbol.for("siraj.cacheState");
 
@@ -79,7 +79,7 @@ async function createCacheService(): Promise<ICacheService> {
       return await createRedisCache();
 
     default:
-      logger.warn(`Unknown cache provider: ${provider}, falling back to redis`);
+      logger.warn(`Unknown cache provider: ${String(provider)}, falling back to redis`);
       return await createRedisCache();
   }
 }
@@ -115,7 +115,7 @@ export const getCacheService = async (): Promise<ICacheService> => {
 export const resetCacheService = (): void => {
   const state = getCacheState();
   if (state.instance) {
-    state.instance.disconnect();
+    void state.instance.disconnect();
     state.instance = null;
   }
   state.initializationPromise = null;

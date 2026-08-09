@@ -70,6 +70,20 @@ export type AdminNoteInfo = {
   lastUpdated: Maybe<Scalars['String']['output']>;
 };
 
+export type AdminResetPasswordInput = {
+  newPassword: Scalars['String']['input'];
+  sendNotificationEmail: InputMaybe<Scalars['Boolean']['input']>;
+  userId: Scalars['ID']['input'];
+};
+
+export type AdminResetPasswordResult = {
+  __typename?: 'AdminResetPasswordResult';
+  emailSent: Maybe<Scalars['Boolean']['output']>;
+  message: Maybe<Scalars['String']['output']>;
+  success: Maybe<Scalars['Boolean']['output']>;
+  userId: Maybe<Scalars['ID']['output']>;
+};
+
 export type AdminRevokeTokenInput = {
   providerSlug: MeetingIntegrationProviderSlug;
   userId: Scalars['String']['input'];
@@ -166,6 +180,10 @@ export enum AppPermission {
   ProfileCoreIdentityEditOwn = 'PROFILE_CORE_IDENTITY_EDIT_OWN',
   ProfileCoreIdentityViewOther = 'PROFILE_CORE_IDENTITY_VIEW_OTHER',
   ProfileCoreIdentityViewOwn = 'PROFILE_CORE_IDENTITY_VIEW_OWN',
+  ProfileCoreStatusEditOther = 'PROFILE_CORE_STATUS_EDIT_OTHER',
+  ProfileCoreStatusEditOwn = 'PROFILE_CORE_STATUS_EDIT_OWN',
+  ProfileCoreStatusViewOther = 'PROFILE_CORE_STATUS_VIEW_OTHER',
+  ProfileCoreStatusViewOwn = 'PROFILE_CORE_STATUS_VIEW_OWN',
   ProfileMeetingConfigsEditOther = 'PROFILE_MEETING_CONFIGS_EDIT_OTHER',
   ProfileMeetingConfigsEditOwn = 'PROFILE_MEETING_CONFIGS_EDIT_OWN',
   ProfileMeetingConfigsViewOther = 'PROFILE_MEETING_CONFIGS_VIEW_OTHER',
@@ -328,6 +346,7 @@ export enum AppPermission {
   TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
   TestSystemOnly = 'TEST_SYSTEM_ONLY',
+  UserAdminResetPassword = 'USER_ADMIN_RESET_PASSWORD',
   WhatsappConfigManage = 'WHATSAPP_CONFIG_MANAGE',
   WhatsappTemplatesManage = 'WHATSAPP_TEMPLATES_MANAGE',
   WhatsappView = 'WHATSAPP_VIEW'
@@ -887,6 +906,8 @@ export type CoreUserProfileFieldsInput = {
   displayCurrency: InputMaybe<CurrencyCode>;
   email: InputMaybe<Scalars['String']['input']>;
   name: InputMaybe<Scalars['String']['input']>;
+  /** User account status (super admin only) */
+  status: InputMaybe<AccountStatus>;
   timezone: InputMaybe<IanaTimezone>;
 };
 
@@ -2599,6 +2620,7 @@ export type ManagerDirectoryRow = {
   roleSlug: Maybe<Scalars['String']['output']>;
   staffProfileId: Maybe<Scalars['String']['output']>;
   status: Maybe<AccountStatus>;
+  userId: Maybe<Scalars['String']['output']>;
 };
 
 /** Manager/Staff account details */
@@ -2791,6 +2813,7 @@ export type Mutation = {
   activateClass: Maybe<ClassInstanceDetail>;
   activateOverrideClass: Maybe<ClassInstanceDetail>;
   activateSupportedCurrency: Maybe<SupportedCurrency>;
+  adminResetPassword: Maybe<AdminResetPasswordResult>;
   adminRevokeMeetingProviderToken: Maybe<AdminRevokeTokenResult>;
   /** Approve a pending lesson report (supervisor/manager action) */
   approveLessonReport: Maybe<LessonReport>;
@@ -3025,6 +3048,11 @@ export type MutationActivateOverrideClassArgs = {
 
 export type MutationActivateSupportedCurrencyArgs = {
   input: SupportedCurrencyUpsertInput;
+};
+
+
+export type MutationAdminResetPasswordArgs = {
+  input: AdminResetPasswordInput;
 };
 
 
@@ -4004,6 +4032,7 @@ export enum NotificationEventType {
   OnDemandInstanceReminderT1 = 'ON_DEMAND_INSTANCE_REMINDER_T1',
   OnDemandInstanceReminderT3 = 'ON_DEMAND_INSTANCE_REMINDER_T3',
   OnDemandTeacherDailyDigest = 'ON_DEMAND_TEACHER_DAILY_DIGEST',
+  PasswordResetByAdmin = 'PASSWORD_RESET_BY_ADMIN',
   PaymentMethodChanged = 'PAYMENT_METHOD_CHANGED',
   QuotaExpired = 'QUOTA_EXPIRED',
   QuotaExpiringSoon = 'QUOTA_EXPIRING_SOON',
@@ -6508,29 +6537,29 @@ export type SystemSetting = {
 };
 
 export enum SystemSettingCategory {
-  App = 'app',
-  Auth = 'auth',
-  Billing = 'billing',
-  Cache = 'cache',
-  Communication = 'communication',
-  Email = 'email',
-  Fx = 'fx',
-  General = 'general',
-  Meeting = 'meeting',
-  Push = 'push',
-  Redis = 'redis',
-  Scheduling = 'scheduling',
-  Security = 'security',
-  Sms = 'sms',
-  Storage = 'storage',
-  System = 'system'
+  App = 'App',
+  Auth = 'Auth',
+  Billing = 'Billing',
+  Cache = 'Cache',
+  Communication = 'Communication',
+  Email = 'Email',
+  Fx = 'Fx',
+  General = 'General',
+  Meeting = 'Meeting',
+  Push = 'Push',
+  Redis = 'Redis',
+  Scheduling = 'Scheduling',
+  Security = 'Security',
+  Sms = 'Sms',
+  Storage = 'Storage',
+  System = 'System'
 }
 
 export enum SystemSettingDataType {
-  Boolean = 'boolean',
-  Integer = 'integer',
-  Json = 'json',
-  String = 'string'
+  Boolean = 'Boolean',
+  Integer = 'Integer',
+  Json = 'Json',
+  String = 'String'
 }
 
 export type SystemSettingUpsertInput = {

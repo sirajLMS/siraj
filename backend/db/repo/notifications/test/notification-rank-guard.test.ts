@@ -9,7 +9,6 @@ import { runInRollback } from "@/backend/db/test/test-utils";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 
 function notificationTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
-  // eslint-disable-next-line sonarjs/assertions-in-tests -- assertions are inside runInRollback(fn)
   test(name, async () => {
     await runInRollback(fn);
   });

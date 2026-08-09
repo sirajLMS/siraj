@@ -35,6 +35,7 @@ export const errorsAr: ErrorsLabels = {
     groupSimulationAlreadyHasGroup: "لديك هذه المجموعة بالفعل؛ اختر مجموعة أخرى للمحاكاة",
     insufficientPermissions: "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
     impersonationNotAllowedWhileImpersonating: "لا يمكنك انتحال هوية أثناء انتحال هوية أخرى.",
+    cannotResetOwnPasswordViaAdmin: "لا يمكنك إعادة تعيين كلمة مرورك الخاصة عبر مسار الإدارة.",
     // ─── Functions (were {param} strings) ────────────────────────────
     demoGroupNotFound: (groupSlug: string) => `مجموعة العرض غير موجودة: ${groupSlug}`,
     demoGroupNoUser: (groupSlug: string) => `لم يتم العثور على مستخدم لمجموعة العرض: ${groupSlug}`,

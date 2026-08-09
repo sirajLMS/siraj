@@ -16,6 +16,12 @@ export type AdminDashboardScheduleInput = {
   teacherId: string | null | undefined;
 };
 
+export type AdminResetPasswordInput = {
+  newPassword: string;
+  sendNotificationEmail: boolean | null | undefined;
+  userId: string | number;
+};
+
 export type AdminRevokeTokenInput = {
   providerSlug: MeetingIntegrationProviderSlug;
   userId: string;
@@ -94,6 +100,10 @@ export type AppPermission =
   | 'PROFILE_CORE_IDENTITY_EDIT_OWN'
   | 'PROFILE_CORE_IDENTITY_VIEW_OTHER'
   | 'PROFILE_CORE_IDENTITY_VIEW_OWN'
+  | 'PROFILE_CORE_STATUS_EDIT_OTHER'
+  | 'PROFILE_CORE_STATUS_EDIT_OWN'
+  | 'PROFILE_CORE_STATUS_VIEW_OTHER'
+  | 'PROFILE_CORE_STATUS_VIEW_OWN'
   | 'PROFILE_MEETING_CONFIGS_EDIT_OTHER'
   | 'PROFILE_MEETING_CONFIGS_EDIT_OWN'
   | 'PROFILE_MEETING_CONFIGS_VIEW_OTHER'
@@ -256,6 +266,7 @@ export type AppPermission =
   | 'TEST_CUSTOM_ALT'
   | 'TEST_CUSTOM_ONLY'
   | 'TEST_SYSTEM_ONLY'
+  | 'USER_ADMIN_RESET_PASSWORD'
   | 'WHATSAPP_CONFIG_MANAGE'
   | 'WHATSAPP_TEMPLATES_MANAGE'
   | 'WHATSAPP_VIEW';
@@ -446,6 +457,8 @@ export type CoreUserProfileFieldsInput = {
   displayCurrency: CurrencyCode | null | undefined;
   email: string | null | undefined;
   name: string | null | undefined;
+  /** User account status (super admin only) */
+  status: AccountStatus | null | undefined;
   timezone: IanaTimezone | null | undefined;
 };
 
@@ -1532,6 +1545,7 @@ export type NotificationEventType =
   | 'ON_DEMAND_INSTANCE_REMINDER_T1'
   | 'ON_DEMAND_INSTANCE_REMINDER_T3'
   | 'ON_DEMAND_TEACHER_DAILY_DIGEST'
+  | 'PASSWORD_RESET_BY_ADMIN'
   | 'PAYMENT_METHOD_CHANGED'
   | 'QUOTA_EXPIRED'
   | 'QUOTA_EXPIRING_SOON'
@@ -2010,28 +2024,28 @@ export type SupportedPaymentLinkUpdateInput = {
 };
 
 export type SystemSettingCategory =
-  | 'app'
-  | 'auth'
-  | 'billing'
-  | 'cache'
-  | 'communication'
-  | 'email'
-  | 'fx'
-  | 'general'
-  | 'meeting'
-  | 'push'
-  | 'redis'
-  | 'scheduling'
-  | 'security'
-  | 'sms'
-  | 'storage'
-  | 'system';
+  | 'App'
+  | 'Auth'
+  | 'Billing'
+  | 'Cache'
+  | 'Communication'
+  | 'Email'
+  | 'Fx'
+  | 'General'
+  | 'Meeting'
+  | 'Push'
+  | 'Redis'
+  | 'Scheduling'
+  | 'Security'
+  | 'Sms'
+  | 'Storage'
+  | 'System';
 
 export type SystemSettingDataType =
-  | 'boolean'
-  | 'integer'
-  | 'json'
-  | 'string';
+  | 'Boolean'
+  | 'Integer'
+  | 'Json'
+  | 'String';
 
 export type SystemSettingUpsertInput = {
   category: SystemSettingCategory | null | undefined;
@@ -2449,6 +2463,18 @@ export type ChangePasswordMutationVariables = Exact<{
 
 
 export type ChangePasswordMutation = ChangePasswordMutation_Mutation;
+
+export type AdminResetPasswordMutation_adminResetPassword_AdminResetPasswordResult = { success: boolean | null, userId: string | null, message: string | null };
+
+export type AdminResetPasswordMutation_Mutation = { adminResetPassword: AdminResetPasswordMutation_adminResetPassword_AdminResetPasswordResult | null };
+
+
+export type AdminResetPasswordMutationVariables = Exact<{
+  input: Types.AdminResetPasswordInput;
+}>;
+
+
+export type AdminResetPasswordMutation = AdminResetPasswordMutation_Mutation;
 
 export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_overdueAmountsByCurrency_BillingCurrencyTotal_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -4595,7 +4621,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfil
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
@@ -4613,7 +4639,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStuden
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, roleSlug: string | null, roleName: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, roleSlug: string | null, roleName: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup = { id: string | null, name: string | null, slug: string | null, description: string | null };
 
@@ -4647,7 +4673,7 @@ export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnPr
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, teacherOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, parentOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, staffProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
 
@@ -4661,7 +4687,7 @@ export type UpdateOwnProfileMutationVariables = Exact<{
 
 export type UpdateOwnProfileMutation = UpdateOwnProfileMutation_Mutation;
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -4673,7 +4699,7 @@ export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMe
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile | null, paymentMethods: Array<UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethods_UserPaymentMethod> | null, paymentMethodDefaults: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethodDefaults_PaymentMethodDefaults | null, staffProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
 

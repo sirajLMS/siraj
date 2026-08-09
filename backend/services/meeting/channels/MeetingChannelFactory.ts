@@ -1,4 +1,3 @@
-import { invalidateEnvConfigCache, resolveEnvConfigMany } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
 import type {
   GenerateMeetingInput,
@@ -7,6 +6,7 @@ import type {
   MeetingProvider,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { UnsupportedProviderKindError } from "@/backend/services/meeting/channels/IMeetingChannel";
+import { invalidateEnvConfigCache, resolveEnvConfigMany } from "@/backend/services/system";
 
 // ============================================================================
 // Env keys per provider slug
@@ -127,9 +127,7 @@ export const resetMeetingChannel = async (slug: MeetingProvider): Promise<void> 
 
 export const resetAllMeetingChannels = async (): Promise<void> => {
   const slugs = [...instances.keys()];
-  for (const slug of slugs) {
-    await resetMeetingChannel(slug);
-  }
+  await Promise.all(slugs.map(slug => resetMeetingChannel(slug)));
 };
 
 /**

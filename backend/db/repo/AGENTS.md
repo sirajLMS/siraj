@@ -26,7 +26,7 @@ backend/db/repo/
 ├── notifications/       notification, notification-preferences
 ├── complaints/          complaint, complaint-response
 ├── storage/             storage, learning-resource
-└── utils/               repo-internal helpers (e.g. resolve-localized)
+└── utils/               repo-internal helpers
 ```
 
 Each sub-directory (except `scheduling/` and `utils/` which pre-date this refactor and have their own internal barrels) contains its own `index.ts` barrel that re-exports every `*.repository.ts` file in that sub-directory. The top-level `backend/db/repo/index.ts` re-exports every sub-directory barrel.

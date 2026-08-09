@@ -1,6 +1,5 @@
 import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
 import { AppPermission, StudentStatus } from "@/backend/enum";
-import { parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
@@ -13,6 +12,7 @@ import type {
   ParentProfileUpdateInput,
   ReactivateParentResult,
 } from "@/backend/types";
+import { parseStudentStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export type {

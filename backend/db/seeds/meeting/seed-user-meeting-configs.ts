@@ -31,7 +31,6 @@ export async function seedOrGet(teachersList: TeacherSelectType[], config?: Seed
     details: {
       meetingUrl: index === 0 ? "https://zoom.us/j/seed-teacher-room" : "https://meet.google.com/seed-teacher-room",
     },
-    // eslint-disable-next-line sonarjs/no-hardcoded-passwords -- seed test data
     password: index === 0 ? "seed-zoom-pass" : null,
   }));
 

@@ -31,11 +31,44 @@
     "cancel": "Cancel",
     "retry": "Retry",
     "saveSuccess": "Profile saved successfully.",
-    "saveError": "Failed to save profile."
+    "saveError": "Failed to save profile.",
+    "manageLifecycle": "Manage Account Lifecycle"
   },
   "errors": {
     "failedToLoad": "Failed to load profile.",
     "notFound": "Profile not found."
+  },
+  "changePassword": {
+    "title": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "submit": "Update Password",
+    "success": "Password updated successfully"
+  },
+  "adminResetPassword": {
+    "title": "Reset Password",
+    "description": {
+      "__fn": "(userName, userEmail) => `Set a new password for ${userName} (${userEmail})`"
+    },
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "sendEmail": "Send reset email to user",
+    "sendEmailLabel": "Send reset email to user",
+    "resetButton": "Reset Password",
+    "resettingButton": "Resetting...",
+    "cancelButton": "Cancel",
+    "success": "Password reset successfully. An email has been sent to the user.",
+    "error": "Failed to reset password. Please try again.",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "accountStatus": "Account Status",
+    "statusActivated": "Activated",
+    "statusDeactivated": "Deactivated",
+    "cannotResetOwnPasswordViaAdmin": "You cannot reset your own password via admin action. Use the change password feature instead."
   },
   "convertedAmount": {
     "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
@@ -46,225 +79,6 @@
   "fieldAccess": {
     "restrictedTitle": "Restricted",
     "restrictedDescription": "You do not have permission to view these details."
-  },
-  "teacher": {
-    "ownSubtitle": "View and update your teaching profile and contact details.",
-    "subtitle": "Manage institutional credentials and administrative details for faculty.",
-    "adminBanner": "Admin view: Identity, Zoom details, and status visible.",
-    "sections": {
-      "account": "Account",
-      "contact": "Contact Information",
-      "zoom": "Zoom",
-      "compensation": "Compensation",
-      "identity": "Identity",
-      "professional": "Professional Qualifications",
-      "stats": "Statistics",
-      "adminOnly": "Administrative Details"
-    },
-    "baseSalary": {
-      "__fn": "(amount, currency) => `${amount} ${currency}`"
-    },
-    "paymentMethod": {
-      "__fn": "(method) => method"
-    },
-    "convertedAmount": {
-      "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
-    },
-    "stats": {
-      "totalClasses": "Total Classes",
-      "avgEngagement": "Average Engagement"
-    },
-    "fields": {
-      "fullName": "Full Name",
-      "primaryEmail": "Primary Email",
-      "phone": "Phone",
-      "address": "Address",
-      "timezone": "Timezone",
-      "nationalId": "National ID",
-      "dateOfBirth": "Date of Birth",
-      "gender": "Gender",
-      "qualifications": "Qualifications",
-      "hourlyRate": "Hourly Rate",
-      "currency": "Currency",
-      "paymentMethod": "Payment Method",
-      "status": "Account Status",
-      "displayCurrency": "Display Currency",
-      "avatar": "Avatar"
-    },
-    "gender": {
-      "male": "Male",
-      "female": "Female"
-    },
-    "status": {
-      "activated": "Activated",
-      "deactivated": "Deactivated"
-    },
-    "nationalIdCompletion": {
-      "banner": "You must enter your National ID before you can use the dashboard.",
-      "action": "Enter your National ID in the Identity section below and save."
-    },
-    "validation": {
-      "nationalIdRequired": "National ID is required.",
-      "nationalIdInvalid": "National ID is invalid for the selected nationality."
-    },
-    "shell": {
-      "tabs": {
-        "profile": "Profile",
-        "paymentMethods": "Payment Methods",
-        "meeting": "Meeting Settings",
-        "students": "Students",
-        "notifications": "Notifications",
-        "permissions": "Permissions"
-      },
-      "loading": "Loading profile...",
-      "error": {
-        "retry": "Retry"
-      }
-    },
-    "actions": {
-      "edit": "Edit Profile",
-      "save": "Save Changes",
-      "cancel": "Cancel",
-      "retry": "Retry",
-      "saveSuccess": "Profile saved successfully.",
-      "saveError": "Failed to save profile."
-    },
-    "errors": {
-      "failedToLoad": "Failed to load profile.",
-      "notFound": "Profile not found."
-    }
-  },
-  "parent": {
-    "ownSubtitle": "View and update your contact and communication details.",
-    "subtitle": "Manage contact and communication details for the student's primary guardian.",
-    "adminBanner": "Admin view: Identity and billing fields visible.",
-    "convertedAmount": {
-      "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
-    },
-    "sections": {
-      "account": "Account",
-      "contact": "Contact Information",
-      "social": "Social & Communication",
-      "identity": "Identity",
-      "billing": "Billing",
-      "students": "Associated Students"
-    },
-    "fields": {
-      "fullName": "Full Name",
-      "primaryEmail": "Primary Email",
-      "phone": "Phone",
-      "whatsapp": "WhatsApp",
-      "facebook": "Facebook",
-      "twitter": "Twitter",
-      "nationality": "Nationality",
-      "address": "Address",
-      "invoiceType": "Invoice Type",
-      "feeAmount": "Base Fee Value",
-      "paymentMethod": "Default Payment Method",
-      "currency": "Currency",
-      "displayCurrency": "Display Currency",
-      "timezone": "Timezone",
-      "lifecycleStatus": "Lifecycle Status",
-      "accountStatus": "Account Status",
-      "avatar": "Avatar"
-    },
-    "status": {
-      "regular": "Regular",
-      "on_trial": "On Trial",
-      "on_leave": "On Leave",
-      "suspended": "Suspended",
-      "deactivated": "Deactivated"
-    },
-    "accountStatus": {
-      "activated": "Activated",
-      "deactivated": "Deactivated"
-    },
-    "actions": {
-      "deactivateAccount": "Revoke Login Access",
-      "deactivateDialogTitle": "Revoke Parent Login Access",
-      "deactivateConfirmText": "Are you sure you want to revoke this parent's login access? They will be immediately logged out and unable to sign in until access is restored.",
-      "reactivateAccount": "Restore Login Access",
-      "reactivateDialogTitle": "Restore Parent Login Access",
-      "reactivateConfirmText": "Are you sure you want to restore login access for this parent? They will be able to sign in again. This does not change their lifecycle status.",
-      "cancel": "Cancel",
-      "deactivating": "Revoking access...",
-      "reactivating": "Restoring access...",
-      "deactivateSuccess": "Parent login access has been revoked.",
-      "reactivateSuccess": "Parent login access has been restored.",
-      "manageLifecycle": "Manage Lifecycle"
-    },
-    "common": {
-      "student": {
-        "fallbackInitial": "S"
-      },
-      "teacher": {
-        "fallbackInitial": "T"
-      }
-    },
-    "students": {
-      "empty": "No students currently associated.",
-      "mobileListLabel": "Associated Students List",
-      "columns": {
-        "name": "Student Name",
-        "status": "Status",
-        "teacher": "Teacher",
-        "hoursPerWeek": "Hours/Week"
-      },
-      "statusLabel": {
-        "regular": "Regular",
-        "on_trial": "On Trial",
-        "on_leave": "On Leave",
-        "suspended": "Suspended",
-        "deactivated": "Deactivated"
-      }
-    },
-    "notSet": "Not set"
-  },
-  "staff": {
-    "ownSubtitle": "View and update your account and contact details.",
-    "subtitle": "Manage system-wide roles and permissions for administrative staff.",
-    "adminBanner": "Admin view: Status and permissions visible.",
-    "sections": {
-      "account": "Account Information",
-      "contact": "Contact Information",
-      "role": "Role Information",
-      "compensation": "Compensation",
-      "permissions": "Effective Permissions"
-    },
-    "fields": {
-      "fullName": "Full Name",
-      "primaryEmail": "Email",
-      "phone": "Phone",
-      "timezone": "Timezone",
-      "roleName": "Role",
-      "roleSlug": "Role ID",
-      "department": "Department",
-      "status": "Account Status",
-      "statusActive": "Active",
-      "statusInactive": "Inactive",
-      "displayCurrency": "Display Currency",
-      "avatar": "Avatar",
-      "hourlyRate": "Hourly Rate",
-      "currency": "Currency"
-    },
-    "permissions": {
-      "inheritedGroups": "Permission Groups",
-      "directOverrides": "Direct Overrides",
-      "empty": {
-        "title": "No permission groups assigned",
-        "description": "This staff member has no inherited permission groups. Assign groups via Permission Management.",
-        "ownDescription": "You do not have any permission groups assigned yet."
-      },
-      "columns": {
-        "resource": "Resource",
-        "action": "Action",
-        "state": "Status"
-      },
-      "states": {
-        "granted": "Granted",
-        "denied": "Denied"
-      }
-    }
   },
   "banking": {
     "title": "Banking & Payment Details",
@@ -323,83 +137,5 @@
       "failedToLoad": "Failed to load assigned students.",
       "retry": "Retry"
     }
-  },
-  "notifications": {
-    "title": "Notification Preferences",
-    "description": "Select how you receive updates for each event type and channel.",
-    "saved": "Notification preferences saved.",
-    "errorLoading": "Failed to load notification preferences.",
-    "errorSaving": "Failed to save notification preferences.",
-    "autoGeneration": {
-      "title": "Auto-generation modes",
-      "onSave": "On save — a meeting URL is generated automatically when you enable auto-generation",
-      "preview": "Preview — generate a test URL to see what your meeting will look like",
-      "booking": "Booking — a fresh URL is generated when a meeting is booked",
-      "learnMore": "Learn more"
-    },
-    "categories": {
-      "info": "Informational",
-      "reminder": "Reminders",
-      "urgent": "Urgent",
-      "digest": "Digests"
-    },
-    "channels": {
-      "EMAIL": "Email",
-      "SMS": "SMS",
-      "PUSH": "Push Notifications",
-      "ON_APP": "In-App",
-      "WHATSAPP": "WhatsApp"
-    },
-    "events": {
-      "CLASS_REMINDER": "Class Reminders",
-      "INVOICE_GENERATED": "Invoice Generation",
-      "COMPLAINT_RESPONSE": "Complaint Responses",
-      "PAYMENT_METHOD_CHANGED": "Payment Method Changed",
-      "NEW_COMPLAINT": "New Complaints",
-      "NEW_SUGGESTION": "New Suggestions",
-      "SUGGESTION_ACKNOWLEDGED": "Suggestion Acknowledged",
-      "SUGGESTION_DUPLICATE_MARKED": "Suggestion Marked Duplicate",
-      "CLASS_SCHEDULED": "Class Scheduled",
-      "CLASS_ACTIVATED": "Class Activated",
-      "CLASS_STARTED": "Class Started",
-      "CLASS_COMPLETED": "Class Completed",
-      "CLASS_MARKED_ABSENT": "Marked Absent",
-      "CLASS_MARKED_MISSED": "Class Missed",
-      "CLASS_LEAVE_REQUESTED": "Leave Requested",
-      "CLASS_RESCHEDULED": "Class Rescheduled",
-      "CLASS_CANCELLED": "Class Cancelled",
-      "CLASS_RESET": "Class Reset",
-      "LESSON_REPORT_SUBMITTED": "Lesson Report Submitted",
-      "LESSON_REPORT_REVIEWED": "Lesson Report Reviewed",
-      "QUOTA_EXPIRING_SOON": "Quota Expiring Soon",
-      "QUOTA_EXPIRED": "Quota Expired",
-      "QUOTA_LOW_BALANCE": "Quota Low Balance",
-      "ON_DEMAND_INSTANCE_PENDING_CREDIT": "On-Demand Credit Pending",
-      "ON_DEMAND_INSTANCE_REMINDER_T3": "On-Demand Reminder (3 days)",
-      "ON_DEMAND_INSTANCE_REMINDER_T1": "On-Demand Reminder (1 day)",
-      "ON_DEMAND_TEACHER_DAILY_DIGEST": "Teacher Daily On-Demand Digest"
-    },
-    "connectAccount": {
-      "connectButton": "Connect",
-      "connectingLabel": "Connecting...",
-      "connectedAs": {
-        "__fn": "(email) => `Connected as ${email}`"
-      },
-      "disconnectButton": "Disconnect",
-      "disconnectConfirmTitle": "Disconnect meeting provider",
-      "disconnectConfirm": "Are you sure you want to disconnect this meeting provider? You will need to re-connect to use it again.",
-      "confirmDisconnect": "Disconnect",
-      "cancel": "Cancel",
-      "reconnectButton": "Reconnect",
-      "reconnectCallout": "Reconnect your account"
-    }
-  },
-  "changePassword": {
-    "title": "Change Password",
-    "currentPassword": "Current Password",
-    "newPassword": "New Password",
-    "confirmPassword": "Confirm New Password",
-    "submit": "Update Password",
-    "success": "Password updated successfully"
   }
 }

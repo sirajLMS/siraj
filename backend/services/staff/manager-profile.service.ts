@@ -1,9 +1,9 @@
 import { StaffProfileRepository, UserRepository } from "@/backend/db";
 import { type AccountStatus, AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { parseAccountStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import type { ManagerDirectoryRow } from "@/backend/types";
+import { parseAccountStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export interface UpdateManagerProfileInput {

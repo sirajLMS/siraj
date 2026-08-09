@@ -3,9 +3,7 @@ import type { AppLocale } from "@/shared/locale/AppLocale";
 const DB_NAME = "siraj-locale-snapshots";
 const DB_VERSION = 1;
 const STORE_NAME = "snapshots";
-
-let hasLoggedFirstHit = false;
-let hasLoggedBuildMismatch = false;
+const FN_PROP = "__fn";
 
 const stats = {
   hits: 0,
@@ -26,14 +24,14 @@ function getDb(): Promise<IDBDatabase | null> {
     try {
       const idb = globalThis.indexedDB;
       const req = idb.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = () => {
+      req.addEventListener("upgradeneeded", () => {
         const db = req.result;
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: "key" });
         }
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => resolve(null);
+      });
+      req.addEventListener("success", () => resolve(req.result));
+      req.addEventListener("error", () => resolve(null));
     } catch {
       resolve(null);
     }
@@ -43,13 +41,17 @@ function getDb(): Promise<IDBDatabase | null> {
 }
 
 export function reviver(_key: string, val: unknown): unknown {
-  if (val && typeof val === "object" && "__fn" in val && typeof val.__fn === "string") {
-    try {
-      const fnValue = val.__fn;
-      // eslint-disable-next-line sonarjs/code-eval
-      return new Function(`return (${fnValue})`)();
-    } catch {
-      return val;
+  if (val && typeof val === "object" && FN_PROP in val) {
+    const fnValue = val[FN_PROP as keyof typeof val];
+    if (typeof fnValue === "string") {
+      try {
+        const fnObj: unknown = Reflect.construct(globalThis.Function, [`return (${fnValue})`]);
+        if (typeof fnObj === "function") {
+          return fnObj();
+        }
+      } catch {
+        return val;
+      }
     }
   }
   return val;
@@ -73,8 +75,8 @@ export async function readSnapshot<TLabels>(
         const tx = db.transaction(STORE_NAME, "readonly");
         const store = tx.objectStore(STORE_NAME);
         const req = store.get(key);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => resolve(undefined);
+        req.addEventListener("success", () => resolve(req.result));
+        req.addEventListener("error", () => resolve(undefined));
       } catch {
         resolve(undefined);
       }
@@ -85,15 +87,8 @@ export async function readSnapshot<TLabels>(
       return undefined;
     }
 
-    const labels = JSON.parse(result.json, reviver) as TLabels;
+    const labels: TLabels = JSON.parse(result.json, reviver);
     stats.hits++;
-    if (!hasLoggedFirstHit) {
-      hasLoggedFirstHit = true;
-      if (typeof console !== "undefined") {
-        // eslint-disable-next-line no-console
-        console.info(`[locale-cache] IndexedDB snapshot hit for ${namespaceId}:${locale}`);
-      }
-    }
     return labels;
   } catch {
     stats.misses++;
@@ -101,10 +96,10 @@ export async function readSnapshot<TLabels>(
   }
 }
 
-export async function writeSnapshot<TLabels>(
+export async function writeSnapshot(
   namespaceId: string,
   locale: AppLocale,
-  labels: TLabels,
+  labels: unknown,
   buildId = process.env.NEXT_PUBLIC_BUILD_ID ?? ""
 ): Promise<void> {
   try {
@@ -120,11 +115,11 @@ export async function writeSnapshot<TLabels>(
         const tx = db.transaction(STORE_NAME, "readwrite");
         const store = tx.objectStore(STORE_NAME);
         const req = store.put(item);
-        req.onsuccess = () => {
+        req.addEventListener("success", () => {
           stats.size++;
           resolve();
-        };
-        req.onerror = () => resolve();
+        });
+        req.addEventListener("error", () => resolve());
       } catch {
         resolve();
       }
@@ -144,8 +139,19 @@ export async function wipeIfBuildIdChanged(buildId: string): Promise<boolean> {
         const tx = db.transaction(STORE_NAME, "readonly");
         const store = tx.objectStore(STORE_NAME);
         const req = store.getAllKeys();
-        req.onsuccess = () => resolve((req.result as string[]) ?? []);
-        req.onerror = () => resolve([]);
+        req.addEventListener("success", () => {
+          const res = req.result;
+          if (Array.isArray(res)) {
+            const stringKeys: string[] = [];
+            for (const item of res) {
+              if (typeof item === "string") stringKeys.push(item);
+            }
+            resolve(stringKeys);
+          } else {
+            resolve([]);
+          }
+        });
+        req.addEventListener("error", () => resolve([]));
       } catch {
         resolve([]);
       }
@@ -154,21 +160,13 @@ export async function wipeIfBuildIdChanged(buildId: string): Promise<boolean> {
     const hasDifferentBuildId = keys.some(k => !k.startsWith(`${buildId}:`));
     if (!hasDifferentBuildId) return false;
 
-    if (!hasLoggedBuildMismatch) {
-      hasLoggedBuildMismatch = true;
-      if (typeof console !== "undefined") {
-        // eslint-disable-next-line no-console
-        console.info(`[locale-cache] BUILD_ID mismatch detected. Wiping IndexedDB snapshot store.`);
-      }
-    }
-
     await new Promise<void>(resolve => {
       try {
         const tx = db.transaction(STORE_NAME, "readwrite");
         const store = tx.objectStore(STORE_NAME);
         const req = store.clear();
-        req.onsuccess = () => resolve();
-        req.onerror = () => resolve();
+        req.addEventListener("success", () => resolve());
+        req.addEventListener("error", () => resolve());
       } catch {
         resolve();
       }

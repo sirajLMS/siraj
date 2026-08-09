@@ -2,21 +2,7 @@ import { z } from "zod";
 import { localizedStringRequiredSchema } from "@/backend/lib/payment-method.validation";
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
-// ============================================================================
-// URL allowlist — host must match one of the provider patterns
-// ============================================================================
-
-export function isUrlAllowedByProvider(url: string, allowlist: readonly string[]): boolean {
-  try {
-    const hostname = new URL(url).hostname.toLowerCase();
-    return allowlist.some(pattern => {
-      const normalized = pattern.toLowerCase().replace(/^\*\./, "");
-      return hostname === normalized || hostname.endsWith(`.${normalized}`);
-    });
-  } catch {
-    return false;
-  }
-}
+import { isUrlAllowedByProvider } from "@/shared/lib/meeting-config";
 
 function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z.ZodType<MeetingConfigDetails> {
   // Gate on providerKind rather than fieldSchema.supportsAutoGeneration:

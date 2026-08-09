@@ -111,17 +111,7 @@ import type {
   MeetingConfigProviderSelectLabels,
   MeetingConfigRecurringScheduleLabels,
   MeetingConfigSummaryLabels,
-  PaymentMethodDefaultsEditorLabels,
-  PaymentMethodDirectionLabels,
-  PaymentMethodDisplayLabels,
-  PaymentMethodIdentifierLabels,
   PaymentMethodLabels,
-  PaymentMethodListLabels,
-  PaymentMethodManagerLabels,
-  PaymentMethodSelectLabels,
-  PaymentMethodTypeFieldsLabels,
-  PaymentMethodTypeLabels,
-  PaymentMethodTypeSelectorLabels,
   PhoneInputLabels,
   TagInputLabels,
   TimezoneSelectLabels,
@@ -232,16 +222,6 @@ export interface UiTranslations {
   meetingConfigSummary: MeetingConfigSummaryLabels;
   meetingConfigRecurringSchedule: MeetingConfigRecurringScheduleLabels;
   paymentMethod: PaymentMethodLabels;
-  paymentMethodTypeSelector: PaymentMethodTypeSelectorLabels;
-  paymentMethodSelect: PaymentMethodSelectLabels;
-  paymentMethodDisplay: PaymentMethodDisplayLabels;
-  paymentMethodList: PaymentMethodListLabels;
-  paymentMethodManager: PaymentMethodManagerLabels;
-  paymentMethodDefaultsEditor: PaymentMethodDefaultsEditorLabels;
-  paymentMethodTypeFields: PaymentMethodTypeFieldsLabels;
-  paymentMethodType: PaymentMethodTypeLabels;
-  paymentMethodDirection: PaymentMethodDirectionLabels;
-  paymentMethodIdentifier: PaymentMethodIdentifierLabels;
   phoneInput: PhoneInputLabels;
   tagInput: TagInputLabels;
   timezoneSelect: TimezoneSelectLabels;

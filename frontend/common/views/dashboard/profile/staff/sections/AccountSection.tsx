@@ -1,6 +1,7 @@
 "use client";
 
-import { MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { MenuItem, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { useState } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import {
@@ -8,6 +9,7 @@ import {
   type CurrencyCode,
   type ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type {
@@ -24,6 +26,7 @@ type AccountSectionProps =
       readonly staffData: StaffProfileData;
       readonly isAdminScope: boolean;
       readonly displayCurrency: CurrencyCode | null | undefined;
+      readonly targetUserId: string;
     }
   | {
       readonly mode: "edit";
@@ -54,10 +57,21 @@ function StaffRoleStatusView({
   );
 }
 
+function InfoField({ label, value }: { readonly label: string; readonly value: React.ReactNode }) {
+  return (
+    <Stack spacing={0.25}>
+      <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>{label}</Typography>
+      {value}
+    </Stack>
+  );
+}
+
 export function AccountSection(props: AccountSectionProps) {
   const t = props.labels.staff;
   const { baseLabels } = props.labels;
-  const { canView, canEdit } = useProfileFieldAccess({ scope: props.scope });
+  const { canView, canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope: props.scope });
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
+  const [sendEmail, setSendEmail] = useState(false);
 
   if (props.mode === "edit") {
     return (
@@ -97,20 +111,62 @@ export function AccountSection(props: AccountSectionProps) {
       />
     ) : null;
 
+  const canResetPassword = canAdminResetPassword();
+  const targetUserId = props.targetUserId;
+  const staffName = props.staffData.name ?? "";
+  const staffEmail = props.staffData.email ?? "";
+
   return (
-    <CoreIdentitySection
-      mode="view"
-      scope={props.scope}
-      name={props.staffData.name}
-      email={props.staffData.email}
-      avatarUrl={props.staffData.avatarUrl}
-      displayCurrency={props.displayCurrency}
-      sectionTitle={t.sections.account}
-      nameLabel={t.fields.fullName}
-      emailLabel={t.fields.primaryEmail}
-      currencyLabel={t.fields.displayCurrency}
-      baseLabels={baseLabels}
-      additionalViewContent={roleStatusContent ?? undefined}
-    />
+    <Stack>
+      <CoreIdentitySection
+        mode="view"
+        scope={props.scope}
+        name={staffName}
+        email={staffEmail}
+        avatarUrl={props.staffData.avatarUrl}
+        displayCurrency={props.displayCurrency}
+        sectionTitle={t.sections.account}
+        nameLabel={t.fields.fullName}
+        emailLabel={t.fields.primaryEmail}
+        currencyLabel={t.fields.displayCurrency}
+        baseLabels={baseLabels}
+        additionalViewContent={
+          <Stack spacing={1}>
+            {roleStatusContent}
+            {canResetPassword && targetUserId && (
+              <Tooltip title={baseLabels.actions.manageLifecycle}>
+                <InfoField
+                  label={baseLabels.actions.manageLifecycle}
+                  value={
+                    <ResetPasswordDialog
+                      open={resetPasswordOpen}
+                      onClose={() => setResetPasswordOpen(false)}
+                      userName={staffName}
+                      userEmail={staffEmail}
+                      isLoading={false}
+                      sendEmail={sendEmail}
+                      setSendEmail={setSendEmail}
+                      onConfirm={() => setResetPasswordOpen(false)}
+                    />
+                  }
+                />
+              </Tooltip>
+            )}
+          </Stack>
+        }
+      />
+      {canResetPassword && targetUserId && (
+        <ResetPasswordDialog
+          open={resetPasswordOpen}
+          onClose={() => setResetPasswordOpen(false)}
+          userName={staffName}
+          userEmail={staffEmail}
+          isLoading={false}
+          sendEmail={sendEmail}
+          setSendEmail={setSendEmail}
+          onConfirm={() => setResetPasswordOpen(false)}
+        />
+      )}
+    </Stack>
   );
 }

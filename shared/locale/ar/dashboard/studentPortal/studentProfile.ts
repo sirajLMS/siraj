@@ -21,4 +21,5 @@ export const dashboardStudentPortalProfileAr: StudentPortalProfileLabels = {
   loadingMessage: "جاري التحميل...",
   saveSuccess: "تم تحديث الملف بنجاح",
   saveError: "فشل تحديث الملف",
+  accountStatus: "حالة الحساب",
 };

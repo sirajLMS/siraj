@@ -54,6 +54,7 @@ export enum NotificationEventType {
   ON_DEMAND_INSTANCE_REMINDER_T3 = "ON_DEMAND_INSTANCE_REMINDER_T3",
   ON_DEMAND_INSTANCE_REMINDER_T1 = "ON_DEMAND_INSTANCE_REMINDER_T1",
   ON_DEMAND_TEACHER_DAILY_DIGEST = "ON_DEMAND_TEACHER_DAILY_DIGEST",
+  PASSWORD_RESET_BY_ADMIN = "PASSWORD_RESET_BY_ADMIN",
 }
 
 export const NOTIFICATION_EVENT_CATEGORY: Readonly<Record<NotificationEventType, NotificationEventCategory>> =
@@ -89,4 +90,5 @@ export const NOTIFICATION_EVENT_CATEGORY: Readonly<Record<NotificationEventType,
     [NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T3]: NotificationEventCategory.REMINDER,
     [NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T1]: NotificationEventCategory.URGENT,
     [NotificationEventType.ON_DEMAND_TEACHER_DAILY_DIGEST]: NotificationEventCategory.DIGEST,
+    [NotificationEventType.PASSWORD_RESET_BY_ADMIN]: NotificationEventCategory.INFO,
   });

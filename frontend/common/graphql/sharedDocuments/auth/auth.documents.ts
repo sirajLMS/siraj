@@ -182,3 +182,16 @@ export const changePasswordMutationDocument: TypedDocumentNode<
     changePassword(input: $input)
   }
 `;
+
+export const adminResetPasswordMutationDocument: TypedDocumentNode<
+  Operations.AdminResetPasswordMutation,
+  Types.MutationAdminResetPasswordArgs
+> = gql`
+  mutation adminResetPassword($input: AdminResetPasswordInput!) {
+    adminResetPassword(input: $input) {
+      success
+      userId
+      message
+    }
+  }
+`;

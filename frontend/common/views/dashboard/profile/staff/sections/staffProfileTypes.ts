@@ -13,6 +13,10 @@ export function toStaffSharedBaseLabels(base: ProfileLabels): ProfileSharedBaseL
   return {
     notSet: base.notSet,
     fieldAccess: base.fieldAccess,
+    actions: {
+      ...base.actions,
+      manageLifecycle: base.actions.manageLifecycle,
+    },
   };
 }
 

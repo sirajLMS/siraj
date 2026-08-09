@@ -1,6 +1,6 @@
 import { StudentStatus } from "@/backend/enum";
-import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
 import type { StudentReturnType, StudentSelectType } from "@/backend/types";
+import { parseAppLanguage, parseGender, parseStudentStatus } from "@/shared/lib/enum";
 
 export namespace StudentUtils {
   export const validateName = async (name: string, _locale?: string): Promise<string | null> => {

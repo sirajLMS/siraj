@@ -1,7 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
-import { localeJsonKey, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { adminAuditLogs, permissionGroups } from "@/backend/db/schema";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
@@ -10,6 +9,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import type { RedisGroupSimulationSessionData } from "@/backend/types/auth/auth.types";
+import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types";
 
@@ -120,10 +120,10 @@ export namespace PermissionGroupSimulationService {
     return groups
       .filter(group => !excludedSlugs.has(group.slug))
       .map(group => {
-        const description = resolveLocalized(group.description, locale);
+        const description = resolveLocalizedString(group.description, locale);
         return {
           slug: group.slug,
-          name: resolveLocalized(group.name, locale),
+          name: resolveLocalizedString(group.name, locale),
           description: description === "" ? null : description,
         };
       });
@@ -251,7 +251,7 @@ export namespace PermissionGroupSimulationService {
         return {
           isActive: true,
           groupSlug: fallback.groupSlug,
-          groupName: group?.name ? resolveLocalized(group.name, locale) : undefined,
+          groupName: group?.name ? resolveLocalizedString(group.name, locale) : undefined,
           startedAt: fallback.startedAt,
           expiresAt: fallback.expiresAt,
         };
@@ -269,7 +269,7 @@ export namespace PermissionGroupSimulationService {
     return {
       isActive: true,
       groupSlug: active.data.groupSlug,
-      groupName: group?.name ? resolveLocalized(group.name, locale) : undefined,
+      groupName: group?.name ? resolveLocalizedString(group.name, locale) : undefined,
       startedAt: new Date(active.data.startedAt),
       expiresAt: active.expiresAt,
     };

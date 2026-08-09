@@ -151,6 +151,19 @@ export type DemoLoginInput = {
   groupSlug: string;
 };
 
+export type AdminResetPasswordInput = {
+  readonly userId: string;
+  readonly newPassword: string;
+  readonly sendNotificationEmail?: boolean;
+};
+
+export type AdminResetPasswordResult = {
+  readonly success: boolean;
+  readonly emailSent: boolean;
+  readonly userId: string;
+  readonly message: string;
+};
+
 export type LoginResponse = {
   user: SafeUser;
   token: string;

@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import type { GridColDef } from "@mui/x-data-grid";
 
 // cspell:ignore Lannister, Cersei, Targaryen, Daenerys

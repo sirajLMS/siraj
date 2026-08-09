@@ -38,6 +38,7 @@ export interface AuthErrors {
   readonly groupSimulationAlreadyHasGroup: string;
   readonly insufficientPermissions: string;
   readonly impersonationNotAllowedWhileImpersonating: string;
+  readonly cannotResetOwnPasswordViaAdmin: string;
 
   // ─── Functions (were {param} strings) ──────────────────────────────
   readonly demoGroupNotFound: (groupSlug: string) => string;

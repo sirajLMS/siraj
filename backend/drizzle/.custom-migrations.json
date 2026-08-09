@@ -1,5 +1,5 @@
 {
-  "manifestHash": "5ae401ddcd203714ce3d8d83c0ae6a63d1d34429510294a0b102ac3e48e86493",
+  "manifestHash": "fef0d2a46c5276438f21811e346b04651a34688b4e83b43401175985294b4914",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -20,6 +20,10 @@
     {
       "file": "30-c-class_instances_auto_miss_transition.sql",
       "sha256": "4972068d5b636e42725250c66587753cce79170d27bbfc32eac4b00d30a35c96"
+    },
+    {
+      "file": "31-user-admin-reset-password.sql",
+      "sha256": "d4279482cd6e64f2a60e51ac7f8af440629798b4b7e42ede606209d26211ef11"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -234,6 +238,8 @@
     "20260803041719_custom_7d-quota_permissions_data",
     "20260803041720_custom_8b-whatsapp-permissions-data",
     "20260803041721_custom_9a-cron-permissions-enum",
-    "20260803041722_custom_9b-cron-permissions-data"
+    "20260803041722_custom_9b-cron-permissions-data",
+    "20260808165054_custom_31-user-admin-reset-password",
+    "20260808165215_custom_31-user-admin-reset-password"
   ]
 }

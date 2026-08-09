@@ -1,4 +1,5 @@
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teachers/profile";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { ProfileLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
@@ -28,4 +29,15 @@ export function toDisplayValue(value: string | null | undefined, fallback: strin
     return fallback;
   }
   return value;
+}
+
+export function toTeacherBaseLabels(base: ProfileLabels): ProfileSharedBaseLabels {
+  return {
+    notSet: base.notSet,
+    fieldAccess: base.fieldAccess,
+    actions: {
+      ...base.actions,
+      manageLifecycle: base.actions.manageLifecycle,
+    },
+  };
 }

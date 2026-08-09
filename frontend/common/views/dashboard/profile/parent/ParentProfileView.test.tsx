@@ -16,12 +16,12 @@ import type {
   ParentAdminData,
   ParentOwnData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { profileEn } from "@/shared/locale/en/profile";
+import { profileBaseEn } from "@/shared/locale/en/profile/base";
 import { profileParentEn } from "@/shared/locale/en/profile/parent";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const mockParentProfileLabels = {
-  base: profileEn,
+  base: profileBaseEn,
   parent: profileParentEn,
 } as const;
 

@@ -7,6 +7,7 @@ import { StaffExtensionProfileSection } from "@/frontend/common/views/dashboard/
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
+import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
 import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
@@ -149,6 +150,23 @@ export function StaffProfileMobileView({
     />
   );
 
+  const renderAccountSection = () => {
+    if (!isAdminScope || !staffData) {
+      return null;
+    }
+    return (
+      <AccountSection
+        mode="view"
+        labels={sectionLabels}
+        scope={scope}
+        staffData={staffData}
+        isAdminScope={isAdminScope}
+        displayCurrency={displayCurrency}
+        targetUserId={targetUserId}
+      />
+    );
+  };
+
   if (mode === ProfileMode.View) {
     return (
       <MobileContentStack>
@@ -157,6 +175,7 @@ export function StaffProfileMobileView({
             {st.adminBanner}
           </Typography>
         ) : null}
+        {renderAccountSection()}
         {renderContactSection()}
         <StaffExtensionProfileSection
           scope={scope}

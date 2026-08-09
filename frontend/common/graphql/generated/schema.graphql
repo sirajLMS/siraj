@@ -43,6 +43,19 @@ type AdminNoteInfo {
   lastUpdated: String
 }
 
+input AdminResetPasswordInput {
+  newPassword: String!
+  sendNotificationEmail: Boolean = true
+  userId: ID!
+}
+
+type AdminResetPasswordResult {
+  emailSent: Boolean
+  message: String
+  success: Boolean
+  userId: ID
+}
+
 input AdminRevokeTokenInput {
   providerSlug: MeetingIntegrationProviderSlug!
   userId: String!
@@ -137,6 +150,10 @@ enum AppPermission {
   PROFILE_CORE_IDENTITY_EDIT_OWN
   PROFILE_CORE_IDENTITY_VIEW_OTHER
   PROFILE_CORE_IDENTITY_VIEW_OWN
+  PROFILE_CORE_STATUS_EDIT_OTHER
+  PROFILE_CORE_STATUS_EDIT_OWN
+  PROFILE_CORE_STATUS_VIEW_OTHER
+  PROFILE_CORE_STATUS_VIEW_OWN
   PROFILE_MEETING_CONFIGS_EDIT_OTHER
   PROFILE_MEETING_CONFIGS_EDIT_OWN
   PROFILE_MEETING_CONFIGS_VIEW_OTHER
@@ -299,6 +316,7 @@ enum AppPermission {
   TEST_CUSTOM_ALT
   TEST_CUSTOM_ONLY
   TEST_SYSTEM_ONLY
+  USER_ADMIN_RESET_PASSWORD
   WHATSAPP_CONFIG_MANAGE
   WHATSAPP_TEMPLATES_MANAGE
   WHATSAPP_VIEW
@@ -832,6 +850,9 @@ input CoreUserProfileFieldsInput {
   displayCurrency: CurrencyCode
   email: String
   name: String
+
+  """User account status (super admin only)"""
+  status: AccountStatus
   timezone: IanaTimezone
 }
 
@@ -2514,6 +2535,7 @@ type ManagerDirectoryRow {
   roleSlug: String
   staffProfileId: String
   status: AccountStatus
+  userId: String
 }
 
 """Manager/Staff account details"""
@@ -2696,6 +2718,7 @@ type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
   activateSupportedCurrency(input: SupportedCurrencyUpsertInput!): SupportedCurrency
+  adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult
   adminRevokeMeetingProviderToken(input: AdminRevokeTokenInput!): AdminRevokeTokenResult
 
   """Approve a pending lesson report (supervisor/manager action)"""
@@ -3043,6 +3066,7 @@ enum NotificationEventType {
   ON_DEMAND_INSTANCE_REMINDER_T1
   ON_DEMAND_INSTANCE_REMINDER_T3
   ON_DEMAND_TEACHER_DAILY_DIGEST
+  PASSWORD_RESET_BY_ADMIN
   PAYMENT_METHOD_CHANGED
   QUOTA_EXPIRED
   QUOTA_EXPIRING_SOON
@@ -4966,29 +4990,29 @@ type SystemSetting {
 }
 
 enum SystemSettingCategory {
-  app
-  auth
-  billing
-  cache
-  communication
-  email
-  fx
-  general
-  meeting
-  push
-  redis
-  scheduling
-  security
-  sms
-  storage
-  system
+  App
+  Auth
+  Billing
+  Cache
+  Communication
+  Email
+  Fx
+  General
+  Meeting
+  Push
+  Redis
+  Scheduling
+  Security
+  Sms
+  Storage
+  System
 }
 
 enum SystemSettingDataType {
-  boolean
-  integer
-  json
-  string
+  Boolean
+  Integer
+  Json
+  String
 }
 
 input SystemSettingUpsertInput {

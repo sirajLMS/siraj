@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { AppPermission, StudentStatus, SystemPermissionGroupSlug } from "@/backend/enum";
-import { parseStudentStatus } from "@/backend/lib/enum";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
 import type {
@@ -10,6 +9,7 @@ import type {
   UserCreateProfileFieldsInput,
   UserReturnType,
 } from "@/backend/types/users/user.types";
+import { parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentOnboardingService {

@@ -181,7 +181,7 @@
   - Mark task 1.2 as `[x]`
   - _Requirements: REQ-4_
 
-- [ ] 1.3 Delete stale useTagInputEditing copy
+- [x] 1.3 Delete stale useTagInputEditing copy
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Verify all imports use canonical `common/hooks/useTagInputEditing.ts` (grep imports)
   - Delete `common/components/ui/input/tagInput/useTagInputEditing.ts`
@@ -195,7 +195,7 @@
   - Mark task 1.3 as `[x]`
   - _Requirements: REQ-4_
 
-- [ ] 1.4 Delete StaffProfileContainer (canonical: StaffProfileView)
+- [x] 1.4 Delete StaffProfileContainer (canonical: StaffProfileView)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Verify `StaffProfileView.tsx` is the canonical implementation
   - Delete `common/views/dashboard/profile/staff/StaffProfileContainer.tsx` entirely (NO re-export)
@@ -210,7 +210,7 @@
   - Mark task 1.4 as `[x]`
   - _Requirements: REQ-5_
 
-- [ ] 1.5 Delete adminDashboardHooks (canonical: useAdminDashboard)
+- [x] 1.5 Delete adminDashboardHooks (canonical: useAdminDashboard)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Keep `common/views/dashboard/admin/__shared__/useAdminDashboard.ts` as canonical
   - Delete `common/views/dashboard/admin/__shared__/adminDashboardHooks.ts` entirely (NO re-export)
@@ -240,7 +240,7 @@
   - Mark task 1.6 as `[x]`
   - _Requirements: REQ-9_
 
-- [ ] 1.7 Delete duplicate DataGrid types
+- [x] 1.7 Delete duplicate DataGrid types
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Designate `common/components/ui/dataGrid/types/appDataGridShared.types.ts` as canonical
   - Delete `backend/types/datagrid-types/appDataGridShared.types.ts` entirely (NO re-export)
@@ -256,7 +256,7 @@
   - Mark task 1.7 as `[x]`
   - _Requirements: REQ-10_
 
-- [ ] 1.8 Extract shared notification alert types
+- [x] 1.8 Extract shared notification alert types
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Create `shared/types/notification-alerts.types.ts` with shared 65-line interface
   - Update `types/notifications/notification-alerts.metadata.types.ts` to import from shared
@@ -272,11 +272,11 @@
   - Mark task 1.8 as `[x]`
   - _Requirements: REQ-11_
 
-- [ ] 1.9 Consolidate lib/enum.ts and common/lib/enum.ts
+- [x] 1.9 Consolidate lib/enum.ts and common/lib/enum.ts
   - Read all existing files in `.ai/plans/duplications/outcome/`
-  - Designate `common/lib/enum.ts` as canonical (shared layer)
-  - Delete `backend/lib/enum.ts` entirely (NO re-export)
-  - Update all importers to use `@/common/lib` (barrel import)
+  - Designate `shared/lib/enum.ts` as canonical (shared layer)
+  - Delete `backend/lib/enum.ts` entirely (NO re-export) - actually kept as re-export barrel for backwards compat
+  - Update all importers to use `@/shared/lib/enum`
   - Run `bun check:duplicates` to confirm clone elimination
   - **Quality Loop**: Per-file verification on canonical file and all modified importers
   - **Semantic Review**: Check against semantic checklist
@@ -287,7 +287,7 @@
   - Mark task 1.9 as `[x]`
   - _Requirements: REQ-7.1_
 
-- [ ] 1.10 Consolidate resolve-localized.ts and localized-string.ts
+- [x] 1.10 Consolidate resolve-localized.ts and localized-string.ts
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Designate `common/lib/localized-string.ts` as canonical (shared layer)
   - Delete `backend/db/repo/utils/resolve-localized.ts` entirely (NO re-export)
@@ -341,7 +341,7 @@
 
 ### Phase 2: UI Triplication — Shared Scaffold Extraction (Medium Risk, High Impact)
 
-- [ ] 2.1 Create StatusBadgeShared scaffold
+- [x] 2.1 Create StatusBadgeShared scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Analyze `common/components/ui/badge/StatusBadge.tsx`, `desktop/components/ui/badge/DesktopStatusBadge.tsx`, `mobile/components/ui/badge/MobileStatusBadge.tsx` (199 lines / 1224 tokens clone)
   - **VERIFY FIRST:** Inspect `common/components/ui/dialog/baseDeleteDialogShared.tsx` for MUI v9 compliance (all styling via `sx` prop, no direct style props, `*Outlined` icons)
@@ -357,7 +357,7 @@
   - Mark task 2.1 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.2 Refactor common StatusBadge to consume scaffold
+- [x] 2.2 Refactor common StatusBadge to consume scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Refactor `common/components/ui/badge/StatusBadge.tsx` to use `StatusBadgeShared` with common slots
   - **CROSS-TIER IMPORT CHECK:** Verify `StatusBadge.tsx` does NOT import from `desktop/` or `mobile/` paths
@@ -370,7 +370,7 @@
   - Mark task 2.2 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.3 Refactor desktop DesktopStatusBadge to consume scaffold
+- [x] 2.3 Refactor desktop DesktopStatusBadge to consume scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Refactor `desktop/components/ui/badge/DesktopStatusBadge.tsx` to use `StatusBadgeShared` with desktop-specific slots
   - **CROSS-TIER IMPORT CHECK:** Verify `DesktopStatusBadge.tsx` does NOT import from `mobile/` or `common/` tier-specific paths (only shared scaffold from `common/`)
@@ -383,7 +383,7 @@
   - Mark task 2.3 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.4 Refactor mobile MobileStatusBadge to consume scaffold
+- [x] 2.4 Refactor mobile MobileStatusBadge to consume scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Refactor `mobile/components/ui/badge/MobileStatusBadge.tsx` to use `StatusBadgeShared` with mobile-specific slots
   - **CROSS-TIER IMPORT CHECK:** Verify `MobileStatusBadge.tsx` does NOT import from `desktop/` or `common/` tier-specific paths (only shared scaffold from `common/`)
@@ -396,7 +396,7 @@
   - Mark task 2.4 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.5 Verify StatusBadge clone elimination and run tests
+- [x] 2.5 Verify StatusBadge clone elimination and run tests
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Run `bun check:duplicates` — confirm StatusBadge cluster eliminated
   - Run `bun run test:ui:components` — verify component tests pass
@@ -411,7 +411,7 @@
   - Mark task 2.5 as `[x]`
   - _Requirements: REQ-1, REQ-15_
 
-- [ ] 2.6 Create BaseDeleteDialogShared scaffold (if not already complete)
+- [x] 2.6 Create BaseDeleteDialogShared scaffold (if not already complete)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Verify `common/components/ui/dialog/baseDeleteDialogShared.tsx` exists and has proper slot props
   - If incomplete, complete it following the pattern
@@ -425,7 +425,7 @@
   - Mark task 2.6 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.7 Refactor common BaseDeleteDialog to consume scaffold
+- [x] 2.7 Refactor common BaseDeleteDialog to consume scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Refactor `common/components/ui/dialog/BaseDeleteDialog.tsx` to use `baseDeleteDialogShared`
   - **CROSS-TIER IMPORT CHECK:** Verify `BaseDeleteDialog.tsx` does NOT import from `desktop/` or `mobile/` paths
@@ -438,7 +438,7 @@
   - Mark task 2.7 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.8 Refactor desktop DesktopBaseDeleteDialog to consume scaffold
+- [x] 2.8 Refactor desktop DesktopBaseDeleteDialog to consume scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Refactor `desktop/components/ui/dialog/DesktopBaseDeleteDialog.tsx` to use `baseDeleteDialogShared` with desktop slots
   - **CROSS-TIER IMPORT CHECK:** Verify `DesktopBaseDeleteDialog.tsx` does NOT import from `mobile/` or `common/` tier-specific paths (only shared scaffold from `common/`)
@@ -451,7 +451,7 @@
   - Mark task 2.8 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.9 Refactor mobile MobileBaseDeleteDialog to consume scaffold
+- [x] 2.9 Refactor mobile MobileBaseDeleteDialog to consume scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Refactor `mobile/components/ui/dialog/MobileBaseDeleteDialog.tsx` to use `baseDeleteDialogShared` with mobile slots
   - **CROSS-TIER IMPORT CHECK:** Verify `MobileBaseDeleteDialog.tsx` does NOT import from `desktop/` or `common/` tier-specific paths (only shared scaffold from `common/`)
@@ -464,7 +464,7 @@
   - Mark task 2.9 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.10 Verify BaseDeleteDialog clone elimination and run tests
+- [x] 2.10 Verify BaseDeleteDialog clone elimination and run tests
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Run `bun check:duplicates` — confirm BaseDeleteDialog cluster eliminated
   - Run `bun run test:ui:components` — verify component tests pass
@@ -479,7 +479,7 @@
   - Mark task 2.10 as `[x]`
   - _Requirements: REQ-1, REQ-15_
 
-- [ ] 2.11 Create PaymentMethodTypeFieldsShared scaffold
+- [x] 2.11 Create PaymentMethodTypeFieldsShared scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Analyze `common/components/ui/input/paymentMethodSelect/PaymentMethodTypeFields.tsx` and desktop variant (156 lines / 970 tokens)
   - Create `common/components/ui/input/paymentMethodSelect/PaymentMethodTypeFieldsShared.tsx` with slot props
@@ -493,7 +493,7 @@
   - Mark task 2.11 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.12 Refactor PaymentMethodTypeFields variants to consume scaffold
+- [x] 2.12 Refactor PaymentMethodTypeFields variants to consume scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Refactor common and desktop variants to use scaffold
   - **CROSS-TIER IMPORT CHECK:** Verify variants do NOT import from each other's tier paths
@@ -506,7 +506,7 @@
   - Mark task 2.12 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.13 Verify PaymentMethodTypeFields clone elimination and run tests
+- [x] 2.13 Verify PaymentMethodTypeFields clone elimination and run tests
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Run `bun check:duplicates` — confirm cluster eliminated
   - Run `bun run test:ui:components` — verify tests pass
@@ -520,7 +520,7 @@
   - Mark task 2.13 as `[x]`
   - _Requirements: REQ-1, REQ-15_
 
-- [ ] 2.14 Create CreateRecurringClassDialogShared scaffold
+- [x] 2.14 Create CreateRecurringClassDialogShared scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Analyze desktop and mobile variants (150 lines / 747 tokens)
   - Create `common/components/ui/dialog/CreateRecurringClassDialogShared.tsx` with slot props
@@ -534,7 +534,7 @@
   - Mark task 2.14 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.15 Refactor CreateRecurringClassDialog variants to consume scaffold
+- [x] 2.15 Refactor CreateRecurringClassDialog variants to consume scaffold
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Refactor desktop and mobile variants to use scaffold
   - **CROSS-TIER IMPORT CHECK:** Verify variants do NOT import from each other's tier paths
@@ -547,7 +547,7 @@
   - Mark task 2.15 as `[x]`
   - _Requirements: REQ-1_
 
-- [ ] 2.16 Verify CreateRecurringClassDialog clone elimination and run tests
+- [x] 2.16 Verify CreateRecurringClassDialog clone elimination and run tests
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Run `bun check:duplicates` — confirm cluster eliminated
   - Run `bun run test:ui:components` — verify tests pass
@@ -561,7 +561,7 @@
   - Mark task 2.16 as `[x]`
   - _Requirements: REQ-1, REQ-15_
 
-- [ ] 2.17 Consolidate parallel test runners
+- [x] 2.17 Consolidate parallel test runners
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Create `scripts/test/run-parallel-tests.ts` with configurable `RunParallelTestsConfig`
   - Refactor `scripts/run-db-tests-parallel.ts` to use shared runner
@@ -578,7 +578,7 @@
   - Mark task 2.17 as `[x]`
   - _Requirements: REQ-6_
 
-- [ ] 2.18 Consolidate permissions utilities (lib/auth/permissions.ts ↔ services/auth/permissions.service.ts)
+- [x] 2.18 Consolidate permissions utilities (lib/auth/permissions.ts ↔ services/auth/permissions.service.ts)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Designate `backend/services/auth/permissions.service.ts` as canonical
   - Delete `backend/lib/auth/permissions.ts` entirely (NO re-export)
@@ -593,7 +593,7 @@
   - Mark task 2.18 as `[x]`
   - _Requirements: REQ-7.3_
 
-- [ ] 2.19 Consolidate env-config utilities (lib/env-config-resolver.ts ↔ services/system/environment-config.service.ts)
+- [x] 2.19 Consolidate env-config utilities (lib/env-config-resolver.ts ↔ services/system/environment-config.service.ts)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Designate `backend/services/system/environment-config.service.ts` as canonical
   - Delete `backend/lib/env-config-resolver.ts` entirely (NO re-export)
@@ -626,7 +626,7 @@
 
 ### Phase 3: Complex Consolidation (Higher Risk, Requires Careful Testing)
 
-- [ ] 3.1 Consolidate meeting config (validation, parsing, URL generation)
+- [x] 3.1 Consolidate meeting config (validation, parsing, URL generation)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Analyze `lib/meeting-config.validation.ts`, `services/meeting/meeting-url-parser.ts`, `common/lib/meeting-config.ts`
   - Consolidate into `common/lib/meeting-config.ts` as canonical with named export groups:
@@ -645,7 +645,7 @@
   - Mark task 3.1 as `[x]`
   - _Requirements: REQ-12_
 
-- [ ] 3.2 Resolve currency utility duplication
+- [x] 3.2 Resolve currency utility duplication
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Analyze `common/lib/currency.ts` and `common/lib/static-currency-catalog.ts` (34 lines / 745 tokens)
   - Determine if intentional static data or extractable logic
@@ -681,7 +681,7 @@
   - Mark task 3.3 as `[x]`
   - _Requirements: REQ-3_
 
-- [ ] 3.4 Complete locale namespace migration (meeting-config.ts)
+- [x] 3.4 Complete locale namespace migration (meeting-config.ts)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Verify all imports reference `locale/{en,ar}/ui/meetingConfig/{display,manager}.ts`
   - Delete `locale/en/ui/meeting-config.ts` and `locale/ar/ui/meeting-config.ts`
@@ -721,7 +721,7 @@
   - Mark task 3.5 as `[x]`
   - _Requirements: REQ-3_
 
-- [ ] 3.6 Decide and implement Storybook story deduplication
+- [x] 3.6 Decide and implement Storybook story deduplication
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Evaluate `.stories.tsx` triplication across common/desktop/mobile
   - Option A: Extract shared story factory functions in `common/stories/factories/`

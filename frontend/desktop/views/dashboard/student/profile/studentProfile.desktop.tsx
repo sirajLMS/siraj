@@ -45,7 +45,7 @@ function StudentOwnProfileView({
             phoneLabel={labels.phone}
             timezoneLabel={parentLabels.fields.timezone}
             currencyLabel={teacherLabels.fields.displayCurrency}
-            baseLabels={{ notSet: notSetLabel, fieldAccess: baseLabels.fieldAccess }}
+            baseLabels={{ notSet: notSetLabel, fieldAccess: baseLabels.fieldAccess, actions: baseLabels.actions }}
           />
           <StudentExtensionProfileSection
             {...sectionBase}

@@ -31,6 +31,7 @@ export interface ProfileActionsLabels {
   readonly retry: string;
   readonly saveSuccess: string;
   readonly saveError: string;
+  readonly manageLifecycle: string;
 }
 
 export interface ProfileErrorsLabels {
@@ -383,6 +384,29 @@ export interface ProfileChangePasswordLabels {
   readonly success: string;
 }
 
+export interface ProfileAdminResetPasswordLabels {
+  readonly title: string;
+  readonly description: (userName: string, userEmail: string) => string;
+  readonly newPassword: string;
+  readonly confirmPassword: string;
+  readonly showPassword: string;
+  readonly hidePassword: string;
+  readonly sendEmail: string;
+  readonly sendEmailLabel: string;
+  readonly resetButton: string;
+  readonly resettingButton: string;
+  readonly cancelButton: string;
+  readonly success: string;
+  readonly error: string;
+  readonly passwordRequired: string;
+  readonly passwordMinLength: string;
+  readonly passwordsDoNotMatch: string;
+  readonly accountStatus: string;
+  readonly statusActivated: string;
+  readonly statusDeactivated: string;
+  readonly cannotResetOwnPasswordViaAdmin: string;
+}
+
 export interface ProfileLabels {
   readonly shell: ProfileShellLabels;
   readonly pageTitle: string;
@@ -403,10 +427,7 @@ export interface ProfileLabels {
   ) => string;
   readonly convertedTotalApprox: (convertedApprox: string, displayCurrency: string) => string;
   readonly fieldAccess: ProfileFieldAccessLabels;
-  readonly teacher: ProfileTeacherLabels;
-  readonly parent: ProfileParentLabels;
-  readonly staff: ProfileStaffLabels;
   readonly banking: ProfileBankingLabels;
   readonly students: ProfileStudentsLabels;
-  readonly notifications: ProfileNotificationsLabels;
+  readonly adminResetPassword: ProfileAdminResetPasswordLabels;
 }

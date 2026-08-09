@@ -15,7 +15,6 @@ export interface SeedUserSpec {
   idempotencyKey: string;
 }
 
-// eslint-disable-next-line sonarjs/no-hardcoded-passwords
 const SEED_PASSWORD = "Seed_Pass1!";
 
 const SEED_TIMEZONES = [

@@ -13,7 +13,7 @@ import {
 } from "@/frontend/common/views/dashboard/profile/core/useProfilePageClientViewModel";
 import { ParentAccountActions } from "@/frontend/common/views/dashboard/profile/parent/ParentAccountActions";
 import { ParentProfileContainer } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileContainer";
-import { StaffProfileContainer } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileContainer";
+import { StaffProfileView } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileView";
 import { TeacherProfileContainer } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileContainer";
 import { StudentProfileContainer } from "@/frontend/common/views/dashboard/student/profile/StudentProfileContainer";
 
@@ -134,7 +134,7 @@ export function ProfilePageClient(props: Readonly<ProfilePageClientProps>) {
         />
       );
     }
-    return <StaffProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
+    return <StaffProfileView scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
   }
 
   return (

@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { CurrencyOption } from "@/frontend/common/lib/currency";
+import { type CurrencyOption, currencies } from "@/frontend/common/lib/currency";
 import { countryCodeToEmoji } from "@/frontend/common/lib/locale";
-import { staticCurrencyCatalog } from "@/frontend/common/lib/static-currency-catalog";
 
 export interface CurrencyCatalogState {
   options: readonly CurrencyOption[];
@@ -36,16 +35,16 @@ function filterActive(rows: readonly SupportedCurrencyRow[]): CurrencyOption[] {
 }
 
 export const useCurrencyStore = create<CurrencyCatalogState>(set => ({
-  options: staticCurrencyCatalog,
+  options: currencies,
   loaded: false,
   setCatalog: rows => {
     const options = filterActive(rows);
     set({
-      options: options.length > 0 ? options : Array.from(staticCurrencyCatalog),
+      options: options.length > 0 ? options : Array.from(currencies),
       loaded: true,
     });
   },
-  resetToStatic: () => set({ options: Array.from(staticCurrencyCatalog), loaded: false }),
+  resetToStatic: () => set({ options: Array.from(currencies), loaded: false }),
 }));
 
 export const mockCurrencyStore = {

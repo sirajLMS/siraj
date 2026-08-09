@@ -45,7 +45,7 @@ export function StudentUserProfileTabContent({
         phoneLabel={labels.phone}
         timezoneLabel={parentLabels.fields.timezone}
         currencyLabel={teacherLabels.fields.displayCurrency}
-        baseLabels={{ notSet: baseLabels.notSet, fieldAccess: baseLabels.fieldAccess }}
+        baseLabels={{ notSet: baseLabels.notSet, fieldAccess: baseLabels.fieldAccess, actions: baseLabels.actions }}
       />
       <StudentExtensionProfileSection
         {...sectionProps}

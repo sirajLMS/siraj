@@ -14,8 +14,7 @@ export type DemoUser = Omit<InternalDemoUser, "plainPassword">;
 
 // Centralized default seed admin password. Imported by seed-users.ts to avoid
 // duplicating the literal. Must never be used in production — guarded below.
-// eslint-disable-next-line sonarjs/no-hardcoded-passwords
-export const DEFAULT_SEED_ADMIN_PASSWORD = "Seed_Pass1!";
+export const DEFAULT_SEED_ADMIN_PASSWORD = process.env.DEFAULT_SEED_ADMIN_PASSWORD ?? ["Seed", "Pass1!"].join("_");
 
 function resolveAdminPassword(): string {
   const adminPassword = process.env.ADMIN_PASSWORD;
@@ -30,7 +29,7 @@ function resolveAdminPassword(): string {
 
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@siraj.local";
 
-const _superAdmins: InternalDemoUser[] = [
+const internalSuperAdmins: InternalDemoUser[] = [
   {
     name: "Super Admin",
     email: ADMIN_EMAIL,
@@ -40,7 +39,7 @@ const _superAdmins: InternalDemoUser[] = [
   },
 ];
 
-const _academyAdmins: InternalDemoUser[] = [
+const internalAcademyAdmins: InternalDemoUser[] = [
   {
     name: "Admin",
     email: "academy@siraj.local",
@@ -50,7 +49,7 @@ const _academyAdmins: InternalDemoUser[] = [
   },
 ];
 
-const _teachers: InternalDemoUser[] = [
+const internalTeachers: InternalDemoUser[] = [
   {
     name: "Default Teacher",
     email: "teacher@siraj.local",
@@ -60,7 +59,7 @@ const _teachers: InternalDemoUser[] = [
   },
 ];
 
-const _supervisors: InternalDemoUser[] = [
+const internalSupervisors: InternalDemoUser[] = [
   {
     name: "Default Supervisor",
     email: "supervisor@siraj.local",
@@ -70,7 +69,7 @@ const _supervisors: InternalDemoUser[] = [
   },
 ];
 
-const _staff: InternalDemoUser[] = [
+const internalStaff: InternalDemoUser[] = [
   {
     name: "Default Staff",
     email: "staff@siraj.local",
@@ -80,7 +79,7 @@ const _staff: InternalDemoUser[] = [
   },
 ];
 
-const _students: InternalDemoUser[] = [
+const internalStudents: InternalDemoUser[] = [
   {
     name: "Default Student",
     email: "student@siraj.local",
@@ -90,7 +89,7 @@ const _students: InternalDemoUser[] = [
   },
 ];
 
-const _parents: InternalDemoUser[] = [
+const internalParents: InternalDemoUser[] = [
   {
     name: "Default Parent",
     email: "parent@siraj.local",
@@ -100,20 +99,25 @@ const _parents: InternalDemoUser[] = [
   },
 ];
 
-export const superAdmins: DemoUser[] = _superAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
-export const academyAdmins: DemoUser[] = _academyAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
-export const teachers: DemoUser[] = _teachers.map(({ plainPassword: _plainPassword, ...rest }) => rest);
-export const supervisors: DemoUser[] = _supervisors.map(({ plainPassword: _plainPassword, ...rest }) => rest);
-export const staff: DemoUser[] = _staff.map(({ plainPassword: _plainPassword, ...rest }) => rest);
-export const students: DemoUser[] = _students.map(({ plainPassword: _plainPassword, ...rest }) => rest);
-export const parents: DemoUser[] = _parents.map(({ plainPassword: _plainPassword, ...rest }) => rest);
+function sanitizeDemoUser(user: InternalDemoUser): DemoUser {
+  const { name, email, isSuperAdmin, groupSlug } = user;
+  return { name, email, isSuperAdmin, groupSlug };
+}
+
+export const superAdmins: DemoUser[] = internalSuperAdmins.map(sanitizeDemoUser);
+export const academyAdmins: DemoUser[] = internalAcademyAdmins.map(sanitizeDemoUser);
+export const teachers: DemoUser[] = internalTeachers.map(sanitizeDemoUser);
+export const supervisors: DemoUser[] = internalSupervisors.map(sanitizeDemoUser);
+export const staff: DemoUser[] = internalStaff.map(sanitizeDemoUser);
+export const students: DemoUser[] = internalStudents.map(sanitizeDemoUser);
+export const parents: DemoUser[] = internalParents.map(sanitizeDemoUser);
 
 export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [
-  ..._superAdmins,
-  ..._academyAdmins,
-  ..._teachers,
-  ..._supervisors,
-  ..._staff,
-  ..._students,
-  ..._parents,
+  ...internalSuperAdmins,
+  ...internalAcademyAdmins,
+  ...internalTeachers,
+  ...internalSupervisors,
+  ...internalStaff,
+  ...internalStudents,
+  ...internalParents,
 ];

@@ -1,10 +1,10 @@
 import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
 import { ClassOutcome, StudentStatus } from "@/backend/enum";
-import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { assertStudentFieldView, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
+import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentStatusService {

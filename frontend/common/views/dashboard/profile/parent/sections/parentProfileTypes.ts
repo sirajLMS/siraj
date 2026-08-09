@@ -14,6 +14,10 @@ export function toParentSharedBaseLabels(base: ProfileLabels): ProfileSharedBase
   return {
     notSet: base.notSet,
     fieldAccess: base.fieldAccess,
+    actions: {
+      ...base.actions,
+      manageLifecycle: base.actions.manageLifecycle,
+    },
   };
 }
 

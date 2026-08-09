@@ -1,4 +1,5 @@
 import type { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import type { AccountStatus } from "@/backend/enum/auth/auth.enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { PaymentMethodDefaults, UserPaymentMethodReturnType } from "@/backend/types/billing/payment-method.types";
 import type {
@@ -51,6 +52,7 @@ export type CoreUserProfileFields = {
   readonly displayCurrency?: CurrencyCode | null;
   readonly phone?: string | null;
   readonly timezone?: IanaTimezone | null;
+  readonly status?: AccountStatus | null;
 };
 
 export type ParentOwnProfileUpdateInput = {

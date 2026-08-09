@@ -1,5 +1,5 @@
-import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
+import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
 import type { IWhatsappChannel, WhatsappProvider } from "@/backend/types/whatsapp/whatsapp-channel.types";
 
 let instance: IWhatsappChannel | null = null;
@@ -75,7 +75,7 @@ export const getWhatsappChannel = async (): Promise<IWhatsappChannel> => {
     }
   })();
 
-  trackInFlight(initializationPromise);
+  void trackInFlight(initializationPromise);
   return initializationPromise;
 };
 

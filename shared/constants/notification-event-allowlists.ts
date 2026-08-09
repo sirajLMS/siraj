@@ -29,7 +29,8 @@ export type NotificationEventTypeKey =
   | "ON_DEMAND_INSTANCE_PENDING_CREDIT"
   | "ON_DEMAND_INSTANCE_REMINDER_T3"
   | "ON_DEMAND_INSTANCE_REMINDER_T1"
-  | "ON_DEMAND_TEACHER_DAILY_DIGEST";
+  | "ON_DEMAND_TEACHER_DAILY_DIGEST"
+  | "PASSWORD_RESET_BY_ADMIN";
 
 export type NotificationPreferenceRole = "student" | "supervisor" | "parent" | "teacher" | "staff" | "admin";
 

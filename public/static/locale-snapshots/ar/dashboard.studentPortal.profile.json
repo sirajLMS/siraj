@@ -18,5 +18,6 @@
   "backToDashboard": "العودة إلى لوحة التحكم",
   "loadingMessage": "جاري التحميل...",
   "saveSuccess": "تم تحديث الملف بنجاح",
-  "saveError": "فشل تحديث الملف"
+  "saveError": "فشل تحديث الملف",
+  "accountStatus": "حالة الحساب"
 }

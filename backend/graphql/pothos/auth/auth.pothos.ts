@@ -1,6 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UserPothosObject } from "@/backend/graphql/pothos/users";
 import type {
+  AdminResetPasswordInput,
+  AdminResetPasswordResult,
   ChangePasswordInput,
   DemoLoginInput,
   LoginInput,
@@ -36,6 +38,27 @@ export const ChangePasswordInputPothosObject = gqlSchemaBuilder
       currentPassword: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
       newPassword: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
       confirmPassword: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
+    }),
+  });
+
+export const AdminResetPasswordInputPothosObject = gqlSchemaBuilder
+  .inputRef<AdminResetPasswordInput>("AdminResetPasswordInput")
+  .implement({
+    fields: t => ({
+      userId: t.id({ required: true }),
+      newPassword: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
+      sendNotificationEmail: t.boolean({ required: false, defaultValue: true }),
+    }),
+  });
+
+export const AdminResetPasswordResultPothosObject = gqlSchemaBuilder
+  .objectRef<AdminResetPasswordResult>("AdminResetPasswordResult")
+  .implement({
+    fields: t => ({
+      success: t.exposeBoolean("success"),
+      emailSent: t.exposeBoolean("emailSent"),
+      userId: t.exposeID("userId"),
+      message: t.exposeString("message"),
     }),
   });
 

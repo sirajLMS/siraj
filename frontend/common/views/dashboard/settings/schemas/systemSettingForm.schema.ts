@@ -35,6 +35,10 @@ const valueSchemaByDataType = {
     z.string().min(1, labels.valueRequired).refine(parseJson, { message: labels.valueJson }),
 } as const;
 
+/**
+ * Validates a system setting value using GraphQL enum types.
+ * If shared enum is passed, it will be converted to GraphQL enum.
+ */
 export function validateSystemSettingValue(
   dataType: SystemSettingDataType,
   value: string,

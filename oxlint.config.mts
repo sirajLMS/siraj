@@ -36,6 +36,27 @@ export default defineConfig({
     "@typescript-eslint/no-namespace": "off",
     "no-unused-vars": ["error", unusedVarOptions],
     "@typescript-eslint/no-unused-vars": ["error", unusedVarOptions],
+    "import/no-unassigned-import": [
+      "error",
+      {
+        allow: [
+          "**/*.css",
+          "**/*.scss",
+          "**/*.mutation",
+          "**/*.mutation.ts",
+          "**/*.query",
+          "**/*.query.ts",
+          "**/*.type",
+          "**/*.type.ts",
+          "**/*.enum",
+          "**/*.enum.ts",
+          "**/*.pothos",
+          "**/*.pothos.ts",
+          "./*",
+          "@/backend/graphql/**",
+        ],
+      },
+    ],
   },
   overrides: [
     {

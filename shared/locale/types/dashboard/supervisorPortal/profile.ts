@@ -19,4 +19,29 @@ export interface SupervisorPortalProfileLabels {
     readonly failedToLoad: string;
     readonly notFound: string;
   };
+  readonly adminResetPassword: {
+    readonly title: string;
+    readonly description: (userName: string, userEmail: string) => string;
+    readonly newPassword: string;
+    readonly confirmPassword: string;
+    readonly showPassword: string;
+    readonly hidePassword: string;
+    readonly sendEmail: string;
+    readonly sendEmailLabel: string;
+    readonly resetButton: string;
+    readonly resettingButton: string;
+    readonly cancelButton: string;
+    readonly success: string;
+    readonly error: string;
+    readonly passwordRequired: string;
+    readonly passwordMinLength: string;
+    readonly passwordsDoNotMatch: string;
+    readonly accountStatus: string;
+    readonly statusActivated: string;
+    readonly statusDeactivated: string;
+    readonly cannotResetOwnPasswordViaAdmin: string;
+  };
+  readonly actions: {
+    readonly manageLifecycle: string;
+  };
 }

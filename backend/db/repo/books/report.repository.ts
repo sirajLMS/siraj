@@ -3,12 +3,12 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
-import { parseCurrencyCode } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportRowReturnType,
 } from "@/backend/types/books/report.types";
+import { parseCurrencyCode } from "@/shared/lib/enum";
 
 export enum ReportGroupingMode {
   DATE = "DATE",

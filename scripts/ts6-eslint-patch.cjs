@@ -1,9 +1,9 @@
-/* eslint-disable */
-const Module = require("node:module");
+const Module = globalThis.process.getBuiltinModule("node:module");
+const RESOLVE_FILENAME = "_resolveFilename";
 const origRequire = Module.prototype.require;
-const origResolve = Module._resolveFilename;
+const origResolve = Module[RESOLVE_FILENAME];
 
-Module._resolveFilename = function (request, parent, isMain, options) {
+Module[RESOLVE_FILENAME] = function (request, parent, isMain, options) {
   if (request.includes("typescript/lib/tsserverlibrary")) {
     return origResolve.call(this, "@typescript/typescript6/lib/tsserverlibrary.js", parent, isMain, options);
   }

@@ -8,6 +8,7 @@ import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboar
 import { StudentUserDetailsProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentUserDetailsProfileSection";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import type { StudentProfileViewLabels } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
+import { StudentAdminSection } from "@/frontend/common/views/dashboard/students/profile/sections/StudentAdminSection";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type StudentProfileEditBodyProps = {
@@ -72,6 +73,11 @@ export function StudentProfileEditBody({
         currencyLabel={parentLabels.fields.displayCurrency}
       />
       <StudentExtensionProfileSection {...sectionBase} sectionTitle={labels.personalInfo} />
+      <StudentAdminSection
+        mode="edit"
+        studentData={profile}
+        labels={{ baseLabels: { actions: { manageLifecycle: baseLabels.actions.manageLifecycle } } }}
+      />
 
       <Stack direction="row" spacing={1} sx={{ alignSelf: "flex-start" }}>
         {onCancel ? (

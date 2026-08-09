@@ -7,6 +7,7 @@ import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/d
 import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileEditBody";
 import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
+import { StudentAdminSection } from "@/frontend/common/views/dashboard/students/profile/sections/StudentAdminSection";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
 import { useStudentManagerProfileTabViewModel } from "@/frontend/common/views/dashboard/students/profile/useStudentManagerProfileTabViewModel";
@@ -71,6 +72,7 @@ export function StudentManagerProfileTab() {
     notSetLabel: baseLabels.notSet,
     timezoneLabel: parentLabels.fields.timezone,
     enforceFieldAccess: true,
+    baseLabels: { notSet: baseLabels.notSet, fieldAccess: baseLabels.fieldAccess, actions: baseLabels.actions },
   };
 
   if (editViewModel.isEditing) {
@@ -107,10 +109,15 @@ export function StudentManagerProfileTab() {
         phoneLabel={labels.phone}
         timezoneLabel={parentLabels.fields.timezone}
         currencyLabel={teacherLabels.fields.displayCurrency}
-        baseLabels={{ notSet: baseLabels.notSet, fieldAccess: baseLabels.fieldAccess }}
+        baseLabels={{ notSet: baseLabels.notSet, fieldAccess: baseLabels.fieldAccess, actions: baseLabels.actions }}
       />
       <StudentExtensionProfileSection {...sectionProps} sectionTitle={labels.personalInfo} />
       <StudentParentAssignmentProfileSection {...sectionProps} sectionTitle={labels.parentInfo} />
+      <StudentAdminSection
+        mode="view"
+        studentData={studentProfile}
+        labels={{ baseLabels: { actions: { manageLifecycle: baseLabels.actions.manageLifecycle } } }}
+      />
     </Stack>
   );
 }

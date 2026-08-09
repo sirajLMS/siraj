@@ -34,6 +34,34 @@ async function getSystemGroup() {
   return sysGroup;
 }
 
+const manageContext = (): UserPermissionContext => ({
+  permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
+  permissionGroups: ["admin_group"],
+  isSuperAdmin: false,
+  role: UserRole.ACADEMY_ADMIN,
+});
+
+const assignContext = (): UserPermissionContext => ({
+  permissions: [AppPermission.PERMISSION_GROUPS_ASSIGN],
+  permissionGroups: ["assigner_group"],
+  isSuperAdmin: false,
+  role: UserRole.STAFF,
+});
+
+const userContext = (): UserPermissionContext => ({
+  permissions: [],
+  permissionGroups: [],
+  isSuperAdmin: false,
+  role: UserRole.USER,
+});
+
+const superAdminContext = (): UserPermissionContext => ({
+  permissions: [],
+  permissionGroups: [],
+  isSuperAdmin: true,
+  role: UserRole.SUPER_ADMIN,
+});
+
 describe("PermissionManagementService Business Logic", () => {
   let adminUser: typeof users.$inferSelect;
   let regularUser: typeof users.$inferSelect;
@@ -47,34 +75,6 @@ describe("PermissionManagementService Business Logic", () => {
   // Track original getUserContext to restore later
   const originalGetUserContext = PermissionsService.getUserContext;
   let mockContext: UserPermissionContext | null = null;
-
-  const manageContext = (): UserPermissionContext => ({
-    permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
-    permissionGroups: ["admin_group"],
-    isSuperAdmin: false,
-    role: UserRole.ACADEMY_ADMIN,
-  });
-
-  const assignContext = (): UserPermissionContext => ({
-    permissions: [AppPermission.PERMISSION_GROUPS_ASSIGN],
-    permissionGroups: ["assigner_group"],
-    isSuperAdmin: false,
-    role: UserRole.STAFF,
-  });
-
-  const userContext = (): UserPermissionContext => ({
-    permissions: [],
-    permissionGroups: [],
-    isSuperAdmin: false,
-    role: UserRole.USER,
-  });
-
-  const superAdminContext = (): UserPermissionContext => ({
-    permissions: [],
-    permissionGroups: [],
-    isSuperAdmin: true,
-    role: UserRole.SUPER_ADMIN,
-  });
 
   function testSystemGroupGuard(
     name: string,
@@ -196,12 +196,13 @@ describe("PermissionManagementService Business Logic", () => {
   afterEach(async () => {
     mockContext = null;
     // Only delete groups this test file created — avoid wiping parallel tests' data
-    for (const groupId of createdGroupIds) {
-      await db
+    const deletePromises = Array.from(createdGroupIds).map(groupId =>
+      db
         .delete(permissionGroups)
         .where(eq(permissionGroups.id, groupId))
-        .catch(() => {});
-    }
+        .catch(() => {})
+    );
+    await Promise.all(deletePromises);
     createdGroupIds.clear();
   });
 
@@ -543,8 +544,9 @@ describe("PermissionManagementService Business Logic", () => {
         regularUser.id,
         tErrors
       );
-      expect(effective).toContain(perm1Key);
-      expect(effective).not.toContain(perm2Key);
+      const effectiveKeys: readonly string[] = effective;
+      expect(effectiveKeys).toContain(perm1Key);
+      expect(effectiveKeys).not.toContain(perm2Key);
 
       // Clean up overrides
       await PermissionManagementService.updateUserOverrides(

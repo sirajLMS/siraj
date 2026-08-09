@@ -7,6 +7,7 @@
 export const PROFILE_FIELD_GROUP_KEYS = [
   "core_identity",
   "core_contact",
+  "core_status",
   "teacher_professional",
   "teacher_identity",
   "parent_social",

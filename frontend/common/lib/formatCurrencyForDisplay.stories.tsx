@@ -32,7 +32,7 @@ function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStory
     lockedCurrency,
     displayAmount,
     locale,
-    buildFxDisplayMessages({ convertedAmount: t.teacher.convertedAmount }, tErrors, {
+    buildFxDisplayMessages({ convertedAmount: t.convertedAmount }, tErrors, {
       convertedTotalApprox: t.convertedTotalApprox,
     })
   );
