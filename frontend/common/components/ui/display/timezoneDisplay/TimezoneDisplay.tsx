@@ -6,6 +6,7 @@ import type * as React from "react";
 import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type TimezoneDisplayProps = {
   readonly timezone?: string | null;
@@ -24,7 +25,7 @@ export const TimezoneDisplay = ({
 }: TimezoneDisplayProps): React.JSX.Element | null => {
   const locale = useAppLocale();
   const fallbackNode = fallback ? (
-    <Typography component="span" variant={typographyVariant} sx={{ whiteSpace: "nowrap", ...sx }}>
+    <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
       {fallback}
     </Typography>
   ) : null;
@@ -39,7 +40,7 @@ export const TimezoneDisplay = ({
     : getTimezonePathLabel(normalizedTimezone, locale);
 
   return (
-    <Typography component="span" variant={typographyVariant} sx={{ whiteSpace: "nowrap", ...sx }}>
+    <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
       {display}
     </Typography>
   );

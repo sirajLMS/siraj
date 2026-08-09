@@ -8,6 +8,7 @@ import { type CountryType, getCountryDisplayName, getCountryEmoji } from "@/fron
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type MobileCountryDisplayProps = {
   readonly code?: string | null;
@@ -53,7 +54,7 @@ export const MobileCountryDisplay = ({
   const name = getCountryDisplayName(resolvedCode, locale);
 
   return (
-    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexWrap: "nowrap", ...sx }}>
+    <Stack direction="row" spacing={0.5} sx={mergeSx({ alignItems: "center", flexWrap: "nowrap" }, sx)}>
       {showEmoji && <MobileLocaleEmoji emoji={emoji} />}
       {showLabel && (
         <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>

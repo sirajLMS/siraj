@@ -10,6 +10,7 @@ import { LocaleAdornmentSwitchMobile } from "@/frontend/mobile/components/ui/inp
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString/localizedStringDrawer.mobile";
 import type { LocalizedStringLabels } from "@/shared/locale";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 type EditDrawerControlProps = {
   readonly t: LocalizedStringLabels;
@@ -104,7 +105,7 @@ export const LocalizedStringInputMobile: React.FC<LocalizedStringInputProps> = (
   });
 
   return (
-    <Box ref={containerRef} sx={{ width: fullWidth ? "100%" : undefined, ...sx }}>
+    <Box ref={containerRef} sx={mergeSx({ width: fullWidth ? "100%" : undefined }, sx)}>
       <TextField
         label={label}
         value={fieldValue}

@@ -15,6 +15,7 @@ import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/fr
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type DesktopCurrencyDisplayProps = {
   readonly code?: CurrencyCode | string | null;
@@ -55,7 +56,7 @@ export const DesktopCurrencyDisplay = ({
   const shortCode = code;
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center", ...sx }}>
+    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center" }, sx)}>
       {CURRENCY_DISPLAY_PART_ORDER.map(part => {
         switch (part) {
           case CurrencyDisplayPart.Flag:

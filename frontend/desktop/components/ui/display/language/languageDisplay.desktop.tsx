@@ -8,6 +8,7 @@ import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/f
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type DesktopLanguageDisplayProps = {
   readonly code?: string | null;
@@ -44,7 +45,7 @@ export const DesktopLanguageDisplay = ({
   const name = getLanguageDisplayName(resolvedCode, locale);
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "nowrap", ...sx }}>
+    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center", flexWrap: "nowrap" }, sx)}>
       {showEmoji && <DesktopLocaleEmoji emoji={emoji} />}
       {showLabel && (
         <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>

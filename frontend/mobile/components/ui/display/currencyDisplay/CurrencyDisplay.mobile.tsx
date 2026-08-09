@@ -15,6 +15,7 @@ import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graph
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type MobileCurrencyDisplayProps = {
   readonly code?: CurrencyCode | string | null;
@@ -62,7 +63,7 @@ export const MobileCurrencyDisplay: React.FC<MobileCurrencyDisplayProps> = ({
     const shortCode = code;
 
     content = (
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", ...sx }}>
+      <Stack direction="row" spacing={0.5} sx={mergeSx({ alignItems: "center" }, sx)}>
         {CURRENCY_DISPLAY_PART_ORDER.map(part => {
           switch (part) {
             case CurrencyDisplayPart.Flag:

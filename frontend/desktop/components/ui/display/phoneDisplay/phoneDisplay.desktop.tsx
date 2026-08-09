@@ -6,6 +6,7 @@ import type * as React from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { formatPhoneDisplay, maskPhone } from "@/shared/lib/phone";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type DesktopPhoneDisplayProps = {
   readonly phone?: string | null;
@@ -27,7 +28,7 @@ export const DesktopPhoneDisplay = ({
   const locale = useAppLocale();
   const fallbackNode: React.JSX.Element | null =
     fallback == null ? null : (
-      <Typography variant={typographyVariant} dir="ltr" sx={{ whiteSpace: "nowrap", ...sx }}>
+      <Typography variant={typographyVariant} dir="ltr" sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
         {fallback}
       </Typography>
     );
@@ -39,7 +40,7 @@ export const DesktopPhoneDisplay = ({
   const display = masked ? maskPhone(phone, defaultRegion) : formatPhoneDisplay(phone, locale);
 
   return (
-    <Typography variant={typographyVariant} dir="ltr" sx={{ whiteSpace: "nowrap", ...sx }}>
+    <Typography variant={typographyVariant} dir="ltr" sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
       {display}
     </Typography>
   );

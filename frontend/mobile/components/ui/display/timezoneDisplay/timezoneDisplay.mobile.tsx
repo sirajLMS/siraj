@@ -12,6 +12,7 @@ import {
 } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type MobileTimezoneDisplayProps = {
   readonly timezone?: string | null;
@@ -55,7 +56,7 @@ export const MobileTimezoneDisplay: React.FC<MobileTimezoneDisplayProps> = ({
         ? getTimezoneSelectLabel(normalizedTimezone, locale)
         : getTimezonePathLabel(normalizedTimezone, locale);
       content = (
-        <Typography component="span" variant={typographyVariant} sx={{ whiteSpace: "nowrap", ...sx }}>
+        <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
           {display}
         </Typography>
       );
