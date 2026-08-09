@@ -71,39 +71,42 @@ function killProcessTree(rootPid: number) {
   }
 }
 
+async function drainStream(stream: ReadableStream<Uint8Array>, prefix: string, streamName: string): Promise<void> {
+  const decoder = new TextDecoder();
+  try {
+    for await (const chunk of stream) {
+      await writeNextLog(`${prefix} ${decoder.decode(chunk)}`);
+    }
+  } catch (err) {
+    testLogger.error(`Error reading Next.js test server ${streamName}:`, err);
+  }
+}
+
 function pipeStreamLogs(proc: ReturnType<typeof spawn>) {
   if (proc.stderr && typeof proc.stderr === "object" && "getReader" in proc.stderr) {
-    const stderrStream = proc.stderr as ReadableStream<Uint8Array>;
-    void (async () => {
-      try {
-        const reader = stderrStream.getReader();
-        const decoder = new TextDecoder();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          await writeNextLog(`[ERROR] ${decoder.decode(value)}`);
-        }
-      } catch (err) {
-        testLogger.error("Error reading Next.js test server stderr:", err);
-      }
-    })();
+    void drainStream(proc.stderr, "[ERROR]", "stderr");
   }
 
   if (proc.stdout && typeof proc.stdout === "object" && "getReader" in proc.stdout) {
-    const stdoutStream = proc.stdout as ReadableStream<Uint8Array>;
-    void (async () => {
-      try {
-        const reader = stdoutStream.getReader();
-        const decoder = new TextDecoder();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          await writeNextLog(`[DEBUG] ${decoder.decode(value)}`);
-        }
-      } catch (err) {
-        testLogger.error("Error reading Next.js test server stdout:", err);
-      }
-    })();
+    void drainStream(proc.stdout, "[DEBUG]", "stdout");
+  }
+}
+
+async function warmUpRoute(
+  route: string,
+  base: string,
+  fetchFn: typeof fetch,
+  routeTimeoutMs: number
+): Promise<void> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), routeTimeoutMs);
+  try {
+    await fetchFn(`${base}${route}`, { redirect: "follow", signal: controller.signal });
+    testLogger.debug(`Warmed up route: ${route}`);
+  } catch (err) {
+    testLogger.warn(`Failed to warm up route ${route}: ${err instanceof Error ? err.message : String(err)}`);
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -116,18 +119,7 @@ async function warmUpDevServerRoutes(): Promise<void> {
   const routeTimeoutMs = 60_000;
 
   testLogger.info("Warming up Next.js dev server routes...");
-  for (const route of routes) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), routeTimeoutMs);
-    try {
-      await fetchFn(`${base}${route}`, { redirect: "follow", signal: controller.signal });
-      testLogger.debug(`Warmed up route: ${route}`);
-    } catch (err) {
-      testLogger.warn(`Failed to warm up route ${route}: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
+  await Promise.all(routes.map(route => warmUpRoute(route, base, fetchFn, routeTimeoutMs)));
 
   // Wait for the server to stabilize after warmup (Turbopack may still be
   // recompiling or the server may restart after a compilation crash).
@@ -137,23 +129,24 @@ async function warmUpDevServerRoutes(): Promise<void> {
   }
 }
 
+async function pollServerReady(url: string, fetchFn: typeof fetch, deadline: number): Promise<boolean> {
+  if (Date.now() >= deadline) return false;
+  try {
+    const res = await fetchFn(url, { method: "HEAD" });
+    if (res.status === 204) return true;
+    testLogger.debug(`Test server responded with status ${res.status} (not ready yet)`);
+  } catch (err) {
+    testLogger.debug(`Test server not ready yet: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return pollServerReady(url, fetchFn, deadline);
+}
+
 async function waitForServerReady(timeoutMs: number): Promise<boolean> {
-  const start = Date.now();
+  const deadline = Date.now() + timeoutMs;
   const url = getTestGraphqlUrl();
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const res = await fetchFn(url, { method: "HEAD" });
-      if (res.status === 204) {
-        return true;
-      }
-      testLogger.debug(`Test server responded with status ${res.status} (not ready yet)`);
-    } catch (err) {
-      testLogger.debug(`Test server not ready yet: ${err instanceof Error ? err.message : String(err)}`);
-    }
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-  return false;
+  return pollServerReady(url, fetchFn, deadline);
 }
 
 async function dumpServerLog(port: number): Promise<void> {
@@ -221,50 +214,52 @@ async function spawnServerOnPort(port: number): Promise<ReturnType<typeof spawn>
   return proc;
 }
 
-async function startServerWithRetry(): Promise<void> {
-  const triedPorts: number[] = [];
-  let lastError: Error | undefined;
-  const mode = getTestServerMode();
-  const readyTimeoutMs = mode === "production" ? 5_000 : 180_000;
+async function tryStartServerOnPort(
+  triedPorts: number[],
+  mode: ReturnType<typeof getTestServerMode>,
+  readyTimeoutMs: number
+): Promise<void> {
+  const port = await allocateTestPort(triedPorts);
+  triedPorts.push(port);
+  setTestPort(port);
+  testLogger.info(`Starting Next.js ${mode} test server on port ${port}...`);
 
-  while (triedPorts.length < 2) {
-    const port = await allocateTestPort(triedPorts);
-    triedPorts.push(port);
-    setTestPort(port);
-    testLogger.info(`Starting Next.js ${mode} test server on port ${port}...`);
+  const proc = await spawnServerOnPort(port);
+  serverProcess = proc;
+  serverRootPid = proc.pid;
 
-    const proc = await spawnServerOnPort(port);
-    serverProcess = proc;
-    serverRootPid = proc.pid;
-
-    const isReady = await waitForServerReady(readyTimeoutMs);
-    if (isReady) {
-      testLogger.info(`Next.js ${mode} test server is ready on port ${port}!`);
-      await restoreCanonicalNextEnvDts();
-      if (mode === "dev") {
-        await warmUpDevServerRoutes();
-      }
-      return;
+  const isReady = await waitForServerReady(readyTimeoutMs);
+  if (isReady) {
+    testLogger.info(`Next.js ${mode} test server is ready on port ${port}!`);
+    await restoreCanonicalNextEnvDts();
+    if (mode === "dev") {
+      await warmUpDevServerRoutes();
     }
-
-    testLogger.warn(`Next.js ${mode} test server failed to become ready on port ${port}.`);
-    await dumpServerLog(port);
-    killProcessTree(serverRootPid);
-    serverProcess = undefined;
-    serverRootPid = undefined;
-    logFilePath = undefined;
-    clearTestPort();
-    await releaseAllocatedTestPort();
-    lastError = new Error(
-      `Next.js ${mode} test server failed to start within ${readyTimeoutMs / 1000} seconds on port ${port}. See ${getTestServerLogPath(port)} for details.`
-    );
-
-    if (process.env.GRAPHQL_TEST_PORT) {
-      break;
-    }
+    return;
   }
 
-  throw lastError ?? new Error(`Next.js ${mode} test server failed to start.`);
+  testLogger.warn(`Next.js ${mode} test server failed to become ready on port ${port}.`);
+  await dumpServerLog(port);
+  killProcessTree(serverRootPid);
+  serverProcess = undefined;
+  serverRootPid = undefined;
+  logFilePath = undefined;
+  clearTestPort();
+  await releaseAllocatedTestPort();
+
+  if (process.env.GRAPHQL_TEST_PORT || triedPorts.length >= 2) {
+    throw new Error(
+      `Next.js ${mode} test server failed to start within ${readyTimeoutMs / 1000} seconds on port ${port}. See ${getTestServerLogPath(port)} for details.`
+    );
+  }
+  return tryStartServerOnPort(triedPorts, mode, readyTimeoutMs);
+}
+
+async function startServerWithRetry(): Promise<void> {
+  const triedPorts: number[] = [];
+  const mode = getTestServerMode();
+  const readyTimeoutMs = mode === "production" ? 5_000 : 180_000;
+  await tryStartServerOnPort(triedPorts, mode, readyTimeoutMs);
 }
 
 export async function isTestServerRunning(): Promise<boolean> {
