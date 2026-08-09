@@ -6,7 +6,6 @@ import {
   type AccountStatus,
   type CurrencyCode,
   type Gender,
-  type IanaTimezone,
   type ProfileMode,
   ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -17,6 +16,7 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { isTeacherNationalIdComplete } from "@/frontend/common/lib/profileCompletion";
+import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import type {
@@ -30,9 +30,16 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 
-function buildEditSource(scope: ProfileScope, profile: ProfileData): TeacherOwnData | TeacherAdminData | null {
+function buildEditSource(scope: ProfileScope, profile: ProfileData | null | undefined): TeacherViewData | null {
+  if (!profile) {
+    return null;
+  }
   return scope === ProfileScope.Own ? profile.teacherOwnProfile : profile.teacherAdminProfile;
 }
+
+const onTabChange = (_tab: string) => {
+  // Tab routing is owned by the profile shell / URL.
+};
 
 export type TeacherOwnSubmitData = {
   name: string;
@@ -53,19 +60,19 @@ export type TeacherAdminSubmitData = {
   nationalId: string;
   nationality: string;
   dateOfBirth: string;
-  gender: string | null;
+  gender: Gender | null;
   address: string;
   qualifications: string;
   timezone: string;
   hourlyRate: string;
   rateCurrency: CurrencyCode | undefined;
-  status: string;
+  status: AccountStatus | null;
   displayCurrency: CurrencyCode | null;
 };
 
 export interface TeacherProfileViewModel {
   readonly labels: TeacherProfileViewLabels;
-  readonly teacherData: TeacherViewData;
+  readonly teacherData: TeacherViewData | null;
   readonly avatarUrl: string | null | undefined;
   readonly displayCurrency: CurrencyCode | null | undefined;
   readonly profilePhone: string | null | undefined;
@@ -115,7 +122,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const [updateUserProfile] = useMutation(updateUserProfileMutationDocument);
 
   const profile = data?.profileByUserId;
-  const teacherData = buildEditSource(scope, profile ?? ({} as ProfileData));
+  const teacherData = buildEditSource(scope, profile);
   const avatarUrl = profile?.avatarUrl;
   const displayCurrency = profile?.displayCurrency;
   const profilePhone = profile?.phone;
@@ -137,7 +144,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
               phone: formData.phone || null,
               nationalId: formData.nationalId || null,
               nationality: formData.nationality || null,
-              timezone: (formData.timezone || null) as IanaTimezone | null,
+              timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
             },
           },
         },
@@ -176,13 +183,13 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
               nationalId: formData.nationalId || null,
               nationality: formData.nationality || null,
               dateOfBirth: formData.dateOfBirth || null,
-              gender: (formData.gender as Gender | null) ?? null,
+              gender: formData.gender,
               address: formData.address || null,
               qualifications: formData.qualifications || null,
-              timezone: (formData.timezone || null) as IanaTimezone | null,
+              timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
               hourlyRate: formData.hourlyRate || null,
               rateCurrency: formData.rateCurrency ?? null,
-              status: (formData.status || null) as AccountStatus | null,
+              status: formData.status,
             },
           },
         },
@@ -196,13 +203,9 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
     }
   };
 
-  const onTabChange = (_tab: string) => {
-    // Tab routing is owned by the profile shell / URL.
-  };
-
   return {
     labels,
-    teacherData: teacherData as TeacherViewData,
+    teacherData,
     avatarUrl,
     displayCurrency,
     profilePhone,

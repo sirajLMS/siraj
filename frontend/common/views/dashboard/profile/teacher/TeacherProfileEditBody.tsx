@@ -108,7 +108,7 @@ export function TeacherProfileEditBody({
           timezone: values.timezone ?? "",
           hourlyRate: values.hourlyRate ?? "",
           rateCurrency: values.rateCurrency,
-          status: values.status ?? "",
+          status: values.status ?? null,
           displayCurrency: values.displayCurrency ?? null,
         });
       }}
