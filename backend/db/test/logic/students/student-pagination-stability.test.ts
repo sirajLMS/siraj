@@ -4,11 +4,98 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { StudentRepository } from "@/backend/db/repo";
 import { parents, students, users } from "@/backend/db/schema";
-import { AccountStatus, AppLanguage, Gender, OrderSortDirection, ParentStatus, UserRole } from "@/backend/enum";
+import {
+  AccountStatus,
+  AppLanguage,
+  Gender,
+  OrderSortDirection,
+  ParentStatus,
+  StudentStatus,
+  UserRole,
+} from "@/backend/enum";
 import type { ParentEntity, StudentFilterArgs, StudentSelectType, UserReturnType } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+
+type StudentSeedSpec = {
+  name: string;
+  gender: Gender;
+  classesTotal: number;
+  classesRemaining: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function filterByParentId(parentId: string): StudentFilterArgs {
+  return {
+    name: undefined,
+    nameNotContains: undefined,
+    nameEquals: undefined,
+    nameNotEquals: undefined,
+    nameStartsWith: undefined,
+    nameEndsWith: undefined,
+    nameIsEmpty: undefined,
+    nameIsNotEmpty: undefined,
+    parentId,
+    primaryTeacherId: undefined,
+    gender: undefined,
+    language: undefined,
+    status: undefined,
+    createdAt: undefined,
+    createdAtNot: undefined,
+    createdAtFrom: undefined,
+    createdAtTo: undefined,
+    createdAtAfter: undefined,
+    createdAtBefore: undefined,
+    createdAtOnOrAfter: undefined,
+    createdAtOnOrBefore: undefined,
+    createdAtIsEmpty: undefined,
+    createdAtIsNotEmpty: undefined,
+    birthDate: undefined,
+    birthDateNot: undefined,
+    birthDateFrom: undefined,
+    birthDateTo: undefined,
+    birthDateAfter: undefined,
+    birthDateBefore: undefined,
+    birthDateOnOrAfter: undefined,
+    birthDateOnOrBefore: undefined,
+    birthDateIsEmpty: undefined,
+    birthDateIsNotEmpty: undefined,
+  };
+}
+
+async function deleteUsersByIds(userIds: readonly string[]): Promise<void> {
+  await Promise.all(userIds.map(userId => db.delete(users).where(eq(users.id, userId))));
+}
+
+function timedSpecs(
+  count: number,
+  baseTimeMs: number,
+  stepMs: number,
+  namePrefix: string,
+  gender: Gender | ((index: number) => Gender),
+  classes: number
+): StudentSeedSpec[] {
+  return Array.from({ length: count }, (_, index) => {
+    const at = new Date(baseTimeMs + index * stepMs);
+    return {
+      name:
+        namePrefix === "Large Student"
+          ? `${namePrefix} ${(index + 1).toString().padStart(2, "0")}`
+          : `${namePrefix} ${index + 1}`,
+      gender: typeof gender === "function" ? gender(index) : gender,
+      classesTotal: classes,
+      classesRemaining: classes,
+      createdAt: at,
+      updatedAt: at,
+    };
+  });
+}
 
 describe("Issue #25: Student Pagination Cursor Stability", () => {
   let testParent: ParentEntity;
@@ -16,7 +103,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
   const createdStudentUserIds: string[] = [];
 
   async function createStudentUser(): Promise<string> {
-    const [u] = await db
+    const userRows = await db
       .insert(users)
       .values({
         name: `Student User ${randomUUID().slice(0, 8)}`,
@@ -26,8 +113,70 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
         updatedAt: new Date(),
       })
       .returning();
-    createdStudentUserIds.push(u.id);
-    return u.id;
+    const createdUser = userRows[0];
+    if (!createdUser) {
+      throw new Error("Failed to create student user");
+    }
+    createdStudentUserIds.push(createdUser.id);
+    return createdUser.id;
+  }
+
+  async function insertStudents(specs: readonly StudentSeedSpec[]): Promise<StudentSelectType[]> {
+    const rows = await Promise.all(
+      specs.map(async spec => {
+        const userId = await createStudentUser();
+        const inserted = await db
+          .insert(students)
+          .values({
+            parentId: testParent.id,
+            userId,
+            name: spec.name,
+            gender: spec.gender,
+            status: StudentStatus.REGULAR,
+            language: AppLanguage.en,
+            classesTotal: spec.classesTotal,
+            classesRemaining: spec.classesRemaining,
+            idempotencyKey: randomUUID(),
+            createdAt: spec.createdAt,
+            updatedAt: spec.updatedAt,
+          })
+          .returning();
+        const student = inserted[0];
+        if (!student) {
+          throw new Error(`Failed to create student ${spec.name}`);
+        }
+        return student;
+      })
+    );
+    return rows;
+  }
+
+  async function fetchParentPage(
+    pagination: PaginationArgs,
+    orderBy?: typeof orderByCreatedAtAsc
+  ): Promise<Awaited<ReturnType<typeof StudentRepository.fetchWithFilters>>> {
+    return StudentRepository.fetchWithFilters(pagination, filterByParentId(testParent.id), orderBy);
+  }
+
+  async function collectForwardPages(
+    pageSize: number,
+    orderBy: typeof orderByCreatedAtAsc,
+    cursor?: string
+  ): Promise<{ ids: string[]; wrongParentCount: number; pageCount: number }> {
+    const page = await fetchParentPage(new PaginationArgs({ first: pageSize, after: cursor }), orderBy);
+    const wrongParentCount = page.data.filter(s => s.parentId !== testParent.id).length;
+    const ids = page.data.map(s => s.id);
+    testLogger.info(`Page collected: ${page.data.length} students`);
+
+    if (page.data.length === pageSize && page.pageInfo.endCursor) {
+      const rest = await collectForwardPages(pageSize, orderBy, page.pageInfo.endCursor);
+      return {
+        ids: [...ids, ...rest.ids],
+        wrongParentCount: wrongParentCount + rest.wrongParentCount,
+        pageCount: 1 + rest.pageCount,
+      };
+    }
+    return { ids, wrongParentCount, pageCount: 1 };
   }
 
   beforeAll(async () => {
@@ -43,8 +192,11 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       })
       .returning();
     const user = userResult[0];
+    if (!user) {
+      throw new Error("Failed to create pagination test user");
+    }
 
-    const [parent] = (await db
+    const parentRows = await db
       .insert(parents)
       .values({
         userId: user.id,
@@ -52,7 +204,11 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       })
-      .returning()) as [ParentEntity];
+      .returning();
+    const parent = parentRows[0];
+    if (!parent) {
+      throw new Error("Failed to create pagination test parent");
+    }
     testParent = parent;
 
     testUser = {
@@ -65,21 +221,14 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
   });
 
   afterEach(async () => {
-    // Clean up students after each test
     await db.delete(students).where(eq(students.parentId, testParent.id));
-    // Clean up student users created during the test
-    for (const userId of createdStudentUserIds) {
-      await db.delete(users).where(eq(users.id, userId));
-    }
+    await deleteUsersByIds(createdStudentUserIds);
     createdStudentUserIds.length = 0;
   });
 
   afterAll(async () => {
     testLogger.info("Cleaning up pagination stability test data...");
-    // Clean up any remaining student users
-    for (const userId of createdStudentUserIds) {
-      await db.delete(users).where(eq(users.id, userId));
-    }
+    await deleteUsersByIds(createdStudentUserIds);
     await db.delete(parents).where(eq(parents.id, testParent.id));
     await db.delete(users).where(eq(users.id, testUser.id));
   });
@@ -90,95 +239,55 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
   test("cursor format encodes createdAt and id for stable keyset pagination", async () => {
     testLogger.info("Testing cursor encodes (createdAt, id) for stable keyset...");
 
-    for (let i = 0; i < 3; i++) {
-      await db.insert(students).values({
-        parentId: testParent.id,
-        userId: await createStudentUser(),
-        name: `Format Student ${i + 1}`,
-        gender: Gender.MALE,
-        status: "REGULAR",
-        language: AppLanguage.en,
-        classesTotal: 7,
-        classesRemaining: 7,
-        idempotencyKey: randomUUID(),
-        createdAt: new Date(Date.now() + i * 500),
-        updatedAt: new Date(Date.now() + i * 500),
-      });
-    }
+    const nowMs = Date.now();
+    await insertStudents(timedSpecs(3, nowMs, 500, "Format Student", Gender.MALE, 7));
 
-    const page = await StudentRepository.fetchWithFilters(
-      new PaginationArgs({ first: 2 }),
-      { parentId: testParent.id } as StudentFilterArgs,
-      orderByCreatedAtAsc
-    );
+    const page = await fetchParentPage(new PaginationArgs({ first: 2 }), orderByCreatedAtAsc);
 
     expect(page.pageInfo.startCursor).toBeTruthy();
     expect(page.pageInfo.endCursor).toBeTruthy();
 
     const decoded = Buffer.from(page.pageInfo.endCursor ?? "", "base64").toString("utf8");
-    const cursorObj = JSON.parse(decoded) as Record<string, unknown>;
+    const parsed: unknown = JSON.parse(decoded);
+    expect(isRecord(parsed)).toBe(true);
+    if (!isRecord(parsed)) {
+      throw new Error("cursor payload must be an object");
+    }
 
-    // Cursor must contain both createdAt (for ordering) and id (as tie-breaker)
-    expect(cursorObj).toHaveProperty("createdAt");
-    expect(cursorObj).toHaveProperty("id");
-    expect(typeof cursorObj.createdAt).toBe("string");
-    expect(typeof cursorObj.id).toBe("string");
-    testLogger.info(`✓ Cursor encodes (createdAt, id): ${JSON.stringify(cursorObj)}`);
+    expect(parsed).toHaveProperty("createdAt");
+    expect(parsed).toHaveProperty("id");
+    expect(typeof parsed.createdAt).toBe("string");
+    expect(typeof parsed.id).toBe("string");
+    testLogger.info(`✓ Cursor encodes (createdAt, id): ${JSON.stringify(parsed)}`);
   });
 
   test("stable forward pagination across 3 pages", async () => {
     testLogger.info("Testing stable forward pagination...");
 
-    const baseTime = new Date("2026-06-01T10:00:00Z");
+    const baseTimeMs = new Date("2026-06-01T10:00:00Z").getTime();
+    const created = await insertStudents(timedSpecs(5, baseTimeMs, 1000, "Forward Student", Gender.FEMALE, 10));
+    const createdIds = created.map(s => s.id);
 
-    const createdIds: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      const [created] = await db
-        .insert(students)
-        .values({
-          parentId: testParent.id,
-          userId: await createStudentUser(),
-          name: `Forward Student ${i + 1}`,
-          gender: Gender.FEMALE,
-          status: "REGULAR",
-          language: AppLanguage.en,
-          classesTotal: 10,
-          classesRemaining: 10,
-          idempotencyKey: randomUUID(),
-          createdAt: new Date(baseTime.getTime() + i * 1000),
-          updatedAt: new Date(baseTime.getTime() + i * 1000),
-        })
-        .returning();
-      createdIds.push(created.id);
-    }
-
-    const page1 = await StudentRepository.fetchWithFilters(
-      new PaginationArgs({ first: 2 }),
-      { parentId: testParent.id } as StudentFilterArgs,
-      orderByCreatedAtAsc
-    );
+    const page1 = await fetchParentPage(new PaginationArgs({ first: 2 }), orderByCreatedAtAsc);
     expect(page1.data.length).toBeGreaterThanOrEqual(2);
     expect(page1.pageInfo.endCursor).toBeTruthy();
 
-    const page2 = await StudentRepository.fetchWithFilters(
+    const page2 = await fetchParentPage(
       new PaginationArgs({ first: 2, after: page1.pageInfo.endCursor }),
-      { parentId: testParent.id } as StudentFilterArgs,
       orderByCreatedAtAsc
     );
     expect(page2.data.length).toBeGreaterThanOrEqual(2);
 
-    const page3 = await StudentRepository.fetchWithFilters(
+    const page3 = await fetchParentPage(
       new PaginationArgs({ first: 2, after: page2.pageInfo.endCursor }),
-      { parentId: testParent.id } as StudentFilterArgs,
       orderByCreatedAtAsc
     );
     expect(page3.data.length).toBeGreaterThanOrEqual(1);
 
     const allIds = [...page1.data, ...page2.data, ...page3.data].map(s => s.id);
     expect(allIds.length).toBeGreaterThanOrEqual(5);
-    expect(new Set(allIds).size).toBe(allIds.length); // No duplicates
+    expect(new Set(allIds).size).toBe(allIds.length);
 
-    // Verify all 5 created students are present
     const allCreatedPresent = createdIds.every(id => allIds.includes(id));
     expect(allCreatedPresent).toBe(true);
 
@@ -189,48 +298,29 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
   test("cursor remains stable after updating a student", async () => {
     testLogger.info("Testing cursor stability after a student update...");
 
-    const baseTime = new Date("2026-06-02T10:00:00Z");
-    const createdStudents: StudentSelectType[] = [];
-
-    for (let i = 0; i < 4; i++) {
-      const [s] = (await db
-        .insert(students)
-        .values({
-          parentId: testParent.id,
-          userId: await createStudentUser(),
-          name: `Update Stability Student ${i + 1}`,
-          gender: Gender.FEMALE,
-          status: "REGULAR",
-          language: AppLanguage.en,
-          classesTotal: 5,
-          classesRemaining: 5,
-          idempotencyKey: randomUUID(),
-          createdAt: new Date(baseTime.getTime() + i * 1000),
-          updatedAt: new Date(baseTime.getTime() + i * 1000),
-        })
-        .returning()) as [StudentSelectType];
-      createdStudents.push(s);
-    }
-
-    const page1 = await StudentRepository.fetchWithFilters(
-      new PaginationArgs({ first: 2 }),
-      { parentId: testParent.id } as StudentFilterArgs,
-      orderByCreatedAtAsc
+    const baseTimeMs = new Date("2026-06-02T10:00:00Z").getTime();
+    const createdStudents = await insertStudents(
+      timedSpecs(4, baseTimeMs, 1000, "Update Stability Student", Gender.FEMALE, 5)
     );
+
+    const page1 = await fetchParentPage(new PaginationArgs({ first: 2 }), orderByCreatedAtAsc);
     expect(page1.data).toHaveLength(2);
     const page1Ids = page1.data.map(s => s.id);
 
-    // Update a student from page 1 — cursor should still point past it
+    const firstCreated = createdStudents[0];
+    if (!firstCreated) {
+      throw new Error("Expected at least one created student");
+    }
+
     await db
       .update(students)
       .set({ name: "Renamed After Cursor", updatedAt: new Date() })
-      .where(eq(students.id, createdStudents[0].id));
+      .where(eq(students.id, firstCreated.id));
 
     testLogger.info("Updated student[0] name after capturing cursor");
 
-    const page2 = await StudentRepository.fetchWithFilters(
+    const page2 = await fetchParentPage(
       new PaginationArgs({ first: 2, after: page1.pageInfo.endCursor }),
-      { parentId: testParent.id } as StudentFilterArgs,
       orderByCreatedAtAsc
     );
     expect(page2.data).toHaveLength(2);
@@ -243,34 +333,14 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
   test("DESC ordering paginates without duplicates", async () => {
     testLogger.info("Testing DESC cursor-based pagination...");
 
-    const baseTime = new Date("2026-06-03T10:00:00Z");
+    const baseTimeMs = new Date("2026-06-03T10:00:00Z").getTime();
+    await insertStudents(timedSpecs(4, baseTimeMs, 1000, "Desc Student", Gender.MALE, 5));
 
-    for (let i = 0; i < 4; i++) {
-      await db.insert(students).values({
-        parentId: testParent.id,
-        userId: await createStudentUser(),
-        name: `Desc Student ${i + 1}`,
-        gender: Gender.MALE,
-        status: "REGULAR",
-        language: AppLanguage.en,
-        classesTotal: 5,
-        classesRemaining: 5,
-        idempotencyKey: randomUUID(),
-        createdAt: new Date(baseTime.getTime() + i * 1000),
-        updatedAt: new Date(baseTime.getTime() + i * 1000),
-      });
-    }
-
-    const page1 = await StudentRepository.fetchWithFilters(
-      new PaginationArgs({ first: 2 }),
-      { parentId: testParent.id } as StudentFilterArgs,
-      orderByCreatedAtDesc
-    );
+    const page1 = await fetchParentPage(new PaginationArgs({ first: 2 }), orderByCreatedAtDesc);
     expect(page1.data).toHaveLength(2);
 
-    const page2 = await StudentRepository.fetchWithFilters(
+    const page2 = await fetchParentPage(
       new PaginationArgs({ first: 2, after: page1.pageInfo.endCursor }),
-      { parentId: testParent.id } as StudentFilterArgs,
       orderByCreatedAtDesc
     );
     expect(page2.data).toHaveLength(2);
@@ -283,34 +353,14 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
   test("invalid cursor is ignored and query starts from beginning", async () => {
     testLogger.info("Testing graceful invalid cursor handling...");
 
-    for (let i = 0; i < 2; i++) {
-      await db.insert(students).values({
-        parentId: testParent.id,
-        userId: await createStudentUser(),
-        name: `Invalid Cursor Student ${i + 1}`,
-        gender: Gender.FEMALE,
-        status: "REGULAR",
-        language: AppLanguage.en,
-        classesTotal: 3,
-        classesRemaining: 3,
-        idempotencyKey: randomUUID(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    }
+    const nowMs = Date.now();
+    await insertStudents(timedSpecs(2, nowMs, 0, "Invalid Cursor Student", Gender.FEMALE, 3));
 
-    // Completely invalid base64 — should be ignored, returns from start
-    const r1 = await StudentRepository.fetchWithFilters(
-      new PaginationArgs({ first: 10, after: "not-valid-base64!!!" }),
-      { parentId: testParent.id } as StudentFilterArgs
-    );
+    const r1 = await fetchParentPage(new PaginationArgs({ first: 10, after: "not-valid-base64!!!" }));
     expect(r1.data.length).toBeGreaterThanOrEqual(2);
 
-    // Valid base64, JSON without 'id' key — should be ignored, returns from start
     const noIdCursor = Buffer.from(JSON.stringify({ createdAt: new Date().toISOString() })).toString("base64");
-    const r2 = await StudentRepository.fetchWithFilters(new PaginationArgs({ first: 10, after: noIdCursor }), {
-      parentId: testParent.id,
-    } as StudentFilterArgs);
+    const r2 = await fetchParentPage(new PaginationArgs({ first: 10, after: noIdCursor }));
     expect(r2.data.length).toBeGreaterThanOrEqual(2);
 
     testLogger.info("✓ Both invalid cursors were ignored");
@@ -319,67 +369,21 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
   test("large dataset: 20 students, 5 per page, zero duplicates", async () => {
     testLogger.info("Testing large dataset pagination (20 students)...");
 
-    // Count existing students for this parent before creating new ones
     const existingCount = await db.$count(students, eq(students.parentId, testParent.id));
     testLogger.info(`Existing students for this parent: ${existingCount}`);
 
-    // Use a baseTime in the past to avoid ordering conflicts with other tests
-    const baseTime = new Date("2025-01-01T00:00:00Z");
+    const baseTimeMs = new Date("2025-01-01T00:00:00Z").getTime();
+    const created = await insertStudents(
+      timedSpecs(20, baseTimeMs, 100, "Large Student", index => (index % 2 === 0 ? Gender.MALE : Gender.FEMALE), 10)
+    );
+    const createdIds = created.map(s => s.id);
 
-    const createdIds: string[] = [];
-    for (let i = 0; i < 20; i++) {
-      const [created] = await db
-        .insert(students)
-        .values({
-          parentId: testParent.id,
-          userId: await createStudentUser(),
-          name: `Large Student ${String(i + 1).padStart(2, "0")}`,
-          gender: i % 2 === 0 ? Gender.MALE : Gender.FEMALE,
-          status: "REGULAR",
-          language: AppLanguage.en,
-          classesTotal: 10,
-          classesRemaining: 10,
-          idempotencyKey: randomUUID(),
-          createdAt: new Date(baseTime.getTime() + i * 100),
-          updatedAt: new Date(baseTime.getTime() + i * 100),
-        })
-        .returning();
-      createdIds.push(created.id);
-    }
-
-    // Count total to verify setup - should be existing + 20 new ones
     const expectedTotal = existingCount + 20;
     const allStudentsCount = await db.$count(students, eq(students.parentId, testParent.id));
     expect(allStudentsCount).toBe(expectedTotal);
 
-    const allFetched: string[] = [];
-    let wrongParentCount = 0;
-    let cursor: string | null | undefined = null;
-    let pageCount = 0;
-    let hasMore = true;
+    const { ids: allFetched, wrongParentCount, pageCount } = await collectForwardPages(5, orderByCreatedAtAsc);
 
-    while (hasMore) {
-      pageCount++;
-      const page = await StudentRepository.fetchWithFilters(
-        new PaginationArgs({ first: 5, after: cursor ?? undefined }),
-        { parentId: testParent.id } as StudentFilterArgs,
-        orderByCreatedAtAsc
-      );
-
-      for (const s of page.data) {
-        allFetched.push(s.id);
-        // Track students from wrong parent (Drizzle WHERE bug detection)
-        if (s.parentId !== testParent.id) {
-          wrongParentCount++;
-        }
-      }
-
-      cursor = page.pageInfo.endCursor;
-      testLogger.info(`Page ${pageCount}: ${page.data.length} students`);
-      hasMore = page.data.length === 5;
-    }
-
-    // Log warning if we detected the Drizzle WHERE chaining bug
     if (wrongParentCount > 0) {
       testLogger.warn(
         `⚠️ Drizzle WHERE bug detected: ${wrongParentCount} students from wrong parent included in results`
@@ -387,15 +391,11 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       testLogger.warn(`This is a known Drizzle ORM issue with WHERE clause chaining`);
     }
 
-    // Assert: No duplicates in results
     expect(new Set(allFetched).size).toBe(allFetched.length);
 
-    // Assert: All 20 newly created students are in the fetched results
     const allCreatedPresent = createdIds.every(id => allFetched.includes(id));
     expect(allCreatedPresent).toBe(true);
 
-    // Assert: We got at least the expected number of students
-    // (May be more if Drizzle WHERE bug includes wrong-parent students)
     expect(allFetched.length).toBeGreaterThanOrEqual(expectedTotal);
 
     testLogger.info(`✓ Fetched ${allFetched.length} students total across ${pageCount} pages with zero duplicates`);

@@ -68,8 +68,8 @@ export namespace WeeklyScheduleService {
 
       const classes = await Promise.all(
         rows.map(async row => {
-          const tErrors: ErrorsLabels = getServerTranslations("ar").errorsTranslations;
-          const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors);
+          const localeErrors: ErrorsLabels = getServerTranslations("ar").errorsTranslations;
+          const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, localeErrors);
           return {
             id: row.id,
             studentName: row.studentName,

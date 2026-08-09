@@ -95,7 +95,8 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: parent => (parent as unknown as Record<string, unknown>).displayAmount as DisplayAmountReturnType | null,
+      resolve: (parent: ManagerDirectoryRow & { displayAmount?: DisplayAmountReturnType | null }) =>
+        parent.displayAmount ?? null,
     }),
   }),
 });
@@ -186,13 +187,11 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
 
       const result = await ManagerDirectoryService.getManagerDirectory(userId, pagination, locale, filters);
 
-      const displayAmounts = await resolveDisplayAmountFields(
-        result.rows as unknown as Record<string, unknown>[],
-        ctx,
-        "hourlyRate",
-        "rateCurrency",
-        "id"
-      );
+      const rowsForDisplay = result.rows.map(row => ({
+        ...row,
+        displayAmount: null as DisplayAmountReturnType | null,
+      })) as Array<{ id: string; [key: string]: unknown }>;
+      const displayAmounts = await resolveDisplayAmountFields(rowsForDisplay, ctx, "hourlyRate", "rateCurrency", "id");
 
       return {
         id: "manager-directory",

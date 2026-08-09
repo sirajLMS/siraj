@@ -1554,7 +1554,8 @@ export type NotificationEventType =
   | 'STUDENT_STATUS_CHANGED'
   | 'STUDENT_TEACHER_REASSIGNED'
   | 'SUGGESTION_ACKNOWLEDGED'
-  | 'SUGGESTION_DUPLICATE_MARKED';
+  | 'SUGGESTION_DUPLICATE_MARKED'
+  | 'USER_STATUS_CHANGED';
 
 export type NotificationPreferenceInput = {
   channel: NotificationChannel;

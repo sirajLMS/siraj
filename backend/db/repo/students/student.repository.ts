@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
-import type { PgSelect } from "drizzle-orm/pg-core";
 import { alias } from "drizzle-orm/pg-core";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
@@ -17,9 +16,16 @@ import { getServerTranslations } from "@/shared/locale";
 function decodeCursor(after: string): { createdAt: string; id: string } | null {
   try {
     const decoded = Buffer.from(after, "base64").toString("utf8");
-    const cursorObj = JSON.parse(decoded) as { createdAt?: string; id?: string };
-    if (cursorObj.createdAt && cursorObj.id) {
-      return { createdAt: cursorObj.createdAt, id: cursorObj.id };
+    const parsed: unknown = JSON.parse(decoded);
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "createdAt" in parsed &&
+      "id" in parsed &&
+      typeof parsed.createdAt === "string" &&
+      typeof parsed.id === "string"
+    ) {
+      return { createdAt: parsed.createdAt, id: parsed.id };
     }
   } catch {
     /* ignore invalid cursor */
@@ -27,11 +33,23 @@ function decodeCursor(after: string): { createdAt: string; id: string } | null {
   return null;
 }
 
+function buildStudentFilterBaseQuery() {
+  return db
+    .select({
+      student: students,
+      total: sql<number>`cast(count(*) over() as int)`,
+    })
+    .from(students)
+    .$dynamic();
+}
+
+type StudentFilterBaseQuery = ReturnType<typeof buildStudentFilterBaseQuery>;
+
 function applyCursorCondition(
-  query: PgSelect,
+  query: StudentFilterBaseQuery,
   cursor: { createdAt: string; id: string },
   orderBy?: Types.StudentsOrderByClause[] | null
-): PgSelect {
+): StudentFilterBaseQuery {
   const cursorDate = new Date(cursor.createdAt);
   const cursorId = cursor.id;
   const isDesc = orderBy?.some(
@@ -47,12 +65,12 @@ function applyCursorCondition(
   );
 }
 
-const _processStudentQuery = async (
-  query: PgSelect,
+async function processStudentQuery(
+  query: StudentFilterBaseQuery,
   paginationArgs?: Types.PaginationArgs | null,
   orderBy?: Types.StudentsOrderByClause[] | null,
   filters?: Types.StudentFilterArgs | null
-): Promise<Types.StudentsWithFiltersResponse> => {
+): Promise<Types.StudentsWithFiltersResponse> {
   let processedQuery = query;
   processedQuery = StudentFilterUtils.applyFilters(processedQuery, filters);
   processedQuery = StudentFilterUtils.applyOrdering(processedQuery, orderBy);
@@ -69,7 +87,7 @@ const _processStudentQuery = async (
     processedQuery = queryWithPagination(processedQuery, paginationArgs);
   }
 
-  const results = await (processedQuery as unknown as Promise<{ student: Types.StudentSelectType; total: number }[]>);
+  const results = await processedQuery;
 
   const total = results[0]?.total ?? 0;
   const items: Types.StudentReturnType[] = results
@@ -92,7 +110,7 @@ const _processStudentQuery = async (
   }
 
   return { data: items, pageInfo };
-};
+}
 
 export namespace StudentRepository {
   /**
@@ -171,10 +189,9 @@ export namespace StudentRepository {
   ): Promise<Types.StudentSelectType[]> => {
     if (input.length === 0) return [];
     try {
-      for (const item of input) {
-        const nameErr = await StudentUtils.validateName(item.name);
-        if (nameErr) throw new Error(nameErr);
-      }
+      const nameErrors = await Promise.all(input.map(item => StudentUtils.validateName(item.name)));
+      const nameErr = nameErrors.find(err => err !== null);
+      if (nameErr) throw new Error(nameErr);
       const values: Types.StudentInsertType[] = input.map(item => ({
         parentId: item.parentId,
         userId: item.userId,
@@ -206,7 +223,8 @@ export namespace StudentRepository {
 
     return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
-      return s ? (StudentUtils.mapEntityToDto(s) as Types.StudentReturnType) : new Error(studentNotFound(id));
+      if (!s) return new Error(studentNotFound(id));
+      return StudentUtils.mapEntityToDto(s) ?? new Error(studentNotFound(id));
     });
   };
 
@@ -285,15 +303,7 @@ export namespace StudentRepository {
     filters?: Types.StudentFilterArgs | null,
     orderBy?: Types.StudentsOrderByClause[] | null
   ): Promise<Types.StudentsWithFiltersResponse> => {
-    const baseQuery = db
-      .select({
-        student: students,
-        total: sql<number>`cast(count(*) over() as int)`,
-      })
-      .from(students)
-      .$dynamic();
-
-    return await _processStudentQuery(baseQuery as unknown as PgSelect, paginationArgs, orderBy, filters);
+    return await processStudentQuery(buildStudentFilterBaseQuery(), paginationArgs, orderBy, filters);
   };
 
   async function adjustClassesQuota(
@@ -437,12 +447,12 @@ export namespace StudentRepository {
     orderBy?: Types.StudentsOrderByClause[] | null,
     tx?: DBTransaction
   ): Promise<Types.StudentDirectoryResult> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
     const parentUsers = alias(users, "parent_users");
     const teacherUsers = alias(users, "teacher_users");
 
-    let baseQuery = queryDb
+    let baseQuery = executor
       .select({
         id: students.id,
         userId: students.userId,
@@ -478,7 +488,7 @@ export namespace StudentRepository {
       baseQuery = queryWithPagination(baseQuery, paginationArgs);
     }
 
-    let countQuery = queryDb.select({ count: sql<number>`count(*)::int` }).from(students).$dynamic();
+    let countQuery = executor.select({ count: sql<number>`count(*)::int` }).from(students).$dynamic();
 
     if (filters) {
       countQuery = StudentFilterUtils.applyFilters(countQuery, filters);
@@ -492,7 +502,7 @@ export namespace StudentRepository {
       rows: rows.map(
         r =>
           Object.assign(r, {
-            status: r.status as StudentStatus,
+            status: parseStudentStatus(r.status) ?? StudentStatus.REGULAR,
             hoursPerWeek: r.hoursPerWeek ? Number.parseFloat(r.hoursPerWeek) : 0,
           }) satisfies Types.StudentDirectory
       ),
@@ -504,15 +514,15 @@ export namespace StudentRepository {
     teacherId: string,
     tx?: DBTransaction
   ): Promise<Types.TeacherAssignedStudentsResult> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const parentUsers = alias(users, "assigned_students_parent_users");
 
-    const assignedStudentIds = queryDb
+    const assignedStudentIds = executor
       .select({ studentId: teacherAssignments.studentId })
       .from(teacherAssignments)
       .where(and(eq(teacherAssignments.teacherId, teacherId), isNull(teacherAssignments.endedAt)));
 
-    const rows = await queryDb
+    const rows = await executor
       .select({
         id: students.id,
         name: students.name,
@@ -666,11 +676,11 @@ export namespace StudentRepository {
     readonly updatedAt: Date;
   };
 
-  function buildStudentProfileSelect(queryDb: typeof db | DBTransaction) {
+  function buildStudentProfileSelect(executor: typeof db | DBTransaction) {
     const parentUser = alias(users, "parent_user");
     const studentUser = alias(users, "student_user");
 
-    return queryDb
+    return executor
       .select({
         id: students.id,
         userId: students.userId,
@@ -741,9 +751,9 @@ export namespace StudentRepository {
   }
 
   export const findProfileById = async (studentId: string, tx?: DBTransaction): Promise<StudentProfileRow | null> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const results = await buildStudentProfileSelect(queryDb).where(eq(students.id, studentId)).limit(1);
+    const results = await buildStudentProfileSelect(executor).where(eq(students.id, studentId)).limit(1);
 
     if (results.length === 0) {
       return null;
@@ -764,7 +774,7 @@ export namespace StudentRepository {
     tx?: DBTransaction
   ): Promise<string[]> => {
     if (!parentId && !teacherId) return [];
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const orConditions: ReturnType<typeof eq>[] = [];
     if (parentId) {
       orConditions.push(eq(students.parentId, parentId));
@@ -773,7 +783,7 @@ export namespace StudentRepository {
       orConditions.push(eq(students.primaryTeacherId, teacherId));
     }
 
-    const rows = await queryDb
+    const rows = await executor
       .select({ id: students.id })
       .from(students)
       .where(or(...orConditions));
@@ -781,7 +791,7 @@ export namespace StudentRepository {
     const studentIds = new Set(rows.map(r => r.id));
 
     if (teacherId) {
-      const assignedRows = await queryDb
+      const assignedRows = await executor
         .select({ studentId: teacherAssignments.studentId })
         .from(teacherAssignments)
         .where(and(eq(teacherAssignments.teacherId, teacherId), isNull(teacherAssignments.endedAt)));

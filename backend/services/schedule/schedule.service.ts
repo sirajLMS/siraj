@@ -21,6 +21,14 @@ import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.
 import { parseClassExecutionState, parseClassOutcome, parseClassTypeOrNull } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 export namespace ScheduleService {
   async function mapDailyScheduleListItem(item: DailyScheduleResult, tErrors: ErrorsLabels) {
     const unknownName = tErrors.unknownName;
@@ -298,13 +306,6 @@ export namespace ScheduleService {
       leaveRequestDisabled = true;
       leaveRequestDisabledReason = "quota";
     }
-
-    const formatTime = (date: Date): string =>
-      date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
 
     const resolvedClassType = parseClassTypeOrNull(cls.classType);
     const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(cls.id, tErrors);

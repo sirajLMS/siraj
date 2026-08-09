@@ -9,14 +9,16 @@ type UseProfileFieldAccessOptions = {
   readonly scope?: ProfileScope;
 };
 
+const isAppPermission = (value: string): value is AppPermission => {
+  return (Object.values(AppPermission) as readonly string[]).includes(value);
+};
+
 const resolvePermission = (
   groupKey: ProfileFieldGroupKey,
   action: "view_own" | "view_other" | "edit_own" | "edit_other"
-): AppPermission => {
-  // profileFieldGroupGraphqlPermission returns a string that maps to AppPermission enum values.
-  // The cast is safe because the function generates GraphQL permission names (e.g., "PROFILE_CORE_STATUS_EDIT_OWN")
-  // that exactly match AppPermission enum members. Shared layer cannot import AppPermission due to layer separation.
-  return profileFieldGroupGraphqlPermission(groupKey, action) as AppPermission;
+): AppPermission | null => {
+  const permStr = profileFieldGroupGraphqlPermission(groupKey, action);
+  return isAppPermission(permStr) ? permStr : null;
 };
 
 export function useProfileFieldAccess(options: UseProfileFieldAccessOptions = {}) {
@@ -26,13 +28,13 @@ export function useProfileFieldAccess(options: UseProfileFieldAccessOptions = {}
   const canView = (groupKey: ProfileFieldGroupKey): boolean => {
     const permission =
       scope === ProfileScope.Own ? resolvePermission(groupKey, "view_own") : resolvePermission(groupKey, "view_other");
-    return hasPermission(permission);
+    return permission ? hasPermission(permission) : false;
   };
 
   const canEdit = (groupKey: ProfileFieldGroupKey): boolean => {
     const permission =
       scope === ProfileScope.Own ? resolvePermission(groupKey, "edit_own") : resolvePermission(groupKey, "edit_other");
-    return hasPermission(permission);
+    return permission ? hasPermission(permission) : false;
   };
 
   const canViewField = (groupKey: ProfileFieldGroupKey): boolean => canView(groupKey);
@@ -44,7 +46,7 @@ export function useProfileFieldAccess(options: UseProfileFieldAccessOptions = {}
       scope === ProfileScope.Own
         ? resolvePermission("core_status", "edit_own")
         : resolvePermission("core_status", "edit_other");
-    return hasPermission(permission);
+    return permission ? hasPermission(permission) : false;
   };
 
   const canAdminResetPassword = (): boolean => {

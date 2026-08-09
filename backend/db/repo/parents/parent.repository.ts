@@ -56,10 +56,10 @@ export namespace ParentRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ParentCreateResult> {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
     // Verify the user exists and doesn't already have a parent profile
-    const existingParent = await queryDb
+    const existingParent = await executor
       .select({ id: parents.id })
       .from(parents)
       .where(eq(parents.userId, input.userId))
@@ -70,7 +70,7 @@ export namespace ParentRepository {
       throw new Error(parent.alreadyExists);
     }
 
-    const [created] = await queryDb
+    const [created] = await executor
       .insert(parents)
       .values({
         userId: input.userId,
@@ -93,7 +93,7 @@ export namespace ParentRepository {
       throw new Error(parent.createFailed);
     }
 
-    const [userRow] = await queryDb
+    const [userRow] = await executor
       .select({ timezone: users.timezone })
       .from(users)
       .where(eq(users.id, input.userId))
@@ -122,8 +122,8 @@ export namespace ParentRepository {
     pageInfo: import("@/backend/types").PageInfo | null;
   };
 
-  async function fetchDirectoryMetrics(queryDb: typeof db | DBTransaction): Promise<ParentDirectoryMetrics> {
-    const metricsResult = await queryDb
+  async function fetchDirectoryMetrics(executor: typeof db | DBTransaction): Promise<ParentDirectoryMetrics> {
+    const metricsResult = await executor
       .select({
         status: parents.status,
         count: count(),
@@ -154,12 +154,12 @@ export namespace ParentRepository {
   }
 
   async function fetchUnpaidInvoiceCounts(
-    queryDb: typeof db | DBTransaction,
+    executor: typeof db | DBTransaction,
     parentIds: string[]
   ): Promise<Map<string, number>> {
     if (parentIds.length === 0) return new Map();
 
-    const unpaidCounts = await queryDb
+    const unpaidCounts = await executor
       .select({
         parentId: invoices.parentId,
         cnt: sql<number>`COUNT(*)::int`.mapWith(Number),
@@ -175,12 +175,12 @@ export namespace ParentRepository {
     options: { search?: string | null; pagination?: PaginationArgs | null; lifecycleStatus?: ParentStatus | null },
     tx?: DBTransaction
   ): Promise<ParentDirectoryResult> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const metrics = await fetchDirectoryMetrics(queryDb);
+    const metrics = await fetchDirectoryMetrics(executor);
     const conditions = buildDirectoryConditions(options);
 
-    let rowsQuery = queryDb
+    let rowsQuery = executor
       .select({
         id: parents.id,
         userId: parents.userId,
@@ -204,13 +204,13 @@ export namespace ParentRepository {
     const rows = await rowsQuery;
 
     const [totalCount, unpaidMap] = await Promise.all([
-      queryDb
+      executor
         .select({ count: count() })
         .from(parents)
         .innerJoin(users, eq(parents.userId, users.id))
         .where(conditions.length > 0 ? and(...conditions) : undefined),
       fetchUnpaidInvoiceCounts(
-        queryDb,
+        executor,
         rows.map(r => r.id)
       ),
     ]);
@@ -232,10 +232,10 @@ export namespace ParentRepository {
     options: { search?: string | null; limit: number },
     tx?: DBTransaction
   ): Promise<ParentDirectoryAutocompleteRow[]> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const conditions = buildDirectoryConditions({ search: options.search });
 
-    return await queryDb
+    return await executor
       .select({
         id: parents.id,
         name: users.name,
@@ -250,21 +250,25 @@ export namespace ParentRepository {
   };
 
   export const getStudentsForParent = async (parentId: string, tx?: DBTransaction): Promise<{ name: string }[]> => {
-    const queryDb = tx ?? db;
-    return await queryDb.select({ name: students.name }).from(students).where(eq(students.parentId, parentId)).limit(5);
+    const executor = tx ?? db;
+    return await executor
+      .select({ name: students.name })
+      .from(students)
+      .where(eq(students.parentId, parentId))
+      .limit(5);
   };
 
   export const getStudentsForParents = async (
     parentIds: readonly string[],
     tx?: DBTransaction
   ): Promise<Map<string, { name: string }[]>> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
     if (parentIds.length === 0) {
       return new Map();
     }
 
-    const rows = await queryDb
+    const rows = await executor
       .select({
         parentId: students.parentId,
         name: students.name,
@@ -309,9 +313,9 @@ export namespace ParentRepository {
   };
 
   export const getParentProfile = async (parentId: string, tx?: DBTransaction): Promise<ParentProfileResult | null> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const results = await queryDb
+    const results = await executor
       .select({
         id: parents.id,
         userId: parents.userId,
@@ -355,7 +359,7 @@ export namespace ParentRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<ParentProfileResult> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const existing = await getParentProfile(parentId, tx);
@@ -375,7 +379,7 @@ export namespace ParentRepository {
     if (input.feeAmount !== undefined) parentUpdate.feeAmount = input.feeAmount;
     if (input.currency !== undefined) parentUpdate.currency = input.currency;
 
-    await queryDb.update(parents).set(parentUpdate).where(eq(parents.id, parentId));
+    await executor.update(parents).set(parentUpdate).where(eq(parents.id, parentId));
 
     const updated = await getParentProfile(parentId, tx);
     if (!updated) {
@@ -420,15 +424,17 @@ export namespace ParentRepository {
     updatedAt: Date;
   };
 
-  export const deactivateParent = async (
+  async function setParentAccountStatus(
     parentId: string,
+    nextStatus: AccountStatus,
+    conflictWhenDeactivated: boolean,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<DeactivatedParentResult> => {
-    const queryDb = tx ?? db;
+  ): Promise<DeactivatedParentResult> {
+    const executor = tx ?? db;
     const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
-    const existing = await queryDb
+    const existing = await executor
       .select({ id: parents.id, userId: parents.userId, accountStatus: users.status })
       .from(parents)
       .innerJoin(users, eq(parents.userId, users.id))
@@ -440,13 +446,18 @@ export namespace ParentRepository {
     }
 
     const current = existing[0];
-    if (parseAccountStatus(current.accountStatus) === AccountStatus.DEACTIVATED) {
-      throw new Error(errorsTranslations.parentAlreadyDeactivated);
+    const isDeactivated = parseAccountStatus(current.accountStatus) === parseAccountStatus("DEACTIVATED");
+    if (isDeactivated === conflictWhenDeactivated) {
+      throw new Error(
+        conflictWhenDeactivated
+          ? errorsTranslations.parentAlreadyDeactivated
+          : errorsTranslations.parentAlreadyActivated
+      );
     }
 
-    const updatedUser = await UserRepository.updateStatus(current.userId, AccountStatus.DEACTIVATED, tx, locale);
+    const updatedUser = await UserRepository.updateStatus(current.userId, nextStatus, tx, locale);
 
-    const [updatedParent] = await queryDb
+    const [updatedParent] = await executor
       .update(parents)
       .set({ updatedAt: new Date() })
       .where(eq(parents.id, parentId))
@@ -462,6 +473,14 @@ export namespace ParentRepository {
       accountStatus: parseAccountStatus(updatedUser.status),
       updatedAt: updatedParent.updatedAt,
     };
+  }
+
+  export const deactivateParent = async (
+    parentId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<DeactivatedParentResult> => {
+    return setParentAccountStatus(parentId, AccountStatus.DEACTIVATED, true, tx, locale);
   };
 
   export const reactivateParent = async (
@@ -469,43 +488,7 @@ export namespace ParentRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<DeactivatedParentResult> => {
-    const queryDb = tx ?? db;
-    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-
-    const existing = await queryDb
-      .select({ id: parents.id, userId: parents.userId, accountStatus: users.status })
-      .from(parents)
-      .innerJoin(users, eq(parents.userId, users.id))
-      .where(eq(parents.id, parentId))
-      .limit(1);
-
-    if (existing.length === 0) {
-      throw new Error(errorsTranslations.parentNotFound);
-    }
-
-    const current = existing[0];
-    if (parseAccountStatus(current.accountStatus) !== AccountStatus.DEACTIVATED) {
-      throw new Error(errorsTranslations.parentAlreadyActivated);
-    }
-
-    const updatedUser = await UserRepository.updateStatus(current.userId, AccountStatus.ACTIVATED, tx, locale);
-
-    const [updatedParent] = await queryDb
-      .update(parents)
-      .set({ updatedAt: new Date() })
-      .where(eq(parents.id, parentId))
-      .returning({
-        id: parents.id,
-        userId: parents.userId,
-        updatedAt: parents.updatedAt,
-      });
-
-    return {
-      id: updatedParent.id,
-      userId: updatedParent.userId,
-      accountStatus: parseAccountStatus(updatedUser.status),
-      updatedAt: updatedParent.updatedAt,
-    };
+    return setParentAccountStatus(parentId, AccountStatus.ACTIVATED, false, tx, locale);
   };
 
   export type ChangeParentLifecycleResult = {
@@ -519,16 +502,16 @@ export namespace ParentRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ChangeParentLifecycleResult> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
-    const existing = await queryDb.select({ id: parents.id }).from(parents).where(eq(parents.id, parentId)).limit(1);
+    const existing = await executor.select({ id: parents.id }).from(parents).where(eq(parents.id, parentId)).limit(1);
 
     if (existing.length === 0) {
       throw new Error(errorsTranslations.parentNotFound);
     }
 
-    const [updated] = await queryDb
+    const [updated] = await executor
       .update(parents)
       .set({ status: newStatus, updatedAt: new Date() })
       .where(eq(parents.id, parentId))
@@ -561,8 +544,8 @@ export namespace ParentRepository {
     updatedAt: Date;
   };
 
-  const getAssociatedStudentsBaseQuery = (queryDb: typeof db | DBTransaction) => {
-    return queryDb
+  const getAssociatedStudentsBaseQuery = (executor: typeof db | DBTransaction) => {
+    return executor
       .select({
         id: students.id,
         name: students.name,
@@ -623,9 +606,9 @@ export namespace ParentRepository {
     parentId: string,
     tx?: DBTransaction
   ): Promise<AssociatedStudentRow[]> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const results = await getAssociatedStudentsBaseQuery(queryDb)
+    const results = await getAssociatedStudentsBaseQuery(executor)
       .where(eq(students.parentId, parentId))
       .orderBy(students.name);
 
@@ -636,9 +619,9 @@ export namespace ParentRepository {
     studentId: string,
     tx?: DBTransaction
   ): Promise<AssociatedStudentRow | null> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const results = await getAssociatedStudentsBaseQuery(queryDb).where(eq(students.id, studentId)).limit(1);
+    const results = await getAssociatedStudentsBaseQuery(executor).where(eq(students.id, studentId)).limit(1);
 
     if (results.length === 0) {
       return null;
@@ -802,14 +785,14 @@ export namespace ParentRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  async function fetchTodaysClassCount(queryDb: typeof db | DBTransaction, studentIds: string[]): Promise<number> {
+  async function fetchTodaysClassCount(executor: typeof db | DBTransaction, studentIds: string[]): Promise<number> {
     if (studentIds.length === 0) return 0;
 
     const today = new Date();
     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
 
-    const [classCountRow] = await queryDb
+    const [classCountRow] = await executor
       .select({ count: count() })
       .from(classInstances)
       .where(
@@ -824,10 +807,10 @@ export namespace ParentRepository {
   }
 
   async function fetchPendingInvoiceSummary(
-    queryDb: typeof db | DBTransaction,
+    executor: typeof db | DBTransaction,
     parentId: string
   ): Promise<{ count: number; totalAmount: string }> {
-    const [invoiceRow] = await queryDb
+    const [invoiceRow] = await executor
       .select({
         count: count(),
         totalAmount: sql<string>`COALESCE(SUM(${invoices.amount}), '0')`,
@@ -841,8 +824,8 @@ export namespace ParentRepository {
     };
   }
 
-  async function fetchUnreadMessageCount(queryDb: typeof db | DBTransaction, parentId: string): Promise<number> {
-    const [unreadRow] = await queryDb
+  async function fetchUnreadMessageCount(executor: typeof db | DBTransaction, parentId: string): Promise<number> {
+    const [unreadRow] = await executor
       .select({ count: count() })
       .from(notificationDeliveries)
       .innerJoin(users, eq(notificationDeliveries.userId, users.id))
@@ -857,10 +840,10 @@ export namespace ParentRepository {
     return unreadRow?.count ?? 0;
   }
 
-  async function fetchPerformanceAvg(queryDb: typeof db | DBTransaction, studentIds: string[]): Promise<number> {
+  async function fetchPerformanceAvg(executor: typeof db | DBTransaction, studentIds: string[]): Promise<number> {
     if (studentIds.length === 0) return 0;
 
-    const [avgRow] = await queryDb
+    const [avgRow] = await executor
       .select({
         avgScore: sql<number>`COALESCE(AVG(${classInstancePerformance.engagementScore}), 0)`,
       })
@@ -880,9 +863,9 @@ export namespace ParentRepository {
     parentId: string,
     tx?: DBTransaction
   ): Promise<ParentDashboardMetricsType> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const parentStudents = await queryDb
+    const parentStudents = await executor
       .select({ id: students.id })
       .from(students)
       .where(eq(students.parentId, parentId));
@@ -890,10 +873,10 @@ export namespace ParentRepository {
     const totalStudents = parentStudents.length;
 
     const [todaysClasses, invoiceSummary, pendingMessages, avgScore] = await Promise.all([
-      fetchTodaysClassCount(queryDb, studentIds),
-      fetchPendingInvoiceSummary(queryDb, parentId),
-      fetchUnreadMessageCount(queryDb, parentId),
-      fetchPerformanceAvg(queryDb, studentIds),
+      fetchTodaysClassCount(executor, studentIds),
+      fetchPendingInvoiceSummary(executor, parentId),
+      fetchUnreadMessageCount(executor, parentId),
+      fetchPerformanceAvg(executor, studentIds),
     ]);
 
     return {
@@ -912,9 +895,9 @@ export namespace ParentRepository {
     parentId: string,
     tx?: DBTransaction
   ): Promise<StudentProgressReturnType[]> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const parentStudents = await queryDb
+    const parentStudents = await executor
       .select({
         id: students.id,
         name: students.name,
@@ -936,9 +919,9 @@ export namespace ParentRepository {
     _parentId: string,
     tx?: DBTransaction
   ): Promise<WorkshopPromoReturnType | null> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const rows = await queryDb
+    const rows = await executor
       .select({
         id: siteContent.id,
         title: siteContent.title,
@@ -959,9 +942,9 @@ export namespace ParentRepository {
     };
   };
   export const upsertByUserId = async (userId: string, status: string, tx?: DBTransaction): Promise<ParentEntity> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const now = new Date();
-    const [row] = await queryDb
+    const [row] = await executor
       .insert(parents)
       .values({ userId, status, createdAt: now, updatedAt: now })
       .onConflictDoUpdate({

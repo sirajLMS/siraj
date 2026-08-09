@@ -38,3 +38,26 @@ export enum CronConcurrencyPolicy {
   SKIP = "SKIP",
   REPLACE = "REPLACE",
 }
+
+const cronConcurrencyPolicyValues = Object.values(CronConcurrencyPolicy) as readonly CronConcurrencyPolicy[];
+const cronConcurrencyPolicyStrings = cronConcurrencyPolicyValues as readonly string[];
+
+/**
+ * Type guard to check if a string is a valid CronConcurrencyPolicy.
+ */
+export function isCronConcurrencyPolicy(value: string): value is CronConcurrencyPolicy {
+  return cronConcurrencyPolicyStrings.includes(value);
+}
+
+/**
+ * Parses a string value into a CronConcurrencyPolicy enum, returning null if invalid.
+ */
+export function parseCronConcurrencyPolicy(value: string | null | undefined): CronConcurrencyPolicy | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (isCronConcurrencyPolicy(value)) {
+    return value;
+  }
+  return null;
+}

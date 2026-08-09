@@ -125,6 +125,7 @@ export interface ProfileParentLabels {
     readonly identity: string;
     readonly billing: string;
     readonly students: string;
+    readonly adminOnly: string;
   };
   readonly fields: {
     readonly fullName: string;

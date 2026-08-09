@@ -15,6 +15,44 @@ function dirTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   });
 }
 
+function studentFilters(overrides: { nameEquals?: string | null; status?: StudentStatus | null }): StudentFilterArgs {
+  return {
+    name: undefined,
+    nameNotContains: undefined,
+    nameEquals: overrides.nameEquals,
+    nameNotEquals: undefined,
+    nameStartsWith: undefined,
+    nameEndsWith: undefined,
+    nameIsEmpty: undefined,
+    nameIsNotEmpty: undefined,
+    parentId: undefined,
+    primaryTeacherId: undefined,
+    gender: undefined,
+    language: undefined,
+    status: overrides.status,
+    createdAt: undefined,
+    createdAtNot: undefined,
+    createdAtFrom: undefined,
+    createdAtTo: undefined,
+    createdAtAfter: undefined,
+    createdAtBefore: undefined,
+    createdAtOnOrAfter: undefined,
+    createdAtOnOrBefore: undefined,
+    createdAtIsEmpty: undefined,
+    createdAtIsNotEmpty: undefined,
+    birthDate: undefined,
+    birthDateNot: undefined,
+    birthDateFrom: undefined,
+    birthDateTo: undefined,
+    birthDateAfter: undefined,
+    birthDateBefore: undefined,
+    birthDateOnOrAfter: undefined,
+    birthDateOnOrBefore: undefined,
+    birthDateIsEmpty: undefined,
+    birthDateIsNotEmpty: undefined,
+  };
+}
+
 async function createStudentWithTeacher(tx: DBTransaction, studentName: string, teacherName: string) {
   const { teacher } = await setupTeacher(tx, {
     name: teacherName,
@@ -78,11 +116,12 @@ describe("StudentRepository.getDirectoryRows", () => {
       const uniqueName = `FilterName_${randomUUID()}`;
       await setupStudent(tx, { name: "Filt Par", email: `filt-${randomUUID()}@t.com` }, {}, { name: uniqueName });
 
-      const filters: Partial<StudentFilterArgs> = {
-        nameEquals: uniqueName,
-      };
-
-      const result = await StudentRepository.getDirectoryRows(null, filters as StudentFilterArgs, null, tx);
+      const result = await StudentRepository.getDirectoryRows(
+        null,
+        studentFilters({ nameEquals: uniqueName }),
+        null,
+        tx
+      );
       expect(result.rows.length).toBeGreaterThanOrEqual(1);
       expect(result.rows.every(r => r.name === uniqueName)).toBe(true);
     });
@@ -95,25 +134,28 @@ describe("StudentRepository.getDirectoryRows", () => {
         { name: "StatusStudent", status: "REGULAR" }
       );
 
-      const filters: Partial<StudentFilterArgs> = {
-        status: StudentStatus.REGULAR,
-      };
-
-      const result = await StudentRepository.getDirectoryRows(null, filters as StudentFilterArgs, null, tx);
-      expect(result.rows.every(r => r.status === "REGULAR")).toBe(true);
+      const result = await StudentRepository.getDirectoryRows(
+        null,
+        studentFilters({ status: StudentStatus.REGULAR }),
+        null,
+        tx
+      );
+      expect(result.rows.every(r => r.status === StudentStatus.REGULAR)).toBe(true);
     });
   });
 
   describe("Pagination paths", () => {
     dirTest("respects perPage limit via PaginationArgs", async tx => {
-      for (let i = 0; i < 3; i++) {
-        await setupStudent(
-          tx,
-          { name: `Pag Par ${i}`, email: `pag-${i}-${randomUUID()}@t.com` },
-          {},
-          { name: `PagStudent_${i}` }
-        );
-      }
+      await Promise.all(
+        Array.from({ length: 3 }, (_, i) =>
+          setupStudent(
+            tx,
+            { name: `Pag Par ${i}`, email: `pag-${i}-${randomUUID()}@t.com` },
+            {},
+            { name: `PagStudent_${i}` }
+          )
+        )
+      );
 
       const pagination = new PaginationArgs({ first: 2 });
       const result = await StudentRepository.getDirectoryRows(pagination, null, null, tx);
@@ -158,11 +200,12 @@ describe("StudentRepository.getDirectoryRows", () => {
 
   describe("Empty result handling", () => {
     dirTest("returns empty array when no students match filter", async tx => {
-      const filters: Partial<StudentFilterArgs> = {
-        nameEquals: `NonExistent_${randomUUID()}_X`,
-      };
-
-      const result = await StudentRepository.getDirectoryRows(null, filters as StudentFilterArgs, null, tx);
+      const result = await StudentRepository.getDirectoryRows(
+        null,
+        studentFilters({ nameEquals: `NonExistent_${randomUUID()}_X` }),
+        null,
+        tx
+      );
       expect(result.rows).toHaveLength(0);
       expect(result.totalCount).toBe(0);
     });

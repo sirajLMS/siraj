@@ -48,9 +48,9 @@ export namespace DemoAuthService {
    * Logs in a user by bypassing password checks, based purely on a requested permission group slug.
    * It looks up the group in the database and finds an associated user.
    *
-   * @drizzle `db.select().from(permissionGroups)`
-   * @drizzle `db.select().from(userPermissionGroups).innerJoin(users)`
-   * @drizzle `db.select().from(users)`
+   * @see {@link db.select().from(permissionGroups)}
+   * @see {@link db.select().from(userPermissionGroups).innerJoin(users)}
+   * @see {@link db.select().from(users)}
    * @param groupSlug The unique slug of the permission group to authenticate as.
    * @param tErrors Translated error labels (passed from GraphQL resolver via ctx.t("errors"))
    * @returns The user entity along with newly generated access and refresh tokens.
@@ -98,7 +98,7 @@ export namespace DemoAuthService {
    * with different seeded notification preferences / overrides.
    */
   async function selectDemoUserForGroup(groupId: string, groupSlug: string): Promise<UserSelectType | null> {
-    const canonicalEmail = INTERNAL_DEMO_USERS.find(entry => entry.groupSlug === groupSlug)?.email;
+    const canonicalEmail = INTERNAL_DEMO_USERS.find(entry => entry.groupSlug.toString() === groupSlug)?.email;
 
     if (canonicalEmail) {
       const [byEmail] = await db

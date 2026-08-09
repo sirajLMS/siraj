@@ -8,6 +8,7 @@ import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/prof
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/staff/sections/AdminOnlySection";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
 import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
@@ -167,6 +168,24 @@ export function StaffProfileMobileView({
     );
   };
 
+  const renderAdminOnlySection = () => {
+    if (!isAdminScope || !staffData) {
+      return null;
+    }
+    return (
+      <AdminOnlySection
+        mode="view"
+        labels={sectionLabels}
+        profile={{
+          userId: targetUserId,
+          name: staffData.name ?? null,
+          email: staffData.email ?? null,
+          status: staffData.status ?? null,
+        }}
+      />
+    );
+  };
+
   if (mode === ProfileMode.View) {
     return (
       <MobileContentStack>
@@ -183,6 +202,7 @@ export function StaffProfileMobileView({
           hourlyRate={staffData?.hourlyRate}
           rateCurrency={staffData?.rateCurrency}
         />
+        {renderAdminOnlySection()}
       </MobileContentStack>
     );
   }

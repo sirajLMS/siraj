@@ -19,7 +19,7 @@ import type {
 } from "@/backend/types/cron/cron.types";
 
 const noop = () => {};
-mock.module("@/backend/lib/logger", () => ({
+void mock.module("@/backend/lib/logger", () => ({
   logger: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));
@@ -32,7 +32,10 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (!(errorCaught instanceof Error)) {
+    throw new TypeError("expected Error");
+  }
+  return errorCaught;
 }
 
 async function createTestSchedule(
@@ -218,12 +221,14 @@ describe("CronRepository", () => {
 
   cronTest("listSchedules — returns paginated results with totalCount", async tx => {
     const { schedule } = await setupSchedule(tx, "list-page-seed");
-    for (let i = 0; i < 4; i++) {
-      await createTestSchedule(tx, {
-        name: `list-page-${i}-${crypto.randomUUID()}`,
-        createdByUserId: schedule.createdByUserId,
-      });
-    }
+    await Promise.all(
+      Array.from({ length: 4 }, (_, i) =>
+        createTestSchedule(tx, {
+          name: `list-page-${i}-${crypto.randomUUID()}`,
+          createdByUserId: schedule.createdByUserId,
+        })
+      )
+    );
 
     const page1 = await CronRepository.listSchedules({ limit: 2, offset: 0 }, tx);
     expect(page1.rows).toHaveLength(2);
@@ -258,9 +263,7 @@ describe("CronRepository", () => {
 
     const due = await CronRepository.listDueSchedules(now, 100, tx);
     expect(due.length).toBeGreaterThanOrEqual(1);
-    expect(due.every(s => s.status === CronScheduleStatus.ACTIVE && s.nextRunAt !== null && s.nextRunAt <= now)).toBe(
-      true
-    );
+    expect(due.every(s => s.status === "ACTIVE" && s.nextRunAt !== null && s.nextRunAt <= now)).toBe(true);
   });
 
   cronTest("listDueSchedules — excludes schedules with nextRunAt in the future", async tx => {
@@ -508,18 +511,15 @@ describe("CronRepository", () => {
   // ── listRunsBySchedule ──
 
   cronTest("listRunsBySchedule — returns paginated runs for a schedule", async tx => {
-    const { schedule, now } = await setupSchedule(tx, "runs-by-sched");
+    const { schedule } = await setupSchedule(tx, "runs-by-sched");
 
-    const runIds: string[] = [];
-    for (let i = 0; i < 3; i++) {
-      await tx
-        .update(cronSchedules)
-        .set({ nextRunAt: new Date(now.getTime() + RESET_OFFSET - i * 1000) })
-        .where(eq(cronSchedules.id, schedule.id));
-      runIds.push(await claimRun(tx, schedule.id, now, CLAIM_TIMEOUT_OFFSET + i * 60000));
-    }
+    const runs = await Promise.all([
+      makeRun(tx, schedule.id, { attempt: 1 }),
+      makeRun(tx, schedule.id, { attempt: 2 }),
+      makeRun(tx, schedule.id, { attempt: 3 }),
+    ]);
 
-    expect(runIds).toHaveLength(3);
+    expect(runs).toHaveLength(3);
     const page1 = await CronRepository.listRunsBySchedule(schedule.id, { limit: 2, offset: 0 }, tx);
     expect(page1.rows).toHaveLength(2);
     expect(page1.totalCount).toBe(3);

@@ -1,10 +1,9 @@
 import { and, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
-import type { ClassExecutionState } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
-import { parseIanaTimezoneOrNull } from "@/shared/lib/enum";
+import { parseClassExecutionState, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 
 export function buildDailyScheduleDayConditions(
   date: Date,
@@ -77,7 +76,7 @@ export async function hydrateDailyScheduleRows(
       durationMinutes: Math.round(
         (instance.scheduledEndAt.getTime() - instance.scheduledStartAt.getTime()) / (1000 * 60)
       ),
-      status: instance.executionState as ClassExecutionState,
+      status: parseClassExecutionState(instance.executionState),
       remarks: instance.remarks ?? null,
       hasTimezoneMismatch: false,
       studentTimezone: null,

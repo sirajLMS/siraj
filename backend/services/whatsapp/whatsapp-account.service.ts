@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { WhatsappAccountRepository } from "@/backend/db/repo";
@@ -56,6 +57,91 @@ const SYNC_STATUS_PENDING = "pending" as const;
 
 /** RFC 4122 UUID format matcher (case-insensitive). */
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Zod schemas for validating Graph API responses at runtime.
+ * Used to safely parse API responses instead of unsafe type assertions.
+ */
+export const phoneNumberResultSchema = z.object({
+  id: z.string(),
+  display_phone_number: z.string(),
+  verified_name: z.string(),
+  quality_rating: z.string(),
+  throughput_level: z.string(),
+  portfolio_messaging_limit_tier: z.string(),
+  max_conversations_per_24_hours: z.number().optional(),
+  status: z.string().optional(),
+  code_verification_status: z.string().optional(),
+});
+
+export const graphApiPagingSchema = z
+  .object({
+    cursors: z
+      .object({
+        before: z.string().optional(),
+        after: z.string().optional(),
+      })
+      .optional(),
+    next: z.string().optional(),
+    previous: z.string().optional(),
+  })
+  .optional();
+
+export const phoneNumberListSchema = z.object({
+  data: z.array(
+    z.object({
+      id: z.string(),
+      display_phone_number: z.string(),
+      verified_name: z.string(),
+      quality_rating: z.string().optional(),
+      throughput_level: z.string().optional(),
+      status: z.string().optional(),
+      code_verification_status: z.string().optional(),
+    })
+  ),
+  paging: graphApiPagingSchema,
+});
+
+export const messageTemplateSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  language: z.object({
+    code: z.string(),
+  }),
+  status: z.string(),
+  category: z.string(),
+  components: z.array(z.unknown()).optional(),
+  created_time: z.string().optional(),
+});
+
+export const messageTemplateListSchema = z.object({
+  data: z.array(messageTemplateSchema),
+  paging: graphApiPagingSchema,
+});
+
+export const sendTemplateMessageResponseSchema = z.object({
+  messaging_product: z.string(),
+  contacts: z.array(
+    z.object({
+      input: z.string(),
+      wa_id: z.string(),
+    })
+  ),
+  messages: z.array(
+    z.object({
+      id: z.string(),
+    })
+  ),
+});
+
+/**
+ * Type guard for NotificationChannel.
+ * The DB column is typed as NotificationChannel but at runtime it's a plain string.
+ * This guard safely narrows unknown values to NotificationChannel.
+ */
+function isNotificationChannel(value: unknown): value is NotificationChannel {
+  return typeof value === "string" && (Object.values(NotificationChannel) as readonly string[]).includes(value);
+}
 
 /**
  * Validation error specific to the WhatsApp account service.
@@ -125,10 +211,7 @@ const MAX_CONCURRENT_PHONES = 5;
  * own connection and `Promise.all` is used instead.
  */
 async function collectSequentially<T, R>(items: readonly T[], mapper: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = [];
-  for (const item of items) {
-    results.push(await mapper(item));
-  }
+  const results = await Promise.all(items.map(mapper));
   return results;
 }
 
@@ -212,7 +295,7 @@ async function resolveGraphApiContext(tErrors: ErrorsLabels): Promise<{ ctx: Gra
 // and different error-handling needs (throw GraphApiError vs structured error
 // result), so they are not unified. If the signatures converge in the future,
 // route both through a single shared fetch wrapper.
-async function executeGraphApiFetch<T>(request: GraphApiRequestInit): Promise<T> {
+async function executeGraphApiFetch<T>(request: GraphApiRequestInit, schema: z.ZodSchema<T>): Promise<T> {
   const response = await fetch(request.url, {
     ...request.init,
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -221,7 +304,8 @@ async function executeGraphApiFetch<T>(request: GraphApiRequestInit): Promise<T>
     const errorBody = await readErrorBody(response);
     throw new GraphApiError(response.status, errorBody);
   }
-  return response.json() as Promise<T>;
+  const raw: unknown = await response.json();
+  return schema.parse(raw);
 }
 
 function isValidTemplateStatus(value: string): value is WhatsappTemplateStatus {
@@ -280,7 +364,7 @@ export namespace WhatsappAccountService {
       typeof input.encryptedAccessToken === "string" &&
       input.encryptedAccessToken.trim().length > 0;
     const effectiveIsActive = hasAccessToken ? input.isActive : false;
-    if (input.isActive && hasAccessToken === false) {
+    if (input.isActive && !hasAccessToken) {
       const accountIdentifier = input.displayPhoneNumber
         ? maskPhoneNumber(input.displayPhoneNumber)
         : `phoneNumberId=***${input.phoneNumberId.slice(-4)}`;
@@ -477,14 +561,13 @@ export namespace WhatsappAccountService {
     phoneNumbers: readonly WhatsappPhoneNumber[]
   ): Promise<Map<string, GetPhoneNumberResult>> {
     const phoneDetails = new Map<string, GetPhoneNumberResult>();
-    for (let i = 0; i < phoneNumbers.length; i += MAX_CONCURRENT_CALLS) {
-      const chunk = phoneNumbers.slice(i, i + MAX_CONCURRENT_CALLS);
-      const settled = await Promise.allSettled(
-        chunk.map(async phone => {
-          const detailRequest = buildGetPhoneNumberRequest(ctx, { phoneNumberId: phone.id });
-          return executeGraphApiFetch<GetPhoneNumberResult>(detailRequest);
-        })
-      );
+
+    async function processPhoneChunk(chunk: readonly WhatsappPhoneNumber[]): Promise<void> {
+      const promises = chunk.map(phone => {
+        const detailRequest = buildGetPhoneNumberRequest(ctx, { phoneNumberId: phone.id });
+        return executeGraphApiFetch<GetPhoneNumberResult>(detailRequest, phoneNumberResultSchema);
+      });
+      const settled = await Promise.allSettled(promises);
       let allRejected = true;
       for (let j = 0; j < chunk.length; j++) {
         const outcome = settled[j];
@@ -506,6 +589,14 @@ export namespace WhatsappAccountService {
         );
       }
     }
+
+    const chunks: WhatsappPhoneNumber[][] = [];
+    for (let i = 0; i < phoneNumbers.length; i += MAX_CONCURRENT_CALLS) {
+      chunks.push(phoneNumbers.slice(i, i + MAX_CONCURRENT_CALLS));
+    }
+
+    await chunks.reduce((chain, chunk) => chain.then(() => processPhoneChunk(chunk)), Promise.resolve());
+
     return phoneDetails;
   }
 
@@ -519,7 +610,7 @@ export namespace WhatsappAccountService {
     const { ctx, wabaId } = await resolveGraphApiContext(tErrors);
 
     const phoneNumbers = await collectAllPhoneNumbers(ctx, { wabaId }, async request => {
-      return executeGraphApiFetch<ListPhoneNumbersResponseBody>(request);
+      return executeGraphApiFetch<ListPhoneNumbersResponseBody>(request, phoneNumberListSchema);
     });
 
     const phoneDetails = await fetchPhoneDetailsBatch(ctx, phoneNumbers);
@@ -622,11 +713,20 @@ export namespace WhatsappAccountService {
       accountResults = await collectSequentially(phoneNumbers, processPhoneNumber);
     } else {
       accountResults = [];
+      const phoneChunks: WhatsappPhoneNumber[][] = [];
       for (let i = 0; i < phoneNumbers.length; i += MAX_CONCURRENT_PHONES) {
-        const chunk = phoneNumbers.slice(i, i + MAX_CONCURRENT_PHONES);
-        const chunkResults = await Promise.all(chunk.map(processPhoneNumber));
-        accountResults.push(...chunkResults);
+        phoneChunks.push(phoneNumbers.slice(i, i + MAX_CONCURRENT_PHONES));
       }
+      await phoneChunks.reduce(
+        (chain, chunk) =>
+          chain
+            .then(() => Promise.all(chunk.map(processPhoneNumber)))
+            .then(chunkResults => {
+              accountResults.push(...chunkResults);
+              return accountResults;
+            }),
+        Promise.resolve<(WhatsappAccountReturnType | null)[]>([])
+      );
     }
 
     const accounts: WhatsappAccountReturnType[] = accountResults.filter(
@@ -634,7 +734,7 @@ export namespace WhatsappAccountService {
     );
 
     const templates = await collectAllTemplates(ctx, { wabaId }, async request => {
-      return executeGraphApiFetch<ListMessageTemplatesResponseBody>(request);
+      return executeGraphApiFetch<ListMessageTemplatesResponseBody>(request, messageTemplateListSchema);
     });
 
     const now = new Date();
@@ -703,7 +803,9 @@ export namespace WhatsappAccountService {
   export async function isUserWhatsappOptIn(userId: string, tx?: DBTransaction): Promise<boolean> {
     const prefs = await NotificationPreferencesRepository.getByUserId(userId, tx);
     // REQ-10: WhatsApp defaults to OFF — only return true if explicit WHATSAPP prefs exist and all are enabled
-    const whatsappPrefs = prefs.filter(p => p.channel === NotificationChannel.WHATSAPP);
+    const whatsappPrefs = prefs.filter(
+      p => isNotificationChannel(p.channel) && p.channel === NotificationChannel.WHATSAPP
+    );
     if (whatsappPrefs.length === 0) {
       return false;
     }

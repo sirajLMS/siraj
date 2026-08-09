@@ -106,12 +106,7 @@ gqlSchemaBuilder.queryField("generateAttendanceReport", t =>
       const result = await ReportService.generateAttendanceReport(filters, ctx.user.id, ctx.locale);
 
       const allPaidAmounts = result.rows.flatMap(row => row.paidAmounts);
-      const displayAmounts = await resolveDisplayAmountFields(
-        allPaidAmounts as unknown as Record<string, unknown>[],
-        ctx,
-        "amount",
-        "currency"
-      );
+      const displayAmounts = await resolveDisplayAmountFields(allPaidAmounts, ctx, "amount", "currency");
 
       return {
         ...result,

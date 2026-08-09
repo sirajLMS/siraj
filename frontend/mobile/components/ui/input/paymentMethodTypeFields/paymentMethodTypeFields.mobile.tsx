@@ -15,14 +15,14 @@ import { PhoneFormFieldMobile } from "@/frontend/mobile/components/ui/input/phon
 import { TagInputMobile } from "@/frontend/mobile/components/ui/input/tagInput";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-const mobileSlots: PaymentMethodTypeFieldsSlots = {
+const getMobileSlots = <T extends FieldValues>(): PaymentMethodTypeFieldsSlots<T> => ({
   LocalizedStringFormField: LocalizedStringFormFieldMobile,
   CountryAutocomplete: CountryAutocompleteMobile,
   CurrencySelect: CurrencySelectMobile,
   PaymentMethodSelect: PaymentMethodSelectMobile,
   PhoneFormField: PhoneFormFieldMobile,
   TagInput: TagInputMobile,
-};
+});
 
 export function PaymentMethodTypeFieldsMobile<T extends FieldValues>({
   ...props
@@ -30,9 +30,9 @@ export function PaymentMethodTypeFieldsMobile<T extends FieldValues>({
   const t = useAppTranslation(Translation.Ui.PaymentMethod);
 
   return (
-    <PaymentMethodTypeFieldsShared
+    <PaymentMethodTypeFieldsShared<T>
       {...props}
-      slots={mobileSlots}
+      slots={getMobileSlots<T>()}
       options={{ stackSpacing: 2, textFieldSize: "small" }}
       tTypeFields={t.typeFields}
     />

@@ -4041,7 +4041,8 @@ export enum NotificationEventType {
   StudentStatusChanged = 'STUDENT_STATUS_CHANGED',
   StudentTeacherReassigned = 'STUDENT_TEACHER_REASSIGNED',
   SuggestionAcknowledged = 'SUGGESTION_ACKNOWLEDGED',
-  SuggestionDuplicateMarked = 'SUGGESTION_DUPLICATE_MARKED'
+  SuggestionDuplicateMarked = 'SUGGESTION_DUPLICATE_MARKED',
+  UserStatusChanged = 'USER_STATUS_CHANGED'
 }
 
 export type NotificationPreference = {

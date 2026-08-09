@@ -1,13 +1,27 @@
+import { z } from "zod";
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
-import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import { logger } from "@/backend/lib/logger";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
-import type { OpenExchangeRatesResponse } from "@/backend/services/fx/providers/openexchangerates/openexchangerates.types";
 import type { FxProviderFetchResult } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";
 
 const OER_LATEST_ENDPOINT = "https://openexchangerates.org/api/latest.json";
 const REQUEST_TIMEOUT_MS = 10_000;
+
+/**
+ * Zod schema for validating OpenExchangeRatesResponse at runtime.
+ * Used to safely parse the API response instead of unsafe type assertions.
+ */
+const openExchangeRatesResponseSchema = z.object({
+  disclaimer: z.string().optional(),
+  license: z.string().optional(),
+  timestamp: z.number(),
+  base: z.string(),
+  rates: z.record(z.string(), z.number()),
+});
+
+export type OpenExchangeRatesResponse = z.infer<typeof openExchangeRatesResponseSchema>;
 
 /**
  * ISO 4217 symbols to request from OER. Excludes the base currency (USD) —
@@ -65,7 +79,8 @@ export class OpenExchangeRatesAdapter implements IFxRateProvider {
       throw new Error(`OpenExchangeRates request failed: HTTP ${response.status} ${response.statusText}`);
     }
 
-    const parsed = (await response.json()) as OpenExchangeRatesResponse;
+    const raw = await response.json();
+    const parsed = openExchangeRatesResponseSchema.parse(raw);
 
     if (!parsed || typeof parsed.rates !== "object" || parsed.rates == null) {
       throw new Error("OpenExchangeRates response missing rates object");

@@ -3,13 +3,14 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
-import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppLanguage, Gender, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   recordStudentProfileEditMutationDocument,
   studentProfileQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
+import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import {
   type StudentPortalProfileEditDraft,
@@ -27,14 +28,20 @@ function toDateInputValue(value: string | null | undefined): string {
   return date.toISOString().slice(0, 10);
 }
 
+const isGender = (val: string | null | undefined): val is Gender =>
+  val !== null && val !== undefined && (Object.values(Gender) as readonly string[]).includes(val);
+
+const isAppLanguage = (val: string | null | undefined): val is AppLanguage =>
+  val !== null && val !== undefined && (Object.values(AppLanguage) as readonly string[]).includes(val);
+
 function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDraft {
   return {
     phone: profile.phone ?? "",
     timezone: profile.timezone ?? "",
-    displayCurrency: (profile.displayCurrency as CurrencyCode | null) ?? "",
+    displayCurrency: parseCurrencyCode(profile.displayCurrency) ?? "",
     dateOfBirth: toDateInputValue(profile.dateOfBirth),
-    gender: (profile.gender as Gender | null) ?? "",
-    language: (profile.language as AppLanguage | null) ?? "",
+    gender: isGender(profile.gender) ? profile.gender : "",
+    language: isAppLanguage(profile.language) ? profile.language : "",
     timezoneOverride: profile.timezoneOverride ?? "",
     parentPhone: profile.parentPhone ?? "",
     avatarUrl: profile.avatarUrl ?? null,
@@ -109,39 +116,37 @@ export interface UseStudentProfileViewModelProps {
   readonly activeTab?: string;
 }
 
-function mapStudentProfileFromQuery(
-  profileData: { studentProfile?: Record<string, unknown> | null } | undefined
-): StudentProfileRow | null {
+function mapStudentProfileFromQuery(profileData: Operations.StudentProfileQuery | undefined): StudentProfileRow | null {
   if (!profileData?.studentProfile) return null;
   const p = profileData.studentProfile;
   return {
-    id: (p.id as string) ?? "",
-    name: (p.name as string) ?? "",
-    status: (p.status as string) ?? "",
-    avatarUrl: (p.avatarUrl as string | null) ?? null,
-    dateOfBirth: (p.dateOfBirth as string | null) ?? null,
-    gender: (p.gender as Gender | null) ?? null,
-    language: (p.language as AppLanguage | null) ?? null,
-    timezoneOverride: (p.timezoneOverride as string | null) ?? null,
-    email: (p.email as string | null) ?? null,
-    phone: (p.phone as string | null) ?? null,
-    timezone: (p.timezone as string | null) ?? null,
-    displayCurrency: (p.displayCurrency as string | null) ?? null,
-    parentId: (p.parentId as string | null) ?? null,
-    parentUserId: (p.parentUserId as string | null) ?? null,
-    parentName: (p.parentName as string | null) ?? null,
-    parentEmail: (p.parentEmail as string | null) ?? null,
-    parentPhone: (p.parentPhone as string | null) ?? null,
-    isAssociatedViewer: (p.isAssociatedViewer as boolean) ?? false,
-    primaryTeacherId: (p.primaryTeacherId as string | null) ?? null,
-    teacherUserId: (p.teacherUserId as string | null) ?? null,
-    teacherName: (p.teacherName as string | null) ?? null,
-    hoursPerWeek: (p.hoursPerWeek as number | null) ?? null,
-    classesRemaining: (p.classesRemaining as number | null) ?? null,
-    classesTotal: (p.classesTotal as number | null) ?? null,
-    version: (p.version as number) ?? 0,
-    createdAt: (p.createdAt as string | null) ?? null,
-    updatedAt: (p.updatedAt as string | null) ?? null,
+    id: p.id ?? "",
+    name: p.name ?? "",
+    status: p.status ?? "",
+    avatarUrl: p.avatarUrl ?? null,
+    dateOfBirth: p.dateOfBirth ?? null,
+    gender: p.gender ?? null,
+    language: p.language ?? null,
+    timezoneOverride: p.timezoneOverride ?? null,
+    email: p.email ?? null,
+    phone: p.phone ?? null,
+    timezone: p.timezone ?? null,
+    displayCurrency: p.displayCurrency ?? null,
+    parentId: p.parentId ?? null,
+    parentUserId: p.parentUserId ?? null,
+    parentName: p.parentName ?? null,
+    parentEmail: p.parentEmail ?? null,
+    parentPhone: p.parentPhone ?? null,
+    isAssociatedViewer: p.isAssociatedViewer ?? false,
+    primaryTeacherId: p.primaryTeacherId ?? null,
+    teacherUserId: p.teacherUserId ?? null,
+    teacherName: p.teacherName ?? null,
+    hoursPerWeek: p.hoursPerWeek ?? null,
+    classesRemaining: p.classesRemaining ?? null,
+    classesTotal: p.classesTotal ?? null,
+    version: p.version ?? 0,
+    createdAt: p.createdAt ?? null,
+    updatedAt: p.updatedAt ?? null,
   };
 }
 

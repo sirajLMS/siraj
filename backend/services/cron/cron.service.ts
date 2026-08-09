@@ -14,6 +14,7 @@ import {
   CronRunStatus,
   CronScheduleStatus,
   type CronTriggerSource,
+  parseCronConcurrencyPolicy,
 } from "@/backend/enum/cron/cron.enums";
 import { DomainError, ForbiddenError, NotFoundError, UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
@@ -589,7 +590,7 @@ async function assertScheduleExists(id: string, t: CronScheduleErrors): Promise<
 const IN_FLIGHT_RUN_STATUSES = [CronRunStatus.RUNNING, CronRunStatus.PENDING, CronRunStatus.RETRYING] as const;
 
 async function trySkipOnInFlight(scheduleId: string, concurrencyPolicy: string): Promise<DispatchByIdResult | null> {
-  if (concurrencyPolicy !== CronConcurrencyPolicy.SKIP) {
+  if (parseCronConcurrencyPolicy(concurrencyPolicy) !== CronConcurrencyPolicy.SKIP) {
     return null;
   }
   const runs = await CronRepository.listRuns({

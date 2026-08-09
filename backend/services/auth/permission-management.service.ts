@@ -2,7 +2,7 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, parseAppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { invalidateRoleChange } from "@/backend/services/cache";
@@ -15,9 +15,49 @@ import type {
 } from "@/backend/types";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
-import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
+import { DEFAULT_CONTENT_LOCALE, isAppLocale, type LocalizedString } from "@/shared/types";
 
 export namespace PermissionManagementService {
+  // ─── Private Helpers ──────────────────────────────────────────────────────
+
+  async function buildPermissionMap(): Promise<Map<string, AppPermission>> {
+    const allPerms = await PermissionManagementRepository.listAllPermissions();
+    const permMap = new Map<string, AppPermission>();
+    for (const p of allPerms) {
+      const parsed = parseAppPermission(p.key);
+      if (parsed) {
+        permMap.set(p.id, parsed);
+      }
+    }
+    return permMap;
+  }
+
+  async function getAllSystemPermissions(): Promise<AppPermission[]> {
+    const allPerms = await PermissionManagementRepository.listAllPermissions();
+    const result: AppPermission[] = [];
+    for (const p of allPerms) {
+      const parsed = parseAppPermission(p.key);
+      if (parsed) {
+        result.push(parsed);
+      }
+    }
+    return result;
+  }
+
+  function applyOverrides(
+    effectiveSet: Set<AppPermission>,
+    overrides: UserOverrideEntity[],
+    permMap: Map<string, AppPermission>
+  ): Set<AppPermission> {
+    for (const override of overrides) {
+      const key = permMap.get(override.permissionId);
+      if (!key) continue;
+      if (override.state === "GRANTED") effectiveSet.add(key);
+      else if (override.state === "DENIED") effectiveSet.delete(key);
+    }
+    return effectiveSet;
+  }
+
   // ─── Private Guards ───────────────────────────────────────────────────────
 
   async function requireManageAccess(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
@@ -71,9 +111,7 @@ export namespace PermissionManagementService {
   async function invalidateRoleChangeFailOpen(userIds: string | string[], context: string): Promise<void> {
     const ids = Array.isArray(userIds) ? userIds : [userIds];
     try {
-      for (const uid of ids) {
-        await invalidateRoleChange(uid);
-      }
+      await Promise.all(ids.map(uid => invalidateRoleChange(uid)));
     } catch (cacheErr) {
       logger.error("Failed to invalidate role change cache", { userIds: ids, context, error: cacheErr });
     }
@@ -147,8 +185,8 @@ export namespace PermissionManagementService {
 
     const trimmed: LocalizedString = {};
     for (const [locale, text] of Object.entries(value)) {
-      if (typeof text === "string") {
-        trimmed[locale as keyof LocalizedString] = text.trim();
+      if (typeof text === "string" && isAppLocale(locale)) {
+        trimmed[locale] = text.trim();
       }
     }
     return trimmed;
@@ -223,15 +261,16 @@ export namespace PermissionManagementService {
 
     const { slug: baseSlug } = await validateGroupName(input.name, tErrors);
 
+    // Find next available slug by checking existing slugs in a single query
+    const existingSlugs = await db
+      .select({ slug: permissionGroups.slug })
+      .from(permissionGroups)
+      .where(sql`${permissionGroups.slug} LIKE ${baseSlug + "%"}`);
+
+    const existingSlugSet = new Set(existingSlugs.map(s => s.slug));
     let slug = baseSlug;
     let counter = 1;
-    while (true) {
-      const [existingGroup] = await db
-        .select({ id: permissionGroups.id })
-        .from(permissionGroups)
-        .where(eq(permissionGroups.slug, slug))
-        .limit(1);
-      if (!existingGroup) break;
+    while (existingSlugSet.has(slug)) {
       slug = `${baseSlug}_${counter}`;
       counter++;
     }
@@ -384,8 +423,7 @@ export namespace PermissionManagementService {
     const user = await requireUserExistsFull(userId, tErrors);
 
     if (user.isSuperAdmin) {
-      const allPerms = await PermissionManagementRepository.listAllPermissions();
-      return allPerms.map(p => p.key as AppPermission);
+      return getAllSystemPermissions();
     }
 
     // Resolve base group permissions
@@ -396,15 +434,8 @@ export namespace PermissionManagementService {
     const overrides = await PermissionManagementRepository.getUserOverrides(userId);
     if (overrides.length === 0) return [...effectiveSet];
 
-    const allPerms = await PermissionManagementRepository.listAllPermissions();
-    const permMap = new Map(allPerms.map(p => [p.id, p.key as AppPermission]));
-
-    for (const override of overrides) {
-      const key = permMap.get(override.permissionId);
-      if (!key) continue;
-      if (override.state === "GRANTED") effectiveSet.add(key);
-      else if (override.state === "DENIED") effectiveSet.delete(key);
-    }
+    const permMap = await buildPermissionMap();
+    applyOverrides(effectiveSet, overrides, permMap);
 
     return [...effectiveSet];
   }
@@ -423,9 +454,9 @@ export namespace PermissionManagementService {
    * Ensures app_permission enum values exist before inserting system permissions.
    */
   export async function ensurePermissionEnumValues(keys: readonly AppPermission[]): Promise<void> {
-    for (const key of keys) {
-      await db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${key}';`));
-    }
+    await Promise.all(
+      keys.map(key => db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${key}';`)))
+    );
   }
 
   /**
@@ -436,12 +467,22 @@ export namespace PermissionManagementService {
   ): Promise<AppPermission[]> {
     if (inputs.length === 0) return [];
 
-    await ensurePermissionEnumValues(inputs.map(spec => spec.key as AppPermission));
+    const permissionKeys: AppPermission[] = [];
+    for (const spec of inputs) {
+      const parsed = parseAppPermission(spec.key);
+      if (!parsed) {
+        throw new Error(`Invalid AppPermission key: ${spec.key}`);
+      }
+      permissionKeys.push(parsed);
+    }
+
+    await ensurePermissionEnumValues(permissionKeys);
     await disableSystemPermissionTrigger();
 
     try {
-      for (const spec of inputs) {
-        await db.execute(sql`
+      await Promise.all(
+        inputs.map(spec =>
+          db.execute(sql`
           INSERT INTO permissions (id, key, resource, action, description, category, is_system)
           VALUES (
             gen_random_uuid(),
@@ -458,9 +499,10 @@ export namespace PermissionManagementService {
             description = EXCLUDED.description,
             category = EXCLUDED.category,
             is_system = EXCLUDED.is_system
-        `);
-      }
-      return inputs.map(spec => spec.key as AppPermission);
+        `)
+        )
+      );
+      return permissionKeys;
     } finally {
       await enableSystemPermissionTrigger();
     }
@@ -475,16 +517,18 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     if (permissionKeys.length === 0) return;
 
-    for (const key of permissionKeys) {
-      await db.execute(sql`
+    await Promise.all(
+      permissionKeys.map(key =>
+        db.execute(sql`
         INSERT INTO group_permissions (group_id, permission_id)
         SELECT g.id, p.id
         FROM permission_groups g, permissions p
         WHERE g.slug = ${groupSlug}
           AND p.key = ${key}::app_permission
         ON CONFLICT DO NOTHING
-      `);
-    }
+      `)
+      )
+    );
   }
 
   /**
@@ -494,9 +538,7 @@ export namespace PermissionManagementService {
     groupSlugs: readonly string[],
     permissionKeys: readonly AppPermission[]
   ): Promise<void> {
-    for (const groupSlug of groupSlugs) {
-      await ensureGroupPermissions(groupSlug, permissionKeys);
-    }
+    await Promise.all(groupSlugs.map(groupSlug => ensureGroupPermissions(groupSlug, permissionKeys)));
   }
 
   /**
@@ -509,16 +551,18 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     if (permissionKeys.length === 0) return;
 
-    for (const key of permissionKeys) {
-      await db.execute(sql`
+    await Promise.all(
+      permissionKeys.map(key =>
+        db.execute(sql`
         DELETE FROM group_permissions gp
         USING permission_groups g, permissions p
         WHERE gp.group_id = g.id
           AND gp.permission_id = p.id
           AND g.slug = ${groupSlug}
           AND p.key = ${key}::app_permission
-      `);
-    }
+      `)
+      )
+    );
   }
   /**
    * Idempotent single user permission override (seed / bootstrap use).

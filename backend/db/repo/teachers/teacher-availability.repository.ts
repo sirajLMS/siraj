@@ -16,10 +16,23 @@ import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
-import { parseGender, parseIanaTimezone } from "@/shared/lib/enum";
+import { parseDayOfWeek, parseGender, parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 type TeacherGender = string | null;
+
+function dayOfWeekEquals(value: string, day: DayOfWeek): boolean {
+  return parseDayOfWeek(value) === parseDayOfWeek(day);
+}
+
+function isVacationRequestStatus(value: unknown): value is VacationRequestStatus {
+  return (
+    value === VacationRequestStatus.PENDING ||
+    value === VacationRequestStatus.APPROVED ||
+    value === VacationRequestStatus.REJECTED ||
+    value === VacationRequestStatus.CANCELLED
+  );
+}
 
 interface TeacherShortInfo {
   teacherId: string;
@@ -110,7 +123,7 @@ function checkUnavailabilityConflict(
   }[]
 ): boolean {
   for (const pattern of patterns) {
-    if ((pattern.dayOfWeek as DayOfWeek) !== bookingDay) continue;
+    if (!dayOfWeekEquals(pattern.dayOfWeek, bookingDay)) continue;
     if (!isWithinEffectiveRange(bookingDate, pattern.effectiveFrom, pattern.effectiveUntil)) continue;
     if (
       timesOverlap(
@@ -142,7 +155,7 @@ function checkWindowsMatch(
 ): boolean {
   if (windows.length === 0) return true;
   return windows.some(window => {
-    if ((window.dayOfWeek as DayOfWeek) !== bookingDay) return false;
+    if (!dayOfWeekEquals(window.dayOfWeek, bookingDay)) return false;
     if (!isWithinEffectiveRange(bookingDate, window.effectiveFrom, window.effectiveUntil)) return false;
     return isWithinTimeWindow(
       bookingStartMinutes,
@@ -235,11 +248,11 @@ function generateGapsFromBlocked(
 
 function expandDateRange(fromDate: string, toDate: string): string[] {
   const dates: string[] = [];
-  const current = new Date(`${fromDate}T00:00:00.000Z`);
-  const end = new Date(`${toDate}T00:00:00.000Z`);
-  while (current <= end) {
-    dates.push(getUtcDateString(current));
-    current.setUTCDate(current.getUTCDate() + 1);
+  let currentMs = Date.parse(`${fromDate}T00:00:00.000Z`);
+  const endMs = Date.parse(`${toDate}T00:00:00.000Z`);
+  while (currentMs <= endMs) {
+    dates.push(getUtcDateString(new Date(currentMs)));
+    currentMs += 24 * 60 * 60 * 1000;
   }
   return dates;
 }
@@ -347,10 +360,10 @@ function countAvailableDays(gaps: Types.TeacherAvailabilityGap[]): number {
 }
 
 function sortTeachers(
-  teachers: Types.AvailabilitySearchTeacher[],
+  teacherResults: Types.AvailabilitySearchTeacher[],
   sortBy: AvailabilitySearchSortBy | null | undefined
 ): Types.AvailabilitySearchTeacher[] {
-  const sorted = [...teachers];
+  const sorted = [...teacherResults];
 
   switch (sortBy) {
     case AvailabilitySearchSortBy.NAME_DESC:
@@ -405,31 +418,19 @@ export namespace TeacherAvailabilityRepository {
     return tx ? runner(tx) : db.transaction(runner);
   }
 
-  async function addWindowWithLock<
-    TTable extends typeof teacherAvailabilityWindows | typeof teacherRecurringUnavailability,
-  >(
+  async function withAvailabilityLock<T>(
     teacherId: string,
-    input: Types.AvailabilityWindowInput,
-    insertValues: Record<string, unknown>,
-    insertTable: TTable,
+    startTime: string,
+    endTime: string,
+    create: (t: DBTransaction) => Promise<T>,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<
-    TTable extends typeof teacherAvailabilityWindows
-      ? Types.TeacherAvailabilityWindowSelectType
-      : Types.TeacherRecurringUnavailabilitySelectType
-  > {
+  ): Promise<T> {
     const runner = async (t: DBTransaction) => {
       await acquireAvailabilityLock(t, teacherId);
-      await assertValidTimeRange(input.startTime, input.endTime, locale);
-
-      const [created] = await t
-        .insert(insertTable)
-        .values(insertValues as never)
-        .returning();
-      return created as never;
+      await assertValidTimeRange(startTime, endTime, locale);
+      return create(t);
     };
-
     return withTransaction(runner, tx);
   }
 
@@ -439,11 +440,17 @@ export namespace TeacherAvailabilityRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherAvailabilityWindowSelectType> => {
-    return addWindowWithLock(
+    return withAvailabilityLock(
       teacherId,
-      input,
-      buildCommonWindowValues(teacherId, input),
-      teacherAvailabilityWindows,
+      input.startTime,
+      input.endTime,
+      async t => {
+        const [created] = await t
+          .insert(teacherAvailabilityWindows)
+          .values(buildCommonWindowValues(teacherId, input))
+          .returning();
+        return created;
+      },
       tx,
       locale
     );
@@ -455,14 +462,20 @@ export namespace TeacherAvailabilityRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherRecurringUnavailabilitySelectType> => {
-    return addWindowWithLock(
+    return withAvailabilityLock(
       teacherId,
-      input,
-      {
-        ...buildCommonWindowValues(teacherId, input),
-        reason: input.reason ?? null,
+      input.startTime,
+      input.endTime,
+      async t => {
+        const [created] = await t
+          .insert(teacherRecurringUnavailability)
+          .values({
+            ...buildCommonWindowValues(teacherId, input),
+            reason: input.reason ?? null,
+          })
+          .returning();
+        return created;
       },
-      teacherRecurringUnavailability,
       tx,
       locale
     );
@@ -526,8 +539,7 @@ export namespace TeacherAvailabilityRepository {
 
   async function fetchVacationRequest(
     t: DBTransaction,
-    vacationRequestId: string,
-    _locale?: string
+    vacationRequestId: string
   ): Promise<Types.TeacherVacationRequestSelectType> {
     const results = await t
       .select()
@@ -549,7 +561,7 @@ export namespace TeacherAvailabilityRepository {
     vacationRequestId: string,
     locale?: string
   ): Promise<void> {
-    if (shouldFail(current.status as VacationRequestStatus)) {
+    if (!isVacationRequestStatus(current.status) || shouldFail(current.status)) {
       const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
       throw new ValidationError(
         errorKey === "vacationRequestNotPending"
@@ -567,7 +579,7 @@ export namespace TeacherAvailabilityRepository {
     locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> {
     const runner = async (t: DBTransaction) => {
-      const current = await fetchVacationRequest(t, input.vacationRequestId, locale);
+      const current = await fetchVacationRequest(t, input.vacationRequestId);
       await acquireAvailabilityLock(t, current.teacherId);
       await assertVacationStatus(
         current,
@@ -601,7 +613,7 @@ export namespace TeacherAvailabilityRepository {
     locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
     const runner = async (t: DBTransaction) => {
-      const current = await fetchVacationRequest(t, vacationRequestId, locale);
+      const current = await fetchVacationRequest(t, vacationRequestId);
       await acquireAvailabilityLock(t, current.teacherId);
       await assertVacationStatus(
         current,
@@ -1046,10 +1058,10 @@ export namespace TeacherAvailabilityRepository {
           continue;
         }
 
-        const dayWindows = windows.filter(window => (window.dayOfWeek as DayOfWeek) === day);
+        const dayWindows = windows.filter(window => dayOfWeekEquals(window.dayOfWeek, day));
         const dayUnavail = unavailabilities.filter(
           unavailability =>
-            (unavailability.dayOfWeek as DayOfWeek) === day &&
+            dayOfWeekEquals(unavailability.dayOfWeek, day) &&
             isWithinEffectiveRange(calendarDate, unavailability.effectiveFrom, unavailability.effectiveUntil)
         );
         const extraBlocked = [

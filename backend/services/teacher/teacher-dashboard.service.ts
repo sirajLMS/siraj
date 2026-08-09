@@ -110,31 +110,30 @@ export namespace TeacherDashboardService {
       idempotencyKey,
     };
 
-    const created = await db.transaction(async tx => {
-      const created = await SchedulingRepository.createClassInstance(entry, tx);
+    const createdInstance = await db.transaction(async tx => {
+      const instance = await SchedulingRepository.createClassInstance(entry, tx);
 
       const openQuota = await QuotaService.selectQuotaForBooking(input.studentId, tx, userId);
       if (openQuota) {
-        await QuotaService.redeemForInstance(input.studentId, created.id, openQuota.id, userId, tx);
+        await QuotaService.redeemForInstance(input.studentId, instance.id, openQuota.id, userId, tx);
       } else {
-        const creditIdempotencyKey = `credit-deduction:${created.id}`;
-        await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx, tErrors);
+        const creditIdempotencyKey = `credit-deduction:${instance.id}`;
+        await CreditService.deductForBooking(input.studentId, instance.id, userId, creditIdempotencyKey, tx, tErrors);
       }
 
-      return created;
+      return instance;
     });
-
     // Best-effort meeting URL generation — never fails the manual booking.
     try {
-      await MeetingConfigSnapshotService.generateAndAttachForClassInstance(created.id);
+      await MeetingConfigSnapshotService.generateAndAttachForClassInstance(createdInstance.id);
     } catch (error) {
       logger.error("Booking-time meeting URL generation failed for manual class instance", {
-        classInstanceId: created.id,
+        classInstanceId: createdInstance.id,
         error: error instanceof Error ? error.message : String(error),
       });
     }
 
-    return created;
+    return createdInstance;
   }
 
   export interface SupportRequestInput {

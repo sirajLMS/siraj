@@ -238,9 +238,7 @@ async function dispatchUnpaidInvoicesForStudent(studentId: string, locale?: stri
     .from(invoices)
     .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
 
-  for (const invoice of unpaidInvoices) {
-    await dispatchInvoiceGenerated(parentUserId, invoice, locale);
-  }
+  await Promise.all(unpaidInvoices.map(invoice => dispatchInvoiceGenerated(parentUserId, invoice, locale)));
 }
 
 /**
@@ -397,7 +395,7 @@ export namespace BillingManagementService {
       "Failed to submit payment proof",
       actorUserId,
       invoiceId,
-      async (tx, tErrors) => {
+      async (tx, txErrors) => {
         const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx);
         await linkProofToInvoice(invoiceId, proofFileId, tx);
 
@@ -416,7 +414,7 @@ export namespace BillingManagementService {
           tx
         );
 
-        const invoice = await BillingRepository.setInvoicePaymentPending(invoiceId, tErrors, expectedVersion, tx);
+        const invoice = await BillingRepository.setInvoicePaymentPending(invoiceId, txErrors, expectedVersion, tx);
         logger.info("Payment proof submitted", {
           actorUserId,
           invoiceId,
@@ -455,7 +453,7 @@ export namespace BillingManagementService {
       "Failed to approve payment proof",
       actorUserId,
       invoiceId,
-      async (tx, tErrors) => {
+      async (tx, txErrors) => {
         const invoice = await finalizeInvoicePaid(
           actorUserId,
           invoiceId,
@@ -463,7 +461,7 @@ export namespace BillingManagementService {
           pending.submittedByUserId,
           expectedVersion,
           tx,
-          tErrors
+          txErrors
         );
         await InvoicePaymentSubmissionRepository.updateSubmissionStatus(
           pending.id,
@@ -502,12 +500,12 @@ export namespace BillingManagementService {
       "Failed to reject payment proof",
       actorUserId,
       invoiceId,
-      async (tx, tErrors) => {
+      async (tx, txErrors) => {
         await InvoicePaymentSubmissionRepository.rejectPendingForInvoice(
           invoiceId,
           actorUserId,
           rejectionReason ?? null,
-          tErrors,
+          txErrors,
           tx
         );
         return BillingRepository.updateInvoiceStatus(invoiceId, "UNPAID", tErrors, null, expectedVersion, tx);
@@ -563,7 +561,7 @@ export namespace BillingManagementService {
       "Failed to mark invoice as paid",
       actorUserId,
       invoiceId,
-      async (tx, tErrors) =>
+      async (tx, _txErrors) =>
         finalizeInvoicePaid(actorUserId, invoiceId, proofFileId, actorUserId, expectedVersion, tx, tErrors),
       tErrors,
       async updated => {

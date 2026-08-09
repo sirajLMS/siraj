@@ -3,7 +3,7 @@
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import type * as React from "react";
-import { type Control, Controller, type FieldValues } from "react-hook-form";
+import { type Control, Controller, type FieldValues, type Path } from "react-hook-form";
 import type { PaymentMethodTypeFieldsProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
 import { resolveFieldName } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/utils";
 import { type CurrencyCode, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -12,9 +12,9 @@ import type { CountryType } from "@/frontend/common/lib/locale";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import type { PaymentMethodTypeFieldsLabels } from "@/shared/locale/types/ui";
 
-type LocalizedStringFormFieldSlot = React.ComponentType<{
-  name: string;
-  control: Control;
+type LocalizedStringFormFieldSlot<T extends FieldValues = FieldValues> = React.ComponentType<{
+  name: Path<T>;
+  control: Control<T>;
   label: string;
   disabled?: boolean;
   required?: boolean;
@@ -53,9 +53,9 @@ type PaymentMethodSelectSlot = React.ComponentType<{
   fullWidth?: boolean;
 }>;
 
-type PhoneFormFieldSlot = React.ComponentType<{
-  name: string;
-  control: Control;
+type PhoneFormFieldSlot<T extends FieldValues = FieldValues> = React.ComponentType<{
+  name: Path<T>;
+  control: Control<T>;
   label: string;
   disabled?: boolean;
   required?: boolean;
@@ -68,12 +68,12 @@ type TagInputSlot = React.ComponentType<{
   onChange: (tags: string[]) => void;
 }>;
 
-export interface PaymentMethodTypeFieldsSlots {
-  LocalizedStringFormField: LocalizedStringFormFieldSlot;
+export interface PaymentMethodTypeFieldsSlots<T extends FieldValues = FieldValues> {
+  LocalizedStringFormField: LocalizedStringFormFieldSlot<T>;
   CountryAutocomplete: CountryAutocompleteSlot;
   CurrencySelect: CurrencySelectSlot;
   PaymentMethodSelect: PaymentMethodSelectSlot;
-  PhoneFormField: PhoneFormFieldSlot;
+  PhoneFormField: PhoneFormFieldSlot<T>;
   TagInput: TagInputSlot;
 }
 
@@ -106,7 +106,7 @@ export function PaymentMethodTypeFieldsShared<T extends FieldValues>({
   options = DEFAULT_OPTIONS,
   tTypeFields,
 }: Readonly<PaymentMethodTypeFieldsProps<T>> & {
-  readonly slots: PaymentMethodTypeFieldsSlots;
+  readonly slots: PaymentMethodTypeFieldsSlots<T>;
   readonly options?: PaymentMethodTypeFieldSharedOptions;
   readonly tTypeFields: PaymentMethodTypeFieldsLabels;
 }): React.ReactNode {
@@ -114,10 +114,6 @@ export function PaymentMethodTypeFieldsShared<T extends FieldValues>({
   const stackSx = stackSpacing !== undefined ? { gap: stackSpacing } : undefined;
   const stackSpacingProp = stackSpacing === undefined ? 2 : undefined;
   const sizeProp = textFieldSize ? { size: textFieldSize } : {};
-  // Control<T> where T extends FieldValues is assignable to Control<FieldValues>
-  // The cast is safe — TypeScript's invariance on Control prevents implicit assignment.
-  const slotControl = control as Control;
-
   const renderCatalogMetadata = () => {
     if (!showCatalogMetadata) {
       return null;
@@ -129,20 +125,20 @@ export function PaymentMethodTypeFieldsShared<T extends FieldValues>({
       <>
         <LocalizedStringFormField
           name={resolveFieldName<T>(catalogPrefix, "name")}
-          control={slotControl}
+          control={control}
           label={tTypeFields.name}
           disabled={disabled}
           required
         />
         <LocalizedStringFormField
           name={resolveFieldName<T>(catalogPrefix, "description")}
-          control={slotControl}
+          control={control}
           label={tTypeFields.description}
           disabled={disabled}
         />
         <LocalizedStringFormField
           name={resolveFieldName<T>(catalogPrefix, "instructions")}
-          control={slotControl}
+          control={control}
           label={tTypeFields.instructions}
           disabled={disabled}
           multiline
@@ -195,6 +191,27 @@ export function PaymentMethodTypeFieldsShared<T extends FieldValues>({
 
   const { PaymentMethodSelect, PhoneFormField } = slots;
 
+  const renderLtrTextField = (fieldName: string, label: string) => (
+    <Controller
+      key={fieldName}
+      name={resolveFieldName<T>(detailsPrefix, fieldName)}
+      control={control}
+      render={({ field, fieldState }) => (
+        <TextField
+          label={label}
+          value={field.value ?? ""}
+          disabled={disabled}
+          fullWidth
+          {...sizeProp}
+          error={Boolean(fieldState.error)}
+          helperText={fieldState.error?.message}
+          onChange={event => field.onChange(event.target.value)}
+          slotProps={{ htmlInput: { dir: "ltr" } }}
+        />
+      )}
+    />
+  );
+
   switch (type) {
     case PaymentMethodType.MobileWallet:
       return (
@@ -220,7 +237,7 @@ export function PaymentMethodTypeFieldsShared<T extends FieldValues>({
           />
           <PhoneFormField
             name={resolveFieldName<T>(detailsPrefix, "phone")}
-            control={slotControl}
+            control={control}
             label={tTypeFields.phone}
             disabled={disabled}
             required
@@ -346,74 +363,10 @@ export function PaymentMethodTypeFieldsShared<T extends FieldValues>({
               />
             )}
           />
-          <Controller
-            name={resolveFieldName<T>(detailsPrefix, "iban")}
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                label={tTypeFields.iban}
-                value={field.value ?? ""}
-                disabled={disabled}
-                fullWidth
-                {...sizeProp}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                onChange={event => field.onChange(event.target.value)}
-                slotProps={{ htmlInput: { dir: "ltr" } }}
-              />
-            )}
-          />
-          <Controller
-            name={resolveFieldName<T>(detailsPrefix, "swiftBic")}
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                label={tTypeFields.swiftBic}
-                value={field.value ?? ""}
-                disabled={disabled}
-                fullWidth
-                {...sizeProp}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                onChange={event => field.onChange(event.target.value)}
-                slotProps={{ htmlInput: { dir: "ltr" } }}
-              />
-            )}
-          />
-          <Controller
-            name={resolveFieldName<T>(detailsPrefix, "accountNumber")}
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                label={tTypeFields.accountNumber}
-                value={field.value ?? ""}
-                disabled={disabled}
-                fullWidth
-                {...sizeProp}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                onChange={event => field.onChange(event.target.value)}
-                slotProps={{ htmlInput: { dir: "ltr" } }}
-              />
-            )}
-          />
-          <Controller
-            name={resolveFieldName<T>(detailsPrefix, "routingNumber")}
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                label={tTypeFields.routingNumber}
-                value={field.value ?? ""}
-                disabled={disabled}
-                fullWidth
-                {...sizeProp}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                onChange={event => field.onChange(event.target.value)}
-                slotProps={{ htmlInput: { dir: "ltr" } }}
-              />
-            )}
-          />
+          {renderLtrTextField("iban", tTypeFields.iban)}
+          {renderLtrTextField("swiftBic", tTypeFields.swiftBic)}
+          {renderLtrTextField("accountNumber", tTypeFields.accountNumber)}
+          {renderLtrTextField("routingNumber", tTypeFields.routingNumber)}
         </Stack>
       );
     case PaymentMethodType.Cash:

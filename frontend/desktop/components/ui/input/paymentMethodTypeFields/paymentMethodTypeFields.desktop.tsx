@@ -15,14 +15,14 @@ import { PhoneFormFieldDesktop } from "@/frontend/desktop/components/ui/input/ph
 import { TagInputDesktop } from "@/frontend/desktop/components/ui/input/tagInput";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-const desktopSlots: PaymentMethodTypeFieldsSlots = {
+const getDesktopSlots = <T extends FieldValues>(): PaymentMethodTypeFieldsSlots<T> => ({
   LocalizedStringFormField: LocalizedStringFormFieldDesktop,
   CountryAutocomplete: CountryAutocompleteDesktop,
   CurrencySelect: CurrencySelectDesktop,
   PaymentMethodSelect: PaymentMethodSelectDesktop,
   PhoneFormField: PhoneFormFieldDesktop,
   TagInput: TagInputDesktop,
-};
+});
 
 export function PaymentMethodTypeFieldsDesktop<T extends FieldValues>({
   ...props
@@ -30,9 +30,9 @@ export function PaymentMethodTypeFieldsDesktop<T extends FieldValues>({
   const t = useAppTranslation(Translation.Ui.PaymentMethod);
 
   return (
-    <PaymentMethodTypeFieldsShared
+    <PaymentMethodTypeFieldsShared<T>
       {...props}
-      slots={desktopSlots}
+      slots={getDesktopSlots<T>()}
       options={{ stackSpacing: 2 }}
       tTypeFields={t.typeFields}
     />

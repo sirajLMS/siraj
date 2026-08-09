@@ -3,6 +3,7 @@
 import { Stack } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/student/profile/sections/AdminOnlySection";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
 import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileEditBody";
@@ -32,6 +33,14 @@ function StudentOwnProfileView({
     enforceFieldAccess: false,
   };
 
+  const adminOnlyLabels = {
+    baseLabels: {
+      notSet: baseLabels.notSet,
+      fieldAccess: baseLabels.fieldAccess,
+      actions: baseLabels.actions,
+    },
+  };
+
   return (
     <Stack spacing={3}>
       <StudentProfileUserDetailsSection
@@ -51,6 +60,7 @@ function StudentOwnProfileView({
       {profile.parentName ? (
         <StudentParentAssignmentProfileSection {...sectionBase} sectionTitle={labels.parentInfo} />
       ) : null}
+      <AdminOnlySection mode="view" labels={adminOnlyLabels} profile={profile} />
     </Stack>
   );
 }

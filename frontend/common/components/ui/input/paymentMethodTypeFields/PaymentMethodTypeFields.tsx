@@ -21,14 +21,14 @@ export type {
   PaymentMethodTypeFieldsProps,
 } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
 
-const sharedSlots: PaymentMethodTypeFieldsSlots = {
+const getSharedSlots = <T extends FieldValues>(): PaymentMethodTypeFieldsSlots<T> => ({
   LocalizedStringFormField,
   CountryAutocomplete,
   CurrencySelect,
   PaymentMethodSelect,
   PhoneFormField,
   TagInput,
-};
+});
 
 export function PaymentMethodTypeFields<T extends FieldValues>({
   ...props
@@ -36,9 +36,9 @@ export function PaymentMethodTypeFields<T extends FieldValues>({
   const t = useAppTranslation(Translation.Ui.PaymentMethod);
 
   return (
-    <PaymentMethodTypeFieldsShared
+    <PaymentMethodTypeFieldsShared<T>
       {...props}
-      slots={sharedSlots}
+      slots={getSharedSlots<T>()}
       options={{ stackSpacing: 2 }}
       tTypeFields={t.typeFields}
     />

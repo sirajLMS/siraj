@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback } from "react";
-import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { studentFieldGroupGraphqlPermission } from "@/shared/lib/field-group-permission-key";
+
+const isAppPermission = (value: string): value is AppPermission =>
+  (Object.values(AppPermission) as readonly string[]).includes(value);
 
 export type UseStudentFieldAccessOptions = {
   /**
@@ -26,9 +29,8 @@ export function useStudentFieldAccess(options: UseStudentFieldAccessOptions = {}
   const canView = useCallback(
     (groupKey: StudentFieldGroupKey): boolean => {
       const action = isOwnStudentProfile ? "view_own" : "view_other";
-      // studentFieldGroupGraphqlPermission returns a string that maps to AppPermission enum values.
-      // The cast is safe because the function generates GraphQL permission names that exactly match AppPermission enum members.
-      return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
+      const permStr = studentFieldGroupGraphqlPermission(groupKey, action);
+      return isAppPermission(permStr) ? hasPermission(permStr) : false;
     },
     [hasPermission, isOwnStudentProfile]
   );
@@ -36,9 +38,8 @@ export function useStudentFieldAccess(options: UseStudentFieldAccessOptions = {}
   const canEdit = useCallback(
     (groupKey: StudentFieldGroupKey): boolean => {
       const action = isOwnStudentProfile ? "edit_own" : "edit_other";
-      // studentFieldGroupGraphqlPermission returns a string that maps to AppPermission enum values.
-      // The cast is safe because the function generates GraphQL permission names that exactly match AppPermission enum members.
-      return hasPermission(studentFieldGroupGraphqlPermission(groupKey, action) as AppPermission);
+      const permStr = studentFieldGroupGraphqlPermission(groupKey, action);
+      return isAppPermission(permStr) ? hasPermission(permStr) : false;
     },
     [hasPermission, isOwnStudentProfile]
   );

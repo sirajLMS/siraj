@@ -62,8 +62,8 @@ function toGraphQLDataType(dataType: SystemSettingDataType): GraphQLSystemSettin
       return GraphQLSystemSettingDataType.Json;
     default: {
       // Exhaustiveness check
-      const _exhaustive: never = dataType;
-      return _exhaustive;
+      const exhaustiveCheck: never = dataType;
+      return exhaustiveCheck;
     }
   }
 }
@@ -105,8 +105,8 @@ function toGraphQLCategory(category: SystemSettingCategory): GraphQLSystemSettin
       return GraphQLSystemSettingCategory.General;
     default: {
       // Exhaustiveness check
-      const _exhaustive: never = category;
-      return _exhaustive;
+      const exhaustiveCheck: never = category;
+      return exhaustiveCheck;
     }
   }
 }

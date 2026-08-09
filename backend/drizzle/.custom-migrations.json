@@ -1,5 +1,5 @@
 {
-  "manifestHash": "fef0d2a46c5276438f21811e346b04651a34688b4e83b43401175985294b4914",
+  "manifestHash": "6bdf0813a5f0cbc27c903b9cad50f89b0d2d6d691331a77194250c29dd43ff1d",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -23,7 +23,11 @@
     },
     {
       "file": "31-user-admin-reset-password.sql",
-      "sha256": "d4279482cd6e64f2a60e51ac7f8af440629798b4b7e42ede606209d26211ef11"
+      "sha256": "1abb1304f5204d570fc9cea52088bd07496b513c3734ba6eb3a80d82b07ba0e0"
+    },
+    {
+      "file": "32-user-admin-reset-password-data.sql",
+      "sha256": "9b4ee33bc88f6b21f3cfc4d99cee8ee12217d7981656b8bab5b96484ff2d1b84"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -240,6 +244,8 @@
     "20260803041721_custom_9a-cron-permissions-enum",
     "20260803041722_custom_9b-cron-permissions-data",
     "20260808165054_custom_31-user-admin-reset-password",
-    "20260808165215_custom_31-user-admin-reset-password"
+    "20260808165215_custom_31-user-admin-reset-password",
+    "20260809053906_custom_31-user-admin-reset-password",
+    "20260809053907_custom_32-user-admin-reset-password-data"
   ]
 }

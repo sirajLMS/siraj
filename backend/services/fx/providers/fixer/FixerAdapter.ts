@@ -1,9 +1,9 @@
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
-import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import { logger } from "@/backend/lib/logger";
-import type { FixerLatestResponse } from "@/backend/services/fx/providers/fixer/fixer.types";
+import { fixerResponseSchema } from "@/backend/services/fx/providers/fixer/fixer.types";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
 import type { FxProviderFetchResult } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";
 
 const FIXER_LATEST_ENDPOINT = "https://api.apilayer.com/fixer/latest";
@@ -129,28 +129,25 @@ export class FixerAdapter implements IFxRateProvider {
       throw new Error(`Fixer request failed: HTTP ${response.status} ${response.statusText}`);
     }
 
-    const parsed = (await response.json()) as FixerLatestResponse;
+    const parsed = await response.json();
+    const fixerResponse = fixerResponseSchema.parse(parsed);
 
-    if (!parsed) {
-      throw new Error("Fixer response body is empty");
-    }
-
-    if (parsed.success === false) {
-      const err = parsed.error;
+    if (!fixerResponse.success) {
+      const err = fixerResponse.error;
       const message = err?.info || err?.type || `Fixer error code ${err?.code ?? "unknown"}`;
       throw new Error(`Fixer request unsuccessful: ${message}`);
     }
 
-    if (!parsed.rates || typeof parsed.rates !== "object") {
+    if (!fixerResponse.rates || typeof fixerResponse.rates !== "object") {
       throw new Error("Fixer response missing rates object");
     }
 
-    const rates = normaliseToUsdHub(parsed.rates);
+    const rates = normaliseToUsdHub(fixerResponse.rates);
 
-    const timestamp = new Date(parsed.timestamp * 1000);
+    const timestamp = new Date(fixerResponse.timestamp * 1000);
 
     logger.info("Fixer fetchLatestRates: succeeded", {
-      base: parsed.base,
+      base: fixerResponse.base,
       timestamp: timestamp.toISOString(),
       rateCount: rates.size,
     });
@@ -160,7 +157,7 @@ export class FixerAdapter implements IFxRateProvider {
       base: CurrencyCode.USD,
       timestamp,
       rates,
-      rawResponse: parsed,
+      rawResponse: fixerResponse,
     };
   }
 }

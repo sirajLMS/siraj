@@ -26,14 +26,27 @@ let activeAdapter: CronQueueAdapter | null = null;
 let activeBackend: CronQueueBackend | null = null;
 let activeBackendResolvedAt = 0;
 
+// Pre-computed valid backend values for type-safe checking (following pattern from AppPermission)
+const VALID_BACKEND_VALUES = Object.values(CronQueueBackend) as readonly CronQueueBackend[];
+const VALID_BACKEND_STRINGS = VALID_BACKEND_VALUES as readonly string[];
+
+/**
+ * Type guard to check if a string is a valid CronQueueBackend.
+ */
+function isCronQueueBackend(value: string): value is CronQueueBackend {
+  return VALID_BACKEND_STRINGS.includes(value);
+}
+
+/**
+ * Parses a string value into a CronQueueBackend enum, throwing if invalid.
+ */
 function mapToBackend(value: string | undefined): CronQueueBackend {
   if (!value) return CronQueueBackend.PG_BOSS;
   const normalized = value.toUpperCase().replaceAll("-", "_");
-  const values = Object.values(CronQueueBackend) as string[];
-  if (!values.includes(normalized)) {
-    throw new CronQueueBackendUnknown(value);
+  if (isCronQueueBackend(normalized)) {
+    return normalized;
   }
-  return normalized as CronQueueBackend;
+  throw new CronQueueBackendUnknown(value);
 }
 
 /**

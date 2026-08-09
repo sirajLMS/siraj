@@ -1,5 +1,4 @@
 import { and, asc, count, desc, eq, inArray, isNull, lte, ne, or, type SQL, sql } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import { queryDb } from "@/backend/db";
 import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
@@ -69,16 +68,24 @@ export namespace BillingRepository {
   /**
    * Internal helper to create a billing entity (invoice or payment) with exchange rate
    */
-  async function createBillingEntity<R>(
+  async function createBillingEntity(
     t: DBTransaction,
-    table: PgTable,
-    input: {
-      currency: CurrencyCode;
-      exchangeRateSnapshot?: string | null;
-      exchangeRateSource?: string | null;
-    } & Record<string, unknown>,
+    table: typeof invoices,
+    input: InvoiceCreateInput,
     tErrors: ErrorsLabels
-  ): Promise<R> {
+  ): Promise<Types.InvoiceSelectType>;
+  async function createBillingEntity(
+    t: DBTransaction,
+    table: typeof payments,
+    input: PaymentRecordInput,
+    tErrors: ErrorsLabels
+  ): Promise<Types.PaymentSelectType>;
+  async function createBillingEntity(
+    t: DBTransaction,
+    table: typeof invoices | typeof payments,
+    input: InvoiceCreateInput | PaymentRecordInput,
+    tErrors: ErrorsLabels
+  ): Promise<Types.InvoiceSelectType | Types.PaymentSelectType> {
     const { snapshot, source } = await resolveExchangeRateSnapshot(
       t,
       input.currency,
@@ -98,18 +105,21 @@ export namespace BillingRepository {
       })
       .returning();
 
-    return results[0] as R;
+    if (results.length === 0) {
+      throw new Error(tErrors.billing.invoiceNotFound("create"));
+    }
+    return results[0];
   }
 
   /**
-   * Get the latest exchange rate.
+   * Fetches the most recent exchange-rate row for a pair with effectiveDate <= now.
+   * Returns null when no rate exists.
    */
-  export const getLatestExchangeRate = async (
+  async function fetchLatestExchangeRateRow(
     fromCurrency: CurrencyCode,
     toCurrency: CurrencyCode,
-    tErrors: ErrorsLabels,
     tx?: DBTransaction | typeof db
-  ): Promise<Types.CurrencyExchangeRateSelectType> => {
+  ): Promise<Types.CurrencyExchangeRateSelectType | null> {
     const q = queryDb(tx);
     const now = new Date();
     const results = await q
@@ -125,7 +135,26 @@ export namespace BillingRepository {
       .orderBy(desc(currencyExchangeRates.effectiveDate), desc(currencyExchangeRates.createdAt))
       .limit(1);
 
-    if (results.length === 0) {
+    return results[0] ?? null;
+  }
+
+  function isExchangeRateStale(effectiveDate: Date): boolean {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    return effectiveDate < twentyFourHoursAgo;
+  }
+
+  /**
+   * Get the latest exchange rate.
+   */
+  export const getLatestExchangeRate = async (
+    fromCurrency: CurrencyCode,
+    toCurrency: CurrencyCode,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction | typeof db
+  ): Promise<Types.CurrencyExchangeRateSelectType> => {
+    const latest = await fetchLatestExchangeRateRow(fromCurrency, toCurrency, tx);
+
+    if (!latest) {
       throw new Error(
         tErrors.file.recordNotFound({
           tableName: "currency_exchange_rates",
@@ -133,10 +162,8 @@ export namespace BillingRepository {
         })
       );
     }
-    const latest = results[0];
 
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    if (latest.effectiveDate < twentyFourHoursAgo) {
+    if (isExchangeRateStale(latest.effectiveDate)) {
       throw new Error(
         tErrors.billing.exchangeRateStale({
           fromCurrency,
@@ -158,28 +185,9 @@ export namespace BillingRepository {
     tx?: DBTransaction,
     _locale?: string
   ): Promise<{ rate: string | null; stale: boolean }> => {
-    const q = queryDb(tx);
-    const now = new Date();
-    const results = await q
-      .select()
-      .from(currencyExchangeRates)
-      .where(
-        and(
-          eq(currencyExchangeRates.fromCurrency, fromCurrency),
-          eq(currencyExchangeRates.toCurrency, toCurrency),
-          lte(currencyExchangeRates.effectiveDate, now)
-        )
-      )
-      .orderBy(desc(currencyExchangeRates.effectiveDate), desc(currencyExchangeRates.createdAt))
-      .limit(1);
+    const latest = await fetchLatestExchangeRateRow(fromCurrency, toCurrency, tx);
 
-    if (results.length === 0) {
-      return { rate: null, stale: true };
-    }
-
-    const latest = results[0];
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    if (latest.effectiveDate < twentyFourHoursAgo) {
+    if (!latest || isExchangeRateStale(latest.effectiveDate)) {
       return { rate: null, stale: true };
     }
 
@@ -312,8 +320,8 @@ export namespace BillingRepository {
    */
   type ExchangeRateHistorySelectRow = {
     id: string;
-    fromCurrency: string;
-    toCurrency: string;
+    fromCurrency: CurrencyCode;
+    toCurrency: CurrencyCode;
     rate: string;
     source: string | null;
     effectiveDate: Date;
@@ -331,8 +339,8 @@ export namespace BillingRepository {
   function mapExchangeRateHistoryRow(r: ExchangeRateHistorySelectRow): Types.ExchangeRateHistoryRow {
     return {
       id: r.id,
-      fromCurrency: r.fromCurrency as CurrencyCode,
-      toCurrency: r.toCurrency as CurrencyCode,
+      fromCurrency: r.fromCurrency,
+      toCurrency: r.toCurrency,
       rate: r.rate,
       source: r.source,
       effectiveDate: r.effectiveDate,
@@ -363,7 +371,7 @@ export namespace BillingRepository {
         .orderBy(desc(currencyExchangeRates.effectiveDate))
         .limit(100);
 
-      return _buildUnpaginatedResult(historyId, rows.map(mapExchangeRateHistoryRow));
+      return buildUnpaginatedResult(historyId, rows.map(mapExchangeRateHistoryRow));
     }
 
     const cap = Math.min(pagination.perPage, 100);
@@ -389,7 +397,7 @@ export namespace BillingRepository {
       id: historyId,
       rows,
       totalCount,
-      pageInfo: _buildPageInfo(rows.length, currentPage, offset, totalCount, cap, lastPage),
+      pageInfo: buildPageInfo(rows.length, currentPage, offset, totalCount, cap, lastPage),
     };
   };
 
@@ -401,8 +409,7 @@ export namespace BillingRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
-    const runner = async (t: DBTransaction) =>
-      createBillingEntity<Types.InvoiceSelectType>(t, invoices, input, tErrors);
+    const runner = async (t: DBTransaction) => createBillingEntity(t, invoices, input, tErrors);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -414,8 +421,7 @@ export namespace BillingRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<Types.PaymentSelectType> => {
-    const runner = async (t: DBTransaction) =>
-      createBillingEntity<Types.PaymentSelectType>(t, payments, input, tErrors);
+    const runner = async (t: DBTransaction) => createBillingEntity(t, payments, input, tErrors);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -538,7 +544,7 @@ export namespace BillingRepository {
     }));
   }
 
-  function _buildPageInfo(
+  function buildPageInfo(
     rowCount: number,
     currentPage: number,
     offset: number,
@@ -558,7 +564,7 @@ export namespace BillingRepository {
     };
   }
 
-  function _buildUnpaginatedResult<TRow>(
+  function buildUnpaginatedResult<TRow>(
     id: string,
     rows: TRow[]
   ): { id: string; rows: TRow[]; totalCount: number; pageInfo: null } {
@@ -760,27 +766,38 @@ export namespace BillingRepository {
     };
   }
 
+  async function fetchInvoiceHistory(
+    whereCondition: SQL | undefined,
+    resultId: string,
+    pagination: Types.PaginationArgs | null,
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceHistoryPaginatedResult> {
+    const q = queryDb(tx);
+    if (!pagination) {
+      return fetchUnpaginatedInvoices(q, whereCondition, resultId);
+    }
+    return fetchInvoicesPaginatedData(q, resultId, whereCondition, pagination);
+  }
+
   export const getInvoicesForParent = async (
     parentId: string,
     pagination: Types.PaginationArgs | null = null,
     search: string | null | undefined = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
-    const q = queryDb(tx);
-    const whereCondition = mergeWhereConditions(
-      and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt)),
-      buildInvoiceSearchCondition(search)
+    return fetchInvoiceHistory(
+      mergeWhereConditions(
+        and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt)),
+        buildInvoiceSearchCondition(search)
+      ),
+      `parent-invoice-history-${parentId}`,
+      pagination,
+      tx
     );
-
-    if (!pagination) {
-      return fetchUnpaginatedInvoices(q, whereCondition, `parent-invoice-history-${parentId}`);
-    }
-
-    return fetchInvoicesPaginatedData(q, `parent-invoice-history-${parentId}`, whereCondition, pagination);
   };
 
-  async function countInvoicesWithJoin(queryDb: DBQueryExecutor, whereCondition: SQL | undefined): Promise<number> {
-    const countResult = await queryDb
+  async function countInvoicesWithJoin(executor: DBQueryExecutor, whereCondition: SQL | undefined): Promise<number> {
+    const countResult = await executor
       .select({ count: count() })
       .from(invoices)
       .leftJoin(students, eq(invoices.studentId, students.id))
@@ -789,11 +806,11 @@ export namespace BillingRepository {
   }
 
   async function fetchUnpaginatedInvoices(
-    queryDb: DBQueryExecutor,
+    executor: DBQueryExecutor,
     whereCondition: SQL | undefined,
     resultId: string
   ): Promise<Types.InvoiceHistoryPaginatedResult> {
-    const rows = await queryDb
+    const rows = await executor
       .select(invoiceBaseFields)
       .from(invoices)
       .leftJoin(students, eq(invoices.studentId, students.id))
@@ -802,11 +819,11 @@ export namespace BillingRepository {
       .orderBy(desc(invoices.issueDate))
       .limit(200);
 
-    return _buildUnpaginatedResult(resultId, rows.map(mapInvoiceRow));
+    return buildUnpaginatedResult(resultId, rows.map(mapInvoiceRow));
   }
 
   async function fetchInvoicesPaginatedData(
-    queryDb: DBQueryExecutor,
+    executor: DBQueryExecutor,
     resultId: string,
     whereCondition: SQL | undefined,
     pagination: Types.PaginationArgs
@@ -816,7 +833,7 @@ export namespace BillingRepository {
     const offset = pagination.offset;
 
     const [dataRows, totalCount] = await Promise.all([
-      queryDb
+      executor
         .select(invoiceBaseFields)
         .from(invoices)
         .leftJoin(students, eq(invoices.studentId, students.id))
@@ -825,7 +842,7 @@ export namespace BillingRepository {
         .orderBy(desc(invoices.issueDate))
         .limit(perPage)
         .offset(offset),
-      countInvoicesWithJoin(queryDb, whereCondition),
+      countInvoicesWithJoin(executor, whereCondition),
     ]);
 
     const lastPage = Math.max(1, Math.ceil(totalCount / perPage));
@@ -835,7 +852,7 @@ export namespace BillingRepository {
       id: resultId,
       rows,
       totalCount,
-      pageInfo: _buildPageInfo(rows.length, currentPage, offset, totalCount, perPage, lastPage),
+      pageInfo: buildPageInfo(rows.length, currentPage, offset, totalCount, perPage, lastPage),
     };
   }
 
@@ -844,14 +861,12 @@ export namespace BillingRepository {
     search: string | null | undefined = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
-    const q = queryDb(tx);
-    const whereCondition = mergeWhereConditions(isNull(invoices.deletedAt), buildInvoiceSearchCondition(search));
-
-    if (!pagination) {
-      return fetchUnpaginatedInvoices(q, whereCondition, "admin-invoice-history");
-    }
-
-    return fetchInvoicesPaginatedData(q, "admin-invoice-history", whereCondition, pagination);
+    return fetchInvoiceHistory(
+      mergeWhereConditions(isNull(invoices.deletedAt), buildInvoiceSearchCondition(search)),
+      "admin-invoice-history",
+      pagination,
+      tx
+    );
   };
 
   export const getAdminBillingSummary = async (tx?: DBTransaction): Promise<Types.AdminBillingSummaryResult> => {
@@ -952,47 +967,37 @@ export namespace BillingRepository {
     }));
   };
 
-  async function fetchUnpaidInvoiceSummary(t: DBTransaction | undefined, parentId: string) {
+  async function fetchInvoiceAmountSummaryByStatus(
+    t: DBTransaction | undefined,
+    parentId: string,
+    status: "UNPAID" | "PAID"
+  ) {
     const q = queryDb(t);
-    const unpaidResult = await q
-      .select({
-        outstandingBalance: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
-        nextDueDate: sql<string | null>`MIN(${invoices.dueDate})`,
-      })
-      .from(invoices)
-      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
+    const whereCondition = and(
+      eq(invoices.parentId, parentId),
+      eq(invoices.status, status),
+      isNull(invoices.deletedAt)
+    );
 
-    const unpaidByCurrency = await q
-      .select({
-        currency: invoices.currency,
-        amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
-      })
-      .from(invoices)
-      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)))
-      .groupBy(invoices.currency);
+    const [aggregateResult, byCurrency] = await Promise.all([
+      q
+        .select({
+          totalAmount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+          nextDueDate: sql<string | null>`MIN(${invoices.dueDate})`,
+        })
+        .from(invoices)
+        .where(whereCondition),
+      q
+        .select({
+          currency: invoices.currency,
+          amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+        })
+        .from(invoices)
+        .where(whereCondition)
+        .groupBy(invoices.currency),
+    ]);
 
-    return { unpaidResult, unpaidByCurrency };
-  }
-
-  async function fetchPaidInvoiceSummary(t: DBTransaction | undefined, parentId: string) {
-    const q = queryDb(t);
-    const paidResult = await q
-      .select({
-        paidThisTerm: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
-      })
-      .from(invoices)
-      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAID"), isNull(invoices.deletedAt)));
-
-    const paidByCurrency = await q
-      .select({
-        currency: invoices.currency,
-        amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
-      })
-      .from(invoices)
-      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAID"), isNull(invoices.deletedAt)))
-      .groupBy(invoices.currency);
-
-    return { paidResult, paidByCurrency };
+    return { aggregateResult, byCurrency };
   }
 
   async function fetchParentBillingExtras(t: DBTransaction | undefined, parentId: string) {
@@ -1028,14 +1033,22 @@ export namespace BillingRepository {
     parentId: string,
     tx?: DBTransaction
   ): Promise<Types.ParentBillingSummaryResult> => {
-    const { unpaidResult, unpaidByCurrency } = await fetchUnpaidInvoiceSummary(tx, parentId);
-    const { paidResult, paidByCurrency } = await fetchPaidInvoiceSummary(tx, parentId);
+    const { aggregateResult: unpaidResult, byCurrency: unpaidByCurrency } = await fetchInvoiceAmountSummaryByStatus(
+      tx,
+      parentId,
+      "UNPAID"
+    );
+    const { aggregateResult: paidResult, byCurrency: paidByCurrency } = await fetchInvoiceAmountSummaryByStatus(
+      tx,
+      parentId,
+      "PAID"
+    );
     const { activeStudentsResult, nextUnpaidRow, pendingCountResult } = await fetchParentBillingExtras(tx, parentId);
 
     return {
       id: `parent-billing-summary-${parentId}`,
-      outstandingBalance: unpaidResult[0]?.outstandingBalance ?? "0.00",
-      paidThisTerm: paidResult[0]?.paidThisTerm ?? "0.00",
+      outstandingBalance: unpaidResult[0]?.totalAmount ?? "0.00",
+      paidThisTerm: paidResult[0]?.totalAmount ?? "0.00",
       nextDueDate: unpaidResult[0]?.nextDueDate ?? null,
       activeStudents: activeStudentsResult[0]?.activeStudents ?? 0,
       nextUnpaidInvoice: nextUnpaidRow
@@ -1165,6 +1178,17 @@ export namespace BillingRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
+  async function upsertManyWithRunner<TRow>(
+    tx: DBTransaction | undefined,
+    runInserts: (t: DBTransaction) => Promise<TRow[][]>
+  ): Promise<TRow[]> {
+    const runner = async (t: DBTransaction) => {
+      const inserted = await runInserts(t);
+      return inserted.flatMap(rows => (rows[0] ? [rows[0]] : []));
+    };
+    return tx ? runner(tx) : db.transaction(runner);
+  }
+
   export const findInvoicesByIdempotencyKeys = async (
     keys: readonly string[],
     tx?: DBTransaction
@@ -1177,53 +1201,34 @@ export namespace BillingRepository {
       .where(inArray(invoices.idempotencyKey, [...keys]));
   };
 
-  async function upsertMany<TInput, TOutput>(
-    inputs: readonly TInput[],
-    table: PgTable,
-    conflictTarget: PgColumn,
-    buildSetClause: (input: TInput) => Record<string, unknown>,
-    tx?: DBTransaction
-  ): Promise<TOutput[]> {
-    if (inputs.length === 0) return [];
-    const now = new Date();
-
-    const runner = async (t: DBTransaction) => {
-      const results: TOutput[] = [];
-      for (const input of inputs) {
-        const inserted = await t
-          .insert(table)
-          .values({
-            ...input,
-            createdAt: now,
-            updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: conflictTarget,
-            set: buildSetClause(input),
-          })
-          .returning();
-        if (inserted[0]) results.push(inserted[0] as TOutput);
-      }
-      return results;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
-  }
-
   export const upsertManyInvoices = async (
     inputs: readonly InvoiceCreateInput[],
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType[]> => {
-    return upsertMany(
-      inputs,
-      invoices,
-      invoices.idempotencyKey,
-      input => ({
-        status: input.status,
-        paidDate: input.paidDate ?? null,
-        updatedAt: new Date(),
-      }),
-      tx
+    if (inputs.length === 0) return [];
+    const now = new Date();
+
+    return upsertManyWithRunner(tx, t =>
+      Promise.all(
+        inputs.map(input =>
+          t
+            .insert(invoices)
+            .values({
+              ...input,
+              createdAt: now,
+              updatedAt: now,
+            })
+            .onConflictDoUpdate({
+              target: invoices.idempotencyKey,
+              set: {
+                status: input.status,
+                paidDate: input.paidDate ?? null,
+                updatedAt: new Date(),
+              },
+            })
+            .returning()
+        )
+      )
     );
   };
 
@@ -1243,14 +1248,28 @@ export namespace BillingRepository {
     inputs: readonly PaymentRecordInput[],
     tx?: DBTransaction
   ): Promise<Types.PaymentSelectType[]> => {
-    return upsertMany(
-      inputs,
-      payments,
-      payments.idempotencyKey,
-      () => ({
-        updatedAt: new Date(),
-      }),
-      tx
+    if (inputs.length === 0) return [];
+    const now = new Date();
+
+    return upsertManyWithRunner(tx, t =>
+      Promise.all(
+        inputs.map(input =>
+          t
+            .insert(payments)
+            .values({
+              ...input,
+              createdAt: now,
+              updatedAt: now,
+            })
+            .onConflictDoUpdate({
+              target: payments.idempotencyKey,
+              set: {
+                updatedAt: new Date(),
+              },
+            })
+            .returning()
+        )
+      )
     );
   };
 
@@ -1261,29 +1280,29 @@ export namespace BillingRepository {
     if (inputs.length === 0) return [];
     const now = new Date();
     const t = tx ?? db;
-    const results: Types.CurrencyExchangeRateSelectType[] = [];
 
-    for (const input of inputs) {
-      const [row] = await t
-        .insert(currencyExchangeRates)
-        .values({
-          ...input,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .onConflictDoUpdate({
-          target: [
-            currencyExchangeRates.fromCurrency,
-            currencyExchangeRates.toCurrency,
-            currencyExchangeRates.effectiveDate,
-          ],
-          set: { rate: input.rate, updatedAt: now },
-        })
-        .returning();
-      if (row) results.push(row);
-    }
+    const inserted = await Promise.all(
+      inputs.map(input =>
+        t
+          .insert(currencyExchangeRates)
+          .values({
+            ...input,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: [
+              currencyExchangeRates.fromCurrency,
+              currencyExchangeRates.toCurrency,
+              currencyExchangeRates.effectiveDate,
+            ],
+            set: { rate: input.rate, updatedAt: now },
+          })
+          .returning()
+      )
+    );
 
-    return results;
+    return inserted.flatMap(rows => (rows[0] ? [rows[0]] : []));
   };
 
   export const createManyExchangeAuditLogs = async (

@@ -13,6 +13,7 @@ export const profileParentEn: ProfileParentLabels = {
     identity: "Identity",
     billing: "Billing",
     students: "Associated Students",
+    adminOnly: "Administrative Details",
   },
   fields: {
     fullName: "Full Name",
