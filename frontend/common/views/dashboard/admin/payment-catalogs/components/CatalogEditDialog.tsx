@@ -23,7 +23,7 @@ import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySe
 import { LocalizedStringFormField } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringFormField";
 import { TagInput } from "@/frontend/common/components/ui/input/tagInput/TagInput";
 import {
-  type CountryCode,
+  CountryCode,
   type CurrencyCode,
   IdentifierKind,
   PaymentDirection,
@@ -36,7 +36,7 @@ import {
   updateSupportedOnlineAccountMutationDocument,
   updateSupportedPaymentLinkMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
-import { type CurrencyOption, getCurrencyOptions } from "@/frontend/common/lib/currency";
+import { type CurrencyOption, getCurrencyOptions, parseCurrencyCode } from "@/frontend/common/lib/currency";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { logger } from "@/frontend/common/utils/logger";
 import type { CatalogEditDialogProps } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
@@ -88,8 +88,26 @@ function resolveCountry(code: string | null | undefined): CountryType | undefine
 
 function resolveCurrency(code: string | null | undefined): CurrencyOption | null {
   if (!code) return null;
-  return getCurrencyOptions().find(option => option.code === code) ?? null;
+  return getCurrencyOptions().find(option => (option.code as string) === code) ?? null;
 }
+
+const isCountryCodeValue = (value: string): value is CountryCode =>
+  (Object.values(CountryCode) as readonly string[]).includes(value);
+
+const toCountryCodeOrEmpty = (value: string | null | undefined): CountryCode | "" => {
+  if (typeof value !== "string" || !isCountryCodeValue(value)) return "";
+  return value;
+};
+
+const buildSharedInput = (values: CatalogFormValues) => ({
+  slug: values.slug,
+  name: values.name,
+  description: values.description.en || values.description.ar ? values.description : null,
+  instructions: values.instructions.en || values.instructions.ar ? values.instructions : null,
+  supportedDirections: values.supportedDirections,
+  logoUrl: values.logoUrl || null,
+  isActive: values.isActive,
+});
 
 export function CatalogEditDialog({ labels, open, kind, row, onClose, onSaved }: Readonly<CatalogEditDialogProps>) {
   const t = labels;
@@ -128,8 +146,8 @@ export function CatalogEditDialog({ labels, open, kind, row, onClose, onSaved }:
       name: row.name ?? emptyLocalized(),
       description: row.description ?? emptyLocalized(),
       instructions: row.instructions ?? emptyLocalized(),
-      countryCode: "countryCode" in row ? ((row.countryCode ?? "") as CountryCode | "") : "",
-      currencyCode: "currencyCode" in row ? ((row.currencyCode ?? "") as CurrencyCode | "") : "",
+      countryCode: "countryCode" in row ? toCountryCodeOrEmpty(row.countryCode) : "",
+      currencyCode: "currencyCode" in row ? (parseCurrencyCode(row.currencyCode) ?? "") : "",
       phoneRegion: "phoneRegion" in row ? (row.phoneRegion ?? "") : "",
       urlAllowlist: "urlAllowlist" in row ? (row.urlAllowlist ?? []) : [],
       urlExample: "urlExample" in row ? (row.urlExample ?? "") : "",
@@ -142,16 +160,6 @@ export function CatalogEditDialog({ labels, open, kind, row, onClose, onSaved }:
   }, [open, reset, row]);
 
   const title = useMemo(() => (isEdit ? t.editTitle : t.createTitle), [isEdit, t]);
-
-  const buildSharedInput = (values: CatalogFormValues) => ({
-    slug: values.slug,
-    name: values.name,
-    description: values.description.en || values.description.ar ? values.description : null,
-    instructions: values.instructions.en || values.instructions.ar ? values.instructions : null,
-    supportedDirections: values.supportedDirections,
-    logoUrl: values.logoUrl || null,
-    isActive: values.isActive,
-  });
 
   const executeMutation = async (values: CatalogFormValues): Promise<void> => {
     const shared = buildSharedInput(values);
@@ -273,7 +281,7 @@ export function CatalogEditDialog({ labels, open, kind, row, onClose, onSaved }:
             <>
               <CountryAutocomplete
                 country={resolveCountry(countryCode)}
-                onChangeAction={country => setValue("countryCode", country.code as CountryCode)}
+                onChangeAction={country => setValue("countryCode", toCountryCodeOrEmpty(country.code))}
                 onClearAction={() => setValue("countryCode", "")}
                 label={t.fields.countryCode}
                 fullWidth
