@@ -6,17 +6,69 @@ import { emailChannel } from "@/backend/services/communication/channels/email";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
 import { whatsappChannel } from "@/backend/services/communication/channels/whatsapp";
-import type { ChannelDispatchResult, CommunicationPayload, NotificationMetadata } from "@/backend/types";
+import type {
+  ChannelDispatchResult,
+  CommunicationPayload,
+  NotificationEntityKind,
+  NotificationMetadata,
+} from "@/backend/types";
 import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
 import type { WhatsappTemplateMetadata } from "@/backend/types/whatsapp/whatsapp-account.types";
 import type { WhatsappTemplateComponent } from "@/backend/types/whatsapp/whatsapp-channel.types";
 import { getServerTranslations } from "@/shared/locale";
 
-function asNotificationMetadata(metadata: Record<string, unknown> | undefined): NotificationMetadata | null {
-  if (!metadata || typeof metadata.entityKind !== "string" || typeof metadata.entityId !== "string") {
-    return null;
+const NOTIFICATION_ENTITY_KINDS: readonly NotificationEntityKind[] = [
+  "invoice",
+  "class",
+  "student",
+  "complaint",
+  "suggestion",
+  "paymentMethod",
+  "schedule",
+  "lessonReport",
+];
+
+/** Type guard: narrows an untyped `metadata` blob to a valid `NotificationMetadata`. */
+function isNotificationMetadata(metadata: unknown): metadata is NotificationMetadata {
+  if (metadata === null || typeof metadata !== "object") return false;
+  const entries = Object.entries(metadata);
+  const entityKind = entries.find(([k]) => k === "entityKind")?.[1];
+  const entityId = entries.find(([k]) => k === "entityId")?.[1];
+  if (typeof entityKind !== "string" || typeof entityId !== "string") {
+    return false;
   }
-  return metadata as unknown as NotificationMetadata;
+  return NOTIFICATION_ENTITY_KINDS.some(kind => kind === entityKind);
+}
+
+function asNotificationMetadata(metadata: Record<string, unknown> | undefined): NotificationMetadata | null {
+  return isNotificationMetadata(metadata) ? metadata : null;
+}
+
+/** Type guard: narrows an untyped value to `Record<string, string>` (for push `data`). */
+function isStringRecord(value: unknown): value is Record<string, string> {
+  if (value === null || typeof value !== "object") return false;
+  return Object.entries(value).every(([, v]) => typeof v === "string");
+}
+
+/**
+ * Type guard: validates that an untyped value matches `WhatsappTemplateMetadata`.
+ * Avoids unsafe `as` assertions by validating each property at runtime.
+ */
+function isWhatsappTemplateMetadata(value: unknown): value is WhatsappTemplateMetadata {
+  if (value === null || typeof value !== "object") return false;
+  const entries = Object.entries(value);
+  const name = entries.find(([k]) => k === "name")?.[1];
+  if (typeof name !== "string") return false;
+  const languageCode = entries.find(([k]) => k === "languageCode")?.[1];
+  if (languageCode !== undefined && languageCode !== null && typeof languageCode !== "string") {
+    return false;
+  }
+  const paramsOrder = entries.find(([k]) => k === "paramsOrder")?.[1];
+  if (paramsOrder !== undefined) {
+    if (!Array.isArray(paramsOrder)) return false;
+    if (!paramsOrder.every(p => typeof p === "string")) return false;
+  }
+  return true;
 }
 
 export namespace CommunicationService {
@@ -29,7 +81,7 @@ export namespace CommunicationService {
     payload: CommunicationPayload,
     locale?: string
   ): Promise<ChannelDispatchResult> {
-    const to = (payload.metadata?.to as string) ?? "";
+    const to = typeof payload.metadata?.to === "string" ? payload.metadata.to : "";
     const commonFields = {
       to,
       eventType: payload.eventType,
@@ -56,7 +108,7 @@ export namespace CommunicationService {
         userId: payload.userId,
         title: payload.title,
         body: payload.body ?? "",
-        data: payload.metadata?.data as Record<string, string> | undefined,
+        data: isStringRecord(payload.metadata?.data) ? payload.metadata.data : undefined,
         eventType: payload.eventType,
         metadata: asNotificationMetadata(payload.metadata),
       },
@@ -86,9 +138,11 @@ export namespace CommunicationService {
    */
   async function dispatchWhatsapp(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-    const to = (payload.metadata?.to as string) ?? "";
+    const to = typeof payload.metadata?.to === "string" ? payload.metadata.to : "";
 
-    const templateRaw = payload.metadata?.whatsappTemplate as WhatsappTemplateMetadata | undefined;
+    const templateRaw = isWhatsappTemplateMetadata(payload.metadata?.whatsappTemplate)
+      ? payload.metadata.whatsappTemplate
+      : undefined;
 
     if (!templateRaw?.name) {
       logger.error("dispatchWhatsapp: whatsappTemplate missing in payload metadata", {
@@ -204,15 +258,15 @@ export namespace CommunicationService {
         case NotificationChannel.WHATSAPP:
           return await dispatchWhatsapp(payload, locale);
         default: {
-          const _exhaustiveCheck: never = payload.channel;
-          logger.error(tErrors.unknownCommunicationChannel(String(_exhaustiveCheck)), {
-            channel: _exhaustiveCheck,
+          const exhaustiveCheck: never = payload.channel;
+          logger.error(tErrors.unknownCommunicationChannel(String(exhaustiveCheck)), {
+            channel: exhaustiveCheck,
             userId: payload.userId,
           });
           return {
             channel: payload.channel,
             success: false,
-            error: tErrors.unknownCommunicationChannel(String(_exhaustiveCheck)),
+            error: tErrors.unknownCommunicationChannel(String(exhaustiveCheck)),
           };
         }
       }
