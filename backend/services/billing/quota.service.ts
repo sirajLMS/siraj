@@ -68,7 +68,7 @@ export namespace QuotaService {
    * to `listFn` and mapping the rows. Used by `listStudentOpenQuotas` and
    * `listStudentQuotas`.
    */
-  async function listScopedByStudent<T>(
+  async function listScopedByStudent<T extends Parameters<typeof mapQuotaToReturnType>[0]>(
     studentId: string,
     tx: ReadExecutor | undefined,
     actorUserId: string | null | undefined,
@@ -79,7 +79,7 @@ export namespace QuotaService {
     const uid = actorUserId ?? "";
     await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
     const rows = await listFn(tx, studentId);
-    return rows.map(row => mapQuotaToReturnType(row as Parameters<typeof mapQuotaToReturnType>[0]));
+    return rows.map(row => mapQuotaToReturnType(row));
   }
 
   /**
@@ -367,7 +367,7 @@ export namespace QuotaService {
         actorUserId,
         idempotencyKey,
       });
-      return updated as QuotaReturnType;
+      return mapQuotaToReturnType(updated);
     });
   };
 
@@ -401,7 +401,7 @@ export namespace QuotaService {
         actorUserId,
         idempotencyKey,
       });
-      return updated as QuotaReturnType;
+      return mapQuotaToReturnType(updated);
     });
   };
 
@@ -417,7 +417,10 @@ export namespace QuotaService {
     // result is only used to decide booking backing, not to expose data.
     return runInTx(
       tx,
-      async t => (await QuotaRepository.selectQuotaForBookingFIFO(t, studentId)) as QuotaReturnType | null
+      async t => {
+        const quotaRow = await QuotaRepository.selectQuotaForBookingFIFO(t, studentId);
+        return quotaRow ? mapQuotaToReturnType(quotaRow) : null;
+      }
     );
   };
 
@@ -448,7 +451,7 @@ export namespace QuotaService {
         actorUserId,
         idempotencyKey,
       });
-      return updated as QuotaReturnType;
+      return mapQuotaToReturnType(updated);
     });
   };
 
@@ -484,7 +487,7 @@ export namespace QuotaService {
 
       return {
         redeemedCount: result.redeemedCount,
-        quota: result.quota ? (result.quota as QuotaReturnType) : null,
+        quota: result.quota ? mapQuotaToReturnType(result.quota) : null,
       };
     });
   };
@@ -506,7 +509,7 @@ export namespace QuotaService {
         actorUserId,
         idempotencyKey,
       });
-      return updated as QuotaReturnType;
+      return mapQuotaToReturnType(updated);
     });
   };
 
@@ -559,13 +562,13 @@ export namespace QuotaService {
       });
       return {
         releasedCount: result.releasedCount,
-        quota: result.quota ? (result.quota as QuotaReturnType) : null,
+        quota: result.quota ? mapQuotaToReturnType(result.quota) : null,
       };
     });
   };
 
   export const expireOverdueQuotas = async (tx?: DBTransaction): Promise<QuotaReturnType[]> => {
-    return runInTx(tx, async t => (await QuotaRepository.expireOverdue(t)) as QuotaReturnType[]);
+    return runInTx(tx, async t => (await QuotaRepository.expireOverdue(t)).map(mapQuotaToReturnType));
   };
 
   export const refreshStudentOndemandInstances = async (
