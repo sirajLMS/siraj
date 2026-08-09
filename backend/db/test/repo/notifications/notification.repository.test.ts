@@ -177,7 +177,7 @@ describe("NotificationRepository — createDeliveriesBatch", () => {
 
     expect(deliveries).toHaveLength(3);
     expect(deliveries.every(d => d.userId === user.id)).toBeTrue();
-    expect(deliveries.every(d => d.status === NotificationDeliveryStatus.PENDING)).toBeTrue();
+    expect(deliveries.every(d => d.status === (NotificationDeliveryStatus.PENDING as string))).toBeTrue();
     expect(deliveries[0].channel).toBe(NotificationChannel.EMAIL);
     expect(deliveries[1].channel).toBe(NotificationChannel.PUSH);
     expect(deliveries[2].channel).toBe(NotificationChannel.ON_APP);
@@ -288,17 +288,19 @@ describe("NotificationRepository — getDeliveriesByUser", () => {
 
     const now = new Date();
 
-    for (let i = 0; i < 3; i++) {
-      await tx.insert(notificationDeliveries).values({
-        userId: user.id,
-        channel: NotificationChannel.EMAIL,
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        status: NotificationDeliveryStatus.SENT,
-        title: `Delivery ${i}`,
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
+    await Promise.all(
+      Array.from({ length: 3 }, (_, i) =>
+        tx.insert(notificationDeliveries).values({
+          userId: user.id,
+          channel: NotificationChannel.EMAIL,
+          eventType: NotificationEventType.COMPLAINT_RESPONSE,
+          status: NotificationDeliveryStatus.SENT,
+          title: `Delivery ${i}`,
+          createdAt: now,
+          updatedAt: now,
+        })
+      )
+    );
 
     const result = await NotificationRepository.getDeliveriesByUser(user.id, { limit: 2, offset: 0 }, tx);
 
@@ -339,7 +341,7 @@ describe("NotificationRepository — getDeliveriesByUser", () => {
       tx
     );
 
-    expect(result.rows.every(r => r.channel === NotificationChannel.EMAIL)).toBeTrue();
+    expect(result.rows.every(r => r.channel === (NotificationChannel.EMAIL as string))).toBeTrue();
     expect(result.rows.some(r => r.title === "Email delivery filter")).toBeTrue();
     expect(result.rows.some(r => r.title === "Push delivery filter")).toBeFalse();
   });
@@ -376,7 +378,7 @@ describe("NotificationRepository — getDeliveriesByUser", () => {
       tx
     );
 
-    expect(result.rows.every(r => r.eventType === NotificationEventType.COMPLAINT_RESPONSE)).toBeTrue();
+    expect(result.rows.every(r => r.eventType === (NotificationEventType.COMPLAINT_RESPONSE as string))).toBeTrue();
     expect(result.rows.some(r => r.title === "Invoice event")).toBeFalse();
   });
 
@@ -443,8 +445,12 @@ describe("NotificationRepository — transaction rollback (Story 15)", () => {
       throw new Error("Simulated batch rollback");
     }).catch(() => null);
 
-    for (const id of createdIds) {
-      const [found] = await db.select().from(notificationDeliveries).where(eq(notificationDeliveries.id, id)).limit(1);
+    const foundRows = await Promise.all(
+      createdIds.map(id =>
+        db.select().from(notificationDeliveries).where(eq(notificationDeliveries.id, id)).limit(1)
+      )
+    );
+    for (const [found] of foundRows) {
       expect(found).toBeUndefined();
     }
   });
