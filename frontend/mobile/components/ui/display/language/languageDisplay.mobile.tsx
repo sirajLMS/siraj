@@ -7,8 +7,8 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileLanguageDisplayProps = {
   readonly code?: string | null;

@@ -251,7 +251,7 @@ async function resolveRecipientUserId(
  * Resolve event types for all statuses in a single batch query using IN clause.
  * Returns a Map of wamid → eventType, defaulting to CLASS_REMINDER for missing rows.
  *
- * @remarks On total DB failure, ALL status updates get eventType=CLASS_REMINDER (M10).
+ * On total DB failure, ALL status updates get eventType=CLASS_REMINDER (M10).
  * This pollutes analytics but is a graceful degradation — no UNKNOWN enum exists in
  * NotificationEventType. Logged at ERROR level to surface this limitation in monitoring.
  */

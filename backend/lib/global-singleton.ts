@@ -18,7 +18,7 @@ export function getGlobalSingleton<T>(key: symbol, factory: () => T): T {
 
 export function getGlobalSingletonIfExists(key: symbol): unknown {
   const store = getStore();
-  return store.has(key) ? (store.get(key) as unknown) : undefined;
+  return store.has(key) ? store.get(key) : undefined;
 }
 
 export function clearGlobalSingleton(key: symbol): void {

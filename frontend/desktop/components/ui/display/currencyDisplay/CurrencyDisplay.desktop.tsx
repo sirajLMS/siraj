@@ -14,8 +14,8 @@ import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graph
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
-import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 
 export type DesktopCurrencyDisplayProps = {
   readonly code?: CurrencyCode | string | null;

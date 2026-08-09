@@ -74,9 +74,19 @@ export function getDrizzleDbPool(): ReturnType<typeof createPool> | null {
   }
 }
 
+/** Type guard: checks if a value is a pool with an `end()` method. */
+function isPoolWithEnd(value: unknown): value is { end(): Promise<void> } {
+  return (
+    value != null &&
+    typeof value === "object" &&
+    "end" in value &&
+    typeof (value as Record<string, unknown>).end === "function"
+  );
+}
+
 export async function closeDrizzleDbPool(): Promise<void> {
-  const pool = getGlobalSingletonIfExists<ReturnType<typeof createPool>>(DB_POOL_KEY);
-  if (pool) {
+  const pool = getGlobalSingletonIfExists(DB_POOL_KEY);
+  if (isPoolWithEnd(pool)) {
     await pool.end();
     clearGlobalSingleton(DB_POOL_KEY);
   }

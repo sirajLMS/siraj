@@ -234,11 +234,7 @@ function MeetingProviderFormCapabilitiesSection({
             <FormControlLabel
               sx={{ gap: 1, ml: -0.5 }}
               control={
-                <Checkbox
-                  checked={field.value}
-                  onChange={e => field.onChange(e.target.checked)}
-                  disabled={isSaving}
-                />
+                <Checkbox checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={isSaving} />
               }
               label={t.fields.supportsUsername}
             />
@@ -251,11 +247,7 @@ function MeetingProviderFormCapabilitiesSection({
             <FormControlLabel
               sx={{ gap: 1, ml: -0.5 }}
               control={
-                <Checkbox
-                  checked={field.value}
-                  onChange={e => field.onChange(e.target.checked)}
-                  disabled={isSaving}
-                />
+                <Checkbox checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={isSaving} />
               }
               label={t.fields.supportsPassword}
             />
@@ -268,11 +260,7 @@ function MeetingProviderFormCapabilitiesSection({
             <FormControlLabel
               sx={{ gap: 1, ml: -0.5 }}
               control={
-                <Checkbox
-                  checked={field.value}
-                  onChange={e => field.onChange(e.target.checked)}
-                  disabled={isSaving}
-                />
+                <Checkbox checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={isSaving} />
               }
               label={t.fields.supportsTenantId}
             />
@@ -285,11 +273,7 @@ function MeetingProviderFormCapabilitiesSection({
             <FormControlLabel
               sx={{ gap: 1.5, ml: 0 }}
               control={
-                <Switch
-                  checked={field.value}
-                  onChange={e => field.onChange(e.target.checked)}
-                  disabled={isSaving}
-                />
+                <Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={isSaving} />
               }
               label={`${t.fields.isActive}: ${isActiveValue ? t.active : t.inactive}`}
             />

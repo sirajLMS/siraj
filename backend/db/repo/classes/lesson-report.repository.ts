@@ -177,7 +177,7 @@ export namespace LessonReportRepository {
       .select({ value: count() })
       .from(lessonReports)
       .where(eq(lessonReports.status, LessonReportStatus.APPROVED));
-    return (result?.value ?? 0);
+    return result?.value ?? 0;
   }
 
   /** Student portal: lesson reports for a single student (newest lesson first). */
@@ -200,7 +200,7 @@ export namespace LessonReportRepository {
       .select({ value: count() })
       .from(lessonReports)
       .where(eq(lessonReports.studentId, studentId));
-    return (result?.value ?? 0);
+    return result?.value ?? 0;
   }
 
   export async function create(input: LessonReportInsertType, tx?: DBTransaction): Promise<LessonReportSelectType> {
@@ -255,7 +255,7 @@ export namespace LessonReportRepository {
       .select({ value: count() })
       .from(lessonReports)
       .where(and(...conditions));
-    return (result?.value ?? 0);
+    return result?.value ?? 0;
   }
 
   export async function findByIdempotencyKeys(

@@ -599,7 +599,8 @@ describe("MeetingIntegrationService", () => {
       );
 
       expect(getMeetingChannelMock).toHaveBeenCalledWith("google_meet");
-      expect(adapterMock.disconnect).toHaveBeenCalled();
+      const { disconnect: disconnectMock } = adapterMock;
+      expect(disconnectMock).toHaveBeenCalled();
     });
 
     test("continues to delete even if adapter.disconnect throws", async () => {

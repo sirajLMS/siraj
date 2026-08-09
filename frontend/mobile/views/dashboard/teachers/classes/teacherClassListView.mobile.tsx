@@ -113,7 +113,7 @@ export function TeacherClassListMobileView({
       {!loading && !error ? (
         <MobileCardList
           rows={rows}
-          getKey={row => row.id ?? (row.studentName ?? "")}
+          getKey={row => row.id ?? row.studentName ?? ""}
           renderItem={row => (
             <ClassCard row={row} labels={labels} locale={locale} handleViewClassAudit={handleViewClassAudit} />
           )}

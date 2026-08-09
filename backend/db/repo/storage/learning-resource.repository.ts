@@ -33,7 +33,13 @@ const resourceSelectColumns = {
   createdAt: learningResources.createdAt,
 };
 
-function resourceReturnShape(resource: { id: string; displayName: string; filePath: string; uploadedByUserId: string; createdAt: Date }): LearningResourceRow {
+function resourceReturnShape(resource: {
+  id: string;
+  displayName: string;
+  filePath: string;
+  uploadedByUserId: string;
+  createdAt: Date;
+}): LearningResourceRow {
   return {
     ...resource,
     uploadedByUserName: null,

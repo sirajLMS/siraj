@@ -9,7 +9,7 @@ export const PhoneNumberScalar = new GraphQLScalarType({
     if (value instanceof PhoneNumber) {
       return value.number;
     }
-    throw new TypeError(`Cannot serialize value as PhoneNumber: ${value}`);
+    throw new TypeError(`Cannot serialize value as PhoneNumber: ${String(value)}`);
   },
   parseValue(value: unknown): PhoneNumber {
     if (typeof value === "string") {

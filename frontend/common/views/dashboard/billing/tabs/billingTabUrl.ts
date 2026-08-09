@@ -11,7 +11,7 @@ export const isBillingTabId = createIsTabId<BillingTabId>(BILLING_TAB_IDS);
 
 /** Builds a billing tab href preserving existing search params. */
 export function buildBillingTabHref(pathname: string, searchParams: URLSearchParams, tab: BillingTabId): string {
-  return buildTabHref<BillingTabId>(pathname, searchParams, tab);
+  return buildTabHref(pathname, searchParams, tab);
 }
 
 /**

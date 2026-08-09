@@ -72,6 +72,25 @@ export default defineConfig({
         "no-console": "off",
       },
     },
+    {
+      files: [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "test/**/*",
+        "backend/db/test/**/*",
+        "backend/services/**/test/**/*",
+        "backend/services/**/*.test.ts",
+        "frontend/**/test/**/*",
+        "frontend/**/*.test.tsx",
+        "frontend/**/*.test.ts",
+        "app/**/*.test.ts",
+      ],
+      rules: {
+        "@typescript-eslint/unbound-method": "off",
+      },
+    },
   ],
   ignorePatterns: [
     "**/.*/**",

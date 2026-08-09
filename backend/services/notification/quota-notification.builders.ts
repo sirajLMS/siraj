@@ -92,7 +92,10 @@ type OndemandInstanceInput = {
 };
 
 function buildOndemandInstancePayloads(
-  labels: (translations: NotificationsLabels) => { readonly title: string; readonly body: (p: { studentName: string; scheduledStartAt: string }) => string },
+  labels: (translations: NotificationsLabels) => {
+    readonly title: string;
+    readonly body: (p: { studentName: string; scheduledStartAt: string }) => string;
+  },
   eventType: NotificationEventType,
   category: NotificationEventCategory,
   input: OndemandInstanceInput

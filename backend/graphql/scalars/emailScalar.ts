@@ -9,7 +9,7 @@ export const EmailScalar = new GraphQLScalarType({
     if (value instanceof Email) {
       return value.value;
     }
-    throw new TypeError(`Cannot serialize value as Email: ${value}`);
+    throw new TypeError(`Cannot serialize value as Email: ${String(value)}`);
   },
   parseValue(value: unknown): Email {
     if (typeof value === "string") {

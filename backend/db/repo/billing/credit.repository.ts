@@ -60,7 +60,7 @@ export namespace CreditRepository {
       .select({ value: count() })
       .from(creditTransactions)
       .where(eq(creditTransactions.studentId, actualStudentId));
-    return (row?.value ?? 0);
+    return row?.value ?? 0;
   };
 
   const insertCreditTransaction = async (
@@ -211,8 +211,8 @@ export namespace CreditRepository {
       .from(creditTransactions)
       .where(eq(creditTransactions.studentId, actualStudentId));
     return {
-      classesTotal: (row?.classesTotal ?? 0),
-      classesRemaining: (row?.classesRemaining ?? 0),
+      classesTotal: row?.classesTotal ?? 0,
+      classesRemaining: row?.classesRemaining ?? 0,
     };
   };
 

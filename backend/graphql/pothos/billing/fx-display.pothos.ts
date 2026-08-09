@@ -117,7 +117,7 @@ export async function resolveDisplayAmountFields(
       const record = item as Record<string, unknown>;
       const subjectUserId = subjectUserIdKey
         ? typeof record[subjectUserIdKey] === "string"
-          ? (record[subjectUserIdKey])
+          ? record[subjectUserIdKey]
           : null
         : null;
       const displayCurrency = resolveEffectiveDisplayCurrency(ctx, subjectUserId);

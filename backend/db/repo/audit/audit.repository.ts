@@ -180,13 +180,13 @@ export namespace AuditRepository {
   export const countAuditLogs = async (tx?: DBTransaction): Promise<number> => {
     const client = tx ?? db;
     const [row] = await client.select({ value: count() }).from(auditLogs);
-    return (row?.value ?? 0);
+    return row?.value ?? 0;
   };
 
   export const countAdminAuditLogs = async (tx?: DBTransaction): Promise<number> => {
     const client = tx ?? db;
     const [row] = await client.select({ value: count() }).from(adminAuditLogs);
-    return (row?.value ?? 0);
+    return row?.value ?? 0;
   };
 
   export const getRecentAdminAuditLogs = async (

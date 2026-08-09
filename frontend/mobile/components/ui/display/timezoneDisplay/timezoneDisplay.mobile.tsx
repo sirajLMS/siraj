@@ -11,8 +11,8 @@ import {
   getTimezoneSelectLabel,
 } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileTimezoneDisplayProps = {
   readonly timezone?: string | null;

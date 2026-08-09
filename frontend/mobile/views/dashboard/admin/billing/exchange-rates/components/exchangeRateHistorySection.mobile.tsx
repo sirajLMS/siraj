@@ -70,9 +70,7 @@ export function ExchangeRateHistorySectionMobile({ labels, historyViewModel }: R
             labelId="fx-history-days-mobile"
             label={labels.history.daysLabel}
             value={maxDays}
-            onChange={event =>
-              historyViewModel.onMaxDaysChange(event.target.value as (typeof dayOptions)[number])
-            }
+            onChange={event => historyViewModel.onMaxDaysChange(event.target.value as (typeof dayOptions)[number])}
           >
             {dayOptions.map(days => (
               <MenuItem key={days} value={days}>

@@ -163,10 +163,7 @@ export function resolveLocalizedCatalogName(name: LocalizedString, slug: string,
   return name[locale as keyof LocalizedString] ?? slug;
 }
 
-export function toPaymentMethodCatalogOption(
-  row: PaymentMethodCatalogRow,
-  locale: string
-): PaymentMethodCatalogOption {
+export function toPaymentMethodCatalogOption(row: PaymentMethodCatalogRow, locale: string): PaymentMethodCatalogOption {
   return {
     id: row.id,
     slug: row.slug,

@@ -38,14 +38,13 @@ function MobileLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<MobileLo
   const uiLocale = useAppLocale();
 
   return (
-    <Stack role="listbox" aria-label={ariaLabel ?? t.selectLocale}>
+    <Stack component="ul" aria-label={ariaLabel ?? t.selectLocale}>
       {languages.map((language, index, array) => {
         const isSelected = language.code === activeLocale;
         const isLastItem = index === array.length - 1;
         return (
           <MobileLanguageOption
             key={language.code}
-            role="option"
             aria-selected={isSelected}
             isSelected={isSelected}
             isLastItem={isLastItem}

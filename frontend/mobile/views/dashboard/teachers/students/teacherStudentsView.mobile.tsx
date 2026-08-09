@@ -51,7 +51,7 @@ export function TeacherStudentsMobileView({ rows, loading, error, labels }: Read
       {!loading && !error ? (
         <MobileCardList
           rows={rows}
-          getKey={row => row.id ?? (row.name ?? "")}
+          getKey={row => row.id ?? row.name ?? ""}
           renderItem={row => <StudentCard row={row} labels={labels} />}
           emptyMessage={labels.noStudents}
           paginationOptions={{ mode: "client" }}

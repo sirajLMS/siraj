@@ -17,7 +17,7 @@ afterEach(async () => {
   }
 });
 
-type LocatorLike = ReturnType<Page["getByRole"]>    ;
+type LocatorLike = ReturnType<Page["getByRole"]>;
 
 async function isVisible(locator: LocatorLike): Promise<boolean> {
   try {

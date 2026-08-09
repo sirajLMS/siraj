@@ -31,7 +31,7 @@ export function EnvSecretField({
   showValueLabel,
   hideValueLabel,
 }: Readonly<EnvSecretFieldProps>) {
-  const revealed = useEnvironmentConfigSettingsStore(state =>  state.revealedKeys[configKey]);
+  const revealed = useEnvironmentConfigSettingsStore(state => state.revealedKeys[configKey]);
   const toggleSecretRevealed = useEnvironmentConfigSettingsStore(state => state.toggleSecretRevealed);
 
   if (!isSecret) {

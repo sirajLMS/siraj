@@ -5,8 +5,8 @@ import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { formatPhoneDisplay, maskPhone } from "@/shared/lib/phone";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { formatPhoneDisplay, maskPhone } from "@/shared/lib/phone";
 
 export type MobilePhoneDisplayProps = {
   readonly phone?: string | null;

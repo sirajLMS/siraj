@@ -71,7 +71,8 @@ export function useMeetingProviderFormViewModel({
     setValue("supportsAutoGeneration", isAuto);
   }, [providerKind, setValue]);
 
-  const isUrlExampleValid = (!urlExample.trim() || urlAllowlist.length === 0 || isUrlAllowedByProvider(urlExample.trim(), urlAllowlist));
+  const isUrlExampleValid =
+    !urlExample.trim() || urlAllowlist.length === 0 || isUrlAllowedByProvider(urlExample.trim(), urlAllowlist);
 
   const isEditing = mode === "edit" && Boolean(providerId);
 

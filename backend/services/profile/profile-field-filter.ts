@@ -53,10 +53,7 @@ function shouldApplyProfileGroup(group: ProfileFieldGroupDefinition, ctx: FieldF
   return group.scopes.includes(ctx.scope);
 }
 
-function stripProfileGroupPaths(
-  filtered: Record<string, unknown>,
-  group: ProfileFieldGroupDefinition
-): void {
+function stripProfileGroupPaths(filtered: Record<string, unknown>, group: ProfileFieldGroupDefinition): void {
   for (const path of group.paths) {
     setValueAtPath(filtered, path, null);
   }

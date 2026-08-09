@@ -206,8 +206,8 @@ type FileSelectDeps = {
 const readAsDataUrl = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.addEventListener("load", () => resolve(reader.result as string))
-    reader.addEventListener("error", reject)
+    reader.addEventListener("load", () => resolve(reader.result as string));
+    reader.addEventListener("error", reject);
     reader.readAsDataURL(file);
   });
 };

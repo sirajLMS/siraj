@@ -402,7 +402,7 @@ export namespace QuotaRepository {
 
     return {
       rows,
-      totalCount: (countRow[0]?.value ?? 0),
+      totalCount: countRow[0]?.value ?? 0,
     };
   };
 
