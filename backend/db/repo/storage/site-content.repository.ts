@@ -60,11 +60,7 @@ export namespace SiteContentRepository {
     inputs: readonly SiteContentUpsertInput[],
     tx?: DBTransaction
   ): Promise<SiteContentSelectType[]> {
-    const results: SiteContentSelectType[] = [];
-    for (const input of inputs) {
-      results.push(await upsert(input, tx));
-    }
-    return results;
+    return Promise.all(inputs.map(input => upsert(input, tx)));
   }
 
   export async function listAll(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
@@ -73,7 +69,7 @@ export namespace SiteContentRepository {
     return rows;
   }
 
-  async function _selectOrdered(
+  async function selectOrdered(
     tx: DBTransaction | undefined,
     where: SQL | undefined
   ): Promise<SiteContentSelectType[]> {
@@ -82,22 +78,22 @@ export namespace SiteContentRepository {
     return rows;
   }
 
-  export async function _listPublished(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
-    return _selectOrdered(tx, eq(siteContent.isPublished, true));
+  export async function listPublished(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
+    return selectOrdered(tx, eq(siteContent.isPublished, true));
   }
 
-  export async function _listByContentType(contentType: string, tx?: DBTransaction): Promise<SiteContentSelectType[]> {
-    return _selectOrdered(tx, eq(siteContent.contentType, contentType));
+  export async function listByContentType(contentType: string, tx?: DBTransaction): Promise<SiteContentSelectType[]> {
+    return selectOrdered(tx, eq(siteContent.contentType, contentType));
   }
 
-  export async function _listPublishedByContentType(
+  export async function listPublishedByContentType(
     contentType: string,
     tx?: DBTransaction
   ): Promise<SiteContentSelectType[]> {
-    return _selectOrdered(tx, and(eq(siteContent.contentType, contentType), eq(siteContent.isPublished, true)));
+    return selectOrdered(tx, and(eq(siteContent.contentType, contentType), eq(siteContent.isPublished, true)));
   }
 
-  export async function _updatePublishState(
+  export async function updatePublishState(
     id: string,
     isPublished: boolean,
     tx?: DBTransaction
@@ -111,7 +107,7 @@ export namespace SiteContentRepository {
     return updated ?? null;
   }
 
-  export async function _deleteById(id: string, tx?: DBTransaction): Promise<boolean> {
+  export async function deleteById(id: string, tx?: DBTransaction): Promise<boolean> {
     const q = queryDb(tx);
     try {
       const deleted = await q.delete(siteContent).where(eq(siteContent.id, id)).returning();
@@ -121,7 +117,7 @@ export namespace SiteContentRepository {
     }
   }
 
-  export async function _deleteBySlug(slug: string, tx?: DBTransaction): Promise<boolean> {
+  export async function deleteBySlug(slug: string, tx?: DBTransaction): Promise<boolean> {
     const q = queryDb(tx);
     try {
       const deleted = await q.delete(siteContent).where(eq(siteContent.slug, slug)).returning();
