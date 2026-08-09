@@ -104,12 +104,13 @@ export function getEntityCacheStats(): Record<string, { hits: number; misses: nu
   return Object.fromEntries(hitMissMap);
 }
 
-export function validateEntry(entry: unknown): entry is CacheEntry<unknown> {
+export function validateEntry<T = unknown>(entry: unknown): entry is CacheEntry<T> {
   return (
     typeof entry === "object" &&
     entry !== null &&
     !Array.isArray(entry) &&
-    (entry as CacheEntry<unknown>).version === CACHE_VERSION
+    "version" in entry &&
+    entry.version === CACHE_VERSION
   );
 }
 
@@ -121,37 +122,40 @@ export function stableStringify(value: unknown): string {
     const items = value.map(stableStringify).join(",");
     return `[${items}]`;
   }
-  const obj = value as Record<string, unknown>;
-  const keys = Object.keys(obj).toSorted((a, b) => a.localeCompare(b));
-  const entries = keys.map(k => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(",");
+  const entries = Object.entries(value)
+    .toSorted((a, b) => a[0].localeCompare(b[0]))
+    .map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`)
+    .join(",");
   return `{${entries}}`;
 }
 
 export async function safeIndexTags(key: string, tags: string[]): Promise<void> {
   try {
-    for (const tag of tags) {
-      const tagKey = `${CACHE_KEY_PREFIX_TAG}${tag}`;
-      try {
-        const raw = await cacheService.get(tagKey);
-        let arr: string[] = [];
-        if (raw) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              arr = parsed;
+    await Promise.all(
+      tags.map(async tag => {
+        const tagKey = `${CACHE_KEY_PREFIX_TAG}${tag}`;
+        try {
+          const raw = await cacheService.get(tagKey);
+          let arr: string[] = [];
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                arr = parsed;
+              }
+            } catch {
+              arr = [];
             }
-          } catch {
-            arr = [];
           }
+          if (!arr.includes(key)) {
+            arr.push(key);
+            await cacheService.set(tagKey, JSON.stringify(arr), { ex: CACHE_TAG_INDEX_TTL });
+          }
+        } catch (err) {
+          logger.error(`safeIndexTags failed for tag ${tag}:`, err);
         }
-        if (!arr.includes(key)) {
-          arr.push(key);
-          await cacheService.set(tagKey, JSON.stringify(arr), { ex: CACHE_TAG_INDEX_TTL });
-        }
-      } catch (err) {
-        logger.error(`safeIndexTags failed for tag ${tag}:`, err);
-      }
-    }
+      })
+    );
   } catch (err) {
     logger.error("safeIndexTags outer error:", err);
   }
@@ -172,12 +176,12 @@ export async function cachedRead<T>(
     if (raw) {
       try {
         const parsed = cacheDeserialize(raw);
-        if (validateEntry(parsed)) {
+        if (validateEntry<T>(parsed)) {
           if (tags.length > 0) {
             await safeIndexTags(key, tags);
           }
           recordHit(prefixOf(key));
-          return parsed.data as T;
+          return parsed.data;
         }
       } catch (pErr) {
         logger.warn(`cachedRead JSON parse error for key ${key}:`, pErr);
@@ -228,12 +232,12 @@ export async function cachedReadSingleFlight<T>(
     if (raw) {
       try {
         const parsed = cacheDeserialize(raw);
-        if (validateEntry(parsed)) {
+        if (validateEntry<T>(parsed)) {
           if (tags.length > 0) {
             await safeIndexTags(key, tags);
           }
           recordHit(prefixOf(key));
-          return parsed.data as T;
+          return parsed.data;
         }
       } catch (pErr) {
         logger.warn(`cachedReadSingleFlight JSON parse error for key ${key}:`, pErr);
