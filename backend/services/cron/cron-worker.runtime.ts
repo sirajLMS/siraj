@@ -243,14 +243,14 @@ async function handleJobError(
     // If the DB update throws, don't enqueue the retry — avoids orphaned jobs.
     try {
       await CronService.retryRun(job.runId, backoff, job.attempt + 1);
-    } catch (err) {
-      logRetryFailure("retryRun", job.runId, err);
+    } catch (caughtErr) {
+      logRetryFailure("retryRun", job.runId, caughtErr);
       return;
     }
     try {
       await adapter.retry(job.queueJobId ?? job.runId, backoff, job.attempt + 1);
-    } catch (err) {
-      logRetryFailure("adapter.retry", job.runId, err);
+    } catch (caughtErr) {
+      logRetryFailure("adapter.retry", job.runId, caughtErr);
     }
     result.retried++;
   } else {
@@ -259,13 +259,13 @@ async function handleJobError(
     // rather than leaving the DB stuck in RUNNING while the queue is failed.
     try {
       await CronService.failRun(job.runId, errorMessage, errorStack);
-    } catch (err) {
-      logger.error("cron.worker", `failRun failed for run ${job.runId}: ${formatError(err)}`);
+    } catch (caughtErr) {
+      logger.error("cron.worker", `failRun failed for run ${job.runId}: ${formatError(caughtErr)}`);
     }
     try {
       await adapter.fail(job.queueJobId ?? job.runId, errorMessage, errorStack ?? undefined);
-    } catch (err) {
-      logger.error("cron.worker", `adapter.fail failed for job ${job.queueJobId}: ${formatError(err)}`);
+    } catch (caughtErr) {
+      logger.error("cron.worker", `adapter.fail failed for job ${job.queueJobId}: ${formatError(caughtErr)}`);
     }
     result.failed++;
   }

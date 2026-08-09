@@ -10,8 +10,8 @@ export namespace InvoicePaymentSubmissionRepository {
     input: Types.InvoicePaymentSubmissionInsertType,
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb.insert(invoicePaymentSubmissions).values(input).returning();
+    const dbToQuery = tx ?? db;
+    const [row] = await dbToQuery.insert(invoicePaymentSubmissions).values(input).returning();
     return row;
   }
 
@@ -51,9 +51,9 @@ export namespace InvoicePaymentSubmissionRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType> {
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
     const now = new Date();
-    const [row] = await queryDb
+    const [row] = await dbToQuery
       .update(invoicePaymentSubmissions)
       .set({
         status,

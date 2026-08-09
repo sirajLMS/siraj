@@ -17,19 +17,19 @@ export async function copyItems(
     destinationPath: input.destinationPath,
     existsFn: fileExists,
     operationName: "copied",
-    processFn: async (ctx, sourcePath) => {
+    processFn: async (opCtx, sourcePath) => {
       const fileName = StorageUtils.extractFileName(sourcePath);
       const destPath = `${input.destinationPath.replace(/\/$/, "")}/${fileName}`;
 
-      const isDir = await isDirectory(ctx, sourcePath);
+      const isDir = await isDirectory(opCtx, sourcePath);
 
       if (isDir) {
-        await copyDirectory(ctx, sourcePath, destPath);
+        await copyDirectory(opCtx, sourcePath, destPath);
       } else {
-        await copySingleFile(ctx, sourcePath, destPath);
+        await copySingleFile(opCtx, sourcePath, destPath);
       }
 
-      return await fileInfoByPath(ctx, destPath);
+      return await fileInfoByPath(opCtx, destPath);
     },
   });
 }

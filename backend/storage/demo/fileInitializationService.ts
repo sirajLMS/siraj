@@ -48,35 +48,35 @@ export class FileSeedingService implements IFileSeedingService {
   /**
    * Ensures that a directory exists in the storage system.
    */
-  async ensureDirectory(path: string, isProtected = true): Promise<FileOperationResult> {
+  async ensureDirectory(dirPath: string, isProtected = true): Promise<FileOperationResult> {
     try {
-      const directoryInfo = await this.storageService.directoryInfoByPath(path);
-      const dbRecord = await StorageDbRepository.directoryByPath(path);
+      const directoryInfo = await this.storageService.directoryInfoByPath(dirPath);
+      const dbRecord = await StorageDbRepository.directoryByPath(dirPath);
 
       if (directoryInfo && dbRecord) {
-        return { success: true, message: `Directory already exists: ${path}` };
+        return { success: true, message: `Directory already exists: ${dirPath}` };
       }
 
       if (directoryInfo && !dbRecord) {
-        await StorageDbRepository.ensureDirectoryRecord({ path, protected: isProtected });
-        logger.info(`   📁 Synced directory DB record: ${path}`);
-        return { success: true, message: `Directory DB record synced: ${path}` };
+        await StorageDbRepository.ensureDirectoryRecord({ path: dirPath, protected: isProtected });
+        logger.info(`   📁 Synced directory DB record: ${dirPath}`);
+        return { success: true, message: `Directory DB record synced: ${dirPath}` };
       }
 
       const input: FolderCreateInput = {
-        path,
+        path: dirPath,
         protected: isProtected,
       };
 
       const result = await this.storageService.createFolder(input);
       if (result.success) {
-        logger.info(`   📁 Created directory: ${path}`);
+        logger.info(`   📁 Created directory: ${dirPath}`);
       } else {
-        logger.warn(`   ⚠️  Could not create directory: ${path} - ${result.message}`);
+        logger.warn(`   ⚠️  Could not create directory: ${dirPath} - ${result.message}`);
       }
       return result;
     } catch (error) {
-      logger.error(`   ❌ Error ensuring directory ${path}:`, error);
+      logger.error(`   ❌ Error ensuring directory ${dirPath}:`, error);
       return {
         success: false,
         message: error instanceof Error ? error.message : String(error),

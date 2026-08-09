@@ -197,30 +197,30 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
             <CssBaseline />
             <StorybookColorSchemeBridge mode={themeMode} direction={direction} locale={locale}>
               <GlobalStyles
-                styles={theme => ({
+                styles={muiTheme => ({
                   ".sbdocs-wrapper": {
                     maxWidth: "100% !important",
                     padding: "2rem !important",
-                    backgroundColor: `${theme.palette.background.default} !important`,
+                    backgroundColor: `${muiTheme.palette.background.default} !important`,
                   },
                   ".sbdocs-preview, .docs-story, .innerZoomElementWrapper, .docs-story > div, .sbdocs [role='toolbar']":
                     {
-                      backgroundColor: `${theme.palette.background.default} !important`,
-                      borderColor: `${theme.palette.divider} !important`,
-                      color: `${theme.palette.text.primary} !important`,
+                      backgroundColor: `${muiTheme.palette.background.default} !important`,
+                      borderColor: `${muiTheme.palette.divider} !important`,
+                      color: `${muiTheme.palette.text.primary} !important`,
                     },
                   ".sbdocs-content": {
                     maxWidth: "100% !important",
                     width: "100% !important",
                   },
                   ".sbdocs-title, .sbdocs-h1, .sbdocs-h2, .sbdocs-h3": {
-                    color: `${theme.palette.text.primary} !important`,
+                    color: `${muiTheme.palette.text.primary} !important`,
                   },
                   ".sbdocs-p, .sbdocs-li, .sbdocs-a": {
-                    color: `${theme.palette.text.secondary} !important`,
+                    color: `${muiTheme.palette.text.secondary} !important`,
                   },
                   ".sbdocs button, .sbdocs a, .sbdocs [role='toolbar'] button": {
-                    color: `${theme.palette.text.primary} !important`,
+                    color: `${muiTheme.palette.text.primary} !important`,
                   },
                 })}
               />

@@ -408,29 +408,29 @@ function PaymentDetailsDialogContent({
   viewerDisplayCurrency,
 }: PaymentDetailsContentProps): React.ReactNode {
   const renderFxConversionNote = ({
-    subjectUserId,
-    viewerDisplayCurrency,
+    subjectUserId: targetUserId,
+    viewerDisplayCurrency: viewerCurrency,
   }: {
     readonly subjectUserId?: string | null;
     readonly viewerDisplayCurrency?: string | null;
   }): React.ReactNode => {
-    if (subjectUserId) {
-      return <FxConversionNote mode="subject" subjectUserId={subjectUserId} />;
+    if (targetUserId) {
+      return <FxConversionNote mode="subject" subjectUserId={targetUserId} />;
     }
-    if (viewerDisplayCurrency) {
+    if (viewerCurrency) {
       return <FxConversionNote mode="viewer" />;
     }
     return null;
   };
 
   const renderPaymentsOrEmpty = ({
-    payments,
-    locale,
-    amountLabel,
-    dateLabel,
-    fxMessages,
-    submission,
-    emptyLabel,
+    payments: paymentRows,
+    locale: uiLocale,
+    amountLabel: amountLabelText,
+    dateLabel: dateLabelText,
+    fxMessages: fxMsgs,
+    submission: submissionData,
+    emptyLabel: emptyLabelText,
   }: {
     readonly payments: readonly PaymentRow[];
     readonly locale: string;
@@ -440,21 +440,21 @@ function PaymentDetailsDialogContent({
     readonly submission: SubmissionRow | null;
     readonly emptyLabel: string;
   }): React.ReactNode => {
-    if (payments.length > 0) {
+    if (paymentRows.length > 0) {
       return (
         <PaymentRecordsSection
-          payments={payments}
-          locale={locale}
-          amountLabel={amountLabel}
-          dateLabel={dateLabel}
-          fxMessages={fxMessages}
+          payments={paymentRows}
+          locale={uiLocale}
+          amountLabel={amountLabelText}
+          dateLabel={dateLabelText}
+          fxMessages={fxMsgs}
         />
       );
     }
-    if (submission === null) {
+    if (submissionData === null) {
       return (
         <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {emptyLabel}
+          {emptyLabelText}
         </Typography>
       );
     }

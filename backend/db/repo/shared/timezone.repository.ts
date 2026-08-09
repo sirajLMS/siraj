@@ -20,11 +20,11 @@ export namespace TimezoneRepository {
 
   export async function upsertMany(inputs: TimezoneUpsertInput[], tx?: DBTransaction): Promise<TimezoneSelectType[]> {
     if (inputs.length === 0) return [];
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
     const results: TimezoneSelectType[] = [];
 
     for (const input of inputs) {
-      const [row] = await queryDb
+      const [row] = await dbToQuery
         .insert(timezones)
         .values({
           ianaId: input.ianaId,

@@ -95,8 +95,8 @@ export async function executeDeleteFile(
 
     try {
       await StorageDbRepository.deleteFile(filePath);
-    } catch (error) {
-      logger.warn(`Failed to delete file from database: ${filePath}`, error);
+    } catch (caughtError) {
+      logger.warn(`Failed to delete file from database: ${filePath}`, caughtError);
     }
 
     return { success: true, message: "File deleted successfully" };

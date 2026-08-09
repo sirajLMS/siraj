@@ -82,10 +82,10 @@ describe("Session Scalability and Redis Integration", () => {
   describe("Session Configuration", () => {
     it("should return default configuration when role not found", async () => {
       await runInRollback(async tx => {
-        const config = await SessionRepository.getSessionConfig("nonexistent_role", tx);
+        const cfg = await SessionRepository.getSessionConfig("nonexistent_role", tx);
 
-        expect(config.ttlSeconds).toBe(7 * 24 * 60 * 60); // 7 days
-        expect(config.maxConcurrentSessions).toBe(5);
+        expect(cfg.ttlSeconds).toBe(7 * 24 * 60 * 60); // 7 days
+        expect(cfg.maxConcurrentSessions).toBe(5);
         testLogger.info("Default configuration returned correctly");
       });
     });

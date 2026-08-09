@@ -245,10 +245,10 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       setGenerationStatus("error");
       setGenerationError(t.saveError);
       return null;
-    } catch (error) {
+    } catch (caughtError) {
       setGenerationStatus("error");
-      if (CombinedGraphQLErrors.is(error)) {
-        const reauthError = error.errors.find(e => e.extensions?.code === PROVIDER_REAUTH_REQUIRED_CODE);
+      if (CombinedGraphQLErrors.is(caughtError)) {
+        const reauthError = caughtError.errors.find(e => e.extensions?.code === PROVIDER_REAUTH_REQUIRED_CODE);
         if (reauthError) {
           const slug = configs.find(c => c.provider?.id === args.providerId)?.provider?.slug;
           if (slug) {
@@ -297,9 +297,9 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         },
       });
       await refetch();
-    } catch (error) {
-      if (CombinedGraphQLErrors.is(error)) {
-        const reauthError = error.errors.find(e => e.extensions?.code === PROVIDER_REAUTH_REQUIRED_CODE);
+    } catch (caughtError) {
+      if (CombinedGraphQLErrors.is(caughtError)) {
+        const reauthError = caughtError.errors.find(e => e.extensions?.code === PROVIDER_REAUTH_REQUIRED_CODE);
         if (reauthError) {
           const slug = config.provider?.slug;
           if (slug) {
@@ -307,7 +307,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
           }
         }
       }
-      logger.error("regenerateConfig failed", error);
+      logger.error("regenerateConfig failed", caughtError);
       setErrorMessage(t.saveError);
     } finally {
       setGenerating(false);
@@ -492,13 +492,13 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         return next;
       });
       setErrorMessage(t.saveError);
-    } catch (error) {
+    } catch (caughtError) {
       setConnectingSlugs(prev => {
         const next = new Set(prev);
         next.delete(providerSlug);
         return next;
       });
-      logger.error("handleReconnect OAuth failed", error);
+      logger.error("handleReconnect OAuth failed", caughtError);
       setErrorMessage(t.saveError);
     }
     // Clear cached instances for configs using this provider.
@@ -536,8 +536,8 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       });
       // Refetch both meeting configs and connected provider tokens.
       await Promise.all([refetch(), connectedProvidersQueryRefetch()]);
-    } catch (error) {
-      logger.error("disconnectProvider OAuth failed", error);
+    } catch (caughtError) {
+      logger.error("disconnectProvider OAuth failed", caughtError);
       setErrorMessage(t.saveError);
     }
     // Clear cached instances for configs using this provider.

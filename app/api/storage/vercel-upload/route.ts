@@ -219,11 +219,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           const rawPayload = JSON.parse(tokenPayload || "{}") as {
             sessionId?: string;
           };
-          const sessionId = rawPayload.sessionId;
+          const parsedSessionId = rawPayload.sessionId;
 
           // Mark session as used
-          if (sessionId) {
-            await StorageService.claimSignedUrl(sessionId);
+          if (parsedSessionId) {
+            await StorageService.claimSignedUrl(parsedSessionId);
           }
 
           // Create file record in database

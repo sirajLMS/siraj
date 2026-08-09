@@ -36,7 +36,7 @@ function configTest(name: string, fn: (tx: DBTransaction, tErrors: ErrorsLabels)
 }
 
 describe("UserMeetingConfigRepository", () => {
-  configTest("create inserts a user meeting config", async (tx, tErrors) => {
+  configTest("create inserts a user meeting config", async (tx, testErrors) => {
     const user = await createTestUser(tx, { email: `umc-create-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
 
@@ -48,7 +48,7 @@ describe("UserMeetingConfigRepository", () => {
         isDefault: false,
         details: { meetingUrl: "https://zoom.us/j/987654321" },
       },
-      tErrors,
+      testErrors,
       tx
     );
 
@@ -76,8 +76,8 @@ describe("UserMeetingConfigRepository", () => {
     expect(found).toBeNull();
   });
 
-  configTest("getByIdOrThrow throws when config is missing", async (tx, tErrors) => {
-    const error = await expectRepoError(() => UserMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tErrors, tx));
+  configTest("getByIdOrThrow throws when config is missing", async (tx, testErrors) => {
+    const error = await expectRepoError(() => UserMeetingConfigRepository.getByIdOrThrow(NIL_UUID, testErrors, tx));
     expect(error.message).toContain("not found");
   });
 
@@ -94,7 +94,7 @@ describe("UserMeetingConfigRepository", () => {
     expect(results[1]?.id).toBe(second.id);
   });
 
-  configTest("update modifies providerId", async (tx, tErrors) => {
+  configTest("update modifies providerId", async (tx, testErrors) => {
     const user = await createTestUser(tx, { email: `umc-provider-${randomUUID()}@test.com` });
     const zoomProvider = await createTestMeetingProvider(tx);
     const meetProvider = await createTestMeetingProvider(tx, {
@@ -109,14 +109,14 @@ describe("UserMeetingConfigRepository", () => {
         providerId: meetProvider.id,
         details: { meetingUrl: "https://meet.google.com/abc-defg-hij" },
       },
-      tErrors,
+      testErrors,
       tx
     );
 
     expect(updated.providerId).toBe(meetProvider.id);
   });
 
-  configTest("update modifies config fields", async (tx, tErrors) => {
+  configTest("update modifies config fields", async (tx, testErrors) => {
     const user = await createTestUser(tx, { email: `umc-update-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const config = await createTestMeetingConfig(tx, user.id, provider.id);
@@ -127,7 +127,7 @@ describe("UserMeetingConfigRepository", () => {
         label: "Updated label",
         details: { meetingUrl: "https://zoom.us/j/111222333" },
       },
-      tErrors,
+      testErrors,
       tx
     );
 
@@ -136,18 +136,18 @@ describe("UserMeetingConfigRepository", () => {
     expect(updated.details.meetingUrl).toBe("https://zoom.us/j/111222333");
   });
 
-  configTest("deleteConfig removes a config", async (tx, tErrors) => {
+  configTest("deleteConfig removes a config", async (tx, testErrors) => {
     const user = await createTestUser(tx, { email: `umc-delete-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const config = await createTestMeetingConfig(tx, user.id, provider.id);
 
-    await UserMeetingConfigRepository.deleteConfig(config.id, tErrors, tx);
+    await UserMeetingConfigRepository.deleteConfig(config.id, testErrors, tx);
 
     const found = await UserMeetingConfigRepository.getById(config.id, tx);
     expect(found).toBeNull();
   });
 
-  configTest("setDefault marks one config as default and clears the previous default", async (tx, tErrors) => {
+  configTest("setDefault marks one config as default and clears the previous default", async (tx, testErrors) => {
     const user = await createTestUser(tx, { email: `umc-default-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const first = await UserMeetingConfigRepository.create(
@@ -158,12 +158,12 @@ describe("UserMeetingConfigRepository", () => {
         isDefault: true,
         details: { meetingUrl: "https://zoom.us/j/100000001" },
       },
-      tErrors,
+      testErrors,
       tx
     );
     const second = await createTestMeetingConfig(tx, user.id, provider.id, { label: "Second" });
 
-    const defaulted = await UserMeetingConfigRepository.setDefault(second.id, tErrors, tx);
+    const defaulted = await UserMeetingConfigRepository.setDefault(second.id, testErrors, tx);
     const refreshedFirst = await UserMeetingConfigRepository.getById(first.id, tx);
     const defaultConfig = await UserMeetingConfigRepository.getDefaultForUser(user.id, tx);
 
@@ -172,7 +172,7 @@ describe("UserMeetingConfigRepository", () => {
     expect(defaultConfig?.id).toBe(second.id);
   });
 
-  configTest("create with isDefault=true clears any existing default for the user", async (tx, tErrors) => {
+  configTest("create with isDefault=true clears any existing default for the user", async (tx, testErrors) => {
     const user = await createTestUser(tx, { email: `umc-5c-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const first = await UserMeetingConfigRepository.create(
@@ -183,7 +183,7 @@ describe("UserMeetingConfigRepository", () => {
         isDefault: true,
         details: { meetingUrl: "https://zoom.us/j/200000001" },
       },
-      tErrors,
+      testErrors,
       tx
     );
 
@@ -195,7 +195,7 @@ describe("UserMeetingConfigRepository", () => {
         isDefault: true,
         details: { meetingUrl: "https://zoom.us/j/200000002" },
       },
-      tErrors,
+      testErrors,
       tx
     );
 
@@ -209,7 +209,7 @@ describe("UserMeetingConfigRepository", () => {
     expect(defaults).toHaveLength(1);
   });
 
-  configTest("create and retrieve providerMetadata round-trip", async (tx, tErrors) => {
+  configTest("create and retrieve providerMetadata round-trip", async (tx, testErrors) => {
     const user = await createTestUser(tx, { email: `umc-pm-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);
     const metadata = { meetingId: "zoom-123", hostEmail: "host@example.com" };
@@ -223,7 +223,7 @@ describe("UserMeetingConfigRepository", () => {
         details: { meetingUrl: "https://zoom.us/j/999999999" },
         providerMetadata: metadata,
       },
-      tErrors,
+      testErrors,
       tx
     );
 

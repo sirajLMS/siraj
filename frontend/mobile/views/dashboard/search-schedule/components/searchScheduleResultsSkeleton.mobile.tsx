@@ -39,7 +39,7 @@ export function SearchScheduleResultsSkeletonMobile({
             </Box>
 
             <Box sx={{ display: "flex", flexDirection: "row", gap: 1, overflowX: "auto", paddingBottom: 1 }}>
-              {Array.from({ length: pillCount }, (_, pillIndex) => (
+              {Array.from({ length: pillCount }, (_unused, pillIndex) => (
                 <Skeleton
                   key={`skeleton-pill-${String(cardIndex)}-${String(pillIndex)}`}
                   variant="rounded"

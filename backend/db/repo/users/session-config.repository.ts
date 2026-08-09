@@ -30,9 +30,9 @@ export namespace SessionConfigRepository {
   }
 
   export async function upsert(input: SessionConfigUpsertInput, tx?: DBTransaction): Promise<SessionConfigSelectType> {
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
     const now = new Date();
-    const [row] = await queryDb
+    const [row] = await dbToQuery
       .insert(sessionConfig)
       .values({
         roleName: input.roleName,
@@ -58,10 +58,10 @@ export namespace SessionConfigRepository {
     tx?: DBTransaction
   ): Promise<SessionConfigSelectType[]> {
     if (inputs.length === 0) return [];
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
     const results: SessionConfigSelectType[] = [];
     for (const input of inputs) {
-      const [row] = await queryDb
+      const [row] = await dbToQuery
         .insert(sessionConfig)
         .values({
           roleName: input.roleName,
@@ -85,8 +85,8 @@ export namespace SessionConfigRepository {
   }
 
   export async function deleteByRoleName(roleName: string, tx?: DBTransaction): Promise<boolean> {
-    const queryDb = tx ?? db;
-    await queryDb.delete(sessionConfig).where(eq(sessionConfig.roleName, roleName));
+    const dbToQuery = tx ?? db;
+    await dbToQuery.delete(sessionConfig).where(eq(sessionConfig.roleName, roleName));
     return true;
   }
 
@@ -95,8 +95,8 @@ export namespace SessionConfigRepository {
     patch: Partial<Pick<SessionConfigSelectType, "ttlSeconds" | "maxConcurrentSessions" | "updatedAt">>,
     tx?: DBTransaction
   ): Promise<SessionConfigSelectType | null> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
+    const dbToQuery = tx ?? db;
+    const [row] = await dbToQuery
       .update(sessionConfig)
       .set({ ...patch, updatedAt: new Date() })
       .where(eq(sessionConfig.roleName, roleName))

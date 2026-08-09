@@ -263,12 +263,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
   test("Enforces unique index on original_class_id", async () => {
     testLogger.info("Testing unique index on original_class_id with disabled triggers...");
     await runInRollback(async tx => {
-      await expectViolation(tx, "uniq", "class_instances_original_class_uniq_idx", async (tx, sid, tid) => {
-        const original = await insertClassInstance(tx, { studentId: sid, teacherId: tid });
+      await expectViolation(tx, "uniq", "class_instances_original_class_uniq_idx", async (txConn, sid, tid) => {
+        const original = await insertClassInstance(txConn, { studentId: sid, teacherId: tid });
 
         // Insert two rescheduled instances targeting the same original
-        await insertClassInstance(tx, { studentId: sid, teacherId: tid, originalClassId: original.id });
-        await insertClassInstance(tx, { studentId: sid, teacherId: tid, originalClassId: original.id });
+        await insertClassInstance(txConn, { studentId: sid, teacherId: tid, originalClassId: original.id });
+        await insertClassInstance(txConn, { studentId: sid, teacherId: tid, originalClassId: original.id });
       });
     });
     testLogger.info("Unique index constraint test passed.");
@@ -277,9 +277,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
   test("Enforces self-referencing check constraint", async () => {
     testLogger.info("Testing self-referencing check constraint...");
     await runInRollback(async tx => {
-      await expectViolation(tx, "self", "class_instances_reschedule_not_self_chk", async (tx, sid, tid) => {
-        const instance = await insertClassInstance(tx, { studentId: sid, teacherId: tid });
-        await tx.update(classInstances).set({ originalClassId: instance.id }).where(eq(classInstances.id, instance.id));
+      await expectViolation(tx, "self", "class_instances_reschedule_not_self_chk", async (txConn, sid, tid) => {
+        const instance = await insertClassInstance(txConn, { studentId: sid, teacherId: tid });
+        await txConn
+          .update(classInstances)
+          .set({ originalClassId: instance.id })
+          .where(eq(classInstances.id, instance.id));
       });
     });
     testLogger.info("Self-referencing check constraint test passed.");
@@ -304,7 +307,9 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     test(name, async () => {
       testLogger.info(`Testing ${name.toLowerCase()}...`);
       await runInRollback(tx =>
-        expectViolation(tx, prefix, constraint, (tx, sid, tid) => insertRescheduledInstance(tx, sid, tid, overrides))
+        expectViolation(tx, prefix, constraint, (_txConn, sid, tid) =>
+          insertRescheduledInstance(tx, sid, tid, overrides)
+        )
       );
       testLogger.info(`${name} test passed.`);
     });

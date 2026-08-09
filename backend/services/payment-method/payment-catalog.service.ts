@@ -229,7 +229,8 @@ export namespace PaymentCatalogService {
       inputs,
       SupportedMobileWalletRepository.upsertMany,
       SupportedMobileWalletRepository.getBySlug,
-      (id, input, tErrors, transaction) => SupportedMobileWalletRepository.update(id, input, tErrors, transaction),
+      (id, input, errorLabels, transaction) =>
+        SupportedMobileWalletRepository.update(id, input, errorLabels, transaction),
       tErrors,
       tx
     );
@@ -244,7 +245,8 @@ export namespace PaymentCatalogService {
       inputs,
       SupportedPaymentLinkRepository.upsertMany,
       SupportedPaymentLinkRepository.getBySlug,
-      (id, input, tErrors, transaction) => SupportedPaymentLinkRepository.update(id, input, tErrors, transaction),
+      (id, input, errorLabels, transaction) =>
+        SupportedPaymentLinkRepository.update(id, input, errorLabels, transaction),
       tErrors,
       tx
     );
@@ -267,7 +269,8 @@ export namespace PaymentCatalogService {
       inputs,
       SupportedOnlineAccountRepository.upsertMany,
       SupportedOnlineAccountRepository.getBySlug,
-      (id, input, tErrors, transaction) => SupportedOnlineAccountRepository.update(id, input, tErrors, transaction),
+      (id, input, errorLabels, transaction) =>
+        SupportedOnlineAccountRepository.update(id, input, errorLabels, transaction),
       tErrors,
       tx
     );

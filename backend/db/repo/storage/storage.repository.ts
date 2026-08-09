@@ -707,9 +707,9 @@ export namespace StorageDbRepository {
     tx?: DBTransaction,
     createdAt: Date = new Date()
   ): Promise<{ id: string; fileId: string; parentId: string; usageType: string; createdAt: Date }> => {
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
 
-    const [result] = await queryDb
+    const [result] = await dbToQuery
       .insert(parentFiles)
       .values({
         fileId,
@@ -729,9 +729,9 @@ export namespace StorageDbRepository {
     tx?: DBTransaction,
     createdAt: Date = new Date()
   ): Promise<{ id: string; fileId: string; invoiceId: string; usageType: string; createdAt: Date }> => {
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
 
-    const [result] = await queryDb
+    const [result] = await dbToQuery
       .insert(invoiceFiles)
       .values({
         fileId,

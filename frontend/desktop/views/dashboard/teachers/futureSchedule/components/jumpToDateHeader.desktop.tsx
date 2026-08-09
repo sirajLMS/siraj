@@ -39,20 +39,20 @@ function DateNavigator({
         <ChevronLeftOutlined />
       </IconButton>
       <Box
-        sx={theme => ({
+        sx={muiTheme => ({
           display: "flex",
           alignItems: "center",
           gap: 1.5,
           px: 2,
           py: 1,
-          backgroundColor: theme.palette.surfaceContainerLow,
-          border: `1px solid ${theme.palette.outlineVariant}`,
+          backgroundColor: muiTheme.palette.surfaceContainerLow,
+          border: `1px solid ${muiTheme.palette.outlineVariant}`,
           borderRadius: 2,
           cursor: "pointer",
         })}
       >
-        <CalendarTodayOutlined sx={theme => ({ color: theme.palette.primary.main })} fontSize="small" />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
+        <CalendarTodayOutlined sx={muiTheme => ({ color: muiTheme.palette.primary.main })} fontSize="small" />
+        <Typography variant="titleLg" sx={muiTheme => ({ color: muiTheme.palette.primary.main })}>
           {formattedDate}
         </Typography>
       </Box>

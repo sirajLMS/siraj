@@ -470,18 +470,23 @@ export function QuotaInsightsContainer() {
   const deliveryRate = useMemo(() => buildDeliveryRate(quotas, t), [quotas, t]);
   const expiredSlippage = useMemo(() => buildExpiredSlippage(quotas, monthFormatter), [quotas, monthFormatter]);
 
-  const { activeQuotasCount, totalClassesRemaining, expiringThisWeekCount, pendingBacklogCount } = useMemo(() => {
-    const activeQuotasCount = quotas.filter(q => q.status === QuotaStatus.Active).length;
-    const totalClassesRemaining = quotas.reduce((sum, q) => sum + (q.remaining ?? 0), 0);
+  const {
+    activeCount: activeQuotasCount,
+    totalRemaining: totalClassesRemaining,
+    expiringCount: expiringThisWeekCount,
+    backlogCount: pendingBacklogCount,
+  } = useMemo(() => {
+    const activeCount = quotas.filter(q => q.status === QuotaStatus.Active).length;
+    const totalRemaining = quotas.reduce((sum, q) => sum + (q.remaining ?? 0), 0);
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const expiringThisWeekCount = quotas.filter(q => {
+    const expiringCount = quotas.filter(q => {
       if (!q.validUntil) return false;
       const d = new Date(q.validUntil);
       return d >= now && d <= nextWeek;
     }).length;
-    const pendingBacklogCount = activeQuotasCount;
-    return { activeQuotasCount, totalClassesRemaining, expiringThisWeekCount, pendingBacklogCount };
+    const backlogCount = activeCount;
+    return { activeCount, totalRemaining, expiringCount, backlogCount };
   }, [quotas]);
 
   const chartLabels = t.charts;

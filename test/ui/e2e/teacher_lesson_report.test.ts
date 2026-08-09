@@ -35,16 +35,16 @@ async function waitForSuccessOrHidden(dialog: Locator, snackbar: Locator): Promi
   }
 }
 
-async function logout(context: BrowserContext, page: Page): Promise<void> {
-  const logoutButton = page.getByRole("button", { name: /logout|sign\s+out|تسجيل\s+الخروج/i }).first();
+async function logout(appContext: BrowserContext, pageNumber: Page): Promise<void> {
+  const logoutButton = pageNumber.getByRole("button", { name: /logout|sign\s+out|تسجيل\s+الخروج/i }).first();
   if (await isVisible(logoutButton)) {
     await logoutButton.click();
-    await page.waitForURL("**/login**");
+    await pageNumber.waitForURL("**/login**");
     return;
   }
-  await context.clearCookies();
-  await page.goto("/login");
-  await page.waitForURL("**/login**");
+  await appContext.clearCookies();
+  await pageNumber.goto("/login");
+  await pageNumber.waitForURL("**/login**");
 }
 
 async function loginDemo(role: "teacher" | "supervisor"): Promise<void> {
@@ -53,8 +53,8 @@ async function loginDemo(role: "teacher" | "supervisor"): Promise<void> {
   await loginAsDemoUser(page, context, DEMO_USERS[role].groupSlug);
 }
 
-async function fillLessonReportDialog(page: Page): Promise<void> {
-  const dialog = page.getByRole("dialog", { name: /lesson\s+report|تقرير\s+الدرس/i });
+async function fillLessonReportDialog(pageNumber: Page): Promise<void> {
+  const dialog = pageNumber.getByRole("dialog", { name: /lesson\s+report|تقرير\s+الدرس/i });
   await dialog.waitFor({ state: "visible" });
 
   const attendanceSelect = dialog.getByLabel(/attendance\s+evaluation|تقييم\s+الحضور/i);
@@ -83,31 +83,33 @@ async function fillLessonReportDialog(page: Page): Promise<void> {
 
   await dialog.waitFor({ state: "hidden" });
 
-  const successSnackbar = page.getByRole("status", { name: /success|successfully|تم\s+بنجاح/i });
+  const successSnackbar = pageNumber.getByRole("status", { name: /success|successfully|تم\s+بنجاح/i });
   await waitForSuccessOrHidden(dialog, successSnackbar);
 }
 
-async function submitTeacherLessonReportIfAvailable(page: Page): Promise<void> {
-  const markCompletedButton = page.getByRole("button", { name: /mark\s+completed|mark\s+complete|إكمال/i }).first();
+async function submitTeacherLessonReportIfAvailable(pageNumber: Page): Promise<void> {
+  const markCompletedButton = pageNumber
+    .getByRole("button", { name: /mark\s+completed|mark\s+complete|إكمال/i })
+    .first();
   const hasMarkCompletedButton = await isVisible(markCompletedButton);
 
   if (!hasMarkCompletedButton) {
-    const pageTitle = page.getByRole("heading", { level: 1 });
+    const pageTitle = pageNumber.getByRole("heading", { level: 1 });
     expect(await pageTitle.first().isVisible()).toBe(true);
     return;
   }
 
   await markCompletedButton.click();
-  await fillLessonReportDialog(page);
+  await fillLessonReportDialog(pageNumber);
 }
 
-async function approvePendingReportIfAvailable(page: Page): Promise<void> {
-  const reviewsTitle = page.getByRole("heading", {
+async function approvePendingReportIfAvailable(pageNumber: Page): Promise<void> {
+  const reviewsTitle = pageNumber.getByRole("heading", {
     name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i,
   });
   await reviewsTitle.first().waitFor({ state: "visible" });
 
-  const reportRow = page
+  const reportRow = pageNumber
     .locator('[role="row"]')
     .filter({ hasText: /Test lesson report|تقرير\s+درس\s+اختباري/i })
     .first();
@@ -122,7 +124,7 @@ async function approvePendingReportIfAvailable(page: Page): Promise<void> {
   await approveButton.waitFor({ state: "visible" });
   await approveButton.click();
 
-  const successSnackbar = page.getByRole("status", { name: /approved|تم\s+الموافقة|success|نجاح/i });
+  const successSnackbar = pageNumber.getByRole("status", { name: /approved|تم\s+الموافقة|success|نجاح/i });
   try {
     await successSnackbar.waitFor({ state: "visible" });
   } catch {

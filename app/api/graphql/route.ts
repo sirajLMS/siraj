@@ -125,7 +125,7 @@ async function flushPendingCookies(response: Response): Promise<Response> {
  */
 async function withRateLimit(
   request: NextRequest,
-  handler: (req: NextRequest) => Promise<Response>
+  eventHandler: (req: NextRequest) => Promise<Response>
 ): Promise<Response> {
   const identifier = getClientIdentifier(request);
 
@@ -162,7 +162,7 @@ async function withRateLimit(
   }
 
   // Add rate limit headers to successful responses
-  const response = await flushPendingCookies(await handler(request));
+  const response = await flushPendingCookies(await eventHandler(request));
 
   // Attach rate-limit headers to the ORIGINAL response. Constructing a new
   // Response (e.g. `new Response(response.body, response)`) silently strips
@@ -183,13 +183,13 @@ async function withRateLimit(
  */
 async function withIdempotency(
   request: NextRequest,
-  handler: (req: NextRequest) => Promise<Response>
+  eventHandler: (req: NextRequest) => Promise<Response>
 ): Promise<Response> {
   const idempotencyKey = request.headers.get("x-idempotency-key");
 
   // Only apply to POST requests with an idempotency key
   if (request.method !== "POST" || !idempotencyKey) {
-    return handler(request);
+    return eventHandler(request);
   }
 
   // We use the client identifier (IP/etc) to scope the idempotency key
@@ -216,7 +216,7 @@ async function withIdempotency(
   }
 
   try {
-    return await handler(request);
+    return await eventHandler(request);
   } catch (error) {
     // On server error, release the key to allow retry
     await IdempotencyService.release(idempotencyKey, identifier);

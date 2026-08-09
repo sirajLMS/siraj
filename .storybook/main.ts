@@ -17,8 +17,8 @@ const config: StorybookConfig = {
   ],
   framework: "@storybook/nextjs-vite",
   staticDirs: ["../public"],
-  async viteFinal(config) {
-    return mergeConfig(config, {
+  async viteFinal(cfg) {
+    return mergeConfig(cfg, {
       resolve: {
         alias: {
           "react-leaflet/package.json": path.resolve("node_modules/react-leaflet/package.json"),

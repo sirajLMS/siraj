@@ -204,8 +204,8 @@ export namespace LessonReportRepository {
   }
 
   export async function create(input: LessonReportInsertType, tx?: DBTransaction): Promise<LessonReportSelectType> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb.insert(lessonReports).values(input).returning();
+    const dbToQuery = tx ?? db;
+    const [row] = await dbToQuery.insert(lessonReports).values(input).returning();
     return row;
   }
 
@@ -275,8 +275,8 @@ export namespace LessonReportRepository {
     studentNotes: string,
     tx?: DBTransaction
   ): Promise<LessonReportSelectType | null> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
+    const dbToQuery = tx ?? db;
+    const [row] = await dbToQuery
       .update(lessonReports)
       .set({
         studentNotes,
@@ -293,7 +293,7 @@ async function updateReportFields(
   fields: Partial<LessonReportInsertType>,
   tx?: DBTransaction
 ): Promise<LessonReportSelectType> {
-  const queryDb = tx ?? db;
-  const [row] = await queryDb.update(lessonReports).set(fields).where(eq(lessonReports.id, reportId)).returning();
+  const dbToQuery = tx ?? db;
+  const [row] = await dbToQuery.update(lessonReports).set(fields).where(eq(lessonReports.id, reportId)).returning();
   return row;
 }
