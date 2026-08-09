@@ -8,7 +8,20 @@ import {
 } from "@/backend/services/cron/job-handler-registry";
 import type { CronJobPayload, CronJobResult } from "@/backend/types/cron/cron.types";
 
-const TEST_KIND = "TEST_KIND" as never;
+/**
+ * Build a `CronJobKind` from an arbitrary string for testing.
+ * Uses `Object.assign` to override the typed property at runtime without an
+ * unsafe `as` narrowing assertion (see pgboss.adapter.test.ts for precedent).
+ */
+function makeTestKind(value: string): CronJobKind {
+  return Object.assign({ kind: CronJobKind.NOOP }, { kind: value }).kind;
+}
+
+const TEST_KIND = makeTestKind("TEST_KIND");
+const UNREGISTERED_KIND = makeTestKind("UNREGISTERED");
+
+const successHandler = async (): Promise<CronJobResult> => ({ success: true });
+const failureHandler = async (): Promise<CronJobResult> => ({ success: false, error: "changed" });
 
 afterEach(() => {
   // Re-register core handlers to reset state
@@ -17,9 +30,8 @@ afterEach(() => {
 
 describe("job-handler-registry", () => {
   test("registerHandler stores a handler retrievable by getHandler", () => {
-    const handler = async (): Promise<CronJobResult> => ({ success: true });
-    registerHandler(TEST_KIND, handler);
-    expect(getHandler(TEST_KIND)).toBe(handler);
+    registerHandler(TEST_KIND, successHandler);
+    expect(getHandler(TEST_KIND)).toBe(successHandler);
   });
 
   test("getHandler returns the built-in NOOP handler by default", () => {
@@ -28,11 +40,11 @@ describe("job-handler-registry", () => {
   });
 
   test("getHandler returns null for unregistered kind", () => {
-    expect(getHandler("UNREGISTERED" as never)).toBeNull();
+    expect(getHandler(UNREGISTERED_KIND)).toBeNull();
   });
 
   test("getRegisteredKinds includes NOOP and any registered handlers", () => {
-    registerHandler(TEST_KIND, async () => ({ success: true }));
+    registerHandler(TEST_KIND, successHandler);
     const kinds = getRegisteredKinds();
     expect(kinds).toContain(CronJobKind.NOOP);
     expect(kinds).toContain(TEST_KIND);
@@ -59,13 +71,10 @@ describe("job-handler-registry", () => {
   });
 
   test("registerHandler overwrites existing handler for same kind", () => {
-    const handler1 = async (): Promise<CronJobResult> => ({ success: true });
-    const handler2 = async (): Promise<CronJobResult> => ({ success: false, error: "changed" });
+    registerHandler(TEST_KIND, successHandler);
+    expect(getHandler(TEST_KIND)).toBe(successHandler);
 
-    registerHandler(TEST_KIND, handler1);
-    expect(getHandler(TEST_KIND)).toBe(handler1);
-
-    registerHandler(TEST_KIND, handler2);
-    expect(getHandler(TEST_KIND)).toBe(handler2);
+    registerHandler(TEST_KIND, failureHandler);
+    expect(getHandler(TEST_KIND)).toBe(failureHandler);
   });
 });
