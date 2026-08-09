@@ -170,7 +170,7 @@ export class PostgresCacheAdapter implements ICacheService {
       // PERF: These 4 pipeline commands (zremrangebyscore + zadd + zcard + expire) could be combined
       // into a single SQL CTE for the rate-limit pattern. Current implementation issues 4 separate queries.
       case "del": {
-        const keys = cmd.args as string[];
+        const keys = cmd.args.map(arg => String(arg));
         for (const key of keys) {
           await CacheDbRepository.del(key);
         }
@@ -178,12 +178,15 @@ export class PostgresCacheAdapter implements ICacheService {
       }
 
       case "set": {
-        const [setKey, setValue, , , flag] = cmd.args as [string, string, string, number, string];
+        const setKey = String(cmd.args[0]);
+        const setValue = String(cmd.args[1]);
+        const ttlSeconds = Number(cmd.args[3]);
+        const flag = typeof cmd.args[4] === "string" ? cmd.args[4] : undefined;
         if (flag === "NX") {
-          const expiresAt = new Date(Date.now() + (cmd.args[3] as number) * 1000);
+          const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
           return await CacheDbRepository.insertIfNotExists(setKey, setValue, expiresAt);
         }
-        const expiresAt = new Date(Date.now() + (cmd.args[3] as number) * 1000);
+        const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
         await CacheDbRepository.set(setKey, setValue, expiresAt);
         return "OK";
       }
@@ -192,7 +195,8 @@ export class PostgresCacheAdapter implements ICacheService {
         // For rate limiting: remove old entries outside the sliding window
         // Redis: ZREMRANGEBYSCORE key min max — removes members with score between min and max
         // PostgreSQL: delete entries with key prefix match and value (timestamp) <= maxScore
-        const [remKey, , maxScore] = cmd.args as [string, number, number];
+        const remKey = String(cmd.args[0]);
+        const maxScore = Number(cmd.args[2]);
         await CacheDbRepository.deleteByPrefixAndScore(remKey, maxScore);
         return 0;
       }
@@ -200,7 +204,8 @@ export class PostgresCacheAdapter implements ICacheService {
       case "zadd": {
         // For rate limiting: add new entry using server-side timestamp
         // Use composite key (key:member) so multiple entries accumulate per rate-limit key
-        const [key, , member] = cmd.args as [string, number, string];
+        const key = String(cmd.args[0]);
+        const member = String(cmd.args[2]);
         const compositeKey = `${key}:${member}`;
         const now = Date.now();
         // Initial TTL is generous; the pipeline's "expire" command immediately
@@ -213,14 +218,15 @@ export class PostgresCacheAdapter implements ICacheService {
       case "zcard": {
         // For rate limiting: count entries matching the key prefix
         // Each zadd stores with composite key "{key}:{member}", so we count "{key}:%"
-        const prefix = cmd.args[0] as string;
+        const prefix = String(cmd.args[0]);
         return await CacheDbRepository.countByKeyPrefix(prefix);
       }
 
       case "expire": {
         // Set expiration on all entries matching the key prefix
         // Since zadd uses composite keys, we update TTL for all "{key}:%" entries
-        const [expKey, expSeconds] = cmd.args as [string, number];
+        const expKey = String(cmd.args[0]);
+        const expSeconds = Number(cmd.args[1]);
         await CacheDbRepository.updateExpiryByPrefix(expKey, expSeconds);
         return 1;
       }
