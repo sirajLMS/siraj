@@ -22,7 +22,7 @@ import {
   IanaTimezone,
   InvoiceStatus,
   InvoiceType,
-  type OverrideState,
+  OverrideState,
   ParentStatus,
   PaymentDirection,
   PaymentMethodType,
@@ -58,9 +58,10 @@ function parseEnumValue<T extends string>(
     return fallback;
   }
 
-  const enumValues = Object.values(enumObject) as readonly T[];
-  if (enumValues.includes(value as T)) {
-    return value as T;
+  const enumValues = Object.values(enumObject);
+  const match = enumValues.find(v => v === value);
+  if (match !== undefined) {
+    return match;
   }
 
   return fallback;
@@ -210,8 +211,11 @@ export const parseIanaTimezoneOrNull = (value: string | null | undefined): IanaT
  * Parses a string value into an OverrideState enum, returning null if invalid.
  */
 export const parseOverrideState = (value: string | null | undefined): OverrideState | null => {
-  if (value === "GRANTED" || value === "DENIED") {
-    return value as OverrideState;
+  if (value === OverrideState.GRANTED) {
+    return OverrideState.GRANTED;
+  }
+  if (value === OverrideState.DENIED) {
+    return OverrideState.DENIED;
   }
   return null;
 };
@@ -233,21 +237,19 @@ export const parseGroupClassAttendanceStatus = (
   value: string | null | undefined,
   fallback: GroupClassAttendanceStatus = GroupClassAttendanceStatus.PENDING
 ): GroupClassAttendanceStatus => {
-  const validValues = Object.values(GroupClassAttendanceStatus) as GroupClassAttendanceStatus[];
+  const validValues = Object.values(GroupClassAttendanceStatus);
   if (value === null || value === undefined) {
     return fallback;
   }
-  if (validValues.includes(value as GroupClassAttendanceStatus)) {
-    return value as GroupClassAttendanceStatus;
-  }
-  return fallback;
+  const match = validValues.find(v => (v as string) === value);
+  return match ?? fallback;
 };
 
 /**
  * Type guard for AppLocale.
  */
 export function isAppLocale(value: string): value is AppLocale {
-  return locales.includes(value as AppLocale);
+  return (locales as readonly string[]).includes(value);
 }
 
 /**
