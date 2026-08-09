@@ -35,6 +35,38 @@ const TOKEN_REFRESH_MARGIN_MS = 120_000;
 
 const MS_TEAMS_REQUIRED_SCOPES = ["OnlineMeetings.ReadWrite.All"] as const;
 
+const MS_GRAPH_SCOPE_PREFIX = "https://graph.microsoft.com/";
+
+function normalizeScope(scope: string): string {
+  return scope.startsWith(MS_GRAPH_SCOPE_PREFIX) ? scope.slice(MS_GRAPH_SCOPE_PREFIX.length) : scope;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isMicrosoftTeamsTokenResponse(value: unknown): value is MicrosoftTeamsTokenResponse {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.token_type === "string" &&
+    typeof value.expires_in === "number" &&
+    typeof value.access_token === "string" &&
+    (value.scope === undefined || typeof value.scope === "string")
+  );
+}
+
+function isMicrosoftTeamsMeetingResponse(value: unknown): value is MicrosoftTeamsMeetingResponse {
+  if (!isRecord(value)) return false;
+  return typeof value.id === "string" && typeof value.joinWebUrl === "string";
+}
+
+function isMicrosoftTeamsErrorResponse(value: unknown): value is MicrosoftTeamsErrorResponse {
+  if (!isRecord(value)) return false;
+  if (value.error === undefined) return true;
+  if (!isRecord(value.error)) return false;
+  return typeof value.error.code === "string" && typeof value.error.message === "string";
+}
+
 interface CachedToken {
   accessToken: string;
   expiresAt: number;
@@ -106,22 +138,27 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
       throw new NoOrgCredentialsNoUserTokenError("microsoft_teams");
     }
 
-    let lastError: unknown = null;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      if (attempt > 0) {
-        await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
-      }
-      try {
-        return await this.createOnlineMeeting(accessToken, organizerUserId, input);
-      } catch (error) {
-        lastError = error;
-        if (error instanceof ProviderUnavailableError) {
-          continue;
-        }
-        throw error;
-      }
+    return this.createMeetingWithRetry(accessToken, organizerUserId, input, 0, 2);
+  }
+
+  private async createMeetingWithRetry(
+    accessToken: string,
+    organizerUserId: string,
+    input: GenerateMeetingInput,
+    attempt: number,
+    maxAttempts: number
+  ): Promise<GenerateMeetingResult> {
+    if (attempt > 0) {
+      await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
     }
-    throw lastError;
+    try {
+      return await this.createOnlineMeeting(accessToken, organizerUserId, input);
+    } catch (error) {
+      if (error instanceof ProviderUnavailableError && attempt + 1 < maxAttempts) {
+        return this.createMeetingWithRetry(accessToken, organizerUserId, input, attempt + 1, maxAttempts);
+      }
+      throw error;
+    }
   }
 
   async deleteMeeting(meetingId: string): Promise<void> {
@@ -226,12 +263,18 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
       );
     }
 
-    const tokenData = (await response.json()) as MicrosoftTeamsTokenResponse;
+    const rawToken: unknown = await response.json();
+    if (!isMicrosoftTeamsTokenResponse(rawToken)) {
+      throw new MicrosoftTeamsApiError(
+        `Microsoft token response was malformed (${response.status})`,
+        undefined,
+        response.status
+      );
+    }
+    const tokenData = rawToken;
 
     if (tokenData.scope) {
       const grantedScopes = tokenData.scope.split(" ");
-      const normalizeScope = (scope: string): string =>
-        scope.startsWith("https://graph.microsoft.com/") ? scope.slice("https://graph.microsoft.com/".length) : scope;
       const normalizedGranted = new Set(grantedScopes.map(normalizeScope));
       const normalizedRequired = MS_TEAMS_REQUIRED_SCOPES.map(normalizeScope);
       const missingScopes = normalizedRequired.filter(scope => !normalizedGranted.has(scope));
@@ -389,13 +432,25 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
     const url = this.buildMeetingUrl(organizerUserId);
     const response = await this.postMeetingRequest(url, accessToken, meetingBody);
     await this.assertMeetingResponseOk(response);
-    const meeting = (await response.json()) as MicrosoftTeamsMeetingResponse;
+    const rawMeeting: unknown = await response.json();
+    if (!isMicrosoftTeamsMeetingResponse(rawMeeting)) {
+      throw new MicrosoftTeamsApiError(
+        `Teams meeting response was malformed (${response.status})`,
+        undefined,
+        response.status
+      );
+    }
+    const meeting = rawMeeting;
     return this.mapMeetingResponse(meeting);
   }
 
   private async parseErrorBody(response: Response): Promise<MicrosoftTeamsErrorResponse | null> {
     try {
-      return (await response.json()) as MicrosoftTeamsErrorResponse;
+      const data: unknown = await response.json();
+      if (!isMicrosoftTeamsErrorResponse(data)) {
+        return null;
+      }
+      return data;
     } catch {
       return null;
     }
