@@ -3,14 +3,14 @@ import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-inst
 export function isJoinableByExecutionState(executionState?: string | null, outcome?: string | null): boolean {
   if (executionState) {
     const normalized = executionState.toUpperCase();
-    if (normalized === String(ClassExecutionState.COMPLETED)) {
+    if (normalized === ClassExecutionState.COMPLETED) {
       return false;
     }
   }
 
   if (outcome) {
     const normalizedOutcome = outcome.toUpperCase();
-    if (normalizedOutcome === String(ClassOutcome.ABSENT) || normalizedOutcome === String(ClassOutcome.LEAVE)) {
+    if (normalizedOutcome === ClassOutcome.ABSENT || normalizedOutcome === ClassOutcome.LEAVE) {
       return false;
     }
   }

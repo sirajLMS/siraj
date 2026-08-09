@@ -203,7 +203,7 @@ async function tryGenerateSlotDay(
   });
 
   const newRemaining =
-    String(executionState) === String(ClassExecutionState.NOT_ACTIVATED) ? remainingBalance - 1 : remainingBalance;
+    executionState === ClassExecutionState.NOT_ACTIVATED ? remainingBalance - 1 : remainingBalance;
   return { generated: true, remaining: newRemaining };
 }
 
@@ -280,7 +280,7 @@ async function generatePendingInstancesForRange(
 
   while (currentDate <= scheduleEndDate) {
     const scheduleDOW = resolveScheduleDOW(currentDate, schedule.timezone);
-    const matchingDay = scheduleDOW ? scheduleDays.find(d => String(d.dayOfWeek) === String(scheduleDOW)) : undefined;
+    const matchingDay = scheduleDOW ? scheduleDays.find(d => d.dayOfWeek === scheduleDOW) : undefined;
 
     if (matchingDay) {
       const result = await tryGenerateSlotDay(

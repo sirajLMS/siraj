@@ -130,10 +130,10 @@ export async function seedOrGet(
     return [];
   }
 
-  const leaveInstances = classInstancesList.filter(ci => ci.outcome === String(ClassOutcome.LEAVE));
+  const leaveInstances = classInstancesList.filter(ci => ci.outcome === ClassOutcome.LEAVE);
   const pendingFutureInstances = classInstancesList.filter(
     ci =>
-      ci.outcome === String(ClassOutcome.PENDING) &&
+      ci.outcome === ClassOutcome.PENDING &&
       startOfDay(ci.scheduledStartAt).getTime() > startOfDay(seedConfig.anchorDate).getTime()
   );
   const teacherUserMap = new Map(teachersList.map(t => [t.id, t.userId]));

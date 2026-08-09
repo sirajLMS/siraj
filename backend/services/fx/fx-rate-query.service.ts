@@ -24,7 +24,7 @@ function computeFxSyncIsStale(
   }
 
   const status = (syncRun.status ?? "").toLowerCase();
-  if (status === String(FxSyncStatus.Failed) || status === String(FxSyncStatus.Partial)) {
+  if (status === FxSyncStatus.Failed || status === FxSyncStatus.Partial) {
     return true;
   }
 

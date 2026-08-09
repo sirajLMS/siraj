@@ -112,7 +112,7 @@ export function LanguageSwitcher() {
       >
         <Stack>
           {languages.map((language, index, array) => {
-            const isSelected = String(currentLocale) === String(language.code);
+            const isSelected = currentLocale === language.code;
 
             const isLastItem = index === array.length - 1;
 

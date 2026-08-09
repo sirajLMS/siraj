@@ -330,8 +330,8 @@ export namespace ComplaintRepository {
       .where(finalWhereClause)
       .groupBy(complaints.status);
 
-    const unanswered = statusCounts.find(r => r.status === String(ComplaintStatus.UNANSWERED))?.count ?? 0;
-    const answered = statusCounts.find(r => r.status === String(ComplaintStatus.ANSWERED))?.count ?? 0;
+    const unanswered = statusCounts.find(r => r.status === ComplaintStatus.UNANSWERED)?.count ?? 0;
+    const answered = statusCounts.find(r => r.status === ComplaintStatus.ANSWERED)?.count ?? 0;
     const totalCount = statusCounts.reduce((sum, r) => sum + r.count, 0);
 
     const [avgResult] = await q

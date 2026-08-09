@@ -64,8 +64,8 @@ export function isClassInstancePastMissedGrace(
   const normalizedExecutionState = row.executionState ?? ClassExecutionState.NOT_ACTIVATED;
 
   if (
-    normalizedExecutionState !== String(ClassExecutionState.NOT_ACTIVATED) ||
-    normalizedOutcome !== String(ClassOutcome.PENDING)
+    normalizedExecutionState !== ClassExecutionState.NOT_ACTIVATED ||
+    normalizedOutcome !== ClassOutcome.PENDING
   ) {
     return false;
   }
@@ -93,15 +93,15 @@ export function resolveClassInstanceDashboardStatus(
   const normalizedExecutionState = (executionState ??
     ClassExecutionState.NOT_ACTIVATED) as ClassInstanceDashboardStatus;
 
-  if (normalizedExecutionState === String(ClassExecutionState.RUNNING)) {
+  if (normalizedExecutionState === ClassExecutionState.RUNNING) {
     return ClassExecutionState.RUNNING;
   }
 
-  if (normalizedExecutionState === String(ClassExecutionState.COMPLETED)) {
+  if (normalizedExecutionState === ClassExecutionState.COMPLETED) {
     return normalizedOutcome;
   }
 
-  if (normalizedExecutionState === String(ClassExecutionState.ACTIVATED)) {
+  if (normalizedExecutionState === ClassExecutionState.ACTIVATED) {
     const startAt = toDate(actualStartAt);
     const endAt = toDate(actualEndAt);
     if (startAt && !endAt) {
@@ -138,17 +138,17 @@ function dashboardStatusMatchesMetric(
 ): boolean {
   switch (metricFilter) {
     case "taken":
-      return dashboardStatus === String(ClassOutcome.TAKEN);
+      return dashboardStatus === ClassOutcome.TAKEN;
     case "pending":
-      return dashboardStatus === String(ClassOutcome.PENDING);
+      return dashboardStatus === ClassOutcome.PENDING;
     case "absent":
-      return dashboardStatus === String(ClassOutcome.ABSENT);
+      return dashboardStatus === ClassOutcome.ABSENT;
     case "leave":
-      return dashboardStatus === String(ClassOutcome.LEAVE);
+      return dashboardStatus === ClassOutcome.LEAVE;
     case "activated":
-      return dashboardStatus === String(ClassExecutionState.ACTIVATED);
+      return dashboardStatus === ClassExecutionState.ACTIVATED;
     case "running":
-      return dashboardStatus === String(ClassExecutionState.RUNNING);
+      return dashboardStatus === ClassExecutionState.RUNNING;
     default:
       return false;
   }

@@ -103,7 +103,7 @@ export async function seedOrGet(
   }
 
   const completedInstances = classInstancesList.filter(
-    instance => instance.executionState === String(ClassExecutionState.COMPLETED)
+    instance => instance.executionState === ClassExecutionState.COMPLETED
   );
   if (completedInstances.length === 0) {
     logger.warn("No COMPLETED class instances available — skipping lesson reports seed.");

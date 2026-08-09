@@ -17,10 +17,10 @@ export function resolvePaymentDirectionLabel(
   if (!dir) {
     return labels.notSet;
   }
-  if (dir === String(PaymentDirection.Payin)) {
+  if (dir === PaymentDirection.Payin) {
     return labels.directions.payin;
   }
-  if (dir === String(PaymentDirection.Payout)) {
+  if (dir === PaymentDirection.Payout) {
     return labels.directions.payout;
   }
   return labels.directions.both;

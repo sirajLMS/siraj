@@ -27,7 +27,7 @@ export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserS
 
   for (let i = 0; i < complaintsList.length; i++) {
     const complaint = complaintsList[i];
-    if (complaint.status !== String(ComplaintStatus.ANSWERED)) continue;
+    if (complaint.status !== ComplaintStatus.ANSWERED) continue;
 
     const faker = getFakerForIndex(seedConfig.fakerSeed, 12000 + i);
     const inserted = await ComplaintService.ensureComplaintResponse({

@@ -92,7 +92,7 @@ export async function DashboardProfileShell({
     emailVerifiedAt: userProfile.emailVerifiedAt?.toISOString() ?? null,
     displayCurrency: userProfile.displayCurrency as CurrencyCode | null,
     phone: userProfile.phone ?? null,
-    status: String(userProfile.status) === "DEACTIVATED" ? AccountStatus.Deactivated : AccountStatus.Activated,
+    status: userProfile.status === "DEACTIVATED" ? AccountStatus.Deactivated : AccountStatus.Activated,
   };
 
   return (

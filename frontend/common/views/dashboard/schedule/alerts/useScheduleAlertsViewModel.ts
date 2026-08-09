@@ -40,12 +40,12 @@ function mapRowToSessionStatus(
   });
 
   if (
-    displayStatus === String(ClassExecutionState.Running) ||
-    displayStatus === String(ClassExecutionState.Activated)
+    displayStatus === ClassExecutionState.Running ||
+    displayStatus === ClassExecutionState.Activated
   ) {
     return "active";
   }
-  if (displayStatus === String(ClassOutcome.Absent) || displayStatus === String(ClassOutcome.Leave)) {
+  if (displayStatus === ClassOutcome.Absent || displayStatus === ClassOutcome.Leave) {
     return "missed";
   }
   return "upcoming";

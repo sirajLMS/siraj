@@ -83,12 +83,12 @@ const defaultValues = (): CatalogFormValues => ({
 
 function resolveCountry(code: string | null | undefined): CountryType | undefined {
   if (!code) return undefined;
-  return countries.find(country => String(country.code) === String(code));
+  return countries.find(country => country.code === code);
 }
 
 function resolveCurrency(code: string | null | undefined): CurrencyOption | null {
   if (!code) return null;
-  return getCurrencyOptions().find(option => String(option.code) === String(code)) ?? null;
+  return getCurrencyOptions().find(option => option.code === code) ?? null;
 }
 
 export function CatalogEditDialog({ labels, open, kind, row, onClose, onSaved }: Readonly<CatalogEditDialogProps>) {

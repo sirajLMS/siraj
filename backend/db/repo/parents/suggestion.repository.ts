@@ -363,13 +363,13 @@ export namespace SuggestionRepository {
       .groupBy(suggestions.status);
 
     const pending =
-      statusCounts.find((r: { status: string; count: number }) => r.status === String(SuggestionStatus.PENDING))
+      statusCounts.find((r: { status: string; count: number }) => r.status === SuggestionStatus.PENDING)
         ?.count ?? 0;
     const reviewed =
-      statusCounts.find((r: { status: string; count: number }) => r.status === String(SuggestionStatus.REVIEWED))
+      statusCounts.find((r: { status: string; count: number }) => r.status === SuggestionStatus.REVIEWED)
         ?.count ?? 0;
     const duplicate =
-      statusCounts.find((r: { status: string; count: number }) => r.status === String(SuggestionStatus.DUPLICATE))
+      statusCounts.find((r: { status: string; count: number }) => r.status === SuggestionStatus.DUPLICATE)
         ?.count ?? 0;
 
     const [avgResult] = await q

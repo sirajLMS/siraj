@@ -5,7 +5,7 @@ export function formatQuotaStatus(
   status: QuotaStatus | string,
   t: QuotaLabels
 ): { label: string; color: "success" | "warning" | "default" | "error" } {
-  switch (String(status)) {
+  switch (status) {
     case "ACTIVE":
       return { label: t.statuses.ACTIVE, color: "success" };
     case "EXPIRED":

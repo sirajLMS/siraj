@@ -72,7 +72,7 @@ function DirectionControllerField({ control, label, options }: DirectionControll
           onChange={event => {
             const value = event.target.value;
             for (const option of Object.values(PaymentDirection)) {
-              if (String(option) === String(value)) {
+              if (option === value) {
                 field.onChange(option);
                 return;
               }
@@ -160,7 +160,7 @@ function PaymentMethodFormFields({
         render={({ field }) => (
           <FormControlLabel
             control={<Checkbox checked={field.value} onChange={event => field.onChange(event.target.checked)} />}
-            label={String(slotDirection) === String(PaymentDirection.Payin) ? t.defaultPayin : t.defaultPayout}
+            label={slotDirection === PaymentDirection.Payin ? t.defaultPayin : t.defaultPayout}
           />
         )}
       />

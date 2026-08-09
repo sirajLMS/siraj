@@ -33,8 +33,8 @@ export async function seedOrGet(
 
   for (const instance of classInstancesList) {
     if (
-      instance.outcome === String(ClassOutcome.PENDING) &&
-      instance.executionState === String(ClassExecutionState.NOT_ACTIVATED)
+      instance.outcome === ClassOutcome.PENDING &&
+      instance.executionState === ClassExecutionState.NOT_ACTIVATED
     ) {
       continue;
     }

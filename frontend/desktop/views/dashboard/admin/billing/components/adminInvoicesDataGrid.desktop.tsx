@@ -117,7 +117,7 @@ function RenderInvoiceAction(
   const { row, labels, canManage, canDelete, billingActionsDisabled } = config;
   const deleteButton = RenderDeleteInvoiceButton(row, labels, canDelete, billingActionsDisabled, onDeleteInvoice);
 
-  if (row.status === String(InvoiceStatus.Paid)) {
+  if (row.status === InvoiceStatus.Paid) {
     const primary = onViewPaymentDetails ? (
       <Tooltip title={labels.viewDetails}>
         <IconButton
@@ -137,7 +137,7 @@ function RenderInvoiceAction(
     return WrapInvoiceActions(primary, deleteButton);
   }
 
-  if (row.status === String(InvoiceStatus.PaymentPending) && canManage && !billingActionsDisabled) {
+  if (row.status === InvoiceStatus.PaymentPending && canManage && !billingActionsDisabled) {
     return WrapInvoiceActions(
       <Button
         variant="text"

@@ -334,7 +334,7 @@ export namespace SuggestionService {
       throw new Error(tErrors.suggestionNotFound);
     }
 
-    if (targetSuggestion.status === String(SuggestionStatus.DUPLICATE)) {
+    if (targetSuggestion.status === SuggestionStatus.DUPLICATE) {
       throw new Error(tErrors.suggestionTargetIsAlreadyDuplicate);
     }
 

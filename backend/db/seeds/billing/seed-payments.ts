@@ -49,7 +49,7 @@ function buildPaymentSnapshot(
 }
 
 function buildPaymentSpecs(invoicesList: InvoiceSelectType[], now: Date, snapshottedAt: string): PaymentSeedSpec[] {
-  const paidInvoices = invoicesList.filter(inv => inv.status === String(InvoiceStatus.PAID));
+  const paidInvoices = invoicesList.filter(inv => inv.status === InvoiceStatus.PAID);
 
   return paidInvoices.map((invoice, index) => {
     const { paymentMethodType, paymentMethodSnapshot } = buildPaymentSnapshot(index, snapshottedAt);

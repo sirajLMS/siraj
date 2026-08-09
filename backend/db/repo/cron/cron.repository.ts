@@ -217,7 +217,7 @@ export namespace CronRepository {
       if (!schedule) return null;
 
       // For SKIP policy, check no in-flight run exists
-      if (schedule.concurrencyPolicy === String(CronConcurrencyPolicy.SKIP)) {
+      if (schedule.concurrencyPolicy === CronConcurrencyPolicy.SKIP) {
         const inFlight = await t
           .select({ id: cronRuns.id })
           .from(cronRuns)
@@ -227,7 +227,7 @@ export namespace CronRepository {
       }
 
       // For REPLACE policy, cancel in-flight runs
-      if (schedule.concurrencyPolicy === String(CronConcurrencyPolicy.REPLACE)) {
+      if (schedule.concurrencyPolicy === CronConcurrencyPolicy.REPLACE) {
         await t
           .update(cronRuns)
           .set({

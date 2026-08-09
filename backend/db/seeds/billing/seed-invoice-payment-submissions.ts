@@ -28,7 +28,7 @@ export async function seedOrGet(
   const candidates = invoicesList
     .filter(
       invoice =>
-        invoice.status === String(InvoiceStatus.UNPAID) || invoice.status === String(InvoiceStatus.PAYMENT_PENDING)
+        invoice.status === InvoiceStatus.UNPAID || invoice.status === InvoiceStatus.PAYMENT_PENDING
     )
     .slice(0, seedConfig.profile === "standard" ? 3 : 1);
 

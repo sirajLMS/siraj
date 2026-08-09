@@ -40,7 +40,7 @@ function MobileLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<MobileLo
   return (
     <Stack component="ul" aria-label={ariaLabel ?? t.selectLocale}>
       {languages.map((language, index, array) => {
-        const isSelected = String(language.code) === String(activeLocale);
+        const isSelected = language.code === activeLocale;
         const isLastItem = index === array.length - 1;
         return (
           <MobileLanguageOption
