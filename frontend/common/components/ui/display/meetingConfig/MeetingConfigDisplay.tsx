@@ -28,9 +28,9 @@ function resolveSourceLabel(
   t: MeetingConfigDisplayLabels
 ): string {
   const normalized = (source ?? "").toLowerCase();
-  if (normalized === EffectiveMeetingSource.Class) return t.sourceClass;
-  if (normalized === EffectiveMeetingSource.Recurring) return t.sourceRecurring;
-  if (normalized === EffectiveMeetingSource.Teacher) return t.sourceTeacher;
+  if (normalized === String(EffectiveMeetingSource.Class)) return t.sourceClass;
+  if (normalized === String(EffectiveMeetingSource.Recurring)) return t.sourceRecurring;
+  if (normalized === String(EffectiveMeetingSource.Teacher)) return t.sourceTeacher;
   return t.sourceNone;
 }
 

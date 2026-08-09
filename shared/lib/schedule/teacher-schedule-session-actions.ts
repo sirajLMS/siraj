@@ -41,15 +41,15 @@ export function resolveTeacherScheduleSessionActions(
     return { ...none, joinVideo };
   }
 
-  if (executionState === ClassExecutionState.COMPLETED) {
+  if (executionState === String(ClassExecutionState.COMPLETED)) {
     return { ...none, joinVideo };
   }
 
-  if (executionState === ClassExecutionState.NOT_ACTIVATED && outcome !== ClassOutcome.PENDING) {
+  if (executionState === String(ClassExecutionState.NOT_ACTIVATED) && outcome !== String(ClassOutcome.PENDING)) {
     return none;
   }
 
-  if (executionState === ClassExecutionState.NOT_ACTIVATED) {
+  if (executionState === String(ClassExecutionState.NOT_ACTIVATED)) {
     return {
       ...none,
       activate: input.canActivate && !input.isConnecting,
@@ -57,7 +57,7 @@ export function resolveTeacherScheduleSessionActions(
     };
   }
 
-  if (executionState === ClassExecutionState.ACTIVATED) {
+  if (executionState === String(ClassExecutionState.ACTIVATED)) {
     return {
       activate: false,
       start: true,
@@ -67,7 +67,7 @@ export function resolveTeacherScheduleSessionActions(
     };
   }
 
-  if (executionState === ClassExecutionState.RUNNING) {
+  if (executionState === String(ClassExecutionState.RUNNING)) {
     return {
       activate: false,
       start: false,

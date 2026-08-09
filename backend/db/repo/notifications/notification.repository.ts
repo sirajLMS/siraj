@@ -726,9 +726,9 @@ export namespace NotificationRepository {
     }));
 
     const openedCount =
-      normalizedStatusCounts.find(row => row.status === NotificationDeliveryStatus.OPENED)?.count ?? 0;
+      normalizedStatusCounts.find(row => row.status === String(NotificationDeliveryStatus.OPENED))?.count ?? 0;
     const failedCount =
-      normalizedStatusCounts.find(row => row.status === NotificationDeliveryStatus.FAILED)?.count ?? 0;
+      normalizedStatusCounts.find(row => row.status === String(NotificationDeliveryStatus.FAILED))?.count ?? 0;
 
     return {
       totalDeliveries,

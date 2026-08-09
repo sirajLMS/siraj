@@ -223,10 +223,10 @@ describe("QuotaRepository", () => {
 
       // Ledger should contain: initial GRANT (from create) + EXPIRE (unused) + GRANT (new period).
       const entries = await QuotaLedgerRepository.findByQuotaId(tx, created.id);
-      const expireRows = entries.filter(e => e.reason === QuotaLedgerReason.EXPIRE);
+      const expireRows = entries.filter(e => e.reason === String(QuotaLedgerReason.EXPIRE));
       expect(expireRows).toHaveLength(1);
       expect(expireRows[0].delta).toBe(-8);
-      const grantRows = entries.filter(e => e.reason === QuotaLedgerReason.GRANT);
+      const grantRows = entries.filter(e => e.reason === String(QuotaLedgerReason.GRANT));
       expect(grantRows).toHaveLength(2);
       expect(grantRows.some(e => e.delta === 8)).toBe(true);
     });
@@ -258,7 +258,7 @@ describe("QuotaRepository", () => {
 
       // An ADJUST (delta=0) ledger row should be inserted for audit-trail completeness
       const entries = await QuotaLedgerRepository.findByQuotaId(tx, created.id);
-      const adjustRows = entries.filter(e => e.reason === QuotaLedgerReason.ADJUST && e.delta === 0);
+      const adjustRows = entries.filter(e => e.reason === String(QuotaLedgerReason.ADJUST) && e.delta === 0);
       expect(adjustRows).toHaveLength(1);
       expect(adjustRows[0].reasonNote).toContain("2026-08-01");
     });

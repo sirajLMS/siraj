@@ -13,7 +13,7 @@ export async function seedOrGet(classInstancesList: ClassInstanceSelectType[], c
     return [];
   }
 
-  const takenInstances = classInstancesList.filter(ci => ci.outcome === ClassOutcome.TAKEN);
+  const takenInstances = classInstancesList.filter(ci => ci.outcome === String(ClassOutcome.TAKEN));
   const sampleRate = seedConfig.profile === "standard" ? 10 : 50;
   const inputs = [];
 

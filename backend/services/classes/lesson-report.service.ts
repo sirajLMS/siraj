@@ -211,7 +211,7 @@ export namespace LessonReportService {
     if (!instance) {
       throw new Error(tErrors.scheduling.classInstanceNotFound({ id: input.classInstanceId }));
     }
-    if (instance.executionState !== ClassExecutionState.COMPLETED) {
+    if (instance.executionState !== String(ClassExecutionState.COMPLETED)) {
       throw new Error("lessonReport.notEligibleForReview");
     }
 
@@ -373,7 +373,7 @@ export namespace LessonReportService {
     if (!report) {
       throw new Error("lessonReport.notFound");
     }
-    if (report.status !== LessonReportStatus.PENDING_REVIEW) {
+    if (report.status !== String(LessonReportStatus.PENDING_REVIEW)) {
       throw new Error("lessonReport.alreadyReviewed");
     }
 

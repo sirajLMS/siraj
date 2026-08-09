@@ -177,7 +177,7 @@ describe("NotificationRepository — createDeliveriesBatch", () => {
 
     expect(deliveries).toHaveLength(3);
     expect(deliveries.every(d => d.userId === user.id)).toBeTrue();
-    expect(deliveries.every(d => d.status === NotificationDeliveryStatus.PENDING)).toBeTrue();
+    expect(deliveries.every(d => d.status === String(NotificationDeliveryStatus.PENDING))).toBeTrue();
     expect(deliveries[0].channel).toBe(NotificationChannel.EMAIL);
     expect(deliveries[1].channel).toBe(NotificationChannel.PUSH);
     expect(deliveries[2].channel).toBe(NotificationChannel.ON_APP);
@@ -339,7 +339,7 @@ describe("NotificationRepository — getDeliveriesByUser", () => {
       tx
     );
 
-    expect(result.rows.every(r => r.channel === NotificationChannel.EMAIL)).toBeTrue();
+    expect(result.rows.every(r => r.channel === String(NotificationChannel.EMAIL))).toBeTrue();
     expect(result.rows.some(r => r.title === "Email delivery filter")).toBeTrue();
     expect(result.rows.some(r => r.title === "Push delivery filter")).toBeFalse();
   });
@@ -376,7 +376,7 @@ describe("NotificationRepository — getDeliveriesByUser", () => {
       tx
     );
 
-    expect(result.rows.every(r => r.eventType === NotificationEventType.COMPLAINT_RESPONSE)).toBeTrue();
+    expect(result.rows.every(r => r.eventType === String(NotificationEventType.COMPLAINT_RESPONSE))).toBeTrue();
     expect(result.rows.some(r => r.title === "Invoice event")).toBeFalse();
   });
 

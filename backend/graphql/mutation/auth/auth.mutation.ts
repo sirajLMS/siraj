@@ -234,7 +234,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         });
       }
 
-      if (user.status === AccountStatus.DEACTIVATED) {
+      if (user.status === String(AccountStatus.DEACTIVATED)) {
         throw new GraphQLError(tErrors.auth.accountDeactivated, {
           // ← compile-time ✅
           extensions: { code: "ACCOUNT_DEACTIVATED" },

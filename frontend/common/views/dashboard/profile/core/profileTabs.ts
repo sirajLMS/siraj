@@ -48,7 +48,7 @@ function isPermissionsTabVisible(
   hasPermission: (permission: AppPermission) => boolean
 ): boolean {
   const staffPermissions =
-    audience === "STAFF" && scope === ProfileScope.Other
+    String(audience) === "STAFF" && String(scope) === String(ProfileScope.Other)
       ? hasPermission(AppPermission.ProfileStaffPermissionsViewOther)
       : false;
   const canEditOther = hasPermission(AppPermission.ProfileStaffPermissionsEditOther);
@@ -64,7 +64,7 @@ function isPaymentMethodsTabVisible(
   hasPermission: (permission: AppPermission) => boolean
 ): boolean {
   const viewPermission =
-    scope === ProfileScope.Own
+    String(scope) === String(ProfileScope.Own)
       ? AppPermission.ProfilePaymentMethodsViewOwn
       : AppPermission.ProfilePaymentMethodsViewOther;
   return hasPermission(viewPermission);
@@ -72,11 +72,13 @@ function isPaymentMethodsTabVisible(
 
 function isMeetingTabVisible(scope: ProfileScope, hasPermission: (permission: AppPermission) => boolean): boolean {
   const viewPermission =
-    scope === ProfileScope.Own
+    String(scope) === String(ProfileScope.Own)
       ? AppPermission.ProfileMeetingConfigsViewOwn
       : AppPermission.ProfileMeetingConfigsViewOther;
   const managePermission =
-    scope === ProfileScope.Own ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
+    String(scope) === String(ProfileScope.Own)
+      ? AppPermission.MeetingConfigsManageOwn
+      : AppPermission.MeetingConfigsManageOther;
   return hasPermission(viewPermission) || hasPermission(managePermission);
 }
 

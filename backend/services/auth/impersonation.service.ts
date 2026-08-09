@@ -113,7 +113,7 @@ export namespace ImpersonationService {
       throw new Error(tErrors.auth.impersonationTargetInactive);
     }
 
-    if (targetUser.status === AccountStatus.DEACTIVATED) {
+    if (targetUser.status === String(AccountStatus.DEACTIVATED)) {
       throw new Error(tErrors.auth.impersonationTargetInactive);
     }
 

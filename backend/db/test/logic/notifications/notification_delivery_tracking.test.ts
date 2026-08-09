@@ -189,8 +189,8 @@ describe("Notification Delivery Tracking", () => {
       expect(analytics.totalDeliveries).toBe(2);
       expect(analytics.openRate).toBe(0.5);
       expect(analytics.failureRate).toBe(0.5);
-      expect(analytics.statusCounts.some(row => row.status === NotificationDeliveryStatus.OPENED)).toBe(true);
-      expect(analytics.statusCounts.some(row => row.status === NotificationDeliveryStatus.FAILED)).toBe(true);
+      expect(analytics.statusCounts.some(row => row.status === String(NotificationDeliveryStatus.OPENED))).toBe(true);
+      expect(analytics.statusCounts.some(row => row.status === String(NotificationDeliveryStatus.FAILED))).toBe(true);
     });
     testLogger.info("Analytics test passed.");
   });

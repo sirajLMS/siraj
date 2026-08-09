@@ -31,7 +31,7 @@ const METRIC_DEFINITIONS = [
 
 export function mapStudentAccountStatus(status: string | null | undefined): StudentAccountStatus {
   if (!status) return "regular";
-  const enumValue = Object.values(StudentStatus).find(v => v === status.toUpperCase());
+  const enumValue = Object.values(StudentStatus).find(v => String(v) === String(status.toUpperCase()));
   if (enumValue) {
     return STUDENT_STATUS_TO_ACCOUNT_STATUS[enumValue] ?? "regular";
   }
@@ -41,8 +41,8 @@ export function mapStudentAccountStatus(status: string | null | undefined): Stud
 function getEnrollmentStatus(status: string | null | undefined): StudentEnrollmentStatus {
   if (!status) return EnrollmentEnum.REGULAR;
   const s = status.toUpperCase();
-  if (s === StudentStatus.Deactivated) return EnrollmentEnum.WITHDRAWN;
-  if (s === StudentStatus.OnTrial) return EnrollmentEnum.PROSPECT;
+  if (s === String(StudentStatus.Deactivated)) return EnrollmentEnum.WITHDRAWN;
+  if (s === String(StudentStatus.OnTrial)) return EnrollmentEnum.PROSPECT;
   return EnrollmentEnum.REGULAR;
 }
 

@@ -167,7 +167,7 @@ export namespace UserOnboardingService {
       // Step 8: Permission group lookup + assignment.
       const slug = typeof opts.groupSlug === "function" ? opts.groupSlug(extension) : opts.groupSlug;
       const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
-      const targetGroup = groups.find(g => g.slug === slug);
+      const targetGroup = groups.find(g => String(g.slug) === String(slug));
       if (!targetGroup) {
         throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
       }

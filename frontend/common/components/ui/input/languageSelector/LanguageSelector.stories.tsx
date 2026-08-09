@@ -13,7 +13,7 @@ function LanguageSelectorStory({
   ...props
 }: Readonly<Partial<LanguageSelectorProps> & { initialLanguageCode?: string }>) {
   const [language, setLanguage] = useState<LanguageType | undefined>(() =>
-    initialLanguageCode ? languages.find(entry => entry.code === initialLanguageCode) : undefined
+    initialLanguageCode ? languages.find(entry => String(entry.code) === String(initialLanguageCode)) : undefined
   );
 
   return (

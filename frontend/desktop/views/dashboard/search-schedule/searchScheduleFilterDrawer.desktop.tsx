@@ -86,7 +86,7 @@ function FilterFields({ labels, draft, onDraftChange }: Readonly<FilterFieldsPro
           let gender: Gender | null = null;
           if (value) {
             for (const option of Object.values(Gender)) {
-              if (option === value) {
+              if (String(option) === String(value)) {
                 gender = option;
                 break;
               }

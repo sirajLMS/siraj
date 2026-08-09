@@ -16,9 +16,9 @@ export type ClassMeetingContextBannerProps = {
 
 function resolveSourceKey(source: EffectiveMeetingSource | string | null | undefined): string {
   const normalized = (source ?? "").toLowerCase();
-  if (normalized === EffectiveMeetingSource.Class) return "sourceClass";
-  if (normalized === EffectiveMeetingSource.Recurring) return "sourceRecurring";
-  if (normalized === EffectiveMeetingSource.Teacher) return "sourceTeacher";
+  if (normalized === String(EffectiveMeetingSource.Class)) return "sourceClass";
+  if (normalized === String(EffectiveMeetingSource.Recurring)) return "sourceRecurring";
+  if (normalized === String(EffectiveMeetingSource.Teacher)) return "sourceTeacher";
   return "sourceNone";
 }
 

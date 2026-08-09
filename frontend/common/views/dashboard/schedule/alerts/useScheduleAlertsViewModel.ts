@@ -39,10 +39,13 @@ function mapRowToSessionStatus(
     scheduledEndAt: scheduledEndAt ?? undefined,
   });
 
-  if (displayStatus === ClassExecutionState.Running || displayStatus === ClassExecutionState.Activated) {
+  if (
+    displayStatus === String(ClassExecutionState.Running) ||
+    displayStatus === String(ClassExecutionState.Activated)
+  ) {
     return "active";
   }
-  if (displayStatus === ClassOutcome.Absent || displayStatus === ClassOutcome.Leave) {
+  if (displayStatus === String(ClassOutcome.Absent) || displayStatus === String(ClassOutcome.Leave)) {
     return "missed";
   }
   return "upcoming";

@@ -103,7 +103,7 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
           {actionLabel}
         </Button>
       ) : null}
-      {row.status === InvoiceStatus.PaymentPending && actionsEnabled ? (
+      {row.status === String(InvoiceStatus.PaymentPending) && actionsEnabled ? (
         <Button
           fullWidth
           variant="outlined"
@@ -113,7 +113,7 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
           {labels.adminTable.reviewSubmission}
         </Button>
       ) : null}
-      {row.status === InvoiceStatus.Paid && onViewPaymentDetails ? (
+      {row.status === String(InvoiceStatus.Paid) && onViewPaymentDetails ? (
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
           <IconButton
             size="small"

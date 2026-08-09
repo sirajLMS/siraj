@@ -267,7 +267,7 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
 
     const unanswered = await ComplaintRepository.getComplaintQueue({ limit: 50, offset: 0, status: "UNANSWERED" }, tx);
 
-    expect(unanswered.complaints.every(r => r.status === "UNANSWERED")).toBeTrue();
+    expect(unanswered.complaints.every(r => String(r.status) === "UNANSWERED")).toBeTrue();
     expect(unanswered.complaints.some(r => r.body === "Answered one")).toBeFalse();
   });
 

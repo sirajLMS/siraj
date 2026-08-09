@@ -316,7 +316,7 @@ describe("SuggestionRepository — getAdminSuggestionQueue", () => {
 
     const result = await SuggestionRepository.getAdminSuggestionQueue({ limit: 50, offset: 0, status: "PENDING" }, tx);
 
-    expect(result.rows.every(r => r.status === SuggestionStatus.PENDING)).toBeTrue();
+    expect(result.rows.every(r => r.status === String(SuggestionStatus.PENDING))).toBeTrue();
     expect(result.rows.some(r => r.body === "Reviewed admin")).toBeFalse();
   });
 

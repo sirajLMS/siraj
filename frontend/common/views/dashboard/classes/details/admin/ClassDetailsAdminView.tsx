@@ -296,7 +296,7 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
 
   const executionState = instance.executionState ?? "";
   const performance = instance.performance;
-  const showLiveMetadata = executionState === "ACTIVATED" || executionState === "RUNNING";
+  const showLiveMetadata = String(executionState) === "ACTIVATED" || String(executionState) === "RUNNING";
   const { metrics, hasData } = buildLivePerformanceMetrics(instance);
   const heatmapData = coerceHeatmapData(performance?.heatmapData);
 
