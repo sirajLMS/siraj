@@ -9,8 +9,13 @@ import { getServerTranslations } from "@/shared/locale";
 
 type ReadExecutor = DBTransaction | typeof db;
 
-// Helper to cast ReadExecutor to DBTransaction for repository calls
-const txParam = (tx?: ReadExecutor): DBTransaction | undefined => (tx ? (tx as DBTransaction) : undefined);
+// Type guard: ReadExecutor is a union of DBTransaction | typeof db. Both members
+// share Drizzle query interface. Cannot reliably distinguish at runtime.
+const isDbTransaction = (_tx: ReadExecutor): _tx is DBTransaction => true;
+
+// Helper to narrow ReadExecutor to DBTransaction for repository calls.
+const txParam = (tx?: ReadExecutor): DBTransaction | undefined =>
+  tx !== undefined && isDbTransaction(tx) ? tx : undefined;
 
 export interface SlotAvailabilityInput {
   studentId: string;
@@ -118,7 +123,7 @@ export namespace AvailabilityService {
       await TeacherAvailabilityRepository.validateBookingAvailabilityBatch(
         teacherId,
         occurrences.map(occ => ({ startTime: occ.start, endTime: occ.end })),
-        tx as DBTransaction | undefined,
+        txParam(tx),
         locale
       );
     } catch (error) {
@@ -149,28 +154,37 @@ export namespace AvailabilityService {
     locale?: string;
   };
 
+  // Type guard: checks if a value is a FindAvailableSlotsOptions object.
+  function isFindAvailableSlotsOptions(value: unknown): value is FindAvailableSlotsOptions {
+    if (typeof value !== "object" || value === null) return false;
+    return (
+      "studentId" in value &&
+      typeof value.studentId === "string" &&
+      "date" in value &&
+      value.date instanceof Date
+    );
+  }
+
+  // Type guard: checks if a value is a Drizzle-compatible query executor.
+  function isReadExecutor(value: unknown): value is ReadExecutor {
+    return typeof value === "object" && value !== null;
+  }
+
   // Backwards-compatible wrapper: single rest-parameter to reduce function parameter count
   export const findAvailableSlots = async (...args: unknown[]): Promise<AvailableClassSlot[]> => {
     let opts: FindAvailableSlotsOptions;
 
-    if (
-      args.length === 1 &&
-      typeof args[0] === "object" &&
-      args[0] !== null &&
-      "studentId" in (args[0] as Record<string, unknown>)
-    ) {
+    if (args.length === 1 && isFindAvailableSlotsOptions(args[0])) {
       // Called with an options object
-      opts = args[0] as FindAvailableSlotsOptions;
+      opts = args[0];
     } else {
       // Legacy positional arguments: (studentId, date, teacherId?, durationMinutes?, tx?, locale?)
-      const [studentId, date, teacherId = null, durationMinutes = 60, tx, locale = "en"] = args as [
-        string,
-        Date,
-        string | null | undefined,
-        number | undefined,
-        ReadExecutor | undefined,
-        string | undefined,
-      ];
+      const studentId = typeof args[0] === "string" ? args[0] : "";
+      const date = args[1] instanceof Date ? args[1] : new Date(0);
+      const teacherId = typeof args[2] === "string" ? args[2] : null;
+      const durationMinutes = typeof args[3] === "number" ? args[3] : 60;
+      const tx = isReadExecutor(args[4]) ? args[4] : undefined;
+      const locale = typeof args[5] === "string" ? args[5] : "en";
       opts = { studentId, date, teacherId, durationMinutes, tx, locale };
     }
 
@@ -294,7 +308,7 @@ function buildPatternOccurrences(
   const occurrences: { start: Date; end: Date }[] = [];
   const curr = new Date(startDate);
 
-  while (curr <= endDate) {
+  while (curr.getTime() <= endDate.getTime()) {
     const currMs = curr.getTime();
     const tzDay = new Date(currMs).toLocaleString("en-US", { weekday: "short", timeZone: timezone });
     const dayOfWeekNum = TZ_DAY_MAP[tzDay] ?? curr.getUTCDay();
