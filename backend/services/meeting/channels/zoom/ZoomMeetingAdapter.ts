@@ -58,6 +58,30 @@ function isExpired(token: CachedToken | null): boolean {
   return Date.now() >= token.expiresAt - TOKEN_REFRESH_MARGIN_MS;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isZoomTokenResponse(value: unknown): value is ZoomTokenResponse {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.access_token === "string" &&
+    typeof value.token_type === "string" &&
+    typeof value.expires_in === "number" &&
+    typeof value.scope === "string"
+  );
+}
+
+function isZoomMeetingResponse(value: unknown): value is ZoomMeetingResponse {
+  if (!isRecord(value)) return false;
+  return typeof value.id === "number" && typeof value.topic === "string" && typeof value.join_url === "string";
+}
+
+function isZoomErrorResponse(value: unknown): value is ZoomErrorResponse {
+  if (!isRecord(value)) return false;
+  return typeof value.code === "number" && typeof value.message === "string";
+}
+
 const ZOOM_REQUIRED_SCOPES = ["meeting:write:meeting", "user:read:user"] as const;
 
 export class ZoomMeetingAdapter implements IMeetingChannel {
@@ -107,22 +131,25 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
       throw new NoOrgCredentialsNoUserTokenError("zoom");
     }
 
-    let lastError: unknown = null;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      if (attempt > 0) {
-        await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
-      }
-      try {
-        return await this.createMeeting(accessToken, input);
-      } catch (error) {
-        lastError = error;
-        if (error instanceof ProviderUnavailableError) {
-          continue;
-        }
-        throw error;
-      }
+    return this.createMeetingWithRetry(accessToken, input, 0);
+  }
+
+  private async createMeetingWithRetry(
+    accessToken: string,
+    input: GenerateMeetingInput,
+    attempt: number
+  ): Promise<GenerateMeetingResult> {
+    if (attempt > 0) {
+      await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
     }
-    throw lastError;
+    try {
+      return await this.createMeeting(accessToken, input);
+    } catch (error) {
+      if (error instanceof ProviderUnavailableError && attempt < 1) {
+        return this.createMeetingWithRetry(accessToken, input, attempt + 1);
+      }
+      throw error;
+    }
   }
 
   async deleteMeeting(meetingId: string): Promise<void> {
@@ -225,7 +252,10 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
       );
     }
 
-    const tokenData = (await response.json()) as ZoomTokenResponse;
+    const tokenData: unknown = await response.json();
+    if (!isZoomTokenResponse(tokenData)) {
+      throw new ZoomApiError("Zoom token response was malformed", undefined, response.status);
+    }
 
     const grantedScopes = tokenData.scope.split(" ");
     const missingScopes = ZOOM_REQUIRED_SCOPES.filter(scope => !grantedScopes.includes(scope));
@@ -332,7 +362,10 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
       );
     }
 
-    const meeting = (await response.json()) as ZoomMeetingResponse;
+    const meeting: unknown = await response.json();
+    if (!isZoomMeetingResponse(meeting)) {
+      throw new ZoomApiError("Zoom meeting response was malformed", undefined, response.status);
+    }
     return {
       joinUrl: meeting.join_url,
       meetingId: String(meeting.id),
@@ -347,7 +380,8 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
 
   private async parseErrorBody(response: Response): Promise<ZoomErrorResponse | null> {
     try {
-      return (await response.json()) as ZoomErrorResponse;
+      const body: unknown = await response.json();
+      return isZoomErrorResponse(body) ? body : null;
     } catch {
       return null;
     }
