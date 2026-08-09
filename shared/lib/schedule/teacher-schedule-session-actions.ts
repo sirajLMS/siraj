@@ -2,8 +2,8 @@ import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-inst
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface TeacherScheduleSessionActionInput {
-  readonly executionState?: string | null;
-  readonly outcome?: string | null;
+  readonly executionState?: ClassExecutionState | null;
+  readonly outcome?: ClassOutcome | null;
   readonly activateEnabled: boolean;
   readonly canActivate: boolean;
   readonly videoEnabled: boolean;
