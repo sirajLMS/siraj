@@ -43,6 +43,21 @@ function verifyCiphertext(value: unknown, plaintext: string) {
   expect(valStr.split(":")).toHaveLength(3);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function extractRows(result: unknown): Record<string, unknown>[] {
+  if (!isRecord(result)) {
+    return [];
+  }
+  const rows = "rows" in result ? result.rows : result;
+  if (!Array.isArray(rows)) {
+    return [];
+  }
+  return rows.filter(isRecord);
+}
+
 describe("Column-Level Encryption", () => {
   test("Sensitive teacher national ID and meeting config secrets are encrypted in the DB but decrypted on select", async () => {
     testLogger.info("Starting column-level encryption test...");
@@ -60,15 +75,13 @@ describe("Column-Level Encryption", () => {
       });
 
       const rawTeacherResult = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher.id}`);
-      const teacherRows =
-        "rows" in rawTeacherResult ? rawTeacherResult.rows : (rawTeacherResult as unknown as Record<string, unknown>[]);
+      const teacherRows = extractRows(rawTeacherResult);
       verifyCiphertext(teacherRows[0]?.national_id, plainNationalId);
 
       const rawConfigResult = await tx.execute(
         sql`SELECT encrypted_secret FROM user_meeting_configs WHERE id = ${config.id}`
       );
-      const configRows =
-        "rows" in rawConfigResult ? rawConfigResult.rows : (rawConfigResult as unknown as Record<string, unknown>[]);
+      const configRows = extractRows(rawConfigResult);
       verifyCiphertext(configRows[0]?.encrypted_secret, plainPassword);
 
       const [drizzleTeacher] = await tx.select().from(teachers).where(sql`id = ${teacher.id}`);
@@ -96,8 +109,8 @@ describe("Column-Level Encryption", () => {
 
       const raw1 = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher1.id}`);
       const raw2 = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher2.id}`);
-      const row1 = "rows" in raw1 ? raw1.rows : (raw1 as unknown as Record<string, unknown>[]);
-      const row2 = "rows" in raw2 ? raw2.rows : (raw2 as unknown as Record<string, unknown>[]);
+      const row1 = extractRows(raw1);
+      const row2 = extractRows(raw2);
 
       expect(row1[0]?.national_id).not.toBe(row2[0]?.national_id);
       expect(String(row1[0]?.national_id)).not.toBe(String(row2[0]?.national_id));
