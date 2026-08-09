@@ -33,6 +33,33 @@ const CTX: GraphApiRequestContext = {
 
 const originalFetch = globalThis.fetch;
 
+/**
+ * Standalone mock fetch for the round-trip test — returns a fixed
+ * `send-template-message` response shape. Defined at module scope so it does
+ * not capture any closure variables (unicorn/consistent-function-scoping).
+ *
+ * `Object.assign` adds the `preconnect` static property required by Bun's
+ * `typeof fetch` (avoiding an unsafe `as unknown as` cast).
+ */
+const mockedFetch: typeof fetch = Object.assign(
+  async () =>
+    new Response(
+      JSON.stringify({
+        messaging_product: "whatsapp",
+        contacts: [{ input: "971501234567", wa_id: "971501234567" }],
+        messages: [{ id: "wamid.mocked.123" }],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    ),
+  {
+    // Bun's `fetch` carries a `preconnect` static method; stub it as a no-op
+    // so the mock satisfies `typeof fetch` without an unsafe cast.
+    preconnect() {
+      // no-op for tests
+    },
+  }
+);
+
 afterEach(() => {
   globalThis.fetch = originalFetch;
   mock.restore();
@@ -50,11 +77,14 @@ describe("send-template-message — buildRequest", () => {
     expect(url).toBe("https://graph.facebook.com/v23.0/123456789/messages");
     expect(init.method).toBe("POST");
 
-    const headers = init.headers as Record<string, string>;
-    expect(headers.Authorization).toBe("Bearer test-token-abc123");
-    expect(headers["Content-Type"]).toBe("application/json");
+    const headers = new Headers(init.headers);
+    expect(headers.get("Authorization")).toBe("Bearer test-token-abc123");
+    expect(headers.get("Content-Type")).toBe("application/json");
 
-    const body = JSON.parse(init.body as string);
+    if (typeof init.body !== "string") {
+      throw new Error("expected init.body to be a string");
+    }
+    const body = JSON.parse(init.body);
     expect(body.messaging_product).toBe("whatsapp");
     expect(body.to).toBe("971501234567");
     expect(body.type).toBe("template");
@@ -72,7 +102,10 @@ describe("send-template-message — buildRequest", () => {
       components: [{ type: "body", parameters: [{ type: "text", text: "John" }] }],
     });
 
-    const body = JSON.parse(init.body as string);
+    if (typeof init.body !== "string") {
+      throw new Error("expected init.body to be a string");
+    }
+    const body = JSON.parse(init.body);
     expect(body.template.components).toHaveLength(1);
     expect(body.template.components[0].type).toBe("body");
   });
@@ -140,8 +173,8 @@ describe("list-phone-numbers — buildRequest", () => {
     expect(url).toContain("limit=100");
     expect(init.method).toBe("GET");
 
-    const headers = init.headers as Record<string, string>;
-    expect(headers.Authorization).toBe("Bearer test-token-abc123");
+    const headers = new Headers(init.headers);
+    expect(headers.get("Authorization")).toBe("Bearer test-token-abc123");
   });
 
   test("builds GET URL with after cursor for pagination", () => {
@@ -267,16 +300,7 @@ describe("list-message-templates — parseResponse", () => {
 
 describe("buildRequest + mocked fetch — round-trip", () => {
   beforeEach(() => {
-    const mockedFetch = async () =>
-      new Response(
-        JSON.stringify({
-          messaging_product: "whatsapp",
-          contacts: [{ input: "971501234567", wa_id: "971501234567" }],
-          messages: [{ id: "wamid.mocked.123" }],
-        }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
-      );
-    globalThis.fetch = mockedFetch as unknown as typeof fetch;
+    globalThis.fetch = mockedFetch;
   });
 
   test("send-template-message: fetch with buildRequest returns parsed result", async () => {
