@@ -49,6 +49,40 @@ export interface ClassInstanceStatusResolveOptions {
   readonly now?: Date;
 }
 
+const DASHBOARD_STATUS_VALUES: ReadonlySet<string> = new Set<string>([
+  ClassOutcome.PENDING,
+  ClassOutcome.TAKEN,
+  ClassOutcome.ABSENT,
+  ClassOutcome.LEAVE,
+  ClassExecutionState.NOT_ACTIVATED,
+  ClassExecutionState.ACTIVATED,
+  ClassExecutionState.RUNNING,
+  ClassExecutionState.COMPLETED,
+]);
+
+function isClassInstanceDashboardStatus(value: string): value is ClassInstanceDashboardStatus {
+  return DASHBOARD_STATUS_VALUES.has(value);
+}
+
+const METRIC_FILTER_KEY_VALUES: ReadonlySet<string> = new Set<string>([
+  "total",
+  "regular",
+  "trial",
+  "advance",
+  "rescheduled",
+  "suspended",
+  "taken",
+  "pending",
+  "activated",
+  "running",
+  "absent",
+  "leave",
+]);
+
+function isDailyScheduleMetricFilterKey(value: string): value is DailyScheduleMetricFilterKey {
+  return METRIC_FILTER_KEY_VALUES.has(value);
+}
+
 function toDate(value: DateLike | undefined): Date | null {
   if (!value) {
     return null;
@@ -60,13 +94,10 @@ export function isClassInstancePastMissedGrace(
   row: ClassInstanceDashboardStatusInput,
   options?: ClassInstanceStatusResolveOptions
 ): boolean {
-  const normalizedOutcome = row.outcome ?? ClassOutcome.PENDING;
-  const normalizedExecutionState = row.executionState ?? ClassExecutionState.NOT_ACTIVATED;
+  const normalizedOutcome: string = row.outcome ?? ClassOutcome.PENDING;
+  const normalizedExecutionState: string = row.executionState ?? ClassExecutionState.NOT_ACTIVATED;
 
-  if (
-    normalizedExecutionState !== ClassExecutionState.NOT_ACTIVATED ||
-    normalizedOutcome !== ClassOutcome.PENDING
-  ) {
+  if (normalizedExecutionState !== "NOT_ACTIVATED" || normalizedOutcome !== "PENDING") {
     return false;
   }
 
@@ -89,25 +120,24 @@ export function resolveClassInstanceDashboardStatus(
   actualEndAt?: DateLike,
   options?: ClassInstanceStatusResolveOptions & { scheduledEndAt?: DateLike }
 ): ClassInstanceDashboardStatus {
-  const normalizedOutcome = (outcome ?? ClassOutcome.PENDING) as ClassInstanceDashboardStatus;
-  const normalizedExecutionState = (executionState ??
-    ClassExecutionState.NOT_ACTIVATED) as ClassInstanceDashboardStatus;
+  const normalizedOutcome: string = outcome ?? ClassOutcome.PENDING;
+  const normalizedExecutionState: string = executionState ?? ClassExecutionState.NOT_ACTIVATED;
 
-  if (normalizedExecutionState === ClassExecutionState.RUNNING) {
-    return ClassExecutionState.RUNNING;
+  if (normalizedExecutionState === "RUNNING") {
+    return "RUNNING";
   }
 
-  if (normalizedExecutionState === ClassExecutionState.COMPLETED) {
-    return normalizedOutcome;
+  if (normalizedExecutionState === "COMPLETED") {
+    return isClassInstanceDashboardStatus(normalizedOutcome) ? normalizedOutcome : "PENDING";
   }
 
-  if (normalizedExecutionState === ClassExecutionState.ACTIVATED) {
+  if (normalizedExecutionState === "ACTIVATED") {
     const startAt = toDate(actualStartAt);
     const endAt = toDate(actualEndAt);
     if (startAt && !endAt) {
-      return ClassExecutionState.RUNNING;
+      return "RUNNING";
     }
-    return ClassExecutionState.ACTIVATED;
+    return "ACTIVATED";
   }
 
   if (
@@ -116,10 +146,10 @@ export function resolveClassInstanceDashboardStatus(
       options
     )
   ) {
-    return ClassOutcome.ABSENT;
+    return "ABSENT";
   }
 
-  return normalizedOutcome;
+  return isClassInstanceDashboardStatus(normalizedOutcome) ? normalizedOutcome : "PENDING";
 }
 
 export function resolveClassInstanceDashboardStatusFromRow(
@@ -138,17 +168,17 @@ function dashboardStatusMatchesMetric(
 ): boolean {
   switch (metricFilter) {
     case "taken":
-      return dashboardStatus === ClassOutcome.TAKEN;
+      return dashboardStatus === "TAKEN";
     case "pending":
-      return dashboardStatus === ClassOutcome.PENDING;
+      return dashboardStatus === "PENDING";
     case "absent":
-      return dashboardStatus === ClassOutcome.ABSENT;
+      return dashboardStatus === "ABSENT";
     case "leave":
-      return dashboardStatus === ClassOutcome.LEAVE;
+      return dashboardStatus === "LEAVE";
     case "activated":
-      return dashboardStatus === ClassExecutionState.ACTIVATED;
+      return dashboardStatus === "ACTIVATED";
     case "running":
-      return dashboardStatus === ClassExecutionState.RUNNING;
+      return dashboardStatus === "RUNNING";
     default:
       return false;
   }
@@ -163,9 +193,11 @@ export function matchesDashboardMetricFilter(
     return true;
   }
 
-  const key = metricFilter as DailyScheduleMetricFilterKey;
+  if (!isDailyScheduleMetricFilterKey(metricFilter)) {
+    return true;
+  }
 
-  switch (key) {
+  switch (metricFilter) {
     case "regular":
       return row.classType === "REGULAR";
     case "trial":
@@ -182,7 +214,8 @@ export function matchesDashboardMetricFilter(
     case "leave":
     case "activated":
     case "running":
-      return dashboardStatusMatchesMetric(resolveClassInstanceDashboardStatusFromRow(row, options), key);
+      return dashboardStatusMatchesMetric(resolveClassInstanceDashboardStatusFromRow(row, options), metricFilter);
+    case "total":
     default:
       return true;
   }
