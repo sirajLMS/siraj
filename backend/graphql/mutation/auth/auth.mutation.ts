@@ -274,8 +274,8 @@ gqlSchemaBuilder.mutationFields(t => ({
    * This endpoint logs in a user using the provided permission group slug without requiring a password.
    * It is intended strictly for demonstration purposes and is secured by environment variables.
    *
-   * @drizzle `DemoAuthService.loginWithGroupSlug` (which uses `db.query.permissionGroups`, `db.query.userPermissionGroups`, `db.query.users`)
-   * @drizzle `SessionRepository.create` (which uses `db.insert(sessions)`)
+   * @see `DemoAuthService.loginWithGroupSlug` (which uses `db.query.permissionGroups`, `db.query.userPermissionGroups`, `db.query.users`)
+   * @see `SessionRepository.create` (which uses `db.insert(sessions)`)
    */
   demoLogin: t.field({
     type: LoginResponsePothosObject,
