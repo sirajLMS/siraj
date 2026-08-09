@@ -8,6 +8,11 @@ import {
   CronRunStatus,
   CronScheduleStatus,
   type CronTriggerSource,
+  isCronConcurrencyPolicy,
+  isCronJobKind,
+  isCronRunStatus,
+  isCronScheduleStatus,
+  isCronTriggerSource,
 } from "@/backend/enum/cron/cron.enums";
 import type {
   CronHeartbeatInsertType,
@@ -36,21 +41,33 @@ const INFLIGHT_STATUSES = [CronRunStatus.PENDING, CronRunStatus.RUNNING, CronRun
 const PENDING_STUCK_TIMEOUT_SECONDS = 300; // 5 minutes
 
 export function toScheduleReturnType(row: CronScheduleSelectType): CronScheduleReturnType {
-  const { createdByUserId: _createdByUserId, updatedByUserId: _updatedByUserId, ...rest } = row;
-  return rest as CronScheduleReturnType;
+  const { createdByUserId: _createdByUserId, updatedByUserId: _updatedByUserId, jobKind, status, concurrencyPolicy, ...rest } = row;
+  // Drizzle's pgEnum infers enum columns as `string`, but the DB enforces valid
+  // enum values. Narrow at runtime via type guards so we avoid an unsafe
+  // `as` assertion when constructing the strongly-typed return value.
+  if (!isCronJobKind(jobKind) || !isCronScheduleStatus(status) || !isCronConcurrencyPolicy(concurrencyPolicy)) {
+    throw new Error(`Invalid cron schedule row (id=${row.id}): enum field contains unexpected value`);
+  }
+  return { ...rest, jobKind, status, concurrencyPolicy };
 }
 
 function toRunReturnType(row: CronRunSelectType): CronRunReturnType {
-  const { errorStack: _errorStack, ...rest } = row;
-  return rest as CronRunReturnType;
+  const { errorStack: _errorStack, jobKind, status, triggerSource, ...rest } = row;
+  // Drizzle's pgEnum infers enum columns as `string`, but the DB enforces valid
+  // enum values. Narrow at runtime via type guards so we avoid an unsafe
+  // `as` assertion when constructing the strongly-typed return value.
+  if (!isCronJobKind(jobKind) || !isCronRunStatus(status) || !isCronTriggerSource(triggerSource)) {
+    throw new Error(`Invalid cron run row (id=${row.id}): enum field contains unexpected value`);
+  }
+  return { ...rest, jobKind, status, triggerSource };
 }
 
 // Internal DB-level audit messages — NOT user-facing strings.
 // The repository has no locale context, so these generic constants are
 // stored as-is in the database. The service layer translates user-facing
 // errors via i18n at the resolver boundary.
-const _REPLACE_MANUAL_TRIGGER_MSG = "Replaced by manual trigger";
-const _HEARTBEAT_TIMEOUT_MSG = "Heartbeat timeout";
+const REPLACE_MANUAL_TRIGGER_MSG = "Replaced by manual trigger";
+const HEARTBEAT_TIMEOUT_MSG = "Heartbeat timeout";
 
 /**
  * Default valid **prior** statuses for each target status, used when `fromStatuses`
@@ -217,7 +234,10 @@ export namespace CronRepository {
       if (!schedule) return null;
 
       // For SKIP policy, check no in-flight run exists
-      if (schedule.concurrencyPolicy === CronConcurrencyPolicy.SKIP) {
+      // `schedule.concurrencyPolicy` is inferred as `string` by drizzle's pgEnum;
+      // widen the enum literal to `string` so the comparison is type-safe and
+      // satisfies `no-unsafe-enum-comparison`.
+      if (schedule.concurrencyPolicy === (CronConcurrencyPolicy.SKIP as string)) {
         const inFlight = await t
           .select({ id: cronRuns.id })
           .from(cronRuns)
@@ -227,12 +247,12 @@ export namespace CronRepository {
       }
 
       // For REPLACE policy, cancel in-flight runs
-      if (schedule.concurrencyPolicy === CronConcurrencyPolicy.REPLACE) {
+      if (schedule.concurrencyPolicy === (CronConcurrencyPolicy.REPLACE as string)) {
         await t
           .update(cronRuns)
           .set({
             status: CronRunStatus.CANCELLED,
-            errorMessage: _REPLACE_MANUAL_TRIGGER_MSG,
+            errorMessage: REPLACE_MANUAL_TRIGGER_MSG,
             updatedAt: now,
           })
           .where(and(eq(cronRuns.scheduleId, scheduleId), inArray(cronRuns.status, [...INFLIGHT_STATUSES])));
@@ -377,7 +397,7 @@ export namespace CronRepository {
       const runIds = stuckRuns.map(r => r.runId);
       const result = await t
         .update(cronRuns)
-        .set({ status: CronRunStatus.TIMEOUT, errorMessage: _HEARTBEAT_TIMEOUT_MSG, updatedAt: now })
+        .set({ status: CronRunStatus.TIMEOUT, errorMessage: HEARTBEAT_TIMEOUT_MSG, updatedAt: now })
         .where(
           and(
             inArray(cronRuns.id, runIds),
