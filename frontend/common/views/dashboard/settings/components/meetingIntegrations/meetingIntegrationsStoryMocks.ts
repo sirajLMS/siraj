@@ -1,4 +1,5 @@
 import {
+  MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug as MeetingIntegrationProviderSlugEnum,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -7,11 +8,13 @@ import type {
   MeetingIntegrationProviderSlug,
   MeetingIntegrationProviderSummary,
   MeetingIntegrationsViewModel,
+  TestMeetingConnectionResult,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 const ZOOM = MeetingIntegrationProviderSlugEnum.Zoom;
 const GOOGLE_MEET = MeetingIntegrationProviderSlugEnum.GoogleMeet;
+const MICROSOFT_TEAMS = MeetingIntegrationProviderSlugEnum.MicrosoftTeams;
 
 function createProviderLabels() {
   return {
@@ -219,9 +222,20 @@ export function createConnectedAccountsMock(): readonly MeetingIntegrationConnec
 export function createViewModelMock(
   overrides: Partial<MeetingIntegrationsViewModel> & { labels: SettingsMeetingIntegrationsLabels }
 ): MeetingIntegrationsViewModel {
-  const emptyRecord = {} as Readonly<
+  const emptyRecord: Readonly<
     Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>
-  >;
+  > = {
+    [ZOOM]: [],
+    [GOOGLE_MEET]: [],
+    [MICROSOFT_TEAMS]: [],
+  };
+  const emptyTestResults: Readonly<
+    Record<MeetingIntegrationProviderSlug, TestMeetingConnectionResult | null>
+  > = {
+    [ZOOM]: null,
+    [GOOGLE_MEET]: null,
+    [MICROSOFT_TEAMS]: null,
+  };
   return {
     labels: overrides.labels,
     locale: "en",
@@ -233,7 +247,7 @@ export function createViewModelMock(
     connectedAccountsByProvider: overrides.connectedAccountsByProvider ?? emptyRecord,
     loadingAccountsFor: overrides.loadingAccountsFor ?? null,
     testingFor: overrides.testingFor ?? null,
-    lastTestResultByProvider: overrides.lastTestResultByProvider ?? ({} as never),
+    lastTestResultByProvider: overrides.lastTestResultByProvider ?? emptyTestResults,
     revokingFor: overrides.revokingFor ?? null,
     metadataDialogAccount: overrides.metadataDialogAccount ?? null,
     metadataDialogProviderSlug: overrides.metadataDialogProviderSlug ?? null,
@@ -261,7 +275,11 @@ export function createViewModelConnected(
     labels,
     providers,
     expandedSlug: ZOOM,
-    connectedAccountsByProvider: { [ZOOM]: connectedAccounts } as never,
+    connectedAccountsByProvider: {
+      [ZOOM]: connectedAccounts,
+      [GOOGLE_MEET]: [],
+      [MICROSOFT_TEAMS]: [],
+    },
   });
 }
 
@@ -277,7 +295,7 @@ export function createViewModelTestResult(
       [ZOOM]: {
         ok: true,
         latencyMs: 245,
-        mode: "VALIDATE_CONFIG",
+        mode: MeetingConnectionTestMode.ValidateConfig,
         testJoinUrl: "https://zoom.us/j/123456789?******",
         deleted: null,
         upstreamResponseSummary: "200 OK — scopes verified",
@@ -287,7 +305,9 @@ export function createViewModelTestResult(
         requiredScopes: ["user:write:admin", "meeting:write"],
         grantedScopes: ["user:write:admin", "meeting:write", "user:read"],
       },
-    } as never,
+      [GOOGLE_MEET]: null,
+      [MICROSOFT_TEAMS]: null,
+    },
   });
 }
 
@@ -303,7 +323,7 @@ export function createViewModelError(
       [GOOGLE_MEET]: {
         ok: false,
         latencyMs: 1200,
-        mode: "VALIDATE_CONFIG",
+        mode: MeetingConnectionTestMode.ValidateConfig,
         testJoinUrl: null,
         deleted: null,
         upstreamResponseSummary: "401 Unauthorized",
@@ -313,7 +333,9 @@ export function createViewModelError(
         requiredScopes: null,
         grantedScopes: null,
       },
-    } as never,
+      [ZOOM]: null,
+      [MICROSOFT_TEAMS]: null,
+    },
   });
 }
 
@@ -326,7 +348,11 @@ export function createViewModelMetadataOpen(
     labels,
     providers,
     expandedSlug: ZOOM,
-    connectedAccountsByProvider: { [ZOOM]: connectedAccounts } as never,
+    connectedAccountsByProvider: {
+      [ZOOM]: connectedAccounts,
+      [GOOGLE_MEET]: [],
+      [MICROSOFT_TEAMS]: [],
+    },
     metadataDialogAccount: {
       id: "a1",
       userId: "user1",
