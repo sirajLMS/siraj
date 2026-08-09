@@ -311,7 +311,7 @@ export namespace ComplaintRepository {
   };
 
   export const getComplaintMetrics = async (
-    whereClause?: SQL | undefined,
+    whereClause?: SQL  ,
     txOrDb?: DBTransaction | typeof db
   ): Promise<ComplaintMetrics> => {
     const q = queryDb(typeof txOrDb === "function" ? undefined : txOrDb);

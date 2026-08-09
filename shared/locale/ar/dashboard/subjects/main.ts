@@ -41,7 +41,7 @@ export const dashboardSubjectsAr: SubjectsLabels = {
   categoryUpdated: "تم تحديث الفئة بنجاح",
   categoryDeleted: "تم حذف الفئة بنجاح",
   detail: {
-    pageTitle: name => `${name}`,
+    pageTitle: name => name,
     resourcesTitle: "الموارد",
     resourcesSubtitle: count => `${count} مورد مرفق`,
     noResources: "لا توجد موارد مرفقة بهذه المادة.",

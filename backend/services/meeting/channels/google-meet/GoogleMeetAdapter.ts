@@ -251,7 +251,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       throw new RateLimitedError("google_meet", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
     }
 
-    if (response.ok === false) {
+    if (!response.ok) {
       const errorBody = await this.parseErrorBody(response);
       throw new GoogleMeetApiError(
         errorBody?.error?.message ?? `Google token exchange failed (${response.status})`,
@@ -367,7 +367,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       throw new ProviderUnavailableError("google_meet", response.status, errorBody?.error?.message);
     }
 
-    if (response.ok === false) {
+    if (!response.ok) {
       const errorBody = await this.parseErrorBody(response);
       throw new GoogleMeetApiError(
         errorBody?.error?.message ?? `Google Meet space creation failed (${response.status})`,

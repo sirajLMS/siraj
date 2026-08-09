@@ -42,7 +42,7 @@ export const dashboardSubjectsEn: SubjectsLabels = {
   categoryUpdated: "Category updated successfully",
   categoryDeleted: "Category deleted successfully",
   detail: {
-    pageTitle: name => `${name}`,
+    pageTitle: name => name,
     resourcesTitle: "Resources",
     resourcesSubtitle: count => `${count} attached resource`,
     noResources: "No resources attached to this subject.",

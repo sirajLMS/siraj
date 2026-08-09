@@ -146,7 +146,7 @@ export namespace LessonReportRepository {
     paginationArgs: PaginationArgs,
     tx?: DBTransaction
   ): Promise<LessonReportWithNames[]> {
-    const conditions: SQL<unknown>[] = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];
+    const conditions: SQL[] = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];
     if (filters.teacherId) conditions.push(eq(lessonReports.teacherId, filters.teacherId));
     if (filters.studentId) conditions.push(eq(lessonReports.studentId, filters.studentId));
 

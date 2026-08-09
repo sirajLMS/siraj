@@ -97,7 +97,7 @@ async function updateById(
 async function findManyRows(
   whereClause: ReturnType<typeof eq>,
   tx?: DBTransaction,
-  orderByClause?: ReturnType<typeof asc> | ReturnType<typeof desc>
+  orderByClause?: ReturnType<typeof asc>  
 ): Promise<WhatsappAccountReturnType[]> {
   const q = queryDb(tx) as unknown as typeof db;
   const rows = orderByClause

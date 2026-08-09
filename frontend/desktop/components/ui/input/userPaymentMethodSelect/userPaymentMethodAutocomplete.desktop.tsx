@@ -148,7 +148,7 @@ export function UserPaymentMethodAutocompleteDesktop({
   const resolvedHelperText = helperText ?? (showRequiredError ? t.select.required : undefined);
 
   return (
-    <Autocomplete<UserPaymentMethodFieldsFragment, false, false, false>
+    <Autocomplete<UserPaymentMethodFieldsFragment, false, false>
       fullWidth={fullWidth}
       options={normalizedOptions}
       autoHighlight

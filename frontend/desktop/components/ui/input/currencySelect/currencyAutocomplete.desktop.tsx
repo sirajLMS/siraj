@@ -224,7 +224,7 @@ export const CurrencyAutocompleteDesktop: React.FC<CurrencyAutocompleteProps> = 
   const resolvedPlaceholder = listAttached ? (label ?? t.selectCurrency) : (placeholder ?? t.searchByCodeOrName);
 
   return (
-    <Autocomplete<CurrencyOption, false, false, false>
+    <Autocomplete<CurrencyOption, false, false>
       fullWidth={fullWidth}
       options={options}
       autoHighlight

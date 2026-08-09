@@ -27,7 +27,7 @@ const StyledAccountTypeButton = styled(Button, {
   shouldForwardProp: prop => prop !== "isSelected",
 })<{ isSelected: boolean }>(({ theme, isSelected }) => ({
   flex: 1,
-  padding: `${theme.spacing(1.5)}`,
+  padding: theme.spacing(1.5),
   borderRadius: Number(theme.shape.borderRadius) * 1.5,
   fontWeight: 700,
   letterSpacing: "0.1em",

@@ -366,7 +366,7 @@ async function runJobWithHeartbeat(
       clearTimeoutTimer();
       handlerCompleted = true;
 
-      if (handlerResult?.success === false) {
+      if (!handlerResult?.success) {
         throw new DomainError("JOB_HANDLER_FAILED", handlerResult?.error ?? "Handler returned failure");
       }
     } catch (err) {

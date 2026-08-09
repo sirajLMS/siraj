@@ -319,7 +319,7 @@ const AutocompleteContent: React.FC<{
   );
 
   return (
-    <Autocomplete<PaymentMethodCatalogOption, false, false, false>
+    <Autocomplete<PaymentMethodCatalogOption, false, false>
       fullWidth={fullWidth}
       options={options}
       autoHighlight

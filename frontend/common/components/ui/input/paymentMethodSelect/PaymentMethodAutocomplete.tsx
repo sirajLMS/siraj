@@ -372,7 +372,7 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
   );
 
   return (
-    <Autocomplete<PaymentMethodCatalogOption, false, false, false>
+    <Autocomplete<PaymentMethodCatalogOption, false, false>
       fullWidth={fullWidth}
       options={options}
       autoHighlight
