@@ -10,7 +10,6 @@ import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objec
 import type {
   ClassSessionMetrics,
   CreateManualClassEntryInput,
-  EffectiveMeetingReturnType,
   LogSupportRequestInput,
   TeacherDashboardPaginatedResult,
   TeacherDashboardScheduleRow,
@@ -35,13 +34,12 @@ export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleR
     meetingJoinUrl: t.string({
       nullable: true,
       deprecationReason: "Use effectiveMeeting.joinUrl",
-      resolve: parent => (parent as unknown as Record<string, unknown>).meetingJoinUrl as string | null,
+      resolve: parent => parent.meetingJoinUrl,
     }),
     effectiveMeeting: t.field({
       type: EffectiveMeetingPothosObject,
       nullable: true,
-      resolve: parent =>
-        (parent as unknown as Record<string, unknown>).effectiveMeeting as EffectiveMeetingReturnType | null,
+      resolve: parent => parent.effectiveMeeting,
     }),
     yourTimeFormatted: t.exposeString("yourTimeFormatted", { nullable: true }),
   }),
