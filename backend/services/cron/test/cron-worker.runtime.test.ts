@@ -14,7 +14,7 @@ let retryCalls: { jobId: string; delaySeconds: number; newAttempt?: number }[] =
 let queuedJobs: CronJobPayload[] = [];
 let jobCounter = 0;
 
-void mock.module("@/backend/services/cron/queue-adapter.factory", () => ({
+await mock.module("@/backend/services/cron/queue-adapter.factory", () => ({
   getQueueAdapter: async () => ({
     init: async () => {},
     send: async () => "mock-queue-id",
@@ -38,7 +38,7 @@ void mock.module("@/backend/services/cron/queue-adapter.factory", () => ({
   resolveQueueBackend: async () => "PG_BOSS",
 }));
 
-void mock.module("@/backend/services/cron/cron.service", () => ({
+await mock.module("@/backend/services/cron/cron.service", () => ({
   CronService: {
     setRunRunning: async (runId: string, workerId: string) => {
       setRunRunningCalls.push({ runId, workerId });
@@ -59,7 +59,7 @@ void mock.module("@/backend/services/cron/cron.service", () => ({
   },
 }));
 
-void mock.module("@/backend/services/cron/job-handler-registry", () => ({
+await mock.module("@/backend/services/cron/job-handler-registry", () => ({
   getHandler: (kind: string) => {
     if (kind === "NOOP") return async () => ({ success: true });
     if (kind === "SLOW_NOOP")

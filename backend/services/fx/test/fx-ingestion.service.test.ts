@@ -52,7 +52,7 @@ const isRecentSuccessMock = mock(async (): Promise<boolean> => false);
 const getRunningSyncRunMock = mock(async (): Promise<SyncRunRow | null> => null);
 const updateExchangeRateInTxMock = mock(async () => ({}));
 
-void mock.module("@/backend/db/repo", () => ({
+await mock.module("@/backend/db/repo", () => ({
   BillingRepository: {
     updateExchangeRateInTx: updateExchangeRateInTxMock,
   },
@@ -67,7 +67,7 @@ void mock.module("@/backend/db/repo", () => ({
 
 const transactionMock = mock(async (cb: (tx: unknown) => Promise<unknown>) => cb({}));
 
-void mock.module("@/backend/db/drizzleDb", () => ({
+await mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     transaction: transactionMock,
   },
@@ -75,14 +75,14 @@ void mock.module("@/backend/db/drizzleDb", () => ({
 
 const hasPermissionMock = mock(async (): Promise<boolean> => true);
 
-void mock.module("@/backend/services", () => ({
+await mock.module("@/backend/services", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
   getRedisService: async () => ({}),
 }));
 
-void mock.module("@/backend/lib", () => ({
+await mock.module("@/backend/lib", () => ({
   logger: {
     log: () => {},
     info: () => {},
@@ -95,7 +95,7 @@ void mock.module("@/backend/lib", () => ({
 // Service now calls getServerTranslations(locale).errorsTranslations (real import).
 // Mock returns the required literal strings so the assertion expectations match.
 // fxSyncAlreadyRunning is preserved as a raw literal — no schema counterpart.
-void mock.module("@/shared/locale/server-graphql", () => ({
+await mock.module("@/shared/locale/server-graphql", () => ({
   getServerTranslations: () => ({
     errorsTranslations: {
       insufficientPermissions: "insufficientPermissions",
@@ -129,7 +129,7 @@ const providerInstance = {
   validateConfig: () => true,
 };
 
-void mock.module("@/backend/services/fx/providers/FxRateProviderFactory", () => ({
+await mock.module("@/backend/services/fx/providers/FxRateProviderFactory", () => ({
   getFxRateProvider: mock(async () => providerInstance),
   resetFxRateProvider: () => {},
   fxRateProvider: {

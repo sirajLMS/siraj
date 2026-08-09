@@ -129,11 +129,11 @@ const mockViewModel: Record<string, unknown> = {
   onPreviewNextRuns: mock(() => []),
 };
 
-void mock.module("@/frontend/common/views/dashboard/cron/useCronViewModel", () => ({
+await mock.module("@/frontend/common/views/dashboard/cron/useCronViewModel", () => ({
   useCronViewModel: () => mockViewModel,
 }));
 
-void mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -146,7 +146,7 @@ void mock.module("next/navigation", () => ({
   usePathname: () => "/dashboard",
 }));
 
-void mock.module("@/frontend/common/utils/logger", () => ({
+await mock.module("@/frontend/common/utils/logger", () => ({
   logger: {
     info: mock(() => {}),
     warn: mock(() => {}),
@@ -155,7 +155,7 @@ void mock.module("@/frontend/common/utils/logger", () => ({
   },
 }));
 
-void mock.module("@/frontend/common/lib/logger", () => ({
+await mock.module("@/frontend/common/lib/logger", () => ({
   default: {
     info: mock(() => {}),
     warn: mock(() => {}),
@@ -165,7 +165,7 @@ void mock.module("@/frontend/common/lib/logger", () => ({
 }));
 
 // Avoid Suspense from usePageBreadcrumbs → useNavLabels → useAppTranslation
-void mock.module("@/frontend/common/views/dashboard/lib/usePageBreadcrumbs", () => ({
+await mock.module("@/frontend/common/views/dashboard/lib/usePageBreadcrumbs", () => ({
   usePageBreadcrumbs: () => [],
 }));
 

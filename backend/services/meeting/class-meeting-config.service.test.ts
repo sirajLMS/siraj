@@ -94,13 +94,13 @@ function buildAutoCreateInput(label: string, meetingUrl: string | null = null): 
 // --- PermissionsService
 const hasPermissionMock = mock(async (): Promise<boolean> => true);
 
-void mock.module("@/backend/services/auth/permissions.service", () => ({
+await mock.module("@/backend/services/auth/permissions.service", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
 }));
 
-void mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -116,7 +116,7 @@ const getProvidersByIdsMock = mock(async (): Promise<Map<string, MeetingProvider
   return map;
 });
 
-void mock.module("@/backend/services/meeting/meeting-provider-catalog.service", () => ({
+await mock.module("@/backend/services/meeting/meeting-provider-catalog.service", () => ({
   MeetingProviderCatalogService: {
     getProvidersByIds: getProvidersByIdsMock,
   },
@@ -125,7 +125,7 @@ void mock.module("@/backend/services/meeting/meeting-provider-catalog.service", 
 // --- MeetingProviderRepository
 const providerGetByIdOrThrowMock = mock(async (): Promise<MeetingProviderSelectType> => buildProvider());
 
-void mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
   MeetingProviderRepository: {
     getByIdOrThrow: providerGetByIdOrThrowMock,
   },
@@ -139,7 +139,7 @@ const classConfigUpdateMock = mock(async (): Promise<ClassMeetingConfigSelectTyp
 const classConfigDeleteMock = mock(async (): Promise<{ id: string }> => ({ id: CONFIG_ID }));
 const classConfigSetDefaultMock = mock(async (): Promise<ClassMeetingConfigSelectType> => buildClassConfig());
 
-void mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
   ClassMeetingConfigRepository: {
     listByScope: classConfigListByScopeMock,
     getByIdOrThrow: classConfigGetByIdOrThrowMock,
@@ -151,7 +151,7 @@ void mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", ()
 }));
 
 // --- UserMeetingConfigRepository (imported by service for EffectiveMeetingService)
-void mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
   UserMeetingConfigRepository: {},
 }));
 
@@ -162,7 +162,7 @@ void mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () 
 // registrations (repositories, logger, etc.) — it should resolve fine.
 
 // --- meeting-config-mask (pure functions, mock for safety)
-void mock.module("@/backend/services/meeting/class-meeting-config-mask", () => ({
+await mock.module("@/backend/services/meeting/class-meeting-config-mask", () => ({
   buildMaskedClassMeetingConfig: (config: ClassMeetingConfigSelectType) => ({
     id: config.id,
     classInstanceId: config.classInstanceId,
@@ -187,17 +187,17 @@ void mock.module("@/backend/services/meeting/class-meeting-config-mask", () => (
 }));
 
 // --- meeting-config.validation — return details as-is so maybeGenerateUrl decides
-void mock.module("@/backend/lib/meeting-config.validation", () => ({
+await mock.module("@/backend/lib/meeting-config.validation", () => ({
   parseMeetingConfigDetails: (_provider: unknown, details: unknown) => details,
 }));
 
 // --- Drizzle db & schema (imported at module level by class-meeting-config.service.ts)
 // Also needed by meeting-config-snapshot.ts which is imported transitively.
-void mock.module("@/backend/db/drizzleDb", () => ({
+await mock.module("@/backend/db/drizzleDb", () => ({
   db: {},
 }));
 
-void mock.module("@/backend/db/schema", () => ({
+await mock.module("@/backend/db/schema", () => ({
   classInstances: {},
   teachers: {},
 }));
@@ -208,11 +208,11 @@ const whereBuilder = () => ({ limit: emptyLimit });
 const fromBuilder = () => ({ where: whereBuilder });
 const selectBuilder = () => ({ from: fromBuilder });
 
-void mock.module("@/backend/db", () => ({
+await mock.module("@/backend/db", () => ({
   queryDb: () => ({ select: selectBuilder }),
 }));
 
-void mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
+await mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
   getMeetingChannel: async () => ({}),
   providerKindToSlug: () => null,
   // meetingChannel must have the `generateMeeting` function so spyOn works

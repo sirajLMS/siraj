@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
-void mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "ar" }),
 }));
 
-void mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
   usePathname: () => "/dashboard",
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
@@ -15,7 +15,7 @@ void mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-void mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -27,7 +27,7 @@ void mock.module("@/shared/i18n/navigation", () => ({
   usePathname: () => "/dashboard",
 }));
 
-void mock.module("next/link", () => ({
+await mock.module("next/link", () => ({
   default: ({
     children,
     href,

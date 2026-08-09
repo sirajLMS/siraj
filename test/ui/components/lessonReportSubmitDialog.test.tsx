@@ -2,7 +2,7 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 
 const loggerError = mock(() => {});
 
-void mock.module("@/frontend/common/utils/logger", () => ({
+await mock.module("@/frontend/common/utils/logger", () => ({
   logger: {
     info: () => {},
     warn: () => {},

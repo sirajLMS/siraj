@@ -55,7 +55,7 @@ const userFindByIdMock = mock(async (id: string) => {
   return null;
 });
 
-void mock.module("@/backend/db/repo", () => ({
+await mock.module("@/backend/db/repo", () => ({
   StudentRepository: {
     findById: findByIdMock,
     reassignTeacher: reassignTeacherMock,
@@ -76,7 +76,7 @@ void mock.module("@/backend/db/repo", () => ({
 
 const hasPermissionMock = mock(async () => true);
 
-void mock.module("@/backend/services/auth/permissions.service", () => ({
+await mock.module("@/backend/services/auth/permissions.service", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
@@ -84,7 +84,7 @@ void mock.module("@/backend/services/auth/permissions.service", () => ({
 
 // --- Field ACL mock ------------------------------------------------------
 
-void mock.module("@/backend/services/student/student-field-acl", () => ({
+await mock.module("@/backend/services/student/student-field-acl", () => ({
   buildStudentFieldFilterContext: async () => ({}),
   assertStudentFieldEdit: () => undefined,
 }));
@@ -93,19 +93,19 @@ void mock.module("@/backend/services/student/student-field-acl", () => ({
 
 const buildStudentLifecyclePayloadsMock = mock(() => [{ channel: "on_app" }]);
 
-void mock.module("@/backend/services/notification/notification-payloads.builders", () => ({
+await mock.module("@/backend/services/notification/notification-payloads.builders", () => ({
   buildStudentLifecyclePayloads: buildStudentLifecyclePayloadsMock,
 }));
 
 const dispatchWithPreferencesMock = mock(async () => []);
 
-void mock.module("@/backend/services/notification/notification-dispatch.helpers", () => ({
+await mock.module("@/backend/services/notification/notification-dispatch.helpers", () => ({
   dispatchWithPreferences: dispatchWithPreferencesMock,
 }));
 
 // --- Logger mock (the service imports `logger` from `@/backend/lib/logger`) --
 
-void mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -124,7 +124,7 @@ void mock.module("@/backend/lib/logger", () => ({
 
 // --- Locale mock ---------------------------------------------------------
 
-void mock.module("@/shared/locale", () => ({
+await mock.module("@/shared/locale", () => ({
   getServerTranslations: () => ({
     errorsTranslations: new Proxy(
       {},

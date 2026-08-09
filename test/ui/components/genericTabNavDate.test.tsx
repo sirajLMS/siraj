@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
-void mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -15,7 +15,7 @@ void mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-void mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"] as const,
   defaultLocale: "en",
   useRouter: () => ({
@@ -35,7 +35,7 @@ void mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-void mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -47,7 +47,7 @@ void mock.module("@/shared/i18n/navigation", () => ({
   usePathname: () => "/students/history",
 }));
 
-void mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 

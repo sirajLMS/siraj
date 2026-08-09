@@ -75,7 +75,7 @@ let currentBoss = makeMockBoss();
 // We mock the class so `new` returns our mock instance.
 // Need a workaround not returning from constructor: use a regular function so
 // calling it with `new` will return the object via default behaviour.
-void mock.module("pg-boss", () => ({
+await mock.module("pg-boss", () => ({
   PgBoss: function MockPgBoss(this: unknown, _options: Record<string, unknown>) {
     // We need to return currentBoss. Since we can't assign its properties to `this`,
     // and the adapter expects `new PgBoss(...)` to return the boss interface,
@@ -85,7 +85,7 @@ void mock.module("pg-boss", () => ({
 }));
 
 // ── Mock @/backend/db/factory so createPool doesn't touch the DB ──
-void mock.module("@/backend/db/factory", () => ({
+await mock.module("@/backend/db/factory", () => ({
   createPool: () => ({ dummy: true }),
 }));
 

@@ -5,7 +5,7 @@ import {
   IanaTimezone,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
-void mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -20,7 +20,7 @@ void mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-void mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -38,7 +38,7 @@ void mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-void mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -50,7 +50,7 @@ void mock.module("@/shared/i18n/navigation", () => ({
   usePathname: () => "/search-schedule",
 }));
 
-void mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 

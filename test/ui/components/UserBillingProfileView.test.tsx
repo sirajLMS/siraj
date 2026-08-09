@@ -5,7 +5,7 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 // runs earlier alphabetically may bleed into this file if we don't re-register our own versions.
 // These mocks MUST be registered before any imports so they apply before module resolution.
 
-void mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -20,7 +20,7 @@ void mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-void mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"],
   defaultLocale: "en",
   useRouter: () => ({
@@ -40,7 +40,7 @@ void mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-void mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -52,7 +52,7 @@ void mock.module("@/shared/i18n/navigation", () => ({
   usePathname: () => "/users/test-user-id/billing-profile",
 }));
 
-void mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
@@ -158,7 +158,7 @@ function MobileView({ metrics, invoices, labels, searchQuery, onSearchChange }: 
 // type-check time; at runtime the mock factory substitutes our hand-rolled
 // stub that branches on `mediaQueryResult` to render the desktop/mobile test
 // fixtures our assertions check.
-void mock.module("@/frontend/desktop/views/dashboard/users/billing-profile/userBillingProfile.desktop", () => ({
+await mock.module("@/frontend/desktop/views/dashboard/users/billing-profile/userBillingProfile.desktop", () => ({
   UserBillingProfileDesktopView: (props: UserBillingProfileViewProps) => {
     const hasPermission = useUserStore.getState().hasPermission?.(AppPermission.BillingViewHistory) ?? false;
     if (!hasPermission) return null;

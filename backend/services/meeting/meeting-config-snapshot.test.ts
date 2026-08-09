@@ -92,7 +92,7 @@ function buildClassInstance(overrides: Partial<FakeClassInstance> = {}): FakeCla
 // ---------------------------------------------------------------------------
 
 // --- Logger
-void mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -102,12 +102,12 @@ void mock.module("@/backend/lib/logger", () => ({
 }));
 
 // --- meeting-config.validation — passthrough
-void mock.module("@/backend/lib/meeting-config.validation", () => ({
+await mock.module("@/backend/lib/meeting-config.validation", () => ({
   parseMeetingConfigDetails: (_provider: unknown, details: unknown) => details as MeetingConfigDetails,
 }));
 
 // --- meeting-config-mask
-void mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
+await mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
   buildMeetingProviderCatalogSnapshot: (provider: MeetingProviderSelectType) => ({
     catalogId: provider.id,
     catalogSlug: provider.slug,
@@ -121,7 +121,7 @@ void mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
 const userConfigGetByIdOrThrowMock = mock(async (): Promise<UserMeetingConfigSelectType> => buildUserConfig());
 const userConfigGetByIdMock = mock(async (): Promise<UserMeetingConfigSelectType | null> => buildUserConfig());
 
-void mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
   UserMeetingConfigRepository: {
     getByIdOrThrow: userConfigGetByIdOrThrowMock,
     getById: userConfigGetByIdMock,
@@ -150,7 +150,7 @@ function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {})
 
 const classConfigGetByIdOrThrowMock = mock(async (): Promise<ClassMeetingConfigSelectType> => buildClassConfig());
 
-void mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
   ClassMeetingConfigRepository: {
     getByIdOrThrow: classConfigGetByIdOrThrowMock,
   },
@@ -160,7 +160,7 @@ void mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", ()
 const providerGetByIdOrThrowMock = mock(async (): Promise<MeetingProviderSelectType> => buildProvider());
 const providerGetByIdMock = mock(async (): Promise<MeetingProviderSelectType | null> => buildProvider());
 
-void mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
   MeetingProviderRepository: {
     getByIdOrThrow: providerGetByIdOrThrowMock,
     getById: providerGetByIdMock,
@@ -199,7 +199,7 @@ const providerKindToSlugMock = mock((kind: string): "zoom" | "google_meet" | "mi
   return null;
 });
 
-void mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
+await mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
   getMeetingChannel: getMeetingChannelMock,
   providerKindToSlug: providerKindToSlugMock,
   meetingChannel: {},
@@ -219,13 +219,13 @@ const dbUpdateSetWhereMock = mock(async () => ({}));
 const dbUpdateSetMock = mock(() => ({ where: dbUpdateSetWhereMock }));
 const dbUpdateMock = mock(() => ({ set: dbUpdateSetMock }));
 
-void mock.module("@/backend/db/drizzleDb", () => ({
+await mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     update: dbUpdateMock,
   },
 }));
 
-void mock.module("@/backend/db/schema", () => ({
+await mock.module("@/backend/db/schema", () => ({
   classInstances: { id: "id" },
   teachers: { id: "id", userId: "userId" },
 }));
@@ -240,7 +240,7 @@ function buildQueryClient() {
 
 const queryClient = buildQueryClient();
 
-void mock.module("@/backend/db", () => ({
+await mock.module("@/backend/db", () => ({
   queryDb: () => queryClient,
 }));
 

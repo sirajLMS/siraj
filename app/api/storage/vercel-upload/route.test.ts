@@ -8,7 +8,7 @@ import {
 } from "@/frontend/common/graphql/test/testPort";
 
 // Mock dependencies
-void mock.module("@/backend/lib", () => ({
+await mock.module("@/backend/lib", () => ({
   extractTokenFromHeader: (header: string | null) => {
     if (header?.startsWith("Bearer ")) return header.slice(7);
     return null;
@@ -22,7 +22,7 @@ void mock.module("@/backend/lib", () => ({
   },
 }));
 
-void mock.module("@/backend/services", () => ({
+await mock.module("@/backend/services", () => ({
   SessionService: {
     validateSession: async (sessionId: string) => {
       if (sessionId === "valid-session-id") {
@@ -37,7 +37,7 @@ void mock.module("@/backend/services", () => ({
   },
 }));
 
-void mock.module("@/backend/db", () => ({
+await mock.module("@/backend/db", () => ({
   SignedUrlRepository: {
     getSignedUrlById: async () => ({
       used: false,
@@ -47,7 +47,7 @@ void mock.module("@/backend/db", () => ({
   },
 }));
 
-void mock.module("@vercel/blob/client", () => ({
+await mock.module("@vercel/blob/client", () => ({
   handleUpload: async () => new Response(JSON.stringify({ type: "blob.generate-client-token" }), { status: 200 }),
 }));
 

@@ -7,7 +7,7 @@ const { NextRequest: NextRequestImpl } = await import("next/server");
 
 // Suppress logger output during tests.
 const noop = () => {};
-void mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));

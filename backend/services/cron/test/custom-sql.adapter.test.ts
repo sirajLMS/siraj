@@ -15,12 +15,12 @@ const poolMock = {
   end: endMock,
 };
 
-void mock.module("@/backend/db/factory", () => ({
+await mock.module("@/backend/db/factory", () => ({
   createPool: () => poolMock,
 }));
 
 // Silence logger calls in test output.
-void mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   default: {
     info: () => {},
     warn: () => {},

@@ -12,11 +12,11 @@ const cacheInstance = {
   expire: expireMock,
 };
 
-void mock.module("@/backend/services/cache", () => ({
+await mock.module("@/backend/services/cache", () => ({
   cacheService: cacheInstance,
 }));
 
-void mock.module("@/backend/lib", () => ({
+await mock.module("@/backend/lib", () => ({
   logger: {
     log: () => {},
     info: () => {},

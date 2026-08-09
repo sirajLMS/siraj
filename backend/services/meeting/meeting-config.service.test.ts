@@ -72,14 +72,14 @@ function buildUserConfig(overrides: Partial<UserMeetingConfigSelectType> = {}): 
 // --- PermissionsService
 const hasPermissionMock = mock(async (): Promise<boolean> => true);
 
-void mock.module("@/backend/services/auth/permissions.service", () => ({
+await mock.module("@/backend/services/auth/permissions.service", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
 }));
 
 // --- Logger
-void mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -95,7 +95,7 @@ const getProvidersByIdsMock = mock(async (): Promise<Map<string, MeetingProvider
   return map;
 });
 
-void mock.module("@/backend/services/meeting/meeting-provider-catalog.service", () => ({
+await mock.module("@/backend/services/meeting/meeting-provider-catalog.service", () => ({
   MeetingProviderCatalogService: {
     getProvidersByIds: getProvidersByIdsMock,
   },
@@ -111,7 +111,7 @@ const userConfigDeleteMock = mock(async (): Promise<{ id: string }> => ({ id: CO
 const userConfigSetDefaultMock = mock(async (): Promise<UserMeetingConfigSelectType> => buildUserConfig());
 const userConfigUpsertManyMock = mock(async (): Promise<UserMeetingConfigSelectType[]> => [buildUserConfig()]);
 
-void mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
   UserMeetingConfigRepository: {
     create: userConfigCreateMock,
     update: userConfigUpdateMock,
@@ -127,7 +127,7 @@ void mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () 
 // --- ClassMeetingConfigRepository (imported by service, used by upsertManyClassMeetingConfigs)
 const classConfigUpsertManyMock = mock(async (): Promise<unknown[]> => []);
 
-void mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
   ClassMeetingConfigRepository: {
     upsertMany: classConfigUpsertManyMock,
   },
@@ -137,7 +137,7 @@ void mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", ()
 const providerGetByIdOrThrowMock = mock(async (): Promise<MeetingProviderSelectType> => buildProvider());
 const providerGetByIdsMock = mock(async (): Promise<MeetingProviderSelectType[]> => [buildProvider()]);
 
-void mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
   MeetingProviderRepository: {
     getByIdOrThrow: providerGetByIdOrThrowMock,
     getByIds: providerGetByIdsMock,
@@ -145,7 +145,7 @@ void mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => 
 }));
 
 // --- meeting-config-mask (pure functions, no mock needed but import-safe)
-void mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
+await mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
   buildMaskedMeetingConfig: (config: UserMeetingConfigSelectType) => ({
     id: config.id,
     userId: config.userId,
@@ -169,7 +169,7 @@ void mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
 
 // --- meeting-config.validation
 // Return the details as-is so maybeGenerateUrl can decide based on meetingUrl presence
-void mock.module("@/backend/lib/meeting-config.validation", () => ({
+await mock.module("@/backend/lib/meeting-config.validation", () => ({
   parseMeetingConfigDetails: (_provider: unknown, details: unknown) => details,
 }));
 

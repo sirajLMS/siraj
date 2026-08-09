@@ -35,7 +35,7 @@ const refreshRatesMock = mock(
 // Suppress expected logger output from cron-auth, the route error path, and
 // the deep db factory logger.log used when services barrel loads drizzleDb.
 const noop = () => {};
-void mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));
