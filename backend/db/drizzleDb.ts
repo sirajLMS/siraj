@@ -55,7 +55,7 @@ function getStatelessHttpDb() {
  * - Resolves to the cached HTTP database singleton if eligible.
  * - Falls back to default pooled `db` instance.
  */
-type QueryDbHandle = ReturnType<typeof getNeonHttpDb> | typeof db;
+export type QueryDbHandle = ReturnType<typeof getNeonHttpDb> | typeof db;
 
 export function queryDb(): QueryDbHandle;
 export function queryDb<T>(tx: T): T extends undefined ? QueryDbHandle : T;
