@@ -57,8 +57,8 @@ function setupProfileReposSpies(
     student?: Awaited<ReturnType<typeof StudentRepository.getStudentIdByUserId>>;
   } = {}
 ) {
-  spyOn(TeacherRepository, "findByUserId").mockResolvedValue(overrides.teacher ?? (null as never));
-  spyOn(ParentRepository, "findByUserId").mockResolvedValue(overrides.parent ?? (null as never));
+  spyOn(TeacherRepository, "findByUserId").mockResolvedValue(overrides.teacher ?? null);
+  spyOn(ParentRepository, "findByUserId").mockResolvedValue(overrides.parent ?? null);
   spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue(overrides.staff ?? null);
   spyOn(StudentRepository, "getStudentIdByUserId").mockResolvedValue(overrides.student ?? null);
 }
@@ -112,10 +112,10 @@ async function runStudentProfileTest(
   const result = await ProfileService.resolvePageContext("student-user", { mode });
 
   expect(permissionChecks).toBeLessThan(10);
-  if (isRedirect(result)) {
+  if ("redirect" in result) {
     throw new Error(`expected student profile ${mode.toLowerCase()} context, got redirect to ${result.redirect}`);
   }
-  const context = result as ProfilePageContext;
+  const context = result;
   assertProfileContext(context, expectedContext);
 }
 
@@ -176,10 +176,10 @@ async function runStaffProfileTest(
   if (expectedRedirect) {
     expect(result).toEqual({ redirect: expectedRedirect });
   } else if (expectedContext) {
-    if (isRedirect(result)) {
+    if ("redirect" in result) {
       throw new Error(`expected staff profile ${mode.toLowerCase()} context, got redirect to ${result.redirect}`);
     }
-    const context = result as ProfilePageContext;
+    const context = result;
     assertProfileContext(context, expectedContext);
   }
 }
@@ -200,10 +200,10 @@ describe("ProfileService.resolvePageContext", () => {
 
     const result = await ProfileService.resolvePageContext("admin-user", { mode: ProfileMode.VIEW });
 
-    if (isRedirect(result)) {
+    if ("redirect" in result) {
       throw new Error("expected profile page context, got redirect");
     }
-    const context = result as ProfilePageContext;
+    const context = result;
     assertProfileContext(context, {
       audience: ProfileAudience.STAFF,
       scope: ProfileScope.OTHER,
