@@ -77,6 +77,7 @@ function getProviderTokenConfig(providerSlug: MeetingProvider): ProviderTokenCon
       };
     }
   }
+  throw new Error(`Unhandled case in getProviderTokenConfig`);
 }
 
 // ============================================================================

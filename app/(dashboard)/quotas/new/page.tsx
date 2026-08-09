@@ -18,7 +18,7 @@ export default async function NewQuotaPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.QUOTAS_MANAGE], locale, context);
   return <QuotaFormContainer />;

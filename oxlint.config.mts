@@ -91,6 +91,18 @@ export default defineConfig({
         "@typescript-eslint/unbound-method": "off",
       },
     },
+    {
+      files: [
+        "frontend/common/hooks/useApolloConnectivity.ts",
+        "frontend/common/providers/apollo/useAuthRecoveryRegistration.ts",
+        "frontend/common/views/dashboard/admin/__shared__/useAdminDashboard.ts",
+        "frontend/common/views/dashboard/teachers/dashboard/utils/useTeacherDashboardLastUpdated.ts",
+        "frontend/common/views/dashboard/components/DashboardProfileShell.tsx",
+      ],
+      rules: {
+        "@typescript-eslint/consistent-return": "off",
+      },
+    },
   ],
   ignorePatterns: [
     "**/.*/**",

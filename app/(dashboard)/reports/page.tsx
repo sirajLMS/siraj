@@ -18,7 +18,7 @@ export default async function ReportsPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.REPORT_GENERATE_CUSTOM], locale, context);
   return <ReportsContainer />;

@@ -44,7 +44,7 @@ export default async function StudentsPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return null;
   }
 
   await requirePermissionForPage(userId, getStudentsPagePermissions(), locale, context);

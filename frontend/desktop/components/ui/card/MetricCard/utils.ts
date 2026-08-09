@@ -21,6 +21,7 @@ export function valueColor({ variant, theme }: { variant: MetricCardVariant; the
     case "default":
       return theme.palette.primary.main;
   }
+  throw new Error("Unhandled variant in valueColor");
 }
 
 export function filledIconWrapSx(theme: Theme, isError: boolean) {

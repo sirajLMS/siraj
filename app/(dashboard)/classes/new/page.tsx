@@ -18,7 +18,7 @@ export default async function CreateRecurringClassPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.SCHEDULE_MANAGE_RECURRING], locale, context);
   return <CreateRecurringClassContainer />;

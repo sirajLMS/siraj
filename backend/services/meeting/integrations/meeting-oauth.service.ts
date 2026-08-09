@@ -173,6 +173,7 @@ function buildAuthorizeUrl(providerSlug: MeetingProvider, redirectUri: string, s
     case "microsoft_teams":
       return buildMicrosoftTeamsAuthorizeUrl(redirectUri, state);
   }
+  throw new Error(`Unhandled case in buildAuthorizeUrl`);
 }
 
 // ============================================================================

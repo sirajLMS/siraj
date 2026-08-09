@@ -143,6 +143,7 @@ async function performStage(stage: QualityStage): Promise<boolean> {
       return await checkSonarResults();
     }
   }
+  throw new Error(`Unhandled case in performStage`);
 }
 
 const STAGES: QualityStage[] = ["BASIC_CHECKS", "CODESCENE", "SONAR_SCAN", "SONAR_RESULTS"];

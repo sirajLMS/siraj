@@ -143,7 +143,7 @@ export const useApolloConnectivity = () => {
       const connected = await checkConnectivity();
       if (connected) {
         reconnectAttemptRef.current = 0;
-        return;
+        return undefined;
       }
       reconnectAttemptRef.current += 1;
       scheduleReconnect();

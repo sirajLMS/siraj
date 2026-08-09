@@ -114,6 +114,7 @@ gqlSchemaBuilder.mutationField("upsertSiteContent", t =>
       } catch (error) {
         handleSiteContentServiceError(error, tErrors);
       }
+      return undefined;
     },
     description: "Creates or updates a site content entry by slug.",
   })

@@ -12,6 +12,7 @@ export function toGqlProfileMode(mode: ProfileMode): GqlProfileMode {
     case ProfileMode.EDIT:
       return GqlProfileMode.Edit;
   }
+  throw new Error(`Unhandled case in toGqlProfileMode`);
 }
 
 export function toGqlProfileScope(scope: ProfileScope): GqlProfileScope {
@@ -21,6 +22,7 @@ export function toGqlProfileScope(scope: ProfileScope): GqlProfileScope {
     case ProfileScope.OTHER:
       return GqlProfileScope.Other;
   }
+  throw new Error(`Unhandled case in toGqlProfileScope`);
 }
 
 export function toGqlProfileAudience(audience: ProfileAudience): GqlProfileAudience {
@@ -34,4 +36,5 @@ export function toGqlProfileAudience(audience: ProfileAudience): GqlProfileAudie
     case ProfileAudience.STUDENT:
       return "STUDENT" as GqlProfileAudience;
   }
+  throw new Error(`Unhandled case in toGqlProfileAudience`);
 }

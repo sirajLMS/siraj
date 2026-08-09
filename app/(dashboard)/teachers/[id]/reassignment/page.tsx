@@ -19,7 +19,7 @@ export default async function TeacherReassignmentPage() {
 
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   await requirePermissionForPage(

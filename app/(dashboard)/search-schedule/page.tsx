@@ -18,7 +18,7 @@ export default async function SearchSchedulePage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.SCHEDULE_SEARCH_AVAILABILITY], locale, context);
   return <SearchScheduleContainer />;

@@ -28,7 +28,7 @@ export default async function StudentProfilePage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(
     userId,

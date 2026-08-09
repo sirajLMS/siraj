@@ -73,6 +73,7 @@ function getAdapterEndpoints(slug: MeetingProvider): readonly string[] {
     case "microsoft_teams":
       return MicrosoftTeamsAdapter.ENDPOINTS;
   }
+  throw new Error(`Unhandled case in getAdapterEndpoints`);
 }
 
 function getProviderKind(slug: MeetingProvider): string {
@@ -84,6 +85,7 @@ function getProviderKind(slug: MeetingProvider): string {
     case "microsoft_teams":
       return "microsoft_teams_oauth";
   }
+  throw new Error(`Unhandled case in getProviderKind`);
 }
 
 function classifyTokenStatus(expiresAt: Date | null, revoked: boolean): MeetingIntegrationConnectedAccountStatus {

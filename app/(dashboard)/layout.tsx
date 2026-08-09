@@ -23,10 +23,10 @@ export default async function DashboardLayout({ children }: { readonly children:
     });
     if (await isPrefetchRequest()) {
       forbidden();
-      return;
+      return undefined;
     }
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   const cookieStore = await cookies();

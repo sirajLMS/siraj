@@ -13,6 +13,7 @@ function getPersonAccentColor(tone: ScheduleSessionPersonAccentTone, theme: Them
     case "default":
       return theme.palette.onSurface;
   }
+  throw new Error(`Unhandled case in getPersonAccentColor`);
 }
 
 export const scheduleSessionCardContentSx = {

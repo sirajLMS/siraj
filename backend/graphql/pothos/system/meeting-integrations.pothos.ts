@@ -295,6 +295,7 @@ gqlSchemaBuilder.mutationField("testMeetingProviderConnection", t =>
       } catch (err) {
         handleMeetingChannelError(err);
       }
+      return undefined;
     },
   })
 );
@@ -328,6 +329,7 @@ gqlSchemaBuilder.mutationField("connectMeetingProviderOAuth", t =>
       } catch (err) {
         handleMeetingChannelError(err);
       }
+      return undefined;
     },
   })
 );

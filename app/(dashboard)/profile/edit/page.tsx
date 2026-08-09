@@ -35,14 +35,14 @@ export default async function ProfileEditPage({ searchParams }: ProfileEditPageP
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   const resolvedSearchParams = await searchParams;
   const resolution = await resolveProfilePageContext(userId, context, { mode: ProfileMode.EDIT });
   if ("redirect" in resolution) {
     redirect({ href: resolution.redirect });
-    return;
+    return undefined;
   }
 
   let nationalIdComplete: boolean | undefined;
@@ -58,12 +58,12 @@ export default async function ProfileEditPage({ searchParams }: ProfileEditPageP
 
     if (!nationalIdComplete && !forceComplete) {
       redirect({ href: TEACHER_PROFILE_COMPLETION_EDIT_HREF });
-      return;
+      return undefined;
     }
 
     if (nationalIdComplete && forceComplete) {
       redirect({ href: buildTeacherProfileEditHref(false) });
-      return;
+      return undefined;
     }
   }
 

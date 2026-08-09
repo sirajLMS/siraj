@@ -33,7 +33,7 @@ export default async function TeacherWeeklySchedulePage({ params }: PageProps) {
 
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   await requirePermissionForPage(userId, [AppPermission.SCHEDULE_VIEW_WEEKLY], locale, context);

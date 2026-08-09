@@ -27,7 +27,7 @@ export function useLastUpdatedLabel(data: unknown, labels: AdminDashboardLastUpd
   useEffect(() => {
     if (dataArrivedAt === null) {
       setLastUpdated(labels.updatedJustNow);
-      return;
+      return undefined;
     }
     const computeLabel = () => {
       const elapsedMin = Math.floor((Date.now() - dataArrivedAt) / 60000);

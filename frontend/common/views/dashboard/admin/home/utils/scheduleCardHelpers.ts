@@ -12,6 +12,7 @@ export function getPersonAccentColor(tone: PersonAccentTone, theme: Theme): stri
     case "default":
       return theme.palette.onSurface;
   }
+  throw new Error(`Unhandled case in getPersonAccentColor`);
 }
 
 export function getNameInitials(name: string): string {

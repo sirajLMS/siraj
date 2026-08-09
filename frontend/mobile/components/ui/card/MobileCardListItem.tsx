@@ -29,6 +29,7 @@ function getAccentColor(color: "primary" | "info" | "error" | "warning", theme: 
     case "warning":
       return theme.palette.warning.main;
   }
+  throw new Error(`Unhandled case in getAccentColor`);
 }
 
 export function MobileCardListItem({
@@ -56,6 +57,7 @@ export function MobileCardListItem({
           case "bottom":
             return { borderBottom: `${width}px solid ${color}` };
         }
+        throw new Error(`Unhandled case in unknown`);
       }
     : undefined;
 
