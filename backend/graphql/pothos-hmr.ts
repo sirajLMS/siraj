@@ -11,26 +11,37 @@ type ConfigStoreLike = {
   refs: Set<unknown>;
   paramAssociations: Map<unknown, unknown>;
   pending: boolean;
-  __sirajHmrPatched?: boolean;
+  sirajHmrPatched?: boolean;
 };
 
 type BuilderWithConfigStore = {
   configStore: ConfigStoreLike;
 };
 
+const patchedFieldMaps = new WeakSet<Map<string, unknown>>();
+
 function allowFieldReplacement(fieldMap: Map<string, unknown>): Map<string, unknown> {
-  if ((fieldMap as { __sirajHmr?: boolean }).__sirajHmr) {
+  if (patchedFieldMaps.has(fieldMap)) {
     return fieldMap;
   }
-  (fieldMap as { __sirajHmr?: boolean }).__sirajHmr = true;
+  patchedFieldMaps.add(fieldMap);
   // Skip the duplicate-field throw in ConfigStore so HMR can replace resolvers.
   fieldMap.has = () => false;
   return fieldMap;
 }
 
+function isRefLike(value: unknown): value is RefLike {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "name" in value &&
+    typeof value.name === "string"
+  );
+}
+
 function clearTypeRegistration(store: ConfigStoreLike, typeName: string, keepRef: RefLike): void {
-  const existing = store.implementors.get(typeName) as RefLike | undefined;
-  if (!existing || existing === keepRef) {
+  const existing = store.implementors.get(typeName);
+  if (!isRefLike(existing) || existing === keepRef) {
     return;
   }
 
@@ -66,10 +77,10 @@ export function enablePothosDevHmr(builder: BuilderWithConfigStore): void {
   }
 
   const store = builder.configStore;
-  if (store.__sirajHmrPatched) {
+  if (store.sirajHmrPatched) {
     return;
   }
-  store.__sirajHmrPatched = true;
+  store.sirajHmrPatched = true;
 
   const originalAddTypeRef = store.addTypeRef.bind(store);
   store.addTypeRef = (ref: RefLike) => {
