@@ -27,6 +27,12 @@ function getTodayString() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+const ACTIVE_DASHBOARD_STATUSES: ReadonlySet<string> = new Set<string>([
+  ClassExecutionState.Running,
+  ClassExecutionState.Activated,
+]);
+const MISSED_DASHBOARD_STATUSES: ReadonlySet<string> = new Set<string>([ClassOutcome.Absent, ClassOutcome.Leave]);
+
 function mapRowToSessionStatus(
   outcome: string | null | undefined,
   executionState: string | null | undefined,
@@ -39,13 +45,10 @@ function mapRowToSessionStatus(
     scheduledEndAt: scheduledEndAt ?? undefined,
   });
 
-  if (
-    displayStatus === ClassExecutionState.Running ||
-    displayStatus === ClassExecutionState.Activated
-  ) {
+  if (ACTIVE_DASHBOARD_STATUSES.has(displayStatus)) {
     return "active";
   }
-  if (displayStatus === ClassOutcome.Absent || displayStatus === ClassOutcome.Leave) {
+  if (MISSED_DASHBOARD_STATUSES.has(displayStatus)) {
     return "missed";
   }
   return "upcoming";
@@ -125,7 +128,7 @@ function buildScheduleLabels(t: ScheduleAlertsLabels) {
     leaveDisabledReason: t.actions.leaveDisabledReason,
     viewClassAudit: t.actions.viewClassAudit,
     contactAdmin: t.actions.contactAdmin,
-    showingOf: t.showingOf as unknown as string,
+    showingOf: t.showingOf,
     active: t.sessionStatus.active,
     upcoming: t.sessionStatus.upcoming,
     missed: t.sessionStatus.missed,
@@ -136,13 +139,24 @@ function buildScheduleLabels(t: ScheduleAlertsLabels) {
   };
 }
 
+type MetricLabelKey = keyof ScheduleAlertsLabels["metrics"];
+
+function isMetricLabelKey(key: string): key is MetricLabelKey {
+  return (
+    key === "totalStudents" ||
+    key === "totalStudentsTrend" ||
+    key === "activeCourses" ||
+    key === "activeCoursesSub"
+  );
+}
+
 function buildMetricLabels(metrics: readonly AlertsMetric[], t: ScheduleAlertsLabels) {
   return Object.fromEntries(
     metrics.map(metric => [
       metric.key,
       {
-        label: t.metrics[metric.labelKey as keyof typeof t.metrics],
-        subLabel: t.metrics[metric.subLabelKey as keyof typeof t.metrics],
+        label: isMetricLabelKey(metric.labelKey) ? t.metrics[metric.labelKey] : "",
+        subLabel: isMetricLabelKey(metric.subLabelKey) ? t.metrics[metric.subLabelKey] : "",
       },
     ])
   );
