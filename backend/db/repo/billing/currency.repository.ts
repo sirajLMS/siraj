@@ -165,6 +165,6 @@ export namespace SupportedCurrencyRepository {
         ) AS in_use`
       )
       .limit(1);
-    return Boolean(row?.exists);
+    return row?.exists;
   }
 }

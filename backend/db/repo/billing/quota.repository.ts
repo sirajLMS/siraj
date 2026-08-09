@@ -402,7 +402,7 @@ export namespace QuotaRepository {
 
     return {
       rows,
-      totalCount: Number(countRow[0]?.value ?? 0),
+      totalCount: (countRow[0]?.value ?? 0),
     };
   };
 
@@ -731,7 +731,7 @@ export namespace QuotaRepository {
     // and balance update. The delta for a single-instance release is always 1,
     // but we use Number() so the guard type-checks and is ready for future callers
     // that might pass a dynamic count.
-    const releaseCount: number = Number(1);
+    const releaseCount: number = 1;
     if (releaseCount === 0) {
       logger.info(
         `releaseForInstance: delta=0, skipping ledger insert and balance update (quota ${input.quotaId}, instance ${input.classInstanceId})`

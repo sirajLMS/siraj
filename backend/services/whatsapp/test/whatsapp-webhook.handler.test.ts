@@ -18,7 +18,7 @@ const whatsappAccountUpdateMock = mock(async (): Promise<boolean> => true);
 const createManyAuditLogsMock = mock(async (_logs: unknown[]): Promise<void> => {});
 const findByPhoneMock = mock(async (): Promise<{ id: string } | null> => null);
 
-mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
+void mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
   NotificationRepository: {
     handleDeliveryWebhook: handleDeliveryWebhookMock,
     getDeliveryByProviderMessageId: getDeliveryByProviderMessageIdMock,
@@ -26,26 +26,26 @@ mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
   },
 }));
 
-mock.module("@/backend/services/whatsapp/whatsapp-account.service", () => ({
+void mock.module("@/backend/services/whatsapp/whatsapp-account.service", () => ({
   WhatsappAccountService: {
     systemFindByPhoneNumberId: findByPhoneNumberIdMock,
     systemUpdateAccount: whatsappAccountUpdateMock,
   },
 }));
 
-mock.module("@/backend/db/repo/users/user.repository", () => ({
+void mock.module("@/backend/db/repo/users/user.repository", () => ({
   UserRepository: {
     findByPhone: findByPhoneMock,
   },
 }));
 
-mock.module("@/backend/services/system/audit.service", () => ({
+void mock.module("@/backend/services/system/audit.service", () => ({
   AuditService: {
     createManyAuditLogs: createManyAuditLogsMock,
   },
 }));
 
-mock.module("@/backend/lib/logger", () => ({
+void mock.module("@/backend/lib/logger", () => ({
   logger: {
     log: () => {},
     info: () => {},

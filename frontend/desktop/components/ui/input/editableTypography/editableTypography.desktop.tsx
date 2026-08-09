@@ -137,7 +137,7 @@ export const EditableTypographyDesktop: React.FC<EditableTypographyProps> = ({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter") {
-        handleSave().then(r => r);
+        void handleSave().then(r => r);
       } else if (e.key === "Escape") {
         handleCancel();
       }

@@ -173,7 +173,7 @@ export function CronDesktopView({
       />
 
       <CronManualTriggerDialog
-        open={Boolean(triggering)}
+        open={triggering}
         schedule={triggeringSchedule ?? null}
         labels={labels}
         triggering={triggering}

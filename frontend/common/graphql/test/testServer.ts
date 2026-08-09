@@ -74,7 +74,7 @@ function killProcessTree(rootPid: number) {
 function pipeStreamLogs(proc: ReturnType<typeof spawn>) {
   if (proc.stderr && typeof proc.stderr === "object" && "getReader" in proc.stderr) {
     const stderrStream = proc.stderr as ReadableStream<Uint8Array>;
-    (async () => {
+    void (async () => {
       try {
         const reader = stderrStream.getReader();
         const decoder = new TextDecoder();
@@ -91,7 +91,7 @@ function pipeStreamLogs(proc: ReturnType<typeof spawn>) {
 
   if (proc.stdout && typeof proc.stdout === "object" && "getReader" in proc.stdout) {
     const stdoutStream = proc.stdout as ReadableStream<Uint8Array>;
-    (async () => {
+    void (async () => {
       try {
         const reader = stdoutStream.getReader();
         const decoder = new TextDecoder();

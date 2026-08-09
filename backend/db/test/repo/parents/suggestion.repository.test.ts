@@ -443,7 +443,7 @@ describe("SuggestionRepository — markSuggestionReviewed (Story 15)", () => {
     expectReviewedFields(result, user.id);
   });
 
-  expectNonExistentError("throws for non-existent suggestion ID", tx =>
+  void expectNonExistentError("throws for non-existent suggestion ID", tx =>
     SuggestionRepository.markSuggestionReviewed({ suggestionId: NIL_UUID, reviewedByUserId: NIL_UUID }, tx)
   );
 });
@@ -466,7 +466,7 @@ describe("SuggestionRepository — respondToSuggestion", () => {
     expectReviewedFields(result, user.id);
   });
 
-  expectNonExistentError("throws for non-existent suggestion ID", tx =>
+  void expectNonExistentError("throws for non-existent suggestion ID", tx =>
     SuggestionRepository.respondToSuggestion(
       { suggestionId: NIL_UUID, adminResponse: "Should fail", reviewedByUserId: NIL_UUID },
       tx
@@ -512,7 +512,7 @@ describe("SuggestionRepository — markAsDuplicate", () => {
     expect(result.status).toBe(SuggestionStatus.DUPLICATE);
   });
 
-  expectNonExistentError("throws for non-existent duplicate suggestion ID", async tx => {
+  void expectNonExistentError("throws for non-existent duplicate suggestion ID", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "MarkDupNF");
     const original = await insertSuggestion(tx, parent.id, { status: "REVIEWED" });
     return SuggestionRepository.markAsDuplicate(
@@ -521,7 +521,7 @@ describe("SuggestionRepository — markAsDuplicate", () => {
     );
   });
 
-  expectNonExistentError("throws for non-existent original suggestion ID (FK violation)", async tx => {
+  void expectNonExistentError("throws for non-existent original suggestion ID (FK violation)", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "MarkDupOrig");
     const duplicate = await insertSuggestion(tx, parent.id, { status: "PENDING" });
     return SuggestionRepository.markAsDuplicate(

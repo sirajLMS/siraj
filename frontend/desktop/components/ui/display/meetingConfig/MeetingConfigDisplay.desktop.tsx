@@ -25,7 +25,7 @@ function resolveSourceLabel(
   source: EffectiveMeetingSource | string | null | undefined,
   t: MeetingConfigDisplayLabels
 ): string {
-  const normalized = String(source ?? "").toLowerCase();
+  const normalized = (source ?? "").toLowerCase();
   if (normalized === EffectiveMeetingSource.Class) return t.sourceClass;
   if (normalized === EffectiveMeetingSource.Recurring) return t.sourceRecurring;
   if (normalized === EffectiveMeetingSource.Teacher) return t.sourceTeacher;

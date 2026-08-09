@@ -123,7 +123,7 @@ export function TeacherClassListDesktopView({
           ) : (
             rows.map(row => (
               <ClassRow
-                key={row.id ?? String(row.studentName ?? "")}
+                key={row.id ?? (row.studentName ?? "")}
                 row={row}
                 labels={labels}
                 locale={locale}

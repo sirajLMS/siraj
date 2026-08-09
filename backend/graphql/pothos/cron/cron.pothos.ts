@@ -210,8 +210,8 @@ gqlSchemaBuilder.queryField("cronSchedule", t =>
     description: "Fetch a single cron schedule by ID.",
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
-      const result = await CronService.getSchedule(String(args.id));
-      handleNotFoundError(result, String(args.id), tErrors);
+      const result = await CronService.getSchedule(args.id);
+      handleNotFoundError(result, args.id, tErrors);
       return result;
     },
   })
@@ -228,8 +228,8 @@ gqlSchemaBuilder.queryField("cronRun", t =>
     description: "Fetch a single cron run by ID.",
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
-      const result = await CronService.getRunById(String(args.id));
-      handleNotFoundError(result, String(args.id), tErrors);
+      const result = await CronService.getRunById(args.id);
+      handleNotFoundError(result, args.id, tErrors);
       return result;
     },
   })

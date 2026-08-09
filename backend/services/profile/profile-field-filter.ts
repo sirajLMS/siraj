@@ -53,8 +53,8 @@ function shouldApplyProfileGroup(group: ProfileFieldGroupDefinition, ctx: FieldF
   return group.scopes.includes(ctx.scope);
 }
 
-function stripProfileGroupPaths<T extends Record<string, unknown>>(
-  filtered: T,
+function stripProfileGroupPaths(
+  filtered: Record<string, unknown>,
   group: ProfileFieldGroupDefinition
 ): void {
   for (const path of group.paths) {
@@ -146,7 +146,7 @@ export function assertProfileEditFieldGroups(ctx: FieldFilterContext, submittedG
   }
 }
 
-const KEY_INCLUDES = <T extends string>(keys: readonly T[], key: string): boolean => keys.includes(key as T);
+const KEY_INCLUDES = (keys: readonly string[], key: string): boolean => keys.includes(key as string);
 
 function collectCoreGroups(core: Record<string, unknown>, groups: Set<string>): void {
   if (["name", "email", "avatarUrl", "displayCurrency"].some(key => key in core)) {

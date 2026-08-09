@@ -263,7 +263,7 @@ export namespace RecurringScheduleRepository {
           teacherUserName: row.teacherUserName,
         })
       ),
-      totalCount: Number(totalCount),
+      totalCount: totalCount,
     };
   }
 }

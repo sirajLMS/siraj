@@ -91,7 +91,7 @@ export function TeacherOnboardingDesktopView({
         <Box
           component="form"
           onSubmit={e => {
-            handleSubmit(onSubmit)(e);
+            void handleSubmit(onSubmit)(e);
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
         >

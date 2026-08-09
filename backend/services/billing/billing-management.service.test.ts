@@ -115,21 +115,21 @@ const dbSelectMock = mock((arg?: unknown) => {
 
 const dbTransactionMock = mock(async (fn: (tx: unknown) => Promise<unknown>) => fn({}));
 
-mock.module("@/backend/db/drizzleDb", () => ({
+void mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     select: dbSelectMock,
     transaction: dbTransactionMock,
   },
 }));
 
-mock.module("@/backend/db/schema", () => ({
+void mock.module("@/backend/db/schema", () => ({
   groupPermissions: {},
   permissions: {},
   userPermissionGroups: {},
   invoices: {},
 }));
 
-mock.module("@/backend/db/repo", () => ({
+void mock.module("@/backend/db/repo", () => ({
   BillingRepository: {
     createInvoice: createInvoiceMock,
     createInvoiceCoverageMonths: createInvoiceCoverageMonthsMock,
@@ -164,7 +164,7 @@ mock.module("@/backend/db/repo", () => ({
 
 const hasPermissionMock = mock(async () => true);
 
-mock.module("@/backend/services/auth/permissions.service", () => ({
+void mock.module("@/backend/services/auth/permissions.service", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
@@ -180,7 +180,7 @@ const syncUnpaidNotificationsMock = mock(async () => ({
   items: [],
 }));
 
-mock.module("@/backend/services/system/notification-sync.service", () => ({
+void mock.module("@/backend/services/system/notification-sync.service", () => ({
   NotificationSyncService: {
     syncUnpaidNotifications: syncUnpaidNotificationsMock,
   },
@@ -188,7 +188,7 @@ mock.module("@/backend/services/system/notification-sync.service", () => ({
 
 // Re-export NotificationSyncService barrel-aligned (the service file imports
 // via `@/backend/services`).
-mock.module("@/backend/services", () => ({
+void mock.module("@/backend/services", () => ({
   NotificationSyncService: {
     syncUnpaidNotifications: syncUnpaidNotificationsMock,
   },
@@ -263,7 +263,7 @@ const buildInvoiceStatusChangedPayloadsMock = mock(
   }
 );
 
-mock.module("@/backend/services/notification/notification-payloads.builders", () => ({
+void mock.module("@/backend/services/notification/notification-payloads.builders", () => ({
   buildInvoiceGeneratedPayloads: buildInvoiceGeneratedPayloadsMock,
   buildInvoiceStatusChangedPayloads: buildInvoiceStatusChangedPayloadsMock,
 }));
@@ -285,13 +285,13 @@ const dispatchWithPreferencesMock = mock(async (payloads: unknown[], affectedUse
   return out;
 });
 
-mock.module("@/backend/services/notification/notification-dispatch.helpers", () => ({
+void mock.module("@/backend/services/notification/notification-dispatch.helpers", () => ({
   dispatchWithPreferences: dispatchWithPreferencesMock,
 }));
 
 // --- Logger mock ---------------------------------------------------------
 
-mock.module("@/backend/lib", () => ({
+void mock.module("@/backend/lib", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -310,7 +310,7 @@ mock.module("@/backend/lib", () => ({
 
 // --- Locale mock (the service imports `@/shared/locale` for type-only) ---
 
-mock.module("@/shared/locale", () => ({
+void mock.module("@/shared/locale", () => ({
   getServerTranslations: () => ({
     errorsTranslations: new Proxy(
       {},
@@ -326,7 +326,7 @@ mock.module("@/shared/locale", () => ({
 
 // --- Proof-file helpers mock --------------------------------------------
 
-mock.module("@/backend/services/billing/billing-payment-proof.helpers", () => ({
+void mock.module("@/backend/services/billing/billing-payment-proof.helpers", () => ({
   assertInvoiceBelongsToParentUser: async () => undefined,
   validateProofFile: async () => ({ filePath: "uploads/proof.png", mimeType: "image/png" }),
   linkProofToInvoice: async () => undefined,

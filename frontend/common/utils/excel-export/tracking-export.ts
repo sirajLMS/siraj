@@ -83,7 +83,7 @@ function resolveStatusValue(status: string | null | undefined, statusLabels: Rec
   if (status === undefined || status === null) {
     return "";
   }
-  return statusLabels[status] ?? String(status);
+  return statusLabels[status] ?? status;
 }
 
 export async function exportRescheduleTracking(data: TrackingExportData): Promise<void> {

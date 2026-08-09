@@ -235,7 +235,7 @@ function MeetingProviderFormCapabilitiesSection({
               sx={{ gap: 1, ml: -0.5 }}
               control={
                 <Checkbox
-                  checked={Boolean(field.value)}
+                  checked={field.value}
                   onChange={e => field.onChange(e.target.checked)}
                   disabled={isSaving}
                 />
@@ -252,7 +252,7 @@ function MeetingProviderFormCapabilitiesSection({
               sx={{ gap: 1, ml: -0.5 }}
               control={
                 <Checkbox
-                  checked={Boolean(field.value)}
+                  checked={field.value}
                   onChange={e => field.onChange(e.target.checked)}
                   disabled={isSaving}
                 />
@@ -269,7 +269,7 @@ function MeetingProviderFormCapabilitiesSection({
               sx={{ gap: 1, ml: -0.5 }}
               control={
                 <Checkbox
-                  checked={Boolean(field.value)}
+                  checked={field.value}
                   onChange={e => field.onChange(e.target.checked)}
                   disabled={isSaving}
                 />
@@ -286,7 +286,7 @@ function MeetingProviderFormCapabilitiesSection({
               sx={{ gap: 1.5, ml: 0 }}
               control={
                 <Switch
-                  checked={Boolean(field.value)}
+                  checked={field.value}
                   onChange={e => field.onChange(e.target.checked)}
                   disabled={isSaving}
                 />

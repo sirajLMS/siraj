@@ -60,10 +60,10 @@ export namespace ReferenceDataService {
       const result = await db.execute(sql.raw(`SELECT COUNT(*)::int AS count FROM "${tableName}"`));
       if (Array.isArray(result)) {
         const row = result[0] as { count?: number } | undefined;
-        counts[tableName] = Number(row?.count ?? 0);
+        counts[tableName] = (row?.count ?? 0);
       } else {
         const rows = (result as unknown as { rows?: { count: number }[] }).rows ?? [];
-        counts[tableName] = Number(rows[0]?.count ?? 0);
+        counts[tableName] = (rows[0]?.count ?? 0);
       }
     }
     return counts;

@@ -28,7 +28,7 @@ export function CategorySelectField<T extends FieldValues>({
   disabled,
   categories,
 }: Readonly<CategorySelectFieldProps<T>>) {
-  const labelId = `${String(name)}-label`;
+  const labelId = `${name}-label`;
 
   return (
     <Controller

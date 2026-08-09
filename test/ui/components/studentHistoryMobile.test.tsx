@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
-mock.module("next/navigation", () => ({
+void mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -15,7 +15,7 @@ mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
+void mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"] as const,
   defaultLocale: "en",
   useRouter: () => ({
@@ -35,7 +35,7 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/navigation", () => ({
+void mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -47,7 +47,7 @@ mock.module("@/shared/i18n/navigation", () => ({
   usePathname: () => "/students/history",
 }));
 
-mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+void mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 

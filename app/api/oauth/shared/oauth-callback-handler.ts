@@ -98,7 +98,7 @@ async function exchangeCodeForTokens(
     for (const [key, value] of Object.entries(cfg.extraTokenParams)) {
       // Ensure only string values are appended; the config type enforces this,
       // but guard defensively in case of unexpected runtime values.
-      if (value != null) params.set(key, String(value));
+      if (value != null) params.set(key, value);
     }
   }
 

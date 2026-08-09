@@ -20,7 +20,7 @@ import { safeCronJobKind } from "@/backend/types/cron/cron.types";
  * Used to type the pool returned by `createPool()` without coupling to `pg` types directly.
  */
 interface QueryablePool {
-  query<T = unknown>(text: string, values?: unknown[]): Promise<{ rows: T[]; rowCount: number }>;
+  query(text: string, values?: unknown[]): Promise<{ rows: unknown[]; rowCount: number }>;
   end(): Promise<void>;
 }
 

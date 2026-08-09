@@ -107,7 +107,7 @@ export const useApolloConnectivity = () => {
         actionText: t.retry,
         onAction: () => {
           reconnectAttemptRef.current = 0;
-          checkConnectivity().then(connected => {
+          void checkConnectivity().then(connected => {
             if (connected) {
               notifications.show(t.connectionRestored, {
                 severity: "success",

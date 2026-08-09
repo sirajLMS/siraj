@@ -49,7 +49,7 @@ export function AvailabilitySearchFormDesktop({ onSearch, labels }: Readonly<Ava
     <Box
       component="form"
       onSubmit={e => {
-        handleSubmit(onSubmit)(e);
+        void handleSubmit(onSubmit)(e);
       }}
       sx={{
         display: "grid",

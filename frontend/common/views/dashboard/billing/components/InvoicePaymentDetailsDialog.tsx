@@ -753,13 +753,13 @@ function useDialogHandlers(review: ReviewState, onClose: () => void): DialogHand
   };
 
   const onApprove = () => {
-    review.handleApprove();
+    void review.handleApprove();
   };
 
   const onRequestReject = () => review.setShowRejectConfirm(true);
 
   const onConfirmReject = () => {
-    review.handleReject();
+    void review.handleReject();
   };
 
   return {

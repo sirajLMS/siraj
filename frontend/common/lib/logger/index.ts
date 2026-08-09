@@ -147,7 +147,7 @@ class ClientLogger {
     if (this.batchTimer !== null) return;
 
     this.batchTimer = setTimeout(() => {
-      this.flushLogs();
+      void this.flushLogs();
     }, this.config.batchInterval);
   }
 

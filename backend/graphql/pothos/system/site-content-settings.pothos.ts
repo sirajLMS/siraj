@@ -89,7 +89,7 @@ gqlSchemaBuilder.queryField("siteContentEntry", t =>
       const tErrors = ctx.t().errorsTranslations;
       await requireAuth(ctx);
       assertCanViewSiteContentSettings(ctx, tErrors);
-      return SiteContentService.getSiteContentById(String(args.id));
+      return SiteContentService.getSiteContentById(args.id);
     },
     description: "Fetches a single site content entry by ID.",
   })
@@ -134,7 +134,7 @@ gqlSchemaBuilder.mutationField("updateSiteContentPublishState", t =>
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
 
-      const result = await SiteContentService.updatePublishState(String(args.id), args.isPublished, userId, tErrors);
+      const result = await SiteContentService.updatePublishState(args.id, args.isPublished, userId, tErrors);
 
       if (!result) {
         throw new GraphQLError(tErrors.notFound, {
@@ -162,7 +162,7 @@ gqlSchemaBuilder.mutationField("deleteSiteContent", t =>
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
 
-      await SiteContentService.deleteSiteContentById(String(args.id), userId, tErrors);
+      await SiteContentService.deleteSiteContentById(args.id, userId, tErrors);
 
       return true;
     },

@@ -207,7 +207,7 @@ function StoryStatusTrackingContainer() {
   const activateSession = useStoryStatusTrackingStore(state => state.activateSession);
   const verifySession = useStoryStatusTrackingStore(state => state.verifySession);
 
-  const suspendedCount = Number(metrics.find(m => m.key === "suspended")?.count ?? 0);
+  const suspendedCount = (metrics.find(m => m.key === "suspended")?.count ?? 0);
 
   const labelsBySection = buildStatusTrackingLabelsBySection(labels);
 

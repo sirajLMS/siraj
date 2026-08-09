@@ -49,7 +49,7 @@ export function AvailabilitySearchFormMobile({ onSearch, labels }: Readonly<Avai
     <Box
       component="form"
       onSubmit={e => {
-        handleSubmit(onSubmit)(e);
+        void handleSubmit(onSubmit)(e);
       }}
       sx={{
         display: "flex",

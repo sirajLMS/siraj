@@ -74,7 +74,7 @@ function buildFormSubmitHandler(
   onSubmit: (data: ComplaintFormData) => void
 ): () => void {
   return () => {
-    handleSubmit(data => {
+    void handleSubmit(data => {
       onSubmit(data);
       reset();
     })();

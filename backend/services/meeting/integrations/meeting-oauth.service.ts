@@ -111,7 +111,7 @@ function buildRedirectUri(providerSlug: MeetingProvider): string {
   const baseUrl = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
   // Use split/join instead of replace/replaceAll for better compatibility and to
   // satisfy static analysis rules that prefer explicit all-occurrence handling.
-  const pathSlug = String(providerSlug).split("_").join("-");
+  const pathSlug = providerSlug.split("_").join("-");
   return `${baseUrl.replace(/\/$/, "")}/api/oauth/${pathSlug}/callback`;
 }
 

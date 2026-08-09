@@ -19,7 +19,7 @@ export function ParentBillingDesktopView({
   isSearchPending = false,
   canView,
   canSubmitProof,
-  canManage = false,
+  canManage,
   billingActionsDisabled = false,
   onSearchChange,
   onPayNow,

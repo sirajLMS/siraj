@@ -43,7 +43,7 @@ function resolveLifecycleStatus(adminData: ParentAdminData): string {
   } else {
     raw = "REGULAR";
   }
-  return String(raw).toLowerCase();
+  return raw.toLowerCase();
 }
 
 function BillingEditSection({

@@ -55,7 +55,7 @@ export function TeacherStudentsDesktopView({ rows, loading, error, labels }: Rea
           {rows.length === 0 ? (
             <Typography sx={{ color: theme => theme.palette.text.secondary }}>{labels.noStudents}</Typography>
           ) : (
-            rows.map(row => <StudentRowCard key={row.id ?? String(row.name ?? "")} row={row} labels={labels} />)
+            rows.map(row => <StudentRowCard key={row.id ?? (row.name ?? "")} row={row} labels={labels} />)
           )}
         </Stack>
       ) : null}

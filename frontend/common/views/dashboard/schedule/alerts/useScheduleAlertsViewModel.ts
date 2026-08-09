@@ -138,8 +138,8 @@ function buildMetricLabels(metrics: readonly AlertsMetric[], t: ScheduleAlertsLa
     metrics.map(metric => [
       metric.key,
       {
-        label: String(t.metrics[metric.labelKey as keyof typeof t.metrics]),
-        subLabel: String(t.metrics[metric.subLabelKey as keyof typeof t.metrics]),
+        label: t.metrics[metric.labelKey as keyof typeof t.metrics],
+        subLabel: t.metrics[metric.subLabelKey as keyof typeof t.metrics],
       },
     ])
   );

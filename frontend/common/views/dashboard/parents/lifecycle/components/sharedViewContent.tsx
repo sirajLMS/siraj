@@ -164,7 +164,7 @@ export function LifecycleFormBody({
     <Box
       component="form"
       onSubmit={e => {
-        methods.handleSubmit(handleSubmit)(e);
+        void methods.handleSubmit(handleSubmit)(e);
       }}
       sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}
     >

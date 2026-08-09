@@ -66,7 +66,7 @@ const fetchCountryCode = (
   defaultCountryCode: string
 ) => {
   if (!hasClientWindow()) {
-    detectCountry(setCountryCode, setError, setLoading, defaultCountryCode);
+    void detectCountry(setCountryCode, setError, setLoading, defaultCountryCode);
     return;
   }
 
@@ -98,7 +98,7 @@ const fetchCountryCode = (
     return;
   }
 
-  detectCountry(setCountryCode, setError, setLoading, defaultCountryCode);
+  void detectCountry(setCountryCode, setError, setLoading, defaultCountryCode);
 };
 
 export function useCountryDetection(timeout: number = 2000, defaultCountryCode: string = "SA"): CountryDetectionResult {

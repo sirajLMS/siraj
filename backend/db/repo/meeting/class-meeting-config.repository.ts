@@ -169,7 +169,7 @@ export namespace ClassMeetingConfigRepository {
 
       const updateData: Record<string, unknown> = { updatedAt: new Date() };
 
-      function collectPresentKeys<T extends Record<string, unknown>>(obj: T, keys: readonly string[]): string[] {
+      function collectPresentKeys(obj: Record<string, unknown>, keys: readonly string[]): string[] {
         const result: string[] = [];
         for (const key of keys) {
           if (key in obj) {

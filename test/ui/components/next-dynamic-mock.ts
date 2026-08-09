@@ -53,9 +53,9 @@ async function preloadViews() {
 }
 
 // Start preloading immediately
-preloadViews();
+void preloadViews();
 
-mock.module("next/dynamic", () => {
+void mock.module("next/dynamic", () => {
   const dynamic = <T extends Record<string, unknown>>(
     importer: () => Promise<{ default: React.ComponentType<T> }>,
     options?: { ssr?: boolean; loading?: () => React.ReactNode }

@@ -52,7 +52,7 @@ const isRecentSuccessMock = mock(async (): Promise<boolean> => false);
 const getRunningSyncRunMock = mock(async (): Promise<SyncRunRow | null> => null);
 const updateExchangeRateInTxMock = mock(async () => ({}));
 
-mock.module("@/backend/db/repo", () => ({
+void mock.module("@/backend/db/repo", () => ({
   BillingRepository: {
     updateExchangeRateInTx: updateExchangeRateInTxMock,
   },
@@ -67,7 +67,7 @@ mock.module("@/backend/db/repo", () => ({
 
 const transactionMock = mock(async (cb: (tx: unknown) => Promise<unknown>) => cb({}));
 
-mock.module("@/backend/db/drizzleDb", () => ({
+void mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     transaction: transactionMock,
   },
@@ -75,14 +75,14 @@ mock.module("@/backend/db/drizzleDb", () => ({
 
 const hasPermissionMock = mock(async (): Promise<boolean> => true);
 
-mock.module("@/backend/services", () => ({
+void mock.module("@/backend/services", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
   getRedisService: async () => ({}),
 }));
 
-mock.module("@/backend/lib", () => ({
+void mock.module("@/backend/lib", () => ({
   logger: {
     log: () => {},
     info: () => {},
@@ -95,7 +95,7 @@ mock.module("@/backend/lib", () => ({
 // Service now calls getServerTranslations(locale).errorsTranslations (real import).
 // Mock returns the required literal strings so the assertion expectations match.
 // fxSyncAlreadyRunning is preserved as a raw literal — no schema counterpart.
-mock.module("@/shared/locale/server-graphql", () => ({
+void mock.module("@/shared/locale/server-graphql", () => ({
   getServerTranslations: () => ({
     errorsTranslations: {
       insufficientPermissions: "insufficientPermissions",
@@ -129,7 +129,7 @@ const providerInstance = {
   validateConfig: () => true,
 };
 
-mock.module("@/backend/services/fx/providers/FxRateProviderFactory", () => ({
+void mock.module("@/backend/services/fx/providers/FxRateProviderFactory", () => ({
   getFxRateProvider: mock(async () => providerInstance),
   resetFxRateProvider: () => {},
   fxRateProvider: {

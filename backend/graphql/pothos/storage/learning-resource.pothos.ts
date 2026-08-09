@@ -87,7 +87,7 @@ gqlSchemaBuilder.mutationField("deleteLearningResource", t =>
       // 2. Delegate to Service Layer
       // We pass the stringified ID, the actor's ID, and the locale.
       // The Service Layer handles the RBAC check for 'resources.delete'.
-      return LearningResourceService.deleteResource(String(args.id), ctx.user.id, ctx.locale);
+      return LearningResourceService.deleteResource(args.id, ctx.user.id, ctx.locale);
     },
   })
 );

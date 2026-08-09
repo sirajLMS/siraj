@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
-mock.module("next/navigation", () => ({
+void mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "ar" }),
   useRouter: () => ({
     push: () => {},
@@ -15,7 +15,7 @@ mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
+void mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"],
   defaultLocale: "ar",
   useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
@@ -28,7 +28,7 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/navigation", () => ({
+void mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -44,7 +44,7 @@ mock.module("@/shared/i18n/navigation", () => ({
 // Note: mock.module registrations are process-global in Bun, so this mock
 // will bleed into subsequent test files. The signature MUST match the real
 // RequirePermission component (plural "permissions", single-or-array).
-mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
+void mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
   RequirePermission: ({
     permissions,
     children,
@@ -69,7 +69,7 @@ mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
 // mock-module target path below redirects to the canonical desktop tier module
 // (real file) so the import in this file resolves at type-check time; at runtime
 // the mock factory still substitutes our hand-rolled stub for assertion control.
-mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop", () => ({
+void mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop", () => ({
   ScheduleOverviewDesktopView: (props: UseScheduleOverviewViewModelProps) => {
     const hasSearchPermission = useUserStore.getState().hasPermission?.(AppPermission.DashboardSearch) ?? false;
     const { shell, filters } = props.labelsBySection;

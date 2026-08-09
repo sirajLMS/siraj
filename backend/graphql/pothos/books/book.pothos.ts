@@ -44,7 +44,7 @@ gqlSchemaBuilder.mutationField("deleteBook", t =>
         throw new Error("unauthenticated");
       }
 
-      return BookService.deleteBook(String(args.id), ctx.user.id, ctx.locale);
+      return BookService.deleteBook(args.id, ctx.user.id, ctx.locale);
     },
   })
 );

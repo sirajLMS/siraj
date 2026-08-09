@@ -143,7 +143,7 @@ export namespace QuotaLedgerRepository {
       .select({ value: sql<number>`count(*)::int` })
       .from(quotaLedger)
       .where(eq(quotaLedger.quotaId, quotaId));
-    return Number(row?.value ?? 0);
+    return (row?.value ?? 0);
   };
 
   export const computeBalance = async (
@@ -159,8 +159,8 @@ export namespace QuotaLedgerRepository {
       .from(quotaLedger)
       .where(eq(quotaLedger.quotaId, quotaId));
     return {
-      remaining: Math.max(0, Number(row?.netSum ?? 0)),
-      reservedClasses: Math.max(0, Math.abs(Number(row?.reservedSum ?? 0))),
+      remaining: Math.max(0, (row?.netSum ?? 0)),
+      reservedClasses: Math.max(0, Math.abs((row?.reservedSum ?? 0))),
     };
   };
 }

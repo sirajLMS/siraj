@@ -16,8 +16,8 @@ function runScript(env: Record<string, string | undefined> = {}): {
     encoding: "utf-8",
   });
   return {
-    stdout: result.stdout?.toString() || "",
-    stderr: result.stderr?.toString() || "",
+    stdout: result.stdout || "",
+    stderr: result.stderr || "",
     exitCode: result.status ?? 1,
   };
 }

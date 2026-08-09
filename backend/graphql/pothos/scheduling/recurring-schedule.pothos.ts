@@ -114,7 +114,7 @@ gqlSchemaBuilder.queryField("recurringSchedules", t =>
           teacherId: row.teacherId,
           teacherName: row.teacherUserName,
           durationMinutes: row.durationMinutes,
-          defaultStartTime: String(row.defaultStartTime).slice(0, 5),
+          defaultStartTime: row.defaultStartTime.slice(0, 5),
           timezone: row.timezone,
           hourlyRate: row.hourlyRate,
           rateCurrency: row.rateCurrency,

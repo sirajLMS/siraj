@@ -25,7 +25,7 @@ export function UserBillingProfileMobileView({
   loading,
   canView,
   canSubmitProof,
-  canManage = false,
+  canManage,
   billingActionsDisabled = false,
   onSearchChange,
   onPayNow,

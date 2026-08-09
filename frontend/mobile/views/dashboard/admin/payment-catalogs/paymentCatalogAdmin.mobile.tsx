@@ -18,7 +18,7 @@ export function PaymentCatalogAdminMobileView({
   mobileWallets,
   paymentLinks,
   onlineAccounts,
-  loading = false,
+  loading,
   onAdd,
   onEdit,
   onDelete,

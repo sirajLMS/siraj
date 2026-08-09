@@ -47,13 +47,13 @@ function makeAdapterMock(): IMeetingChannel {
 // ---------------------------------------------------------------------------
 
 // --- Adapter static ENDPOINTS (service reads these for listIntegrationProviders)
-mock.module("@/backend/services/meeting/channels/zoom/ZoomMeetingAdapter", () => ({
+void mock.module("@/backend/services/meeting/channels/zoom/ZoomMeetingAdapter", () => ({
   ZoomMeetingAdapter: {
     ENDPOINTS: ["https://zoom.us/oauth/token", "https://api.zoom.us/v2/users/me", "https://api.zoom.us/v2/meetings"],
   },
 }));
 
-mock.module("@/backend/services/meeting/channels/google-meet/GoogleMeetAdapter", () => ({
+void mock.module("@/backend/services/meeting/channels/google-meet/GoogleMeetAdapter", () => ({
   GoogleMeetAdapter: {
     ENDPOINTS: [
       "https://oauth2.googleapis.com/token",
@@ -63,7 +63,7 @@ mock.module("@/backend/services/meeting/channels/google-meet/GoogleMeetAdapter",
   },
 }));
 
-mock.module("@/backend/services/meeting/channels/microsoft-teams/MicrosoftTeamsAdapter", () => ({
+void mock.module("@/backend/services/meeting/channels/microsoft-teams/MicrosoftTeamsAdapter", () => ({
   MicrosoftTeamsAdapter: {
     ENDPOINTS: [
       "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
@@ -83,7 +83,7 @@ function setAdapterMock(adapter: ReturnType<typeof makeAdapterMock>): void {
 const getMeetingChannelMock = mock(async (): Promise<IMeetingChannel> => adapterMock);
 const resetMeetingChannelMock = mock(async (): Promise<void> => undefined);
 
-mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
+void mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
   getMeetingChannel: getMeetingChannelMock,
   resetMeetingChannel: resetMeetingChannelMock,
 }));
@@ -91,14 +91,14 @@ mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => (
 // --- PermissionsService
 const hasPermissionMock = mock(async (): Promise<boolean> => true);
 
-mock.module("@/backend/services/auth/permissions.service", () => ({
+void mock.module("@/backend/services/auth/permissions.service", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
 }));
 
 // --- Logger (so adapter constructor doesn't fail)
-mock.module("@/backend/lib/logger", () => ({
+void mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -112,7 +112,7 @@ const listByProviderMock = mock(async (): Promise<MeetingProviderTokenSelectType
 const getByUserAndProviderMock = mock(async (): Promise<MeetingProviderTokenSelectType | null> => null);
 const deleteByUserAndProviderMock = mock(async (): Promise<void> => undefined);
 
-mock.module("@/backend/db/repo/meeting/meeting-provider-token.repository", () => ({
+void mock.module("@/backend/db/repo/meeting/meeting-provider-token.repository", () => ({
   MeetingProviderTokenRepository: {
     listByProvider: listByProviderMock,
     getByUserAndProvider: getByUserAndProviderMock,
@@ -128,7 +128,7 @@ const userFindByIdsMock = mock(async (ids: string[]): Promise<Map<string, UserSe
   return map;
 });
 
-mock.module("@/backend/db/repo/users/user.repository", () => ({
+void mock.module("@/backend/db/repo/users/user.repository", () => ({
   UserRepository: {
     findByIds: userFindByIdsMock,
   },
@@ -137,7 +137,7 @@ mock.module("@/backend/db/repo/users/user.repository", () => ({
 // --- AuditService
 const createManyAuditLogsMock = mock(async (): Promise<CreateAuditLogInput[]> => []);
 
-mock.module("@/backend/services/system/audit.service", () => ({
+void mock.module("@/backend/services/system/audit.service", () => ({
   AuditService: {
     createManyAuditLogs: createManyAuditLogsMock,
   },

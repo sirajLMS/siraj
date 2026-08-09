@@ -6,7 +6,7 @@ const { NotFoundError } = await import("@/backend/lib/errors");
 // --- Mock logger ---
 
 const noop = () => {};
-mock.module("@/backend/lib/logger", () => ({
+void mock.module("@/backend/lib/logger", () => ({
   logger: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));
@@ -14,7 +14,7 @@ mock.module("@/backend/lib/logger", () => ({
 // --- Mock cron-auth ---
 
 const TEST_SECRET = "test-cron-secret-1234567890abcdef";
-mock.module("@/backend/lib/cron-auth", () => {
+void mock.module("@/backend/lib/cron-auth", () => {
   const verifyCronSecretAuth = (request: { method: string; headers: Headers }) => {
     const auth = request.headers.get("authorization");
     if (request.method !== "GET")
@@ -41,7 +41,7 @@ const mockDispatchById = mock(async () => ({
   queueJobId: "q-456",
 }));
 
-mock.module("@/backend/services/cron/cron.service", () => ({
+void mock.module("@/backend/services/cron/cron.service", () => ({
   CronService: {
     dispatchScheduleById: mockDispatchById,
   },

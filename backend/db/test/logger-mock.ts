@@ -38,7 +38,7 @@ import { mock } from "bun:test";
 
 const noop = () => {};
 
-mock.module("@/backend/lib/logger", () => ({
+void mock.module("@/backend/lib/logger", () => ({
   logger: {
     log: noop,
     info: noop,

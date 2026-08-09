@@ -16,7 +16,7 @@ export function formatQuotaStatus(
     case "ARCHIVED":
       return { label: t.statuses.ARCHIVED, color: "default" };
     default:
-      return { label: String(status), color: "default" };
+      return { label: status, color: "default" };
   }
 }
 
@@ -29,7 +29,7 @@ export function formatQuotaKind(kind: QuotaKind | string, t: QuotaLabels): strin
     case "PERIODIC":
       return t.kinds.PERIODIC;
     default:
-      return String(kind);
+      return kind;
   }
 }
 

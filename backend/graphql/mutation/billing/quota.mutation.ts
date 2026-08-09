@@ -79,7 +79,7 @@ gqlSchemaBuilder.mutationField("updateQuota", t =>
       // V3-012: Permission check is enforced by QuotaService.updateQuota.
       // V3-070: Map service-layer errors to proper GraphQL error codes.
       try {
-        return await QuotaService.updateQuota(String(args.id), args.input as QuotaUpdateInput, actorUserId, ctx.locale);
+        return await QuotaService.updateQuota(args.id, args.input as QuotaUpdateInput, actorUserId, ctx.locale);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -100,7 +100,7 @@ gqlSchemaBuilder.mutationField("deleteQuota", t =>
       // V3-012: Permission check is enforced by QuotaService.deleteQuota.
       // V3-070: Map service-layer errors to proper GraphQL error codes.
       try {
-        return await QuotaService.deleteQuota(String(args.id), actorUserId, ctx.locale);
+        return await QuotaService.deleteQuota(args.id, actorUserId, ctx.locale);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }

@@ -16,14 +16,14 @@ const IANA_TIMEZONE_IDS_STRINGS: string[] = Object.keys(IANA_TIMEZONE_LABELS);
 const IANA_TIMEZONE_LABELS_MAP: Record<string, { readonly en: string; readonly ar: string }> = (() => {
   const result: Record<string, { readonly en: string; readonly ar: string }> = {};
   for (const [k, v] of Object.entries(IANA_TIMEZONE_LABELS)) {
-    result[String(k)] = v;
+    result[k] = v;
   }
   return result;
 })();
 const IANA_TIMEZONE_TERRITORY_CODES_MAP: Record<string, string | null> = (() => {
   const result: Record<string, string | null> = {};
   for (const [k, v] of Object.entries(IANA_TIMEZONE_TERRITORY_CODES)) {
-    result[String(k)] = v;
+    result[k] = v;
   }
   return result;
 })();
