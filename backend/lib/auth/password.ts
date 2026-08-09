@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { getServerTranslations } from "@/shared/locale";
 
 const SALT_ROUNDS = 12;
@@ -20,12 +20,12 @@ export async function validatePasswordStrength(password: string, locale?: string
  * Hash a plain text password
  */
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, SALT_ROUNDS);
+  return hash(password, SALT_ROUNDS);
 }
 
 /**
  * Compare a plain text password with a hashed password
  */
 export async function comparePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(plainPassword, hashedPassword);
+  return compare(plainPassword, hashedPassword);
 }

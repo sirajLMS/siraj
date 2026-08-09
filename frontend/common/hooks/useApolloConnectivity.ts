@@ -114,6 +114,7 @@ export const useApolloConnectivity = () => {
                 autoHideDuration: 3000,
               });
             }
+            return undefined;
           });
         },
       });

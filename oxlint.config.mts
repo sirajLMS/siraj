@@ -54,6 +54,7 @@ export default defineConfig({
           "**/*.pothos.ts",
           "./*",
           "@/backend/graphql/**",
+          "@mui/x-data-grid/themeAugmentation",
         ],
       },
     ],

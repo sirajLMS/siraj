@@ -191,6 +191,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult }: Reado
               message: labels.invalidCredentials,
             });
           }
+          return undefined;
         })
         .catch(() => {
           setLoginResult({

@@ -92,6 +92,7 @@ export const createConnectivityLink = (
             } else {
               handleDisconnected(observer);
             }
+            return undefined;
           })
           .catch(e => observer.error(e));
       }

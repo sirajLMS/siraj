@@ -248,7 +248,7 @@ export function useCreateRecurringClassViewModel(
       generateInstancesForWeeks: 4,
       hourlyRate: "",
       rateCurrency: "",
-      days: DEFAULT_DAY_SCHEDULE.map(day => ({ ...day })),
+      days: DEFAULT_DAY_SCHEDULE.map(day => Object.assign({}, day)),
     },
   });
   const { register, handleSubmit, watch, setValue, control, formState } = formInstance;
