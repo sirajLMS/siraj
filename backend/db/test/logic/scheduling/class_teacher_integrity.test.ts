@@ -7,15 +7,11 @@ import { classInstances, parents, students, teacherAssignments, teachers, users 
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
-import type { ParentEntity } from "@/backend/types/parents/parent.types";
-import type { StudentSelectType } from "@/backend/types/students/student.types";
-import type { TeacherSelectType } from "@/backend/types/teachers/teacher.types";
-import type { UserSelectType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function createTestUser(tx: DBTransaction, name: string, email: string) {
   const now = new Date();
-  const [user] = ((await tx
+  const [user] = await tx
     .insert(users)
     .values({
       name,
@@ -24,32 +20,32 @@ async function createTestUser(tx: DBTransaction, name: string, email: string) {
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [UserSelectType]) ?? [{} as UserSelectType];
+    .returning();
   return { user, now };
 }
 
 async function createTestParent(tx: DBTransaction, name: string, email: string) {
   const { user, now } = await createTestUser(tx, name, email);
-  const [parent] = (await tx
+  const [parent] = await tx
     .insert(parents)
     .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
-    .returning()) as [ParentEntity];
+    .returning();
   return parent;
 }
 
 async function createTestTeacher(tx: DBTransaction, name: string, email: string) {
   const { user, now } = await createTestUser(tx, name, email);
-  const [teacher] = (await tx
+  const [teacher] = await tx
     .insert(teachers)
     .values({ userId: user.id, createdAt: now, updatedAt: now })
-    .returning()) as [TeacherSelectType];
+    .returning();
   return teacher;
 }
 
 async function createTestStudent(tx: DBTransaction, parentId: string, name: string, gender: Gender = Gender.MALE) {
   const now = new Date();
   const { user: studentUser } = await createTestUser(tx, name, `student-${randomUUID()}@example.com`);
-  const [student] = (await tx
+  const [student] = await tx
     .insert(students)
     .values({
       parentId,
@@ -61,7 +57,7 @@ async function createTestStudent(tx: DBTransaction, parentId: string, name: stri
       updatedAt: now,
       idempotencyKey: randomUUID(),
     })
-    .returning()) as [StudentSelectType];
+    .returning();
 
   return student;
 }
@@ -87,7 +83,10 @@ async function expectClassCreationToFail(tx: DBTransaction, studentId: string, t
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  expect((errorCaught as Error).message).toContain("is not assigned to student");
+  if (!(errorCaught instanceof Error)) {
+    throw new TypeError("expected Error");
+  }
+  expect(errorCaught.message).toContain("is not assigned to student");
 }
 
 describe("Class Teacher Assignment Integrity", () => {
@@ -157,7 +156,10 @@ describe("Class Teacher Assignment Integrity", () => {
         errorCaught = error;
       }
       expect(errorCaught).not.toBeNull();
-      expect((errorCaught as Error).message).toContain("is not assigned to student");
+      if (!(errorCaught instanceof Error)) {
+        throw new TypeError("expected Error");
+      }
+      expect(errorCaught.message).toContain("is not assigned to student");
     });
     testLogger.info("Class update to non-assigned teacher failed as expected.");
   });
