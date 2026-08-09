@@ -2,14 +2,37 @@ import { and, eq, gte, inArray, isNull, lt, ne, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, classSubjects, recurringSchedules, students } from "@/backend/db/schema";
-import type { ClassExecutionState, ClassOutcome } from "@/backend/enum";
-import { DayOfWeek } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome, DayOfWeek } from "@/backend/enum";
 import type {
   FutureClassRow,
   TeacherAssignedClassRow,
   WeeklyScheduleGridRow,
   WeeklyWorkloadMetrics,
 } from "@/backend/types/scheduling/scheduling.types";
+
+function isClassExecutionState(value: string): value is ClassExecutionState {
+  const values: string[] = Object.values(ClassExecutionState);
+  return values.includes(value);
+}
+
+function isClassOutcome(value: string): value is ClassOutcome {
+  const values: string[] = Object.values(ClassOutcome);
+  return values.includes(value);
+}
+
+function assertClassExecutionState(value: string): ClassExecutionState {
+  if (!isClassExecutionState(value)) {
+    throw new Error(`Invalid ClassExecutionState value: ${value}`);
+  }
+  return value;
+}
+
+function assertClassOutcome(value: string): ClassOutcome {
+  if (!isClassOutcome(value)) {
+    throw new Error(`Invalid ClassOutcome value: ${value}`);
+  }
+  return value;
+}
 
 export async function getTeacherFutureClasses(
   teacherId: string,
@@ -54,8 +77,8 @@ export async function getTeacherFutureClasses(
 
   return rows.map(row =>
     Object.assign(row, {
-      executionState: row.executionState as ClassExecutionState,
-      outcome: row.outcome as ClassOutcome | null,
+      executionState: assertClassExecutionState(row.executionState),
+      outcome: assertClassOutcome(row.outcome),
     })
   );
 }
@@ -109,8 +132,8 @@ export const getWeeklyScheduleGrid = async (
       DayOfWeek.SATURDAY,
     ];
     return Object.assign(row, {
-      executionState: row.executionState as ClassExecutionState,
-      outcome: row.outcome as ClassOutcome | null,
+      executionState: assertClassExecutionState(row.executionState),
+      outcome: assertClassOutcome(row.outcome),
       dayOfWeek: dayNames[dayIndex],
     });
   });
@@ -185,8 +208,8 @@ export const getTeacherAssignedClasses = async (
 
   return rows.map(row =>
     Object.assign(row, {
-      executionState: row.executionState as ClassExecutionState,
-      outcome: row.outcome as ClassOutcome | null,
+      executionState: assertClassExecutionState(row.executionState),
+      outcome: assertClassOutcome(row.outcome),
     })
   );
 };
