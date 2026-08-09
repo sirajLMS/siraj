@@ -39,7 +39,7 @@ async function expectDeleteBlocked(tx: DBTransaction, studentId: string): Promis
     await tx.delete(students).where(sql`id = ${studentId}`);
   } catch (error) {
     didThrow = true;
-    testLogger.info(`Caught expected error: ${error}`);
+    testLogger.info(`Caught expected error: ${String(error)}`);
   }
   expect(didThrow).toBe(true);
 }

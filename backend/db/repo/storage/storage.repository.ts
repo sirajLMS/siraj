@@ -368,7 +368,7 @@ export namespace StorageDbRepository {
 
       return { success: true, message: "File usage registered successfully" };
     } catch (error) {
-      return { success: false, message: `Failed to register file usage: ${error}` };
+      return { success: false, message: `Failed to register file usage: ${String(error)}` };
     }
   };
 
@@ -597,7 +597,7 @@ export namespace StorageDbRepository {
     } catch (error) {
       return {
         success: false,
-        message: `Failed to update permissions: ${error}`,
+        message: `Failed to update permissions: ${String(error)}`,
       };
     }
   };
@@ -630,7 +630,7 @@ export namespace StorageDbRepository {
 
       return { success: false, message: "File or directory not found" };
     } catch (error) {
-      return { success: false, message: `Failed to set protection: ${error}` };
+      return { success: false, message: `Failed to set protection: ${String(error)}` };
     }
   };
 

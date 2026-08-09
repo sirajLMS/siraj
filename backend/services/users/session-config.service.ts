@@ -112,7 +112,7 @@ async function emitAudit(
   try {
     await AuditService.createManyAuditLogs([input], tx);
   } catch (error) {
-    logger.error(`session-config-service: audit log failed for ${action} on "${roleName}". ${error}`);
+    logger.error(`session-config-service: audit log failed for ${action} on "${roleName}". ${String(error)}`);
   }
 }
 

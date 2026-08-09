@@ -41,7 +41,7 @@ describe("Currency Exchange Rates", () => {
         await tx.insert(currencyExchangeRates).values(exchangeRateInput2);
       } catch (error) {
         didThrow = true;
-        testLogger.info(`Caught expected error: ${error}`);
+        testLogger.info(`Caught expected error: ${String(error)}`);
         // The insert failed, which is what we expect - the unique constraint is working
       }
       expect(didThrow).toBe(true);
