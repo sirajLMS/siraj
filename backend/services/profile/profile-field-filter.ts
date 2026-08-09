@@ -146,7 +146,7 @@ export function assertProfileEditFieldGroups(ctx: FieldFilterContext, submittedG
   }
 }
 
-const KEY_INCLUDES = (keys: readonly string[], key: string): boolean => keys.includes(key as string);
+const KEY_INCLUDES = (keys: readonly string[], key: string): boolean => keys.includes(key);
 
 function collectCoreGroups(core: Record<string, unknown>, groups: Set<string>): void {
   if (["name", "email", "avatarUrl", "displayCurrency"].some(key => key in core)) {

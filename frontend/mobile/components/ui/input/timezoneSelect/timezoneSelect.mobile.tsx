@@ -49,7 +49,7 @@ export const TimezoneSelectMobile: React.FC<TimezoneSelectProps> = ({
   const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
 
   return (
-    <Autocomplete<TimezoneOption, false, false>
+    <Autocomplete<TimezoneOption>
       fullWidth={fullWidth}
       options={options}
       autoHighlight

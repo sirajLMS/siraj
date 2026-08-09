@@ -352,7 +352,7 @@ export const PaymentMethodAutocompleteMobile: React.FC<PaymentMethodAutocomplete
   });
 
   return (
-    <Autocomplete<PaymentMethodCatalogOption, false, false>
+    <Autocomplete<PaymentMethodCatalogOption>
       fullWidth={fullWidth}
       options={options}
       autoHighlight

@@ -33,7 +33,7 @@ export function AudienceAutocomplete({
     excludeIds && excludeIds.length > 0 ? options.filter(option => !excludeIds.includes(option.id)) : options;
 
   return (
-    <Autocomplete<PersonOption, false, false>
+    <Autocomplete<PersonOption>
       fullWidth={fullWidth}
       size={size}
       options={[...visibleOptions]}
