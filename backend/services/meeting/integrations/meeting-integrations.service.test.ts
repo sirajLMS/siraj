@@ -1,14 +1,17 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { AccountStatus } from "@/backend/enum/auth/auth.enum";
 import {
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
 } from "@/backend/enum/meeting/meeting-integrations.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   GenerateMeetingInput,
   GenerateMeetingResult,
   IMeetingChannel,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
 import type { CreateAuditLogInput, MeetingProviderTokenSelectType, UserSelectType } from "@/backend/types";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -18,9 +21,9 @@ const ACTOR_ID = "11111111-1111-4111-8111-111111111111";
 const USER_ID_A = "22222222-2222-4222-8222-222222222222";
 const USER_ID_B = "33333333-3333-4333-8333-333333333333";
 
-const FAKE_ERRORS = {
-  unauthorizedAction: "You are not authorized to perform this action.",
-} as unknown as import("@/shared/locale").ErrorsLabels;
+// Use the real English locale object so the test exercises the same shape
+// the service expects (ErrorsLabels) without an unsafe type assertion.
+const FAKE_ERRORS = errorsEn;
 
 // ---------------------------------------------------------------------------
 // Mock adapter helpers
@@ -135,7 +138,7 @@ await mock.module("@/backend/db/repo/users/user.repository", () => ({
 }));
 
 // --- AuditService
-const createManyAuditLogsMock = mock(async (): Promise<CreateAuditLogInput[]> => []);
+const createManyAuditLogsMock = mock(async (_inputs: readonly CreateAuditLogInput[]): Promise<CreateAuditLogInput[]> => []);
 
 await mock.module("@/backend/services/system/audit.service", () => ({
   AuditService: {
@@ -163,7 +166,7 @@ function makeToken(opts: {
   expiresAt?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
-}) {
+}): MeetingProviderTokenSelectType {
   const now = new Date();
   return {
     id: `${opts.userId}-token-id`,
@@ -175,7 +178,30 @@ function makeToken(opts: {
     scopes: [],
     createdAt: opts.createdAt ?? now,
     updatedAt: opts.updatedAt ?? now,
-  } as unknown as import("@/backend/types").MeetingProviderTokenSelectType;
+  };
+}
+
+function makeUser(overrides: Partial<UserSelectType> = {}): UserSelectType {
+  return {
+    id: USER_ID_A,
+    name: "Alice",
+    email: "alice@test.com",
+    emailVerifiedAt: null,
+    password: "hashed-password",
+    rememberTokenHash: null,
+    avatarFilePath: null,
+    avatarUrl: null,
+    phone: null,
+    status: AccountStatus.ACTIVATED,
+    isSuperAdmin: false,
+    timezone: IanaTimezone.UTC,
+    displayCurrency: null,
+    lastLoginAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    ...overrides,
+  };
 }
 
 async function expectThrows(fn: () => Promise<unknown>): Promise<Error> {
@@ -186,7 +212,10 @@ async function expectThrows(fn: () => Promise<unknown>): Promise<Error> {
     caught = err;
   }
   expect(caught).toBeInstanceOf(Error);
-  return caught as Error;
+  if (!(caught instanceof Error)) {
+    throw new Error("expected fn() to throw an Error instance");
+  }
+  return caught;
 }
 
 // ---------------------------------------------------------------------------
@@ -369,16 +398,7 @@ describe("MeetingIntegrationService", () => {
       userFindByIdsMock.mockImplementation(async (ids: string[]) => {
         const map = new Map<string, UserSelectType | null>();
         for (const id of ids) {
-          map.set(
-            id,
-            id === USER_ID_A
-              ? ({
-                  id: USER_ID_A,
-                  name: "Alice",
-                  email: "alice@test.com",
-                } as unknown as UserSelectType)
-              : null
-          );
+          map.set(id, id === USER_ID_A ? makeUser({ id: USER_ID_A, name: "Alice", email: "alice@test.com" }) : null);
         }
         return map;
       });
@@ -625,7 +645,7 @@ describe("MeetingIntegrationService", () => {
       await MeetingIntegrationService.revokeToken(ACTOR_ID, { userId: USER_ID_A, providerSlug: "zoom" }, FAKE_ERRORS);
 
       expect(createManyAuditLogsMock).toHaveBeenCalledTimes(1);
-      const auditCallArgs = createManyAuditLogsMock.mock.calls[0] as unknown as [CreateAuditLogInput[]];
+      const auditCallArgs = createManyAuditLogsMock.mock.calls[0];
       const auditEntry = auditCallArgs[0][0];
       expect(auditEntry.action).toBe("REVOKE");
       expect(auditEntry.entityType).toBe("MEETING_PROVIDER_TOKEN");
