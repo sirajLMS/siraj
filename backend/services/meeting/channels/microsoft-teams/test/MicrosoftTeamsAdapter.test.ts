@@ -184,30 +184,32 @@ describe("MicrosoftTeamsAdapter", () => {
   });
 
   describe("generateMeeting with per-user fallback", () => {
-    const MOCK_TOKEN_ROW: Partial<MeetingProviderTokenSelectType> = {
+    const MOCK_TOKEN_ROW: MeetingProviderTokenSelectType = {
+      id: "mock-token-id",
       userId: "user-123",
       providerSlug: "microsoft_teams",
       refreshToken: "stored-refresh-token",
       accessToken: "old-access-token",
+      expiresAt: null,
       scopes: ["https://graph.microsoft.com/OnlineMeetings.ReadWrite"],
+      createdAt: new Date("2026-01-01T00:00:00Z"),
+      updatedAt: new Date("2026-01-01T00:00:00Z"),
     };
 
-    function mockTokenRepo(tokenRow: Partial<MeetingProviderTokenSelectType> | null) {
-      spyOn(MeetingProviderTokenRepository, "getByUserAndProvider").mockResolvedValue(
-        tokenRow as MeetingProviderTokenSelectType | null
-      );
-      spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(
-        (tokenRow ?? MOCK_TOKEN_ROW) as MeetingProviderTokenSelectType
-      );
+    function mockTokenRepo(tokenRow: MeetingProviderTokenSelectType | null) {
+      spyOn(MeetingProviderTokenRepository, "getByUserAndProvider").mockResolvedValue(tokenRow);
+      spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(tokenRow ?? MOCK_TOKEN_ROW);
     }
 
+    let refreshSpy: ReturnType<typeof spyOn>;
+
     afterEach(() => {
-      (tokenRefreshModule.refreshAccessToken as unknown as { mockRestore?: () => void })?.mockRestore?.();
+      refreshSpy?.mockRestore();
     });
 
     test("uses per-user token when org creds missing and actorUserId provided", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-teams-token",
         refreshToken: "new-refresh-token",
         expiresAt: new Date(Date.now() + 3600000),
@@ -225,24 +227,26 @@ describe("MicrosoftTeamsAdapter", () => {
       expect(result.joinUrl).toBe(MOCK_MEETING_RESPONSE.joinWebUrl);
       expect(refreshSpy).toHaveBeenCalledWith("microsoft_teams", "stored-refresh-token", "user-123");
 
-      const meetingCall = fetchSpy.mock.calls.find((call: Parameters<typeof fetch>) =>
-        (call[0] as string).includes("/onlineMeetings")
-      );
-      expect(meetingCall?.[0]).toContain("/me/onlineMeetings");
-      expect(meetingCall?.[0]).not.toContain("/users/me/");
+      const meetingCall = fetchSpy.mock.calls.find((call: Parameters<typeof fetch>) => {
+        const input = call[0];
+        return typeof input === "string" && input.includes("/onlineMeetings");
+      });
+      const meetingUrl = typeof meetingCall?.[0] === "string" ? meetingCall[0] : "";
+      expect(meetingUrl).toContain("/me/onlineMeetings");
+      expect(meetingUrl).not.toContain("/users/me/");
     });
 
     test("throws NoOrgCredentialsNoUserTokenError when no token row and no org creds", async () => {
       mockTokenRepo(null);
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new MicrosoftTeamsAdapter({});
-      let caughtErr: Error | undefined;
+      let caughtErr: unknown;
       try {
         await adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" });
         throw new Error("Expected generateMeeting to throw");
       } catch (err) {
-        caughtErr = err as Error;
+        caughtErr = err;
       }
       expect(caughtErr).toBeInstanceOf(NoOrgCredentialsNoUserTokenError);
       expect(refreshSpy).not.toHaveBeenCalled();
@@ -250,7 +254,7 @@ describe("MicrosoftTeamsAdapter", () => {
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
         new ProviderReauthRequiredError("microsoft_teams", "user-123", "invalid_grant")
       );
 
