@@ -15,6 +15,15 @@ import type { UserEntityOnboardingLabels } from "@/shared/locale/types/onboardin
 
 type OnboardingFields = UserEntityOnboardingFieldsShape & FieldValues;
 
+type ValidationLabels = UserEntityOnboardingLabels["validation"];
+
+function isValidationKey(
+  key: string,
+  validation: ValidationLabels
+): key is keyof typeof validation {
+  return key in validation;
+}
+
 function validationMessage(
   labels: UserEntityOnboardingLabels,
   message: string | { message?: string } | undefined
@@ -22,8 +31,29 @@ function validationMessage(
   if (!message) return undefined;
   const msgStr = typeof message === "string" ? message : message.message;
   if (!msgStr) return undefined;
-  const key = msgStr as keyof UserEntityOnboardingLabels["validation"];
-  return labels.validation[key] ?? msgStr;
+  if (isValidationKey(msgStr, labels.validation)) {
+    return labels.validation[msgStr];
+  }
+  return msgStr;
+}
+
+function getErrorMessage(error: unknown): string | undefined {
+  if (error && typeof error === "object" && "message" in error) {
+    const msg = error.message;
+    return typeof msg === "string" ? msg : undefined;
+  }
+  return undefined;
+}
+
+function isFieldPath<T extends OnboardingFields>(value: string): value is Path<T> {
+  return typeof value === "string";
+}
+
+function fieldPath<T extends OnboardingFields>(value: string): Path<T> {
+  if (!isFieldPath<T>(value)) {
+    throw new Error(`Invalid field path: ${value}`);
+  }
+  return value;
 }
 
 interface TextFieldWrapperProps<T extends OnboardingFields> {
@@ -64,7 +94,7 @@ function TextFieldWrapper<T extends OnboardingFields>({
             error={errorKey ? !!errors[errorKey] : false}
             helperText={validationMessage(
               labels,
-              errorKey ? (errors[errorKey] as { message?: string })?.message : undefined
+              errorKey ? getErrorMessage(errors[errorKey]) : undefined
             )}
             fullWidth
             sx={outlinedInputSx}
@@ -82,7 +112,7 @@ interface AvatarFieldProps<T extends OnboardingFields> {
 }
 
 function AvatarField<T extends OnboardingFields>({ control, labels, onUploadAvatar }: AvatarFieldProps<T>) {
-  const avatarField = "avatarUrl" as Path<T>;
+  const avatarField = fieldPath<T>("avatarUrl");
   return (
     <Grid size={{ xs: 12 }}>
       <AvatarImageField
@@ -107,7 +137,7 @@ interface SimpleTextFieldProps<T extends OnboardingFields> {
 }
 
 function SimpleTextField<T extends OnboardingFields>(props: SimpleTextFieldProps<T>) {
-  return <TextFieldWrapper {...props} fieldName={props.fieldName as Path<T>} />;
+  return <TextFieldWrapper {...props} fieldName={fieldPath<T>(props.fieldName)} />;
 }
 
 function createTextFieldComponent(
@@ -153,7 +183,7 @@ interface PhoneFieldProps<T extends OnboardingFields> {
 }
 
 function PhoneField<T extends OnboardingFields>({ control, errors, labels, phoneRequired }: PhoneFieldProps<T>) {
-  const phoneField = "phone" as Path<T>;
+  const phoneField = fieldPath<T>("phone");
   return (
     <Grid size={{ xs: 12, md: 6 }}>
       <PhoneFormField
@@ -163,7 +193,7 @@ function PhoneField<T extends OnboardingFields>({ control, errors, labels, phone
         required={phoneRequired}
         placeholder={labels.placeholders.phone}
         error={!!errors.phone}
-        helperText={validationMessage(labels, (errors.phone as { message?: string })?.message)}
+        helperText={validationMessage(labels, getErrorMessage(errors.phone))}
       />
     </Grid>
   );
@@ -176,7 +206,7 @@ interface TimezoneFieldProps<T extends OnboardingFields> {
 }
 
 function TimezoneField<T extends OnboardingFields>({ control, errors, labels }: TimezoneFieldProps<T>) {
-  const timezoneField = "timezone" as Path<T>;
+  const timezoneField = fieldPath<T>("timezone");
   return (
     <Grid size={{ xs: 12, md: 6 }}>
       <Controller
@@ -192,7 +222,7 @@ function TimezoneField<T extends OnboardingFields>({ control, errors, labels }: 
             label={labels.fields.timezone}
             required
             error={!!errors.timezone}
-            helperText={validationMessage(labels, (errors.timezone as { message?: string })?.message)}
+            helperText={validationMessage(labels, getErrorMessage(errors.timezone))}
             fullWidth
           />
         )}
@@ -207,7 +237,7 @@ interface CurrencyFieldProps<T extends OnboardingFields> {
 }
 
 function CurrencyField<T extends OnboardingFields>({ control, labels }: CurrencyFieldProps<T>) {
-  const displayCurrencyField = "displayCurrency" as Path<T>;
+  const displayCurrencyField = fieldPath<T>("displayCurrency");
   return (
     <Grid size={{ xs: 12, md: 6 }}>
       <Controller
