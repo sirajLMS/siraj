@@ -286,9 +286,9 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
   complaintTest("supports pagination with limit and offset", async tx => {
     const { parent } = await setupParentWithStudent(tx, "Paginate");
 
-    for (let i = 0; i < 3; i++) {
-      await insertComplaint(tx, parent.id, { body: `Paginated complaint ${i}` });
-    }
+    await Promise.all(
+      Array.from({ length: 3 }, (_, i) => insertComplaint(tx, parent.id, { body: `Paginated complaint ${i}` }))
+    );
 
     const page1 = await ComplaintRepository.getComplaintQueue({ limit: 2, offset: 0 }, tx);
     const page2 = await ComplaintRepository.getComplaintQueue({ limit: 2, offset: 2 }, tx);
@@ -409,9 +409,11 @@ describe("ComplaintRepository — getUnansweredComplaints", () => {
   complaintTest("respects the limit parameter", async tx => {
     const { parent } = await setupParentWithStudent(tx, "UnansLimit");
 
-    for (let i = 0; i < 5; i++) {
-      await insertComplaint(tx, parent.id, { status: "UNANSWERED", body: `Limit test ${i}` });
-    }
+    await Promise.all(
+      Array.from({ length: 5 }, (_, i) =>
+        insertComplaint(tx, parent.id, { status: "UNANSWERED", body: `Limit test ${i}` })
+      )
+    );
 
     const result = await ComplaintRepository.getUnansweredComplaints(2, tx);
 
