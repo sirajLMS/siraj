@@ -164,6 +164,26 @@ function lineMentionsAnyFile(line: string, files: string[]): boolean {
 }
 
 /**
+ * Collect continuation lines following an error-block header.
+ * Stops at the next error-block header or a blank line.
+ * Returns the collected lines and the index of the last consumed line.
+ */
+function collectErrorBlockContinuation(
+  lines: string[],
+  startIndex: number,
+  errorBlockRegex: RegExp
+): { continuationLines: string[]; lastIndex: number } {
+  const continuationLines: string[] = [];
+  let lastIndex = startIndex;
+  for (let j = startIndex + 1; j < lines.length; j++) {
+    if (errorBlockRegex.exec(lines[j]) || lines[j].trim() === "") break;
+    continuationLines.push(lines[j]);
+    lastIndex = j;
+  }
+  return { continuationLines, lastIndex };
+}
+
+/**
  * Filter tsgo output for lines mentioning any of the target files.
  */
 function filterTsgoForFiles(tsgoOutput: string, files: string[]): string {
@@ -171,20 +191,24 @@ function filterTsgoForFiles(tsgoOutput: string, files: string[]): string {
   const matchingLines: string[] = [];
   const errorBlockRegex = /^(.+\.tsx?)\(\d+,\d+\):/;
 
-  for (let i = 0; i < lines.length; i++) {
+  let i = 0;
+  while (i < lines.length) {
     const line = lines[i];
     const isErrorBlock = errorBlockRegex.exec(line);
-
-    if (isErrorBlock && lineMentionsAnyFile(line, files)) {
-      // Collect the error block (header + continuation lines)
-      matchingLines.push(line);
-      for (let j = i + 1; j < lines.length; j++) {
-        if (errorBlockRegex.exec(lines[j]) || lines[j].trim() === "") break;
-        matchingLines.push(lines[j]);
-      }
-    } else if (!isErrorBlock && lineMentionsAnyFile(line, files)) {
-      matchingLines.push(line);
+    if (!lineMentionsAnyFile(line, files)) {
+      i++;
+      continue;
     }
+    matchingLines.push(line);
+
+    if (!isErrorBlock) {
+      i++;
+      continue;
+    }
+    // Collect the error block (header + continuation lines)
+    const { continuationLines, lastIndex } = collectErrorBlockContinuation(lines, i, errorBlockRegex);
+    matchingLines.push(...continuationLines);
+    i = lastIndex + 1;
   }
 
   return matchingLines.length > 0 ? matchingLines.join("\n") : "";

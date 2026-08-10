@@ -390,6 +390,42 @@ function DayScheduleList({
   );
 }
 
+function StudentSubjectFields({
+  teacherId,
+  state,
+  isDialogOpen,
+  mutationLoading,
+  t,
+  StudentSelect,
+}: {
+  readonly teacherId: string;
+  readonly state: CreateRecurringClassDialogFormState;
+  readonly isDialogOpen: boolean;
+  readonly mutationLoading: boolean;
+  readonly t: TeacherCreateRecurringClassLabels;
+  readonly StudentSelect: React.ComponentType<Readonly<CreateRecurringClassStudentSelectSlotProps>>;
+}) {
+  return (
+    <>
+      <StudentSelect
+        studentId={state.studentId}
+        setStudentId={state.setStudentId}
+        teacherId={teacherId}
+        isDialogOpen={isDialogOpen}
+        mutationLoading={mutationLoading}
+        label={t.fields.student}
+      />
+      <SubjectSelect
+        value={state.subjectId}
+        onChange={state.setSubjectId}
+        label={t.fields.subject}
+        placeholder={t.fields.subjectPlaceholder}
+        disabled={mutationLoading}
+      />
+    </>
+  );
+}
+
 function DialogFormContent({
   teacherId,
   state,
@@ -445,20 +481,13 @@ function DialogFormContent({
             warningSx={layout.warningSx}
           />
         ) : null}
-        <StudentSelect
-          studentId={state.studentId}
-          setStudentId={state.setStudentId}
+        <StudentSubjectFields
           teacherId={teacherId}
+          state={state}
           isDialogOpen={isDialogOpen}
           mutationLoading={mutationLoading}
-          label={t.fields.student}
-        />
-        <SubjectSelect
-          value={state.subjectId}
-          onChange={state.setSubjectId}
-          label={t.fields.subject}
-          placeholder={t.fields.subjectPlaceholder}
-          disabled={mutationLoading}
+          t={t}
+          StudentSelect={StudentSelect}
         />
         <DurationTimeFields
           duration={state.duration}
@@ -504,6 +533,31 @@ function DialogFormContent({
         />
       </Stack>
     </DialogContent>
+  );
+}
+
+function DialogFooterActions({
+  closeDialog,
+  hasSessionCreateClass,
+  mutationLoading,
+  t,
+}: {
+  readonly closeDialog: () => void;
+  readonly hasSessionCreateClass: boolean;
+  readonly mutationLoading: boolean;
+  readonly t: TeacherCreateRecurringClassLabels;
+}) {
+  return (
+    <DialogActions>
+      <Button onClick={closeDialog} disabled={mutationLoading}>
+        {t.actions.cancel}
+      </Button>
+      {hasSessionCreateClass ? (
+        <Button type="submit" variant="contained" color="primary" disabled={mutationLoading}>
+          {mutationLoading ? t.actions.submitting : t.actions.create}
+        </Button>
+      ) : null}
+    </DialogActions>
   );
 }
 
@@ -571,16 +625,12 @@ export function CreateRecurringClassDialogShared({
           onSchedulingModeChange={handleSchedulingModeChange}
           onOndemandNoCreditsOutcomeChange={handleOndemandNoCreditsOutcomeChange}
         />
-        <DialogActions>
-          <Button onClick={closeDialog} disabled={mutationLoading}>
-            {t.actions.cancel}
-          </Button>
-          {hasSessionCreateClass ? (
-            <Button type="submit" variant="contained" color="primary" disabled={mutationLoading}>
-              {mutationLoading ? t.actions.submitting : t.actions.create}
-            </Button>
-          ) : null}
-        </DialogActions>
+        <DialogFooterActions
+          closeDialog={closeDialog}
+          hasSessionCreateClass={hasSessionCreateClass}
+          mutationLoading={mutationLoading}
+          t={t}
+        />
       </form>
     </DialogShell>
   );

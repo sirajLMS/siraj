@@ -88,11 +88,35 @@ async function loadNamespaceSnapshot(exportVal: unknown): Promise<{ updates: Sna
   return { updates };
 }
 
+interface ApplyStats {
+  totalSnapshots: number;
+  writtenSnapshots: number;
+}
+
+function applySnapshotResults(
+  fileResults: ({ updates: SnapshotUpdate[] } | null)[],
+  hash: ReturnType<typeof createHash>
+): ApplyStats {
+  let totalSnapshots = 0;
+  let writtenSnapshots = 0;
+
+  for (const result of fileResults) {
+    if (!result) continue;
+    for (const update of result.updates) {
+      hash.update(update.hashChunk);
+      totalSnapshots++;
+      if (writeSnapshotFile(update.targetFile, update.json)) {
+        writtenSnapshots++;
+      }
+    }
+  }
+
+  return { totalSnapshots, writtenSnapshots };
+}
+
 async function main() {
   const namespaceFiles = walkNamespaceFiles(NAMESPACES_DIR);
   const hash = createHash("sha256");
-  let totalSnapshots = 0;
-  let writtenSnapshots = 0;
 
   // Load all namespace module exports and their snapshots in parallel.
   // Promise.all preserves array order, so the file/export/locale ordering
@@ -107,17 +131,12 @@ async function main() {
 
   // Apply hash updates and file writes sequentially (no awaits here) to keep
   // the hash output stable regardless of parallel load completion order.
+  let totalSnapshots = 0;
+  let writtenSnapshots = 0;
   for (const fileResults of processedFiles) {
-    for (const result of fileResults) {
-      if (!result) continue;
-      for (const update of result.updates) {
-        hash.update(update.hashChunk);
-        totalSnapshots++;
-        if (writeSnapshotFile(update.targetFile, update.json)) {
-          writtenSnapshots++;
-        }
-      }
-    }
+    const stats = applySnapshotResults(fileResults, hash);
+    totalSnapshots += stats.totalSnapshots;
+    writtenSnapshots += stats.writtenSnapshots;
   }
 
   const finalHash = hash.digest("hex").slice(0, 16);

@@ -293,35 +293,43 @@ function attachExitHandlers(): void {
   });
 }
 
+function getQueuePosition(ticketInfo: QueueTicketInfo): { pos: number; total: number } {
+  const validTickets = getValidQueueTickets();
+  const myIndex = validTickets.findIndex(t => t.info.ticketId === ticketInfo.ticketId);
+  const pos = myIndex >= 0 ? myIndex + 1 : validTickets.length + 1;
+  return { pos, total: validTickets.length };
+}
+
+function logIfStateChanged(stateStr: string, lastLoggedState: string, message: string): string {
+  if (stateStr !== lastLoggedState) {
+    console.log(message);
+  }
+  return stateStr;
+}
+
 function checkQueuePosition(
   ticketInfo: QueueTicketInfo,
   activePid: number,
   activeDesc: string,
   lastLoggedState: string
 ): string {
-  const validTickets = getValidQueueTickets();
-  const myIndex = validTickets.findIndex(t => t.info.ticketId === ticketInfo.ticketId);
-  const pos = myIndex >= 0 ? myIndex + 1 : validTickets.length + 1;
-  const stateStr = `held_by_${activePid}_pos_${pos}_total_${validTickets.length}`;
-
-  if (stateStr !== lastLoggedState) {
-    console.log(
-      `${YELLOW}[process-lock]${NC} Lock held by PID ${activePid} (${activeDesc}). Position in queue: ${pos}/${validTickets.length}. Waiting...`
-    );
-  }
-  return stateStr;
+  const { pos, total } = getQueuePosition(ticketInfo);
+  const stateStr = `held_by_${activePid}_pos_${pos}_total_${total}`;
+  return logIfStateChanged(
+    stateStr,
+    lastLoggedState,
+    `${YELLOW}[process-lock]${NC} Lock held by PID ${activePid} (${activeDesc}). Position in queue: ${pos}/${total}. Waiting...`
+  );
 }
 
 function checkWaitingPosition(ticketInfo: QueueTicketInfo, lastLoggedState: string): string {
-  const validTickets = getValidQueueTickets();
-  const myIndex = validTickets.findIndex(t => t.info.ticketId === ticketInfo.ticketId);
-  const pos = myIndex >= 0 ? myIndex + 1 : validTickets.length + 1;
-  const stateStr = `waiting_pos_${pos}_total_${validTickets.length}`;
-
-  if (stateStr !== lastLoggedState) {
-    console.log(`${YELLOW}[process-lock]${NC} Waiting for turn in queue. Position: ${pos}/${validTickets.length}...`);
-  }
-  return stateStr;
+  const { pos, total } = getQueuePosition(ticketInfo);
+  const stateStr = `waiting_pos_${pos}_total_${total}`;
+  return logIfStateChanged(
+    stateStr,
+    lastLoggedState,
+    `${YELLOW}[process-lock]${NC} Waiting for turn in queue. Position: ${pos}/${total}...`
+  );
 }
 
 function isProcessDescendantOf(activePid: number): boolean {
