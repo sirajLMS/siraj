@@ -42,11 +42,13 @@ export function getDayOfWeekEnum(date: Date): DayOfWeek {
 }
 
 export function* iterateDatesInWindow(start: Date, end: Date): Generator<Date> {
-  const current = startOfDay(start);
+  let current = startOfDay(start);
   const last = startOfDay(end);
   while (current <= last) {
     yield new Date(current);
-    current.setDate(current.getDate() + 1);
+    const next = new Date(current);
+    next.setDate(next.getDate() + 1);
+    current = next;
   }
 }
 
