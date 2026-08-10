@@ -1,5 +1,5 @@
 import type { quotaLedger, quotas } from "@/backend/db/schema";
-import type { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
+import { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
 
 export type QuotaSelectType = typeof quotas.$inferSelect;
 export type QuotaInsertType = typeof quotas.$inferInsert;
@@ -28,19 +28,46 @@ export type QuotaLedgerReturnType = Omit<QuotaLedgerSelectType, "reason" | "upda
   reason: QuotaLedgerReason;
 };
 
+/** Type guard: narrows string to QuotaKind by checking against enum values. */
+const isQuotaKind = (value: string): value is QuotaKind =>
+  (Object.values(QuotaKind) as readonly string[]).includes(value);
+
+/** Type guard: narrows string to QuotaStatus by checking against enum values. */
+const isQuotaStatus = (value: string): value is QuotaStatus =>
+  (Object.values(QuotaStatus) as readonly string[]).includes(value);
+
+/** Type guard: narrows string to QuotaPeriodType by checking against enum values. */
+const isQuotaPeriodType = (value: string): value is QuotaPeriodType =>
+  (Object.values(QuotaPeriodType) as readonly string[]).includes(value);
+
+/** Type guard: narrows string to QuotaLedgerReason by checking against enum values. */
+const isQuotaLedgerReason = (value: string): value is QuotaLedgerReason =>
+  (Object.values(QuotaLedgerReason) as readonly string[]).includes(value);
+
 export function mapQuotaToReturnType(row: QuotaSelectType): QuotaReturnType {
+  if (!isQuotaKind(row.kind)) {
+    throw new Error(`Invalid QuotaKind value: ${row.kind}`);
+  }
+  if (!isQuotaStatus(row.status)) {
+    throw new Error(`Invalid QuotaStatus value: ${row.status}`);
+  }
+  const periodType =
+    row.periodType === null ? null : isQuotaPeriodType(row.periodType) ? row.periodType : null;
   return {
     ...row,
-    kind: row.kind as QuotaKind,
-    status: row.status as QuotaStatus,
-    periodType: row.periodType ? (row.periodType as QuotaPeriodType) : null,
+    kind: row.kind,
+    status: row.status,
+    periodType,
   };
 }
 
 export function mapQuotaLedgerToReturnType(row: QuotaLedgerSelectType): QuotaLedgerReturnType {
+  if (!isQuotaLedgerReason(row.reason)) {
+    throw new Error(`Invalid QuotaLedgerReason value: ${row.reason}`);
+  }
   return {
     ...row,
-    reason: row.reason as QuotaLedgerReason,
+    reason: row.reason,
   };
 }
 
