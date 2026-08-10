@@ -68,7 +68,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const locale = ((context.globals.locale as string | undefined) ?? "ar") as "ar" | "en";
   const rawTheme = context.globals.theme;
   const themeMode: PaletteMode = rawTheme === "light" || rawTheme === "dark" ? rawTheme : "dark";
-  const _viewport = (context.globals.viewport as "mobile" | "tablet" | "desktop" | undefined) ?? "desktop";
+  const viewport = (context.globals.viewport as "mobile" | "tablet" | "desktop" | undefined) ?? "desktop";
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
 
   // CSS-variables theme matches the App Router provider; mode toggles via useColorScheme.
@@ -180,7 +180,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const content = <RenderStory Story={Story} context={context} />;
 
   // Calculate maxWidth based on viewport global
-  const maxWidth = _viewport === "mobile" ? 600 : _viewport === "tablet" ? 900 : "none";
+  const maxWidth = viewport === "mobile" ? 600 : viewport === "tablet" ? 900 : "none";
 
   return (
     <LocaleProvider locale={locale}>
