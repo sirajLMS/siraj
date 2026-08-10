@@ -104,20 +104,21 @@ export namespace MeetingProviderCatalogService {
         const existingProviders = await Promise.all(
           inputs.map(input => MeetingProviderRepository.getBySlug(input.slug, tx))
         );
-        const results = await Promise.all(
-          inputs.map((input, index) => {
-            const existing = existingProviders[index];
-            if (!existing) return null;
-            return MeetingProviderRepository.update(
+        const toUpdate = inputs
+          .map((input, index) => ({ input, existing: existingProviders[index] }))
+          .filter(
+            (entry): entry is { input: MeetingProviderSubmitInput; existing: NonNullable<typeof entry.existing> } =>
+              entry.existing !== null
+          );
+        return Promise.all(
+          toUpdate.map(({ input, existing }) =>
+            MeetingProviderRepository.update(
               existing.id,
               { ...input, isActive: input.isActive ?? true },
               tErrors,
               tx
-            );
-          })
-        );
-        return results.filter(
-          (result): result is MeetingProviderSelectType => result !== null
+            )
+          )
         );
       }
       throw error;
