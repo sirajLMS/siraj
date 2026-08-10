@@ -11,6 +11,12 @@ import { shiftMonth } from "@/frontend/common/views/dashboard/search-schedule/ut
 import { TeacherAvailabilityCalendarGridMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityCalendarGrid.mobile";
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 
+function flipSx(theme: Theme) {
+  return {
+    transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+  };
+}
+
 function DrawerHeader({
   labels,
   title,
@@ -56,10 +62,6 @@ function MonthNavigator({
 }) {
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
   const yearStr = currentMonth.getFullYear();
-
-  const flipSx = (theme: Theme) => ({
-    transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-  });
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, py: 2 }}>
