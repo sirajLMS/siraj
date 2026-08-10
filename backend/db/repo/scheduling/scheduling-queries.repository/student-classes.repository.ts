@@ -30,18 +30,17 @@ async function setStudentClassesFrozenState(
   extraPredicate: ReturnType<typeof eq> | undefined,
   tx?: DBTransaction
 ): Promise<number> {
+  const BATCH_SIZE = 500;
+
+  const conditions = and(
+    eq(classInstances.studentId, studentId),
+    isNull(classInstances.deletedAt),
+    gte(classInstances.scheduledStartAt, fromDate),
+    extraPredicate
+  );
+
   const runner = async (t: DBTransaction): Promise<number> => {
-    const BATCH_SIZE = 500;
-    let totalUpdated = 0;
-
-    const conditions = and(
-      eq(classInstances.studentId, studentId),
-      isNull(classInstances.deletedAt),
-      gte(classInstances.scheduledStartAt, fromDate),
-      extraPredicate
-    );
-
-    while (true) {
+    const processNextBatch = async (totalUpdated: number): Promise<number> => {
       const batch = await t
         .select({ id: classInstances.id })
         .from(classInstances)
@@ -49,7 +48,7 @@ async function setStudentClassesFrozenState(
         .limit(BATCH_SIZE)
         .for("update");
 
-      if (batch.length === 0) break;
+      if (batch.length === 0) return totalUpdated;
 
       await t
         .update(classInstances)
@@ -61,12 +60,12 @@ async function setStudentClassesFrozenState(
           )
         );
 
-      totalUpdated += batch.length;
+      const newTotal = totalUpdated + batch.length;
+      if (batch.length < BATCH_SIZE) return newTotal;
+      return processNextBatch(newTotal);
+    };
 
-      if (batch.length < BATCH_SIZE) break;
-    }
-
-    return totalUpdated;
+    return processNextBatch(0);
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 }
