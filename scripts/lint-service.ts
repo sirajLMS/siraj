@@ -52,6 +52,7 @@
 
 import { exec } from "node:child_process";
 import { parseArgs } from "node:util";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -282,8 +283,10 @@ export const lintService = new LintService();
  * @returns LintResult with success flag, combined output, and exit code
  */
 export async function requestLint(id: string, files: string[] = [], options: LintOptions = {}): Promise<LintResult> {
-  const r = await lintService.enqueue(id, files, options);
-  return { success: r.success, output: r.output, exitCode: r.exitCode };
+  return withProcessLock(`lint-service: ${id}`, async () => {
+    const r = await lintService.enqueue(id, files, options);
+    return { success: r.success, output: r.output, exitCode: r.exitCode };
+  });
 }
 
 /**
@@ -308,7 +311,9 @@ export async function requestLintWithMetrics(
   files?: string[],
   options?: LintOptions
 ): Promise<LintExecutionResult> {
-  return lintService.enqueue(id, files ?? [], options ?? {});
+  return withProcessLock(`lint-service: ${id}`, async () => {
+    return lintService.enqueue(id, files ?? [], options ?? {});
+  });
 }
 
 // ─── CLI Entrypoint ─────────────────────────────────────────────────────────

@@ -37,6 +37,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 import { type LintResult, requestLint } from "@/scripts/lint-service";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -456,12 +457,13 @@ function validateArgs(filePath: string | null, lifecycle: string | null): Valida
 
 // ─── Progressive Check Runner ───────────────────────────────────────────────
 
-function failOnResult(result: CheckResult, failMsg: string): void {
+function failOnResult(result: CheckResult, failMsg: string): boolean {
   if (!result.passed) {
     logFail(failMsg);
     console.log("\n" + result.output);
-    process.exit(1);
+    return true;
   }
+  return false;
 }
 
 async function runProgressiveChecks(
@@ -469,58 +471,62 @@ async function runProgressiveChecks(
   relPath: string,
   lifecycle: Lifecycle,
   targetDepth: number
-): Promise<void> {
+): Promise<number> {
   // Step 1: tsgo (always runs first, project-wide, filtered for this file)
   const tsgoResult = checkTsgo(filePath);
-  failOnResult(tsgoResult, "tsgo FAILED — stopping here. Fix type errors before proceeding.");
+  if (failOnResult(tsgoResult, "tsgo FAILED — stopping here. Fix type errors before proceeding.")) return 1;
   logPass(`tsgo passed (no errors for ${relPath})`);
 
   if (targetDepth <= LIFECYCLE_ORDER.tsgo) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "tsgo" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
   // Step 2: biome:check (file-level)
   const biomeResult = checkBiome(filePath);
-  failOnResult(biomeResult, "biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding.");
+  if (failOnResult(biomeResult, "biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding."))
+    return 1;
   logPass("biome:check passed");
 
   if (targetDepth <= LIFECYCLE_ORDER.biome) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "biome" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
   // Step 3: oxlint (file-level)
   const oxlintResult = checkOxlint(filePath);
-  failOnResult(oxlintResult, "oxlint FAILED — stopping here. Fix oxlint errors before proceeding.");
+  if (failOnResult(oxlintResult, "oxlint FAILED — stopping here. Fix oxlint errors before proceeding.")) return 1;
   logPass("oxlint passed");
 
   // Step 4: lint:type-aware via lint service (file-level)
   const lintResult = await checkLint(filePath);
-  failOnResult(lintResult, "lint:type-aware FAILED — stopping here. Fix lint errors before proceeding.");
+  if (failOnResult(lintResult, "lint:type-aware FAILED — stopping here. Fix lint errors before proceeding.")) return 1;
   logPass("lint:type-aware passed");
 
   if (targetDepth <= LIFECYCLE_ORDER.lint) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "lint" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
   // Step 5: check:duplicates via jscpd (intra-file clones only)
   const duplicatesResult = checkDuplicates(filePath);
-  failOnResult(
-    duplicatesResult,
-    "check:duplicates FAILED — stopping here. Remove intra-file duplicated code before proceeding."
-  );
+  if (
+    failOnResult(
+      duplicatesResult,
+      "check:duplicates FAILED — stopping here. Remove intra-file duplicated code before proceeding."
+    )
+  )
+    return 1;
   logPass("check:duplicates passed");
 
   // Step 6: codescene --file (file-level)
   const codesceneResult = checkCodescene(filePath);
-  failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.");
+  if (failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.")) return 1;
   logPass("codescene passed");
 
   // All checks passed for this lifecycle
   console.log(`\n${GREEN}✅ All checks for lifecycle "${lifecycle}" passed for ${relPath}${NC}`);
-  process.exit(0);
+  return 0;
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────
@@ -578,7 +584,11 @@ async function main(): Promise<void> {
 
   printApplicableRuleFiles(filePathSafe);
 
-  await runProgressiveChecks(filePathSafe, relPath, lifecycleSafe, targetDepth);
+  const exitCode = await withProcessLock(`sub-loop: ${relPath}`, async () => {
+    return await runProgressiveChecks(filePathSafe, relPath, lifecycleSafe, targetDepth);
+  });
+
+  process.exit(exitCode);
 }
 
 void main();

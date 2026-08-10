@@ -38,6 +38,7 @@
 import { spawnSync } from "node:child_process";
 import { relative, resolve } from "node:path";
 import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 import { type LintResult, requestLint } from "@/scripts/lint-service";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -372,15 +373,6 @@ function printHeader(lifecycle: Lifecycle, files: string[]): void {
   console.log("");
 }
 
-/** Run a check, push to results, and short-circuit (exit) on failure. */
-function runCheckAndShortCircuit(result: CheckResult, results: CheckResult[], files: string[]): void {
-  results.push(result);
-  if (!result.passed) {
-    printSummary(results, files);
-    process.exit(1);
-  }
-}
-
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const lifecycle = parseLifecycle(args);
@@ -391,33 +383,61 @@ async function main(): Promise<void> {
     process.exit(0);
   }
 
-  printHeader(lifecycle, files);
+  const exitCode = await withProcessLock("sub-loop-uncommitted", async () => {
+    printHeader(lifecycle, files);
 
-  const depth = LIFECYCLE_ORDER[lifecycle];
-  const results: CheckResult[] = [];
+    const depth = LIFECYCLE_ORDER[lifecycle];
+    const results: CheckResult[] = [];
 
-  // tsgo (depth 0+)
-  runCheckAndShortCircuit(checkTsgoAll(files), results, files);
+    // tsgo (depth 0+)
+    results.push(checkTsgoAll(files));
+    if (!results[results.length - 1].passed) {
+      printSummary(results, files);
+      return 1;
+    }
 
-  // biome (depth 1+)
-  if (depth >= 1) {
-    runCheckAndShortCircuit(checkBiomeAll(files), results, files);
-  }
+    // biome (depth 1+)
+    if (depth >= 1) {
+      results.push(checkBiomeAll(files));
+      if (!results[results.length - 1].passed) {
+        printSummary(results, files);
+        return 1;
+      }
+    }
 
-  // oxlint + lint:type-aware (depth 2+)
-  if (depth >= 2) {
-    runCheckAndShortCircuit(checkOxlintAll(files), results, files);
-    runCheckAndShortCircuit(await checkLintTypeAwareAll(files), results, files);
-  }
+    // oxlint + lint:type-aware (depth 2+)
+    if (depth >= 2) {
+      results.push(checkOxlintAll(files));
+      if (!results[results.length - 1].passed) {
+        printSummary(results, files);
+        return 1;
+      }
+      results.push(await checkLintTypeAwareAll(files));
+      if (!results[results.length - 1].passed) {
+        printSummary(results, files);
+        return 1;
+      }
+    }
 
-  // check:duplicates + codescene (depth 3+)
-  if (depth >= 3) {
-    runCheckAndShortCircuit(checkDuplicatesAll(files), results, files);
-    runCheckAndShortCircuit(checkCodesceneAll(files), results, files);
-  }
+    // check:duplicates + codescene (depth 3+)
+    if (depth >= 3) {
+      results.push(checkDuplicatesAll(files));
+      if (!results[results.length - 1].passed) {
+        printSummary(results, files);
+        return 1;
+      }
+      results.push(checkCodesceneAll(files));
+      if (!results[results.length - 1].passed) {
+        printSummary(results, files);
+        return 1;
+      }
+    }
 
-  printSummary(results, files);
-  process.exit(0);
+    printSummary(results, files);
+    return 0;
+  });
+
+  process.exit(exitCode);
 }
 
 function printSummary(results: CheckResult[], files: string[]): void {
