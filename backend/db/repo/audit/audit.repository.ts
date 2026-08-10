@@ -88,13 +88,13 @@ export namespace AuditRepository {
     const run = async (t: DBTransaction): Promise<Types.AuditLogSelectType[]> => {
       const rows = mapAuditLogRows(inputs);
 
-      const results: Types.AuditLogSelectType[] = [];
-      for (let i = 0; i < rows.length; i += DEFAULT_BULK_CHUNK_SIZE) {
-        const chunk = rows.slice(i, i + DEFAULT_BULK_CHUNK_SIZE);
-        const inserted = await t.insert(auditLogs).values(chunk).returning();
-        results.push(...inserted);
-      }
-      return results;
+      const chunks = Array.from({ length: Math.ceil(rows.length / DEFAULT_BULK_CHUNK_SIZE) }, (_, i) =>
+        rows.slice(i * DEFAULT_BULK_CHUNK_SIZE, (i + 1) * DEFAULT_BULK_CHUNK_SIZE)
+      );
+      const insertedChunks = await Promise.all(
+        chunks.map(chunk => t.insert(auditLogs).values(chunk).returning())
+      );
+      return insertedChunks.flat();
     };
 
     return runInTransaction(tx, run);
@@ -147,13 +147,13 @@ export namespace AuditRepository {
     const run = async (t: DBTransaction): Promise<Types.AdminAuditLogSelectType[]> => {
       const rows = mapAdminAuditLogRows(inputs);
 
-      const results: Types.AdminAuditLogSelectType[] = [];
-      for (let i = 0; i < rows.length; i += DEFAULT_BULK_CHUNK_SIZE) {
-        const chunk = rows.slice(i, i + DEFAULT_BULK_CHUNK_SIZE);
-        const inserted = await t.insert(adminAuditLogs).values(chunk).returning();
-        results.push(...inserted);
-      }
-      return results;
+      const chunks = Array.from({ length: Math.ceil(rows.length / DEFAULT_BULK_CHUNK_SIZE) }, (_, i) =>
+        rows.slice(i * DEFAULT_BULK_CHUNK_SIZE, (i + 1) * DEFAULT_BULK_CHUNK_SIZE)
+      );
+      const insertedChunks = await Promise.all(
+        chunks.map(chunk => t.insert(adminAuditLogs).values(chunk).returning())
+      );
+      return insertedChunks.flat();
     };
 
     return runInTransaction(tx, run);
