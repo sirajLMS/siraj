@@ -13,6 +13,17 @@ import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { Link } from "@/shared/i18n";
 
+const STATUS_LABEL_KEYS: Readonly<Record<AttendanceStatus, string>> = {
+  [AttendanceStatus.Absent]: "absent",
+  [AttendanceStatus.Late]: "late",
+  [AttendanceStatus.Present]: "present",
+};
+
+function getStatusLabel(status: AttendanceStatus, labels: Readonly<Record<string, string>>): string {
+  const key = STATUS_LABEL_KEYS[status];
+  return labels[key] ?? labels[status] ?? status;
+}
+
 function formatDuration(mins: number): string {
   if (mins < 60) return `${mins}m`;
   const hrs = mins / 60;
@@ -199,7 +210,7 @@ export function ClassSessionListMobile({ dateStr, sessions }: Readonly<ClassSess
         renderItem={session => (
           <ClassSessionCard
             session={session}
-            statusLabel={t.status[session.status as keyof typeof t.status] ?? session.status}
+            statusLabel={getStatusLabel(session.status, t.status)}
             durationLabel={formatDuration(session.duration)}
           />
         )}

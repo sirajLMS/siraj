@@ -2,6 +2,7 @@
 
 import { Box, CircularProgress } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
+import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
 import { availabilitySearchResolver } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type {
@@ -24,10 +25,10 @@ interface TeacherAvailabilityMobileViewProps extends Omit<TeacherAvailabilityVie
 
 function resolveDefaultFilters(
   propFilters: AvailabilitySearchFormData,
-  storeFilters: { readonly fromTime: Date | null; readonly toTime: Date | null; readonly gender: unknown }
+  storeFilters: { readonly fromTime: Date | null; readonly toTime: Date | null; readonly gender: Gender | null }
 ): AvailabilitySearchFormData {
   const storeHasDraft = storeFilters.fromTime !== null || storeFilters.toTime !== null || storeFilters.gender !== null;
-  return storeHasDraft ? (storeFilters as AvailabilitySearchFormData) : propFilters;
+  return storeHasDraft ? storeFilters : propFilters;
 }
 
 export function TeacherAvailabilityMobileView({

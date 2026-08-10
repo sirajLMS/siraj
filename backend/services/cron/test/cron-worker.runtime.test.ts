@@ -11,7 +11,7 @@ let failRunCalls: { runId: string; error: string }[] = [];
 let retryRunCalls: { runId: string; backoff: number; attempt: number }[] = [];
 let heartbeatCalls: { runId: string; workerId: string }[] = [];
 let retryCalls: { jobId: string; delaySeconds: number; newAttempt?: number }[] = [];
-let queuedJobs: CronJobPayload[] = [];
+let queuedJobs: TestJobPayload[] = [];
 let jobCounter = 0;
 
 await mock.module("@/backend/services/cron/queue-adapter.factory", () => ({
@@ -78,9 +78,13 @@ await mock.module("@/backend/services/cron/job-handler-registry", () => ({
 
 const { runDrainLoop } = await import("@/backend/services/cron/cron-worker.runtime");
 
+// CronJobKind is a string enum; tests use arbitrary string values (e.g. "FAILING")
+// for the mock handler registry, so we widen jobKind to string for test payloads.
+type TestJobPayload = Omit<CronJobPayload, "jobKind"> & { jobKind: string } & { queueJobId: string };
+
 function makeJob(
-  overrides: Partial<Omit<CronJobPayload, "jobKind" | "queueJobId">> & { jobKind?: string; queueJobId?: string } = {}
-): CronJobPayload & { queueJobId: string } {
+  overrides: Partial<Omit<TestJobPayload, "queueJobId">> & { queueJobId?: string } = {}
+): TestJobPayload {
   const { jobKind, queueJobId, ...rest } = overrides;
   return {
     runId: `run-${++jobCounter}`,
@@ -93,7 +97,7 @@ function makeJob(
     maxRetries: 3,
     retryBackoffSeconds: 60,
     ...rest,
-  } as CronJobPayload & { queueJobId: string };
+  };
 }
 
 afterEach(() => {

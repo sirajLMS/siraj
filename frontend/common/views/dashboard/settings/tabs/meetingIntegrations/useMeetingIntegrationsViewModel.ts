@@ -94,7 +94,9 @@ function mapConnectedAccount(
 interface UseMeetingIntegrationsStoreAccess {
   expandedSlug: ViewModelProviderSlug | null;
   loadingAccountsFor: ViewModelProviderSlug | null;
-  connectedAccountsByProvider: Readonly<Record<ViewModelProviderSlug, readonly MeetingIntegrationConnectedAccount[]>>;
+  connectedAccountsByProvider: Readonly<
+    Partial<Record<ViewModelProviderSlug, readonly MeetingIntegrationConnectedAccount[]>>
+  >;
   testingFor: ViewModelProviderSlug | null;
   lastTestResultByProvider: Readonly<Record<ViewModelProviderSlug, TestMeetingConnectionResult | null>>;
   revokingFor: { userId: string; providerSlug: ViewModelProviderSlug } | null;

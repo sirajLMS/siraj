@@ -12,6 +12,10 @@ const mtimeCache: Map<string, number> = new Map();
 const resultCache: Map<string, { status: string; details: string }> = new Map();
 let isLoaded = false;
 
+function isCachedStatus(value: string): value is "perfect" | "warning" | "error" {
+  return value === "perfect" || value === "warning" || value === "error";
+}
+
 export function ensureCacheDir(): void {
   if (!existsSync(CONFIG.CACHE_DIR)) {
     mkdirSync(CONFIG.CACHE_DIR, { recursive: true });
@@ -110,7 +114,7 @@ export function getCachedResult(filePath: string): CachedResult | null {
 
   return {
     file: filePath,
-    status: cached.status as "perfect" | "warning" | "error",
+    status: isCachedStatus(cached.status) ? cached.status : "error",
     details: cached.details,
   };
 }

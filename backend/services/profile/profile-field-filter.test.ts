@@ -159,12 +159,15 @@ describe("filterProfileByFieldGroups", () => {
   });
 
   test("legacy profile permissions do not grant field access", () => {
+    const legacyPerms = ["teacher.view_own_profile"].filter((p): p is AppPermission =>
+      (Object.values(AppPermission) as readonly string[]).includes(p)
+    );
     const legacyViewCtx = {
       actorUserId: "teacher-1",
       targetUserId: "teacher-1",
       scope: ProfileScope.OWN,
       audience: ProfileAudience.TEACHER,
-      permissions: new Set<AppPermission>(["teacher.view_own_profile" as AppPermission]),
+      permissions: new Set<AppPermission>(legacyPerms),
     };
 
     const payload = { name: "Hidden", email: "hidden@example.com" };

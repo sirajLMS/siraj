@@ -21,6 +21,7 @@ import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import {
   CLASS_TYPE_OPTIONS,
+  type ClassType,
   type RecurringClassFormFieldsProps,
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { RecurringClassFormLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
@@ -29,6 +30,12 @@ import { StudentAutocompleteMobile, TeacherAutocompleteMobile } from "@/frontend
 import { DaysScheduleSectionMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/daysScheduleSection.mobile";
 import { DurationInputMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/durationInput.mobile";
 import { TimeInputMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/timeInput.mobile";
+
+const CLASS_TYPE_VALUES: readonly string[] = CLASS_TYPE_OPTIONS;
+
+function isClassType(value: string): value is ClassType {
+  return CLASS_TYPE_VALUES.includes(value);
+}
 
 interface PeopleSectionProps {
   readonly control: Control<RecurringClassFormData>;
@@ -261,9 +268,11 @@ export function RecurringClassFormFieldsMobile({
   const classType = watch("classType") || "";
 
   const handleClassTypeChange = (val: string) => {
-    setValue("classType", val as RecurringClassFormData["classType"], {
-      shouldValidate: true,
-    });
+    if (isClassType(val)) {
+      setValue("classType", val, {
+        shouldValidate: true,
+      });
+    }
   };
 
   return (

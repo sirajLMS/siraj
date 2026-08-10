@@ -9,7 +9,7 @@
  * (e.g. use deduplication keys, check-before-write, or natural idempotency).
  * Future plan implementers rely on this contract.
  */
-import type { CronJobKind } from "@/backend/enum/cron/cron.enums";
+import { CronJobKind } from "@/backend/enum/cron/cron.enums";
 import type { CronJobHandler, CronJobPayload, CronJobResult } from "@/backend/types/cron/cron.types";
 
 const registry = new Map<CronJobKind, CronJobHandler>();
@@ -25,7 +25,7 @@ async function noopHandler(_job: CronJobPayload): Promise<CronJobResult> {
  * Called once on module load, but safe to call multiple times.
  */
 export function registerCoreHandlers(): void {
-  registry.set("NOOP" as CronJobKind, noopHandler);
+  registry.set(CronJobKind.NOOP, noopHandler);
 }
 
 // Auto-register on module load

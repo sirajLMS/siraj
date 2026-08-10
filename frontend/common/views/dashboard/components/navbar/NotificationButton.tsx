@@ -18,16 +18,16 @@ interface NotificationButtonProps extends Omit<IconButtonProps, "children" | "ti
   notificationCount: number;
 }
 
+function openNotificationsDrawer() {
+  useNotificationsDrawerStore.getState().openDrawer();
+}
+
 export function NotificationButton({ notificationCount, ...props }: Readonly<NotificationButtonProps>) {
   const t = useAppTranslation(Translation.Common);
 
-  const handleClick = () => {
-    useNotificationsDrawerStore.getState().openDrawer();
-  };
-
   return (
     <RequirePermission permissions={[AppPermission.NotificationViewAlerts]}>
-      <NavbarIcon tooltipTitle={t.notifications} onClick={handleClick} {...props}>
+      <NavbarIcon tooltipTitle={t.notifications} onClick={openNotificationsDrawer} {...props}>
         <Badge
           badgeContent={notificationCount}
           variant="dot"

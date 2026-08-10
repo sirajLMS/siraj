@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationPreferencesRepository, UserRepository } from "@/backend/db/repo";
-import { NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { AccountStatus, IanaTimezone, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import {
   dispatchWithPreferences,
@@ -61,11 +61,27 @@ let findSafeByIdsSpy: ReturnType<typeof spyOn>;
 type ContactOverrides = { email?: string | null; phone?: string | null };
 
 function mockUser(overrides?: ContactOverrides): UserSelectType {
+  const id = crypto.randomUUID();
+  const now = new Date();
   return {
-    email: "parent@test.com",
-    phone: "+15555550100",
-    ...overrides,
-  } as UserSelectType;
+    id,
+    name: "Test User",
+    email: overrides?.email ?? "parent@test.com",
+    emailVerifiedAt: null,
+    password: crypto.randomUUID(),
+    rememberTokenHash: null,
+    avatarFilePath: null,
+    avatarUrl: null,
+    phone: overrides?.phone ?? "+15555550100",
+    status: AccountStatus.ACTIVATED,
+    isSuperAdmin: false,
+    timezone: IanaTimezone.UTC,
+    displayCurrency: null,
+    lastLoginAt: null,
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
+  };
 }
 
 function mockFindSafeByIdsWithUser(userOverrides?: ContactOverrides) {
@@ -205,7 +221,9 @@ describe("dispatchWithPreferences — preferences filtering", () => {
       await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
       throw new Error("Expected dispatchWithPreferences to throw");
     } catch (err) {
-      caughtErr = err as Error;
+      if (err instanceof Error) {
+        caughtErr = err;
+      }
     }
     expect(caughtErr).toBeDefined();
     expect(caughtErr?.message).toContain("prefs DB unreachable");

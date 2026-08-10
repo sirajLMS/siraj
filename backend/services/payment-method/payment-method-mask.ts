@@ -60,6 +60,24 @@ function isBankTransferDetails(details: PaymentMethodDetails): details is BankTr
   return !("walletId" in details || "paymentLinkId" in details || "onlineAccountId" in details || "note" in details);
 }
 
+function maskBankTransferDetails(details: PaymentMethodDetails, revealSensitive: boolean): PaymentMethodDetails {
+  if (!isBankTransferDetails(details)) {
+    throw new Error("Bank transfer details have an unexpected shape");
+  }
+  const plain = revealSensitive ? decryptBankTransferDetails(details) : details;
+  if (revealSensitive) {
+    return plain;
+  }
+  return {
+    iban: maskNumericField(plain.iban) ?? undefined,
+    bankName: maskTextField(plain.bankName) ?? undefined,
+    beneficiaryName: maskTextField(plain.beneficiaryName) ?? undefined,
+    swiftBic: maskSwiftBic(plain.swiftBic) ?? undefined,
+    accountNumber: maskNumericField(plain.accountNumber) ?? undefined,
+    routingNumber: maskNumericField(plain.routingNumber) ?? undefined,
+  };
+}
+
 function maskDetails(
   type: PaymentMethodType,
   details: PaymentMethodDetails,
@@ -93,23 +111,8 @@ function maskDetails(
         identifier: revealSensitive ? details.identifier : (maskTextField(details.identifier) ?? ""),
       };
     }
-    case PaymentMethodType.BANK_TRANSFER: {
-      if (!isBankTransferDetails(details)) {
-        throw new Error("Bank transfer details have an unexpected shape");
-      }
-      const plain = revealSensitive ? decryptBankTransferDetails(details) : details;
-      if (revealSensitive) {
-        return plain;
-      }
-      return {
-        iban: maskNumericField(plain.iban) ?? undefined,
-        bankName: maskTextField(plain.bankName) ?? undefined,
-        beneficiaryName: maskTextField(plain.beneficiaryName) ?? undefined,
-        swiftBic: maskSwiftBic(plain.swiftBic) ?? undefined,
-        accountNumber: maskNumericField(plain.accountNumber) ?? undefined,
-        routingNumber: maskNumericField(plain.routingNumber) ?? undefined,
-      };
-    }
+    case PaymentMethodType.BANK_TRANSFER:
+      return maskBankTransferDetails(details, revealSensitive);
     case PaymentMethodType.CASH:
       return details;
     case PaymentMethodType.PROOF_UPLOAD:

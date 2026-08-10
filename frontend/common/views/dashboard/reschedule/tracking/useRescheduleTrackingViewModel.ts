@@ -234,7 +234,7 @@ function buildViewLabels(t: RescheduleTrackingLabels): RescheduleTrackingViewLab
     viewDetails: t.actions.viewDetails,
     approveLeave: t.actions.approveLeave,
     rejectLeave: t.actions.rejectLeave,
-    showingOf: t.showingOf as unknown as string,
+    showingOf: t.showingOf(0, 0),
     noEntries: t.noEntries,
     statusPending: t.status.pendingLeave,
     statusRescheduled: t.status.rescheduled,

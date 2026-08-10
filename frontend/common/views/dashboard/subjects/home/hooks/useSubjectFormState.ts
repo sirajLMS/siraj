@@ -58,7 +58,17 @@ export function useSubjectFormState(options: Readonly<UseSubjectFormStateOptions
   const handleSubmit = form.handleSubmit;
 
   const nameValue = useWatch({ control, name: "name" });
-  const values = useWatch({ control }) as SubjectFormValues;
+  const watchedValues = useWatch<SubjectFormValues>({ control });
+  const values: SubjectFormValues = {
+    name: watchedValues.name ?? "",
+    slug: watchedValues.slug ?? "",
+    categoryId: watchedValues.categoryId ?? "",
+    description: watchedValues.description,
+    isActive: watchedValues.isActive,
+    avatarUrl: watchedValues.avatarUrl,
+    hourlyRate: watchedValues.hourlyRate,
+    rateCurrency: watchedValues.rateCurrency,
+  };
 
   useEffect(() => {
     if (open && subject) {

@@ -1,4 +1,4 @@
-import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import { IANA_TIMEZONE_LABELS } from "@/shared/constants/iana-timezone-labels";
 import { IANA_TIMEZONE_TERRITORY_CODES } from "@/shared/constants/iana-timezone-territories";
@@ -33,6 +33,12 @@ const IANA_TIMEZONE_TO_GRAPHQL_ENUM: Readonly<Record<string, string>> = Object.f
   IANA_TIMEZONE_IDS_STRINGS.map(id => [id, id.replaceAll("/", "_")])
 );
 
+const IANA_TIMEZONE_ENUM_VALUES: ReadonlySet<string> = new Set(Object.values(IanaTimezone) as readonly string[]);
+
+function isIanaTimezone(value: string): value is IanaTimezone {
+  return IANA_TIMEZONE_ENUM_VALUES.has(value);
+}
+
 export type TimezoneOption = {
   readonly id: string;
   readonly label: string;
@@ -57,7 +63,8 @@ export function fromGraphqlIanaTimezone(value: string): string {
 
 export function toGraphqlIanaTimezone(value: string | null | undefined): IanaTimezone {
   const normalized = normalizeIanaTimezoneId(value ?? "UTC");
-  return (IANA_TIMEZONE_TO_GRAPHQL_ENUM[normalized] ?? "Africa_Cairo") as IanaTimezone;
+  const enumValue = IANA_TIMEZONE_TO_GRAPHQL_ENUM[normalized] ?? "Africa_Cairo";
+  return isIanaTimezone(enumValue) ? enumValue : IanaTimezone.AfricaCairo;
 }
 
 export function resolveBrowserIanaTimezoneId(): string {

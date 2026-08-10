@@ -58,25 +58,27 @@ async function copyDirectory(ctx: VercelContext, sourcePath: string, destPath: s
     fileCount: allBlobs.length,
   });
 
-  for (const blob of allBlobs) {
-    const relativePath = blob.pathname.slice(prefix.length);
-    const newFilePath = `${destPath}/${relativePath}`;
+  await Promise.all(
+    allBlobs.map(async blob => {
+      const relativePath = blob.pathname.slice(prefix.length);
+      const newFilePath = `${destPath}/${relativePath}`;
 
-    try {
-      await copy(blob.url, newFilePath, {
-        token: ctx.token,
-        access: ctx.access,
-      });
+      try {
+        await copy(blob.url, newFilePath, {
+          token: ctx.token,
+          access: ctx.access,
+        });
 
-      logger.info("📋 copyDirectory: Copied file", {
-        from: blob.pathname,
-        to: newFilePath,
-      });
-    } catch (error) {
-      logger.error(`Failed to copy file in directory: ${blob.pathname}`, error);
-      throw error;
-    }
-  }
+        logger.info("📋 copyDirectory: Copied file", {
+          from: blob.pathname,
+          to: newFilePath,
+        });
+      } catch (error) {
+        logger.error(`Failed to copy file in directory: ${blob.pathname}`, error);
+        throw error;
+      }
+    })
+  );
 
   logger.info("✅ copyDirectory: All files copied", {
     sourceDir: sourcePath,

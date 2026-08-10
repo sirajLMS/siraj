@@ -15,7 +15,8 @@ describe("Neon @integration", () => {
     const { drizzle: drizzleNeonHttp } = await import("drizzle-orm/neon-http");
     const { neon } = await import("@neondatabase/serverless");
 
-    const client = neon(neonUrl as string);
+    if (!neonUrl) return;
+    const client = neon(neonUrl);
     const httpDb = drizzleNeonHttp({ client, relations });
     const result = await httpDb.execute(sql`SELECT 1 as test`);
 

@@ -178,6 +178,7 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import type { SvgIconComponent } from "@mui/icons-material";
 import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
@@ -627,9 +628,7 @@ const baseProps: UserBillingProfileViewProps = {
   userId: "test-user-id",
 };
 
-const MockIcon = Object.assign(() => null as React.ReactElement | null, {
-  muiName: "SvgIcon",
-}) as unknown as import("@mui/icons-material").SvgIconComponent;
+const MockIcon: SvgIconComponent = Object.assign((_props: unknown) => null, { muiName: "SvgIcon" });
 
 describe("UserBillingProfileView", () => {
   test("renders nothing when unauthorized", () => {

@@ -14,10 +14,17 @@ export function registerNamespace<TLabels>(
   namespaceRegistry.set(key, config);
 }
 
+function isNamespaceLoaderConfig<TLabels>(
+  config: NamespaceLoaderConfig<unknown> | undefined
+): config is NamespaceLoaderConfig<TLabels> | undefined {
+  return config !== undefined;
+}
+
 function narrowConfig<TLabels>(
   config: NamespaceLoaderConfig<unknown> | undefined
 ): NamespaceLoaderConfig<TLabels> | undefined {
-  return config as NamespaceLoaderConfig<TLabels> | undefined;
+  if (!isNamespaceLoaderConfig<TLabels>(config)) return undefined;
+  return config;
 }
 
 export function getNamespaceConfig<TLabels>(

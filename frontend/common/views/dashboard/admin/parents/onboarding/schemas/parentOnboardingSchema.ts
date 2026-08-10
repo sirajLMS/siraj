@@ -47,9 +47,14 @@ export const parentOnboardingSchema = z
       ctx.addIssue({ code: "custom", message: "meetingUrlRequired", path: ["meetingUrl"] });
     }
     if (hasUrl && data.meetingUrl) {
-      try {
-        void new URL(data.meetingUrl);
-      } catch {
+      const isValidUrl = (() => {
+        try {
+          return Boolean(new URL(data.meetingUrl));
+        } catch {
+          return false;
+        }
+      })();
+      if (!isValidUrl) {
         ctx.addIssue({ code: "custom", message: "meetingUrlInvalid", path: ["meetingUrl"] });
       }
     }

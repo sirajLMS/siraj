@@ -1,6 +1,12 @@
 import { spawnSync } from "node:child_process";
 import { withProcessLock } from "@/scripts/lib/process-lock";
 
+function getErrorCode(e: Error): string | undefined {
+  const desc = Object.getOwnPropertyDescriptor(e, "code");
+  const code = desc?.value;
+  return typeof code === "string" ? code : undefined;
+}
+
 const args = process.argv.slice(2);
 if (args.length < 2) {
   console.error("Usage: bun run scripts/lib/run-locked-cmd.ts <lock-name> [KEY=VAL...] <cmd> [args...]");
@@ -49,7 +55,7 @@ const exitCode = await withProcessLock(lockName, async () => {
     timeout: timeoutMs,
   });
 
-  if (result.error && (result.error as { code?: string }).code === "ETIMEDOUT") {
+  if (result.error && getErrorCode(result.error) === "ETIMEDOUT") {
     console.error(
       `\n\x1b[31m❌ [run-locked-cmd] COMMAND TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
         `Command "${cmd} ${cmdArgs.join(" ")}" took longer than 5 minutes (300000ms) to complete.\n` +

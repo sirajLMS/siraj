@@ -18,6 +18,10 @@ const useSnapshotFallback =
 
 let hasWipedBuildId = false;
 
+function isCacheEntry<TLabels>(entry: CacheEntry<unknown> | undefined): entry is CacheEntry<TLabels> {
+  return entry !== undefined;
+}
+
 function checkBuildIdWipe(): void {
   if (useSnapshotFallback && !hasWipedBuildId) {
     hasWipedBuildId = true;
@@ -43,7 +47,8 @@ function startNamespaceLoad<TLabels>(handle: NamespaceHandle<TLabels>, locale: A
   checkBuildIdWipe();
 
   const localeCache = getLocaleCache(handle);
-  const existing = localeCache.get(locale) as CacheEntry<TLabels> | undefined;
+  const cachedEntry = localeCache.get(locale);
+  const existing = isCacheEntry<TLabels>(cachedEntry) ? cachedEntry : undefined;
   if (existing) {
     return existing;
   }

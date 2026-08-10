@@ -46,6 +46,12 @@ function resolveLifecycleStatus(adminData: ParentAdminData): string {
   return raw.toLowerCase();
 }
 
+const LIFECYCLE_STATUS_KEYS = ["regular", "on_trial", "on_leave", "suspended", "deactivated"] as const;
+
+function isLifecycleStatusKey(value: string): value is (typeof LIFECYCLE_STATUS_KEYS)[number] {
+  return (LIFECYCLE_STATUS_KEYS as readonly string[]).includes(value);
+}
+
 function BillingEditSection({
   labels,
   register,
@@ -141,7 +147,7 @@ function BillingViewSection({
             <StatusBadge
               category="studentAccount"
               status={lifecycleStatus}
-              label={t.status[lifecycleStatus as keyof typeof t.status]}
+              label={isLifecycleStatusKey(lifecycleStatus) ? t.status[lifecycleStatus] : t.status.regular}
             />
             {parentId ? (
               <Typography

@@ -6,12 +6,16 @@ import { type LanguageType, languages } from "@/frontend/common/lib/locale";
 import type { LanguageSelectorProps } from "@/frontend/mobile/components/ui/input/languageSelector/LanguageSelector";
 import { LanguageSelectorMobile } from "@/frontend/mobile/components/ui/input/languageSelector/languageSelector.mobile";
 
+const LANGUAGE_BY_CODE: Readonly<Record<string, LanguageType>> = Object.fromEntries(
+  languages.map(entry => [entry.code, entry])
+);
+
 function LanguageSelectorMobileStory({
   initialLanguageCode,
   ...props
 }: Readonly<Partial<LanguageSelectorProps> & { initialLanguageCode?: string }>) {
   const [language, setLanguage] = useState<LanguageType | undefined>(() =>
-    initialLanguageCode ? languages.find(entry => entry.code === initialLanguageCode) : undefined
+    initialLanguageCode ? LANGUAGE_BY_CODE[initialLanguageCode] : undefined
   );
 
   return (

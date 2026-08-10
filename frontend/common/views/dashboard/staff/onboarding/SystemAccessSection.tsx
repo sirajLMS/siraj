@@ -15,6 +15,12 @@ const ACCOUNT_TYPES: readonly ManagerAccountType[] = [
   ManagerAccountType.Supervisor,
 ];
 
+const ACCOUNT_TYPE_LABEL_KEYS: Readonly<Record<ManagerAccountType, "manager" | "admin" | "supervisor">> = {
+  [ManagerAccountType.Manager]: "manager",
+  [ManagerAccountType.Admin]: "admin",
+  [ManagerAccountType.Supervisor]: "supervisor",
+};
+
 const StyledAccountTypeContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   padding: theme.spacing(0.5),
@@ -55,7 +61,7 @@ function AccountTypeToggle({
         <StyledAccountTypeContainer>
           {ACCOUNT_TYPES.map(type => {
             const isSelected = field.value === type;
-            const labelKey = type.toLowerCase() as "manager" | "admin" | "supervisor";
+            const labelKey = ACCOUNT_TYPE_LABEL_KEYS[type];
             return (
               <StyledAccountTypeButton
                 key={type}

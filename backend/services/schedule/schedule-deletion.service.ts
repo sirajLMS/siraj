@@ -11,6 +11,22 @@ import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import type { ErrorsLabels } from "@/shared/locale";
 
+function handleQuotaReleaseError(
+  schedule: { id: string; quotaId: string; studentId: string },
+  actorUserId: string
+): (error: unknown) => never {
+  return (error: unknown) => {
+    logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
+      recurringScheduleId: schedule.id,
+      quotaId: schedule.quotaId,
+      studentId: schedule.studentId,
+      actorUserId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  };
+}
+
 export namespace ScheduleDeletionService {
   /**
    * Best-effort remote meeting cleanup for a single class instance.
@@ -228,16 +244,7 @@ export namespace ScheduleDeletionService {
               schedule.earmarkedClasses,
               actorUserId,
               tx
-            ).catch(error => {
-              logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
-                recurringScheduleId: schedule.id,
-                quotaId: schedule.quotaId,
-                studentId: schedule.studentId,
-                actorUserId,
-                error: error instanceof Error ? error.message : String(error),
-              });
-              throw error;
-            })
+            ).catch(handleQuotaReleaseError(schedule, actorUserId))
           ),
         Promise.resolve()
       );

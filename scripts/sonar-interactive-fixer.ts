@@ -111,6 +111,26 @@ function clearScreen(): void {
   process.stdout.write("\x1Bc");
 }
 
+function isSonarIssue(value: unknown): value is SonarIssue {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const v = Object.fromEntries(Object.entries(value));
+  return (
+    typeof v.key === "string" &&
+    typeof v.rule === "string" &&
+    typeof v.severity === "string" &&
+    typeof v.component === "string" &&
+    typeof v.message === "string" &&
+    typeof v.status === "string" &&
+    typeof v.type === "string"
+  );
+}
+
+function isSonarResult(value: unknown): value is SonarResult {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const v = Object.fromEntries(Object.entries(value));
+  return Array.isArray(v.issues) && v.issues.every(isSonarIssue);
+}
+
 /**
  * Load and parse sonar-result.json
  */
@@ -128,7 +148,11 @@ function loadSonarResults(): SonarResult | null {
 
   try {
     const content = readFileSync(fullPath, "utf-8");
-    return JSON.parse(content) as SonarResult;
+    const parsed: unknown = JSON.parse(content);
+    if (!isSonarResult(parsed)) {
+      throw new Error("Parsed JSON does not match expected SonarResult shape");
+    }
+    return parsed;
   } catch (error) {
     logger.error("Failed to parse sonar-result.json", { error });
     console.log(`\n${c.red}${c.bold}✖ Error:${c.reset} Failed to parse ${c.cyan}${SONAR_RESULT_PATH}${c.reset}\n`);

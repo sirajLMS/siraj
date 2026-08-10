@@ -57,9 +57,8 @@ export function resolveMetricLabel(path: string, sources: MetricLabelSources): s
     }
   } else if (path.startsWith("metrics.")) {
     const parts = path.split(".");
-    const metricKey = parts[1];
-    if (metricKey !== undefined && hasKey(sources.statusTracking.metrics, metricKey)) {
-      const resolved = sources.statusTracking.metrics[metricKey];
+    if (parts[1] !== undefined && hasKey(sources.statusTracking.metrics, parts[1])) {
+      const resolved = sources.statusTracking.metrics[parts[1]];
       if (typeof resolved === "string") {
         return resolved;
       }

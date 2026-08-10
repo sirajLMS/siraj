@@ -9,11 +9,6 @@ import {
   PaymentMethodTypePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
-  BankTransferDetails,
-  CashDetails,
-  MobileWalletDetails,
-  OnlineAccountDetails,
-  PaymentLinkDetails,
   PaymentMethodCatalogSnapshot,
   PaymentMethodDefaults,
   PaymentMethodDetails,
@@ -44,12 +39,15 @@ interface SupportedCommonShape {
   updatedAt: Date;
 }
 
-function detailField<T extends PaymentMethodDetails, K extends keyof T>(
-  key: K,
-  details: PaymentMethodDetails
-): T[K] | null {
-  if (key in details) {
-    return (details as T)[key] ?? null;
+function isRecordLike(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function detailField(key: string, details: PaymentMethodDetails): string | null {
+  if (key in details && isRecordLike(details)) {
+    const record: Record<string, unknown> = details;
+    const value = record[key];
+    return typeof value === "string" ? value : null;
   }
   return null;
 }
@@ -58,37 +56,37 @@ const PaymentMethodDetailsRef = gqlSchemaBuilder.objectRef<PaymentMethodDetails>
 
 export const PaymentMethodDetailsPothosObject = PaymentMethodDetailsRef.implement({
   fields: t => ({
-    walletId: t.string({ nullable: true, resolve: d => detailField<MobileWalletDetails, "walletId">("walletId", d) }),
-    phone: t.string({ nullable: true, resolve: d => detailField<MobileWalletDetails, "phone">("phone", d) }),
+    walletId: t.string({ nullable: true, resolve: d => detailField("walletId", d) }),
+    phone: t.string({ nullable: true, resolve: d => detailField("phone", d) }),
     paymentLinkId: t.string({
       nullable: true,
-      resolve: d => detailField<PaymentLinkDetails, "paymentLinkId">("paymentLinkId", d),
+      resolve: d => detailField("paymentLinkId", d),
     }),
-    url: t.string({ nullable: true, resolve: d => detailField<PaymentLinkDetails, "url">("url", d) }),
+    url: t.string({ nullable: true, resolve: d => detailField("url", d) }),
     onlineAccountId: t.string({
       nullable: true,
-      resolve: d => detailField<OnlineAccountDetails, "onlineAccountId">("onlineAccountId", d),
+      resolve: d => detailField("onlineAccountId", d),
     }),
     identifier: t.string({
       nullable: true,
-      resolve: d => detailField<OnlineAccountDetails, "identifier">("identifier", d),
+      resolve: d => detailField("identifier", d),
     }),
-    iban: t.string({ nullable: true, resolve: d => detailField<BankTransferDetails, "iban">("iban", d) }),
-    bankName: t.string({ nullable: true, resolve: d => detailField<BankTransferDetails, "bankName">("bankName", d) }),
+    iban: t.string({ nullable: true, resolve: d => detailField("iban", d) }),
+    bankName: t.string({ nullable: true, resolve: d => detailField("bankName", d) }),
     beneficiaryName: t.string({
       nullable: true,
-      resolve: d => detailField<BankTransferDetails, "beneficiaryName">("beneficiaryName", d),
+      resolve: d => detailField("beneficiaryName", d),
     }),
-    swiftBic: t.string({ nullable: true, resolve: d => detailField<BankTransferDetails, "swiftBic">("swiftBic", d) }),
+    swiftBic: t.string({ nullable: true, resolve: d => detailField("swiftBic", d) }),
     accountNumber: t.string({
       nullable: true,
-      resolve: d => detailField<BankTransferDetails, "accountNumber">("accountNumber", d),
+      resolve: d => detailField("accountNumber", d),
     }),
     routingNumber: t.string({
       nullable: true,
-      resolve: d => detailField<BankTransferDetails, "routingNumber">("routingNumber", d),
+      resolve: d => detailField("routingNumber", d),
     }),
-    note: t.string({ nullable: true, resolve: d => detailField<CashDetails, "note">("note", d) }),
+    note: t.string({ nullable: true, resolve: d => detailField("note", d) }),
   }),
 });
 
@@ -248,16 +246,22 @@ export type UserPaymentMethodSubmitGqlInput = Omit<UserPaymentMethodSubmitInput,
   readonly isDefault?: boolean;
 };
 
+function userPaymentMethodCommonInputFields(t: PothosInputFieldBuilder) {
+  return {
+    type: t.field({ type: PaymentMethodTypePothosEnum, required: true }),
+    direction: t.field({ type: PaymentDirectionPothosEnum, required: true }),
+    isDefault: t.boolean({ required: false }),
+    label: t.string({ required: false }),
+    details: t.field({ type: PaymentMethodDetailsInputPothos, required: true }),
+  };
+}
+
 export const UserPaymentMethodCreateInputPothos = gqlSchemaBuilder
   .inputRef<UserPaymentMethodSubmitGqlInput>("UserPaymentMethodCreateInput")
   .implement({
     fields: t => ({
       userId: t.string({ required: true }),
-      type: t.field({ type: PaymentMethodTypePothosEnum, required: true }),
-      direction: t.field({ type: PaymentDirectionPothosEnum, required: true }),
-      isDefault: t.boolean({ required: false }),
-      label: t.string({ required: false }),
-      details: t.field({ type: PaymentMethodDetailsInputPothos, required: true }),
+      ...userPaymentMethodCommonInputFields(t),
     }),
   });
 
@@ -272,13 +276,7 @@ export type UserPaymentMethodInitialGqlInput = Omit<
 export const UserPaymentMethodInitialInputPothos = gqlSchemaBuilder
   .inputRef<UserPaymentMethodInitialGqlInput>("UserPaymentMethodInitialInput")
   .implement({
-    fields: t => ({
-      type: t.field({ type: PaymentMethodTypePothosEnum, required: true }),
-      direction: t.field({ type: PaymentDirectionPothosEnum, required: true }),
-      isDefault: t.boolean({ required: false }),
-      label: t.string({ required: false }),
-      details: t.field({ type: PaymentMethodDetailsInputPothos, required: true }),
-    }),
+    fields: t => userPaymentMethodCommonInputFields(t),
   });
 
 export const UserPaymentMethodUpdateInputPothos = gqlSchemaBuilder

@@ -5,8 +5,10 @@ import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/
 import { LocalizedStringInputDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localizedStringInput.desktop";
 import type { LocalizedString } from "@/shared/types";
 
+const EMPTY_LOCALIZED_STRING: LocalizedString = {};
+
 function LocalizedStringInputStory({
-  initialValue = {},
+  initialValue = EMPTY_LOCALIZED_STRING,
   ...props
 }: Readonly<Omit<LocalizedStringInputProps, "value" | "onChangeAction"> & { initialValue?: LocalizedString }>) {
   const [value, setValue] = useState<LocalizedString>(initialValue);

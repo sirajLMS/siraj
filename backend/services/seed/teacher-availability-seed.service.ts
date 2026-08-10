@@ -52,11 +52,14 @@ export namespace TeacherAvailabilitySeedService {
     inputs: readonly AvailabilityWindowUpsertInput[],
     tx?: DBTransaction
   ): Promise<TeacherAvailabilityWindowSelectType[]> {
-    const results: TeacherAvailabilityWindowSelectType[] = [];
-    for (const input of inputs) {
-      results.push(await seedAvailabilityWindow(input, tx));
-    }
-    return results;
+    return inputs.reduce(
+      async (accumulated, input) => {
+        const acc = await accumulated;
+        acc.push(await seedAvailabilityWindow(input, tx));
+        return acc;
+      },
+      Promise.resolve([] as TeacherAvailabilityWindowSelectType[])
+    );
   }
 
   /** Idempotently create recurring unavailability for a demo teacher. */

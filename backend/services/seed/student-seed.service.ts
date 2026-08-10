@@ -64,11 +64,19 @@ export namespace StudentSeedService {
     tx?: DBTransaction
   ): Promise<StudentSelectType[]> {
     assertSeedWriteAllowed("Student seed writes");
-    const results: StudentSelectType[] = [];
-    for (const input of inputs) {
-      results.push(await seedStudentByKey(input, tx));
-    }
-    return results;
+    return seedStudentsSequential(inputs, 0, [], tx);
+  }
+
+  /** Recursive sequential helper — preserves tx ordering for shared transactions. */
+  async function seedStudentsSequential(
+    inputs: readonly SeedStudentInput[],
+    index: number,
+    results: StudentSelectType[],
+    tx?: DBTransaction
+  ): Promise<StudentSelectType[]> {
+    if (index >= inputs.length) return results;
+    results.push(await seedStudentByKey(inputs[index], tx));
+    return seedStudentsSequential(inputs, index + 1, results, tx);
   }
 
   /** Seed-only primary teacher assignment for demo students. */

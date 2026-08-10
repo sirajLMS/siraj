@@ -173,14 +173,12 @@ export async function executeBulkDelete<
     input.force || false
   );
 
-  let successCount = 0;
   const failures: Array<{ path: string; error: string }> = [];
-  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
-  for (const itemPath of input.paths) {
-    try {
+  const results = await Promise.allSettled(
+    input.paths.map(itemPath => {
       const parentPath = itemPath.substring(0, itemPath.lastIndexOf("/"));
-      const result = await deleteFn(ctx, {
+      return deleteFn(ctx, {
         itemPath,
         force: input.force || false,
         dbFile: dbFileMap.get(itemPath),
@@ -188,15 +186,23 @@ export async function executeBulkDelete<
         parentDir: dbParentDirMap.get(parentPath),
         usageCheck: usageCheckMap.get(itemPath),
       });
+    })
+  );
 
-      if (result != null) {
-        successfulItems.push(result);
+  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
+  let successCount = 0;
+
+  for (let i = 0; i < input.paths.length; i++) {
+    const outcome = results[i];
+    if (outcome.status === "fulfilled") {
+      if (outcome.value != null) {
+        successfulItems.push(outcome.value);
       }
       successCount++;
-    } catch (error) {
+    } else {
       failures.push({
-        path: itemPath,
-        error: error instanceof Error ? error.message : String(error),
+        path: input.paths[i],
+        error: outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason),
       });
     }
   }

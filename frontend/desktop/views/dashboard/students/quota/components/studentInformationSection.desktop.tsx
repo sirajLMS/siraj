@@ -32,6 +32,12 @@ import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/student
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
+type QuotaFieldKey = keyof StudentQuotaLabels["fields"];
+
+function isQuotaFieldKey(value: string, fields: StudentQuotaLabels["fields"]): value is QuotaFieldKey {
+  return value in fields;
+}
+
 function parseDateValue(dateStr: string): Date | null {
   if (!dateStr) return null;
   const parsed = parse(dateStr, DATE_FORMAT, new Date());
@@ -165,7 +171,7 @@ function GenderField() {
                     }
                     label={
                       <Typography variant="bodyMd">
-                        {t.fields[option.labelKey as keyof StudentQuotaLabels["fields"]]}
+                        {isQuotaFieldKey(option.labelKey, t.fields) ? t.fields[option.labelKey] : ""}
                       </Typography>
                     }
                     sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}

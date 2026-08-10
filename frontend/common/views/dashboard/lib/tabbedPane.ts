@@ -62,8 +62,11 @@ export function resolveTab<TabId extends string, LabelKey extends string>(
   tabParam: string | null,
   availableTabs: readonly TabDefinition<TabId, LabelKey>[]
 ): TabId | undefined {
-  if (tabParam && availableTabs.some(tab => tab.id === tabParam)) {
-    return tabParam as TabId;
+  if (tabParam) {
+    const matchingTab = availableTabs.find(tab => tab.id === tabParam);
+    if (matchingTab) {
+      return matchingTab.id;
+    }
   }
   return availableTabs[0]?.id;
 }

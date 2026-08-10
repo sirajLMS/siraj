@@ -11,20 +11,30 @@ beforeAll(() => {
   tErrors = getServerTranslations("en").errorsTranslations;
 });
 
-const badTx = {
-  select: () => {
-    throw new Error("Mock database error");
-  },
-  insert: () => {
-    throw new Error("Mock database error");
-  },
-  update: () => {
-    throw new Error("Mock database error");
-  },
-  delete: () => {
-    throw new Error("Mock database error");
-  },
-} as unknown as DBTransaction;
+function isDBTransaction(value: unknown): value is DBTransaction {
+  return typeof value === "object" && value !== null && "select" in value;
+}
+
+function makeBadTx(): DBTransaction {
+  const mock = {
+    select: () => {
+      throw new Error("Mock database error");
+    },
+    insert: () => {
+      throw new Error("Mock database error");
+    },
+    update: () => {
+      throw new Error("Mock database error");
+    },
+    delete: () => {
+      throw new Error("Mock database error");
+    },
+  };
+  if (!isDBTransaction(mock)) throw new Error("Mock transaction setup failed");
+  return mock;
+}
+
+const badTx = makeBadTx();
 
 describe("UserPaymentMethodRepository", () => {
   test("creates, lists, updates, and deletes user payment methods", async () => {

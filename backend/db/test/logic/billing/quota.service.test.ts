@@ -187,7 +187,10 @@ describe("QuotaService", () => {
       // message indicates the quota may be depleted or inactive (the repo's atomic
       // SELECT FOR UPDATE finds no matching ACTIVE row with remaining>0). This is the
       // not-found / not-usable failure path as surfaced through the service.
-      expect((error as Error).message).toContain("depleted or inactive");
+      expect(error).toBeInstanceOf(Error);
+      if (error instanceof Error) {
+        expect(error.message).toContain("depleted or inactive");
+      }
     });
   });
 

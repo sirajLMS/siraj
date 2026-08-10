@@ -23,6 +23,21 @@ export interface UploadFileToStorageResult {
   readonly path?: string;
 }
 
+interface StorageUploadResponse {
+  readonly id: string;
+  readonly path?: string;
+}
+
+function isStorageUploadResponse(value: unknown): value is StorageUploadResponse {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    "id" in value &&
+    typeof (value as Record<string, unknown>).id === "string"
+  );
+}
+
 /**
  * Prepares an upload via the `prepareUpload` mutation, then PUTs the file bytes
  * to the test storage endpoint. Shared by GraphQL integration tests that need a
@@ -66,9 +81,12 @@ export async function uploadFileToStorage(options: UploadFileToStorageOptions): 
     throw new Error(`${errorMessagePrefix}: ${response.status} - ${errorText}`);
   }
 
-  const result = (await response.json()) as { id: string; path?: string };
+  const json: unknown = await response.json();
+  if (!isStorageUploadResponse(json)) {
+    throw new Error(`${errorMessagePrefix}: invalid storage response`);
+  }
   return {
-    id: result.id,
-    path: result.path,
+    id: json.id,
+    path: json.path,
   };
 }

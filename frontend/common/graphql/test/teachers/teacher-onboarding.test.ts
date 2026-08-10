@@ -7,6 +7,7 @@ import {
   IanaTimezone,
   PaymentDirection,
   PaymentMethodType,
+  type TeacherOnboardingInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
@@ -23,7 +24,7 @@ const createMinimalTeacherInput = (
     name: string;
     email: string;
   }>
-) => ({
+): TeacherOnboardingInput => ({
   name: overrides?.name ?? "Test Teacher",
   email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
   avatarUrl: null,
@@ -49,9 +50,16 @@ const createMinimalTeacherInput = (
       bankName: "Bank of America",
       beneficiaryName: "John Doe",
       iban: "US12345678901234567890",
+      identifier: null,
+      note: null,
+      onlineAccountId: null,
+      paymentLinkId: null,
+      phone: null,
       routingNumber: "123456789",
       swiftBic: "BOFAUS3N",
-    } as import("@/frontend/common/graphql/generated/gql/graphql-types").PaymentMethodDetailsInput,
+      url: null,
+      walletId: null,
+    },
   },
   displayCurrency: null,
 });
@@ -69,10 +77,13 @@ const attemptCreateTeacherAs = async (demoUser: string) => {
 
 type TeacherInputOverrides = { name: string; email: string };
 
-const createTeacherAsAdmin = async (overrides: TeacherInputOverrides, fieldOverrides?: Record<string, unknown>) => {
+const createTeacherAsAdmin = async (
+  overrides: TeacherInputOverrides,
+  fieldOverrides?: Partial<TeacherOnboardingInput>
+) => {
   const token = await loginDemoUser("academy_admin");
   const base = createMinimalTeacherInput(overrides);
-  const input = fieldOverrides ? { ...base, ...fieldOverrides } : base;
+  const input: TeacherOnboardingInput = fieldOverrides ? { ...base, ...fieldOverrides } : base;
 
   const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
 

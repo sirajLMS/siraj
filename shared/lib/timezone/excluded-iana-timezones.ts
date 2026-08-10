@@ -8,14 +8,14 @@ export const EXCLUDED_IANA_TIMEZONE_REPLACEMENTS: Readonly<Record<ExcludedIanaTi
   "Asia/Jerusalem": "Asia/Hebron",
 };
 
-export function isExcludedIanaTimezoneId(timezoneId: string): boolean {
+export function isExcludedIanaTimezoneId(timezoneId: string): timezoneId is ExcludedIanaTimezoneId {
   return (EXCLUDED_IANA_TIMEZONE_IDS as readonly string[]).includes(timezoneId);
 }
 
 /** Resolve excluded legacy IDs (e.g. OS-reported Jerusalem) to Palestine timezones. */
 export function resolveExcludedIanaTimezoneId(timezoneId: string): string {
   if (isExcludedIanaTimezoneId(timezoneId)) {
-    return EXCLUDED_IANA_TIMEZONE_REPLACEMENTS[timezoneId as ExcludedIanaTimezoneId];
+    return EXCLUDED_IANA_TIMEZONE_REPLACEMENTS[timezoneId];
   }
   return timezoneId;
 }

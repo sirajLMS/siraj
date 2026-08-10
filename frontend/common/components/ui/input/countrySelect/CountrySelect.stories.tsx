@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import type { CountrySelectProps } from "@/frontend/common/components/ui/input/countrySelect/types";
-import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 
 function CountrySelectStory({
@@ -32,7 +32,7 @@ type Story = StoryObj<typeof CountrySelectStory>;
 
 export const Default: Story = {
   args: {
-    initialCountryCode: CountryCode.Sa,
+    initialCountryCode: "SA",
   },
 };
 
@@ -40,14 +40,14 @@ export const Empty: Story = {};
 
 export const Required: Story = {
   args: {
-    initialCountryCode: CountryCode.Eg,
+    initialCountryCode: "EG",
     required: true,
   },
 };
 
 export const Disabled: Story = {
   args: {
-    initialCountryCode: CountryCode.Sa,
+    initialCountryCode: "SA",
     disabled: true,
   },
 };
@@ -57,6 +57,6 @@ export const Arabic: Story = {
     locale: "ar",
   },
   args: {
-    initialCountryCode: CountryCode.Sa,
+    initialCountryCode: "SA",
   },
 };

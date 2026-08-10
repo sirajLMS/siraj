@@ -4,15 +4,23 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { books } from "@/backend/db/schema";
-import type { AvailabilityStatus } from "@/backend/enum";
+import { AvailabilityStatus } from "@/backend/enum";
 import type { PaginationArgs } from "@/backend/types";
 import type { BookReturnType } from "@/backend/types/books/book.types";
+
+const VALID_AVAILABILITY_STATUSES = new Set(Object.values(AvailabilityStatus) as readonly string[]);
+
+function isAvailabilityStatus(value: string): value is AvailabilityStatus {
+  return VALID_AVAILABILITY_STATUSES.has(value);
+}
 
 function mapRow(row: { id: string; name: string; availabilityStatus: string; createdAt: Date }): BookReturnType {
   return {
     id: row.id,
     name: row.name,
-    availabilityStatus: row.availabilityStatus as AvailabilityStatus,
+    availabilityStatus: isAvailabilityStatus(row.availabilityStatus)
+      ? row.availabilityStatus
+      : AvailabilityStatus.AVAILABLE,
     createdAt: row.createdAt,
   };
 }

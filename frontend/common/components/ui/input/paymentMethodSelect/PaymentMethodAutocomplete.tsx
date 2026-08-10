@@ -30,6 +30,28 @@ const filterOptions = createFilterOptions<PaymentMethodCatalogOption>({
   stringify: option => `${option.displayName} ${option.slug}`,
 });
 
+interface SlotPropsInputShape {
+  readonly startAdornment?: React.ReactNode;
+  readonly endAdornment?: React.ReactNode;
+  readonly [key: string]: unknown;
+}
+
+interface SlotPropsShape {
+  readonly input?: SlotPropsInputShape;
+  readonly htmlInput?: Record<string, unknown>;
+}
+
+function isSlotPropsShape(value: unknown): value is SlotPropsShape {
+  return typeof value === "object" && value !== null;
+}
+
+function resolveSlotProps(slotProps: unknown): SlotPropsShape {
+  if (!isSlotPropsShape(slotProps)) {
+    return {};
+  }
+  return slotProps;
+}
+
 const PaymentMethodOption: React.FC<{
   readonly props: React.HTMLAttributes<HTMLLIElement> & { readonly key?: React.Key };
   readonly entry: PaymentMethodCatalogOption;
@@ -101,10 +123,7 @@ const AutocompleteTextField: React.FC<{
   autoComplete,
   option,
 }) => {
-  const slotProps = params.slotProps as {
-    input?: { startAdornment?: React.ReactNode; endAdornment?: React.ReactNode } & Record<string, unknown>;
-    htmlInput?: Record<string, unknown>;
-  };
+  const slotProps = resolveSlotProps(params.slotProps);
   return (
     <TextField
       {...params}

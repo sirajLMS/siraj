@@ -69,7 +69,8 @@ async function expectRejection(fn: () => Promise<unknown>) {
     error = e;
   }
   expect(error).not.toBeNull();
-  return error as Error;
+  if (error instanceof Error) return error;
+  return new Error(String(error));
 }
 
 // Test helper functions

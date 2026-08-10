@@ -54,20 +54,22 @@ async function clearClassesOnDate(token: string, dateVal: string) {
   });
 
   const list = result.data?.dailyScheduleList || [];
-  for (const item of list) {
-    if (!item.id) continue;
-    await testClient.mutate({
-      mutation: deleteClassInstanceMutationDocument,
-      variables: {
-        classInstanceId: item.id,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${token}`,
+  const itemsToDelete = list.map(item => item.id).filter((id): id is NonNullable<typeof id> => id !== null);
+  await Promise.all(
+    itemsToDelete.map(classInstanceId =>
+      testClient.mutate({
+        mutation: deleteClassInstanceMutationDocument,
+        variables: {
+          classInstanceId,
         },
-      },
-    });
-  }
+        context: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      })
+    )
+  );
 }
 
 describe("GraphQL Teacher Dashboard Integration Tests", () => {

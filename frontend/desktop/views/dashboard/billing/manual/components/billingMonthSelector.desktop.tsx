@@ -5,7 +5,12 @@ import { Checkbox, FormControlLabel } from "@mui/material";
 import { BillingMonthSelectorShared } from "@/frontend/common/views/dashboard/billing/manual/components/billingMonthSelectorShared";
 import type { BillingMonthItemSlotProps } from "@/frontend/common/views/dashboard/billing/manual/types";
 import type { BillingMonthSelectorProps } from "@/frontend/common/views/dashboard/billing/manual/types/billingMonthSelector.types";
+import { BILLING_MONTH_IDS, type BillingMonthId } from "@/shared/constants/billing-months";
 import type { BillingManualLabels } from "@/shared/locale";
+
+function isBillingMonthId(value: string): value is BillingMonthId {
+  return (BILLING_MONTH_IDS as readonly string[]).includes(value);
+}
 
 function DesktopMonthItem({ monthId, isChecked, onToggle, label }: Readonly<BillingMonthItemSlotProps>) {
   return (
@@ -39,7 +44,7 @@ const desktopGridSx: SxProps<Theme> = {
 };
 
 const desktopLabelFor = (monthId: string, labels: BillingManualLabels): string =>
-  labels.months[monthId as keyof BillingManualLabels["months"]];
+  isBillingMonthId(monthId) ? labels.months[monthId] : monthId;
 
 export function BillingMonthSelectorDesktop(props: Readonly<BillingMonthSelectorProps>) {
   return (

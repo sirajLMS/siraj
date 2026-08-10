@@ -4,6 +4,12 @@ import type { Permission, PermissionGroup, User } from "@/frontend/common/graphq
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 
+const VALID_OVERRIDE_STATES: ReadonlySet<string> = new Set<string>(["GRANTED", "DENIED", "INHERIT"]);
+
+function isOverrideState(value: unknown): value is OverrideState {
+  return typeof value === "string" && VALID_OVERRIDE_STATES.has(value);
+}
+
 interface UseOverrideDataParams {
   readonly userId: string | null;
   readonly users: readonly User[];
@@ -32,8 +38,8 @@ export function useOverrideData({ userId, users, groups, permissions, open, sear
     if (queryData?.userOverrides) {
       const overridesMap: Record<string, OverrideState> = {};
       for (const override of queryData.userOverrides) {
-        if (override.permissionId) {
-          overridesMap[override.permissionId] = override.state as OverrideState;
+        if (override.permissionId && isOverrideState(override.state)) {
+          overridesMap[override.permissionId] = override.state;
         }
       }
       setInitialOverrides(overridesMap);

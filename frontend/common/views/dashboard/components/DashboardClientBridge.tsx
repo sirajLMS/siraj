@@ -33,7 +33,7 @@ interface DashboardClientBridgeProps {
 const NOTIFICATION_COUNT_POLL_INTERVAL_MS = 60_000;
 
 function isValidPermission(value: string): value is AppPermission {
-  return Object.values(AppPermission).includes(value as AppPermission);
+  return (Object.values(AppPermission) as readonly string[]).includes(value);
 }
 
 /**

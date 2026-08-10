@@ -14,6 +14,13 @@ import {
   StyledUndeliveredIcon,
 } from "@/frontend/common/views/dashboard/classes/audit/components";
 import { COMMUNICATION_ICONS } from "@/frontend/common/views/dashboard/classes/audit/constants";
+import type { CommunicationType } from "@/frontend/common/views/dashboard/classes/audit/types";
+
+const VALID_COMMUNICATION_TYPES = new Set<string>(Object.keys(COMMUNICATION_ICONS));
+
+function isCommunicationType(value: string | null | undefined): value is CommunicationType {
+  return value != null && VALID_COMMUNICATION_TYPES.has(value);
+}
 
 const StyledDesktopResendButton = styled(Button)(({ theme }) => ({
   borderColor: theme.palette.border.light,
@@ -28,7 +35,7 @@ const StyledDesktopResendButton = styled(Button)(({ theme }) => ({
 }));
 
 function DesktopLogEntryItem({ entry }: Readonly<{ entry: CommunicationLogEntry }>) {
-  const type = (entry.type ?? "email") as keyof typeof COMMUNICATION_ICONS;
+  const type = isCommunicationType(entry.type) ? entry.type : "email";
   const Icon = COMMUNICATION_ICONS[type] ?? EmailOutlined;
 
   return (

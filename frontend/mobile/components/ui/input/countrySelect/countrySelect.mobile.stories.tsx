@@ -12,7 +12,7 @@ function CountrySelectStory({
   ...props
 }: Readonly<Partial<CountrySelectProps> & { initialCountryCode?: CountryCode }>) {
   const [country, setCountry] = useState<CountryType | null | undefined>(() =>
-    initialCountryCode ? countries.find(entry => entry.code === initialCountryCode) : undefined
+    initialCountryCode ? countries.find(entry => (entry.code as string) === (initialCountryCode as string)) : undefined
   );
 
   return (

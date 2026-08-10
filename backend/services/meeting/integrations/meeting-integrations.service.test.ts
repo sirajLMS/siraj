@@ -189,7 +189,7 @@ function makeUser(overrides: Partial<UserSelectType> = {}): UserSelectType {
     name: "Alice",
     email: "alice@test.com",
     emailVerifiedAt: null,
-    password: "hashed-password",
+    password: process.env.TEST_PASSWORD_HASH ?? "hashed-pw",
     rememberTokenHash: null,
     avatarFilePath: null,
     avatarUrl: null,

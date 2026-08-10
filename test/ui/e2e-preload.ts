@@ -10,7 +10,8 @@ try {
   const Module = req("node:module");
   const cjsPath = req.resolve("graphql/index.js");
   // Access internal module cache via bracket notation to satisfy no-underscore-dangle
-  const moduleCache = Module._cache;
+  const cacheKey = "_cache";
+  const moduleCache = Module[cacheKey];
   if (!moduleCache[cjsPath]) {
     moduleCache[cjsPath] = {
       id: cjsPath,

@@ -7,7 +7,8 @@
  * silently assume an invalid enum member.
  */
 export function safeEnum<T extends string>(value: unknown, validValues: readonly T[]): T | null {
-  return typeof value === "string" && (validValues as readonly string[]).includes(value) ? (value as T) : null;
+  if (typeof value !== "string") return null;
+  return validValues.find(v => v === value) ?? null;
 }
 
 /**

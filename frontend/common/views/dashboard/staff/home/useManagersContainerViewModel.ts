@@ -84,7 +84,7 @@ function buildManagerMetrics(
 }
 
 function resolveFilter<T extends string>(filter: T): T | null {
-  return filter === ("all" as T) ? null : filter;
+  return filter === "all" ? null : filter;
 }
 
 export interface ManagersContainerViewModel {

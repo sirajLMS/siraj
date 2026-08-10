@@ -62,7 +62,7 @@ export type MeetingIntegrationsViewModel = {
   readonly onExpandedSlugChange: (slug: MeetingIntegrationProviderSlug | null) => void;
 
   readonly connectedAccountsByProvider: Readonly<
-    Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>
+    Partial<Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>>
   >;
   readonly loadingAccountsFor: MeetingIntegrationProviderSlug | null;
 

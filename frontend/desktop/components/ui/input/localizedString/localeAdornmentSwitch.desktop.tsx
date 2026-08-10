@@ -38,7 +38,7 @@ function DesktopLocaleList({ activeLocale, ariaLabel, onPick }: Readonly<Desktop
   return (
     <Stack component="ul" aria-label={ariaLabel ?? t.selectLocale}>
       {languages.map((language, index, array) => {
-        const isSelected = language.code === activeLocale;
+        const isSelected = (language.code as string) === activeLocale;
         const isLastItem = index === array.length - 1;
         return (
           <DesktopLanguageOption

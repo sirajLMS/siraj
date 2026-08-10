@@ -3,7 +3,7 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { type Resolver, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
@@ -233,7 +233,7 @@ export function useCreateRecurringClassViewModel(
   // NEW FOR PLAN v5: `useForm` instantiation + `zodResolver` lifted out of the
   // tier view (specs N4 + §6.2 — ViewModel is the SOLE owner of the form).
   const formInstance = useForm<RecurringClassFormData>({
-    resolver: zodResolver(schema) as unknown as Resolver<RecurringClassFormData>,
+    resolver: zodResolver(schema),
     defaultValues: {
       studentId: "",
       teacherId: "",

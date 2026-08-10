@@ -39,6 +39,11 @@ export type ClassMeetingConfigsSectionProps = {
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 };
 
+function isClassMeetingConfig(config: unknown): config is ClassMeetingConfigFieldsFragment {
+  if (typeof config !== "object" || config === null) return false;
+  return "classInstanceId" in config;
+}
+
 function configLabel(config: ClassMeetingConfigFieldsFragment, locale: string): string {
   if (config.label?.trim()) return config.label.trim();
   if (config.provider?.name) return resolveLocalizedString(config.provider.name, locale);
@@ -315,7 +320,9 @@ export function ClassMeetingConfigsSection({
   }, [configs, deleteId, locale]);
 
   const handleEdit = useCallback((config: unknown) => {
-    setEditConfig(config as ClassMeetingConfigFieldsFragment);
+    if (isClassMeetingConfig(config)) {
+      setEditConfig(config);
+    }
     setFormOpen(true);
   }, []);
 

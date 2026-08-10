@@ -105,6 +105,22 @@ function extractPersistedDraftFilters(draft: SearchScheduleDraftFilters): Persis
   };
 }
 
+function isPersistedSearchScheduleState(value: unknown): value is PersistedSearchScheduleState {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    "draftFilters" in value &&
+    "selectedTeacher" in value &&
+    "pageSize" in value &&
+    "formFilterDrawerOpen" in value &&
+    "monthDrawerOpen" in value &&
+    "monthDrawerAnchorFromDate" in value &&
+    "monthDrawerCurrentMonth" in value &&
+    "monthDrawerTeacher" in value
+  );
+}
+
 function mergeDraftWithPersistedFilters(
   persistedFilters?: Partial<PersistedSearchScheduleFilters>
 ): SearchScheduleDraftFilters {
@@ -288,7 +304,7 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
         monthDrawerTeacher: state.monthDrawerTeacher,
       }),
       merge: (persistedState, currentState) => {
-        const persisted = persistedState as PersistedSearchScheduleState | undefined;
+        const persisted = isPersistedSearchScheduleState(persistedState) ? persistedState : undefined;
 
         return {
           ...currentState,

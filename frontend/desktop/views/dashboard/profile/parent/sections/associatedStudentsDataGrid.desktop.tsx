@@ -8,6 +8,13 @@ import type { AssociatedStudentsDataGridDesktopProps } from "@/frontend/common/v
 import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 
+const STUDENT_STATUS_KEYS = ["regular", "suspended", "on_leave", "on_trial"] as const;
+type StudentStatusKey = (typeof STUDENT_STATUS_KEYS)[number];
+
+function isStudentStatusKey(value: string): value is StudentStatusKey {
+  return (STUDENT_STATUS_KEYS as readonly string[]).includes(value);
+}
+
 export function AssociatedStudentsDataGridDesktop({
   rows,
   labels,
@@ -39,7 +46,7 @@ export function AssociatedStudentsDataGridDesktop({
         minWidth: 130,
         renderCell: params => {
           const status = (params.row.status ?? "REGULAR").toLowerCase();
-          const statusLabel = t.students.statusLabel[status as keyof typeof t.students.statusLabel];
+          const statusLabel = isStudentStatusKey(status) ? t.students.statusLabel[status] : status;
           return <DesktopStatusBadge category="studentAccount" status={status} label={statusLabel} />;
         },
       },

@@ -196,6 +196,8 @@ const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
   },
 }));
 
+function handleOpenAuditLogs() {}
+
 function StoryStatusTrackingContainer() {
   const labels = useStatusTrackingLabels();
   const router = useRouter();
@@ -227,8 +229,6 @@ function StoryStatusTrackingContainer() {
     }
     router.push("/schedule/tracking/reschedule");
   };
-
-  const handleOpenAuditLogs = () => {};
 
   return (
     <StatusTrackingView

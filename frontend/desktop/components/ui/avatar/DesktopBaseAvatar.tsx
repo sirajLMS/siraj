@@ -21,7 +21,7 @@ const ROUNDED_BORDER_RADIUS = 1.5;
 
 export function DesktopBaseAvatar({ src, label = "", size = 40, variant = "circular", sx, children }: BaseAvatarProps) {
   const initials = children ?? avatarInitials(label);
-  const normalizedSx = Array.isArray(sx) ? sx : ([sx].filter(Boolean) as SxProps<Theme>[]);
+  const normalizedSx = Array.isArray(sx) ? sx : sx ? [sx] : [];
   const roundedStyle = variant === "rounded" ? { borderRadius: ROUNDED_BORDER_RADIUS } : {};
   const avatarContent = getAvatarContent(src, initials);
 

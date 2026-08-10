@@ -298,7 +298,7 @@ function filterTsgoForFile(tsgoOutput: string, filePath: string): string {
 
     if (isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
       matchingLines.push(...collectErrorBlock(lines, i, errorBlockRegex));
-    } else if (!isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
+    } else if (!isErrorBlock && !line.startsWith("$ ") && lineMentionsFile(line, relPath, filePath)) {
       matchingLines.push(line);
     }
   }

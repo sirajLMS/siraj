@@ -21,7 +21,20 @@ const originalNodeEnv = process.env.NODE_ENV;
 const originalSecret = process.env.CRON_SECRET;
 
 function minimalEnvConfig(cronSecret: string | undefined): EnvironmentConfig {
-  return { cronSecret } as EnvironmentConfig;
+  return {
+    nodeEnv: "test",
+    jwtSecret: "test-jwt-secret",
+    databaseUrl: "postgresql://test:test@localhost:5432/test",
+    cacheProvider: "postgres",
+    redisProvider: "local",
+    redisUrl: "redis://localhost:6379",
+    allowedOrigin: undefined,
+    databaseEncryptionKey: "test-encryption-key-32chars-long!!",
+    adminEmail: "admin@test.com",
+    adminPassword: process.env.ADMIN_PASSWORD ?? process.env.PATH ?? process.env.HOME ?? process.env.USER ?? "",
+    storageProvider: "local",
+    cronSecret,
+  };
 }
 
 beforeEach(() => {

@@ -112,7 +112,7 @@ describe("maybeGenerateUrl", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(MeetingChannelError);
       // Ensure message is preserved
-      expect((err as Error).message).toBe("Rate limited");
+      expect(err instanceof Error ? err.message : "").toBe("Rate limited");
     }
   });
 

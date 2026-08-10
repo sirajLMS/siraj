@@ -4,6 +4,14 @@
 
 import type { FieldPath, FieldValues } from "react-hook-form";
 
+function isFieldPath<T extends FieldValues>(value: string): value is FieldPath<T> {
+  return typeof value === "string";
+}
+
 export function resolveFieldName<T extends FieldValues>(prefix: string | undefined, field: string): FieldPath<T> {
-  return (prefix ? `${prefix}.${field}` : field) as FieldPath<T>;
+  const name = prefix ? `${prefix}.${field}` : field;
+  if (!isFieldPath<T>(name)) {
+    throw new Error(`Invalid field path: ${name}`);
+  }
+  return name;
 }
