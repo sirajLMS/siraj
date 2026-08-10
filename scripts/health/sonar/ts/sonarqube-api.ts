@@ -138,9 +138,7 @@ export async function createProject(token: string): Promise<void> {
     if (
       isRecord(data) &&
       Array.isArray(data.components) &&
-      (data.components as unknown[]).some(
-        c => isRecord(c) && typeof c.key === "string" && c.key === CONFIG.PROJECT_KEY,
-      )
+      (data.components as unknown[]).some(c => isRecord(c) && typeof c.key === "string" && c.key === CONFIG.PROJECT_KEY)
     ) {
       logSuccess("Project already exists");
       markStepCompleted("project_created");

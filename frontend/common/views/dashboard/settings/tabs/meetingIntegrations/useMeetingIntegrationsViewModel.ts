@@ -27,9 +27,7 @@ import type {
 import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
-function isMeetingIntegrationProviderSlug(
-  value: string | null | undefined
-): value is MeetingIntegrationProviderSlug {
+function isMeetingIntegrationProviderSlug(value: string | null | undefined): value is MeetingIntegrationProviderSlug {
   return (
     value === MeetingIntegrationProviderSlug.Zoom ||
     value === MeetingIntegrationProviderSlug.GoogleMeet ||
@@ -46,9 +44,7 @@ function mapProviderSummary(
 ): MeetingIntegrationProviderSummary {
   return {
     id: provider.id ?? "",
-    slug: isMeetingIntegrationProviderSlug(provider.slug)
-      ? provider.slug
-      : MeetingIntegrationProviderSlug.Zoom,
+    slug: isMeetingIntegrationProviderSlug(provider.slug) ? provider.slug : MeetingIntegrationProviderSlug.Zoom,
     kind: provider.kind ?? "unknown",
     credentialsHealthy: provider.credentialsHealthy ?? false,
     lastTestedAt: provider.lastTestedAt ? new Date(provider.lastTestedAt) : null,

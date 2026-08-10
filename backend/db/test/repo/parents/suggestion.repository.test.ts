@@ -347,9 +347,7 @@ describe("SuggestionRepository — getAdminSuggestionQueue", () => {
     const { parent } = await setupParentForSuggestion(tx, "PagAdmSug");
 
     await Promise.all(
-      Array.from({ length: 3 }, (_, i) =>
-        insertSuggestion(tx, parent.id, { body: `Paginated admin suggestion ${i}` })
-      )
+      Array.from({ length: 3 }, (_, i) => insertSuggestion(tx, parent.id, { body: `Paginated admin suggestion ${i}` }))
     );
 
     const page1 = await SuggestionRepository.getAdminSuggestionQueue({ limit: 2, offset: 0 }, tx);

@@ -41,7 +41,14 @@ const INFLIGHT_STATUSES = [CronRunStatus.PENDING, CronRunStatus.RUNNING, CronRun
 const PENDING_STUCK_TIMEOUT_SECONDS = 300; // 5 minutes
 
 export function toScheduleReturnType(row: CronScheduleSelectType): CronScheduleReturnType {
-  const { createdByUserId: _createdByUserId, updatedByUserId: _updatedByUserId, jobKind, status, concurrencyPolicy, ...rest } = row;
+  const {
+    createdByUserId: _createdByUserId,
+    updatedByUserId: _updatedByUserId,
+    jobKind,
+    status,
+    concurrencyPolicy,
+    ...rest
+  } = row;
   // Drizzle's pgEnum infers enum columns as `string`, but the DB enforces valid
   // enum values. Narrow at runtime via type guards so we avoid an unsafe
   // `as` assertion when constructing the strongly-typed return value.

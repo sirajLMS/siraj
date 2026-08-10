@@ -446,9 +446,7 @@ describe("NotificationRepository — transaction rollback (Story 15)", () => {
     }).catch(() => null);
 
     const foundRows = await Promise.all(
-      createdIds.map(id =>
-        db.select().from(notificationDeliveries).where(eq(notificationDeliveries.id, id)).limit(1)
-      )
+      createdIds.map(id => db.select().from(notificationDeliveries).where(eq(notificationDeliveries.id, id)).limit(1))
     );
     for (const [found] of foundRows) {
       expect(found).toBeUndefined();
