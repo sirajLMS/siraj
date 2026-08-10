@@ -11,7 +11,7 @@ const lockName = args[0];
 let argIdx = 1;
 const extraEnv: Record<string, string> = {};
 
-while (argIdx < args.length && /^[A-Za-z0-9_]+=.*/.test(args[argIdx])) {
+while (argIdx < args.length && /^\w+=.*/.test(args[argIdx])) {
   const eqIdx = args[argIdx].indexOf("=");
   const key = args[argIdx].slice(0, eqIdx);
   const val = args[argIdx].slice(eqIdx + 1);
@@ -28,6 +28,9 @@ const cmd = args[argIdx];
 const cmdArgs = args.slice(argIdx + 1);
 const mergedEnv = { ...process.env, ...extraEnv };
 
+const isCodeScene = lockName.toLowerCase().includes("codescene") || cmd.toLowerCase().includes("codescene");
+const timeoutMs = isCodeScene ? undefined : 5 * 60 * 1000; // 5 minutes (300,000ms)
+
 // On Vercel CI / production builds, bypass process lock to prevent build timeouts
 if (process.env.VERCEL || process.env.NOW_BUILDER) {
   const result = spawnSync(cmd, cmdArgs, {
@@ -43,7 +46,19 @@ const exitCode = await withProcessLock(lockName, async () => {
     stdio: "inherit",
     shell: false,
     env: mergedEnv,
+    timeout: timeoutMs,
   });
+
+  if (result.error && (result.error as { code?: string }).code === "ETIMEDOUT") {
+    console.error(
+      `\n\x1b[31m❌ [run-locked-cmd] COMMAND TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
+        `Command "${cmd} ${cmdArgs.join(" ")}" took longer than 5 minutes (300000ms) to complete.\n` +
+        `This usually indicates an un-excluded build/dist directory, an infinite loop, or resource contention.\n` +
+        `Fix the underlying issue before running again.\n`
+    );
+    return 1;
+  }
+
   return result.status ?? 1;
 });
 

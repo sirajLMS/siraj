@@ -412,12 +412,47 @@ export async function acquireProcessLock(description: string): Promise<() => voi
 
 /**
  * Wrap an async function in process lock execution.
+ * Enforces a 5-minute timeout (300,000ms) for all tasks EXCEPT CodeScene.
  */
 export async function withProcessLock<T>(description: string, fn: () => Promise<T>): Promise<T> {
   const release = await acquireProcessLock(description);
+
+  const isCodeScene = description.toLowerCase().includes("codescene");
+  const MAX_TASK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
+  let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
+  let timedOut = false;
+
+  const timeoutPromise = isCodeScene
+    ? null
+    : new Promise<never>((_, reject) => {
+        timeoutTimer = setTimeout(() => {
+          timedOut = true;
+          const msg =
+            `\n\x1b[31m❌ [process-lock] TASK TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
+            `Task "${description}" took longer than 5 minutes (300000ms) to complete.\n` +
+            `This usually indicates an un-excluded build/dist directory, an infinite loop, or resource contention.\n` +
+            `Fix the underlying issue before running again.\n`;
+          console.error(msg);
+          reject(new Error(msg));
+        }, MAX_TASK_TIMEOUT_MS);
+      });
+
   try {
+    if (timeoutPromise) {
+      return await Promise.race([fn(), timeoutPromise]);
+    }
     return await fn();
+  } catch (error) {
+    if (timedOut) {
+      // Clean up & propagate the timeout error cleanly
+      throw error;
+    }
+    throw error;
   } finally {
+    if (timeoutTimer) {
+      clearTimeout(timeoutTimer);
+    }
     release();
   }
 }
