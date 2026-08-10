@@ -162,23 +162,13 @@ All layers use types from `backend/types/{entity}.types.ts`:
 - Use Material 3 `on<Color>` siblings for contrast (e.g., `theme.palette.onPrimary`)
 - See `frontend/THEME_PALETTE.md` for tokens
 
-## SonarQube Issue Management
-
-When `.scannerwork/sonar-result.json` exists:
-1. **DO NOT run new Sonar analysis** - use `scripts/sonar-manager.ts`
-2. **Resolve DUPLICATIONS first** (mandatory priority)
-3. Use `bun scripts/sonar-manager.ts list-duplicates` and `list-files`
-4. Clear entries with `delete --file <path>` or `--all-duplicates`
-5. Final verification: both commands must return empty
-
 ## Code Quality Workflow
 
 After making changes:
-1. Run `bun quality-gate` - it handles tsgo, biome, lint, codescene, sonar sequentially
+1. Run `bun quality-gate` - it handles tsgo, biome, lint, codescene sequentially
 2. If CODESCENE fails: run `bun run codescene --file <path>` to fix
-3. If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts`
-4. Re-run `bun quality-gate` to resume from last failed stage
-5. Use `bun quality-gate:fresh` only for clean-slate verification
+3. Re-run `bun quality-gate` to resume from last failed stage
+4. Use `bun quality-gate:fresh` only for clean-slate verification
 
 ## Lint Service (In-Process Serialized ESLint)
 
@@ -278,14 +268,14 @@ within each lifecycle stage. Key rules:
 
 - Subagents are dispatched **per lifecycle stage only** — no mixing stages in the same wave
 - Each stage must fully complete before advancing to the next
-- Stage order: `tsgo` → `biome:check` → `lint` → `codescene` → `sonar-results`
+- Stage order: `tsgo` → `biome:check` → `lint` → `codescene`
 
 ### Subagent Dispatch Model
 
 - **One subagent per file** — maximum parallelism
 - **tsgo uses grouped parallel**: bundle related files (same import chain, same directory, same type
   dependency) into batches. Fix a batch in parallel, verify, then move to the next batch
-- **biome/lint/codescene/sonar-results**: full parallel — all files at once
+- **biome/lint/codescene**: full parallel — all files at once
 
 ### Per-File Verification via `scripts/health/sub-loop.ts`
 
@@ -305,7 +295,6 @@ the script exits 0. The `--lifecycle` arg controls the target stage:
 | `biome` | tsgo → biome |
 | `lint` | tsgo → biome → lint (via queue client) |
 | `codescene` | tsgo → biome → lint → codescene --file |
-| `sonar-results` | same as `codescene` (no sonar-scan) |
 
 **Progressive enforcement**: no skipping ahead. If tsgo fails, only fix tsgo — don't run
 biome/lint/codescene until tsgo passes.
@@ -360,20 +349,6 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
   ```
 - **Never modify a file you were not assigned to.** The orchestrator coordinates multi-file changes
   by dispatching a follow-up subagent wave for the dependency files.
-
-## Sonar-Scan Prohibition (IMPORTANT)
-
-**SonarQube scan is VERY COSTLY to run. Subagents must NEVER run it.**
-
-- Subagents must **NEVER** run `bun sonar-scan` or `bun scripts/sonar-manager.ts`
-- Only the **quality-gate orchestrator** handles sonar stages (SONAR_SCAN, SONAR_RESULTS)
-- Subagents work with **existing results** in `.scannerwork/sonar-result.json` — they never
-  trigger a new scan
-- The `scripts/health/sub-loop.ts` script **hardcodes exclusion** of sonar-scan and
-  sonar-manager — there is no flag to enable them
-- If a subagent needs sonar duplication/issue data, it queries the existing results via
-  `bun scripts/sonar-manager.ts list-duplicates` and `list-files` (read-only operations,
-  no scan trigger)
 
 ## AI Agent Communication Rules
 

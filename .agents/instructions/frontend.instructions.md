@@ -174,12 +174,11 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 
 ### Code Quality
 
-- Run `bun quality-gate` after modifications - sequential stages: BASIC_CHECKS -> CODESCENE -> SONAR_SCAN -> SONAR_RESULTS
+- Run `bun quality-gate` after modifications - sequential stages: BASIC_CHECKS -> CODESCENE
 - State persists in `.quality-gate-state.json` - re-run `bun quality-gate` to resume from last failure
 - CODESCENE failure: run `bun run codescene --file <path>` to fix
-- SONAR_RESULTS failure: use `bun scripts/sonar-manager.ts` to resolve
-- Fresh start: `bun quality-gate:fresh` (clears state and stale results)
-- NEVER bypass quality gate or skip CodeScene/SonarQube diagnostics
+- Fresh start: `bun quality-gate:fresh` (clears state)
+- NEVER bypass quality gate or skip CodeScene diagnostics
 - Default 5-minute timeout to prevent hanging
 
 ### Commit Message Rules

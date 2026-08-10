@@ -2,12 +2,11 @@
 name: quality-gate
 description: >
   Run the project's `bun quality-gate` command and follow its output instructions to resolve
-  all reported issues across stages (BASIC_CHECKS, CODESCENE, SONAR_SCAN, SONAR_RESULTS).
+  all reported issues across stages (BASIC_CHECKS, CODESCENE).
   Dispatches parallel subagents (one per file) within each lifecycle stage — no interleaving
   across stages. Each subagent calls `scripts/health/sub-loop.ts` for progressive per-file
   verification (tsgo → biome → lint-queue-client → codescene, in strict order, short-circuiting
-  at first failure). Subagents NEVER run sonar-scan (very costly). Use when asked to run quality
-  gates, fix quality-gate issues, or resolve CodeScene/SonarQube failures.
+  at first failure). Use when asked to run quality gates, fix quality-gate issues, or resolve CodeScene failures.
 ---
 
 ## Quality Gate Workflow
@@ -36,7 +35,7 @@ that stage, and re-runs the gate until all stages pass.
 ```
 
 **Key principle**: Subagents run in parallel **within one lifecycle stage only**. No interleaving
-across stages — e.g., don't dispatch CODESCENE fix subagents while SONAR fix subagents are still running.
+across stages — e.g., don't dispatch CODESCENE fix subagents while BASIC_CHECKS fix subagents are still running.
 
 ### Critical Rules
 
@@ -51,10 +50,6 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while SONAR fix s
      -H "Content-Type: application/json" \
      -d '{"id":"quality-gate","files":["file1.ts","file2.ts"]}'
    ```
-
-2. **Subagents NEVER run `bun sonar-scan` or `bun sonar-manager.ts`.**
-   SonarQube scan is VERY COSTLY. Only the orchestrator (this skill) handles sonar stages.
-   This is a hard prohibition — no exceptions, no workarounds.
 
 3. **Each subagent calls `scripts/health/sub-loop.ts` for per-file verification:**
    ```bash
@@ -148,8 +143,8 @@ asks to resume from existing state, or if you are certain the persisted state is
 (e.g., you just ran `:fresh` moments ago and only made targeted fixes since).
 
 Read the output carefully. It will indicate:
-- Which stage failed (`BASIC_CHECKS`, `CODESCENE`, `SONAR_SCAN`, or `SONAR_RESULTS`)
-- The owner of the failure (`quality-gate`, `codescene`, or `sonar-manager`)
+- Which stage failed (`BASIC_CHECKS` or `CODESCENE`)
+- The owner of the failure (`quality-gate` or `codescene`)
 - Specific remediation instructions (printed in colored text)
 
 State is persisted in `.quality-gate-state.json`. Re-running `bun quality-gate` resumes from the
@@ -165,8 +160,6 @@ Map the failed stage to the correct remediation workflow:
 |---|---|---|
 | `BASIC_CHECKS` | `quality-gate` | Fix tsgo (grouped parallel) → biome (parallel) → lint (parallel) |
 | `CODESCENE` | `codescene` | Fix CodeScene warnings — dispatch parallel subagents per file |
-| `SONAR_SCAN` | `sonar-manager` | **Orchestrator only** — no subagents. Check connectivity/config. |
-| `SONAR_RESULTS` | `sonar-manager` | Fix duplications first (parallel per group), then issues (parallel per file) |
 
 If the owner is NOT `quality-gate`, the recovery check runs automatically on the next `bun quality-gate`
 invocation. Fix the underlying issues first, then re-run `bun quality-gate`.
@@ -277,81 +270,21 @@ in one file breaks another file.
 
 5. Re-run `bun run codescene --scan` to verify all warnings are resolved.
 
-6. Re-run `bun quality-gate` — it recovers ownership from `codescene` and advances to SONAR_SCAN.
+6. Re-run `bun quality-gate` — it recovers ownership from `codescene` and completes.
 
 ---
 
-### Phase 7: Fix SONAR_SCAN (Orchestrator Only — NO Subagents)
-
-**⚠️ CRITICAL: SonarQube scan is VERY COSTLY. Subagents NEVER run sonar-scan.**
-
-1. The orchestrator runs `bun quality-gate` which executes `bun sonar-scan` internally.
-2. If sonar-scan fails: check connectivity, token, and configuration at the orchestrator level.
-3. **No subagents are dispatched for this stage.** This is orchestrator-only.
-4. Once sonar-scan passes, the quality gate advances to SONAR_RESULTS.
-
----
-
-### Phase 8: Fix SONAR_RESULTS (Parallel, No sonar-scan)
-
-**Mandatory priority: Duplications first, then Issues.**
-
-#### 8a. Duplications (Parallel per Group)
-
-1. Run `bun scripts/sonar-manager.ts list-duplicates` to get duplication groups.
-2. For each duplication group **(sequentially — one group at a time)**:
-   a. **Dispatch one subagent per file** in the group — launch all in a SINGLE response (parallel
-      within the group). Each subagent receives:
-      - `lifecycle: sonar-results`
-      - The duplication details and the other files in the group
-   b. Each subagent: reads instruction file + AGENTS.md, refactors to eliminate duplication, then runs:
-      ```bash
-      bun run scripts/health/sub-loop.ts <file> --lifecycle sonar-results
-      ```
-      (This runs tsgo → biome → lint → codescene — NO sonar-scan, NO sonar-manager.)
-   c. **Wait for all subagents in the group to complete.**
-   d. Clear resolved duplications:
-      ```bash
-      bun scripts/sonar-manager.ts delete --file <path>
-      # Or clear all at once:
-      bun scripts/sonar-manager.ts --all-duplicates
-      ```
-3. Re-run `bun scripts/sonar-manager.ts list-duplicates` — must return empty.
-
-#### 8b. Issues (Parallel per File)
-
-1. Run `bun scripts/sonar-manager.ts list-files` to get files with issues.
-2. **Dispatch one subagent per file** — launch all in a SINGLE response (parallel).
-   Each subagent receives:
-   - `lifecycle: sonar-results`
-   - The sonar issues for that file (subagent gets them via `bun scripts/sonar-manager.ts list-issues --file <path>`)
-3. Each subagent: fixes each issue (code smells, bugs, vulnerabilities), then runs:
-   ```bash
-   bun run scripts/health/sub-loop.ts <file> --lifecycle sonar-results
-   ```
-4. **Wait for all subagents to complete.**
-5. Clear resolved issues: `bun scripts/sonar-manager.ts delete --file <path>`
-6. Re-run `bun scripts/sonar-manager.ts list-files` — must return empty.
-
-#### 8c. Final Verification
-
-Both `list-duplicates` and `list-files` must return empty before proceeding.
-
-Re-run `bun quality-gate` — it recovers ownership and verifies all stages pass.
-
----
-
-### Phase 9: Resume / Loop
+### Phase 7: Resume / Loop
 
 Re-run `bun quality-gate` until all stages pass.
 
 The state machine behavior:
-- If the previous owner was `codescene` or `sonar-manager`, the script runs a recovery check first.
+- If the previous owner was `codescene`, the script runs a recovery check first.
 - If the recovery check passes, ownership returns to `quality-gate` and stages continue.
 - If the recovery check fails, the script exits — fix remaining issues and re-run.
-- When all 4 stages pass: `✨✨ ALL QUALITY GATES PASSED! ✨✨` and lifecycle = DONE.
+- When all stages pass: `✨✨ ALL QUALITY GATES PASSED! ✨✨` and lifecycle = DONE.
 
-If the same stage fails again after fixes, repeat the relevant fix phase (3–8).
+If the same stage fails again after fixes, repeat the relevant fix phase (3–6).
 Continue the loop until the quality gate passes completely.
 
 ---
@@ -442,7 +375,6 @@ Report your results to the orchestrator:
 
 ## PROHIBITIONS
  - `bun run lint` IS the lint queue client — safe to run directly (it serializes through the queue server). However, subagents should prefer the per-file `sub-loop.ts` script for file-scoped verification.
- - NEVER run `bun sonar-scan` or `bun scripts/sonar-manager.ts` — those are orchestrator-only
  - NEVER modify files other than <file-path>
 
 ERRORS TO FIX:

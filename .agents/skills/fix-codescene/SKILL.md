@@ -29,7 +29,6 @@ CodeScene-only workflow: scan → optional wave-size question → parallel execu
 |-----------|-----|
 | `bun codescene --reset` / `--reset --scan` | Incremental CodeScene cache must stay intact |
 | `bun codescene --scan --full` | Bypasses incremental cache |
-| `bun sonar-scan` / `bun scripts/sonar-manager.ts` | Costly; out of scope |
 | `bun quality-gate` / `bun quality-gate:fresh` | Out of scope |
 
 **Orchestrator allowed commands:** `bun run codescene --scan`, `curl` lint-queue `/status`, start lint-queue server in background if down.

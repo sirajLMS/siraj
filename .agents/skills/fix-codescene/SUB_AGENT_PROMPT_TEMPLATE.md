@@ -11,7 +11,6 @@ CodeScene warnings for this file (from `bun run codescene --scan`):
 - You may ONLY read and edit `<file-path>`. Do NOT read or edit any other repository source file.
   (Exception: you may read the rule files that `sub-loop.ts` prints in Step 1.)
 - NEVER run `bun codescene --reset`, `bun codescene --reset --scan`, or any `--reset`/`--full` combination on `bun codescene`. The incremental cache must stay intact. Only `bun codescene --file` (run automatically by sub-loop) is allowed.
-- NEVER run `bun sonar-scan` or `bun scripts/sonar-manager.ts`.
 - NEVER run `bun quality-gate` or `bun quality-gate:fresh`.
 - Do NOT modify imports in OTHER files. If a fix requires editing another file, STOP and report a CROSS-FILE DEPENDENCY (format below) instead of touching that file.
 
@@ -74,7 +73,6 @@ Reply to the orchestrator with:
 
 - NEVER modify files other than `<file-path>` (except rule files from sub-loop Step 1)
 - NEVER run codescene with `--reset` or `--full`
-- NEVER run sonar-scan or sonar-manager
 - Prefer sub-loop for verification; `bun run lint` is the lint queue client if needed outside sub-loop
 
 ERRORS TO FIX:

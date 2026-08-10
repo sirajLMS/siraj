@@ -25,7 +25,6 @@
  *   biome         → run tsgo, then biome:check (stop if tsgo fails)
  *   lint          → run tsgo, biome, oxlint, then lint:type-aware via lint service (stop if earlier check fails)
  *   codescene     → run tsgo, biome, oxlint, lint:type-aware, check:duplicates, then codescene --file
- *   sonar-results → same as codescene (subagents verify file is clean before orchestrator handles sonar)
  *
  * Exit codes:
  *   0 = all checks up to the lifecycle stage passed
@@ -42,7 +41,7 @@ import { type LintResult, requestLint } from "@/scripts/lint-service";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type Lifecycle = "tsgo" | "biome" | "lint" | "codescene" | "sonar-results";
+type Lifecycle = "tsgo" | "biome" | "lint" | "codescene";
 
 interface CheckResult {
   name: string;
@@ -58,7 +57,6 @@ const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
   biome: 1,
   lint: 2,
   codescene: 3,
-  "sonar-results": 3, // same depth as codescene — no sonar for subagents
 };
 
 const RED = "\x1b[31m";
@@ -557,9 +555,6 @@ ${BOLD}Exit codes:${NC}
   0 = all checks up to lifecycle stage passed
   1 = stopped at a failing check (errors printed)
   2 = invalid arguments
-
-${BOLD}⚠️  IMPORTANT:${NC} This script NEVER runs sonar-scan or sonar-manager.
-   SonarQube scan is very costly. Only the quality-gate orchestrator runs it.
 `);
 }
 

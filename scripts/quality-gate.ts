@@ -12,29 +12,16 @@ import { join } from "node:path";
 import { withProcessLock } from "@/scripts/lib/process-lock";
 
 const STATE_FILE = join(process.cwd(), ".quality-gate-state.json");
-const SONAR_MANAGER = "scripts/sonar-manager.ts";
 
-type QualityStage = "BASIC_CHECKS" | "CODESCENE" | "SONAR_SCAN" | "SONAR_RESULTS";
+type QualityStage = "BASIC_CHECKS" | "CODESCENE";
 type QualityLifecycle = "FRESH" | "NEED_CONFIRM" | "DONE";
 
 interface QualityState {
   stage: QualityStage;
-  owner: "quality-gate" | "codescene" | "sonar-manager";
+  owner: "quality-gate" | "codescene";
   lifecycle: QualityLifecycle;
   lastRun: string;
 }
-
-const SONAR_INSTRUCTIONS = `
-/**
- * AI AGENT PROMPT:
- * Use this script to manage Sonar results found in .scannerwork/sonar-result.json.
- * **Do NOT run a new Sonar analysis command.** Work ONLY with existing results.
- *
- * RESOLUTION ORDER:
- * 1. FIX DUPLICATIONS: Run \`bun scripts/sonar-manager.ts list-duplicates\`.
- * 2. FIX ISSUES: Once duplicates are empty, run \`bun scripts/sonar-manager.ts list-files\`.
- */
-`;
 
 const CODESCENE_INSTRUCTIONS = `
 /**
@@ -99,23 +86,6 @@ function clearState(): void {
   if (existsSync(STATE_FILE)) unlinkSync(STATE_FILE);
 }
 
-async function checkSonarResults(): Promise<boolean> {
-  const duplicates = await runCommand("bun", [SONAR_MANAGER, "list-duplicates"]);
-  const filesWithIssues = await runCommand("bun", [SONAR_MANAGER, "list-files"]);
-
-  const hasDuplicates = !duplicates.output.includes("No duplications found");
-  const hasIssues = !filesWithIssues.output.includes("No files with issues found");
-
-  if (hasDuplicates || hasIssues) {
-    console.warn("\n⚠️ SonarQube quality gate failed.");
-    console.log("\x1b[35m%s\x1b[0m", SONAR_INSTRUCTIONS);
-    return false;
-  }
-
-  console.log("✅ Sonar results are clean.");
-  return true;
-}
-
 async function performStage(stage: QualityStage): Promise<boolean> {
   switch (stage) {
     case "BASIC_CHECKS": {
@@ -133,27 +103,11 @@ async function performStage(stage: QualityStage): Promise<boolean> {
       }
       return true;
     }
-    case "SONAR_SCAN": {
-      if (process.argv.includes("--skip-sonar")) {
-        console.log("\n📡 Skipping SonarQube Scan stage...");
-        return true;
-      }
-      console.log("\n📡 Running SonarQube Scan...");
-      const scan = await runCommand("bun", ["sonar-scan"]);
-      return scan.success;
-    }
-    case "SONAR_RESULTS": {
-      if (process.argv.includes("--skip-sonar")) {
-        console.log("\n📡 Skipping SonarQube Results check stage...");
-        return true;
-      }
-      return await checkSonarResults();
-    }
   }
   throw new Error(`Unhandled case in performStage`);
 }
 
-const STAGES: QualityStage[] = ["BASIC_CHECKS", "CODESCENE", "SONAR_SCAN", "SONAR_RESULTS"];
+const STAGES: QualityStage[] = ["BASIC_CHECKS", "CODESCENE"];
 
 async function recoverOwnership(state: QualityState): Promise<void> {
   console.log(`\n🔍 Checking if "${state.owner}" issues are resolved...`);
@@ -162,20 +116,6 @@ async function recoverOwnership(state: QualityState): Promise<void> {
   if (state.owner === "codescene") {
     const check = await runCommand("bun", ["codescene"]);
     if (check.success) resolved = true;
-  } else if (state.owner === "sonar-manager") {
-    // Check if results exist first
-    const sonarResultPath = join(process.cwd(), ".scannerwork", "sonar-result.json");
-    if (!existsSync(sonarResultPath)) {
-      console.log("ℹ️ No Sonar results found. Forcing a re-scan...");
-      state.stage = "SONAR_SCAN";
-      resolved = true;
-    } else if (await checkSonarResults()) {
-      resolved = true;
-    } else {
-      console.log(
-        "ℹ️ Sonar issues still present. If you have applied fixes, you can run 'bun quality-gate --fresh' to force a re-scan."
-      );
-    }
   }
 
   if (resolved) {
@@ -199,7 +139,6 @@ async function executeStages(startIndex: number, lifecycle: QualityLifecycle): P
     if (!success) {
       let owner: QualityState["owner"] = "quality-gate";
       if (currentStage === "CODESCENE") owner = "codescene";
-      if (currentStage === "SONAR_RESULTS" || currentStage === "SONAR_SCAN") owner = "sonar-manager";
 
       saveState(currentStage, owner, "NEED_CONFIRM");
       console.error(`\n❌ Stage ${currentStage} failed. Fix the issues and rerun.`);
@@ -215,11 +154,8 @@ async function executeStages(startIndex: number, lifecycle: QualityLifecycle): P
 async function runQualityGate(): Promise<void> {
   const isFresh = process.argv.includes("--fresh");
   if (isFresh) {
-    console.log("🧹 Fresh start requested. Clearing state and stale results...");
+    console.log("🧹 Fresh start requested. Clearing state...");
     clearState();
-    if (existsSync(join(process.cwd(), ".scannerwork", "sonar-result.json"))) {
-      unlinkSync(join(process.cwd(), ".scannerwork", "sonar-result.json"));
-    }
   }
 
   let state = getState();

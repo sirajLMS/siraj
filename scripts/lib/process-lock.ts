@@ -314,6 +314,30 @@ function checkWaitingPosition(ticketInfo: QueueTicketInfo, lastLoggedState: stri
   return stateStr;
 }
 
+function isProcessDescendantOf(activePid: number): boolean {
+  if (process.pid === activePid) return true;
+  let currentPid = process.ppid;
+  let depth = 0;
+  while (currentPid > 1 && depth < 5) {
+    if (currentPid === activePid) return true;
+    try {
+      const statPath = `/proc/${currentPid}/stat`;
+      if (!existsSync(statPath)) break;
+      const statContent = readFileSync(statPath, "utf8");
+      const lastParen = statContent.lastIndexOf(")");
+      if (lastParen === -1) break;
+      const rest = statContent.substring(lastParen + 2).split(" ");
+      const ppid = Number.parseInt(rest[1], 10);
+      if (Number.isNaN(ppid) || ppid <= 1) break;
+      currentPid = ppid;
+      depth++;
+    } catch {
+      break;
+    }
+  }
+  return false;
+}
+
 // ─── Core Lock API ──────────────────────────────────────────────────────────
 
 /**
@@ -324,9 +348,9 @@ export async function acquireProcessLock(description: string): Promise<() => voi
   ensureLockDirs();
   attachExitHandlers();
 
-  // 1. Re-entrancy check
+  // 1. Re-entrancy check (same process or descendant process spawned by lock owner)
   const currentActive = getActiveLock();
-  if (currentActive && currentActive.pid === process.pid) {
+  if (currentActive && isProcessDescendantOf(currentActive.pid)) {
     inMemoryReentryCount++;
     return createReleaseCallback(description);
   }
