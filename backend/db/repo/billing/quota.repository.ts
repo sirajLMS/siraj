@@ -1204,34 +1204,44 @@ export namespace QuotaRepository {
       .orderBy(desc(quotas.priority))
       .for("update");
 
+    // Pre-compute the per-quota deductions sequentially (no awaits) so the loop
+    // can break early once the requested count is fully allocated across quotas
+    // ordered by priority. The rows are already locked by `FOR UPDATE`, so the
+    // subsequent writes can be dispatched in parallel without TOCTOU races.
+    const plannedDeductions: Array<{ quota: (typeof activeQuotas)[number]; toTake: number; index: number }> = [];
     let remainingToDeduct = input.count;
-    let deducted = 0;
-
     for (let i = 0; i < activeQuotas.length; i++) {
       const quota = activeQuotas[i];
       if (remainingToDeduct <= 0) break;
       const toTake = Math.min(remainingToDeduct, quota.remaining);
-      const now = new Date();
+      plannedDeductions.push({ quota, toTake, index: i });
+      remainingToDeduct -= toTake;
+    }
 
-      const [updated] = await tx
-        .update(quotas)
-        .set({
-          remaining: sql<number>`${quotas.remaining} - ${toTake}`,
-          usedThisPeriod: sql<number>`${quotas.usedThisPeriod} + ${toTake}`,
-          version: sql<number>`${quotas.version} + 1`,
-          updatedAt: now,
-        })
-        .where(
-          and(
-            eq(quotas.id, quota.id),
-            eq(quotas.status, QuotaStatus.ACTIVE),
-            gte(quotas.remaining, toTake),
-            isNull(quotas.deletedAt)
+    const now = new Date();
+
+    const deductions = await Promise.all(
+      plannedDeductions.map(async ({ quota, toTake, index }) => {
+        const [updated] = await tx
+          .update(quotas)
+          .set({
+            remaining: sql<number>`${quotas.remaining} - ${toTake}`,
+            usedThisPeriod: sql<number>`${quotas.usedThisPeriod} + ${toTake}`,
+            version: sql<number>`${quotas.version} + 1`,
+            updatedAt: now,
+          })
+          .where(
+            and(
+              eq(quotas.id, quota.id),
+              eq(quotas.status, QuotaStatus.ACTIVE),
+              gte(quotas.remaining, toTake),
+              isNull(quotas.deletedAt)
+            )
           )
-        )
-        .returning();
+          .returning();
 
-      if (updated) {
+        if (!updated) return 0;
+
         // Deterministic idempotency key based on quota ID, period, and deduction sequence
         // index so each levy within a call produces a unique key (RBL2-6).
         // Using the quota's current periodAnchor as the period key avoids the non-deterministic
@@ -1246,15 +1256,14 @@ export namespace QuotaRepository {
           reason: QuotaLedgerReason.ADJUST,
           reasonNote: `Deducted ${toTake} for on-demand refresh`,
           actorUserId: input.actorUserId ?? null,
-          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey, String(i)),
+          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey, String(index)),
         });
 
-        deducted += toTake;
-        remainingToDeduct -= toTake;
-      }
-    }
+        return toTake;
+      })
+    );
 
-    return deducted;
+    return deductions.reduce((total, value) => total + value, 0);
   };
 
   /** @internal — Used by tests for per-period reset assertions. Production rollover uses refreshPeriodic.
