@@ -79,34 +79,37 @@ export async function anyPeerHeartbeatsAlive(ownerPid: number): Promise<boolean>
   try {
     const entries = await readdir(HEARTBEAT_DIR);
     const now = Date.now();
-    for (const filename of entries) {
-      if (!filename.endsWith(".hb")) continue;
-      const pid = heartbeatFilePid(filename);
-      if (pid === null || pid === ownerPid) continue;
-      try {
-        const raw = await readFile(join(HEARTBEAT_DIR, filename), "utf8");
-        const ts = Number.parseInt(raw, 10);
-        if (!Number.isFinite(ts) || now - ts > STALE_HEARTBEAT_MS) continue;
-        if (alive(pid)) return true;
-      } catch {
-        // ignore — file removed concurrently
-      }
-    }
-    return false;
+    const checks = await Promise.all(
+      entries.map(async (filename) => {
+        if (!filename.endsWith(".hb")) return false;
+        const pid = heartbeatFilePid(filename);
+        if (pid === null || pid === ownerPid) return false;
+        try {
+          const raw = await readFile(join(HEARTBEAT_DIR, filename), "utf8");
+          const ts = Number.parseInt(raw, 10);
+          if (!Number.isFinite(ts) || now - ts > STALE_HEARTBEAT_MS) return false;
+          return alive(pid);
+        } catch {
+          // ignore — file removed concurrently
+          return false;
+        }
+      }),
+    );
+    return checks.some(Boolean);
   } catch {
     return false;
   }
 }
 
 /** For tests: clear heartbeat dir contents so a stale file never leaks in. */
-export async function _resetHeartbeatsForTest(): Promise<void> {
+export async function resetHeartbeatsForTest(): Promise<void> {
   try {
     const entries = await readdir(HEARTBEAT_DIR);
-    for (const filename of entries) {
-      if (filename.endsWith(".hb")) {
-        await unlink(join(HEARTBEAT_DIR, filename)).catch(() => {});
-      }
-    }
+    await Promise.all(
+      entries
+        .filter((filename) => filename.endsWith(".hb"))
+        .map((filename) => unlink(join(HEARTBEAT_DIR, filename)).catch(() => {})),
+    );
   } catch {
     // dir missing — ignore
   }
