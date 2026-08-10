@@ -147,7 +147,12 @@ export namespace MeetingConfigSnapshotService {
     existingSnapshot: MeetingConfigSnapshot | null
   ): Promise<string | null> {
     let lastError: unknown = null;
-    for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+
+    async function attempt(n: number): Promise<string | null> {
+      if (n > MAX_RETRY_ATTEMPTS) {
+        return null;
+      }
+
       try {
         const adapter = await getMeetingChannel(slug);
         const result: GenerateMeetingResult = await adapter.generateMeeting({
@@ -161,7 +166,7 @@ export namespace MeetingConfigSnapshotService {
 
         logger.info("generateAndAttachForClassInstance: success", {
           classInstanceId,
-          attempt,
+          attempt: n,
           joinUrl: result.joinUrl,
           upstreamMeetingId: result.meetingId ?? null,
         });
@@ -171,7 +176,7 @@ export namespace MeetingConfigSnapshotService {
         lastError = error;
         logger.warn("generateAndAttachForClassInstance: attempt failed", {
           classInstanceId,
-          attempt,
+          attempt: n,
           maxAttempts: MAX_RETRY_ATTEMPTS,
           error: error instanceof Error ? error.message : String(error),
           isMeetingChannelError: error instanceof MeetingChannelError,
@@ -180,27 +185,33 @@ export namespace MeetingConfigSnapshotService {
         if (isNonRetryable(error)) {
           logger.warn("generateAndAttachForClassInstance: non-retryable error, skipping retries", {
             classInstanceId,
-            attempt,
+            attempt: n,
             code: error.code,
             error: error.message,
           });
-          break;
+          return null;
         }
 
-        if (attempt < MAX_RETRY_ATTEMPTS) {
-          await sleep(BASE_BACKOFF_MS * 2 ** (attempt - 1));
+        if (n < MAX_RETRY_ATTEMPTS) {
+          await sleep(BASE_BACKOFF_MS * 2 ** (n - 1));
         }
+
+        return attempt(n + 1);
       }
     }
 
-    logger.error("generateAndAttachForClassInstance: meetingGenerationFailed", {
-      classInstanceId,
-      providerKind,
-      attempts: MAX_RETRY_ATTEMPTS,
-      error: lastError instanceof Error ? lastError.message : String(lastError),
-    });
+    const joinUrl = await attempt(1);
 
-    return null;
+    if (joinUrl === null) {
+      logger.error("generateAndAttachForClassInstance: meetingGenerationFailed", {
+        classInstanceId,
+        providerKind,
+        attempts: MAX_RETRY_ATTEMPTS,
+        error: lastError instanceof Error ? lastError.message : String(lastError),
+      });
+    }
+
+    return joinUrl;
   }
 
   /**
