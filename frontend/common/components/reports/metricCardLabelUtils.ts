@@ -14,6 +14,14 @@ export interface MetricLabelSources {
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasKey<T extends object>(obj: T, key: string | number | symbol): key is keyof T {
+  return key in obj;
+}
+
 function resolveDashboardTranslation(path: string, sources: MetricLabelSources): string | undefined {
   const parts = path.split(".");
   const sectionKey = parts[1];
@@ -21,15 +29,18 @@ function resolveDashboardTranslation(path: string, sources: MetricLabelSources):
     return undefined;
   }
 
-  const section = sources.dashboardSections[sectionKey as keyof typeof sources.dashboardSections];
+  if (!hasKey(sources.dashboardSections, sectionKey)) {
+    return undefined;
+  }
+  const section = sources.dashboardSections[sectionKey];
   if (!section) {
     return undefined;
   }
 
   let curr: unknown = section;
   for (let i = 2; i < parts.length; i++) {
-    if (curr && typeof curr === "object") {
-      curr = (curr as Record<string, unknown>)[parts[i]];
+    if (isRecord(curr)) {
+      curr = curr[parts[i]];
     } else {
       return undefined;
     }
@@ -46,15 +57,20 @@ export function resolveMetricLabel(path: string, sources: MetricLabelSources): s
     }
   } else if (path.startsWith("metrics.")) {
     const parts = path.split(".");
-    const resolved = sources.statusTracking.metrics[parts[1] as keyof StatusTrackingLabels["metrics"]];
-    if (typeof resolved === "string") {
-      return resolved;
+    const metricKey = parts[1];
+    if (metricKey !== undefined && hasKey(sources.statusTracking.metrics, metricKey)) {
+      const resolved = sources.statusTracking.metrics[metricKey];
+      if (typeof resolved === "string") {
+        return resolved;
+      }
     }
   }
 
-  const commonValue = sources.common[path as keyof CommonLabels];
-  if (typeof commonValue === "string") {
-    return commonValue;
+  if (hasKey(sources.common, path)) {
+    const commonValue = sources.common[path];
+    if (typeof commonValue === "string") {
+      return commonValue;
+    }
   }
 
   return path;
