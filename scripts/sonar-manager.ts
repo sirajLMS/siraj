@@ -17,6 +17,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 
 const SONAR_RESULT_PATH = path.join(process.cwd(), ".scannerwork", "sonar-result.json");
 const STATE_FILE = path.join(process.cwd(), ".quality-gate-state.json");
@@ -28,19 +29,27 @@ interface QualityState {
   lastRun: string;
 }
 
+function isQualityState(val: unknown): val is QualityState {
+  return typeof val === "object" && val !== null;
+}
+
+function isSonarResult(val: unknown): val is SonarResult {
+  return typeof val === "object" && val !== null;
+}
+
 function updateQualityStateIfOwned(result: SonarResult) {
   const hasIssues = result.issues && result.issues.length > 0;
   const hasDuplicates = result.duplicatedBlocksDetails && result.duplicatedBlocksDetails.length > 0;
 
   if (!hasIssues && !hasDuplicates && fs.existsSync(STATE_FILE)) {
     try {
-      const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf-8")) as QualityState;
-      if (state.owner === "sonar-manager") {
-        state.owner = "quality-gate";
-        state.stage = "SONAR_RESULTS";
-        state.lifecycle = "NEED_CONFIRM";
-        state.lastRun = new Date().toISOString();
-        fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");
+      const parsed: unknown = JSON.parse(fs.readFileSync(STATE_FILE, "utf-8"));
+      if (isQualityState(parsed) && parsed.owner === "sonar-manager") {
+        parsed.owner = "quality-gate";
+        parsed.stage = "SONAR_RESULTS";
+        parsed.lifecycle = "NEED_CONFIRM";
+        parsed.lastRun = new Date().toISOString();
+        fs.writeFileSync(STATE_FILE, JSON.stringify(parsed, null, 2), "utf-8");
         console.log("\n✅ All Sonar issues cleared. Ownership transferred back to quality-gate.");
         console.log("ℹ️ Rerun 'bun quality-gate' to confirm perfect health.");
       }
@@ -101,7 +110,11 @@ function readSonarResult(): SonarResult {
     process.exit(1);
   }
   const content = fs.readFileSync(SONAR_RESULT_PATH, "utf-8");
-  return JSON.parse(content) as SonarResult;
+  const parsed: unknown = JSON.parse(content);
+  if (isSonarResult(parsed)) {
+    return parsed;
+  }
+  return { issues: [] };
 }
 
 function writeSonarResult(result: SonarResult) {
@@ -227,7 +240,7 @@ Examples:
 `);
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
   const action = args[0];
 
@@ -236,36 +249,38 @@ function main() {
     return;
   }
 
-  const result = readSonarResult();
-  const fileArg = args.includes("--file") ? args[args.indexOf("--file") + 1] : null;
-  const ruleArg = args.includes("--rule") ? args[args.indexOf("--rule") + 1] : null;
-  const groupByRule = args.includes("--group-by-rule");
-  const allDuplicates = args.includes("--all-duplicates");
+  await withProcessLock("sonar-manager", async () => {
+    const result = readSonarResult();
+    const fileArg = args.includes("--file") ? args[args.indexOf("--file") + 1] : null;
+    const ruleArg = args.includes("--rule") ? args[args.indexOf("--rule") + 1] : null;
+    const groupByRule = args.includes("--group-by-rule");
+    const allDuplicates = args.includes("--all-duplicates");
 
-  switch (action) {
-    case "list-files":
-      listFiles(result);
-      updateQualityStateIfOwned(result);
-      break;
+    switch (action) {
+      case "list-files":
+        listFiles(result);
+        updateQualityStateIfOwned(result);
+        break;
 
-    case "list-issues":
-      listIssues(result, fileArg, ruleArg, groupByRule);
-      break;
+      case "list-issues":
+        listIssues(result, fileArg, ruleArg, groupByRule);
+        break;
 
-    case "list-duplicates":
-      listDuplicates(result, fileArg);
-      updateQualityStateIfOwned(result);
-      break;
+      case "list-duplicates":
+        listDuplicates(result, fileArg);
+        updateQualityStateIfOwned(result);
+        break;
 
-    case "delete":
-      deleteIssues(result, fileArg, ruleArg, allDuplicates);
-      break;
+      case "delete":
+        deleteIssues(result, fileArg, ruleArg, allDuplicates);
+        break;
 
-    default:
-      console.error(`Unknown action: ${action}`);
-      showHelp();
-      process.exit(1);
-  }
+      default:
+        console.error(`Unknown action: ${action}`);
+        showHelp();
+        process.exit(1);
+    }
+  });
 }
 
-main();
+void main();

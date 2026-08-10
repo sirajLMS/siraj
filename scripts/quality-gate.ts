@@ -9,6 +9,7 @@
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 
 const STATE_FILE = join(process.cwd(), ".quality-gate-state.json");
 const SONAR_MANAGER = "scripts/sonar-manager.ts";
@@ -71,12 +72,18 @@ async function runCommand(command: string, args: string[]): Promise<{ success: b
   });
 }
 
+function isQualityState(val: unknown): val is QualityState {
+  return typeof val === "object" && val !== null;
+}
+
 function getState(): QualityState {
   if (existsSync(STATE_FILE)) {
     try {
-      const state = JSON.parse(readFileSync(STATE_FILE, "utf8")) as QualityState;
-      if (!state.lifecycle) state.lifecycle = "FRESH";
-      return state;
+      const parsed: unknown = JSON.parse(readFileSync(STATE_FILE, "utf8"));
+      if (isQualityState(parsed)) {
+        if (!parsed.lifecycle) parsed.lifecycle = "FRESH";
+        return parsed;
+      }
     } catch {
       return { stage: "BASIC_CHECKS", owner: "quality-gate", lifecycle: "FRESH", lastRun: new Date().toISOString() };
     }
@@ -249,7 +256,9 @@ if (timeoutMs > 0) {
 }
 
 try {
-  await runQualityGate();
+  await withProcessLock("quality-gate", async () => {
+    await runQualityGate();
+  });
   if (timeoutId) clearTimeout(timeoutId);
   process.exit(0);
 } catch (err: unknown) {

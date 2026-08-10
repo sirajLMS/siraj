@@ -11,6 +11,7 @@ import {
   writeConnectionInfo,
 } from "@/scripts/health/sonar/ts/sonarqube-api";
 import { resetSetup } from "@/scripts/health/sonar/ts/state";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 
 function printHelp() {
   globalThis.console.log(`
@@ -50,62 +51,64 @@ async function main() {
     return;
   }
 
-  globalThis.console.log("");
-  logInfo("🔍 SonarQube Analysis Runner");
-  globalThis.console.log("");
+  await withProcessLock("sonar-scan", async () => {
+    globalThis.console.log("");
+    logInfo("🔍 SonarQube Analysis Runner");
+    globalThis.console.log("");
 
-  try {
-    const isScanRequested = args.includes("--scan") || args.includes("--fresh");
-    const forceScan = args.includes("--fresh");
+    try {
+      const isScanRequested = args.includes("--scan") || args.includes("--fresh");
+      const forceScan = args.includes("--fresh");
 
-    if (isScanRequested) {
-      const changed = await isProjectChanged();
-      if (!changed && !forceScan) {
-        logSuccess("✨ No changes detected since last scan. Skipping analysis phase.");
+      if (isScanRequested) {
+        const changed = await isProjectChanged();
+        if (!changed && !forceScan) {
+          logSuccess("✨ No changes detected since last scan. Skipping analysis phase.");
+          const token = await generateToken();
+          await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-result.json" });
+          return;
+        }
+
+        if (forceScan) {
+          logInfo("🔄 Force scan requested. Ignoring cache.");
+        } else {
+          logInfo("🔄 Changes detected. Starting analysis...");
+        }
+
+        checkDocker();
+        checkDockerCompose();
+        startSonarQube();
+        await waitForSonarQube();
+        await changeAdminPassword();
         const token = await generateToken();
+        await createProject(token);
+        writeConnectionInfo(token);
+        await installScanner();
+        const scanStartTime = runAnalysis(token);
+        await waitForAnalysisProcessing(token, scanStartTime);
+        await saveProjectFingerprint();
         await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-result.json" });
-        return;
-      }
-
-      if (forceScan) {
-        logInfo("🔄 Force scan requested. Ignoring cache.");
+      } else if (args.includes("--result")) {
+        const token = await generateToken();
+        writeConnectionInfo(token);
+        await fetchAndDisplayResults({ token, includeDuplications: false, outputFilename: "sonar-result.json" });
+      } else if (args.includes("--full")) {
+        const token = await generateToken();
+        writeConnectionInfo(token);
+        await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-full.json" });
       } else {
-        logInfo("🔄 Changes detected. Starting analysis...");
+        logError("Invalid arguments. Use --help for usage information.");
+        process.exit(1);
       }
 
-      checkDocker();
-      checkDockerCompose();
-      startSonarQube();
-      await waitForSonarQube();
-      await changeAdminPassword();
-      const token = await generateToken();
-      await createProject(token);
-      writeConnectionInfo(token);
-      await installScanner();
-      const scanStartTime = runAnalysis(token);
-      await waitForAnalysisProcessing(token, scanStartTime);
-      await saveProjectFingerprint();
-      await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-result.json" });
-    } else if (args.includes("--result")) {
-      const token = await generateToken();
-      writeConnectionInfo(token);
-      await fetchAndDisplayResults({ token, includeDuplications: false, outputFilename: "sonar-result.json" });
-    } else if (args.includes("--full")) {
-      const token = await generateToken();
-      writeConnectionInfo(token);
-      await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-full.json" });
-    } else {
-      logError("Invalid arguments. Use --help for usage information.");
+      globalThis.console.log("");
+      logSuccess("All done! 🎉");
+      globalThis.console.log("");
+    } catch (error) {
+      logError(error instanceof Error ? error.message : String(error));
       process.exit(1);
     }
-
-    globalThis.console.log("");
-    logSuccess("All done! 🎉");
-    globalThis.console.log("");
-  } catch (error) {
-    logError(error instanceof Error ? error.message : String(error));
-    process.exit(1);
-  }
+  });
 }
 
 void main();

@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, relative, sep } from "node:path";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 
 const BUN_BIN = join(homedir(), ".bun", "bin", "bun");
 const PROJECT_ROOT = process.cwd();
@@ -521,7 +522,9 @@ async function main(): Promise<void> {
     return;
   }
 
-  const exitCode = await runTest(resolvedPath);
+  const exitCode = await withProcessLock(`run-test: ${testPath}`, async () => {
+    return await runTest(resolvedPath);
+  });
   process.exit(exitCode);
 }
 
