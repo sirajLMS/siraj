@@ -147,7 +147,7 @@ function isCldrWindowsZonesData(data: unknown): data is CldrWindowsZonesData {
     if (!isRecord(entry)) return false;
     const mapZone = entry.mapZone;
     if (!isRecord(mapZone)) return false;
-    return typeof mapZone["_type"] === "string" && typeof mapZone["_territory"] === "string";
+    return typeof mapZone._type === "string" && typeof mapZone._territory === "string";
   });
 }
 

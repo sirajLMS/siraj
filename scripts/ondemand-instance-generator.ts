@@ -133,9 +133,7 @@ export async function runOndemandInstanceGenerator(): Promise<void> {
     // Process schedules in parallel — each schedule runs inside its own tx with
     // SELECT FOR UPDATE on the student's quotas + existing on-demand instances,
     // so concurrent runs for the same student serialize at the DB level.
-    const generatedCounts = await Promise.all(
-      schedules.map(schedule => generateInstancesForSchedule(schedule, now))
-    );
+    const generatedCounts = await Promise.all(schedules.map(schedule => generateInstancesForSchedule(schedule, now)));
     const totalGenerated = generatedCounts.reduce((sum, count) => sum + count, 0);
 
     logger.info(`[OnDemandInstanceGenerator] Completed generation. Generated ${totalGenerated} instances.`);

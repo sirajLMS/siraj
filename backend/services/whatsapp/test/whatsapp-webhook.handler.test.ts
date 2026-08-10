@@ -73,7 +73,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /** Safely extract a mock call argument as a Record. */
-function getMockCallArgAt(mockFn: { mock: { calls: unknown[] } }, callIndex: number, argIndex: number): Record<string, unknown> {
+function getMockCallArgAt(
+  mockFn: { mock: { calls: unknown[] } },
+  callIndex: number,
+  argIndex: number
+): Record<string, unknown> {
   const call = mockFn.mock.calls[callIndex];
   const arg = Array.isArray(call) ? call[argIndex] : undefined;
   return isRecord(arg) ? arg : {};

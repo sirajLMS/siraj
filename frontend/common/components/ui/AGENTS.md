@@ -266,3 +266,13 @@ test/ui/components/
 | Use non-suffixed `.tsx` for shared UI | Use `.shared.tsx` suffix (deprecated convention) |
 | Call `useViewport` ONLY in switcher via `ResponsiveViewSwitch` | Call `useViewport` in primitives or versioned files |
 | Use `*Outlined` icon names | Use `*Outline` icon names |
+
+## Duplication Elimination — Shared Scaffold Pattern
+
+When a UI component exists in common/desktop/mobile tiers with similar logic, extract a `*Shared.tsx` scaffold with slot props. See `docs/frontend/ui-shared-scaffold-pattern.md` for the complete pattern reference.
+
+Key rules:
+- Scaffold file: `<ComponentName>Shared.tsx` in `common/components/ui/<category>/`
+- All styling via MUI v9 `sx` prop (NEVER direct style props)
+- Tier variants import ONLY the shared scaffold from `common/` (no cross-tier imports)
+- See `docs/frontend/duplication-elimination-patterns.md` for deletion and consolidation patterns

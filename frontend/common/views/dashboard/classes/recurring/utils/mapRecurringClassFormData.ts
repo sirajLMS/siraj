@@ -17,15 +17,49 @@ import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/c
 
 const CLASS_TYPE_VALUES: readonly string[] = ["REGULAR", "TRIAL", "ADVANCE"];
 const CURRENCY_CODE_VALUES: readonly string[] = [
-  "AED", "AUD", "BHD", "CAD", "CHF", "CNY", "DJF", "DZD", "EGP", "EUR",
-  "GBP", "ILS", "INR", "IQD", "JOD", "JPY", "KMF", "KWD", "LBP", "LYD",
-  "MAD", "MRU", "OMR", "QAR", "SAR", "SDG", "SOS", "SYP", "TND", "TRY",
-  "USD", "YER",
+  "AED",
+  "AUD",
+  "BHD",
+  "CAD",
+  "CHF",
+  "CNY",
+  "DJF",
+  "DZD",
+  "EGP",
+  "EUR",
+  "GBP",
+  "ILS",
+  "INR",
+  "IQD",
+  "JOD",
+  "JPY",
+  "KMF",
+  "KWD",
+  "LBP",
+  "LYD",
+  "MAD",
+  "MRU",
+  "OMR",
+  "QAR",
+  "SAR",
+  "SDG",
+  "SOS",
+  "SYP",
+  "TND",
+  "TRY",
+  "USD",
+  "YER",
 ];
 const SCHEDULING_MODE_VALUES: readonly string[] = ["NUMBER_OF_CLASSES", "ON_DEMAND", "QUOTA"];
 const ONDEMAND_OUTCOME_VALUES: readonly string[] = ["AUTO_CANCEL", "AUTO_ABSENT_NO_CREDITS", "REMIND_ONLY"];
 const DAY_OF_WEEK_VALUES: readonly string[] = [
-  "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY",
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
 ];
 
 function toBackendDayOfWeek(value: string): BackendDayOfWeek {
@@ -71,7 +105,8 @@ export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurrin
     earmarkedClasses: data.earmarkedClasses ?? null,
     schedulingMode: SCHEDULING_MODE_VALUES.find((v): v is SchedulingMode => v === data.schedulingMode) ?? null,
     generationHorizonWeeks: data.generationHorizonWeeks ?? null,
-    ondemandNoCreditsOutcome: ONDEMAND_OUTCOME_VALUES.find((v): v is OnDemandNoCreditsOutcome => v === data.ondemandNoCreditsOutcome) ?? null,
+    ondemandNoCreditsOutcome:
+      ONDEMAND_OUTCOME_VALUES.find((v): v is OnDemandNoCreditsOutcome => v === data.ondemandNoCreditsOutcome) ?? null,
   };
 }
 
@@ -92,10 +127,13 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
     generateInstancesForWeeks: data.generateInstancesForWeeks,
     hourlyRate: data.hourlyRate ?? null,
     rateCurrency: CURRENCY_CODE_VALUES.find((v): v is BackendCurrencyCode => v === data.rateCurrency) ?? null,
-    schedulingMode: SCHEDULING_MODE_VALUES.find((v): v is BackendSchedulingMode => v === data.schedulingMode) ?? undefined,
+    schedulingMode:
+      SCHEDULING_MODE_VALUES.find((v): v is BackendSchedulingMode => v === data.schedulingMode) ?? undefined,
     quotaId: data.quotaId ?? undefined,
     earmarkedClasses: data.earmarkedClasses ?? undefined,
     generationHorizonWeeks: data.generationHorizonWeeks ?? undefined,
-    ondemandNoCreditsOutcome: ONDEMAND_OUTCOME_VALUES.find((v): v is BackendOnDemandNoCreditsOutcome => v === data.ondemandNoCreditsOutcome) ?? undefined,
+    ondemandNoCreditsOutcome:
+      ONDEMAND_OUTCOME_VALUES.find((v): v is BackendOnDemandNoCreditsOutcome => v === data.ondemandNoCreditsOutcome) ??
+      undefined,
   };
 }

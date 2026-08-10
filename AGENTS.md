@@ -422,3 +422,8 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/billing/quota-system.md` - Quota System: append-only ledger, FIFO selection, periodic rollover, on-demand scheduling integration
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
 - `docs/services/cron-service.md` - Cron service pattern reference
+- `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern for common/desktop/mobile triplication
+- `docs/frontend/duplication-elimination-patterns.md` - Canonical source deletion, scaffold extraction, shared types patterns
+- `docs/testing/shared-test-runner.md` - Shared parallel test runner pattern
+- `docs/backend/shared-types-pattern.md` - Cross-layer shared types in shared/types/
+- `docs/i18n/locale-namespace-migration.md` - Locale namespace migration from monolithic to sub-module directories

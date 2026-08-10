@@ -215,7 +215,6 @@ export function matchesDashboardMetricFilter(
     case "activated":
     case "running":
       return dashboardStatusMatchesMetric(resolveClassInstanceDashboardStatusFromRow(row, options), metricFilter);
-    case "total":
     default:
       return true;
   }

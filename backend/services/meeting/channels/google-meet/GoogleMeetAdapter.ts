@@ -70,9 +70,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isServiceAccountJson(value: unknown): value is GoogleMeetServiceAccountJson {
   if (!isRecord(value)) return false;
   return (
-    typeof value.type === "string" &&
-    typeof value.client_email === "string" &&
-    typeof value.private_key === "string"
+    typeof value.type === "string" && typeof value.client_email === "string" && typeof value.private_key === "string"
   );
 }
 
@@ -88,9 +86,7 @@ function isTokenResponse(value: unknown): value is GoogleMeetTokenResponse {
 function isSpaceResponse(value: unknown): value is GoogleMeetSpaceResponse {
   if (!isRecord(value)) return false;
   return (
-    typeof value.name === "string" &&
-    typeof value.meetingUri === "string" &&
-    typeof value.meetingCode === "string"
+    typeof value.name === "string" && typeof value.meetingUri === "string" && typeof value.meetingCode === "string"
   );
 }
 
@@ -98,9 +94,7 @@ function isErrorResponse(value: unknown): value is GoogleMeetErrorResponse {
   if (!isRecord(value)) return false;
   if (value.error === undefined) return true;
   if (!isRecord(value.error)) return false;
-  return (
-    typeof value.error.code === "number" && typeof value.error.message === "string"
-  );
+  return typeof value.error.code === "number" && typeof value.error.message === "string";
 }
 
 export class GoogleMeetAdapter implements IMeetingChannel {
@@ -299,11 +293,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
 
     const rawToken: unknown = await response.json();
     if (!isTokenResponse(rawToken)) {
-      throw new GoogleMeetApiError(
-        "Google token exchange returned malformed response",
-        undefined,
-        response.status
-      );
+      throw new GoogleMeetApiError("Google token exchange returned malformed response", undefined, response.status);
     }
     const tokenData: GoogleMeetTokenResponse = rawToken;
     this.cachedToken = {
@@ -360,11 +350,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
 
     const rawSpace: unknown = await response.json();
     if (!isSpaceResponse(rawSpace)) {
-      throw new GoogleMeetApiError(
-        "Google Meet returned malformed space response",
-        undefined,
-        response.status
-      );
+      throw new GoogleMeetApiError("Google Meet returned malformed space response", undefined, response.status);
     }
     const space: GoogleMeetSpaceResponse = rawSpace;
     return {

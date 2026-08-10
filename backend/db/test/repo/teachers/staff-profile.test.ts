@@ -492,10 +492,7 @@ describe("StaffProfileRepository — create", () => {
     const mockTx = asDbTx({ select: selectFn, insert: insertFn });
 
     const error = await expectRepoError(() =>
-      StaffProfileRepository.create(
-        { userId: randomUUID(), createdAt: new Date(), updatedAt: new Date() },
-        mockTx
-      )
+      StaffProfileRepository.create({ userId: randomUUID(), createdAt: new Date(), updatedAt: new Date() }, mockTx)
     );
 
     expect(error.message).toContain("Failed");

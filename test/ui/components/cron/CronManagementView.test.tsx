@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { CronScheduleStatus, CronRunStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CronRunStatus, CronScheduleStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const mockLabels: CronLabels = {
   pageTitle: "Cron Schedules",

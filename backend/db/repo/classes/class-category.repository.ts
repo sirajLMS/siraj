@@ -227,10 +227,7 @@ export namespace ClassCategoryRepository {
         }
       };
 
-      await inputs.reduce(
-        (chain, input) => chain.then(() => upsertOne(input)),
-        Promise.resolve()
-      );
+      await inputs.reduce((chain, input) => chain.then(() => upsertOne(input)), Promise.resolve());
 
       return results;
     };

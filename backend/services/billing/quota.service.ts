@@ -415,13 +415,10 @@ export namespace QuotaService {
     // internal flows (CreditService, scripts, class-session service) where
     // no user session exists. Read access to quota selection is safe — the
     // result is only used to decide booking backing, not to expose data.
-    return runInTx(
-      tx,
-      async t => {
-        const quotaRow = await QuotaRepository.selectQuotaForBookingFIFO(t, studentId);
-        return quotaRow ? mapQuotaToReturnType(quotaRow) : null;
-      }
-    );
+    return runInTx(tx, async t => {
+      const quotaRow = await QuotaRepository.selectQuotaForBookingFIFO(t, studentId);
+      return quotaRow ? mapQuotaToReturnType(quotaRow) : null;
+    });
   };
 
   export const redeemForInstance = async (

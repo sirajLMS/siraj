@@ -7,8 +7,8 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
 import { DomainError } from "@/backend/lib/errors";
-import { PaginationArgs } from "@/backend/types";
 import type { CreditInsertInput, CreditTransactionSelectType } from "@/backend/types";
+import { PaginationArgs } from "@/backend/types";
 
 // NOTE: Overload-by-type-discrimination — tx parameter is polymorphic: string (studentId) or Transaction instance. Callers must be aware that getBalance(tx, undefined) silently targets the wrong studentId.
 type ReadExecutor = DBTransaction | typeof db;

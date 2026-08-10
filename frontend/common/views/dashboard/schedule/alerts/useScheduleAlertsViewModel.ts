@@ -143,10 +143,7 @@ type MetricLabelKey = keyof ScheduleAlertsLabels["metrics"];
 
 function isMetricLabelKey(key: string): key is MetricLabelKey {
   return (
-    key === "totalStudents" ||
-    key === "totalStudentsTrend" ||
-    key === "activeCourses" ||
-    key === "activeCoursesSub"
+    key === "totalStudents" || key === "totalStudentsTrend" || key === "activeCourses" || key === "activeCoursesSub"
   );
 }
 

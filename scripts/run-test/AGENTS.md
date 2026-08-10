@@ -32,3 +32,7 @@ scripts/run-test/
     bun-features.test.ts — Bun test feature coverage
     failing-examples.test.ts — Intentional failures for parser verification
 ```
+
+## Shared Parallel Test Runner
+
+Parallel test execution logic is consolidated in `scripts/test/run-parallel-tests.ts` with configurable `RunParallelTestsConfig`. Suite-specific runners (`run-db-tests-parallel.ts`, `run-services-tests-parallel.ts`, `run-integration-tests-parallel.ts`) are thin configuration wrappers. See `docs/testing/shared-test-runner.md` for the pattern.

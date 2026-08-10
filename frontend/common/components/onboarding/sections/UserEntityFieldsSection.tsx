@@ -17,10 +17,7 @@ type OnboardingFields = UserEntityOnboardingFieldsShape & FieldValues;
 
 type ValidationLabels = UserEntityOnboardingLabels["validation"];
 
-function isValidationKey(
-  key: string,
-  validation: ValidationLabels
-): key is keyof typeof validation {
+function isValidationKey(key: string, validation: ValidationLabels): key is keyof typeof validation {
   return key in validation;
 }
 
@@ -92,10 +89,7 @@ function TextFieldWrapper<T extends OnboardingFields>({
             required={required}
             type={type}
             error={errorKey ? !!errors[errorKey] : false}
-            helperText={validationMessage(
-              labels,
-              errorKey ? getErrorMessage(errors[errorKey]) : undefined
-            )}
+            helperText={validationMessage(labels, errorKey ? getErrorMessage(errors[errorKey]) : undefined)}
             fullWidth
             sx={outlinedInputSx}
           />

@@ -32,10 +32,7 @@ export async function seedOrGet(
   const specs: StatusEventSpec[] = [];
 
   for (const instance of classInstancesList) {
-    if (
-      instance.outcome === ClassOutcome.PENDING &&
-      instance.executionState === ClassExecutionState.NOT_ACTIVATED
-    ) {
+    if (instance.outcome === ClassOutcome.PENDING && instance.executionState === ClassExecutionState.NOT_ACTIVATED) {
       continue;
     }
 

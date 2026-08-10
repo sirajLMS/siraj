@@ -119,3 +119,11 @@ The Quota System (`QuotaService`, `QuotaNotificationService`, `AvailabilityServi
 - **Session Start**: `ClassSessionService` calls `QuotaService.redeemForInstance` for ON_DEMAND PENDING_CREDIT instances
 - **Manual Entry**: `TeacherDashboardService.createManualEntry` delegates to `QuotaService.redeemForInstance` when quota-backed (prevents double deduction)
 
+## Canonical Service Pattern (Duplication Elimination)
+
+When utility functions in `backend/lib/` duplicate service-layer logic, the service file is canonical. Delete the `lib/` duplicate and update importers to use `@/backend/services/<module>` barrel. See `docs/frontend/duplication-elimination-patterns.md` Pattern 4.
+
+Completed consolidations:
+- `backend/lib/auth/permissions.ts` → `backend/services/auth/permissions.service.ts` (Task 2.18)
+- `backend/lib/env-config-resolver.ts` → `backend/services/system/environment-config.service.ts` (Task 2.19)
+

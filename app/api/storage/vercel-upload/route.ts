@@ -15,11 +15,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isHandleUploadBody(value: unknown): value is HandleUploadBody {
-  return (
-    isRecord(value) &&
-    typeof value.type === "string" &&
-    isRecord(value.payload)
-  );
+  return isRecord(value) && typeof value.type === "string" && isRecord(value.payload);
 }
 
 function parseClientPayload(raw: string | null | undefined): VercelUploadUrlClientPlayload {

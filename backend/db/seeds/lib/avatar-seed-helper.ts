@@ -57,7 +57,7 @@ export async function seedAvatarForEntity(input: {
 
 export async function seedAvatarPool(input: SeedAvatarPoolInput): Promise<Map<string, string | null>> {
   const results = await Promise.all(
-    input.poolFiles.map(async (avatarFile) => {
+    input.poolFiles.map(async avatarFile => {
       const assetRelativePath = `${input.assetDir}/${avatarFile}`;
       const localFilePath = resolveAssetPath(assetRelativePath);
       const bucketPath = `${input.bucketDir}/${avatarFile}`;
@@ -78,7 +78,7 @@ export async function seedAvatarPool(input: SeedAvatarPoolInput): Promise<Map<st
         logger.error(`Failed to seed avatar pool file ${avatarFile}:`, error);
         return [avatarFile, null] as const;
       }
-    }),
+    })
   );
 
   const avatarUrls = new Map<string, string | null>();
@@ -118,6 +118,6 @@ export async function linkAvatarsToEntities(input: SeedAvatarPoolInput): Promise
       if (entity.userId) {
         await syncUserAvatarUrl(entity.userId, avatarUrl);
       }
-    }),
+    })
   );
 }

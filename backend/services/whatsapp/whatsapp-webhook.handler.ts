@@ -220,9 +220,7 @@ function isStatusUpdate(value: unknown): value is StatusUpdate {
 
 /** Type guard: validates a string is a valid `NotificationEventType` enum value. */
 function isNotificationEventType(value: unknown): value is NotificationEventType {
-  return (
-    typeof value === "string" && (Object.values(NotificationEventType) as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (Object.values(NotificationEventType) as readonly string[]).includes(value);
 }
 
 async function handleMessagesStatus(

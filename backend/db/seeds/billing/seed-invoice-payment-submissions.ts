@@ -26,10 +26,7 @@ export async function seedOrGet(
   );
 
   const candidates = invoicesList
-    .filter(
-      invoice =>
-        invoice.status === InvoiceStatus.UNPAID || invoice.status === InvoiceStatus.PAYMENT_PENDING
-    )
+    .filter(invoice => invoice.status === InvoiceStatus.UNPAID || invoice.status === InvoiceStatus.PAYMENT_PENDING)
     .slice(0, seedConfig.profile === "standard" ? 3 : 1);
 
   if (candidates.length === 0) {

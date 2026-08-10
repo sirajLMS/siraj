@@ -138,7 +138,9 @@ await mock.module("@/backend/db/repo/users/user.repository", () => ({
 }));
 
 // --- AuditService
-const createManyAuditLogsMock = mock(async (_inputs: readonly CreateAuditLogInput[]): Promise<CreateAuditLogInput[]> => []);
+const createManyAuditLogsMock = mock(
+  async (_inputs: readonly CreateAuditLogInput[]): Promise<CreateAuditLogInput[]> => []
+);
 
 await mock.module("@/backend/services/system/audit.service", () => ({
   AuditService: {

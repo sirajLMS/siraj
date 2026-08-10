@@ -1,8 +1,7 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import { type QueryDbHandle } from "@/backend/db/drizzleDb";
 import type { DBTransaction } from "@/backend/db/db.types";
-import type { db } from "@/backend/db/drizzleDb";
+import type { db, QueryDbHandle } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
@@ -24,6 +23,7 @@ function assertComplaintStatus(value: string): ComplaintStatus {
   if (!isComplaintStatus(value)) throw new Error(`Invalid complaint status: ${value}`);
   return value;
 }
+
 import type {
   ComplaintFileReturnType,
   ComplaintMetrics,
@@ -352,7 +352,8 @@ export namespace ComplaintRepository {
     const validStatuses = Object.values(ComplaintStatus) as readonly string[];
     const unansweredStr = ComplaintStatus.UNANSWERED as string;
     const answeredStr = ComplaintStatus.ANSWERED as string;
-    const unanswered = statusCounts.find(r => validStatuses.includes(r.status) && r.status === unansweredStr)?.count ?? 0;
+    const unanswered =
+      statusCounts.find(r => validStatuses.includes(r.status) && r.status === unansweredStr)?.count ?? 0;
     const answered = statusCounts.find(r => validStatuses.includes(r.status) && r.status === answeredStr)?.count ?? 0;
     const totalCount = statusCounts.reduce((sum, r) => sum + r.count, 0);
 

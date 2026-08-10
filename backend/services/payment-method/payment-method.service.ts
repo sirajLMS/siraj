@@ -68,10 +68,7 @@ function isOnlineAccountDetails(details: PaymentMethodDetails): details is Onlin
 // absence of the discriminant keys carried by every other variant.
 function isBankTransferDetails(details: PaymentMethodDetails): details is BankTransferDetails {
   return (
-    !("walletId" in details) &&
-    !("paymentLinkId" in details) &&
-    !("onlineAccountId" in details) &&
-    !("note" in details)
+    !("walletId" in details) && !("paymentLinkId" in details) && !("onlineAccountId" in details) && !("note" in details)
   );
 }
 

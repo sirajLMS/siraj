@@ -31,12 +31,7 @@ function allowFieldReplacement(fieldMap: Map<string, unknown>): Map<string, unkn
 }
 
 function isRefLike(value: unknown): value is RefLike {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "name" in value &&
-    typeof value.name === "string"
-  );
+  return typeof value === "object" && value !== null && "name" in value && typeof value.name === "string";
 }
 
 function clearTypeRegistration(store: ConfigStoreLike, typeName: string, keepRef: RefLike): void {

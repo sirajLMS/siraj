@@ -238,7 +238,17 @@ async function authenticateDemoUserAttempt(
   if (!isRetryable) {
     throw newError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);
   }
-  return authenticateDemoUserAttempt(graphqlUrl, groupSlug, fetchFn, context, baseUrl, isDevMode, maxAttempts, attempt + 1, newError);
+  return authenticateDemoUserAttempt(
+    graphqlUrl,
+    groupSlug,
+    fetchFn,
+    context,
+    baseUrl,
+    isDevMode,
+    maxAttempts,
+    attempt + 1,
+    newError
+  );
 }
 
 export async function authenticateDemoUser(context: BrowserContext, groupSlug: string): Promise<void> {
@@ -247,7 +257,17 @@ export async function authenticateDemoUser(context: BrowserContext, groupSlug: s
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
   const isDevMode = process.env.TEST_SERVER_MODE === "dev";
   const maxAttempts = isDevMode ? 10 : 5;
-  await authenticateDemoUserAttempt(graphqlUrl, groupSlug, fetchFn, context, baseUrl, isDevMode, maxAttempts, 1, undefined);
+  await authenticateDemoUserAttempt(
+    graphqlUrl,
+    groupSlug,
+    fetchFn,
+    context,
+    baseUrl,
+    isDevMode,
+    maxAttempts,
+    1,
+    undefined
+  );
 }
 
 export async function waitForDashboardReady(page: Page): Promise<void> {

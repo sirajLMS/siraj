@@ -35,10 +35,7 @@ async function createTestParent(tx: DBTransaction, name: string, email: string) 
 
 async function createTestTeacher(tx: DBTransaction, name: string, email: string) {
   const { user, now } = await createTestUser(tx, name, email);
-  const [teacher] = await tx
-    .insert(teachers)
-    .values({ userId: user.id, createdAt: now, updatedAt: now })
-    .returning();
+  const [teacher] = await tx.insert(teachers).values({ userId: user.id, createdAt: now, updatedAt: now }).returning();
   return teacher;
 }
 

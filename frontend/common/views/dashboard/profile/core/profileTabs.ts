@@ -76,9 +76,7 @@ function isMeetingTabVisible(scope: ProfileScope, hasPermission: (permission: Ap
       ? AppPermission.ProfileMeetingConfigsViewOwn
       : AppPermission.ProfileMeetingConfigsViewOther;
   const managePermission =
-    scope === ProfileScope.Own
-      ? AppPermission.MeetingConfigsManageOwn
-      : AppPermission.MeetingConfigsManageOther;
+    scope === ProfileScope.Own ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
   return hasPermission(viewPermission) || hasPermission(managePermission);
 }
 

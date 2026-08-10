@@ -472,9 +472,7 @@ describe("Session Scalability and Redis Integration", () => {
         count = await SessionRepository.countUserSessions(user.id);
         expect(count).toBe(0);
 
-        const sessions = await Promise.all(
-          sessionIds.map(id => SessionRepository.findSessionById(id))
-        );
+        const sessions = await Promise.all(sessionIds.map(id => SessionRepository.findSessionById(id)));
         for (const session of sessions) {
           expect(session).toBeNull();
         }

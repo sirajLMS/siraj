@@ -349,10 +349,7 @@ async function fetchAndPrintDuplicatedBlocks(token: string): Promise<Duplication
       `${COLORS.CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLORS.NC}\n`
     );
 
-    const processFile = async (
-      index: number,
-      acc: DuplicationFileDetails[]
-    ): Promise<DuplicationFileDetails[]> => {
+    const processFile = async (index: number, acc: DuplicationFileDetails[]): Promise<DuplicationFileDetails[]> => {
       if (index >= filesWithDuplications.length) return acc;
       const file = filesWithDuplications[index];
       const details = await printFileDuplicationDetails({ file, authHeader });
@@ -396,8 +393,8 @@ async function printFileDuplicationDetails(options: {
         blocks: [],
       };
       for (const block of group.blocks) {
-        const refFile = block["_ref"] ? dupData.files[block["_ref"]] : null;
-        const refPath = refFile ? refFile.name || block["_ref"] || "unknown" : file.path;
+        const refFile = block._ref ? dupData.files[block._ref] : null;
+        const refPath = refFile ? refFile.name || block._ref || "unknown" : file.path;
         globalThis.console.log(
           `    ${COLORS.CYAN}→${COLORS.NC} ${refPath} (lines ${block.from}-${block.from + block.size - 1})`
         );

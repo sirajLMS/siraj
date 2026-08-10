@@ -222,16 +222,12 @@ export function createConnectedAccountsMock(): readonly MeetingIntegrationConnec
 export function createViewModelMock(
   overrides: Partial<MeetingIntegrationsViewModel> & { labels: SettingsMeetingIntegrationsLabels }
 ): MeetingIntegrationsViewModel {
-  const emptyRecord: Readonly<
-    Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>
-  > = {
+  const emptyRecord: Readonly<Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>> = {
     [ZOOM]: [],
     [GOOGLE_MEET]: [],
     [MICROSOFT_TEAMS]: [],
   };
-  const emptyTestResults: Readonly<
-    Record<MeetingIntegrationProviderSlug, TestMeetingConnectionResult | null>
-  > = {
+  const emptyTestResults: Readonly<Record<MeetingIntegrationProviderSlug, TestMeetingConnectionResult | null>> = {
     [ZOOM]: null,
     [GOOGLE_MEET]: null,
     [MICROSOFT_TEAMS]: null,

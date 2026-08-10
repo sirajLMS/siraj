@@ -172,11 +172,7 @@ export function UserPersonalGenderField<T extends UserPersonalFieldsShape & Fiel
             />
           )}
         />
-        {errors.gender ? (
-          <FormHelperText>
-            {validationMessage(translate, errors.gender?.message)}
-          </FormHelperText>
-        ) : null}
+        {errors.gender ? <FormHelperText>{validationMessage(translate, errors.gender?.message)}</FormHelperText> : null}
       </FormControl>
     </Grid>
   );

@@ -200,14 +200,7 @@ describe("StudentLifecycleService — notification dispatch", () => {
     test("dispatches payloads to parent + old + new teacher via dispatchWithPreferences", async () => {
       const { StudentLifecycleService } = await importService();
 
-      await StudentLifecycleService.reassignTeacher(
-        ACTOR_ID,
-        STUDENT_ID,
-        NEW_TEACHER_ID,
-        errorsEn,
-        undefined,
-        "en"
-      );
+      await StudentLifecycleService.reassignTeacher(ACTOR_ID, STUDENT_ID, NEW_TEACHER_ID, errorsEn, undefined, "en");
 
       expect(hasPermissionMock).toHaveBeenCalledWith(ACTOR_ID, AppPermission.STUDENT_REASSIGN_TEACHER);
       expect(reassignTeacherMock).toHaveBeenCalledTimes(1);

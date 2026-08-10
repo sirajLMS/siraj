@@ -49,11 +49,7 @@ async function createTestTeachers(tx: DBTransaction, now: Date): Promise<Teacher
   );
 }
 
-async function createTestStudents(
-  tx: DBTransaction,
-  parentId: string,
-  now: Date
-): Promise<StudentSelectType[]> {
+async function createTestStudents(tx: DBTransaction, parentId: string, now: Date): Promise<StudentSelectType[]> {
   const studentsData = [
     { name: "Overlap Student 1", gender: Gender.MALE },
     { name: "Overlap Student 2", gender: Gender.FEMALE },

@@ -284,15 +284,17 @@ interface DispatchCall {
 }
 
 const dispatchCalls: DispatchCall[] = [];
-const dispatchWithPreferencesMock = mock(async (payloads: TestPayload[], affectedUserIds: string[], locale?: string) => {
-  dispatchCalls.push({ payloads, affectedUserIds, locale });
-  // Simulate a successful multi-channel dispatch.
-  const out: unknown[] = [];
-  for (const p of payloads) {
-    out.push({ channel: p.channel, success: true });
+const dispatchWithPreferencesMock = mock(
+  async (payloads: TestPayload[], affectedUserIds: string[], locale?: string) => {
+    dispatchCalls.push({ payloads, affectedUserIds, locale });
+    // Simulate a successful multi-channel dispatch.
+    const out: unknown[] = [];
+    for (const p of payloads) {
+      out.push({ channel: p.channel, success: true });
+    }
+    return out;
   }
-  return out;
-});
+);
 
 await mock.module("@/backend/services/notification/notification-dispatch.helpers", () => ({
   dispatchWithPreferences: dispatchWithPreferencesMock,
@@ -491,12 +493,7 @@ describe("BillingManagementService notification dispatch", () => {
     test("dispatches INVOICE_GENERATED to the parent via dispatchWithPreferences", async () => {
       const { BillingManagementService } = await importService();
 
-      await BillingManagementService.createManualInvoice(
-        ACTOR_ID,
-        createManualInvoiceInput(null),
-        tErrorsStub,
-        "en"
-      );
+      await BillingManagementService.createManualInvoice(ACTOR_ID, createManualInvoiceInput(null), tErrorsStub, "en");
 
       // Builder called once for the parent.
       expect(buildInvoiceGeneratedPayloadsMock).toHaveBeenCalledTimes(1);
@@ -516,12 +513,7 @@ describe("BillingManagementService notification dispatch", () => {
     test("preserves the tray-summary syncUnpaidNotifications call (F9)", async () => {
       const { BillingManagementService } = await importService();
 
-      await BillingManagementService.createManualInvoice(
-        ACTOR_ID,
-        createManualInvoiceInput(true),
-        tErrorsStub,
-        "en"
-      );
+      await BillingManagementService.createManualInvoice(ACTOR_ID, createManualInvoiceInput(true), tErrorsStub, "en");
 
       // syncUnpaidNotifications must fire because sendEmail=true → tray-summary kept.
       expect(syncUnpaidNotificationsMock).toHaveBeenCalled();
@@ -532,12 +524,7 @@ describe("BillingManagementService notification dispatch", () => {
     test("dispatches INVOICE_GENERATED for each unpaid invoice and keeps the tray-summary sync (F9)", async () => {
       const { BillingManagementService } = await importService();
 
-      const result = await BillingManagementService.sendPaymentReminder(
-        ACTOR_ID,
-        STUDENT_ID,
-        tErrorsStub,
-        "en"
-      );
+      const result = await BillingManagementService.sendPaymentReminder(ACTOR_ID, STUDENT_ID, tErrorsStub, "en");
 
       expect(result.success).toBe(true);
       expect(syncUnpaidNotificationsMock).toHaveBeenCalledTimes(1);
@@ -602,14 +589,7 @@ describe("BillingManagementService notification dispatch", () => {
       const { BillingManagementService } = await importService();
       getInvoiceByIdMock.mockResolvedValue(mockPaymentPendingInvoice);
 
-      await BillingManagementService.rejectPaymentProof(
-        ACTOR_ID,
-        INVOICE_ID,
-        tErrorsStub,
-        "Bad file",
-        undefined,
-        "en"
-      );
+      await BillingManagementService.rejectPaymentProof(ACTOR_ID, INVOICE_ID, tErrorsStub, "Bad file", undefined, "en");
 
       expectStatusChangedDispatchToParent("proofRejected");
     });
@@ -619,14 +599,7 @@ describe("BillingManagementService notification dispatch", () => {
     test("dispatches INVOICE_STATUS_CHANGED with action=markedPaid to the parent", async () => {
       const { BillingManagementService } = await importService();
 
-      await BillingManagementService.markInvoicePaid(
-        ACTOR_ID,
-        INVOICE_ID,
-        PROOF_FILE_ID,
-        tErrorsStub,
-        undefined,
-        "en"
-      );
+      await BillingManagementService.markInvoicePaid(ACTOR_ID, INVOICE_ID, PROOF_FILE_ID, tErrorsStub, undefined, "en");
 
       expectStatusChangedDispatchToParent("markedPaid");
     });

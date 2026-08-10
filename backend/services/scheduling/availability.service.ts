@@ -159,12 +159,7 @@ export namespace AvailabilityService {
   // Type guard: checks if a value is a FindAvailableSlotsOptions object.
   function isFindAvailableSlotsOptions(value: unknown): value is FindAvailableSlotsOptions {
     if (typeof value !== "object" || value === null) return false;
-    return (
-      "studentId" in value &&
-      typeof value.studentId === "string" &&
-      "date" in value &&
-      value.date instanceof Date
-    );
+    return "studentId" in value && typeof value.studentId === "string" && "date" in value && value.date instanceof Date;
   }
 
   // Type guard: checks if a value is a Drizzle-compatible query executor.

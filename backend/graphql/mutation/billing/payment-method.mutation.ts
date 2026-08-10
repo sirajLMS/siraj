@@ -48,13 +48,7 @@ function isUpdateSupportedMobileWalletInput(value: unknown): value is UpdateSupp
 }
 
 function isSupportedPaymentLinkSubmitInput(value: unknown): value is SupportedPaymentLinkSubmitInput {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "slug" in value &&
-    "name" in value &&
-    "urlAllowlist" in value
-  );
+  return typeof value === "object" && value !== null && "slug" in value && "name" in value && "urlAllowlist" in value;
 }
 
 function isUpdateSupportedPaymentLinkInput(value: unknown): value is UpdateSupportedPaymentLinkInput {
@@ -62,13 +56,7 @@ function isUpdateSupportedPaymentLinkInput(value: unknown): value is UpdateSuppo
 }
 
 function isSupportedOnlineAccountSubmitInput(value: unknown): value is SupportedOnlineAccountSubmitInput {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "slug" in value &&
-    "name" in value &&
-    "identifierKind" in value
-  );
+  return typeof value === "object" && value !== null && "slug" in value && "name" in value && "identifierKind" in value;
 }
 
 function isUpdateSupportedOnlineAccountInput(value: unknown): value is UpdateSupportedOnlineAccountInput {

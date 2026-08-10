@@ -36,7 +36,6 @@ export class SessionRedisService {
     return typeof method === "function" ? method.bind(nativeClient) : undefined;
   }
 
-
   /**
    * Generate Redis key for session
    */

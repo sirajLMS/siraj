@@ -92,12 +92,7 @@ function pipeStreamLogs(proc: ReturnType<typeof spawn>) {
   }
 }
 
-async function warmUpRoute(
-  route: string,
-  base: string,
-  fetchFn: typeof fetch,
-  routeTimeoutMs: number
-): Promise<void> {
+async function warmUpRoute(route: string, base: string, fetchFn: typeof fetch, routeTimeoutMs: number): Promise<void> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), routeTimeoutMs);
   try {

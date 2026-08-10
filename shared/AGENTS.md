@@ -249,3 +249,18 @@ Canonical `*Labels` interfaces live in `shared/locale/types/**`. View-layer code
 - **Build ID Stamping**: Resolved in `next.config.ts` (`NEXT_PUBLIC_BUILD_ID` env → `.next-locale-snapshots-version` content hash → random UUID fallback). Mismatched `BUILD_ID` automatically wipes stale IndexedDB entries on first access.
 - **Adding New Namespaces**: Each new `defineNamespace` call in `shared/locale/namespaces/**/*.namespace.ts` MUST pass a stable string ID as the first parameter (e.g. `defineNamespace("dashboard.students.directory", config)`).
 
+## Cross-Layer Shared Types Pattern
+
+When a type definition is used by both backend and frontend, it MUST live in `shared/types/` to avoid duplication. See `docs/backend/shared-types-pattern.md` for the complete pattern.
+
+Key rules:
+- Cross-layer types go in `shared/types/<domain>.types.ts`
+- Both backend and frontend import from the same canonical file
+- `shared/` layer MUST NOT import from `backend/` or `frontend/`
+
+## Locale Namespace Migration
+
+Monolithic locale files (e.g., `profile.ts`, `meeting-config.ts`) should be migrated to camelCase sub-module directories. See `docs/i18n/locale-namespace-migration.md` for the migration pattern.
+
+Completed migrations: `profile/`, `meetingConfig/`, `paymentMethod/`
+

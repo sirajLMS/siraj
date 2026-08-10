@@ -30,11 +30,7 @@ function isFieldValue<T extends FieldValues>(_value: unknown): _value is T[Path<
 }
 
 /** Sets a form field value without requiring an unsafe type assertion at the call site. */
-function setFieldValue<T extends FieldValues>(
-  setValue: UseFormSetValue<T>,
-  name: Path<T>,
-  value: unknown,
-): void {
+function setFieldValue<T extends FieldValues>(setValue: UseFormSetValue<T>, name: Path<T>, value: unknown): void {
   if (isFieldValue<T>(value)) {
     setValue(name, value);
   }
