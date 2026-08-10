@@ -39,7 +39,7 @@ type CatalogRepo<
   TListActiveFilter extends { direction?: PaymentDirection } = { direction?: PaymentDirection },
 > = {
   listAll: (tx?: DBTransaction) => Promise<TResult[]>;
-  listActive: (filters: TListActiveFilter, tx?: DBTransaction) => Promise<TResult[]>;
+  listActive: (filters?: TListActiveFilter, tx?: DBTransaction) => Promise<TResult[]>;
   create: (input: TCreateInput, tx?: DBTransaction) => Promise<TResult>;
   update: (id: string, input: TUpdateInput, tErrors: ErrorsLabels, tx?: DBTransaction) => Promise<TResult>;
   deactivate: (id: string, tErrors: ErrorsLabels, tx?: DBTransaction) => Promise<TResult>;
@@ -61,7 +61,7 @@ function buildCatalogMethods<
       if (filters?.activeOnly === false) {
         return repo.listAll(undefined);
       }
-      return repo.listActive({ direction: filters?.direction } as TListActiveFilter, undefined);
+      return repo.listActive(filters, undefined);
     },
     async create(actorUserId: string, input: TCreateInput, tErrors: ErrorsLabels) {
       await assertCatalogAdmin(actorUserId, tErrors);
@@ -209,13 +209,14 @@ export namespace PaymentCatalogService {
     } catch (error) {
       if (!isDuplicateError(error)) throw error;
 
-      const results: T[] = [];
-      for (const input of inputs) {
+      const results = await inputs.reduce(async (accPromise, input) => {
+        const acc = await accPromise;
         const existing = await getBySlug(input.slug, tx);
-        if (existing && "id" in existing) {
-          results.push(await updateById(existing.id as string, input, tErrors, tx));
+        if (existing && "id" in existing && typeof existing.id === "string") {
+          acc.push(await updateById(existing.id, input, tErrors, tx));
         }
-      }
+        return acc;
+      }, Promise.resolve([] as T[]));
       return results;
     }
   }

@@ -1,0 +1,732 @@
+# Tasks Document: Code Duplication Elimination Phase 2 (Frontend)
+
+## Document Information
+
+- **Feature Name**: Code Duplication Elimination Phase 2 — Frontend Consolidation
+- **Target Directory**: `.ai/plans/duplications-phase2`
+- **Outcome Directory**: `.ai/plans/duplications-phase2/outcome`
+- **Version**: 1.0
+- **Date**: 2026-08-10
+- **Author**: Spec-driven continuation of `.ai/plans/duplications/`
+- **Related Documents**:
+  - Requirements: [requirements.md](./requirements.md)
+  - Design: [design.md](./design.md)
+  - Predecessor Tasks: [../duplications/tasks.md](../duplications/tasks.md)
+
+## Non-Negotiable Execution Protocol for All Tasks
+
+1. **Pre-Execution Outcome Knowledge Read:**
+   Before executing ANY task, the executing agent MUST read ALL existing files in `.ai/plans/duplications-phase2/outcome/` AND the predecessor plan's outcome files in `../duplications/outcome/` to absorb prior research, search results, docs, and pitfalls so analysis is not repeated.
+
+2. **Per-File Quality Verification Loop (Immediate post-edit):**
+   Whenever a file is modified, execute per-file verification (`bun tsgo` + `bun biome:check` + `bun run scripts/lint-service.ts -f <file> --id verify`) BEFORE moving to another file or subtask.
+
+3. **Post-Execution Outcome File Creation:**
+   Upon completing the task implementation and quality checks, write a new outcome document under `.ai/plans/duplications-phase2/outcome/<task-id>-outcome.md` summarizing research, analysis, changes, cross-file dependencies, and carry-over knowledge.
+
+4. **Task Progress Tracking:**
+   The executing agent MUST update the task checkbox `[ ]` -> `[x]` in this `tasks.md` file upon successful completion.
+
+5. **Deferred Items Ledger:**
+   Any work deferred from one task to another MUST be logged in `.ai/plans/duplications-phase2/deferred-items.md` with a clear description, source task, target task, and status.
+
+## MANDATORY Subtasks for Every Implementation Task
+
+**EVERY implementation task (X.Y) MUST include these subtasks in strict order:**
+
+### Quality Loop Subtask (X.Y.QL)
+```markdown
+- [ ] X.Y.QL **Quality Loop**: Per-file verification on `<file-path>`
+  - Run: `bun tsgo`
+  - Run: `bun biome:check`
+  - Run: `bun run scripts/lint-service.ts -f <file-path> --id verify`
+  - Fix all errors before proceeding
+```
+
+### Outcome File Subtask (X.Y.OUT)
+```markdown
+- [ ] X.Y.OUT **Outcome File**: Write `.ai/plans/duplications-phase2/outcome/<task-id>-outcome.md`
+  - Document: research, analysis, changes, cross-file dependencies, carry-over knowledge
+  - If aggressive consolidation changed behavior: include "Behavioral Changes" section
+```
+
+**Sequence:** QL (Quality Loop) → OUT (Outcome File) → Mark `[x]`
+
+## Layer-to-Instructions Mapping (Reference for ALL Plans)
+
+| Layer | AGENTS.md Files (absolute paths) | .agents/instructions Files (absolute paths) |
+|-------|----------------------------------|---------------------------------------------|
+| Root | `/home/ahmed/Projects/siraj/AGENTS.md` | — |
+| Frontend Common | `/home/ahmed/Projects/siraj/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/components/ui/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md` |
+| Frontend Desktop | `/home/ahmed/Projects/siraj/frontend/desktop/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/mobile-desktop.instructions.md` |
+| Frontend Mobile | `/home/ahmed/Projects/siraj/frontend/mobile/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/mobile-desktop.instructions.md` |
+| Test UI | `/home/ahmed/Projects/siraj/test/ui/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md` |
+
+## Implementation Overview
+
+### Implementation Strategy
+- **Phased Waves**: 4 waves ordered by impact/risk ratio (UI Triplication Scaffolds → View Component Pairs → Within-Common Consolidation → Verification)
+- **Canonical Patterns**: Reuse the predecessor plan's `*Shared.tsx` scaffold pattern (see `docs/frontend/ui-shared-scaffold-pattern.md` and `docs/frontend/duplication-elimination-patterns.md`)
+- **Aggressive Consolidation**: Per `REQ-11`, extract all shared logic to scaffolds; update tests when behavior changes
+- **Knowledge Capture**: Outcome file per task; final knowledge propagation to `docs/`
+
+### Development Approach
+- **Testing Strategy**: Reuse existing test suites — update tests when aggressive consolidation changes behavior
+- **Integration Strategy**: `*Shared.tsx` scaffold with slot props for tier variations; canonical-source-with-barrel-import for utility consolidations
+- **Deployment Strategy**: Standard rolling deployment — all changes backward compatible
+
+## Implementation Plan
+
+### Task 0: Pre-Implementation Baseline (MANDATORY)
+
+- [ ] 0. Establish error baseline and create deferred-items ledger
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/` (will be empty — first task)
+  - Read all existing files in `../duplications/outcome/` (predecessor plan — 41 outcome files) to absorb prior context
+  - Record baseline error counts BEFORE any implementation:
+    ```bash
+    # Record tsgo error count (expected: 0 — verified clean by post-completion update)
+    bun tsgo 2>&1 | grep "error TS" | wc -l > /tmp/baseline-phase2-tsgo.txt
+
+    # Record biome warnings (expected: 0)
+    bun biome:check 2>&1 | grep -c "warn" > /tmp/baseline-phase2-biome.txt
+
+    # Record lint output (expected: 4 pre-existing sonarjs errors, out-of-scope)
+    bun run scripts/lint-service.ts --json --id baseline-phase2 > /tmp/baseline-phase2-lint.json
+
+    # Record jscpd clone count (expected: 823 total, 718 frontend)
+    bun check:duplicates 2>&1 | tail -10 > /tmp/baseline-phase2-jscpd.txt
+    ```
+  - Create deferred-items ledger: `.ai/plans/duplications-phase2/deferred-items.md` (use predecessor plan's format as template)
+  - Write outcome file: `.ai/plans/duplications-phase2/outcome/0-baseline-outcome.md` documenting baseline counts
+  - Update progress: Mark task 0 as `[x]` in `tasks.md`
+  - _Requirements: REQ-0_
+
+  - [ ] 0.QL **Quality Loop**: N/A (baseline task — no files modified)
+
+  - [ ] 0.OUT **Outcome File**: Write `outcome/0-baseline-outcome.md`
+    - Document: baseline tsgo=0, biome=0, lint=4 (OOS), jscpd=823 (718 frontend)
+    - Document: tier-pair breakdown from jscpd JSON analysis
+    - Document: top 40 frontend clone clusters (full list in `outcome/0-baseline-outcome.md`)
+
+### Phase 1: Quick Wins — UI Component Triplication Scaffolds (Low Risk, High Impact)
+
+**Pattern**: For each UI component with common+desktop+mobile variants, create a `*Shared.tsx` scaffold with slot props, then refactor all variants to consume the scaffold.
+
+**Reference implementation**: `frontend/common/components/ui/dialog/baseDeleteDialogShared.tsx` (from predecessor plan).
+
+- [ ] 1.1 Create CurrencyAutocompleteShared scaffold and refactor 3 variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Read predecessor plan outcome: `../duplications/outcome/2.1-statusbadge-shared-outcome.md` (scaffold pattern reference)
+  - **VERIFY FIRST:** Inspect `frontend/common/components/ui/dialog/baseDeleteDialogShared.tsx` for MUI v9 compliance (all styling via `sx` prop, no direct style props, `*Outlined` icons)
+  - Analyze `frontend/common/components/ui/input/currencySelect/CurrencyAutocomplete.tsx`, `frontend/desktop/components/ui/input/currencySelect/currencyAutocomplete.desktop.tsx`, `frontend/mobile/components/ui/input/currencySelect/currencyAutocomplete.mobile.tsx` (1301 tokens / 245 lines duplicated between common↔mobile, 1246 tokens / 226 lines between common↔desktop)
+  - Create `frontend/common/components/ui/input/currencySelect/CurrencyAutocompleteShared.tsx` with slot props for tier variations
+  - Refactor `CurrencyAutocomplete.tsx` (common) to consume scaffold
+  - Refactor `currencyAutocomplete.desktop.tsx` to consume scaffold
+  - Refactor `currencyAutocomplete.mobile.tsx` to consume scaffold
+  - **MUI v9 COMPLIANCE:** All styling MUST use `sx` prop; NEVER direct style props (`fontWeight`, `textAlign`, `mb`, `mt`, `p`, `display`, `gap`, `alignItems`, `justifyContent`, `flexWrap`, `component`); icons MUST use `*Outlined` naming
+  - **CROSS-TIER IMPORT CHECK:** Verify desktop/mobile variants import ONLY from `@/common/components/ui/input/currencySelect/CurrencyAutocompleteShared` (not from each other, not from common tier-specific paths)
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.1.QL **Quality Loop**: Per-file verification on `CurrencyAutocompleteShared.tsx`, `CurrencyAutocomplete.tsx`, `currencyAutocomplete.desktop.tsx`, `currencyAutocomplete.mobile.tsx`
+    - Run: `bun tsgo`
+    - Run: `bun biome:check`
+    - Run: `bun run scripts/lint-service.ts -f <each-file> --id verify`
+    - Fix all errors before proceeding
+
+  - [ ] 1.1.OUT **Outcome File**: Write `outcome/1.1-currency-autocomplete-shared-outcome.md`
+    - Document: scaffold interface, slot props, behavioral changes (if any), cross-file dependencies
+
+- [ ] 1.2 Create PhoneInputShared scaffold and refactor 3 variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/input/phoneInput/PhoneInput.tsx`, `frontend/desktop/components/ui/input/phoneInput/phoneInput.desktop.tsx`, `frontend/mobile/components/ui/input/phoneInput/PhoneInput.tsx` (1119 tokens / 253 lines common↔desktop, 998 tokens / 229 lines common↔mobile)
+  - **VERIFY FIRST:** Note that mobile variant is named `PhoneInput.tsx` (not `phoneInput.mobile.tsx`) — verify this is intentional and not a naming inconsistency
+  - Create `frontend/common/components/ui/input/phoneInput/PhoneInputShared.tsx` with slot props
+  - Refactor all 3 variants to consume scaffold
+  - **MUI v9 COMPLIANCE:** All styling via `sx` prop; icons use `*Outlined` naming
+  - **CROSS-TIER IMPORT CHECK:** Variants import only from scaffold
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.2.QL **Quality Loop**: Per-file verification on all 4 files (scaffold + 3 variants)
+  - [ ] 1.2.OUT **Outcome File**: Write `outcome/1.2-phone-input-shared-outcome.md`
+
+- [ ] 1.3 Create PaymentMethodDisplayShared scaffold and refactor 3 variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay.tsx`, `frontend/desktop/components/ui/display/paymentMethod/paymentMethodDisplay.desktop.tsx`, `frontend/mobile/components/ui/display/paymentMethod/paymentMethodDisplay.mobile.tsx` (1110 tokens / 172 lines common↔desktop, 788 tokens / 132 lines common↔mobile)
+  - Create `frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplayShared.tsx` with slot props
+  - Refactor all 3 variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.3.QL **Quality Loop**: Per-file verification on all 4 files
+  - [ ] 1.3.OUT **Outcome File**: Write `outcome/1.3-payment-method-display-shared-outcome.md`
+
+- [ ] 1.4 Create UserPaymentMethodAutocompleteShared scaffold and refactor 3 variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/input/userPaymentMethodSelect/UserPaymentMethodAutocomplete.tsx`, `frontend/desktop/components/ui/input/userPaymentMethodSelect/userPaymentMethodAutocomplete.desktop.tsx`, `frontend/mobile/components/ui/input/userPaymentMethodSelect/userPaymentMethodAutocomplete.mobile.tsx` (1047 tokens / 190 lines common↔mobile, 1043 tokens / 190 lines common↔desktop)
+  - Create `frontend/common/components/ui/input/userPaymentMethodSelect/UserPaymentMethodAutocompleteShared.tsx` with slot props
+  - Refactor all 3 variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.4.QL **Quality Loop**: Per-file verification on all 4 files
+  - [ ] 1.4.OUT **Outcome File**: Write `outcome/1.4-user-payment-method-autocomplete-shared-outcome.md`
+
+- [ ] 1.5 Create EditableTypographyShared scaffold and refactor 3 variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/input/editableTypography/EditableTypography.tsx`, `frontend/desktop/components/ui/input/editableTypography/editableTypography.desktop.tsx`, `frontend/mobile/components/ui/input/editableTypography/editableTypography.mobile.tsx` (974 tokens / 194 lines common↔desktop, 854 tokens / 165 lines common↔mobile)
+  - Create `frontend/common/components/ui/input/editableTypography/EditableTypographyShared.tsx` with slot props
+  - Refactor all 3 variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.5.QL **Quality Loop**: Per-file verification on all 4 files
+  - [ ] 1.5.OUT **Outcome File**: Write `outcome/1.5-editable-typography-shared-outcome.md`
+
+- [ ] 1.6 Create TagInputShared scaffold and refactor 3 variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/input/tagInput/TagInput.tsx`, `frontend/desktop/components/ui/input/tagInput/tagInput.desktop.tsx`, `frontend/mobile/components/ui/input/tagInput/tagInput.mobile.tsx` (946 tokens / 149 lines desktop↔mobile, 738 tokens / 109 lines common↔desktop)
+  - **NOTE:** Predecessor plan already deleted `common/components/ui/input/tagInput/useTagInputEditing.ts` (task 1.3) — verify no stale references remain
+  - Create `frontend/common/components/ui/input/tagInput/TagInputShared.tsx` with slot props
+  - Refactor all 3 variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.6.QL **Quality Loop**: Per-file verification on all 4 files
+  - [ ] 1.6.OUT **Outcome File**: Write `outcome/1.6-tag-input-shared-outcome.md`
+
+- [ ] 1.7 Create CountryAutocompleteShared scaffold and refactor 3 variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/input/countrySelect/CountryAutocomplete.tsx`, `frontend/desktop/components/ui/input/countrySelect/countryAutocomplete.desktop.tsx`, `frontend/mobile/components/ui/input/countrySelect/countryAutocomplete.mobile.tsx` (776 tokens / 155 lines common↔desktop, 770 tokens / 157 lines common↔mobile)
+  - Create `frontend/common/components/ui/input/countrySelect/CountryAutocompleteShared.tsx` with slot props
+  - Refactor all 3 variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.7.QL **Quality Loop**: Per-file verification on all 4 files
+  - [ ] 1.7.OUT **Outcome File**: Write `outcome/1.7-country-autocomplete-shared-outcome.md`
+
+- [ ] 1.8 Create MeetingJoinActionShared scaffold and refactor 2 variants (common + desktop)
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/display/meetingConfig/MeetingJoinAction.tsx`, `frontend/desktop/components/ui/display/meetingConfig/MeetingJoinAction.desktop.tsx` (915 tokens / 137 lines common↔desktop — only 2 variants, no mobile)
+  - Create `frontend/common/components/ui/display/meetingConfig/MeetingJoinActionShared.tsx` with slot props
+  - Refactor both variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.8.QL **Quality Loop**: Per-file verification on all 3 files (scaffold + 2 variants)
+  - [ ] 1.8.OUT **Outcome File**: Write `outcome/1.8-meeting-join-action-shared-outcome.md`
+
+- [ ] 1.9 Create MeetingConfigDisplayShared scaffold and refactor 2 variants (common + desktop)
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay.tsx`, `frontend/desktop/components/ui/display/meetingConfig/MeetingConfigDisplay.desktop.tsx` (747 tokens / 109 lines common↔desktop)
+  - Create `frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplayShared.tsx` with slot props
+  - Refactor both variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.9.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 1.9.OUT **Outcome File**: Write `outcome/1.9-meeting-config-display-shared-outcome.md`
+
+- [ ] 1.10 Create PaymentMethodAutocompleteShared scaffold and refactor 2 variants (common + desktop)
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - **NOTE:** Predecessor plan already created `PaymentMethodTypeFieldsShared.tsx` (task 2.11-2.13) — verify this is a different component (autocomplete vs type fields)
+  - Analyze `frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete.tsx`, `frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodAutocomplete.desktop.tsx` (702 tokens / 133 lines common↔desktop)
+  - Create `frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodAutocompleteShared.tsx` with slot props
+  - Refactor both variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.10.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 1.10.OUT **Outcome File**: Write `outcome/1.10-payment-method-autocomplete-shared-outcome.md`
+
+- [ ] 1.11 Create PaginationControlsShared scaffold and refactor 2 variants (common + mobile)
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/filter/PaginationControls.tsx`, `frontend/mobile/components/ui/filter/paginationControls.mobile.tsx` (719 tokens / 120 lines common↔mobile — only 2 variants, no desktop)
+  - Create `frontend/common/components/ui/filter/PaginationControlsShared.tsx` with slot props
+  - Refactor both variants to consume scaffold
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 1.11.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 1.11.OUT **Outcome File**: Write `outcome/1.11-pagination-controls-shared-outcome.md`
+
+- [ ] 1.12 Phase 1 verification — run `bun check:duplicates` and `bun run test:ui:components`
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Run `bun check:duplicates` — confirm all 11 UI component clusters eliminated (expected reduction: ~10,000 tokens)
+  - Run `bun run test:ui:components` — verify all component tests pass
+  - Run Storybook for the 11 components — verify visual parity
+  - **CROSS-TIER IMPORT CHECK:** Run lint on all modified files to verify no cross-tier imports
+  - _Requirements: REQ-1, REQ-6, REQ-8_
+
+  - [ ] 1.12.QL **Quality Loop**: Per-file verification on any test files modified
+  - [ ] 1.12.OUT **Outcome File**: Write `outcome/1.12-phase1-verification-outcome.md`
+
+### Phase 1.5: Plan Review Gate (MANDATORY)
+
+- [ ] 1.5 Review complete plan using @plan-review skill
+  - **Input files:** `requirements.md`, `design.md`, `tasks.md`
+  - **Invoke:** `@plan-review` skill on complete plan
+  - **Expected output:** "Plan passes all AGENTS.md rules" OR structured violation list
+  - If violations found:
+    - Fix all reported violations in plan files
+    - Re-run `@plan-review`
+    - Repeat until zero violations
+  - Write outcome: `.ai/plans/duplications-phase2/outcome/plan-review-R1.md`
+  - Mark complete ONLY when plan passes all checks
+  - _Requirements: REQ-4_
+
+  - [ ] 1.5.QL **Quality Loop**: N/A (plan files, no code modifications)
+  - [ ] 1.5.OUT **Outcome File**: Write `outcome/plan-review-R1.md`
+
+### Phase 2: Desktop↔Mobile View Component Pairs (Medium Risk, High Impact)
+
+**Pattern**: For each desktop↔mobile view component pair, create a `*Shared.tsx` scaffold in a `__shared__/` subdirectory at the parent level, then refactor both variants to consume the scaffold.
+
+**Reference**: Predecessor plan's `__shared__/` pattern (e.g., `common/views/dashboard/admin/__shared__/useAdminDashboard.ts`).
+
+**Aggressive consolidation**: Per `REQ-11`, extract ALL shared logic to the scaffold. Keep only genuinely different behavior in tier variants. Update tests as needed.
+
+- [ ] 2.1 Create localizedStringDrawerShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/.../localizedStringDrawer.desktop.tsx` and `frontend/mobile/views/dashboard/.../localizedStringDrawer.mobile.tsx` (1377 tokens / 218 lines — top frontend clone cluster)
+  - **VERIFY FIRST:** Locate the exact paths via `find frontend -name "localizedStringDrawer*"`
+  - Create `frontend/views/dashboard/.../__shared__/localizedStringDrawerShared.tsx` with slot props
+  - Refactor desktop and mobile variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION:** Extract shared logic (drawer state, field rendering, save/cancel handlers) to scaffold; keep tier-specific layout in variants
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.1.QL **Quality Loop**: Per-file verification on all 3 files (scaffold + 2 variants)
+  - [ ] 2.1.OUT **Outcome File**: Write `outcome/2.1-localized-string-drawer-shared-outcome.md`
+    - Include "Behavioral Changes" section if consolidation changed behavior
+
+- [ ] 2.2 Create managementControlsCardShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/teachers/reassignment/components/managementControlsCard.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/reassignment/components/managementControlsCard.mobile.tsx` (1264 tokens / 198 lines)
+  - Create `frontend/views/dashboard/teachers/reassignment/components/__shared__/managementControlsCardShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.2.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.2.OUT **Outcome File**: Write `outcome/2.2-management-controls-card-shared-outcome.md`
+
+- [ ] 2.3 Create meetingProviderFormShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/admin/meeting-providers/form/meetingProviderForm.desktop.tsx` and `frontend/mobile/views/dashboard/admin/meeting-providers/form/meetingProviderForm.mobile.tsx` (1134 tokens / 183 lines)
+  - Create `frontend/views/dashboard/admin/meeting-providers/form/__shared__/meetingProviderFormShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.3.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.3.OUT **Outcome File**: Write `outcome/2.3-meeting-provider-form-shared-outcome.md`
+
+- [ ] 2.4 Create studentStatusHeaderShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/students/status/components/studentStatusHeader.desktop.tsx` and `frontend/mobile/views/dashboard/students/status/components/studentStatusHeader.mobile.tsx` (1062 tokens / 167 lines)
+  - Create `frontend/views/dashboard/students/status/components/__shared__/studentStatusHeaderShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.4.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.4.OUT **Outcome File**: Write `outcome/2.4-student-status-header-shared-outcome.md`
+
+- [ ] 2.5 Create complaintFormFieldsShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/complaints/components/complaintFormFields.desktop.tsx` and `frontend/mobile/views/dashboard/complaints/components/complaintFormFields.mobile.tsx` (1055 tokens / 205 lines)
+  - Create `frontend/views/dashboard/complaints/components/__shared__/complaintFormFieldsShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.5.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.5.OUT **Outcome File**: Write `outcome/2.5-complaint-form-fields-shared-outcome.md`
+
+- [ ] 2.6 Create complaintQueueCardShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/complaints/components/complaintQueueCard.desktop.tsx` and `frontend/mobile/views/dashboard/complaints/components/complaintQueueCard.mobile.tsx` (1053 tokens / 186 lines)
+  - Create `frontend/views/dashboard/complaints/components/__shared__/complaintQueueCardShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.6.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.6.OUT **Outcome File**: Write `outcome/2.6-complaint-queue-card-shared-outcome.md`
+
+- [ ] 2.7 Create jumpToDateHeaderShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.mobile.tsx` (1009 tokens / 145 lines)
+  - Create `frontend/views/dashboard/teachers/futureSchedule/components/__shared__/jumpToDateHeaderShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.7.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.7.OUT **Outcome File**: Write `outcome/2.7-jump-to-date-header-shared-outcome.md`
+
+- [ ] 2.8 Create futureClassCardShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/teachers/futureSchedule/components/futureClassCard.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/futureSchedule/components/futureClassCard.mobile.tsx` (977 tokens / 157 lines)
+  - Create `frontend/views/dashboard/teachers/futureSchedule/components/__shared__/futureClassCardShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.8.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.8.OUT **Outcome File**: Write `outcome/2.8-future-class-card-shared-outcome.md`
+
+- [ ] 2.9 Create miniCalendarShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/teachers/futureSchedule/components/miniCalendar.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/futureSchedule/components/miniCalendar.mobile.tsx` (943 tokens / 148 lines)
+  - Create `frontend/views/dashboard/teachers/futureSchedule/components/__shared__/miniCalendarShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.9.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.9.OUT **Outcome File**: Write `outcome/2.9-mini-calendar-shared-outcome.md`
+
+- [ ] 2.10 Create studentInformationSectionShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/students/quota/components/studentInformationSection.desktop.tsx` and `frontend/mobile/views/dashboard/students/quota/components/studentInformationSection.mobile.tsx` (923 tokens / 160 lines)
+  - Create `frontend/views/dashboard/students/quota/components/__shared__/studentInformationSectionShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.10.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.10.OUT **Outcome File**: Write `outcome/2.10-student-information-section-shared-outcome.md`
+
+- [ ] 2.11 Create searchScheduleFilterDrawerShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/search-schedule/searchScheduleFilterDrawer.desktop.tsx` and `frontend/mobile/views/dashboard/search-schedule/searchScheduleFilterDrawer.mobile.tsx` (899 tokens / 151 lines)
+  - Create `frontend/views/dashboard/search-schedule/__shared__/searchScheduleFilterDrawerShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION:** Filter logic, state management, and data fetching go to scaffold; layout (sidebar vs bottom sheet) stays in variants
+  - **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.11.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.11.OUT **Outcome File**: Write `outcome/2.11-search-schedule-filter-drawer-shared-outcome.md`
+
+- [ ] 2.12 Create meetingIntegrationsTabShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/settings/tabs/meetingIntegrations/meetingIntegrationsTab.desktop.tsx` and `frontend/mobile/views/dashboard/settings/tabs/meetingIntegrations/meetingIntegrationsTab.mobile.tsx` (829 tokens / 137 lines)
+  - Create `frontend/views/dashboard/settings/tabs/meetingIntegrations/__shared__/meetingIntegrationsTabShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.12.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.12.OUT **Outcome File**: Write `outcome/2.12-meeting-integrations-tab-shared-outcome.md`
+
+- [ ] 2.13 Create courseDetailsSectionShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/students/quota/components/courseDetailsSection.desktop.tsx` and `frontend/mobile/views/dashboard/students/quota/components/courseDetailsSection.mobile.tsx` (797 tokens / 150 lines)
+  - Create `frontend/views/dashboard/students/quota/components/__shared__/courseDetailsSectionShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.13.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.13.OUT **Outcome File**: Write `outcome/2.13-course-details-section-shared-outcome.md`
+
+- [ ] 2.14 Create weeklyAvailabilityGridShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.mobile.tsx` (796 tokens / 154 lines)
+  - Create `frontend/views/dashboard/teachers/availability/components/__shared__/weeklyAvailabilityGridShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.14.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.14.OUT **Outcome File**: Write `outcome/2.14-weekly-availability-grid-shared-outcome.md`
+
+- [ ] 2.15 Create teacherAvailabilityMonthDrawerShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.desktop.tsx` and `frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.mobile.tsx` (793 tokens / 123 lines)
+  - Create `frontend/views/dashboard/search-schedule/components/__shared__/teacherAvailabilityMonthDrawerShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.15.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.15.OUT **Outcome File**: Write `outcome/2.15-teacher-availability-month-drawer-shared-outcome.md`
+
+- [ ] 2.16 Create parentProfileShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/profile/parent/parentProfile.desktop.tsx` and `frontend/mobile/views/dashboard/profile/parent/parentProfile.mobile.tsx` (777 tokens / 149 lines)
+  - Create `frontend/views/dashboard/profile/parent/__shared__/parentProfileShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.16.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.16.OUT **Outcome File**: Write `outcome/2.16-parent-profile-shared-outcome.md`
+
+- [ ] 2.17 Create suspensionAnalyticsShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/classes/status/tracking/components/suspensionAnalytics.desktop.tsx` and `frontend/mobile/views/dashboard/classes/status/tracking/components/suspensionAnalytics.mobile.tsx` (753 tokens / 110 lines)
+  - Create `frontend/views/dashboard/classes/status/tracking/components/__shared__/suspensionAnalyticsShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.17.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.17.OUT **Outcome File**: Write `outcome/2.17-suspension-analytics-shared-outcome.md`
+
+- [ ] 2.18 Create staffProfileShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - **NOTE:** Predecessor plan already deleted `common/views/dashboard/profile/staff/StaffProfileContainer.tsx` (task 1.4) — verify no stale references
+  - Analyze `frontend/desktop/views/dashboard/profile/staff/staffProfile.desktop.tsx` and `frontend/mobile/views/dashboard/profile/staff/staffProfile.mobile.tsx` (750 tokens / 172 lines)
+  - Create `frontend/views/dashboard/profile/staff/__shared__/staffProfileShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.18.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.18.OUT **Outcome File**: Write `outcome/2.18-staff-profile-shared-outcome.md`
+
+- [ ] 2.19 Create editCategoryDialogShared scaffold and refactor desktop + mobile variants
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/desktop/views/dashboard/subjects/home/components/editCategoryDialog.desktop.tsx` and `frontend/mobile/views/dashboard/subjects/home/components/editCategoryDialog.mobile.tsx` (735 tokens / 153 lines)
+  - Create `frontend/views/dashboard/subjects/home/components/__shared__/editCategoryDialogShared.tsx`
+  - Refactor both variants to consume scaffold
+  - **AGGRESSIVE CONSOLIDATION** + **MUI v9 COMPLIANCE** + **CROSS-TIER IMPORT CHECK**
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
+
+  - [ ] 2.19.QL **Quality Loop**: Per-file verification on all 3 files
+  - [ ] 2.19.OUT **Outcome File**: Write `outcome/2.19-edit-category-dialog-shared-outcome.md`
+
+- [ ] 2.20 Phase 2 verification — run `bun check:duplicates` and `bun run test:ui:components`
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Run `bun check:duplicates` — confirm all 19 view component clusters eliminated (expected reduction: ~17,500 tokens)
+  - Run `bun run test:ui:components` — verify all component tests pass (with updates for aggressive consolidation)
+  - Run Storybook for the 19 components — verify visual parity
+  - **CROSS-TIER IMPORT CHECK:** Run lint on all modified files
+  - _Requirements: REQ-2, REQ-6, REQ-8_
+
+  - [ ] 2.20.QL **Quality Loop**: Per-file verification on any test files modified
+  - [ ] 2.20.OUT **Outcome File**: Write `outcome/2.20-phase2-verification-outcome.md`
+
+### Phase 2.5: Mid-Point Review Gate (CONDITIONAL — Plan has >15 tasks AND distinct frontend phases)
+
+- [ ] 2.5 Frontend architecture review checkpoint
+  - **Scope:** All `frontend/` files modified in Phases 1-2 (scaffolds + variants)
+  - **Dispatch review subagents in parallel:**
+    - `review-frontend` (scope: all new/modified `frontend/` files — MUI v9 compliance, Apollo hook patterns, Zustand store patterns, theme compliance, component patterns)
+    - `review-types` (scope: all new/modified type files — canonical type naming, no duplicate type definitions, import path consistency, enum usage)
+  - **Aggregate findings:** Filter to frontend-specific issues only
+  - **Fix phase:** Dispatch fix subagents per file cluster using `.agents/instructions/frontend.instructions.md` and `.agents/instructions/mobile-desktop.instructions.md` as guardrails
+  - **Verify:** Run `scripts/health/sub-loop.ts` per fixed file
+  - **Re-review:** Dispatch review subagents again until zero frontend-specific findings
+  - Write outcome: `.ai/plans/duplications-phase2/outcome/midpoint-review-R1.md`
+  - Mark complete ONLY when frontend review is clean
+  - _Requirements: REQ-5_
+
+  - [ ] 2.5.QL **Quality Loop**: N/A (review task — no code modifications during review itself)
+  - [ ] 2.5.OUT **Outcome File**: Write `outcome/midpoint-review-R1.md`
+
+### Phase 3: Complex Consolidation — Within-Common Duplications (Higher Risk)
+
+- [ ] 3.1 Complete CatalogImageUpload partial extraction
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/components/ui/input/catalogImageUpload/CatalogImageUpload.tsx` ↔ `frontend/common/components/ui/input/catalogImageUpload/catalogImageUploadShared.tsx` (1083 tokens / 209 lines — 7 clones — partial extraction was started but not completed)
+  - **VERIFY FIRST:** Inspect `catalogImageUploadShared.tsx` to understand what was already extracted
+  - Complete the extraction: refactor `CatalogImageUpload.tsx` to fully consume `catalogImageUploadShared.tsx`
+  - Also address the `common↔desktop` duplication (762 tokens / 128 lines): create or update scaffold for the desktop variant
+  - Run `bun check:duplicates` to confirm clone elimination
+  - _Requirements: REQ-3, REQ-6, REQ-7, REQ-12, REQ-13_
+
+  - [ ] 3.1.QL **Quality Loop**: Per-file verification on `CatalogImageUpload.tsx`, `catalogImageUploadShared.tsx`, `catalogImageUpload.desktop.tsx`
+  - [ ] 3.1.OUT **Outcome File**: Write `outcome/3.1-catalog-image-upload-completion-outcome.md`
+
+- [ ] 3.2 Consolidate excel-export utilities (parent-directory-export ↔ tracking-export)
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Analyze `frontend/common/utils/excel-export/parent-directory-export.ts` ↔ `frontend/common/utils/excel-export/tracking-export.ts` (810 tokens / 121 lines — 4 clones)
+  - **VERIFY FIRST:** Determine if the duplication is intentional (different export schemas) or extractable (shared export logic)
+  - IF extractable: Create `frontend/common/utils/excel-export/shared-export-logic.ts` with shared logic; refactor both files to consume it
+  - IF intentional: Document distinction in both files AND add `.jscpd.json` ignore pattern with justification in `deferred-items.md`
+  - Run `bun check:duplicates` to confirm elimination or documented exclusion
+  - _Requirements: REQ-3, REQ-6, REQ-7_
+
+  - [ ] 3.2.QL **Quality Loop**: Per-file verification on modified files
+  - [ ] 3.2.OUT **Outcome File**: Write `outcome/3.2-excel-export-consolidation-outcome.md`
+
+- [ ] 3.3 Investigate and consolidate top 10 within-common duplications
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Run `bun check:duplicates` and identify the top 10 remaining `common↔common` clone clusters (excluding CatalogImageUpload from 3.1 and excel-export from 3.2)
+  - For each cluster:
+    - Investigate whether duplication is extractable or intentional
+    - IF extractable: Consolidate using canonical-source-with-barrel-import pattern
+    - IF intentional: Document and add `.jscpd.json` ignore pattern
+  - Run `bun check:duplicates` to confirm eliminations or documented exclusions
+  - _Requirements: REQ-3, REQ-6, REQ-7_
+
+  - [ ] 3.3.QL **Quality Loop**: Per-file verification on all modified files
+  - [ ] 3.3.OUT **Outcome File**: Write `outcome/3.3-within-common-consolidation-outcome.md`
+    - Include table of all 10 clusters with disposition (eliminated / documented / deferred)
+
+- [ ] 3.4 Address remaining desktop↔desktop and mobile↔mobile duplications
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Run `bun check:duplicates` and identify the top 10 remaining `desktop↔desktop` (24 clusters, 4086 tokens) and `mobile↔mobile` (14 clusters, 2169 tokens) clone clusters
+  - For each cluster:
+    - Investigate whether duplication is extractable
+    - IF extractable: Consolidate using canonical-source pattern within the same tier
+    - IF intentional: Document and add `.jscpd.json` ignore pattern
+  - Run `bun check:duplicates` to confirm eliminations or documented exclusions
+  - _Requirements: REQ-3, REQ-6, REQ-7_
+
+  - [ ] 3.4.QL **Quality Loop**: Per-file verification on all modified files
+  - [ ] 3.4.OUT **Outcome File**: Write `outcome/3.4-within-tier-consolidation-outcome.md`
+
+### Phase 4: Final Verification & Knowledge Propagation
+
+- [ ] 4.1 Final jscpd verification
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Run `bun check:duplicates` — verify clone count is ≤323 (target: ≥500 of 718 frontend clones eliminated, ≥70% reduction per NFR-4)
+  - Document any remaining clones in `deferred-items.md` with justification
+  - _Requirements: REQ-8.1, NFR-4_
+
+  - [ ] 4.1.QL **Quality Loop**: N/A (verification only)
+  - [ ] 4.1.OUT **Outcome File**: Write `outcome/4.1-final-jscpd-verification-outcome.md`
+
+- [ ] 4.2 Run full quality gate
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Run `bun tsgo` — must be 0 errors (baseline was 0)
+  - Run `bun biome:check` — must be 0 warnings (baseline was 0)
+  - Run `bun run scripts/lint-service.ts --json --id final-check` — must be 0 errors for plan-modified files (4 pre-existing sonarjs errors are out-of-scope per NFR-3)
+  - If any stage fails, fix and re-run
+  - _Requirements: REQ-8.2, NFR-1, NFR-2, NFR-3_
+
+  - [ ] 4.2.QL **Quality Loop**: N/A (global gate)
+  - [ ] 4.2.OUT **Outcome File**: Write `outcome/4.2-quality-gate-outcome.md`
+
+- [ ] 4.3 Run full test suite (NO DEFERRAL — actually run all suites this time)
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Run `bun run build:test` (required before E2E — should succeed since tsgo is clean)
+  - Run `bun run test:db` — all pass
+  - Run `bun run test:services` — all pass
+  - Run `bun run test:integration` — all pass
+  - Run `bun run test:ui:components` — all pass (with updates for aggressive consolidation per REQ-11)
+  - Run `bun run test:ui:e2e` — all pass
+  - **NO DEFERRAL:** Unlike the predecessor plan's Task 4.3, this task SHALL actually run all test suites. The predecessor plan's deferral reason (tsgo errors blocking build:test) no longer applies.
+  - If any test fails, fix the failure (either the code or the test, per REQ-11) before proceeding
+  - _Requirements: REQ-8.3, REQ-11, NFR-5_
+
+  - [ ] 4.3.QL **Quality Loop**: N/A (test execution)
+  - [ ] 4.3.OUT **Outcome File**: Write `outcome/4.3-full-test-suite-outcome.md`
+    - Document: actual test results (pass/fail counts), any test updates made, behavioral changes verified
+
+- [ ] 4.4 Baseline comparison and deferred items enforcement
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Compare current error counts vs `/tmp/baseline-phase2-*.txt` — document new errors introduced (expected: 0 new tsgo, 0 new biome, 0 new lint for plan-modified files)
+  - Enforce deferred items resolution:
+    ```bash
+    grep -c "❌\|⚠️" .ai/plans/duplications-phase2/deferred-items.md
+    # Expected: 0
+    ```
+  - All deferred items MUST be ✅ Done with verification references
+  - _Requirements: REQ-8.4, REQ-10_
+
+  - [ ] 4.4.QL **Quality Loop**: N/A
+  - [ ] 4.4.OUT **Outcome File**: Write `outcome/4.4-baseline-comparison-outcome.md`
+
+- [ ] 4.5 Knowledge Propagation & Documentation (MANDATORY FINAL TASK)
+  - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
+  - Synthesize all learnings from outcome files
+  - **Update existing docs** (created by predecessor plan):
+    - `docs/frontend/ui-shared-scaffold-pattern.md` — add any new slot prop patterns discovered (e.g., view component scaffolds in `__shared__/` directories)
+    - `docs/frontend/duplication-elimination-patterns.md` — add patterns for: view component scaffold placement, within-common utility consolidation, partial extraction completion
+  - **Create new docs if needed** (only if patterns don't fit existing docs):
+    - `docs/frontend/view-component-scaffold-pattern.md` — IF the `__shared__/` directory pattern for view components warrants its own doc
+  - **Update layer AGENTS.md files** with new rules/patterns:
+    - `frontend/common/components/ui/AGENTS.md` — add reference to any new scaffold patterns
+    - `frontend/views/AGENTS.md` — add `__shared__/` directory convention for view component scaffolds
+    - `frontend/desktop/AGENTS.md` — add cross-tier import reminder (desktop variants import only from `common/` scaffolds or `views/.../__shared__/` scaffolds)
+    - `frontend/mobile/AGENTS.md` — same as desktop
+  - **Update `.agents/skills/` if patterns affect skills**:
+    - `.agents/skills/refactor-mobile-desktop/SKILL.md` — add view component scaffold pattern (Phase 2) as an extension of the UI component scaffold pattern (Phase 1)
+  - **Update `.agents/instructions/` if new conventions**:
+    - `.agents/instructions/frontend.instructions.md` — add `__shared__/` directory convention
+    - `.agents/instructions/mobile-desktop.instructions.md` — add cross-tier import rules for scaffolds
+  - **Update root `AGENTS.md`** Important References section if any new docs were created
+  - Run global check: `bun tsgo`, `bun biome:check`, `bun run scripts/lint-service.ts --json --id final-check` (0 errors, 0 warnings for plan-modified files; 4 pre-existing out-of-scope sonarjs errors acceptable)
+  - _Requirements: REQ-9_
+
+  - [ ] 4.5.QL **Quality Loop**: Per-file verification on all modified docs and AGENTS.md files
+  - [ ] 4.5.OUT **Outcome File**: Write `outcome/4.5-knowledge-propagation-outcome.md`
+  - Update progress: Mark task 4.5 as `[x]` in `tasks.md`
+
+---
+
+## Domain-to-Artifacts Mapping (Reference for Knowledge Propagation)
+
+| Plan Domain | Docs Subdir | AGENTS.md to Update | Skills to Update | Instructions to Update |
+|---|---|---|---|---|
+| Frontend components / views | `docs/frontend/` | `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/components/ui/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` (if exists) | `.agents/instructions/frontend.instructions.md` |
+| Frontend mobile/desktop | `docs/frontend/` | `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md` | `.agents/skills/refactor-mobile-desktop/SKILL.md` | `.agents/instructions/mobile-desktop.instructions.md` |
+
+---
+
+## Task Execution Checklist
+
+### Before Starting Each Task
+- [ ] Requirements and design documents are reviewed
+- [ ] Dependencies are identified and available
+- [ ] Development environment is set up
+- [ ] Task scope and acceptance criteria are clear
+- [ ] **ALL outcome files in `.ai/plans/duplications-phase2/outcome/` AND `../duplications/outcome/` have been read**
+
+### During Implementation
+- [ ] Code follows established patterns and standards (especially `docs/frontend/ui-shared-scaffold-pattern.md`)
+- [ ] Existing tests are updated when aggressive consolidation changes behavior (per REQ-11)
+- [ ] Error handling and edge cases are considered
+- [ ] Code is documented with clear comments
+
+### Before Completion Each Task
+- [ ] All acceptance criteria are met
+- [ ] Tests pass and coverage is adequate
+- [ ] **Quality Loop passed** (tsgo + biome:check + lint queue on modified files)
+- [ ] Integration with existing code is verified
+- [ ] Cross-tier import check passed (no desktop↔mobile or common↔tier-specific imports)
+
+### Task Completion
+- [ ] Feature works as specified in requirements
+- [ ] No regressions in existing functionality (or documented behavioral changes per REQ-11)
+- [ ] Documentation is updated if needed
+- [ ] Task is marked as complete in `tasks.md` (`[ ]` -> `[x]`)
+- [ ] Outcome file written to `.ai/plans/duplications-phase2/outcome/<task-id>-outcome.md`
+- [ ] Any deferred items logged in `deferred-items.md`
