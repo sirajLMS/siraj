@@ -1,9 +1,29 @@
 import { StudentRepository } from "@/backend/db";
 import { StudentHistoryRepository } from "@/backend/db/repo/students/student-history.repository";
-import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/backend/enum";
+import { AppPermission, ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { ErrorsLabels } from "@/shared/locale";
+
+const CLASS_EXECUTION_STATES: readonly string[] = Object.values(ClassExecutionState);
+const CLASS_OUTCOMES: readonly string[] = Object.values(ClassOutcome);
+
+function isClassExecutionState(value: string): value is ClassExecutionState {
+  return CLASS_EXECUTION_STATES.includes(value);
+}
+
+function isClassOutcome(value: string): value is ClassOutcome {
+  return CLASS_OUTCOMES.includes(value);
+}
+
+function toClassExecutionState(value: string): ClassExecutionState {
+  return isClassExecutionState(value) ? value : ClassExecutionState.NOT_ACTIVATED;
+}
+
+function toClassOutcome(value: string | null): ClassOutcome | null {
+  if (value === null) return null;
+  return isClassOutcome(value) ? value : null;
+}
 
 export namespace StudentHistoryService {
   async function assertCanViewStudentHistory(userId: string, studentId: string, tErrors: ErrorsLabels): Promise<void> {
@@ -51,8 +71,8 @@ export namespace StudentHistoryService {
       rawSessions.map(async session => {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id, tErrors);
         return Object.assign(session, {
-          status: session.status as ClassExecutionState,
-          outcome: (session.outcome as ClassOutcome | null) ?? null,
+          status: toClassExecutionState(session.status),
+          outcome: toClassOutcome(session.outcome ?? null),
           meetingJoinUrl: effectiveMeeting.joinUrl,
           effectiveMeeting,
         });
@@ -86,8 +106,8 @@ export namespace StudentHistoryService {
 
     return {
       ...detail,
-      executionState: detail.executionState as ClassExecutionState,
-      outcome: detail.outcome as ClassOutcome | null,
+      executionState: toClassExecutionState(detail.executionState),
+      outcome: toClassOutcome(detail.outcome),
       meetingJoinUrl: effectiveMeeting.joinUrl,
       effectiveMeeting,
     };

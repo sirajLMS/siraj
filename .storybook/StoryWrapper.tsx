@@ -31,6 +31,18 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 });
 
+function isLocale(value: unknown): value is "ar" | "en" {
+  return value === "ar" || value === "en";
+}
+
+function isViewport(value: unknown): value is "mobile" | "tablet" | "desktop" {
+  return value === "mobile" || value === "tablet" || value === "desktop";
+}
+
+function isPaletteMode(value: unknown): value is PaletteMode {
+  return value === "light" || value === "dark";
+}
+
 /**
  * Syncs Storybook's `theme` global to MUI's `useColorScheme()` and the DOM
  * attributes that scope CSS variable palettes (`data-theme`, `data-mui-color-scheme`).
@@ -65,10 +77,10 @@ function StorybookColorSchemeBridge({
 }
 
 export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: StoryContext }) => {
-  const locale = ((context.globals.locale as string | undefined) ?? "ar") as "ar" | "en";
-  const rawTheme = context.globals.theme;
-  const themeMode: PaletteMode = rawTheme === "light" || rawTheme === "dark" ? rawTheme : "dark";
-  const viewport = (context.globals.viewport as "mobile" | "tablet" | "desktop" | undefined) ?? "desktop";
+  const globals = context.globals as Record<string, unknown>;
+  const locale = isLocale(globals.locale) ? globals.locale : "ar";
+  const themeMode: PaletteMode = isPaletteMode(globals.theme) ? globals.theme : "dark";
+  const viewport = isViewport(globals.viewport) ? globals.viewport : "desktop";
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
 
   // CSS-variables theme matches the App Router provider; mode toggles via useColorScheme.

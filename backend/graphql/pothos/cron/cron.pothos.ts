@@ -187,6 +187,13 @@ const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput", {
   }),
 });
 
+// ─── Type Guards ──────────────────────────────────────────────────────────────
+
+function isRecordOrNull(value: unknown): value is Record<string, unknown> | null {
+  if (value === null) return true;
+  return typeof value === "object" && !Array.isArray(value);
+}
+
 // ─── Error Handler ────────────────────────────────────────────────────────────
 
 function handleNotFoundError(result: unknown, id: string, tErrors: ErrorsLabels): asserts result {
@@ -295,7 +302,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         description: args.input.description ?? null,
         cronExpression: args.input.cronExpression,
         jobKind: args.input.jobKind,
-        payload: (args.input.payload as Record<string, unknown> | null) ?? null,
+        payload: isRecordOrNull(args.input.payload) ? args.input.payload : null,
         timezone: args.input.timezone ?? IanaTimezone.UTC,
         concurrencyPolicy: args.input.concurrencyPolicy ?? CronConcurrencyPolicy.ALLOW,
         maxRetries: args.input.maxRetries ?? 3,
@@ -320,7 +327,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         description: args.input.description ?? undefined,
         cronExpression: args.input.cronExpression ?? undefined,
         jobKind: args.input.jobKind ?? undefined,
-        payload: (args.input.payload as Record<string, unknown> | null) ?? undefined,
+        payload: isRecordOrNull(args.input.payload) ? args.input.payload : undefined,
         timezone: args.input.timezone ?? undefined,
         concurrencyPolicy: args.input.concurrencyPolicy ?? undefined,
         maxRetries: args.input.maxRetries ?? undefined,
@@ -378,7 +385,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         {
           id: args.input.id,
           source: CronTriggerSource.MANUAL,
-          payload: args.input.payload as Record<string, unknown> | null,
+          payload: isRecordOrNull(args.input.payload) ? args.input.payload : null,
         },
         ctx.locale
       );

@@ -4,6 +4,17 @@ import type { ICacheService } from "@/backend/services/cache/ICacheService";
 import { getRedisService } from "@/backend/services/redis";
 import type { CacheStats } from "@/backend/services/shared/CacheInterface";
 
+const DBSIZE_KEY = "dbsize";
+const PROVIDER_NAME_KEY = "providerName";
+
+function hasDbsize(redis: object): redis is { dbsize: () => Promise<number> } {
+  return DBSIZE_KEY in redis && typeof redis[DBSIZE_KEY] === "function";
+}
+
+function hasProviderName(redis: object): redis is { providerName: () => string } {
+  return PROVIDER_NAME_KEY in redis && typeof redis[PROVIDER_NAME_KEY] === "function";
+}
+
 /**
  * Redis Cache Adapter
  * Wrapper around existing IRedisService to match ICacheService interface
@@ -99,11 +110,11 @@ export class RedisCacheAdapter implements ICacheService {
       const redis = await getRedisService();
       let size = 0;
       let providerName = "redis";
-      if ("dbsize" in redis && typeof (redis as { dbsize?: () => Promise<number> }).dbsize === "function") {
-        size = await (redis as { dbsize: () => Promise<number> }).dbsize();
+      if (hasDbsize(redis)) {
+        size = await redis.dbsize();
       }
-      if ("providerName" in redis && typeof (redis as { providerName?: () => string }).providerName === "function") {
-        providerName = (redis as { providerName: () => string }).providerName();
+      if (hasProviderName(redis)) {
+        providerName = redis.providerName();
       }
       return {
         provider: providerName,

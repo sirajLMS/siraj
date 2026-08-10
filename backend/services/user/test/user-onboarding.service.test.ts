@@ -37,7 +37,9 @@ function buildCreateUserOptions<TExtension>(
       password: generateTestPassword(),
     },
     groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
-    createExtension: async () => ({ id: "fake", status: "ACTIVATED" }) as TExtension,
+    createExtension: async () => {
+      throw new Error("createExtension must be overridden in tests that reach extension creation");
+    },
     tErrors,
     logTag: "Test",
     ...overrides,

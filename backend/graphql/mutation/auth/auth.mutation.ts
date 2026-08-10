@@ -3,7 +3,6 @@ import { GraphQLError } from "graphql";
 import { cookies, headers } from "next/headers";
 import { RateLimitRepository, SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { AccountStatus } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
@@ -65,9 +64,14 @@ async function resolveUserFromRefreshToken(
   return { session, user };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function parseSessionPayload(payload: string): Record<string, unknown> | null {
   try {
-    return JSON.parse(payload) as Record<string, unknown>;
+    const parsed: unknown = JSON.parse(payload);
+    return isRecord(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -234,7 +238,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         });
       }
 
-      if (user.status === AccountStatus.DEACTIVATED) {
+      if (user.status === "DEACTIVATED") {
         throw new GraphQLError(tErrors.auth.accountDeactivated, {
           // ← compile-time ✅
           extensions: { code: "ACCOUNT_DEACTIVATED" },
@@ -304,7 +308,7 @@ gqlSchemaBuilder.mutationFields(t => ({
           user: result.user,
         };
       } catch (error) {
-        const err = error as Error;
+        const err = error instanceof Error ? error : new Error(String(error));
         logger.error("Demo login failed", { error: err });
         throw new GraphQLError(tErrors.auth.demoLoginFailed, {
           // ← compile-time ✅

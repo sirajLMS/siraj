@@ -7,6 +7,22 @@ import { SuggestionStatus } from "@/backend/enum";
 import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmitInput } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 
+function isSuggestionStatus(value: string): value is SuggestionStatus {
+  return (Object.values(SuggestionStatus) as readonly string[]).includes(value);
+}
+
+const commonSuggestionColumns = {
+  parentName: users.name,
+  submitterName: suggestions.submitterName,
+  body: suggestions.body,
+  status: suggestions.status,
+  adminResponse: suggestions.adminResponse,
+  duplicateOfId: suggestions.duplicateOfId,
+  reviewedByUserId: suggestions.reviewedByUserId,
+  reviewedAt: suggestions.reviewedAt,
+  createdAt: suggestions.createdAt,
+};
+
 export namespace SuggestionRepository {
   export type SuggestionInsertInput = {
     parentId: string;
@@ -132,8 +148,8 @@ export namespace SuggestionRepository {
 
     const conditions = [isNull(suggestions.deletedAt)];
 
-    if (options.status) {
-      conditions.push(eq(suggestions.status, options.status as SuggestionStatus));
+    if (options.status && isSuggestionStatus(options.status)) {
+      conditions.push(eq(suggestions.status, options.status));
     }
 
     if (options.search) {
@@ -147,18 +163,10 @@ export namespace SuggestionRepository {
         id: suggestions.id,
         parentId: suggestions.parentId,
         parentUserId: parents.userId,
-        parentName: users.name,
-        submitterName: suggestions.submitterName,
-        body: suggestions.body,
-        status: suggestions.status,
-        adminResponse: suggestions.adminResponse,
-        duplicateOfId: suggestions.duplicateOfId,
+        ...commonSuggestionColumns,
         duplicateOfBody: sql<string | null>`COALESCE(${dupSuggestions.body}, NULL)`,
         duplicateOfSubmitterName: sql<string | null>`COALESCE(${dupSuggestions.submitterName}, NULL)`,
-        reviewedByUserId: suggestions.reviewedByUserId,
         reviewerName: sql<string | null>`COALESCE(${users.name}, NULL)`,
-        reviewedAt: suggestions.reviewedAt,
-        createdAt: suggestions.createdAt,
       })
       .from(suggestions)
       .leftJoin(parents, eq(suggestions.parentId, parents.id))
@@ -213,19 +221,11 @@ export namespace SuggestionRepository {
       .select({
         id: suggestions.id,
         parentId: suggestions.parentId,
-        parentName: users.name,
-        submitterName: suggestions.submitterName,
-        body: suggestions.body,
-        status: suggestions.status,
-        adminResponse: suggestions.adminResponse,
-        duplicateOfId: suggestions.duplicateOfId,
+        ...commonSuggestionColumns,
         duplicateOfBody: sql<string | null>`COALESCE(${dupSuggestions.body}, NULL)`,
         duplicateOfSubmitterName: sql<string | null>`COALESCE(${dupSuggestions.submitterName}, NULL)`,
-        reviewedByUserId: suggestions.reviewedByUserId,
         reviewerName: sql<string | null>`COALESCE(${reviewerUsers.name}, NULL)`,
-        reviewedAt: suggestions.reviewedAt,
         emailSentAt: suggestions.emailSentAt,
-        createdAt: suggestions.createdAt,
       })
       .from(suggestions)
       .leftJoin(parents, eq(suggestions.parentId, parents.id))
@@ -362,12 +362,9 @@ export namespace SuggestionRepository {
       .where(isNull(suggestions.deletedAt))
       .groupBy(suggestions.status);
 
-    const pending =
-      statusCounts.find((r: { status: string; count: number }) => r.status === SuggestionStatus.PENDING)?.count ?? 0;
-    const reviewed =
-      statusCounts.find((r: { status: string; count: number }) => r.status === SuggestionStatus.REVIEWED)?.count ?? 0;
-    const duplicate =
-      statusCounts.find((r: { status: string; count: number }) => r.status === SuggestionStatus.DUPLICATE)?.count ?? 0;
+    const pending = statusCounts.find((r: { status: string; count: number }) => r.status === "PENDING")?.count ?? 0;
+    const reviewed = statusCounts.find((r: { status: string; count: number }) => r.status === "REVIEWED")?.count ?? 0;
+    const duplicate = statusCounts.find((r: { status: string; count: number }) => r.status === "DUPLICATE")?.count ?? 0;
 
     const [avgResult] = await q
       .select({
