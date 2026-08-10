@@ -43,14 +43,16 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
   await fs.mkdir(dest, { recursive: true, mode: 0o755 });
   const entries = await fs.readdir(src, { withFileTypes: true });
 
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
+  await Promise.all(
+    entries.map(async (entry) => {
+      const srcPath = path.join(src, entry.name);
+      const destPath = path.join(dest, entry.name);
 
-    if (entry.isDirectory()) {
-      await copyDirectory(srcPath, destPath);
-    } else {
-      await fs.copyFile(srcPath, destPath);
-    }
-  }
+      if (entry.isDirectory()) {
+        await copyDirectory(srcPath, destPath);
+      } else {
+        await fs.copyFile(srcPath, destPath);
+      }
+    })
+  );
 }
