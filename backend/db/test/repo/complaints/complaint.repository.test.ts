@@ -18,7 +18,10 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) {
+    return errorCaught;
+  }
+  return new Error(String(errorCaught));
 }
 
 function complaintTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
@@ -267,7 +270,7 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
 
     const unanswered = await ComplaintRepository.getComplaintQueue({ limit: 50, offset: 0, status: "UNANSWERED" }, tx);
 
-    expect(unanswered.complaints.every(r => r.status === "UNANSWERED")).toBeTrue();
+    expect(unanswered.complaints.every(r => r.status === ComplaintStatus.UNANSWERED)).toBeTrue();
     expect(unanswered.complaints.some(r => r.body === "Answered one")).toBeFalse();
   });
 
