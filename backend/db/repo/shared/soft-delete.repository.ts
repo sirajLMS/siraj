@@ -16,41 +16,23 @@ import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
-type SoftDeleteConfigEntry<TName extends Types.SoftDeletableTableName> = {
-  table: {
-    [K in TName]: Types.SoftDeletableEntityMap[K] extends infer _Row
-      ? (typeof SOFT_DELETE_TABLE_RECORDS)[K]
-      : never;
-  }[TName];
-  entityType: string;
+type SoftDeletableTable = {
+  id: { readonly id: unknown };
+  deletedAt: { readonly deletedAt: unknown };
+  updatedAt?: { readonly updatedAt: unknown };
+  $inferSelect: unknown;
 };
 
-const SOFT_DELETE_TABLE_RECORDS = {
-  users,
-  recurring_schedules: recurringSchedules,
-  class_instances: classInstances,
-  complaints,
-  learning_resources: learningResources,
-  invoices,
-  suggestions,
-  books,
+const SOFT_DELETE_ENTITY_TYPES = {
+  users: "USER",
+  recurring_schedules: "RECURRING_SCHEDULE",
+  class_instances: "CLASS_INSTANCE",
+  complaints: "COMPLAINT",
+  learning_resources: "LEARNING_RESOURCE",
+  invoices: "INVOICE",
+  suggestions: "SUGGESTION",
+  books: "BOOK",
 } as const;
-
-const SOFT_DELETE_TABLES: {
-  [K in Types.SoftDeletableTableName]: {
-    table: (typeof SOFT_DELETE_TABLE_RECORDS)[K];
-    entityType: string;
-  };
-} = {
-  users: { table: users, entityType: "USER" },
-  recurring_schedules: { table: recurringSchedules, entityType: "RECURRING_SCHEDULE" },
-  class_instances: { table: classInstances, entityType: "CLASS_INSTANCE" },
-  complaints: { table: complaints, entityType: "COMPLAINT" },
-  learning_resources: { table: learningResources, entityType: "LEARNING_RESOURCE" },
-  invoices: { table: invoices, entityType: "INVOICE" },
-  suggestions: { table: suggestions, entityType: "SUGGESTION" },
-  books: { table: books, entityType: "BOOK" },
-};
 
 export namespace SoftDeleteRepository {
   async function acquireSoftDeleteLock(

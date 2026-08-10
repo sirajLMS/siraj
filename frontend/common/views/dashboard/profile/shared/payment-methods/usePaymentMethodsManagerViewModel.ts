@@ -68,6 +68,12 @@ function buildMethodMap(
   return map;
 }
 
+function toPaymentMethodFragments(
+  methods: Array<UserPaymentMethodFieldsFragment> | null | undefined
+): readonly UserPaymentMethodFieldsFragment[] | undefined {
+  return methods ?? undefined;
+}
+
 const PAYMENT_METHOD_TYPE_TO_LABEL_KEY: Readonly<Record<string, keyof PaymentMethodTypeLabels>> = {
   MOBILE_WALLET: "mobileWallet",
   PAYMENT_LINK: "paymentLink",

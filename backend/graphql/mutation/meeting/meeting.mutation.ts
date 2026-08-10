@@ -97,7 +97,7 @@ function normalizeRequiredLocalizedString(
   };
 }
 
-function normalizeProviderCreateInput(input: {
+type ProviderInputShape = {
   readonly slug?: string | null;
   readonly name?: { readonly ar?: string | null; readonly en?: string | null } | null;
   readonly description?: { readonly ar?: string | null; readonly en?: string | null } | null;
@@ -114,7 +114,14 @@ function normalizeProviderCreateInput(input: {
   } | null;
   readonly providerKind?: string | null;
   readonly isActive?: boolean | null;
-}): MeetingProviderSubmitInput {
+};
+
+function resolveProviderKind(kind: string | null | undefined): MeetingProviderKind | undefined {
+  if (kind == null) return undefined;
+  return isMeetingProviderKind(kind) ? kind : "manual";
+}
+
+function normalizeProviderCreateInput(input: ProviderInputShape): MeetingProviderSubmitInput {
   const slug = input.slug;
   if (slug == null) {
     throw new Error("slug is required");
@@ -137,31 +144,14 @@ function normalizeProviderCreateInput(input: {
     urlExample: input.urlExample ?? null,
     logoUrl: input.logoUrl ?? null,
     fieldSchema: normalizeFieldSchema(fieldSchema),
-    ...(input.providerKind == null
+    ...(resolveProviderKind(input.providerKind) == null
       ? {}
-      : { providerKind: isMeetingProviderKind(input.providerKind) ? input.providerKind : "manual" }),
+      : { providerKind: resolveProviderKind(input.providerKind) }),
     isActive: input.isActive ?? undefined,
   };
 }
 
-function normalizeProviderUpdateInput(input: {
-  readonly slug?: string | null;
-  readonly name?: { readonly ar?: string | null; readonly en?: string | null } | null;
-  readonly description?: { readonly ar?: string | null; readonly en?: string | null } | null;
-  readonly instructions?: { readonly ar?: string | null; readonly en?: string | null } | null;
-  readonly urlAllowlist?: readonly string[] | null;
-  readonly urlExample?: string | null;
-  readonly logoUrl?: string | null;
-  readonly fieldSchema?: {
-    readonly requiresMeetingUrl: boolean;
-    readonly supportsAutoGeneration?: boolean | null;
-    readonly supportsUsername?: boolean | null;
-    readonly supportsPassword?: boolean | null;
-    readonly supportsTenantId?: boolean | null;
-  } | null;
-  readonly providerKind?: string | null;
-  readonly isActive?: boolean | null;
-}) {
+function normalizeProviderUpdateInput(input: ProviderInputShape) {
   return {
     ...(input.slug == null ? {} : { slug: input.slug }),
     ...(input.name == null ? {} : { name: normalizeRequiredLocalizedString(input.name) }),
@@ -171,9 +161,9 @@ function normalizeProviderUpdateInput(input: {
     ...(input.urlExample === undefined ? {} : { urlExample: input.urlExample }),
     ...(input.logoUrl === undefined ? {} : { logoUrl: input.logoUrl }),
     ...(input.fieldSchema == null ? {} : { fieldSchema: normalizeFieldSchema(input.fieldSchema) }),
-    ...(input.providerKind == null
+    ...(resolveProviderKind(input.providerKind) == null
       ? {}
-      : { providerKind: isMeetingProviderKind(input.providerKind) ? input.providerKind : "manual" }),
+      : { providerKind: resolveProviderKind(input.providerKind) }),
     ...(input.isActive == null ? {} : { isActive: input.isActive }),
   };
 }

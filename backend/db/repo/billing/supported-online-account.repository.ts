@@ -155,7 +155,9 @@ export namespace SupportedOnlineAccountRepository {
     const run = async (t: DBTransaction): Promise<SupportedOnlineAccountSelectType[]> => {
       const now = new Date();
 
-      const upsertOne = async (input: SupportedOnlineAccountInsertType): Promise<SupportedOnlineAccountSelectType | null> => {
+      const upsertOne = async (
+        input: SupportedOnlineAccountInsertType
+      ): Promise<SupportedOnlineAccountSelectType | null> => {
         const [row] = await t
           .insert(supportedOnlineAccounts)
           .values({
@@ -190,7 +192,10 @@ export namespace SupportedOnlineAccountRepository {
         return row ? toSelectType(row) : null;
       };
 
-      const upsertNext = async (index: number, acc: SupportedOnlineAccountSelectType[]): Promise<SupportedOnlineAccountSelectType[]> => {
+      const upsertNext = async (
+        index: number,
+        acc: SupportedOnlineAccountSelectType[]
+      ): Promise<SupportedOnlineAccountSelectType[]> => {
         if (index >= inputs.length) return acc;
         const result = await upsertOne(inputs[index]);
         if (result) acc.push(result);

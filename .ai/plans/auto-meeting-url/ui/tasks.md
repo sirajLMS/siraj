@@ -94,9 +94,9 @@
     - Create `meeting-url-status.ts` — new type file
     - Create `oauth-flow.ts` — new type file
     - Create `meeting-generation.ts` — new type file
-  - **Quality Loop**: `bun tsgo` + `bun biome:check` + lint queue for each modified/created file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` for each modified/created file (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `shared/AGENTS.md`
-  - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/1-i18n-foundation-outcome.md`
   - Update progress: Mark task 1 as `[x]`
   - _Requirements: AC-8.1, AC-8.2 (i18n completeness)_
@@ -117,9 +117,9 @@
     export interface ProviderEndpoint { name: string; url: string; method: "GET" | "POST"; }
     export interface TokenMetadata { issuedAt: string; expiresAt: string | null; scopes: string[]; tokenType: string; }
     ```
-  - **Quality Loop**: `bun tsgo` + `bun biome:check` + lint queue for the new file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` for the new file (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/views/AGENTS.md` (paths), `backend/types/AGENTS.md` rules for `Pick`/`Omit` extension shapes (cross-reference), `backend/graphql/AGENTS.md` if schema additions were made there
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/2-shared-types-outcome.md`
   - Update progress: Mark task 2 as `[x]`
   - _Requirements: All (type foundation)_
@@ -145,9 +145,9 @@
   - Create mobile variant: `meetingIntegrationsHealthHeaders.mobile.tsx` (under `frontend/mobile/views/dashboard/settings/components/meetingIntegrations/`)
   - Use `ResponsiveViewSwitch` to switch between variants
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component) — the ViewModel (`useMeetingIntegrationsViewModel`, task 29) resolves strings via `useAppTranslation(Translation.Dashboard.SettingsMeetingIntegrations)` and passes them down. See `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification on all modified/created files
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` on all modified/created files (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/3-health-headers-outcome.md`
   - Update progress: Mark task 3 as `[x]`
   - _Requirements: AC-1.1 (MetricCardGrid for health cards)_
@@ -169,9 +169,9 @@
   - Empty: Typography `text.secondary` "No connected accounts"
   - Error: Alert with error message + retry
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7, tier views receive `labels` via props from the ViewModel, which owns all `useAppTranslation` calls.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, `frontend/common/graphql/AGENTS.md` (documents for queries), `.agents/instructions/mobile-desktop.instructions.md` (desktop/mobile variants)
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/4-connected-accounts-table-outcome.md`
   - Update progress: Mark task 4 as `[x]`
   - _Requirements: AC-1.2 (DesktopAppDataGrid for connected accounts)_
@@ -188,9 +188,9 @@
   - Scopes: Multi-select chips (add/remove)
   - Create config form fields specific to provider type (Zoom: accountId, MS Teams: tenantId)
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/5-credential-form-outcome.md`
   - Update progress: Mark task 5 as `[x]`
   - _Requirements: AC-1.3 (zod validation for credential forms)_
@@ -206,9 +206,9 @@
   - Confirm: translated "Revoke" button
   - Loading state: confirm button shows `CircularProgress` (pass `isLoading`)
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/6-revoke-dialog-outcome.md`
   - Update progress: Mark task 6 as `[x]`
   - _Requirements: AC-1.4 (BaseDeleteDialog for revoke)_
@@ -220,9 +220,9 @@
   - Show: latency, endpoint reached, authentication status
   - `aria-live="polite"` for status updates
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/7-test-connection-panel-outcome.md`
   - Update progress: Mark task 7 as `[x]`
   - _Requirements: AC-1.1 (test connection states)_
@@ -233,9 +233,9 @@
   - `TokenMetadataDialog`: Add copy token ID button, show scopes as chips, loading state
   - `EndpointList`: Add copy URL button per endpoint with toast notification
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/8-metadata-endpoints-outcome.md`
   - Update progress: Mark task 8 as `[x]`
   - _Requirements: AC-1.1 (admin diagnostic improvements)_
@@ -249,9 +249,9 @@
   - Error state: Alert with translated error + retry
   - `aria-label="Connect {providerName} OAuth"`
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/9-connect-provider-action-outcome.md`
   - Update progress: Mark task 9 as `[x]`
   - _Requirements: AC-1.5 (Connect Provider button in settings)_
@@ -267,9 +267,9 @@
   - Subtle styling (outline button, not primary)
   - `aria-label="Navigate to teacher meeting configs"`
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/10-profile-link-callout-outcome.md`
   - Update progress: Mark task 10 as `[x]`
   - _Requirements: AC-1.6, AC-4.1 (cross-navigation settings → profile)_
@@ -285,9 +285,9 @@
   - Use `ResponsiveViewSwitch` with `createLazyView` so each variant is a separate chunk (code-split). This is what enables the lazy-load + code-split behavior of AC-1.7.
   - The tab does NOT own any layout logic itself — it only renders the active variant. All layout, MetricCardGrid, AppDataGrid, dialogs, etc. live in the desktop/mobile variants (built in tasks 3-10) — the tab just wires them together via the shared ViewModel (`useMeetingIntegrationsViewModel`, task 29).
   - The ViewModel already passes `labels` down to tier views (per `frontend/common/views/AGENTS.md` Rule 7); the tab itself must NOT call `useAppTranslation`.
-  - **Quality Loop**: Per-file verification on the redesigned tab and both new variants
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` on the redesigned tab and both new variants (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/mobile/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/2b-tab-container-outcome.md`
   - Update progress: Mark task 2b as `[x]`
   - _Requirements: AC-1.7 (lazy-load + code-split desktop/mobile variants)_
@@ -308,9 +308,9 @@
   - `aria-live="polite"` region for screen reader announcements
   - All strings passed as `labels` prop from the manager ViewModel (`useMeetingConfigsManagerViewModel`, task 30) — no `useAppTranslation` in this view component itself. Per `frontend/common/views/AGENTS.md` Rule 7.
   - **Log errors via `logger.error` from `@/frontend/utils/logger`** in addition to toast notifications (per Fix 9 — log the OAuth error details for diagnostics; the toast is the user-facing surface, the logger.error is the developer-facing surface). Never use `console.*`.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/11-oauth-callback-handler-outcome.md`
   - Update progress: Mark task 11 as `[x]`
   - _Requirements: AC-2.1, AC-5.2 (OAuth callback auto-detection)_
@@ -324,9 +324,9 @@
   - "Reconnect" button separate from "Connect" (same mutation, preserves configs)
   - `aria-label` per state
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/12-connect-provider-account-outcome.md`
   - Update progress: Mark task 12 as `[x]`
   - _Requirements: AC-5.1, AC-5.3, AC-5.4 (OAuth connection UX)_
@@ -341,9 +341,9 @@
   - `aria-label="Reconnect all expiring providers"`, progress announced via live region
   - Toasts: use `const notifications = useNotifications()` (import via subpath `@toolpad/core/useNotifications`) called in the owning ViewModel — NOT in this view component. The view dispatches via ViewModel callbacks.
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/13-reconnect-all-action-outcome.md`
   - Update progress: Mark task 13 as `[x]`
   - _Requirements: AC-2.2 (Reconnect All batch action)_
@@ -358,9 +358,9 @@
   - Alert slide-down animation on mount
   - `role="alert"`, `aria-live` per severity
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/14-reauth-banner-outcome.md`
   - Update progress: Mark task 14 as `[x]`
   - _Requirements: AC-2.5, AC-5.3 (proactive reauth banner)_
@@ -379,9 +379,9 @@
   - If mutation errors, show `Alert severity="error"` inside dialog body; ViewModel logs via `logger.error` from `@/frontend/utils/logger`
   - Accessibility: `aria-describedby` on confirm button pointing to body text
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/14b-disconnect-confirm-dialog-outcome.md`
   - Update progress: Mark task 14b as `[x]`
   - _Requirements: AC-5.1, AC-5.4 (OAuth disconnect UX)_
@@ -395,9 +395,9 @@
   - The submit handler wires the existing mutations. Verify the canonical document/operation names: `createUserMeetingConfig`, `updateUserMeetingConfig`, `deleteUserMeetingConfig` (the const exports are `createUserMeetingConfigMutationDocument`, `updateUserMeetingConfigMutationDocument`, `deleteUserMeetingConfigMutationDocument` at `meeting.documents.ts`). Do NOT use the non-existent `createMeetingConfig`/`updateMeetingConfig`/`deleteMeetingConfig` names.
   - Show preview URL in dialog with copy button
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/15-config-form-dialog-outcome.md`
   - Update progress: Mark task 15 as `[x]`
   - _Requirements: AC-2.6, AC-6.3 (config form with zod + test preview)_
@@ -412,9 +412,9 @@
   - URL expiration display (if `expiresAt` available, null-safe) — `expiresAt` is a new backend field; verify codegen exposes it and that the plan-review finding it might be missing is resolved by the prerequisite schema update in task 2 / backend task canonicalization
   - Handle null backend fields gracefully
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/16-class-configs-section-outcome.md`
   - Update progress: Mark task 16 as `[x]`
   - _Requirements: AC-2.7, AC-6.1, AC-6.2 (class meeting config generation status)_
@@ -427,9 +427,9 @@
   - "Reconnect" button inline
   - `role="status"`, `aria-live="polite"`
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/17-token-expiry-warning-outcome.md`
   - Update progress: Mark task 17 as `[x]`
   - _Requirements: AC-2.3, AC-5.3 (token expiry display)_
@@ -444,9 +444,9 @@
   - Expanded: Step-by-step guide (Connect → Create Config → Auto-generate at booking)
   - `aria-expanded` on toggle, `aria-controls` linking to content
   - All strings passed as `labels` prop from ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/18-auto-generation-callout-outcome.md`
   - Update progress: Mark task 18 as `[x]`
   - _Requirements: AC-6.3 (generation preview callout)_
@@ -463,9 +463,9 @@
     - Integrate the profile-side `DisconnectConfirmDialog` (task 14b) — wire its `open`/`onConfirm`/`onClose` to ViewModel state.
   - The manager is the ORCHESTRATION layer — it owns no visual styling itself, only composition. It delegates all labels to the per-component `labels` props sourced from `useMeetingConfigsManagerViewModel` (task 30) which resolves UI strings via `useAppTranslation(Translation.Ui.MeetingConfig)` (NOT `Dashboard.ProfileMeetingConfigs` which does not exist — see design.md §7). The manager view component must NOT call `useAppTranslation` (per `frontend/common/views/AGENTS.md` Rule 7).
   - If a desktop/mobile tier split is warranted for the manager layout itself, apply `ResponsiveViewSwitch` + `createLazyView` (consistent with task 2b's tab pattern) — otherwise keep it as a single shared composition component. Decide based on whether the layout diverges meaningfully between desktop and mobile.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/mobile/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/18b-configs-manager-outcome.md`
   - Update progress: Mark task 18b as `[x]`
   - _Requirements: AC-2.2, AC-2.3, AC-4.2, AC-5.4 (profile meeting-configs orchestration)_
@@ -483,9 +483,9 @@
   - `role="status"`, `aria-label` with full status text, `title` for tooltip
   - Size variants: small (16px icon), medium (24px icon)
   - All strings via `useAppTranslation(Translation.Dashboard.MeetingUrlStatus)` (self-contained UI primitive in `frontend/common/components/ui/` may own its translations — see `frontend/common/components/ui/AGENTS.md`)
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/19-url-status-badge-outcome.md`
   - Update progress: Mark task 19 as `[x]`
   - _Requirements: AC-3.1, AC-3.5, AC-3.6 (URL status badges)_
@@ -500,9 +500,9 @@
   - Variants: icon, button, text
   - `aria-label="Copy meeting URL"`, `aria-pressed` for copied state
   - All strings via `useAppTranslation` (self-contained UI primitive — see `frontend/common/components/ui/AGENTS.md`)
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/20-copy-url-button-outcome.md`
   - Update progress: Mark task 20 as `[x]`
   - _Requirements: AC-2.4, AC-3.2, AC-3.3 (copy URL for teachers/students/parents)_
@@ -515,9 +515,9 @@
   - `role="status"`, `aria-label`
   - Colors from theme palette (no hardcoded)
   - All strings via `useAppTranslation(Translation.Dashboard.OAuthFlow)` (self-contained UI primitive — see `frontend/common/components/ui/AGENTS.md`)
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/21-oauth-status-badge-outcome.md`
   - Update progress: Mark task 21 as `[x]`
   - _Requirements: AC-5.7 (connection status badge)_
@@ -532,9 +532,9 @@
   - Mobile: Card section (badge top, buttons below)
   - `aria-label` describing full state
   - All strings via `useAppTranslation` (self-contained UI primitive — see `frontend/common/components/ui/AGENTS.md`)
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/22-url-cell-outcome.md`
   - Update progress: Mark task 22 as `[x]`
   - _Requirements: AC-3.1, AC-3.2, AC-3.5 (URL display in data tables)_
@@ -545,9 +545,9 @@
   - States: pending (CircularProgress + pulsing animation), success (green check + URL + copy + expiresAt), failed (red error + expandable details + retry)
   - `aria-live="polite"` for status changes
   - All strings via `useAppTranslation(Translation.Dashboard.MeetingGeneration)` (self-contained UI primitive — see `frontend/common/components/ui/AGENTS.md`)
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/23-generation-indicator-outcome.md`
   - Update progress: Mark task 23 as `[x]`
   - _Requirements: AC-6.1, AC-6.4 (generation status with URL display)_
@@ -561,9 +561,9 @@
   - Use provider slug to determine logo
   - `alt` text "{Provider Name} logo", `role="img"`
   - Colors from theme palette (no hardcoded)
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/24-provider-logo-outcome.md`
   - Update progress: Mark task 24 as `[x]`
   - _Requirements: UX (provider visual identification)_
@@ -579,9 +579,9 @@
   - All strings via `labels` prop from ViewModel (no `useAppTranslation` in view component). Per `frontend/common/views/AGENTS.md` Rule 7.
   - All breadcrumb label strings must be passed via props from the parent ViewModel — do NOT call `useAppTranslation` directly inside the breadcrumb view components (per `frontend/common/views/AGENTS.md` Rule 7).
   - RTL: separator flips automatically via MUI `dir` context — no manual handling
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/24b-breadcrumb-outcome.md`
   - Update progress: Mark task 24b as `[x]`
   - _Requirements: AC-4.5 (breadcrumb shows current location)_
@@ -600,9 +600,9 @@
   - Use MUI built-in transitions (`Fade`, `Slide`, `Collapse`, `Grow`) — NO external animation library
   - For TokenExpiryWarning pulse only: `@keyframes` via `sx` prop (scoped to component)
   - Verify all animations check `useMediaQuery('(prefers-reduced-motion: reduce)')`
-  - **Quality Loop**: Per-file verification on each modified component
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` on each modified component (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/24c-animation-spec-outcome.md`
   - Update progress: Mark task 24c as `[x]`
   - _Requirements: UX-NFR-1 (smooth transitions), Accessibility (reduced motion)_
@@ -620,9 +620,9 @@
   - Add `expiresAt` display (null-safe)
   - States: pending (CircularProgress + chip), generated (join + copy), failed (error + retry), expired (warning chip)
   - All strings via `useAppTranslation(Translation.Dashboard.MeetingUrlStatus)` (self-contained UI primitive — see `frontend/common/components/ui/AGENTS.md`)
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/25-join-action-enhanced-outcome.md`
   - Update progress: Mark task 25 as `[x]`
   - _Requirements: AC-3.1-3.6 (MeetingJoinAction enhancement)_
@@ -637,9 +637,9 @@
   - Join button for all authenticated users
   - Null-safe handling for pending/failed/missing URLs
   - All strings passed as `labels` prop from the teacher schedule ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7. The shared `MeetingUrlCell`/`MeetingUrlStatusBadge` primitives may own their own `useAppTranslation` as noted in their respective tasks.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/26-schedule-grid-integration-outcome.md`
   - Update progress: Mark task 26 as `[x]`
   - _Requirements: AC-3.1, AC-3.2 (URL status in teacher schedule)_
@@ -654,9 +654,9 @@
   - Join button for all
   - Null-safe handling
   - All strings passed as `labels` prop from the student/parent dashboard ViewModel (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/27-student-parent-integration-outcome.md`
   - Update progress: Mark task 27 as `[x]`
   - _Requirements: AC-3.3, AC-3.4 (URL display for students and parents)_
@@ -671,9 +671,9 @@
   - Add new fields: `testingProviderSlug`, `revokingAccountId`, `connectingProviderSlug`, `testConnectionResult`, `metadataDialogAccountId`, `credentialFormProvider`, `credentialFormMode`
   - Add corresponding actions/setters
   - Add `ProfileLinkCallout` visibility check (permission-based) — gate via the `AppPermission.SettingsEditMeetingIntegrations` enum (resolved from `@/frontend/common/graphql/generated/gql/graphql-types`), NOT a bare string literal.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/28-settings-store-outcome.md`
   - Update progress: Mark task 28 as `[x]`
   - _Requirements: AC-1.8, AC-1.6 (settings store enhancement)_
@@ -687,9 +687,9 @@
   - Resolve all UI strings via `useAppTranslation(Translation.Dashboard.SettingsMeetingIntegrations)` here in the ViewModel and pass them down to tier views as `labels` props (per `frontend/common/views/AGENTS.md` Rule 7).
   - Ensure notification calls in ViewModel (not in view components) — use `const notifications = useNotifications()` imported via the SUBPATH `@toolpad/core/useNotifications` (NOT `@toolpad/core`).
   - **Log errors via `logger.error` from `@/frontend/utils/logger`** in addition to toast notifications (per Fix 9 — log mutation/network error details for diagnostics; the toast is the user-facing surface, `logger.error` is the developer-facing surface). Never use `console.*`.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/29-settings-viewmodel-outcome.md`
   - Update progress: Mark task 29 as `[x]`
   - _Requirements: AC-1.5, AC-1.6, AC-1.8 (settings ViewModel)_
@@ -708,9 +708,9 @@
   - Ensure notification calls in ViewModel (not in view components) — use `const notifications = useNotifications()` imported via the SUBPATH `@toolpad/core/useNotifications` (NOT `@toolpad/core`).
   - Resolve all UI strings via `useAppTranslation(Translation.Ui.MeetingConfig)` here in the ViewModel and pass them down to tier views as `labels` props (per `frontend/common/views/AGENTS.md` Rule 7). NOTE: the namespace is `Ui.MeetingConfig` (NOT `Dashboard.ProfileMeetingConfigs` which does NOT exist — see design.md §7).
   - **Log errors via `logger.error` from `@/frontend/utils/logger`** in addition to toast notifications (per Fix 9 — log OAuth callback errors, mutation/network errors for diagnostics; the toast is the user-facing surface, `logger.error` is the developer-facing surface). Never use `console.*`.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/30-profile-viewmodel-outcome.md`
   - Update progress: Mark task 30 as `[x]`
   - _Requirements: AC-2.1, AC-2.2, AC-2.4, AC-4.2 (profile ViewModel)_
@@ -724,9 +724,9 @@
   - Integrate `OAuthCallbackHandler` into the manager
   - Integrate `ReconnectAllAction` when `requiresReconnect` is true AND `reauthProviders.length >= 2` (use the ViewModel-exposed `requiresReconnect` / `reauthProviders` fields — NOT internal `reauthProviderSlugs`/`connectingSlugs`)
   - All strings passed as `labels` prop from the `useMeetingConfigsManagerViewModel` (no `useAppTranslation` in this view component). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/31-profile-cross-link-outcome.md`
   - Update progress: Mark task 31 as `[x]`
   - _Requirements: AC-4.2 (profile → settings cross-link)_
@@ -746,9 +746,9 @@
   - No horizontal scrolling — content stacks vertically
   - All strings passed as `labels` prop from the ViewModel (mobile variants must NOT call `useAppTranslation`). Per `frontend/common/views/AGENTS.md` Rule 7. Verify that the desktop AND mobile variants both source labels from the same ViewModel.
   - Verify any `MobileCardList` / `DesktopAppDataGrid` usage passes the REQUIRED `paginationOptions: ListPaginationOptions` prop (non-optional). If the parity check reveals a missing `paginationOptions` on mobile, file it as a defect in the outcome doc.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/mobile/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/32-settings-mobile-parity-outcome.md`
   - Update progress: Mark task 32 as `[x]`
   - _Requirements: AC-7.1, AC-7.5, AC-7.6 (settings mobile parity)_
@@ -766,9 +766,9 @@
   - No horizontal scrolling
   - All strings passed as `labels` prop from the ViewModel (mobile variants must NOT call `useAppTranslation`). Per `frontend/common/views/AGENTS.md` Rule 7.
   - Verify any `MobileCardList` / `MobileMetricCardGrid` / `DesktopAppDataGrid` usage passes the REQUIRED `paginationOptions: ListPaginationOptions` prop (non-optional for the data grid / card list). Flag missing props in the outcome doc.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/mobile/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/33-profile-mobile-parity-outcome.md`
   - Update progress: Mark task 33 as `[x]`
   - _Requirements: AC-7.2, AC-7.4, AC-7.5 (profile mobile parity)_
@@ -781,9 +781,9 @@
   - Verify: All touch targets ≥48dp, no horizontal scrolling
   - Verify any `MobileCardList` / `DesktopAppDataGrid` usage passes the REQUIRED `paginationOptions: ListPaginationOptions` prop (non-optional). Flag missing props in the outcome doc.
   - All strings passed as `labels` prop from the ViewModel (mobile variants must NOT call `useAppTranslation`). Per `frontend/common/views/AGENTS.md` Rule 7.
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `frontend/mobile/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/34-dashboard-mobile-parity-outcome.md`
   - Update progress: Mark task 34 as `[x]`
   - _Requirements: AC-7.3, AC-7.5, AC-7.6 (dashboards mobile parity)_
@@ -819,10 +819,10 @@
     - `MeetingProviderLogo`: all providers, fallback, sizes
     - `OAuthConnectionStatusBadge`: all 4 states, countdown
   - Use Happy DOM + mocked Apollo Client
-  - **Quality Loop**: Per-file verification on test files
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` on test files (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`
   - Run: `bun run test:ui:components`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/35-component-tests-outcome.md`
   - Update progress: Mark task 35 as `[x]`
   - _Requirements: NFR-20 (test coverage ≥80%)_
@@ -846,9 +846,10 @@
   - Use Vitest (Storybook's test runner) — story test files use `*.stories.tsx` convention
   - Mock Apollo via `MockedProvider` from `@apollo/client/testing` for GraphQL-dependent stories
   - Mock `useNotifications` via a simple stub (show/showPromise)
-  - **Quality Loop**: Per-file verification
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
   - Run: `bun run test:ui:components` (Storybook stories run through Vitest)
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/35b-storybook-stories-outcome.md`
   - Update progress: Mark task 35b as `[x]`
   - _Requirements: NFR-20 (all states covered for visual regression)_
@@ -867,9 +868,9 @@
     - Mobile: settings tab, profile tab (375px viewport)
     - RTL: Arabic layout for all meeting views
   - Run: `bun run test:ui:e2e`
-  - **Quality Loop**: Per-file verification on test files
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` on test files (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/36-e2e-tests-outcome.md`
   - Update progress: Mark task 36 as `[x]`
   - _Requirements: NFR-20 (100% for critical paths)_
@@ -894,9 +895,9 @@
     - All strings translated (no English hardcoded)
   - Run accessibility audit (axe-core or similar)
   - Fix any issues found
-  - **Quality Loop**: Per-file verification on fixed files
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` on fixed files (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
   - **Instruction Verification**: Validate against `frontend/AGENTS.md`, `shared/AGENTS.md`
-  - Run global check
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/37-accessibility-i18n-outcome.md`
   - Update progress: Mark task 37 as `[x]`
   - _Requirements: AC-8.1 through AC-8.10 (accessibility and i18n)_
@@ -919,7 +920,8 @@
   - Update `frontend/views/AGENTS.md` if applicable
   - Update `.agents/instructions/frontend.instructions.md` if conventions changed
   - Update root `AGENTS.md` Important References section
-  - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+  - **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` on all modified doc files (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; fix and re-run until exit 0)
+  - Run global check: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified file as a final sweep, or `bun quality-gate` for full-repo sequential verification (tsgo → biome → lint → codescene → sonar; 0 errors, 0 warnings)
   - Write outcome: `.ai/plans/auto-meeting-url/ui/outcome/38-knowledge-propagation-outcome.md`
   - Update progress: Mark task 38 as `[x]`
   - _Requirements: All (knowledge transfer)_
@@ -981,9 +983,7 @@ The following ACs were not explicitly traced in the Req-level table above. They 
 ## Verification Checklist
 
 Each task must pass:
-- [ ] TypeScript compiles (`bun tsgo`)
-- [ ] Biome checks pass (`bun biome:check`)
-- [ ] Lint passes via queue (`bun run lint` or lint queue client)
+- [ ] Per-file quality loop passes: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` (runs tsgo → biome → oxlint → lint → check:duplicates → codescene; short-circuits at first failure; exit 0)
 - [ ] Unit tests pass for component
 - [ ] Manual QA on mobile (375px), tablet (768px), desktop (1440px)
 - [ ] Arabic RTL layout verified

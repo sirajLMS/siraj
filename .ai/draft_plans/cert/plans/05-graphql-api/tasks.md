@@ -23,10 +23,10 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - [ ] Register all 11 cert pgEnums in `backend/graphql/pothos/shared/enum.pothos.ts`
 - [ ] Enums to register: `CertificateTemplateStatus`, `CertificateOrientation`, `CertificateBackgroundType`, `CertificateElementType`, `CertificateVariableType`, `CertificateRecipientGroupStatus`, `CertificateRecipientItemStatus`, `CertificateStatus`, `CertificateGenerationStatus`, `CertificateVerificationMethod`, `CertificateVerificationResult`
 - [ ] Ensure each enum's values match the pgEnum string values from Plan 1's schema
-- [ ] Run quality loop on `backend/graphql/pothos/shared/enum.pothos.ts`:
-  - `bun tsgo` — 0 type errors
-  - `bun biome:check` — 0 issues
-  - Lint via queue client for the file
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/shared/enum.pothos.ts --lifecycle codescene
+  ```
 - [ ] Verify against instruction files:
   - `backend/graphql/AGENTS.md`
   - `backend/graphql/pothos/AGENTS.md`
@@ -40,7 +40,11 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - [ ] Create `backend/graphql/pothos/certificates/` directory
 - [ ] Create `backend/graphql/pothos/certificates/index.ts` — barrel file exporting all cert Pothos modules
 - [ ] Wire barrel import into `backend/graphql/pothos/index.ts`
-- [ ] Run quality loop on both files
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/index.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/index.ts --lifecycle codescene
+  ```
 - [ ] Verify against `backend/graphql/pothos/AGENTS.md`
 - **Requirements**: AC-10 (barrel exports wired into root Pothos index)
 - **Files created**: `backend/graphql/pothos/certificates/index.ts`
@@ -62,7 +66,10 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
   - `RevokeInput` (id + reason)
 - [ ] All input fields map to corresponding `SubmitInput` properties from `backend/types/`
 - [ ] Required vs optional fields match the SubmitInput types
-- [ ] Run quality loop
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/inputs.pothos.ts --lifecycle codescene
+  ```
 - [ ] Verify against `backend/graphql/AGENTS.md`, `backend/types/AGENTS.md`
 - **Requirements**: Design §6 (Mutation Catalog — all input types)
 - **Files created**: `backend/graphql/pothos/certificates/inputs.pothos.ts`
@@ -82,7 +89,11 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - [ ] Create DataLoader batch loader: `backend/graphql/pothos/certificates/certificate.dataLoader.ts`
   - Batch function: given IDs, query service for certificates and return in same order
 - [ ] Auth scope: field-level `CERT_VIEW` for sensitive fields (verificationCode, pdfUrl)
-- [ ] Run quality loop on both files
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/certificate.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/certificate.dataLoader.ts --lifecycle codescene
+  ```
 - [ ] Verify against `backend/graphql/pothos/AGENTS.md`
 - **Requirements**: AC-01 (9 Pothos object types), AC-05 (DataLoader batch loading)
 - **Files created**: `certificate.pothos.ts`, `certificate.dataLoader.ts`
@@ -318,14 +329,10 @@ Total: 14 tasks, ~36 hours estimated
 
 ## Quality Loop (Per File)
 
-After creating/modifying ANY file in this plan, run:
+After creating/modifying ANY file in this plan, run the single per-file progressive verification command (type checking → formatting → lint → codescene code-health, short-circuiting on first failure):
 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-05","files":["<the-file>"]}'
+bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
 
 Fix all errors before proceeding to next task.

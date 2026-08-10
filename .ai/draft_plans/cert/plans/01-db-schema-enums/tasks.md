@@ -4,7 +4,7 @@
 > **Plan #**: 01
 > **Dependencies**: None (foundation plan)
 > **Execution Model**: Sequential per task (each task produces files the next task imports)
-> **Quality Model**: Per-file tsgo + biome + lint via `scripts/health/sub-loop.ts`
+> **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
 ---
@@ -71,21 +71,12 @@ T01 (pgEnums) ──→ T02 (categories table) ──→ T03 (templates table)
 
 For the modified file:
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"t01","files":["backend/db/schema/enums.ts"]}'
-```
-
-Or equivalently:
-```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/enums.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/enums.ts --lifecycle codescene
 ```
 
 ### Verification
 - All 11 pgEnums appended to `backend/db/schema/enums.ts` with correct value lists (via `createPgEnumFromEnum`)
-- `bun tsgo` passes with zero new type errors
+- `bun tsgo` passes (via sub-loop) with zero new type errors
 - No enum name or value duplicates with existing codebase
 
 ---

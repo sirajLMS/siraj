@@ -8,6 +8,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logger, resolveLocalStoragePath } from "@/backend/lib";
 import { StorageService } from "@/backend/services";
 
+/**
+ * Bridge DOM ReadableStream to a Node Readable via async iteration.
+ */
+function toNodeReadable(stream: ReadableStream): Readable {
+  return Readable.from(stream);
+}
+
 interface SignedUrlData {
   contentType: string;
   fileSize: bigint;
@@ -49,7 +56,7 @@ function validateHeaders(request: NextRequest, signedUrl: SignedUrlData): NextRe
 /**
  * Stream request body to file while calculating SHA-256
  */
-async function streamToFile(stream: ReadableStream<Uint8Array>, filePath: string, expectedMd5: string): Promise<void> {
+async function streamToFile(stream: ReadableStream, filePath: string, expectedMd5: string): Promise<void> {
   const hash = crypto.createHash("sha256");
   const writeStream = createWriteStream(filePath);
 
@@ -61,7 +68,7 @@ async function streamToFile(stream: ReadableStream<Uint8Array>, filePath: string
   });
 
   try {
-    await pipeline(Readable.fromWeb(stream), hashTransform, writeStream);
+    await pipeline(toNodeReadable(stream), hashTransform, writeStream);
 
     const actualHash = hash.digest("base64");
     if (actualHash !== expectedMd5) {

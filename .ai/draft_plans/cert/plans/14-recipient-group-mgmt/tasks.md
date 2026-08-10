@@ -72,13 +72,13 @@ T11 (Knowledge propagation)
   - **Files to modify**: `shared/locale/namespaces/certificates/index.ts`
   - **Instruction files**: `frontend.instructions.md`, `shared/AGENTS.md`
 
-- [ ] 1.6 Run quality loop
+- [ ] 1.6 Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t01","files":["shared/locale/types/certificates/recipient-groups.ts","shared/locale/ar/certificates/recipient-groups.ts","shared/locale/en/certificates/recipient-groups.ts","shared/locale/namespaces/certificates/recipient-groups.namespace.ts"]}'
+  bun run scripts/health/sub-loop.ts shared/locale/types/certificates/recipient-groups.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/recipient-groups.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/en/certificates/recipient-groups.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/recipient-groups.namespace.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/index.ts --lifecycle codescene
   ```
 
 - [ ] 1.7 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t01-outcome.md`

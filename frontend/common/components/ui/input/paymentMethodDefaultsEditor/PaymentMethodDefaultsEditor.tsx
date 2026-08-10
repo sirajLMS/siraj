@@ -19,11 +19,15 @@ export type { PaymentMethodDefaultsEditorProps } from "./types";
 
 const DEFAULT_INSTRUCTIONS: LocalizedString = {};
 
-function makeLabelResolver(labels: PaymentMethodTypeLabels | PaymentMethodDirectionLabels, prefix: string) {
-  return (messageKey: string) => {
-    const shortKey = messageKey.slice(prefix.length) as keyof typeof labels;
-    return labels[shortKey] ?? "";
-  };
+const TYPE_LABEL_KEYS = ["mobileWallet", "paymentLink", "onlineAccount", "bankTransfer", "cash"] as const;
+const DIRECTION_LABEL_KEYS = ["in", "out", "both"] as const;
+
+function isTypeLabelKey(key: string): key is (typeof TYPE_LABEL_KEYS)[number] {
+  return (TYPE_LABEL_KEYS as readonly string[]).includes(key);
+}
+
+function isDirectionLabelKey(key: string): key is (typeof DIRECTION_LABEL_KEYS)[number] {
+  return (DIRECTION_LABEL_KEYS as readonly string[]).includes(key);
 }
 
 export function PaymentMethodDefaultsEditor({
@@ -54,11 +58,14 @@ export function PaymentMethodDefaultsEditor({
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = getPaymentMethodTypeLabel(method.type, makeLabelResolver(t.type, "type."));
-      const directionLabel = getPaymentMethodDirectionLabel(
-        method.direction,
-        makeLabelResolver(t.direction, "direction.")
-      );
+      const typeLabel = getPaymentMethodTypeLabel(method.type, key => {
+        const shortKey = key.slice("type.".length);
+        return isTypeLabelKey(shortKey) ? t.type[shortKey] : "";
+      });
+      const directionLabel = getPaymentMethodDirectionLabel(method.direction, key => {
+        const shortKey = key.slice("direction.".length);
+        return isDirectionLabelKey(shortKey) ? t.direction[shortKey] : "";
+      });
       const base = method.label?.trim() || method.catalogSlug || typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
     },

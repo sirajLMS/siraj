@@ -355,9 +355,9 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
 
 - [ ] 3.7 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/stores/templateListStore.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/stores/templateListStore.types.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/stores/__mocks__/templateListStore.ts --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/stores/templateListStore.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/stores/templateListStore.types.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/stores/__mocks__/templateListStore.ts --lifecycle codescene
   ```
 
 - [ ] 3.8 Write outcome file: `.ai/plans/cert-plan-08/outcome/T03-zustand-store-outcome.md`
@@ -445,12 +445,12 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 
 - [ ] 4.7 Run quality loop:
   ```bash
-  bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/templates/page.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/types.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/useTemplatesViewModel.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/TemplateListView.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/TemplateListContainer.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/index.ts --lifecycle lint
+  bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/templates/page.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/types.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/useTemplatesViewModel.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/TemplateListView.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/TemplateListContainer.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/index.ts --lifecycle codescene
   ```
 
 - [ ] 4.8 Write outcome file: `.ai/plans/cert-plan-08/outcome/T04-container-viewmodel-outcome.md`
@@ -570,17 +570,17 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 
 - [ ] 5.9 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/components/TemplateToolbar.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateCard.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateCardGrid.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateTable.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/StatusBadge.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/SkeletonGrid.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/ErrorState.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/EmptyState.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/LoadMoreButton.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkActionBar.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/components/TemplateToolbar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateCard.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateCardGrid.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateTable.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/StatusBadge.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/SkeletonGrid.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/ErrorState.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/EmptyState.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/LoadMoreButton.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkActionBar.tsx --lifecycle codescene
   ```
 
 - [ ] 5.10 Write outcome file: `.ai/plans/cert-plan-08/outcome/T05-desktop-view-outcome.md`
@@ -675,12 +675,12 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 
 - [ ] 6.9 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileTemplateCard.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/states/MobileSkeletonList.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/states/MobileListStates.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileBulkActionBar.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileLoadMoreButton.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileTemplateCard.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/states/MobileSkeletonList.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/states/MobileListStates.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileBulkActionBar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileLoadMoreButton.tsx --lifecycle codescene
   ```
 
 - [ ] 6.10 Write outcome file: `.ai/plans/cert-plan-08/outcome/T06-mobile-view-outcome.md`
@@ -763,8 +763,8 @@ These tasks implement user interactions: the create template dialog, card action
 
 - [ ] 7.6 Run quality loop:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/schemas/createTemplateSchema.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CreateTemplateDialog.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/schemas/createTemplateSchema.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CreateTemplateDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 7.7 Write outcome file: `.ai/plans/cert-plan-08/outcome/T07-create-dialog-outcome.md`
@@ -827,8 +827,8 @@ These tasks implement user interactions: the create template dialog, card action
 
 - [ ] 8.5 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/DeleteConfirmDialog.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/DeleteConfirmDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 8.6 Write outcome file: `.ai/plans/cert-plan-08/outcome/T08-card-actions-outcome.md`
@@ -928,11 +928,11 @@ These tasks implement user interactions: the create template dialog, card action
 
 - [ ] 9.7 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/FilterPanel.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkChangeCategoryDialog.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkActionBar.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/FilterPanel.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkChangeCategoryDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkActionBar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx --lifecycle codescene
   ```
 
 - [ ] 9.8 Write outcome file: `.ai/plans/cert-plan-08/outcome/T09-bulk-filter-outcome.md`
@@ -1037,8 +1037,8 @@ These tasks add the sidebar navigation and capture all learnings in the knowledg
 
 - [ ] 10.7 Run quality loop:
   ```bash
-  bun run scripts/health/sub-loop.ts <sidebar-config-file> --lifecycle lint
-  bun run scripts/health/sub-loop.ts <sidebar-component-file> --lifecycle lint
+  bun run scripts/health/sub-loop.ts <sidebar-config-file> --lifecycle codescene
+  bun run scripts/health/sub-loop.ts <sidebar-component-file> --lifecycle codescene
   ```
   (Replace `<sidebar-config-file>` and `<sidebar-component-file>` with actual paths discovered in 10.1)
 
@@ -1228,15 +1228,15 @@ These tasks cover component testing (Happy DOM), E2E testing (Playwright), and i
 
 - [ ] 12.10 Run quality loop on all test files:
   ```bash
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCard.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCardGrid.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/FilterPanel.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/CreateTemplateDialog.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/DeleteConfirmDialog.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/BulkActionBar.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/MobileTemplateCard.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateTable.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/e2e/templates-list.spec.ts --lifecycle lint
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCard.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCardGrid.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/FilterPanel.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/CreateTemplateDialog.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/DeleteConfirmDialog.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/BulkActionBar.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/MobileTemplateCard.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateTable.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/e2e/templates-list.spec.ts --lifecycle codescene
   ```
 
 - [ ] 12.11 Write outcome file: `.ai/plans/cert-plan-08/outcome/T12-testing-outcome.md`
@@ -1317,10 +1317,10 @@ showSorting `outlined` for inactive
 
 - [  ] 13.7 Run quality loop on enhanced files:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/useTemplatesViewModel.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/components/TemplateToolbar.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileToolbar.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/useTemplatesViewModel.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/components/TemplateToolbar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileToolbar.tsx --lifecycle codescene
   ```
 
 - [ ] 13. Write outcome file `.ai/plans/cert-plan-08/outcome/T13-feature-enhancements.md`
@@ -1513,7 +1513,7 @@ All outcome files are written to: `.ai/plans/cert-plan-08/outcome/`
 ```bash
 # Run the sub-loop script for progressive verification (tsgo → biome → lint → codescene)
 # Short-circuits at first failure; --lifecycle controls target stage
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
 ### Global Quality Commands

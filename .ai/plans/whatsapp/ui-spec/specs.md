@@ -52,7 +52,7 @@ A production-ready WhatsApp settings page where admins can manage accounts, cred
 1. WHEN an executing agent starts any task THEN system SHALL read ALL existing outcome files in `.ai/plans/whatsapp/ui-spec/outcome/` to absorb prior research, search results, and pitfalls.
 2. WHEN an executing agent completes any task THEN system SHALL write a new outcome document under `.ai/plans/whatsapp/ui-spec/outcome/<task-id>-outcome.md` detailing research findings, implementation details, and carry-over points.
 3. WHEN an executing agent completes any subtask THEN system SHALL update the corresponding task checkbox `[ ]` -> `[x]` in `trackable-tasks.md`.
-4. WHEN any file is modified THEN system SHALL execute per-file verification via `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` on that specific file (handles tsgo → biome → oxlint → lint:type-aware in one progressive command).
+4. WHEN any file is modified THEN system SHALL execute per-file verification via `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on that specific file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command).
 5. WHEN any subtask is completed THEN system SHALL execute `bun tsgo`, `bun biome:check`, and `bun run lint` globally, exiting with zero errors and zero warnings.
 
 ### Requirement 1: Create/Edit Account Form (UI-REQ-1)
@@ -407,7 +407,7 @@ WhatsApp settings appear under the **Integrations** (`grp_integrations`) group i
 - [ ] `loading.tsx` and `error.tsx` route boundaries added
 - [ ] Component tests cover all mutation paths
 - [ ] ViewModel tests cover create/update/validation flows
-- [ ] `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` passes on all modified files (tsgo → biome → oxlint → lint, 0 errors)
+- [ ] `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` passes on all modified files (tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene, 0 errors)
 
 ### Acceptance Metrics
 - 0 raw enum values rendered in any component (audit via grep)

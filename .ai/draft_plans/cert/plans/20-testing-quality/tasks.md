@@ -87,9 +87,10 @@
   - Returns object with all created entities
 
 ### Quality Loop (per file)
-- `bun tsgo` — type check
-- `bun biome:check` — format + lint
-- Lint queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"t1","files":["backend/db/test/entity-setup.ts"]}'`
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/db/test/entity-setup.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 - Read: `AGENTS.md` (root), `backend/db/test/AGENTS.md`, `backend/db/repo/AGENTS.md`
@@ -141,8 +142,10 @@
 - Verify 100% coverage on `CertificateRepository`
 
 ### Quality Loop
-- `bun tsgo`, `bun biome:check`, lint queue client for the file
-- `bun codescene --file backend/db/test/repo/cert/certificate.repository.test.ts`
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/db/test/repo/cert/certificate.repository.test.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 - Read: `AGENTS.md` (root), `backend/db/test/AGENTS.md`
@@ -377,7 +380,12 @@ Same pattern as T2.
   - Test category tree integrity: delete parent → children behavior correct
 
 ### Quality Loop & Instruction Verification
-- Same quality loop as T2
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/db/test/logic/cert/generation-logic.test.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/db/test/logic/cert/template-version-logic.test.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/db/test/logic/cert/state-machine-logic.test.ts --lifecycle codescene
+  ```
 - Read: `backend/db/test/AGENTS.md` — verify `logic/` directory rules
 - Verify Rule 11: `logic/` for business-logic workflows, `repo/` for isolation
 
@@ -413,7 +421,10 @@ Same pattern as T2.
   - Already generated for same recipient → assert error contains "already generated"
 
 ### Quality Loop & Instruction Verification
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/test/generation.service.test.ts --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `backend/services/AGENTS.md`
 - Read: `.agents/instructions/backend.instructions.md`, `.agents/instructions/tests.instructions.md`
 
@@ -538,7 +549,10 @@ Same as T10.
 
 ### Quality Loop & Instruction Verification
 - Run: `bun run generate:gqlSchema` + `bun codegen` before tests (ensure document imports resolve)
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/test/cert/certificate-queries.test.ts --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `frontend/common/graphql/test/AGENTS.md`, `frontend/common/graphql/AGENTS.md`
 - Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
 - Verify Rule 3: TypedDocumentNode imports, no raw string queries
@@ -685,7 +699,10 @@ Same as T14.
   - `cleanup()` + `useUserStore.setState({ permissions: [] })` in `afterEach`
 
 ### Quality Loop & Instruction Verification
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts test/ui/components/cert/template-list.test.tsx --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `test/ui/AGENTS.md`
 - Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
 
@@ -831,7 +848,10 @@ Same as T19.
 
 ### Quality Loop & Instruction Verification
 - Requires `bun run build:test` first
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/generation-flow.test.ts --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `test/ui/AGENTS.md`
 - Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
 - Verify: no `waitForTimeout`, no `networkidle` — Playwright auto-waiting only
@@ -938,7 +958,13 @@ Same as T23.
   - RTL/LTR rendering
 
 ### Quality Loop & Instruction Verification
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/template-list/template-list.stories.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/certificate-list/certificate-list.stories.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/generation-dialog/generation-dialog.stories.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/verification-page/verification-page.stories.tsx --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
 - Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
 - Verify: `.storybook/main.ts` story glob pattern matches file paths

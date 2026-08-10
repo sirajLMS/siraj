@@ -444,10 +444,6 @@ export async function findOverlappingInstancesForRange(
     .where(and(...conditions));
 }
 
-function _isOnDemandStatus(value: string): value is OnDemandStatus {
-  return (Object.values(OnDemandStatus) as readonly string[]).includes(value);
-}
-
 /**
  * Batch-updates the execution state and on-demand status of multiple class
  * instances in a single UPDATE. Used by `QuotaService.refreshStudentOndemandInstances`

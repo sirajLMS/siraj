@@ -3,7 +3,7 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { supportedPaymentLinks } from "@/backend/db/schema";
-import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
   SupportedPaymentLinkInsertType,
   SupportedPaymentLinkSelectType,
@@ -26,9 +26,7 @@ function toSelectType(row: LinkRow): SupportedPaymentLinkSelectType {
     instructions: row.instructions,
     urlAllowlist: row.urlAllowlist,
     urlExample: row.urlExample,
-    supportedDirections: isPaymentDirection(row.supportedDirections)
-      ? row.supportedDirections
-      : PaymentDirection.BOTH,
+    supportedDirections: isPaymentDirection(row.supportedDirections) ? row.supportedDirections : PaymentDirection.BOTH,
     logoUrl: row.logoUrl,
     isActive: row.isActive,
     createdAt: row.createdAt,

@@ -5,21 +5,26 @@ import { logger } from "@/backend/lib/logger";
 import { CurrencyHedgeService } from "@/backend/services/fx/currency-hedge.service";
 import type { CurrencyHedgeSelectType } from "@/backend/types";
 
-function createHedgeMap<TKey extends CurrencyCode>(
-  rows: CurrencyHedgeSelectType[]
-): Map<TKey, CurrencyHedgeSelectType> {
-  const map = new Map<TKey, CurrencyHedgeSelectType>();
+function createHedgeMap(rows: CurrencyHedgeSelectType[]): Map<CurrencyCode, CurrencyHedgeSelectType> {
+  const map = new Map<CurrencyCode, CurrencyHedgeSelectType>();
   for (const row of rows) {
-    map.set(row.currency as TKey, row);
+    map.set(row.currency, row);
   }
   return map;
 }
 
-const HEDGE_SPECS = [
+interface HedgeSpec {
+  currency: CurrencyCode;
+  amount: string;
+  hedgeType: string;
+  notes: string;
+}
+
+const HEDGE_SPECS: readonly HedgeSpec[] = [
   { currency: CurrencyCode.USD, amount: "10000.00", hedgeType: "LONG", notes: "USD exposure hedge" },
   { currency: CurrencyCode.EGP, amount: "250000.00", hedgeType: "SHORT", notes: "EGP exposure hedge" },
   { currency: CurrencyCode.SAR, amount: "50000.00", hedgeType: "LONG", notes: "SAR exposure hedge" },
-] as const;
+];
 
 export async function seedOrGet(config?: SeedConfig) {
   logger.info("Seeding currency hedges...");

@@ -4,7 +4,7 @@
 > **Plan #**: 04
 > **Dependencies**: Plan 1 (DB Schema & Enums), Plan 2 (Types & Permissions), Plan 3 (Repository Layer)
 > **Execution Model**: Sequential per task (each task produces files the next task imports)
-> **Quality Model**: Per-file tsgo + biome + lint via `scripts/health/sub-loop.ts`
+> **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
 ---
@@ -85,22 +85,17 @@ T01 (i18n schema) ──────────────┐
 
 ### Quality Loop
 
-For each file created:
+Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check -- <file>
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"t01","files":["<file>"]}'
-```
-
-Or equivalently:
-```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/certificates.errors.services.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/certificates.errors.services.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/certificates.errors.services.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/certificates.notifications.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/certificates.notifications.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/certificates.notifications.ts --lifecycle codescene
 ```
 
 ### Verification
-- `bun tsgo` passes with zero new type errors
 - Arabic pluralization covers all six forms for `categoryHasTemplates`
 - No hardcoded English or Arabic strings in service files (they will use `tErrors`)
 
@@ -137,7 +132,7 @@ it's only "complete" after T12.
 
 Run only after all T03-T12 services are added:
 ```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle codescene
 ```
 
 ---
@@ -185,9 +180,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle li
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/certificate-generation.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/certificate-generation.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - `bun tsgo` passes with zero new type errors
@@ -234,9 +230,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/certificate-generation.
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/certificate-batch.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/certificate-batch.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - Batch loops without rolling back succeeded certificates
@@ -277,9 +274,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/certificate-batch.servi
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/certificate-revocation.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/certificate-revocation.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - Revoking non-issued certificate throws `tErrors.certificateNotRevocable`
@@ -328,9 +326,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/certificate-revocation.
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/certificate-verification.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/certificate-verification.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - No permission check (public)
@@ -371,9 +370,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/certificate-verificatio
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/certificate-expiry.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/certificate-expiry.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - Idempotent — no double status update or audit log
@@ -416,9 +416,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/certificate-expiry.serv
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/template-management.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/template-management.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - `publish` rejects empty templates
@@ -468,9 +469,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/template-management.ser
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/template-element.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/template-element.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - Each element type validated per decision table
@@ -515,9 +517,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/template-element.servic
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/template-variable.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/template-variable.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - Variable `key` uniqueness enforced within template
@@ -561,9 +564,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/template-variable.servi
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/recipient-group.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/recipient-group.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - Duplicate student membership rejected with `tErrors.studentAlreadyInGroup`
@@ -605,9 +609,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/recipient-group.service
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/category.service.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/category.service.ts --lifecycle codescene
+  ```
 
 ### Verification
 - Circular reference detection works (target parent not a descendant of moved category)
@@ -648,9 +653,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/category.service.ts --l
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/cache.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/cache.ts --lifecycle codescene
+  ```
 
 ### Verification
 - All helpers catch errors and log via `logger.warn` (never throw)
@@ -683,9 +689,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/cache.ts --lifecycle li
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle codescene
+  ```
 
 ### Verification
 - `bun tsgo` passes — all imports resolve
@@ -707,9 +714,10 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle li
 
 ### Quality Loop
 
-```bash
-bun run scripts/health/sub-loop.ts backend/services/index.ts --lifecycle lint
-```
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/index.ts --lifecycle codescene
+  ```
 
 ### Verification
 - `bun tsgo` passes — `import { CertificateGenerationService } from "@/backend/services"` resolves
@@ -746,9 +754,7 @@ bun run scripts/health/sub-loop.ts backend/services/index.ts --lifecycle lint
 
 4. **Run** full-repo quality gate to verify no regressions:
    ```bash
-   bun run lint
-   bun tsgo
-   bun biome:check
+   bun quality-gate
    ```
 
 ### Verification

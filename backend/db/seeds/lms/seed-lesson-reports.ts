@@ -1,6 +1,6 @@
 import type { SeedConfig } from "@/backend/db/seeds/lib";
 import { findAdminUserOrFallback, findSupervisorUserOrFallback } from "@/backend/db/seeds/lib";
-import { AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
+import { AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 import type {
@@ -102,9 +102,7 @@ export async function seedOrGet(
     return [];
   }
 
-  const completedInstances = classInstancesList.filter(
-    instance => instance.executionState === ClassExecutionState.COMPLETED
-  );
+  const completedInstances = classInstancesList.filter(instance => instance.executionState === "COMPLETED");
   if (completedInstances.length === 0) {
     logger.warn("No COMPLETED class instances available — skipping lesson reports seed.");
     return [];
@@ -118,37 +116,35 @@ export async function seedOrGet(
 
   const specs = buildReportSpecs(completedInstances, studentById, teacherById);
 
-  const results: (LessonReportReturnType | null)[] = [];
+  const results = await Promise.all(
+    specs.map(async spec => {
+      const submittedByUserId = teacherUserIdById.get(spec.classInstance.teacherId) ?? adminUser?.id;
+      if (!submittedByUserId) {
+        logger.warn("No submitter user id available — skipping lesson report.");
+        return null;
+      }
 
-  for (const spec of specs) {
-    const submittedByUserId = teacherUserIdById.get(spec.classInstance.teacherId) ?? adminUser?.id;
-    if (!submittedByUserId) {
-      logger.warn("No submitter user id available — skipping lesson report.");
-      continue;
-    }
+      const isReviewed = spec.status === LessonReportStatus.APPROVED || spec.status === LessonReportStatus.REJECTED;
+      const reviewedByUserId = isReviewed ? (supervisorUser?.id ?? submittedByUserId) : null;
+      const reviewedAt = isReviewed ? (spec.classInstance.actualEndAt ?? spec.classInstance.scheduledEndAt) : null;
 
-    const isReviewed = spec.status === LessonReportStatus.APPROVED || spec.status === LessonReportStatus.REJECTED;
-    const reviewedByUserId = isReviewed ? (supervisorUser?.id ?? submittedByUserId) : null;
-    const reviewedAt = isReviewed ? (spec.classInstance.actualEndAt ?? spec.classInstance.scheduledEndAt) : null;
-
-    const report = await LessonReportService.seedLessonReportIfMissing({
-      classInstanceId: spec.classInstance.id,
-      studentId: spec.classInstance.studentId,
-      teacherId: spec.classInstance.teacherId,
-      lessonDate: spec.classInstance.scheduledStartAt,
-      durationMinutes: spec.classInstance.durationMinutes,
-      attendanceEvaluation: spec.attendanceEvaluation,
-      teacherNotes: spec.teacherNotes,
-      completionPercentage: spec.completionPercentage,
-      status: spec.status,
-      submittedByUserId,
-      reviewedByUserId,
-      reviewedAt,
-      rejectionReason: spec.rejectionReason,
-    });
-
-    results.push(report);
-  }
+      return LessonReportService.seedLessonReportIfMissing({
+        classInstanceId: spec.classInstance.id,
+        studentId: spec.classInstance.studentId,
+        teacherId: spec.classInstance.teacherId,
+        lessonDate: spec.classInstance.scheduledStartAt,
+        durationMinutes: spec.classInstance.durationMinutes,
+        attendanceEvaluation: spec.attendanceEvaluation,
+        teacherNotes: spec.teacherNotes,
+        completionPercentage: spec.completionPercentage,
+        status: spec.status,
+        submittedByUserId,
+        reviewedByUserId,
+        reviewedAt,
+        rejectionReason: spec.rejectionReason,
+      });
+    })
+  );
 
   const seeded = results.filter((row): row is LessonReportReturnType => row != null);
   logger.info(`LMS lesson reports seeded (${seeded.length} rows).`);

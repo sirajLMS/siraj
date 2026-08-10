@@ -108,9 +108,10 @@
 
 **Dependency Graph (what must be sequential):**
 ```
-Phase 0 (baseline) → Phase 1 (parallel wave) → Phase 1.5 (plan review)
-→ Phase 2 (parallel wave) → Phase 2.5 (mid-point review)
-→ Phase 3 (sequential consolidation) → Phase 4 (verification)
+Phase 0 (baseline) → Phase 1 (parallel: 11 subagents) → Phase 1.5 (plan review)
+→ Phase 2 (parallel: 19 subagents) → Phase 2.5 (mid-point review)
+→ Phase 3 (partial parallel: 3.1+3.2 simultaneous, then 3.3, then 3.4)
+→ Phase 4 (sequential verification: 4.1 → 4.2 → 4.3 → 4.4 → 4.5)
 ```
 
 **Parallel Dispatch Model:**
@@ -118,7 +119,8 @@ Phase 0 (baseline) → Phase 1 (parallel wave) → Phase 1.5 (plan review)
 - Phase 1 Verification (1.12): Runs **after** all Phase 1 subagents complete — aggregates results
 - Phase 2: Dispatch **all 19 tasks (2.1–2.19) simultaneously** as background `general-purpose` subagents
 - Phase 2 Verification (2.20): Runs **after** all Phase 2 subagents complete — aggregates results
-- Phases 3 and 4: Sequential (cross-cutting analysis dependencies)
+- Phase 3: Tasks 3.1 + 3.2 dispatched in parallel (different directories); 3.3 and 3.4 sequential (depend on jscpd re-analysis)
+- Phase 4: Sequential (global verification gates)
 
 **Subagent Prompt Contract:**
 Each parallel subagent receives:
@@ -765,8 +767,9 @@ Each parallel subagent receives:
 
 ### Phase 3: Complex Consolidation — Within-Common Duplications (Higher Risk)
 
-- [ ] 3.1 Complete CatalogImageUpload partial extraction
-  <!-- DISPATCH: SEQUENTIAL (orchestrator-executed, depends on Phase 2.5 review completion) -->
+**PARTIAL PARALLELISM**: Tasks 3.1 and 3.2 operate on different directories (`catalogImageUpload/` vs `excel-export/`) and can be dispatched in parallel. Tasks 3.3 and 3.4 depend on jscpd re-analysis after prior tasks complete, so they run sequentially.
+  - [ ] 3.1 Complete CatalogImageUpload partial extraction
+  <!-- DISPATCH: PARALLEL with 3.2 (different directories — catalogImageUpload vs excel-export) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/input/catalogImageUpload/CatalogImageUpload.tsx` ↔ `frontend/common/components/ui/input/catalogImageUpload/catalogImageUploadShared.tsx` (1083 tokens / 209 lines — 7 clones — partial extraction was started but not completed)
   - **VERIFY FIRST:** Inspect `catalogImageUploadShared.tsx` to understand what was already extracted
@@ -782,7 +785,7 @@ Each parallel subagent receives:
   - [ ] 3.1.OUT **Outcome File**: Write `outcome/3.1-catalog-image-upload-completion-outcome.md`
 
 - [ ] 3.2 Consolidate excel-export utilities (parent-directory-export ↔ tracking-export)
-  <!-- DISPATCH: SEQUENTIAL (can parallel with 3.1 if preferred — different directory) -->
+  <!-- DISPATCH: PARALLEL with 3.1 (different directories — excel-export vs catalogImageUpload) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/utils/excel-export/parent-directory-export.ts` ↔ `frontend/common/utils/excel-export/tracking-export.ts` (810 tokens / 121 lines — 4 clones)
   - **VERIFY FIRST:** Determine if the duplication is intentional (different export schemas) or extractable (shared export logic)
@@ -926,6 +929,82 @@ Each parallel subagent receives:
 
 ---
 
+## Parallel Subagent Prompt Template (for Orchestrator)
+
+When dispatching Phase 1 or Phase 2 tasks as parallel subagents, the orchestrator constructs a prompt using this template. Replace `<TASK_DESCRIPTION>` with the full task entry verbatim from this file, and fill in the placeholders.
+
+```
+You are a parallel subagent executing Task <TASK_ID> of the duplications-phase2 plan.
+
+## Your Task
+
+<TASK_DESCRIPTION — copy the full - [ ] X.Y task entry verbatim, including all sub-bullets>
+
+## Execution Protocol
+
+1. Read ALL outcome files in `.ai/plans/duplications-phase2/outcome/` FIRST to absorb prior context.
+2. Read the reference scaffold: `frontend/common/components/ui/dialog/baseDeleteDialogShared.tsx`
+3. Read the pattern docs: `docs/frontend/ui-shared-scaffold-pattern.md`
+4. Read ALL applicable AGENTS.md files (see Layer-to-Instructions Mapping in tasks.md):
+   - `/home/ahmed/Projects/siraj/AGENTS.md` (root — always)
+   - <AGENTS_MD_FILES_FOR_THIS_COMPONENT>
+5. Read applicable instruction files:
+   - <INSTRUCTION_FILES_FOR_THIS_COMPONENT>
+6. Implement the scaffold and refactor variants per the task description.
+7. For EACH modified file, run the per-file quality loop:
+   `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene`
+   This runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene progressively,
+   short-circuiting at first failure. Fix ALL errors before moving to the next file.
+8. Run `bun check:duplicates` to confirm the clone cluster was eliminated.
+9. Write your outcome file: `.ai/plans/duplications-phase2/outcome/<TASK_ID>-outcome.md`
+   Include: scaffold interface, slot props, behavioral changes (if any), cross-file dependencies.
+
+## Critical Rules
+
+- **MUI v9 COMPLIANCE**: All styling via `sx` prop; NEVER direct style props (fontWeight, textAlign, mb, mt, p, display, gap, alignItems, justifyContent, flexWrap, component); icons MUST use `*Outlined` naming.
+- **CROSS-TIER IMPORT CHECK**: Desktop/mobile variants import ONLY from the scaffold path (`@/common/components/ui/.../<Component>Shared` or `@/views/.../__shared__/<Component>Shared`). NEVER from each other's tier-specific paths.
+- **AGGRESSIVE CONSOLIDATION** (Phase 2 only): Extract ALL shared logic to scaffold. Keep only genuinely different behavior in tier variants.
+- **NO `console.*`**: Use `logger` from `@/frontend/utils/logger`.
+- **Path aliases**: Use `@/` prefix for all imports (never relative `./` or `../`).
+
+## Completion Criteria
+
+- [ ] Scaffold file created with slot props
+- [ ] All variant files refactored to consume scaffold
+- [ ] Per-file quality loop passed for ALL modified files (tsgo + biome + lint + codescene)
+- [ ] `bun check:duplicates` confirms clone elimination for this cluster
+- [ ] Outcome file written to `.ai/plans/duplications-phase2/outcome/<TASK_ID>-outcome.md`
+```
+
+### Orchestrator Dispatch Example (Phase 1)
+
+The orchestrator dispatches all 11 Phase 1 subagents in a **single response** using the `task` tool, 11 times in parallel:
+
+```
+Task 1.1: agent_type="general-purpose", mode="background", name="scaffold-1.1"
+Task 1.2: agent_type="general-purpose", mode="background", name="scaffold-1.2"
+...
+Task 1.11: agent_type="general-purpose", mode="background", name="scaffold-1.11"
+```
+
+After all 11 completion notifications arrive, the orchestrator:
+1. Calls `read_agent` for each to verify success
+2. Checks all 11 outcome files exist
+3. Runs Task 1.12 (verification) directly
+4. Updates all checkboxes in `tasks.md`
+5. Proceeds to Task 1.5 (plan review)
+
+### Orchestrator Dispatch Example (Phase 2)
+
+Same model — 19 subagents dispatched simultaneously. After all 19 complete:
+1. `read_agent` for each
+2. Check all 19 outcome files
+3. Run Task 2.20 (verification) directly
+4. Update all checkboxes
+5. Proceed to Task 2.5 (mid-point review)
+
+---
+
 ## Task Execution Checklist
 
 ### Before Starting Each Task
@@ -934,6 +1013,16 @@ Each parallel subagent receives:
 - [ ] Development environment is set up
 - [ ] Task scope and acceptance criteria are clear
 - [ ] **ALL outcome files in `.ai/plans/duplications-phase2/outcome/` AND `../duplications/outcome/` have been read**
+- [ ] **For parallel tasks:** Verify no other subagent is modifying files in the same component directory (shouldn't happen — tasks are directory-independent, but verify)
+
+### For Parallel Subagent Tasks (Phase 1 & Phase 2 Implementation)
+- [ ] Subagent prompt constructed using the Parallel Subagent Prompt Template
+- [ ] Subagent receives full task description, AGENTS.md paths, instruction file paths, quality loop command
+- [ ] Subagent dispatches all Phase 1 (or Phase 2) tasks in a **single response** (maximum parallelism)
+- [ ] Orchestrator waits for all completion notifications before running verification task
+- [ ] Orchestrator verifies all outcome files were created
+- [ ] Orchestrator runs `bun tsgo` globally to catch cross-file type errors (shouldn't be any, but verify)
+- [ ] Orchestrator updates all task checkboxes after verification passes
 
 ### During Implementation
 - [ ] Code follows established patterns and standards (especially `docs/frontend/ui-shared-scaffold-pattern.md`)

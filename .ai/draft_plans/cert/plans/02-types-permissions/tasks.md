@@ -4,7 +4,7 @@
 > **Plan #**: 02
 > **Dependencies**: Plan 1 (DB Schema & Enums) — provides Drizzle table definitions
 > **Execution Model**: Sequential per task (each task produces types the next task imports)
-> **Quality Model**: Per-file tsgo + biome + lint via `scripts/health/sub-loop.ts`
+> **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
 ---
@@ -77,13 +77,14 @@ T01 (enums in backend/enum) ──→ T02 (entity types: Template)
 
 For each file:
 ```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/enum/certificates/index.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/enum/index.ts --lifecycle codescene
 ```
 
 ### Verification
 - All 11 TypeScript enums exported
 - No `label/labelAr/description/descriptionAr` fields co-located in the enum files (display labels are added in T12 via `shared/locale/`)
-- `bun tsgo` passes with zero new type errors
+- Per-file quality loop passes with zero type errors
 
 ---
 
@@ -109,7 +110,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/template.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/template.types.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -136,7 +137,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/template.types.ts 
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/certificate.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/certificate.types.ts --lifecycle codescene
 ```
 
 ---
@@ -156,7 +157,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/certificate.types.
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/category.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/category.types.ts --lifecycle codescene
 ```
 
 ---
@@ -183,8 +184,8 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/category.types.ts 
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/templateElement.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/templateVariable.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/templateElement.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/templateVariable.types.ts --lifecycle codescene
 ```
 
 ---
@@ -214,9 +215,9 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/templateVariable.t
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroup.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItem.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItemVariableValue.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroup.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItem.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItemVariableValue.types.ts --lifecycle codescene
 ```
 
 ---

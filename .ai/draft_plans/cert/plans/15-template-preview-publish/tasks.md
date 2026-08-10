@@ -87,11 +87,17 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Create `shared/locale/ar/dashboard/certificatePreview/index.ts` — Arabic translations including Arabic pluralization rules (zero/one/two/few/many) for `elementCount`, `variableCount`, `certificateCount`, `archive.confirmMessage`, `duplicateNames`
 - [ ] Wire into `Translation.Dashboard.CertificatePreview` handle in the main `Translations` type
 - [ ] Check the i18n handle signature conforms to Siraj's compile-time TS i18n system — `getTranslations(locale)` returns full `Translations` object (no namespace arg), `useAppTranslation(Translation.Dashboard.CertificatePreview)`, `ctx.t().dashboardTranslations.certificatePreview.*`
-- [ ] **Quality loop per file**: run `bun tsgo`, `bun biome:check`, `bun run lint` (via lint queue client for each file), `bun run codescene --file <file>` on each of the 5+ locale files
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificatePreview/index.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/certificatePreview/index.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificatePreview/index.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificatePreview/index.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/i18n.types.test.ts --lifecycle codescene
+  ```
 - [ ] **Instruction verification**: read `shared/AGENTS.md` and `.github/instructions/frontend.instructions.md` before editing; confirm no forbidden imports from `@/frontend/**`, `@/backend/**`, `@/app/**`
 - [ ] **Testing**: add unit test in `test/ui/components/cert-preview/i18n.types.test.ts` verifying type signatures compile and pluralization functions execute correctly for EN/AR
 - [ ] **Knowledge propagation**: document i18n namespace structure in outcome file; add reference to `frontend/AGENTS.md` Important References
-- [ ] Run quality loop on all 5+ locale files
 - [ ] Verify against: `shared/AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - **Requirements**: AC-I18N-01 (all keys in both EN/AR, pluralization follows Arabic rules, interpolation uses typed functions), REQ-PREVIEW-03, REQ-PUBLISH-01, REQ-ARCHIVE-02, REQ-REVERT-02, REQ-VERSION-01
 - **Files created**: `shared/locale/types/dashboard/certificatePreview/index.ts`, `shared/locale/namespaces/dashboard/certificatePreview/index.ts`, `shared/locale/en/dashboard/certificatePreview/index.ts`, `shared/locale/ar/dashboard/certificatePreview/index.ts`, `test/ui/components/cert-preview/i18n.types.test.ts`
@@ -112,7 +118,12 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Import hooks from `"@apollo/client/react"`, not `"@apollo/client"` (NO `useLazyQuery`)
 - [ ] Re-export all documents from `frontend/common/graphql/sharedDocuments/certificates/index.ts` barrel
 - [ ] Run GraphQL codegen: `bun run generate:gqlSchema` then `bun codegen` if schema/generated types are needed
-- [ ] **Quality loop**: run `bun tsgo`, `bun biome:check`, `bun run lint` (via lint queue client for the documents file and barrel), `bun run codescene --file <file>` on created files
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/preview.documents.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/test/preview.test.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/index.ts --lifecycle codescene
+  ```
 - [ ] **Instruction verification**: read `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.github/instructions/frontend.instructions.md` before editing; confirm all documents include `id` field, no `useLazyQuery`, naming convention `{entityName}QueryDocument` / `{entityName}MutationDocument`
 - [ ] **Testing**: add integration test in `frontend/common/graphql/test/preview.test.ts` verifying documents parse and match expected shape; verify `TemplateForPreviewQueryDocument` includes all required fields for preview rendering
 - [ ] **Knowledge propagation**: document GraphQL document structure in outcome file; add to `frontend/common/graphql/AGENTS.md` if new patterns emerged

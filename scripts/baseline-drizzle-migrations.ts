@@ -78,10 +78,7 @@ async function recordMigration(migration: MigrationRow): Promise<void> {
   `);
 }
 
-async function processPendingMigrations(
-  migrations: MigrationRow[],
-  recordedNames: Set<string>
-): Promise<number> {
+async function processPendingMigrations(migrations: MigrationRow[], recordedNames: Set<string>): Promise<number> {
   let baselined = 0;
 
   const processNext = async (index: number): Promise<void> => {

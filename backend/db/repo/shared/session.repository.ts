@@ -52,6 +52,38 @@ export namespace SessionRepository {
   }
 
   /**
+   * Map a Redis session to a SessionSelectType return shape.
+   */
+  function mapRedisSession(redisSession: RedisSessionData): SessionSelectType {
+    return {
+      hashedId: redisSession.hashedId,
+      userId: redisSession.userId,
+      ipAddress: redisSession.ipAddress || null,
+      userAgent: redisSession.userAgent || null,
+      payload: redisSession.payload,
+      lastActivity: BigInt(Math.floor(new Date(redisSession.lastActivityAt).getTime() / 1000)),
+    };
+  }
+
+  /**
+   * Build an inline session result from create/update inputs.
+   */
+  function buildSessionResult(
+    hashedId: string,
+    input: { userId: string; ipAddress?: string | null; userAgent?: string | null; payload: string },
+    now: Date
+  ): SessionSelectType {
+    return {
+      hashedId,
+      userId: input.userId,
+      ipAddress: input.ipAddress || null,
+      userAgent: input.userAgent || null,
+      payload: input.payload,
+      lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
+    };
+  }
+
+  /**
    * Get session configuration for a role
    */
   export const getSessionConfig = async (
@@ -112,17 +144,7 @@ export namespace SessionRepository {
       if (redisSessionsEnabled()) {
         const redisService = await getSessionRedisService();
         const redisSession = await redisService.getSession(hashedId);
-
-        if (redisSession) {
-          return {
-            hashedId: redisSession.hashedId,
-            userId: redisSession.userId,
-            ipAddress: redisSession.ipAddress || null,
-            userAgent: redisSession.userAgent || null,
-            payload: redisSession.payload,
-            lastActivity: BigInt(Math.floor(new Date(redisSession.lastActivityAt).getTime() / 1000)),
-          };
-        }
+        if (redisSession) return mapRedisSession(redisSession);
       }
 
       return await db
@@ -433,14 +455,7 @@ export namespace SessionRepository {
       .set({ lastActivityAt: now, expiresAt })
       .where(eq(sessionMetadata.sessionId, hashedId));
 
-    return {
-      hashedId: session.hashedId,
-      userId: session.userId,
-      ipAddress: session.ipAddress || null,
-      userAgent: session.userAgent || null,
-      payload: session.payload,
-      lastActivity: BigInt(Math.floor(new Date(session.lastActivityAt).getTime() / 1000)),
-    };
+    return mapRedisSession(session);
   };
 
   /**
@@ -452,16 +467,7 @@ export namespace SessionRepository {
       if (redisSessionsEnabled()) {
         const redisService = await getSessionRedisService();
         const redisSession = await redisService.getSession(hmacHash);
-        if (redisSession) {
-          return {
-            hashedId: redisSession.hashedId,
-            userId: redisSession.userId,
-            ipAddress: redisSession.ipAddress || null,
-            userAgent: redisSession.userAgent || null,
-            payload: redisSession.payload,
-            lastActivity: BigInt(Math.floor(new Date(redisSession.lastActivityAt).getTime() / 1000)),
-          };
-        }
+        if (redisSession) return mapRedisSession(redisSession);
       }
 
       return await db

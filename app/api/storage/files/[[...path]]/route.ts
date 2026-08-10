@@ -1,7 +1,6 @@
-import { createReadStream, statSync } from "node:fs";
+import { createReadStream, type ReadStream, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { Readable } from "node:stream";
 import { type NextRequest, NextResponse } from "next/server";
 import {
   extractTokenFromHeader,
@@ -47,6 +46,16 @@ async function getRelativePath(params: Promise<{ path?: string[] }>): Promise<st
 }
 
 /**
+ * Convert a Node.js ReadStream into an async generator yielding Buffer chunks.
+ * Bun's BodyInit accepts AsyncGenerator<ArrayBufferView>, which Buffer satisfies.
+ */
+async function* streamToAsyncIterable(stream: ReadStream): AsyncGenerator<Buffer> {
+  for await (const chunk of stream) {
+    yield chunk as Buffer;
+  }
+}
+
+/**
  * Options for generating a range response
  */
 interface RangeResponseOptions {
@@ -74,7 +83,7 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
   const { start, end } = range;
   const chunkSize = end - start + 1;
   const stream = createReadStream(absolutePath, { start, end });
-  const body = new Response(Readable.toWeb(stream)).body;
+  const body = streamToAsyncIterable(stream);
 
   return new NextResponse(body, {
     status: 206,
@@ -128,8 +137,7 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
   }
 
   const stream = createReadStream(absolutePath);
-  const webStream = Readable.toWeb(stream);
-  const body = new Response(webStream).body;
+  const body = streamToAsyncIterable(stream);
 
   return new NextResponse(body, {
     status: 200,
