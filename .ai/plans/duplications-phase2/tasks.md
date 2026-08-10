@@ -37,9 +37,8 @@
 ### Quality Loop Subtask (X.Y.QL)
 ```markdown
 - [ ] X.Y.QL **Quality Loop**: Per-file verification on `<file-path>`
-  - Run: `bun tsgo`
-  - Run: `bun biome:check`
-  - Run: `bun run scripts/lint-service.ts -f <file-path> --id verify`
+  - Run: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene`
+  - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
   - Fix all errors before proceeding
 ```
 
@@ -129,9 +128,8 @@
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.1.QL **Quality Loop**: Per-file verification on `CurrencyAutocompleteShared.tsx`, `CurrencyAutocomplete.tsx`, `currencyAutocomplete.desktop.tsx`, `currencyAutocomplete.mobile.tsx`
-    - Run: `bun tsgo`
-    - Run: `bun biome:check`
-    - Run: `bun run scripts/lint-service.ts -f <each-file> --id verify`
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
 
   - [ ] 1.1.OUT **Outcome File**: Write `outcome/1.1-currency-autocomplete-shared-outcome.md`
@@ -149,6 +147,9 @@
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.2.QL **Quality Loop**: Per-file verification on all 4 files (scaffold + 3 variants)
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.2.OUT **Outcome File**: Write `outcome/1.2-phone-input-shared-outcome.md`
 
 - [ ] 1.3 Create PaymentMethodDisplayShared scaffold and refactor 3 variants
@@ -161,6 +162,9 @@
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.3.QL **Quality Loop**: Per-file verification on all 4 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.3.OUT **Outcome File**: Write `outcome/1.3-payment-method-display-shared-outcome.md`
 
 - [ ] 1.4 Create UserPaymentMethodAutocompleteShared scaffold and refactor 3 variants
@@ -173,6 +177,9 @@
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.4.QL **Quality Loop**: Per-file verification on all 4 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.4.OUT **Outcome File**: Write `outcome/1.4-user-payment-method-autocomplete-shared-outcome.md`
 
 - [ ] 1.5 Create EditableTypographyShared scaffold and refactor 3 variants
@@ -185,6 +192,9 @@
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.5.QL **Quality Loop**: Per-file verification on all 4 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.5.OUT **Outcome File**: Write `outcome/1.5-editable-typography-shared-outcome.md`
 
 - [ ] 1.6 Create TagInputShared scaffold and refactor 3 variants
@@ -198,6 +208,9 @@
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.6.QL **Quality Loop**: Per-file verification on all 4 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.6.OUT **Outcome File**: Write `outcome/1.6-tag-input-shared-outcome.md`
 
 - [ ] 1.7 Create CountryAutocompleteShared scaffold and refactor 3 variants
@@ -210,6 +223,9 @@
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.7.QL **Quality Loop**: Per-file verification on all 4 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.7.OUT **Outcome File**: Write `outcome/1.7-country-autocomplete-shared-outcome.md`
 
 - [ ] 1.8 Create MeetingJoinActionShared scaffold and refactor 2 variants (common + desktop)
@@ -222,6 +238,9 @@
   - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.8.QL **Quality Loop**: Per-file verification on all 3 files (scaffold + 2 variants)
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.8.OUT **Outcome File**: Write `outcome/1.8-meeting-join-action-shared-outcome.md`
 
 - [ ] 1.9 Create MeetingConfigDisplayShared scaffold and refactor 2 variants (common + desktop)
@@ -234,6 +253,9 @@
   - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.9.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.9.OUT **Outcome File**: Write `outcome/1.9-meeting-config-display-shared-outcome.md`
 
 - [ ] 1.10 Create PaymentMethodAutocompleteShared scaffold and refactor 2 variants (common + desktop)
@@ -247,6 +269,9 @@
   - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.10.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.10.OUT **Outcome File**: Write `outcome/1.10-payment-method-autocomplete-shared-outcome.md`
 
 - [ ] 1.11 Create PaginationControlsShared scaffold and refactor 2 variants (common + mobile)
@@ -259,6 +284,9 @@
   - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 1.11.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.11.OUT **Outcome File**: Write `outcome/1.11-pagination-controls-shared-outcome.md`
 
 - [ ] 1.12 Phase 1 verification — run `bun check:duplicates` and `bun run test:ui:components`
@@ -270,6 +298,9 @@
   - _Requirements: REQ-1, REQ-6, REQ-8_
 
   - [ ] 1.12.QL **Quality Loop**: Per-file verification on any test files modified
+    - Run: `bun run scripts/health/sub-loop.ts <each-test-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 1.12.OUT **Outcome File**: Write `outcome/1.12-phase1-verification-outcome.md`
 
 ### Phase 1.5: Plan Review Gate (MANDATORY)
@@ -309,6 +340,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.1.QL **Quality Loop**: Per-file verification on all 3 files (scaffold + 2 variants)
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.1.OUT **Outcome File**: Write `outcome/2.1-localized-string-drawer-shared-outcome.md`
     - Include "Behavioral Changes" section if consolidation changed behavior
 
@@ -322,6 +356,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.2.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.2.OUT **Outcome File**: Write `outcome/2.2-management-controls-card-shared-outcome.md`
 
 - [ ] 2.3 Create meetingProviderFormShared scaffold and refactor desktop + mobile variants
@@ -334,6 +371,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.3.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.3.OUT **Outcome File**: Write `outcome/2.3-meeting-provider-form-shared-outcome.md`
 
 - [ ] 2.4 Create studentStatusHeaderShared scaffold and refactor desktop + mobile variants
@@ -346,6 +386,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.4.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.4.OUT **Outcome File**: Write `outcome/2.4-student-status-header-shared-outcome.md`
 
 - [ ] 2.5 Create complaintFormFieldsShared scaffold and refactor desktop + mobile variants
@@ -358,6 +401,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.5.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.5.OUT **Outcome File**: Write `outcome/2.5-complaint-form-fields-shared-outcome.md`
 
 - [ ] 2.6 Create complaintQueueCardShared scaffold and refactor desktop + mobile variants
@@ -370,6 +416,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.6.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.6.OUT **Outcome File**: Write `outcome/2.6-complaint-queue-card-shared-outcome.md`
 
 - [ ] 2.7 Create jumpToDateHeaderShared scaffold and refactor desktop + mobile variants
@@ -382,6 +431,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.7.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.7.OUT **Outcome File**: Write `outcome/2.7-jump-to-date-header-shared-outcome.md`
 
 - [ ] 2.8 Create futureClassCardShared scaffold and refactor desktop + mobile variants
@@ -394,6 +446,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.8.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.8.OUT **Outcome File**: Write `outcome/2.8-future-class-card-shared-outcome.md`
 
 - [ ] 2.9 Create miniCalendarShared scaffold and refactor desktop + mobile variants
@@ -406,6 +461,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.9.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.9.OUT **Outcome File**: Write `outcome/2.9-mini-calendar-shared-outcome.md`
 
 - [ ] 2.10 Create studentInformationSectionShared scaffold and refactor desktop + mobile variants
@@ -418,6 +476,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.10.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.10.OUT **Outcome File**: Write `outcome/2.10-student-information-section-shared-outcome.md`
 
 - [ ] 2.11 Create searchScheduleFilterDrawerShared scaffold and refactor desktop + mobile variants
@@ -431,6 +492,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.11.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.11.OUT **Outcome File**: Write `outcome/2.11-search-schedule-filter-drawer-shared-outcome.md`
 
 - [ ] 2.12 Create meetingIntegrationsTabShared scaffold and refactor desktop + mobile variants
@@ -443,6 +507,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.12.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.12.OUT **Outcome File**: Write `outcome/2.12-meeting-integrations-tab-shared-outcome.md`
 
 - [ ] 2.13 Create courseDetailsSectionShared scaffold and refactor desktop + mobile variants
@@ -455,6 +522,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.13.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.13.OUT **Outcome File**: Write `outcome/2.13-course-details-section-shared-outcome.md`
 
 - [ ] 2.14 Create weeklyAvailabilityGridShared scaffold and refactor desktop + mobile variants
@@ -467,6 +537,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.14.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.14.OUT **Outcome File**: Write `outcome/2.14-weekly-availability-grid-shared-outcome.md`
 
 - [ ] 2.15 Create teacherAvailabilityMonthDrawerShared scaffold and refactor desktop + mobile variants
@@ -479,6 +552,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.15.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.15.OUT **Outcome File**: Write `outcome/2.15-teacher-availability-month-drawer-shared-outcome.md`
 
 - [ ] 2.16 Create parentProfileShared scaffold and refactor desktop + mobile variants
@@ -491,6 +567,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.16.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.16.OUT **Outcome File**: Write `outcome/2.16-parent-profile-shared-outcome.md`
 
 - [ ] 2.17 Create suspensionAnalyticsShared scaffold and refactor desktop + mobile variants
@@ -503,6 +582,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.17.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.17.OUT **Outcome File**: Write `outcome/2.17-suspension-analytics-shared-outcome.md`
 
 - [ ] 2.18 Create staffProfileShared scaffold and refactor desktop + mobile variants
@@ -516,6 +598,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.18.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.18.OUT **Outcome File**: Write `outcome/2.18-staff-profile-shared-outcome.md`
 
 - [ ] 2.19 Create editCategoryDialogShared scaffold and refactor desktop + mobile variants
@@ -528,6 +613,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
   - [ ] 2.19.QL **Quality Loop**: Per-file verification on all 3 files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.19.OUT **Outcome File**: Write `outcome/2.19-edit-category-dialog-shared-outcome.md`
 
 - [ ] 2.20 Phase 2 verification — run `bun check:duplicates` and `bun run test:ui:components`
@@ -539,6 +627,9 @@
   - _Requirements: REQ-2, REQ-6, REQ-8_
 
   - [ ] 2.20.QL **Quality Loop**: Per-file verification on any test files modified
+    - Run: `bun run scripts/health/sub-loop.ts <each-test-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 2.20.OUT **Outcome File**: Write `outcome/2.20-phase2-verification-outcome.md`
 
 ### Phase 2.5: Mid-Point Review Gate (CONDITIONAL — Plan has >15 tasks AND distinct frontend phases)
@@ -571,6 +662,9 @@
   - _Requirements: REQ-3, REQ-6, REQ-7, REQ-12, REQ-13_
 
   - [ ] 3.1.QL **Quality Loop**: Per-file verification on `CatalogImageUpload.tsx`, `catalogImageUploadShared.tsx`, `catalogImageUpload.desktop.tsx`
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 3.1.OUT **Outcome File**: Write `outcome/3.1-catalog-image-upload-completion-outcome.md`
 
 - [ ] 3.2 Consolidate excel-export utilities (parent-directory-export ↔ tracking-export)
@@ -583,6 +677,9 @@
   - _Requirements: REQ-3, REQ-6, REQ-7_
 
   - [ ] 3.2.QL **Quality Loop**: Per-file verification on modified files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 3.2.OUT **Outcome File**: Write `outcome/3.2-excel-export-consolidation-outcome.md`
 
 - [ ] 3.3 Investigate and consolidate top 10 within-common duplications
@@ -596,6 +693,9 @@
   - _Requirements: REQ-3, REQ-6, REQ-7_
 
   - [ ] 3.3.QL **Quality Loop**: Per-file verification on all modified files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 3.3.OUT **Outcome File**: Write `outcome/3.3-within-common-consolidation-outcome.md`
     - Include table of all 10 clusters with disposition (eliminated / documented / deferred)
 
@@ -610,6 +710,9 @@
   - _Requirements: REQ-3, REQ-6, REQ-7_
 
   - [ ] 3.4.QL **Quality Loop**: Per-file verification on all modified files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 3.4.OUT **Outcome File**: Write `outcome/3.4-within-tier-consolidation-outcome.md`
 
 ### Phase 4: Final Verification & Knowledge Propagation
@@ -661,35 +764,30 @@
   - All deferred items MUST be ✅ Done with verification references
   - _Requirements: REQ-8.4, REQ-10_
 
-  - [ ] 4.4.QL **Quality Loop**: N/A
   - [ ] 4.4.OUT **Outcome File**: Write `outcome/4.4-baseline-comparison-outcome.md`
 
 - [ ] 4.5 Knowledge Propagation & Documentation (MANDATORY FINAL TASK)
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Synthesize all learnings from outcome files
-  - **Update existing docs** (created by predecessor plan):
     - `docs/frontend/ui-shared-scaffold-pattern.md` — add any new slot prop patterns discovered (e.g., view component scaffolds in `__shared__/` directories)
     - `docs/frontend/duplication-elimination-patterns.md` — add patterns for: view component scaffold placement, within-common utility consolidation, partial extraction completion
-  - **Create new docs if needed** (only if patterns don't fit existing docs):
     - `docs/frontend/view-component-scaffold-pattern.md` — IF the `__shared__/` directory pattern for view components warrants its own doc
   - **Update layer AGENTS.md files** with new rules/patterns:
     - `frontend/common/components/ui/AGENTS.md` — add reference to any new scaffold patterns
     - `frontend/views/AGENTS.md` — add `__shared__/` directory convention for view component scaffolds
     - `frontend/desktop/AGENTS.md` — add cross-tier import reminder (desktop variants import only from `common/` scaffolds or `views/.../__shared__/` scaffolds)
-    - `frontend/mobile/AGENTS.md` — same as desktop
+    ++ **MANDATORY Subtasks for Every Implementation Task**
   - **Update `.agents/skills/` if patterns affect skills**:
     - `.agents/skills/refactor-mobile-desktop/SKILL.md` — add view component scaffold pattern (Phase 2) as an extension of the UI component scaffold pattern (Phase 1)
   - **Update `.agents/instructions/` if new conventions**:
     - `.agents/instructions/frontend.instructions.md` — add `__shared__/` directory convention
     - `.agents/instructions/mobile-desktop.instructions.md` — add cross-tier import rules for scaffolds
-  - **Update root `AGENTS.md`** Important References section if any new docs were created
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run scripts/lint-service.ts --json --id final-check` (0 errors, 0 warnings for plan-modified files; 4 pre-existing out-of-scope sonarjs errors acceptable)
   - _Requirements: REQ-9_
 
   - [ ] 4.5.QL **Quality Loop**: Per-file verification on all modified docs and AGENTS.md files
   - [ ] 4.5.OUT **Outcome File**: Write `outcome/4.5-knowledge-propagation-outcome.md`
   - Update progress: Mark task 4.5 as `[x]` in `tasks.md`
-
 ---
 
 ## Domain-to-Artifacts Mapping (Reference for Knowledge Propagation)
