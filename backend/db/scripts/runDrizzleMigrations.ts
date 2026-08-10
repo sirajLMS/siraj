@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { sql } from "drizzle-orm";
+import type { MigrationMeta } from "drizzle-orm/migrator";
 import { readMigrationFiles } from "drizzle-orm/migrator";
 import { getMigrationsToRun } from "drizzle-orm/migrator.utils";
 import type { NeonDatabase } from "drizzle-orm/neon-serverless";
@@ -81,7 +82,7 @@ export async function runDrizzleMigrations(db: PgMigratorDatabase, config: Drizz
 
   logger.log(`Applying ${migrationsToRun.length} pending Drizzle migration folder(s)...`);
 
-  for (const migration of migrationsToRun) {
+  const applyMigration = async (migration: MigrationMeta): Promise<void> => {
     const migrationName = migration.name;
     if (!migrationName) {
       throw new Error("Pending migration is missing a folder name.");
@@ -91,14 +92,20 @@ export async function runDrizzleMigrations(db: PgMigratorDatabase, config: Drizz
     await preCommitEnumStatementsForMigrationFile(migrationPath);
 
     await db.transaction(async tx => {
-      for (const stmt of migration.sql) {
-        await tx.execute(sql.raw(stmt));
-      }
+      await migration.sql.reduce<Promise<unknown>>(
+        (sequence, stmt) => sequence.then(() => tx.execute(sql.raw(stmt))),
+        Promise.resolve()
+      );
       await tx.execute(
         sql`insert into ${sql.identifier(migrationsSchema)}.${sql.identifier(migrationsTable)} ("hash", "created_at", "name") values(${migration.hash}, ${migration.folderMillis}, ${migrationName})`
       );
     });
 
     logger.log(`Applied migration: ${migrationName}`);
-  }
+  };
+
+  await migrationsToRun.reduce<Promise<unknown>>(
+    (sequence, migration) => sequence.then(() => applyMigration(migration)),
+    Promise.resolve()
+  );
 }
