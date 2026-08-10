@@ -26,18 +26,18 @@ const wabaId = process.env.WHATSAPP_WABA_ID ?? "";
 const hasCreds = Boolean(accessToken && wabaId);
 const describeLive = describeLiveWhen(hasCreds, "list-message-templates @live-comm");
 
+const fetchPage = async (request: GraphApiRequestInit): Promise<ListMessageTemplatesResponseBody> => {
+  const response = await fetch(request.url, {
+    ...request.init,
+    signal: AbortSignal.timeout(10_000),
+  });
+  expect(response.ok).toBe(true);
+  return response.json() as Promise<ListMessageTemplatesResponseBody>;
+};
+
 describeLive("list-message-templates @live-comm", () => {
   test("collectAllTemplates follows pagination and carries verbatim language.code (B6)", async () => {
     const ctx: GraphApiRequestContext = { accessToken, apiVersion: undefined };
-
-    const fetchPage = async (request: GraphApiRequestInit): Promise<ListMessageTemplatesResponseBody> => {
-      const response = await fetch(request.url, {
-        ...request.init,
-        signal: AbortSignal.timeout(10_000),
-      });
-      expect(response.ok).toBe(true);
-      return response.json() as Promise<ListMessageTemplatesResponseBody>;
-    };
 
     const allTemplates = await collectAllTemplates(ctx, { wabaId }, fetchPage);
 
