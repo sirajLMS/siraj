@@ -61,20 +61,26 @@ export function setupTestServerLifecycle() {
 async function stopServerWhenPeersDone(): Promise<void> {
   stopTimeout = null;
   releaseHeartbeatSync();
+  await pollForPeerCompletion(process.pid, 0);
+}
 
-  const ownerPid = process.pid;
-  for (let round = 0; round < MAX_STOP_POLL_ROUNDS; round++) {
-    const peersAlive = await anyPeerHeartbeatsAlive(ownerPid);
-    if (!peersAlive) {
-      stopTestServer();
-      serverStartPromise = null;
-      return;
-    }
-    testLogger.debug(`Deferring test server stop: ${peersAlive ? "peer worker(s) still active" : "no peers"}.`);
-    await new Promise(resolve => setTimeout(resolve, STOP_POLL_INTERVAL_MS));
-  }
-
-  testLogger.warn("Test server stop poll timed out; forcing stop.");
+function stopTestServerAndClearPromise(): void {
   stopTestServer();
   serverStartPromise = null;
+}
+
+async function pollForPeerCompletion(ownerPid: number, round: number): Promise<void> {
+  if (round >= MAX_STOP_POLL_ROUNDS) {
+    testLogger.warn("Test server stop poll timed out; forcing stop.");
+    stopTestServerAndClearPromise();
+    return;
+  }
+  const peersAlive = await anyPeerHeartbeatsAlive(ownerPid);
+  if (!peersAlive) {
+    stopTestServerAndClearPromise();
+    return;
+  }
+  testLogger.debug(`Deferring test server stop: ${peersAlive ? "peer worker(s) still active" : "no peers"}.`);
+  await new Promise(resolve => setTimeout(resolve, STOP_POLL_INTERVAL_MS));
+  await pollForPeerCompletion(ownerPid, round + 1);
 }
