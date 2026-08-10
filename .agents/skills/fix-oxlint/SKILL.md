@@ -221,7 +221,7 @@ If an executor fails (sub-loop never passes, or it hit an unexpected error):
 - On retry, include failure context in the prompt (previous attempt's error output)
 - Max 2 retries per file; if still failing after 2 retries, mark as `failed` and report
 
-### Step 8: Final verification
+### Step 8: Final oxlint verification
 
 After all files are done (or blocked/failed):
 
@@ -230,6 +230,33 @@ bun run scripts/oxlint-categorize.ts
 ```
 
 Expect `totalIssues: 0` (or remaining issues only in `blocked` or `failed` files).
+
+### Step 9: Post-oxlint ESLint verification (MANDATORY)
+
+Fixing oxlint issues can introduce ESLint/sonarjs errors (e.g., removing `void` triggers
+`no-new`, removing `as` triggers `different-types-comparison`, extracting functions triggers
+`cognitive-complexity` or `no-nested-functions`). After oxlint is clean, run:
+
+```bash
+bun run lint
+```
+
+If ESLint errors appear:
+- If they are in files already fixed by the pool, re-dispatch a single executor for each
+  affected file with the ESLint error details appended to the prompt.
+- If they are in files NOT touched by the pool (pre-existing), fix them directly or dispatch
+  a single executor for each.
+
+Then also run type-aware lint:
+
+```bash
+bun run scripts/lint-service.ts --type-aware --fix
+```
+
+If type-aware lint errors appear, fix them the same way.
+
+Only after both `bun run lint` and `bun lint:type-aware` pass clean is the fix-oxlint
+workflow complete.
 
 ## Single-file case
 
@@ -258,6 +285,8 @@ Include:
 - Total executor dispatches (including retries)
 - Cross-file dependencies encountered
 - Final categorization summary (`totalIssues`)
+- Final ESLint (`bun run lint`) result — pass/fail
+- Final type-aware lint (`bun lint:type-aware`) result — pass/fail
 - Any `blocked` or `failed` files with reasons
 
 ## Relationship to quality-gate

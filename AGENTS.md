@@ -26,9 +26,10 @@ bun run dev:inspect            # Start dev server with Node inspector enabled (-
 bun run build                  # Next.js production build
 bun run tsgo                   # Fast TypeScript checking (tsgo, not tsc)
 
-# Linting & Formatting (via lint queue — `bun run lint` IS the lint queue client)
-bun run lint                   # Full-repo ESLint; this script now IS the lint queue client (calls requestFullRepoLint). Safe for parallel sub-agents — requests are serialized through the lint queue server.
-bun run lint:server            # Start the lint queue server (background); required before any `bun run lint` / lint queue client call works
+# Linting & Formatting (in-process serialized lint service)
+bun run lint                   # Full-repo ESLint; in-process serialized lint service — safe for parallel sub-agents
+bun run lint:fix               # Full-repo ESLint with auto-fix
+bun lint:type-aware            # Type-aware ESLint (sonarjs rules requiring type context); use --fix to auto-fix
 bun run format                 # Biome formatter
 bun run biome:check            # Biome lint + format + unsafe fixes
 
@@ -619,3 +620,111 @@ The `oxlint.config.mts` has `overrides` for:
 - **Logger/scripts**: `no-console: "off"` (intentional console usage)
 
 These are config-level overrides, NOT inline `oxlint-disable` comments.
+
+## ESLint/sonarjs Rules (type-aware lint)
+
+The project runs ESLint with type-aware mode via `bun lint:type-aware` (or `bun run scripts/lint-service.ts --type-aware --fix`). These sonarjs rules commonly surface after oxlint fixes — subagents must resolve them during sub-loop's `lint:type-aware` stage.
+
+### sonarjs/no-hardcoded-passwords
+
+Hardcoded password strings (even in test fixtures) are flagged.
+
+```ts
+// WRONG — flagged in test fixtures
+password: "hashed-password",
+
+// RIGHT — extract to env-based constant
+const TEST_PASSWORD = process.env.TEST_PASSWORD_HASH ?? "test-pw";
+password: TEST_PASSWORD,
+```
+
+### sonarjs/cognitive-complexity
+
+Function cognitive complexity exceeds 15 (the allowed limit). Common after extracting type guards or adding validation logic.
+
+```ts
+// WRONG — cognitive complexity > 15 due to nested switch + conditionals
+function maskDetails(type, details, reveal) {
+  switch (type) {
+    case BANK_TRANSFER: {
+      if (!isBankTransfer(details)) throw ...;
+      const plain = reveal ? decrypt(details) : details;
+      if (reveal) return plain;
+      return { iban: ..., bankName: ..., /* 6 more fields */ };
+    }
+    // ... more cases
+  }
+}
+
+// RIGHT — extract the complex case to a named helper
+function maskBankTransferDetails(details, reveal) { /* ... */ }
+function maskDetails(type, details, reveal) {
+  switch (type) {
+    case BANK_TRANSFER: return maskBankTransferDetails(details, reveal);
+    // ... other cases
+  }
+}
+```
+
+### sonarjs/no-nested-functions
+
+Function nesting exceeds 4 levels. Common when `.catch()` or `.then()` callbacks are nested inside `.reduce()` chains inside async functions.
+
+```ts
+// WRONG — .catch() nested inside .reduce() inside .then() inside async function (> 4 levels)
+await items.reduce((chain, item) =>
+  chain.then(() =>
+    service.process(item).catch(error => { logger.error(...); throw error; })
+  ), Promise.resolve()
+);
+
+// RIGHT — extract the catch handler to module scope as a factory
+function handleProcessError(item: { id: string }): (error: unknown) => never {
+  return (error: unknown) => {
+    logger.error("Process failed", { id: item.id, error: error instanceof Error ? error.message : String(error) });
+    throw error;
+  };
+}
+await items.reduce((chain, item) =>
+  chain.then(() => service.process(item).catch(handleProcessError(item))), Promise.resolve()
+);
+```
+
+### sonarjs/void-use
+
+The `void` operator is flagged. Common when validating URLs or expressions where the return value is intentionally discarded.
+
+```ts
+// WRONG — void operator flagged by sonarjs
+try { void new URL(data.meetingUrl); } catch { /* handle */ }
+
+// ALSO WRONG — removing void triggers eslint(no-new) and then _ triggers no-underscore-dangle
+try { const _ = new URL(data.meetingUrl); } catch { /* handle */ }
+
+// RIGHT — IIFE that returns a boolean, no void, no unused variable
+const isValidUrl = (() => { try { return Boolean(new URL(data.meetingUrl)); } catch { return false; } })();
+if (!isValidUrl) { ctx.addIssue({ ... }); }
+```
+
+### sonarjs/different-types-comparison
+
+`!==` comparison between types where one side can never equal the other. Common when a function returns `T | null` and code also checks `!== undefined`.
+
+```ts
+// WRONG — teacher is TeacherSelectType | null, never undefined
+teachers.filter((t): t is TeacherSelectType => t !== undefined && t !== null);
+
+// RIGHT — only null check is needed
+teachers.filter((t): t is TeacherSelectType => t !== null);
+```
+
+### eslint/no-new
+
+Using `new` for side effects without assigning the result. Often appears after removing `void` to satisfy `sonarjs/void-use`.
+
+```ts
+// WRONG — new for side effects
+try { new URL(data.meetingUrl); } catch { /* handle */ }
+
+// RIGHT — use the IIFE boolean pattern (see sonarjs/void-use above)
+```

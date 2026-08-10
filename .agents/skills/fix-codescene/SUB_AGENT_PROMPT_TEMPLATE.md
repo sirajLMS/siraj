@@ -63,6 +63,15 @@ For test files, use `bun run scripts/run-test/run-test.ts <test-path>` when sub-
 
 NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section for fix patterns per rule.
 
+**ESLint/sonarjs rules** may also surface during sub-loop's `lint:type-aware` stage. Common patterns:
+- `sonarjs/cognitive-complexity` — extract case blocks into named helper functions at module scope.
+- `sonarjs/no-nested-functions` — extract nested callbacks to module-scope factory functions.
+- `sonarjs/void-use` — replace `void new URL(url)` with an IIFE returning a boolean.
+- `sonarjs/different-types-comparison` — if type is `T | null` (no `undefined`), remove `!== undefined`.
+- `sonarjs/no-hardcoded-passwords` — extract to module-level constant from env var.
+- `eslint/no-new` — assign `new` result to a variable or wrap in validation IIFE.
+See AGENTS.md "ESLint/sonarjs Rules" section for full patterns.
+
 ## STEP 5: Stage and Report
 
 ### Step 5a: Stage the file (only if sub-loop exits 0)

@@ -104,6 +104,38 @@ Fix each issue listed in "ISSUES TO FIX" below. Use the fix patterns for each ru
 **`oxc(no-map-spread)`** — Spread syntax inside `.map()` is flagged.
 - Use `Object.assign({}, item, { extra: true })` instead of `{ ...item, extra: true }`.
 
+### ESLint/sonarjs Fix Patterns (also surfaced by sub-loop's lint stage)
+
+Sub-loop runs ESLint with type-aware mode. These sonarjs rules commonly appear after oxlint fixes:
+
+**`sonarjs/no-hardcoded-passwords`** — Hardcoded password strings in test fixtures are flagged.
+- Extract to a module-level constant: `const TEST_PASSWORD = process.env.TEST_PASSWORD_HASH ?? "test-pw";`
+- Or use an environment variable lookup pattern.
+
+**`sonarjs/cognitive-complexity`** — Function cognitive complexity exceeds 15.
+- Extract case blocks or nested conditionals into named helper functions at module scope.
+- Each helper should handle one branch/case, reducing the parent function's branching depth.
+
+**`sonarjs/no-nested-functions`** — Function nesting exceeds 4 levels.
+- Extract nested callbacks (e.g., `.catch(error => { ... })` inside `.reduce()`) to module-scope functions.
+- Use a factory function that captures needed variables and returns the callback: `function handler(ctx): (err) => void { ... }`.
+
+**`sonarjs/void-use`** — The `void` operator is flagged.
+- Replace `void new URL(url)` with assigning to a variable: `const _ = new URL(url)` — but this triggers `no-new` (see below).
+- Best pattern: use an IIFE that returns a boolean for validation:
+  ```ts
+  const isValid = (() => { try { return Boolean(new URL(url)); } catch { return false; } })();
+  if (!isValid) { /* handle error */ }
+  ```
+
+**`sonarjs/different-types-comparison`** — `!==` comparison between types where one side can never be the other.
+- If a function returns `T | null` (not `T | undefined`), remove the `!== undefined` check — only `!== null` is needed.
+- For type guards: `.filter((x): x is T => x !== null)` instead of `x !== undefined && x !== null`.
+
+**`eslint(no-new)`** — Using `new` for side effects (not assigning the result).
+- Assign the result to a variable: `const _ = new URL(url);` — but this may trigger `no-unused-vars` or `no-underscore-dangle`.
+- Best: wrap in a validation function that returns the result (see `void-use` pattern above).
+
 ### Critical Rules from AGENTS.md
 - NEVER use `console.*` — use `logger` from `@/frontend/utils/logger` or `@/backend/lib/logger`
 - NEVER create `oxlint-disable` comments — fix the root cause
@@ -134,7 +166,9 @@ bun run scripts/health/sub-loop.ts {{FILE_PATH}} --lifecycle codescene
 
 If it fails at tsgo → fix only tsgo. Re-run. Once tsgo passes it advances to biome → fix biome → re-run → advances to oxlint → fix oxlint → re-run → advances to lint:type-aware → fix lint → re-run → advances to check:duplicates → fix duplicates → re-run → advances to codescene --file → fix any remaining warnings → re-run. Repeat until the script exits 0.
 
-**IMPORTANT:** Sub-loop runs the FULL progressive verification. It will surface issues beyond just the oxlint rules in the JSON — it runs tsgo, biome, oxlint, lint, duplicates, and codescene. Fix ALL issues it surfaces until it exits 0. Both new and preexisting issues in this file must be resolved.
+**IMPORTANT:** Sub-loop runs the FULL progressive verification. It will surface issues beyond just the oxlint rules in the JSON — it runs tsgo, biome, oxlint, lint (type-aware), duplicates, and codescene. Fix ALL issues it surfaces until it exits 0. Both new and preexisting issues in this file must be resolved.
+
+This includes ESLint/sonarjs errors that may appear as a side-effect of your oxlint fixes (e.g., removing `void` can trigger `no-new`, removing `as` can trigger `different-types-comparison`). See the "ESLint/sonarjs Fix Patterns" section above.
 
 NEVER add `oxlint-disable` comments — fix the root cause instead.
 

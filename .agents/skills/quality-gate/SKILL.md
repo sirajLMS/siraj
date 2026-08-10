@@ -238,7 +238,7 @@ Both are dispatched as parallel subagents — one per file.
 3. Merge the file lists (a file may have both oxlint and ESLint issues).
 
 4. **Dispatch one subagent per file** — launch all in a SINGLE response (parallel).
-   Pool size: **16 subagents max** (24 causes rate-limiting in some environments).
+   Pool size: **16 subagents max** (24 causes rate-limiting in some environments). For dedicated large-scale oxlint-only sweeps (100+ files), use the `fix-oxlint` skill which supports a pool of 36.
    Each subagent receives:
    - `lifecycle: lint`
    - The oxlint violations for that file
@@ -412,6 +412,17 @@ which documents every rule with fix patterns:
 | `no-map-spread` | Use `Object.assign({}, ...)` instead of spread in `.map()`. |
 | `no-underscore-dangle` | Rename `_field` → `field` or use bracket notation `obj["_ref"]` for external APIs. |
 
+**ESLint/sonarjs rules** (surfaced by sub-loop's `lint:type-aware` stage — commonly appear after oxlint fixes):
+
+| Rule | Fix Pattern |
+|---|---|
+| `sonarjs/no-hardcoded-passwords` | Extract to module-level constant: `const TEST_PW = process.env.TEST_PW ?? "test-pw";` |
+| `sonarjs/cognitive-complexity` | Extract case blocks / nested conditionals into named helper functions at module scope. |
+| `sonarjs/no-nested-functions` | Extract nested callbacks (e.g., `.catch()` inside `.reduce()`) to module-scope factory functions. |
+| `sonarjs/void-use` | Replace `void new URL(url)` with an IIFE: `const ok = (() => { try { return Boolean(new URL(url)); } catch { return false; } })();` |
+| `sonarjs/different-types-comparison` | If type is `T | null` (no `undefined`), remove `!== undefined` — only `!== null` is needed. |
+| `eslint/no-new` | Assign `new` result to variable or wrap in validation IIFE (see `void-use` pattern). |
+
 **Key lesson**: Type guards are the universal escape hatch for `no-unsafe-type-assertion`. When oxlint blocks
 `as`, write a `value is Type` predicate function with real runtime validation.
 
@@ -419,7 +430,7 @@ which documents every rule with fix patterns:
 
 When dispatching many subagents (e.g., fixing 100+ files with oxlint violations):
 
-1. **Pool size: 16 max.** 24 can cause rate-limiting in some environments. 8-16 is the sweet spot.
+1. **Pool size: 16 max** for quality-gate. 24 can cause rate-limiting in some environments. 8-16 is the sweet spot. For dedicated large-scale oxlint-only sweeps (100+ files), use the `fix-oxlint` skill which supports a pool of 36.
 2. **One file per agent.** Each subagent owns one file completely — fixes ALL violations in that file, not just one rule.
 3. **Always keep the pool full.** As each subagent completes, dispatch the next pending file immediately.
 4. **Use `--lifecycle codescene`** for full verification (tsgo → biome → oxlint → lint → duplicates → codescene).

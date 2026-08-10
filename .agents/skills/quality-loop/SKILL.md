@@ -74,9 +74,26 @@ bun run scripts/lint-service.ts -f <file> --json --id quality-loop
 # Returns: { success: boolean, output: string, exitCode: number, metrics: {...} }
 ```
 
+### Step 5: Type-Aware Lint (ESLint with TypeScript type checking)
+
+```bash
+bun run scripts/lint-service.ts --type-aware --fix
+```
+
+Type-aware lint runs ESLint with TypeScript type information enabled, catching rules that require
+type context (e.g., `sonarjs/different-types-comparison`, `sonarjs/cognitive-complexity`,
+`sonarjs/no-nested-functions`). These errors often surface after oxlint fixes (e.g., removing a
+type assertion can change the inferred type, triggering a different-types-comparison error).
+
+For file-scoped type-aware lint:
+
+```bash
+bun run scripts/lint-service.ts -f <file> --type-aware --id quality-loop
+```
+
 ### Loop
 
-If any step reports issues, fix them and restart the loop from the failing step. A clean round is when all four pass without errors.
+If any step reports issues, fix them and restart the loop from the failing step. A clean round is when all five pass without errors.
 
 ### File-Scoped Verification (for subagents and targeted fixes)
 
@@ -93,6 +110,12 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>
 #   lint      → tsgo + biome + oxlint + lint:type-aware
 #   codescene → tsgo + biome + oxlint + lint:type-aware + check:duplicates + codescene --file
 ```
+
+Note: The `lint` and `codescene` lifecycle stages include `lint:type-aware` (ESLint with TypeScript
+type checking), which catches `sonarjs/different-types-comparison`, `sonarjs/cognitive-complexity`,
+`sonarjs/no-nested-functions`, `sonarjs/void-use`, `sonarjs/no-hardcoded-passwords`, and similar
+type-dependent rules. These commonly surface after oxlint fixes and must be resolved in the same
+subagent session.
 
 For batch verification of ALL uncommitted files (staged or unstaged):
 
