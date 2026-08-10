@@ -262,9 +262,11 @@ export namespace PaymentMethodService {
       await assertCatalogActive(parsed.type, input.details, tErrors, t);
 
       if (parsed.isDefault) {
-        for (const slot of slotsForDirection(parsed.direction)) {
-          await UserPaymentMethodRepository.clearDefaultsInSlot(parsed.userId, slot, t);
-        }
+        await Promise.all(
+          slotsForDirection(parsed.direction).map(slot =>
+            UserPaymentMethodRepository.clearDefaultsInSlot(parsed.userId, slot, t)
+          )
+        );
       }
 
       const created = await UserPaymentMethodRepository.create(
@@ -323,9 +325,11 @@ export namespace PaymentMethodService {
 
       const direction = input.direction ?? existing.direction;
       if (input.isDefault) {
-        for (const slot of slotsForDirection(direction)) {
-          await UserPaymentMethodRepository.clearDefaultsInSlot(existing.userId, slot, t);
-        }
+        await Promise.all(
+          slotsForDirection(direction).map(slot =>
+            UserPaymentMethodRepository.clearDefaultsInSlot(existing.userId, slot, t)
+          )
+        );
       }
 
       const updated = await UserPaymentMethodRepository.update(
@@ -533,9 +537,11 @@ export namespace PaymentMethodService {
     await assertCatalogActive(parsed.type, input.details, tErrors, tx);
 
     if (parsed.isDefault) {
-      for (const slot of slotsForDirection(parsed.direction)) {
-        await UserPaymentMethodRepository.clearDefaultsInSlot(parsed.userId, slot, tx);
-      }
+      await Promise.all(
+        slotsForDirection(parsed.direction).map(slot =>
+          UserPaymentMethodRepository.clearDefaultsInSlot(parsed.userId, slot, tx)
+        )
+      );
     }
 
     const created = await UserPaymentMethodRepository.create(
