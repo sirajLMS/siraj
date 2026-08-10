@@ -112,17 +112,14 @@ export namespace InvoicePaymentSubmissionRepository {
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType[]> {
     if (inputs.length === 0) return [];
-    const results: Types.InvoicePaymentSubmissionSelectType[] = [];
-
-    for (const input of inputs) {
-      const existing = await getLatestByInvoiceId(input.invoiceId, tx);
-      if (existing) {
-        results.push(existing);
-        continue;
-      }
-      results.push(await createSubmission(input, tx));
-    }
-
-    return results;
+    return Promise.all(
+      inputs.map(async input => {
+        const existing = await getLatestByInvoiceId(input.invoiceId, tx);
+        if (existing) {
+          return existing;
+        }
+        return createSubmission(input, tx);
+      })
+    );
   }
 }
