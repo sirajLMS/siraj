@@ -14,6 +14,7 @@ import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graph
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 
 export type DesktopCurrencyDisplayProps = {
@@ -55,7 +56,7 @@ export const DesktopCurrencyDisplay = ({
   const shortCode = code;
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center", ...sx }}>
+    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center" }, sx)}>
       {CURRENCY_DISPLAY_PART_ORDER.map(part => {
         switch (part) {
           case CurrencyDisplayPart.Flag:

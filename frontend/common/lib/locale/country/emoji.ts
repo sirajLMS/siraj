@@ -6,7 +6,7 @@ const ASCII_LETTER_A = 65;
 
 /** Derive a flag emoji from an ISO 3166-1 alpha-2 country code. */
 export function countryCodeToEmoji(countryCode: string): string {
-  return [...countryCode.toUpperCase()]
+  return Array.from(countryCode.toUpperCase())
     .map(char => String.fromCodePoint(REGIONAL_INDICATOR_BASE - ASCII_LETTER_A + (char.codePointAt(0) ?? 0)))
     .join("");
 }

@@ -88,7 +88,7 @@ export function useAudienceAutocomplete({
 
   return {
     options,
-    loading: Boolean(loading) && !cached,
+    loading: loading && !cached,
     inputValue,
     onInputChange: setInputValue,
   };

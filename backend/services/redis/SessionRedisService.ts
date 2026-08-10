@@ -21,6 +21,20 @@ export class SessionRedisService {
   private readonly userSessionsKeyPrefix = "user_sessions:";
 
   constructor(private readonly redis: IRedisService) {}
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
+  private getNativeMethod(name: string): ((...args: unknown[]) => Promise<unknown>) | undefined {
+    const redisAny = this.redis as unknown;
+    if (!this.isRecord(redisAny)) return undefined;
+    const getter = redisAny.getNativeClient;
+    if (typeof getter !== "function") return undefined;
+    const nativeClient = getter.call(redisAny);
+    if (!this.isRecord(nativeClient)) return undefined;
+    const method = nativeClient[name];
+    return typeof method === "function" ? method.bind(nativeClient) : undefined;
+  }
 
   /**
    * Generate Redis key for session
@@ -50,16 +64,12 @@ export class SessionRedisService {
     const userSessionsKey = this.getUserSessionsKey(data.userId);
 
     // cspell:disable-next-line -- Redis commands
-    const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+    const sAdd = this.getNativeMethod("sadd");
+    const expire = this.getNativeMethod("expire");
 
-    if (nativeClient && typeof nativeClient === "object") {
-      const sAdd = (nativeClient as Record<string, unknown>).sadd;
-      const expire = (nativeClient as Record<string, unknown>).expire;
-
-      if (typeof sAdd === "function" && typeof expire === "function") {
-        await sAdd.call(nativeClient, userSessionsKey, sessionId);
-        await expire.call(nativeClient, userSessionsKey, ttlSeconds);
-      }
+    if (sAdd && expire) {
+      await sAdd(userSessionsKey, sessionId);
+      await expire(userSessionsKey, ttlSeconds);
     }
 
     logger.debug("Session stored in Redis", { userId: data.userId });
@@ -206,17 +216,13 @@ export class SessionRedisService {
       const userSessionsKey = this.getUserSessionsKey(session.userId);
 
       // Use native Redis client for DEL and SREM
-      const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+      const del = this.getNativeMethod("del");
+      // cspell:disable-next-line -- Redis command
+      const sRem = this.getNativeMethod("srem");
 
-      if (nativeClient && typeof nativeClient === "object") {
-        const del = (nativeClient as Record<string, unknown>).del;
-        // cspell:disable-next-line -- Redis command
-        const sRem = (nativeClient as Record<string, unknown>).srem;
-
-        if (typeof del === "function" && typeof sRem === "function") {
-          await del.call(nativeClient, this.getSessionKey(sessionId));
-          await sRem.call(nativeClient, userSessionsKey, sessionId);
-        }
+      if (del && sRem) {
+        await del(this.getSessionKey(sessionId));
+        await sRem(userSessionsKey, sessionId);
       }
 
       logger.debug(`Session ${sessionId} deleted from Redis`);
@@ -232,25 +238,14 @@ export class SessionRedisService {
     const userSessionsKey = this.getUserSessionsKey(userId);
 
     // cspell:disable-next-line -- Redis commands
-    const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
-
-    if (!nativeClient || typeof nativeClient !== "object") {
-      logger.error("Could not access native Redis client");
+    const sMembers = this.getNativeMethod("smembers");
+    if (!sMembers) {
+      logger.error("smembers command not available on Redis client");
       return [];
     }
 
-    // Check if smembers method exists
-    const sMembers = (nativeClient as Record<string, unknown>).smembers as
-      | ((key: string) => Promise<unknown>)
-      | undefined;
-    if (typeof sMembers === "function") {
-      const result = await sMembers.call(nativeClient, userSessionsKey);
-      return Array.isArray(result) ? (result as string[]) : [];
-    }
-
-    // cspell:disable-next-line -- Redis command
-    logger.error("smembers command not available on Redis client");
-    return [];
+    const result = await sMembers(userSessionsKey);
+    return Array.isArray(result) ? result.map(String) : [];
   }
 
   /**
@@ -264,16 +259,11 @@ export class SessionRedisService {
     }
 
     // Delete all session keys and the user sessions set
-    const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+    const del = this.getNativeMethod("del");
 
-    if (nativeClient && typeof nativeClient === "object") {
-      const del = (nativeClient as Record<string, unknown>).del;
-
-      if (typeof del === "function") {
-        const keysToDelete = [...sessionIds.map(id => this.getSessionKey(id)), this.getUserSessionsKey(userId)];
-
-        await del.call(nativeClient, ...keysToDelete);
-      }
+    if (del) {
+      const keysToDelete = [...sessionIds.map(id => this.getSessionKey(id)), this.getUserSessionsKey(userId)];
+      await del(...keysToDelete);
     }
 
     logger.info(`Deleted ${sessionIds.length} sessions for user ${userId}`);
@@ -288,16 +278,12 @@ export class SessionRedisService {
     const userSessionsKey = this.getUserSessionsKey(userId);
 
     // Use native Redis client for SCARD
-    const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+    // cspell:disable-next-line -- Redis command
+    const sCard = this.getNativeMethod("scard");
 
-    if (nativeClient && typeof nativeClient === "object") {
-      // cspell:disable-next-line -- Redis command
-      const sCard = (nativeClient as Record<string, unknown>).scard as ((key: string) => Promise<unknown>) | undefined;
-
-      if (typeof sCard === "function") {
-        const count = await sCard.call(nativeClient, userSessionsKey);
-        return Number(count) || 0;
-      }
+    if (sCard) {
+      const count = await sCard(userSessionsKey);
+      return Number(count) || 0;
     }
 
     return 0;

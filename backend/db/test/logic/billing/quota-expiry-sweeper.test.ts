@@ -6,7 +6,7 @@ import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.re
 import { quotas } from "@/backend/db/schema";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
+import { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type { QuotaSelectType, QuotaSubmitInput } from "@/backend/types";
 
@@ -38,8 +38,8 @@ describe("Quota Expiry Sweeper Logic", () => {
 
       // Verify ledger entries: EXPIRE row from sweeper + GRANT row from initial creation
       const ledgerEntries = await QuotaLedgerRepository.findByQuotaId(tx, quota.id);
-      const hasExpireRow = ledgerEntries.some(entry => entry.reason === QuotaLedgerReason.EXPIRE);
-      const hasGrantRow = ledgerEntries.some(entry => entry.reason === QuotaLedgerReason.GRANT);
+      const hasExpireRow = ledgerEntries.some(entry => entry.reason === "EXPIRE");
+      const hasGrantRow = ledgerEntries.some(entry => entry.reason === "GRANT");
       expect(hasExpireRow).toBe(true);
       expect(hasGrantRow).toBe(true);
     });
@@ -77,9 +77,7 @@ describe("Quota Expiry Sweeper Logic", () => {
 
       // Verify the rollover GRANT ledger row was inserted (periodic, not the initial creation grant)
       const ledgerEntries = await QuotaLedgerRepository.findByQuotaId(tx, quota.id);
-      const grants = ledgerEntries.filter(
-        entry => entry.reason === QuotaLedgerReason.GRANT && entry.delta === quota.totalClasses
-      );
+      const grants = ledgerEntries.filter(entry => entry.reason === "GRANT" && entry.delta === quota.totalClasses);
       // One from creation, one from periodic refresh
       expect(grants.length).toBeGreaterThanOrEqual(2);
     });

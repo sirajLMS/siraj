@@ -28,6 +28,25 @@ const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
   [NotificationDeliveryStatus.FAILED]: -1,
 };
 
+// Lookup map from the raw DB status string to the NotificationDeliveryStatus enum.
+// The pgEnum column infers as `string` at the Drizzle level, so this map restores
+// the enum type without resorting to an unsafe type assertion.
+const DELIVERY_STATUS_LOOKUP: Record<string, NotificationDeliveryStatus> = {
+  [NotificationDeliveryStatus.PENDING]: NotificationDeliveryStatus.PENDING,
+  [NotificationDeliveryStatus.SENT]: NotificationDeliveryStatus.SENT,
+  [NotificationDeliveryStatus.DELIVERED]: NotificationDeliveryStatus.DELIVERED,
+  [NotificationDeliveryStatus.OPENED]: NotificationDeliveryStatus.OPENED,
+  [NotificationDeliveryStatus.FAILED]: NotificationDeliveryStatus.FAILED,
+};
+
+const toDeliveryStatus = (value: string): NotificationDeliveryStatus => {
+  const status = DELIVERY_STATUS_LOOKUP[value];
+  if (!status) {
+    throw new Error(`Invalid NotificationDeliveryStatus: ${value}`);
+  }
+  return status;
+};
+
 export namespace NotificationRepository {
   export type NotificationDeliveryInsertInput = CreateNotificationDeliveryInput & {
     status: NotificationDeliveryStatus;
@@ -297,7 +316,7 @@ export namespace NotificationRepository {
     statusTimestamps: ReturnType<typeof buildStatusTimestamps>,
     now: Date
   ): Promise<NotificationDeliverySelectType> => {
-    const webhookStatus = webhookRow.status as NotificationDeliveryStatus;
+    const webhookStatus = toDeliveryStatus(webhookRow.status);
 
     // Only update if the new status represents a valid forward transition
     // for the webhook-created row (B3 forward-only guard).
@@ -350,7 +369,7 @@ export namespace NotificationRepository {
       }
 
       const current = results[0];
-      await assertValidStatusTransition(current.status as NotificationDeliveryStatus, input.status, locale);
+      await assertValidStatusTransition(toDeliveryStatus(current.status), input.status, locale);
 
       const statusTimestamps = buildStatusTimestamps(input.status, now);
 
@@ -491,7 +510,7 @@ export namespace NotificationRepository {
     failureReason: string | null | undefined,
     now: Date
   ): Promise<NotificationDeliverySelectType> => {
-    const currentStatus = current.status as NotificationDeliveryStatus;
+    const currentStatus = toDeliveryStatus(current.status);
 
     // Same-status webhook — no-op, return current row.
     if (currentStatus === status) {
@@ -721,7 +740,7 @@ export namespace NotificationRepository {
       .groupBy(notificationDeliveries.status);
 
     const normalizedStatusCounts: NotificationDeliveryStatusCount[] = statusCounts.map(row => ({
-      status: row.status as NotificationDeliveryStatus,
+      status: toDeliveryStatus(row.status),
       count: row.count,
     }));
 

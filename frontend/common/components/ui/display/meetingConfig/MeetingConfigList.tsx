@@ -53,6 +53,7 @@ export function MeetingConfigList({
       {title ? <Typography sx={{ typography: "titleMd" }}>{title}</Typography> : null}
       {configs.map(config => {
         if (!config.id) return null;
+        const configId: string = config.id;
         const providerName = config.provider
           ? resolveLocalizedString(config.provider.name, locale)
           : (config.providerId ?? "");
@@ -107,17 +108,13 @@ export function MeetingConfigList({
                   <IconButton
                     aria-label={tManager.setDefault}
                     size="small"
-                    onClick={() => onSetDefaultAction(config.id as string)}
+                    onClick={() => onSetDefaultAction(configId)}
                   >
                     <StarOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}
                 {onDeleteAction ? (
-                  <IconButton
-                    aria-label={tManager.delete}
-                    size="small"
-                    onClick={() => onDeleteAction(config.id as string)}
-                  >
+                  <IconButton aria-label={tManager.delete} size="small" onClick={() => onDeleteAction(configId)}>
                     <DeleteOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}

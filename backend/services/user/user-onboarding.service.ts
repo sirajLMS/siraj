@@ -1,7 +1,8 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
-import type { AppPermission, CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
+import type { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
+import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { validatePasswordStrength } from "@/backend/lib/auth";
 import { logger } from "@/backend/lib/logger";
@@ -12,6 +13,17 @@ import type {
   UserReturnType,
 } from "@/backend/types/users/user.types";
 import type { ErrorsLabels } from "@/shared/locale";
+
+const CURRENCY_CODES = new Set<string>(Object.values(CurrencyCode));
+
+function isCurrencyCode(value: string): value is CurrencyCode {
+  return CURRENCY_CODES.has(value);
+}
+
+function resolveDisplayCurrency(value: string | null | undefined): CurrencyCode | null {
+  if (value == null) return null;
+  return isCurrencyCode(value) ? value : null;
+}
 
 /**
  * Shared, parameterized user-of-type onboarding helper.
@@ -149,13 +161,9 @@ export namespace UserOnboardingService {
         if (profileFields.phone != null) {
           await UserRepository.updateProfileFields(user.id, { phone: profileFields.phone }, locale, txObj);
         }
-        if (profileFields.displayCurrency != null) {
-          await UserRepository.updateProfileFields(
-            user.id,
-            { displayCurrency: profileFields.displayCurrency as CurrencyCode },
-            locale,
-            txObj
-          );
+        const displayCurrency = resolveDisplayCurrency(profileFields.displayCurrency);
+        if (displayCurrency != null) {
+          await UserRepository.updateProfileFields(user.id, { displayCurrency }, locale, txObj);
         }
       } else if (opts.writeDefaultTimezone) {
         await UserRepository.updateTimezone(user.id, IanaTimezone.UTC, txObj, locale);
@@ -166,8 +174,9 @@ export namespace UserOnboardingService {
 
       // Step 8: Permission group lookup + assignment.
       const slug = typeof opts.groupSlug === "function" ? opts.groupSlug(extension) : opts.groupSlug;
+      const slugStr: string = slug;
       const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
-      const targetGroup = groups.find(g => g.slug === slug);
+      const targetGroup = groups.find(g => g.slug === slugStr);
       if (!targetGroup) {
         throw new Error(tErrors.permissionGroup.permissionGroupNotFound);
       }

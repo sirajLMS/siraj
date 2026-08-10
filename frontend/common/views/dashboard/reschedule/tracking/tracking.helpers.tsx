@@ -79,13 +79,12 @@ export function buildTrackingMetrics(rawMetrics: RawMetrics | null | undefined) 
     rescheduled: rawMetrics?.rescheduled,
     cancelled: rawMetrics?.cancelled,
   };
-  return TRACKING_METRIC_DEFINITIONS.map(def => ({
-    key: def.key,
-    count: counts[def.key] ?? 0,
-    labelKey: def.labelKey,
-    icon: def.icon,
-    ...(def.variant ? { variant: def.variant } : {}),
-  }));
+  return TRACKING_METRIC_DEFINITIONS.map(def =>
+    Object.assign(
+      { key: def.key, count: counts[def.key] ?? 0, labelKey: def.labelKey, icon: def.icon },
+      def.variant ? { variant: def.variant } : {}
+    )
+  );
 }
 
 export function buildTrackingRows(rawRows: readonly RescheduleTrackingRow[], locale: string): TrackingRow[] {

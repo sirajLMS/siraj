@@ -24,10 +24,10 @@ describe("ParentOnboardingService.createParent", () => {
     let error: unknown = null;
     try {
       await ParentOnboardingService.createParent(
-        "00000000-0000-0000-0000-000000000000",
+        "[CARD_REDACTED]-[CARD_REDACTED]",
         {
           name: "Test",
-          email: "test@test.com",
+          email: "[EMAIL_REDACTED]",
           password: generateTestPassword(),
         },
         tErrors
@@ -37,7 +37,10 @@ describe("ParentOnboardingService.createParent", () => {
     }
 
     expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("permissions");
+    expect(error).toBeInstanceOf(Error);
+    if (error instanceof Error) {
+      expect(error.message).toContain("permissions");
+    }
     hasPermissionSpy.mockRestore();
   });
 
@@ -53,7 +56,7 @@ describe("ParentOnboardingService.createParent", () => {
           name: "New Parent",
           email: `newparent-${randomUUID()}@test.com`,
           password: generateTestPassword(),
-          phone: "+1234567890",
+          phone: "+[PHONE_REDACTED]",
           invoiceType: "MONTHLY",
           feeAmount: "500.00",
           initialPayinMethod: {
@@ -86,10 +89,10 @@ describe("ParentOnboardingService.createParent", () => {
     let error: unknown = null;
     try {
       await ParentOnboardingService.createParent(
-        "00000000-0000-0000-0000-000000000000",
+        "[CARD_REDACTED]-[CARD_REDACTED]",
         {
           name: "Dup Parent",
-          email: "existing@test.com",
+          email: "[EMAIL_REDACTED]",
           password: generateTestPassword(),
         },
         tErrors
@@ -99,7 +102,10 @@ describe("ParentOnboardingService.createParent", () => {
     }
 
     expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("email");
+    expect(error).toBeInstanceOf(Error);
+    if (error instanceof Error) {
+      expect(error.message).toContain("email");
+    }
 
     hasPermissionSpy.mockRestore();
     existsByEmailSpy.mockRestore();
@@ -109,7 +115,7 @@ describe("ParentOnboardingService.createParent", () => {
     const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
     const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
 
-    const createdEmail = "rollback-parent@test.com";
+    const createdEmail = "[EMAIL_REDACTED]";
     const listAllGroupsSpy = spyOn(PermissionManagementRepository, "listAllGroups").mockRejectedValue(
       new Error("Database failure")
     );
@@ -117,7 +123,7 @@ describe("ParentOnboardingService.createParent", () => {
     let error: unknown = null;
     try {
       await ParentOnboardingService.createParent(
-        "00000000-0000-0000-0000-000000000000",
+        "[CARD_REDACTED]-[CARD_REDACTED]",
         {
           name: "Rollback Parent",
           email: createdEmail,

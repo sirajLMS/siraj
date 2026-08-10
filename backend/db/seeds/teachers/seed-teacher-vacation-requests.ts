@@ -56,37 +56,39 @@ export async function seedOrGet(
   const teacherUserMap = new Map(teachersList.map(t => [t.id, usersList.find(u => u.id === t.userId)?.id]));
   const anchor = startOfDay(seedConfig.anchorDate);
   const specs = buildVacationSpecs(teachersList, seedConfig.profile);
-  const results = [];
 
-  for (const spec of specs) {
-    const teacher = teachersList[spec.teacherIndex];
-    if (!teacher) continue;
+  const results = await Promise.all(
+    specs.map(async spec => {
+      const teacher = teachersList[spec.teacherIndex];
+      if (!teacher) return null;
 
-    const requestedByUserId = teacherUserMap.get(teacher.id);
-    if (!requestedByUserId) continue;
+      const requestedByUserId = teacherUserMap.get(teacher.id);
+      if (!requestedByUserId) return null;
 
-    const startAt = addMonths(anchor, spec.startOffsetMonths);
-    const endAt = new Date(startAt);
-    endAt.setDate(endAt.getDate() + spec.durationDays);
-    const teacherTimezone = usersList.find(u => u.id === teacher.userId)?.timezone ?? IanaTimezone.UTC;
-    const tz = timezones.find(t => t.ianaId === teacherTimezone) ?? timezones[0];
-    const isPending = spec.status === VacationRequestStatus.PENDING;
+      const startAt = addMonths(anchor, spec.startOffsetMonths);
+      const endAt = new Date(startAt);
+      endAt.setDate(endAt.getDate() + spec.durationDays);
+      const teacherTimezone = usersList.find(u => u.id === teacher.userId)?.timezone ?? IanaTimezone.UTC;
+      const tz = timezones.find(t => t.ianaId === teacherTimezone) ?? timezones[0];
+      const isPending = spec.status === VacationRequestStatus.PENDING;
 
-    const inserted = await TeacherAvailabilitySeedService.seedVacationRequestIfMissing({
-      teacherId: teacher.id,
-      requestedByUserId,
-      startAt,
-      endAt,
-      timezone: teacherTimezone,
-      timezoneId: tz?.id ?? null,
-      reason: "Seed vacation request",
-      status: spec.status,
-      processedAt: isPending ? null : now,
-      processedByUserId: isPending ? null : (adminUser?.id ?? null),
-    });
-    results.push(inserted);
-  }
+      return TeacherAvailabilitySeedService.seedVacationRequestIfMissing({
+        teacherId: teacher.id,
+        requestedByUserId,
+        startAt,
+        endAt,
+        timezone: teacherTimezone,
+        timezoneId: tz?.id ?? null,
+        reason: "Seed vacation request",
+        status: spec.status,
+        processedAt: isPending ? null : now,
+        processedByUserId: isPending ? null : (adminUser?.id ?? null),
+      });
+    })
+  );
 
-  logger.info(`Teacher vacation requests seeded (${results.length} rows).`);
-  return results;
+  const filteredResults = results.filter((r): r is NonNullable<typeof r> => r !== null);
+
+  logger.info(`Teacher vacation requests seeded (${filteredResults.length} rows).`);
+  return filteredResults;
 }

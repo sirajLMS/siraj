@@ -14,13 +14,13 @@ export async function copyItems(
     destinationPath: input.destinationPath,
     existsFn: fileExists,
     operationName: "copied",
-    processFn: async (ctx, sourcePath) => {
+    processFn: async (opCtx, sourcePath) => {
       const fileName = StorageUtils.extractFileName(sourcePath);
       const destPath = `${input.destinationPath.replace(/\/$/, "")}/${fileName}`;
 
-      await ctx.bucket.file(sourcePath).copy(ctx.bucket.file(destPath));
+      await opCtx.bucket.file(sourcePath).copy(opCtx.bucket.file(destPath));
 
-      return await fileInfoByPath(ctx, destPath);
+      return await fileInfoByPath(opCtx, destPath);
     },
   });
 }

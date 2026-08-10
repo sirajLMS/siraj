@@ -84,7 +84,8 @@ export async function seedOrGet(
   });
 
   if (shouldSeedExtendedFiles(seedConfig)) {
-    for (const inserted of results) {
+    await results.reduce(async (prev, inserted) => {
+      await prev;
       try {
         await seedEntityFile({
           assetRelativePath: "documents/sample-invoice.pdf",
@@ -97,7 +98,7 @@ export async function seedOrGet(
       } catch (error) {
         logger.error(`Failed to seed invoice file for ${inserted.id}:`, error);
       }
-    }
+    }, Promise.resolve());
   }
 
   logger.info(`Invoices seeded (${results.length} rows).`);

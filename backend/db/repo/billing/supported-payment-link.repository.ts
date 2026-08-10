@@ -3,7 +3,7 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { supportedPaymentLinks } from "@/backend/db/schema";
-import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
   SupportedPaymentLinkInsertType,
   SupportedPaymentLinkSelectType,
@@ -13,8 +13,25 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 type LinkRow = typeof supportedPaymentLinks.$inferSelect;
 
+function isPaymentDirection(value: string): value is PaymentDirection {
+  return (Object.values(PaymentDirection) as readonly string[]).includes(value);
+}
+
 function toSelectType(row: LinkRow): SupportedPaymentLinkSelectType {
-  return row as SupportedPaymentLinkSelectType;
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    description: row.description,
+    instructions: row.instructions,
+    urlAllowlist: row.urlAllowlist,
+    urlExample: row.urlExample,
+    supportedDirections: isPaymentDirection(row.supportedDirections) ? row.supportedDirections : PaymentDirection.BOTH,
+    logoUrl: row.logoUrl,
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
 type ListActiveFilters = {
@@ -143,7 +160,9 @@ export namespace SupportedPaymentLinkRepository {
       const now = new Date();
       const results: SupportedPaymentLinkSelectType[] = [];
 
-      for (const input of inputs) {
+      const processNext = async (index: number): Promise<void> => {
+        if (index >= inputs.length) return;
+        const input = inputs[index];
         const [row] = await t
           .insert(supportedPaymentLinks)
           .values({
@@ -178,8 +197,10 @@ export namespace SupportedPaymentLinkRepository {
         if (row) {
           results.push(toSelectType(row));
         }
-      }
+        return processNext(index + 1);
+      };
 
+      await processNext(0);
       return results;
     };
 

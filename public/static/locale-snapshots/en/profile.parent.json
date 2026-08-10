@@ -11,7 +11,8 @@
     "social": "Social & Communication",
     "identity": "Identity",
     "billing": "Billing",
-    "students": "Associated Students"
+    "students": "Associated Students",
+    "adminOnly": "Administrative Details"
   },
   "fields": {
     "fullName": "Full Name",

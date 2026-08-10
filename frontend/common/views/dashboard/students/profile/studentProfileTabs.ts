@@ -27,8 +27,10 @@ const TAB_GROUP_MAP: Record<StudentProfileTab, readonly StudentFieldGroupKey[]> 
   history: HISTORY_TAB_GROUPS,
 };
 
+const STUDENT_PROFILE_TAB_SET = new Set<string>(STUDENT_PROFILE_TABS);
+
 export function isStudentProfileTab(value: string | null): value is StudentProfileTab {
-  return STUDENT_PROFILE_TABS.includes(value as StudentProfileTab);
+  return value !== null && STUDENT_PROFILE_TAB_SET.has(value);
 }
 
 export function canViewStudentProfileTab(

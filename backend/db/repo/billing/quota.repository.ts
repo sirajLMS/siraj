@@ -81,8 +81,7 @@ export namespace QuotaRepository {
     policy: unknown
   ): policy is { maxRolloverPercent: number | null; accumulationCap: number | null } => {
     if (typeof policy === "object" && policy !== null) {
-      const obj = policy as Record<string, unknown>;
-      return "maxRolloverPercent" in obj && "accumulationCap" in obj;
+      return "maxRolloverPercent" in policy && "accumulationCap" in policy;
     }
     return false;
   };
@@ -100,6 +99,20 @@ export namespace QuotaRepository {
       .limit(1)
       .then(([row]) => row ?? null);
 
+  /** Handles a duplicate idempotency-key hit by logging, returning the current quota row, or throwing. */
+  const handleDuplicateIdempotencyKey = async (
+    tx: DBTransaction,
+    operationName: string,
+    input: { quotaId: string; studentId: string }
+  ): Promise<QuotaSelectType> => {
+    logger.info(
+      `${operationName}: duplicate idempotency key, skipping (quota ${input.quotaId}, student ${input.studentId})`
+    );
+    const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
+    if (!existing) throw new QuotaNotFoundError("Quota not found");
+    return existing;
+  };
+
   /** Computes the period-end date from an anchor + periodDays. */
   const computePeriodEnd = (anchor: Date, periodDays: number): Date =>
     new Date(anchor.getTime() + periodDays * 24 * 60 * 60 * 1000);
@@ -115,11 +128,13 @@ export namespace QuotaRepository {
       const cap = rolloverPolicy.accumulationCap;
       return Math.min(raw, cap ?? raw);
     }
-    const policyStr = (rolloverPolicy as string | null) ?? "GRANT";
-    if (policyStr === "GRANT") {
-      return unused;
+    if (typeof rolloverPolicy === "string") {
+      if (rolloverPolicy === "GRANT") {
+        return unused;
+      }
+      return 0;
     }
-    return 0;
+    return unused;
   };
 
   /** Advances an anchor forward in whole `periodDays` increments until it sits after `now`. */
@@ -402,7 +417,7 @@ export namespace QuotaRepository {
 
     return {
       rows,
-      totalCount: Number(countRow[0]?.value ?? 0),
+      totalCount: countRow[0]?.value ?? 0,
     };
   };
 
@@ -539,12 +554,7 @@ export namespace QuotaRepository {
 
     if (ledgerResult.rowCount === 0) {
       // Duplicate idempotency key — operation already applied on a previous call
-      logger.info(
-        `reserveClasses: duplicate idempotency key, skipping (quota ${input.quotaId}, schedule ${input.recurringScheduleId})`
-      );
-      const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
-      if (!existing) throw new QuotaNotFoundError("Quota not found");
-      return existing;
+      return handleDuplicateIdempotencyKey(tx, "reserveClasses", input);
     }
 
     // Only update balance after successful ledger insert
@@ -603,12 +613,7 @@ export namespace QuotaRepository {
 
     if (ledgerResult.rowCount === 0) {
       // Duplicate idempotency key — operation already applied on a previous call
-      logger.info(
-        `releaseForRecurringSchedule: duplicate idempotency key, skipping (quota ${input.quotaId}, schedule ${input.recurringScheduleId})`
-      );
-      const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
-      if (!existing) throw new QuotaNotFoundError("Quota not found");
-      return existing;
+      return handleDuplicateIdempotencyKey(tx, "releaseForRecurringSchedule", input);
     }
 
     // Only update balance after successful ledger insert
@@ -731,7 +736,7 @@ export namespace QuotaRepository {
     // and balance update. The delta for a single-instance release is always 1,
     // but we use Number() so the guard type-checks and is ready for future callers
     // that might pass a dynamic count.
-    const releaseCount: number = Number(1);
+    const releaseCount: number = 1;
     if (releaseCount === 0) {
       logger.info(
         `releaseForInstance: delta=0, skipping ledger insert and balance update (quota ${input.quotaId}, instance ${input.classInstanceId})`
@@ -1204,34 +1209,44 @@ export namespace QuotaRepository {
       .orderBy(desc(quotas.priority))
       .for("update");
 
+    // Pre-compute the per-quota deductions sequentially (no awaits) so the loop
+    // can break early once the requested count is fully allocated across quotas
+    // ordered by priority. The rows are already locked by `FOR UPDATE`, so the
+    // subsequent writes can be dispatched in parallel without TOCTOU races.
+    const plannedDeductions: Array<{ quota: (typeof activeQuotas)[number]; toTake: number; index: number }> = [];
     let remainingToDeduct = input.count;
-    let deducted = 0;
-
     for (let i = 0; i < activeQuotas.length; i++) {
       const quota = activeQuotas[i];
       if (remainingToDeduct <= 0) break;
       const toTake = Math.min(remainingToDeduct, quota.remaining);
-      const now = new Date();
+      plannedDeductions.push({ quota, toTake, index: i });
+      remainingToDeduct -= toTake;
+    }
 
-      const [updated] = await tx
-        .update(quotas)
-        .set({
-          remaining: sql<number>`${quotas.remaining} - ${toTake}`,
-          usedThisPeriod: sql<number>`${quotas.usedThisPeriod} + ${toTake}`,
-          version: sql<number>`${quotas.version} + 1`,
-          updatedAt: now,
-        })
-        .where(
-          and(
-            eq(quotas.id, quota.id),
-            eq(quotas.status, QuotaStatus.ACTIVE),
-            gte(quotas.remaining, toTake),
-            isNull(quotas.deletedAt)
+    const now = new Date();
+
+    const deductions = await Promise.all(
+      plannedDeductions.map(async ({ quota, toTake, index }) => {
+        const [updated] = await tx
+          .update(quotas)
+          .set({
+            remaining: sql<number>`${quotas.remaining} - ${toTake}`,
+            usedThisPeriod: sql<number>`${quotas.usedThisPeriod} + ${toTake}`,
+            version: sql<number>`${quotas.version} + 1`,
+            updatedAt: now,
+          })
+          .where(
+            and(
+              eq(quotas.id, quota.id),
+              eq(quotas.status, QuotaStatus.ACTIVE),
+              gte(quotas.remaining, toTake),
+              isNull(quotas.deletedAt)
+            )
           )
-        )
-        .returning();
+          .returning();
 
-      if (updated) {
+        if (!updated) return 0;
+
         // Deterministic idempotency key based on quota ID, period, and deduction sequence
         // index so each levy within a call produces a unique key (RBL2-6).
         // Using the quota's current periodAnchor as the period key avoids the non-deterministic
@@ -1246,15 +1261,14 @@ export namespace QuotaRepository {
           reason: QuotaLedgerReason.ADJUST,
           reasonNote: `Deducted ${toTake} for on-demand refresh`,
           actorUserId: input.actorUserId ?? null,
-          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey, String(i)),
+          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey, String(index)),
         });
 
-        deducted += toTake;
-        remainingToDeduct -= toTake;
-      }
-    }
+        return toTake;
+      })
+    );
 
-    return deducted;
+    return deductions.reduce((total, value) => total + value, 0);
   };
 
   /** @internal — Used by tests for per-period reset assertions. Production rollover uses refreshPeriodic.

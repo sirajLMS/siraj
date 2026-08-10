@@ -6,6 +6,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { useRef } from "react";
 import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
 import { useLocalizedStringInputState } from "@/frontend/common/hooks/useLocalizedStringInputState";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { LocaleAdornmentSwitchDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localeAdornmentSwitch.desktop";
 import { LocalizedStringDrawerDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localizedStringDrawer.desktop";
 import type { LocalizedStringLabels } from "@/shared/locale";
@@ -104,7 +105,7 @@ export const LocalizedStringInputDesktop: React.FC<LocalizedStringInputProps> = 
   });
 
   return (
-    <Box ref={containerRef} sx={{ width: fullWidth ? "100%" : undefined, ...sx }}>
+    <Box ref={containerRef} sx={mergeSx({ width: fullWidth ? "100%" : undefined }, sx)}>
       <TextField
         label={label}
         value={fieldValue}

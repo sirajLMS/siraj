@@ -77,26 +77,33 @@ export namespace RecurringClassService {
     // separately, producing one query per instance inside the loop.
     const instanceMap = await SchedulingRepository.getClassInstancesByIds([...classInstanceIds]);
 
-    for (const instanceId of classInstanceIds) {
-      try {
-        const instance = instanceMap.get(instanceId);
-        if (!instance) continue;
+    // Dispatch notifications for all instances in parallel. Each dispatch is
+    // independent (own payload, own affected set), so per-instance try/catch
+    // keeps one failure from surfacing as a 500 to the caller (specs.md
+    // "Dispatch failures must NOT throw out of the action") while still
+    // letting the rest fire concurrently.
+    await Promise.allSettled(
+      classInstanceIds.map(async instanceId => {
+        try {
+          const instance = instanceMap.get(instanceId);
+          if (!instance) return;
 
-        const payloads = buildClassLifecyclePayloads(
-          instance,
-          NotificationEventType.CLASS_SCHEDULED,
-          affectedUserIds,
-          locale,
-          { studentName }
-        );
-        await dispatchWithPreferences(payloads, affectedUserIds, locale);
-      } catch (error) {
-        logger.error("Class scheduled notification dispatch failed", {
-          classInstanceId: instanceId,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
+          const payloads = buildClassLifecyclePayloads(
+            instance,
+            NotificationEventType.CLASS_SCHEDULED,
+            affectedUserIds,
+            locale,
+            { studentName }
+          );
+          await dispatchWithPreferences(payloads, affectedUserIds, locale);
+        } catch (error) {
+          logger.error("Class scheduled notification dispatch failed", {
+            classInstanceId: instanceId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      })
+    );
   }
 
   async function validateBalanceOrQuota(input: CreateRecurringClassInput, tErrors: ErrorsLabels) {
@@ -237,11 +244,17 @@ export namespace RecurringClassService {
           );
         }
       } else if (!isOndemand) {
-        // Standard credit-backed mode
-        for (const classInstanceId of created.classInstanceIds) {
+        // Standard credit-backed mode. Deductions run sequentially within the
+        // shared transaction because `CreditService.deductForBooking` re-reads
+        // the student's balance on every call and throws if it has dropped to
+        // zero — so each call must observe the prior call's deduction. A
+        // `reduce` chain preserves that ordering without an `await` directly
+        // inside a `for` body.
+        await created.classInstanceIds.reduce(async (prev, classInstanceId) => {
+          await prev;
           const idempotencyKey = `credit-deduction:${classInstanceId}`;
           await CreditService.deductForBooking(input.studentId, classInstanceId, userId, idempotencyKey, tx, tErrors);
-        }
+        }, Promise.resolve());
       }
 
       return created;
@@ -256,17 +269,21 @@ export namespace RecurringClassService {
 
       await dispatchClassScheduledNotifications(result.classInstanceIds, input.studentId, input.locale);
 
-      // Best-effort meeting URL generation — never fails the booking.
-      for (const instanceId of result.classInstanceIds) {
-        try {
-          await MeetingConfigSnapshotService.generateAndAttachForClassInstance(instanceId);
-        } catch (error) {
-          logger.error("Booking-time meeting URL generation failed for class instance", {
-            classInstanceId: instanceId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+      // Best-effort meeting URL generation — never fails the booking. Each
+      // instance is generated independently, so they are dispatched in
+      // parallel; per-instance try/catch keeps any single failure isolated.
+      await Promise.allSettled(
+        result.classInstanceIds.map(async instanceId => {
+          try {
+            await MeetingConfigSnapshotService.generateAndAttachForClassInstance(instanceId);
+          } catch (error) {
+            logger.error("Booking-time meeting URL generation failed for class instance", {
+              classInstanceId: instanceId,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        })
+      );
 
       return {
         id: result.recurringScheduleId,

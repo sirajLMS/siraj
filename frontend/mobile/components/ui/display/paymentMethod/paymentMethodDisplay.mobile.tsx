@@ -25,6 +25,14 @@ import {
   useAppTranslation,
 } from "@/shared/locale";
 
+function getLabel(labels: object, key: string): string {
+  if (!Object.hasOwn(labels, key)) {
+    return "";
+  }
+  const value = Reflect.get(labels, key);
+  return typeof value === "string" ? value : "";
+}
+
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
   return (
     <Box sx={{ display: "flex", gap: 0.75, alignItems: "baseline", flexWrap: "wrap" }}>
@@ -77,9 +85,7 @@ function buildHeaderSpecs(
 ): DetailRowSpec[] {
   const specs: DetailRowSpec[] = [];
 
-  const typeLabel = method.type
-    ? getPaymentMethodTypeLabel(method.type, key => tType[key as keyof PaymentMethodTypeLabels] ?? "")
-    : "";
+  const typeLabel = method.type ? getPaymentMethodTypeLabel(method.type, key => getLabel(tType, key)) : "";
   if (typeLabel) {
     specs.push({
       key: "type",
@@ -89,10 +95,7 @@ function buildHeaderSpecs(
   }
 
   if (showDirection && method.direction) {
-    const directionLabel = getPaymentMethodDirectionLabel(
-      method.direction,
-      key => tDirection[key as keyof PaymentMethodDirectionLabels] ?? ""
-    );
+    const directionLabel = getPaymentMethodDirectionLabel(method.direction, key => getLabel(tDirection, key));
     if (directionLabel) {
       specs.push({
         key: "direction",
@@ -162,9 +165,7 @@ export function MobilePaymentMethodDisplay({
   const t = useAppTranslation(Translation.Ui.PaymentMethod);
   const tDisplay = t.display;
 
-  const typeLabel = method.type
-    ? getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "")
-    : "";
+  const typeLabel = method.type ? getPaymentMethodTypeLabel(method.type, key => getLabel(t.type, key)) : "";
 
   const verificationStatus = method.verifiedAt ? "verified" : "unverified";
   const activityStatus = method.isActive === false ? "inactive" : "active";

@@ -26,8 +26,9 @@ export async function moveItems(
     beforeProcess: async (_, validSources) => {
       return await loadMoveEntities(validSources);
     },
-    processFn: async (ctx, sourcePath, entities: MoveEntities) => {
-      return await moveItem(ctx, sourcePath, input.destinationPath, entities);
+    processFn: async (opCtx, sourcePath, entities) => {
+      if (!entities) throw new Error("Move entities not loaded");
+      return await moveItem(opCtx, sourcePath, input.destinationPath, entities);
     },
   });
 }

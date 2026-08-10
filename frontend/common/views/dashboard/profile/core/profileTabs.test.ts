@@ -57,7 +57,7 @@ describe("getVisibleProfileTabs", () => {
   });
 
   test("shows notifications tab for student own scope", () => {
-    const tabs = createTabs("STUDENT" as ProfileAudience, ProfileScope.Own, [AppPermission.ProfileCoreIdentityViewOwn]);
+    const tabs = createTabs(ProfileAudience.Student, ProfileScope.Own, [AppPermission.ProfileCoreIdentityViewOwn]);
 
     expectTab(tabs, "notifications", true);
     expectTab(tabs, "profile", true);

@@ -3,7 +3,7 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { userPaymentMethods } from "@/backend/db/schema";
-import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type {
   UserPaymentMethodInsertType,
   UserPaymentMethodSelectType,
@@ -14,11 +14,22 @@ type DefaultSlot = "PAYIN" | "PAYOUT";
 
 type UserPaymentMethodRow = typeof userPaymentMethods.$inferSelect;
 
+const PAYMENT_METHOD_TYPE_VALUES = new Set<string>(Object.values(PaymentMethodType));
+const PAYMENT_DIRECTION_VALUES = new Set<string>(Object.values(PaymentDirection));
+
+function isPaymentMethodType(value: string): value is PaymentMethodType {
+  return PAYMENT_METHOD_TYPE_VALUES.has(value);
+}
+
+function isPaymentDirection(value: string): value is PaymentDirection {
+  return PAYMENT_DIRECTION_VALUES.has(value);
+}
+
 function toSelectType(row: UserPaymentMethodRow): UserPaymentMethodSelectType {
   return {
     ...row,
-    type: row.type as UserPaymentMethodSelectType["type"],
-    direction: row.direction as UserPaymentMethodSelectType["direction"],
+    type: isPaymentMethodType(row.type) ? row.type : PaymentMethodType.CASH,
+    direction: isPaymentDirection(row.direction) ? row.direction : PaymentDirection.PAYIN,
   };
 }
 

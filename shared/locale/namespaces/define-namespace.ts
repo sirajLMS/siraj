@@ -19,9 +19,12 @@ export function defineNamespace<TLabels>(
   maybeConfig?: NamespaceLoaderConfig<TLabels>
 ): NamespaceHandle<TLabels> {
   const id = typeof idOrConfig === "string" ? idOrConfig : undefined;
-  const config = (typeof idOrConfig === "string" ? maybeConfig : idOrConfig) as NamespaceLoaderConfig<TLabels>;
+  const config = typeof idOrConfig === "string" ? maybeConfig : idOrConfig;
+  if (!config) {
+    throw new Error("defineNamespace: config is required");
+  }
 
-  const handle = {} as NamespaceHandle<TLabels>;
+  const handle: NamespaceHandle<TLabels> = {};
   if (id) {
     Object.defineProperty(handle, NAMESPACE_ID_SYMBOL, {
       value: id,

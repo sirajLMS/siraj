@@ -4,6 +4,7 @@
 > **Dependencies:** Plan 05 (GraphQL API for Certificate Templates), Plan 01 (Database Schema), Plan 02 (Types & Permissions)
 > **Dependents:** Plan 09 (Category Management — blocked by sidebar), Plan 10 (Template Editor — blocked by create dialog), Plan 11 (Certificate Generation — blocked by Generate action), Plan 15 (Verification Log — blocked by sidebar), Plan 17 (Admin Dashboard — blocked by nav)
 > **Estimate:** 11 tasks · ~32–40 hours total
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 
 ---
 
@@ -56,15 +57,61 @@
 ```
 
 **Chain:**
-- T01 → T02 → T03 → T04 → {T05, T06} → {T07, T08} → T09 → T10 → T11 → T12 → T13
+- T01 → T02 → T03 → T04 → {T05, T06, T10} → {T07, T08} → {T09, T13} → T12 → T11
 - T04 is the critical-path gate: all view/interaction tasks depend on the container
-- T05 and T06 may run in parallel after T04
-- T07 and T08 may run in parallel after T05 (T08 has soft dependency on T06 for mobile action wiring)
+- T05 and T06 may run via parallel subagents after T04
+- T07 and T08 may run via parallel subagents after T05 (T08 has soft dependency on T06 for mobile action wiring)
 - T09 requires T05 (BulkActionBar component) and T08 (action handlers)
-- T10 requires T01 (i18n sidebar keys) and can run concurrent with T05–T09
+- T10 requires T01 (i18n sidebar keys) and can run via parallel subagents concurrent with T05–T09
 - T11 (knowledge propagation) depends on all prior tasks
-- T12 (testing) depends on T09 (all components created) — can run parallel with T10/T11
-- T13 (feature enhancements) depends on T05, T06, T08 (component files must exist)
+- T12 (testing) depends on T09 (all components created) — can run via parallel subagents with T10/T11
+- T13 (feature enhancements) depends on T05, T06, T08 (component files must exist) — runs via parallel subagents concurrent with T09
+
+**Execution order**: T01 → T02 → T03 → T04 → (T05, T06, T10 via parallel subagents) → (T07, T08 via parallel subagents) → (T09, T13 via parallel subagents) → T12 → T11
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task with no dependencies — must complete first to unblock all subsequent tasks
+
+### Wave 2: T02
+- Tasks: T02
+- Rationale: GraphQL documents depend on T01 for naming alignment — sequential gating
+
+### Wave 3: T03
+- Tasks: T03
+- Rationale: Zustand store depends on T01 and T02 for type alignment and query variable shapes — sequential gating
+
+### Wave 4: T04
+- Tasks: T04
+- Rationale: Container + ViewModel is the critical-path gate — all view and interaction tasks depend on it
+
+### Wave 5: T05, T06, T10
+- Tasks: T05, T06, T10
+- Rationale: T05 (desktop view) and T06 (mobile view) depend only on T04; T10 (sidebar nav) depends only on T01 — no interdependencies, all can run via parallel subagents
+
+### Wave 6: T07, T08
+- Tasks: T07, T08
+- Rationale: T07 (create dialog) depends on T01, T02, T04; T08 (card actions) depends on T04, T05, T06 — both available after Wave 5, no interdependencies, can run via parallel subagents
+
+### Wave 7: T09, T13
+- Tasks: T09, T13
+- Rationale: T09 (bulk actions + filter panel) depends on T03, T04, T05; T13 (feature enhancements) depends on T05, T06, T08 — both available after Wave 6, no interdependencies, can run via parallel subagents
+
+### Wave 8: T12
+- Tasks: T12
+- Rationale: Testing requires all component files from T01–T09 to exist — gated by Wave 7 completion
+
+### Final Wave: T11 (Knowledge Propagation)
+- Task: T11
+- Rationale: Must run after all other tasks complete — synthesizes learnings from T01–T10 and T12–T13
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -92,30 +139,14 @@
 
 ## Quality Loop (Per-File Verification)
 
-Every task must run the progressive quality loop **per file** before marking the task complete. The standard loop is:
+Every task must run the progressive quality loop **per file** before marking the task complete. The loop runs type checking, formatting/lint, and codescene code-health analysis in a single command, short-circuiting at the first failing check:
 
 ```bash
-# 1. Type check (fast, safe to run concurrently)
-bun tsgo
-
-# 2. Biome formatting + lint (safe to run concurrently)
-bun biome:check
-
-# 3. ESLint via lint queue client (serialized — safe for parallel sub-agents)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-08-T<NN>","files":["<file-path>"]}'
+# Full progressive chain: tsgo → biome → lint → codescene (short-circuits at first failure)
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
-For per-file progressive verification (tsgo → biome → lint → codescene, short-circuits at first failure):
-
-```bash
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>
-```
-
-**Stage options:** `tsgo`, `biome`, `lint`, `codescene`, `sonar-results` (sonar-results is same as codescene — no sonar-scan).
-
-> **Lint Queue Server:** Must be running before any lint call. Start with `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background). The port is in `scripts/lint-queue-config.ts`.
+**Stage options:** `tsgo`, `biome`, `lint`, `codescene`, `sonar-results` (sonar-results is same as codescene — no sonar-scan). Use `--lifecycle codescene` as the gold-standard for each file.
 
 ---
 
@@ -198,13 +229,16 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
   - `certificates.certificates` = "الشهادات"
   - `certificates.verificationLog` = "سجل التحقق"
 
-- [ ] 1.9 Run quality loop per file:
+- [ ] 1.9 Run quality loop per file (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-08-T01","files":["shared/locale/types/dashboard/certificates/templates/list.ts","shared/locale/types/dashboard/sidebar.ts","shared/locale/namespaces/dashboard/certificates/templates/list.namespace.ts","shared/locale/namespaces/dashboard/sidebar.namespace.ts","shared/locale/en/dashboard/certificates/templates/list.ts","shared/locale/en/dashboard/sidebar.ts","shared/locale/ar/dashboard/certificates/templates/list.ts","shared/locale/ar/dashboard/sidebar.ts"]}'
+  bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/templates/list.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/sidebar.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/certificates/templates/list.namespace.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/sidebar.namespace.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templates/list.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/sidebar.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templates/list.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/sidebar.ts --lifecycle codescene
   ```
 
 - [ ] 1.10 Write outcome file: `.ai/plans/cert-plan-08/outcome/T01-i18n-translations-outcome.md`
@@ -279,13 +313,9 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
   - Ensure `CertTemplateConnection`, `BatchResult`, `TemplateStatus` types exist
   - Fix any missing types by coordinating with Plan 05 backend (cross-file dependency — report if blocked)
 
-- [ ] 2.6 Run quality loop:
+- [ ] 2.6 Run quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-08-T02","files":["frontend/common/graphql/sharedDocuments/cert/template-list.documents.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/template-list.documents.ts --lifecycle codescene
   ```
 
 - [ ] 2.7 Write outcome file: `.ai/plans/cert-plan-08/outcome/T02-graphql-documents-outcome.md`
@@ -355,9 +385,9 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
 
 - [ ] 3.7 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/stores/templateListStore.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/stores/templateListStore.types.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/stores/__mocks__/templateListStore.ts --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/stores/templateListStore.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/stores/templateListStore.types.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/stores/__mocks__/templateListStore.ts --lifecycle codescene
   ```
 
 - [ ] 3.8 Write outcome file: `.ai/plans/cert-plan-08/outcome/T03-zustand-store-outcome.md`
@@ -445,12 +475,12 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 
 - [ ] 4.7 Run quality loop:
   ```bash
-  bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/templates/page.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/types.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/useTemplatesViewModel.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/TemplateListView.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/TemplateListContainer.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/index.ts --lifecycle lint
+  bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/templates/page.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/types.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/useTemplatesViewModel.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/TemplateListView.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/TemplateListContainer.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/index.ts --lifecycle codescene
   ```
 
 - [ ] 4.8 Write outcome file: `.ai/plans/cert-plan-08/outcome/T04-container-viewmodel-outcome.md`
@@ -484,6 +514,8 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 **Requirements covered:** REQ-08-01 (card grid), REQ-08-03 (filter UI), REQ-08-04 (load more button), REQ-08-09 (desktop responsive grid), REQ-08-10 (loading/error/empty states)
 
 **Dependencies:** T04 (container provides ViewModel)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T06, T10.
 
 **Subtasks:**
 
@@ -570,17 +602,17 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 
 - [ ] 5.9 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/components/TemplateToolbar.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateCard.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateCardGrid.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateTable.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/StatusBadge.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/SkeletonGrid.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/ErrorState.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/EmptyState.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/LoadMoreButton.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkActionBar.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/components/TemplateToolbar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateCard.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateCardGrid.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/TemplateTable.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/StatusBadge.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/SkeletonGrid.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/ErrorState.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/states/EmptyState.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/LoadMoreButton.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkActionBar.tsx --lifecycle codescene
   ```
 
 - [ ] 5.10 Write outcome file: `.ai/plans/cert-plan-08/outcome/T05-desktop-view-outcome.md`
@@ -617,6 +649,8 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 **Requirements covered:** REQ-08-01 (card list), REQ-08-04 (mobile load more), REQ-08-09 (mobile responsive: 1-col compact), REQ-08-10 (mobile skeleton/error/empty states)
 
 **Dependencies:** T04 (container provides ViewModel)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T10.
 
 **Subtasks:**
 
@@ -675,12 +709,12 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 
 - [ ] 6.9 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileTemplateCard.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/states/MobileSkeletonList.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/states/MobileListStates.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileBulkActionBar.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileLoadMoreButton.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileTemplateCard.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/states/MobileSkeletonList.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/states/MobileListStates.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileBulkActionBar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileLoadMoreButton.tsx --lifecycle codescene
   ```
 
 - [ ] 6.10 Write outcome file: `.ai/plans/cert-plan-08/outcome/T06-mobile-view-outcome.md`
@@ -719,6 +753,8 @@ These tasks implement user interactions: the create template dialog, card action
 **Requirements covered:** REQ-08-07 (create template dialog)
 
 **Dependencies:** T01 (i18n create dialog labels), T02 (create mutation document), T04 (container mutation handler)
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T08.
 
 **Subtasks:**
 
@@ -763,8 +799,8 @@ These tasks implement user interactions: the create template dialog, card action
 
 - [ ] 7.6 Run quality loop:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/schemas/createTemplateSchema.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CreateTemplateDialog.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/schemas/createTemplateSchema.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CreateTemplateDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 7.7 Write outcome file: `.ai/plans/cert-plan-08/outcome/T07-create-dialog-outcome.md`
@@ -790,6 +826,8 @@ These tasks implement user interactions: the create template dialog, card action
 **Requirements covered:** REQ-08-05 (card actions: Edit, Preview, Duplicate, Delete, Generate)
 
 **Dependencies:** T04 (container mutation handlers), T05 (card component), T06 (mobile card)
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T07.
 
 **Subtasks:**
 
@@ -827,8 +865,8 @@ These tasks implement user interactions: the create template dialog, card action
 
 - [ ] 8.5 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/DeleteConfirmDialog.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/DeleteConfirmDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 8.6 Write outcome file: `.ai/plans/cert-plan-08/outcome/T08-card-actions-outcome.md`
@@ -859,6 +897,8 @@ These tasks implement user interactions: the create template dialog, card action
 **Requirements covered:** REQ-08-03 (filter panel with AND logic), REQ-08-08 (bulk actions: archive, delete, change category)
 
 **Dependencies:** T03 (store selection state), T04 (container bulk handlers), T05 (BulkActionBar component)
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T13.
 
 **Subtasks:**
 
@@ -928,11 +968,11 @@ These tasks implement user interactions: the create template dialog, card action
 
 - [ ] 9.7 Run quality loop per file:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/FilterPanel.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkChangeCategoryDialog.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkActionBar.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/FilterPanel.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkChangeCategoryDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/BulkActionBar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx --lifecycle codescene
   ```
 
 - [ ] 9.8 Write outcome file: `.ai/plans/cert-plan-08/outcome/T09-bulk-filter-outcome.md`
@@ -970,6 +1010,8 @@ These tasks add the sidebar navigation and capture all learnings in the knowledg
 **Requirements covered:** REQ-08-06 (sidebar navigation — Certificates group with 5 items)
 
 **Dependencies:** T01 (i18n sidebar keys)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T06.
 
 **Subtasks:**
 
@@ -1037,8 +1079,8 @@ These tasks add the sidebar navigation and capture all learnings in the knowledg
 
 - [ ] 10.7 Run quality loop:
   ```bash
-  bun run scripts/health/sub-loop.ts <sidebar-config-file> --lifecycle lint
-  bun run scripts/health/sub-loop.ts <sidebar-component-file> --lifecycle lint
+  bun run scripts/health/sub-loop.ts <sidebar-config-file> --lifecycle codescene
+  bun run scripts/health/sub-loop.ts <sidebar-component-file> --lifecycle codescene
   ```
   (Replace `<sidebar-config-file>` and `<sidebar-component-file>` with actual paths discovered in 10.1)
 
@@ -1149,6 +1191,8 @@ These tasks cover component testing (Happy DOM), E2E testing (Playwright), and i
 
 **Dependencies:** All prior tasks (T01–T09 must be complete; component files must exist; T10 sidebar is not a gating dependency)
 
+> **Parallelizable**: This task runs as a subagent in Wave 8 (single-task wave — testing gate before knowledge propagation).
+
 **Subtasks:**
 
 - [ ] 12.1 Create `test/ui/components/templates/TemplateCard.test.tsx`:
@@ -1228,15 +1272,15 @@ These tasks cover component testing (Happy DOM), E2E testing (Playwright), and i
 
 - [ ] 12.10 Run quality loop on all test files:
   ```bash
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCard.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCardGrid.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/FilterPanel.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/CreateTemplateDialog.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/DeleteConfirmDialog.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/BulkActionBar.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/MobileTemplateCard.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateTable.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/e2e/templates-list.spec.ts --lifecycle lint
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCard.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCardGrid.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/FilterPanel.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/CreateTemplateDialog.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/DeleteConfirmDialog.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/BulkActionBar.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/MobileTemplateCard.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateTable.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/e2e/templates-list.spec.ts --lifecycle codescene
   ```
 
 - [ ] 12.11 Write outcome file: `.ai/plans/cert-plan-08/outcome/T12-testing-outcome.md`
@@ -1270,6 +1314,8 @@ These tasks cover component testing (Happy DOM), E2E testing (Playwright), and i
 **Requirements covered:** REQ-08-05e (Generate action per Plan 17 flag), REQ-08-03 (filter enhancements), DD-6 (optimistic UI for mutations)
 
 **Dependencies:** T05 (desktop view files exist), T06 (mobile view files exist), T08 (CardActionMenu wired)
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T09.
 
 **Subtasks:**
 
@@ -1317,10 +1363,10 @@ showSorting `outlined` for inactive
 
 - [  ] 13.7 Run quality loop on enhanced files:
   ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/useTemplatesViewModel.ts --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/components/TemplateToolbar.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileToolbar.tsx --lifecycle lint
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/useTemplatesViewModel.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/components/TemplateToolbar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/components/MobileToolbar.tsx --lifecycle codescene
   ```
 
 - [ ] 13. Write outcome file `.ai/plans/cert-plan-08/outcome/T13-feature-enhancements.md`
@@ -1512,46 +1558,19 @@ All outcome files are written to: `.ai/plans/cert-plan-08/outcome/`
 
 ```bash
 # Run the sub-loop script for progressive verification (tsgo → biome → lint → codescene)
-# Short-circuits at first failure; --lifecycle controls target stage
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+# Short-circuits at first failure; --lifecycle codescene is the gold-standard
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
 ### Global Quality Commands
 
 ```bash
-# Type check (safe to run concurrently)
-bun tsgo
-
-# Biome formatting + lint (safe to run concurrently)
-bun biome:check
-
-# Full-repo ESLint via lint queue server (safe for parallel sub-agents)
-bun run lint
-
 # Full quality gate (tsgo → biome → lint → codescene → sonar)
 bun quality-gate
 
 # Fresh quality gate (reset state and run from scratch)
 bun quality-gate:fresh
 ```
-
-### Lint Queue Server (Required for `bun run lint`)
-
-```bash
-# Start the lint queue server (background — required before any lint call)
-~/.bun/bin/bun run scripts/lint-queue-server.ts
-
-# Health check
-curl -s http://localhost:${LINT_QUEUE_PORT}/status
-# Returns: { running: true, queueLength: N }
-
-# File-scoped lint (faster for sub-agents)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-08-T<NN>","files":["<file-path-1>","<file-path-2>"]}'
-```
-
-> **Port configuration:** The port is defined in `scripts/lint-queue-config.ts`. Set `export LINT_QUEUE_PORT=$(grep -oP 'LINT_QUEUE_PORT = \K\d+' scripts/lint-queue-config.ts)` or override with `LINT_QUEUE_PORT=<port>`.
 
 ### Sonar-Scan Prohibition
 
@@ -1616,11 +1635,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T12","files":["frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx --lifecycle codescene
 ```
 
 ---
@@ -1669,11 +1684,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T13","files":["frontend/views/dashboard/cert/templates/list/TemplateCard.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateCard.tsx --lifecycle codescene
 ```
 
 ---
@@ -1722,11 +1733,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T14","files":["frontend/views/dashboard/cert/templates/list/TemplateListTable.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateListTable.tsx --lifecycle codescene
 ```
 
 ---
@@ -1756,11 +1763,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T15","files":["frontend/views/dashboard/cert/templates/list/TemplateListTable.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateListTable.tsx --lifecycle codescene
 ```
 
 ---
@@ -1827,11 +1830,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T16","files":["frontend/views/dashboard/cert/templates/list/CreateTemplateDialog.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/CreateTemplateDialog.tsx --lifecycle codescene
 ```
 
 ---
@@ -1880,11 +1879,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T17","files":["frontend/stores/cert/templateListStore.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/stores/cert/templateListStore.ts --lifecycle codescene
 ```
 
 ---
@@ -1931,11 +1926,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T18","files":["frontend/components/layout/Sidebar.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/components/layout/Sidebar.tsx --lifecycle codescene
 ```
 
 ---
@@ -1973,11 +1964,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T19","files":["frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateGrid.tsx --lifecycle codescene
 ```
 
 ---
@@ -2201,18 +2189,16 @@ done
 **Files:** All files created in T12–T21.
 
 **Sub-tasks:**
-1. Start the lint queue server in background: `~/.bun/bin/bun run scripts/lint-queue-server.ts`.
-2. Health check: `curl -s http://localhost:${LINT_QUEUE_PORT}/status`.
-3. For each file created, run:
+1. For each file created, run:
    ```bash
    bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
    ```
-4. The sub-loop runs progressive checks (tsgo → biome → lint → codescene) and short-circuits at the first failing check.
-5. Fix any issues found, re-run the sub-loop until exit code 0.
-6. For instruction-file / AGENTS.md discovery: the sub-loop automatically prints applicable instruction files (`.github/instructions/*.instructions.md`) and AGENTS.md files. Read ALL listed files before fixing.
-7. After all individual files pass, run `bun quality-gate` for full-project verification.
-8. If CODESCENE fails on a file: run `bun run codescene --file <path>` to get detailed report and fix.
-9. If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts` (read-only queries) — but sub-agents never run sonar-scan.
+2. The sub-loop runs progressive checks (tsgo → biome → lint → codescene) and short-circuits at the first failing check. The in-process lint queue client handles serialized lint automatically — no server startup needed.
+3. Fix any issues found, re-run the sub-loop until exit code 0.
+4. For instruction-file / AGENTS.md discovery: the sub-loop automatically prints applicable instruction files (`.github/instructions/*.instructions.md`) and AGENTS.md files. Read ALL listed files before fixing.
+5. After all individual files pass, run `bun quality-gate` for full-project verification.
+6. If CODESCENE fails on a file: run `bun run codescene --file <path>` to get detailed report and fix.
+7. If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts` (read-only queries) — but sub-agents never run sonar-scan.
 
 **File List for Quality Loop:**
 
@@ -2298,10 +2284,9 @@ bun quality-gate
 
 **Verification:**
 ```bash
-# Verify AGENTS.md files are updated
-bun tsgo
-bun biome:check
-bun run lint
+# Verify AGENTS.md files are updated (full progressive chain per file)
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/stores/AGENTS.md --lifecycle codescene
 
 # Verify no broken cross-references
 grep -r "dashboard/cert/templates" frontend/views/dashboard/cert/AGENTS.md

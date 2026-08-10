@@ -35,6 +35,40 @@ async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; 
   return { actorUserId, tErrors };
 }
 
+// Pothos input types are structurally compatible with the catalog submit-input
+// types at runtime, but differ in optional/enum field shapes (e.g. `CountryCode`
+// enum vs `string | null`). These guards replace unsafe `as` assertions with
+// validated narrowing so the compiler can verify safety.
+function isSupportedMobileWalletSubmitInput(value: unknown): value is SupportedMobileWalletSubmitInput {
+  return typeof value === "object" && value !== null && "slug" in value && "name" in value;
+}
+
+function isUpdateSupportedMobileWalletInput(value: unknown): value is UpdateSupportedMobileWalletInput {
+  return typeof value === "object" && value !== null;
+}
+
+function isSupportedPaymentLinkSubmitInput(value: unknown): value is SupportedPaymentLinkSubmitInput {
+  return typeof value === "object" && value !== null && "slug" in value && "name" in value && "urlAllowlist" in value;
+}
+
+function isUpdateSupportedPaymentLinkInput(value: unknown): value is UpdateSupportedPaymentLinkInput {
+  return typeof value === "object" && value !== null;
+}
+
+function isSupportedOnlineAccountSubmitInput(value: unknown): value is SupportedOnlineAccountSubmitInput {
+  return typeof value === "object" && value !== null && "slug" in value && "name" in value && "identifierKind" in value;
+}
+
+function isUpdateSupportedOnlineAccountInput(value: unknown): value is UpdateSupportedOnlineAccountInput {
+  return typeof value === "object" && value !== null;
+}
+
+/** Narrows `value` to `T` via `guard`, throwing when the shape does not match. */
+function assertShape<T>(value: unknown, guard: (v: unknown) => v is T, message: string): T {
+  if (!guard(value)) throw new Error(message);
+  return value;
+}
+
 gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
   t.field({
     type: UserPaymentMethodPothosObject,
@@ -154,7 +188,7 @@ gqlSchemaBuilder.mutationField("createSupportedMobileWallet", t =>
       const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.createMobileWallet(
         actorUserId,
-        args.input as SupportedMobileWalletSubmitInput,
+        assertShape(args.input, isSupportedMobileWalletSubmitInput, "createSupportedMobileWallet: invalid input"),
         tErrors
       );
     },
@@ -174,7 +208,7 @@ gqlSchemaBuilder.mutationField("updateSupportedMobileWallet", t =>
       return PaymentCatalogService.updateMobileWallet(
         actorUserId,
         args.id,
-        args.input as UpdateSupportedMobileWalletInput,
+        assertShape(args.input, isUpdateSupportedMobileWalletInput, "updateSupportedMobileWallet: invalid input"),
         tErrors
       );
     },
@@ -206,7 +240,7 @@ gqlSchemaBuilder.mutationField("createSupportedPaymentLink", t =>
       const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.createPaymentLink(
         actorUserId,
-        args.input as SupportedPaymentLinkSubmitInput,
+        assertShape(args.input, isSupportedPaymentLinkSubmitInput, "createSupportedPaymentLink: invalid input"),
         tErrors
       );
     },
@@ -226,7 +260,7 @@ gqlSchemaBuilder.mutationField("updateSupportedPaymentLink", t =>
       return PaymentCatalogService.updatePaymentLink(
         actorUserId,
         args.id,
-        args.input as UpdateSupportedPaymentLinkInput,
+        assertShape(args.input, isUpdateSupportedPaymentLinkInput, "updateSupportedPaymentLink: invalid input"),
         tErrors
       );
     },
@@ -258,7 +292,7 @@ gqlSchemaBuilder.mutationField("createSupportedOnlineAccount", t =>
       const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentCatalogService.createOnlineAccount(
         actorUserId,
-        args.input as SupportedOnlineAccountSubmitInput,
+        assertShape(args.input, isSupportedOnlineAccountSubmitInput, "createSupportedOnlineAccount: invalid input"),
         tErrors
       );
     },
@@ -278,7 +312,7 @@ gqlSchemaBuilder.mutationField("updateSupportedOnlineAccount", t =>
       return PaymentCatalogService.updateOnlineAccount(
         actorUserId,
         args.id,
-        args.input as UpdateSupportedOnlineAccountInput,
+        assertShape(args.input, isUpdateSupportedOnlineAccountInput, "updateSupportedOnlineAccount: invalid input"),
         tErrors
       );
     },

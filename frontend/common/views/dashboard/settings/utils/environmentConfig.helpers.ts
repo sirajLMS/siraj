@@ -31,7 +31,7 @@ export function isEnvConfigEntryDirty(
 }
 
 export function isEnvConfigEntrySaving(key: string, savingKeys: Readonly<Record<string, boolean>>): boolean {
-  return savingKeys[key] === true;
+  return savingKeys[key];
 }
 
 export function removeDraftValue(draftValues: Readonly<Record<string, string>>, key: string): Record<string, string> {

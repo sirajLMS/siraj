@@ -75,6 +75,18 @@ const EndAdornment: React.FC<{
     existingAdornment
   );
 
+type TextFieldSlotProps = {
+  readonly input?: { readonly startAdornment?: React.ReactNode; readonly endAdornment?: React.ReactNode } & Record<
+    string,
+    unknown
+  >;
+  readonly htmlInput?: Record<string, unknown>;
+} & Record<string, unknown>;
+
+function isTextFieldSlotProps(value: unknown): value is TextFieldSlotProps {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 const AutocompleteTextField: React.FC<{
   readonly params: React.ComponentProps<typeof TextField>;
   readonly label?: string;
@@ -98,14 +110,8 @@ const AutocompleteTextField: React.FC<{
   autoComplete,
   option,
 }) => {
-  const {
-    input: inputSlotProps,
-    htmlInput: htmlInputSlotProps,
-    ...restSlotProps
-  } = params.slotProps as {
-    input?: { startAdornment?: React.ReactNode; endAdornment?: React.ReactNode } & Record<string, unknown>;
-    htmlInput?: Record<string, unknown>;
-  } & Record<string, unknown>;
+  const slotProps = isTextFieldSlotProps(params.slotProps) ? params.slotProps : {};
+  const { input: inputSlotProps, htmlInput: htmlInputSlotProps, ...restSlotProps } = slotProps;
   return (
     <TextField
       {...params}
@@ -352,7 +358,7 @@ export const PaymentMethodAutocompleteMobile: React.FC<PaymentMethodAutocomplete
   });
 
   return (
-    <Autocomplete<PaymentMethodCatalogOption, false, false, false>
+    <Autocomplete<PaymentMethodCatalogOption>
       fullWidth={fullWidth}
       options={options}
       autoHighlight

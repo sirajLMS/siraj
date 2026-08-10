@@ -71,7 +71,7 @@ function SelectFieldGroup({
   readonly label: string;
   readonly control: Control<ComplaintFormData>;
   readonly name: "category" | "studentId";
-  readonly error: FieldErrors<ComplaintFormData>["category"] | FieldErrors<ComplaintFormData>["studentId"];
+  readonly error: FieldErrors<ComplaintFormData>["category"];
   readonly children: React.ReactNode;
 }) {
   const labelId = `${name}-label`;

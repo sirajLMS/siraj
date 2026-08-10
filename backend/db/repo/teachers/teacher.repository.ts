@@ -78,7 +78,7 @@ export namespace TeacherRepository {
     };
   }
 
-  export const findByUserId = async (userId: string, tx?: DBTransaction) => {
+  export const findByUserId = async (userId: string, tx?: DBTransaction): Promise<TeacherSelectType | null> => {
     const q = queryDb(tx);
     const [teacher] = await q.select().from(teachers).where(eq(teachers.userId, userId)).limit(1);
     return teacher ?? null;

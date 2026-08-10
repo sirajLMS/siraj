@@ -7,6 +7,8 @@
 | **Depends On** | Plan 5 (GraphQL API), Plan 11 (Visual Canvas) |
 | **Estimated Total Effort** | ~48 hours |
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
 ---
 
 ## Dependency Graph
@@ -109,6 +111,80 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 | 26 | Knowledge Propagation (New Components) | 16–25 | 2 |
 | 27 | Comprehensive Testing (Original) | 1–14 complete | 24 |
 
+**Execution order**: T1 → T2 → T3, T21 (via parallel subagents) → T4, T8 (via parallel subagents) → T5 → T6 → T7 → T9, T10, T12 (via parallel subagents) → T11 → T13, T14 (via parallel subagents) → T15 → T16, T17, T18, T19, T20, T27 (via parallel subagents) → T22 → T23, T24 (via parallel subagents) → T25 → T26
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T1
+- Tasks: T1
+- Rationale: No dependencies — single starting task
+
+### Wave 2: T2
+- Tasks: T2
+- Rationale: Depends only on T1; no other task is ready
+
+### Wave 3: T3, T21
+- Tasks: T3, T21
+- Rationale: T3 depends on T1+T2; T21 depends on T2 — both are ready after Wave 2 and have no interdependencies
+
+### Wave 4: T4, T8
+- Tasks: T4, T8
+- Rationale: T4 depends on T3; T8 depends on T3 — both ready after Wave 3, independent of each other
+
+### Wave 5: T5
+- Tasks: T5
+- Rationale: Depends on T3 + T4 — single task, no parallelization available
+
+### Wave 6: T6
+- Tasks: T6
+- Rationale: Depends on T3 + T4 + T5 — single task
+
+### Wave 7: T7
+- Tasks: T7
+- Rationale: Depends on T3 + T5 + T6 — single task
+
+### Wave 8: T9, T10, T12
+- Tasks: T9, T10, T12
+- Rationale: T9 depends on T3 + T7; T10 depends on T5 + T6 + T7; T12 depends on T5 + T6 + T7 — all ready after Wave 7, no interdependencies
+
+### Wave 9: T11
+- Tasks: T11
+- Rationale: Depends on T8 + T9 + T10 — single convergent task
+
+### Wave 10: T13, T14
+- Tasks: T13, T14
+- Rationale: Both depend on Tasks 1–12 being complete — independent of each other, can run in parallel
+
+### Wave 11: T15
+- Tasks: T15
+- Rationale: Knowledge propagation — depends on Tasks 1–14; final wave of the first phase
+
+### Wave 12: T16, T17, T18, T19, T20, T27
+- Tasks: T16, T17, T18, T19, T20, T27
+- Rationale: T16 depends on T7 + T14 + T21; T17 depends on T11 + T21; T18 depends on T7 + T21; T19 depends on T11 + T21; T20 depends on T4 + T21; T27 depends on Tasks 1–14 complete — all ready after Wave 11, all independent
+
+### Wave 13: T22
+- Tasks: T22
+- Rationale: Depends on T11 + T20 + T21 — single convergent task
+
+### Wave 14: T23, T24
+- Tasks: T23, T24
+- Rationale: Both depend on Tasks 16–22 — independent of each other (component tests vs E2E tests), can run in parallel
+
+### Wave 15: T25
+- Tasks: T25
+- Rationale: Quality loop depends on Tasks 16–24 — must wait for all prior waves
+
+### Final Wave: Knowledge Propagation
+- Task: T26
+- Rationale: Must run after all other tasks complete (depends on Tasks 16–25)
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
+
 ---
 
 ## Task 1 — GraphQL Documents for Element CRUD
@@ -196,6 +272,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Goal**: Create the ViewModel hook that provides element CRUD operations, validation callbacks, clipboard operations, z-order actions, visibility/lock toggles, and i18n labels to the property panel and layer panel. This ViewModel reads selection from Plan 11's canvas store via selector — does NOT own `selectedIds` or `elements[]`.
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T21.
+
 **Files to Create:**
 - `frontend/common/views/dashboard/certificates/template-editor/elements/useTemplateElementEditorViewModel.ts`
 - `frontend/common/views/dashboard/certificates/template-editor/elements/types/elementEditor.types.ts`
@@ -244,6 +322,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 ## Task 4 — Utility Functions (Validation, Defaults, Labels)
 
 **Goal**: Create the pure utility functions for element validation, default property generation, and label derivation.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T8.
 
 **Files to Create:**
 - `frontend/common/views/dashboard/certificates/template-editor/elements/utils/validateElement.ts`
@@ -489,6 +569,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Goal**: Create the desktop layer panel (left sidebar) showing all elements sorted by z-index descending with visibility/lock toggles and drag-to-reorder using @dnd-kit/sortable.
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T4.
+
 **Files to Create:**
 - `frontend/desktop/views/dashboard/certificates/template-editor/elements/layerPanel/LayerPanelSection.desktop.tsx`
 - `frontend/desktop/views/dashboard/certificates/template-editor/elements/layerPanel/LayerPanelItem.desktop.tsx`
@@ -551,6 +633,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Goal**: Create the desktop right-click context menu for selected elements on the canvas.
 
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10 and T12.
+
 **Files to Create:**
 - `frontend/desktop/views/dashboard/certificates/template-editor/elements/ElementContextMenu.desktop.tsx`
 
@@ -592,6 +676,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 ## Task 10 — Desktop Property Panel (Right Sidebar)
 
 **Goal**: Create the desktop right sidebar property panel that shows the selected element's properties in collapsible accordion sections.
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T9 and T12.
 
 **Files to Create:**
 - `frontend/desktop/views/dashboard/certificates/template-editor/elements/propertyPanel/PropertyPanelSection.desktop.tsx`
@@ -729,6 +815,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Goal**: Create the mobile element editor: scrollable element list, full-screen edit dialog, mini-canvas thumbnail, and add element bottom sheet.
 
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T9 and T10.
+
 **Files to Create:**
 - `frontend/mobile/views/dashboard/certificates/template-editor/elements/elementEditor.mobile.tsx`
 - `frontend/mobile/views/dashboard/certificates/template-editor/elements/ElementListView.mobile.tsx`
@@ -817,6 +905,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Goal**: Implement the i18n namespace in `shared/locale/`, wire all components together, finalize Apollo cache update functions, and run codegen.
 
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T14.
+
 **Files to Create:**
 - `shared/locale/namespaces/dashboard/certificates/templateElements.namespace.ts`
 - `shared/locale/en/dashboard/certificates/templateElements.ts`
@@ -895,8 +985,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 - Apollo cache updates use `cache.modify` / `cache.evict` / `cache.gc` (not raw writes)
 
 **Quality Loop:**
-- tsgo + biome:check + lint via queue client on ALL modified/created files
-- Run `bun biome:check` (unsafe fixes for formatting)
+- Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on ALL modified/created files (progressive: tsgo → biome → lint → codescene, short-circuits on first failure)
 - Verify both English and Arabic locale files have identical key structures (compile-time type check)
 - Run `bun run generate:gqlSchema && bun codegen` — verify no type errors
 
@@ -905,6 +994,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 ## Task 14 — Accessibility Verification + Keyboard Navigation
 
 **Goal**: Verify and fix accessibility issues across all element editor components: keyboard navigation, screen reader labels, focus management, and color contrast.
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T13.
 
 **Files to Modify:**
 - Any component files from Tasks 5-12 that fail accessibility checks (fix in place)
@@ -1002,6 +1093,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Goal**: Create the `ElementPropertiesPanel` desktop右侧 sidebar component that renders a vertical accordion of position/size, appearance, and type-specific properties for the currently selected canvas element. Adapts to element type and supports multi-select batch state.
 
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T17, T18, T19, T20, and T27.
+
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/panels/ElementPropertiesPanel.tsx`
 - `frontend/views/dashboard/cert/templates/editor/panels/sections/PositionSizeSection.tsx`
@@ -1029,13 +1122,15 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
 ## Task 17 — Alignment Guide Engine
 
 **Goal**: Create the `AlignmentGuides` canvas overlay component that renders smart, edge, distribution, and page-center guide lines while dragging elements, with a 5px snap threshold.
+
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T16, T18, T19, T20, and T27.
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/canvas/AlignmentGuides.tsx`
@@ -1067,13 +1162,15 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
 ## Task 18 — Element Context Menu
 
 **Goal**: Create the `ElementContextMenu` component with the full right-click menu: cut/copy/paste/duplicate/delete, z-order, align submenu, distribute submenu, group/ungroup.
+
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T16, T17, T19, T20, and T27.
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/canvas/ElementContextMenu.tsx`
@@ -1098,13 +1195,15 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
 ## Task 19 — Multi-Select Toolbar + Selection Rectangle
 
 **Goal**: Create the `MultiSelectToolbar` floating component that appears above the selection bounding box when 2+ elements are selected, with align/distribute/group/match-size/delete buttons. Also implement the marquee selection rectangle.
+
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T16, T17, T18, T20, and T27.
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/canvas/MultiSelectToolbar.tsx`
@@ -1136,13 +1235,15 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
 ## Task 20 — Element Library Palette (Left Sidebar)
 
 **Goal**: Create the `ElementLibrary` left-sidebar palette with four collapsible sections (Text, Media, Shapes, Background) of draggable element templates that can be dropped onto the canvas or clicked to create an element at canvas center.
+
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T16, T17, T18, T19, and T27.
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/panels/ElementLibrary.tsx`
@@ -1169,13 +1270,15 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
 ## Task 21 — Extended Zustand Element Store (Clipboard, Groups, History)
 
 **Goal**: Extend the Task 2 `useTemplateElementEditorStore` with multi-select, clipboard, groups, align/distribute/matchSize, and undo/redo (history command pattern). Consolidate to be the single source of truth for `selectedElementIds` (remove duplicate selection state from Plan 11 canvas store).
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T3.
 
 **Files to Create/Modify:**
 - `frontend/common/stores/certificates/templateElementEditorStore.ts` (extend existing from Task 2)
@@ -1207,7 +1310,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
@@ -1238,13 +1341,15 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
 ## Task 23 — Component Tests for New Components (6 test files)
 
 **Goal**: Create component tests (Happy DOM + mocked Apollo) for the six new components from Tasks 16–22.
+
+> **Parallelizable**: This task runs as a subagent in Wave 14 alongside T24.
 
 **Files to Create:**
 - `test/ui/components/cert/templates/editor/ElementPropertiesPanel.test.tsx`
@@ -1322,7 +1427,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - `bun run test:ui:components` for component tests
-- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle lint` on each test file
+- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle codescene` on each test file
 - Target: 90%+ line coverage for each new component
 
 ---
@@ -1330,6 +1435,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 ## Task 24 — E2E Tests for Interactive Editor Workflows (6 tests)
 
 **Goal**: Create end-to-end tests (Playwright, production server) for the interactive editor workflows involving the new components: adding elements, dragging, multi-select align, context menu, undo/redo.
+
+> **Parallelizable**: This task runs as a subagent in Wave 14 alongside T23.
 
 **Depends On**: Tasks 16–22 complete
 
@@ -1405,7 +1512,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - `bun run build:test && bun run test:ui:e2e` for E2E tests
-- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle lint` on each test file
+- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle codescene` on each test file
 
 ---
 
@@ -1416,21 +1523,17 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 **Files:** All files created in Tasks 16–24
 
 **Subtasks:**
-1. Ensure the lint queue server is running: `~/.bun/bin/bun run scripts/lint-queue-server.ts`
-2. For each new file, run: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
-3. Fix all tsgo errors first (progressive enforcement — do not skip to biome/lint while tsgo fails)
-4. Fix all biome issues (formatting + unsafe fixes)
-5. Fix all lint errors (ESLint via queue client)
-6. Re-run `bun run tsgo` to ensure the full type check passes across the project (not just per-file)
-7. Re-run `bun biome:check` full-project to ensure no formatting drift
-8. Run `bun run lint` (full-repo via queue client) to ensure no lint regressions
-9. Verify no required types from GraphQL codegen are missing — if any `graphql-types.ts` types are referenced for new element types (`barcode`, `signature`, `background`), run `bun run generate:gqlSchema && bun codegen`
+ 1. For each new file, run: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`
+ 2. Fix all tsgo errors first (progressive enforcement — do not skip to biome/lint while tsgo fails)
+ 3. Fix all biome issues (formatting + unsafe fixes)
+ 4. Fix all lint errors (ESLint via queue client)
+ 5. Re-run full-project `bun run tsgo` then `bun biome:check` then `bun run lint` to ensure no regressions across the codebase
+ 6. Verify no required types from GraphQL codegen are missing — if any `graphql-types.ts` types are referenced for new element types (`barcode`, `signature`, `background`), run `bun run generate:gqlSchema && bun codegen`
 
 **Instruction Verification:**
 - Read: `AGENTS.md` (root) — Per-File Verification Loop section
 - Read: `scripts/health/sub-loop.ts` — progressive lifecycle enforcement
-- Progressive: tsgo → biome → lint (short-circuit on first failure — do not skip ahead)
-- Lint queue server MUST be running before lint calls
+- Progressive: tsgo → biome → lint → codescene (short-circuit on first failure — do not skip ahead)
 
 **Quality Loop:**
 - This task IS the quality loop — no additional gate needed beyond verification
@@ -1472,6 +1575,8 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 ## Task 27 — Comprehensive Testing (Original)
 
 **Goal**: Achieve full test coverage for all Plan 12 components and integration points, following the project's layered testing strategy.
+
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T16, T17, T18, T19, and T20.
 
 **Dependencies**: Tasks 1–14 complete
 
@@ -1628,7 +1733,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 - `bun run test:ui:components` for component tests (Happy DOM)
 - `bun run test:graphql` for GraphQL integration tests (dev server)
 - `bun run build:test && bun run test:ui:e2e` for E2E tests (production server)
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` on each new test file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on each new test file
 - Target: 90%+ line coverage for new components; 100% for repo layer
 
 ---
@@ -1639,7 +1744,7 @@ After all **27 tasks** complete, verify:
 
 - [ ] `bun run tsgo` passes with zero errors (including generated GraphQL types)
 - [ ] `bun biome:check` passes with zero issues
-- [ ] `bun run lint` passes (via queue client) on all files created/modified in this plan
+- [ ] `bun run lint` passes on all files created/modified in this plan
 - [ ] All 6 element type forms render correctly with translated labels
 - [ ] Shared input controls (PositionSizeInputs, OpacitySlider, ColorPickerField, FontPicker) render and validate correctly
 - [ ] Desktop property panel shows common + type-specific fields in collapsible accordion sections
@@ -2468,13 +2573,9 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
     - Subscribe-to-canvas-store bridge: use `subscribeWithSelector` to mirror `useCanvasStore.keyObjectId` into `templateElementEditorStore.keyObjectId` on every change (read-only subscriber).
   - **Imports**: types from `@/frontend/common/stores/cert/snapAlignTypes`.
   - **No hardcoded values** — defaults come from `DEFAULT_SNAP_SETTINGS` where applicable.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    bun run tsgo
-    bun biome:check
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5s-t1","files":["frontend/common/stores/templateElementEditorStore.ts"]}'
+    bun run scripts/health/sub-loop.ts frontend/common/stores/templateElementEditorStore.ts --lifecycle codescene
     ```
 
 - [ ] **R5S-T2: Add `'align'` tab to `RightPanelTabs`**
@@ -2483,13 +2584,9 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
     - New tab after `'transform'`: icon `VerticalAlignCenterOutlined`, label `i18n('rightPanel.tabs.align')`.
     - The panel header always renders (so user has snap settings affordance from any selection state).
     - Pass `alignTarget`, `distributeFrom`, `distributeGap`, `matchSizeReferenceKind`, `matchSizeScope`, `keyObjectId` from the panel store down to sub-panels.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    bun run tsgo
-    bun biome:check
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5s-t2","files":["frontend/views/dashboard/cert/templates/editor/properties/RightPanelTabs.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/properties/RightPanelTabs.tsx --lifecycle codescene
     ```
 
 - [ ] **R5S-T3: Create `AlignPanel.tsx`**
@@ -2884,7 +2981,7 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
   - Create doc: `docs/frontend/certificate-zoom-navigation.md`
   - Update `frontend/AGENTS.md` with zoom/navigation panel patterns
   - Update root `AGENTS.md` Important References
-  - Run: `bun tsgo`, `bun biome:check`, `bun run lint`
+  - Run: `bun run scripts/health/sub-loop.ts docs/frontend/certificate-zoom-navigation.md --lifecycle codescene`
   - Write outcome file
 
 ## Round 5: Advanced Typography Tasks
@@ -3786,11 +3883,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` — keys: `mask.typeIndicator.*`, `mask.density`, `mask.feather`, `mask.smooth`, `mask.contrast`, `mask.shiftEdge`, `mask.viewMode.*`, `mask.invert`, `mask.apply`, `mask.delete`, `mask.enable`, `mask.disable`, `mask.confirm.*`
   - Subscribe to `mask` data via `useShallow` selector — re-renders only on `mask.density`/`feather`/`smooth`/`contrast`/`shiftEdge` change, not entire element
   - Confimation `Dialog` for Apply: `DialogTitle` + `DialogContentText` (`mask.confirm.applyTitle` / `applyMessage`) + `DialogActions` (Cancel / Confirm)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p01","files":["frontend/views/dashboard/cert/templates/editor/panels/MaskPropertyPanel.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/MaskPropertyPanel.tsx --lifecycle codescene
     ```
 
 ### MASK-P02: Refine Edge Dialog
@@ -3823,11 +3918,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - All `sx={{}}`, colors from theme palette
   - i18n keys: `mask.refineEdge.title`, `.smooth`, `.feather`, `.contrast`, `.shiftEdge`, `.decontaminate`, `.decontaminateAmount`, `.output.layerMask`/`.newDocument`/`.newLayerWithMask`/`.newSelection`, `.apply`
   - Accessibility: sliders announce `aria-valuetext`; RadioGroup has `aria-label`; Dialog has `aria-labelledby` for title
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p02","files":["frontend/views/dashboard/cert/templates/editor/panels/RefineEdgeDialog.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/RefineEdgeDialog.tsx --lifecycle codescene
     ```
 
 ### MASK-P03: Opacity Mask Editor
@@ -3851,11 +3944,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - All `sx={{}}`, no style props, no hardcoded colors
   - i18n keys: `mask.opacityMask.title`, `.link`, `.unlink`, `.clip`, `.invert`, `.editMask`, `.transformIndependent`
   - `React.memo` on dual thumbnails — re-render only on mask version change (not every element change)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p03","files":["frontend/views/dashboard/cert/templates/editor/panels/OpacityMaskEditor.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/OpacityMaskEditor.tsx --lifecycle codescene
     ```
 
 ### MASK-P04: Clipping Mask Properties
@@ -3877,11 +3968,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - Description text: `mask.clipping.description` ("Element visible only inside the base shape's area")
   - All `sx={{}}`, colors from theme palette
   - i18n keys: `mask.clipping.description`, `.clippedTo`, `.clippedToName(name)`, `.baseFor`, `.baseForList(names)`, `.release`, `.editShape`, `.vectorType`, `.rasterType`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p04","files":["frontend/views/dashboard/cert/templates/editor/panels/ClippingMaskProperties.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/ClippingMaskProperties.tsx --lifecycle codescene
     ```
 
 ### MASK-P05: Mask Brush Settings Panel
@@ -3905,11 +3994,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - All `sx={{}}`, colors from theme palette
   - i18n keys: `mask.brushSettings.title`, `.size`, `.hardness`, `.opacity`, `.flow`, `.pressure`, `.pressureActive`, `.notDetected`, `.defaultBrush`, `.softRound`, `.hardRound`, `.airbrush`
   - Brush settings stored in the store (or local state synced to store) — canvas reads them via `useStore` selector; panel doesn't cause canvas re-renders on every slider move (primitive numbers)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p05","files":["frontend/views/dashboard/cert/templates/editor/panels/MaskBrushSettings.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/MaskBrushSettings.tsx --lifecycle codescene
     ```
 
 ### MASK-P06: Quick Mask Panel
@@ -3928,11 +4015,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - **Opacity** `Slider` (0-100, default 50) — `aria-valuetext`
   - All `sx={{}}`, no style props, colors from theme palette
   - i18n keys: `mask.quickMaskPanel.title`, `mask.quickMask.mode`, `.maskedAreas`, `.selectedAreas`, `.color`, `.opacity`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p06","files":["frontend/views/dashboard/cert/templates/editor/panels/QuickMaskPanel.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/QuickMaskPanel.tsx --lifecycle codescene
     ```
 
 ### MASK-P07: i18n Keys (AR + EN) + Type Schema Extend
@@ -3992,11 +4077,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `addOpacityMask`, `deleteOpacityMask`, `toggleOpacityMaskClip`, `invertOpacityMask`, `toggleOpacityMaskLink` — for `OpacityMaskEditor`
   - `setMaskProperty` must accept `Partial<LayerMaskData>` — updates only the specified fields, increments `mask.version`
   - Persistence: verify `maskMode`, `activeMaskTarget`, `quickMaskActive`, `quickMaskOptions`, `maskViewMode`, `refineSettings` are NOT in `persist` partializer (ephemeral). Only element-level `layerMask`/`vectorMask`/`clippingMaskBaseId`/`clippingMaskClippedIds`/`opacityMask` persisted.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p08","files":["frontend/common/stores/cert/certTemplateEditorStore.ts"]}'
+    bun run scripts/health/sub-loop.ts frontend/common/stores/cert/certTemplateEditorStore.ts --lifecycle codescene
     ```
 
 ### MASK-P09: Component Tests + Knowledge Propagation

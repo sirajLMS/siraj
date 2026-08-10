@@ -33,11 +33,15 @@ Use this template to create actionable implementation plans that break down your
 1. **Pre-Execution Outcome Knowledge Read:**  
    Before executing ANY task, the executing agent MUST read ALL existing files in `.ai/plans/<feature-name>/outcome/` to absorb prior research, search results, docs, and pitfalls so analysis is not repeated.
 2. **Per-File Quality Verification Loop (Immediate post-edit):**  
-   Whenever a file is modified, execute per-file verification (`bun tsgo` + `bun biome:check` + `bun run scripts/lint-service.ts -f <file> --id verify`) BEFORE moving to another file or subtask.
+   Whenever a file is modified, execute the unified per-file quality verification script BEFORE moving to another file or subtask:
+   ```bash
+   bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
+   ```
+   This single script runs `tsgo → biome:check → oxlint → lint:type-aware → check:duplicates → codescene --file` in strict progressive order, short-circuiting at the first failing check. It also auto-discovers and prints the applicable `.github/instructions/*.instructions.md` and layer `AGENTS.md` files for the target file. Exit code `0` = all checks passed.
 3. **Semantic Review Checklist (Pre-Completion Gate):**  
-   Before marking any subtask as complete, execute agent self-review against semantic checklist (race conditions, env-config, dead code, cross-layer, enums, deferred items).
+   Before marking any subtask as complete, execute agent self-review against semantic checklist (race conditions, env-config, dead code, cross-layer, enums, deferred items). The `sub-loop.ts` script handles mechanical checks but cannot detect semantic bugs — this checklist covers what the script cannot.
 4. **Global Health Check (Completion Gate):**  
-   Before marking any subtask as complete, run full global checks: `bun tsgo`, `bun biome:check`, and `bun run scripts/lint-service.ts --json --id global` globally. All MUST exit with **zero errors and zero warnings**.
+   Before marking any subtask as complete, re-run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on all modified files. All MUST exit with **code 0** (zero errors, zero warnings).
 5. **Post-Execution Outcome File Creation:**  
    Upon completing the task implementation and quality checks, write a new outcome document under `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` summarizing research, analysis, changes, cross-file dependencies, and carry-over knowledge.
 6. **Task Progress Tracking:**  
@@ -50,10 +54,12 @@ Use this template to create actionable implementation plans that break down your
 ### Quality Loop Subtask (X.Y.QL)
 ```markdown
 - [ ] X.Y.QL **Quality Loop**: Per-file verification on `<file-path>`
-  - Run: `bun tsgo`
-  - Run: `bun biome:check`
-  - Run: `bun run scripts/lint-service.ts -f <file-path> --id verify`
-  - Fix all errors before proceeding
+  - Run: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene`
+  - The script runs: tsgo → biome:check → oxlint → lint:type-aware → check:duplicates → codescene --file
+  - It auto-discovers & prints applicable AGENTS.md + .agents/instructions files
+  - It enforces the Fix-Or-Report rule (fix within same file; report cross-file deps to orchestrator)
+  - Exit code 0 = all checks passed; 1 = stopped at failing check (errors printed)
+  - Fix all errors and re-run until exit code 0 before proceeding
 ```
 
 ### Semantic Review Subtask (X.Y.SR) — NEW
@@ -73,15 +79,14 @@ Use this template to create actionable implementation plans that break down your
 
 ### Instruction Verification Subtask (X.Y.IV)
 ```markdown
-- [ ] X.Y.IV **Instruction Verification**: Validate `<file-path>` against:
-  - AGENTS.md: `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/<layer>/AGENTS.md`
-  - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/<layer>.instructions.md`
+- [ ] X.Y.IV **Instruction Verification**: Read & validate `<file-path>` against rule files
+  - The `sub-loop.ts` script (run in X.Y.QL) auto-discovers & prints applicable rule files
+  - Read ALL printed AGENTS.md files (e.g., `/home/ahmed/Projects/siraj/AGENTS.md`, `/home/ahmed/Projects/siraj/<layer>/AGENTS.md`)
+  - Read ALL printed .agents/instructions files (e.g., `/home/ahmed/Projects/siraj/.agents/instructions/<layer>.instructions.md`)
+  - Validate the file against the rules in those files
 ```
 
-**Sequence:** QL (Quality Loop) → SR (Semantic Review) → IV (Instruction Verification) → Mark `[x]`cts/siraj/<layer>/AGENTS.md`, ...
-  - Instructions: `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, ...
-  - (Use absolute paths from the Layer-to-Instructions mapping table below)
-```
+**Sequence:** QL (Quality Loop — runs sub-loop.ts which prints applicable rule files) → SR (Semantic Review) → IV (Instruction Verification — reads the printed rule files) → Mark `[x]`
 
 ### Layer-to-Instructions Mapping (Reference for ALL Plans)
 
@@ -148,9 +153,9 @@ Use this template to create actionable implementation plans that break down your
   - Create directory structure for the feature and outcome directory `.ai/plans/<feature-name>/outcome/`
   - Set up build configuration and dependencies
   - Configure development tools and linting
-  - **Quality Loop**: Run per-file verification on modified files
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
   - **Semantic Review**: Check against semantic checklist
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - Write outcome file: `.ai/plans/<feature-name>/outcome/1-setup-outcome.md`
   - Update progress: Mark task 1 as `[x]` in `trackable-tasks.md`
   - _Requirements: [Reference specific requirements]_
@@ -171,7 +176,7 @@ Use this template to create actionable implementation plans that break down your
   - _Requirements: REQ-0 (Execution Protocol)_
 
 ### Phase 2: Core Business Logicalidate modified files against applicable AGENTS.md and .agents/instructions
-  - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+  - Run global check: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file (exit code 0)
   - Write outcome file: `.ai/plans/<feature-name>/outcome/1.1-setup-outcome.md`
   - Update progress: Mark task 1.1 as `[x]` in `tasks.md`
   - _Requirements: [Reference specific requirements]_
@@ -180,16 +185,16 @@ Use this template to create actionable implementation plans that break down your
   - Define TypeScript interfaces for all data models
   - Implement validation functions for data integrity
   - Create unit tests for data model validation
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 3. Set up database schema and migrations
   - Create database tables and relationships
   - Write migration scripts for schema changes
   - Set up database connection and configuration
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 2: Core Business Logic
@@ -199,25 +204,25 @@ Use this template to create actionable implementation plans that break down your
   - Implement core business rules and validation
   - Add error handling and logging
   - Write comprehensive unit tests
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 4.2 Create [Component Name] repository
   - Implement data access layer with CRUD operations
   - Add query optimization and caching
   - Write integration tests with database
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 4.3 Implement [Business Process] workflow
   - Code the main business process flow
   - Add state management and transitions
   - Write unit tests for workflow logic
-  - **Quality Loop**: Run per-file verification on modified files
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
   - **Semantic Review**: Check against semantic checklist
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 2.5: Mid-Point Review Gate (CONDITIONAL — Multi-Phase Plans >15 Tasks)
@@ -232,7 +237,7 @@ Use this template to create actionable implementation plans that break down your
     - `review-config` (scope: env-config, drizzle.config, migration files)
   - **Aggregate findings:** Filter to backend-specific issues only (ignore frontend/integration issues for now)
   - **Fix phase:** Dispatch fix subagents per file using `.agents/instructions/backend.instructions.md` as guardrails
-  - **Verify:** Run `scripts/health/sub-loop.ts` per fixed file
+  - **Verify:** Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per fixed file
   - **Re-review:** Dispatch review subagents again until zero backend-specific findings
   - Write outcome: `.ai/plans/<feature-name>/outcome/midpoint-review-R1.md` (use template)
   - Mark complete ONLY when backend review is clean
@@ -246,24 +251,24 @@ Use this template to create actionable implementation plans that break down your
   - Implement GET, POST, PUT, DELETE operations
   - Add request validation and sanitization
   - Write API integration tests
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 5.2 Add authentication and authorization
   - Implement JWT token validation
   - Add role-based access control
   - Write security tests and validation
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 5.3 Implement error handling and logging
   - Create consistent error response format
   - Add comprehensive logging and monitoring
   - Write error handling tests
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 4: User Interface
@@ -273,24 +278,24 @@ Use this template to create actionable implementation plans that break down your
   - Build reusable UI components
   - Add responsive design and accessibility
   - Write component unit tests
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 6.2 Implement [Feature] user flows
   - Create complete user interaction flows
   - Add form validation and error handling
   - Write end-to-end tests for user scenarios
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 6.3 Add state management and data fetching
   - Implement client-side state management
   - Add API integration and caching
   - Write integration tests for data flow
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 5: Integration and Testing
@@ -300,24 +305,24 @@ Use this template to create actionable implementation plans that break down your
   - Implement external API integrations
   - Add retry logic and error handling
   - Write integration tests with mocked services
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 7.2 Add monitoring and observability
   - Implement health checks and metrics
   - Add performance monitoring and alerting
   - Write monitoring validation tests
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 7.3 Implement comprehensive testing suite
   - Create end-to-end test scenarios
   - Add performance and load testing
   - Write security and penetration tests
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 6: Deployment and Documentation
@@ -327,24 +332,24 @@ Use this template to create actionable implementation plans that break down your
   - Write deployment scripts and configuration
   - Set up environment-specific settings
   - Create rollback procedures
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 8.2 Create operational documentation
   - Write API documentation and examples
   - Create troubleshooting guides
   - Document configuration and maintenance procedures
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 - [ ] 8.3 Implement final validation and cleanup
   - Run complete test suite and validation
   - Perform code review and quality checks
   - Clean up temporary code and comments
-  - **Quality Loop**: Run per-file verification on modified files
-  - **Instruction Verification**: Validate modified files against applicable AGENTS.md and .agents/instructions
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
 ### Phase 7: Knowledge Propagation (MANDATORY Final Task)
@@ -375,7 +380,7 @@ Use this template to create actionable implementation plans that break down your
     - Add a domain-specific section with key rules and a reference to the new doc
   - Update `.agents/instructions/<layer>.instructions.md` if new conventions should be enforced by instruction files
   - Update root `AGENTS.md` Important References section with the new doc
-  - Run global check: `bun tsgo`, `bun biome:check`, `bun run scripts/lint-service.ts --json --id final-check` (0 errors, 0 warnings)
+  - Run global check: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file (exit code 0)
   - Write outcome file: `.ai/plans/<feature-name>/outcome/10-knowledge-propagation-outcome.md`
   - Update progress: Mark task 10 as `[x]` in `trackable-tasks.md`
   - _Requirements: Knowledge propagation protocol_
@@ -469,8 +474,8 @@ Use this checklist when executing each task:
 - [ ] Tests pass and coverage is adequate
 - [ ] Code review is completed
 - [ ] Integration with existing code is verified
-- [ ] **Quality Loop passed** (tsgo + biome:check + lint queue)
-- [ ] **Instruction Verification passed** (validated against all applicable AGENTS.md and .agents/instructions)
+- [ ] **Quality Loop passed** (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` exit code 0)
+- [ ] **Instruction Verification passed** (sub-loop.ts auto-discovered & printed applicable AGENTS.md + .agents/instructions; agent read & validated against them)
 
 ### Task Completion
 - [ ] Feature works as specified in requirements
@@ -490,8 +495,8 @@ Use this checklist when executing each task:
   - Implement database schema and migrations
   - Add CRUD operations with error handling
   - Write unit and integration tests
-  - **Quality Loop**: Run per-file verification
-  - **Instruction Verification**: Validate against layer AGENTS.md
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [X.X]_
 ```
 
@@ -502,8 +507,8 @@ Use this checklist when executing each task:
   - Add error handling and logging
   - Create service interfaces and abstractions
   - Write comprehensive unit tests
-  - **Quality Loop**: Run per-file verification
-  - **Instruction Verification**: Validate against layer AGENTS.md
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [X.X]_
 ```
 
@@ -514,8 +519,8 @@ Use this checklist when executing each task:
   - Add request/response validation
   - Implement authentication and authorization
   - Write API integration tests
-  - **Quality Loop**: Run per-file verification
-  - **Instruction Verification**: Validate against layer AGENTS.md
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [X.X]_
 ```
 
@@ -526,8 +531,8 @@ Use this checklist when executing each task:
   - Implement responsive design
   - Add accessibility features
   - Write component tests and user scenarios
-  - **Quality Loop**: Run per-file verification
-  - **Instruction Verification**: Validate against layer AGENTS.md
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [X.X]_
 ```
 
@@ -538,8 +543,8 @@ Use this checklist when executing each task:
   - Add retry logic and circuit breakers
   - Create integration tests with mocking
   - Document integration procedures
-  - **Quality Loop**: Run per-file verification
-  - **Instruction Verification**: Validate against layer AGENTS.md
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [X.X]_
 ```
 

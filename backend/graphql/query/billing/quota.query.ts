@@ -28,7 +28,7 @@ gqlSchemaBuilder.queryField("quotaLedger", t =>
       const actorUserId = await requireAuth(ctx);
       const pagination = PaginationArgs.fromArgs(args.pagination);
       try {
-        return await QuotaService.getQuotaLedger(String(args.quotaId), pagination, actorUserId, ctx.locale);
+        return await QuotaService.getQuotaLedger(args.quotaId, pagination, actorUserId, ctx.locale);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -47,7 +47,7 @@ gqlSchemaBuilder.queryField("quota", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       try {
-        return await QuotaService.getQuota(String(args.id), ctx.locale, undefined, actorUserId);
+        return await QuotaService.getQuota(args.id, ctx.locale, undefined, actorUserId);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -87,7 +87,7 @@ gqlSchemaBuilder.queryField("studentQuotas", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       try {
-        return await QuotaService.listStudentQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+        return await QuotaService.listStudentQuotas(args.studentId, undefined, actorUserId, ctx.locale);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -106,7 +106,7 @@ gqlSchemaBuilder.queryField("studentOpenQuotas", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       try {
-        return await QuotaService.listStudentOpenQuotas(String(args.studentId), undefined, actorUserId, ctx.locale);
+        return await QuotaService.listStudentOpenQuotas(args.studentId, undefined, actorUserId, ctx.locale);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -125,7 +125,7 @@ gqlSchemaBuilder.queryField("quotaBalance", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       try {
-        return await QuotaService.getStudentQuotaBalance(String(args.studentId), undefined, actorUserId, ctx.locale);
+        return await QuotaService.getStudentQuotaBalance(args.studentId, undefined, actorUserId, ctx.locale);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -147,12 +147,12 @@ gqlSchemaBuilder.queryField("availableClassSlots", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      await assertAssociatedOrManage(actorUserId, String(args.studentId), tErrors);
+      await assertAssociatedOrManage(actorUserId, args.studentId, tErrors);
       try {
         return await AvailabilityService.findAvailableSlots(
-          String(args.studentId),
+          args.studentId,
           args.date,
-          args.teacherId ? String(args.teacherId) : null,
+          args.teacherId ? args.teacherId : null,
           args.durationMinutes ?? 60,
           undefined,
           ctx.locale

@@ -24,7 +24,7 @@ export default async function QuotaDetailPage({ params }: Readonly<QuotaDetailPa
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.QUOTAS_VIEW], locale, context);
   return <QuotaDetailContainer quotaId={id} />;

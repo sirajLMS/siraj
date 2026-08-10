@@ -124,12 +124,12 @@ async function reserveLockedPort(port: number): Promise<boolean> {
 }
 
 async function reserveFirstAvailablePort(candidates: number[]): Promise<number | undefined> {
-  for (const port of candidates) {
-    if (await reserveLockedPort(port)) {
-      return port;
-    }
+  async function tryNext(index: number): Promise<number | undefined> {
+    if (index >= candidates.length) return undefined;
+    if (await reserveLockedPort(candidates[index])) return candidates[index];
+    return tryNext(index + 1);
   }
-  return undefined;
+  return tryNext(0);
 }
 
 export function setTestPort(port: number): void {

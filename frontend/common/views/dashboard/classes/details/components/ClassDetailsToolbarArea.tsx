@@ -4,12 +4,13 @@ import { Box, Stack } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { MeetingJoinEmptyRole } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { AppPermission, type ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classDetailsContentPaddingSx,
   classDetailsSectionStackSx,
 } from "@/frontend/common/views/dashboard/classes/details/classDetailsMobileLayout";
 import { LiveSessionToolbar } from "@/frontend/common/views/dashboard/classes/details/components/LiveSessionToolbar";
+import type { ClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -17,7 +18,7 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 export type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin" | "student";
 
 export interface ClassDetailsToolbarAreaProps {
-  readonly instance: ClassInstanceDetail;
+  readonly instance: ClassInstance;
   readonly viewMode: ClassDetailsToolbarViewMode;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;

@@ -35,6 +35,7 @@ function EditableTypographyStory({
             return "Unable to save right now";
           }
           setValue(newValue);
+          return undefined;
         }}
         doubleClickToEdit={doubleClickToEdit}
         startEditing={startEditing}

@@ -22,6 +22,10 @@ function requireAuth(ctx: { user?: { id: string } }): string {
   return ctx.user.id;
 }
 
+function isSuggestionStatus(value: string): value is SuggestionStatus {
+  return (Object.values(SuggestionStatus) as readonly string[]).includes(value);
+}
+
 const SuggestionStatusPothosEnum = gqlSchemaBuilder.enumType(SuggestionStatus, {
   name: "SuggestionStatus",
   description: "Status of a suggestion in the review pipeline.",
@@ -280,7 +284,7 @@ function toSuggestionReturnType(result: SuggestionSelectType): SuggestionReturnT
     parentId: result.parentId,
     submitterName: result.submitterName,
     body: result.body,
-    status: result.status as SuggestionStatus,
+    status: isSuggestionStatus(result.status) ? result.status : SuggestionStatus.PENDING,
     duplicateOfId: result.duplicateOfId ?? null,
     adminResponse: result.adminResponse ?? null,
     reviewedByUserId: result.reviewedByUserId ?? null,

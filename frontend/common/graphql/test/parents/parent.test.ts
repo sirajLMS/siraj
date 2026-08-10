@@ -123,11 +123,11 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
 
   let superAdminToken = "";
   let parentId = "";
-  let _r: LoginAndProvisionResult | null = null;
+  let provisionResult: LoginAndProvisionResult | null = null;
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentProfTest");
-    _r = r;
+    provisionResult = r;
     superAdminToken = r.superAdminToken;
     parentId = r.parentId;
     expect(superAdminToken).toBeTruthy();
@@ -172,15 +172,15 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    expect(_r).not.toBeNull();
-    if (!_r) throw new Error("Entities not provisioned");
+    expect(provisionResult).not.toBeNull();
+    if (!provisionResult) throw new Error("Entities not provisioned");
     await cleanupTestEntities(superAdminToken, {
-      studentUserId: _r.studentUserId,
-      teacherUserId: _r.teacherUserId,
-      parentUserId: _r.parentUserId,
-      studentId: _r.studentId,
-      teacherId: _r.teacherId,
-      parentId: _r.parentId,
+      studentUserId: provisionResult.studentUserId,
+      teacherUserId: provisionResult.teacherUserId,
+      parentUserId: provisionResult.parentUserId,
+      studentId: provisionResult.studentId,
+      teacherId: provisionResult.teacherId,
+      parentId: provisionResult.parentId,
     });
     expect(superAdminToken).toBeTruthy();
   });
@@ -191,11 +191,11 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
 
   let superAdminToken = "";
   let parentId = "";
-  let _r: LoginAndProvisionResult | null = null;
+  let provisionResult: LoginAndProvisionResult | null = null;
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentAssocTest");
-    _r = r;
+    provisionResult = r;
     superAdminToken = r.superAdminToken;
     parentId = r.parentId;
     expect(superAdminToken).toBeTruthy();
@@ -228,15 +228,15 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
   });
 
   test("cleanup provisioned entities", async () => {
-    expect(_r).not.toBeNull();
-    if (!_r) throw new Error("Entities not provisioned");
+    expect(provisionResult).not.toBeNull();
+    if (!provisionResult) throw new Error("Entities not provisioned");
     await cleanupTestEntities(superAdminToken, {
-      studentUserId: _r.studentUserId,
-      teacherUserId: _r.teacherUserId,
-      parentUserId: _r.parentUserId,
-      studentId: _r.studentId,
-      teacherId: _r.teacherId,
-      parentId: _r.parentId,
+      studentUserId: provisionResult.studentUserId,
+      teacherUserId: provisionResult.teacherUserId,
+      parentUserId: provisionResult.parentUserId,
+      studentId: provisionResult.studentId,
+      teacherId: provisionResult.teacherId,
+      parentId: provisionResult.parentId,
     });
     expect(superAdminToken).toBeTruthy();
   });
@@ -365,11 +365,11 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
   setupTestServerLifecycle();
 
   let superAdminToken = "";
-  let _r: LoginAndProvisionResult | null = null;
+  let provisionResult: LoginAndProvisionResult | null = null;
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentQuotaTest");
-    _r = r;
+    provisionResult = r;
     superAdminToken = r.superAdminToken;
     expect(superAdminToken).toBeTruthy();
   });
@@ -398,17 +398,17 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    expect(_r).not.toBeNull();
-    if (!_r) throw new Error("Entities not provisioned");
-    await cleanupTestEntities(_r.superAdminToken, {
-      studentUserId: _r.studentUserId,
-      teacherUserId: _r.teacherUserId,
-      parentUserId: _r.parentUserId,
-      studentId: _r.studentId,
-      teacherId: _r.teacherId,
-      parentId: _r.parentId,
+    expect(provisionResult).not.toBeNull();
+    if (!provisionResult) throw new Error("Entities not provisioned");
+    await cleanupTestEntities(provisionResult.superAdminToken, {
+      studentUserId: provisionResult.studentUserId,
+      teacherUserId: provisionResult.teacherUserId,
+      parentUserId: provisionResult.parentUserId,
+      studentId: provisionResult.studentId,
+      teacherId: provisionResult.teacherId,
+      parentId: provisionResult.parentId,
     });
-    expect(_r.superAdminToken).toBeTruthy();
+    expect(provisionResult.superAdminToken).toBeTruthy();
   });
 });
 

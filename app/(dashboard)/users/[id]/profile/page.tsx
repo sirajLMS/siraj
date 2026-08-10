@@ -36,7 +36,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   const resolution = await resolveProfilePageContext(userId, context, {
@@ -45,7 +45,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   });
   if ("redirect" in resolution) {
     redirect({ href: resolution.redirect });
-    return;
+    return undefined;
   }
 
   return (

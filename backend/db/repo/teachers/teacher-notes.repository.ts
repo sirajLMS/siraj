@@ -199,15 +199,14 @@ export namespace TeacherNotesRepository {
   ): Promise<TeacherImportantNoteSelectType[]> {
     if (inputs.length === 0) return [];
 
-    const results: TeacherImportantNoteSelectType[] = [];
-    for (const input of inputs) {
-      const existing = await findByTitles([input.title], tx);
-      if (existing[0]) {
-        results.push(existing[0]);
-        continue;
-      }
-      results.push(await createNote(input, undefined, tx));
-    }
-    return results;
+    return Promise.all(
+      inputs.map(async input => {
+        const existing = await findByTitles([input.title], tx);
+        if (existing[0]) {
+          return existing[0];
+        }
+        return createNote(input, undefined, tx);
+      })
+    );
   }
 }

@@ -26,17 +26,17 @@ class RateLimiter {
   private readonly prefix: string;
   private readonly maxRequests: number;
   private readonly windowMs: number;
-  private readonly _failOpen: boolean;
+  private readonly failOpen: boolean;
 
   constructor(prefix: string, maxRequests: number, windowMs: number, failOpen = true) {
     this.prefix = prefix;
     this.maxRequests = maxRequests;
     this.windowMs = windowMs;
-    this._failOpen = failOpen;
+    this.failOpen = failOpen;
   }
 
   get isFailOpen(): boolean {
-    return this._failOpen;
+    return this.failOpen;
   }
 
   /**
@@ -81,9 +81,9 @@ class RateLimiter {
     } catch (error) {
       logger.error("Rate limiting error:", error);
       return {
-        success: this._failOpen,
+        success: this.failOpen,
         limit: this.maxRequests,
-        remaining: this._failOpen ? this.maxRequests : 0,
+        remaining: this.failOpen ? this.maxRequests : 0,
         reset: now + this.windowMs,
       };
     }
@@ -147,9 +147,9 @@ class RateLimiter {
     } catch (error) {
       logger.error("Rate limiting error:", error);
       return {
-        success: this._failOpen,
+        success: this.failOpen,
         limit: this.maxRequests,
-        remaining: this._failOpen ? this.maxRequests : 0,
+        remaining: this.failOpen ? this.maxRequests : 0,
         reset: now + this.windowMs,
       };
     }

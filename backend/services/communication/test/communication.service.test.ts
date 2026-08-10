@@ -165,11 +165,16 @@ describe("CommunicationService", () => {
         NotificationChannel.PUSH,
       ];
 
-      for (const channel of channels) {
-        const result = await CommunicationService.dispatch(
-          createTestPayload({ channel, body: "Body", metadata: { to: "test@test.com" } })
-        );
+      const results = await Promise.all(
+        channels.map(async channel => {
+          const innerResult = await CommunicationService.dispatch(
+            createTestPayload({ channel, body: "Body", metadata: { to: "test@test.com" } })
+          );
+          return { channel, result: innerResult };
+        })
+      );
 
+      for (const { channel, result } of results) {
         expect(result.channel).toBe(channel);
       }
     });

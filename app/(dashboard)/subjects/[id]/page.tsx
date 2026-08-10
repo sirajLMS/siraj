@@ -28,7 +28,7 @@ export default async function SubjectDetailPage({ params }: { readonly params: P
 
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   return <SubjectDetailView subjectId={id} />;

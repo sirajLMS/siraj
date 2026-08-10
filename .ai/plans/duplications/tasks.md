@@ -610,7 +610,7 @@
 
 ### Phase 2.5: Mid-Point Review Gate (CONDITIONAL — Plan has >15 tasks AND distinct backend+frontend phases)
 
-- [ ] 2.5 Backend architecture review checkpoint
+- [x] 2.5 Backend architecture review checkpoint
   - **Scope:** All `backend/` files modified in Phases 1-2 (foundation + business logic)
   - **Dispatch review subagents in parallel:**
     - `review-backend` (scope: backend services, repositories, business logic)
@@ -661,7 +661,7 @@
   - Mark task 3.2 as `[x]`
   - _Requirements: REQ-13_
 
-- [ ] 3.3 Complete locale namespace migration (profile.ts)
+- [x] 3.3 Complete locale namespace migration (profile.ts)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Verify all imports reference `locale/{en,ar}/profile/{teacher,parent,staff,notifications}/index.ts`
   - Delete `locale/en/profile.ts` and `locale/ar/profile.ts`
@@ -701,7 +701,7 @@
   - Mark task 3.4 as `[x]`
   - _Requirements: REQ-3_
 
-- [ ] 3.5 Complete locale namespace migration (payment-method.ts)
+- [x] 3.5 Complete locale namespace migration (payment-method.ts)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Verify all imports reference `locale/{en,ar}/ui/paymentMethod/manager.ts`
   - Delete `locale/en/ui/payment-method.ts` and `locale/ar/ui/payment-method.ts`
@@ -739,7 +739,7 @@
 
 ### Phase 4: Final Verification & Knowledge Propagation
 
-- [ ] 4.1 Final jscpd verification
+- [x] 4.1 Final jscpd verification
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Run `bun check:duplicates` — verify clone count is 0 (or only documented exclusions)
   - Document any remaining clones in `deferred-items.md` with justification
@@ -750,7 +750,7 @@
   - Mark task 4.1 as `[x]`
   - _Requirements: REQ-15_
 
-- [ ] 4.2 Run full quality gate
+- [x] 4.2 Run full quality gate
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Run `bun quality-gate` — must pass all stages (tsgo → biome → lint → codescene → sonar-results)
   - If any stage fails, fix and re-run
@@ -761,7 +761,7 @@
   - Mark task 4.2 as `[x]`
   - _Requirements: REQ-15_
 
-- [ ] 4.3 Run full test suite
+- [x] 4.3 Run full test suite
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Run `bun run build:test` (required before E2E)
   - Run `bun run test:db` — all pass
@@ -776,7 +776,7 @@
   - Mark task 4.3 as `[x]`
   - _Requirements: REQ-15_
 
-- [ ] 4.4 Baseline comparison and deferred items enforcement
+- [x] 4.4 Baseline comparison and deferred items enforcement
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Compare current error counts vs `/tmp/baseline-*.txt` — document new errors introduced
   - Enforce deferred items resolution:
@@ -792,7 +792,7 @@
   - Mark task 4.4 as `[x]`
   - _Requirements: REQ-0, REQ-15_
 
-- [ ] 4.5 Knowledge Propagation & Documentation (MANDATORY FINAL TASK)
+- [x] 4.5 Knowledge Propagation & Documentation (MANDATORY FINAL TASK)
   - Read all existing files in `.ai/plans/duplications/outcome/`
   - Synthesize all learnings from outcome files
   - Create canonical reference docs under `docs/`:

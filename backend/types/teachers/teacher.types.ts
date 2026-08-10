@@ -11,6 +11,7 @@ import type {
 } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
+import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type { ClassSessionMetrics } from "@/backend/types/scheduling/schedule.types";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
@@ -48,6 +49,7 @@ export type TeacherDashboardScheduleRow = {
   executionState: ClassExecutionState;
   outcome: ClassOutcome | null;
   meetingJoinUrl: string | null;
+  effectiveMeeting: EffectiveMeetingReturnType | null;
   yourTimeFormatted: string | null;
   isFrozen: boolean;
 };
@@ -97,6 +99,7 @@ export type TeacherProfileReturnType = Omit<
   timezone: IanaTimezone;
   totalClasses: number;
   avgEngagementScore: number;
+  displayAmount?: DisplayAmountReturnType | null;
 };
 
 export type TeacherProfileUpdateInputType = Partial<

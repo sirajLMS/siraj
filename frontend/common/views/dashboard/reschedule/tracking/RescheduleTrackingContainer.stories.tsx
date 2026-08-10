@@ -12,13 +12,12 @@ const MOCK_METRIC_COUNTS: Record<string, number> = {
   cancelled: 3,
 };
 
-const MOCK_METRICS = TRACKING_METRIC_DEFINITIONS.map(def => ({
-  key: def.key,
-  count: MOCK_METRIC_COUNTS[def.key] ?? 0,
-  labelKey: def.labelKey,
-  icon: def.icon,
-  ...(def.variant ? { variant: def.variant } : {}),
-}));
+const MOCK_METRICS = TRACKING_METRIC_DEFINITIONS.map(def =>
+  Object.assign(
+    { key: def.key, count: MOCK_METRIC_COUNTS[def.key] ?? 0, labelKey: def.labelKey, icon: def.icon },
+    def.variant ? { variant: def.variant } : {}
+  )
+);
 
 const MOCK_ROWS: TrackingRow[] = [
   {

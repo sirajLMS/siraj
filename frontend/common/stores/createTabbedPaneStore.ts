@@ -19,13 +19,14 @@ export function createTabbedPaneStore<TabId extends string>(allTabIds: readonly 
   }
 
   function createInitialVisitedTabs(): Record<TabId, boolean> {
-    return allTabIds.reduce(
-      (acc, tabId) => {
-        acc[tabId] = false;
-        return acc;
-      },
-      {} as Record<TabId, boolean>
-    );
+    const entries: [TabId, boolean][] = allTabIds.map(tabId => [tabId, false]);
+    const obj: Record<string, boolean> = Object.fromEntries(entries);
+    const isTabIdRecord = (value: Record<string, boolean>): value is Record<TabId, boolean> =>
+      allTabIds.every(tabId => tabId in value);
+    if (!isTabIdRecord(obj)) {
+      throw new Error("Failed to create initial visited tabs record");
+    }
+    return obj;
   }
 
   return create<TabbedPaneState>(set => ({

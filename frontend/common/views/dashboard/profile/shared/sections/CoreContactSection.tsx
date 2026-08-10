@@ -3,7 +3,7 @@
 import PhoneOutlined from "@mui/icons-material/PhoneOutlined";
 import ScheduleOutlined from "@mui/icons-material/ScheduleOutlined";
 import { Stack, TextField } from "@mui/material";
-import type { Control, FieldPath, UseFormRegister } from "react-hook-form";
+import type { Control, FieldPath, FieldValues, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDisplay/PhoneDisplay";
@@ -42,7 +42,9 @@ type CoreContactEditWithRegisterProps = {
   readonly register: UseFormRegister<CoreContactFormFields>;
 };
 
-type CoreContactEditWithControlProps<T extends CoreContactFormFields = CoreContactFormFields> = {
+type CoreContactEditWithControlProps<
+  T extends CoreContactFormFields & FieldValues = CoreContactFormFields & FieldValues,
+> = {
   readonly mode: "edit";
   readonly scope?: ProfileScope;
   readonly sectionTitle: string;
@@ -52,12 +54,23 @@ type CoreContactEditWithControlProps<T extends CoreContactFormFields = CoreConta
   readonly control: Control<T>;
 };
 
-type CoreContactSectionProps<T extends CoreContactFormFields = CoreContactFormFields> =
+type CoreContactSectionProps<T extends CoreContactFormFields & FieldValues = CoreContactFormFields & FieldValues> =
   | CoreContactViewProps
   | CoreContactEditWithRegisterProps
   | CoreContactEditWithControlProps<T>;
 
-function CoreContactEditSection<T extends CoreContactFormFields>({
+function isCoreContactFieldPath<T extends CoreContactFormFields & FieldValues>(value: string): value is FieldPath<T> {
+  return typeof value === "string";
+}
+
+function coreContactFieldPath<T extends CoreContactFormFields & FieldValues>(name: string): FieldPath<T> {
+  if (!isCoreContactFieldPath<T>(name)) {
+    throw new Error(`Invalid core contact field path: ${name}`);
+  }
+  return name;
+}
+
+function CoreContactEditSection<T extends CoreContactFormFields & FieldValues>({
   props,
   contactEditable,
 }: {
@@ -71,7 +84,7 @@ function CoreContactEditSection<T extends CoreContactFormFields>({
       <Stack spacing={2}>
         {"control" in props ? (
           <PhoneFormField
-            name={"phone" as FieldPath<T>}
+            name={coreContactFieldPath<T>("phone")}
             control={props.control}
             label={props.phoneLabel}
             disabled={!contactEditable}
@@ -87,7 +100,7 @@ function CoreContactEditSection<T extends CoreContactFormFields>({
         )}
         {showTimezone && "control" in props ? (
           <Controller
-            name={"timezone" as FieldPath<T>}
+            name={coreContactFieldPath<T>("timezone")}
             control={props.control}
             render={({ field, fieldState }) => (
               <TimezoneSelect
@@ -119,7 +132,7 @@ function CoreContactEditSection<T extends CoreContactFormFields>({
   );
 }
 
-export function CoreContactSection<T extends CoreContactFormFields = CoreContactFormFields>(
+export function CoreContactSection<T extends CoreContactFormFields & FieldValues = CoreContactFormFields & FieldValues>(
   props: CoreContactSectionProps<T>
 ) {
   const fallbackBaseLabels = useProfileSharedBaseLabels();

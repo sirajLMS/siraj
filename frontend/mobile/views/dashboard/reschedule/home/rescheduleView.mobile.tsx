@@ -54,7 +54,7 @@ export function RescheduleViewMobile({
         <Box
           component="form"
           onSubmit={e => {
-            handleSubmit(onSubmit)(e);
+            void handleSubmit(onSubmit)(e);
           }}
           sx={theme => ({ p: theme.layout.cardPadding, display: "flex", flexDirection: "column", gap: 4 })}
         >

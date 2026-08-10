@@ -443,7 +443,7 @@ Track the effectiveness of your spec-driven development process:
 
 ## Semantic Review Checklist (Per-Task)
 
-Use this checklist as agent self-review BEFORE marking any task complete. The mechanical quality loop (tsgo + biome + lint) catches syntax/style but misses these semantic bugs.
+Use this checklist as agent self-review BEFORE marking any task complete. The `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` script catches syntax/style/duplication/code-health issues but misses these semantic bugs.
 
 ### Race Conditions & Concurrency
 - [ ] **Atomic Operations**: No read-then-write sequences without atomicity (SELECT FOR UPDATE / transaction / advisory lock)
@@ -521,7 +521,7 @@ Use this when implementing features with shared state, concurrent actors, or opt
 Use this at phase boundaries to catch cross-file type errors that per-file tsgo misses.
 
 ### Phase-Boundary Type Coherence Gate
-- [ ] **Baseline Comparison**: Run full `bun tsgo` and compare error count vs pre-phase baseline
+- [ ] **Baseline Comparison**: Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` and compare exit code / error count vs pre-phase baseline
 - [ ] **Cross-File Dependencies**: Document all type/interface changes and their consumer files
 - [ ] **Breaking Changes**: Flag all breaking changes (renamed fields, removed properties, type narrowing)
 - [ ] **Cascade Fix**: Fix all new errors caused by type changes before proceeding to next phase

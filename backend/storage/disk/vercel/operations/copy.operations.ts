@@ -17,19 +17,19 @@ export async function copyItems(
     destinationPath: input.destinationPath,
     existsFn: fileExists,
     operationName: "copied",
-    processFn: async (ctx, sourcePath) => {
+    processFn: async (opCtx, sourcePath) => {
       const fileName = StorageUtils.extractFileName(sourcePath);
       const destPath = `${input.destinationPath.replace(/\/$/, "")}/${fileName}`;
 
-      const isDir = await isDirectory(ctx, sourcePath);
+      const isDir = await isDirectory(opCtx, sourcePath);
 
       if (isDir) {
-        await copyDirectory(ctx, sourcePath, destPath);
+        await copyDirectory(opCtx, sourcePath, destPath);
       } else {
-        await copySingleFile(ctx, sourcePath, destPath);
+        await copySingleFile(opCtx, sourcePath, destPath);
       }
 
-      return await fileInfoByPath(ctx, destPath);
+      return await fileInfoByPath(opCtx, destPath);
     },
   });
 }
@@ -58,25 +58,27 @@ async function copyDirectory(ctx: VercelContext, sourcePath: string, destPath: s
     fileCount: allBlobs.length,
   });
 
-  for (const blob of allBlobs) {
-    const relativePath = blob.pathname.slice(prefix.length);
-    const newFilePath = `${destPath}/${relativePath}`;
+  await Promise.all(
+    allBlobs.map(async blob => {
+      const relativePath = blob.pathname.slice(prefix.length);
+      const newFilePath = `${destPath}/${relativePath}`;
 
-    try {
-      await copy(blob.url, newFilePath, {
-        token: ctx.token,
-        access: ctx.access,
-      });
+      try {
+        await copy(blob.url, newFilePath, {
+          token: ctx.token,
+          access: ctx.access,
+        });
 
-      logger.info("📋 copyDirectory: Copied file", {
-        from: blob.pathname,
-        to: newFilePath,
-      });
-    } catch (error) {
-      logger.error(`Failed to copy file in directory: ${blob.pathname}`, error);
-      throw error;
-    }
-  }
+        logger.info("📋 copyDirectory: Copied file", {
+          from: blob.pathname,
+          to: newFilePath,
+        });
+      } catch (error) {
+        logger.error(`Failed to copy file in directory: ${blob.pathname}`, error);
+        throw error;
+      }
+    })
+  );
 
   logger.info("✅ copyDirectory: All files copied", {
     sourceDir: sourcePath,

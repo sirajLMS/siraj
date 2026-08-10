@@ -160,16 +160,16 @@ function renderFooterAction(
 
 function StudentNameLink({
   studentName,
-  studentHref,
+  studentHref: href,
 }: {
   readonly studentName: string;
   readonly studentHref?: string;
 }) {
-  if (studentHref) {
+  if (href) {
     return (
       <Typography
         component={Link}
-        href={studentHref}
+        href={href}
         sx={{
           typography: "titleLg",
           color: theme => theme.palette.primary.main,
@@ -205,7 +205,7 @@ function CardHeader({
   labels,
   canActivate,
   isLive,
-  studentHref,
+  studentHref: href,
 }: {
   readonly row: TeacherScheduleRow;
   readonly labels: TeacherDashboardViewLabels;
@@ -224,7 +224,7 @@ function CardHeader({
             {labels.activeControls.liveNow}
           </Typography>
         )}
-        <StudentNameLink studentName={row.studentName} studentHref={studentHref} />
+        <StudentNameLink studentName={row.studentName} studentHref={href} />
         {!canActivate || row.status === "pending" || row.status === "connecting" ? null : (
           <Box sx={{ mt: 0.75 }}>
             <MobileStatusBadge

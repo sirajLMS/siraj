@@ -203,11 +203,19 @@ type FileSelectDeps = {
   readonly setLocalPreview: (file: File) => void;
 };
 
+const isReaderResultString = (value: string | ArrayBuffer | null): value is string => typeof value === "string";
+
 const readAsDataUrl = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
+    reader.addEventListener("load", () => {
+      if (isReaderResultString(reader.result)) {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Failed to read file as data URL"));
+      }
+    });
+    reader.addEventListener("error", reject);
     reader.readAsDataURL(file);
   });
 };

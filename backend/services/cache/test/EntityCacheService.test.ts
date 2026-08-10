@@ -172,11 +172,10 @@ describe("EntityCacheService Unit Tests", () => {
   });
 
   it("throws error if ttlSeconds > CACHE_TAG_INDEX_TTL", async () => {
-    const invalidTtlCall = () => cachedRead("ec:test", 90000, async () => "data");
-    expect(invalidTtlCall).toThrow("cache TTL exceeds tag index TTL");
-
-    const invalidSingleFlightCall = () => cachedReadSingleFlight("ec:test", 90000, async () => "data");
-    expect(invalidSingleFlightCall).toThrow("cache TTL exceeds tag index TTL");
+    expect(() => cachedRead("ec:test", 90000, async () => "data")).toThrow("cache TTL exceeds tag index TTL");
+    expect(() => cachedReadSingleFlight("ec:test", 90000, async () => "data")).toThrow(
+      "cache TTL exceeds tag index TTL"
+    );
   });
 
   it("cachedReadSingleFlight runs single flight pipeline on miss", async () => {

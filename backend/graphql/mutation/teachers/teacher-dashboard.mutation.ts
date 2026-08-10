@@ -10,6 +10,14 @@ import {
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+const VALID_CLASS_TYPES = new Set(["REGULAR", "TRIAL", "PROMOTION"]);
+
+function isValidClassType(value: unknown): value is "REGULAR" | "TRIAL" | "PROMOTION" {
+  return typeof value === "string" && VALID_CLASS_TYPES.has(value);
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
@@ -35,7 +43,7 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
           scheduledStartAt: args.input.scheduledStartAt,
           scheduledEndAt: args.input.scheduledEndAt,
           durationMinutes: args.input.durationMinutes,
-          classType: (args.input.classType as "REGULAR" | "TRIAL" | "PROMOTION" | undefined) ?? undefined,
+          classType: isValidClassType(args.input.classType) ? args.input.classType : undefined,
         },
         tErrors
       );

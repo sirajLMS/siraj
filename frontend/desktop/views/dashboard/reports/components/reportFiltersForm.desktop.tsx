@@ -19,6 +19,12 @@ import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/inp
 
 export type ReportFiltersFormDesktopLabels = ReportFiltersFormLabels;
 
+const REPORT_TYPE_VALUES = new Set<string>(["by_teacher", "by_student", "by_date"]);
+
+function isReportType(value: string): value is ReportType {
+  return REPORT_TYPE_VALUES.has(value);
+}
+
 export function ReportFiltersFormDesktop({
   fromDate,
   toDate,
@@ -38,7 +44,10 @@ export function ReportFiltersFormDesktop({
   const teacherValue = selectedTeacher ?? resolvePersonOption(teacherId, [], selectedTeacher);
 
   const handleReportTypeSelect = (event: SelectChangeEvent) => {
-    onReportTypeChange(event.target.value as ReportType);
+    const value = event.target.value;
+    if (isReportType(value)) {
+      onReportTypeChange(value);
+    }
   };
 
   return (

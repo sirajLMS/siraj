@@ -13,8 +13,22 @@ import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/compone
 import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { LocalizedString } from "@/shared/types";
 
 export type { PaymentMethodDefaultsEditorProps } from "./types";
+
+const DEFAULT_INSTRUCTIONS: LocalizedString = {};
+
+const TYPE_LABEL_KEYS = ["mobileWallet", "paymentLink", "onlineAccount", "bankTransfer", "cash"] as const;
+const DIRECTION_LABEL_KEYS = ["in", "out", "both"] as const;
+
+function isTypeLabelKey(key: string): key is (typeof TYPE_LABEL_KEYS)[number] {
+  return (TYPE_LABEL_KEYS as readonly string[]).includes(key);
+}
+
+function isDirectionLabelKey(key: string): key is (typeof DIRECTION_LABEL_KEYS)[number] {
+  return (DIRECTION_LABEL_KEYS as readonly string[]).includes(key);
+}
 
 export function PaymentMethodDefaultsEditor({
   methods,
@@ -22,7 +36,7 @@ export function PaymentMethodDefaultsEditor({
   payoutDefaultId,
   onPayinDefaultChangeAction,
   onPayoutDefaultChangeAction,
-  instructions = {},
+  instructions = DEFAULT_INSTRUCTIONS,
   onInstructionsSaveAction,
   displayCurrency,
   onDisplayCurrencyChangeAction,
@@ -44,11 +58,14 @@ export function PaymentMethodDefaultsEditor({
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "");
-      const directionLabel = getPaymentMethodDirectionLabel(
-        method.direction,
-        key => t.direction[key as keyof typeof t.direction] ?? ""
-      );
+      const typeLabel = getPaymentMethodTypeLabel(method.type, key => {
+        const shortKey = key.slice("type.".length);
+        return isTypeLabelKey(shortKey) ? t.type[shortKey] : "";
+      });
+      const directionLabel = getPaymentMethodDirectionLabel(method.direction, key => {
+        const shortKey = key.slice("direction.".length);
+        return isDirectionLabelKey(shortKey) ? t.direction[shortKey] : "";
+      });
       const base = method.label?.trim() || method.catalogSlug || typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
     },

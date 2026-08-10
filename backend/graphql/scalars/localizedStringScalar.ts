@@ -5,12 +5,16 @@ import { isAppLocale } from "@/shared/types/localized-string";
 
 const MAX_VALUE_LENGTH = 4096;
 
+function isStringRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function validateLocalizedMap(value: unknown): LocalizedString {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+  if (!isStringRecord(value)) {
     throw new GraphQLError("LocalizedString must be an object keyed by AppLocale");
   }
 
-  const obj = value as Record<string, unknown>;
+  const obj: Record<string, unknown> = value;
   const result: Partial<Record<AppLocale, string>> = {};
 
   for (const [key, val] of Object.entries(obj)) {

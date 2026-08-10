@@ -51,7 +51,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
 
   const [activateClass] = useMutation(activateClassMutationDocument, {
     onCompleted: () => {
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
+      void client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
       reportMutationError("Activate class failed:", err, t.actionFeedback.activateError);
@@ -60,7 +60,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
 
   const [activateOverrideClass] = useMutation(activateOverrideClassMutationDocument, {
     onCompleted: () => {
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
+      void client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
       reportMutationError("Activate override class failed:", err, t.actionFeedback.forceActivateError);
@@ -69,7 +69,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
 
   const [stopClassMutation] = useMutation(stopClassMutationDocument, {
     onCompleted: () => {
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
+      void client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
       reportMutationError("Stop class failed:", err, t.actionFeedback.stopError);
@@ -84,7 +84,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
 
   const [startSessionMutation, { loading: isStarting }] = useMutation(updateSessionStatusStartMutationDocument, {
     onCompleted: () => {
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
+      void client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
       reportMutationError("Start session failed:", err, t.actionFeedback.startError);
@@ -93,7 +93,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
 
   const [markAbsentMutation, { loading: isMarkingAbsent }] = useMutation(updateSessionStatusAbsentMutationDocument, {
     onCompleted: () => {
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
+      void client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
       reportMutationError("Mark absent failed:", err, t.actionFeedback.markAbsentError);
@@ -102,7 +102,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
 
   const [processLeaveMutation, { loading: isProcessingLeave }] = useMutation(updateSessionStatusLeaveMutationDocument, {
     onCompleted: () => {
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
+      void client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
       reportMutationError("Process leave failed:", err, t.actionFeedback.leaveError);
@@ -111,7 +111,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
 
   const [resetSessionMutation, { loading: isResetting }] = useMutation(resetClassMutationDocument, {
     onCompleted: () => {
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
+      void client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
       reportMutationError("Reset session failed:", err, t.actionFeedback.resetError);
@@ -120,7 +120,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
 
   const [overrideRateMutation, { loading: isOverridingRate }] = useMutation(overrideClassInstanceRateMutationDocument, {
     onCompleted: () => {
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
+      void client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
       reportMutationError("Override rate failed:", err, t.instanceDetails.overrideError);

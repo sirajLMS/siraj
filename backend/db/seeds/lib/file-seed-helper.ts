@@ -30,9 +30,7 @@ export async function seedEntityFile(input: SeedEntityFileInput): Promise<{ url:
   const storageService = await getStorageService();
 
   if (input.ensureParentDirs) {
-    for (const dir of input.ensureParentDirs) {
-      await fileSeeder.ensureDirectory(dir, true);
-    }
+    await Promise.all(input.ensureParentDirs.map(dir => fileSeeder.ensureDirectory(dir, true)));
   }
 
   const localFilePath = resolveAssetPath(input.assetRelativePath);

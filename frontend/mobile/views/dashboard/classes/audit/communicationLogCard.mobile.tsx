@@ -13,6 +13,7 @@ import {
   StyledUndeliveredIcon,
 } from "@/frontend/common/views/dashboard/classes/audit/components";
 import { COMMUNICATION_ICONS } from "@/frontend/common/views/dashboard/classes/audit/constants";
+import type { CommunicationType } from "@/frontend/common/views/dashboard/classes/audit/types";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 
 const StyledMobileResendButton = styled(Button)(({ theme }) => ({
@@ -26,8 +27,13 @@ const StyledMobileResendButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+function isCommunicationType(value: string): value is CommunicationType {
+  return (Object.keys(COMMUNICATION_ICONS) as readonly string[]).includes(value);
+}
+
 function MobileLogEntryItem({ entry }: Readonly<{ entry: CommunicationLogEntry }>) {
-  const type = (entry.type ?? "email") as keyof typeof COMMUNICATION_ICONS;
+  const rawType = entry.type ?? "email";
+  const type = isCommunicationType(rawType) ? rawType : "email";
   const Icon = COMMUNICATION_ICONS[type] ?? EmailOutlined;
   const deliveryIcon = entry.isDelivered ? <StyledDeliveredIcon /> : <StyledUndeliveredIcon />;
 

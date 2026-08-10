@@ -6,7 +6,6 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { type ReactNode, useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   AdminInvoiceRow,
@@ -117,7 +116,7 @@ function RenderInvoiceAction(
   const { row, labels, canManage, canDelete, billingActionsDisabled } = config;
   const deleteButton = RenderDeleteInvoiceButton(row, labels, canDelete, billingActionsDisabled, onDeleteInvoice);
 
-  if (row.status === InvoiceStatus.Paid) {
+  if (row.status === "PAID") {
     const primary = onViewPaymentDetails ? (
       <Tooltip title={labels.viewDetails}>
         <IconButton
@@ -137,7 +136,7 @@ function RenderInvoiceAction(
     return WrapInvoiceActions(primary, deleteButton);
   }
 
-  if (row.status === InvoiceStatus.PaymentPending && canManage && !billingActionsDisabled) {
+  if (row.status === "PAYMENT_PENDING" && canManage && !billingActionsDisabled) {
     return WrapInvoiceActions(
       <Button
         variant="text"
@@ -156,6 +155,25 @@ function RenderInvoiceAction(
     return WrapInvoiceActions(null, deleteButton);
   }
 
+  const markAsPaidButton = (
+    <Button
+      variant="text"
+      onClick={() => {
+        onMarkAsPaid({
+          id: row.id,
+          parentUserId: row.parentUserId,
+          amount: row.amount,
+          studentName: row.studentName,
+          dueDate: row.dueDate,
+          invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
+        });
+      }}
+      sx={{ fontWeight: 700, textTransform: "uppercase" }}
+    >
+      {row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay}
+    </Button>
+  );
+
   const showViewRejection = shouldShowViewRejection(row.status, row.hasRejectedSubmission) && onViewPaymentDetails;
 
   if (showViewRejection) {
@@ -170,47 +188,14 @@ function RenderInvoiceAction(
         >
           {labels.viewRejection}
         </Button>
-        <Button
-          variant="text"
-          onClick={() => {
-            onMarkAsPaid({
-              id: row.id,
-              parentUserId: row.parentUserId,
-              amount: row.amount,
-              studentName: row.studentName,
-              dueDate: row.dueDate,
-              invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
-            });
-          }}
-          sx={{ fontWeight: 700, textTransform: "uppercase" }}
-        >
-          {row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay}
-        </Button>
+        {markAsPaidButton}
       </Box>,
       deleteButton
     );
   }
 
   if (isPayableUnpaidStatus(row.status)) {
-    return WrapInvoiceActions(
-      <Button
-        variant="text"
-        onClick={() => {
-          onMarkAsPaid({
-            id: row.id,
-            parentUserId: row.parentUserId,
-            amount: row.amount,
-            studentName: row.studentName,
-            dueDate: row.dueDate,
-            invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
-          });
-        }}
-        sx={{ fontWeight: 700, textTransform: "uppercase" }}
-      >
-        {row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay}
-      </Button>,
-      deleteButton
-    );
+    return WrapInvoiceActions(markAsPaidButton, deleteButton);
   }
 
   return WrapInvoiceActions(null, deleteButton);
@@ -231,9 +216,8 @@ export function AdminInvoicesDataGridDesktop({
   onPageChange,
   loading = false,
 }: Readonly<AdminInvoicesDataGridProps>) {
-  const config = useMemo<RenderInvoiceActionConfig>(
+  const config = useMemo<Omit<RenderInvoiceActionConfig, "row">>(
     () => ({
-      row: {} as AdminInvoiceRow, // placeholder, will be replaced in renderCell
       labels,
       canManage,
       canDelete,

@@ -24,7 +24,8 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) return errorCaught;
+  throw new Error(String(errorCaught));
 }
 
 async function expectRepoErrorMessage(fn: () => Promise<unknown>, expectedSubstring: string): Promise<void> {
@@ -560,7 +561,8 @@ describe("BillingRepository — listExchangeRateHistory", () => {
     await runInRollback(async tx => {
       const now = new Date();
       const baseTime = now.getTime();
-      for (let i = 0; i < 3; i++) {
+      const insertRateAt = async (i: number): Promise<void> => {
+        if (i >= 3) return;
         await insertExchangeRateRow(
           tx,
           CurrencyCode.USD,
@@ -569,7 +571,9 @@ describe("BillingRepository — listExchangeRateHistory", () => {
           "seed",
           new Date(baseTime - i * 86400000)
         );
-      }
+        return insertRateAt(i + 1);
+      };
+      await insertRateAt(0);
 
       const pagination = new PaginationArgs({
         first: 2,

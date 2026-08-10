@@ -33,7 +33,7 @@ export default async function ScheduleWeeklyPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   const teacherId = await requireTeacherIdForPage(userId, locale, context);

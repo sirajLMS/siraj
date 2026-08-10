@@ -5,7 +5,6 @@ import {
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ReportGroupingMode, ReportService } from "@/backend/services/report/report.service";
-import type { DisplayAmountReturnType } from "@/backend/types";
 import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportResult,
@@ -39,7 +38,7 @@ export const AttendanceReportPaidAmountObj = AttendanceReportPaidAmountRef.imple
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: parent => (parent as unknown as Record<string, unknown>).displayAmount as DisplayAmountReturnType | null,
+      resolve: parent => parent.displayAmount ?? null,
     }),
   }),
 });

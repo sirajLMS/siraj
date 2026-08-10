@@ -98,7 +98,7 @@ async function exchangeCodeForTokens(
     for (const [key, value] of Object.entries(cfg.extraTokenParams)) {
       // Ensure only string values are appended; the config type enforces this,
       // but guard defensively in case of unexpected runtime values.
-      if (value != null) params.set(key, String(value));
+      if (value != null) params.set(key, value);
     }
   }
 
@@ -113,7 +113,32 @@ async function exchangeCodeForTokens(
     throw new Error(`${cfg.displayName} token exchange failed (${res.status}): ${body}`);
   }
 
-  return (await res.json()) as OAuthTokenResponse;
+  const data: unknown = await res.json();
+  if (!isOAuthTokenResponse(data)) {
+    throw new Error(`${cfg.displayName} token exchange returned unexpected shape: ${JSON.stringify(data)}`);
+  }
+  return data;
+}
+
+/**
+ * Type guard that validates a token-endpoint response conforms to the minimal
+ * {@link OAuthTokenResponse} shape. Used instead of `as` to satisfy oxlint's
+ * `no-unsafe-type-assertion` rule.
+ */
+function isOAuthTokenResponse(value: unknown): value is OAuthTokenResponse {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  return (
+    "access_token" in value &&
+    typeof value.access_token === "string" &&
+    "token_type" in value &&
+    typeof value.token_type === "string" &&
+    "expires_in" in value &&
+    typeof value.expires_in === "number" &&
+    (!("refresh_token" in value) || value.refresh_token === undefined || typeof value.refresh_token === "string") &&
+    (!("scope" in value) || value.scope === undefined || typeof value.scope === "string")
+  );
 }
 
 /**

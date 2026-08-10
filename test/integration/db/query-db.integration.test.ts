@@ -8,12 +8,12 @@
  */
 import { expect, test } from "bun:test";
 import { sql } from "drizzle-orm";
-import { clearDbConnectionSingleton, queryDb } from "@/backend/db";
+import { clearDbConnectionSingleton, type QueryDbHandle, queryDb } from "@/backend/db";
 import { resetEnvironmentCache } from "@/backend/lib/env";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
-const neonTestUrl = process.env.NEON_TEST_DATABASE_URL;
+const neonTestUrl: string | undefined = process.env.NEON_TEST_DATABASE_URL;
 const hasNeonTestUrl = (() => {
   if (!neonTestUrl || neonTestUrl.includes("ep-example")) return false;
   try {
@@ -31,7 +31,8 @@ describeLive("queryDb HTTP integration @db", () => {
     const { neon } = await import("@neondatabase/serverless");
     const { relations } = await import("@/backend/db/drizzleRelations");
 
-    const client = neon(neonTestUrl as string);
+    const neonUrl: string = neonTestUrl ?? "";
+    const client = neon(neonUrl);
     const httpDb = drizzleNeonHttp({ client, relations });
     const result = await httpDb.execute(sql`SELECT 1 as test`);
 
@@ -51,7 +52,7 @@ describeLive("queryDb HTTP integration @db", () => {
       resetEnvironmentCache();
       clearDbConnectionSingleton();
 
-      const handle = queryDb() as typeof httpDb;
+      const handle: QueryDbHandle = queryDb();
       const queryDbResult = await handle.execute(sql`SELECT 1 as test`);
       expect(queryDbResult.rows).toHaveLength(1);
       expect(queryDbResult.rows[0].test).toBe(1);

@@ -17,7 +17,7 @@ export default async function ClassesPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   await requireTeacherIdForPage(userId, locale, context);

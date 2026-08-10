@@ -26,13 +26,22 @@ interface ScheduleResultLike {
   readonly totalCount?: number | null;
 }
 
+function isScheduleRow(value: unknown): value is DailyScheduleRow {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function toScheduleRows(rows: readonly unknown[] | null | undefined): readonly DailyScheduleRow[] {
+  if (!rows) return [];
+  return rows.every(isScheduleRow) ? rows : [];
+}
+
 /** Derives metric list, rows, and total count from the GraphQL schedule response. */
 export function extractScheduleSummary(scheduleResult: ScheduleResultLike | null | undefined): ScheduleSummary {
   if (!scheduleResult) {
     return { metricsList: buildAdminDashboardMetrics(null), rows: [], totalCount: undefined };
   }
   const metricsList = buildAdminDashboardMetrics(scheduleResult.metrics);
-  const rows = (scheduleResult.rows ?? []) as unknown as readonly DailyScheduleRow[];
+  const rows = toScheduleRows(scheduleResult.rows);
   const totalCount = scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0;
   return { metricsList, rows, totalCount };
 }

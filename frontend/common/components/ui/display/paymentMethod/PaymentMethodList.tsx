@@ -13,6 +13,28 @@ import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/p
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { PaymentMethodDirectionLabels, PaymentMethodTypeLabels } from "@/shared/locale/types/ui";
+
+type PaymentMethodTypeLabelKey = keyof PaymentMethodTypeLabels;
+type PaymentDirectionLabelKey = keyof PaymentMethodDirectionLabels;
+
+const PAYMENT_METHOD_TYPE_LABEL_KEYS: readonly PaymentMethodTypeLabelKey[] = [
+  "mobileWallet",
+  "paymentLink",
+  "onlineAccount",
+  "bankTransfer",
+  "cash",
+  "proofUpload",
+];
+const PAYMENT_DIRECTION_LABEL_KEYS: readonly PaymentDirectionLabelKey[] = ["in", "out", "both"];
+
+function isPaymentMethodTypeLabelKey(value: string): value is PaymentMethodTypeLabelKey {
+  return (PAYMENT_METHOD_TYPE_LABEL_KEYS as readonly string[]).includes(value);
+}
+
+function isPaymentDirectionLabelKey(value: string): value is PaymentDirectionLabelKey {
+  return (PAYMENT_DIRECTION_LABEL_KEYS as readonly string[]).includes(value);
+}
 
 export type PaymentMethodListProps = {
   readonly methods: readonly PaymentMethodRow[];
@@ -55,7 +77,7 @@ export function PaymentMethodList({
         width: 160,
         renderCell: params => (
           <Typography sx={{ typography: "bodyMd" }}>
-            {getPaymentMethodTypeLabel(params.row.type, key => t.type[key as keyof typeof t.type] ?? "")}
+            {getPaymentMethodTypeLabel(params.row.type, key => (isPaymentMethodTypeLabelKey(key) ? t.type[key] : ""))}
           </Typography>
         ),
       },
@@ -65,9 +87,8 @@ export function PaymentMethodList({
         width: 120,
         renderCell: params => (
           <Typography sx={{ typography: "bodyMd" }}>
-            {getPaymentMethodDirectionLabel(
-              params.row.direction,
-              key => t.direction[key as keyof typeof t.direction] ?? ""
+            {getPaymentMethodDirectionLabel(params.row.direction, key =>
+              isPaymentDirectionLabelKey(key) ? t.direction[key] : ""
             )}
           </Typography>
         ),

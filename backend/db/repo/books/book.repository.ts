@@ -4,15 +4,23 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { books } from "@/backend/db/schema";
-import type { AvailabilityStatus } from "@/backend/enum";
+import { AvailabilityStatus } from "@/backend/enum";
 import type { PaginationArgs } from "@/backend/types";
 import type { BookReturnType } from "@/backend/types/books/book.types";
+
+const VALID_AVAILABILITY_STATUSES = new Set(Object.values(AvailabilityStatus) as readonly string[]);
+
+function isAvailabilityStatus(value: string): value is AvailabilityStatus {
+  return VALID_AVAILABILITY_STATUSES.has(value);
+}
 
 function mapRow(row: { id: string; name: string; availabilityStatus: string; createdAt: Date }): BookReturnType {
   return {
     id: row.id,
     name: row.name,
-    availabilityStatus: row.availabilityStatus as AvailabilityStatus,
+    availabilityStatus: isAvailabilityStatus(row.availabilityStatus)
+      ? row.availabilityStatus
+      : AvailabilityStatus.AVAILABLE,
     createdAt: row.createdAt,
   };
 }
@@ -84,58 +92,54 @@ export namespace BookRepository {
     if (inputs.length === 0) return [];
 
     const run = async (t: DBTransaction): Promise<BookReturnType[]> => {
-      const results: BookReturnType[] = [];
       const now = new Date();
 
-      for (const input of inputs) {
-        const [existing] = await t
-          .select({
-            id: books.id,
-            name: books.name,
-            availabilityStatus: books.availabilityStatus,
-            createdAt: books.createdAt,
-          })
-          .from(books)
-          .where(and(eq(books.name, input.name), isNull(books.deletedAt)))
-          .limit(1);
+      const results = await Promise.all(
+        inputs.map(async input => {
+          const [existing] = await t
+            .select({
+              id: books.id,
+              name: books.name,
+              availabilityStatus: books.availabilityStatus,
+              createdAt: books.createdAt,
+            })
+            .from(books)
+            .where(and(eq(books.name, input.name), isNull(books.deletedAt)))
+            .limit(1);
 
-        if (existing) {
-          const [updated] = await t
-            .update(books)
-            .set({ availabilityStatus: input.availabilityStatus })
-            .where(eq(books.id, existing.id))
+          if (existing) {
+            const [updated] = await t
+              .update(books)
+              .set({ availabilityStatus: input.availabilityStatus })
+              .where(eq(books.id, existing.id))
+              .returning({
+                id: books.id,
+                name: books.name,
+                availabilityStatus: books.availabilityStatus,
+                createdAt: books.createdAt,
+              });
+            return updated ? mapRow(updated) : null;
+          }
+
+          const [created] = await t
+            .insert(books)
+            .values({
+              name: input.name,
+              availabilityStatus: input.availabilityStatus,
+              createdAt: now,
+            })
             .returning({
               id: books.id,
               name: books.name,
               availabilityStatus: books.availabilityStatus,
               createdAt: books.createdAt,
             });
-          if (updated) {
-            results.push(mapRow(updated));
-          }
-          continue;
-        }
 
-        const [created] = await t
-          .insert(books)
-          .values({
-            name: input.name,
-            availabilityStatus: input.availabilityStatus,
-            createdAt: now,
-          })
-          .returning({
-            id: books.id,
-            name: books.name,
-            availabilityStatus: books.availabilityStatus,
-            createdAt: books.createdAt,
-          });
+          return created ? mapRow(created) : null;
+        })
+      );
 
-        if (created) {
-          results.push(mapRow(created));
-        }
-      }
-
-      return results;
+      return results.filter((r): r is BookReturnType => r !== null);
     };
 
     if (tx) {

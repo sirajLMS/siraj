@@ -58,18 +58,24 @@ export namespace ClassReminderService {
 
     try {
       const upcoming = await SchedulingRepository.findUpcomingInstances({ withinHours });
-      let deliveriesDispatched = 0;
 
-      for (const instance of upcoming) {
-        try {
-          const delta = await dispatchForInstance(instance, locale);
-          deliveriesDispatched += delta;
-        } catch (err) {
+      // Each instance is dispatched independently (no shared DB transaction,
+      // no ordering dependency) — safe to parallelise. `Promise.allSettled`
+      // preserves per-instance failure isolation: a rejection for one
+      // instance does NOT halt the cron run (specs.md §5.2).
+      const outcomes = await Promise.allSettled(upcoming.map(instance => dispatchForInstance(instance, locale)));
+
+      let deliveriesDispatched = 0;
+      for (let i = 0; i < outcomes.length; i++) {
+        const outcome = outcomes[i];
+        if (outcome.status === "fulfilled") {
+          deliveriesDispatched += outcome.value;
+        } else {
           // Per specs.md §5.2 (per-user isolation) — extend to per-instance.
           // One instance's failure must NOT halt the cron run.
           logger.error("ClassReminderService: per-instance dispatch failed", {
-            instanceId: instance.id,
-            err: formatError(err),
+            instanceId: upcoming[i].id,
+            err: formatError(outcome.reason),
           });
         }
       }

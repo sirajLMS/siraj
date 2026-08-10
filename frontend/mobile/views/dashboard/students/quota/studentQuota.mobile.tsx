@@ -221,7 +221,7 @@ function QuotaFormCardMobile({
               onSubmit={e => {
                 e.preventDefault();
                 if (!readOnly) {
-                  methods.handleSubmit(onSubmit)(e);
+                  void methods.handleSubmit(onSubmit)(e);
                 }
               }}
               sx={{

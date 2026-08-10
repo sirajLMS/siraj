@@ -19,6 +19,12 @@ import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input
 
 export type ReportFiltersFormMobileLabels = ReportFiltersFormLabels;
 
+const VALID_REPORT_TYPES = new Set<string>(["by_teacher", "by_student", "by_date"]);
+
+function isReportType(value: string): value is ReportType {
+  return VALID_REPORT_TYPES.has(value);
+}
+
 export function ReportFiltersFormMobile({
   fromDate,
   toDate,
@@ -38,7 +44,10 @@ export function ReportFiltersFormMobile({
   const teacherValue = selectedTeacher ?? resolvePersonOption(teacherId, [], selectedTeacher);
 
   const handleReportTypeSelect = (event: SelectChangeEvent) => {
-    onReportTypeChange(event.target.value as ReportType);
+    const value = event.target.value;
+    if (isReportType(value)) {
+      onReportTypeChange(value);
+    }
   };
 
   return (

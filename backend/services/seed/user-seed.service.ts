@@ -73,13 +73,11 @@ export namespace UserSeedService {
     groupMap: Map<string, string>
   ): Promise<UserSelectType[]> {
     assertSeedWriteAllowed("Demo user seed writes");
-    const results: UserSelectType[] = [];
+    const users = await Promise.all(inputs.map(input => upsertDemoUser(input, groupMap)));
     for (const input of inputs) {
-      const user = await upsertDemoUser(input, groupMap);
-      results.push(user);
       logger.debug("Seed demo user ensured", { email: input.email });
     }
-    return results;
+    return users;
   }
 
   /** Read helper for seed scripts — lists staff profiles for avatar seeding. */

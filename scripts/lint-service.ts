@@ -52,6 +52,7 @@
 
 import { exec } from "node:child_process";
 import { parseArgs } from "node:util";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -92,8 +93,8 @@ const ESLINT_PATCH = "-r ./scripts/ts6-eslint-patch.cjs";
 /** Default per-request timeout for file-scoped lint runs (5 minutes) */
 const DEFAULT_TIMEOUT_FILES_MS = Number(process.env.LINT_QUEUE_TIMEOUT_MS ?? 300000);
 
-/** Default per-request timeout for full-repo lint runs (20 minutes) */
-const DEFAULT_TIMEOUT_FULL_REPO_MS = Number(process.env.LINT_QUEUE_TIMEOUT_MS ?? 1200000);
+/** Default per-request timeout for full-repo lint runs (5 minutes) */
+const DEFAULT_TIMEOUT_FULL_REPO_MS = Number(process.env.LINT_QUEUE_TIMEOUT_MS ?? 300000);
 
 /** ESLint concurrency value (default 4; override via LINT_QUEUE_CONCURRENCY env var) */
 const CONCURRENCY = process.env.LINT_QUEUE_CONCURRENCY ?? "4";
@@ -282,8 +283,10 @@ export const lintService = new LintService();
  * @returns LintResult with success flag, combined output, and exit code
  */
 export async function requestLint(id: string, files: string[] = [], options: LintOptions = {}): Promise<LintResult> {
-  const r = await lintService.enqueue(id, files, options);
-  return { success: r.success, output: r.output, exitCode: r.exitCode };
+  return withProcessLock(`lint-service: ${id}`, async () => {
+    const r = await lintService.enqueue(id, files, options);
+    return { success: r.success, output: r.output, exitCode: r.exitCode };
+  });
 }
 
 /**
@@ -308,7 +311,9 @@ export async function requestLintWithMetrics(
   files?: string[],
   options?: LintOptions
 ): Promise<LintExecutionResult> {
-  return lintService.enqueue(id, files ?? [], options ?? {});
+  return withProcessLock(`lint-service: ${id}`, async () => {
+    return lintService.enqueue(id, files ?? [], options ?? {});
+  });
 }
 
 // ─── CLI Entrypoint ─────────────────────────────────────────────────────────

@@ -18,7 +18,7 @@ import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { PhoneInput } from "@/frontend/common/components/ui/input";
-import type { UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, type UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   managerDirectoryQueryDocument,
   updateManagerProfileMutationDocument,
@@ -190,18 +190,18 @@ export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowAction
     executeManagerUpdate(
       updateProfile,
       manager.staffProfileId,
-      { phone: editPhone || null } as unknown as UpdateManagerProfileInput,
+      { hourlyRate: null, phone: editPhone || null, rateCurrency: null, status: null },
       () => setEditDialogOpen(false),
       "Manager profile updated",
       { staffProfileId: manager.staffProfileId }
     );
 
   const handleDeactivateSubmit = () => {
-    const newStatus = manager.status === "active" ? "DEACTIVATED" : "ACTIVATED";
+    const newStatus = manager.status === "active" ? AccountStatus.Deactivated : AccountStatus.Activated;
     return executeManagerUpdate(
       updateProfile,
       manager.staffProfileId,
-      { status: newStatus } as UpdateManagerProfileInput,
+      { hourlyRate: null, phone: null, rateCurrency: null, status: newStatus },
       () => setDeactivateDialogOpen(false),
       "Manager status updated",
       { staffProfileId: manager.staffProfileId, newStatus }

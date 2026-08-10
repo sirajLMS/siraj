@@ -5,7 +5,7 @@ import type {
   UserMeetingConfigSelectType,
 } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
-import type { ErrorsLabels } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -16,14 +16,7 @@ const CONFIG_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const CLASS_INSTANCE_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const UPSTREAM_MEETING_ID = "zoom-meeting-123";
 
-const FAKE_ERRORS = {
-  meetingConfigNotFound: (id: string) => `Meeting config not found: ${id}`,
-  meetingProviderNotFound: (id: string) => `Meeting provider not found: ${id}`,
-} as unknown as ErrorsLabels;
-
-// ---------------------------------------------------------------------------
-// Mock data builders
-// ---------------------------------------------------------------------------
+const FAKE_ERRORS = errorsEn;
 
 // ---------------------------------------------------------------------------
 // Mock data builders
@@ -92,7 +85,7 @@ function buildClassInstance(overrides: Partial<FakeClassInstance> = {}): FakeCla
 // ---------------------------------------------------------------------------
 
 // --- Logger
-mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -102,12 +95,25 @@ mock.module("@/backend/lib/logger", () => ({
 }));
 
 // --- meeting-config.validation — passthrough
-mock.module("@/backend/lib/meeting-config.validation", () => ({
-  parseMeetingConfigDetails: (_provider: unknown, details: unknown) => details as MeetingConfigDetails,
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isMeetingConfigDetails(value: unknown): value is MeetingConfigDetails {
+  if (!isRecord(value)) return false;
+  if ("meetingUrl" in value && value.meetingUrl !== null && typeof value.meetingUrl !== "string") return false;
+  if ("username" in value && typeof value.username !== "string") return false;
+  if ("tenantId" in value && typeof value.tenantId !== "string") return false;
+  return true;
+}
+
+await mock.module("@/backend/lib/meeting-config.validation", () => ({
+  parseMeetingConfigDetails: (_provider: unknown, details: unknown): MeetingConfigDetails =>
+    isMeetingConfigDetails(details) ? details : {},
 }));
 
 // --- meeting-config-mask
-mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
+await mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
   buildMeetingProviderCatalogSnapshot: (provider: MeetingProviderSelectType) => ({
     catalogId: provider.id,
     catalogSlug: provider.slug,
@@ -121,7 +127,7 @@ mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
 const userConfigGetByIdOrThrowMock = mock(async (): Promise<UserMeetingConfigSelectType> => buildUserConfig());
 const userConfigGetByIdMock = mock(async (): Promise<UserMeetingConfigSelectType | null> => buildUserConfig());
 
-mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
   UserMeetingConfigRepository: {
     getByIdOrThrow: userConfigGetByIdOrThrowMock,
     getById: userConfigGetByIdMock,
@@ -150,7 +156,7 @@ function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {})
 
 const classConfigGetByIdOrThrowMock = mock(async (): Promise<ClassMeetingConfigSelectType> => buildClassConfig());
 
-mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
   ClassMeetingConfigRepository: {
     getByIdOrThrow: classConfigGetByIdOrThrowMock,
   },
@@ -160,7 +166,7 @@ mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => (
 const providerGetByIdOrThrowMock = mock(async (): Promise<MeetingProviderSelectType> => buildProvider());
 const providerGetByIdMock = mock(async (): Promise<MeetingProviderSelectType | null> => buildProvider());
 
-mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
   MeetingProviderRepository: {
     getByIdOrThrow: providerGetByIdOrThrowMock,
     getById: providerGetByIdMock,
@@ -199,7 +205,7 @@ const providerKindToSlugMock = mock((kind: string): "zoom" | "google_meet" | "mi
   return null;
 });
 
-mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
+await mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
   getMeetingChannel: getMeetingChannelMock,
   providerKindToSlug: providerKindToSlugMock,
   meetingChannel: {},
@@ -219,13 +225,13 @@ const dbUpdateSetWhereMock = mock(async () => ({}));
 const dbUpdateSetMock = mock(() => ({ where: dbUpdateSetWhereMock }));
 const dbUpdateMock = mock(() => ({ set: dbUpdateSetMock }));
 
-mock.module("@/backend/db/drizzleDb", () => ({
+await mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     update: dbUpdateMock,
   },
 }));
 
-mock.module("@/backend/db/schema", () => ({
+await mock.module("@/backend/db/schema", () => ({
   classInstances: { id: "id" },
   teachers: { id: "id", userId: "userId" },
 }));
@@ -240,7 +246,7 @@ function buildQueryClient() {
 
 const queryClient = buildQueryClient();
 
-mock.module("@/backend/db", () => ({
+await mock.module("@/backend/db", () => ({
   queryDb: () => queryClient,
 }));
 

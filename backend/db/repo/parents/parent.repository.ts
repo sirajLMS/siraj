@@ -389,7 +389,7 @@ export namespace ParentRepository {
     return updated;
   };
 
-  export const findByUserId = async (userId: string, tx?: DBTransaction) => {
+  export const findByUserId = async (userId: string, tx?: DBTransaction): Promise<ParentEntity | null> => {
     const q = queryDb(tx);
     const [parent] = await q.select().from(parents).where(eq(parents.userId, userId)).limit(1);
     return parent ?? null;

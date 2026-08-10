@@ -4,6 +4,7 @@ import { ChevronRightOutlined } from "@mui/icons-material";
 import { Box, Breadcrumbs, Link, type SxProps, type Theme, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import {
   type UsePageBreadcrumbsOptions,
   usePageBreadcrumbs,
@@ -52,25 +53,27 @@ export function MobilePageHeader({
   const autoBreadcrumbs = usePageBreadcrumbs(breadcrumbOptions ?? {});
   const resolvedBreadcrumbs = breadcrumbs ?? autoBreadcrumbs;
 
-  const headerSx: SxProps<Theme> = {
-    px: { xs: 2, md: 3 },
-    py: { xs: 1, md: 2 },
-    ...(edgeToEdge
-      ? {
-          width: "100%",
-        }
-      : {}),
-    ...(sticky
-      ? {
-          position: "sticky",
-          top: 0,
-          zIndex: theme => theme.zIndex.appBar,
-          backgroundColor: theme => theme.palette.background.paper,
-          borderBottom: theme => `1px solid ${theme.palette.divider}`,
-        }
-      : {}),
-    ...sx,
-  };
+  const headerSx = mergeSx(
+    {
+      px: { xs: 2, md: 3 },
+      py: { xs: 1, md: 2 },
+      ...(edgeToEdge
+        ? {
+            width: "100%",
+          }
+        : {}),
+      ...(sticky
+        ? {
+            position: "sticky",
+            top: 0,
+            zIndex: theme => theme.zIndex.appBar,
+            backgroundColor: theme => theme.palette.background.paper,
+            borderBottom: theme => `1px solid ${theme.palette.divider}`,
+          }
+        : {}),
+    },
+    sx
+  );
 
   return (
     <Box sx={headerSx}>

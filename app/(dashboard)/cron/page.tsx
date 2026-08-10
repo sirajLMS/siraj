@@ -18,7 +18,7 @@ export default async function CronPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.CRON_MANAGE], locale, context);
   return <CronPageContainer />;

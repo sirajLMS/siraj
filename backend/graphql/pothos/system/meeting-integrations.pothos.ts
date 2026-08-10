@@ -1,5 +1,5 @@
 import { GraphQLError } from "graphql";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, MeetingIntegrationProviderSlug } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
@@ -26,6 +26,12 @@ import type {
   TestMeetingConnectionSubmitInput,
 } from "@/backend/types/meeting/meeting-integrations.types";
 import type { ErrorsLabels } from "@/shared/locale";
+
+const MEETING_PROVIDERS = new Set<string>(Object.values(MeetingIntegrationProviderSlug));
+
+function isMeetingProvider(value: string): value is MeetingProvider {
+  return MEETING_PROVIDERS.has(value);
+}
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
@@ -258,11 +264,13 @@ gqlSchemaBuilder.queryField("meetingIntegrationConnectedAccounts", t =>
     resolve: async (_root, args, ctx) => {
       const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       assertCanViewMeetingIntegrations(ctx, tErrors);
-      return MeetingIntegrationService.listConnectedAccounts(
-        actorUserId,
-        args.providerSlug as MeetingProvider,
-        tErrors
-      );
+      const providerSlug: MeetingProvider | null = isMeetingProvider(args.providerSlug) ? args.providerSlug : null;
+      if (!providerSlug) {
+        throw new GraphQLError(tErrors.meetingProvider.meetingProviderNotFound(args.providerSlug), {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
+      }
+      return MeetingIntegrationService.listConnectedAccounts(actorUserId, providerSlug, tErrors);
     },
   })
 );
@@ -295,6 +303,7 @@ gqlSchemaBuilder.mutationField("testMeetingProviderConnection", t =>
       } catch (err) {
         handleMeetingChannelError(err);
       }
+      return undefined;
     },
   })
 );
@@ -328,6 +337,7 @@ gqlSchemaBuilder.mutationField("connectMeetingProviderOAuth", t =>
       } catch (err) {
         handleMeetingChannelError(err);
       }
+      return undefined;
     },
   })
 );

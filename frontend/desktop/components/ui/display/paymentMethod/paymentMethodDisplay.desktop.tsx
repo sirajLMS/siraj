@@ -25,6 +25,10 @@ import {
   useAppTranslation,
 } from "@/shared/locale";
 
+function isKeyOf<T extends object>(value: string | number | symbol, obj: T): value is keyof T {
+  return value in obj;
+}
+
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
   return (
     <Box sx={{ display: "flex", gap: 1, alignItems: "baseline", flexWrap: "wrap" }}>
@@ -78,7 +82,7 @@ function buildHeaderSpecs(
   const specs: DetailRowSpec[] = [];
 
   const typeLabel = method.type
-    ? getPaymentMethodTypeLabel(method.type, key => tType[key as keyof PaymentMethodTypeLabels] ?? "")
+    ? getPaymentMethodTypeLabel(method.type, key => (isKeyOf(key, tType) ? tType[key] : ""))
     : "";
   if (typeLabel) {
     specs.push({
@@ -89,9 +93,8 @@ function buildHeaderSpecs(
   }
 
   if (showDirection && method.direction) {
-    const directionLabel = getPaymentMethodDirectionLabel(
-      method.direction,
-      key => tDirection[key as keyof PaymentMethodDirectionLabels] ?? ""
+    const directionLabel = getPaymentMethodDirectionLabel(method.direction, key =>
+      isKeyOf(key, tDirection) ? tDirection[key] : ""
     );
     if (directionLabel) {
       specs.push({
@@ -163,7 +166,7 @@ export function DesktopPaymentMethodDisplay({
   const tDisplay = t.display;
 
   const typeLabel = method.type
-    ? getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "")
+    ? getPaymentMethodTypeLabel(method.type, key => (isKeyOf(key, t.type) ? t.type[key] : ""))
     : "";
 
   const verificationStatus = method.verifiedAt ? "verified" : "unverified";

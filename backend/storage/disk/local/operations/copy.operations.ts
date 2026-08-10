@@ -17,12 +17,12 @@ export async function copyItems(
     destinationPath: input.destinationPath,
     existsFn: fileExists,
     operationName: "processed",
-    processFn: async (ctx, sourcePath) => {
+    processFn: async (opCtx, sourcePath) => {
       const fileName = StorageUtils.extractFileName(sourcePath);
       const destPath = `${input.destinationPath.replace(/\/$/, "")}/${fileName}`;
 
-      const sourceAbsolutePath = getAbsolutePath(ctx.basePath, sourcePath);
-      const destAbsolutePath = getAbsolutePath(ctx.basePath, destPath);
+      const sourceAbsolutePath = getAbsolutePath(opCtx.basePath, sourcePath);
+      const destAbsolutePath = getAbsolutePath(opCtx.basePath, destPath);
 
       await ensureDirectory(path.dirname(destAbsolutePath));
 
@@ -34,7 +34,7 @@ export async function copyItems(
         await fs.copyFile(sourceAbsolutePath, destAbsolutePath);
       }
 
-      return await fileInfoByPath(ctx, destPath);
+      return await fileInfoByPath(opCtx, destPath);
     },
   });
 }
@@ -43,14 +43,16 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
   await fs.mkdir(dest, { recursive: true, mode: 0o755 });
   const entries = await fs.readdir(src, { withFileTypes: true });
 
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
+  await Promise.all(
+    entries.map(async entry => {
+      const srcPath = path.join(src, entry.name);
+      const destPath = path.join(dest, entry.name);
 
-    if (entry.isDirectory()) {
-      await copyDirectory(srcPath, destPath);
-    } else {
-      await fs.copyFile(srcPath, destPath);
-    }
-  }
+      if (entry.isDirectory()) {
+        await copyDirectory(srcPath, destPath);
+      } else {
+        await fs.copyFile(srcPath, destPath);
+      }
+    })
+  );
 }

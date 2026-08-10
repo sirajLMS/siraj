@@ -1,4 +1,4 @@
-import type { AppPermission } from "@/backend/enum";
+import { type AppPermission, isAppPermission } from "@/backend/enum";
 
 export type StudentFieldGroupKey =
   | "student_identity"
@@ -22,7 +22,13 @@ function studentPerm(
   group: StudentFieldGroupKey,
   action: "view_own" | "view_other" | "edit_own" | "edit_other"
 ): AppPermission {
-  return `student.${group}.${action}` as AppPermission;
+  const key = `student.${group}.${action}`;
+  if (isAppPermission(key)) {
+    return key;
+  }
+  // The enum is exhaustive for all student.{group}.{action} combinations,
+  // so this should never be reached; throw to satisfy the type guard return.
+  throw new Error(`Unknown student permission: ${key}`);
 }
 
 export const STUDENT_FIELD_GROUPS: readonly StudentFieldGroupDefinition[] = [
@@ -84,7 +90,12 @@ export const STUDENT_FIELD_GROUPS: readonly StudentFieldGroupDefinition[] = [
   },
 ] as const;
 
-export const STUDENT_FIELD_GROUP_BY_KEY: Readonly<Record<StudentFieldGroupKey, StudentFieldGroupDefinition>> =
-  Object.fromEntries(STUDENT_FIELD_GROUPS.map(group => [group.groupKey, group])) as Readonly<
-    Record<StudentFieldGroupKey, StudentFieldGroupDefinition>
-  >;
+export const STUDENT_FIELD_GROUP_BY_KEY: Record<StudentFieldGroupKey, StudentFieldGroupDefinition> = {
+  student_identity: STUDENT_FIELD_GROUPS[0],
+  student_academic: STUDENT_FIELD_GROUPS[1],
+  student_teacher: STUDENT_FIELD_GROUPS[2],
+  student_parent: STUDENT_FIELD_GROUPS[3],
+  student_schedule: STUDENT_FIELD_GROUPS[4],
+  student_history: STUDENT_FIELD_GROUPS[5],
+  student_quota_edit: STUDENT_FIELD_GROUPS[6],
+};

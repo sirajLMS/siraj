@@ -2,7 +2,7 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useCallback, useState } from "react";
-import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { recordStudentProfileEditMutationDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import type {
@@ -27,6 +27,10 @@ const EMPTY_DRAFT: StudentPortalProfileEditDraft = {
   avatarUrl: null,
 };
 
+const VALID_CURRENCY_CODES = new Set(Object.values(CurrencyCode) as readonly string[]);
+const VALID_GENDERS = new Set(Object.values(Gender) as readonly string[]);
+const VALID_LANGUAGES = new Set(Object.values(AppLanguage) as readonly string[]);
+
 function toDateInputValue(value: string | null | undefined): string {
   if (!value) return "";
   const date = new Date(value);
@@ -34,14 +38,41 @@ function toDateInputValue(value: string | null | undefined): string {
   return date.toISOString().slice(0, 10);
 }
 
+function isCurrencyCode(value: string): value is CurrencyCode {
+  return VALID_CURRENCY_CODES.has(value);
+}
+
+function isGender(value: string): value is Gender {
+  return VALID_GENDERS.has(value);
+}
+
+function isAppLanguage(value: string): value is AppLanguage {
+  return VALID_LANGUAGES.has(value);
+}
+
+function toCurrencyCode(value: string | null): CurrencyCode | "" {
+  if (value && isCurrencyCode(value)) return value;
+  return "";
+}
+
+function toGender(value: string | null): Gender | "" {
+  if (value && isGender(value)) return value;
+  return "";
+}
+
+function toAppLanguage(value: string | null): AppLanguage | "" {
+  if (value && isAppLanguage(value)) return value;
+  return "";
+}
+
 function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDraft {
   return {
     phone: profile.phone ?? "",
     timezone: profile.timezone ?? "",
-    displayCurrency: (profile.displayCurrency as CurrencyCode | null) ?? "",
+    displayCurrency: toCurrencyCode(profile.displayCurrency),
     dateOfBirth: toDateInputValue(profile.dateOfBirth),
-    gender: (profile.gender as Gender | null) ?? "",
-    language: (profile.language as AppLanguage | null) ?? "",
+    gender: toGender(profile.gender),
+    language: toAppLanguage(profile.language),
     timezoneOverride: profile.timezoneOverride ?? "",
     parentPhone: profile.parentPhone ?? "",
     avatarUrl: profile.avatarUrl ?? null,

@@ -18,8 +18,10 @@ type LocalizedStringFormFieldStoryProps = {
   readonly disabled?: boolean;
 };
 
+const DEFAULT_LOCALIZED_STRING: LocalizedString = {};
+
 function LocalizedStringFormFieldStory({
-  defaultValue = {},
+  defaultValue = DEFAULT_LOCALIZED_STRING,
   label = "Name",
   required,
   error,

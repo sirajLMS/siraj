@@ -15,7 +15,8 @@ export async function expectRepositoryError(fn: () => Promise<unknown>): Promise
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) return errorCaught;
+  throw new Error(String(errorCaught));
 }
 
 /**

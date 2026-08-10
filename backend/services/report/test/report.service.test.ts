@@ -33,7 +33,7 @@ describe("ReportService — generateAttendanceReport", () => {
     try {
       await ReportService.generateAttendanceReport(dummyFilters, dummyActorId);
     } catch (e) {
-      errorCaught = e as Error;
+      errorCaught = e instanceof Error ? e : new Error(String(e));
     }
 
     expect(errorCaught).not.toBeNull();
@@ -103,7 +103,7 @@ describe("ReportService — generateAttendanceReport", () => {
     try {
       await ReportService.generateAttendanceReport(dummyFilters, dummyActorId);
     } catch (e) {
-      errorCaught = e as Error;
+      errorCaught = e instanceof Error ? e : new Error(String(e));
     }
 
     expect(errorCaught).not.toBeNull();

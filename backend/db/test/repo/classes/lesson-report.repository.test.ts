@@ -18,7 +18,10 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (!(errorCaught instanceof Error)) {
+    throw new Error("Expected thrown value to be an Error instance");
+  }
+  return errorCaught;
 }
 
 function requireInstance(instance: ClassInstanceSelectType | null): ClassInstanceSelectType {
@@ -292,9 +295,11 @@ describe("LessonReportRepository.findPendingReviews", () => {
     await runInRollback(async tx => {
       const { teacher, adminUser } = await setupReportChain(tx);
 
-      for (let i = 0; i < 3; i++) {
-        await seedPendingReportForTeacher(tx, teacher.id, adminUser.id, `pend-${i}-${randomUUID()}`, `PendPage${i}`);
-      }
+      await Promise.all(
+        Array.from({ length: 3 }, (_, i) =>
+          seedPendingReportForTeacher(tx, teacher.id, adminUser.id, `pend-${i}-${randomUUID()}`, `PendPage${i}`)
+        )
+      );
 
       const pagination = new PaginationArgs({ first: 2, page: 1 });
       const rows = await LessonReportRepository.findPendingReviews({ teacherId: teacher.id }, pagination, tx);
@@ -312,9 +317,11 @@ describe("LessonReportRepository.countPendingReviews", () => {
 
       const initialCount = await LessonReportRepository.countPendingReviews({ teacherId: teacher.id }, tx);
 
-      for (let i = 0; i < 2; i++) {
-        await seedPendingReportForTeacher(tx, teacher.id, adminUser.id, `count-${i}-${randomUUID()}`, `PendCount${i}`);
-      }
+      await Promise.all(
+        Array.from({ length: 2 }, (_, i) =>
+          seedPendingReportForTeacher(tx, teacher.id, adminUser.id, `count-${i}-${randomUUID()}`, `PendCount${i}`)
+        )
+      );
 
       const newCount = await LessonReportRepository.countPendingReviews({ teacherId: teacher.id }, tx);
       expect(newCount).toBe(initialCount + 2);

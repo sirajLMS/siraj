@@ -113,6 +113,19 @@ function useSubjectsDialogLabels(): SubjectsDialogLabels {
   );
 }
 
+function isSubjectItem(value: unknown): value is SubjectItem {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    typeof (value as Record<string, unknown>).id === "string"
+  );
+}
+
+function isSubjectItemList(value: unknown): value is readonly SubjectItem[] {
+  return Array.isArray(value) && value.every(isSubjectItem);
+}
+
 function useSubjectsData(activeCategoryId: string | null): SubjectsDataResult {
   const {
     data: categoriesData,
@@ -143,8 +156,8 @@ function useSubjectsData(activeCategoryId: string | null): SubjectsDataResult {
     [categoriesData?.classCategories]
   );
 
-  const subjects = useMemo(
-    () => (subjectsData?.classSubjects ?? []) as unknown as readonly SubjectItem[],
+  const subjects = useMemo<readonly SubjectItem[]>(
+    () => (isSubjectItemList(subjectsData?.classSubjects) ? subjectsData.classSubjects : []),
     [subjectsData?.classSubjects]
   );
 

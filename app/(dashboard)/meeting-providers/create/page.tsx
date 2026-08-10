@@ -18,7 +18,7 @@ export default async function CreateMeetingProviderPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.MEETING_PROVIDERS_MANAGE_CATALOG], locale, context);
   return <MeetingProviderFormContainer mode="create" />;

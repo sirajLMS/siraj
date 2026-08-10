@@ -9,7 +9,7 @@ interface MeetingIntegrationsSettingsUiState {
   readonly expandedSlug: MeetingIntegrationProviderSlug | null;
   readonly loadingAccountsFor: MeetingIntegrationProviderSlug | null;
   readonly connectedAccountsByProvider: Readonly<
-    Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>
+    Partial<Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>>
   >;
   readonly testingFor: MeetingIntegrationProviderSlug | null;
   readonly lastTestResultByProvider: Readonly<Record<string, TestMeetingConnectionResult | null>>;
@@ -36,9 +36,8 @@ interface MeetingIntegrationsSettingsUiState {
 const initialState = {
   expandedSlug: MeetingIntegrationProviderSlug.Zoom as MeetingIntegrationProviderSlug | null,
   loadingAccountsFor: null as MeetingIntegrationProviderSlug | null,
-  connectedAccountsByProvider: {} as Record<
-    MeetingIntegrationProviderSlug,
-    readonly MeetingIntegrationConnectedAccount[]
+  connectedAccountsByProvider: {} as Partial<
+    Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>
   >,
   testingFor: null as MeetingIntegrationProviderSlug | null,
   lastTestResultByProvider: {} as Record<string, TestMeetingConnectionResult | null>,

@@ -24,13 +24,13 @@ export default async function ProfilePage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return null;
   }
 
   const resolution = await resolveProfilePageContext(userId, context, { mode: ProfileMode.VIEW });
   if ("redirect" in resolution) {
     redirect({ href: resolution.redirect });
-    return;
+    return undefined;
   }
 
   return (

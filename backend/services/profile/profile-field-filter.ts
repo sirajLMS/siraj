@@ -26,6 +26,10 @@ export type StudentFieldFilterContext = {
   readonly permissions: ReadonlySet<AppPermission>;
 };
 
+function isStringRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function setValueAtPath(target: Record<string, unknown>, path: string, value: unknown): void {
   const segments = path.split(".");
   let current: Record<string, unknown> = target;
@@ -33,13 +37,16 @@ function setValueAtPath(target: Record<string, unknown>, path: string, value: un
   for (let index = 0; index < segments.length - 1; index += 1) {
     const segment = segments[index];
     const next = current[segment];
-    if (next == null || typeof next !== "object") {
+    if (!isStringRecord(next)) {
       return;
     }
-    current = next as Record<string, unknown>;
+    current = next;
   }
 
-  current[segments.at(-1) as string] = value;
+  const lastSegment = segments.at(-1);
+  if (lastSegment !== undefined) {
+    current[lastSegment] = value;
+  }
 }
 
 function cloneForFiltering<T>(payload: T): T {
@@ -53,10 +60,7 @@ function shouldApplyProfileGroup(group: ProfileFieldGroupDefinition, ctx: FieldF
   return group.scopes.includes(ctx.scope);
 }
 
-function stripProfileGroupPaths<T extends Record<string, unknown>>(
-  filtered: T,
-  group: ProfileFieldGroupDefinition
-): void {
+function stripProfileGroupPaths(filtered: Record<string, unknown>, group: ProfileFieldGroupDefinition): void {
   for (const path of group.paths) {
     setValueAtPath(filtered, path, null);
   }
@@ -146,7 +150,7 @@ export function assertProfileEditFieldGroups(ctx: FieldFilterContext, submittedG
   }
 }
 
-const KEY_INCLUDES = <T extends string>(keys: readonly T[], key: string): boolean => keys.includes(key as T);
+const KEY_INCLUDES = (keys: readonly string[], key: string): boolean => keys.includes(key);
 
 function collectCoreGroups(core: Record<string, unknown>, groups: Set<string>): void {
   if (["name", "email", "avatarUrl", "displayCurrency"].some(key => key in core)) {

@@ -74,6 +74,22 @@ export interface MeetingOAuthStatePayload extends JoseJWTPayload {
   nonce: string;
 }
 
+const MEETING_PROVIDERS: readonly MeetingProvider[] = ["zoom", "google_meet", "microsoft_teams"];
+
+function isMeetingProvider(value: string): value is MeetingProvider {
+  return (MEETING_PROVIDERS as readonly string[]).includes(value);
+}
+
+function isOAuthStatePayload(payload: JoseJWTPayload): payload is MeetingOAuthStatePayload {
+  return (
+    typeof payload.userId === "string" &&
+    typeof payload.providerSlug === "string" &&
+    isMeetingProvider(payload.providerSlug) &&
+    typeof payload.returnPath === "string" &&
+    typeof payload.nonce === "string"
+  );
+}
+
 function getStateSigningSecret(): Uint8Array {
   const config = getEnvironmentConfig();
   return new TextEncoder().encode(config.jwtSecret);
@@ -96,7 +112,8 @@ async function signOAuthState(userId: string, providerSlug: MeetingProvider, ret
 export async function verifyOAuthState(state: string): Promise<MeetingOAuthStatePayload | null> {
   try {
     const { payload } = await jwtVerify(state, getStateSigningSecret());
-    return payload as unknown as MeetingOAuthStatePayload;
+    if (!isOAuthStatePayload(payload)) return null;
+    return payload;
   } catch {
     return null;
   }
@@ -111,7 +128,7 @@ function buildRedirectUri(providerSlug: MeetingProvider): string {
   const baseUrl = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
   // Use split/join instead of replace/replaceAll for better compatibility and to
   // satisfy static analysis rules that prefer explicit all-occurrence handling.
-  const pathSlug = String(providerSlug).split("_").join("-");
+  const pathSlug = providerSlug.split("_").join("-");
   return `${baseUrl.replace(/\/$/, "")}/api/oauth/${pathSlug}/callback`;
 }
 
@@ -173,6 +190,7 @@ function buildAuthorizeUrl(providerSlug: MeetingProvider, redirectUri: string, s
     case "microsoft_teams":
       return buildMicrosoftTeamsAuthorizeUrl(redirectUri, state);
   }
+  throw new Error(`Unhandled case in buildAuthorizeUrl`);
 }
 
 // ============================================================================
@@ -276,11 +294,16 @@ export namespace MeetingOAuthService {
     const user = await UserRepository.findById(actorUserId);
     const email = user?.email ?? null;
 
-    return tokens.map(token => ({
-      providerSlug: token.providerSlug as MeetingProvider,
-      email,
-      connectedAt: token.createdAt ?? null,
-      expiresAt: token.expiresAt ?? null,
-    }));
+    return tokens.reduce<MyConnectedMeetingProviderReturnType[]>((acc, token) => {
+      if (isMeetingProvider(token.providerSlug)) {
+        acc.push({
+          providerSlug: token.providerSlug,
+          email,
+          connectedAt: token.createdAt ?? null,
+          expiresAt: token.expiresAt ?? null,
+        });
+      }
+      return acc;
+    }, []);
   }
 }

@@ -9,7 +9,7 @@ export const dashboardStudentHistoryAr: StudentHistoryLabels = {
     student: "طالب",
   },
   pageTitle: name => `تاريخ حصص ${name}`,
-  pageSubtitle: month => `${month}`,
+  pageSubtitle: month => month,
   exportPdf: "تصدير PDF",
   changeMonth: "تغيير الشهر",
   metrics: {

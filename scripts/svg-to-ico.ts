@@ -1,8 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import * as sharpModule from "sharp";
+import { sharp } from "sharp";
 import toIco from "to-ico";
-
-const sharp = sharpModule as unknown as typeof import("sharp").default;
 
 const svgPath = process.argv[2] || "public/favicon.svg";
 const outputPath = process.argv[3] || "app/favicon.ico";

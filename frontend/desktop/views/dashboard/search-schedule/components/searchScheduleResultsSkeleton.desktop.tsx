@@ -35,7 +35,7 @@ export function SearchScheduleResultsSkeletonDesktop({
             </Box>
 
             <HorizontalScrollRow sx={{ gap: 1, paddingInlineStart: 0, paddingInlineEnd: 0 }}>
-              {Array.from({ length: pillCount }, (_, pillIndex) => (
+              {Array.from({ length: pillCount }, (_unused, pillIndex) => (
                 <Skeleton
                   key={`skeleton-pill-${String(cardIndex)}-${String(pillIndex)}`}
                   variant="rounded"

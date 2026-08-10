@@ -6,7 +6,7 @@ import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import SchoolOutlined from "@mui/icons-material/SchoolOutlined";
 import WcOutlined from "@mui/icons-material/WcOutlined";
 import { FormControl, FormHelperText, Stack, TextField } from "@mui/material";
-import type { Control, FieldPath, UseFormRegister } from "react-hook-form";
+import type { Control, FieldPath, FieldValues, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { CountryDisplay } from "@/frontend/common/components/ui/display";
@@ -61,14 +61,14 @@ type ProfilePersonalViewProps = ProfilePersonalSectionBaseProps & {
   readonly qualifications?: string | null;
 };
 
-type ProfilePersonalEditProps<T extends ProfilePersonalFormFields = ProfilePersonalFormFields> =
+type ProfilePersonalEditProps<T extends ProfilePersonalFormFields & FieldValues = ProfilePersonalFormFields> =
   ProfilePersonalSectionBaseProps & {
     readonly mode: "edit";
     readonly register: UseFormRegister<T>;
     readonly control: Control<T>;
   };
 
-type ProfilePersonalSectionProps<T extends ProfilePersonalFormFields = ProfilePersonalFormFields> =
+type ProfilePersonalSectionProps<T extends ProfilePersonalFormFields & FieldValues = ProfilePersonalFormFields> =
   | ProfilePersonalViewProps
   | ProfilePersonalEditProps<T>;
 
@@ -130,7 +130,18 @@ function usePersonalFieldAccess(props: ProfilePersonalSectionBaseProps) {
   return { canViewField, canEditField, hasAccessibleField };
 }
 
-function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields>({
+function isPersonalFieldPath<T extends ProfilePersonalFormFields & FieldValues>(value: string): value is FieldPath<T> {
+  return typeof value === "string";
+}
+
+function personalFieldPath<T extends ProfilePersonalFormFields & FieldValues>(value: string): FieldPath<T> {
+  if (!isPersonalFieldPath<T>(value)) {
+    throw new Error(`Invalid personal field path: ${value}`);
+  }
+  return value;
+}
+
+function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields & FieldValues>({
   props,
   access,
 }: {
@@ -145,7 +156,7 @@ function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields>({
       <Stack spacing={2}>
         {canViewField("nationality") ? (
           <Controller
-            name={"nationality" as FieldPath<T>}
+            name={personalFieldPath<T>("nationality")}
             control={control}
             render={({ field, fieldState }) => {
               const selectedCountry = field.value ? getCountryByCode(field.value) : undefined;
@@ -173,12 +184,12 @@ function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields>({
             multiline
             rows={2}
             disabled={!canEditField("address")}
-            {...register("address" as FieldPath<T>)}
+            {...register(personalFieldPath<T>("address"))}
           />
         ) : null}
         {canViewField("dateOfBirth") ? (
           <Controller
-            name={"dateOfBirth" as FieldPath<T>}
+            name={personalFieldPath<T>("dateOfBirth")}
             control={control}
             render={({ field, fieldState }) => {
               const dateValue = field.value ? new Date(field.value) : null;
@@ -216,11 +227,11 @@ function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields>({
         {canViewField("gender") ? (
           <Controller
             control={control}
-            name={"gender" as FieldPath<T>}
+            name={personalFieldPath<T>("gender")}
             render={({ field, fieldState }) => (
               <FormControl fullWidth error={Boolean(fieldState.error)} disabled={!canEditField("gender")}>
                 <GenderSelector
-                  gender={(field.value as Gender | null) ?? null}
+                  gender={field.value ?? null}
                   setGenderAction={field.onChange}
                   fullWidth
                   labels={{
@@ -242,7 +253,7 @@ function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields>({
             multiline
             rows={3}
             disabled={!canEditField("qualifications")}
-            {...register("qualifications" as FieldPath<T>)}
+            {...register(personalFieldPath<T>("qualifications"))}
           />
         ) : null}
       </Stack>
@@ -305,7 +316,7 @@ function ProfilePersonalSectionView({
   );
 }
 
-export function ProfilePersonalSection<T extends ProfilePersonalFormFields = ProfilePersonalFormFields>(
+export function ProfilePersonalSection<T extends ProfilePersonalFormFields & FieldValues = ProfilePersonalFormFields>(
   props: ProfilePersonalSectionProps<T>
 ) {
   const fallbackBaseLabels = useProfileSharedBaseLabels();

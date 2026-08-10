@@ -65,13 +65,13 @@ function jsonToLiteral(value: unknown): ConstValueNode | undefined {
   }
   if (typeof value === "object") {
     const fields = Object.entries(value)
-      .map(([key, val]) => {
+      .map(([key, val]): ConstObjectFieldNode | null => {
         const literal = jsonToLiteral(val);
         if (!literal) return null;
         return { kind: Kind.OBJECT_FIELD, name: { kind: Kind.NAME, value: key }, value: literal };
       })
-      .filter((f): f is Exclude<typeof f, null> => f !== null);
-    return { kind: Kind.OBJECT, fields: fields as ConstObjectFieldNode[] };
+      .filter((f): f is ConstObjectFieldNode => f !== null);
+    return { kind: Kind.OBJECT, fields };
   }
   return undefined;
 }

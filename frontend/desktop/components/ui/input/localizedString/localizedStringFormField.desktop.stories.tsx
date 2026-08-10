@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { LocalizedStringFormFieldDesktop } from "@/frontend/desktop/components/ui/input/localizedString/localizedStringFormField.desktop";
 import type { LocalizedString } from "@/shared/types";
 
+const DEFAULT_LOCALIZED_STRING: LocalizedString = {};
+
 type FormValues = {
   name: LocalizedString;
 };
@@ -18,7 +20,7 @@ type LocalizedStringFormFieldStoryProps = {
 };
 
 function LocalizedStringFormFieldStory({
-  defaultValue = {},
+  defaultValue = DEFAULT_LOCALIZED_STRING,
   label = "Name",
   required,
   error,

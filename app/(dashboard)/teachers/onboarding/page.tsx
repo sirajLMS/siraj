@@ -18,7 +18,7 @@ export default async function TeacherOnboardingPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.TEACHERS_CREATE], locale, context);
 

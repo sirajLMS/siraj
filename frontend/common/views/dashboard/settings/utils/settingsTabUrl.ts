@@ -27,8 +27,8 @@ export function resolveSettingsTab(
   tabParam: string | null,
   availableTabs: readonly SettingsTabDefinition[]
 ): SettingsTabId | undefined {
-  if (tabParam && availableTabs.some(tab => tab.id === tabParam)) {
-    return tabParam as SettingsTabId;
+  if (tabParam && isSettingsTabId(tabParam) && availableTabs.some(tab => tab.id === tabParam)) {
+    return tabParam;
   }
   return availableTabs[0]?.id;
 }

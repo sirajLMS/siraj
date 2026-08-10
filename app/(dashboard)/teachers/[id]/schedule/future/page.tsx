@@ -30,7 +30,7 @@ export default async function FutureSchedulePage({ params }: PageProps) {
 
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   return <FutureScheduleContainer teacherId={id} />;

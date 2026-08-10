@@ -90,14 +90,15 @@ export function getBooleanEnv(name: string): boolean {
  * Generic helper to get an environment variable with validation
  */
 function getEnumEnv<T extends string>(name: string, allowed: T[], defaultValue: T): T {
-  const value = process.env[name]?.toLowerCase() as T | undefined;
-  if (!value) return defaultValue;
+  const raw = process.env[name]?.toLowerCase();
+  if (!raw) return defaultValue;
 
-  if (!allowed.includes(value)) {
-    logger.warn(`⚠️  Invalid ${name}: ${value}. Must be one of: ${allowed.join(", ")}. Using '${defaultValue}'.`);
+  const match = allowed.find(v => v === raw);
+  if (!match) {
+    logger.warn(`⚠️  Invalid ${name}: ${raw}. Must be one of: ${allowed.join(", ")}. Using '${defaultValue}'.`);
     return defaultValue;
   }
-  return value;
+  return match;
 }
 
 /**

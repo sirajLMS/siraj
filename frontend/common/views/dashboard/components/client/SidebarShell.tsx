@@ -24,6 +24,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistry";
 import { SIDEBAR_END_NAV_ITEM_KEYS } from "@/frontend/common/views/dashboard/config/navigationConfig";
 import { PROFILE_NAV_KEY } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
@@ -153,11 +154,13 @@ function getGroupTitleStyles(): SxProps<Theme> {
 
 /** Full-width divider in collapsed icon mode. */
 function getCollapsedSidebarDividerSx(extra?: SxProps<Theme>): SxProps<Theme> {
-  return {
-    borderColor: "var(--mui-palette-outlineVariant)",
-    width: "100%",
-    ...extra,
-  };
+  return mergeSx(
+    {
+      borderColor: "var(--mui-palette-outlineVariant)",
+      width: "100%",
+    },
+    extra
+  );
 }
 
 interface SidebarGroupHeaderProps {
@@ -428,12 +431,11 @@ function SidebarAccountFooter({
       component={Link}
       href="/profile"
       selected={isProfileActive}
-      sx={{
-        ...getSidebarItemStyles(isCollapsed, isProfileActive),
+      sx={mergeSx(getSidebarItemStyles(isCollapsed, isProfileActive), {
         py: 1,
         flex: 1,
         minWidth: 0,
-      }}
+      })}
     >
       <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40, color: "inherit" }}>
         <UserAvatar src={avatarUrl} sx={{ width: 32, height: 32 }} />

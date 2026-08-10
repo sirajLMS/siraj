@@ -3,7 +3,7 @@ import { SupportedMobileWalletRepository } from "@/backend/db/repo/billing/suppo
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-payment-method.repository";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { AccountStatus, CurrencyCode, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
@@ -59,6 +59,35 @@ const mobileWalletCreateInput = {
   details: { walletId: WALLET_ID, phone: "01012345678" },
 };
 
+type FindSafeByIdsReturn = Awaited<ReturnType<typeof UserRepository.findSafeByIds>>;
+type UserMapValue = Exclude<FindSafeByIdsReturn extends Map<string, infer V> ? V : never, null>;
+
+function createMockUserMap(ids: string[]): FindSafeByIdsReturn {
+  const map = new Map<string, UserMapValue | null>();
+  for (const id of ids) {
+    map.set(id, {
+      id,
+      name: "Test User",
+      email: "[EMAIL_REDACTED]",
+      emailVerifiedAt: null,
+      password: "",
+      rememberTokenHash: null,
+      avatarFilePath: null,
+      avatarUrl: null,
+      phone: "+[PHONE_REDACTED]",
+      status: AccountStatus.ACTIVATED,
+      isSuperAdmin: false,
+      timezone: "UTC",
+      displayCurrency: CurrencyCode.EGP,
+      lastLoginAt: null,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      deletedAt: null,
+    });
+  }
+  return map;
+}
+
 describe("PaymentMethodService notification dispatch", () => {
   const spies: ReturnType<typeof spyOn>[] = [];
   let dispatchMultiSpy: ReturnType<typeof spyOn>;
@@ -68,11 +97,7 @@ describe("PaymentMethodService notification dispatch", () => {
     tErrors = getServerTranslations("en").errorsTranslations;
 
     const userSpy = spyOn(UserRepository, "findSafeByIds").mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, { email: string; phone: string }>();
-      for (const id of ids) {
-        map.set(id, { email: "owner@test.com", phone: "+1234567890" });
-      }
-      return map as never;
+      return createMockUserMap(ids);
     });
     spies.push(userSpy);
 
@@ -122,7 +147,7 @@ describe("PaymentMethodService notification dispatch", () => {
 
   function assertPaymentMethodChangedPayloads(expectedUserId: string = OWNER_ID): CommunicationPayloadShape[] {
     expect(dispatchMultiSpy).toHaveBeenCalledTimes(1);
-    const payloads = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayloadShape[];
+    const payloads: CommunicationPayloadShape[] = dispatchMultiSpy.mock.calls[0][0];
     expect(payloads).toHaveLength(4);
     expect(payloads.every(payload => payload.eventType === NotificationEventType.PAYMENT_METHOD_CHANGED)).toBe(true);
     expect(payloads.every(payload => payload.userId === expectedUserId)).toBe(true);

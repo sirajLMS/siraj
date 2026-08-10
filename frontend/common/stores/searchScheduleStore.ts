@@ -105,6 +105,22 @@ function extractPersistedDraftFilters(draft: SearchScheduleDraftFilters): Persis
   };
 }
 
+function isPersistedSearchScheduleState(value: unknown): value is PersistedSearchScheduleState {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    "draftFilters" in value &&
+    "selectedTeacher" in value &&
+    "pageSize" in value &&
+    "formFilterDrawerOpen" in value &&
+    "monthDrawerOpen" in value &&
+    "monthDrawerAnchorFromDate" in value &&
+    "monthDrawerCurrentMonth" in value &&
+    "monthDrawerTeacher" in value
+  );
+}
+
 function mergeDraftWithPersistedFilters(
   persistedFilters?: Partial<PersistedSearchScheduleFilters>
 ): SearchScheduleDraftFilters {
@@ -160,7 +176,7 @@ interface SearchScheduleState {
   readonly page: number;
   readonly pageSize: number;
   readonly selectedTeacher: SearchScheduleTeacherOption | null;
-  readonly _hasHydrated: boolean;
+  readonly hasHydrated: boolean;
   // NEW FOR PLAN v5: form-filter drawer open state (lifted from searchScheduleForm.{mobile,desktop}.tsx).
   readonly formFilterDrawerOpen: boolean;
   // NEW FOR PLAN v5: sort menu anchor element (lifted from searchScheduleSortMenu.{mobile,desktop}.tsx).
@@ -198,7 +214,7 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
       page: 0,
       pageSize: DEFAULT_PAGE_SIZE,
       selectedTeacher: null,
-      _hasHydrated: false,
+      hasHydrated: false,
       // NEW FOR PLAN v5 (newly created for the migration wave): default values for the lifted
       // drawer/menu/month state. formFilterDrawerOpen stays false until the toolbar opens it.
       // sortMenuAnchorEl is a non-serializable DOM element — excluded from persist.
@@ -214,7 +230,7 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           draft: { ...state.draft, ...draft },
         })),
       setSelectedTeacher: selectedTeacher => set({ selectedTeacher }),
-      setHasHydrated: hasHydrated => set({ _hasHydrated: hasHydrated }),
+      setHasHydrated: hasHydrated => set({ hasHydrated }),
       // NEW FOR PLAN v5: form-filter drawer setter — toggles the mobile/desktop filter drawer.
       setFormFilterDrawerOpen: formFilterDrawerOpen => set({ formFilterDrawerOpen }),
       // NEW FOR PLAN v5: sort menu anchor setter — opens/closes the popover menu.
@@ -288,7 +304,7 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
         monthDrawerTeacher: state.monthDrawerTeacher,
       }),
       merge: (persistedState, currentState) => {
-        const persisted = persistedState as PersistedSearchScheduleState | undefined;
+        const persisted = isPersistedSearchScheduleState(persistedState) ? persistedState : undefined;
 
         return {
           ...currentState,

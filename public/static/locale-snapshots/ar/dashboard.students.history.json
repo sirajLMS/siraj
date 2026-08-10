@@ -10,7 +10,7 @@
     "__fn": "(name) => `\\u062A\\u0627\\u0631\\u064A\\u062E \\u062D\\u0635\\u0635 ${name}`"
   },
   "pageSubtitle": {
-    "__fn": "(month) => `${month}`"
+    "__fn": "(month) => month"
   },
   "exportPdf": "تصدير PDF",
   "changeMonth": "تغيير الشهر",

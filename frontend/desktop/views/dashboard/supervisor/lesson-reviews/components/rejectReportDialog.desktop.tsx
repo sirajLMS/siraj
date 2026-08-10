@@ -24,6 +24,13 @@ interface RejectReportDialogDesktopProps {
   readonly onConfirm: () => void;
 }
 
+const confirmSx: SxProps<Theme> = theme => ({
+  py: 1.5,
+  backgroundColor: theme.palette.error.main,
+  color: theme.palette.onError,
+  "&:hover": { backgroundColor: theme.palette.error.dark },
+});
+
 export function RejectReportDialogDesktop({
   open,
   reason,
@@ -33,13 +40,6 @@ export function RejectReportDialogDesktop({
   onClose,
   onConfirm,
 }: Readonly<RejectReportDialogDesktopProps>) {
-  const confirmSx: SxProps<Theme> = theme => ({
-    py: 1.5,
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.onError,
-    "&:hover": { backgroundColor: theme.palette.error.dark },
-  });
-
   return (
     <Dialog open={open} onClose={loading ? undefined : onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ pt: 4 }}>

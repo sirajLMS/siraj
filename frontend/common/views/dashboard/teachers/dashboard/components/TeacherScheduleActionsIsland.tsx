@@ -43,9 +43,9 @@ export function TeacherScheduleActionsIsland() {
         await activateClass({ variables: { classInstanceId: id } });
         refetch();
       } catch (err) {
-        const error = err as Error;
-        logger.error("Error activating class:", error);
-        if (error.message?.includes("missedClassTime") || error.message?.toLowerCase().includes("missed class time")) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error("Error activating class:", err);
+        if (message?.includes("missedClassTime") || message?.toLowerCase().includes("missed class time")) {
           setData({ activationError: "missedClassTime" });
         } else {
           setData({ activationError: "activationFailed" });

@@ -13,41 +13,41 @@ import { logger } from "@/frontend/common/utils/logger";
 import { formDetailsToInput } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
+function buildTeacherInput(formData: TeacherOnboardingFormData): TeacherOnboardingInput {
+  return {
+    name: formData.name,
+    email: formData.email,
+    password: formData.password,
+    avatarUrl: formData.avatarUrl ?? null,
+    nationality: formData.nationality || null,
+    nationalId: formData.nationalId || null,
+    phone: formData.phone || null,
+    dateOfBirth: formData.dateOfBirth || null,
+    gender: formData.gender,
+    address: formData.address || null,
+    qualifications: formData.qualifications || null,
+    countryCode: formData.countryCode,
+    timezone: toGraphqlIanaTimezone(formData.timezone),
+    displayCurrency: formData.displayCurrency ?? null,
+    hourlyRate: formData.hourlyRate,
+    rateCurrency: formData.rateCurrency,
+    initialPayoutMethod: formData.payoutMethod?.type
+      ? {
+          type: formData.payoutMethod.type,
+          direction: PaymentDirection.Payout,
+          isDefault: true,
+          label: formData.payoutMethod.label?.trim() || null,
+          details: formDetailsToInput(formData.payoutMethod.details ?? {}),
+        }
+      : null,
+  };
+}
+
 export function useCreateTeacherOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createTeacherMutationDocument);
   const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const client = useApolloClient();
   const { cache } = client;
-
-  const buildTeacherInput = (formData: TeacherOnboardingFormData): TeacherOnboardingInput => {
-    return {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      avatarUrl: formData.avatarUrl ?? null,
-      nationality: formData.nationality || null,
-      nationalId: formData.nationalId || null,
-      phone: formData.phone || null,
-      dateOfBirth: formData.dateOfBirth || null,
-      gender: formData.gender,
-      address: formData.address || null,
-      qualifications: formData.qualifications || null,
-      countryCode: formData.countryCode,
-      timezone: toGraphqlIanaTimezone(formData.timezone),
-      displayCurrency: formData.displayCurrency ?? null,
-      hourlyRate: formData.hourlyRate,
-      rateCurrency: formData.rateCurrency,
-      initialPayoutMethod: formData.payoutMethod?.type
-        ? {
-            type: formData.payoutMethod.type,
-            direction: PaymentDirection.Payout,
-            isDefault: true,
-            label: formData.payoutMethod.label?.trim() || null,
-            details: formDetailsToInput(formData.payoutMethod.details ?? {}),
-          }
-        : null,
-    };
-  };
 
   const createMeetingConfig = async (formData: TeacherOnboardingFormData, userId: string): Promise<void> => {
     if (!formData.meetingProvider?.id || !formData.meetingUrl?.trim()) return;

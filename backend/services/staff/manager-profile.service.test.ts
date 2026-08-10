@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { StaffProfileRepository, UserRepository } from "@/backend/db/repo";
-import { AccountStatus } from "@/backend/enum";
+import { AccountStatus, UserRole } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
+import type { UserReturnType, UserSelectType } from "@/backend/types";
 
 const targetRow = {
   id: "00000000-0000-0000-0000-000000000002",
@@ -22,6 +24,50 @@ const updatedRow = {
   ...targetRow,
   phone: "+966500000000",
   status: AccountStatus.DEACTIVATED,
+};
+
+const mockTimestamp = new Date("2024-01-01T00:00:00.000Z");
+
+const updateProfileFieldsResult: UserReturnType = {
+  id: targetRow.id,
+  name: targetRow.name,
+  email: targetRow.email,
+  emailVerifiedAt: null,
+  password: "redacted",
+  rememberTokenHash: null,
+  avatarFilePath: null,
+  avatarUrl: null,
+  phone: "+966500000000",
+  status: AccountStatus.DEACTIVATED,
+  isSuperAdmin: false,
+  timezone: IanaTimezone.UTC,
+  displayCurrency: null,
+  lastLoginAt: null,
+  createdAt: mockTimestamp,
+  updatedAt: mockTimestamp,
+  role: UserRole.STAFF,
+  teacherId: null,
+  parentId: null,
+};
+
+const updateStatusResult: UserSelectType = {
+  id: targetRow.id,
+  name: targetRow.name,
+  email: targetRow.email,
+  emailVerifiedAt: null,
+  password: "redacted",
+  rememberTokenHash: null,
+  avatarFilePath: null,
+  avatarUrl: null,
+  phone: "+966500000000",
+  status: AccountStatus.DEACTIVATED,
+  isSuperAdmin: false,
+  timezone: IanaTimezone.UTC,
+  displayCurrency: null,
+  lastLoginAt: null,
+  createdAt: mockTimestamp,
+  updatedAt: mockTimestamp,
+  deletedAt: null,
 };
 
 describe("ManagerProfileService admin update", () => {
@@ -46,16 +92,10 @@ describe("ManagerProfileService admin update", () => {
   });
 
   test("routes phone and status updates through UserRepository", async () => {
-    const updateProfileFieldsSpy = spyOn(UserRepository, "updateProfileFields").mockResolvedValue({
-      id: targetRow.id,
-      name: targetRow.name,
-      email: targetRow.email,
-      status: AccountStatus.DEACTIVATED,
-    } as never);
-    const updateStatusSpy = spyOn(UserRepository, "updateStatus").mockResolvedValue({
-      id: targetRow.id,
-      status: AccountStatus.DEACTIVATED,
-    } as never);
+    const updateProfileFieldsSpy = spyOn(UserRepository, "updateProfileFields").mockResolvedValue(
+      updateProfileFieldsResult
+    );
+    const updateStatusSpy = spyOn(UserRepository, "updateStatus").mockResolvedValue(updateStatusResult);
 
     const result = await ManagerProfileService.updateManagerProfile(
       "00000000-0000-0000-0000-000000000001",

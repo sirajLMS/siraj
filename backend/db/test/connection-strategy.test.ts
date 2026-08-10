@@ -22,6 +22,12 @@ const ENV_KEYS = [
 type EnvKey = (typeof ENV_KEYS)[number];
 type EnvSnapshot = Partial<Record<EnvKey, string | undefined>>;
 
+const ENV_KEY_SET: ReadonlySet<string> = new Set(ENV_KEYS);
+
+function isEnvKey(value: string): value is EnvKey {
+  return ENV_KEY_SET.has(value);
+}
+
 let envSnapshot: EnvSnapshot = {};
 
 function setProcessEnv(key: EnvKey, value: string | undefined): void {
@@ -48,7 +54,9 @@ function setEnv(overrides: EnvSnapshot): void {
     setProcessEnv(key, undefined);
   }
   for (const [key, value] of Object.entries(overrides)) {
-    setProcessEnv(key as EnvKey, value);
+    if (isEnvKey(key)) {
+      setProcessEnv(key, value);
+    }
   }
 }
 

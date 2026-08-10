@@ -103,8 +103,8 @@ export function resolveDisplayAmountField<P extends { id: string; amount?: strin
   );
 }
 
-export async function resolveDisplayAmountFields<T extends { id: string }>(
-  items: readonly T[],
+export async function resolveDisplayAmountFields(
+  items: readonly { id: string }[],
   ctx: BaseContext,
   amountKey: string,
   currencyKey: string,
@@ -117,7 +117,7 @@ export async function resolveDisplayAmountFields<T extends { id: string }>(
       const record = item as Record<string, unknown>;
       const subjectUserId = subjectUserIdKey
         ? typeof record[subjectUserIdKey] === "string"
-          ? (record[subjectUserIdKey] as string)
+          ? record[subjectUserIdKey]
           : null
         : null;
       const displayCurrency = resolveEffectiveDisplayCurrency(ctx, subjectUserId);

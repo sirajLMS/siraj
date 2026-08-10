@@ -191,6 +191,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult }: Reado
               message: labels.invalidCredentials,
             });
           }
+          return undefined;
         })
         .catch(() => {
           setLoginResult({
@@ -211,7 +212,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult }: Reado
       component="form"
       onSubmit={e => {
         e.preventDefault();
-        handleSubmit(onSubmit)(e);
+        void handleSubmit(onSubmit)(e);
       }}
       sx={{
         display: "flex",

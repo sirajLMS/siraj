@@ -84,21 +84,23 @@ async function deleteDirectory(ctx: VercelContext, dirPath: string): Promise<voi
     fileCount: allBlobs.length,
   });
 
-  for (const blob of allBlobs) {
-    try {
-      await del(blob.url, { token: ctx.token });
+  await Promise.all(
+    allBlobs.map(async blob => {
+      try {
+        await del(blob.url, { token: ctx.token });
 
-      const dbFile = await StorageDbRepository.fileByPath(blob.pathname);
-      if (dbFile) {
-        await StorageDbRepository.deleteFile(blob.pathname);
+        const dbFile = await StorageDbRepository.fileByPath(blob.pathname);
+        if (dbFile) {
+          await StorageDbRepository.deleteFile(blob.pathname);
+        }
+
+        logger.info("🗑️ deleteDirectory: Deleted file", { path: blob.pathname });
+      } catch (error) {
+        logger.error(`Failed to delete file in directory: ${blob.pathname}`, error);
+        throw error;
       }
-
-      logger.info("🗑️ deleteDirectory: Deleted file", { path: blob.pathname });
-    } catch (error) {
-      logger.error(`Failed to delete file in directory: ${blob.pathname}`, error);
-      throw error;
-    }
-  }
+    })
+  );
 
   logger.info("✅ deleteDirectory: All files deleted", {
     dir: dirPath,

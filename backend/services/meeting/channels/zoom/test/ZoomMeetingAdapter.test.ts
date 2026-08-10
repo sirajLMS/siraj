@@ -234,39 +234,49 @@ describe("ZoomMeetingAdapter", () => {
   });
 
   describe("generateMeeting with per-user fallback", () => {
-    const MOCK_TOKEN_ROW: Partial<MeetingProviderTokenSelectType> = {
+    let refreshSpy: ReturnType<typeof spyOn>;
+
+    const MOCK_TOKEN_ROW: MeetingProviderTokenSelectType = {
+      id: "token-row-id",
       userId: "user-123",
       providerSlug: "zoom",
       refreshToken: "stored-refresh-token",
       accessToken: "old-access-token",
+      expiresAt: null,
       scopes: ["meeting:write:meeting"],
+      createdAt: new Date("2026-01-01T00:00:00Z"),
+      updatedAt: new Date("2026-01-01T00:00:00Z"),
     };
+
+    function mergeTokenRow(overrides: Partial<MeetingProviderTokenSelectType>): MeetingProviderTokenSelectType {
+      return { ...MOCK_TOKEN_ROW, ...overrides };
+    }
 
     function mockTokenRepo(
       tokenRow: Partial<MeetingProviderTokenSelectType> | null,
       upsertResult?: Partial<MeetingProviderTokenSelectType>
     ) {
+      const resolvedTokenRow: MeetingProviderTokenSelectType | null = tokenRow ? mergeTokenRow(tokenRow) : null;
+
       const getByUserAndProviderSpy = spyOn(MeetingProviderTokenRepository, "getByUserAndProvider").mockResolvedValue(
-        tokenRow as MeetingProviderTokenSelectType | null
+        resolvedTokenRow
       );
 
-      const upsertSpy = spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(
-        (upsertResult ?? MOCK_TOKEN_ROW) as MeetingProviderTokenSelectType
-      );
+      const resolvedUpsert = upsertResult ? mergeTokenRow(upsertResult) : MOCK_TOKEN_ROW;
+      const upsertSpy = spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(resolvedUpsert);
 
       return { getByUserAndProviderSpy, upsertSpy };
     }
 
     afterEach(() => {
-      try {
-        (tokenRefreshModule.refreshAccessToken as unknown as { mockRestore?: () => void })?.mockRestore?.();
-      } catch {
-        // spy might not be set
+      if (refreshSpy) {
+        refreshSpy.mockRestore();
+        refreshSpy = undefined;
       }
     });
 
     test("uses per-user token when org creds missing and actorUserId provided", async () => {
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-zoom-token",
         refreshToken: "new-refresh-token",
         expiresAt: new Date(Date.now() + 3_600_000),
@@ -289,7 +299,7 @@ describe("ZoomMeetingAdapter", () => {
 
     test("throws NoOrgCredentialsNoUserTokenError when no token row and no org creds", async () => {
       mockTokenRepo(null);
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new ZoomMeetingAdapter({});
       let caughtErr: Error | undefined;
@@ -297,7 +307,11 @@ describe("ZoomMeetingAdapter", () => {
         await adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" });
         throw new Error("Expected generateMeeting to throw");
       } catch (err) {
-        caughtErr = err as Error;
+        if (err instanceof Error) {
+          caughtErr = err;
+        } else {
+          throw new Error(String(err), { cause: err });
+        }
       }
       expect(caughtErr).toBeInstanceOf(NoOrgCredentialsNoUserTokenError);
       expect(refreshSpy).not.toHaveBeenCalled();
@@ -305,7 +319,7 @@ describe("ZoomMeetingAdapter", () => {
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
         new ProviderReauthRequiredError("zoom", "user-123", "invalid_grant")
       );
 

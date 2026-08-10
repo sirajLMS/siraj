@@ -23,8 +23,11 @@ async function performLogin(page: Page, context: BrowserContext): Promise<void> 
   try {
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
   } catch (e) {
-    const err = e as Error;
-    logger.error("login failed:", err.message);
+    if (e instanceof Error) {
+      logger.error("login failed:", e.message);
+    } else {
+      logger.error("login failed:", String(e));
+    }
   }
   await page.waitForLoadState("networkidle").catch(() => {});
 }

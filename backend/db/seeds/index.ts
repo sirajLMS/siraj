@@ -254,18 +254,14 @@ async function seedTeacherScheduleWindows(context: SeedContext, step: RunStep, c
   const teachers = context.teachers ?? [];
   const users = context.users ?? [];
   const timezones = context.timezones ?? [];
-  const windowSeeds: Array<[string, () => Promise<unknown>]> = [
-    ["teacher-availability-windows", () => seedOrGetTeacherAvailabilityWindows(teachers, users, timezones, config)],
-    [
-      "teacher-recurring-unavailability",
-      () => seedOrGetTeacherRecurringUnavailability(teachers, users, timezones, config),
-    ],
-    ["teacher-vacation-requests", () => seedOrGetTeacherVacationRequests(teachers, users, timezones, config)],
-  ];
 
-  for (const [name, run] of windowSeeds) {
-    await step(name, run);
-  }
+  await step("teacher-availability-windows", () =>
+    seedOrGetTeacherAvailabilityWindows(teachers, users, timezones, config)
+  );
+  await step("teacher-recurring-unavailability", () =>
+    seedOrGetTeacherRecurringUnavailability(teachers, users, timezones, config)
+  );
+  await step("teacher-vacation-requests", () => seedOrGetTeacherVacationRequests(teachers, users, timezones, config));
 }
 
 async function seedLeaveRequests(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {

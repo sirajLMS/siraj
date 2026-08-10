@@ -56,30 +56,34 @@ export async function seedAvatarForEntity(input: {
 }
 
 export async function seedAvatarPool(input: SeedAvatarPoolInput): Promise<Map<string, string | null>> {
+  const results = await Promise.all(
+    input.poolFiles.map(async avatarFile => {
+      const assetRelativePath = `${input.assetDir}/${avatarFile}`;
+      const localFilePath = resolveAssetPath(assetRelativePath);
+      const bucketPath = `${input.bucketDir}/${avatarFile}`;
+
+      if (!fs.existsSync(localFilePath)) {
+        logger.warn(`Avatar asset missing — skipping pool upload: ${assetRelativePath}`);
+        return [avatarFile, null] as const;
+      }
+
+      try {
+        const fileSeeder = await createFileSeedingService();
+        await fileSeeder.ensureDirectory(input.bucketDir, true);
+        await fileSeeder.seedFile({ bucketPath, localFilePath });
+        const storageService = await getStorageService();
+        const fileInfo = await storageService.fileInfoByPath(bucketPath);
+        return [avatarFile, fileInfo?.url ?? null] as const;
+      } catch (error) {
+        logger.error(`Failed to seed avatar pool file ${avatarFile}:`, error);
+        return [avatarFile, null] as const;
+      }
+    })
+  );
+
   const avatarUrls = new Map<string, string | null>();
-
-  for (const avatarFile of input.poolFiles) {
-    const assetRelativePath = `${input.assetDir}/${avatarFile}`;
-    const localFilePath = resolveAssetPath(assetRelativePath);
-    const bucketPath = `${input.bucketDir}/${avatarFile}`;
-
-    if (!fs.existsSync(localFilePath)) {
-      logger.warn(`Avatar asset missing — skipping pool upload: ${assetRelativePath}`);
-      avatarUrls.set(avatarFile, null);
-      continue;
-    }
-
-    try {
-      const fileSeeder = await createFileSeedingService();
-      await fileSeeder.ensureDirectory(input.bucketDir, true);
-      await fileSeeder.seedFile({ bucketPath, localFilePath });
-      const storageService = await getStorageService();
-      const fileInfo = await storageService.fileInfoByPath(bucketPath);
-      avatarUrls.set(avatarFile, fileInfo?.url ?? null);
-    } catch (error) {
-      logger.error(`Failed to seed avatar pool file ${avatarFile}:`, error);
-      avatarUrls.set(avatarFile, null);
-    }
+  for (const [avatarFile, url] of results) {
+    avatarUrls.set(avatarFile, url);
   }
 
   return avatarUrls;
@@ -98,21 +102,22 @@ async function syncUserAvatarUrl(userId: string, avatarUrl: string | null): Prom
 }
 
 export async function linkAvatarsToEntities(input: SeedAvatarPoolInput): Promise<void> {
-  for (let i = 0; i < input.entities.length; i++) {
-    const entity = input.entities[i];
-    if (!entity) continue;
+  await Promise.all(
+    input.entities.map(async (entity, i) => {
+      if (!entity) return;
 
-    const avatarUrl = await seedAvatarForEntity({
-      index: i,
-      poolFiles: input.poolFiles,
-      assetDir: input.assetDir,
-      bucketDir: input.bucketDir,
-      referenceTable: input.referenceTable,
-      referenceId: entity.id,
-    });
+      const avatarUrl = await seedAvatarForEntity({
+        index: i,
+        poolFiles: input.poolFiles,
+        assetDir: input.assetDir,
+        bucketDir: input.bucketDir,
+        referenceTable: input.referenceTable,
+        referenceId: entity.id,
+      });
 
-    if (entity.userId) {
-      await syncUserAvatarUrl(entity.userId, avatarUrl);
-    }
-  }
+      if (entity.userId) {
+        await syncUserAvatarUrl(entity.userId, avatarUrl);
+      }
+    })
+  );
 }

@@ -26,11 +26,10 @@ const sameWidthModifier: Modifier<"sameWidth", Record<string, unknown>> = {
   fn: ({ state }) => {
     const anchor = state.rects.reference;
     if (anchor) {
-      state.styles.popper = {
-        ...state.styles.popper,
+      state.styles.popper = Object.assign({}, state.styles.popper, {
         width: `${anchor.width}px`,
         minWidth: `${anchor.width}px`,
-      };
+      });
     }
   },
 };
@@ -138,10 +137,7 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
   const resolvedPlaceholder = listAttached ? (label ?? selectCountryLabel) : undefined;
 
   const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    const inputProps = (
-      params as unknown as { inputProps?: { onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void } }
-    ).inputProps;
-    inputProps?.onBlur?.(event);
+    params.slotProps.htmlInput.onBlur?.(event);
     onBlur?.();
   };
 

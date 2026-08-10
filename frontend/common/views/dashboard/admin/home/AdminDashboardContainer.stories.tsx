@@ -15,6 +15,8 @@ import type { AdminDashboardLabels } from "@/shared/locale";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
 
+function noopSubmit() {}
+
 function buildLabelsBySection(labels: AdminDashboardLabels): AdminDashboardLabelsBySection {
   return {
     shell: {
@@ -65,8 +67,6 @@ export function MockAdminDashboardContainer() {
   const setSelectedStatus = useDashboardStore(state => state.setSelectedStatus);
   const [page, setPage] = useState(0);
   const pageSize = 10;
-
-  const handleSubmit = () => {};
 
   const cleanedLastUpdatedKey = lastUpdatedKey.startsWith("dashboard.")
     ? lastUpdatedKey.replace("dashboard.", "")
@@ -146,7 +146,7 @@ export function MockAdminDashboardContainer() {
       onSearchChange={setSearchQuery}
       onDateChange={setDateFilter}
       onTeacherChange={setTeacherFilter}
-      onSubmit={handleSubmit}
+      onSubmit={noopSubmit}
       pageSize={pageSize}
       pageCount={pageCount}
       canDashboardSearch

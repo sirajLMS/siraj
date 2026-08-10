@@ -49,7 +49,7 @@ export function ManagerOnboardingDesktopView({
       <Box
         component="form"
         onSubmit={e => {
-          handleSubmit(onSubmit)(e);
+          void handleSubmit(onSubmit)(e);
         }}
       >
         <StyledFormWrapper>

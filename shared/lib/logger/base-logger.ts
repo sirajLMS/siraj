@@ -74,7 +74,7 @@ export abstract class BaseLogger {
     }
 
     // Write to file
-    if (this.writeToFileEnabled) this.writeToFile(level, message);
+    if (this.writeToFileEnabled) void this.writeToFile(level, message);
   }
 
   public log(...args: unknown[]): void {

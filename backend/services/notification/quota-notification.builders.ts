@@ -20,8 +20,8 @@ import type { NotificationsLabels } from "@/shared/locale/notifications";
  * @param category  The `NotificationEventCategory` tag (info/reminder/urgent/digest).
  * @param input      The builder input containing `affectedUserIds` and `locale`.
  */
-function buildQuotaPayloads<L extends { readonly title: string; readonly body: (p: B) => string }, B>(
-  labels: (translations: NotificationsLabels) => L,
+function buildQuotaPayloads<B>(
+  labels: (translations: NotificationsLabels) => { readonly title: string; readonly body: (p: B) => string },
   bodyParams: B,
   eventType: NotificationEventType,
   category: NotificationEventCategory,
@@ -91,10 +91,11 @@ type OndemandInstanceInput = {
   locale?: string;
 };
 
-function buildOndemandInstancePayloads<
-  L extends { readonly title: string; readonly body: (p: { studentName: string; scheduledStartAt: string }) => string },
->(
-  labels: (translations: NotificationsLabels) => L,
+function buildOndemandInstancePayloads(
+  labels: (translations: NotificationsLabels) => {
+    readonly title: string;
+    readonly body: (p: { studentName: string; scheduledStartAt: string }) => string;
+  },
   eventType: NotificationEventType,
   category: NotificationEventCategory,
   input: OndemandInstanceInput

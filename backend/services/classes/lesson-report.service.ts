@@ -5,7 +5,7 @@ import { LessonReportRepository, type PendingReviewFilters } from "@/backend/db/
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
-import { AppPermission, type AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
+import { AppPermission, AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -34,6 +34,28 @@ import { getServerTranslations } from "@/shared/locale";
  *   rejectReport   → PENDING_REVIEW → REJECTED    (side effect: CreditService.refundOnCancel)
  */
 export namespace LessonReportService {
+  function isLessonReportStatus(value: string): value is LessonReportStatus {
+    return (Object.values(LessonReportStatus) as readonly string[]).includes(value);
+  }
+
+  function isAttendanceEvaluation(value: string): value is AttendanceEvaluation {
+    return (Object.values(AttendanceEvaluation) as readonly string[]).includes(value);
+  }
+
+  function assertLessonReportStatus(value: string): LessonReportStatus {
+    if (!isLessonReportStatus(value)) {
+      throw new Error(`Unexpected LessonReportStatus: ${value}`);
+    }
+    return value;
+  }
+
+  function assertAttendanceEvaluation(value: string): AttendanceEvaluation {
+    if (!isAttendanceEvaluation(value)) {
+      throw new Error(`Unexpected AttendanceEvaluation: ${value}`);
+    }
+    return value;
+  }
+
   function toReturnType(
     row: LessonReportSelectType & {
       teacherName?: string | null;
@@ -44,8 +66,8 @@ export namespace LessonReportService {
   ): LessonReportReturnType {
     return {
       ...row,
-      status: row.status as LessonReportStatus,
-      attendanceEvaluation: row.attendanceEvaluation as AttendanceEvaluation,
+      status: assertLessonReportStatus(row.status),
+      attendanceEvaluation: assertAttendanceEvaluation(row.attendanceEvaluation),
       teacherName: row.teacherName ?? null,
       studentName: row.studentName ?? null,
       subjectName: row.subjectName ?? null,
@@ -211,7 +233,7 @@ export namespace LessonReportService {
     if (!instance) {
       throw new Error(tErrors.scheduling.classInstanceNotFound({ id: input.classInstanceId }));
     }
-    if (instance.executionState !== ClassExecutionState.COMPLETED) {
+    if (instance.executionState !== "COMPLETED") {
       throw new Error("lessonReport.notEligibleForReview");
     }
 
@@ -373,7 +395,7 @@ export namespace LessonReportService {
     if (!report) {
       throw new Error("lessonReport.notFound");
     }
-    if (report.status !== LessonReportStatus.PENDING_REVIEW) {
+    if (report.status !== "PENDING_REVIEW") {
       throw new Error("lessonReport.alreadyReviewed");
     }
 

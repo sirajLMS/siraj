@@ -9,6 +9,10 @@ import type {
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
+function isMeetingIntegrationConnectedAccount(value: unknown): value is MeetingIntegrationConnectedAccount {
+  return typeof value === "object" && value !== null && "userId" in value;
+}
+
 export function ConnectedAccountsTable({
   labels,
   accounts,
@@ -65,7 +69,10 @@ export function ConnectedAccountsTable({
       headerName: labels.columns.actions,
       flex: 0.5,
       renderCell: params => {
-        const account = params.row as MeetingIntegrationConnectedAccount;
+        const account = params.row;
+        if (!isMeetingIntegrationConnectedAccount(account)) {
+          return null;
+        }
         return (
           <Box sx={{ display: "flex", gap: 1 }}>
             <Button size="small" onClick={() => viewModel.onMetadataDialogOpen(account, providerSlug)}>
@@ -95,7 +102,7 @@ export function ConnectedAccountsTable({
       <DataGrid
         rows={accounts}
         columns={columns}
-        getRowId={row => (row as MeetingIntegrationConnectedAccount).id}
+        getRowId={row => (isMeetingIntegrationConnectedAccount(row) ? row.id : String(row))}
         autoHeight
         hideFooter
         disableRowSelectionOnClick

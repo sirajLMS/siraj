@@ -221,9 +221,7 @@ export namespace TeacherDueService {
 
     try {
       const teacherIds = [...new Set(updated.map(d => d.teacherId))];
-      for (const tid of teacherIds) {
-        await invalidateClassLifecycle(tid, undefined);
-      }
+      await Promise.all(teacherIds.map(tid => invalidateClassLifecycle(tid, undefined)));
     } catch (cacheErr) {
       logger.error("Failed to invalidate class lifecycle tags after marking dues as paid", { error: cacheErr });
     }

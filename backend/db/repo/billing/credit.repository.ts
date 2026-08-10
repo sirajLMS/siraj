@@ -7,17 +7,25 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
 import { DomainError } from "@/backend/lib/errors";
-import type { CreditInsertInput, CreditTransactionSelectType, PaginationArgs } from "@/backend/types";
+import type { CreditInsertInput, CreditTransactionSelectType } from "@/backend/types";
+import { PaginationArgs } from "@/backend/types";
 
 // NOTE: Overload-by-type-discrimination — tx parameter is polymorphic: string (studentId) or Transaction instance. Callers must be aware that getBalance(tx, undefined) silently targets the wrong studentId.
 type ReadExecutor = DBTransaction | typeof db;
+
+/** Type guard: narrows unknown to CreditReason by checking against enum values. */
+const isCreditReason = (value: unknown): value is CreditReason =>
+  typeof value === "string" && (Object.values(CreditReason) as readonly string[]).includes(value);
 
 export namespace CreditRepository {
   export const getBalance = async (
     tx?: ReadExecutor,
     studentId?: string
   ): Promise<{ classesTotal: number; classesRemaining: number }> => {
-    const targetStudentId = studentId ?? (tx as unknown as string);
+    const targetStudentId = studentId ?? (typeof tx === "string" ? tx : undefined);
+    if (!targetStudentId) {
+      throw new DomainError("INVALID_ARGS", "studentId is required when tx is not a string");
+    }
     const q = queryDb(typeof tx === "string" ? undefined : tx);
     const [row] = await q
       .select({
@@ -39,8 +47,12 @@ export namespace CreditRepository {
     paginationArgs?: PaginationArgs | null
   ): Promise<CreditTransactionSelectType[]> => {
     const actualTx = typeof tx === "string" ? undefined : tx;
-    const actualStudentId = typeof tx === "string" ? tx : (studentId as string);
-    const actualPagination = typeof tx === "string" ? (studentId as PaginationArgs | null) : paginationArgs;
+    const actualStudentId = typeof tx === "string" ? tx : studentId;
+    if (typeof actualStudentId !== "string") {
+      throw new DomainError("INVALID_ARGS", "studentId must be a string when tx is not a string");
+    }
+    const actualPagination =
+      typeof tx === "string" ? (studentId instanceof PaginationArgs ? studentId : null) : paginationArgs;
     const q = queryDb(actualTx);
     const baseQuery = q
       .select()
@@ -54,13 +66,16 @@ export namespace CreditRepository {
 
   export const countTransactions = async (tx: ReadExecutor | string, studentId?: string): Promise<number> => {
     const actualTx = typeof tx === "string" ? undefined : tx;
-    const actualStudentId = typeof tx === "string" ? tx : (studentId as string);
+    const actualStudentId = typeof tx === "string" ? tx : studentId;
+    if (typeof actualStudentId !== "string") {
+      throw new DomainError("INVALID_ARGS", "studentId must be a string when tx is not a string");
+    }
     const q = queryDb(actualTx);
     const [row] = await q
       .select({ value: count() })
       .from(creditTransactions)
       .where(eq(creditTransactions.studentId, actualStudentId));
-    return Number(row?.value ?? 0);
+    return row?.value ?? 0;
   };
 
   const insertCreditTransaction = async (
@@ -187,8 +202,12 @@ export namespace CreditRepository {
     reason?: CreditReason
   ): Promise<CreditTransactionSelectType[]> => {
     const actualTx = typeof tx === "string" ? undefined : tx;
-    const actualClassId = typeof tx === "string" ? tx : (classInstanceId as string);
-    const actualReason = typeof tx === "string" ? (classInstanceId as CreditReason) : reason;
+    const actualClassId = typeof tx === "string" ? tx : classInstanceId;
+    if (typeof actualClassId !== "string") {
+      throw new DomainError("INVALID_ARGS", "classInstanceId must be a string when tx is not a string");
+    }
+    const actualReason =
+      typeof tx === "string" ? (isCreditReason(classInstanceId) ? classInstanceId : undefined) : reason;
     const q = queryDb(actualTx);
     const whereCondition = actualReason
       ? and(eq(creditTransactions.classInstanceId, actualClassId), eq(creditTransactions.reason, actualReason))
@@ -201,7 +220,10 @@ export namespace CreditRepository {
     studentId?: string
   ): Promise<{ classesTotal: number; classesRemaining: number }> => {
     const actualTx = typeof tx === "string" ? undefined : tx;
-    const actualStudentId = typeof tx === "string" ? tx : (studentId as string);
+    const actualStudentId = typeof tx === "string" ? tx : studentId;
+    if (typeof actualStudentId !== "string") {
+      throw new DomainError("INVALID_ARGS", "studentId must be a string when tx is not a string");
+    }
     const q = queryDb(actualTx);
     const [row] = await q
       .select({
@@ -211,8 +233,8 @@ export namespace CreditRepository {
       .from(creditTransactions)
       .where(eq(creditTransactions.studentId, actualStudentId));
     return {
-      classesTotal: Number(row?.classesTotal ?? 0),
-      classesRemaining: Number(row?.classesRemaining ?? 0),
+      classesTotal: row?.classesTotal ?? 0,
+      classesRemaining: row?.classesRemaining ?? 0,
     };
   };
 

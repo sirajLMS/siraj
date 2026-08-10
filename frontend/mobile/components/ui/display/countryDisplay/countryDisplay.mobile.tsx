@@ -7,6 +7,7 @@ import type * as React from "react";
 import { type CountryType, getCountryDisplayName, getCountryEmoji } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileCountryDisplayProps = {
@@ -53,7 +54,7 @@ export const MobileCountryDisplay = ({
   const name = getCountryDisplayName(resolvedCode, locale);
 
   return (
-    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexWrap: "nowrap", ...sx }}>
+    <Stack direction="row" spacing={0.5} sx={mergeSx({ alignItems: "center", flexWrap: "nowrap" }, sx)}>
       {showEmoji && <MobileLocaleEmoji emoji={emoji} />}
       {showLabel && (
         <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>

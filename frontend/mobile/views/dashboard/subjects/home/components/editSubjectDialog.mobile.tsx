@@ -2,7 +2,8 @@
 
 import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField/AvatarImageField";
-import type { ClassSubjectUpdateInput, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassSubjectUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import {
   ActiveToggleField,
@@ -14,6 +15,12 @@ import type { SubjectFormValues } from "@/frontend/common/views/dashboard/subjec
 import type { EditSubjectDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 
 const FORM_ID = "edit-subject-form-mobile";
+
+const VALID_CURRENCY_CODES = new Set(Object.values(CurrencyCode) as readonly string[]);
+
+function isCurrencyCode(value: string): value is CurrencyCode {
+  return VALID_CURRENCY_CODES.has(value);
+}
 
 /**
  * EditSubjectDialogMobile — full-screen edit-subject dialog.
@@ -44,7 +51,7 @@ export function EditSubjectDialogMobile({
       sortOrder: null,
       avatarUrl: data.avatarUrl || null,
       hourlyRate: data.hourlyRate || null,
-      rateCurrency: data.rateCurrency ? (data.rateCurrency as CurrencyCode) : null,
+      rateCurrency: data.rateCurrency && isCurrencyCode(data.rateCurrency) ? data.rateCurrency : null,
     };
     onSubmit(subject.id, input);
   };

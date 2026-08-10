@@ -21,7 +21,7 @@ export default async function AuthLayout({ children }: { readonly children: Reac
       to: targetHref,
     });
     redirect(targetHref);
-    return;
+    return undefined;
   }
 
   return <AppClientProviders locale={locale}>{children}</AppClientProviders>;

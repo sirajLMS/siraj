@@ -3,7 +3,11 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useMemo } from "react";
-import type { MeetingConnectionTestMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  MeetingConnectionTestMode,
+  MeetingIntegrationConnectedAccountStatus,
+  MeetingIntegrationProviderSlug,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   adminRevokeMeetingProviderTokenMutationDocument,
@@ -23,12 +27,24 @@ import type {
 import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
+function isMeetingIntegrationProviderSlug(value: string | null | undefined): value is MeetingIntegrationProviderSlug {
+  return (
+    value === MeetingIntegrationProviderSlug.Zoom ||
+    value === MeetingIntegrationProviderSlug.GoogleMeet ||
+    value === MeetingIntegrationProviderSlug.MicrosoftTeams
+  );
+}
+
+function isStringRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function mapProviderSummary(
   provider: Operations.MeetingIntegrationProviderFieldsFragment
 ): MeetingIntegrationProviderSummary {
   return {
     id: provider.id ?? "",
-    slug: (provider.slug as ViewModelProviderSlug) ?? "zoom",
+    slug: isMeetingIntegrationProviderSlug(provider.slug) ? provider.slug : MeetingIntegrationProviderSlug.Zoom,
     kind: provider.kind ?? "unknown",
     credentialsHealthy: provider.credentialsHealthy ?? false,
     lastTestedAt: provider.lastTestedAt ? new Date(provider.lastTestedAt) : null,
@@ -48,13 +64,13 @@ function mapTestResult(
   return {
     ok: result.ok ?? false,
     latencyMs: result.latencyMs ?? 0,
-    mode: (result.mode as TestMeetingConnectionResult["mode"]) ?? "VALIDATE_CONFIG",
+    mode: result.mode ?? MeetingConnectionTestMode.ValidateConfig,
     testJoinUrl: result.testJoinUrl,
     deleted: result.deleted,
     upstreamResponseSummary: result.upstreamResponseSummary ?? "",
     errorCode: result.errorCode,
     errorMessage: result.errorMessage,
-    rawUpstreamPayload: (result.rawUpstreamPayload as Record<string, unknown> | null) ?? null,
+    rawUpstreamPayload: isStringRecord(result.rawUpstreamPayload) ? result.rawUpstreamPayload : null,
     requiredScopes: result.requiredScopes ?? null,
     grantedScopes: result.grantedScopes ?? null,
   };
@@ -71,14 +87,16 @@ function mapConnectedAccount(
     connectedAt: account.connectedAt ? new Date(account.connectedAt) : null,
     expiresAt: account.expiresAt ? new Date(account.expiresAt) : null,
     lastRefreshedAt: account.lastRefreshedAt ? new Date(account.lastRefreshedAt) : null,
-    status: (account.status as MeetingIntegrationConnectedAccount["status"]) ?? "CONNECTED",
+    status: account.status ?? MeetingIntegrationConnectedAccountStatus.Connected,
   };
 }
 
 interface UseMeetingIntegrationsStoreAccess {
   expandedSlug: ViewModelProviderSlug | null;
   loadingAccountsFor: ViewModelProviderSlug | null;
-  connectedAccountsByProvider: Readonly<Record<ViewModelProviderSlug, readonly MeetingIntegrationConnectedAccount[]>>;
+  connectedAccountsByProvider: Readonly<
+    Partial<Record<ViewModelProviderSlug, readonly MeetingIntegrationConnectedAccount[]>>
+  >;
   testingFor: ViewModelProviderSlug | null;
   lastTestResultByProvider: Readonly<Record<ViewModelProviderSlug, TestMeetingConnectionResult | null>>;
   revokingFor: { userId: string; providerSlug: ViewModelProviderSlug } | null;

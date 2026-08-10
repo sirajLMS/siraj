@@ -20,7 +20,7 @@ export default async function MonthlyReportsPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.MONTHLY_REPORTS_VIEW], locale, context);
   return (

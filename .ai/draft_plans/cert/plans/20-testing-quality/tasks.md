@@ -9,6 +9,8 @@
 | Depends On | Plans 1–19 (all prior plans) |
 | Related Docs | `MASTER_ARCHITECTURE.md`, `siraj_analysis/10-testing-quality-patterns.md`, `requirements.md`, `design.md` |
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
 ---
 
 ## Task Summary
@@ -87,9 +89,10 @@
   - Returns object with all created entities
 
 ### Quality Loop (per file)
-- `bun tsgo` — type check
-- `bun biome:check` — format + lint
-- Lint queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"t1","files":["backend/db/test/entity-setup.ts"]}'`
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/db/test/entity-setup.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 - Read: `AGENTS.md` (root), `backend/db/test/AGENTS.md`, `backend/db/repo/AGENTS.md`
@@ -102,6 +105,8 @@
 ## T2: Certificate Repository Tests (100% Coverage)
 
 **Estimated**: 3–4 hours | **Depends On**: T1 | **Refs**: REQ-1.1
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -141,8 +146,10 @@
 - Verify 100% coverage on `CertificateRepository`
 
 ### Quality Loop
-- `bun tsgo`, `bun biome:check`, lint queue client for the file
-- `bun codescene --file backend/db/test/repo/cert/certificate.repository.test.ts`
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/db/test/repo/cert/certificate.repository.test.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 - Read: `AGENTS.md` (root), `backend/db/test/AGENTS.md`
@@ -156,6 +163,8 @@
 ## T3: Template Repository Tests
 
 **Estimated**: 2–3 hours | **Depends On**: T1 | **Refs**: REQ-1.2
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -197,6 +206,8 @@ Same pattern as T2.
 
 **Estimated**: 2 hours | **Depends On**: T1 | **Refs**: REQ-1.3
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+
 ### Subtasks
 
 - **T4.1**: Create `backend/db/test/repo/cert/template-element.repository.test.ts`
@@ -231,6 +242,8 @@ Same pattern as T2.
 
 **Estimated**: 2 hours | **Depends On**: T1 | **Refs**: REQ-1.4
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+
 ### Subtasks
 
 - **T5.1**: Create `backend/db/test/repo/cert/template-variable.repository.test.ts`
@@ -262,6 +275,8 @@ Same pattern as T2.
 ## T6: Recipient Group Repository Tests
 
 **Estimated**: 2–3 hours | **Depends On**: T1 | **Refs**: REQ-1.5
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -296,6 +311,8 @@ Same pattern as T2.
 
 **Estimated**: 1–2 hours | **Depends On**: T1 | **Refs**: REQ-1.6
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T22, T26, T27.
+
 ### Subtasks
 
 - **T7.1**: Create `backend/db/test/repo/cert/verification.repository.test.ts`
@@ -320,6 +337,8 @@ Same pattern as T2.
 ## T8: Category Repository Tests
 
 **Estimated**: 2–3 hours | **Depends On**: T1 | **Refs**: REQ-1.7
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -355,6 +374,8 @@ Same pattern as T2.
 
 **Estimated**: 3–4 hours | **Depends On**: T1–T8 | **Refs**: REQ-1.8
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T18, T23, T24, T25.
+
 ### Subtasks
 
 - **T9.1**: Create `backend/db/test/logic/cert/generation-logic.test.ts`
@@ -377,7 +398,12 @@ Same pattern as T2.
   - Test category tree integrity: delete parent → children behavior correct
 
 ### Quality Loop & Instruction Verification
-- Same quality loop as T2
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/db/test/logic/cert/generation-logic.test.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/db/test/logic/cert/template-version-logic.test.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/db/test/logic/cert/state-machine-logic.test.ts --lifecycle codescene
+  ```
 - Read: `backend/db/test/AGENTS.md` — verify `logic/` directory rules
 - Verify Rule 11: `logic/` for business-logic workflows, `repo/` for isolation
 
@@ -386,6 +412,8 @@ Same pattern as T2.
 ## T10: Generation Pipeline Service Tests
 
 **Estimated**: 2–3 hours | **Depends On**: T1, Plan 4 | **Refs**: REQ-2.1
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -413,7 +441,10 @@ Same pattern as T2.
   - Already generated for same recipient → assert error contains "already generated"
 
 ### Quality Loop & Instruction Verification
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/test/generation.service.test.ts --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `backend/services/AGENTS.md`
 - Read: `.agents/instructions/backend.instructions.md`, `.agents/instructions/tests.instructions.md`
 
@@ -422,6 +453,8 @@ Same pattern as T2.
 ## T11: Verification Service Tests
 
 **Estimated**: 2 hours | **Depends On**: T1, Plan 4 | **Refs**: REQ-2.2
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -452,6 +485,8 @@ Same as T10.
 
 **Estimated**: 2–3 hours | **Depends On**: T1, Plan 4 | **Refs**: REQ-2.3
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+
 ### Subtasks
 
 - **T12.1**: Create `backend/services/cert/test/template-management.service.test.ts`
@@ -479,6 +514,8 @@ Same as T10.
 ## T13: Entity Cache Service Tests
 
 **Estimated**: 2 hours | **Depends On**: T1, Plan 4 | **Refs**: REQ-2.4
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -509,6 +546,8 @@ Same as T10.
 
 **Estimated**: 3–4 hours | **Depends On**: T1, Plan 5 | **Refs**: REQ-3.1
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+
 ### Subtasks
 
 - **T14.1**: Create `frontend/common/graphql/test/cert/certificate-queries.test.ts`
@@ -538,7 +577,10 @@ Same as T10.
 
 ### Quality Loop & Instruction Verification
 - Run: `bun run generate:gqlSchema` + `bun codegen` before tests (ensure document imports resolve)
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/test/cert/certificate-queries.test.ts --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `frontend/common/graphql/test/AGENTS.md`, `frontend/common/graphql/AGENTS.md`
 - Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
 - Verify Rule 3: TypedDocumentNode imports, no raw string queries
@@ -549,6 +591,8 @@ Same as T10.
 ## T15: GraphQL Template Query Integration Tests
 
 **Estimated**: 2–3 hours | **Depends On**: T1, Plan 5 | **Refs**: REQ-3.2
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T16, T17, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -582,6 +626,8 @@ Same as T14.
 
 **Estimated**: 3 hours | **Depends On**: T1, Plan 5 | **Refs**: REQ-3.3
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T17, T19, T20, T21, T22, T26, T27.
+
 ### Subtasks
 
 - **T16.1**: Create `frontend/common/graphql/test/cert/certificate-mutations.test.ts`
@@ -609,6 +655,8 @@ Same as T14.
 ## T17: GraphQL Template + Group + Category Mutation Tests
 
 **Estimated**: 3 hours | **Depends On**: T1, Plan 5 | **Refs**: REQ-3.4, REQ-3.5, REQ-3.6
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T19, T20, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -643,6 +691,8 @@ Same as T14.
 
 **Estimated**: 2–3 hours | **Depends On**: T14–T17 | **Refs**: REQ-3.7, design.md §2.6
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9, T23, T24, T25.
+
 ### Subtasks
 
 - **T18.1**: Create `frontend/common/graphql/test/cert/auth-scope.test.ts`
@@ -666,6 +716,8 @@ Same as T14.
 
 **Estimated**: 2–3 hours | **Depends On**: Plans 8, 16 | **Refs**: REQ-4.1
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T20, T21, T22, T26, T27.
+
 ### Subtasks
 
 - **T19.1**: Create `test/ui/components/cert/template-list.test.tsx`
@@ -685,7 +737,10 @@ Same as T14.
   - `cleanup()` + `useUserStore.setState({ permissions: [] })` in `afterEach`
 
 ### Quality Loop & Instruction Verification
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts test/ui/components/cert/template-list.test.tsx --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `test/ui/AGENTS.md`
 - Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
 
@@ -694,6 +749,8 @@ Same as T14.
 ## T20: UI Component Tests — Certificate List
 
 **Estimated**: 2–3 hours | **Depends On**: Plan 16 | **Refs**: REQ-4.2
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T21, T22, T26, T27.
 
 ### Subtasks
 
@@ -722,6 +779,8 @@ Same as T19.
 ## T21: UI Component Tests — Generation Dialog
 
 **Estimated**: 2–3 hours | **Depends On**: Plan 17 | **Refs**: REQ-4.3
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T22, T26, T27.
 
 ### Subtasks
 
@@ -755,6 +814,8 @@ Same as T19.
 
 **Estimated**: 2 hours | **Depends On**: Plan 19 | **Refs**: REQ-4.4
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T26, T27.
+
 ### Subtasks
 
 - **T22.1**: Create `test/ui/components/cert/verification-page.test.tsx`
@@ -782,6 +843,8 @@ Same as T19.
 ## T23: E2E Test — Full Generation Flow
 
 **Estimated**: 3–4 hours | **Depends On**: T1–T18 | **Refs**: REQ-5.1
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9, T18, T24, T25.
 
 ### Subtasks
 
@@ -831,7 +894,10 @@ Same as T19.
 
 ### Quality Loop & Instruction Verification
 - Requires `bun run build:test` first
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/generation-flow.test.ts --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `test/ui/AGENTS.md`
 - Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
 - Verify: no `waitForTimeout`, no `networkidle` — Playwright auto-waiting only
@@ -843,6 +909,8 @@ Same as T19.
 ## T24: E2E Test — Public Verification Page
 
 **Estimated**: 2 hours | **Depends On**: T1–T18 | **Refs**: REQ-5.2
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9, T18, T23, T25.
 
 ### Subtasks
 
@@ -880,6 +948,8 @@ Same as T23.
 
 **Estimated**: 2–3 hours | **Depends On**: T1–T18 | **Refs**: REQ-5.3
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9, T18, T23, T24.
+
 ### Subtasks
 
 - **T25.1**: Create `test/ui/e2e/cert/template-management.test.ts`
@@ -915,6 +985,8 @@ Same as T23.
 
 **Estimated**: 2–3 hours | **Depends On**: Plans 8–19 | **Refs**: REQ-6.1
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T27.
+
 ### Subtasks
 
 - **T26.1**: Create `frontend/common/views/dashboard/certificates/template-list/template-list.stories.tsx`
@@ -938,7 +1010,13 @@ Same as T23.
   - RTL/LTR rendering
 
 ### Quality Loop & Instruction Verification
-- `bun tsgo`, `bun biome:check`, lint queue client
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/template-list/template-list.stories.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/certificate-list/certificate-list.stories.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/generation-dialog/generation-dialog.stories.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/verification-page/verification-page.stories.tsx --lifecycle codescene
+  ```
 - Read: `AGENTS.md` (root), `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
 - Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
 - Verify: `.storybook/main.ts` story glob pattern matches file paths
@@ -949,6 +1027,8 @@ Same as T23.
 ## T27: Storybook Stories — Component-Level
 
 **Estimated**: 2–3 hours | **Depends On**: Plans 8–19 | **Refs**: REQ-6.2
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26.
 
 ### Subtasks
 
@@ -985,10 +1065,6 @@ Same as T26.
 
 ### Subtasks
 
-- **T28.1**: Start lint queue server
-  - `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background, detached)
-  - Verify: `curl -s http://localhost:${LINT_QUEUE_PORT}/status` returns `{running: true, queueLength: 0}`
-
 - **T28.2**: Run full quality gate
   - `bun quality-gate` (tsgo → biome → lint → codescene → sonar)
   - If any stage fails, fix per `scripts/health/sub-loop.ts` per-file
@@ -1018,7 +1094,7 @@ Same as T26.
 
 ### Instruction Verification
 - Read: `AGENTS.md` (root) — quality gate workflow
-- Follow: per-file sub-loop via `bun run scripts/health/sub-loop.ts <path> --lifecycle <stage>`
+- Follow: per-file sub-loop via `bun run scripts/health/sub-loop.ts <path> --lifecycle codescene`
 - Never run: `bun sonar-scan` (subagent prohibition — orchestrator only)
 
 ---
@@ -1050,40 +1126,42 @@ T1 (entity-setup)
 
 ## Execution Order
 
+**Execution order**: T1 → (T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27 via parallel subagents after T1) → (T9, T18, T23, T24, T25 via parallel subagents after Wave 2) → T28
+
 ### Phase A: Test Infrastructure (Sequential)
 1. **T1** — Entity-setup helpers (blocks everything)
    - Run verification loop: `bun tsgo`, `bun biome:check`, lint queue client
    - Verify all helper signatures compile and type-check
 
-### Phase B: DB Repository Tests (Parallel after T1)
-2. **T2, T3, T4, T5, T6, T7, T8** — All 7 repo test files (parallel)
+### Phase B: DB Repository Tests (via parallel subagents after T1)
+2. **T2, T3, T4, T5, T6, T7, T8** — All 7 repo test files (via parallel subagents)
    - Each independently: run `bun tsgo`, `bun biome:check`, lint queue client
    - Run `bun run scripts/run-test/run-test.ts <test-path>` for each file
    - Verify 100% coverage per file
 
-### Phase C: DB Logic + Service Tests (Parallel after Phase B)
+### Phase C: DB Logic + Service Tests (via parallel subagents after Phase B)
 3. **T9** — DB logic tests (depends on T2–T8)
-4. **T10, T11, T12, T13** — Service tests (parallel, depend on T1)
+4. **T10, T11, T12, T13** — Service tests (via parallel subagents, depend on T1)
    - Run `bun run scripts/run-test/run-test.ts <test-path>` for each
 
-### Phase D: GraphQL Integration Tests (Parallel after T1)
-5. **T14, T15** — Query tests (parallel)
-6. **T16, T17** — Mutation tests (parallel, after T14–T15 preferred but not required)
+### Phase D: GraphQL Integration Tests (via parallel subagents after T1)
+5. **T14, T15** — Query tests (via parallel subagents)
+6. **T16, T17** — Mutation tests (via parallel subagents, after T14–T15 preferred but not required)
 7. **T18** — Auth scope + DataLoader (after T14–T17)
    - Run `bun run generate:gqlSchema` + `bun codegen` before any GraphQL test
    - Run `bun run test:graphql` to verify all cert GraphQL tests
 
-### Phase E: UI Component Tests (Parallel)
-8. **T19, T20, T21, T22** — All 4 component test files (parallel)
+### Phase E: UI Component Tests (via parallel subagents)
+8. **T19, T20, T21, T22** — All 4 component test files (via parallel subagents)
    - Run `bun run test:ui:components` to verify
 
 ### Phase F: E2E Tests (After build:test)
 9. `bun run build:test` — Build production bundle (required before E2E)
-10. **T23, T24, T25** — All 3 E2E test files (parallel, each uses own browser context)
+10. **T23, T24, T25** — All 3 E2E test files (via parallel subagents, each uses own browser context)
     - Run `bun run test:ui:e2e` to verify
 
-### Phase G: Storybook Stories (Parallel)
-11. **T26, T27** — Page-level and component-level stories (parallel)
+### Phase G: Storybook Stories (via parallel subagents)
+11. **T26, T27** — Page-level and component-level stories (via parallel subagents)
     - Run `bun run build-storybook` to verify
 
 ### Phase H: Quality Gate (Sequential, last)
@@ -1093,6 +1171,30 @@ T1 (entity-setup)
     - Run all test suites to verify
     - Verify 100% coverage on DB repo tests
     - Walk through all acceptance criteria
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T1
+- Tasks: T1 (entity-setup helpers)
+- Rationale: T1 blocks all other tasks — no other task can start until test infrastructure helpers exist
+
+### Wave 2: T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27
+- Tasks: T2–T8 (DB repo tests), T10–T13 (service tests), T14–T17 (GraphQL integration tests), T19–T22 (UI component tests), T26–T27 (Storybook stories)
+- Rationale: All depend only on T1 (or external plans already completed). No interdependencies among these tasks — each can be dispatched to a separate subagent concurrently
+
+### Wave 3: T9, T18, T23, T24, T25
+- Tasks: T9 (DB logic tests, depends on T2–T8), T18 (auth scope + DataLoader, depends on T14–T17), T23–T25 (E2E tests, depend on T1–T18)
+- Rationale: All depend on Wave 2 tasks completing first. No interdependencies among Wave 3 tasks themselves — they can run as parallel subagents concurrently
+
+### Final Wave: T28
+- Task: T28 (full quality gate + test execution verification)
+- Rationale: Must run after all other tasks complete — aggregates and verifies all tests
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 

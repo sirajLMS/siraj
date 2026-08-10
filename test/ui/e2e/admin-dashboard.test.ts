@@ -8,13 +8,13 @@ setupBrowserLifecycle();
 const SEARCH_SCHEDULE_TITLE = /search schedule availability|البحث عن توفر الجدول/i;
 const SEARCH_BUTTON = /^search$|^بحث$/i;
 
-let context: BrowserContext;
-let page: Page;
+let context: BrowserContext | undefined;
+let page: Page | undefined;
 
 afterEach(async () => {
   await closeE2eSession(page, context);
-  page = undefined as unknown as Page;
-  context = undefined as unknown as BrowserContext;
+  page = undefined;
+  context = undefined;
 });
 
 describe.serial("Admin Dashboard E2E", () => {

@@ -13,8 +13,24 @@ import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/fro
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { PaymentMethodDirectionLabels, PaymentMethodTypeLabels } from "@/shared/locale/types/ui";
 
 export type { PaymentMethodRow };
+
+function isPaymentMethodTypeLabelKey(value: string): value is keyof PaymentMethodTypeLabels {
+  return (
+    value === "mobileWallet" ||
+    value === "paymentLink" ||
+    value === "onlineAccount" ||
+    value === "bankTransfer" ||
+    value === "cash" ||
+    value === "proofUpload"
+  );
+}
+
+function isPaymentDirectionLabelKey(value: string): value is keyof PaymentMethodDirectionLabels {
+  return value === "in" || value === "out" || value === "both";
+}
 
 export type DesktopPaymentMethodListProps = {
   readonly methods: readonly PaymentMethodRow[];
@@ -57,7 +73,7 @@ export function DesktopPaymentMethodList({
         width: 160,
         renderCell: params => (
           <Typography sx={{ typography: "bodyMd" }}>
-            {getPaymentMethodTypeLabel(params.row.type, key => t.type[key as keyof typeof t.type] ?? "")}
+            {getPaymentMethodTypeLabel(params.row.type, key => (isPaymentMethodTypeLabelKey(key) ? t.type[key] : ""))}
           </Typography>
         ),
       },
@@ -67,9 +83,8 @@ export function DesktopPaymentMethodList({
         width: 120,
         renderCell: params => (
           <Typography sx={{ typography: "bodyMd" }}>
-            {getPaymentMethodDirectionLabel(
-              params.row.direction,
-              key => t.direction[key as keyof typeof t.direction] ?? ""
+            {getPaymentMethodDirectionLabel(params.row.direction, key =>
+              isPaymentDirectionLabelKey(key) ? t.direction[key] : ""
             )}
           </Typography>
         ),

@@ -11,7 +11,6 @@ CodeScene warnings for this file (from `bun run codescene --scan`):
 - You may ONLY read and edit `<file-path>`. Do NOT read or edit any other repository source file.
   (Exception: you may read the rule files that `sub-loop.ts` prints in Step 1.)
 - NEVER run `bun codescene --reset`, `bun codescene --reset --scan`, or any `--reset`/`--full` combination on `bun codescene`. The incremental cache must stay intact. Only `bun codescene --file` (run automatically by sub-loop) is allowed.
-- NEVER run `bun sonar-scan` or `bun scripts/sonar-manager.ts`.
 - NEVER run `bun quality-gate` or `bun quality-gate:fresh`.
 - Do NOT modify imports in OTHER files. If a fix requires editing another file, STOP and report a CROSS-FILE DEPENDENCY (format below) instead of touching that file.
 
@@ -58,11 +57,28 @@ NEVER modify a file you were not assigned to.
 
   bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 
-If it fails at tsgo → fix only tsgo. Re-run. Once tsgo passes it advances to biome → fix biome → re-run → advances to lint → fix lint → re-run → advances to codescene --file → fix any remaining warnings → re-run. Repeat until the script exits 0.
+If it fails at tsgo → fix only tsgo. Re-run. Once tsgo passes it advances to biome → fix biome → re-run → advances to oxlint → fix oxlint → re-run → advances to lint:type-aware → fix lint → re-run → advances to check:duplicates → fix duplicates → re-run → advances to codescene --file → fix any remaining warnings → re-run. Repeat until the script exits 0.
 
 For test files, use `bun run scripts/run-test/run-test.ts <test-path>` when sub-loop passes but you need to validate behavior.
 
-## STEP 5: Report Completion
+NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section for fix patterns per rule.
+
+**ESLint/sonarjs rules** may also surface during sub-loop's `lint:type-aware` stage. Common patterns:
+- `sonarjs/cognitive-complexity` — extract case blocks into named helper functions at module scope.
+- `sonarjs/no-nested-functions` — extract nested callbacks to module-scope factory functions.
+- `sonarjs/void-use` — replace `void new URL(url)` with an IIFE returning a boolean.
+- `sonarjs/different-types-comparison` — if type is `T | null` (no `undefined`), remove `!== undefined`.
+- `sonarjs/no-hardcoded-passwords` — extract to module-level constant from env var.
+- `eslint/no-new` — assign `new` result to a variable or wrap in validation IIFE.
+See AGENTS.md "ESLint/sonarjs Rules" section for full patterns.
+
+## STEP 5: Stage and Report
+
+### Step 5a: Stage the file (only if sub-loop exits 0)
+
+  git add <file-path>
+
+### Step 5b: Report Completion
 
 Reply to the orchestrator with:
 - File: <file-path>
@@ -74,8 +90,7 @@ Reply to the orchestrator with:
 
 - NEVER modify files other than `<file-path>` (except rule files from sub-loop Step 1)
 - NEVER run codescene with `--reset` or `--full`
-- NEVER run sonar-scan or sonar-manager
-- Prefer sub-loop for verification; `bun run lint` is the lint queue client if needed outside sub-loop
+- Prefer sub-loop for verification; `bun run scripts/lint-service.ts -f <file> --id fix-codescene` if needed outside sub-loop (in-process, no HTTP server)
 
 ERRORS TO FIX:
 <paste warning lines>

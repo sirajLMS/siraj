@@ -14,6 +14,10 @@ import type {
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
+function isSuggestionStatus(value: string): value is SuggestionStatus {
+  return (Object.values(SuggestionStatus) as readonly string[]).includes(value);
+}
+
 export namespace SuggestionService {
   export async function submitSuggestion(
     actorUserId: string,
@@ -114,7 +118,7 @@ export namespace SuggestionService {
           parentUserId: row.parentUserId,
           submitterName: row.submitterName,
           body: row.body,
-          status: row.status as SuggestionStatus,
+          status: isSuggestionStatus(row.status) ? row.status : SuggestionStatus.PENDING,
           duplicateOfId: row.duplicateOfId,
           adminResponse: row.adminResponse,
           reviewedByUserId: row.reviewedByUserId,
@@ -226,7 +230,7 @@ export namespace SuggestionService {
         parentId: "",
         submitterName: result.submitterName,
         body: result.body,
-        status: result.status as SuggestionStatus,
+        status: isSuggestionStatus(result.status) ? result.status : SuggestionStatus.PENDING,
         createdAt: result.createdAt,
         parentName: "",
       }));
@@ -334,7 +338,7 @@ export namespace SuggestionService {
       throw new Error(tErrors.suggestionNotFound);
     }
 
-    if (targetSuggestion.status === SuggestionStatus.DUPLICATE) {
+    if (targetSuggestion.status === "DUPLICATE") {
       throw new Error(tErrors.suggestionTargetIsAlreadyDuplicate);
     }
 
@@ -456,10 +460,6 @@ export namespace SuggestionService {
   export async function createManySuggestions(
     inputs: Parameters<typeof SuggestionRepository.insertSuggestion>[0][]
   ): Promise<SuggestionSelectType[]> {
-    const results: SuggestionSelectType[] = [];
-    for (const input of inputs) {
-      results.push(await SuggestionRepository.insertSuggestion(input));
-    }
-    return results;
+    return Promise.all(inputs.map(input => SuggestionRepository.insertSuggestion(input)));
   }
 }

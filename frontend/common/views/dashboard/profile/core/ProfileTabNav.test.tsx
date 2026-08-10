@@ -10,7 +10,7 @@ const mockRouterReplace = mock(() => {});
 const mockRouterBack = mock(() => {});
 
 function mockNavigation(moduleOverrides: Record<string, unknown> = {}) {
-  mock.module("next/navigation", () => ({
+  void mock.module("next/navigation", () => ({
     useRouter: () => ({
       push: mockRouterPush,
       replace: mockRouterReplace,

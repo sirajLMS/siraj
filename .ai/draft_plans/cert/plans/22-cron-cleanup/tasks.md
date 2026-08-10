@@ -4,6 +4,7 @@
 > **Dependencies**: Plan 1 (schema), Plan 3 (repository), Plan 4 (services), Plan 5 (GraphQL—types), Plan 6 (PDF rendering—cache entries), Plan 7 (storage—storage cleanup), Plan 16 (certificates—status updates)
 > **Scope**: 5 cron jobs: expired certificate detection, storage cleanup (orphaned files), render cache cleanup, verification log archiving, batch generation cleanup. Vercel Cron integration, Redis single-flight locks, failure isolation, audit logging, idempotency
 > **Execution**: Sequential through phases below
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 
 ---
 
@@ -16,6 +17,44 @@ T01 ──► T02 ──► T03 ──► T04
          │                       │
 T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 ```
+
+**Execution order**: T01 → T02 → T03 → T04 → (T05, T06, T07, T08, T09 via parallel subagents after T04) → T10 → T11
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task — creates cleanup infrastructure module. No dependencies on other tasks in this plan.
+
+### Wave 2: T02
+- Tasks: T02
+- Rationale: Depends on T01 (uses cleanup infrastructure patterns). Must wait for T01 to complete.
+
+### Wave 3: T03
+- Tasks: T03
+- Rationale: Depends on T02 (environment variables must be registered before cron job paths reference them). Must wait for T02 to complete.
+
+### Wave 4: T04
+- Tasks: T04
+- Rationale: Depends on T03 (cron auth helper needed after cron jobs are registered). Must wait for T03 to complete.
+
+### Wave 5: T05, T06, T07, T08, T09
+- Tasks: T05, T06, T07, T08, T09
+- Rationale: All five cleanup services depend only on T01 (infrastructure) and T04 (cron auth) which are already completed in Wave 4. They have no interdependencies — each is an independent service targeting different domain logic (expired certs, storage, render cache, verification logs, batch generation). All five can run as separate parallel subagents simultaneously.
+
+### Wave 6: T10
+- Tasks: T10
+- Rationale: Depends on all five cleanup services (T05–T09) — creates route files that import each service. Must wait for all Wave 5 subagents to complete.
+
+### Final Wave: Knowledge Propagation
+- Task: T11
+- Rationale: Must run after all other tasks complete — consolidates outcome files and updates documentation across all affected AGENTS.md files and instruction files.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -32,7 +71,13 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
   - `logCleanupEvent(jobName, affectedCount, metadata)`: inserts into audit log table
 - [ ] Create `backend/services/cert/cleanup/cleanup-stats.ts` — stats aggregation
   - `recordJobStats(jobName, status, duration, processedCount, errorCount)`
-- [ ] Run quality loop on all files
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/CleanupModule.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/cleanup-lock.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/cleanup-audit.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/cleanup-stats.ts --lifecycle codescene
+  ```
 - [ ] Verify against: `backend/services/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`
 - **Requirements**: REQ-CRON-05 (Redis single-flight), REQ-CRON-13 (failure isolation), REQ-CRON-16 (audit logging)
 - **Files created**: `CleanupModule.ts`, `cleanup-lock.ts`, `cleanup-audit.ts`, `cleanup-stats.ts`
@@ -48,7 +93,11 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
   - `CERT_CRON_BATCH_CLEANUP_INTERVAL`: schedule for batch generation cleanup (default: `0 6 * * *` — daily at 6am)
 - [ ] Add variables to `.env.example` with comments explaining each schedule
 - [ ] Use zod validation for schedule format if Siraj's env system uses zod
-- [ ] Run quality loop
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/lib/env.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .env.example --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-14 (env config registration)
 - **Files modified**: `backend/lib/env.ts`, `.env.example`
 - **Dependencies**: T01
@@ -62,7 +111,10 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
   - `cert-verification-cleanup`: path `/api/cron/cert-verification-cleanup`, schedule from env
   - `cert-batchgen-cleanup`: path `/api/cron/cert-batchgen-cleanup`, schedule from env
 - [ ] Verify syntax against Vercel Cron format (consult `node_modules/next/dist/docs/` if Next.js 16 cron docs exist)
-- [ ] Run quality loop on `vercel.json`
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts vercel.json --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-01 (Vercel Cron integration)
 - **Files modified**: `vercel.json`
 - **Dependencies**: T02
@@ -73,7 +125,10 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 - [ ] If not: create `backend/lib/cron-auth.ts` — verifies `Authorization: Bearer {CRON_SECRET}` header
 - [ ] If existing: verify it works for the new cert cron paths and that no modifications are needed
 - [ ] Document the auth pattern in the cleanup infrastructure module
-- [ ] Run quality loop
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/lib/cron-auth.ts --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-02 (cron secret auth)
 - **Files created**: `backend/lib/cron-auth.ts` (if not existing)
 - **Dependencies**: T03
@@ -93,7 +148,10 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 - [ ] Idempotency: certificates already `expired` are skipped (no re-processing)
 - [ ] Failure isolation: if one certificate update fails, log error and continue to next
 - [ ] Service exported from `CleanupModule.ts`
-- [ ] Run quality loop
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/ExpiredCertificatesCleanup.ts --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-03 (expired detection), REQ-CRON-13 (failure isolation), REQ-CRON-16 (audit logging)
 - **Files created**: `ExpiredCertificatesCleanup.ts`
 - **Dependencies**: T01, T04
@@ -109,7 +167,10 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 - [ ] Idempotency: if file doesn't exist in storage, skip (no error)
 - [ ] Failure isolation: storage provider errors logged and skipped, continue to next file
 - [ ] Soft-delete awareness: only clean files where parent entity is soft-deleted for > 30 days
-- [ ] Run quality loop
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/StorageCleanup.ts --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-04 (storage cleanup), REQ-CRON-13 (failure isolation)
 - **Files created**: `StorageCleanup.ts`
 - **Dependencies**: T01, T04, Plan 7 (storage service)
@@ -125,7 +186,10 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 - [ ] Cache TTL: 7 days (configurable via `CERT_CACHE_TTL_DAYS` env)
 - [ ] Idempotency: already-deleted cache files are skipped
 - [ ] Failure isolation: per-file errors logged, continue to next
-- [ ] Run quality loop
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/RenderCacheCleanup.ts --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-06 (cache cleanup), REQ-CRON-13 (failure isolation)
 - **Files created**: `RenderCacheCleanup.ts`
 - **Dependencies**: T01, T04, Plan 6 (cache usage type), Plan 7 (storage service)
@@ -141,7 +205,10 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 - [ ] Archive retention: 90 days active, archived retained indefinitely (or per `CERT_VERIFICATION_LOG_RETENTION_DAYS` env)
 - [ ] Idempotency: already-archived logs are skipped
 - [ ] Failure isolation: per-log errors logged, continue to next
-- [ ] Run quality loop
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/VerificationLogArchive.ts --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-07 (verification log archiving), REQ-CRON-13 (failure isolation)
 - **Files created**: `VerificationLogArchive.ts`
 - **Dependencies**: T01, T04, Plan 1 (verifications table)
@@ -157,7 +224,10 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 - [ ] Timeout threshold: 24 hours (configurable via `CERT_BATCH_TIMEOUT_HOURS` env)
 - [ ] Idempotency: items already `failed` or `complete` are skipped
 - [ ] Failure isolation: per-item errors logged, continue to next
-- [ ] Run quality loop
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/BatchGenerationCleanup.ts --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-08 (batch gen cleanup), REQ-CRON-13 (failure isolation)
 - **Files created**: `BatchGenerationCleanup.ts`
 - **Dependencies**: T01, T04, Plan 1 (recipient_group_items table)
@@ -235,14 +305,10 @@ Total: 11 tasks, ~29 hours estimated
 
 ## Quality Loop (Per File)
 
-After creating/modifying ANY file, run:
+After creating/modifying ANY file, run the per-file progressive verification (type checking → formatting → lint → codescene code-health analysis) in one command that short-circuits on first failure:
 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-22","files":["<the-file>"]}'
+bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
 
 Fix all errors before proceeding to next task.

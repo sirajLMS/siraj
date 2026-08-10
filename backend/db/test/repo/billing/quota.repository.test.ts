@@ -6,7 +6,7 @@ import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.re
 import { quotas } from "@/backend/db/schema";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { QuotaKind, QuotaLedgerReason, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
+import { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
 import type { QuotaSubmitInput, QuotaUpdateInput } from "@/backend/types";
 
 describe("QuotaRepository", () => {
@@ -223,10 +223,10 @@ describe("QuotaRepository", () => {
 
       // Ledger should contain: initial GRANT (from create) + EXPIRE (unused) + GRANT (new period).
       const entries = await QuotaLedgerRepository.findByQuotaId(tx, created.id);
-      const expireRows = entries.filter(e => e.reason === QuotaLedgerReason.EXPIRE);
+      const expireRows = entries.filter(e => e.reason === "EXPIRE");
       expect(expireRows).toHaveLength(1);
       expect(expireRows[0].delta).toBe(-8);
-      const grantRows = entries.filter(e => e.reason === QuotaLedgerReason.GRANT);
+      const grantRows = entries.filter(e => e.reason === "GRANT");
       expect(grantRows).toHaveLength(2);
       expect(grantRows.some(e => e.delta === 8)).toBe(true);
     });
@@ -258,7 +258,7 @@ describe("QuotaRepository", () => {
 
       // An ADJUST (delta=0) ledger row should be inserted for audit-trail completeness
       const entries = await QuotaLedgerRepository.findByQuotaId(tx, created.id);
-      const adjustRows = entries.filter(e => e.reason === QuotaLedgerReason.ADJUST && e.delta === 0);
+      const adjustRows = entries.filter(e => e.reason === "ADJUST" && e.delta === 0);
       expect(adjustRows).toHaveLength(1);
       expect(adjustRows[0].reasonNote).toContain("2026-08-01");
     });

@@ -2,7 +2,7 @@
 // of tier (`frontend/{mobile,desktop}/views/dashboard/admin/payment-catalogs/**`)
 // per specs.md §3 N9 — no lowercase pure-data helpers in tier files.
 
-import { IdentifierKind, PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { IdentifierKind, type PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentCatalogsLabels } from "@/shared/locale";
 
 /**
@@ -17,10 +17,10 @@ export function resolvePaymentDirectionLabel(
   if (!dir) {
     return labels.notSet;
   }
-  if (dir === PaymentDirection.Payin) {
+  if (dir === "PAYIN") {
     return labels.directions.payin;
   }
-  if (dir === PaymentDirection.Payout) {
+  if (dir === "PAYOUT") {
     return labels.directions.payout;
   }
   return labels.directions.both;

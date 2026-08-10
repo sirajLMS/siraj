@@ -17,7 +17,7 @@ export default async function ScheduleFuturePage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   const teacherId = await requireTeacherIdForPage(userId, locale, context);

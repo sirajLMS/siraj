@@ -46,7 +46,7 @@ export function installCodeScene(): boolean {
   }
 
   logInfo("Running installer...");
-  // Equivalent to: echo "" | curl -fsSL ... | sh
+  // Equivalent to: echo "" | curl -fsSL ... | sh -- -y
   const curl = spawnSync(
     "/usr/bin/curl",
     ["-fsSL", "https://downloads.codescene.io/enterprise/cli/install-cs-tool.sh"],
@@ -57,9 +57,14 @@ export function installCodeScene(): boolean {
     return false;
   }
 
-  const sh = spawnSync("/bin/sh", [], {
+  // Pass -y (headless mode) so the installer skips the interactive
+  // "Press enter to continue" prompt that reads from /dev/tty, which is
+  // unavailable in non-TTY contexts and causes installation to fail with
+  // "cannot open /dev/tty: No such device or address".
+  const sh = spawnSync("/bin/sh", ["-s", "--", "-y"], {
     input: curl.stdout,
     encoding: "utf8",
+    stdio: ["pipe", "pipe", "pipe"],
   });
   if (sh.status === 0) {
     logSuccess("CodeScene CLI installed successfully");
@@ -118,7 +123,7 @@ function saveTokenLocal(token: string): boolean {
     fs.writeFileSync(CONFIG.TOKEN_FILE, token, "utf8");
     return true;
   } catch (error) {
-    logError(`Failed to save token locally: ${(error as Error).message}`);
+    logError(`Failed to save token locally: ${error instanceof Error ? error.message : String(error)}`);
     return false;
   }
 }
@@ -154,7 +159,7 @@ function saveTokenUnix(token: string): boolean {
     }
     return true;
   } catch (error) {
-    logError(`Failed to save token to shell config files: ${(error as Error).message}`);
+    logError(`Failed to save token to shell config files: ${error instanceof Error ? error.message : String(error)}`);
     return false;
   }
 }

@@ -25,6 +25,18 @@ const DEFAULT_SNACKBAR: WhatsappSnackbarState = { open: false, message: "", seve
 
 type SnackbarShow = (message: string, severity: "success" | "error") => void;
 
+interface SyncFromMetaResult {
+  data?: { syncWhatsappAccountsFromMeta?: { accounts?: unknown[] | null } };
+}
+
+function isSyncFromMetaResult(value: unknown): value is SyncFromMetaResult {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    ("data" in value ? typeof value.data === "object" || value.data === undefined : true)
+  );
+}
+
 async function deleteAccountAction(
   id: string,
   deleteAccount: (opts: { variables: { id: string } }) => Promise<unknown>,
@@ -87,9 +99,8 @@ async function syncFromMetaAction(
 ): Promise<void> {
   setSyncing(true);
   try {
-    const result = (await syncFromMeta()) as {
-      data?: { syncWhatsappAccountsFromMeta?: { accounts?: unknown[] | null } };
-    };
+    const rawResult = await syncFromMeta();
+    const result: SyncFromMetaResult = isSyncFromMetaResult(rawResult) ? rawResult : {};
     const accountsResult = result.data?.syncWhatsappAccountsFromMeta?.accounts;
     await refetchAccounts();
     if (accountsResult && accountsResult.length > 0) {

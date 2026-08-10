@@ -18,7 +18,7 @@ export default async function DstMigrationPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.SYSTEM_BULK_UPDATE_DST], locale, context);
   return <DstMigrationContainer />;

@@ -5,6 +5,7 @@ import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { formatPhoneDisplay, maskPhone } from "@/shared/lib/phone";
 
 export type MobilePhoneDisplayProps = {
@@ -40,7 +41,7 @@ export const MobilePhoneDisplay: React.FC<MobilePhoneDisplayProps> = ({
   } else {
     const display = masked ? maskPhone(phone, defaultRegion) : formatPhoneDisplay(phone, locale);
     content = (
-      <Typography variant={typographyVariant} dir="ltr" sx={{ whiteSpace: "nowrap", ...sx }}>
+      <Typography variant={typographyVariant} dir="ltr" sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
         {display}
       </Typography>
     );

@@ -156,13 +156,21 @@ export async function runClassInstanceUpsertMany(
   const updatedAt = options?.updatedAt ?? new Date();
 
   const runner = async (t: DBTransaction): Promise<ClassInstanceSelectType[]> => {
-    const results: ClassInstanceSelectType[] = [];
+    const chunks: ClassInstanceInsertType[][] = [];
     for (let i = 0; i < instances.length; i += chunkSize) {
-      const chunk = instances.slice(i, i + chunkSize);
-      for (const instance of chunk) {
-        results.push(await upsertRow(t, instance, updatedAt));
-      }
+      chunks.push(instances.slice(i, i + chunkSize));
     }
+
+    const results: ClassInstanceSelectType[] = [];
+    await chunks.reduce(async (prev, chunk) => {
+      await prev;
+      const chunkResults = await chunk.reduce(async (prevChunk, instance) => {
+        const prevResult = await prevChunk;
+        const row = await upsertRow(t, instance, updatedAt);
+        return [...prevResult, row];
+      }, Promise.resolve<ClassInstanceSelectType[]>([]));
+      results.push(...chunkResults);
+    }, Promise.resolve());
     return results;
   };
 

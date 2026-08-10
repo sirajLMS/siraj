@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { sql } from "drizzle-orm";
+import type { MigrationMeta } from "drizzle-orm/migrator";
 import { readMigrationFiles } from "drizzle-orm/migrator";
 import { getMigrationsToRun } from "drizzle-orm/migrator.utils";
 import type { NeonDatabase } from "drizzle-orm/neon-serverless";
@@ -26,6 +27,18 @@ interface DbMigrationRow {
 }
 
 type PgMigratorDatabase = NodePgDatabase | NeonDatabase;
+
+function isDbMigrationRow(value: unknown): value is DbMigrationRow {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    "id" in value &&
+    typeof value.id === "number" &&
+    "hash" in value &&
+    typeof value.hash === "string"
+  );
+}
 
 /**
  * Runs pending Drizzle migrations one folder at a time (separate transactions).
@@ -62,7 +75,7 @@ export async function runDrizzleMigrations(db: PgMigratorDatabase, config: Drizz
   const dbMigrationResult = await db.execute(
     sql`select id, hash, created_at, name from ${sql.identifier(migrationsSchema)}.${sql.identifier(migrationsTable)}`
   );
-  const dbMigrations = (dbMigrationResult.rows as unknown as DbMigrationRow[]).map(row => ({
+  const dbMigrations = (dbMigrationResult.rows as readonly unknown[]).filter(isDbMigrationRow).map(row => ({
     id: row.id,
     hash: row.hash,
     created_at: String(row.created_at),
@@ -81,7 +94,7 @@ export async function runDrizzleMigrations(db: PgMigratorDatabase, config: Drizz
 
   logger.log(`Applying ${migrationsToRun.length} pending Drizzle migration folder(s)...`);
 
-  for (const migration of migrationsToRun) {
+  const applyMigration = async (migration: MigrationMeta): Promise<void> => {
     const migrationName = migration.name;
     if (!migrationName) {
       throw new Error("Pending migration is missing a folder name.");
@@ -91,14 +104,20 @@ export async function runDrizzleMigrations(db: PgMigratorDatabase, config: Drizz
     await preCommitEnumStatementsForMigrationFile(migrationPath);
 
     await db.transaction(async tx => {
-      for (const stmt of migration.sql) {
-        await tx.execute(sql.raw(stmt));
-      }
+      await migration.sql.reduce<Promise<unknown>>(
+        (sequence, stmt) => sequence.then(() => tx.execute(sql.raw(stmt))),
+        Promise.resolve()
+      );
       await tx.execute(
         sql`insert into ${sql.identifier(migrationsSchema)}.${sql.identifier(migrationsTable)} ("hash", "created_at", "name") values(${migration.hash}, ${migration.folderMillis}, ${migrationName})`
       );
     });
 
     logger.log(`Applied migration: ${migrationName}`);
-  }
+  };
+
+  await migrationsToRun.reduce<Promise<unknown>>(
+    (sequence, migration) => sequence.then(() => applyMigration(migration)),
+    Promise.resolve()
+  );
 }

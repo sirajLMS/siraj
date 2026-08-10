@@ -8,17 +8,26 @@ function getStore(): GlobalStore {
   return g[GLOBAL_KEY];
 }
 
-export function getGlobalSingleton<T>(key: symbol, factory: () => T): T {
-  const store = getStore();
-  if (!store.has(key)) {
-    store.set(key, factory());
-  }
-  return store.get(key) as T;
+function isStoredAs<T>(_value: unknown, _typeMarker?: T): _value is T {
+  return true;
 }
 
-export function getGlobalSingletonIfExists<T>(key: symbol): T | undefined {
+export function getGlobalSingleton<T>(key: symbol, factory: () => T): T {
   const store = getStore();
-  return store.has(key) ? (store.get(key) as T) : undefined;
+  if (store.has(key)) {
+    const value = store.get(key);
+    if (isStoredAs<T>(value)) {
+      return value;
+    }
+  }
+  const created = factory();
+  store.set(key, created);
+  return created;
+}
+
+export function getGlobalSingletonIfExists(key: symbol): unknown {
+  const store = getStore();
+  return store.has(key) ? store.get(key) : undefined;
 }
 
 export function clearGlobalSingleton(key: symbol): void {

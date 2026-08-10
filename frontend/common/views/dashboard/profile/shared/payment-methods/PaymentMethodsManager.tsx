@@ -13,7 +13,30 @@ import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method"
 import { PaymentMethodDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodDeleteDialog";
 import { PaymentMethodFormDialog } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodFormDialog";
 import { usePaymentMethodsManagerViewModel } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodsManagerViewModel";
-import type { PaymentMethodLabels, PaymentMethodManagerLabels } from "@/shared/locale/types/ui";
+import type {
+  PaymentMethodLabels,
+  PaymentMethodManagerLabels,
+  PaymentMethodTypeLabels,
+} from "@/shared/locale/types/ui";
+
+function isPaymentMethodTypeLabelKey(key: string): key is keyof PaymentMethodTypeLabels {
+  return (
+    key === "mobileWallet" ||
+    key === "paymentLink" ||
+    key === "onlineAccount" ||
+    key === "bankTransfer" ||
+    key === "cash" ||
+    key === "proofUpload"
+  );
+}
+
+function resolveTypeLabel(messageKey: string, typeLabels: PaymentMethodTypeLabels): string {
+  const stripped = messageKey.startsWith("type.") ? messageKey.slice(5) : messageKey;
+  if (isPaymentMethodTypeLabelKey(stripped)) {
+    return typeLabels[stripped];
+  }
+  return "";
+}
 
 export type PaymentMethodsSlot = "payin" | "payout";
 
@@ -47,9 +70,7 @@ function VerifyBankTransferButtons({ methods, verifying, onVerify, t, tType }: V
       }}
       sx={{ alignSelf: "flex-start" }}
     >
-      {t.verify(
-        row.label ?? getPaymentMethodTypeLabel(row.type, key => tType.type[key as keyof typeof tType.type] ?? "")
-      )}
+      {t.verify(row.label ?? getPaymentMethodTypeLabel(row.type, key => resolveTypeLabel(key, tType.type)))}
     </Button>
   ));
 }

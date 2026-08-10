@@ -18,7 +18,7 @@ const whatsappAccountUpdateMock = mock(async (): Promise<boolean> => true);
 const createManyAuditLogsMock = mock(async (_logs: unknown[]): Promise<void> => {});
 const findByPhoneMock = mock(async (): Promise<{ id: string } | null> => null);
 
-mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
+await mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
   NotificationRepository: {
     handleDeliveryWebhook: handleDeliveryWebhookMock,
     getDeliveryByProviderMessageId: getDeliveryByProviderMessageIdMock,
@@ -26,26 +26,26 @@ mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
   },
 }));
 
-mock.module("@/backend/services/whatsapp/whatsapp-account.service", () => ({
+await mock.module("@/backend/services/whatsapp/whatsapp-account.service", () => ({
   WhatsappAccountService: {
     systemFindByPhoneNumberId: findByPhoneNumberIdMock,
     systemUpdateAccount: whatsappAccountUpdateMock,
   },
 }));
 
-mock.module("@/backend/db/repo/users/user.repository", () => ({
+await mock.module("@/backend/db/repo/users/user.repository", () => ({
   UserRepository: {
     findByPhone: findByPhoneMock,
   },
 }));
 
-mock.module("@/backend/services/system/audit.service", () => ({
+await mock.module("@/backend/services/system/audit.service", () => ({
   AuditService: {
     createManyAuditLogs: createManyAuditLogsMock,
   },
 }));
 
-mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     log: () => {},
     info: () => {},
@@ -67,9 +67,51 @@ async function importHandler() {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/** Type guard: checks if a value is a Record<string, unknown>. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Safely extract a mock call argument as a Record. */
+function getMockCallArgAt(
+  mockFn: { mock: { calls: unknown[] } },
+  callIndex: number,
+  argIndex: number
+): Record<string, unknown> {
+  const call = mockFn.mock.calls[callIndex];
+  const arg = Array.isArray(call) ? call[argIndex] : undefined;
+  return isRecord(arg) ? arg : {};
+}
+
+/** Build a NotificationDeliverySelectType mock with all required fields. */
+function createDeliveryRow(overrides: Partial<NotificationDeliverySelectType>): NotificationDeliverySelectType {
+  return {
+    id: "delivery-id",
+    userId: "user-id",
+    deviceTokenId: null,
+    channel: "whatsapp",
+    eventType: NotificationEventType.CLASS_REMINDER,
+    status: "sent",
+    title: null,
+    body: null,
+    providerMessageId: null,
+    failureReason: null,
+    webhookPayload: null,
+    metadata: null,
+    sentAt: null,
+    deliveredAt: null,
+    openedAt: null,
+    failedAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+}
+
 /** Extract the first argument of the Nth call to a mock as a typed record. */
 function getMockCallArg(mockFn: { mock: { calls: unknown[][] } }, callIndex: number): Record<string, unknown> {
-  return (mockFn.mock.calls[callIndex]?.[0] as Record<string, unknown>) ?? {};
+  const arg = mockFn.mock.calls[callIndex]?.[0];
+  return isRecord(arg) ? arg : {};
 }
 
 function makeWebhookBody(changes: unknown[]) {
@@ -221,7 +263,10 @@ async function processStatusExpectRejection(wamid: string, rawStatus: string, re
  * Extract the first audit-log input object from createManyAuditLogsMock.
  */
 function getFirstAuditInput(): Record<string, unknown> {
-  return (createManyAuditLogsMock.mock.calls as unknown as unknown[][][])[0][0][0] as Record<string, unknown>;
+  const calls = createManyAuditLogsMock.mock.calls as unknown[];
+  const firstCall = calls[0];
+  const arg = Array.isArray(firstCall) ? firstCall[0] : undefined;
+  return isRecord(arg) ? arg : {};
 }
 
 /**
@@ -250,7 +295,8 @@ async function processTemplateChangeAndAssertAudit(
     }
   }
 
-  const metadata = (auditInput.metadata ?? {}) as Record<string, unknown>;
+  const metadataRaw = auditInput.metadata ?? {};
+  const metadata = isRecord(metadataRaw) ? metadataRaw : {};
   for (const [key, value] of Object.entries(expectedMetadata)) {
     expect(metadata[key]).toBe(value);
   }
@@ -347,8 +393,13 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
       await WhatsappWebhookHandler.processEvent(body);
 
       // Non-mutating: original body still has messages[] (S3 strips via shallow copy, not delete)
-      const change = (body as { entry: { changes: { value: { messages?: unknown[] } }[] }[] }).entry[0].changes[0];
-      expect(change.value.messages).toEqual([{ from: "+123", text: "inbound PII" }]);
+      const bodyEntry = isRecord(body) && "entry" in body ? body.entry : undefined;
+      const entryArr = Array.isArray(bodyEntry) ? bodyEntry : [];
+      const firstEntry = isRecord(entryArr[0]) ? entryArr[0] : {};
+      const changesArr = "changes" in firstEntry && Array.isArray(firstEntry.changes) ? firstEntry.changes : [];
+      const change = isRecord(changesArr[0]) ? changesArr[0] : {};
+      const changeValue = "value" in change && isRecord(change.value) ? change.value : {};
+      expect(changeValue.messages).toEqual([{ from: "+123", text: "inbound PII" }]);
 
       // Statuses are still processed even when messages[] is present
       expect(handleDeliveryWebhookMock).toHaveBeenCalledWith(
@@ -745,10 +796,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
         })
       );
       // r10-027: Assert untouched fields are NOT in the update payload (preserved in DB)
-      const updateCallArg = (whatsappAccountUpdateMock.mock.calls as unknown as unknown[][])[0][1] as Record<
-        string,
-        unknown
-      >;
+      const updateCallArg = getMockCallArgAt(whatsappAccountUpdateMock, 0, 1);
       expect(updateCallArg).not.toHaveProperty("displayName");
       expect(updateCallArg).not.toHaveProperty("isActive");
       expect(updateCallArg).not.toHaveProperty("throughputLevel");
@@ -805,18 +853,12 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
         })
       );
       // r10-027: Assert untouched fields are NOT in the update payload (preserved in DB)
-      const capUpdateArg = (whatsappAccountUpdateMock.mock.calls as unknown as unknown[][])[0][1] as Record<
-        string,
-        unknown
-      >;
+      const capUpdateArg = getMockCallArgAt(whatsappAccountUpdateMock, 0, 1);
       expect(capUpdateArg).not.toHaveProperty("displayName");
       expect(capUpdateArg).not.toHaveProperty("isActive");
       expect(capUpdateArg).not.toHaveProperty("qualityRating");
       expect(createManyAuditLogsMock).toHaveBeenCalledTimes(1);
-      const auditInput = (createManyAuditLogsMock.mock.calls as unknown as unknown[][][])[0][0][0] as Record<
-        string,
-        unknown
-      >;
+      const auditInput = getFirstAuditInput();
       expect(auditInput.description).toBe("business_capability_update");
       expect(auditInput.changes).toEqual(
         expect.objectContaining({
@@ -852,10 +894,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
         expect.not.objectContaining({ maxPhoneNumbersPerBusiness: expect.anything() })
       );
       // But the audit changes should include null for the missing field
-      const auditInput = (createManyAuditLogsMock.mock.calls as unknown as unknown[][][])[0][0][0] as Record<
-        string,
-        unknown
-      >;
+      const auditInput = getFirstAuditInput();
       expect(auditInput.changes).toEqual(expect.objectContaining({ maxPhoneNumbersPerBusiness: null }));
     });
 
@@ -897,7 +936,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
 
       await WhatsappWebhookHandler.processEvent({
         object: "whatsapp_business_account",
-        entry: [{ id: "waba-1", changes: "not-an-array" as unknown as unknown[] }],
+        entry: [{ id: "waba-1", changes: ["not-an-array"] as unknown[] }],
       });
 
       expect(handleDeliveryWebhookMock).not.toHaveBeenCalled();
@@ -923,10 +962,10 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
       mockResolvedUser();
 
       // Simulate: 2 statuses, but only 1 has a matching delivery row
-      const deliveryRow = {
+      const deliveryRow = createDeliveryRow({
         id: "delivery-1",
         eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      } as unknown as NotificationDeliverySelectType;
+      });
       const deliveryMap = new Map<string, NotificationDeliverySelectType>();
       deliveryMap.set("wamid.fallback.1", deliveryRow);
       // wamid.fallback.2 is missing from the map → should get CLASS_REMINDER fallback
@@ -945,17 +984,11 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
       expect(handleDeliveryWebhookMock).toHaveBeenCalledTimes(2);
 
       // First call: event type from delivery row
-      const firstCall = (handleDeliveryWebhookMock.mock.calls as unknown as unknown[][])[0][0] as Record<
-        string,
-        unknown
-      >;
+      const firstCall = getMockCallArgAt(handleDeliveryWebhookMock, 0, 0);
       expect(firstCall.eventType).toBe(NotificationEventType.COMPLAINT_RESPONSE);
 
       // Second call: CLASS_REMINDER fallback (wamid not in delivery map)
-      const secondCall = (handleDeliveryWebhookMock.mock.calls as unknown as unknown[][])[1][0] as Record<
-        string,
-        unknown
-      >;
+      const secondCall = getMockCallArgAt(handleDeliveryWebhookMock, 1, 0);
       expect(secondCall.eventType).toBe(NotificationEventType.CLASS_REMINDER);
     });
   });

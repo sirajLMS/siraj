@@ -109,7 +109,7 @@ async function isAnalysisReady(options: {
 
     if (!response.ok) return { ready: false };
 
-    const data = (await response.json()) as { analyses: Array<{ date: string }> };
+    const data: { analyses: Array<{ date: string }> } = await response.json();
     if (data.analyses.length === 0) return { ready: false };
 
     const analysisDate = data.analyses[0].date;
@@ -128,7 +128,13 @@ export async function waitForAnalysisProcessing(token: string, scanStartTime: nu
   const maxAttempts = 30;
   const authHeader = `Basic ${btoa(token + ":")}`;
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+  const poll = async (attempt: number): Promise<void> => {
+    if (attempt >= maxAttempts) {
+      globalThis.console.log("");
+      logWarning("Analysis results may not be fully processed yet, but continuing...");
+      return;
+    }
+
     const { ready, date } = await isAnalysisReady({ authHeader, scanStartTime });
     if (ready) {
       logSuccess(`Fresh analysis results are ready (analyzed at: ${date})`);
@@ -137,10 +143,10 @@ export async function waitForAnalysisProcessing(token: string, scanStartTime: nu
 
     process.stdout.write(".");
     await new Promise(resolve => setTimeout(resolve, 2000));
-  }
+    return poll(attempt + 1);
+  };
 
-  globalThis.console.log("");
-  logWarning("Analysis results may not be fully processed yet, but continuing...");
+  await poll(0);
 }
 
 interface FetchResultsOptions {
@@ -216,12 +222,10 @@ export async function fetchAndDisplayResults(options: FetchResultsOptions): Prom
 }
 
 async function fetchAllIssues(token: string): Promise<SonarIssue[]> {
-  const allIssues: SonarIssue[] = [];
-  let page = 1;
   const pageSize = 500;
   const authHeader = `Basic ${btoa(token + ":")}`;
 
-  while (true) {
+  const fetchPage = async (page: number): Promise<SonarResponse> => {
     const url = `${CONFIG.SONAR_HOST}/api/issues/search?componentKeys=${CONFIG.PROJECT_KEY}&statuses=OPEN,CONFIRMED&p=${page}&ps=${pageSize}`;
     const response = await fetch(url, {
       headers: { Authorization: authHeader },
@@ -230,18 +234,24 @@ async function fetchAllIssues(token: string): Promise<SonarIssue[]> {
     if (!response.ok) {
       if (response.status === 400 && page * pageSize > 10000) {
         logWarning("Reached SonarQube's 10,000 issues pagination limit. Some issues may not be included.");
-        break;
+        return { total: 0, p: page, ps: pageSize, paging: { pageIndex: page, pageSize, total: 0 }, issues: [] };
       }
       throw new Error(`SonarQube API error: ${response.status}`);
     }
 
-    const data = (await response.json()) as SonarResponse;
+    const data: SonarResponse = await response.json();
+    return data;
+  };
+
+  const fetchNext = async (page: number, allIssues: SonarIssue[]): Promise<SonarIssue[]> => {
+    const data = await fetchPage(page);
     allIssues.push(...data.issues);
 
-    if (allIssues.length >= data.paging.total || allIssues.length >= 10000) break;
-    page++;
-  }
-  return allIssues;
+    if (allIssues.length >= data.paging.total || allIssues.length >= 10000) return allIssues;
+    return fetchNext(page + 1, allIssues);
+  };
+
+  return fetchNext(1, []);
 }
 
 async function fetchDuplicationMetrics(token: string): Promise<SonarMeasure[]> {
@@ -261,9 +271,9 @@ async function fetchDuplicationMetrics(token: string): Promise<SonarMeasure[]> {
 
   if (!response.ok) throw new Error(`SonarQube API error: ${response.status}`);
 
-  const data = (await response.json()) as {
+  const data: {
     component: { measures: SonarMeasure[] };
-  };
+  } = await response.json();
   return data.component.measures;
 }
 
@@ -316,14 +326,14 @@ async function fetchAndPrintDuplicatedBlocks(token: string): Promise<Duplication
     });
     if (!response.ok) return null;
 
-    const data = (await response.json()) as {
+    const data: {
       components: Array<{
         key: string;
         path: string;
         qualifier: string;
         measures: SonarMeasure[];
       }>;
-    };
+    } = await response.json();
     const filesWithDuplications = data.components.filter(comp => {
       const blocks = comp.measures.find(m => m.metric === "duplicated_blocks");
       return blocks?.value && Number.parseInt(blocks.value, 10) > 0 && comp.qualifier === "FIL";
@@ -339,11 +349,15 @@ async function fetchAndPrintDuplicatedBlocks(token: string): Promise<Duplication
       `${COLORS.CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLORS.NC}\n`
     );
 
-    const duplicationDetails = [];
-    for (const file of filesWithDuplications) {
+    const processFile = async (index: number, acc: DuplicationFileDetails[]): Promise<DuplicationFileDetails[]> => {
+      if (index >= filesWithDuplications.length) return acc;
+      const file = filesWithDuplications[index];
       const details = await printFileDuplicationDetails({ file, authHeader });
-      if (details) duplicationDetails.push(details);
-    }
+      if (details) acc.push(details);
+      return processFile(index + 1, acc);
+    };
+
+    const duplicationDetails = await processFile(0, []);
     return duplicationDetails;
   } catch (err) {
     logWarning(`Error fetching duplicated blocks: ${err instanceof Error ? err.message : String(err)}`);
@@ -366,7 +380,7 @@ async function printFileDuplicationDetails(options: {
     });
     if (!dupResponse.ok) return null;
 
-    const dupData = (await dupResponse.json()) as SonarDuplicationsResponse;
+    const dupData: SonarDuplicationsResponse = await dupResponse.json();
     const details: DuplicationFileDetails = {
       file: file.path,
       blockCount: Number.parseInt(blockCount, 10),
@@ -379,8 +393,9 @@ async function printFileDuplicationDetails(options: {
         blocks: [],
       };
       for (const block of group.blocks) {
-        const refFile = block._ref ? dupData.files[block._ref] : null;
-        const refPath = refFile ? refFile.name || block._ref || "unknown" : file.path;
+        const refKey = "_ref";
+        const refFile = block[refKey] ? dupData.files[block[refKey]] : null;
+        const refPath = refFile ? refFile.name || block[refKey] || "unknown" : file.path;
         globalThis.console.log(
           `    ${COLORS.CYAN}→${COLORS.NC} ${refPath} (lines ${block.from}-${block.from + block.size - 1})`
         );

@@ -1,6 +1,10 @@
 import { afterAll, afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
 import type { NextRequest } from "next/server";
 
+import { FxSyncTrigger } from "@/backend/enum";
+import { resetEnvironmentCache } from "@/backend/lib/env";
+import type { RefreshExchangeRatesInput, RefreshExchangeRatesResult } from "@/backend/types";
+
 const { NextRequest: NextRequestImpl } = await import("next/server");
 
 const TEST_SECRET = "test-cron-secret-1234567890abcdef";
@@ -8,22 +12,14 @@ const TEST_SECRET = "test-cron-secret-1234567890abcdef";
 // Set env before any import that transitively loads @/backend/services / env validation.
 function setEnv(key: string, value: string | undefined): void {
   Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true });
+  resetEnvironmentCache();
 }
 
 setEnv("NODE_ENV", "test");
 setEnv("CRON_SECRET", TEST_SECRET);
 
-type RefreshRatesResult = {
-  id: string;
-  success: boolean;
-  pairsWritten: number;
-  pairsFailed: number;
-  syncRunId: string;
-  errorMessage?: string;
-};
-
 const refreshRatesMock = mock(
-  async (): Promise<RefreshRatesResult> => ({
+  async (_input?: RefreshExchangeRatesInput): Promise<RefreshExchangeRatesResult> => ({
     id: "fx-refresh-sync-1",
     success: true,
     pairsWritten: 12,
@@ -32,10 +28,26 @@ const refreshRatesMock = mock(
   })
 );
 
+interface RefreshRatesCallArg {
+  triggeredByUserId: string | null;
+  trigger: FxSyncTrigger;
+  force: boolean;
+}
+
+function isRefreshRatesCallArg(value: unknown): value is RefreshRatesCallArg {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "triggeredByUserId" in value &&
+    "trigger" in value &&
+    "force" in value
+  );
+}
+
 // Suppress expected logger output from cron-auth, the route error path, and
 // the deep db factory logger.log used when services barrel loads drizzleDb.
 const noop = () => {};
-mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));
@@ -117,13 +129,12 @@ describe("GET /api/fx/refresh", () => {
 
     expect(response.status).toBe(200);
     expect(refreshRatesMock).toHaveBeenCalledTimes(1);
-    const calls = refreshRatesMock.mock.calls as unknown as [
-      { triggeredByUserId: string | null; trigger: string; force: boolean } | undefined,
-    ][];
-    const callArg = calls[0]?.[0];
+
+    const rawCalls = refreshRatesMock.mock.calls;
+    const callArg = isRefreshRatesCallArg(rawCalls[0]?.[0]) ? rawCalls[0][0] : undefined;
     expect(callArg).toEqual({
       triggeredByUserId: null,
-      trigger: "cron",
+      trigger: FxSyncTrigger.Cron,
       force: false,
     });
 

@@ -9,8 +9,10 @@ interface UserStoreInitializerProps {
   readonly isSuperAdmin: boolean;
 }
 
+const VALID_PERMISSIONS = new Set(Object.values(AppPermission) as readonly string[]);
+
 function isValidPermission(value: string): value is AppPermission {
-  return Object.values(AppPermission).includes(value as AppPermission);
+  return VALID_PERMISSIONS.has(value);
 }
 
 export function UserStoreInitializer({ userProfile, isSuperAdmin }: UserStoreInitializerProps) {

@@ -3,6 +3,7 @@
 import Box from "@mui/material/Box";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type MobileLocaleEmojiProps = {
   readonly emoji: string;
@@ -16,7 +17,7 @@ export type MobileLocaleEmojiProps = {
  */
 export const MobileLocaleEmoji: React.FC<MobileLocaleEmojiProps> = ({ emoji, sx }): React.ReactNode => {
   return (
-    <Box component="span" aria-hidden sx={{ flexShrink: 0, lineHeight: 1.1, ...sx }}>
+    <Box component="span" aria-hidden sx={mergeSx({ flexShrink: 0, lineHeight: 1.1 }, sx)}>
       {emoji}
     </Box>
   );

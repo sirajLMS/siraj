@@ -12,21 +12,22 @@ import {
   formatQuotaStatus,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
 
+const SKELETON_KEYS = ["skeleton-0", "skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4"] as const;
+
+function renderSkeletons() {
+  return SKELETON_KEYS.map(key => (
+    <Card key={key} variant="outlined">
+      <CardContent>
+        <Skeleton variant="text" width="60%" />
+        <Skeleton variant="text" width="40%" />
+        <Skeleton variant="rectangular" height={40} sx={{ mt: 1 }} />
+      </CardContent>
+    </Card>
+  ));
+}
+
 export function QuotaListMobile(props: Readonly<ReturnType<typeof useQuotaViewModel>>) {
   const { t, quotas, loading } = props;
-
-  function renderSkeletons() {
-    const skeletonKeys = ["skeleton-0", "skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4"] as const;
-    return skeletonKeys.map(key => (
-      <Card key={key} variant="outlined">
-        <CardContent>
-          <Skeleton variant="text" width="60%" />
-          <Skeleton variant="text" width="40%" />
-          <Skeleton variant="rectangular" height={40} sx={{ mt: 1 }} />
-        </CardContent>
-      </Card>
-    ));
-  }
 
   function renderEmptyState() {
     return (

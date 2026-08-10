@@ -66,37 +66,46 @@ async function insertClassInstances(
   allInstances: ClassInstanceInsertType[],
   now: Date
 ): Promise<ClassInstanceSelectType[]> {
-  const results: ClassInstanceSelectType[] = [];
-  for (let i = 0; i < allInstances.length; i += CHUNK_SIZE) {
-    const chunk = allInstances.slice(i, i + CHUNK_SIZE);
-    const inserted = await ClassSessionService.upsertManyClassInstancesForSeed(chunk, {
-      chunkSize: CHUNK_SIZE,
-      updatedAt: now,
-    });
-    results.push(...inserted);
-    logger.info(`Class instances progress: ${Math.min(i + CHUNK_SIZE, allInstances.length)}/${allInstances.length}`);
-  }
-  return results;
+  const chunkCount = Math.ceil(allInstances.length / CHUNK_SIZE);
+  const chunks = Array.from({ length: chunkCount }, (_, i) => allInstances.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
+  let completed = 0;
+  const insertedChunks = await Promise.all(
+    chunks.map(async chunk => {
+      const inserted = await ClassSessionService.upsertManyClassInstancesForSeed(chunk, {
+        chunkSize: CHUNK_SIZE,
+        updatedAt: now,
+      });
+      completed += inserted.length;
+      logger.info(`Class instances progress: ${completed}/${allInstances.length}`);
+      return inserted;
+    })
+  );
+  return insertedChunks.flat();
 }
 
 async function seedClassInstanceFiles(results: ClassInstanceSelectType[], seedConfig: SeedConfig): Promise<void> {
   if (!shouldSeedExtendedFiles(seedConfig)) return;
 
-  for (let i = 0; i < Math.min(results.length, 3); i++) {
-    const instance = results[i];
-    if (!instance) continue;
+  const instances = results.slice(0, 3).filter((instance): instance is ClassInstanceSelectType => Boolean(instance));
 
-    try {
-      await seedEntityFile({
+  const outcomes = await Promise.allSettled(
+    instances.map(instance =>
+      seedEntityFile({
         assetRelativePath: "documents/sample-attachment.pdf",
         bucketPath: `public/class-instances/seed_${instance.id}.pdf`,
         referenceTable: "class_instances",
         referenceId: instance.id,
         usageType: "attachment",
         ensureParentDirs: ["public/class-instances"],
-      });
-    } catch (error) {
-      logger.error(`Failed to seed class instance file for ${instance.id}:`, error);
+      })
+    )
+  );
+
+  for (let i = 0; i < outcomes.length; i++) {
+    const outcome = outcomes[i];
+    const instance = instances[i];
+    if (outcome?.status === "rejected" && instance) {
+      logger.error(`Failed to seed class instance file for ${instance.id}:`, outcome.reason);
     }
   }
 }

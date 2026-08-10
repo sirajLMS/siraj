@@ -11,7 +11,7 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 // Re-registering here ensures our file gets the shape it requires, regardless of what
 // earlier files left behind. The LAST mock.module registration for a given path wins.
 
-mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -26,7 +26,7 @@ mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"] as const,
   defaultLocale: "en",
   useRouter: () => ({
@@ -46,7 +46,7 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -60,7 +60,7 @@ mock.module("@/shared/i18n/navigation", () => ({
 
 // Eliminates dependency on the router-backed language switch hook so this file is
 // immune to any router mock configuration registered by earlier test files.
-mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
@@ -71,7 +71,7 @@ import { Fragment } from "react";
 // (ViewModel + desktop tier + ReflectionDialog) so GraphQL mocks drive real UI.
 // `StudentDashboardContainerImpl` is defined below; the mock factory re-exports it
 // via closure — avoiding `require()` and keeping the file lint-clean.
-mock.module("@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer", () => ({
+await mock.module("@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer", () => ({
   StudentDashboardContainer: StudentDashboardContainerImpl,
 }));
 

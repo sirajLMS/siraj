@@ -32,7 +32,7 @@ export namespace ClassSubjectService {
     };
   }
 
-  async function _fetchSubjectWithResources(id: string): Promise<ClassSubjectReturnType> {
+  async function fetchSubjectWithResources(id: string): Promise<ClassSubjectReturnType> {
     const subject = await ClassSubjectRepository.getSubjectById(id);
     const resourcesBySubjectId = await SubjectResourceRepository.loadResourcesBySubjectIds([id]);
     return buildSubjectReturnType(subject, resourcesBySubjectId);
@@ -60,7 +60,7 @@ export namespace ClassSubjectService {
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 
-    return _fetchSubjectWithResources(id);
+    return fetchSubjectWithResources(id);
   }
 
   export async function createSubject(
@@ -80,7 +80,7 @@ export namespace ClassSubjectService {
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_UPDATE, tErrors);
     await ClassSubjectRepository.updateSubject(id, input);
-    return _fetchSubjectWithResources(id);
+    return fetchSubjectWithResources(id);
   }
 
   export async function deleteSubject(userId: string, id: string, tErrors: ErrorsLabels): Promise<{ id: string }> {

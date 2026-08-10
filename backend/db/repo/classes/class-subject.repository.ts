@@ -201,7 +201,9 @@ export namespace ClassSubjectRepository {
       const now = new Date();
       const results: ClassSubjectSelectType[] = [];
 
-      for (const input of inputs) {
+      async function upsertNext(index: number): Promise<void> {
+        if (index >= inputs.length) return;
+        const input = inputs[index];
         const [row] = await t
           .insert(classSubjects)
           .values({
@@ -232,7 +234,10 @@ export namespace ClassSubjectRepository {
         if (row) {
           results.push(row);
         }
+        return upsertNext(index + 1);
       }
+
+      await upsertNext(0);
 
       return results;
     };

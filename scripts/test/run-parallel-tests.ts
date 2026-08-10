@@ -14,6 +14,7 @@
 import { availableParallelism } from "node:os";
 import { Glob } from "bun";
 import { isTestCi } from "@/backend/lib/test-ci-env";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 import { TEST_ENV_FILE } from "@/scripts/lib/test-build-env";
 import { getErrorMessage } from "@/shared/utils/error";
 
@@ -260,53 +261,62 @@ function printFinalSummary(
 export async function runParallelTests(config: RunParallelTestsConfig): Promise<TestRunResult> {
   const { pattern, cwd, maxWorkers, label, timeoutMs = DEFAULT_TIMEOUT_MS } = config;
 
-  const glob = new Glob(pattern);
-  const testFiles: string[] = [];
+  return withProcessLock(`test-suite: ${label}`, async () => {
+    const glob = new Glob(pattern);
+    const testFiles: string[] = [];
 
-  for await (const file of glob.scan({ cwd })) {
-    testFiles.push(`${cwd}/${file}`);
-  }
+    for await (const file of glob.scan({ cwd })) {
+      testFiles.push(`${cwd}/${file}`);
+    }
 
-  const totalFiles = testFiles.length;
-  const parallelism = availableParallelism();
-  const effectiveWorkers = Math.min(parallelism, totalFiles, maxWorkers);
+    const totalFiles = testFiles.length;
+    const parallelism = availableParallelism();
+    const effectiveWorkers = Math.min(parallelism, totalFiles, maxWorkers);
 
-  globalThis.console.log(`${BOLD}Bun Parallel Test Runner${RESET}`);
-  globalThis.console.log(
-    `${GRAY}Running ${totalFiles} ${label} test files across ${effectiveWorkers} parallel processes (capped from ${parallelism} for ${label} safety)...${RESET}\n`
-  );
+    globalThis.console.log(`${BOLD}Bun Parallel Test Runner${RESET}`);
+    globalThis.console.log(
+      `${GRAY}Running ${totalFiles} ${label} test files across ${effectiveWorkers} parallel processes (capped from ${parallelism} for ${label} safety)...${RESET}\n`
+    );
 
-  const startAll = performance.now();
-  const acc: RunAccumulators = {
-    totalPasses: 0,
-    totalFails: 0,
-    totalExpects: 0,
-    totalTestsRun: 0,
-    filesFailedCount: 0,
-    failureDetails: [],
-  };
+    const startAll = performance.now();
+    const acc: RunAccumulators = {
+      totalPasses: 0,
+      totalFails: 0,
+      totalExpects: 0,
+      totalTestsRun: 0,
+      filesFailedCount: 0,
+      failureDetails: [],
+    };
 
-  const queue = [...testFiles];
-  const workers: Promise<void>[] = [];
-  const limit = Math.min(parallelism, totalFiles, maxWorkers);
-  for (let i = 0; i < limit; i++) {
-    workers.push(processQueue(queue, timeoutMs, acc));
-  }
+    const queue = [...testFiles];
+    const workers: Promise<void>[] = [];
+    const limit = Math.min(parallelism, totalFiles, maxWorkers);
+    for (let i = 0; i < limit; i++) {
+      workers.push(processQueue(queue, timeoutMs, acc));
+    }
 
-  await Promise.all(workers);
+    await Promise.all(workers);
 
-  const totalDurationSec = ((performance.now() - startAll) / 1000).toFixed(2);
+    const totalDurationSec = ((performance.now() - startAll) / 1000).toFixed(2);
 
-  if (acc.failureDetails.length > 0) {
-    printFailureSummary(acc.failureDetails);
-  }
+    if (acc.failureDetails.length > 0) {
+      printFailureSummary(acc.failureDetails);
+    }
 
-  printFinalSummary(acc.totalPasses, acc.totalFails, acc.totalExpects, acc.totalTestsRun, totalFiles, totalDurationSec);
+    printFinalSummary(
+      acc.totalPasses,
+      acc.totalFails,
+      acc.totalExpects,
+      acc.totalTestsRun,
+      totalFiles,
+      totalDurationSec
+    );
 
-  if (acc.filesFailedCount > 0) {
-    process.exit(1);
-  } else {
-    globalThis.console.log(`\n${GREEN}${BOLD}All tests passed!${RESET}`);
-    process.exit(0);
-  }
+    if (acc.filesFailedCount > 0) {
+      process.exit(1);
+    } else {
+      globalThis.console.log(`\n${GREEN}${BOLD}All tests passed!${RESET}`);
+      process.exit(0);
+    }
+  });
 }

@@ -93,14 +93,14 @@ export namespace SiteContentService {
   }
 
   export async function listPublishedSiteContent(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
-    return SiteContentRepository._listPublished(tx);
+    return SiteContentRepository.listPublished(tx);
   }
 
   export async function listSiteContentByType(
     contentType: string,
     tx?: DBTransaction
   ): Promise<SiteContentSelectType[]> {
-    return SiteContentRepository._listByContentType(contentType, tx);
+    return SiteContentRepository.listByContentType(contentType, tx);
   }
 
   export async function getSiteContentById(id: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
@@ -139,7 +139,7 @@ export namespace SiteContentService {
   ): Promise<SiteContentSelectType | null> {
     await assertManagePermission(actorUserId, tErrors);
 
-    const result = await SiteContentRepository._updatePublishState(id, isPublished, tx);
+    const result = await SiteContentRepository.updatePublishState(id, isPublished, tx);
 
     await emitAudit(actorUserId, "UPDATE", id, tx);
 
@@ -152,7 +152,7 @@ export namespace SiteContentService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<void> {
-    await deleteSiteContent(txn => SiteContentRepository._deleteById(id, txn), id, actorUserId, tErrors, tx);
+    await deleteSiteContent(txn => SiteContentRepository.deleteById(id, txn), id, actorUserId, tErrors, tx);
   }
 
   export async function deleteSiteContentBySlug(
@@ -161,7 +161,7 @@ export namespace SiteContentService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<void> {
-    await deleteSiteContent(txn => SiteContentRepository._deleteBySlug(slug, txn), slug, actorUserId, tErrors, tx);
+    await deleteSiteContent(txn => SiteContentRepository.deleteBySlug(slug, txn), slug, actorUserId, tErrors, tx);
   }
 
   /**

@@ -9,6 +9,8 @@
 | **Tasks** | 23 tasks (11 original + 12 supplementary) |
 | **Total Estimated Effort** | ~80 hours (~12 working days) — ~29h original + ~51h supplementary |
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
 ---
 
 ## Dependency Graph
@@ -42,13 +44,65 @@ Task 1 (i18n namespace)
 1. **Task 1**: i18n namespace (foundation — all components need labels)
 2. **Task 2**: Verify route + public layout (App Router structure)
 3. **Task 3**: Verification container + GraphQL document (data layer)
-4. **Task 4** + **Task 5**: Result display + state components + loading/error states (can partly parallel)
+4. **Task 4** + **Task 5**: Result display + state components + loading/error states (can partly via parallel subagents)
 5. **Task 6**: Share + print + watermarks
 6. **Task 7**: SEO meta tags + OG image + JSON-LD + ISR cache headers
-7. **Task 8**: Language toggle (parallel with Tasks 4-7 — only depends on Tasks 1+2)
-8. **Task 9**: Analytics integration (depends on Task 3 — can run parallel with Tasks 4-8)
-9. **Task 10**: Manual code entry page (depends on Tasks 1+2+8 — parallel with Tasks 4-7)
+7. **Task 8**: Language toggle (via parallel subagents with Tasks 4-7 — only depends on Tasks 1+2)
+8. **Task 9**: Analytics integration (depends on Task 3 — can run via parallel subagents with Tasks 4-8)
+9. **Task 10**: Manual code entry page (depends on Tasks 1+2+8 — via parallel subagents with Tasks 4-7)
 10. **Task 11**: Knowledge propagation (final — requires all prior tasks complete)
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task (i18n namespace) — no dependencies, must complete first
+
+### Wave 2: T02, T14
+- Tasks: T02, T14
+- Rationale: Both depend only on T01 (i18n). T02 creates verify route/layout, T14 creates QrScanner — no interdependencies
+
+### Wave 3: T03, T08, T12, T13
+- Tasks: T03, T08, T12, T13
+- Rationale: All depend on T01+T02 (available after Wave 2). T03 (verification container + GraphQL), T08 (language toggle), T12 (PublicVerificationPage), T13 (VerificationSearchPage) — no interdependencies
+
+### Wave 4: T04, T09, T10
+- Tasks: T04, T09, T10
+- Rationale: T04 depends on T03 (Wave 3); T09 depends on T03 (Wave 3); T10 depends on T01+T02+T08 (Wave 3) — all dependencies satisfied, no interdependencies among them
+
+### Wave 5: T05, T06, T07, T15, T18
+- Tasks: T05, T06, T07, T15, T18
+- Rationale: T05 depends on T04 (Wave 4); T06 depends on T04 (Wave 4); T07 depends on T02+T04 (Wave 4); T15 depends on T12 (Wave 3); T18 depends on T12 (Wave 3) — all dependencies satisfied, no interdependencies
+
+### Wave 6: T16
+- Tasks: T16
+- Rationale: Depends on T15 (Wave 5). No other task is unblocked at this level
+
+### Wave 7: T17
+- Tasks: T17
+- Rationale: Depends on Plan 5 (cross-plan, already available). API route handler provides backend endpoint for T19
+
+### Wave 8: T19
+- Tasks: T19
+- Rationale: Depends on T17 (Wave 7). Zustand store fetches from the API route
+
+### Wave 9: T20, T21
+- Tasks: T20, T21
+- Rationale: T20 depends on T12-16 + T19 (all complete after Wave 8); T21 depends on T12-19 (all complete after Wave 8) — no interdependencies between them
+
+### Wave 10: T22
+- Tasks: T22
+- Rationale: Depends on T12-21 (all complete after Wave 9). Quality gate loop for all supplementary files
+
+### Final Wave: Knowledge Propagation
+- Tasks: T11, T23
+- Rationale: T11 requires all Tasks 1-10 complete; T23 requires all Tasks 12-22 complete. Both must run after all other tasks complete
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -69,39 +123,15 @@ For every file created/modified in this plan, read the applicable AGENTS.md and 
 
 ### Quality Loop (Per File)
 
-After creating or modifying each file, run the per-file verification loop BEFORE moving to the next task:
-
-1. **tsgo**: `bun tsgo` — type checking (safe to run concurrently)
-2. **biome**: `bun biome:check` — formatting + lint (safe to run concurrently)
-3. **lint** (via queue client): Submit file to lint queue for ESLint check
+After creating or modifying each file, run the per-file verification loop BEFORE moving to the next task. A single command runs the full progressive chain — type checking (tsgo), formatting (biome), linting (ESLint via queue client), and codescene code-health analysis — short-circuiting on the first failure:
 
 ```bash
-# Start lint queue server (background) — once at start of plan
-~/.bun/bin/bun run scripts/lint-queue-server.ts &
-
-# Per-file lint (example)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"task1-verify","files":["shared/locale/types/certificates/verification.ts"]}'
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
-### Per-File Quality Gate Commands Reference
-
-For each file created/modified, run these commands in order (sub-loop verification):
+After all files pass, run the full quality gate:
 
 ```bash
-# Type check (tsgo)
-bun tsgo
-
-# Biome check (format + lint)
-bun biome:check
-
-# Lint via queue client (replace FILES array with actual files)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"<task-id>","files":["<file1>","<file2>"]}'
-
-# After all files pass, run full quality gate
 bun quality-gate
 ```
 
@@ -200,9 +230,7 @@ Document AC mapping in a task completion note (chat response, not a file).
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.1","files":["shared/locale/types/certificates/verification.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/types/certificates/verification.ts --lifecycle codescene
 ```
 
 **Testing**: Create `shared/locale/types/certificates/verification.test.ts` — verify type compilation and export
@@ -218,9 +246,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.2","files":["shared/locale/ar/certificates/verification.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/verification.ts --lifecycle codescene
 ```
 
 **Testing**: Create `shared/locale/ar/certificates/verification.test.ts` — verify all keys present, pluralization works
@@ -236,9 +262,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.3","files":["shared/locale/en/certificates/verification.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/en/certificates/verification.ts --lifecycle codescene
 ```
 
 **Testing**: Create `shared/locale/en/certificates/verification.test.ts` — verify all keys present, pluralization works
@@ -254,9 +278,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.4","files":["shared/locale/namespaces/certificates/verification.namespace.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/verification.namespace.ts --lifecycle codescene
 ```
 
 #### 1.5 Register namespace in Translation registry
@@ -272,9 +294,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.5","files":["shared/locale/namespaces/translation.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/translation.ts --lifecycle codescene
 ```
 
 #### 1.6 Add to MessageSchema type
@@ -290,18 +310,21 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task1.6","files":["shared/locale/types/message.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/types/message.ts --lifecycle codescene
 ```
 
 #### 1.7 Verify package
 
 **Action**: Run `bun tsgo` to verify the entire i18n namespace compiles correctly and all type references resolve.
 
-**Quality loop**: 
+**Quality loop**: Run per-file quality loop for each file created in Task 1:
 ```bash
-bun tsgo
+bun run scripts/health/sub-loop.ts shared/locale/types/certificates/verification.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/verification.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/certificates/verification.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/verification.namespace.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/translation.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/types/message.ts --lifecycle codescene
 ```
 
 **Testing**: Run `bun test shared/locale/certificates/verification.test.ts` (all locale test files)
@@ -316,6 +339,9 @@ bun tsgo
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 1 (i18n namespace)
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T14.
+
 **Requirements**: FR-V1
 **AC Mapping**: FR-V1.1, FR-V1.2, FR-V1.3, FR-V1.4, FR-V1.5, FR-V1.6, FR-V1.7
 
@@ -342,9 +368,7 @@ bun tsgo
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task2.1","files":["app/verify/layout.tsx"]}'
+bun run scripts/health/sub-loop.ts app/verify/layout.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/e2e/verify/layout.spec.ts` — verify layout renders without auth, correct locale
@@ -366,9 +390,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task2.2","files":["app/verify/[code]/page.tsx"]}'
+bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/e2e/verify/page.spec.ts` — verify page loads, passes code to container
@@ -389,6 +411,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 1 (i18n), Task 2 (route), Plan 5 (GraphQL API)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T08, T12, T13.
+
 **Requirements**: FR-V2, FR-V4, FR-V5 (client-side handling)
 **AC Mapping**: FR-V2.1, FR-V2.2, FR-V2.3, FR-V2.4, FR-V2.5, FR-V4.1, FR-V4.2, FR-V4.3, FR-V5.1, FR-V5.2, FR-V5.3
 
@@ -412,9 +437,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task3.1","files":["frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts --lifecycle codescene
 ```
 
 **Testing**: Create `frontend/common/graphql/test/verify/certificates.verification.documents.test.ts` — verify query structure, field selection
@@ -426,7 +449,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 **Quality loop**: 
 ```bash
 bun codegen
-bun tsgo
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts --lifecycle codescene
 ```
 
 **Testing**: Verify generated types in `frontend/common/graphql/generated/` resolve correctly
@@ -458,9 +481,7 @@ bun tsgo
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task3.3","files":["frontend/common/views/verify/VerificationContainer.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationContainer.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/VerificationContainer.test.tsx` — test all status mappings, rate limit countdown, error parsing
@@ -481,9 +502,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task3.4","files":["frontend/common/views/verify/VerificationView.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test responsive delegate, status rendering
@@ -499,9 +518,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task3.5","files":["frontend/common/views/verify/types.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/types.ts --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/types.test.ts` — verify type exports
@@ -519,6 +536,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Task 3 (container + view)
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T09, T10.
+
 **Requirements**: FR-V2, FR-V3, FR-V7 (partial — share buttons created in Task 6)
 **AC Mapping**: FR-V2.6, FR-V2.7, FR-V3.1, FR-V3.2, FR-V3.3, FR-V3.4, FR-V3.5, FR-V7.1, FR-V7.2
 
@@ -542,9 +562,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.1","files":["frontend/common/views/verify/VerificationStatusBadge.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationStatusBadge.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/VerificationStatusBadge.test.tsx` — test all three statuses, icons, aria-labels, responsive sizing
@@ -574,9 +592,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.2","files":["frontend/desktop/views/verify/CertificateMetadataPanel.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/verify/CertificateMetadataPanel.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/desktop/CertificateMetadataPanel.test.tsx` — test all fields, RTL, date formatting, locale handling
@@ -597,9 +613,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.3","files":["frontend/mobile/views/verify/CertificateMetadataPanel.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/mobile/views/verify/CertificateMetadataPanel.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/mobile/CertificateMetadataPanel.test.tsx` — test stacked layout, accordion, touch targets, RTL
@@ -628,9 +642,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.4","files":["frontend/common/views/verify/CertificatePreview.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/CertificatePreview.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/CertificatePreview.test.tsx` — test visual rendering, responsive, watermark, right-click disable, aspect ratio
@@ -649,9 +661,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.5","files":["frontend/common/views/verify/VerificationView.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test all status flows, component composition
@@ -670,9 +680,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.6","files":["frontend/common/views/verify/RevocationInfo.tsx","frontend/common/views/verify/ExpirationInfo.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/RevocationInfo.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/ExpirationInfo.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/RevocationInfo.test.tsx` and `ExpirationInfo.test.tsx` — test no revocationReason, locale date formatting, theme colors
@@ -697,9 +706,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.7","files":["frontend/common/views/verify/AcademyBranding.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/AcademyBranding.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/AcademyBranding.test.tsx` — test logo fallback, RTL, trust signal, print hidden, no theme override
@@ -725,9 +732,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.8","files":["frontend/common/views/verify/DownloadButton.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/DownloadButton.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/DownloadButton.test.tsx` — test conditional render, click handler, print hidden, error state
@@ -752,9 +757,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.9","files":["frontend/common/views/verify/RevokedState.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/RevokedState.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/RevokedState.test.tsx` — test no revocationReason, date formatting, aria-live, theme colors
@@ -778,9 +781,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.10","files":["frontend/common/views/verify/ExpiredState.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/ExpiredState.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/ExpiredState.test.tsx` — test validity period interpolation, date formatting, aria-live
@@ -804,9 +805,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task4.11","files":["frontend/common/views/verify/NotFoundState.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/NotFoundState.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/NotFoundState.test.tsx` — test manual entry link, aria-live, rate-limit collapsed usage
@@ -822,6 +821,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 4 (wire into view)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T06, T07, T15, T18.
+
 **Requirements**: FR-V8, FR-V9
 **AC Mapping**: FR-V8.1, FR-V8.2, FR-V8.3, FR-V9.1, FR-V9.2, FR-V9.3
 
@@ -844,9 +846,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task5.1","files":["frontend/common/views/verify/VerificationLoading.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationLoading.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/VerificationLoading.test.tsx` — test skeleton render, aria-busy, aria-live
@@ -869,9 +869,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task5.2","files":["frontend/common/views/verify/ErrorState.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/ErrorState.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/ErrorState.test.tsx` — test all props, role=alert, aria-live, retry callback
@@ -893,9 +891,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task5.3","files":["frontend/common/views/verify/RateLimitError.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/RateLimitError.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/RateLimitError.test.tsx` — test countdown, pluralization, auto-retry, aria-live
@@ -917,9 +913,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task5.4","files":["frontend/common/views/verify/VerificationView.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test all status state rendering
@@ -934,6 +928,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (result components)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T07, T15, T18.
+
 **Requirements**: FR-V7, FR-V10
 **AC Mapping**: FR-V7.1, FR-V7.2, FR-V7.3, FR-V7.4, FR-V7.5, FR-V10.1, FR-V10.2, FR-V10.3, FR-V10.4, FR-V10.5, FR-V10.6, FR-V10.7
 
@@ -965,9 +962,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.1","files":["frontend/common/views/verify/ShareButtons.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/ShareButtons.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/ShareButtons.test.tsx` — test Web Share API fallback, social URLs, copy to clipboard, RTL
@@ -987,9 +982,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.2","files":["frontend/common/views/verify/PrintButton.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/PrintButton.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/PrintButton.test.tsx` — test print call, print hidden
@@ -1019,9 +1012,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.3","files":["frontend/common/views/verify/verifyPrintStyles.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/verifyPrintStyles.ts --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/verifyPrintStyles.test.ts` — test print-only classes, watermark logic per status
@@ -1047,9 +1038,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.4","files":["frontend/common/views/verify/PrintHeader.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/PrintHeader.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/PrintHeader.test.tsx` — test print-only render, watermark per status, notFound exclusion
@@ -1065,9 +1054,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task6.5","files":["frontend/common/views/verify/VerificationView.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test share/print buttons present in valid/revoked/expired, absent in notFound
@@ -1082,6 +1069,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 2 (page), Task 4 (result components), Plan 4 (verification service)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T06, T15, T18.
+
 **Requirements**: FR-V6
 **AC Mapping**: FR-V6.1, FR-V6.2, FR-V6.3, FR-V6.4, FR-V6.5, FR-V6.6, FR-V6.7, FR-V6.8
 
@@ -1120,9 +1110,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.1","files":["app/verify/[code]/page.tsx"]}'
+bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/e2e/verify/seo.spec.ts` — verify meta tags, canonical URL, robots directive, OG tags
@@ -1142,9 +1130,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.2","files":["app/verify/page.tsx"]}'
+bun run scripts/health/sub-loop.ts app/verify/page.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/e2e/verify/manual-entry-seo.spec.ts` — verify generic meta tags
@@ -1168,9 +1154,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.3","files":["app/verify/[code]/page.tsx"]}'
+bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/e2e/verify/isr.spec.ts` — verify cache headers, ISR behavior
@@ -1197,9 +1181,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.4","files":["app/verify/[code]/opengraph-image.tsx"]}'
+bun run scripts/health/sub-loop.ts app/verify/[code]/opengraph-image.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/e2e/verify/og-image.spec.ts` — verify OG image generation, fallback
@@ -1229,9 +1211,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Quality loop**: 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"task7.5","files":["frontend/common/views/verify/StructuredData.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/StructuredData.tsx --lifecycle codescene
 ```
 
 **Testing**: Create `test/ui/components/verify/StructuredData.test.tsx` — test JSON-LD schema, only for valid, ISO dates
@@ -1246,6 +1226,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Estimated time**: 2 hours
 **Dependencies**: Task 2 (route), Task 1 (i18n)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T12, T13.
+
 **Requirements**: FR-V14
 
 ### Subtasks
@@ -1271,7 +1254,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 **Instruction files**: `frontend.instructions.md`
 **AGENTS.md files**: `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/LanguageToggle.tsx --lifecycle codescene
+```
 
 #### 8.2 Wire LanguageToggle into VerificationView
 
@@ -1283,7 +1269,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 - Hidden in print CSS (`sx={{ '@media print': { display: 'none' } }}`)
 - Passed `currentLocale`, `code`, and `labels.language.*`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
+```
 
 #### 8.3 Update [code] page to read `?lang` query param
 
@@ -1295,7 +1284,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 - Otherwise, fall back to `getLocale()` (which reads from cookie or Accept-Language)
 - Pass the resolved locale to `<VerificationContainer>`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codescene
+```
 
 **AGENTS.md files to read for this task**:
 - `AGENTS.md` (root — i18n locale detection)
@@ -1308,6 +1300,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 3 (container), Plan 5 (GraphQL API), Plan 18 (verification logging)
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04, T10.
+
 **Requirements**: FR-V4.3 (analytics source detection), NFR-V4.3
 
 ### Subtasks
@@ -1329,7 +1324,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: appli
 - The server-side `verifySafe()` reads the `Referer` header and determines the source — the client does NOT self-report (untrusted)
 - Metadata path (`verifyForMetadata`) does NOT send analytics (metadata is for SEO, not user-facing verification)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationContainer.tsx --lifecycle codescene
+```
 
 #### 9.2 Verify analytics logging in Plan 18
 
@@ -1361,6 +1359,9 @@ If Plan 18 does not yet support this, add a cross-plan note in `INTER_PLAN_CONTR
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 2 (verify route), Task 1 (i18n)
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04, T09.
+
 **Requirements**: FR-V12
 
 ### Subtasks
@@ -1384,7 +1385,10 @@ If Plan 18 does not yet support this, add a cross-plan note in `INTER_PLAN_CONTR
 - Accessible: `aria-invalid` on input when validation fails
 - Include a `<LanguageToggle>` (from Task 8) at the top of the form
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/common/views/verify/ManualCodeForm.tsx --lifecycle codescene
+```
 
 #### 10.2 Create /verify page
 
@@ -1397,7 +1401,10 @@ If Plan 18 does not yet support this, add a cross-plan note in `INTER_PLAN_CONTR
 - Renders `<ManualCodeForm>` with labels
 - Exports `generateMetadata` with generic meta tags + `noindex, follow` (from Task 7.2)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts app/verify/page.tsx --lifecycle codescene
+```
 
 #### 10.3 Test manual entry flow
 
@@ -1414,6 +1421,9 @@ If Plan 18 does not yet support this, add a cross-plan note in `INTER_PLAN_CONTR
 
 **Estimated time**: 1-2 hours
 **Dependencies**: All tasks 1-10 complete
+
+> **Parallelizable**: This task runs as a subagent in the Final Wave alongside T23.
+
 **Requirements**: Plan 21 alignment
 
 ### Subtasks
@@ -1497,7 +1507,7 @@ If Plan 18 does not yet support this, add a cross-plan note in `INTER_PLAN_CONTR
 
 ### Execution Parallelism
 
-Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 can have partial overlap (4 and 5 both edit VerificationView, so coordinate). Task 8 (language toggle) depends only on Tasks 1+2 and can run parallel with Tasks 4-7. Task 9 (analytics) depends on Task 3 and can run parallel with Tasks 4-8. Task 10 (manual entry) depends on Tasks 1+2+8 and can run parallel with Tasks 4-7. Final task 11 requires all prior tasks complete.
+Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 can have partial overlap (4 and 5 both edit VerificationView, so coordinate). Task 8 (language toggle) depends only on Tasks 1+2 and can run via parallel subagents with Tasks 4-7. Task 9 (analytics) depends on Task 3 and can run via parallel subagents with Tasks 4-8. Task 10 (manual entry) depends on Tasks 1+2+8 and can run via parallel subagents with Tasks 4-7. Final task 11 requires all prior tasks complete.
 
 ---
 
@@ -1509,6 +1519,9 @@ The following tasks add the public-facing verification page components, REST API
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Task 1 (i18n), Task 2 (verify route)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T08, T13.
+
 **Requirements**: FR-V1, FR-V2, FR-V3
 
 #### 12.1 Create PublicVerificationPage component
@@ -1528,7 +1541,10 @@ The following tasks add the public-facing verification page components, REST API
 - Valid state renders `<ShareCertificateDialog>` (Task 15) when `shareDialogOpen` is true
 - All text from i18n: `useAppTranslation(Translation.Dashboard.PublicVerification)`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/views/public/verify/PublicVerificationPage.tsx --lifecycle codescene
+```
 
 #### 12.2 Create app/[locale]/verify/[certificateNumber]/page.tsx
 
@@ -1542,7 +1558,10 @@ The following tasks add the public-facing verification page components, REST API
 - NO auth check — public route (FR-V1.7)
 - `export const revalidate = 300` — ISR at 5-minute cache for the page
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateNumber]/page.tsx --lifecycle codescene
+```
 
 #### 12.3 Test loading state
 
@@ -1550,7 +1569,10 @@ The following tasks add the public-facing verification page components, REST API
 - Renders with `status="loading"` — verifies CircularProgress and "Verifying certificate..." text appear
 - No certificate card shown in loading state
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicVerificationPage.test.tsx --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — path aliases, i18n client)
@@ -1563,6 +1585,8 @@ The following tasks add the public-facing verification page components, REST API
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 1 (i18n), Task 14 (QrScanner)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T08, T12.
 
 #### 13.1 Create VerificationSearchPage component
 
@@ -1582,7 +1606,10 @@ The following tasks add the public-facing verification page components, REST API
 - React 19: form onSubmit uses `React.SyntheticEvent<HTMLFormElement>` (NOT FormEvent)
 - Accessible: `TextField` has `InputLabel` with `htmlFor` association, `aria-label`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/views/public/verify/VerificationSearchPage.tsx --lifecycle codescene
+```
 
 #### 13.2 Create app/[locale]/verify/page.tsx
 
@@ -1595,7 +1622,10 @@ The following tasks add the public-facing verification page components, REST API
 - Exports `generateMetadata` with generic "Verify a Certificate" title (no index — this is a search page)
 - NO auth check — public route
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts app/[locale]/verify/page.tsx --lifecycle codescene
+```
 
 #### 13.3 Test search form submit
 
@@ -1604,7 +1634,10 @@ The following tasks add the public-facing verification page components, REST API
 - Verifies recent searches chips render from store state
 - Verifies invalid/empty input does not navigate
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/VerificationSearchPage.test.tsx --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — React 19 form events, path aliases)
@@ -1617,6 +1650,8 @@ The following tasks add the public-facing verification page components, REST API
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 1 (i18n)
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02.
 
 #### 14.1 Install html5-qrcode
 
@@ -1653,7 +1688,10 @@ The following tasks add the public-facing verification page components, REST API
 - **Cleanup**: `useEffect` cleanup function calls `html5Qrcode.stop()` + `.clear()` on unmount or dialog close
 - All error messages from i18n: `useAppTranslation(Translation.Dashboard.PublicVerification)`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/views/public/verify/QrScanner.tsx --lifecycle codescene
+```
 
 #### 14.3 Test scanner dialog open/close
 
@@ -1664,7 +1702,10 @@ The following tasks add the public-facing verification page components, REST API
 - Verifies manual entry fallback link calls `onClose`
 - Verifies error alert renders when camera permission is denied (mock throws)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/QrScanner.test.tsx --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — package installs, path aliases)
@@ -1676,6 +1717,8 @@ The following tasks add the public-facing verification page components, REST API
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 12 (PublicVerificationPage — uses the card)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T06, T07, T18.
 
 #### 15.1 Create PublicCertificateCard component
 
@@ -1699,7 +1742,10 @@ The following tasks add the public-facing verification page components, REST API
 - Responsive: stacks vertically on mobile (<600px) via `useMediaQuery`
 - All text from i18n: `useAppTranslation(Translation.Dashboard.PublicVerification)`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/views/public/verify/PublicCertificateCard.tsx --lifecycle codescene
+```
 
 #### 15.2 Test card rendering
 
@@ -1710,7 +1756,10 @@ The following tasks add the public-facing verification page components, REST API
 - Renders with expired status — verifies warning badge
 - Responsive: does not crash on mobile viewport
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicCertificateCard.test.tsx --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — MUI v9 sx prop, no style props)
@@ -1722,6 +1771,8 @@ The following tasks add the public-facing verification page components, REST API
 
 **Estimated time**: 3 hours
 **Dependencies**: Task 15 (PublicCertificateCard — opens the dialog)
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 (singleton wave).
 
 #### 16.1 Create ShareCertificateDialog component
 
@@ -1745,7 +1796,10 @@ The following tasks add the public-facing verification page components, REST API
 
 **Install**: `bun add qrcode.react` (if not already in package.json)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/views/public/verify/ShareCertificateDialog.tsx --lifecycle codescene
+```
 
 #### 16.2 Test share dialog
 
@@ -1757,7 +1811,10 @@ The following tasks add the public-facing verification page components, REST API
 - Verifies Email link href starts with mailto:
 - Verifies dialog closes when onClose called
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/ShareCertificateDialog.test.tsx --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — path aliases)
@@ -1770,6 +1827,8 @@ The following tasks add the public-facing verification page components, REST API
 **Estimated time**: 4 hours
 **Dependencies**: Plan 5 (verifyCertificateService — cross-plan), Task 19 (rate limiter for store)
 
+> **Parallelizable**: This task runs as a subagent in Wave 7 (singleton wave).
+
 #### 17.1 Create rate limiting middleware
 
 **File to create**: `backend/lib/rate-limiter.ts`
@@ -1781,7 +1840,10 @@ The following tasks add the public-facing verification page components, REST API
 - Sliding window algorithm (or fixed window with TTL)
 - Thread-safe for Bun single-threaded runtime (no race conditions expected)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts backend/lib/rate-limiter.ts --lifecycle codescene
+```
 
 #### 17.2 Create route handler
 
@@ -1801,7 +1863,10 @@ The following tasks add the public-facing verification page components, REST API
 - Uses `logger` from `@/backend/lib/logger` (NEVER console.*)
 - No auth check — public endpoint
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts app/api/certificates/verify/[certificateNumber]/route.ts --lifecycle codescene
+```
 
 #### 17.3 Test route handler
 
@@ -1813,7 +1878,10 @@ The following tasks add the public-facing verification page components, REST API
 - Verifies rate limit returns 429 after 30 requests (mock IP)
 - Verifies rate-limited response does NOT call verifyCertificateService (short-circuits)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/api/certificates/verify/route.test.ts --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — backend logging, rate limiting, no console.*)
@@ -1826,6 +1894,8 @@ The following tasks add the public-facing verification page components, REST API
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Plan 5 (verifyForMetadata — cross-plan), Task 12 (page route)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T06, T07, T15.
 
 #### 18.1 Add generateMetadata to app/[locale]/verify/[certificateNumber]/page.tsx
 
@@ -1844,7 +1914,10 @@ The following tasks add the public-facing verification page components, REST API
 - For non-valid: generic title/description, static OG fallback, same canonical/robots
 - Imports: `import type { Metadata } from 'next'`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateNumber]/page.tsx --lifecycle codescene
+```
 
 #### 18.2 Add JSON-LD structured data to page
 
@@ -1865,7 +1938,10 @@ const jsonLd = result.valid ? {
 - Renders via `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />` (only when `jsonLd` is not null)
 - Omitted for revoked/not-found (no certificate metadata leaked to search engines)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateNumber]/page.tsx --lifecycle codescene
+```
 
 #### 18.3 Update robots.txt
 
@@ -1876,7 +1952,10 @@ const jsonLd = result.valid ? {
 - `Disallow: /api/certificates/verify` (API endpoint not indexed)
 - Individual `/verify/[certificateNumber]` pages already `noindex` via generateMetadata robots tag
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts app/robots.ts --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — i18n server translations, metadata)
@@ -1888,6 +1967,8 @@ const jsonLd = result.valid ? {
 
 **Estimated time**: 3 hours
 **Dependencies**: Task 17 (API route — store fetches from it)
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 (singleton wave).
 
 #### 19.1 Create useVerificationStore
 
@@ -1907,7 +1988,10 @@ const jsonLd = result.valid ? {
 - Uses `create` from `zustand` + `persist` from `zustand/middleware`
 - Store name: `siraj-verification-store`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts frontend/stores/verificationStore.ts --lifecycle codescene
+```
 
 #### 19.2 Test store
 
@@ -1923,7 +2007,10 @@ const jsonLd = result.valid ? {
 - Tests `openScanner`/`closeScanner` toggle `scannerOpen`
 - Tests `handleScanResult` sets certificateNumber + closes scanner
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/stores/verificationStore.test.ts --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — Zustand stores, path aliases)
@@ -1935,6 +2022,8 @@ const jsonLd = result.valid ? {
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Tasks 12-16 (components to test), Task 19 (store)
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T21.
 
 This task creates 5 component test files for the public verification components. All tests use Happy DOM + mocked Apollo/fetch (no real server). Follows the pattern in existing `test/ui/components/verify/` tests.
 
@@ -1950,7 +2039,10 @@ This task creates 5 component test files for the public verification components.
 - Error state: renders error message + retry button
 - Mocks: `useVerificationStore` (via `zustand/testing` or by overriding the store)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicVerificationPage.test.tsx --lifecycle codescene
+```
 
 #### 20.2 VerificationSearchPage.test.tsx
 
@@ -1965,7 +2057,10 @@ This task creates 5 component test files for the public verification components.
 - QR scanner button opens QrScanner dialog
 - Accordion expand/collapse works
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/VerificationSearchPage.test.tsx --lifecycle codescene
+```
 
 #### 20.3 QrScanner.test.tsx
 
@@ -1979,7 +2074,10 @@ This task creates 5 component test files for the public verification components.
 - Manual entry link calls `onClose`
 - Mocks `html5-qrcode` module with `vi.mock('html5-qrcode')`
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/QrScanner.test.tsx --lifecycle codescene
+```
 
 #### 20.4 PublicCertificateCard.test.tsx
 
@@ -1995,7 +2093,10 @@ This task creates 5 component test files for the public verification components.
 - Academy logo Avatar renders with correct src
 - Expiry date null: renders "N/A"
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicCertificateCard.test.tsx --lifecycle codescene
+```
 
 #### 20.5 ShareCertificateDialog.test.tsx
 
@@ -2011,7 +2112,10 @@ This task creates 5 component test files for the public verification components.
 - onClose called when dialog closed
 - QR code QRCodeSVG renders with correct URL value
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/components/verify/ShareCertificateDialog.test.tsx --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — test runner, run-test script)
@@ -2024,6 +2128,8 @@ This task creates 5 component test files for the public verification components.
 
 **Estimated time**: 5-6 hours
 **Dependencies**: Tasks 12-19 (all components + store + API), `bun run build:test` (production server)
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T20.
 
 #### 21.1 Build production server
 
@@ -2042,7 +2148,10 @@ This task creates 5 component test files for the public verification components.
 - Verifies verification details card with timestamp + verification ID
 - Verifies QR code renders (img with src containing QR)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/e2e/verify/verify-valid.spec.ts --lifecycle codescene
+```
 
 #### 21.3 E2E: Verify revoked certificate
 
@@ -2056,7 +2165,10 @@ This task creates 5 component test files for the public verification components.
 - Verifies NO download/print buttons
 - Verifies red theme (error color)
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/e2e/verify/verify-revoked.spec.ts --lifecycle codescene
+```
 
 #### 21.4 E2E: Verify not found certificate
 
@@ -2069,7 +2181,10 @@ This task creates 5 component test files for the public verification components.
 - Verifies search field appears to re-enter certificate number
 - Verifies typing a new code + submit navigates to the new verify page
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/e2e/verify/verify-not-found.spec.ts --lifecycle codescene
+```
 
 #### 21.5 E2E: QR scan flow
 
@@ -2084,7 +2199,10 @@ This task creates 5 component test files for the public verification components.
 - Verifies valid certificate page renders (for a valid scanned cert)
 - Desktop fallback: upload a QR image file, verifies decode + redirect
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/e2e/verify/qr-scan.spec.ts --lifecycle codescene
+```
 
 #### 21.6 E2E: Share dialog flow
 
@@ -2101,7 +2219,10 @@ This task creates 5 component test files for the public verification components.
 - Verifies QR code image renders
 - Close dialog → verifies it disappears
 
-**Quality loop**: tsgo + biome + lint
+**Quality loop**: 
+```bash
+bun run scripts/health/sub-loop.ts test/ui/e2e/verify/share-dialog.spec.ts --lifecycle codescene
+```
 
 **AGENTS.md files to read**:
 - `AGENTS.md` (root — E2E test commands, build:test prerequisite)
@@ -2113,6 +2234,8 @@ This task creates 5 component test files for the public verification components.
 
 **Estimated time**: 2-3 hours
 **Dependencies**: All tasks 12-21 complete
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 (singleton wave).
 
 #### 22.1 Run quality gate
 
@@ -2131,18 +2254,20 @@ This task creates 5 component test files for the public verification components.
 - `app/[locale]/verify/page.tsx`
 - All test files (Tasks 20-21)
 
-**Per-file verification loop** (before running full quality-gate):
-1. For each new file, run `bun tsgo` (type check)
-2. Run `bun biome:check` on the file
-3. Run lint via queue client:
+**Per-file verification loop** (before running full quality-gate): Run the progressive sub-loop (tsgo → biome → lint → codescene, short-circuiting on first failure) for each new file:
    ```bash
-   LINT_QUEUE_PORT=$(grep -oP 'LINT_QUEUE_PORT = \K\d+' scripts/lint-queue-config.ts)
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"verify-task22","files":["frontend/views/public/verify/PublicVerificationPage.tsx"]}'
+   bun run scripts/health/sub-loop.ts frontend/views/public/verify/PublicVerificationPage.tsx --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/views/public/verify/VerificationSearchPage.tsx --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/views/public/verify/QrScanner.tsx --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/views/public/verify/PublicCertificateCard.tsx --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/views/public/verify/ShareCertificateDialog.tsx --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/stores/verificationStore.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/lib/rate-limiter.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts app/api/certificates/verify/[certificateNumber]/route.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateNumber]/page.tsx --lifecycle codescene
+   bun run scripts/health/sub-loop.ts app/[locale]/verify/page.tsx --lifecycle codescene
    ```
-4. Fix any issues (tsgo errors first, then biome, then lint)
-5. Re-run until file passes all three checks
+   Fix any issues and re-run until each file passes all checks.
 
 #### 22.2 Run final quality gate
 
@@ -2157,6 +2282,8 @@ This task creates 5 component test files for the public verification components.
 
 **Estimated time**: 1-2 hours
 **Dependencies**: All tasks 12-22 complete
+
+> **Parallelizable**: This task runs as a subagent in the Final Wave alongside T11.
 
 #### 23.1 Update NEW_PAGE_WORKFLOW.md with public REST endpoint pattern
 
@@ -2259,7 +2386,7 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
 **Supplementary tasks (12-23)**:
 - Task 12 (PublicVerificationPage) depends on Tasks 1+2 (i18n, route).
 - Task 13 (VerificationSearchPage) depends on Tasks 1+14 (QrScanner).
-- Task 14 (QrScanner) depends on Task 1 (i18n) — can run parallel with Tasks 4-10.
+- Task 14 (QrScanner) depends on Task 1 (i18n) — can run via parallel subagents with Tasks 4-10.
 - Task 15 (PublicCertificateCard) depends on Task 12.
 - Task 16 (ShareCertificateDialog) depends on Task 15.
 - Task 17 (API route handler) depends on Plan 5 (cross-plan) + Task 19 (rate limiter).
@@ -2288,7 +2415,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Backend validation: `POST /api/verify` validates captcha token server-side
   - Failure handling: show captcha challenge modal on low score
   - Rate limit with captcha: after 3 failed attempts, require explicit captcha
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts app/[locale]/verify/components/CaptchaWidget.tsx --lifecycle codescene
+    ```
 
 ### R4-T2: Rate Limiting & Abuse Prevention
 - [ ] Update `backend/services/certificate-verification-service.ts`
@@ -2299,7 +2429,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Ban system: 5 rate limit violations → 24h ban with locked page
   - Rate limit display: "Too many attempts. Try again in X minutes"
   - Admin dashboard: show rate limit statistics and ban list
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts backend/services/certificate-verification-service.ts --lifecycle codescene
+    ```
 
 ### R4-T3: Share & Embed Widget
 - [ ] Create `frontend/views/dashboard/certificates/verification/ShareWidget.tsx`
@@ -2310,7 +2443,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Social media share buttons: Twitter, Facebook, LinkedIn, WhatsApp
   - Email share: `mailto:` link with pre-filled subject and body
   - Custom share text: editable message template with certificate link
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/verification/ShareWidget.tsx --lifecycle codescene
+    ```
 
 ### R4-T4: SEO & Social Media Meta Tags
 - [ ] Update `app/[locale]/verify/[certificateId]/page.tsx`
@@ -2320,7 +2456,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Canonical URL: `<link rel="canonical" href="...">`
   - Schema.org structured data: `EducationalOccupationalCredential` JSON-LD
   - Meta description: "Verify the authenticity of {Recipient Name}'s certificate from {Academy Name}"
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateId]/page.tsx --lifecycle codescene
+    ```
 
 ### R4-T5: CDN Caching Strategy
 - [ ] Update `backend/services/certificate-verification-service.ts`
@@ -2330,7 +2469,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Stale-while-revalidate: `Cache-Control: stale-while-revalidate=3600`
   - Cache key: `verify:${certificateId}` with locale suffix
   - Cache metrics: hit rate, miss rate logged via `logger.debug`
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts backend/services/certificate-verification-service.ts --lifecycle codescene
+    ```
 
 ### R4-T6: Accessibility
 - [ ] Update `app/[locale]/verify/[certificateId]/page.tsx`
@@ -2343,7 +2485,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Screen reader: announce "Verification successful" or "Verification failed"
   - Color contrast: WCAG 2.1 AA compliance (4.5:1 for text, 3:1 for large text)
   - Focus management: trap focus in share dialog, restore on close
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateId]/page.tsx --lifecycle codescene
+    ```
 
 ### R4-T7: Multi-Language Verification
 - [ ] Update `app/[locale]/verify/[certificateId]/page.tsx`
@@ -2354,7 +2499,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Date formatting: locale-aware date display (`Intl.DateTimeFormat`)
   - Number formatting: locale-aware numbers (`Intl.NumberFormat`)
   - Fallback locale: if certificate data not in requested locale, fall back to EN
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateId]/page.tsx --lifecycle codescene
+    ```
 
 ### R4-T8: Dark Mode Support
 - [ ] Update `app/[locale]/verify/[certificateId]/page.tsx`
@@ -2364,7 +2512,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Theme toggle: IconButton (sun/moon icon) in header
   - Theme persistence: localStorage key `verify-theme`
   - Certificate preview: dark background with light certificate card
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateId]/page.tsx --lifecycle codescene
+    ```
 
 ### R4-T9: Error & Not Found States
 - [ ] Create `app/[locale]/verify/components/VerificationError.tsx`
@@ -2375,7 +2526,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - Server error: "Verification service is temporarily unavailable. Please try again later."
   - Network error: "Unable to connect. Check your internet connection." + retry button
   - Each state: dedicated illustration, helpful message, actionable CTA
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts app/[locale]/verify/components/VerificationError.tsx --lifecycle codescene
+    ```
 
 ### R4-T10: Verification Analytics
 - [ ] Create `backend/services/verification-analytics-service.ts`
@@ -2386,7 +2540,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - API endpoint: `GET /api/certificates/:id/verification-stats` (admin only)
   - Analytics dashboard: charts in certificate detail page (line chart of verifications over time)
   - Privacy: IP addresses stored for 30 days then deleted, no PII
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts backend/services/verification-analytics-service.ts --lifecycle codescene
+    ```
 
 ### R4-T11: API Security Hardening
 - [ ] Update `backend/graphql/pothos/certificate-verification.ts`
@@ -2396,7 +2553,10 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
   - CORS: restrict to academy domains in production, permissive in dev
   - CSP headers: `Content-Security-Policy: default-src 'self'`
   - XSS prevention: all output escaped, no `dangerouslySetInnerHTML`
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: 
+    ```bash
+    bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificate-verification.ts --lifecycle codescene
+    ```
 
 ### R4-T12: Component Tests
 - [ ] Create `test/ui/components/verification/CaptchaWidget.test.tsx`

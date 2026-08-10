@@ -739,9 +739,7 @@ export function validateTwoStepPin(value: string): string | null {
 23. Mobile TemplatesTab: renders expandable card
 
 ### Quality Gates
-- `bun tsgo` — 0 type errors
-- `bun biome:check` — 0 issues
-- `bun run lint` — 0 ESLint errors
+- Per-file: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` — handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command (short-circuits at first failure)
 - All tests pass: `bun run test:ui:components`
 
 ## Security Considerations

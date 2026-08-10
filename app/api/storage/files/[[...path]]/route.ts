@@ -46,6 +46,30 @@ async function getRelativePath(params: Promise<{ path?: string[] }>): Promise<st
 }
 
 /**
+ * Convert a Node.js ReadStream into a web ReadableStream for use as a Response body.
+ */
+function streamToReadableStream(stream: ReturnType<typeof createReadStream>): ReadableStream {
+  return new ReadableStream({
+    start(controller) {
+      let streamError: unknown = null;
+      stream.on("error", (error: unknown) => {
+        streamError = error;
+        controller.error(error);
+      });
+      stream.on("end", () => {
+        if (!streamError) controller.close();
+      });
+      stream.on("data", (chunk: Buffer) => {
+        if (!streamError) controller.enqueue(new Uint8Array(chunk));
+      });
+    },
+    cancel() {
+      stream.destroy();
+    },
+  });
+}
+
+/**
  * Options for generating a range response
  */
 interface RangeResponseOptions {
@@ -73,8 +97,9 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
   const { start, end } = range;
   const chunkSize = end - start + 1;
   const stream = createReadStream(absolutePath, { start, end });
+  const body = streamToReadableStream(stream);
 
-  return new NextResponse(stream as unknown as BodyInit, {
+  return new NextResponse(body, {
     status: 206,
     headers: {
       "Content-Type": contentType,
@@ -126,7 +151,9 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
   }
 
   const stream = createReadStream(absolutePath);
-  return new NextResponse(stream as unknown as BodyInit, {
+  const body = streamToReadableStream(stream);
+
+  return new NextResponse(body, {
     status: 200,
     headers: {
       "Content-Type": contentType,

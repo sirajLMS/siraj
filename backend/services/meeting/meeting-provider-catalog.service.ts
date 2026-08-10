@@ -101,21 +101,20 @@ export namespace MeetingProviderCatalogService {
       return await MeetingProviderRepository.upsertMany(inputs, tErrors, tx);
     } catch (error) {
       if (isDuplicateError(error)) {
-        const results: MeetingProviderSelectType[] = [];
-        for (const input of inputs) {
-          const existing = await MeetingProviderRepository.getBySlug(input.slug, tx);
-          if (existing) {
-            results.push(
-              await MeetingProviderRepository.update(
-                existing.id,
-                { ...input, isActive: input.isActive ?? true },
-                tErrors,
-                tx
-              )
-            );
-          }
-        }
-        return results;
+        const existingProviders = await Promise.all(
+          inputs.map(input => MeetingProviderRepository.getBySlug(input.slug, tx))
+        );
+        const toUpdate = inputs
+          .map((input, index) => ({ input, existing: existingProviders[index] }))
+          .filter(
+            (entry): entry is { input: MeetingProviderSubmitInput; existing: NonNullable<typeof entry.existing> } =>
+              entry.existing !== null
+          );
+        return Promise.all(
+          toUpdate.map(({ input, existing }) =>
+            MeetingProviderRepository.update(existing.id, { ...input, isActive: input.isActive ?? true }, tErrors, tx)
+          )
+        );
       }
       throw error;
     }

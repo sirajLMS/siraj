@@ -8,6 +8,7 @@ import { LocaleAdornmentSwitch } from "@/frontend/common/components/ui/input/loc
 import { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
 import { useLocalizedStringInputState } from "@/frontend/common/hooks/useLocalizedStringInputState";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { type LocalizedStringLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 /**
@@ -119,7 +120,7 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
   });
 
   return (
-    <Box ref={containerRef} sx={{ width: fullWidth ? "100%" : undefined, ...sx }}>
+    <Box ref={containerRef} sx={mergeSx({ width: fullWidth ? "100%" : undefined }, sx)}>
       <TextField
         label={label}
         value={fieldValue}

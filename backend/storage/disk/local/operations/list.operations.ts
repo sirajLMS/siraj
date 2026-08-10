@@ -76,23 +76,27 @@ async function processListFilesEntries(
   const items: Array<Types.FileInfo | Types.DirectoryInfo> = [];
   const { dbFileMap, dbDirMap } = await loadListEntities(filePaths, dirPaths);
 
-  for (const filePath of filePaths) {
-    try {
-      const dbFile = dbFileMap.get(filePath);
-      items.push(await processFile(ctx, filePath, dbFile));
-    } catch (error) {
-      logger.warn(`Failed to process file: ${filePath}`, error);
+  const fileResults = await Promise.allSettled(
+    filePaths.map(filePath => processFile(ctx, filePath, dbFileMap.get(filePath)))
+  );
+  fileResults.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      items.push(result.value);
+    } else {
+      logger.warn(`Failed to process file: ${filePaths[index]}`, result.reason);
     }
-  }
+  });
 
-  for (const dirPath of dirPaths) {
-    try {
-      const dbDir = dbDirMap.get(dirPath);
-      items.push(await processDirectory(ctx, dirPath, dbDir));
-    } catch (error) {
-      logger.warn(`Failed to process directory: ${dirPath}`, error);
+  const dirResults = await Promise.allSettled(
+    dirPaths.map(dirPath => processDirectory(ctx, dirPath, dbDirMap.get(dirPath)))
+  );
+  dirResults.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      items.push(result.value);
+    } else {
+      logger.warn(`Failed to process directory: ${dirPaths[index]}`, result.reason);
     }
-  }
+  });
 
   return items;
 }
@@ -115,17 +119,18 @@ export async function fetchDirectoryChildren(
 
     try {
       const entries = await fs.readdir(absolutePath, { withFileTypes: true });
+      const directoryEntries = entries.filter(entry => entry.isDirectory());
 
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          try {
-            const dirInfo = await processLocalDirectoryEntry(ctx, entry.name, targetPath, dbDirectoriesByPath);
-            directories.push(dirInfo);
-          } catch (error) {
-            logger.warn(`Failed to process directory entry: ${entry.name}`, error);
-          }
+      const dirEntryResults = await Promise.allSettled(
+        directoryEntries.map(entry => processLocalDirectoryEntry(ctx, entry.name, targetPath, dbDirectoriesByPath))
+      );
+      dirEntryResults.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          directories.push(result.value);
+        } else {
+          logger.warn(`Failed to process directory entry: ${directoryEntries[index].name}`, result.reason);
         }
-      }
+      });
     } catch (error) {
       logger.warn(`Failed to read directory: ${targetPath}`, error);
     }

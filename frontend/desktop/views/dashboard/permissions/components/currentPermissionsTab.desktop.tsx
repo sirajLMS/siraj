@@ -87,7 +87,7 @@ export function CurrentPermissionsTabDesktop({
         headerName: t.columnKey,
         flex: 1,
         minWidth: 200,
-        renderCell: params => <StyledPermissionKeyCell>{params.value as string}</StyledPermissionKeyCell>,
+        renderCell: params => <StyledPermissionKeyCell>{String(params.value)}</StyledPermissionKeyCell>,
       },
       {
         field: "category",

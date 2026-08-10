@@ -47,13 +47,13 @@ Use this template to create comprehensive requirements documents using the EARS 
 
 #### Acceptance Criteria
 
-1. WHEN feature implementation begins THEN system SHALL record baseline error counts (`bun tsgo`, `bun biome:check`, `bun run scripts/lint-service.ts --json --id baseline`) to distinguish new from pre-existing issues.
+1. WHEN feature implementation begins THEN system SHALL record baseline error counts (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` exit code, plus `bun tsgo` / `bun biome:check` / `bun run scripts/lint-service.ts --json --id baseline` for granular per-tool counts) to distinguish new from pre-existing issues.
 2. WHEN feature implementation begins THEN system SHALL create deferred-items ledger at `.ai/plans/<feature-name>/deferred-items.md` from template to track all deferred work.
 3. WHEN an executing agent starts any task THEN system SHALL read ALL existing outcome files in `.ai/plans/<feature-name>/outcome/` to absorb prior research, search results, and pitfalls.
 4. WHEN an executing agent completes any task THEN system SHALL write a new outcome document under `.ai/plans/<feature-name>/outcome/<task-id>-outcome.md` detailing research findings, docs/web search results, implementation details, cross-file dependencies, and carry-over points.
 5. WHEN an executing agent completes any subtask THEN system SHALL update the corresponding task checkbox `[ ]` -> `[x]` in `trackable-tasks.md`.
-6. WHEN any file is modified THEN system SHALL execute per-file verification (`bun tsgo` + `bun biome:check` + `bun run scripts/lint-service.ts -f <file> --id verify`) on that specific file.
-7. WHEN any subtask is marked complete THEN system SHALL complete semantic review checklist (race conditions, env-config, deferred items, cross-layer, enums) before marking `[x]`.
+6. WHEN any file is modified THEN system SHALL execute per-file verification via the unified script `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file; auto-discovers applicable AGENTS.md + .agents/instructions; exit code 0 = pass) on that specific file.
+7. WHEN any subtask is marked complete THEN system SHALL complete semantic review checklist (race conditions, env-config, deferred items, cross-layer, enums) before marking `[x]`. The `sub-loop.ts` script handles mechanical checks but cannot detect semantic bugs — this checklist covers what the script cannot.
 
 ### Requirement 0.5: Translation System & Enum Import Compliance
 

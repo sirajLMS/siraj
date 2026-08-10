@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { CronRunStatus, CronScheduleStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
-const mockLabels = {
+const mockLabels: CronLabels = {
   pageTitle: "Cron Schedules",
   pageSubtitle: "Manage cron schedules",
   colName: "Name",
@@ -74,7 +75,40 @@ const mockLabels = {
     queueBackendNotAvailable: "Queue backend not available",
     permissionDenied: "Permission denied",
     genericError: "An unexpected error occurred",
+    invalidTimezone: (tz: string) => `Invalid timezone: ${tz}`,
+    runNotFound: (id: string) => `Run not found: ${id}`,
+    manualTriggerConflict: "Manual trigger conflict",
+    dispatchSendFailed: (id: string) => `Dispatch send failed: ${id}`,
+    enqueueRetryFailed: (id: string) => `Enqueue retry failed: ${id}`,
+    queueBackendUnknown: (backend: string) => `Unknown queue backend: ${backend}`,
+    missingScheduleId: "Missing schedule ID",
+    invalidScheduleIdFormat: "Invalid schedule ID format",
+    tickerFailed: "Ticker failed",
+    classRemindersFailed: "Class reminders failed",
+    userContextRequired: "User context required",
+    unauthorized: "Unauthorized",
+    methodNotAllowed: "Method not allowed",
+    serverMisconfigured: "Server misconfigured",
   },
+  colConcurrencyPolicy: "Concurrency Policy",
+  colTriggerSource: "Trigger Source",
+  colAttempt: "Attempt",
+  colDuration: "Duration",
+  colErrorMessage: "Error Message",
+  triggerSourceVercelTicker: "Vercel Ticker",
+  triggerSourceVercelExplicit: "Vercel Explicit",
+  triggerSourceExternal: "External",
+  triggerSourceWorkerRetry: "Worker Retry",
+  triggerSourceManual: "Manual",
+  pgBoss: "PG Boss",
+  bullmqPostgres: "BullMQ Postgres",
+  customSql: "Custom SQL",
+  queueBackendStub: "Queue Backend Stub",
+  bullmqRedis: "BullMQ Redis",
+  statusSkipped: "Skipped",
+  manualTriggerCancel: "Cancel",
+  loading: "Loading...",
+  triggerSkipped: "Trigger skipped",
 } as const;
 
 const mockViewModel: Record<string, unknown> = {
@@ -129,11 +163,11 @@ const mockViewModel: Record<string, unknown> = {
   onPreviewNextRuns: mock(() => []),
 };
 
-mock.module("@/frontend/common/views/dashboard/cron/useCronViewModel", () => ({
+await mock.module("@/frontend/common/views/dashboard/cron/useCronViewModel", () => ({
   useCronViewModel: () => mockViewModel,
 }));
 
-mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -146,7 +180,7 @@ mock.module("next/navigation", () => ({
   usePathname: () => "/dashboard",
 }));
 
-mock.module("@/frontend/common/utils/logger", () => ({
+await mock.module("@/frontend/common/utils/logger", () => ({
   logger: {
     info: mock(() => {}),
     warn: mock(() => {}),
@@ -155,7 +189,7 @@ mock.module("@/frontend/common/utils/logger", () => ({
   },
 }));
 
-mock.module("@/frontend/common/lib/logger", () => ({
+await mock.module("@/frontend/common/lib/logger", () => ({
   default: {
     info: mock(() => {}),
     warn: mock(() => {}),
@@ -165,7 +199,7 @@ mock.module("@/frontend/common/lib/logger", () => ({
 }));
 
 // Avoid Suspense from usePageBreadcrumbs → useNavLabels → useAppTranslation
-mock.module("@/frontend/common/views/dashboard/lib/usePageBreadcrumbs", () => ({
+await mock.module("@/frontend/common/views/dashboard/lib/usePageBreadcrumbs", () => ({
   usePageBreadcrumbs: () => [],
 }));
 
@@ -348,88 +382,88 @@ describe("CronMobileView", () => {
 
 describe("getCronStatusColor", () => {
   test("returns success for ACTIVE", () => {
-    expect(getCronStatusColor("ACTIVE" as never)).toBe("success");
+    expect(getCronStatusColor(CronScheduleStatus.Active)).toBe("success");
   });
 
   test("returns warning for PAUSED", () => {
-    expect(getCronStatusColor("PAUSED" as never)).toBe("warning");
+    expect(getCronStatusColor(CronScheduleStatus.Paused)).toBe("warning");
   });
 
   test("returns default for DISABLED", () => {
-    expect(getCronStatusColor("DISABLED" as never)).toBe("default");
+    expect(getCronStatusColor(CronScheduleStatus.Disabled)).toBe("default");
   });
 });
 
 describe("getCronStatusLabel", () => {
   test("returns statusActive label for ACTIVE", () => {
-    expect(getCronStatusLabel("ACTIVE" as never, mockLabels as unknown as CronLabels)).toBe("Active");
+    expect(getCronStatusLabel(CronScheduleStatus.Active, mockLabels)).toBe("Active");
   });
 
   test("returns statusPaused label for PAUSED", () => {
-    expect(getCronStatusLabel("PAUSED" as never, mockLabels as unknown as CronLabels)).toBe("Paused");
+    expect(getCronStatusLabel(CronScheduleStatus.Paused, mockLabels)).toBe("Paused");
   });
 
   test("returns statusDisabled label for DISABLED", () => {
-    expect(getCronStatusLabel("DISABLED" as never, mockLabels as unknown as CronLabels)).toBe("Disabled");
+    expect(getCronStatusLabel(CronScheduleStatus.Disabled, mockLabels)).toBe("Disabled");
   });
 });
 
 describe("getCronRunStatusColor", () => {
   test("returns success for COMPLETED", () => {
-    expect(getCronRunStatusColor("COMPLETED" as never)).toBe("success");
+    expect(getCronRunStatusColor(CronRunStatus.Completed)).toBe("success");
   });
 
   test("returns info for RUNNING", () => {
-    expect(getCronRunStatusColor("RUNNING" as never)).toBe("info");
+    expect(getCronRunStatusColor(CronRunStatus.Running)).toBe("info");
   });
 
   test("returns info for RETRYING", () => {
-    expect(getCronRunStatusColor("RETRYING" as never)).toBe("info");
+    expect(getCronRunStatusColor(CronRunStatus.Retrying)).toBe("info");
   });
 
   test("returns error for FAILED", () => {
-    expect(getCronRunStatusColor("FAILED" as never)).toBe("error");
+    expect(getCronRunStatusColor(CronRunStatus.Failed)).toBe("error");
   });
 
   test("returns error for TIMEOUT", () => {
-    expect(getCronRunStatusColor("TIMEOUT" as never)).toBe("error");
+    expect(getCronRunStatusColor(CronRunStatus.Timeout)).toBe("error");
   });
 
   test("returns warning for PENDING", () => {
-    expect(getCronRunStatusColor("PENDING" as never)).toBe("warning");
+    expect(getCronRunStatusColor(CronRunStatus.Pending)).toBe("warning");
   });
 
   test("returns default for CANCELLED", () => {
-    expect(getCronRunStatusColor("CANCELLED" as never)).toBe("default");
+    expect(getCronRunStatusColor(CronRunStatus.Cancelled)).toBe("default");
   });
 });
 
 describe("getCronRunStatusLabel", () => {
   test("returns statusPending label for PENDING", () => {
-    expect(getCronRunStatusLabel("PENDING" as never, mockLabels as unknown as CronLabels)).toBe("Pending");
+    expect(getCronRunStatusLabel(CronRunStatus.Pending, mockLabels)).toBe("Pending");
   });
 
   test("returns statusRunning label for RUNNING", () => {
-    expect(getCronRunStatusLabel("RUNNING" as never, mockLabels as unknown as CronLabels)).toBe("Running");
+    expect(getCronRunStatusLabel(CronRunStatus.Running, mockLabels)).toBe("Running");
   });
 
   test("returns statusCompleted label for COMPLETED", () => {
-    expect(getCronRunStatusLabel("COMPLETED" as never, mockLabels as unknown as CronLabels)).toBe("Completed");
+    expect(getCronRunStatusLabel(CronRunStatus.Completed, mockLabels)).toBe("Completed");
   });
 
   test("returns statusFailed label for FAILED", () => {
-    expect(getCronRunStatusLabel("FAILED" as never, mockLabels as unknown as CronLabels)).toBe("Failed");
+    expect(getCronRunStatusLabel(CronRunStatus.Failed, mockLabels)).toBe("Failed");
   });
 
   test("returns statusRetrying label for RETRYING", () => {
-    expect(getCronRunStatusLabel("RETRYING" as never, mockLabels as unknown as CronLabels)).toBe("Retrying");
+    expect(getCronRunStatusLabel(CronRunStatus.Retrying, mockLabels)).toBe("Retrying");
   });
 
   test("returns statusTimeout label for TIMEOUT", () => {
-    expect(getCronRunStatusLabel("TIMEOUT" as never, mockLabels as unknown as CronLabels)).toBe("Timeout");
+    expect(getCronRunStatusLabel(CronRunStatus.Timeout, mockLabels)).toBe("Timeout");
   });
 
   test("returns statusCancelled label for CANCELLED", () => {
-    expect(getCronRunStatusLabel("CANCELLED" as never, mockLabels as unknown as CronLabels)).toBe("Cancelled");
+    expect(getCronRunStatusLabel(CronRunStatus.Cancelled, mockLabels)).toBe("Cancelled");
   });
 });

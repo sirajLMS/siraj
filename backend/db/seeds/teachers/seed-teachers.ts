@@ -9,7 +9,6 @@ import {
   TEACHER_AVATAR_FILES,
 } from "@/backend/db/seeds/lib";
 import { CurrencyCode } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { logger } from "@/backend/lib/logger";
 import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
 import type { TimezoneSelectType, UserSelectType } from "@/backend/types";
@@ -26,7 +25,7 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneSele
   logger.info("Seeding system teachers...");
   const seedConfig = config ?? loadSeedConfig();
 
-  const defaultTimezone = timezones.find(t => t.ianaId === IanaTimezone.UTC) || timezones[0];
+  const defaultTimezone = timezones.find(t => t.ianaId === "UTC") || timezones[0];
   if (!defaultTimezone) {
     throw new Error("No timezones found in seed data.");
   }
@@ -39,25 +38,23 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneSele
     throw new Error("No teacher users found in seed data.");
   }
 
-  const results = [];
-  for (let i = 0; i < teacherUsers.length; i++) {
-    const user = teacherUsers[i];
-    const tzIana = i === 0 ? IanaTimezone.UTC : pickTimezoneForIndex(i);
-    resolveTimezone(timezones, tzIana);
-    const status = i === 0 ? ALL_ACCOUNT_STATUSES[0] : cycleAtIndex(ALL_ACCOUNT_STATUSES, i);
+  const results = await Promise.all(
+    teacherUsers.map(async (user, i) => {
+      const tzIana = i === 0 ? "UTC" : pickTimezoneForIndex(i);
+      resolveTimezone(timezones, tzIana);
+      const status = i === 0 ? ALL_ACCOUNT_STATUSES[0] : cycleAtIndex(ALL_ACCOUNT_STATUSES, i);
 
-    // Pass the hourlyRate and rateCurrency cleanly via service bootstrap
-    const rate = (50 + i * 15).toString();
-    const teacher = await PersonaSeedService.seedTeacherProfile({
-      userId: user.id,
-      timezone: tzIana,
-      status,
-      hourlyRate: rate,
-      rateCurrency: CurrencyCode.SAR,
-    });
-
-    results.push(teacher);
-  }
+      // Pass the hourlyRate and rateCurrency cleanly via service bootstrap
+      const rate = (50 + i * 15).toString();
+      return PersonaSeedService.seedTeacherProfile({
+        userId: user.id,
+        timezone: tzIana,
+        status,
+        hourlyRate: rate,
+        rateCurrency: CurrencyCode.SAR,
+      });
+    })
+  );
 
   if (shouldSeedExtendedFiles(seedConfig)) {
     await linkAvatarsToEntities({

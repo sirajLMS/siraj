@@ -59,15 +59,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
           hasUser: Boolean(data?.refreshToken?.user),
         });
       }
-    } catch (error) {
+    } catch (caughtError) {
       setIsAuthenticated(false);
       setUser(null);
       clearAuthData();
       logger.info({ caller: "AuthProvider.checkAuth" }, "[AuthRedirect] refreshToken mutation failed", {
         reason: "refreshToken threw an error",
         currentUrl,
-        errorName: error instanceof Error ? error.name : "unknown",
-        errorMessage: error instanceof Error ? error.message : String(error),
+        errorName: caughtError instanceof Error ? caughtError.name : "unknown",
+        errorMessage: caughtError instanceof Error ? caughtError.message : String(caughtError),
       });
     } finally {
       setIsLoading(false);

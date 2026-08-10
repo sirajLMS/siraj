@@ -1,6 +1,11 @@
 import { GraphQLScalarType, Kind } from "graphql";
 import { PhoneNumber } from "@/shared/lib/phone";
 
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
+
 // Pothos custom scalar for PhoneNumber
 export const PhoneNumberScalar = new GraphQLScalarType({
   name: "PhoneNumber",
@@ -9,7 +14,7 @@ export const PhoneNumberScalar = new GraphQLScalarType({
     if (value instanceof PhoneNumber) {
       return value.number;
     }
-    throw new TypeError(`Cannot serialize value as PhoneNumber: ${value}`);
+    throw new TypeError(`Cannot serialize value as PhoneNumber: ${String(value)}`);
   },
   parseValue(value: unknown): PhoneNumber {
     if (typeof value === "string") {
@@ -21,7 +26,7 @@ export const PhoneNumberScalar = new GraphQLScalarType({
         }
         throw new TypeError("Invalid phone number");
       } catch (err) {
-        throw new TypeError(`Invalid phone number: ${value}: ${(err as Error).message}`, { cause: err });
+        throw new TypeError(`Invalid phone number: ${value}: ${getErrorMessage(err)}`, { cause: err });
       }
     }
     throw new TypeError(`Expected string for PhoneNumber, got: ${typeof value}`);
@@ -35,7 +40,7 @@ export const PhoneNumberScalar = new GraphQLScalarType({
         }
         throw new TypeError("Invalid phone number");
       } catch (err) {
-        throw new TypeError(`Invalid phone number literal: ${ast.value}: ${(err as Error).message}`, { cause: err });
+        throw new TypeError(`Invalid phone number literal: ${ast.value}: ${getErrorMessage(err)}`, { cause: err });
       }
     }
     throw new TypeError("PhoneNumber literal must be a string");

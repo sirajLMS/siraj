@@ -86,8 +86,8 @@ function renderDayCell(
   return (
     <Box
       key={`day-${day}`}
-      role="button"
-      tabIndex={0}
+      component="button"
+      type="button"
       onClick={() => onSelectDay(isSelected ? null : day)}
       onKeyDown={e => {
         if (e.key === "Enter" || e.key === " ") {

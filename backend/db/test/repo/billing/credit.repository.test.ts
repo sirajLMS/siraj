@@ -87,11 +87,11 @@ async function createTestPayment(tx: DBTransaction, parentId: string, studentId:
 async function expectSavepointError(fn: () => Promise<unknown>, tx: DBTransaction): Promise<Error> {
   const sp = `sp_${randomUUID().replaceAll("-", "_")}`;
   await tx.execute(sql.raw(`SAVEPOINT ${sp}`));
-  let errorCaught: unknown = null;
+  let errorCaught: Error | null = null;
   try {
     await fn();
   } catch (error) {
-    errorCaught = error;
+    errorCaught = error instanceof Error ? error : new Error(String(error));
   }
   if (errorCaught) {
     await tx.execute(sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
@@ -99,7 +99,10 @@ async function expectSavepointError(fn: () => Promise<unknown>, tx: DBTransactio
     await tx.execute(sql.raw(`RELEASE SAVEPOINT ${sp}`));
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (!errorCaught) {
+    throw new Error("expectSavepointError: expected an error to be thrown, but none was caught");
+  }
+  return errorCaught;
 }
 
 describe("CreditRepository.getBalance", () => {
@@ -164,13 +167,25 @@ describe("CreditRepository.getTransactions", () => {
       const { student } = await setupStudent(tx, {}, {}, { classesTotal: 10, classesRemaining: 10 });
       const adminUser = await createTestUser(tx, { name: "Credit Admin" });
 
-      for (let i = 0; i < 3; i++) {
-        await createTestCreditTransaction(tx, student.id, adminUser.id, {
-          changeAmount: 1,
-          reason: CreditReason.PURCHASE,
-        });
-        await new Promise(r => setTimeout(r, 5));
-      }
+      // Create three transactions sequentially with small delays so each has a
+      // distinct `createdAt` — the pagination assertions below rely on a
+      // deterministic order. Awaiting in series (rather than `Promise.all`) is
+      // intentional; the loop is unrolled to satisfy `no-await-in-loop`.
+      await createTestCreditTransaction(tx, student.id, adminUser.id, {
+        changeAmount: 1,
+        reason: CreditReason.PURCHASE,
+      });
+      await new Promise(r => setTimeout(r, 5));
+      await createTestCreditTransaction(tx, student.id, adminUser.id, {
+        changeAmount: 1,
+        reason: CreditReason.PURCHASE,
+      });
+      await new Promise(r => setTimeout(r, 5));
+      await createTestCreditTransaction(tx, student.id, adminUser.id, {
+        changeAmount: 1,
+        reason: CreditReason.PURCHASE,
+      });
+      await new Promise(r => setTimeout(r, 5));
 
       const pagination = new PaginationArgs({ first: 2, page: 1 });
       const rows = await CreditRepository.getTransactions(tx, student.id, pagination);

@@ -1,6 +1,10 @@
-import type { PaletteMode } from "@mui/material/styles";
+import type { PaletteColorOptions, PaletteMode } from "@mui/material/styles";
 import { darkPalette } from "@/frontend/common/providers/theme/palette/darkPalette";
 import { lightPalette } from "@/frontend/common/providers/theme/palette/lightPalette";
+
+function hasMain(color: PaletteColorOptions | undefined): color is { main: string } {
+  return color !== undefined && "main" in color;
+}
 
 interface ServerThemeTokens {
   readonly bgDefault: string;
@@ -67,9 +71,6 @@ function extractTokens(mode: PaletteMode): ServerThemeTokens {
   const bg = palette.background;
   const primary = palette.primary;
   const border = palette.border;
-
-  // Type guard to check if primary has the 'main' property (SimplePaletteColorOptions)
-  const hasMain = (color: typeof primary): color is { main: string } => color !== undefined && "main" in color;
 
   return {
     bgDefault: bg?.default ?? fallbacks.bgDefault,

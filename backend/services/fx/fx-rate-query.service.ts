@@ -12,6 +12,12 @@ import { getServerTranslations } from "@/shared/locale";
 
 const FX_STALE_MS = 24 * 60 * 60 * 1000;
 
+const STALE_SYNC_STATUSES: ReadonlySet<string> = new Set(["failed", "partial"]);
+
+function isFxSyncStatus(value: string): value is FxSyncStatus {
+  return (Object.values(FxSyncStatus) as readonly string[]).includes(value);
+}
+
 function computeFxSyncIsStale(
   syncRun: {
     readonly finishedAt?: Date | null;
@@ -24,7 +30,7 @@ function computeFxSyncIsStale(
   }
 
   const status = (syncRun.status ?? "").toLowerCase();
-  if (status === FxSyncStatus.Failed || status === FxSyncStatus.Partial) {
+  if (STALE_SYNC_STATUSES.has(status)) {
     return true;
   }
 
@@ -80,7 +86,7 @@ export namespace FxRateQueryService {
     return {
       id: "fx-sync-health",
       isStale: computeFxSyncIsStale(syncRun),
-      status: (syncRun?.status as FxSyncStatus | undefined) ?? null,
+      status: syncRun?.status && isFxSyncStatus(syncRun.status) ? syncRun.status : null,
       finishedAt: syncRun?.finishedAt ?? null,
     };
   }

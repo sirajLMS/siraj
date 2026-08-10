@@ -3,11 +3,11 @@
 import { ContentCopyOutlined, OpenInNewOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, CircularProgress, Link, Typography } from "@mui/material";
 import { useState } from "react";
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
+import {
   MeetingConnectionTestMode,
-  TestMeetingConnectionResult,
-} from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
+  MeetingIntegrationProviderSlug,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TestMeetingConnectionResult } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 const marketplaceUrls: Partial<Record<MeetingIntegrationProviderSlug, string>> = {
@@ -34,7 +34,7 @@ function TestButtonRow({ labels, testing, providerSlug, onRunTest }: TestButtonR
         size="small"
         variant="outlined"
         disabled={testing}
-        onClick={() => onRunTest(providerSlug, "VALIDATE_CONFIG" as MeetingConnectionTestMode)}
+        onClick={() => onRunTest(providerSlug, MeetingConnectionTestMode.ValidateConfig)}
         startIcon={testing ? <CircularProgress size={16} /> : undefined}
       >
         {labels.validateConfig}
@@ -43,7 +43,7 @@ function TestButtonRow({ labels, testing, providerSlug, onRunTest }: TestButtonR
         size="small"
         variant="outlined"
         disabled={testing}
-        onClick={() => onRunTest(providerSlug, "GENERATE_AND_DELETE" as MeetingConnectionTestMode)}
+        onClick={() => onRunTest(providerSlug, MeetingConnectionTestMode.GenerateAndDelete)}
       >
         {labels.generateAndDelete}
       </Button>

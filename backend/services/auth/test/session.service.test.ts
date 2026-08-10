@@ -6,7 +6,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { SessionService } from "@/backend/services/auth/session.service";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import type { SessionSelectType, UserSelectType } from "@/backend/types";
+import type { SessionSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 
 type MockUserContextOptions = {
   role: UserRole;
@@ -40,8 +40,9 @@ function mockSafeUser(id: string): UserSelectType {
     createdAt: new Date(),
     updatedAt: new Date(),
     emailVerifiedAt: null,
+    lastLoginAt: null,
     displayCurrency: null,
-  } as unknown as UserSelectType;
+  };
 }
 
 function mockUserContext({
@@ -53,19 +54,34 @@ function mockUserContext({
   return { permissions, permissionGroups, isSuperAdmin, role };
 }
 
-function _setupTeacherProfileMocks({ userId, nationalId }: SetupTeacherProfileMocksOptions): void {
+function mockTeacher(userId: string, nationalId: string | null): TeacherSelectType {
+  return {
+    id: "teacher-1",
+    userId,
+    nationality: null,
+    nationalId,
+    phone: null,
+    dateOfBirth: null,
+    gender: null,
+    address: null,
+    qualifications: null,
+    countryCode: null,
+    hourlyRate: null,
+    rateCurrency: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+function setupTeacherProfileMocks({ userId, nationalId }: SetupTeacherProfileMocksOptions): void {
   spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser(userId));
   spyOn(PermissionsService, "getUserContext").mockResolvedValue(mockUserContext({ role: UserRole.TEACHER }));
   spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockResolvedValue("teacher-1");
   spyOn(ParentPortalService, "resolveParentIdForUser").mockResolvedValue(null);
-  spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
-    id: "teacher-1",
-    userId,
-    nationalId,
-  } as never);
+  spyOn(TeacherRepository, "findByUserId").mockResolvedValue(mockTeacher(userId, nationalId));
 }
 
-function _restoreTeacherProfileMocks(): void {
+function restoreTeacherProfileMocks(): void {
   spyOn(UserRepository, "findSafeById").mockRestore();
   spyOn(PermissionsService, "getUserContext").mockRestore();
   spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockRestore();
@@ -79,9 +95,9 @@ function mockSession(userId: string): SessionSelectType {
     userId,
     ipAddress: null,
     userAgent: null,
-    payload: undefined,
+    payload: "mock-payload",
     lastActivity: 100n,
-  } as unknown as SessionSelectType;
+  };
 }
 
 function restoreSessionMocks(): void {
@@ -91,26 +107,26 @@ function restoreSessionMocks(): void {
 }
 
 afterEach(() => {
-  _restoreTeacherProfileMocks();
+  restoreTeacherProfileMocks();
 });
 
 describe("SessionService.getCurrentUserProfile nationalIdComplete flag", () => {
   test("returns nationalIdComplete=true for a teacher with nationalId set", async () => {
-    _setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: "29601234567818" });
+    setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: "29601234567818" });
 
     const profile = await SessionService.getCurrentUserProfile(TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(true);
   });
 
   test("returns nationalIdComplete=false for a teacher with nationalId null", async () => {
-    _setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: null });
+    setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: null });
 
     const profile = await SessionService.getCurrentUserProfile(TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(false);
   });
 
   test("returns nationalIdComplete=false for a teacher with whitespace-only nationalId", async () => {
-    _setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: "   " });
+    setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: "   " });
 
     const profile = await SessionService.getCurrentUserProfile(TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(false);
@@ -121,7 +137,7 @@ describe("SessionService.getCurrentUserProfile nationalIdComplete flag", () => {
     spyOn(PermissionsService, "getUserContext").mockResolvedValue(mockUserContext({ role: UserRole.PARENT }));
     spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockResolvedValue(null);
     spyOn(ParentPortalService, "resolveParentIdForUser").mockResolvedValue("parent-1");
-    const teacherSpy = spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null as never);
+    const teacherSpy = spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null);
 
     const profile = await SessionService.getCurrentUserProfile(NON_TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(true);

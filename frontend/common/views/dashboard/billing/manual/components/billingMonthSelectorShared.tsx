@@ -2,6 +2,7 @@
 
 import { Box, FormHelperText } from "@mui/material";
 import { Controller } from "react-hook-form";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { StyledSectionLabel } from "@/frontend/common/views/dashboard/billing/manual/components/billingMonthSelectorShared.styles";
 import type { BillingMonthSelectorSharedProps } from "@/frontend/common/views/dashboard/billing/manual/types/billingMonthSelectorShared.types";
 import { BILLING_MONTH_IDS } from "@/shared/constants/billing-months";
@@ -33,7 +34,7 @@ export function BillingMonthSelectorShared({ props, slots }: Readonly<BillingMon
 
           return (
             <Box>
-              <Box sx={{ display: "grid", ...gridSx }}>
+              <Box sx={mergeSx({ display: "grid" }, gridSx)}>
                 {BILLING_MONTH_IDS.map(monthId => {
                   const isChecked = selectedMonths.includes(monthId);
 

@@ -109,7 +109,7 @@ export const CustomStyling: Story = {
       px: 4,
       backgroundColor: (theme: Theme) => theme.palette.primaryContainer,
       borderRadius: 3,
-      border: `1px solid ${(theme: Theme) => theme.palette.primary.main}`,
+      border: (theme: Theme) => `1px solid ${theme.palette.primary.main}`,
     } as const,
   },
 };
@@ -167,7 +167,7 @@ export const AllVariants: Story = {
               px: 4,
               backgroundColor: (theme: Theme) => theme.palette.primaryContainer,
               borderRadius: 3,
-              border: `1px solid ${(theme: Theme) => theme.palette.primary.main}`,
+              border: (theme: Theme) => `1px solid ${theme.palette.primary.main}`,
             } as const
           }
         />

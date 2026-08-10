@@ -15,6 +15,21 @@ function loc(en: string, ar?: string) {
   return { ar: ar ?? en, en };
 }
 
+const emptyArray = (): unknown[] => [];
+
+const updateReturningUser = () => ({
+  returning: () => Promise.resolve([{ id: "some-user-id" }]),
+});
+
+function isDbTx(value: unknown): value is DBTransaction {
+  return typeof value === "object" && value !== null;
+}
+
+function asDbTx(mock: object): DBTransaction {
+  if (isDbTx(mock)) return mock;
+  throw new Error("Mock is not a valid DBTransaction");
+}
+
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
   try {
@@ -23,7 +38,8 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) return errorCaught;
+  throw new Error("Expected Error instance to be thrown");
 }
 
 function staffTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
@@ -460,39 +476,26 @@ describe("StaffProfileRepository — create", () => {
 
     await StaffProfileRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx);
 
-    let error: unknown = null;
-    try {
-      await StaffProfileRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx, "ar");
-    } catch (e) {
-      error = e;
-    }
+    const error = await expectRepoError(() =>
+      StaffProfileRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx, "ar")
+    );
 
-    expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("موجود بالفعل");
+    expect(error.message).toContain("موجود بالفعل");
   });
 
   staffTest("rejects when create insertion fails", async () => {
-    const selectLimit = () => [];
-    const selectWhere = () => ({ limit: selectLimit });
+    const selectWhere = () => ({ limit: emptyArray });
     const selectFrom = () => ({ where: selectWhere });
     const selectFn = () => ({ from: selectFrom });
-    const insertReturning = () => [];
-    const insertValues = () => ({ returning: insertReturning });
+    const insertValues = () => ({ returning: emptyArray });
     const insertFn = () => ({ values: insertValues });
-    const mockTx = { select: selectFn, insert: insertFn } as unknown as DBTransaction;
+    const mockTx = asDbTx({ select: selectFn, insert: insertFn });
 
-    let error: unknown = null;
-    try {
-      await StaffProfileRepository.create(
-        { userId: randomUUID(), createdAt: new Date(), updatedAt: new Date() },
-        mockTx
-      );
-    } catch (e) {
-      error = e;
-    }
+    const error = await expectRepoError(() =>
+      StaffProfileRepository.create({ userId: randomUUID(), createdAt: new Date(), updatedAt: new Date() }, mockTx)
+    );
 
-    expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("Failed");
+    expect(error.message).toContain("Failed");
   });
 
   staffTest("throws error when manager profile update select fails", async () => {
@@ -509,27 +512,20 @@ describe("StaffProfileRepository — create", () => {
     const outerWhere = () => ({ limit: limitHandler });
     const fromFn = () => ({ innerJoin, where: outerWhere });
     const selectFn = () => ({ from: fromFn });
-    const updateSetWhere = () => ({
-      returning: () => Promise.resolve([{ id: "some-user-id" }]),
-    });
-    const updateSet = () => ({ where: updateSetWhere });
+    const updateSet = () => ({ where: updateReturningUser });
     const updateFn = () => ({ set: updateSet });
-    const mockTx = { select: selectFn, update: updateFn } as unknown as DBTransaction;
+    const mockTx = asDbTx({ select: selectFn, update: updateFn });
 
-    let error: unknown = null;
-    try {
-      await StaffProfileRepository.updateManagerProfile(
+    const error = await expectRepoError(() =>
+      StaffProfileRepository.updateManagerProfile(
         "some-id",
         { status: AccountStatus.DEACTIVATED, statusIsSet: true },
         undefined,
         mockTx
-      );
-    } catch (e) {
-      error = e;
-    }
+      )
+    );
 
-    expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("Failed");
+    expect(error.message).toContain("Failed");
   });
 
   test("supports calls without tx", async () => {

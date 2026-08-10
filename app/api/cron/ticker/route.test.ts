@@ -5,7 +5,7 @@ const { NextRequest: NextRequestImpl, NextResponse } = await import("next/server
 // --- Mock logger ---
 
 const noop = () => {};
-mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));
@@ -13,7 +13,7 @@ mock.module("@/backend/lib/logger", () => ({
 // --- Mock cron-auth ---
 
 const TEST_SECRET = "test-cron-secret-1234567890abcdef";
-mock.module("@/backend/lib/cron-auth", () => {
+await mock.module("@/backend/lib/cron-auth", () => {
   const verifyCronSecretAuth = (request: { method: string; headers: Headers }) => {
     // R1 / R1b: Production without CRON_SECRET → 500 (fail-loud for server misconfiguration)
     if (process.env.NODE_ENV === "production" && !process.env.CRON_SECRET) {
@@ -42,7 +42,7 @@ mock.module("@/backend/lib/cron-auth", () => {
 const mockDispatchDue = mock(async () => ({ dispatched: 2, skipped: 1 }));
 const mockReconcile = mock(async () => 0);
 
-mock.module("@/backend/services/cron/cron.service", () => ({
+await mock.module("@/backend/services/cron/cron.service", () => ({
   CronService: {
     dispatchDueSchedules: mockDispatchDue,
     reconcileStuckRuns: mockReconcile,
@@ -52,7 +52,7 @@ mock.module("@/backend/services/cron/cron.service", () => ({
 // --- Mock runDrainLoop ---
 
 const mockDrainLoop = mock(async () => ({ processed: 3, failed: 0, retried: 0 }));
-mock.module("@/backend/services/cron/cron-worker.runtime", () => ({
+await mock.module("@/backend/services/cron/cron-worker.runtime", () => ({
   runDrainLoop: mockDrainLoop,
 }));
 

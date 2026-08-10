@@ -3,6 +3,7 @@
 > **Plan**: 07 — Storage & File Management
 > **Depends On**: Plan 4 (Services & Business Logic)
 > **Related Docs**: MASTER_ARCHITECTURE.md; requirements.md; design.md
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 
 ---
 
@@ -30,7 +31,47 @@ T-07-01 (Schema: junction tables)
 
 ## Execution Order
 
-1. T-07-01 → T-07-02 → T-07-03 → T-07-04 → T-07-05, T-07-06 (parallel) → T-07-07 → T-07-08 → T-07-09
+1. T-07-01 → T-07-02 → T-07-03 → T-07-04 → T-07-05, T-07-06 (via parallel subagents) → T-07-07 → T-07-08 → T-07-09
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T-07-01
+- Tasks: T-07-01 (Schema: junction tables)
+- Rationale: Foundation task — no internal dependencies, must complete before any type or repository work begins
+
+### Wave 2: T-07-02
+- Tasks: T-07-02 (Types: ValidReferenceTable + storage types)
+- Rationale: Depends on T-07-01 schema; types must be defined before repository methods can use them
+
+### Wave 3: T-07-03
+- Tasks: T-07-03 (Repository: junction insert, fan-out, cleanup)
+- Rationale: Depends on T-07-02 types; repository methods consume the type union and schema tables
+
+### Wave 4: T-07-04
+- Tasks: T-07-04 (Service: CertificateStorageService namespace)
+- Rationale: Depends on T-07-03 repository; service layer calls repository methods and is consumed by access checks, i18n consumers, and the cron endpoint
+
+### Wave 5: T-07-05, T-07-06
+- Tasks: T-07-05 (Service: checkUserAccessThroughEntity extension), T-07-06 (i18n: locale types, namespace, AR + EN)
+- Rationale: Both depend only on already-completed tasks (T-07-04 and T-07-02 respectively) and have no interdependencies — they touch different file trees (backend services vs shared locale)
+
+### Wave 6: T-07-07
+- Tasks: T-07-07 (API: cron storage-cleanup endpoint)
+- Rationale: Depends on T-07-04 service; runs after the parallel pair per the execution order to avoid merge conflicts in the service layer
+
+### Wave 7: T-07-08
+- Tasks: T-07-08 (Quality gate: full verification)
+- Rationale: Depends on all prior tasks (T-07-01 through T-07-07) — runs the full quality gate across all touched files
+
+### Final Wave: Knowledge Propagation
+- Task: T-07-09 (Knowledge propagation)
+- Rationale: Must run after all other tasks complete — documents the full implementation pattern and updates AGENTS.md files
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -62,13 +103,10 @@ T-07-01 (Schema: junction tables)
 
 ### Quality Loop
 
-```bash
-bun tsgo
-bun biome:check --write
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"T-07-01","files":["backend/db/schema/storage/storage.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/db/schema/storage/storage.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 
@@ -109,13 +147,12 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### Quality Loop
 
-```bash
-bun tsgo
-bun biome:check --write
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"T-07-02","files":["backend/types/storage/storage.types.ts","backend/types/certificates/certificate-storage.types.ts","backend/types/certificates/index.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/types/storage/storage.types.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/types/certificates/certificate-storage.types.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/types/certificates/index.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 
@@ -172,13 +209,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### Quality Loop
 
-```bash
-bun tsgo
-bun biome:check --write
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"T-07-03","files":["backend/db/repo/storage/storage.repository.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/db/repo/storage/storage.repository.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 
@@ -258,13 +292,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### Quality Loop
 
-```bash
-bun tsgo
-bun biome:check --write
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"T-07-04","files":["backend/services/storage/certificate-storage.service.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/storage/certificate-storage.service.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 
@@ -308,13 +339,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### Quality Loop
 
-```bash
-bun tsgo
-bun biome:check --write
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"T-07-05","files":["backend/services/storage/storage.service.ts","backend/services/storage/certificate-storage.service.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/storage/storage.service.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/storage/certificate-storage.service.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 
@@ -368,13 +397,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### Quality Loop
 
-```bash
-bun tsgo
-bun biome:check --write
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"T-07-06","files":["shared/locale/types/dashboard/certificates/storage.ts","shared/locale/namespaces/dashboard/certificates/storage.namespace.ts","shared/locale/ar/dashboard/certificates/storage.ts","shared/locale/en/dashboard/certificates/storage.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/storage.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/certificates/storage.namespace.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/storage.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/storage.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 
@@ -417,13 +446,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### Quality Loop
 
-```bash
-bun tsgo
-bun biome:check --write
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"T-07-07","files":["app/api/cron/storage-cleanup/route.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts app/api/cron/storage-cleanup/route.ts --lifecycle codescene
+  ```
 
 ### Instruction Verification
 
@@ -510,7 +536,12 @@ This IS the quality loop — if any step fails, fix the offending file from the 
 
 ### Quality Loop
 
-Documentation files — run `bun tsgo` and `bun biome:check` to ensure no broken imports if the docs reference code symbols. No lint needed for pure prose docs, but biome formatting should pass.
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/storage/adding-entity-to-storage.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts docs/storage/certificate-storage-conventions.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/storage/AGENTS.md --lifecycle codescene
+  ```
 
 ### Instruction Verification
 

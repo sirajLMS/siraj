@@ -26,18 +26,19 @@ const wabaId = process.env.WHATSAPP_WABA_ID ?? "";
 const hasCreds = Boolean(accessToken && wabaId);
 const describeLive = describeLiveWhen(hasCreds, "list-phone-numbers @live-comm");
 
+const fetchPage = async (request: GraphApiRequestInit): Promise<ListPhoneNumbersResponseBody> => {
+  const response = await fetch(request.url, {
+    ...request.init,
+    signal: AbortSignal.timeout(10_000),
+  });
+  expect(response.ok).toBe(true);
+  const data: ListPhoneNumbersResponseBody = await response.json();
+  return data;
+};
+
 describeLive("list-phone-numbers @live-comm", () => {
   test("collectAllPhoneNumbers follows cursor pagination and terminates (P2)", async () => {
     const ctx: GraphApiRequestContext = { accessToken, apiVersion: undefined };
-
-    const fetchPage = async (request: GraphApiRequestInit): Promise<ListPhoneNumbersResponseBody> => {
-      const response = await fetch(request.url, {
-        ...request.init,
-        signal: AbortSignal.timeout(10_000),
-      });
-      expect(response.ok).toBe(true);
-      return response.json() as Promise<ListPhoneNumbersResponseBody>;
-    };
 
     const allPhoneNumbers = await collectAllPhoneNumbers(ctx, { wabaId }, fetchPage);
 
@@ -56,7 +57,7 @@ describeLive("list-phone-numbers @live-comm", () => {
     const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10_000) });
     expect(response.ok).toBe(true);
 
-    const body = (await response.json()) as ListPhoneNumbersResponseBody;
+    const body: ListPhoneNumbersResponseBody = await response.json();
     const { phoneNumbers, nextCursor } = parseResponse(body);
 
     expect(phoneNumbers.length).toBeGreaterThan(0);

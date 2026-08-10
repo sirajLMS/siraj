@@ -52,7 +52,7 @@ const isRecentSuccessMock = mock(async (): Promise<boolean> => false);
 const getRunningSyncRunMock = mock(async (): Promise<SyncRunRow | null> => null);
 const updateExchangeRateInTxMock = mock(async () => ({}));
 
-mock.module("@/backend/db/repo", () => ({
+await mock.module("@/backend/db/repo", () => ({
   BillingRepository: {
     updateExchangeRateInTx: updateExchangeRateInTxMock,
   },
@@ -67,7 +67,7 @@ mock.module("@/backend/db/repo", () => ({
 
 const transactionMock = mock(async (cb: (tx: unknown) => Promise<unknown>) => cb({}));
 
-mock.module("@/backend/db/drizzleDb", () => ({
+await mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     transaction: transactionMock,
   },
@@ -75,14 +75,14 @@ mock.module("@/backend/db/drizzleDb", () => ({
 
 const hasPermissionMock = mock(async (): Promise<boolean> => true);
 
-mock.module("@/backend/services", () => ({
+await mock.module("@/backend/services", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
   getRedisService: async () => ({}),
 }));
 
-mock.module("@/backend/lib", () => ({
+await mock.module("@/backend/lib", () => ({
   logger: {
     log: () => {},
     info: () => {},
@@ -95,7 +95,7 @@ mock.module("@/backend/lib", () => ({
 // Service now calls getServerTranslations(locale).errorsTranslations (real import).
 // Mock returns the required literal strings so the assertion expectations match.
 // fxSyncAlreadyRunning is preserved as a raw literal — no schema counterpart.
-mock.module("@/shared/locale/server-graphql", () => ({
+await mock.module("@/shared/locale/server-graphql", () => ({
   getServerTranslations: () => ({
     errorsTranslations: {
       insufficientPermissions: "insufficientPermissions",
@@ -129,7 +129,7 @@ const providerInstance = {
   validateConfig: () => true,
 };
 
-mock.module("@/backend/services/fx/providers/FxRateProviderFactory", () => ({
+await mock.module("@/backend/services/fx/providers/FxRateProviderFactory", () => ({
   getFxRateProvider: mock(async () => providerInstance),
   resetFxRateProvider: () => {},
   fxRateProvider: {
@@ -171,6 +171,20 @@ function resetMocks(): void {
   hasPermissionMock.mockResolvedValue(true);
 }
 
+// Type guards for mock call argument inspection (avoids unsafe type assertions)
+
+function isCreateInput(value: unknown): value is { provider: FxProvider; triggerType: FxSyncTrigger } {
+  return typeof value === "object" && value !== null && "provider" in value && "triggerType" in value;
+}
+
+function isCompleteSuccessPatch(value: unknown): value is { status: FxSyncStatus; pairsWritten: number } {
+  return typeof value === "object" && value !== null && "status" in value && "pairsWritten" in value;
+}
+
+function isCompleteFailurePatch(value: unknown): value is { status: FxSyncStatus; errorMessage: string } {
+  return typeof value === "object" && value !== null && "status" in value && "errorMessage" in value;
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -191,7 +205,8 @@ async function expectRejection(
     thrown = error;
   }
   expect(thrown).toBeInstanceOf(Error);
-  expect((thrown as Error).message).toBe(expectedMessage);
+  if (!(thrown instanceof Error)) throw new Error("Expected thrown to be an Error");
+  expect(thrown.message).toBe(expectedMessage);
   return {
     createSyncRunCalls: createSyncRunMock.mock.calls.length,
     completeSyncRunCalls: completeSyncRunMock.mock.calls.length,
@@ -215,18 +230,18 @@ describe("FxIngestionService.refreshRates", () => {
     expect(typeof result.syncRunId).toBe("string");
 
     expect(createSyncRunMock).toHaveBeenCalledTimes(1);
-    const createCalls = createSyncRunMock.mock.calls as unknown as Array<
-      [{ provider: FxProvider; triggerType: FxSyncTrigger }]
-    >;
+    const createCalls: ReadonlyArray<readonly unknown[]> = createSyncRunMock.mock.calls;
     const createArg = createCalls[0]?.[0];
+    if (!isCreateInput(createArg)) throw new Error("Expected createSyncRun call arg");
     expect(createArg.provider).toBe(FxProvider.OpenExchangeRates);
     expect(createArg.triggerType).toBe(FxSyncTrigger.Manual);
 
     expect(completeSyncRunMock).toHaveBeenCalledTimes(1);
-    const completeCalls = completeSyncRunMock.mock.calls as unknown as Array<
-      [string, { status: FxSyncStatus; pairsWritten: number }]
-    >;
-    const [completeId, completePatch] = completeCalls[0] ?? ["", { status: FxSyncStatus.Success, pairsWritten: 0 }];
+    const completeCalls: ReadonlyArray<readonly unknown[]> = completeSyncRunMock.mock.calls;
+    const completeId = typeof completeCalls[0]?.[0] === "string" ? completeCalls[0][0] : "";
+    const rawPatch = completeCalls[0]?.[1];
+    if (!isCompleteSuccessPatch(rawPatch)) throw new Error("Expected completeSyncRun success patch");
+    const completePatch = rawPatch;
     expect(completeId).toBe("sync-run-1");
     expect(completePatch.status).toBe(FxSyncStatus.Success);
     expect(completePatch.pairsWritten).toBe(2);
@@ -250,10 +265,11 @@ describe("FxIngestionService.refreshRates", () => {
     expect(result.errorMessage).toBe("provider boom");
 
     expect(completeSyncRunMock).toHaveBeenCalledTimes(1);
-    const completeCalls = completeSyncRunMock.mock.calls as unknown as Array<
-      [string, { status: FxSyncStatus; errorMessage: string }]
-    >;
-    const [completeId, completePatch] = completeCalls[0] ?? ["", { status: FxSyncStatus.Failed, errorMessage: "" }];
+    const completeCalls: ReadonlyArray<readonly unknown[]> = completeSyncRunMock.mock.calls;
+    const completeId = typeof completeCalls[0]?.[0] === "string" ? completeCalls[0][0] : "";
+    const rawPatch = completeCalls[0]?.[1];
+    if (!isCompleteFailurePatch(rawPatch)) throw new Error("Expected completeSyncRun failure patch");
+    const completePatch = rawPatch;
     expect(completeId).toBe("sync-run-1");
     expect(completePatch.status).toBe(FxSyncStatus.Failed);
     expect(completePatch.errorMessage).toBe("provider boom");

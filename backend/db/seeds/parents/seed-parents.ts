@@ -25,18 +25,17 @@ export async function seedOrGet(users: UserSelectType[], config?: SeedConfig) {
     throw new Error("No parent users found in seed data.");
   }
 
-  const results = [];
-  for (let i = 0; i < parentUsers.length; i++) {
-    const user = parentUsers[i];
-    const timezone = i === 0 ? IanaTimezone.Africa_Cairo : pickTimezoneForIndex(i);
-    const status = cycleAtIndex(ALL_PARENT_STATUSES, i);
-    const parent = await PersonaSeedService.seedParentProfile({
-      userId: user.id,
-      timezone,
-      status,
-    });
-    results.push(parent);
-  }
+  const results = await Promise.all(
+    parentUsers.map((user, i) => {
+      const timezone = i === 0 ? IanaTimezone.Africa_Cairo : pickTimezoneForIndex(i);
+      const status = cycleAtIndex(ALL_PARENT_STATUSES, i);
+      return PersonaSeedService.seedParentProfile({
+        userId: user.id,
+        timezone,
+        status,
+      });
+    })
+  );
 
   if (shouldSeedExtendedFiles(seedConfig)) {
     await linkAvatarsToEntities({

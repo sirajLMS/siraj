@@ -1,5 +1,7 @@
 # Plan 16 — Certificate List & Management: Task Breakdown
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
 ## Document Info
 
 | Field | Value |
@@ -45,11 +47,13 @@ Task 1 (i18n namespace)
 
 ### Execution Order
 
+**Execution order**: T1 → T2 → T3 → T4 → (T5, T6, T7, T8 via parallel subagents after T4) → T9 → T10 → T11 → T12 → (T13, T14 via parallel subagents after T12) → (T15, T16 via parallel subagents after T13/T14) → T17 → (T18, T19 via parallel subagents after T17) → T20 → T21
+
 1. **Task 1**: i18n namespace (foundation — all components need labels)
 2. **Task 2**: Zustand store (state management foundation — all views depend on it)
 3. **Task 3**: GraphQL documents (data layer — container depends on these)
 4. **Task 4**: Container + ViewModel (orchestrates queries, mutations, store)
-5. **Task 5** + **Task 6**: Desktop view + Mobile view (parallel after container)
+5. **Task 5** + **Task 6**: Desktop view + Mobile view (via parallel subagents after container)
 6. **Task 7**: Revoke dialog + batch confirm dialog
 7. **Task 8**: FilterBar + FilterDrawer + DesktopMetricCardGrid + MobileMetricCardGrid
 8. **Task 9**: CertificateStatusBadge + CertificateCardItem (shared sub-components)
@@ -57,6 +61,74 @@ Task 1 (i18n namespace)
 10. **Task 11**: CSV export + batch re-download ZIP
 11. **Task 12**: Integration verification (refetch, cache, navigation)
 12. **Task 13**: Knowledge propagation (final)
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T1
+- Tasks: T1 (i18n namespace)
+- Rationale: Foundation task with no dependencies — all other tasks need i18n labels. Must complete before any other task starts.
+
+### Wave 2: T2
+- Tasks: T2 (Zustand store)
+- Rationale: Depends on T1 (i18n types). Must complete before GraphQL documents can reference store types. Sequential dependency on Wave 1.
+
+### Wave 3: T3
+- Tasks: T3 (GraphQL documents)
+- Rationale: Depends on T2 (store types) and Plan 5 (GraphQL schema). Must complete before the container can import query/mutation documents. Sequential dependency on Wave 2.
+
+### Wave 4: T4
+- Tasks: T4 (Container + ViewModel)
+- Rationale: Depends on T1 (i18n), T2 (store), T3 (GraphQL documents). Orchestrates all queries, mutations, and store interactions. Must complete before any view components can be built. Sequential dependency on Wave 3.
+
+### Wave 5: T5, T6, T7, T8
+- Tasks: T5 (Desktop view — AppDataGrid), T6 (Mobile view — card list), T7 (Revoke dialog + batch confirm), T8 (FilterBar + FilterDrawer + metrics)
+- Rationale: All four tasks depend only on T4 (Container + ViewModel). They create independent view/dialog/filter components with no interdependencies — each imports from the container but not from each other. Safe to run as 4 parallel subagents.
+
+### Wave 6: T9
+- Tasks: T9 (App Router page + sidebar navigation)
+- Rationale: Depends on T4 (container) and T8 (filter panel). Must complete before the page can render. Sequential dependency on Wave 5.
+
+### Wave 7: T10
+- Tasks: T10 (Integration verification)
+- Rationale: Depends on T4–T9 (all components built). Verifies end-to-end integration. Sequential dependency on Wave 6.
+
+### Wave 8: T11
+- Tasks: T11 (Knowledge propagation — base)
+- Rationale: Depends on T10 (verification complete). Records base-plan knowledge artifacts. Sequential dependency on Wave 7.
+
+### Wave 9: T12
+- Tasks: T12 (CertificateListPage component)
+- Rationale: Depends on T9 (App Router page) and T4 (Container + ViewModel). Builds the top-level desktop page wrapper. Sequential dependency on Wave 8.
+
+### Wave 10: T13, T14
+- Tasks: T13 (CertificateTable — AppDataGrid primary view), T14 (CertificateCard + CertificateGrid — grid view)
+- Rationale: Both depend on T4 (Container — exports row props) and T12 (page hosts the table/grid). T13 and T14 are independent components consumed by the page — no interdependency between them. Safe to run as 2 parallel subagents.
+
+### Wave 11: T15, T16
+- Tasks: T15 (RevokeCertificateDialog), T16 (CertificateExportDialog)
+- Rationale: Both depend on T4 (Container calls dialog open actions) and T13/T14 (table/card row actions). The two dialogs are independent components with no shared code — safe to run as 2 parallel subagents.
+
+### Wave 12: T17
+- Tasks: T17 (useCertificateListStore enhanced)
+- Rationale: Depends on T2 (existing certListStore), T3 (GraphQL documents), and T15/T16 (annotations to revoke/export actions). Extends the existing store with new dialog/view-mode actions. Sequential dependency on Wave 11.
+
+### Wave 13: T18, T19
+- Tasks: T18 (5 component tests), T19 (6 E2E tests)
+- Rationale: Both depend on T12–T17 (all components exist). Component tests (T18) use mocked Apollo (no server); E2E tests (T19) require `build:test` and run on the test port range. They are independent test suites — safe to run as 2 parallel subagents. (T19 requires `build:test` prerequisite but does not depend on T18 results.)
+
+### Wave 14: T20
+- Tasks: T20 (Quality loop per file)
+- Rationale: Depends on T12–T19 (all new files exist). Runs per-file progressive quality gate and full-repo quality gate. Must complete after all test files exist. Sequential dependency on Wave 13.
+
+### Final Wave: Knowledge Propagation
+- Task: T21 (Knowledge propagation — certificate list UI)
+- Rationale: Must run after all other tasks complete. Depends on T20 (quality gate clean) and packages knowledge artifacts for Plan 21.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -79,18 +151,10 @@ For every file created/modified in this plan, read the applicable AGENTS.md and 
 
 After creating or modifying each file, run the per-file verification loop BEFORE moving to the next task:
 
-1. **tsgo**: `bun tsgo` — type checking (safe to run concurrently)
-2. **biome**: `bun biome:check` — formatting + lint (safe to run concurrently)
-3. **lint** (via queue client): Submit file to lint queue for ESLint check
+The per-file progressive verification runs type checking → formatting → lint → codescene code-health analysis in one command:
 
 ```bash
-# Start lint queue server (background) — once at start of plan
-~/.bun/bin/bun run scripts/lint-queue-server.ts &
-
-# Per-file lint (example)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"task1-certlist","files":["shared/locale/types/dashboard/certificates/list.ts","shared/locale/en/dashboard/certificates/list.ts"]}'
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
 ---
@@ -175,7 +239,18 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 #### 1.7 Verify namespace compiles
 
-**Action**: Run `bun tsgo` to verify the entire i18n namespace compiles correctly and all type references resolve. Also verify `shared/locale/namespaces/index.ts` re-exports the new namespace (if the barrel file pattern requires it — check existing entries like `export * from "./dashboard/students/directory.namespace"`).
+**Action**: Verify the entire i18n namespace compiles correctly and all type references resolve. Also verify `shared/locale/namespaces/index.ts` re-exports the new namespace (if the barrel file pattern requires it — check existing entries like `export * from "./dashboard/students/directory.namespace"`).
+
+**Quality loop**: Run the per-file progressive quality loop on the i18n files created/modified in this task:
+
+```bash
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/list.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/list.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/list.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/certificates/list.namespace.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/translation.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/types/message.ts --lifecycle codescene
+```
 
 **AGENTS.md files to read for this task**:
 - `shared/AGENTS.md` (i18n namespace registration steps, layer isolation, barrel re-export rules)
@@ -372,6 +447,7 @@ Do NOT define `CertificateFilters` here — the store uses individual fields (no
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (container + view)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T6, T7, T8.
 **Requirements**: REQ-16.7 (desktop grid columns), REQ-16.22–16.24 (column config), REQ-16.36 (status badges)
 
 ### Subtasks
@@ -430,6 +506,7 @@ Do NOT define `CertificateFilters` here — the store uses individual fields (no
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 4 (container + view)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T5, T7, T8.
 **Requirements**: REQ-16.8 (mobile card list), REQ-16.39–16.40 (navigation)
 
 ### Subtasks
@@ -479,6 +556,7 @@ Do NOT define `CertificateFilters` here — the store uses individual fields (no
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 4 (container + view)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T5, T6, T8.
 **Requirements**: §2.8 (revoke workflow), REQ-16.30 (bulk action confirmation)
 
 ### Subtasks
@@ -532,6 +610,7 @@ Do NOT define `CertificateFilters` here — the store uses individual fields (no
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 4 (container + view)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T5, T6, T7.
 **Requirements**: REQ-16.10–16.11 (metrics), REQ-16.15–16.18 (filters)
 
 ### Subtasks
@@ -641,22 +720,24 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 
 ### Subtasks
 
-#### 10.1 Verify type checking
+#### 10.1 Verify type checking, formatting, lint, and code health
 
-**Action**: Run `bun tsgo` to verify all TypeScript types resolve correctly across the entire plan. Fix any type errors in any file.
+**Action**: Run the per-file progressive quality loop on every file created/modified in this plan to verify TypeScript types, formatting, lint, and codescene health all pass:
 
-#### 10.2 Verify Biome formatting
+```bash
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateListPage.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateTable.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateCard.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateGrid.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/RevokeCertificateDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateExportDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certListStore.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certListStore.types.ts --lifecycle codescene
+```
 
-**Action**: Run `bun biome:check` to verify all files are properly formatted. Fix any issues.
+Fix any type errors, formatting issues, or lint violations in any file.
 
-#### 10.3 Verify ESLint
-
-**Action**: Run `bun run lint` (full-repo lint via queue client) to verify no ESLint violations in any file. Fix all violations.
-
-> The lint queue server must be running. Start it with:
-> `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background process)
-
-#### 10.4 Verify dev server renders
+#### 10.2 Verify dev server renders
 
 **Action**: Run `bun run dev` and navigate to `/certificates`:
 - Verify the page loads without errors
@@ -665,7 +746,7 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 - Verify search, filter, pagination work
 - Verify clicking a row navigates to `/certificates/[id]` (will 404 until Plan 18 is built — that's OK, just verify the navigation triggers)
 
-#### 10.5 Verify mutations
+#### 10.3 Verify mutations
 
 **Action**: In the dev server:
 - Select certificates and verify bulk action toolbar appears
@@ -675,7 +756,7 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 - Click Delete on a draft → verify it disappears from list (soft-deleted)
 - Verify error handling: attempt invalid transition and verify error toast/snackbar
 
-#### 10.6 Verify i18n
+#### 10.4 Verify i18n
 
 **Action**: Switch locale to Arabic (change cookie or URL param):
 - Verify all labels render in Arabic
@@ -712,12 +793,10 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 
 **Action**: Run the full quality gate to verify the entire plan passes:
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun quality-gate
 ```
 
-All three must pass clean. Fix any failures before marking this task complete.
+Must pass clean. Fix any failures before marking this task complete.
 
 ---
 
@@ -764,7 +843,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - `frontend/views/AGENTS.md` (view conventions, MUI v9 style props)
 - `frontend/AGENTS.md` (MUI v9, icon names, theme)
 
-**Quality loop**: tsgo + biome + lint (per `[scripts/health/sub-loop.ts](scripts/health/sub-loop.ts)` with `--lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (per `[scripts/health/sub-loop.ts](scripts/health/sub-loop.ts)` with `--lifecycle codescene`).
 
 #### 12.2 Wire FilterBar to store
 
@@ -784,6 +863,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Task 4 (Container + ViewModel — exports the row props), Task 12 (page hosts the table)
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T14.
 **Requirements**: REQ-16.1–16.7 (columns, sort), REQ-16.19–16.21 (pagination), REQ-16.25–16.30 (bulk action bar), §B (column spec)
 
 ### Subtasks
@@ -804,7 +884,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 **AGENTS.md files to read**:
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/components/ui/AGENTS.md` (if present), root `AGENTS.md`.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -812,6 +892,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (Container — same Props shape as the mobile `CertificateCardItem`), Task 12 (page swaps to grid view)
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T13.
 **Requirements**: REQ-16.1 (list view alt), §C (card spec)
 
 ### Subtasks
@@ -837,7 +918,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Content**: Map the current-page items to `<CertificateCard>` inside `<Grid container spacing={{ xs: 2, md: 3 }}>` — each item wrapped in `<Grid item xs={12} sm={6} md={4} lg={3}>`. Below the grid render the same page-size selector and pager used by `CertificateTable` so both views share pagination state from the store.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -845,6 +926,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (Container calls `openRevokeDialog`), Task 13 (table single-row Revoke action), Plan 5 (revoke/batch-revoke GraphQL mutations — see Task 3 documents)
+> **Parallelizable**: This task runs as a subagent in Wave 11 alongside T16.
 **Requirements**: REQ-16.31–16.35 (revoke workflow), §D (dialog spec)
 
 ### Subtasks
@@ -869,7 +951,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, root `AGENTS.md`.
 - Cross-check §Status Badge Mapping to ensure the list re-renders with the new status badge after a successful revoke.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -877,6 +959,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (Container calls `openExportDialog`), Task 13 (table Export button), Plan 5 (export query/mutation)
+> **Parallelizable**: This task runs as a subagent in Wave 11 alongside T15.
 **Requirements**: REQ-16.36–16.40 (export workflow), §E (dialog spec)
 
 ### Subtasks
@@ -894,7 +977,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - Open the returned download URL via `window.open(downloadUrl, '_blank')`.
 - Show a brief success snackbar; on error show the i18n `export.error` message.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -935,7 +1018,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - `frontend/common/stores/AGENTS.md` (Zustand conventions, no persistence for directory stores).
 - `frontend/common/graphql/AGENTS.md` for the query/mutation imports used by the new actions.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -943,6 +1026,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 5-6 hours
 **Dependencies**: Tasks 12–17 (all components exist), Plan 5 (mock Apollo providers)
+> **Parallelizable**: This task runs as a subagent in Wave 13 alongside T19.
 **Requirements**: REQ-16.1–16.40 (behavioural coverage), §Component test conventions
 
 ### Subtasks
@@ -1006,7 +1090,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - `test/ui/AGENTS.md` and `tests.instructions.md` (component-test conventions, mock Apollo, no server).
 - `frontend/AGENTS.md` (for MUI v9 style notes when writing assertions).
 
-**Quality loop per file**: tsgo + biome + lint via `sub-loop.ts --lifecycle lint`. For per-test-file run use `bun run scripts/run-test/run-test.ts <test-path>`.
+**Quality loop per file**: tsgo + biome + lint via `sub-loop.ts --lifecycle codescene`. For per-test-file run use `bun run scripts/run-test/run-test.ts <test-path>`.
 
 ---
 
@@ -1014,6 +1098,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Task 10 (dev server integration verified), Tasks 12–17 (page, table, card, dialogs)
+> **Parallelizable**: This task runs as a subagent in Wave 13 alongside T18.
 **Requirements**: REQ-16.1–16.40 (end-to-end verification on a production build)
 
 ### Prerequisites
@@ -1086,7 +1171,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 Run the progressive per-file loop on every new file to catch issues at the file level before they propagate to the full quality gate:
 
 ```bash
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
 Where `<file-path>` is one of:
@@ -1117,12 +1202,10 @@ The loop runs tsgo → biome → lint-queue-client and short-circuits at the fir
 **Action**: After per-file loops pass, run the full-repo quality gate to ensure no regressions elsewhere:
 
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun quality-gate
 ```
 
-All three must pass clean before this task is marked complete. Do NOT run `bun sonar-scan` (subagents are prohibited from running the SonarQube scan; the orchestrator handles that stage).
+Must pass clean before this task is marked complete. Do NOT run `bun sonar-scan` (subagents are prohibited from running the SonarQube scan; the orchestrator handles that stage).
 
 ---
 
@@ -1155,12 +1238,10 @@ All three must pass clean before this task is marked complete. Do NOT run `bun s
 **Action**: Run the full quality gate to verify the entire plan passes clean:
 
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun quality-gate
 ```
 
-All three must pass clean. Fix any failures before marking this task complete.
+Must pass clean. Fix any failures before marking this task complete.
 
 ---
 

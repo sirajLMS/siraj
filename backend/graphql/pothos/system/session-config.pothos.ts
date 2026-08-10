@@ -50,6 +50,7 @@ async function executeSessionConfigMutation<T>(
   } catch (error) {
     handleSessionConfigServiceError(error, tErrors);
   }
+  throw new Error("executeSessionConfigMutation: unreachable");
 }
 
 /**

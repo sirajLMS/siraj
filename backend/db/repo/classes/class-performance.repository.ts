@@ -8,6 +8,33 @@ import type {
   ClassInstancePerformanceSelectType,
 } from "@/backend/types/classes/class-instance-performance.types";
 
+async function upsertOne(
+  t: DBTransaction,
+  input: ClassInstancePerformanceInsertType
+): Promise<ClassInstancePerformanceSelectType> {
+  const [upserted] = await t
+    .insert(classInstancePerformance)
+    .values(input)
+    .onConflictDoUpdate({
+      target: classInstancePerformance.classInstanceId,
+      set: {
+        engagementScore: input.engagementScore,
+        assessmentProgress: input.assessmentProgress,
+        assessmentTotal: input.assessmentTotal,
+        focusLevel: input.focusLevel,
+        sessionHealth: input.sessionHealth,
+        heatmapData: input.heatmapData,
+        latencyMs: input.latencyMs,
+        attendanceRate: input.attendanceRate,
+        avgGrade: input.avgGrade,
+        lastClassDaysAgo: input.lastClassDaysAgo,
+        updatedAt: input.updatedAt,
+      },
+    })
+    .returning();
+  return upserted;
+}
+
 export namespace ClassPerformanceRepository {
   export async function getByClassInstanceId(
     classInstanceId: string,
@@ -79,30 +106,11 @@ export namespace ClassPerformanceRepository {
     if (inputs.length === 0) return [];
 
     const runner = async (t: DBTransaction): Promise<ClassInstancePerformanceSelectType[]> => {
-      const results: ClassInstancePerformanceSelectType[] = [];
-      for (const input of inputs) {
-        const [upserted] = await t
-          .insert(classInstancePerformance)
-          .values(input)
-          .onConflictDoUpdate({
-            target: classInstancePerformance.classInstanceId,
-            set: {
-              engagementScore: input.engagementScore,
-              assessmentProgress: input.assessmentProgress,
-              assessmentTotal: input.assessmentTotal,
-              focusLevel: input.focusLevel,
-              sessionHealth: input.sessionHealth,
-              heatmapData: input.heatmapData,
-              latencyMs: input.latencyMs,
-              attendanceRate: input.attendanceRate,
-              avgGrade: input.avgGrade,
-              lastClassDaysAgo: input.lastClassDaysAgo,
-              updatedAt: input.updatedAt,
-            },
-          })
-          .returning();
-        results.push(upserted);
-      }
+      const results = await inputs.reduce<Promise<ClassInstancePerformanceSelectType[]>>(async (prev, input) => {
+        const accumulated = await prev;
+        const upserted = await upsertOne(t, input);
+        return [...accumulated, upserted];
+      }, Promise.resolve([]));
       return results;
     };
 

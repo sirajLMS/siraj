@@ -12,6 +12,17 @@ import { CountrySelect } from "@/frontend/common/components/ui/input/countrySele
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 
+function isPersonalFieldPath<T extends UserPersonalFieldsShape & FieldValues>(value: string): value is Path<T> {
+  return typeof value === "string";
+}
+
+function personalFieldPath<T extends UserPersonalFieldsShape & FieldValues>(value: string): Path<T> {
+  if (!isPersonalFieldPath<T>(value)) {
+    throw new Error(`Invalid personal field path: ${value}`);
+  }
+  return value;
+}
+
 function validationMessage(translate: OnboardingSectionTranslations, fieldErrorOrMessage: unknown): string | undefined {
   if (!fieldErrorOrMessage) return undefined;
 
@@ -34,12 +45,38 @@ type PersonalFieldProps<T extends UserPersonalFieldsShape & FieldValues> = {
   readonly translate: OnboardingSectionTranslations;
 };
 
+function PersonalTextField<T extends UserPersonalFieldsShape & FieldValues>({
+  register,
+  translate,
+  fieldKey,
+  labelKey,
+  placeholderKey,
+}: Readonly<{
+  register: UseFormRegister<T>;
+  translate: OnboardingSectionTranslations;
+  fieldKey: string;
+  labelKey: keyof OnboardingSectionTranslations["fields"];
+  placeholderKey: keyof OnboardingSectionTranslations["placeholders"];
+}>) {
+  return (
+    <Grid size={{ xs: 12, md: 6 }}>
+      <TextField
+        {...register(personalFieldPath<T>(fieldKey))}
+        label={translate.fields[labelKey]}
+        placeholder={translate.placeholders[placeholderKey]}
+        fullWidth
+        sx={outlinedInputSx}
+      />
+    </Grid>
+  );
+}
+
 export function UserPersonalNationalityField<T extends UserPersonalFieldsShape & FieldValues>({
   control,
   errors,
   translate,
 }: Readonly<PersonalFieldProps<T>>) {
-  const nationalityField = "nationality" as Path<T>;
+  const nationalityField = personalFieldPath<T>("nationality");
 
   return (
     <Grid size={{ xs: 12, md: 6 }}>
@@ -66,23 +103,10 @@ export function UserPersonalNationalityField<T extends UserPersonalFieldsShape &
   );
 }
 
-export function UserPersonalAddressField<T extends UserPersonalFieldsShape & FieldValues>({
-  register,
-  translate,
-}: Readonly<Pick<PersonalFieldProps<T>, "register" | "translate">>) {
-  const addressField = "address" as Path<T>;
-
-  return (
-    <Grid size={{ xs: 12, md: 6 }}>
-      <TextField
-        {...register(addressField)}
-        label={translate.fields.address}
-        placeholder={translate.placeholders.address}
-        fullWidth
-        sx={outlinedInputSx}
-      />
-    </Grid>
-  );
+export function UserPersonalAddressField<T extends UserPersonalFieldsShape & FieldValues>(
+  props: Readonly<Pick<PersonalFieldProps<T>, "register" | "translate">>
+) {
+  return <PersonalTextField {...props} fieldKey="address" labelKey="address" placeholderKey="address" />;
 }
 
 export function UserPersonalDateOfBirthField<T extends UserPersonalFieldsShape & FieldValues>({
@@ -90,7 +114,7 @@ export function UserPersonalDateOfBirthField<T extends UserPersonalFieldsShape &
   errors,
   translate,
 }: Readonly<Pick<PersonalFieldProps<T>, "control" | "errors" | "translate">>) {
-  const dateOfBirthField = "dateOfBirth" as Path<T>;
+  const dateOfBirthField = personalFieldPath<T>("dateOfBirth");
 
   return (
     <Grid size={{ xs: 12, md: 6 }}>
@@ -138,7 +162,7 @@ export function UserPersonalGenderField<T extends UserPersonalFieldsShape & Fiel
   errors,
   translate,
 }: Readonly<Pick<PersonalFieldProps<T>, "control" | "errors" | "translate">>) {
-  const genderField = "gender" as Path<T>;
+  const genderField = personalFieldPath<T>("gender");
 
   return (
     <Grid size={{ xs: 12, md: 6 }}>
@@ -161,31 +185,16 @@ export function UserPersonalGenderField<T extends UserPersonalFieldsShape & Fiel
             />
           )}
         />
-        {errors.gender ? (
-          <FormHelperText>
-            {validationMessage(translate, (errors.gender as { message?: string } | undefined)?.message)}
-          </FormHelperText>
-        ) : null}
+        {errors.gender ? <FormHelperText>{validationMessage(translate, errors.gender?.message)}</FormHelperText> : null}
       </FormControl>
     </Grid>
   );
 }
 
-export function UserPersonalQualificationsField<T extends UserPersonalFieldsShape & FieldValues>({
-  register,
-  translate,
-}: Readonly<Pick<PersonalFieldProps<T>, "register" | "translate">>) {
-  const qualificationsField = "qualifications" as Path<T>;
-
+export function UserPersonalQualificationsField<T extends UserPersonalFieldsShape & FieldValues>(
+  props: Readonly<Pick<PersonalFieldProps<T>, "register" | "translate">>
+) {
   return (
-    <Grid size={{ xs: 12, md: 6 }}>
-      <TextField
-        {...register(qualificationsField)}
-        label={translate.fields.qualifications}
-        placeholder={translate.placeholders.qualifications}
-        fullWidth
-        sx={outlinedInputSx}
-      />
-    </Grid>
+    <PersonalTextField {...props} fieldKey="qualifications" labelKey="qualifications" placeholderKey="qualifications" />
   );
 }

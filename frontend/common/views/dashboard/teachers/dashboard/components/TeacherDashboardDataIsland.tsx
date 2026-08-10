@@ -166,9 +166,9 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
       videoEnabled: Boolean(row.zoomMeetingUrl),
       activateEnabled,
       durationMinutes: row.durationMinutes ?? undefined,
-      zoomMeetingUrl: row.zoomMeetingUrl ?? null,
+      meetingJoinUrl: row.zoomMeetingUrl ?? null,
       isLive: row.executionState === "ACTIVATED" || row.executionState === "IN_PROGRESS",
       isCurrent: row.executionState === "ACTIVATED" || row.executionState === "IN_PROGRESS",
-    } as unknown as TeacherScheduleRow;
+    };
   });
 }

@@ -149,12 +149,18 @@ describe("GoogleMeetAdapter", () => {
   });
 
   describe("generateMeeting with per-user fallback", () => {
-    const MOCK_TOKEN_ROW: Partial<MeetingProviderTokenSelectType> = {
+    let refreshSpy: ReturnType<typeof spyOn>;
+
+    const MOCK_TOKEN_ROW: MeetingProviderTokenSelectType = {
+      id: "token-row-id-1",
       userId: "user-123",
       providerSlug: "google_meet",
       refreshToken: "stored-refresh-token",
       accessToken: "old-access-token",
+      expiresAt: null,
       scopes: ["https://www.googleapis.com/auth/meetings.space.created"],
+      createdAt: new Date("2025-01-01T00:00:00Z"),
+      updatedAt: new Date("2025-01-01T00:00:00Z"),
     };
 
     const MOCK_SPACE_RESPONSE = {
@@ -164,22 +170,18 @@ describe("GoogleMeetAdapter", () => {
       config: { accessType: 1 },
     };
 
-    function mockTokenRepo(tokenRow: Partial<MeetingProviderTokenSelectType> | null) {
-      spyOn(MeetingProviderTokenRepository, "getByUserAndProvider").mockResolvedValue(
-        tokenRow as MeetingProviderTokenSelectType | null
-      );
-      spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(
-        (tokenRow ?? MOCK_TOKEN_ROW) as MeetingProviderTokenSelectType
-      );
+    function mockTokenRepo(tokenRow: MeetingProviderTokenSelectType | null) {
+      spyOn(MeetingProviderTokenRepository, "getByUserAndProvider").mockResolvedValue(tokenRow);
+      spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(tokenRow ?? MOCK_TOKEN_ROW);
     }
 
     afterEach(() => {
-      (tokenRefreshModule.refreshAccessToken as unknown as { mockRestore?: () => void })?.mockRestore?.();
+      if (refreshSpy) refreshSpy.mockRestore();
     });
 
     test("uses per-user token when org creds missing and actorUserId provided", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-google-token",
         refreshToken: "new-refresh-token",
         expiresAt: new Date(Date.now() + 3_600_000),
@@ -200,7 +202,7 @@ describe("GoogleMeetAdapter", () => {
 
     test("throws NoOrgCredentialsNoUserTokenError when no token row and no org creds", async () => {
       mockTokenRepo(null);
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new GoogleMeetAdapter({});
       let caughtErr: Error | undefined;
@@ -208,7 +210,11 @@ describe("GoogleMeetAdapter", () => {
         await adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" });
         throw new Error("Expected generateMeeting to throw");
       } catch (err) {
-        caughtErr = err as Error;
+        if (err instanceof Error) {
+          caughtErr = err;
+        } else {
+          throw new Error(String(err), { cause: err });
+        }
       }
       expect(caughtErr).toBeInstanceOf(NoOrgCredentialsNoUserTokenError);
       expect(refreshSpy).not.toHaveBeenCalled();
@@ -216,7 +222,7 @@ describe("GoogleMeetAdapter", () => {
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
         new ProviderReauthRequiredError("google_meet", "user-123", "invalid_grant")
       );
 
@@ -228,7 +234,7 @@ describe("GoogleMeetAdapter", () => {
 
     test("throws PermissionDeniedError on 403 with DWD-specific error message", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-google-token",
         refreshToken: "new-refresh-token",
         expiresAt: new Date(Date.now() + 3_600_000),
@@ -256,7 +262,7 @@ describe("GoogleMeetAdapter", () => {
 
     test("throws MeetingChannelError on generic 403 (not DWD-specific)", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-google-token",
         refreshToken: "new-refresh-token",
         expiresAt: new Date(Date.now() + 3_600_000),

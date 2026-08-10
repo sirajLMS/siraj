@@ -6,12 +6,18 @@ import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-typ
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { CountrySelectDesktop } from "@/frontend/desktop/components/ui/input/countrySelect/countrySelect.desktop";
 
+const COUNTRY_BY_CODE = new Map<string, CountryType>(countries.map(entry => [entry.code, entry]));
+
+function findCountryByCode(code: CountryCode): CountryType | undefined {
+  return COUNTRY_BY_CODE.get(code);
+}
+
 function CountrySelectStory({
   initialCountryCode,
   ...props
 }: Readonly<Partial<CountrySelectProps> & { initialCountryCode?: CountryCode }>) {
   const [country, setCountry] = useState<CountryType | null | undefined>(() =>
-    initialCountryCode ? countries.find(entry => entry.code === initialCountryCode) : undefined
+    initialCountryCode ? findCountryByCode(initialCountryCode) : undefined
   );
 
   return (

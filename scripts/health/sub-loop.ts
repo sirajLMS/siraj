@@ -25,7 +25,6 @@
  *   biome         → run tsgo, then biome:check (stop if tsgo fails)
  *   lint          → run tsgo, biome, oxlint, then lint:type-aware via lint service (stop if earlier check fails)
  *   codescene     → run tsgo, biome, oxlint, lint:type-aware, check:duplicates, then codescene --file
- *   sonar-results → same as codescene (subagents verify file is clean before orchestrator handles sonar)
  *
  * Exit codes:
  *   0 = all checks up to the lifecycle stage passed
@@ -37,11 +36,12 @@ import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 import { type LintResult, requestLint } from "@/scripts/lint-service";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type Lifecycle = "tsgo" | "biome" | "lint" | "codescene" | "sonar-results";
+type Lifecycle = "tsgo" | "biome" | "lint" | "codescene";
 
 interface CheckResult {
   name: string;
@@ -57,7 +57,6 @@ const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
   biome: 1,
   lint: 2,
   codescene: 3,
-  "sonar-results": 3, // same depth as codescene — no sonar for subagents
 };
 
 const RED = "\x1b[31m";
@@ -175,6 +174,20 @@ function printApplicableRuleFiles(filePath: string): void {
   console.log(`  • If fixing requires modifying ANOTHER file: do NOT modify that file.`);
   console.log(`    Report the cross-file dependency to the orchestrator instead.`);
   console.log("");
+  console.log(`${BOLD}Oxlint Fix Patterns (see AGENTS.md for full details):${NC}`);
+  console.log(
+    `  • no-unsafe-type-assertion: Use type guards ("value is Type"), instanceof Error, satisfies Partial<T>`
+  );
+  console.log(`  • no-await-in-loop: Use Promise.all (parallel) or recursive helper/reduce (sequential)`);
+  console.log(`  • consistent-function-scoping: Move non-capturing functions to module scope`);
+  console.log(`  • no-object-type-as-default-prop: Extract default to module-level const`);
+  console.log(`  • no-unsafe-enum-comparison: Wrap with String() or use string literals`);
+  console.log(`  • no-shadow: Destructuring rename or _ prefix for unused params`);
+  console.log(`  • consistent-return: Use "return undefined" instead of bare "return"`);
+  console.log(`  • no-map-spread: Use Object.assign instead of spread in .map()`);
+  console.log(`  • no-underscore-dangle: Rename or use bracket notation for external APIs`);
+  console.log(`  • NEVER add oxlint-disable comments — fix the root cause`);
+  console.log("");
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -285,7 +298,7 @@ function filterTsgoForFile(tsgoOutput: string, filePath: string): string {
 
     if (isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
       matchingLines.push(...collectErrorBlock(lines, i, errorBlockRegex));
-    } else if (!isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
+    } else if (!isErrorBlock && !line.startsWith("$ ") && lineMentionsFile(line, relPath, filePath)) {
       matchingLines.push(line);
     }
   }
@@ -456,12 +469,13 @@ function validateArgs(filePath: string | null, lifecycle: string | null): Valida
 
 // ─── Progressive Check Runner ───────────────────────────────────────────────
 
-function failOnResult(result: CheckResult, failMsg: string): void {
+function failOnResult(result: CheckResult, failMsg: string): boolean {
   if (!result.passed) {
     logFail(failMsg);
     console.log("\n" + result.output);
-    process.exit(1);
+    return true;
   }
+  return false;
 }
 
 async function runProgressiveChecks(
@@ -469,58 +483,62 @@ async function runProgressiveChecks(
   relPath: string,
   lifecycle: Lifecycle,
   targetDepth: number
-): Promise<void> {
+): Promise<number> {
   // Step 1: tsgo (always runs first, project-wide, filtered for this file)
   const tsgoResult = checkTsgo(filePath);
-  failOnResult(tsgoResult, "tsgo FAILED — stopping here. Fix type errors before proceeding.");
+  if (failOnResult(tsgoResult, "tsgo FAILED — stopping here. Fix type errors before proceeding.")) return 1;
   logPass(`tsgo passed (no errors for ${relPath})`);
 
   if (targetDepth <= LIFECYCLE_ORDER.tsgo) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "tsgo" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
   // Step 2: biome:check (file-level)
   const biomeResult = checkBiome(filePath);
-  failOnResult(biomeResult, "biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding.");
+  if (failOnResult(biomeResult, "biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding."))
+    return 1;
   logPass("biome:check passed");
 
   if (targetDepth <= LIFECYCLE_ORDER.biome) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "biome" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
   // Step 3: oxlint (file-level)
   const oxlintResult = checkOxlint(filePath);
-  failOnResult(oxlintResult, "oxlint FAILED — stopping here. Fix oxlint errors before proceeding.");
+  if (failOnResult(oxlintResult, "oxlint FAILED — stopping here. Fix oxlint errors before proceeding.")) return 1;
   logPass("oxlint passed");
 
   // Step 4: lint:type-aware via lint service (file-level)
   const lintResult = await checkLint(filePath);
-  failOnResult(lintResult, "lint:type-aware FAILED — stopping here. Fix lint errors before proceeding.");
+  if (failOnResult(lintResult, "lint:type-aware FAILED — stopping here. Fix lint errors before proceeding.")) return 1;
   logPass("lint:type-aware passed");
 
   if (targetDepth <= LIFECYCLE_ORDER.lint) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "lint" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
   // Step 5: check:duplicates via jscpd (intra-file clones only)
   const duplicatesResult = checkDuplicates(filePath);
-  failOnResult(
-    duplicatesResult,
-    "check:duplicates FAILED — stopping here. Remove intra-file duplicated code before proceeding."
-  );
+  if (
+    failOnResult(
+      duplicatesResult,
+      "check:duplicates FAILED — stopping here. Remove intra-file duplicated code before proceeding."
+    )
+  )
+    return 1;
   logPass("check:duplicates passed");
 
   // Step 6: codescene --file (file-level)
   const codesceneResult = checkCodescene(filePath);
-  failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.");
+  if (failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.")) return 1;
   logPass("codescene passed");
 
   // All checks passed for this lifecycle
   console.log(`\n${GREEN}✅ All checks for lifecycle "${lifecycle}" passed for ${relPath}${NC}`);
-  process.exit(0);
+  return 0;
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────
@@ -551,9 +569,6 @@ ${BOLD}Exit codes:${NC}
   0 = all checks up to lifecycle stage passed
   1 = stopped at a failing check (errors printed)
   2 = invalid arguments
-
-${BOLD}⚠️  IMPORTANT:${NC} This script NEVER runs sonar-scan or sonar-manager.
-   SonarQube scan is very costly. Only the quality-gate orchestrator runs it.
 `);
 }
 
@@ -578,7 +593,11 @@ async function main(): Promise<void> {
 
   printApplicableRuleFiles(filePathSafe);
 
-  await runProgressiveChecks(filePathSafe, relPath, lifecycleSafe, targetDepth);
+  const exitCode = await withProcessLock(`sub-loop: ${relPath}`, async () => {
+    return await runProgressiveChecks(filePathSafe, relPath, lifecycleSafe, targetDepth);
+  });
+
+  process.exit(exitCode);
 }
 
 void main();

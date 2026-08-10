@@ -6,14 +6,15 @@ import {
   type LanguageSelectorProps,
 } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { type LanguageType, languages } from "@/frontend/common/lib/locale";
+import type { LanguageType } from "@/frontend/common/lib/locale";
+import { getLanguageByCode } from "@/frontend/common/lib/locale/language/lookup";
 
 function LanguageSelectorStory({
   initialLanguageCode,
   ...props
 }: Readonly<Partial<LanguageSelectorProps> & { initialLanguageCode?: string }>) {
   const [language, setLanguage] = useState<LanguageType | undefined>(() =>
-    initialLanguageCode ? languages.find(entry => entry.code === initialLanguageCode) : undefined
+    initialLanguageCode ? getLanguageByCode(initialLanguageCode) : undefined
   );
 
   return (

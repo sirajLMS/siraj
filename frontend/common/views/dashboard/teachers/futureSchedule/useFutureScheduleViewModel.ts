@@ -29,6 +29,18 @@ import { getErrorMessage } from "@/shared/utils/error";
  * (selectedDate) already lives in `useFutureScheduleDateStore` Zustand store.
  */
 
+const EMPTY_CLASSES: readonly FutureClass[] = [];
+
+function isFutureClass(value: unknown): value is FutureClass {
+  return (
+    typeof value === "object" && value !== null && !Array.isArray(value) && "id" in value && "scheduledDate" in value
+  );
+}
+
+function isFutureClassArray(value: unknown): value is FutureClass[] {
+  return Array.isArray(value) && value.every(isFutureClass);
+}
+
 export interface FutureScheduleViewModel {
   readonly classes: readonly FutureClass[];
   readonly leaveQuotaUsed: number;
@@ -95,7 +107,8 @@ export function useFutureScheduleViewModel(props: Readonly<UseFutureScheduleView
     }
   };
 
-  const classes = (schedule?.classes ?? []) as FutureClass[];
+  const rawClasses = schedule?.classes ?? [];
+  const classes: readonly FutureClass[] = isFutureClassArray(rawClasses) ? rawClasses : EMPTY_CLASSES;
   const notes: ImportantNoteItem[] = (schedule?.importantNotes ?? []).map(n => ({
     id: n.id ?? "",
     title: n.title ?? "",
@@ -115,8 +128,8 @@ export function useFutureScheduleViewModel(props: Readonly<UseFutureScheduleView
     : null;
 
   const classDates = classes
-    .filter((c: FutureClass) => c.scheduledDate)
-    .map((c: FutureClass) => c.scheduledDate as string);
+    .filter((c): c is FutureClass & { scheduledDate: string } => c.scheduledDate !== null)
+    .map(c => c.scheduledDate);
 
   // NEW FOR PLAN v5: lifted support-contact action (previously owned inline
   // by the tier-side `supportContact.{mobile,desktop}.tsx` files). Performs

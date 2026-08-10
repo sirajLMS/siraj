@@ -107,13 +107,14 @@ export const useApolloConnectivity = () => {
         actionText: t.retry,
         onAction: () => {
           reconnectAttemptRef.current = 0;
-          checkConnectivity().then(connected => {
+          void checkConnectivity().then(connected => {
             if (connected) {
               notifications.show(t.connectionRestored, {
                 severity: "success",
                 autoHideDuration: 3000,
               });
             }
+            return undefined;
           });
         },
       });
@@ -142,7 +143,7 @@ export const useApolloConnectivity = () => {
       const connected = await checkConnectivity();
       if (connected) {
         reconnectAttemptRef.current = 0;
-        return;
+        return undefined;
       }
       reconnectAttemptRef.current += 1;
       scheduleReconnect();

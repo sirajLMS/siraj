@@ -43,7 +43,7 @@ export function useQuotaViewModel() {
 
   const [deleteQuotaMutation] = useMutation(deleteQuotaMutationDocument, {
     onCompleted: () => {
-      refetch();
+      void refetch();
     },
   });
 

@@ -137,6 +137,30 @@ async function attemptDemoLogin(graphqlUrl: string, groupSlug: string, fetchFn: 
   });
 }
 
+interface DemoLoginResponseBody {
+  data?: { demoLogin?: { token?: string } };
+  errors?: unknown[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isDemoLoginResponseBody(value: unknown): value is DemoLoginResponseBody {
+  if (!isRecord(value)) return false;
+  if (value.errors !== undefined && !Array.isArray(value.errors)) return false;
+  if (value.data !== undefined) {
+    const data = value.data;
+    if (!isRecord(data)) return false;
+    if (data.demoLogin !== undefined) {
+      const demoLogin = data.demoLogin;
+      if (!isRecord(demoLogin)) return false;
+      if (demoLogin.token !== undefined && typeof demoLogin.token !== "string") return false;
+    }
+  }
+  return true;
+}
+
 async function processDemoLoginResponse(
   response: Response,
   context: BrowserContext,
@@ -144,10 +168,8 @@ async function processDemoLoginResponse(
 ): Promise<boolean> {
   if (!response.ok) return false;
 
-  const body = (await response.json()) as {
-    data?: { demoLogin?: { token?: string } };
-    errors?: unknown[];
-  };
+  const body: unknown = await response.json();
+  if (!isDemoLoginResponseBody(body)) return false;
   const token = body.data?.demoLogin?.token;
   if (!token) return false;
 
@@ -195,25 +217,57 @@ async function executeDemoLoginAttempt(
   }
 }
 
+async function authenticateDemoUserAttempt(
+  graphqlUrl: string,
+  groupSlug: string,
+  fetchFn: typeof fetch,
+  context: BrowserContext,
+  baseUrl: string,
+  isDevMode: boolean,
+  maxAttempts: number,
+  attempt: number,
+  lastError: unknown
+): Promise<void> {
+  if (attempt > maxAttempts) {
+    throw lastError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);
+  }
+  const result = await executeDemoLoginAttempt(graphqlUrl, groupSlug, fetchFn, context, baseUrl);
+  if (result.success) return;
+  const newError = result.error ?? lastError;
+  const isRetryable = await handleDemoLoginRetry(attempt, maxAttempts, isDevMode, result.is429);
+  if (!isRetryable) {
+    throw newError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);
+  }
+  return authenticateDemoUserAttempt(
+    graphqlUrl,
+    groupSlug,
+    fetchFn,
+    context,
+    baseUrl,
+    isDevMode,
+    maxAttempts,
+    attempt + 1,
+    newError
+  );
+}
+
 export async function authenticateDemoUser(context: BrowserContext, groupSlug: string): Promise<void> {
   const baseUrl = getTestBaseUrl();
   const graphqlUrl = `${baseUrl}/api/graphql`;
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
   const isDevMode = process.env.TEST_SERVER_MODE === "dev";
   const maxAttempts = isDevMode ? 10 : 5;
-  let lastError: unknown;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const result = await executeDemoLoginAttempt(graphqlUrl, groupSlug, fetchFn, context, baseUrl);
-    if (result.success) return;
-
-    lastError = result.error ?? lastError;
-    const isRetryable = await handleDemoLoginRetry(attempt, maxAttempts, isDevMode, result.is429);
-    if (isRetryable) continue;
-    throw lastError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);
-  }
-
-  throw lastError ?? new Error(`Failed to authenticate demo user with groupSlug: ${groupSlug}`);
+  await authenticateDemoUserAttempt(
+    graphqlUrl,
+    groupSlug,
+    fetchFn,
+    context,
+    baseUrl,
+    isDevMode,
+    maxAttempts,
+    1,
+    undefined
+  );
 }
 
 export async function waitForDashboardReady(page: Page): Promise<void> {
@@ -226,47 +280,57 @@ export async function waitForDashboardReady(page: Page): Promise<void> {
   await page.locator("main, [role='main']").first().waitFor({ state: "visible", timeout });
 }
 
+async function retryWithBackoffAttempt<T>(
+  operation: () => Promise<T>,
+  maxAttempts: number,
+  backoff: (attempt: number) => Promise<void>,
+  attempt: number,
+  lastError: unknown
+): Promise<T> {
+  if (attempt > maxAttempts) {
+    throw lastError;
+  }
+  try {
+    return await operation();
+  } catch (error) {
+    if (attempt >= maxAttempts) {
+      throw error;
+    }
+    await backoff(attempt);
+    return retryWithBackoffAttempt(operation, maxAttempts, backoff, attempt + 1, error);
+  }
+}
+
+async function retryWithBackoff<T>(
+  operation: () => Promise<T>,
+  maxAttempts: number,
+  backoff: (attempt: number) => Promise<void>
+): Promise<T> {
+  return retryWithBackoffAttempt(operation, maxAttempts, backoff, 1, undefined);
+}
+
 async function gotoWithRetry(page: Page, path: string): Promise<void> {
   const maxAttempts = 3;
   const isDevMode = process.env.TEST_SERVER_MODE === "dev";
   const gotoTimeout = isDevMode ? 180_000 : 30_000;
-  let lastError: unknown;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      await page.goto(path, { waitUntil: "commit", timeout: gotoTimeout });
-      return;
-    } catch (error) {
-      lastError = error;
-      if (attempt < maxAttempts) {
-        await page.waitForTimeout(3_000 * attempt);
-      }
-    }
-  }
-
-  throw lastError;
+  await retryWithBackoff(
+    () => page.goto(path, { waitUntil: "commit", timeout: gotoTimeout }),
+    maxAttempts,
+    attempt => page.waitForTimeout(3_000 * attempt)
+  );
 }
 
 export async function loginAsDemoUser(page: Page, context: BrowserContext, groupSlug: string): Promise<void> {
   await authenticateDemoUser(context, groupSlug);
-
   const maxAttempts = 3;
-  let lastError: unknown;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
+  await retryWithBackoff(
+    async () => {
       await gotoWithRetry(page, "/dashboard");
       await waitForDashboardReady(page);
-      return;
-    } catch (error) {
-      lastError = error;
-      if (attempt < maxAttempts) {
-        await page.waitForTimeout(2_000 * attempt);
-      }
-    }
-  }
-
-  throw lastError;
+    },
+    maxAttempts,
+    attempt => page.waitForTimeout(2_000 * attempt)
+  );
 }
 
 /**

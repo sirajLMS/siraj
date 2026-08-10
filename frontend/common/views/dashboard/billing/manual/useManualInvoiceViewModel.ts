@@ -64,7 +64,7 @@ function buildSubmitHandler(
   sendEmail: boolean
 ): () => void {
   return () => {
-    handleSubmit(data => {
+    void handleSubmit(data => {
       onSubmit(data, sendEmail);
     })();
   };

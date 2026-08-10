@@ -78,28 +78,43 @@ async function recordMigration(migration: MigrationRow): Promise<void> {
   `);
 }
 
-export async function baselineDrizzleMigrations(): Promise<void> {
-  const migrations = readMigrationFiles({ migrationsFolder: MIGRATIONS_FOLDER }) as MigrationRow[];
-  await ensureMigrationsTable();
-  const recordedNames = await getRecordedNames();
-
+async function processPendingMigrations(migrations: MigrationRow[], recordedNames: Set<string>): Promise<number> {
   let baselined = 0;
-  for (const migration of migrations) {
+
+  const processNext = async (index: number): Promise<void> => {
+    if (index >= migrations.length) {
+      return;
+    }
+
+    const migration = migrations[index];
     if (recordedNames.has(migration.name)) {
-      continue;
+      await processNext(index + 1);
+      return;
     }
 
     const applied = await isMigrationApplied(migration.name);
     if (!applied) {
       logger.log(`Baseline stop: ${migration.name} is not applied in the database yet`);
-      break;
+      return;
     }
 
     await recordMigration(migration);
     recordedNames.add(migration.name);
     baselined += 1;
     logger.log(`Baselined migration journal entry: ${migration.name}`);
-  }
+    await processNext(index + 1);
+  };
+
+  await processNext(0);
+  return baselined;
+}
+
+export async function baselineDrizzleMigrations(): Promise<void> {
+  const migrations = readMigrationFiles({ migrationsFolder: MIGRATIONS_FOLDER }) as MigrationRow[];
+  await ensureMigrationsTable();
+  const recordedNames = await getRecordedNames();
+
+  const baselined = await processPendingMigrations(migrations, recordedNames);
 
   if (baselined === 0) {
     logger.log("No drizzle migration journal baselining was needed");

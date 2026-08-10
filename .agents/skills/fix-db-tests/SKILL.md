@@ -45,10 +45,26 @@ bun run scripts/run-test/run-test.ts <test-path>
 
 Look for a "wall of green" — all tests passing.
 
-### Step 5: Type-check after fixes
+### Step 5: Type-check and quality verification after fixes
 
 ```bash
 bun tsgo
 ```
 
 This ensures fixes didn't introduce type errors.
+
+For per-file progressive verification (tsgo → biome → oxlint → lint → duplicates → codescene):
+
+```bash
+bun run scripts/health/sub-loop.ts <test-path> --lifecycle lint
+```
+
+The sub-loop script prints which instruction files and AGENTS.md files apply to the test file.
+Read ALL listed files before fixing (especially `tests.instructions.md` and `backend/AGENTS.md`
+for backend DB tests).
+
+For direct file-scoped lint (no HTTP server needed — in-process lint service):
+
+```bash
+bun run scripts/lint-service.ts -f <test-path> --id fix-db-tests
+```

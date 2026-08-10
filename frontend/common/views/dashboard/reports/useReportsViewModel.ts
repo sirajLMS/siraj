@@ -121,6 +121,66 @@ export interface ReportsViewModel {
   readonly formatPaidAmounts: (paidAmounts: readonly ReportPaidAmount[]) => string;
 }
 
+const DEFAULT_LABELS: ReportsViewLabels = {
+  pageTitle: "",
+  pageSubtitle: "",
+  filtersTitle: "",
+  exportCsv: "",
+  printReport: "",
+  filtersLabels: {
+    fromDate: "",
+    toDate: "",
+    teacher: "",
+    allTeachers: "",
+    reportType: "",
+    submit: "",
+    reportTypes: {
+      byTeacher: "",
+      byStudent: "",
+      byDate: "",
+    },
+  },
+  tableLabels: {
+    name: "",
+    taken: "",
+    absent: "",
+    leave: "",
+    pending: "",
+    hours: "",
+    paid: "",
+    noEntries: "",
+  },
+  summaryLabels: {
+    engagementRate: "",
+    engagementGrowth: "",
+    increase: "",
+    financialDistribution: "",
+    financialSubtitle: "",
+  },
+  totalsLabel: "",
+  ledgerTitle: "",
+  ledgerLabels: {
+    studentLabel: (name: string) => name,
+    paid: "",
+    statusLabels: {
+      active: "",
+      on_break: "",
+    },
+    taken: "",
+    absent: "",
+    leave: "",
+    pending: "",
+    hours: "",
+  },
+};
+
+const DEFAULT_SUMMARY: ReportsSummary = {
+  engagementRate: 0,
+  engagementGrowth: null,
+  currencyDistribution: [],
+  totalHours: "",
+};
+
 export function useReportsViewModel(props: Readonly<UseReportsViewModelProps> = {}): ReportsViewModel {
   const fromDate = useReportsStore(state => state.fromDate);
   const toDate = useReportsStore(state => state.toDate);
@@ -145,9 +205,9 @@ export function useReportsViewModel(props: Readonly<UseReportsViewModelProps> = 
   // ViewModel with no arguments (specs.md §6.1) — the page passes `<ReportsContainer />`
   // and the VM supplies safe defaults for callers that omit input data/handlers.
   // Wrapped in `useMemo` so the `useMemo` further down has stable deps.
-  const safeLabels = useMemo(() => labels ?? ({} as ReportsViewLabels), [labels]);
+  const safeLabels = useMemo(() => labels ?? DEFAULT_LABELS, [labels]);
   const safeRows = useMemo(() => rows ?? [], [rows]);
-  const safeSummary = useMemo(() => summary ?? ({} as ReportsSummary), [summary]);
+  const safeSummary = useMemo(() => summary ?? DEFAULT_SUMMARY, [summary]);
   const safeCanGenerate = canGenerate ?? false;
   const safeOnSubmit = onSubmit ?? (() => undefined);
   const safeOnExportCsv = onExportCsv ?? (() => undefined);

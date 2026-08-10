@@ -21,6 +21,7 @@ import {
   promptAndSaveToken,
   showTokenInstructions,
 } from "@/scripts/health/codescene/installer";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 
 function printHelp() {
   globalThis.console.log(`
@@ -221,18 +222,20 @@ async function main() {
     if (!args.includes("--scan") && !args.includes("--file")) return;
   }
 
-  logInfo("🔍 CodeScene Health Checker");
-  globalThis.console.log("");
+  await withProcessLock("codescene", async () => {
+    logInfo("🔍 CodeScene Health Checker");
+    globalThis.console.log("");
 
-  handleSystemChecks();
-  checkVersion();
-  await configureToken();
+    handleSystemChecks();
+    checkVersion();
+    await configureToken();
 
-  await handleAction(args);
+    await handleAction(args);
 
-  globalThis.console.log("");
-  logSuccess("All done! 🎉");
-  globalThis.console.log("");
+    globalThis.console.log("");
+    logSuccess("All done! 🎉");
+    globalThis.console.log("");
+  });
 }
 
 void main();

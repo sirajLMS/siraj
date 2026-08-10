@@ -8,6 +8,9 @@ const SENSITIVE_BANK_FIELDS = ["iban", "accountNumber", "routingNumber", "swiftB
 
 type SensitiveBankField = (typeof SENSITIVE_BANK_FIELDS)[number];
 
+type Mutable<T> = { -readonly [K in keyof T]: T[K] };
+type MutableBankTransferDetails = Mutable<BankTransferDetails> & Partial<Record<SensitiveBankField, string>>;
+
 /**
  * Encrypt the sensitive routing fields of a `BankTransferDetails` object
  * (copy-on-write). Returns a new object; the input is not mutated. The service
@@ -15,11 +18,11 @@ type SensitiveBankField = (typeof SENSITIVE_BANK_FIELDS)[number];
  * or into a `payment_method_snapshot`.
  */
 export function encryptBankTransferDetails(details: BankTransferDetails): BankTransferDetails {
-  const encrypted: BankTransferDetails = { ...details };
+  const encrypted: MutableBankTransferDetails = { ...details };
   for (const field of SENSITIVE_BANK_FIELDS) {
     const value = details[field];
     if (typeof value === "string" && value.length > 0) {
-      (encrypted as Record<SensitiveBankField, string | undefined>)[field] = encryptField(value);
+      encrypted[field] = encryptField(value);
     }
   }
   return encrypted;
@@ -32,12 +35,12 @@ export function encryptBankTransferDetails(details: BankTransferDetails): BankTr
  * the stored value rather than surfacing ciphertext — see `decryptField`.
  */
 export function decryptBankTransferDetails(details: BankTransferDetails): BankTransferDetails {
-  const decrypted: BankTransferDetails = { ...details };
+  const decrypted: MutableBankTransferDetails = { ...details };
   for (const field of SENSITIVE_BANK_FIELDS) {
     const value = details[field];
     if (typeof value === "string" && value.length > 0) {
       const plain = decryptField(value);
-      (decrypted as Record<SensitiveBankField, string | undefined>)[field] = plain ?? value;
+      decrypted[field] = plain ?? value;
     }
   }
   return decrypted;

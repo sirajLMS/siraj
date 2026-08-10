@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileLanguageDisplayProps = {
@@ -48,7 +49,7 @@ export const MobileLanguageDisplay: React.FC<MobileLanguageDisplayProps> = ({
     const name = getLanguageDisplayName(resolvedCode, locale);
 
     content = (
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexWrap: "nowrap", ...sx }}>
+      <Stack direction="row" spacing={0.5} sx={mergeSx({ alignItems: "center", flexWrap: "nowrap" }, sx)}>
         {showEmoji && <MobileLocaleEmoji emoji={emoji} />}
         {showLabel && (
           <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>

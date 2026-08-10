@@ -18,13 +18,15 @@ describe("Cache Split Routing & Functionality", () => {
   const allKeys = [RATE_LIMIT_KEY, SESSION_KEY, INCR_KEY];
 
   afterAll(async () => {
-    for (const key of allKeys) {
-      try {
-        await CacheDbRepository.del(key);
-      } catch {
-        // Key may not exist — ignore
-      }
-    }
+    await Promise.all(
+      allKeys.map(async key => {
+        try {
+          await CacheDbRepository.del(key);
+        } catch {
+          // Key may not exist — ignore
+        }
+      })
+    );
   });
 
   it("should route rate limit keys to rate_limit_cache table", async () => {

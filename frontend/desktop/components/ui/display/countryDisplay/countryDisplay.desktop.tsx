@@ -7,6 +7,7 @@ import type * as React from "react";
 import { type CountryType, getCountryDisplayName, getCountryEmoji } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 
 export type DesktopCountryDisplayProps = {
@@ -44,7 +45,7 @@ export const DesktopCountryDisplay = ({
   const name = getCountryDisplayName(resolvedCode, locale);
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "nowrap", ...sx }}>
+    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center", flexWrap: "nowrap" }, sx)}>
       {showEmoji && <DesktopLocaleEmoji emoji={emoji} />}
       {showLabel && (
         <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>

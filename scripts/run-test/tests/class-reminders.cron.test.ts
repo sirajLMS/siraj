@@ -7,6 +7,7 @@ import { ClassReminderService } from "@/backend/services/notification/class-remi
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
 import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
+import type { StudentSelectType } from "@/backend/types/students/student.types";
 
 // ─── Test fixtures ─────────────────────────────────────────────────────
 
@@ -24,7 +25,7 @@ function buildClassInstance(overrides: Partial<ClassInstanceSelectType> = {}): C
     id: INSTANCE_ID,
     studentId: STUDENT_ID,
     teacherId: "teacher-001",
-    subjectId: null,
+    subjectId: "00000000-0000-0000-0000-000000000eee",
     recurringScheduleId: null,
     originalClassId: null,
     scheduledStartAt: new Date(baseNow.getTime() + 4 * 60 * 60 * 1000),
@@ -39,12 +40,56 @@ function buildClassInstance(overrides: Partial<ClassInstanceSelectType> = {}): C
     isRescheduled: false,
     isFrozen: false,
     meetingJoinUrl: null,
+    userMeetingConfigId: null,
+    meetingProviderId: null,
+    meetingConfigSnapshot: null,
+    activatedAt: null,
+    activatedByUserId: null,
+    forceActivated: false,
+    forceActivatedByUserId: null,
+    actualStartAt: null,
+    actualEndAt: null,
+    quotaDeducted: false,
+    schedulingMode: "NUMBER_OF_CLASSES",
+    ondemandStatus: null,
+    payrollCredited: false,
+    rateAmount: null,
+    rateCurrency: null,
+    rateSource: null,
+    isRateOverridden: false,
+    remarks: null,
+    adminNotes: null,
     idempotencyKey: "seed-instance-1",
     createdAt: baseNow,
     updatedAt: baseNow,
     deletedAt: null,
     ...overrides,
-  } as unknown as ClassInstanceSelectType;
+  };
+}
+
+function buildStudent(overrides: Partial<StudentSelectType> = {}): StudentSelectType {
+  const baseNow = new Date("2026-07-18T08:00:00.000Z");
+  return {
+    id: STUDENT_ID,
+    parentId: null,
+    userId: PARENT_USER_ID,
+    primaryTeacherId: null,
+    name: "Ahmed Test-Student",
+    avatarUrl: null,
+    dateOfBirth: null,
+    gender: null,
+    language: null,
+    timezoneOverride: null,
+    status: "REGULAR",
+    classesTotal: 0,
+    classesRemaining: 0,
+    version: 0,
+    hoursPerWeek: "0",
+    idempotencyKey: "seed-student-1",
+    createdAt: baseNow,
+    updatedAt: baseNow,
+    ...overrides,
+  };
 }
 
 function successResult(channel: CommunicationPayload["channel"]): ChannelDispatchResult {
@@ -87,10 +132,7 @@ beforeEach(() => {
     studentUserId: null,
     teacherUserId: TEACHER_USER_ID,
   });
-  findStudentSpy = spyOn(StudentRepository, "findById").mockResolvedValue({
-    id: STUDENT_ID,
-    name: "Ahmed Test-Student",
-  } as never);
+  findStudentSpy = spyOn(StudentRepository, "findById").mockResolvedValue(buildStudent());
   // "all enabled" — so dispatch isn't filtered down by prefs.
   getPrefsSpy = spyOn(NotificationPreferencesRepository, "getByUserId").mockResolvedValue([]);
   dispatchMultiSpy = spyOn(CommunicationService, "dispatchMulti").mockResolvedValue([]);
@@ -238,13 +280,19 @@ describe.skip("ClassReminderService — idempotency keys (S2 CROSS-FILE DEPENDEN
     dispatchMultiSpy.mockRestore();
     dispatchMultiSpy = installDispatchCapture(firstCapture);
     await ClassReminderService.dispatchDailyReminders({ withinHours: 24 });
-    const firstRunKeys = firstCapture.calls.flat().map(p => p.metadata?.idempotencyKey as string);
+    const firstRunKeys = firstCapture.calls
+      .flat()
+      .map(p => p.metadata?.idempotencyKey)
+      .filter((key): key is string => typeof key === "string");
 
     const secondCapture: DispatchCapture = { calls: [] };
     dispatchMultiSpy.mockRestore();
     dispatchMultiSpy = installDispatchCapture(secondCapture);
     await ClassReminderService.dispatchDailyReminders({ withinHours: 24 });
-    const secondRunKeys = secondCapture.calls.flat().map(p => p.metadata?.idempotencyKey as string);
+    const secondRunKeys = secondCapture.calls
+      .flat()
+      .map(p => p.metadata?.idempotencyKey)
+      .filter((key): key is string => typeof key === "string");
 
     expect(firstRunKeys.length).toBeGreaterThan(0);
     expect(secondRunKeys).toHaveLength(firstRunKeys.length);

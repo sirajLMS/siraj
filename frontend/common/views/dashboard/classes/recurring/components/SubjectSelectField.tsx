@@ -89,7 +89,7 @@ export function SubjectSelectField<T extends FieldValues>({
       control={control}
       render={({ field }) => (
         <SubjectSelect
-          name={String(name)}
+          name={name}
           value={field.value ?? ""}
           onChange={field.onChange}
           label={label}

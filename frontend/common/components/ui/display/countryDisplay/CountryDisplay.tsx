@@ -8,6 +8,7 @@ import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji
 import { type CountryType, getCountryDisplayName, getCountryEmoji } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export type CountryDisplayProps = {
   readonly code?: string | null;
@@ -44,7 +45,7 @@ export const CountryDisplay = ({
   const name = getCountryDisplayName(resolvedCode, locale);
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center", ...sx }}>
+    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center" }, sx)}>
       {showEmoji && <LocaleEmoji emoji={emoji} />}
       {showLabel && (
         <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>

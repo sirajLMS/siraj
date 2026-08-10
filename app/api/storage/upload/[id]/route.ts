@@ -2,9 +2,18 @@ import crypto from "node:crypto";
 import { createWriteStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { Readable, Transform } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import { logger, resolveLocalStoragePath } from "@/backend/lib";
 import { StorageService } from "@/backend/services";
+
+/**
+ * Bridge DOM ReadableStream to a Node Readable via async iteration.
+ */
+function toNodeReadable(stream: ReadableStream): Readable {
+  return Readable.from(stream);
+}
 
 interface SignedUrlData {
   contentType: string;
@@ -45,33 +54,21 @@ function validateHeaders(request: NextRequest, signedUrl: SignedUrlData): NextRe
 }
 
 /**
- * Stream request body to file while calculating MD5
+ * Stream request body to file while calculating SHA-256
  */
-async function streamToFile(stream: ReadableStream<Uint8Array>, filePath: string, expectedMd5: string): Promise<void> {
-  // Use sha256 for integrity check
+async function streamToFile(stream: ReadableStream, filePath: string, expectedMd5: string): Promise<void> {
   const hash = crypto.createHash("sha256");
   const writeStream = createWriteStream(filePath);
-  const reader = stream.getReader();
+
+  const hashTransform = new Transform({
+    transform(chunk: Buffer, _encoding, callback) {
+      hash.update(chunk);
+      callback(null, chunk);
+    },
+  });
 
   try {
-    let result = await reader.read();
-    while (!result.done) {
-      hash.update(result.value);
-      await new Promise<void>((resolve, reject) => {
-        writeStream.write(result.value, (err: Error | null | undefined) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-      result = await reader.read();
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      writeStream.end((err: Error | null | undefined) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await pipeline(toNodeReadable(stream), hashTransform, writeStream);
 
     const actualHash = hash.digest("base64");
     if (actualHash !== expectedMd5) {

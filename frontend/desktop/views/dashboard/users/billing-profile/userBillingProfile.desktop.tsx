@@ -17,7 +17,7 @@ export function UserBillingProfileDesktopView({
   searchQuery,
   canView,
   canSubmitProof,
-  canManage = false,
+  canManage,
   billingActionsDisabled = false,
   onSearchChange,
   onPayNow,

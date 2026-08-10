@@ -25,6 +25,19 @@ export type MeetingConfigsManagerProps = {
   readonly canManage: boolean;
 };
 
+type ProviderMeta = { meetingId?: string; spaceName?: string };
+
+function isProviderMeta(value: unknown): value is ProviderMeta {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const meetingId = "meetingId" in value ? value.meetingId : undefined;
+  const spaceName = "spaceName" in value ? value.spaceName : undefined;
+  const meetingIdValid = meetingId === undefined || typeof meetingId === "string";
+  const spaceNameValid = spaceName === undefined || typeof spaceName === "string";
+  return meetingIdValid && spaceNameValid;
+}
+
 function AddConfigButton({ onClick, label }: { readonly onClick: () => void; readonly label: string }) {
   return (
     <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
@@ -144,7 +157,8 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
     const providerName = config.provider?.name
       ? resolveLocalizedString(config.provider.name, locale)
       : (config.provider?.slug ?? "");
-    const providerMeta = config.providerMetadata as { meetingId?: string; spaceName?: string } | null | undefined;
+    const providerMeta =
+      config.providerMetadata != null && isProviderMeta(config.providerMetadata) ? config.providerMetadata : null;
     const meetingId = providerMeta?.meetingId ?? providerMeta?.spaceName ?? null;
     const meetingUrl = config.details?.meetingUrl ?? null;
     const isExpanded = state.expandedBookingsId === configId;

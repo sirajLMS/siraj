@@ -6,8 +6,8 @@ import { createLazyView } from "@/frontend/common/components/ui/container/create
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   AppPermission,
-  type ComplaintCategory,
-  type ComplaintStatus,
+  ComplaintCategory,
+  ComplaintStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   parentComplaintsQueryDocument,
@@ -18,6 +18,16 @@ import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboar
 import { useParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { Translation, useAppTranslation } from "@/shared/locale";
+
+const COMPLAINT_STATUS_VALUES = new Set<string>(Object.values(ComplaintStatus));
+function isComplaintStatus(value: string): value is ComplaintStatus {
+  return COMPLAINT_STATUS_VALUES.has(value);
+}
+
+const COMPLAINT_CATEGORY_VALUES = new Set<string>(Object.values(ComplaintCategory));
+function isComplaintCategory(value: string): value is ComplaintCategory {
+  return COMPLAINT_CATEGORY_VALUES.has(value);
+}
 
 const lazyViews = createLazyView<ParentComplaintsViewModel>(
   () =>
@@ -72,7 +82,9 @@ export function ParentComplaintsContainer() {
       id: record.id ?? "",
       regarding: record.studentName ? `Regarding: ${record.studentName}` : "General",
       summary: record.body ?? "",
-      status: (record.status ?? "Unanswered") as ComplaintStatus,
+      status: isComplaintStatus(record.status ?? "")
+        ? (record.status ?? ComplaintStatus.Unanswered)
+        : ComplaintStatus.Unanswered,
       adminResponse:
         record.responses && record.responses.length > 0
           ? {
@@ -96,7 +108,7 @@ export function ParentComplaintsContainer() {
           studentId: formData.studentId,
           submitterEmail: formData.contactEmail,
           body: formData.complaintDetails,
-          category: formData.category as ComplaintCategory,
+          category: isComplaintCategory(formData.category) ? formData.category : ComplaintCategory.Other,
           files: null,
         },
       },

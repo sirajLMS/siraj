@@ -5,6 +5,7 @@
 > **Dependents:** Plan 12 (Element Management), Plan 15 (Preview & Publishing)
 > **Scope:** Canvas rendering, selection, drag-move, resize, rotation, snap guides, zoom/pan (react-zoom-pan-pinch), rulers, keyboard shortcuts, undo/redo, 6 element types, per-type property panel, desktop + mobile views, optimistic-locking save, auto-save, i18n, permissions
 > **Target:** Desktop-primary with mobile support (tier-isolated architecture)
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 
 ---
 
@@ -43,6 +44,56 @@ T01: Canvas Types (CanvasElement, CanvasState, CanvasTool, InteractionState)
 T01..T13, T10a..T10p ──> T14: Quality Gate (tsgo, biome, lint, codescene)
 T14 ──> T15: Knowledge Propagation & Documentation
 ```
+
+**Execution order**: T01 → (T02, T03 via parallel subagents after T01) → T04 → (T05, T06 via parallel subagents after T04) → (T07, T08 via parallel subagents after T06) → (T09, T10, T11, T12, T13 via parallel subagents after T03/T04) → (T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l via parallel subagents after T10) → (T10m, T10n, T10o, T10p via parallel subagents after T10a-T10l) → T14 → T15
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01 (Canvas Type Definitions)
+- Rationale: Foundation task — all other tasks depend on the type definitions. No parallelization possible at this stage.
+
+### Wave 2: T02, T03
+- Tasks: T02 (i18n Namespace), T03 (Zustand Canvas Store)
+- Rationale: Both depend only on T01 (types). They touch disjoint module surfaces (locale files vs. Zustand store) and have no interdependencies.
+
+### Wave 3: T04
+- Tasks: T04 (CanvasArea + CanvasViewport + CanvasContainer)
+- Rationale: Depends on T03 store. Single-task wave because T05 and T06 both extend T04's ElementRenderer output.
+
+### Wave 4: T05, T06
+- Tasks: T05 (Drag-to-Move), T06 (Resize Handles)
+- Rationale: Both depend on T04 (ElementRenderer + SelectionFrame). Drag and resize touch separate interaction state branches (`dragging` vs. `resizing`) and disjoint component props.
+
+### Wave 5: T07, T08
+- Tasks: T07 (Rotation Handle), T08 (Snap-to-Grid + Alignment Guides)
+- Rationale: Both extend T06's SelectionHandles. Rotation adds a `rotating` interaction branch; snap/guides add a parallel guide-rendering layer. Disjoint concerns.
+
+### Wave 6: T09, T10, T11, T12, T13
+- Tasks: T09 (Canvas Toolbar), T10 (Rulers + Keyboard Shortcuts + Zoom/Pan), T11 (Mobile View), T12 (ViewModel + Container + GraphQL), T13 (UI Testing)
+- Rationale: All depend on the store (T03) and/or the surface (T04) which are complete by Wave 3/4. Toolbar, rulers/shortcuts, mobile view, ViewModel/GraphQL wiring, and test scaffolding target separate files and have no interdependencies among each other.
+
+### Wave 7: T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l
+- Tasks: All T10a–T10l React Flow sub-components
+- Rationale: All depend on T10 (Ruler/Zoom/Keyboard foundation) and the store (T03). Each component owns its own file (`nodes/TextNode.tsx`, `nodes/ImageNode.tsx`, etc.) with no cross-imports until integration. The palette (T10g), context menu (T10h), store (T10i), handles (T10j), overlay (T10k), and shortcut handler (T10l) all target disjoint modules.
+
+### Wave 8: T10m, T10n, T10o, T10p
+- Tasks: T10m (Component Tests), T10n (E2E Tests), T10o (Quality Loop), T10p (Knowledge Propagation)
+- Rationale: T10m and T10n test bodies depend on all T10a–T10l components existing — they run after Wave 7. T10o applies the per-file quality loop over the new files. T10p propagates learnings to docs. Tests, quality, and docs touch disjoint file sets.
+
+### Wave 9: T14
+- Tasks: T14 (Quality Gate)
+- Rationale: Full quality-gate run (tsgo → biome → lint → codescene → sonar) over the entire plan output. Must run after every implementation task in T01–T13 and T10a–T10p is complete.
+
+### Final Wave: Knowledge Propagation
+- Task: T15 (Knowledge Propagation & Documentation)
+- Rationale: Must run after T14 quality gate passes. Updates AGENTS.md, IMPLEMENTATION_LEARNINGS.md, COMPONENT_PATTERNS.md, and instruction files with the final canonical patterns.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -97,11 +148,7 @@ T14 ──> T15: Knowledge Propagation & Documentation
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T01","files":["frontend/common/views/dashboard/cert-canvas/types/canvasElement.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-canvas/types/canvasElement.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -114,6 +161,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T02: i18n Translation Namespace (~3h)
 
 **Objective:** Create the compile-time i18n type file and both English and Arabic translation implementations for the `Translation.Dashboard.CertificateCanvas` namespace.
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03 (Zustand Canvas Store). Both depend only on T01 (types) and touch disjoint module surfaces (locale files vs. Zustand store).
 
 **Subtasks:**
 - [ ] 2.1 Create type file `shared/locale/types/dashboard/certificates/canvas.ts`:
@@ -164,11 +213,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T02","files":["shared/locale/types/dashboard/certificates/canvas.ts","shared/locale/en/dashboard/certificates/canvas.ts","shared/locale/ar/dashboard/certificates/canvas.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/canvas.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/canvas.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/canvas.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -181,6 +228,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T03: Zustand Canvas Store (~5h)
 
 **Objective:** Create the session-only Zustand store (`certCanvasStore.ts`) with all state fields, 26 actions, past/future history stacks with 500ms coalescing, clipboard, selection (string[] not Set), and save protocol with optimistic locking.
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02 (i18n Namespace). Both depend only on T01 (types) and touch disjoint module surfaces (Zustand store vs. locale files).
 
 **Subtasks:**
 - [ ] 3.1 Create `frontend/common/stores/certCanvasStore.ts` with the following state fields:
@@ -283,11 +332,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T03","files":["frontend/common/stores/certCanvasStore.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/stores/certCanvasStore.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -339,11 +384,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T04","files":["frontend/desktop/views/dashboard/certificates/templates/editor/ElementRenderer.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/ElementRenderer.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -356,6 +397,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T05: Drag-to-Move
 
 **Objective:** Implement drag-to-move with real-time position updates, boundary constraints, ghost outline, and coalesced undo commands.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T06 (Resize Handles). Both extend T04's ElementRenderer and touch separate interaction state branches (dragging vs. resizing).
 
 **Subtasks:**
 - [ ] 5.1 Implement drag initiation:
@@ -391,11 +434,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T05","files":["frontend/desktop/views/dashboard/certificates/templates/editor/ElementRenderer.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/ElementRenderer.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -408,6 +447,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T06: Resize Handles (8 Handles)
 
 **Objective:** Implement 8 resize handles (corners + edges) with min size constraints, aspect ratio locking with Shift, and real-time visual feedback.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T05 (Drag-to-Move). Both extend T04's ElementRenderer and touch separate interaction state branches (resizing vs. dragging).
 
 **Subtasks:**
 - [ ] 6.1 Create `ResizeHandles` component:
@@ -450,11 +491,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T06","files":["frontend/desktop/views/dashboard/certificates/templates/editor/ResizeHandles.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/ResizeHandles.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -467,6 +504,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T07: Rotation Handle
 
 **Objective:** Implement a rotation handle above the element that rotates around the element center with 15° snapping when Shift is held.
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T08 (Snap-to-Grid + Alignment Guides). Both extend T06's SelectionHandles and touch disjoint concerns (rotation interaction vs. snap/guide rendering).
 
 **Subtasks:**
 - [ ] 7.1 Create `RotationHandle` component:
@@ -502,11 +541,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T07","files":["frontend/desktop/views/dashboard/certificates/templates/editor/RotationHandle.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/RotationHandle.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -521,6 +556,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T08: Snap-to-Grid + Alignment Guides
 
 **Objective:** Implement snap-to-grid and snap-to-element alignment guides with threshold-based proximity detection.
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T07 (Rotation Handle). Both extend T06's SelectionHandles and touch disjoint concerns (snap/guide rendering vs. rotation interaction).
 
 **Subtasks:**
 - [ ] 8.1 Implement snap-to-grid:
@@ -557,11 +594,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T08","files":["frontend/desktop/views/dashboard/certificates/templates/editor/SnapGuideOverlay.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/SnapGuideOverlay.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -574,6 +607,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T09: Canvas Toolbar (Zoom, Grid, Undo/Redo, Save)
 
 **Objective:** Create the canvas toolbar with: add element dropdown, zoom controls, grid toggle, undo/redo buttons, and save button.
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T10 (Rulers + Keyboard Shortcuts + Zoom/Pan), T11 (Mobile View), T12 (ViewModel + Container + GraphQL), T13 (UI Testing). All depend on T03 (store) / T04 (canvas surface) and target disjoint module surfaces (toolbar vs. rulers/shortcuts vs. mobile vs. ViewModel/GraphQL vs. test scaffolding).
 
 **Subtasks:**
 - [ ] 9.1 Create `CanvasToolbar` component:
@@ -630,11 +665,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T09","files":["frontend/desktop/views/dashboard/certificates/templates/editor/CanvasToolbar.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/CanvasToolbar.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -649,6 +680,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10: Rulers + Keyboard Shortcuts + Zoom/Pan
 
 **Objective:** Implement pixel rulers (top + left), comprehensive keyboard shortcuts, and zoom/pan interactions.
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T09 (Canvas Toolbar), T11 (Mobile View), T12 (ViewModel + Container + GraphQL), T13 (UI Testing). All depend on T03 (store) / T04 (canvas surface) and target disjoint module surfaces (rulers/shortcuts/zoom vs. toolbar vs. mobile vs. ViewModel/GraphQL vs. test scaffolding).
 
 **Subtasks:**
 - [ ] 10.1 Create `CanvasRuler` component:
@@ -710,11 +743,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10","files":["frontend/desktop/views/dashboard/certificates/templates/editor/CanvasRuler.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/CanvasRuler.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -728,6 +757,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10a: TextNode Component (~3h)
 
 **Objective:** Create the React Flow `TextNode` component that renders a text element with content-editable support, variable interpolation highlighting, resize handles, and rotation handle.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10a.1 Create `frontend/views/dashboard/cert/templates/editor/nodes/TextNode.tsx`:
@@ -751,11 +782,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10a","files":["frontend/views/dashboard/cert/templates/editor/nodes/TextNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/TextNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -768,6 +795,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10b: ImageNode Component (~3h)
 
 **Objective:** Create the React Flow `ImageNode` component that renders an image element with fit modes, resize with aspect-ratio lock, and image replacement via double-click.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10b.1 Create `frontend/views/dashboard/cert/templates/editor/nodes/ImageNode.tsx`:
@@ -790,11 +819,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10b","files":["frontend/views/dashboard/cert/templates/editor/nodes/ImageNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/ImageNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -807,6 +832,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10c: ShapeNode Component (~3h)
 
 **Objective:** Create the React Flow `ShapeNode` component that renders SVG-based shapes (rectangle, circle, ellipse, line, triangle, star, hexagon) with solid/gradient fills and stroke styles.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10c.1 Create `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx`:
@@ -834,11 +861,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10c","files":["frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -851,6 +874,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10d: QRCodeNode Component (~2h)
 
 **Objective:** Create the React Flow `QRCodeNode` component that renders QR codes using `qrcode.react`, with static/variable data binding, error correction levels, and optional logo overlay.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10d.1 Create `frontend/views/dashboard/cert/templates/editor/nodes/QRCodeNode.tsx`:
@@ -875,11 +900,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10d","files":["frontend/views/dashboard/cert/templates/editor/nodes/QRCodeNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/QRCodeNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -892,6 +913,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10e: SignatureNode Component (~3h)
 
 **Objective:** Create the React Flow `SignatureNode` component supporting placeholder, uploaded, and drawn signature modes with signer name/title display.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10d, T10f, T10g, T10h, T10i, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10e.1 Create `frontend/views/dashboard/cert/templates/editor/nodes/SignatureNode.tsx`:
@@ -916,11 +939,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10e","files":["frontend/views/dashboard/cert/templates/editor/nodes/SignatureNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/SignatureNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -933,6 +952,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10f: BackgroundNode Component (~2h)
 
 **Objective:** Create the React Flow `BackgroundNode` component that renders the certificate background (color, gradient, image, pattern) behind all other nodes.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10d, T10e, T10g, T10h, T10i, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10f.1 Create `frontend/views/dashboard/cert/templates/editor/nodes/BackgroundNode.tsx`:
@@ -960,11 +981,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10f","files":["frontend/views/dashboard/cert/templates/editor/nodes/BackgroundNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/BackgroundNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -977,6 +994,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10g: ElementLibraryPalette Component (~3h)
 
 **Objective:** Create the `ElementLibraryPalette` component — a draggable element grid that allows users to drag element types onto the canvas to create new nodes.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10d, T10e, T10f, T10h, T10i, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10g.1 Create `frontend/views/dashboard/cert/templates/editor/ElementLibraryPalette.tsx`:
@@ -997,11 +1016,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10g","files":["frontend/views/dashboard/cert/templates/editor/ElementLibraryPalette.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ElementLibraryPalette.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1014,6 +1029,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10h: CanvasContextMenu Component (~3h)
 
 **Objective:** Create the `CanvasContextMenu` component that appears on right-click and provides node/canvas operations (copy, paste, duplicate, delete, z-order, lock, properties).
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10i, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10h.1 Create `frontend/views/dashboard/cert/templates/editor/CanvasContextMenu.tsx`:
@@ -1040,11 +1057,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10h","files":["frontend/views/dashboard/cert/templates/editor/CanvasContextMenu.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/CanvasContextMenu.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1057,6 +1070,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10i: useCanvasStore Zustand Store (~4h)
 
 **Objective:** Create the `useCanvasStore` Zustand store managing React Flow nodes/edges, selection, clipboard, viewport, grid, context menu, and all canvas actions (per design §21).
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10j, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10i.1 Create `frontend/common/stores/useCanvasStore.ts`:
@@ -1084,11 +1099,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10i","files":["frontend/common/stores/useCanvasStore.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/stores/useCanvasStore.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1101,6 +1112,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10j: Custom Resize & Rotate Handle Components (~3h)
 
 **Objective:** Create reusable resize handle and rotation handle components that overlay on selected React Flow nodes.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10k, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10j.1 Create `frontend/views/dashboard/cert/templates/editor/handles/ResizeHandles.tsx`:
@@ -1130,11 +1143,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10j","files":["frontend/views/dashboard/cert/templates/editor/handles/ResizeHandles.tsx","frontend/views/dashboard/cert/templates/editor/handles/RotateHandle.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/handles/ResizeHandles.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/handles/RotateHandle.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1147,6 +1157,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10k: Alignment Guide Overlay Component (~2h)
 
 **Objective:** Create the `AlignmentGuideOverlay` component that renders alignment guide lines and snap indicators over the canvas during drag operations.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10l. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10k.1 Create `frontend/views/dashboard/cert/templates/editor/AlignmentGuideOverlay.tsx`:
@@ -1168,11 +1180,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10k","files":["frontend/views/dashboard/cert/templates/editor/AlignmentGuideOverlay.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/AlignmentGuideOverlay.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1185,6 +1193,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10l: Keyboard Shortcut Handler (~2h)
 
 **Objective:** Create the keyboard shortcut handler for the React Flow canvas that binds all canvas keyboard interactions.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k. All depend on T10 (Rulers/Zoom/Keyboard). Each owns its own file with no cross-imports until integration.
 
 **Subtasks:**
 - [ ] 10l.1 Create `frontend/views/dashboard/cert/templates/editor/useCanvasKeyboard.ts`:
@@ -1221,11 +1231,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10l","files":["frontend/views/dashboard/cert/templates/editor/useCanvasKeyboard.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useCanvasKeyboard.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1238,6 +1244,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### T10m: Component Tests for Node Types & UI Components (~4h)
 
 **Objective:** Write comprehensive component tests for all 7 new component files (6 node types + ElementLibraryPalette + CanvasContextMenu + handles + alignment overlay).
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10n (E2E Tests), T10o (Quality Loop), T10p (Knowledge Propagation). Test bodies depend on all T10a–T10l components existing (Wave 7 complete). Tests, quality, and docs touch disjoint file sets.
 
 **Subtasks:**
 - [ ] 10m.1 Create `test/ui/components/cert/templates/editor/nodes/TextNode.test.tsx`:
@@ -1357,6 +1365,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/us
 
 **Objective:** Write 10 E2E tests covering the full canvas interaction flow: drag, select, resize, rotate, delete, copy/paste, undo/redo, zoom/pan, context menu.
 
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10m (Component Tests), T10o (Quality Loop), T10p (Knowledge Propagation). E2E test bodies depend on all T10a–T10l components existing (Wave 7 complete). Tests, quality, and docs touch disjoint file sets.
+
 **Prerequisites:** `bun run build:test` must complete successfully before running E2E tests.
 
 **Subtasks:**
@@ -1447,15 +1457,12 @@ bun run scripts/run-test/run-test.ts test/ui/e2e/cert/canvas.spec.ts
 
 **Objective:** Run the per-file quality verification loop on every new file created in T10a–T10l before they are integrated.
 
-**Subtasks:**
-- [ ] 10o.1 Start lint queue server:
-  ```bash
-  ~/.bun/bin/bun run scripts/lint-queue-server.ts &
-  ```
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10m (Component Tests), T10n (E2E Tests), T10p (Knowledge Propagation). Quality loop runs over the new files from Wave 7. Tests, quality, and docs touch disjoint file sets.
 
-- [ ] 10o.2 For each new file, run the progressive verification loop:
+**Subtasks:**
+- [ ] 10o.1 For each new file, run the progressive verification loop:
   ```bash
-  bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+  bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
   ```
   Files to verify:
   - `frontend/views/dashboard/cert/templates/editor/nodes/TextNode.tsx`
@@ -1491,6 +1498,8 @@ bun run scripts/run-test/run-test.ts test/ui/e2e/cert/canvas.spec.ts
 ### T10p: Knowledge Propagation & Documentation Update (~2h)
 
 **Objective:** Update all relevant project documentation, AGENTS.md files, skills, and instruction files with the new React Flow canvas component patterns.
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10m (Component Tests), T10n (E2E Tests), T10o (Quality Loop). Documentation updates depend on Wave 7 components being complete. Tests, quality, and docs touch disjoint file sets.
 
 **Subtasks:**
 - [ ] 10p.1 Read all outcome files in `.ai/plans/cert-plan-11/outcome/`:
@@ -1547,11 +1556,15 @@ bun run scripts/run-test/run-test.ts test/ui/e2e/cert/canvas.spec.ts
 
 **Requirements References:** Feature 6 (Outcome Knowledge Base)
 
-**Quality Loop:**
+**Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun run scripts/health/sub-loop.ts docs/frontend/canvas-editor.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts .agents/skills/frontend-patterns/SKILL.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts .agents/instructions/frontend.instructions.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1595,11 +1608,14 @@ bun run lint
 - [ ] 11.7 Update root `AGENTS.md` Important References:
   - Add `docs/frontend/canvas-editor.md`
 
-- [ ] 11.8 Run global quality check:
+- [ ] 11.8 Run per-file quality loop for each file (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  bun run lint
+  bun run scripts/health/sub-loop.ts docs/frontend/canvas-editor.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .agents/skills/frontend-patterns/SKILL.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .agents/instructions/frontend.instructions.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
   ```
 
 - [ ] 11.9 Write outcome file: `.ai/plans/cert-plan-11/outcome/T11-knowledge-propagation-outcome.md`
@@ -1614,11 +1630,14 @@ bun run lint
 
 **Requirements References:** Feature 6 (Outcome Knowledge Base)
 
-**Quality Loop:**
+**Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun run scripts/health/sub-loop.ts docs/frontend/canvas-editor.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts .agents/skills/frontend-patterns/SKILL.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts .agents/instructions/frontend.instructions.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1827,18 +1846,12 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 - [ ] R4.1.8 Run quality loop per file:
   ```bash
-  for f in frontend/views/dashboard/cert/templates/editor/useDragOverlap.ts \
-           frontend/common/stores/canvasStore.ts \
-           frontend/views/dashboard/cert/templates/editor/CanvasOverlapOverlay.tsx \
-           frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx \
-           frontend/views/dashboard/cert/templates/editor/Toolbar.tsx \
-           frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts; do
-    bun tsgo --filter "$f"
-    bun biome:check --write "$f"
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d "{\"id\":\"r4-01\",\"files\":[\"$f\"]}"
-  done
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useDragOverlap.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/stores/canvasStore.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/CanvasOverlapOverlay.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/Toolbar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts --lifecycle codescene
   ```
 
 **Files to Create/Modify:**
@@ -1849,7 +1862,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/Toolbar.tsx` (modify — add Pan Bounds toggle)
 - `frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts` (modify — add zoom shortcuts)
 
-**Quality Loop:** Per-file tsgo → biome → lint via queue client.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
 
@@ -1900,7 +1913,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/common/stores/canvasStore.ts` (modify — add `nudgeNode`)
 - `frontend/views/dashboard/cert/templates/editor/nodes/index.tsx` (modify — apply warning outline)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/collisionUtils.test.ts` — pure function tests for `computeNudgeDirection` with various overlap configurations
@@ -1941,7 +1954,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/CanvasOffscreenIndicators.tsx` (new)
 - `frontend/common/stores/canvasStore.ts` (modify — add `focusNode`)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/CanvasOffscreenIndicators.test.tsx` — verify badges appear when nodes are scrolled out of view, and that clicking badge calls `focusNode`
@@ -2010,7 +2023,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/nodes/BackgroundNode.tsx` (modify — wrap)
 - `frontend/views/dashboard/cert/templates/editor/PropertyPanel.tsx` (modify — add Size section)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`. Note MUI v9: NO style props (use `sx` prop), Outlined icon names.
 
@@ -2080,7 +2093,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/common/stores/canvasStore.ts` (modify — add `backgroundPattern`, `snapToNodes`)
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — apply background CSS)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/snapToGrid.test.tsx` — verify that dragging a node snaps its position to nearest 16px grid when `snapEnabled`
@@ -2175,7 +2188,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — add `onNodeClick`, `selectionOnDrag`)
 - `frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts` (modify — add Cmd+A, Delete)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/alignmentUtils.test.ts` — verify `alignLeft`, `alignRight`, `distributeH` produce correct node positions
@@ -2252,7 +2265,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts` (modify — add Copy/Paste)
 - `frontend/views/dashboard/cert/templates/editor/CanvasContextMenu.tsx` (modify — wire Copy/Paste items)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/clipboardStore.test.ts` — verify save/load, localStorage round-trip, zod validation
@@ -2310,7 +2323,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/nodes/ResizableNodeWrapper.tsx` (modify — touch handle sizes)
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — touch props)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/useLongPress.test.tsx` — verify callback fires after 500ms hold, cancels if finger moves >10px
@@ -2347,6 +2360,8 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 ### R5-T2: Gradient Editor Overlay Component
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Fill/Stroke) alongside R5-T3, R5-T4, R5-T5. All depend on R5-T1. Each targets a separate overlay/renderer component.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/overlays/GradientEditorOverlay.tsx` (new)
   - `interface GradientEditorOverlayProps { elementId: string; elementBounds: CanvasBounds; gradient: GradientValue; onGradientChange: (updated: GradientValue) => void; editorType: 'linear' | 'radial' | 'conic'; }`
   - Renders only when `fillStrokeStore.gradientEditorActive === true && gradientEditorElementId === elementId`
@@ -2360,6 +2375,8 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 ### R5-T3: Pattern Preview Overlay
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Fill/Stroke) alongside R5-T2, R5-T4, R5-T5. All depend on R5-T1. Each targets a separate overlay/renderer component.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/overlays/PatternTileBoundaryOverlay.tsx` (new)
   - Shows dashed `divider`-colored outlines (1 px, `opacity: 0.3`) at each pattern tile boundary — visible only when the pattern-filled element is selected and the property panel has focus
   - Tiles computed from `fill.pattern.scale`, `.angle`, `.repeatWidth`, `.repeatHeight`
@@ -2368,6 +2385,8 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 ### R5-T4: Image Fill Position/Scale Overlay
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Fill/Stroke) alongside R5-T2, R5-T3, R5-T5. All depend on R5-T1. Each targets a separate overlay/renderer component.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/overlays/ImageFillOverlay.tsx` (new)
   - Position handle (top-left corner of image), scale handle (bottom-right corner), fit-to-element `IconButton`
   - Dragging position handle changes `image.positionX/Y`; scale handle changes `image.scale` (10-200%) — `Shift` constrains aspect
@@ -2375,6 +2394,8 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-T5: SVG Stroke Renderer Component
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Fill/Stroke) alongside R5-T2, R5-T3, R5-T4. All depend on R5-T1. Each targets a separate overlay/renderer component.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/renderers/StrokeRenderer.tsx` (new)
   - `interface StrokeRendererProps { elementId: string; stroke: StrokeConfig; shapePath: string; elementBounds: CanvasBounds; }`
@@ -2423,6 +2444,8 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-T9: Plan 11 R5 Test Suite
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Fill/Stroke) alongside R5-T7, R5-T8. It waits on R5-T6 and all Wave 2 component tasks being complete. Each Wave 4 task targets a separate integration surface.
 
 - [ ] Create `test/ui/components/canvas/FillRenderer.test.tsx` (new)
   - Test: type='none' renders `<rect fill="none" />`
@@ -2492,15 +2515,36 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 ```
 Phase R5-A (sequential): R5-T1 (FillRenderer — depends on fillStrokeUtils from Plan 10 R5-T1 being committed)
-Phase R5-B (parallel): R5-T2 (Gradient editor overlay), R5-T3 (Pattern tile boundaries), R5-T4 (Image fill overlay), R5-T5 (StrokeRenderer) — all wait on T1
+Phase R5-B (via parallel subagents): R5-T2 (Gradient editor overlay), R5-T3 (Pattern tile boundaries), R5-T4 (Image fill overlay), R5-T5 (StrokeRenderer) — all wait on T1
 Phase R5-C (sequential): R5-T6 (Multi-stroke — modifies T5's StrokeRenderer) — waits on T5 done
 Phase R5-D (sequential): R5-T7 (Blend-mode + cache — modifies T1/T6 outputs) — waits on T6
 Phase R5-E (sequential): R5-T8 (Store additions + autosave integration — waits on T7 for the gradientEditorActive coordination)
-Phase R5-F (parallel): R5-T9 (test suite — waits on T1-T8 implementation)
+Phase R5-F (via parallel subagents): R5-T9 (test suite — waits on T1-T8 implementation)
 Phase R5-G (sequential): R5-T10 (knowledge propagation)
 ```
 
-**Plan 11 R5 total estimated time**: ~24 hours (~10 wall-clock hours via parallel phases R5-B and R5-F)
+**Plan 11 R5 total estimated time**: ~24 hours (~10 wall-clock hours via parallel subagent phases R5-B and R5-F)
+
+### R5 Fill/Stroke Parallel Subagent Strategy
+
+### Wave 1 (R5 Fill): R5-T1
+- Tasks: R5-T1 (FillRenderer)
+- Rationale: Foundation — all other R5 tasks depend on T1's fillStrokeUtils.
+
+### Wave 2 (R5 Fill): R5-T2, R5-T3, R5-T4, R5-T5
+- Tasks (via parallel subagents): R5-T2 (Gradient editor overlay), R5-T3 (Pattern tile boundaries), R5-T4 (Image fill overlay), R5-T5 (StrokeRenderer)
+- Rationale: All depend on R5-T1. Each targets a separate overlay/renderer module.
+
+### Wave 3 (R5 Fill): R5-T6 → R5-T7 → R5-T8
+- Tasks: R5-T6 (Multi-stroke) → R5-T7 (Blend-mode + cache) → R5-T8 (Store additions) — sequential, each modifies the prior task's output.
+
+### Wave 4 (R5 Fill): R5-T9
+- Tasks: R5-T9 (test suite)
+- Rationale: Test suite waits on all T1–T8 implementation. Single-task wave.
+
+### Final Wave (R5 Fill): R5-T10
+- Task: R5-T10 (Knowledge Propagation)
+- Rationale: Must run after all R5 Fill/Stroke implementation is complete.
 
 ### Plan 11 Combined Total Time (Rounds 1-5)
 
@@ -2530,6 +2574,8 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5S-T2: Snap Feedback Slice
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Snap & Align) alongside R5S-T4. Both depend on R5S-T1. Each targets a separate module — T2 (Zustand slice) and T4 (handle cursors/labels).
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/snap/useSnapFeedback.ts` (new)
   - Local Zustand slice: `activeGuides`, `activeMeasurements`, `setFeedback`, `clearFeedback`
@@ -2561,6 +2607,8 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
 
 ### R5S-T4: Interactive Transform Handles — Cursors & Live Labels
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Snap & Align) alongside R5S-T2. Both depend on R5S-T1. Each targets a separate module — T2 (Zustand slice) and T4 (handle cursors/labels).
+
 - [ ] Modify `frontend/views/dashboard/cert/templates/editor/overlays/ResizeHandles.tsx` (extend existing)
   - Apply CSS `cursor` per handle: `nw-resize`, `n-resize`, `ne-resize`, `e-resize`, `se-resize`, `s-resize`, `sw-resize`, `w-resize`
   - Wires into `useCanvasInteractions` resize handler for Shift/Alt/Shift+Alt modifiers
@@ -2584,6 +2632,8 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
 
 ### R5S-T5: Multi-Element Transformation (Group Bounding Box)
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Snap & Align) alongside R5S-T6, R5S-T7. All wait on R5S-T3. Each targets a separate module — T5 (group overlay), T6 (store actions), T7 (i18n keys).
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/overlays/GroupTransformFrame.tsx` (new)
   - Renders shared `ResizeHandles` + `RotationHandle` on the group bbox rather than individual elements
   - Reads the union of selected element rects (memoized via `useShallow` on the bbox math)
@@ -2602,6 +2652,8 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
 
 ### R5S-T6: Store Actions — Align, Distribute, Match Size, Key Object, Snap Settings
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Snap & Align) alongside R5S-T5, R5S-T7. All wait on R5S-T3. Each targets a separate module — T5 (group overlay), T6 (store actions), T7 (i18n keys).
+
 - [ ] Modify `frontend/common/stores/useCanvasStore.ts` (extend existing T10i)
   - Add state: `snapSettings: SnapSettings` (default `DEFAULT_SNAP_SETTINGS`), `keyObjectId: string | null`, `alignTarget: AlignTarget` (default `'selection'`), `distributeFrom: DistributeFrom` (default `'edge'`)
   - Add actions per §R5S.7: `alignElements`, `distributeElements`, `distributeSpacing`, `matchSize`, `setKeyObject`, `setAlignTarget`, `setDistributeFrom`, `updateSnapSettings`
@@ -2610,6 +2662,8 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5S-T7: i18n Keys (Plan 11 Snap & Align portion)
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Snap & Align) alongside R5S-T5, R5S-T6. All wait on R5S-T3. Each targets a separate module — T5 (group overlay), T6 (store actions), T7 (i18n keys).
 
 - [ ] Update `shared/locale/types/dashboard/certificates/templateEditor.ts` (modify)
   - Add `snapEngine` schema: `measurement.distance/size/position/angle`, `equalSpacingLabel`, `equalSizeLabel`, `snapNotification`
@@ -2622,6 +2676,8 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5S-T8: Test Suite (Plan 11 Snap & Align)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 (R5 Snap & Align). It waits on all Wave 4 tasks (T5, T6, T7) being complete.
 
 - [ ] Create `test/unit/snapEngine.test.ts` (new)
   - Test `gridCandidates`: 16px grid, source `x=23.7` snap to `24`; `x=22` snap to `16`
@@ -2700,15 +2756,41 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
 
 ```
 Phase R5S-A (sequential): R5S-T1 (snapEngine + snapCandidates — pure, no React; depends on Plan 10 R5S-T1 types being committed)
-Phase R5S-B (parallel): R5S-T2 (SnapFeedback slice + interactions wiring), R5S-T4 (ResizeHandles/RotationHandle modifiers + MeasurementBadge + rotationCursor) — both wait on T1
+Phase R5S-B (via parallel subagents): R5S-T2 (SnapFeedback slice + interactions wiring), R5S-T4 (ResizeHandles/RotationHandle modifiers + MeasurementBadge + rotationCursor) — both wait on T1
 Phase R5S-C (sequential): R5S-T3 (SmartGuideOverlay + CanvasArea mount) — depends on T2 (uses the feedback slice)
-Phase R5S-D (parallel): R5S-T5 (GroupTransformFrame + interactions + CanvasArea), R5S-T6 (Store actions) — T5 depends on T3/T4 visuals; T6 is independent of visuals
-Phase R5S-E (parallel): R5S-T7 (i18n keys — independent of code)
-Phase R5S-F (parallel): R5S-T8 (test suite — waits on T1-T7 implementation)
+Phase R5S-D (via parallel subagents): R5S-T5 (GroupTransformFrame + interactions + CanvasArea), R5S-T6 (Store actions) — T5 depends on T3/T4 visuals; T6 is independent of visuals
+Phase R5S-E (via parallel subagents): R5S-T7 (i18n keys — independent of code)
+Phase R5S-F (via parallel subagents): R5S-T8 (test suite — waits on T1-T7 implementation)
 Phase R5S-G (sequential): R5S-T9 (knowledge propagation — waits on all of above)
 ```
 
-**Plan 11 R5S total estimated time**: ~22 hours (~10 wall-clock hours via parallel phases R5S-B/R5S-D/R5S-E/R5S-F)
+**Plan 11 R5S total estimated time**: ~22 hours (~10 wall-clock hours via parallel subagent phases R5S-B/R5S-D/R5S-E/R5S-F)
+
+### R5 Snap & Align Parallel Subagent Strategy
+
+### Wave 1 (R5S): R5S-T1
+- Tasks: R5S-T1 (snapEngine + snapCandidates)
+- Rationale: Foundation — pure functions, no React. All other R5S tasks depend on T1.
+
+### Wave 2 (R5S): R5S-T2, R5S-T4
+- Tasks (via parallel subagents): R5S-T2 (SnapFeedback slice + interactions wiring), R5S-T4 (ResizeHandles/RotationHandle modifiers + MeasurementBadge + rotationCursor)
+- Rationale: Both depend on R5S-T1. T2 targets the feedback slice + interactions; T4 targets handle components + measurement badge. Disjoint modules.
+
+### Wave 3 (R5S): R5S-T3
+- Tasks: R5S-T3 (SmartGuideOverlay + CanvasArea mount)
+- Rationale: Sequential — depends on R5S-T2's feedback slice.
+
+### Wave 4 (R5S): R5S-T5, R5S-T6, R5S-T7
+- Tasks (via parallel subagents): R5S-T5 (GroupTransformFrame + interactions + CanvasArea), R5S-T6 (Store actions), R5S-T7 (i18n keys)
+- Rationale: T5 depends on T3/T4 visuals (complete from Wave 2/3). T6 is independent of visuals. T7 (i18n) is independent of code. All three target disjoint modules.
+
+### Wave 5 (R5S): R5S-T8
+- Tasks: R5S-T8 (test suite)
+- Rationale: Test suite waits on all T1–T7 implementation. Single-task wave.
+
+### Final Wave (R5S): R5S-T9
+- Task: R5S-T9 (Knowledge Propagation)
+- Rationale: Must run after all R5S Snap & Align implementation is complete.
 
 ### Plan 11 Combined Total Time (Rounds 1-5 Snap & Align included)
 
@@ -2724,7 +2806,7 @@ Phase R5S-G (sequential): R5S-T9 (knowledge propagation — waits on all of abov
 
 ## Round 5: Advanced Layers Tasks
 
-> Tasks for the canvas-side layer rendering — mirrors `design.md` §"Round 5: Advanced Layers Panel". Plan 11 R5 tasks cover the **compositor, render order, visibility, groups, clipping, masks, blend modes, scroll-sync, and WebGL fallback**. Per-row layer UI / panel chrome are in Plan 10 §"Round 5: Advanced Layers Tasks" and Plan 12 §"Round 5: Advanced Layers Tasks" respectively. Quality model: every task ends with `**Quality loop**: tsgo + biome + lint queue client`.
+> Tasks for the canvas-side layer rendering — mirrors `design.md` §"Round 5: Advanced Layers Panel". Plan 11 R5 tasks cover the **compositor, render order, visibility, groups, clipping, masks, blend modes, scroll-sync, and WebGL fallback**. Per-row layer UI / panel chrome are in Plan 10 §"Round 5: Advanced Layers Tasks" and Plan 12 §"Round 5: Advanced Layers Tasks" respectively. Quality model: every task ends with a per-file `scripts/health/sub-loop.ts --lifecycle codescene` call (runs progressive chain: tsgo → biome → lint → codescene).
 >
 > Cross-file dependencies are flagged inline (e.g. the compositor reads `layers`/`groups` owned by Plan 12 §R5 store tasks). Do NOT modify those store files — file a CROSS-FILE DEPENDENCY report and proceed with a typed interface against the expected store API.
 
@@ -2749,9 +2831,31 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
                        └─→ LYC-T13 (knowledge propagation)
 ```
 
-**Execution order**: LYC-T01 → (LYC-T02, LYC-T03, LYC-T04, LYC-T06, LYC-T07, LYC-T08 in parallel; LYC-T09 after LYC-T08; LYC-T05 after LYC-T04) → LYC-T10 → LYC-T11 → LYC-T12 → LYC-T13
+**Execution order**: LYC-T01 → (LYC-T02, LYC-T03, LYC-T04, LYC-T06, LYC-T07, LYC-T08 via parallel subagents; LYC-T09 after LYC-T08; LYC-T05 after LYC-T04) → LYC-T10 → LYC-T11 → LYC-T12 → LYC-T13
 
 **Estimated effort**: 22 hours (parallelizable to ~14 wall-clock hours)
+
+### LYC Parallel Subagent Strategy
+
+### Wave 1 (LYC): LYC-T01
+- Tasks: LYC-T01 (Canvas Layer Compositor Core)
+- Rationale: Foundation task — all other LYC tasks depend on the compositor core or its API.
+
+### Wave 2 (LYC): LYC-T02, LYC-T03, LYC-T04, LYC-T06, LYC-T07, LYC-T08
+- Tasks (via parallel subagents): LYC-T02 (useLayerRenderOrder), LYC-T03 (Visibility + Selection Filter), LYC-T04 (Opacity Lock), LYC-T06 (Blend Mode Dropdown), LYC-T07 (Lock Opacity Slider), LYC-T08 (Reorder Buttons)
+- Rationale: All depend on LYC-T01. Each modifies a separate component module — no cross-imports among siblings.
+
+### Wave 2b (LYC): LYC-T05, LYC-T09
+- Tasks: LYC-T05 (Blend Mode Apply — after LYC-T04), LYC-T09 (Opacity Slider — after LYC-T08)
+- Rationale: LYC-T05 depends on LYC-T04 (Opacity Lock). LYC-T09 depends on LYC-T08 (Lock Opacity Slider). These run after their respective Wave 2 parents.
+
+### Wave 3 (LYC): LYC-T10 → LYC-T11 → LYC-T12 → LYC-T13
+- Tasks: LYC-T10 → LYC-T11 → LYC-T12 → LYC-T13 (sequential integration and testing)
+- Rationale: Integration test, E2E test, quality loop, and knowledge propagation — each depends on the prior.
+
+### Final Wave (LYC): Knowledge Propagation
+- Task: LYC-T13 (Knowledge Propagation & Documentation)
+- Rationale: Must run after all LYC implementation tasks are complete and verified.
 
 ---
 
@@ -2793,6 +2897,8 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 **Depends on**: LYC-T01
 **Requirements**: design.md §R5.1, §R5.5
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (LYC) alongside LYC-T03, LYC-T04, LYC-T06, LYC-T07, LYC-T08. All depend on LYC-T01 and modify separate component modules.
+
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `frontend/AGENTS.md` root
 
@@ -2819,6 +2925,8 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 **Estimated time**: 2 hours
 **Depends on**: LYC-T01
 **Requirements**: design.md §R5.2
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (LYC) alongside LYC-T02, LYC-T04, LYC-T06, LYC-T07, LYC-T08. All depend on LYC-T01 and modify separate component modules.
 
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md` root
@@ -2847,6 +2955,8 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 **Depends on**: LYC-T01
 **Requirements**: design.md §R5.3
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (LYC) alongside LYC-T02, LYC-T03, LYC-T06, LYC-T07, LYC-T08. All depend on LYC-T01 and modify separate component modules.
+
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
 - [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
@@ -2874,6 +2984,8 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 **Depends on**: LYC-T04
 **Requirements**: design.md §R5.3
 
+> **Parallelizable**: This task runs as a subagent in Wave 2b (LYC) after LYC-T04 completes. It runs alongside LYC-T09 (which depends on LYC-T08).
+
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
 - [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
@@ -2899,6 +3011,8 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 **Estimated time**: 2 hours
 **Depends on**: LYC-T01
 **Requirements**: design.md §R5.4
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (LYC) alongside LYC-T02, LYC-T03, LYC-T04, LYC-T07, LYC-T08. All depend on LYC-T01 and modify separate component modules.
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
@@ -2930,6 +3044,8 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 **Depends on**: LYC-T01
 **Requirements**: design.md §R5.7
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (LYC) alongside LYC-T02, LYC-T03, LYC-T04, LYC-T06, LYC-T08. All depend on LYC-T01 and modify separate component modules.
+
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
 - [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
@@ -2954,6 +3070,8 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 **Estimated time**: 2 hours
 **Depends on**: LYC-T01
 **Requirements**: design.md §R5.8
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (LYC) alongside LYC-T02, LYC-T03, LYC-T04, LYC-T06, LYC-T07. All depend on LYC-T01 and modify separate component modules.
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
@@ -2980,6 +3098,8 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 **Estimated time**: 3.5 hours
 **Depends on**: LYC-T08
 **Requirements**: design.md §R5.8
+
+> **Parallelizable**: This task runs as a subagent in Wave 2b (LYC) after LYC-T08 completes. It runs alongside LYC-T05 (which depends on LYC-T04).
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md` (PERF / lazy init patterns)
 
@@ -3138,7 +3258,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 ```
 Phase LYC-A: LYC-T01 (compositor core)
-Phase LYC-B (parallel):
+Phase LYC-B (via parallel subagents):
   LYC-T02 (hook), LYC-T03 (visibility filter),
   LYC-T04 (group composite), LYC-T06 (clipping), LYC-T07 (mask), LYC-T08 (blend Canvas2D)
 Phase LYC-C (sequential within branch):
@@ -3150,7 +3270,7 @@ Phase LYC-F: LYC-T12 (tests)
 Phase LYC-G: LYC-T13 (knowledge propagation)
 ```
 
-**Round 5 Advanced Layers Panel total (Plan 11 chunk)**: ~22 hours → ~14 wall-clock hours via Phase LYC-B parallelism (6 tasks in parallel)
+**Round 5 Advanced Layers Panel total (Plan 11 chunk)**: ~22 hours → ~14 wall-clock hours via Phase LYC-B parallel subagents (6 tasks via parallel subagents)
 
 ### Full Plan 11 Time (Rounds 1-5 including Layers)
 
@@ -3243,6 +3363,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T03 — `FreeTransformOverlay` (Bounding Box + 8 Handles + Rotation Handle)
 
+> **Parallelizable**: This task runs as a subagent in Wave 5 (TR) alongside TR-T10, TR-T11, TR-T12. All wait on TR-T02 (FreeTransformController). Each targets a separate component module.
+
 - [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformOverlay.tsx` (per design.md R6.3):
   - Renders an SVG overlay on top of the selected element(s) bounding box
@@ -3263,6 +3385,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T04 — Scale Transform Utils + 9-Slice
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (TR) alongside TR-T05, TR-T06, and TR-T09 (warp presets math). All depend on TR-T01. Each targets a separate transform utility module.
+
 - [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/transform/transformScale.ts` (per design.md R6.4):
   - `computeScaleFromHandle(handle: HandlePosition, dragDx, dragDy, originalBox, modifiers: { shift, alt }): { scaleX, scaleY }`
@@ -3276,6 +3400,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### TR-T05 — Rotate Transform Utils + `applyRotate九十`/Flip
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (TR) alongside TR-T04, TR-T06, and TR-T09 (warp presets math). All depend on TR-T01. Each targets a separate transform utility module.
 
 - [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/transform/transformRotate.ts` (per design.md R6.5):
@@ -3294,6 +3420,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### TR-T06 — Skew Transform Utils
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (TR) alongside TR-T04, TR-T05, and TR-T09 (warp presets math). All depend on TR-T01. Each targets a separate transform utility module.
 
 - [ ] Read `frontend/views/AGMENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/transform/transformSkew.ts` (per design.md R6.7):
@@ -3328,6 +3456,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T09 — `WarpGridOverlay` + `WarpRenderer` + 13 Warp Presets
 
+> **Parallelizable**: The warp presets math portion of this task runs as a subagent in Wave 2 (TR) alongside TR-T04, TR-T05, TR-T06. The component-level portion (WarpGridOverlay + WarpRenderer) runs in Wave 6 after TR-T02 (FreeTransformController) is complete. All depend on TR-T01.
+
 - [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/warp/WarpGridOverlay.tsx` (per design.md R6.9):
   - Renders a 3×3 grid overlay on the element
@@ -3348,6 +3478,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T10 — `FreeTransformOptionsBar` — Mode Toggles + W/H + Chain Lock + Reference Point Grid
 
+> **Parallelizable**: This task runs as a subagent in Wave 5 (TR) alongside TR-T03, TR-T11, TR-T12. All wait on TR-T02 (FreeTransformController). Each targets a separate component module.
+
 - [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformOptionsBar.tsx` (per design.md R6.10):
   - Mode toggle `ButtonGroup`: Scale / Rotate / Skew / Distort / Perspective / Warp — labelles from `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)`: `transform.scale`, `transform.rotate`, etc.
@@ -3361,6 +3493,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T11 — Live Transform Rendering in `ElementRenderer`
 
+> **Parallelizable**: This task runs as a subagent in Wave 5 (TR) alongside TR-T03, TR-T10, TR-T12. All wait on TR-T02 (FreeTransformController). Each targets a separate component module.
+
 - [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Modify `frontend/views/dashboard/cert/templates/editor/canvas/ElementRenderer.tsx`:
   - When `activeTool === 'freeTransform'` and this element is in `selectedElementIds` AND the controller has a `workingState.liveTransform`, apply that transform as a `CSS transform` (or SVG matrix for SVG elements) to the rendered output as the user drags
@@ -3370,6 +3504,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### TR-T12 — Register `transformHandlers` Bridge to Plan 10 Store
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 (TR) alongside TR-T03, TR-T10, TR-T11. All wait on TR-T02 (FreeTransformController). Each targets a separate component module.
 
 - [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Modify `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformController.ts` (final piece of TR-T02):
@@ -3381,6 +3517,8 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### TR-T13 — Component + Math Tests
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 (TR). The test suite waits on all TR components (T01–T12) being complete.
 
 - [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
 - [ ] Create `test/ui/components/editor/canvas/FreeTransformOverlay.test.tsx`:
@@ -3425,17 +3563,50 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ```
 Phase TR-A (seq):  TR-T01 (transformTypes — first)
-Phase TR-B (par):  TR-T04 (scale), TR-T05 (rotate + flip), TR-T06 (skew), TR-T09 (warp presets only — math) [all depend on TR-T01]
+Phase TR-B (via parallel subagents):  TR-T04 (scale), TR-T05 (rotate + flip), TR-T06 (skew), TR-T09 (warp presets only — math) [all depend on TR-T01]
 Phase TR-C (seq):  TR-T07 (distort + solveProjective) [depends on TR-T01]
 Phase TR-D (seq):  TR-T08 (perspective) — depends on TR-T07 (uses solveProjective)
 Phase TR-E (seq):  TR-T02 (FreeTransformController — depends on all utils)
-Phase TR-F (par):  TR-T03 (overlay), TR-T10 (options bar), TR-T11 (ElementRenderer modify), TR-T12 (register handlers in controller) [wait on TR-T02]
-Phase TR-G (par):  TR-T09 (WarpGridOverlay + WarpRenderer component-level — wait on warpPresets from TR-B + controller from TR-T02)
-Phase TR-H (par):  TR-T13 (test suite ×4 files — wait on all components)
+Phase TR-F (via parallel subagents):  TR-T03 (overlay), TR-T10 (options bar), TR-T11 (ElementRenderer modify), TR-T12 (register handlers in controller) [wait on TR-T02]
+Phase TR-G (via parallel subagents):  TR-T09 (WarpGridOverlay + WarpRenderer component-level — wait on warpPresets from TR-B + controller from TR-T02)
+Phase TR-H (via parallel subagents):  TR-T13 (test suite ×4 files — wait on all components)
 Phase TR-I (seq):  TR-T14 (knowledge propagation)
 ```
 
-**Plan 11 R6 total**: ~25 hours → ~14 wall-clock hours (parallelism in TR-B, TR-F, TR-G, TR-H)
+**Plan 11 R6 total**: ~25 hours → ~14 wall-clock hours (via parallel subagents in TR-B, TR-F, TR-G, TR-H)
+
+### TR Transform Parallel Subagent Strategy
+
+### Wave 1 (TR): TR-T01
+- Tasks: TR-T01 (Canonical Transform Types File)
+- Rationale: Foundation — all transform utils depend on the types file.
+
+### Wave 2 (TR): TR-T04, TR-T05, TR-T06, TR-T09
+- Tasks (via parallel subagents): TR-T04 (scale), TR-T05 (rotate + flip), TR-T06 (skew), TR-T09 (warp presets — math only)
+- Rationale: All depend on TR-T01. Each targets a separate transform utility module.
+
+### Wave 3 (TR): TR-T07 → TR-T08
+- Tasks: TR-T07 (distort + solveProjective) → TR-T08 (perspective) — sequential, T08 depends on T07.
+
+### Wave 4 (TR): TR-T02
+- Tasks: TR-T02 (FreeTransformController)
+- Rationale: Single-task wave — depends on all transform utils (T04, T05, T06, T07, T08, T09).
+
+### Wave 5 (TR): TR-T03, TR-T10, TR-T11, TR-T12
+- Tasks (via parallel subagents): TR-T03 (FreeTransformOverlay), TR-T10 (Options Bar), TR-T11 (ElementRenderer modify), TR-T12 (register handlers in controller)
+- Rationale: All wait on TR-T02. Each targets a separate component/module.
+
+### Wave 6 (TR): TR-T09 (component-level)
+- Tasks: TR-T09 (WarpGridOverlay + WarpRenderer component-level)
+- Rationale: Waits on warpPresets from Wave 2 + controller from Wave 4.
+
+### Wave 7 (TR): TR-T13
+- Tasks: TR-T13 (test suite ×4 files)
+- Rationale: Test suite waits on all components. Single-task wave.
+
+### Final Wave (TR): TR-T14
+- Task: TR-T14 (Knowledge Propagation)
+- Rationale: Must run after all TR Transform implementation is complete.
 
 ### Full Plan 11 Time (Rounds 1-6)
 
@@ -3469,6 +3640,8 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
 
 ### R5-B2: Text Measurement Hook
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Typography) alongside R5-B3, R5-B4, R5-B5. All depend on R5-B1. Each targets a separate text module.
+
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/canvas/text/useTextMeasurement.ts`:
   - Returns `TextMeasurement`: `{ width, height, lineHeight, lineCount, lineWidths, baselineY }`
   - Uses `OffscreenCanvas` with fallback to hidden `<canvas>` element
@@ -3479,6 +3652,8 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
 
 ### R5-B3: Text Hit Area
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Typography) alongside R5-B2, R5-B4, R5-B5. All depend on R5-B1. Each targets a separate text module.
+
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/canvas/text/TextHitArea.tsx`:
   - Renders invisible `Box` overlay with click target = `max(measurement.width, element.width) × max(measurement.height, element.height)`
   - 4px tolerance for descenders
@@ -3487,6 +3662,8 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-B4: Text Caching Hook
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Typography) alongside R5-B2, R5-B3, R5-B5. All depend on R5-B1. Each targets a separate text module.
 
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/canvas/text/useTextCache.ts`:
   - Maintains `Map<string, TextCacheEntry>` (LRU max 50 entries)
@@ -3505,6 +3682,8 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-B5: Text Preview During Drag
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Typography) alongside R5-B2, R5-B3, R5-B4. All depend on R5-B1. Each targets a separate text module.
 
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/canvas/text/SimplifiedTextPreview.tsx`:
   - Renders bounding box with text color tint at 8% opacity + first ~20 chars as preview label
@@ -3543,6 +3722,8 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-B7: Text Placeholder
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Typography) alongside R5-B9, R5-B10. All wait on R5-B6 (inline edit mode). Each targets a separate text feature module.
 
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/canvas/text/TextPlaceholder.tsx`:
   - Shows when `richTextContent.text.trim() === ""` and `spans.length === 0`
@@ -3585,6 +3766,8 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
 
 ### R5-B9: Vertical Text
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Typography) alongside R5-B7, R5-B10. All wait on R5-B6 (inline edit mode). Each targets a separate text feature module.
+
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/canvas/text/VerticalText.tsx`:
   - CSS: `writingMode: "vertical-rl"` + `textOrientation: "mixed"` on container
   - Default `text-orientation: mixed` for CJK vertical text
@@ -3595,6 +3778,8 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
 
 ### R5-B10: Text Shadow on Canvas
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Typography) alongside R5-B7, R5-B9. All wait on R5-B6 (inline edit mode). Each targets a separate text feature module.
+
 - [ ] Extend `TextRenderer.tsx` to render text shadow:
   - Read `element.settings.textShadow` from store
   - Generate CSS `text-shadow: ${x}px ${y}px ${blur}px ${alpha(color, opacity)}`
@@ -3604,12 +3789,16 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
 
 ### R5-B11: i18n Extension
 
+> **Parallelizable**: This task runs as a subagent in Wave 6 (R5 Typography) alongside R5-B12. Both wait on all Wave 4 component tasks (B7, B8, B9, B10). B11 (i18n) and B12 (tests) have disjoint file sets.
+
 - [ ] Add canvas text i18n keys to `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts`:
   - `typography.placeholder.empty` → EN: "Double-click to edit", AR: "انقر مرتين للتعديل"
   - `typography.textOnPath.bindToPath`, `unbind`, `startOffset`, `baselineOffset`, `flip`, `noPath`, `direction`, `forward`, `reverse`
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-B12: Component Tests
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 (R5 Typography) alongside R5-B11. Both wait on all Wave 4 component tasks (B7, B8, B9, B10). B11 (i18n) and B12 (tests) have disjoint file sets.
 
 - [ ] Create `test/ui/components/canvas/TextRenderer.test.tsx`:
   - Test `textRendering: optimizeLegibility` is applied
@@ -3659,15 +3848,45 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
 
 ```
 Phase R5-B-a (sequential):   R5-B1 TextRenderer (depends on RichTextRenderer from Plan 10)
-Phase R5-B-b (parallel):     R5-B2 measurement, R5-B3 hit area, R5-B4 cache, R5-B5 simplified preview
+Phase R5-B-b (via parallel subagents):     R5-B2 measurement, R5-B3 hit area, R5-B4 cache, R5-B5 simplified preview
 Phase R5-B-c (sequential):   R5-B6 inline edit mode (depends on R5-B1)
-Phase R5-B-d (parallel):     R5-B7 placeholder, R5-B9 vertical text, R5-B10 text shadow
+Phase R5-B-d (via parallel subagents):     R5-B7 placeholder, R5-B9 vertical text, R5-B10 text shadow
 Phase R5-B-e (sequential):   R5-B8 text on path (depends on types + measurement)
-Phase R5-B-f (parallel):     R5-B11 i18n AR + EN, R5-B12 tests (depends on all components)
+Phase R5-B-f (via parallel subagents):     R5-B11 i18n AR + EN, R5-B12 tests (depends on all components)
 Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 ```
 
-**Round 5 total estimated time for Plan 11**: ~40 hours → ~24 wall-clock hours with parallelism.
+**Round 5 total estimated time for Plan 11**: ~40 hours → ~24 wall-clock hours with parallel subagents.
+
+### R5 Typography Parallel Subagent Strategy
+
+### Wave 1 (R5-B): R5-B1
+- Tasks: R5-B1 (TextRenderer)
+- Rationale: Foundation — depends on RichTextRenderer from Plan 10. All other R5-B tasks depend on B1.
+
+### Wave 2 (R5-B): R5-B2, R5-B3, R5-B4, R5-B5
+- Tasks (via parallel subagents): R5-B2 (measurement), R5-B3 (hit area), R5-B4 (cache), R5-B5 (simplified preview)
+- Rationale: All depend on R5-B1. Each targets a separate utility/module.
+
+### Wave 3 (R5-B): R5-B6
+- Tasks: R5-B6 (inline edit mode)
+- Rationale: Sequential — depends on R5-B1.
+
+### Wave 4 (R5-B): R5-B7, R5-B9, R5-B10
+- Tasks (via parallel subagents): R5-B7 (placeholder), R5-B9 (vertical text), R5-B10 (text shadow)
+- Rationale: All independent features that extend the TextRenderer. Disjoint modules.
+
+### Wave 5 (R5-B): R5-B8
+- Tasks: R5-B8 (text on path)
+- Rationale: Sequential — depends on types + measurement from earlier waves.
+
+### Wave 6 (R5-B): R5-B11, R5-B12
+- Tasks (via parallel subagents): R5-B11 (i18n AR + EN), R5-B12 (tests)
+- Rationale: B11 (i18n) is independent of code. B12 (tests) depends on all components. Both run via parallel subagents — disjoint file sets.
+
+### Final Wave (R5-B): R5-B13
+- Task: R5-B13 (Knowledge Propagation)
+- Rationale: Must run after all R5 Typography implementation is complete.
 
 ## Round 5: Context Menus Tasks
 
@@ -3685,6 +3904,8 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-T2: Canvas Empty-Area Builder
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 CM) alongside R5-T4, R5-T5, R5-T8. All depend on R5-T1. Each targets a separate context menu module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/canvasContextMenu.ts` (new)
   - `buildCanvasContextMenu(ctx: MenuContextDescriptor): ContextMenuItem[]` — empty-area menu
@@ -3705,6 +3926,8 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 
 ### R5-T4: Element-Type Additions Builder
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 CM) alongside R5-T2, R5-T5, R5-T8. All depend on R5-T1. Each targets a separate context menu module.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/elementTypeMenuItems.ts` (new)
   - `elementTypeMenuItems(elementType: CanvasElementType, ctx: MenuContextDescriptor): ContextMenuItem[]`
   - Text additions (§R5.4): Edit Text (Enter), Change Font submenu (Recent Fonts up to 5, separator, Browse All...), Increase Font Size (Ctrl+Shift+>), Decrease Font Size (Ctrl+Shift+<), separator, Align Text submenu (Left, Center, Right, Justify), Bold (Ctrl+B, toggle), Italic (Ctrl+I, toggle), Underline (Ctrl+U, toggle), separator, Convert to Outlines, Convert to Path
@@ -3715,6 +3938,8 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-T5: Ruler Context Menu
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 CM) alongside R5-T2, R5-T4, R5-T8. All depend on R5-T1. Each targets a separate context menu module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/rulerContextMenu.ts` (new)
   - `buildRulerContextMenu(opts: { orientation: 'horizontal' | 'vertical'; hasGuides: boolean; anyLockedGuides: boolean }): ContextMenuItem[]`
@@ -3730,6 +3955,8 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 
 ### R5-T6: Duplicate Special Dialog
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5 CM) alongside R5-T7, R5-T9. All wait on Wave 2 tasks (T1, T2, T4, T5, T8). Each targets a separate dialog/integration module.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/dialogs/DuplicateSpecialDialog.tsx` (new)
   - Fields per §R5.6: Number of Copies (TextField number, min 1 max 100), Spacing (X/Y px fields), Mode toggle (Translate / Rotate), Rotation Angle (when Rotate), Scale per Copy (%) slider 0-200, mini preview canvas showing first 3 copies as outlined rectangles
   - Confirm dispatches `canvasStore.duplicateSpecial(selectedIds, { count, spacing, mode, scalePerCopy })`
@@ -3740,6 +3967,8 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 
 ### R5-T7: Numeric Transform Dialog
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5 CM) alongside R5-T6, R5-T9. All wait on Wave 2 tasks (T1, T2, T4, T5, T8). Each targets a separate dialog/integration module.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/dialogs/NumericTransformDialog.tsx` (new)
   - Fields per §R5.7: X, Y, W (lock-aspect chain icon), H, Rotation (-360 to 360), Skew X (-45 to 45), Skew Y (-45 to 45), Flip H (checkbox), Flip V (checkbox)
   - Live preview via `canvasStore.updateElementTransform(id, transform)` debounced 100ms
@@ -3748,6 +3977,8 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-T8: Context Menu Behavior Module & Store Actions
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 CM) alongside R5-T2, R5-T4, R5-T5. All depend on R5-T1. Each targets a separate context menu module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/contextMenuBehavior.ts` (new)
   - Exports constants `SUBMENU_DELAY_MS = 200`, `SUBMENU_ROLLBACK_MS = 150`, `MENU_OPEN_TRANSITION_MS = 80`, `MENU_CLOSE_TRANSITION_MS = 80`
@@ -3766,12 +3997,16 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 
 ### R5-T9: Editor Canvas Integration
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5 CM) alongside R5-T6, R5-T7. All wait on Wave 2 tasks (T1, T2, T4, T5, T8). Each targets a separate dialog/integration module.
+
 - [ ] Modify `frontend/views/dashboard/cert/templates/editor/CanvasArea.tsx` (existing)
   - Attach `onContextMenu` from `useCanvasContextMenu` (R5-T1) to the canvas root `Box`
   - Ensure each rendered element has `data-element-id={element.id}` attribute on its outer wrapper for `document.elementFromPoint` detection
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-T10: Test Suite
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 CM). It waits on all Wave 3 implementation tasks (T6, T7, T9) being complete.
 
 - [ ] Create `test/ui/components/editor/contextMenus/useCanvasContextMenu.test.tsx` (new)
   - Test: right-click on empty canvas with no selection open-menu with "New Element" submenu and NOT Cut/Copy
@@ -3866,14 +4101,40 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 
 ```
 Phase R5-A (sequential): R5-T1 (canvas hook — entry point for both empty-area and element routes)
-Phase R5-B (parallel): R5-T2 (empty-area builder), R5-T3 (element builder), R5-T4 (element-type additions builder), R5-T5 (ruler builder + ruler integration), R5-T8 (behavior constants + store actions)
+Phase R5-B (via parallel subagents): R5-T2 (empty-area builder), R5-T3 (element builder), R5-T4 (element-type additions builder), R5-T5 (ruler builder + ruler integration), R5-T8 (behavior constants + store actions)
   ─── R5-T3 waits on R5-T4 (element builder appends element-type menu items)
-Phase R5-C (parallel): R5-T6 (Duplicate Special Dialog — waits on T8's duplicateSpecial action), R5-T7 (Numeric Transform Dialog — waits on T8's updateElementTransform action), R5-T9 (canvas integration — waits on T1-T5)
-Phase R5-D (parallel): R5-T10 (test suite — waits on T1-T8 implementation)
+Phase R5-C (via parallel subagents): R5-T6 (Duplicate Special Dialog — waits on T8's duplicateSpecial action), R5-T7 (Numeric Transform Dialog — waits on T8's updateElementTransform action), R5-T9 (canvas integration — waits on T1-T5)
+Phase R5-D (via parallel subagents): R5-T10 (test suite — waits on T1-T8 implementation)
 Phase R5-E (sequential): R5-T11 (knowledge propagation — waits on all of above)
 ```
 
-**Plan 11 R5 (Context Menus) total estimated time**: ~18 hours → ~9 wall-clock hours with the parallel phases R5-B, R5-C, R5-D.
+**Plan 11 R5 (Context Menus) total estimated time**: ~18 hours → ~9 wall-clock hours with the parallel subagent phases R5-B, R5-C, R5-D.
+
+### R5 Context Menus Parallel Subagent Strategy
+
+### Wave 1 (R5 CM): R5-T1
+- Tasks: R5-T1 (Canvas Context Menu Hook)
+- Rationale: Foundation — entry point for both empty-area and element routes.
+
+### Wave 2 (R5 CM): R5-T2, R5-T4, R5-T5, R5-T8
+- Tasks (via parallel subagents): R5-T2 (empty-area builder), R5-T4 (element-type additions builder), R5-T5 (ruler builder + ruler integration), R5-T8 (behavior constants + store actions)
+- Rationale: All depend on R5-T1. R5-T3 waits on R5-T4 so T4 must complete before T3. T2, T4, T5, T8 target disjoint modules.
+
+### Wave 2b (R5 CM): R5-T3
+- Tasks: R5-T3 (element builder — appends element-type menu items)
+- Rationale: Sequential — waits on R5-T4's element-type additions.
+
+### Wave 3 (R5 CM): R5-T6, R5-T7, R5-T9
+- Tasks (via parallel subagents): R5-T6 (Duplicate Special Dialog), R5-T7 (Numeric Transform Dialog), R5-T9 (canvas integration)
+- Rationale: T6 waits on T8's duplicateSpecial action. T7 waits on T8's updateElementTransform action. T9 waits on T1–T5. All T8 and T1–T5 are complete by this wave. Disjoint modules.
+
+### Wave 4 (R5 CM): R5-T10
+- Tasks: R5-T10 (test suite)
+- Rationale: Test suite waits on all T1–T8 implementation. Single-task wave.
+
+### Final Wave (R5 CM): R5-T11
+- Task: R5-T11 (Knowledge Propagation)
+- Rationale: Must run after all R5 Context Menus implementation is complete.
 
 > All quality-loop checks per file use `scripts/health/sub-loop.ts <path> --lifecycle <stage>` with progressive checks (tsgo → biome → lint → codescene). The lint queue server must be running before any lint call. See `AGENTS.md` §"Lint Queue Server" for startup commands.
 
@@ -3932,7 +4193,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/utils/shapePathGenerators.ts` (new)
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — add `shape` to `nodeTypes`)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/ShapeNode.test.tsx` — verify each shape type renders correct SVG element, correct attributes, pointer-events logic
@@ -3943,6 +4204,8 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 ### T-R5-02: Shape Drawing Interaction — Click+Drag on Canvas
 
 **Objective:** Implement click+drag drawing of shapes on the canvas with Shift (proportional) and Alt (from center) modifiers.
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Shapes) alongside T-R5-03. Both depend on T-R5-01. T02 targets drawing interaction; T03 targets path parser + edit mode. Disjoint modules.
 
 **Subtasks:**
 
@@ -3993,7 +4256,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/common/stores/canvasStore.ts` (modify — add drawing state)
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — conditional panOnDrag)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/useShapeDrawing.test.tsx` — verify draw rectangle (normal), draw square (Shift), draw from center (Alt), accidental click discarded, custom shape placement
@@ -4004,6 +4267,8 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 ### T-R5-03: Shape Edit Mode — Anchor Points & Bezier Handles
 
 **Objective:** Double-click shape to enter edit mode showing draggable anchor points and Bezier handles.
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5 Shapes) alongside T-R5-02. Both depend on T-R5-01. T02 targets drawing interaction; T03 targets path parser + edit mode. Disjoint modules.
 
 **Subtasks:**
 
@@ -4053,7 +4318,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/common/stores/canvasStore.ts` (modify — edit mode state)
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — double-click handler)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/pathParser.test.ts` — verify parse/serialize round-trip, insert anchor, delete anchor, move anchor, convert anchor type
@@ -4120,7 +4385,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — render boolean path)
 - `package.json` (modify — add `js-clipper` dependency)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/booleanPathMath.test.ts` — verify unite of two overlapping rectangles, subtract creates cutout, intersect produces overlap area, exclude produces XOR, merge creates compound path, flatten produces single baked path, error on degenerate paths
@@ -4130,6 +4395,8 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 ### T-R5-05: Shape Path Caching & Performance
 
 **Objective:** Cache shape path generation during drag interactions for smooth performance.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Shapes) alongside T-R5-06, T-R5-07, T-R5-08. All are independent feature tasks extending shape rendering. Disjoint modules.
 
 **Subtasks:**
 
@@ -4153,7 +4420,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/utils/shapePathCache.ts` (new)
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — use cache)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/shapePathCache.test.ts` — verify cache hit returns same string, cache miss computes and stores, LRU eviction at 500 limit, `clearShapePathCache` empties cache
@@ -4163,6 +4430,8 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 ### T-R5-06: Interactive Corner Radius Handle on Canvas
 
 **Objective:** Drag a handle on the top-left corner of selected rectangles to adjust corner radius.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Shapes) alongside T-R5-05, T-R5-07, T-R5-08. All are independent feature tasks extending shape rendering. Disjoint modules.
 
 **Subtasks:**
 
@@ -4186,7 +4455,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/nodes/CornerRadiusHandle.tsx` (new)
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — render handle)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/CornerRadiusHandle.test.tsx` — verify handle visible only on selected rect, drag updates radius, radius clamped to valid range
@@ -4196,6 +4465,8 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 ### T-R5-07: Interactive Polygon Sides & Star Points Editing on Canvas
 
 **Objective:** Show +/− buttons on canvas for adjusting polygon sides and star points.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Shapes) alongside T-R5-05, T-R5-06, T-R5-08. All are independent feature tasks extending shape rendering. Disjoint modules.
 
 **Subtasks:**
 
@@ -4222,7 +4493,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeSidesHandle.tsx` (new)
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — render handle)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/ShapeSidesHandle.test.tsx` — verify +/− increments/decrements sides within bounds, star inner radius handle updates value, handle hidden when not selected
@@ -4232,6 +4503,8 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 ### T-R5-08: Shape Hover & Selection Visuals
 
 **Objective:** Shape hover highlight and bounding-box selection frame.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Shapes) alongside T-R5-05, T-R5-06, T-R5-07. All are independent feature tasks extending shape rendering. Disjoint modules.
 
 **Subtasks:**
 
@@ -4253,7 +4526,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Files to Create/Modify:**
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — hover handlers)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/ShapeHover.test.tsx` — verify hover adds outline, mouse leave removes it, color from theme
@@ -4289,7 +4562,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — error boundary fallback)
 - `frontend/views/dashboard/cert/templates/editor/utils/booleanPathMath.ts` (modify — error handling)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/ShapeErrorStates.test.tsx` — verify invalid path renders fallback, boolean failure renders first operand + toast, SVG import error shows alert
@@ -4329,14 +4602,36 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 
 ```
 Phase R5-A (sequential):  T-R5-01 (shape rendering — foundation)
-Phase R5-B (parallel):    T-R5-02 (drawing interaction), T-R5-03 (path parser + edit mode)
+Phase R5-B (via parallel subagents):    T-R5-02 (drawing interaction), T-R5-03 (path parser + edit mode)
 Phase R5-C (sequential):  T-R5-04 (boolean path math — depends on path generator)
-Phase R5-D (parallel):    T-R5-05 (caching), T-R5-06 (corner radius handle), T-R5-07 (sides handle), T-R5-08 (hover)
+Phase R5-D (via parallel subagents):    T-R5-05 (caching), T-R5-06 (corner radius handle), T-R5-07 (sides handle), T-R5-08 (hover)
 Phase R5-E (sequential):  T-R5-09 (error states)
 Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 ```
 
 **Round 5 total estimated time**: 28 hours (parallelizable to ~16 wall-clock hours)
+
+### R5 Custom Shapes Parallel Subagent Strategy
+
+### Wave 1 (R5 Shapes): T-R5-01
+- Tasks: T-R5-01 (Shape Node Rendering)
+- Rationale: Foundation — shape rendering base. All other R5 Shapes tasks depend on T01.
+
+### Wave 2 (R5 Shapes): T-R5-02, T-R5-03
+- Tasks (via parallel subagents): T-R5-02 (drawing interaction), T-R5-03 (path parser + edit mode)
+- Rationale: Both depend on T-R5-01. T02 targets drawing interaction; T03 targets path parser + edit mode. Disjoint modules.
+
+### Wave 3 (R5 Shapes): T-R5-04
+- Tasks: T-R5-04 (boolean path math)
+- Rationale: Sequential — depends on path generator from Wave 2.
+
+### Wave 4 (R5 Shapes): T-R5-05, T-R5-06, T-R5-07, T-R5-08
+- Tasks (via parallel subagents): T-R5-05 (caching), T-R5-06 (corner radius handle), T-R5-07 (sides handle), T-R5-08 (hover)
+- Rationale: All independent feature tasks that extend the shape rendering. Disjoint modules.
+
+### Wave 5 (R5 Shapes): T-R5-09 → T-R5-10
+- Tasks: T-R5-09 (error states) → T-R5-10 (component tests) — sequential.
+- Rationale: T09 (error states) then T10 (tests — depends on all above).
 
 ## Round 5: Zoom & Navigation Tasks
 
@@ -4420,6 +4715,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 
 ### R5-CS-T1: Eyedropper Zustand store + canvas store additions
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 (R5-CS) alongside R5-CS-T3, R5-CS-T4. All are independent state + buffer tasks. Disjoint modules.
+
 - [ ] Create `frontend/common/stores/cert/eyedropperStore.ts` with `useEyedropperStore` (Zustand create<>):
   - State: `isActive`, `cursorScreenPos`, `cursorCanvasPos`, `sampledColor: ColorValue | null`, `paintSlot: 'fill' | 'stroke'`
   - Actions: `activate(slot)`, `deactivate()`, `updateCursor(screenPos, canvasPos)`, `setSampledColor(c)`
@@ -4434,6 +4731,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 
 ### R5-CS-T2: Eyedropper interaction hook (useEyedropperInteraction)
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5-CS) alongside R5-CS-T9. Both depend on stores built in Wave 1. T2 and T9 target separate hook modules.
+
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/sampling/useEyedropperInteraction.ts`
 - [ ] Implement hook signature `useEyedropperInteraction(canvasBounds: CanvasBounds, viewportRef: RefObject<HTMLDivElement>): void`
 - [ ] Register window-scoped `mousemove`, `mousedown`, `keydown` listeners (only when `activeTool === 'eyedropper'`)
@@ -4445,6 +4744,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-CS-T3: Canvas pixel buffer provider (CanvasPixelBuffer + useCanvasPixelBuffer)
+
+> **Parallelizable**: This task runs as a subagent in Wave 1 (R5-CS) alongside R5-CS-T1, R5-CS-T4. All are independent state + buffer tasks. Disjoint modules.
 
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/sampling/CanvasPixelBuffer.tsx`
 - [ ] Implement `CanvasPixelBuffer` class with:
@@ -4461,6 +4762,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 
 ### R5-CS-T4: Pixel sampling utility (sampleColorAt)
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 (R5-CS) alongside R5-CS-T1, R5-CS-T3. All are independent state + buffer tasks. Disjoint modules.
+
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/sampling/sampleColorAt.ts`
 - [ ] Export `async function sampleColorAt(canvasPos: {x,y}, size: EyedropperSampleSize, source: EyedropperSampleSource | null): Promise<ColorValue | null>`
 - [ ] For sample sizes ≤3×3: read pixels individually via `getPixel` and average
@@ -4470,6 +4773,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-CS-T5: Eyedropper loupe component (EyedropperLoupe)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5-CS) alongside R5-CS-T6, R5-CS-T7, R5-CS-T8. All UI components depend on hooks from Wave 2. Each targets a separate component file.
 
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/overlays/EyedropperLoupe.tsx`
 - [ ] Component signature: `EyedropperLoupe({ screenPos, canvasPos, color, sampleSize }: EyedropperLoupeProps)`
@@ -4481,6 +4786,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-CS-T6: Crosshair indicator + RealtimeColorReadout
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5-CS) alongside R5-CS-T5, R5-CS-T7, R5-CS-T8. All UI components depend on hooks from Wave 2. Each targets a separate component file.
 
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/overlays/CrosshairIndicator.tsx`
   - 21×21 element with red horizontal+vertical lines (1px) + center dot
@@ -4494,6 +4801,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 
 ### R5-CS-T7: Eyedropper options bar (sample size + sample source dropdowns)
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5-CS) alongside R5-CS-T5, R5-CS-T6, R5-CS-T8. All UI components depend on hooks from Wave 2. Each targets a separate component file.
+
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/overlays/EyedropperOptionsBar.tsx`
 - [ ] Render at bottom-left of canvas container with `position: 'absolute', bottom: 16, left: 16`
 - [ ] Sample size `Select` — values: `'point' | '3x3' | '5x5' | '11x11' | '51x51'` with i18n labels via `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` (`toolbarEyedropper.sampleSize.*`)
@@ -4504,6 +4813,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-CS-T8: Eyedropper overlay orchestrator (EyedropperOverlay + Portal)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5-CS) alongside R5-CS-T5, R5-CS-T6, R5-CS-T7. All UI components depend on hooks from Wave 2. Each targets a separate component file.
 
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/overlays/EyedropperOverlay.tsx`
 - [ ] Early return `null` if `activeTool !== 'eyedropper'`
@@ -4518,6 +4829,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 
 ### R5-CS-T9: Wire eyedropper tool activation to canvas viewport
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5-CS) alongside R5-CS-T2. Both depend on stores built in Wave 1. T2 and T9 target separate hook modules.
+
 - [ ] In `frontend/desktop/views/dashboard/certificates/template-editor/canvas/CanvasViewport.tsx` (existing Plan 11 file):
 - [ ] Mount `<EyedropperOverlay />` inside the viewport container
 - [ ] Call `useEyedropperInteraction(canvasBounds, viewportRef)` once at top of component
@@ -4528,6 +4841,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-CS-T10: Test suite — eyedropper interaction + color sampling
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5-CS) alongside R5-CS-T11. T10 (tests) depends on all components. T11 (i18n) is independent of code. Disjoint file sets.
 
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/sampling/__tests__/eyedropper.test.tsx`
 - [ ] Test cases (use Happy DOM renderer):
@@ -4546,12 +4861,15 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 
 ### R5-CS-T11: i18n consumption + documentation propagation
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5-CS) alongside R5-CS-T10. T10 (tests) depends on all components. T11 (i18n) is independent of code. Disjoint file sets.
+
 - [ ] Add i18n implementations for `toolbarEyedropper.sampleSize.*` and `toolbarEyedropper.sampleFrom.*` in all locale files under `shared/locale/<lang>/dashboard/certificates/templateEditor.json` (Plan 10 owns the type additions — Plan 11 only adds the implementation string values)
 - [ ] Verify there are NO duplicate `Round 5` block ids in any design file (this Plan 11 R5-CS section names are unique to Plan 11)
 - [ ] Update any existing canvas documentation file that references the previous (pre-eyedropper) canvas interaction model — note that `I` key now picks the eyedropper when not in a text-editing context (see Plan 10 §R5-CS11 keyboard shortcuts)
-- [ ] Run `bun run tsgo` to verify the new store/overlay/hook files type-check against the shared Plan 10 types import
-- [ ] Run `bun biome:check` on new files
-- [ ] Run `bun run lint` (which goes through lint queue client) to verify no ESLint violations in new files
+- [ ] Run per-file quality loop for each new file (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
+  ```
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ---
@@ -4566,13 +4884,31 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 | R5-CS-D: Testing + i18n | R5-CS-T10, R5-CS-T11 | 11h |
 | **Plan 11 R5 total** | **11 tasks** | **~56h** |
 
-Parallelism within phases: T1, T3, T4 are independent (parallel), then T2 + T9 on already-built stores, then UI components T5-T8 in parallel.
+Parallelism within phases: T1, T3, T4 are independent (via parallel subagents), then T2 + T9 on already-built stores, then UI components T5–T8 via parallel subagents.
+
+### R5 Color System Parallel Subagent Strategy
+
+### Wave 1 (R5-CS): R5-CS-T1, R5-CS-T3, R5-CS-T4
+- Tasks (via parallel subagents): R5-CS-T1 (color state), R5-CS-T3 (buffer), R5-CS-T4 (sample offset)
+- Rationale: All independent state + buffer tasks. Disjoint modules.
+
+### Wave 2 (R5-CS): R5-CS-T2, R5-CS-T9
+- Tasks (via parallel subagents): R5-CS-T2 (interaction hooks), R5-CS-T9 (sampler)
+- Rationale: Both depend on stores built in Wave 1. T2 and T9 target separate hook modules.
+
+### Wave 3 (R5-CS): R5-CS-T5, R5-CS-T6, R5-CS-T7, R5-CS-T8
+- Tasks (via parallel subagents): R5-CS-T6 (EyedropperTool), R5-CS-T5 (ColorPickerPopover), R5-CS-T7 (RecentColors), R5-CS-T8 (ColorSliderPanel)
+- Rationale: All UI components depend on hooks from Wave 2. Each targets a separate component file.
+
+### Wave 4 (R5-CS): R5-CS-T10, R5-CS-T11
+- Tasks (via parallel subagents): R5-CS-T10 (test suite), R5-CS-T11 (i18n)
+- Rationale: T10 (tests) depends on all components. T11 (i18n) is independent of code. Disjoint file sets.
 
 ---
 
 ## Round 5: Effects & Filter Tasks
 
-> These tasks implement the Plan 11 canvas rendering pipeline for the Round 5 effects engine defined in `design.md` §"Round 5: Effects & Filter Engine" (R5.1–R5.15). The canonical type source (`effectTypes.ts`) is created in Plan 10 FX-T01; Plan 11 imports it. Quality model: per-file tsgo + biome + lint queue client, per AGENTS.md.
+> These tasks implement the Plan 11 canvas rendering pipeline for the Round 5 effects engine defined in `design.md` §"Round 5: Effects & Filter Engine" (R5.1–R5.15). The canonical type source (`effectTypes.ts`) is created in Plan 10 FX-T01; Plan 11 imports it. Quality model: per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure), per AGENTS.md.
 
 ### Task Map (Plan 11 Effects Rendering)
 
@@ -4605,12 +4941,34 @@ R5FX-T01 (effectsPipeline.ts — orchestrator)
 
 **Execution order**:
 - Phase A (sequential): R5FX-T01
-- Phase B (parallel): R5FX-T02, R5FX-T03, R5FX-T04, R5FX-T05, R5FX-T06, R5FX-T07, R5FX-T08, R5FX-T09, R5FX-T10, R5FX-T11
-- Phase C (parallel): R5FX-T12, R5FX-T13, R5FX-T14
+- Phase B (via parallel subagents): R5FX-T02, R5FX-T03, R5FX-T04, R5FX-T05, R5FX-T06, R5FX-T07, R5FX-T08, R5FX-T09, R5FX-T10, R5FX-T11
+- Phase C (via parallel subagents): R5FX-T12, R5FX-T13, R5FX-T14
 - Phase D (sequential): R5FX-T15 (depends on all above)
 - Phase E (sequential): R5FX-T16 (depends on T15)
 
-**Estimated effort**: ~38 hours (parallelizable to ~18 wall-clock hours via Phase B parallelism)
+**Estimated effort**: ~38 hours (parallelizable to ~18 wall-clock hours via Phase B parallel subagents)
+
+### R5FX Effects Parallel Subagent Strategy
+
+### Wave 1 (R5FX): R5FX-T01
+- Tasks: R5FX-T01 (Effects Pipeline Orchestrator)
+- Rationale: Foundation — all other R5FX tasks depend on the pipeline orchestrator.
+
+### Wave 2 (R5FX): R5FX-T02 through R5FX-T11
+- Tasks (via parallel subagents): R5FX-T02 (SVG Filter Stack Builder), R5FX-T03 (Drop Shadow), R5FX-T04 (Inner Shadow), R5FX-T05 (Outer Glow), R5FX-T06 (Inner Glow), R5FX-T07 (Blur), R5FX-T08 (Color Overlay), R5FX-T09 (Gradient Overlay), R5FX-T10 (Satin/Pattern), R5FX-T11 (Stroke Overlay)
+- Rationale: All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
+
+### Wave 3 (R5FX): R5FX-T12, R5FX-T13, R5FX-T14
+- Tasks (via parallel subagents): R5FX-T12 (Effect Panel DSL), R5FX-T13 (Effect Layer List), R5FX-T14 (SVG Filter Container)
+- Rationale: All depend on Phase B effect renderers being complete. Each targets a separate UI component.
+
+### Wave 4 (R5FX): R5FX-T15
+- Tasks: R5FX-T15 (Canvas Store Modifications + Effect Element Wrapper)
+- Rationale: Sequential — depends on all Phase B and C components.
+
+### Final Wave (R5FX): R5FX-T16
+- Task: R5FX-T16 (Integration Tests + Knowledge Propagation)
+- Rationale: Must run after all R5FX implementation is complete.
 
 ---
 
@@ -4632,17 +4990,13 @@ R5FX-T01 (effectsPipeline.ts — orchestrator)
   - Import `blendModeMapping` from `./blendModeMapping`
   - Import `globalLight` from `./globalLight`
   - **Quality loop**: tsgo + biome + lint queue client
-  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/effectsPipeline.ts --lifecycle lint`
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t01","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/effectsPipeline.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/effectsPipeline.ts --lifecycle codescene`
 
 ---
 
 ### R5FX-T02: SVG Filter Stack Builder
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T03 through R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/svgFilterStack.ts`
   - Export `buildSvgFilterStack(effects: EffectLayer[], idPrefix: string): SvgFilterDefinition | null`
@@ -4661,6 +5015,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### R5FX-T03: Drop Shadow Renderer
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02, R5FX-T04 through R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/dropShadowRendering.ts`
   - Export `renderDropShadow(effect: DropShadowParams, globalLight: GlobalLightConfig): { css: string | null, svg: string | null }`
   - If `effect.useGlobalLight` is true, use `globalLight.angle` instead of `effect.angle`
@@ -4673,16 +5029,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - Return `css` for simple single-shadow; `svg` for knockout/multiple
   - Import `DropShadowParams`, `GlobalLightConfig` from `@/frontend/common/stores/cert/effectTypes.ts`
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t03","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/dropShadowRendering.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/dropShadowRendering.ts --lifecycle codescene`
 
 ---
 
 ### R5FX-T04: Inner Shadow Renderer
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02, R5FX-T03, R5FX-T05 through R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/innerShadowRendering.ts`
   - Export `renderInnerShadow(effect: InnerShadowParams, globalLight: GlobalLightConfig): { css: string | null, svg: string | null }`
@@ -4697,6 +5050,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ---
 
 ### R5FX-T05: Glow Renderer (Outer + Inner)
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02 through R5FX-T04, R5FX-T06 through R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/glowRendering.ts`
   - Export `renderOuterGlow(effect: OuterGlowParams): { css: string | null, svg: string | null }`
@@ -4715,6 +5070,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### R5FX-T06: Blur Renderer (6 Variants)
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02 through R5FX-T05, R5FX-T07 through R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/blurRendering.ts`
   - Export `renderBlur(effect: BlurEffectParams): { css: string | null, svg: string | null }`
   - Discriminate on `effect.kind`:
@@ -4728,16 +5085,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - Return both `{ css, svg }` — caller merges as needed
   - Import `BlurEffectParams` from `@/frontend/common/stores/cert/effectTypes.ts`
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t06","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/blurRendering.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/blurRendering.ts --lifecycle codescene`
 
 ---
 
 ### R5FX-T07: Color Adjustment Renderer (10 Variants)
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02 through R5FX-T06, R5FX-T08 through R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/colorAdjustRendering.ts`
   - Export `renderColorAdjust(effect: ColorAdjustParams): { css: string | null, svg: string | null }`
@@ -4760,6 +5114,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### R5FX-T08: Overlay Renderer (4 Types)
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02 through R5FX-T07, R5FX-T09 through R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/overlayRendering.ts`
   - Export `renderOverlay(effect: OverlayParams): { overlayStyle: CSSProperties, isolation: boolean }`
   - Discriminate on `effect.kind`:
@@ -4774,6 +5130,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ---
 
 ### R5FX-T09: Stylize Renderer (12 Variants)
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02 through R5FX-T08, R5FX-T10, R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/stylizeRendering.ts`
   - Export `renderStylize(effect: StylizeParams, globalLight: GlobalLightConfig): { svg: string | null, overlayStyle: CSSProperties | null }`
@@ -4793,16 +5151,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - If `effect.useGlobalLight` is true on bevelEmboss or emboss, use `globalLight.angle` and `globalLight.altitude`
   - Import `StylizeParams`, `GlobalLightConfig` from `@/frontend/common/stores/cert/effectTypes.ts`
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t09","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/stylizeRendering.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/stylizeRendering.ts --lifecycle codescene`
 
 ---
 
 ### R5FX-T10: Blend Mode Mapping (46 Modes)
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02 through R5FX-T09, R5FX-T11. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/blendModeMapping.ts`
   - Export `mapBlendModeToCss(mode: BlendMode46): string | null`
@@ -4824,6 +5179,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### R5FX-T11: Global Light System
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 (R5FX) alongside R5FX-T02 through R5FX-T10. All 10 effect renderers depend on R5FX-T01. Each targets a separate effect renderer module.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/globalLight.ts`
   - Export `getGlobalLight(): GlobalLightConfig` — reads from `canvasStore.getState().globalLight`
   - Export `setGlobalLight(config: Partial<GlobalLightConfig>): void` — dispatches `canvasStore.getState().setGlobalLight(config)`
@@ -4838,6 +5195,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### R5FX-T12: Effect Cache (LRU)
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5FX) alongside R5FX-T13, R5FX-T14. All depend on Phase B effect renderers being complete. Each targets a separate UI/utility component.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/effectCache.ts`
   - Export `createEffectCache(maxSize: number): EffectCache`
   - `EffectCache` interface: `get(key: string): ComposedEffects | null; set(key: string, value: ComposedEffects): void; clear(): void; size(): number`
@@ -4847,16 +5206,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - `clear()` called when element is destroyed or effects array changes structurally (add/remove)
   - Invalidation: caller compares stored key against current params; if mismatch, recompute and `set`
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t12","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/effectCache.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/effectCache.ts --lifecycle codescene`
 
 ---
 
 ### R5FX-T13: Debounced Effect Render Hook
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5FX) alongside R5FX-T12, R5FX-T14. All depend on Phase B effect renderers being complete. Each targets a separate UI/utility component.
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/useDebouncedEffectRender.ts`
   - Export `useDebouncedEffectRender(element: CanvasElement, delay?: number): { composed: ComposedEffects | null; isStale: boolean }`
@@ -4875,6 +5231,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ### R5FX-T14: SVG Filter Container Component
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 (R5FX) alongside R5FX-T12, R5FX-T13. All depend on Phase B effect renderers being complete. Each targets a separate UI/utility component.
+
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/effectRendering/EffectSvgContainer.tsx`
   - Lazy-mounted hidden SVG container that houses `<filter>` definitions
   - Only mounts when at least one element has an effect requiring SVG
@@ -4889,12 +5247,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - Import `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` from `@/shared/locale/client` (for aria-label)
   - MUI v9: `sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}` — NOT style prop
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t14","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/EffectSvgContainer.tsx"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/EffectSvgContainer.tsx --lifecycle codescene`
 
 ---
 
@@ -4934,14 +5287,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - MUI v9: `sx={{ position: 'relative' }}` on overlay wrappers — NOT style props
   - **Quality loop**: tsgo + biome + lint queue client
 
-```bash
-# Lint both files in one queue request
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t15","files":["frontend/common/stores/cert/canvasStore.ts","frontend/views/dashboard/cert/templates/editor/EffectElementWrapper.tsx"]}'
-```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` for each of the two files.
+Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for each of the two files.
 
 ---
 
@@ -4976,13 +5322,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` for each 
   - Document: "Backward-compat: boxShadow/textShadow derived from effects[], BlendMode → BlendMode46 superset"
   - **Quality loop**: tsgo + biome + lint queue client
 
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t16","files":["test/ui/components/template-editor/effectRendering/effectsPipeline.test.tsx","test/ui/components/template-editor/effectRendering/EffectSvgContainer.test.tsx","frontend/IMPLEMENTATION_LEARNINGS.md"]}'
-```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` for each file.
+Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for each file.
 
 ---
 
@@ -4991,8 +5331,8 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` for each 
 | Phase | Tasks | Est. Hours | Wall-clock |
 |-------|-------|------------|------------|
 | Phase A (seq) | R5FX-T01 | 3h | 3h |
-| Phase B (par) | R5FX-T02..T11 | 20h | 8h |
-| Phase C (par) | R5FX-T12..T14 | 6h | 3h |
+| Phase B (via parallel subagents) | R5FX-T02..T11 | 20h | 8h |
+| Phase C (via parallel subagents) | R5FX-T12..T14 | 6h | 3h |
 | Phase D (seq) | R5FX-T15 | 5h | 5h |
 | Phase E (seq) | R5FX-T16 | 4h | 4h |
 | **Total** | R5FX-T01..T16 | **38h** | **~18h** |
@@ -5102,9 +5442,39 @@ MASK-T02 (store additions from Plan 10)                                         
   MASK-C12 (test suite + knowledge propagation — depends on C01-C11) ◄────────┘
 ```
 
-**Execution order**: Plan 10 MASK-T01/T02 first → (MASK-C01, MASK-C02 parallel; MASK-C03 depends on Pen R5) → MASK-C04 (waits C01+C02) → (MASK-C05, MASK-C07, MASK-C09 parallel) → MASK-C06 (waits C05) → MASK-C08, MASK-C10 parallel → MASK-C11 → MASK-C12
+**Execution order**: Plan 10 MASK-T01/T02 first → (MASK-C01, MASK-C02 via parallel subagents; MASK-C03 depends on Pen R5) → MASK-C04 (waits C01+C02) → (MASK-C05, MASK-C07, MASK-C09 via parallel subagents) → MASK-C06 (waits C05) → MASK-C08, MASK-C10 via parallel subagents → MASK-C11 → MASK-C12
 
-**Estimated effort**: ~36 hours (~20 wall-clock hours via the parallel phases)
+**Estimated effort**: ~36 hours (~20 wall-clock hours via the parallel subagent phases)
+
+### MASK Parallel Subagent Strategy
+
+### Wave 1 (MASK): MASK-C01, MASK-C02, MASK-C03
+- Tasks: MASK-C01 (Clipping Mask Renderer), MASK-C02 (Opacity Mask Renderer), MASK-C03 (Vector Mask — depends on Pen R5)
+- Rationale: C01 and C02 run via parallel subagents. C03 depends on Pen R5 (external). All depend on Plan 10 MASK-T01/T02.
+
+### Wave 2 (MASK): MASK-C04
+- Tasks: MASK-C04 (Mask Group + Panel)
+- Rationale: Sequential — waits on C01 + C02 from Wave 1.
+
+### Wave 3 (MASK): MASK-C05, MASK-C07, MASK-C09
+- Tasks (via parallel subagents): MASK-C05 (Mask Inversion), MASK-C07 (ClipGroup), MASK-C09 (Thumbnail)
+- Rationale: C05 depends on C01. C07 depends on C01. C09 depends on C01 + C02. All parent deps satisfied by Wave 1/2. Disjoint modules.
+
+### Wave 4 (MASK): MASK-C06
+- Tasks: MASK-C06 (Mask Linking)
+- Rationale: Sequential — waits on C05 from Wave 3.
+
+### Wave 5 (MASK): MASK-C08, MASK-C10
+- Tasks (via parallel subagents): MASK-C08 (Opacity Mask — needs C02), MASK-C10 (Refine Edge — needs C02)
+- Rationale: Both depend on C02. Disjoint modules.
+
+### Wave 6 (MASK): MASK-C11
+- Tasks: MASK-C11 (Quality Loop)
+- Rationale: Sequential — quality loop over all MASK files.
+
+### Final Wave (MASK): MASK-C12
+- Task: MASK-C12 (Test Suite + Knowledge Propagation)
+- Rationale: Must run after all MASK implementation is complete.
 
 ---
 
@@ -5113,6 +5483,8 @@ MASK-T02 (store additions from Plan 10)                                         
 **Estimated time**: 3 hours
 **Depends on**: Plan 10 MASK-T01 (types), MASK-T02 (store actions — `createClippingMask`/`releaseClippingMask`)
 **Requirements**: design.md §R5.1
+
+> **Parallelizable**: This task runs as a subagent in Wave 1 (MASK) alongside MASK-C02. Both depend on Plan 10 MASK-T01/T02 and target separate renderer modules.
 
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md`
@@ -5134,17 +5506,15 @@ MASK-T02 (store additions from Plan 10)                                         
   - Transform: clip path recomputes on base transform change (`useMemo` keyed on `(baseId, baseShape.transform, baseShape.version)`)
   - All colors from theme palette — never hardcoded
   - **Quality loop**: tsgo + biome + lint queue client
-    ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan11-c01","files":["frontend/views/dashboard/cert/templates/editor/renderers/ClippingMaskRenderer.tsx"]}'
-    ```
+    - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/renderers/ClippingMaskRenderer.tsx --lifecycle codescene`
 
 ### MASK-C02: Layer Mask Canvas Renderer
 
 **Estimated time**: 4 hours
 **Depends on**: Plan 10 MASK-T01, MASK-T02
 **Requirements**: design.md §R5.2
+
+> **Parallelizable**: This task runs as a subagent in Wave 1 (MASK) alongside MASK-C01. Both depend on Plan 10 MASK-T01/T02 and target separate renderer modules.
 
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md`
@@ -5170,6 +5540,8 @@ MASK-T02 (store additions from Plan 10)                                         
 **Estimated time**: 3 hours
 **Depends on**: Pen Tool R5 `AnchorOverlay` component, Plan 10 MASK-T01
 **Requirements**: design.md §R5.3
+
+> **Parallelizable**: This task runs as a subagent in Wave 1 (MASK) alongside MASK-C01 and MASK-C02. Depends on Pen R5 AnchorOverlay (external dependency).
 
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md`
@@ -5210,6 +5582,8 @@ MASK-T02 (store additions from Plan 10)                                         
 **Estimated time**: 4 hours
 **Depends on**: MASK-C04 (buffer contract), Plan 10 MASK-T02 (`commitMaskStroke` action)
 **Requirements**: design.md §R5.5
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 (MASK) alongside MASK-C07 and MASK-C09. All parent dependencies (C01, C02, C04) are satisfied by Waves 1–2.
 
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md`
@@ -5255,6 +5629,8 @@ MASK-T02 (store additions from Plan 10)                                         
 **Depends on**: MASK-C01 (clipping mask renderer)
 **Requirements**: design.md §R5.7
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 (MASK) alongside MASK-C05 and MASK-C09. All parent dependencies (C01) are satisfied by Wave 1.
+
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md`
 
@@ -5272,6 +5648,8 @@ MASK-T02 (store additions from Plan 10)                                         
 **Estimated time**: 3 hours
 **Depends on**: MASK-C02 (layer mask renderer — reuse SVG `<mask>` pattern)
 **Requirements**: design.md §R5.8
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 (MASK) alongside MASK-C10. Both depend on MASK-C02 (satisfied by Wave 1) and MASK-C05 (satisfied by Wave 3).
 
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md`
@@ -5293,6 +5671,8 @@ MASK-T02 (store additions from Plan 10)                                         
 **Depends on**: MASK-C01, MASK-C02 (uses same rendering logic at 32×32)
 **Requirements**: design.md §R5.9
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 (MASK) alongside MASK-C05 and MASK-C07. All parent dependencies (C01, C02) are satisfied by Wave 1.
+
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md`
 
@@ -5309,6 +5689,8 @@ MASK-T02 (store additions from Plan 10)                                         
 **Estimated time**: 3 hours
 **Depends on**: MASK-C02 (layer mask renderer with filter chain)
 **Requirements**: design.md §R5.10
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 (MASK) alongside MASK-C08. Both depend on MASK-C02 (satisfied by Wave 1) and MASK-C05 (satisfied by Wave 3).
 
 - [ ] **Read applicable AGENTS.md**:
   - `frontend/views/AGENTS.md`, `AGENTS.md`
@@ -5405,14 +5787,14 @@ Phase R5M-A (sequential): MASK-C01 (ClippingMaskRenderer), MASK-C02 (LayerMaskRe
   ─── MASK-C03 (VectorMaskPathOverlay — depends on Pen R5 AnchorOverlay)
 Phase R5M-B (sequential after C01+C02): MASK-C04 (MaskEditingOverlay)
   ─── MASK-C05 (brush handler — depends on C04 buffer contract)
-Phase R5M-C (parallel after C01+C03+T02): MASK-C07 (ClipGroup — needs C01), MASK-C09 (Thumbnail — needs C01+C02)
+Phase R5M-C (via parallel subagents after C01+C03+T02): MASK-C07 (ClipGroup — needs C01), MASK-C09 (Thumbnail — needs C01+C02)
 Phase R5M-D (sequential after C05): MASK-C06 (QuickMask — needs brush handler)
-Phase R5M-E (parallel after C02+C05): MASK-C08 (OpacityMask — needs C02), MASK-C10 (RefineEdge — needs C02)
+Phase R5M-E (via parallel subagents after C02+C05): MASK-C08 (OpacityMask — needs C02), MASK-C10 (RefineEdge — needs C02)
 Phase R5M-F (sequential after C01): MASK-C11 (release + indicator)
 Phase R5M-G (sequential after all): MASK-C12 (test suite + knowledge propagation)
 ```
 
-**Plan 11 R5 mask total estimated time**: ~36 hours (~20 wall-clock hours via parallel phases R5M-A, R5M-C, R5M-E)
+**Plan 11 R5 mask total estimated time**: ~36 hours (~20 wall-clock hours via parallel subagent phases R5M-A, R5M-C, R5M-E)
 
 ### Plan 11 Combined Total Time (Rounds 1-5 + Mask)
 

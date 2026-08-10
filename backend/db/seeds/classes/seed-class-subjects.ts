@@ -28,19 +28,16 @@ export async function seedOrGet() {
       return new Map(rows.map(row => [row.slug, row] as const));
     },
     createMany: async toCreate => {
-      const inputs = [];
-      for (const spec of toCreate) {
-        const avatarUrl = await seedCatalogLogoUrl("subjects", spec.slug);
-        inputs.push({
-          slug: spec.slug,
-          name: spec.name,
-          categoryId: spec.categoryId,
-          description: spec.description,
-          sortOrder: spec.sortOrder,
-          avatarUrl,
-          isActive: true,
-        });
-      }
+      const avatarUrls = await Promise.all(toCreate.map(spec => seedCatalogLogoUrl("subjects", spec.slug)));
+      const inputs = toCreate.map((spec, index) => ({
+        slug: spec.slug,
+        name: spec.name,
+        categoryId: spec.categoryId,
+        description: spec.description,
+        sortOrder: spec.sortOrder,
+        avatarUrl: avatarUrls[index],
+        isActive: true,
+      }));
       return ClassCatalogService.upsertManySubjects(inputs);
     },
     refetchOnRace: async slugs => {

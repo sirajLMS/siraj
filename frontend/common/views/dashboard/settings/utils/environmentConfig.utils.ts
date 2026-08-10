@@ -31,8 +31,10 @@ export function groupEnvConfigEntriesByCategory(
   const grouped = new Map<SettingsEnvironmentCategoryKey, EnvConfigEntryFieldsFragment[]>();
 
   for (const entry of entries) {
-    const category = isSettingsEnvironmentCategoryKey(entry.category ?? "") ? entry.category : "general";
-    const resolvedCategory = category as SettingsEnvironmentCategoryKey;
+    const rawCategory = entry.category ?? "";
+    const resolvedCategory: SettingsEnvironmentCategoryKey = isSettingsEnvironmentCategoryKey(rawCategory)
+      ? rawCategory
+      : "general";
     const bucket = grouped.get(resolvedCategory) ?? [];
     bucket.push(entry);
     grouped.set(resolvedCategory, bucket);

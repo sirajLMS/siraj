@@ -111,6 +111,26 @@ function clearScreen(): void {
   process.stdout.write("\x1Bc");
 }
 
+function isSonarIssue(value: unknown): value is SonarIssue {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const v = Object.fromEntries(Object.entries(value));
+  return (
+    typeof v.key === "string" &&
+    typeof v.rule === "string" &&
+    typeof v.severity === "string" &&
+    typeof v.component === "string" &&
+    typeof v.message === "string" &&
+    typeof v.status === "string" &&
+    typeof v.type === "string"
+  );
+}
+
+function isSonarResult(value: unknown): value is SonarResult {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const v = Object.fromEntries(Object.entries(value));
+  return Array.isArray(v.issues) && v.issues.every(isSonarIssue);
+}
+
 /**
  * Load and parse sonar-result.json
  */
@@ -128,7 +148,11 @@ function loadSonarResults(): SonarResult | null {
 
   try {
     const content = readFileSync(fullPath, "utf-8");
-    return JSON.parse(content) as SonarResult;
+    const parsed: unknown = JSON.parse(content);
+    if (!isSonarResult(parsed)) {
+      throw new Error("Parsed JSON does not match expected SonarResult shape");
+    }
+    return parsed;
   } catch (error) {
     logger.error("Failed to parse sonar-result.json", { error });
     console.log(`\n${c.red}${c.bold}✖ Error:${c.reset} Failed to parse ${c.cyan}${SONAR_RESULT_PATH}${c.reset}\n`);
@@ -441,6 +465,50 @@ async function handleMenuAction(
   return { newIndex: nav.handeled ? nav.newIndex : currentIndex, newRunner: runner, shouldBreak: false };
 }
 
+async function runMenuStep(
+  rl: readline.Interface,
+  fileIssuesList: FileIssues[],
+  currentIndex: number,
+  runner: RunnerMode,
+  isDryRun: boolean
+): Promise<void> {
+  if (currentIndex >= fileIssuesList.length) {
+    clearScreen();
+    console.log(`\n${c.brightGreen}${c.bold}🎉 All files processed!${c.reset}\n`);
+    return;
+  }
+
+  clearScreen();
+  const totalIssues = fileIssuesList.reduce((acc, f) => acc + f.issues.length, 0);
+  printHeader(totalIssues, fileIssuesList.length, runner);
+  printFileSummary(fileIssuesList);
+
+  const currentFile = fileIssuesList[currentIndex];
+  if (!currentFile) return;
+
+  console.log(
+    `${c.brightMagenta}${c.bold}Current Selection [${currentIndex + 1}/${fileIssuesList.length}]:${c.reset} ` +
+      `${c.brightCyan}${c.bold}${currentFile.filePath}${c.reset}`
+  );
+  printFileIssuesDetail(currentFile);
+
+  console.log(`${c.bold}${c.white}Options:${c.reset}`);
+  console.log(
+    `  ${c.brightGreen}[Enter/f]${c.reset} Launch ${runner === "vscode" ? "VS Code Chat" : "Copilot CLI"} for current file`
+  );
+  console.log(`  ${c.brightBlue}[r]${c.reset} Toggle runner mode (current: ${runner})`);
+  console.log(`  ${c.brightYellow}[n]${c.reset} Next file  |  ${c.brightYellow}[p]${c.reset} Previous file`);
+  console.log(`  ${c.brightCyan}[<number>]${c.reset} Select specific file number (1-${fileIssuesList.length})`);
+  console.log(`  ${c.brightRed}[q]${c.reset} Quit`);
+
+  const answer = (await rl.question(`\n${c.bold}${c.brightGreen}Action > ${c.reset}`)).trim().toLowerCase();
+
+  const result = await handleMenuAction(answer, rl, currentFile, runner, currentIndex, fileIssuesList.length, isDryRun);
+
+  if (result.shouldBreak) return;
+  return runMenuStep(rl, fileIssuesList, result.newIndex, result.newRunner, isDryRun);
+}
+
 async function interactiveMenu(
   fileIssuesList: FileIssues[],
   initialRunner: RunnerMode,
@@ -451,55 +519,8 @@ async function interactiveMenu(
     output: process.stdout,
   });
 
-  let currentIndex = 0;
-  let runner = initialRunner;
-
   try {
-    while (currentIndex < fileIssuesList.length) {
-      clearScreen();
-      const totalIssues = fileIssuesList.reduce((acc, f) => acc + f.issues.length, 0);
-      printHeader(totalIssues, fileIssuesList.length, runner);
-      printFileSummary(fileIssuesList);
-
-      const currentFile = fileIssuesList[currentIndex];
-      if (!currentFile) break;
-
-      console.log(
-        `${c.brightMagenta}${c.bold}Current Selection [${currentIndex + 1}/${fileIssuesList.length}]:${c.reset} ` +
-          `${c.brightCyan}${c.bold}${currentFile.filePath}${c.reset}`
-      );
-      printFileIssuesDetail(currentFile);
-
-      console.log(`${c.bold}${c.white}Options:${c.reset}`);
-      console.log(
-        `  ${c.brightGreen}[Enter/f]${c.reset} Launch ${runner === "vscode" ? "VS Code Chat" : "Copilot CLI"} for current file`
-      );
-      console.log(`  ${c.brightBlue}[r]${c.reset} Toggle runner mode (current: ${runner})`);
-      console.log(`  ${c.brightYellow}[n]${c.reset} Next file  |  ${c.brightYellow}[p]${c.reset} Previous file`);
-      console.log(`  ${c.brightCyan}[<number>]${c.reset} Select specific file number (1-${fileIssuesList.length})`);
-      console.log(`  ${c.brightRed}[q]${c.reset} Quit`);
-
-      const answer = (await rl.question(`\n${c.bold}${c.brightGreen}Action > ${c.reset}`)).trim().toLowerCase();
-
-      const result = await handleMenuAction(
-        answer,
-        rl,
-        currentFile,
-        runner,
-        currentIndex,
-        fileIssuesList.length,
-        isDryRun
-      );
-
-      if (result.shouldBreak) break;
-      currentIndex = result.newIndex;
-      runner = result.newRunner;
-    }
-
-    if (currentIndex >= fileIssuesList.length) {
-      clearScreen();
-      console.log(`\n${c.brightGreen}${c.bold}🎉 All files processed!${c.reset}\n`);
-    }
+    await runMenuStep(rl, fileIssuesList, 0, initialRunner, isDryRun);
   } finally {
     rl.close();
   }

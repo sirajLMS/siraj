@@ -13,6 +13,10 @@ export interface PermissionCatalogDataGridDesktopProps extends BasePermissionCat
   readonly loading?: boolean;
 }
 
+function isStringOrNull(value: unknown): value is string | null {
+  return value === null || typeof value === "string";
+}
+
 interface PermissionKeyCellProps {
   readonly value: string | null;
 }
@@ -94,14 +98,14 @@ export function PermissionCatalogDataGridDesktop({
         headerName: t.columnKey,
         flex: 1,
         minWidth: 200,
-        renderCell: params => <PermissionKeyCell value={params.value as string | null} />,
+        renderCell: params => <PermissionKeyCell value={isStringOrNull(params.value) ? params.value : null} />,
       },
       {
         field: "category",
         headerName: t.columnCategory,
         width: 180,
         renderCell: params => {
-          const val = params.value as string | null;
+          const val = isStringOrNull(params.value) ? params.value : null;
           return (
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {val ?? ""}
@@ -115,7 +119,7 @@ export function PermissionCatalogDataGridDesktop({
         flex: 2,
         minWidth: 300,
         renderCell: params => {
-          const val = params.value as string | null;
+          const val = isStringOrNull(params.value) ? params.value : null;
           return (
             <Typography variant="bodyMd" sx={{ whiteSpace: "normal", wordBreak: "break-word" }}>
               {val ?? ""}

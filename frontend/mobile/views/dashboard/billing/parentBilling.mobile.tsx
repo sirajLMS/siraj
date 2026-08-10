@@ -26,7 +26,7 @@ export function ParentBillingMobileView({
   loading,
   canView,
   canSubmitProof,
-  canManage = false,
+  canManage,
   billingActionsDisabled = false,
   onSearchChange,
   onPayNow,

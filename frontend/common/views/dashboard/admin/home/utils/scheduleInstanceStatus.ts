@@ -1,4 +1,4 @@
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type ClassInstanceStatusResolveOptions,
   DEFAULT_MISSED_GRACE_MINUTES,
@@ -6,6 +6,15 @@ import {
 } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 export type ScheduleInstanceDisplayStatus = ClassOutcome | ClassExecutionState;
+
+const DISPLAY_STATUS_VALUES: ReadonlySet<string> = new Set<string>([
+  ...(Object.values(ClassOutcome) as readonly string[]),
+  ...(Object.values(ClassExecutionState) as readonly string[]),
+]);
+
+function isScheduleInstanceDisplayStatus(value: string): value is ScheduleInstanceDisplayStatus {
+  return DISPLAY_STATUS_VALUES.has(value);
+}
 
 type DateLike = Date | string | null;
 
@@ -49,9 +58,10 @@ export function resolveScheduleInstanceDisplayStatus(
     durationMinutes: options?.durationMinutes,
   });
 
-  return resolveClassInstanceDashboardStatus(outcome, executionState, actualStartAt, actualEndAt, {
+  const status = resolveClassInstanceDashboardStatus(outcome, executionState, actualStartAt, actualEndAt, {
     scheduledEndAt,
     missedGraceMinutes: options?.missedGraceMinutes ?? DEFAULT_MISSED_GRACE_MINUTES,
     now: options?.now,
-  }) as unknown as ScheduleInstanceDisplayStatus;
+  });
+  return isScheduleInstanceDisplayStatus(status) ? status : ClassOutcome.Pending;
 }

@@ -18,7 +18,7 @@ export default async function SuggestionsPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.COMMUNICATION_SUBMIT_SUGGESTION], locale, context);
   return <ParentSuggestionsContainer />;

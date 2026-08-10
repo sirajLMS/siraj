@@ -46,7 +46,7 @@ export interface UseTabbedPaneViewModelOptions<TabId extends string, LabelKey ex
   /** Optional fallback tab id (defaults to the first visible tab). */
   readonly fallbackTab?: TabId;
   /** Page-level labels joined into the ViewModel (the chrome renders them). */
-  readonly pageLabels?: Labels;
+  readonly pageLabels: Labels;
   /**
    * Custom `hasPermission` hook (defaults to the global `useUserStore`).
    * Allows Callers to layer additional logic (e.g. superadmin overrides)
@@ -95,7 +95,7 @@ export function useTabbedPaneViewModel<TabId extends string, LabelKey extends st
   );
 
   return {
-    labels: options.pageLabels as Labels,
+    labels: options.pageLabels,
     activeTab: resolvedActiveTab,
     tabNavItems,
   };

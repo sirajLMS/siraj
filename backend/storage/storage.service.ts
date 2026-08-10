@@ -10,6 +10,12 @@ import { createVercelAdapter } from "@/backend/storage/disk/vercel";
  */
 type StorageProvider = "gcp" | "local" | "vercel" | "s3" | "r2";
 
+const VALID_STORAGE_PROVIDERS: readonly StorageProvider[] = ["gcp", "local", "vercel", "s3", "r2"];
+
+function isStorageProvider(value: string): value is StorageProvider {
+  return (VALID_STORAGE_PROVIDERS as readonly string[]).includes(value);
+}
+
 // Module-level state replaces the static class properties
 let instance: StorageService | null = null;
 let initializationPromise: Promise<StorageService> | null = null;
@@ -18,11 +24,10 @@ let initializationPromise: Promise<StorageService> | null = null;
  * Get the storage provider from environment variable
  */
 function getStorageProvider(): StorageProvider {
-  const provider = getEnvironmentConfig().storageProvider as StorageProvider;
+  const provider = getEnvironmentConfig().storageProvider;
 
-  const validProviders: StorageProvider[] = ["gcp", "local", "vercel", "s3", "r2"];
-  if (!validProviders.includes(provider)) {
-    throw new Error(`Invalid STORAGE_PROVIDER: ${provider}. Options: ${validProviders.join(", ")}`);
+  if (!isStorageProvider(provider)) {
+    throw new Error(`Invalid STORAGE_PROVIDER: ${provider}. Options: ${VALID_STORAGE_PROVIDERS.join(", ")}`);
   }
 
   return provider;

@@ -19,7 +19,7 @@ gqlSchemaBuilder.queryField("teacherMonthlyReport", t =>
       }
       return TeacherMonthlyReportService.getMonthlyReport(
         ctx.user.id,
-        String(args.teacherId),
+        args.teacherId,
         args.year,
         args.month,
         ctx.locale
@@ -44,7 +44,7 @@ gqlSchemaBuilder.queryField("studentMonthlyReport", t =>
       }
       return StudentMonthlyReportService.getMonthlyReport(
         ctx.user.id,
-        String(args.studentId),
+        args.studentId,
         args.year,
         args.month,
         ctx.locale

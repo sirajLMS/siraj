@@ -322,6 +322,60 @@ function PaymentRecordsSection({
   );
 }
 
+function renderFxConversionNote({
+  subjectUserId: targetUserId,
+  viewerDisplayCurrency: viewerCurrency,
+}: {
+  readonly subjectUserId?: string | null;
+  readonly viewerDisplayCurrency?: string | null;
+}): React.ReactNode {
+  if (targetUserId) {
+    return <FxConversionNote mode="subject" subjectUserId={targetUserId} />;
+  }
+  if (viewerCurrency) {
+    return <FxConversionNote mode="viewer" />;
+  }
+  return null;
+}
+
+function renderPaymentsOrEmpty({
+  payments: paymentRows,
+  locale: uiLocale,
+  amountLabel: amountLabelText,
+  dateLabel: dateLabelText,
+  fxMessages: fxMsgs,
+  submission: submissionData,
+  emptyLabel: emptyLabelText,
+}: {
+  readonly payments: readonly PaymentRow[];
+  readonly locale: string;
+  readonly amountLabel: string;
+  readonly dateLabel: string;
+  readonly fxMessages: FormatCurrencyMessages;
+  readonly submission: SubmissionRow | null;
+  readonly emptyLabel: string;
+}): React.ReactNode {
+  if (paymentRows.length > 0) {
+    return (
+      <PaymentRecordsSection
+        payments={paymentRows}
+        locale={uiLocale}
+        amountLabel={amountLabelText}
+        dateLabel={dateLabelText}
+        fxMessages={fxMsgs}
+      />
+    );
+  }
+  if (submissionData === null) {
+    return (
+      <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+        {emptyLabelText}
+      </Typography>
+    );
+  }
+  return null;
+}
+
 type PaymentDetailsContentProps = {
   readonly loading: boolean;
   readonly loadFailed: boolean;
@@ -407,60 +461,6 @@ function PaymentDetailsDialogContent({
   fxMessages,
   viewerDisplayCurrency,
 }: PaymentDetailsContentProps): React.ReactNode {
-  const renderFxConversionNote = ({
-    subjectUserId,
-    viewerDisplayCurrency,
-  }: {
-    readonly subjectUserId?: string | null;
-    readonly viewerDisplayCurrency?: string | null;
-  }): React.ReactNode => {
-    if (subjectUserId) {
-      return <FxConversionNote mode="subject" subjectUserId={subjectUserId} />;
-    }
-    if (viewerDisplayCurrency) {
-      return <FxConversionNote mode="viewer" />;
-    }
-    return null;
-  };
-
-  const renderPaymentsOrEmpty = ({
-    payments,
-    locale,
-    amountLabel,
-    dateLabel,
-    fxMessages,
-    submission,
-    emptyLabel,
-  }: {
-    readonly payments: readonly PaymentRow[];
-    readonly locale: string;
-    readonly amountLabel: string;
-    readonly dateLabel: string;
-    readonly fxMessages: FormatCurrencyMessages;
-    readonly submission: SubmissionRow | null;
-    readonly emptyLabel: string;
-  }): React.ReactNode => {
-    if (payments.length > 0) {
-      return (
-        <PaymentRecordsSection
-          payments={payments}
-          locale={locale}
-          amountLabel={amountLabel}
-          dateLabel={dateLabel}
-          fxMessages={fxMessages}
-        />
-      );
-    }
-    if (submission === null) {
-      return (
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {emptyLabel}
-        </Typography>
-      );
-    }
-    return null;
-  };
-
   if (loading) {
     return (
       <Stack sx={{ alignItems: "center", py: 3 }}>
@@ -753,13 +753,13 @@ function useDialogHandlers(review: ReviewState, onClose: () => void): DialogHand
   };
 
   const onApprove = () => {
-    review.handleApprove();
+    void review.handleApprove();
   };
 
   const onRequestReject = () => review.setShowRejectConfirm(true);
 
   const onConfirmReject = () => {
-    review.handleReject();
+    void review.handleReject();
   };
 
   return {

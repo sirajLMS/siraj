@@ -16,7 +16,7 @@ import {
   PaymentMethodType,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentMethodTransactionSnapshotFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import type { LocalizedString } from "@/shared/types/localized-string";
+import { isAppLocale, type LocalizedString } from "@/shared/types/localized-string";
 
 export { IdentifierKind, PaymentDirection, PaymentMethodType };
 
@@ -160,13 +160,10 @@ export interface PaymentMethodCatalogOption {
 }
 
 export function resolveLocalizedCatalogName(name: LocalizedString, slug: string, locale: string): string {
-  return name[locale as keyof LocalizedString] ?? slug;
+  return isAppLocale(locale) ? (name[locale] ?? slug) : slug;
 }
 
-export function toPaymentMethodCatalogOption<T extends PaymentMethodCatalogRow>(
-  row: T,
-  locale: string
-): PaymentMethodCatalogOption {
+export function toPaymentMethodCatalogOption(row: PaymentMethodCatalogRow, locale: string): PaymentMethodCatalogOption {
   return {
     id: row.id,
     slug: row.slug,
@@ -175,8 +172,8 @@ export function toPaymentMethodCatalogOption<T extends PaymentMethodCatalogRow>(
   };
 }
 
-export function toPaymentMethodCatalogOptions<T extends PaymentMethodCatalogRow>(
-  rows: readonly T[],
+export function toPaymentMethodCatalogOptions(
+  rows: readonly PaymentMethodCatalogRow[],
   locale: string
 ): readonly PaymentMethodCatalogOption[] {
   return rows.map(row => toPaymentMethodCatalogOption(row, locale));

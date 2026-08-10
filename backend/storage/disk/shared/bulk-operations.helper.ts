@@ -59,7 +59,7 @@ export async function executeBulkOperation<TContext, TExtraData = void>(params: 
   processFn: (
     ctx: TContext,
     sourcePath: string,
-    extraData: TExtraData
+    extraData: TExtraData | undefined
   ) => Promise<Types.FileInfo | Types.DirectoryInfo | null>;
   beforeProcess?: (ctx: TContext, validSources: string[]) => Promise<TExtraData>;
   operationName: string;
@@ -93,20 +93,31 @@ export async function executeBulkOperation<TContext, TExtraData = void>(params: 
     };
   }
 
-  const extraData = beforeProcess ? await beforeProcess(ctx, validSources) : (undefined as unknown as TExtraData);
+  const extraData: TExtraData | undefined = beforeProcess ? await beforeProcess(ctx, validSources) : undefined;
 
-  for (const sourcePath of validSources) {
-    try {
-      const result = await processFn(ctx, sourcePath, extraData);
-      if (result) {
-        successfulItems.push(result);
+  const results = await Promise.all(
+    validSources.map(async sourcePath => {
+      try {
+        const result = await processFn(ctx, sourcePath, extraData);
+        return { ok: true as const, result, sourcePath };
+      } catch (error) {
+        return {
+          ok: false as const,
+          sourcePath,
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    })
+  );
+
+  for (const r of results) {
+    if (r.ok) {
+      if (r.result) {
+        successfulItems.push(r.result);
       }
       successCount++;
-    } catch (error) {
-      failures.push({
-        path: sourcePath,
-        error: error instanceof Error ? error.message : String(error),
-      });
+    } else {
+      failures.push({ path: r.sourcePath, error: r.error });
     }
   }
 

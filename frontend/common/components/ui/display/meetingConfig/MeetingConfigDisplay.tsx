@@ -9,7 +9,7 @@ import type {
 } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
+import type { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import { type MeetingConfigDisplayLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
@@ -27,10 +27,10 @@ function resolveSourceLabel(
   source: EffectiveMeetingSource | string | null | undefined,
   t: MeetingConfigDisplayLabels
 ): string {
-  const normalized = String(source ?? "").toLowerCase();
-  if (normalized === EffectiveMeetingSource.Class) return t.sourceClass;
-  if (normalized === EffectiveMeetingSource.Recurring) return t.sourceRecurring;
-  if (normalized === EffectiveMeetingSource.Teacher) return t.sourceTeacher;
+  const normalized = (source ?? "").toLowerCase();
+  if (normalized === "class") return t.sourceClass;
+  if (normalized === "recurring") return t.sourceRecurring;
+  if (normalized === "teacher") return t.sourceTeacher;
   return t.sourceNone;
 }
 

@@ -54,6 +54,7 @@ export default defineConfig({
           "**/*.pothos.ts",
           "./*",
           "@/backend/graphql/**",
+          "@mui/x-data-grid/themeAugmentation",
         ],
       },
     ],
@@ -69,6 +70,37 @@ export default defineConfig({
       ],
       rules: {
         "no-console": "off",
+      },
+    },
+    {
+      files: [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "test/**/*",
+        "backend/db/test/**/*",
+        "backend/services/**/test/**/*",
+        "backend/services/**/*.test.ts",
+        "frontend/**/test/**/*",
+        "frontend/**/*.test.tsx",
+        "frontend/**/*.test.ts",
+        "app/**/*.test.ts",
+      ],
+      rules: {
+        "@typescript-eslint/unbound-method": "off",
+      },
+    },
+    {
+      files: [
+        "frontend/common/hooks/useApolloConnectivity.ts",
+        "frontend/common/providers/apollo/useAuthRecoveryRegistration.ts",
+        "frontend/common/views/dashboard/admin/__shared__/useAdminDashboard.ts",
+        "frontend/common/views/dashboard/teachers/dashboard/utils/useTeacherDashboardLastUpdated.ts",
+        "frontend/common/views/dashboard/components/DashboardProfileShell.tsx",
+      ],
+      rules: {
+        "@typescript-eslint/consistent-return": "off",
       },
     },
   ],
