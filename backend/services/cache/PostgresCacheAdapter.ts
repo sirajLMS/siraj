@@ -145,10 +145,7 @@ export class PostgresCacheAdapter implements ICacheService {
       // connection — skip transaction to avoid deadlocks
       const isDelOrSetOnly = commands.every(cmd => cmd.command === "del" || cmd.command === "set");
       if (isDelOrSetOnly) {
-        const results: unknown[] = [];
-        for (const cmd of commands) {
-          results.push(await this.executePipelineCommand(cmd));
-        }
+        const results = await Promise.all(commands.map(cmd => this.executePipelineCommand(cmd)));
         return results;
       }
 
@@ -171,9 +168,7 @@ export class PostgresCacheAdapter implements ICacheService {
       // into a single SQL CTE for the rate-limit pattern. Current implementation issues 4 separate queries.
       case "del": {
         const keys = cmd.args.map(arg => String(arg));
-        for (const key of keys) {
-          await CacheDbRepository.del(key);
-        }
+        await Promise.all(keys.map(key => CacheDbRepository.del(key)));
         return keys.length;
       }
 
