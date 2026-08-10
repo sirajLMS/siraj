@@ -72,50 +72,50 @@ export async function seedOrGet(
 }
 
 async function seedUserAvatars(users: UserSelectType[]): Promise<void> {
-  for (let i = 0; i < users.length; i++) {
-    const user = users[i];
-    const avatarFile = getAvatarFileNameForPersona("teachers", i);
-
-    try {
-      const { url } = await seedEntityFile({
-        assetRelativePath: `avatars/teachers/${avatarFile}`,
-        bucketPath: `public/avatars/users/${avatarFile}`,
-        referenceTable: "users",
-        referenceId: user.id,
-        usageType: "avatar",
-        ensureParentDirs: ["public/avatars/users"],
-      });
-      if (url) {
-        await UserSeedService.seedAvatarUrl(user.id, url);
+  await Promise.all(
+    users.map(async (user, i) => {
+      const avatarFile = getAvatarFileNameForPersona("teachers", i);
+      try {
+        const { url } = await seedEntityFile({
+          assetRelativePath: `avatars/teachers/${avatarFile}`,
+          bucketPath: `public/avatars/users/${avatarFile}`,
+          referenceTable: "users",
+          referenceId: user.id,
+          usageType: "avatar",
+          ensureParentDirs: ["public/avatars/users"],
+        });
+        if (url) {
+          await UserSeedService.seedAvatarUrl(user.id, url);
+        }
+      } catch (error) {
+        logger.error(`Failed to seed user avatar for ${user.id}:`, error);
       }
-    } catch (error) {
-      logger.error(`Failed to seed user avatar for ${user.id}:`, error);
-    }
-  }
+    })
+  );
 }
 
 async function seedStaffProfileAvatars(
   staffProfiles: Awaited<ReturnType<typeof UserSeedService.findStaffProfilesByUserIds>>
 ): Promise<void> {
-  for (let i = 0; i < staffProfiles.length; i++) {
-    const profile = staffProfiles[i];
-    if (!profile) continue;
-
-    try {
-      const avatarFile = getAvatarFileNameForPersona("teachers", i);
-      const { url } = await seedEntityFile({
-        assetRelativePath: `avatars/teachers/${avatarFile}`,
-        bucketPath: `public/avatars/staff/${avatarFile}`,
-        referenceTable: "staff_profiles",
-        referenceId: profile.staffProfileId,
-        usageType: "avatar",
-        ensureParentDirs: ["public/avatars/staff"],
-      });
-      if (url) {
-        await UserSeedService.seedAvatarUrl(profile.id, url);
+  await Promise.all(
+    staffProfiles.map(async (profile, i) => {
+      if (!profile) return;
+      try {
+        const avatarFile = getAvatarFileNameForPersona("teachers", i);
+        const { url } = await seedEntityFile({
+          assetRelativePath: `avatars/teachers/${avatarFile}`,
+          bucketPath: `public/avatars/staff/${avatarFile}`,
+          referenceTable: "staff_profiles",
+          referenceId: profile.staffProfileId,
+          usageType: "avatar",
+          ensureParentDirs: ["public/avatars/staff"],
+        });
+        if (url) {
+          await UserSeedService.seedAvatarUrl(profile.id, url);
+        }
+      } catch (error) {
+        logger.error(`Failed to seed staff profile avatar for ${profile.staffProfileId}:`, error);
       }
-    } catch (error) {
-      logger.error(`Failed to seed staff profile avatar for ${profile.staffProfileId}:`, error);
-    }
-  }
+    })
+  );
 }
