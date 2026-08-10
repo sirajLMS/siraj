@@ -1,4 +1,4 @@
-import { createReadStream, type ReadStream, statSync } from "node:fs";
+import { createReadStream, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
@@ -46,13 +46,27 @@ async function getRelativePath(params: Promise<{ path?: string[] }>): Promise<st
 }
 
 /**
- * Convert a Node.js ReadStream into an async generator yielding Buffer chunks.
- * Bun's BodyInit accepts AsyncGenerator<ArrayBufferView>, which Buffer satisfies.
+ * Convert a Node.js ReadStream into a web ReadableStream for use as a Response body.
  */
-async function* streamToAsyncIterable(stream: ReadStream): AsyncGenerator<Buffer> {
-  for await (const chunk of stream) {
-    yield chunk as Buffer;
-  }
+function streamToReadableStream(stream: ReturnType<typeof createReadStream>): ReadableStream {
+  return new ReadableStream({
+    start(controller) {
+      let streamError: unknown = null;
+      stream.on("error", (error: unknown) => {
+        streamError = error;
+        controller.error(error);
+      });
+      stream.on("end", () => {
+        if (!streamError) controller.close();
+      });
+      stream.on("data", (chunk: Buffer) => {
+        if (!streamError) controller.enqueue(new Uint8Array(chunk));
+      });
+    },
+    cancel() {
+      stream.destroy();
+    },
+  });
 }
 
 /**
@@ -83,7 +97,7 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
   const { start, end } = range;
   const chunkSize = end - start + 1;
   const stream = createReadStream(absolutePath, { start, end });
-  const body = streamToAsyncIterable(stream);
+  const body = streamToReadableStream(stream);
 
   return new NextResponse(body, {
     status: 206,
@@ -137,7 +151,7 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
   }
 
   const stream = createReadStream(absolutePath);
-  const body = streamToAsyncIterable(stream);
+  const body = streamToReadableStream(stream);
 
   return new NextResponse(body, {
     status: 200,

@@ -1,4 +1,4 @@
-import { AppPermission, type FxProvider, type FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
+import { AppPermission, FxProvider, FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CurrencyCodePothosObject,
@@ -42,6 +42,14 @@ function parsePaginationArgs(input: PaginationInput | null | undefined): Paginat
     page: input.page ?? null,
     maxCount: input.maxCount ?? null,
   });
+}
+
+function isFxProvider(value: string): value is FxProvider {
+  return (Object.values(FxProvider) as readonly string[]).includes(value);
+}
+
+function isFxSyncStatus(value: string): value is FxSyncStatus {
+  return (Object.values(FxSyncStatus) as readonly string[]).includes(value);
 }
 
 // ─── ExchangeRate Object (latest exchange rates) ──────────────────────────────
@@ -219,8 +227,8 @@ gqlSchemaBuilder.queryField("latestFxSyncRun", t =>
       const { providerResponse: _providerResponse, ...rest } = syncRun;
       return {
         ...rest,
-        provider: syncRun.provider as FxProvider,
-        status: syncRun.status as FxSyncStatus,
+        provider: isFxProvider(syncRun.provider) ? syncRun.provider : FxProvider.OpenExchangeRates,
+        status: isFxSyncStatus(syncRun.status) ? syncRun.status : FxSyncStatus.Failed,
       };
     },
   })

@@ -25,12 +25,19 @@ function deriveBookingIdempotencyKey(input: {
   return createHash("sha256").update(parts.join(":")).digest("hex");
 }
 
+/** Type guard for objects with a string `code` property (e.g. Postgres errors). */
+function hasErrorCode(error: unknown): error is { code: string } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof (error as Record<string, unknown>).code === "string"
+  );
+}
+
 /** Detects a Postgres unique-constraint violation (SQLSTATE 23505). */
 function isUniqueViolation(error: unknown): boolean {
-  if (typeof error === "object" && error !== null && "code" in error) {
-    return (error as { code: string }).code === "23505";
-  }
-  return false;
+  return hasErrorCode(error) && error.code === "23505";
 }
 
 async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Promise<void> {
@@ -40,8 +47,36 @@ async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Pr
   }
 }
 
+/** Type guard: narrows a `string` to `CreditReason` enum. */
+function isCreditReason(value: string): value is CreditReason {
+  return (Object.values(CreditReason) as readonly string[]).includes(value);
+}
+
 function mapToReturnType(row: CreditTransactionSelectType): CreditTransactionReturnType {
-  return { ...row, reason: row.reason as CreditTransactionReturnType["reason"] };
+  const reason = isCreditReason(row.reason) ? row.reason : CreditReason.ADJUSTMENT;
+  return { ...row, reason };
+}
+
+/** Shared purchase logic: insert ledger row, adjust student classes, refresh quotas. */
+async function executePurchase(
+  tx: DBTransaction,
+  input: CreditTransactionSubmitInput,
+  actorUserId: string,
+  idempotencyKey: string,
+  tErrors: ErrorsLabels
+): Promise<CreditTransactionReturnType> {
+  const ledgerRow = await CreditRepository.createPurchase(tx, {
+    studentId: input.studentId,
+    changeAmount: input.hours,
+    sourcePaymentId: input.sourcePaymentId ?? null,
+    notes: input.notes ?? null,
+    creditedByUserId: actorUserId,
+    idempotencyKey,
+  });
+
+  await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
+  await QuotaService.refreshStudentOndemandInstances(input.studentId, tx);
+  return mapToReturnType(ledgerRow);
 }
 
 export namespace CreditService {
@@ -82,18 +117,7 @@ export namespace CreditService {
           return null;
         }
 
-        const ledgerRow = await CreditRepository.createPurchase(tx, {
-          studentId: input.studentId,
-          changeAmount: input.hours,
-          sourcePaymentId: input.sourcePaymentId ?? null,
-          notes: input.notes ?? null,
-          creditedByUserId: actorUserId,
-          idempotencyKey,
-        });
-
-        await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
-        await QuotaService.refreshStudentOndemandInstances(input.studentId, tx);
-        return mapToReturnType(ledgerRow);
+        return executePurchase(tx, input, actorUserId, idempotencyKey, tErrors);
       });
 
       logger.info("Credit purchase seeded", {
@@ -148,19 +172,7 @@ export namespace CreditService {
           throw new ConflictError(tErrors.credit.duplicatePurchase);
         }
 
-        const ledgerRow = await CreditRepository.createPurchase(tx, {
-          studentId: input.studentId,
-          changeAmount: input.hours,
-          sourcePaymentId: input.sourcePaymentId ?? null,
-          notes: input.notes ?? null,
-          creditedByUserId: actorUserId,
-          idempotencyKey,
-        });
-
-        await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
-        await QuotaService.refreshStudentOndemandInstances(input.studentId, tx);
-
-        return ledgerRow;
+        return executePurchase(tx, input, actorUserId, idempotencyKey, tErrors);
       });
 
       logger.info("Credit purchase recorded", {
@@ -169,7 +181,7 @@ export namespace CreditService {
         hours: input.hours,
       });
 
-      return mapToReturnType(created);
+      return created;
     } catch (error) {
       // Catch raw Postgres unique-violation (23505) from a concurrent purchase
       // with the same idempotency key that slipped between the pre-check and

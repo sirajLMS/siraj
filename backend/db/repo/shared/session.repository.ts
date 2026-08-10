@@ -66,19 +66,22 @@ export namespace SessionRepository {
   }
 
   /**
-   * Build an inline session result from create/update inputs.
+   * Build a SessionSelectType return shape from input fields and a timestamp.
    */
-  function buildSessionResult(
+  function buildInlineSession(
     hashedId: string,
-    input: { userId: string; ipAddress?: string | null; userAgent?: string | null; payload: string },
+    userId: string,
+    ipAddress: string | null | undefined,
+    userAgent: string | null | undefined,
+    payload: string,
     now: Date
   ): SessionSelectType {
     return {
       hashedId,
-      userId: input.userId,
-      ipAddress: input.ipAddress || null,
-      userAgent: input.userAgent || null,
-      payload: input.payload,
+      userId,
+      ipAddress: ipAddress || null,
+      userAgent: userAgent || null,
+      payload,
       lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
     };
   }
@@ -290,14 +293,7 @@ export namespace SessionRepository {
       });
 
       logger.info(`Created session ${hashedId} for user ${input.userId}`);
-      return {
-        hashedId,
-        userId: input.userId,
-        ipAddress: input.ipAddress || null,
-        userAgent: input.userAgent || null,
-        payload: input.payload,
-        lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
-      };
+      return buildInlineSession(hashedId, input.userId, input.ipAddress, input.userAgent, input.payload, now);
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
@@ -355,14 +351,7 @@ export namespace SessionRepository {
         .where(eq(sessionMetadata.sessionId, hashedId));
 
       logger.debug(`Updated session ${hashedId}`);
-      return {
-        hashedId,
-        userId: input.userId,
-        ipAddress: input.ipAddress || null,
-        userAgent: input.userAgent || null,
-        payload: input.payload,
-        lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
-      };
+      return buildInlineSession(hashedId, input.userId, input.ipAddress, input.userAgent, input.payload, now);
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));

@@ -53,14 +53,28 @@ function enrichCurrencyTotalsWithDisplay(
   }));
 }
 
-async function enrichSummaryWithDisplayAmounts<T>(
+type BillingSummaryWithCurrencyTotals = {
+  readonly id: string;
+  readonly outstandingByCurrency: readonly BillingCurrencyTotal[];
+  readonly [key: string]: unknown;
+};
+
+function extractCurrencyTotals(result: Record<string, unknown>, key: string): readonly BillingCurrencyTotal[] {
+  const value = result[key];
+  if (Array.isArray(value)) {
+    return value as readonly BillingCurrencyTotal[];
+  }
+  return [];
+}
+
+async function enrichSummaryWithDisplayAmounts<T extends BillingSummaryWithCurrencyTotals>(
   result: T,
   ctx: import("@/backend/graphql/gqlContext").BaseContext,
-  firstArrayKey: keyof T,
-  secondArrayKey: keyof T
+  firstArrayKey: keyof T & string,
+  secondArrayKey: keyof T & string
 ): Promise<T> {
-  const firstArray = result[firstArrayKey] as unknown as readonly BillingCurrencyTotal[];
-  const secondArray = result[secondArrayKey] as unknown as readonly BillingCurrencyTotal[];
+  const firstArray = extractCurrencyTotals(result, firstArrayKey);
+  const secondArray = extractCurrencyTotals(result, secondArrayKey);
   const allCurrencyTotals = [...firstArray, ...secondArray];
 
   const displayAmounts = await resolveDisplayAmountFields(

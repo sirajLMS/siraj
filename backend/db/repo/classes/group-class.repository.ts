@@ -22,6 +22,10 @@ import type {
   GroupClassSelectType,
 } from "@/backend/types";
 
+async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTransaction) => Promise<T>): Promise<T> {
+  return tx ? fn(tx) : db.transaction(fn);
+}
+
 export namespace GroupClassRepository {
   export async function getByClassInstanceId(
     classInstanceId: string,
@@ -41,11 +45,10 @@ export namespace GroupClassRepository {
   }
 
   export async function create(input: GroupClassCreateInput, tx?: DBTransaction): Promise<GroupClassSelectType> {
-    const runner = async (t: DBTransaction) => {
+    return runInTransaction(tx, async t => {
       const [created] = await t.insert(groupClasses).values(input).returning();
       return created;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   }
 
   export async function getEnrollments(
@@ -76,11 +79,7 @@ export namespace GroupClassRepository {
     tx?: DBTransaction
   ): Promise<GroupClassEnrollmentSelectType[]> {
     if (inputs.length === 0) return [];
-    const runner = async (t: DBTransaction) => {
-      const rows = await t.insert(groupClassEnrollments).values(inputs).returning();
-      return rows;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    return runInTransaction(tx, async t => t.insert(groupClassEnrollments).values(inputs).returning());
   }
 
   export async function getCommunications(
@@ -99,11 +98,10 @@ export namespace GroupClassRepository {
     input: ClassCommunicationCreateInput,
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType> {
-    const runner = async (t: DBTransaction) => {
+    return runInTransaction(tx, async t => {
       const [created] = await t.insert(classCommunications).values(input).returning();
       return created;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   }
 
   export async function updateAdminNote(
@@ -111,7 +109,7 @@ export namespace GroupClassRepository {
     content: string,
     tx?: DBTransaction
   ): Promise<GroupClassSelectType | null> {
-    const runner = async (t: DBTransaction) => {
+    return runInTransaction(tx, async t => {
       const [updated] = await t
         .update(classInstances)
         .set({ adminNotes: content, updatedAt: new Date() })
@@ -127,9 +125,7 @@ export namespace GroupClassRepository {
         .limit(1);
 
       return groupClass ?? null;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   }
 
   export async function getEnrollmentsWithStudentDetails(
@@ -201,11 +197,7 @@ export namespace GroupClassRepository {
     tx?: DBTransaction
   ): Promise<GroupClassSelectType[]> {
     if (inputs.length === 0) return [];
-    const runner = async (t: DBTransaction) => {
-      const rows = await t.insert(groupClasses).values(inputs).returning();
-      return rows;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    return runInTransaction(tx, async t => t.insert(groupClasses).values(inputs).returning());
   }
 
   export async function findEnrollmentKeys(
@@ -255,7 +247,7 @@ export namespace GroupClassRepository {
   ): Promise<GroupClassEnrollmentSelectType[]> {
     if (inputs.length === 0) return [];
 
-    const runner = async (t: DBTransaction) => {
+    return runInTransaction(tx, async t => {
       await bulkInsertOnConflictDoNothing(groupClassEnrollments, inputs, { tx: t });
       const keys = inputs.map(i => ({ groupClassId: i.groupClassId, studentId: i.studentId }));
       const rows = await t
@@ -269,9 +261,7 @@ export namespace GroupClassRepository {
         );
       const wanted = new Set(keys.map(k => k.groupClassId + ":" + k.studentId));
       return rows.filter(r => wanted.has(r.groupClassId + ":" + r.studentId));
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   }
 
   export async function listGroupClassIdsWithCommunications(
@@ -292,10 +282,6 @@ export namespace GroupClassRepository {
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType[]> {
     if (inputs.length === 0) return [];
-    const runner = async (t: DBTransaction) => {
-      const rows = await t.insert(classCommunications).values(inputs).returning();
-      return rows;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    return runInTransaction(tx, async t => t.insert(classCommunications).values(inputs).returning());
   }
 }

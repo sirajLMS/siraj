@@ -99,6 +99,7 @@ export type TeacherProfileReturnType = Omit<
   timezone: IanaTimezone;
   totalClasses: number;
   avgEngagementScore: number;
+  displayAmount?: DisplayAmountReturnType | null;
 };
 
 export type TeacherProfileUpdateInputType = Partial<

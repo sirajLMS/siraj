@@ -9,6 +9,61 @@ import type {
   AuditLogReturnType,
 } from "@/backend/types";
 
+const VALID_ENTITY_TYPES = new Set<string>([
+  "SYSTEM",
+  "STUDENT",
+  "INVOICE",
+  "PAYMENT",
+  "PERMISSION",
+  "PERMISSION_GROUP",
+  "USER_PERMISSION",
+  "EXCHANGE_RATE",
+  "SYSTEM_SETTING",
+  "SITE_CONTENT",
+  "SESSION_CONFIG",
+  "ENV_CONFIG",
+  "USER",
+  "TEACHER",
+  "PARENT",
+  "CLASS_INSTANCE",
+  "RECURRING_SCHEDULE",
+  "LEAVE_REQUEST",
+  "COMPLAINT",
+  "LEARNING_RESOURCE",
+  "SUGGESTION",
+  "BOOK",
+  "MEETING_PROVIDER_TOKEN",
+  "WHATSAPP_ACCOUNT",
+]);
+
+const VALID_ACTIONS = new Set<string>([
+  "CREATE",
+  "UPDATE",
+  "DELETE",
+  "UPSERT",
+  "STATUS_CHANGE",
+  "REFUND",
+  "GRANT",
+  "REVOKE",
+  "ASSIGN",
+  "UNASSIGN",
+  "APPROVE",
+  "REJECT",
+  "ACTIVATE",
+  "DEACTIVATE",
+  "RESTORE",
+  "TEACHER_SUPPORT_REQUEST",
+  "WHATSAPP_OPT_IN",
+]);
+
+function isAuditEntityType(value: string): value is AuditEntityType {
+  return VALID_ENTITY_TYPES.has(value);
+}
+
+function isAuditAction(value: string): value is AuditAction {
+  return VALID_ACTIONS.has(value);
+}
+
 const AuditLogRef = gqlSchemaBuilder.objectRef<AuditLogReturnType>("AuditLog");
 
 export const AuditLogPothosObject = AuditLogRef.implement({
@@ -74,8 +129,8 @@ function toAuditLogFilterInput(
     | undefined
 ): AuditLogFilterInput {
   return {
-    entityType: (filter?.entityType ?? undefined) as AuditEntityType | undefined,
-    action: (filter?.action ?? undefined) as AuditAction | undefined,
+    entityType: filter?.entityType && isAuditEntityType(filter.entityType) ? filter.entityType : undefined,
+    action: filter?.action && isAuditAction(filter.action) ? filter.action : undefined,
     actorUserId: filter?.actorUserId ?? undefined,
     startDate: filter?.startDate ?? undefined,
     endDate: filter?.endDate ?? undefined,

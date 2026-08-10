@@ -13,12 +13,13 @@ let cachedProviderName: FxProvider | null = null;
 
 const validProviders: FxProvider[] = [FxProvider.OpenExchangeRates, FxProvider.Fixer];
 
+function isFxProvider(value: string): value is FxProvider {
+  return validProviders.some(provider => (provider as string) === value);
+}
+
 function normalizeProvider(raw: string): FxProvider | null {
   const normalized = raw.toLowerCase();
-  if (!validProviders.includes(normalized as FxProvider)) {
-    return null;
-  }
-  return normalized as FxProvider;
+  return isFxProvider(normalized) ? normalized : null;
 }
 
 /**

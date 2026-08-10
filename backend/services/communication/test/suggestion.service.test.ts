@@ -112,7 +112,11 @@ async function expectErrorMatching(promise: Promise<unknown>, predicate: (messag
   try {
     await promise;
   } catch (e) {
-    errorCaught = e as Error;
+    if (e instanceof Error) {
+      errorCaught = e;
+    } else {
+      errorCaught = new Error(String(e));
+    }
   }
   expect(errorCaught).not.toBeNull();
   expect(predicate(errorCaught?.message?.toLowerCase() ?? "")).toBe(true);
@@ -131,12 +135,13 @@ function mockSafeUser(id: string): UserSelectType {
     timezone: IanaTimezone.UTC,
     status: AccountStatus.ACTIVATED,
     isSuperAdmin: false,
+    lastLoginAt: null,
     deletedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     emailVerifiedAt: null,
     displayCurrency: null,
-  } as unknown as UserSelectType;
+  };
 }
 
 describe("SuggestionService", () => {

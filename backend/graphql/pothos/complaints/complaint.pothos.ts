@@ -147,6 +147,40 @@ export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
     }),
   });
 
+function isComplaintCategory(value: string): value is ComplaintCategory {
+  return (Object.values(ComplaintCategory) as readonly string[]).includes(value);
+}
+
+function isComplaintStatus(value: string): value is ComplaintStatus {
+  return (Object.values(ComplaintStatus) as readonly string[]).includes(value);
+}
+
+function buildPaginationArgs(
+  raw:
+    | {
+        first?: number | null;
+        skip?: number | null;
+        after?: string | null;
+        before?: string | null;
+        last?: number | null;
+        page?: number | null;
+        maxCount?: number | null;
+      }
+    | null
+    | undefined
+): PaginationArgs | null {
+  if (!raw) return null;
+  return new PaginationArgs({
+    first: raw.first ?? null,
+    skip: raw.skip ?? null,
+    after: raw.after ?? null,
+    before: raw.before ?? null,
+    last: raw.last ?? null,
+    page: raw.page ?? null,
+    maxCount: raw.maxCount ?? null,
+  });
+}
+
 function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType {
   return {
     ...complaint,
@@ -171,18 +205,7 @@ gqlSchemaBuilder.queryField("parentComplaints", t =>
         throw new Error("unauthenticated");
       }
 
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = buildPaginationArgs(args.paginationArgs);
 
       const result = await ComplaintService.getParentComplaints(ctx.user.id, pagination, ctx.locale);
 
@@ -210,17 +233,7 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
         throw new Error("unauthenticated");
       }
 
-      const paginationArgs = args.paginationArgs
-        ? new PaginationArgs({
-            first: args.paginationArgs.first ?? null,
-            skip: args.paginationArgs.skip ?? null,
-            after: args.paginationArgs.after ?? null,
-            before: args.paginationArgs.before ?? null,
-            last: args.paginationArgs.last ?? null,
-            page: args.paginationArgs.page ?? null,
-            maxCount: args.paginationArgs.maxCount ?? null,
-          })
-        : null;
+      const paginationArgs = buildPaginationArgs(args.paginationArgs);
 
       const result = await ComplaintService.getQueueWithMetricsPaginated(
         ctx.user.id,
@@ -293,11 +306,14 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
         ctx.locale
       );
 
+      const category = isComplaintCategory(created.category) ? created.category : ComplaintCategory.OTHER;
+      const status = isComplaintStatus(created.status) ? created.status : ComplaintStatus.UNANSWERED;
+
       return normalizeComplaint({
         id: created.id,
-        category: created.category as ComplaintCategory,
+        category,
         body: created.body,
-        status: created.status as ComplaintStatus,
+        status,
         createdAt: created.createdAt,
         updatedAt: created.updatedAt,
         parentName: null,
