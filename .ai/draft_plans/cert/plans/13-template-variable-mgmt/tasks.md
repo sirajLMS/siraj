@@ -70,12 +70,10 @@ T02 ──┘                    │      ├──→ T10 ──→ T11
 
 ## Quality Loop (Per File)
 
+> **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
+
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13","files":["<the-file>"]}'
+bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
 
 ---
@@ -115,12 +113,10 @@ Create the Zustand store that manages the variable panel's local UI state — fo
 - i18n keys match the namespace structure defined in requirements.md
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t01","files":["frontend/common/stores/variablePanelStore.ts","frontend/common/stores/index.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/stores/variablePanelStore.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/index.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -168,13 +164,16 @@ Create all GraphQL query and mutation documents for variable management: list qu
 - `bun codegen` completes without errors
 
 **Quality Loop:**
+- [ ] Generate GraphQL schema and TypeScript types:
 ```bash
 bun run generate:gqlSchema && bun codegen
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t02","files":["backend/graphql/pothos/certificates/variable.pothos.ts","backend/types/certificates/variable.types.ts","backend/services/certificates/variable.service.ts","frontend/common/graphql/sharedDocuments/certificates/variable.documents.ts"]}'
+```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+```bash
+bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/variable.pothos.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/variable.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/services/certificates/variable.service.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/variable.documents.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -240,12 +239,15 @@ Create the desktop variable panel container, the variable list (with system and 
 - All colors from theme palette (no hardcoded colors)
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t03","files":["frontend/desktop/views/dashboard/certificates/templates/editor/VariablePanel.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableList.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableRow.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/VariablePanelHeader.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValuePreview.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/SystemVariableBadge.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/RequiredIndicator.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/VariablePanel.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableList.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableRow.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/VariablePanelHeader.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValuePreview.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/SystemVariableBadge.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/RequiredIndicator.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -306,12 +308,13 @@ Create the variable creation/editing form with all shared fields (name, display 
 - All strings from i18n (no hardcoded text)
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t04","files":["frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableForm.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableTypeSelector.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValueInput.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/TypeChangeWarningDialog.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/NameChangeBindingWarningDialog.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableForm.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableTypeSelector.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValueInput.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/TypeChangeWarningDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/NameChangeBindingWarningDialog.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -367,12 +370,14 @@ Complete the text and number type-specific configuration and default value input
 - All strings from i18n
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t05","files":["frontend/desktop/views/dashboard/certificates/templates/editor/components/TextTypeConfigFields.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/NumberTypeConfigFields.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/TextDefaultValueInput.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/NumberDefaultValueInput.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableTypeSelector.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValueInput.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/TextTypeConfigFields.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/NumberTypeConfigFields.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/TextDefaultValueInput.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/NumberDefaultValueInput.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableTypeSelector.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValueInput.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -426,12 +431,13 @@ Create the date-specific variable input with a date picker, format selector (sho
 - All strings from i18n
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t06","files":["frontend/desktop/views/dashboard/certificates/templates/editor/components/DateVariableInput.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/DateFormatSelector.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/RelativeDateInput.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/DateTypeConfigFields.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValueInput.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DateVariableInput.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DateFormatSelector.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/RelativeDateInput.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DateTypeConfigFields.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValueInput.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -489,12 +495,14 @@ Create the select options editor (key-value pair list with add/remove capabiliti
 - All strings from i18n
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t07","files":["frontend/desktop/views/dashboard/certificates/templates/editor/components/SelectOptionsEditor.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/SelectOptionRow.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/SelectDefaultValueInput.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/SelectTypeConfigFields.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableForm.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValueInput.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/SelectOptionsEditor.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/SelectOptionRow.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/SelectDefaultValueInput.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/SelectTypeConfigFields.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableForm.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DefaultValueInput.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -553,12 +561,12 @@ Implement system variable initialization (triggered on template creation) and th
 - All strings from i18n
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t08","files":["backend/services/certificates/variable.service.ts","backend/services/certificates/template.service.ts","frontend/desktop/views/dashboard/certificates/templates/editor/components/SystemVariableBadge.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/SystemVariableGroup.tsx"]}'
+bun run scripts/health/sub-loop.ts backend/services/certificates/variable.service.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/services/certificates/template.service.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/SystemVariableBadge.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/SystemVariableGroup.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -615,12 +623,13 @@ Implement the deletion flow for variables, including the binding warning dialog 
 - Arabic pluralization for binding count
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t09","files":["backend/services/certificates/variable.service.ts","backend/graphql/pothos/certificates/variable.pothos.ts","frontend/desktop/views/dashboard/certificates/templates/editor/components/DeleteBindingWarningDialog.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/DeleteConfirmDialog.tsx","frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableRow.tsx"]}'
+bun run scripts/health/sub-loop.ts backend/services/certificates/variable.service.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/variable.pothos.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DeleteBindingWarningDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/DeleteConfirmDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/components/VariableRow.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -678,12 +687,14 @@ Create the mobile version of the variable panel (simplified list with bottom she
 - All strings from i18n (shared with desktop)
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-13-t10","files":["frontend/mobile/views/dashboard/certificates/templates/editor/VariablePanelMobile.tsx","frontend/mobile/views/dashboard/certificates/templates/editor/components/VariableListMobile.tsx","frontend/mobile/views/dashboard/certificates/templates/editor/components/VariableRowMobile.tsx","frontend/mobile/views/dashboard/certificates/templates/editor/components/VariableFormMobile.tsx","frontend/mobile/views/dashboard/certificates/templates/editor/components/MoveButtons.tsx","frontend/common/views/dashboard/certificates/templates/editor/TemplateEditorView.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/editor/VariablePanelMobile.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/editor/components/VariableListMobile.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/editor/components/VariableRowMobile.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/editor/components/VariableFormMobile.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templates/editor/components/MoveButtons.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templates/editor/TemplateEditorView.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -733,9 +744,9 @@ Create documentation for the certificate variable system, update relevant AGENTS
 - Knowledge can be used by future agents to understand and extend the variable system
 
 **Quality Loop:**
+- [ ] Run per-file quality loop for the documentation file created/modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check
+bun run scripts/health/sub-loop.ts docs/frontend/certificate-variables.md --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -784,7 +795,10 @@ bun biome:check
   - Test: Sorting by Name, Key, Type, Category, Templates
   - **File:** `test/ui/components/template-variable-mgmt/VariableList.test.tsx`
   - **Requirements:** AC-13-01a, AC-13-01b, AC-13-01c, AC-13-01d, AC-13-01e, AC-13-01f
-  - **Quality Loop:** `bun tsgo && bun biome:check && curl -X POST .../lint -d '{"id":"test-13-list","files":["test/ui/components/template-variable-mgmt/VariableList.test.tsx"]}'`
+  - **Quality Loop:**
+    ```bash
+    bun run scripts/health/sub-loop.ts test/ui/components/template-variable-mgmt/VariableList.test.tsx --lifecycle codescene
+    ```
 
 - [ ] **5.1.2** Variable Form (Create/Edit) Tests
   - Test: Create form opens with empty fields, Save disabled until dirty
@@ -855,7 +869,10 @@ bun biome:check
   - Test: System variable key checks
   - **File:** `test/ui/components/template-variable-mgmt/variablePanelStore.test.ts`
   - **Requirements:** All ACs (store underpins all UI)
-  - **Quality Loop:** `bun tsgo && bun biome:check`
+  - **Quality Loop:**
+    ```bash
+    bun run scripts/health/sub-loop.ts test/ui/components/template-variable-mgmt/variablePanelStore.test.ts --lifecycle codescene
+    ```
 
 ### 5.2 E2E Tests
 
@@ -1056,9 +1073,7 @@ bun biome:check
 
 Before marking any task complete, verify:
 
-- [ ] `bun tsgo` passes (no TypeScript errors)
-- [ ] `bun biome:check` passes (formatting + lint)
-- [ ] `curl -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"<task-id>","files":["<modified-files>"]}'` returns success
+- [ ] Per-file quality loop passes (tsgo → biome → lint → codescene via `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
 - [ ] All instruction files from Instruction Verification Table read and followed
 - [ ] Component tests written and passing
 - [ ] i18n keys added to both en/ar locale files
@@ -1318,7 +1333,7 @@ Before marking any task complete, verify:
   - Custom validation: code editor textarea with syntax info
   - Validation error display: red text below field in variable editor
   - _Store: `variableStore` adds `validationRules: Record<string, ValidationRule>`_
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/ValidationEditor.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 
 ### R4-T2: Type-Specific Variable Editors
 - [ ] Create `frontend/views/dashboard/certificates/variable-mgmt/components/TypeEditors.tsx`
@@ -1329,16 +1344,14 @@ Before marking any task complete, verify:
   - ImageVariableEditor: file upload + preview thumbnail + dimensions display
   - URLVariableEditor: TextField with URL validation + link preview
   - Each editor returns typed value: `string | number | boolean | Date | File | URL`
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T3: Variable Grouping
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/TypeEditors.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 - [ ] Create `frontend/views/dashboard/certificates/variable-mgmt/components/VariableGroups.tsx`
   - Group sections: collapsible Card per group (Student Info, Course Info, Academy Info)
   - Drag to reorder groups: DnD within the groups list
   - Color tag groups: ColorPicker integration per group
   - Group-level required indicator: badge showing "X required"
   - _Store: `variableStore` adds `groups: VariableGroup[], createGroup(), reorderGroups()`_
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/VariableGroups.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 
 ### R4-T4: CSV Import/Export
 - [ ] Create `frontend/views/dashboard/certificates/variable-mgmt/components/CSVImportExport.tsx`
@@ -1350,16 +1363,14 @@ Before marking any task complete, verify:
   - Error display: Dialog showing row number + invalid field + error
   - Preview: show first 5 rows before confirming import
   - Conflict resolution: skip/overwrite/rename radio per conflict
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T5: Variable Defaults & Fallbacks
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/CSVImportExport.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 - [ ] Update `frontend/views/dashboard/certificates/variable-mgmt/VariableEditor.tsx`
   - Default value field per variable type
   - Fallback chain display: "Recipient → Template Default → Blank"
   - Null handling: "show placeholder text" option
   - "No data found" template text field
   - _Store: `variableStore` adds `defaultValues`, `fallbacks`, `nullDisplayMode`_
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/VariableEditor.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 
 ### R4-T6: Computed Variables
 - [ ] Create `frontend/views/dashboard/certificates/variable-mgmt/components/ComputedVariableEditor.tsx`
@@ -1368,26 +1379,20 @@ Before marking any task complete, verify:
   - Dependency graph: visual tree showing variable dependencies
   - Circular reference detection: validate on save
   - Auto-suggest: suggest variables by typing `$` prefix
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T7: Variable Usage Tracking
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/ComputedVariableEditor.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 - [ ] Create `frontend/views/dashboard/certificates/variable-mgmt/components/UsageTracker.tsx`
   - Per-variable usage count display: badge in variable list
   - "Find all references" button: show list of elements using variable
   - Unused variable warnings: yellow icon next to unused variables
   - Delete with usage confirmation: "This variable is used in 3 elements. Delete anyway?"
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T8: Variable Suggestions (Inline Autocomplete)
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/UsageTracker.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 - [ ] Update `frontend/views/dashboard/certificates/template-editor/canvas/TextNodeEditor.tsx`
   - Auto-suggest dropdown when typing `{` character
   - Fuzzy search: match by partial name
   - Recently used at top of suggestions
   - Variable insertion: click or Enter to insert with `{variableName}` format
   - Inline preview: show current value in suggestion item
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T9: Multi-Language Variable Values
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/canvas/TextNodeEditor.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 - [ ] Update `frontend/views/dashboard/certificates/variable-mgmt/VariableEditor.tsx`
   - Locale selector: MUI v9 Tabs (EN | AR)
   - Per-locale value fields: separate editor per locale
@@ -1395,7 +1400,7 @@ Before marking any task complete, verify:
   - RTL support for Arabic values: `dir="rtl"` on input fields
   - Mixed LTR/RTL rendering: per-variable direction detection
   - _Store: `variableStore` adds `localeValues: Record<string, Record<Locale, string>>`_
-  - **Quality loop**: tsgo + biome + lint
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/VariableEditor.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 
 ### R4-T10: Search & Filter
 - [ ] Create `frontend/views/dashboard/certificates/variable-mgmt/components/VariableSearch.tsx`
@@ -1404,17 +1409,13 @@ Before marking any task complete, verify:
   - Filter by group: group selector dropdown
   - Filter by required: Switch toggle
   - Search result highlighting: `<mark>` around matched text
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T11: Accessibility
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/VariableSearch.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 - [ ] Update `frontend/views/dashboard/certificates/variable-mgmt/components/VariablePickerDialog.tsx`
   - Keyboard navigation: Tab through variables, Enter to select, Esc to close
   - ARIA labels: `aria-label="Select variable"` per item
   - Screen reader: announce variable type and current value
   - Focus management: trap focus in dialog, restore on close
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T12: Component Tests
+  - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/VariablePickerDialog.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
 - [ ] Create `test/ui/components/variable-mgmt/ValidationEditor.test.tsx`
   - Test required field validation
   - Test min/max length for text

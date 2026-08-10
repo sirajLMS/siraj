@@ -127,7 +127,6 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] **Instruction verification**: read `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.github/instructions/frontend.instructions.md` before editing; confirm all documents include `id` field, no `useLazyQuery`, naming convention `{entityName}QueryDocument` / `{entityName}MutationDocument`
 - [ ] **Testing**: add integration test in `frontend/common/graphql/test/preview.test.ts` verifying documents parse and match expected shape; verify `TemplateForPreviewQueryDocument` includes all required fields for preview rendering
 - [ ] **Knowledge propagation**: document GraphQL document structure in outcome file; add to `frontend/common/graphql/AGENTS.md` if new patterns emerged
-- [ ] Run quality loop on the documents file and barrel
 - [ ] Verify against: `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.github/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-06 (dedicated preview page fetches template), REQ-PUBLISH-02 (version snapshot), REQ-PUBLISH-03 (cache invalidation), REQ-ARCHIVE-01, REQ-ARCHIVE-03, REQ-REVERT-01, REQ-VERSION-01
 - **Files created**: `frontend/common/graphql/sharedDocuments/certificates/preview.documents.ts`, `frontend/common/graphql/test/preview.test.ts`
@@ -146,7 +145,13 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] **NO `persist` middleware** — both stores are ephemeral session state per `frontend/common/stores/AGENTS.md`
 - [ ] Import generated types from `frontend/common/graphql/generated/gql/graphql-types.ts` for `revertTargetVersion` and other GraphQL entity types
 - [ ] Create mock stores for Storybook in `frontend/stores/` if the pattern requires it (check existing stores)
-- [ ] **Quality loop per file**: run `bun tsgo`, `bun biome:check`, `bun run lint` (via lint queue client), `bun run codescene --file <file>` on both store files
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts frontend/common/stores/certPreviewStore.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/stores/certPublishStore.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/certPreviewStore.test.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/certPublishStore.test.ts --lifecycle codescene
+  ```
 - [ ] **Instruction verification**: read `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md` before editing; confirm NO `persist` middleware, state fields are properly typed, actions follow naming conventions
 - [ ] **Testing**: add unit tests in `test/ui/components/cert-preview/certPreviewStore.test.ts` and `certPublishStore.test.ts` verifying initial state, action mutations, and type safety
 - [ ] **Knowledge propagation**: document store patterns in outcome file; update `frontend/common/stores/AGENTS.md` if new conventions emerged
@@ -1136,14 +1141,10 @@ Total: 30 tasks (~117 hours estimated), including 12 new tasks (~52 hours estima
 
 ## Quality Loop (Per File)
 
-After creating/modifying ANY file, run:
+After creating/modifying ANY file, run the per-file progressive verification (type checking → formatting → lint → codescene code-health, short-circuiting on first failure):
 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-15","files":["<the-file>"]}'
+bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
 
 Fix all errors before proceeding to next task.

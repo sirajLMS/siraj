@@ -1011,10 +1011,6 @@ Same as T26.
 
 ### Subtasks
 
-- **T28.1**: Start lint queue server
-  - `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background, detached)
-  - Verify: `curl -s http://localhost:${LINT_QUEUE_PORT}/status` returns `{running: true, queueLength: 0}`
-
 - **T28.2**: Run full quality gate
   - `bun quality-gate` (tsgo → biome → lint → codescene → sonar)
   - If any stage fails, fix per `scripts/health/sub-loop.ts` per-file
@@ -1044,7 +1040,7 @@ Same as T26.
 
 ### Instruction Verification
 - Read: `AGENTS.md` (root) — quality gate workflow
-- Follow: per-file sub-loop via `bun run scripts/health/sub-loop.ts <path> --lifecycle <stage>`
+- Follow: per-file sub-loop via `bun run scripts/health/sub-loop.ts <path> --lifecycle codescene`
 - Never run: `bun sonar-scan` (subagent prohibition — orchestrator only)
 
 ---

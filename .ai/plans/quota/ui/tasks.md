@@ -35,7 +35,9 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ## Tasks
 
-### Task Group 1: i18n Key Additions (Foundation)
+> **Parallel Execution**: Tasks are organized into waves (Wave 0–5). Within each wave, all task groups run as **parallel subagents**. See `implementation.md` → "Parallel Execution Strategy" for the full wave table, dependency graph, and dispatch rules. Each subagent must run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file before completing.
+
+### Task Group 1: i18n Key Additions (Foundation) — Wave 0
 
 - [ ] 1.1 Add PENDING status and formatters to billing quota i18n
   - Add `status.PENDING` string and `statuses.PENDING` function to all 3 locale files (types, en, ar)
@@ -76,7 +78,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 2: Form Schema Wiring
+### Task Group 2: Form Schema Wiring — Wave 0
 
 - [ ] 2.1 Rewrite billing quota Zod schema as factory pattern
   - Create `createQuotaSchema(labels: DashboardBillingQuota)` factory returning `z.object({...})` with fields: `studentId`, `name`, `kind` (enum `["PACKAGE", "PERIODIC"]` — NOT `ON_DEMAND`), `periodType`, `periodDays`, `validFrom`, `validUntil`, `totalClasses` (NOT `maxClasses`), `priority` (enum `["LOW", "MEDIUM", "HIGH"]`). Conditional validation for periodDays (required when CUSTOM) and validUntil > validFrom.
@@ -96,7 +98,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 3: Billing Quota List — Tier Isolation
+### Task Group 3: Billing Quota List — Tier Isolation — Wave 1 (parallel with Groups 4, 5, 6)
 
 - [ ] 3.1 Create desktop quota list tier view
   - `DesktopPageContainer` + `DesktopPageHeader` (breadcrumbs, title, actions) + `DesktopMetricCardGrid` (3 metrics) + `SectionPanel` (FilterButton + ExportButton + PrimaryPageAction) + `DesktopAppDataGrid` with server pagination
@@ -143,7 +145,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 4: Billing Quota Form — Tier Isolation + Validation
+### Task Group 4: Billing Quota Form — Tier Isolation + Validation — Wave 1 (parallel with Groups 3, 5, 6)
 
 - [ ] 4.1 Create desktop quota form tier view
   - `DesktopPageContainer` + `DesktopPageHeader` (breadcrumbs: Quotas > New/Edit) + `FormProvider` + form sections using RHF + zodResolver
@@ -188,7 +190,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 5: Billing Quota Detail — Tier Isolation + Delete Confirmation
+### Task Group 5: Billing Quota Detail — Tier Isolation + Delete Confirmation — Wave 1 (parallel with Groups 3, 4, 6)
 
 - [ ] 5.1 Create desktop quota detail tier view
   - `DesktopPageContainer` + `DesktopPageHeader` (breadcrumbs, back button, Edit/Delete actions)
@@ -234,7 +236,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 6: Quota Insights — Aggregation + Filtering
+### Task Group 6: Quota Insights — Aggregation + Filtering — Wave 1 (parallel with Groups 3, 4, 5)
 
 - [ ] 6.1 Create desktop insights tier view
   - `DesktopPageContainer` + `DesktopPageHeader` (breadcrumbs: Quotas > Insights)
@@ -275,7 +277,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 7: Navigation, Breadcrumbs, Cross-Linking
+### Task Group 7: Navigation, Breadcrumbs, Cross-Linking — Wave 2 (parallel with Groups 8, 9)
 
 - [ ] 7.1 Add breadcrumbs to all quota pages
   - Desktop: `DesktopPageHeader` `breadcrumbs` prop on list, new, detail, edit, insights
@@ -320,7 +322,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 8: Audience Views — Live Data Wiring
+### Task Group 8: Audience Views — Live Data Wiring — Wave 2 (parallel with Groups 7, 9)
 
 - [ ] 8.1 Wire StudentQuotaView to studentQuotas query
   - Fetch quota data using `studentQuotas` or `quotaBalance` query
@@ -357,7 +359,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 9: Recurring Class Dialog — Quota Autocomplete
+### Task Group 9: Recurring Class Dialog — Quota Autocomplete — Wave 2 (parallel with Groups 7, 8)
 
 - [ ] 9.1 Replace free-text quotaId field with Autocomplete
   - Use `studentOpenQuotas` query to populate options
@@ -372,7 +374,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 10: Accessibility — ARIA, Keyboard, Screen Reader
+### Task Group 10: Accessibility — ARIA, Keyboard, Screen Reader — Wave 3 (parallel with Groups 11, 12)
 
 - [ ] 10.1 Add aria-labels to all icon-only buttons in quota components
   - Back button: `aria-label={t("back")}`, Edit: `aria-label={t("edit")}`, Delete: `aria-label={t("delete")}`, Add FAB: `aria-label={t("addQuota")}`
@@ -419,7 +421,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 11: Design System Compliance
+### Task Group 11: Design System Compliance — Wave 3 (parallel with Groups 10, 12)
 
 - [ ] 11.1 Fix string-quoted palette access violations
   - Replace `"text.secondary"`, `"warning.main"`, `"error.main"` with `sx={(theme) => ({ color: theme.palette.text.secondary })}` in all quota files
@@ -460,7 +462,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 12: Animation and Transitions
+### Task Group 12: Animation and Transitions — Wave 3 (parallel with Groups 10, 11)
 
 - [ ] 12.1 Add list item enter/exit animations
   - Desktop: MUI `Grow` with `timeout={300}` on DataGrid rows (or Fade on container)
@@ -494,7 +496,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 13: Storybook Stories
+### Task Group 13: Storybook Stories — Wave 4 (parallel with Groups 14, 17)
 
 - [ ] 13.1 Create QuotaContainer stories
   - States: Default, Loading, Empty, Error
@@ -536,7 +538,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 14: Component Tests
+### Task Group 14: Component Tests — Wave 4 (parallel with Groups 13, 17)
 
 - [ ] 14.1 Create QuotaContainer component tests (desktop + mobile)
   - Desktop: DataGrid renders, pagination, empty state, loading, error
@@ -576,7 +578,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 15: E2E Tests
+### Task Group 15: E2E Tests — Wave 4+ (after component tests + build:test)
 
 - [ ] 15.1 Create quota E2E test suite
   - `setupBrowserLifecycle()`, `loginAsDemoUser(DEMO_USERS.academyAdmin.groupSlug)`
@@ -595,7 +597,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 16: Role-Based Access Matrix (R16)
+### Task Group 16: Role-Based Access Matrix (R16) — Wave 2 (after audience views from Group 8)
 
 - [ ] 16.1 Implement `QuotaFormAccessProvider` context for permission-based field gating
   - Create React context + hook `useQuotaFormAccess()` that reads from `usePermission` for `QUOTAS_MANAGE`, `QUOTAS_VIEW`, `QUOTA_TAB_GROUPS`
@@ -629,7 +631,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 17: GraphQL Cache Optimization
+### Task Group 17: GraphQL Cache Optimization — Wave 4 (parallel with Groups 13, 14)
 
 - [ ] 16.1 Add cache update functions to quota mutations
   - Create: `update` function adds new item to `QUOTAS` list cache
@@ -643,7 +645,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 
 ---
 
-### Task Group 18: Knowledge Propagation & Documentation
+### Task Group 18: Knowledge Propagation & Documentation — Wave 5 (after all waves)
 
 - [ ] 18.1 Create canonical reference doc
   - Read all outcome files in `.ai/plans/quota/ui/outcome/`
@@ -679,3 +681,5 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 - [x] Accessibility sub-tasks for keyboard nav, focus trap, WCAG contrast (10.4, 10.5)
 - [x] Design system sub-tasks for *Outlined icons, typography variants, on<Color> siblings (11.4, 11.5)
 - [x] Animation sub-tasks for MetricCard count-up, StatusBadge color transition, CodeScene LOC budget (12.2, 12.3)
+- [x] Parallel execution via subagent waves (6 waves, see implementation.md)
+- [x] Each task group annotated with its wave and parallelization context

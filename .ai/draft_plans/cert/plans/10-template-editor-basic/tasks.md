@@ -4,7 +4,7 @@
 > **Plan #**: 10
 > **Dependencies**: Plan 5 (GraphQL API), Plan 7 (File Upload), Plan 8 (Navigation Config), Plan 9 (Category Management)
 > **Execution Model**: Sequential per task (each task produces files the next task imports)
-> **Quality Model**: Per-file tsgo + biome + lint via `scripts/health/sub-loop.ts`
+> **Quality Model**: Per-file tsgo + biome + lint + codescene via `scripts/health/sub-loop.ts --lifecycle codescene`
 > **Time Budget**: 2-4 hours per task
 
 ---
@@ -79,7 +79,7 @@ T16 (BackgroundUploadZone)──┤         │         │         │
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/templateEditor.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/templateEditor.ts --lifecycle codescene
 ```
 
 ### Instruction Verification
@@ -118,7 +118,7 @@ bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/te
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templateEditor.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templateEditor.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -151,7 +151,7 @@ bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templ
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templateEditor.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templateEditor.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -195,7 +195,7 @@ bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templ
 
 For each modified file:
 ```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
 ```
 
 ### Verification
@@ -245,7 +245,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/constants/certificate.constants.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/constants/certificate.constants.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -308,8 +308,8 @@ bun run scripts/health/sub-loop.ts shared/constants/certificate.constants.ts --l
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/templateEditor.documents.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/templateEditor.documents.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/index.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -345,7 +345,7 @@ bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certi
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/types/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/types/index.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -392,7 +392,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/useTemplateEditorViewModel.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/useTemplateEditorViewModel.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -434,7 +434,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/TemplateEditorContainer.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/TemplateEditorContainer.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -475,7 +475,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/BasicInfoSection.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/BasicInfoSection.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -522,7 +522,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/DimensionsSection.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/DimensionsSection.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -570,7 +570,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/BackgroundSection.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/BackgroundSection.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -614,7 +614,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/CertificateTitleSection.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/CertificateTitleSection.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -655,7 +655,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/ValidityPeriodSection.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/sections/ValidityPeriodSection.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -694,7 +694,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templateEditor/templateEditorView.desktop.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templateEditor/templateEditorView.desktop.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -735,7 +735,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templateEditor/templateEditorView.mobile.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templateEditor/templateEditorView.mobile.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -777,7 +777,7 @@ bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/templates/[id]/page.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/templates/[id]/page.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -797,21 +797,16 @@ bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/templates/[id]
 
 ### Subtasks
 
-1. **Run full type check**:
+1. **Run per-file quality loop** (full progressive chain: tsgo → biome → lint → codescene) for each template editor file:
    ```bash
-   bun tsgo
-   ```
-
-2. **Run biome across all template editor files**:
-   ```bash
-   bun biome:check -- frontend/common/views/dashboard/certificates/templateEditor/ frontend/desktop/views/dashboard/certificates/templateEditor/ frontend/mobile/views/dashboard/certificates/templateEditor/ frontend/common/stores/templateEditorStore.ts frontend/common/graphql/sharedDocuments/cert/templateEditor-documents.ts shared/locale/types/dashboard/certificates/templateEditor.ts shared/locale/ar/dashboard/certificates/templateEditor.ts shared/locale/en/dashboard/certificates/templateEditor.ts
-   ```
-
-3. **Run lint via queue client** on all template editor files:
-   ```bash
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"t18","files":["frontend/common/views/dashboard/certificates/templateEditor/","frontend/desktop/views/dashboard/certificates/templateEditor/","frontend/mobile/views/dashboard/certificates/templateEditor/","frontend/common/stores/templateEditorStore.ts","frontend/common/graphql/sharedDocuments/cert/templateEditor-documents.ts","shared/locale/types/dashboard/certificates/templateEditor.ts","shared/locale/ar/dashboard/certificates/templateEditor.ts","shared/locale/en/dashboard/certificates/templateEditor.ts"]}'
+   bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/templateEditor/ --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templateEditor/ --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/templateEditor/ --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/common/stores/templateEditorStore.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/templateEditor-documents.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/templateEditor.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templateEditor.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templateEditor.ts --lifecycle codescene
    ```
 
 4. **Review acceptance criteria** from requirements.md §5:
@@ -906,7 +901,7 @@ bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/templates/[id]
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -937,7 +932,7 @@ bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts -
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -969,7 +964,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorToolbar.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorToolbar.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1003,7 +998,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1037,7 +1032,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorStatusBar.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorStatusBar.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1070,10 +1065,10 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorToolbar.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorLayout.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorStatusBar.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/useEditorShortcuts.test.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorToolbar.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorLayout.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorStatusBar.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/useEditorShortcuts.test.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1114,8 +1109,8 @@ bun run scripts/health/sub-loop.ts test/ui/components/editor/useEditorShortcuts.
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/editor-save-undo-redo.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/editor-zoom-grid-snap.spec.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts test/ui/e2e/editor-save-undo-redo.spec.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/editor-zoom-grid-snap.spec.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1133,14 +1128,9 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/editor-zoom-grid-snap.spec.ts --l
 
 ### Subtasks
 
-1. Run full type check: `bun tsgo`
-2. Run Biome: `bun biome:check`
-3. Ensure lint queue server is running: `~/.bun/bin/bun run scripts/lint-queue-server.ts`
-4. Run full-repo lint: `bun run lint`
-5. Fix any type/lint/biome issues in editor chrome files
-6. Re-run quality loop per-file via `scripts/health/sub-loop.ts`
-7. Verify no regression in existing tests: `bun run test`
-8. Check for CodeScene issues: `bun run codescene --file <path>` for each new file if CodeScene flags them
+1. Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene) for each editor chrome file — see the Quality Loop block below
+2. Fix any type/lint/biome/codescene issues in editor chrome files
+3. Verify no regression in existing tests: `bun run test`
 
 ### Quality Loop
 
@@ -1153,9 +1143,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ```
 
 ### Verification
-- `bun tsgo` passes clean
-- `bun biome:check` passes clean
-- `bun run lint` passes clean
+- Per-file quality loop (`sub-loop.ts --lifecycle codescene`) passes clean for all editor chrome files
 - All CodeScene health checks pass for editor chrome files
 - No new SonarQube duplications introduced
 
@@ -1241,20 +1229,10 @@ Per-file verification loop for every file created/modified:
 
 ```bash
 # Progressive: tsgo → biome → lint (short-circuits at first failure)
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
-Full plan verification (after T18):
-
-```bash
-bun tsgo                          # Type check (safe to run concurrently)
-bun biome:check                   # Biome (safe to run concurrently)
-bun run lint                      # Full-repo lint via queue client (serialized behind queue server)
-```
-
-> The lint queue server must be running before any lint call. Start it with:
-> `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background process).
-> See `AGENTS.md` §"Lint Queue Server" for details.
+Full plan verification (after T18): run `bun quality-gate` (sequential: tsgo → biome → lint → codescene → sonar).
 
 ---
 
@@ -1351,7 +1329,7 @@ T44 (knowledge propagation) depends on T43
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle codescene
 bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle codescene
 ```
 
@@ -1403,8 +1381,8 @@ bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts -
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ToolbarOverflow.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorToolbar.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ToolbarOverflow.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorToolbar.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1451,7 +1429,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle codescene
 bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle codescene
 ```
 
@@ -1514,9 +1492,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ShortcutManager.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ShortcutSettingsDialog.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ShortcutManager.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ShortcutSettingsDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1578,9 +1556,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useUnsavedChangesGuard.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/UnsavedChangesDialog.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/AutosaveIndicator.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useUnsavedChangesGuard.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/UnsavedChangesDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/AutosaveIndicator.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1636,9 +1614,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useAutosave.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ConflictDialog.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useAutosave.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ConflictDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1687,7 +1665,7 @@ bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts -
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorSkeletons.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorSkeletons.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1744,9 +1722,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/CanvasErrorBoundary.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/PanelErrorBoundary.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/CanvasErrorBoundary.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/PanelErrorBoundary.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1798,8 +1776,8 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/SrLiveRegion.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/SrLiveRegion.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1852,9 +1830,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorMobileLayout.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorTabletLayout.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorMobileLayout.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorTabletLayout.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorLayout.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1896,8 +1874,8 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useAutosave.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useAutosave.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1949,8 +1927,8 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorTabBar.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/RecentTemplatesList.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorTabBar.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/RecentTemplatesList.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1995,8 +1973,8 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorStatusBar.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/utils/formatRelativeTime.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/EditorStatusBar.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/utils/formatRelativeTime.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -2055,9 +2033,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/templateEditor.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templateEditor.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templateEditor.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/templateEditor.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templateEditor.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templateEditor.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -2111,16 +2089,16 @@ bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templ
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts test/ui/components/editor/ToolbarOverflow.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/UnsavedChangesDialog.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/AutosaveIndicator.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/useAutosave.test.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/ShortcutManager.test.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/ConflictDialog.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorTabBar.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/ErrorBoundaries.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/editor/SrLiveRegion.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/editor-prod-hardening.spec.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts test/ui/components/editor/ToolbarOverflow.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/UnsavedChangesDialog.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/AutosaveIndicator.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/useAutosave.test.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/ShortcutManager.test.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/ConflictDialog.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorTabBar.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/ErrorBoundaries.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/editor/SrLiveRegion.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/editor-prod-hardening.spec.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -2227,7 +2205,7 @@ Phase R4-J (sequential):  T44 (knowledge propagation — depends on T43)
 
 ## Round 5: Effects & Filter Tasks
 
-> These tasks implement the Round 5 effects engine toolbar integration defined in `design.md` §"Round 5". Round 5 is reused across independent feature domains (Fill & Stroke, Pen Tool, Effects). This is the third Round 5 domain. Quality model: per-file tsgo + biome + lint queue client, per AGENTS.md.
+> These tasks implement the Round 5 effects engine toolbar integration defined in `design.md` §"Round 5". Round 5 is reused across independent feature domains (Fill & Stroke, Pen Tool, Effects). This is the third Round 5 domain. Quality model: per-file tsgo + biome + lint + codescene (via sub-loop --lifecycle codescene), per AGENTS.md.
 
 ### Task Map (Plan 10 Effects Engine)
 
@@ -2287,7 +2265,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
   - **No hardcoded hex** — use `theme.palette.common.black`, `theme.palette.common.white`, `theme.palette.primary.main`, `theme.palette.warning.light` as appropriate. If the existing R4-9 BlendMode type lives in `@/frontend/dashboard/views/.../blendModeUtils.ts`, re-import rather than redefine — but the FX section extends BlendMode to the full 46-mode list per §R5.7. Coordinate with Plan 12 FX-T03 for the canonical extended `BlendMode` type.
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - File: `frontend/common/stores/cert/effectTypes.ts`
 
 **Files to Create/Modify:**
@@ -2320,7 +2298,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
   - Provide a callback to apply a preset (calls `applyPresetToSelected` — Plan 11 store interface)
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Files to Create/Modify:**
 - `frontend/views/dashboard/cert/templates/editor/toolbar/QuickEffectsButton.tsx` (new)
@@ -2352,7 +2330,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
   - Memoize each preset tile with `React.memo`; the menu closes the popover and re-renders nothing else.
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Files to Create/Modify:**
 - `frontend/views/dashboard/cert/templates/editor/toolbar/QuickEffectsMenu.tsx` (new)
@@ -2384,7 +2362,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
   - `useTheme()` at the component layer provides the theme to `toggleLastShadow(theme)` / `toggleLastGlow(theme)` calls
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Files to Create/Modify:**
 - `frontend/views/dashboard/cert/templates/editor/toolbar/useQuickToggleEffects.ts` (new)
@@ -2421,7 +2399,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
   - `effects.presetApplied = (name) => \`تم تطبيق ${name}\``
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Files to Create/Modify:**
 - `shared/locale/types/dashboard/certificates/templateEditor.ts` (modify — extend existing `effects` block or add it; coordinate with Plan 12)
@@ -2444,7 +2422,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
 - [ ] Run `bun run tsgo` once across the full repo (no isolated file defect after check).
 
 - [ ] Run quality loop across modified files.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Files to Create/Modify:**
 - (No new files — this is verification only)
@@ -2480,7 +2458,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
   - **Note**: This E2E test needs the canvas store to bebservable. If not directly introspectable from Playwright, assert via the visual diff (drop shadow visible on element).
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Files to Create/Modify:**
 - `test/ui/components/editor/effectToolbar/QuickEffectsButton.test.tsx` (new)
@@ -2502,7 +2480,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
 - [ ] **Modify** `frontend/AGENTS.md` with a one-line pointer: `See COMPONENT_PATTERNS.md §"Effects Toolbar Pattern" for the quick effects dropdown implementation pattern.` (append to the appropriate section — under a "UI Patterns" or similar existing section; if no such section, add to the end as a new bullet item)
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Files to Create/Modify:**
 - `frontend/COMPONENT_PATTERNS.md` (modify — append-only)
@@ -2545,7 +2523,7 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - Export all types: `FillType`, `StrokeType`, `BlendMode`, `StrokePosition`, `StrokeCapStyle`, `StrokeJoinStyle`, `StrokeDashStyle`, `ImageFillMode`, `ColorStop`, `GradientValue`, `MeshPoint`, `GradientMeshValue`, `PatternDef`, `PatternFillConfig`, `ImageFillConfig`, `FillConfig`, `StrokeLayer`, `StrokeConfig`, `GradientPreset`, `CachedFillStroke`
   - Export default-config factory functions: `defaultFillConfig(elementType)`, `defaultStrokeConfig(elementType)`, `defaultGradientValue(type)`, `defaultPatternFillConfig()`, `defaultImageFillConfig()`, `defaultGradientMesh()`, `defaultStrokeLayer()`
   - The per-element-type default mapping matches Plan 10 §R5.3 (Shape: no fill, black 1px solid stroke; Text: black fill, no stroke; Image/QR/Signature: no fill, no stroke; Background: white fill, no stroke)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/common/stores/cert/fillStrokeUtils.ts` (new)
   - `fillToSvgAttrs(fill, width, height)`: Convert `FillConfig` to SVG attributes (returns `{ fill, fillOpacity, fillDef }` where `fillDef` is the SVG `<linearGradient>`/`<radialGradient>`/`<pattern>`/`<defs>` element string)
   - `fillToCss(fill, width, height)`: Convert to CSS `background`/`backgroundImage` clause (for HTML-backed fills)
@@ -2554,15 +2532,15 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - `strokeToSvgAttrs(layer)`: Convert `StrokeLayer` to SVG attributes object
   - `strokePositionToSvg(layer, shapePath, bounds)`: Generate clipped stroke SVG for inside/outside positions (returns Sibling SVG defs + `<path>` strings)
   - `computeFillStopId()`, `computeMeshPointId()`, `computeStrokeLayerId()`: ID generators (use crypto.randomUUID() or incremental)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Add i18n keys for Plan 10 R5 toolbar controls to `shared/locale/types/dashboard/certificates/templateEditor.ts`
   - Keys: `toolbar.fillSwatch`, `toolbar.strokeSwatch`, `toolbar.strokeWidth`, `toolbar.swapFillStroke`, `toolbar.resetFillStroke`, `toolbar.toggleFill`, `toolbar.toggleStroke`, `toolbar.blendModeToggle`, `toolbar.selectElementPrompt` (the "Select an element to edit fill" tooltip)
   - All plural / interpolation functions follow the compile-time i18n system (see `shared/AGENTS.md`)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Implement the new i18n keys in `shared/locale/ar/dashboard/certificates/templateEditor.ts` and `shared/locale/en/dashboard/certificates/templateEditor.ts`
   - All Arabic translations follow Modern Standard Arabic conventions
   - All English translations are sentence case
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T2: Fill/Stroke Shared Zustand Store
 
@@ -2573,18 +2551,18 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - Default 12 quick-swatches: `['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#FFC107', '#FF9800']`
   - Default gradient presets: 12 gradients loaded from `frontend/common/stores/cert/gradientPresets.config.ts` (a static config file holding preset definitions)
   - Default pattern library: 14 base patterns (Stripes-Horizontal/Vertical/Diagonal, Dots-Small/Large, Checkerboard, Herringbone, Weave, Cross-hatch, Diamond, Hex, Bubbles, Clouds, Waves, Topographic), each with inline SVG `svgData`, the latter four being "organic"
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/common/stores/cert/gradientPresets.config.ts` (new)
   - Static export: `DEFAULT_GRADIENT_PRESETS: GradientPreset[]` (12 entries)
   - 12 named presets: "Sunrise", "Ocean", "Forest", "Lavender", "Coral", "Mint", "Sunset", "Twilight", "Desert", "Aurora", "Gold", "Silver"
   - Each preset has 2-5 stops (varied to demonstrate the editor's range)
   - Linear gradients with angles 0/45/90/135/180/270° spread across presets
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/common/stores/cert/patternLibrary.config.ts` (new)
   - Static export: `DEFAULT_PATTERNS: PatternDef[]` (14 entries across categories — basic, geometric, organic)
   - Each pattern has an inline SVG `svgData` string (e.g. `<rect width="10" height="10" fill="currentColor"/><rect x="0" y="0" width="5" height="5" fill="white"/>` for small dots, scaled)
   - `repeatType` is `'square'` for most; `'hex'` for Hex pattern; the boundaries (`repeatWidth`, `repeatHeight`) reflect the base tile size
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T3: Toolbar Fill Swatch Component
 
@@ -2597,7 +2575,7 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - Use `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` from `@/shared/locale/client`
   - Use MUI v9 with `sx={{}}` (no style props on `Box`, `Typography`)
   - Use `useShallow` from `zustand/react/shallow` to pick `templateElementEditorStore.selectedElementIds` (avoid re-renders on position drag)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T4: Toolbar Stroke Swatch & Width Input Components
 
@@ -2605,12 +2583,12 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - Same structure as `ToolbarFillSwatch` (§R5-T3) but bound to `stroke.layers[0]` (the first stroke layer)
   - Color swatch grid in the popover plus 5 stroke-width `Chip` presets (`0, 1, 2, 5, 10px`) — clicking a chip sets `stroke.layers[0].width` and `stroke.layers[0].type = 'solid'` if it was `'none'`
   - `Tooltip` showing i18n label + "(Shift+S)"
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/ToolbarStrokeWidthInput.tsx` (new)
   - Numeric `TextField` (type: number, width 56px, step 0.5, min 0, max 50)
   - Up/down arrow steppers next to the field (use MUI `IconButton` with `ArrowDropUpOutlined`/`ArrowDropDownOutlined`)
   - Disabled when `elementId` is null or `stroke.enabled === false`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T5: Fill/Stroke Toggle & Swap Toolbar Cluster
 
@@ -2620,12 +2598,12 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - Toggle Stroke `IconButton` (`BorderColorOutlined`): same pattern
   - Swap Fill/Stroke `IconButton` (`SwapHorizOutlined`): disabled when fill is gradient/pattern/image with no solid color (` Tooltip` for disabled state)
   - Reset to Default `IconButton` (`RestartAltOutlined`)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Update `frontend/views/dashboard/cert/templates/editor/EditorToolbar.tsx` (modify)
   - Add the `ToolbarFillSwatch` + `ToolbarFillStrokeToggle` + `ToolbarStrokeSwatch` + `ToolbarStrokeWidthInput` cluster in a `Box` between alignment tools and zoom controls (see design §R5.5)
   - Register the R5 cluster with `priority: 25` in the `ToolbarOverflow` system (per R4.1)
   - Each component shows a `Tooltip` with i18n label + keyboard shortcut
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T6: Fill/Stroke Keyboard Shortcuts Hook
 
@@ -2635,7 +2613,7 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - Reads current selection from `templateElementEditorStore.selectedElementIds` and the element's fill/stroke via `useCanvasStore`
   - Dispatches via the same Apollo `useMutation` `updateTemplateElementsBulk` (used elsewhere in the editor)
   - The "reset" action uses `defaultFillConfig(elementType)` and `defaultStrokeConfig(elementType)` from `fillStrokeTypes.ts`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T7: Plan 10 R5 Test Suite
 
@@ -2647,26 +2625,26 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - Test: "Open Fill Panel" button calls `setLastEditedSection('fill')` and `setPanelExpanded('fill', true)`
   - Test: no-fill checkerboard slash overlay renders when `fill.type === 'none'`
   - Test: swatch shows gradient thumbnail (CSS gradient) when `fill.type === 'linear-gradient'`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/ToolbarStrokeSwatch.test.tsx` (new)
   - Test: stroke chip presets (0, 1, 2, 5, 10px) update `stroke.layers[0].width`
   - Test: chip click flips `stroke.layers[0].type` from `'none'` to `'solid'`
   - Test: stroke swatch disabled when `stroke.enabled === false`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/ToolbarFillStrokeToggle.test.tsx` (new)
   - Test: toggle fill flips `fill.enabled`
   - Test: toggle stroke flips `stroke.enabled`
   - Test: swap color exchange — solid fill `#FF0000` and solid stroke `#0000FF` become `#0000FF` fill and `#FF0000` stroke
   - Test: swap is disabled when fill has `type: 'linear-gradient'` and no solid color; the disabled Tooltip shows
   - Test: reset restores per-element-type defaults (shape → no fill, black 1px stroke; text → black fill, no stroke)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/useFillStrokeShortcuts.test.tsx` (new)
   - Test: `Shift+F` keys fire `onToggleFill` only when an element is selected
   - Test: `Shift+S` fires `onToggleStroke`
   - Test: `Shift+X` swaps colors
   - Test: `Shift+R` resets to defaults
   - Test: shortcuts do not fire when the text input has focus (scope switching per R4.3 — `'panel'` scope suppresses editor-scope shortcuts)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/unit/fillStrokeUtils.test.ts` (new)
   - Test `fillToSvgAttrs`: solid color returns `{ fill: '#FF0000' }`; linear gradient returns `{ fill: 'url(#grad-...)', fillDef: '<linearGradient>...</linearGradient>' }`
   - Test `fillToCss`: linear gradient returns `linear-gradient(90deg, #ff0000 0%, #0000ff 100%)`
@@ -2674,7 +2652,7 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
   - Test `strokeToSvgAttrs` returns correct SVG attributes for solid, dashed, dotted, custom dash
   - Test `strokePositionToSvg` returns inside-stroke (clipped outer shape minus inner shrunk shape) and outside-stroke (doubled strokeWidth + inverted clip)
   - Test default-config factories return the per-element-type defaults per Plan 10 §R5.3
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T8: Knowledge Propagation (Plan 10 R5)
 
@@ -2687,7 +2665,7 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
 - [ ] Update `frontend/AGENTS.md` (append-only)
   - Reference `fillStrokeStore` and `fillStrokeTypes` as the canonical store/types for fill & stroke across Plans 10, 11, 12
   - Note the shared `frontend/common/stores/cert/fillStrokeTypes.ts` location — must be imported (not redefined) by Plan 11 and 12
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Instruction File & AGENTS.md Discovery (Round 5 Append, Plan 10)
 
@@ -2769,7 +2747,7 @@ T50 (tests) depends on T46–T49
   - `PathStrokeConfig` interface: `{ enabled, color, width: number (1-50), opacity: number (0-1), dashArray: string, linecap: 'butt'|'round'|'square', linejoin: 'miter'|'round'|'bevel' }`
   - `PathFillConfig` interface: `{ enabled, color, opacity: number (0-1) }`
   - `PathElement` interface extending `CanvasElement`: `{ type: 'path', pathData: PathData, stroke: PathStrokeConfig, fill: PathFillConfig }`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `frontend/common/stores/certTemplateEditorStore.ts`:
   - Add R5 state fields per `design.md` §R5.4:
     - `activeTool: EditorTool` (default: `'select'`)
@@ -2787,7 +2765,7 @@ T50 (tests) depends on T46–T49
     - `setSelectedAnchorIds`, `addSelectedAnchor`, `removeSelectedAnchor`, `clearSelectedAnchors`
     - `setActivePathElement`, `setPathOperation`
   - Do NOT add R5 fields to the `persist` partializer (pen tool state is ephemeral/session-only)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Files to Create/Modify
 
@@ -2797,14 +2775,9 @@ T50 (tests) depends on T46–T49
 ### Quality Loop
 
 ```bash
-# File-scoped lint via queue client:
-export LINT_QUEUE_PORT=$(grep -oP 'LINT_QUEUE_PORT = \K\d+' scripts/lint-queue-config.ts)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5-t45","files":["frontend/views/dashboard/certificates/template-editor/types/penTool.types.ts","frontend/common/stores/certTemplateEditorStore.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/types/penTool.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certTemplateEditorStore.ts --lifecycle codescene
 ```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 ---
 
@@ -2825,7 +2798,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
   - Custom `SvgIcon` with pen nib SVG path (from `design.md` §R5.1)
   - Uses `currentColor` (no hardcoded colors)
   - `viewBox="0 0 24 24"`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/certificates/template-editor/toolbar/PenToolGroup.tsx`:
   - `PenToolGroupProps` interface with `activeTool`, `onToolChange`, `disabled` props
   - MUI `ToggleButtonGroup` (exclusive) as the main button showing active tool
@@ -2836,13 +2809,13 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
   - Reads `activeTool` and `setActiveTool` from `useCertTemplateEditorStore`
   - All styling via `sx={{}}` — no MUI style props
   - `disabled={disabled || loading}` — disabled during template load
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `frontend/views/dashboard/certificates/template-editor/EditorToolbar.tsx`:
   - Import `PenToolGroup` and add it to the toolbar row, positioned after zoom controls and before grid/snap toggles (as specified in `design.md` §R5.1)
   - Add `priority: 15` for the pen tool group (low priority = stays visible — between Zoom Out=40 and Grid=60 — adjust priorities: Save=0, Publish=5, PenToolGroup=15, Undo=10, Redo=20, Zoom In=30, Zoom Out=40, Zoom Reset=50, Grid=60, Snap=70)
   - Pass `activeTool` and `setActiveTool` from store to `PenToolGroup`
   - Pass `disabled={loading}` from existing toolbar prop
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Files to Create/Modify
 
@@ -2853,12 +2826,10 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 ### Quality Loop
 
 ```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5-t46","files":["frontend/views/dashboard/certificates/template-editor/toolbar/PenNibIcon.tsx","frontend/views/dashboard/certificates/template-editor/toolbar/PenToolGroup.tsx","frontend/views/dashboard/certificates/template-editor/EditorToolbar.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/toolbar/PenNibIcon.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/toolbar/PenToolGroup.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/EditorToolbar.tsx --lifecycle codescene
 ```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 ---
 
@@ -2882,12 +2853,12 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
   - **Path operations dropdown**: MUI `Select` with 5 `MenuItem`s (Stroke Path, Fill Path, Path to Selection, Stroke to Shape, Path to Shape) — shown only when `hasActivePath === true`
   - All labels from `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` keys `penTool.*`
   - Container: `Box` with `sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 2, py: 1, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `frontend/views/dashboard/certificates/template-editor/EditorLayout.tsx` (or equivalent layout file):
   - Import `PenToolOptionsBar` and render it conditionally between the `EditorToolbar` and the canvas area
   - Visibility: render when `activeTool` is any pen variant (`'pen'`, `'curvaturePen'`, `'freeformPen'`, `'addAnchor'`, `'deleteAnchor'`, `'convertPoint'`, `'directSelection'`, `'pathSelection'`)
   - Use Framer Motion `AnimatePresence` for slide-in/slide-out animation (consistent with R4-T31 panel animations): `initial={{ height: 0, opacity: 0 }}` → `animate={{ height: 'auto', opacity: 1 }}` → `exit={{ height: 0, opacity: 0 }}`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Files to Create/Modify
 
@@ -2897,12 +2868,9 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 ### Quality Loop
 
 ```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5-t47","files":["frontend/views/dashboard/certificates/template-editor/toolbar/PenToolOptionsBar.tsx","frontend/views/dashboard/certificates/template-editor/EditorLayout.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/toolbar/PenToolOptionsBar.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/EditorLayout.tsx --lifecycle codescene
 ```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 ---
 
@@ -2932,12 +2900,12 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
     - `Delete` / `Backspace` → if `isDrawingPath` then delete last anchor (Backspace); if `selectedAnchorIds.length > 0` then delete selected anchors (Delete)
   - Cleanup: unregister all shortcuts on unmount
   - Guards: shortcuts only fire when canvas is focused (check `document.activeElement` or active ref)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `frontend/views/dashboard/certificates/template-editor/ShortcutManager.ts` (if needed):
   - Verify `registerShortcut` method signature supports the pen tool shortcut registrations
   - Verify conflict detection works for `Delete` at scope `'canvas'` priority 100 (element deletion) vs pen tool at priority 200 (anchor deletion, fires only when `selectedAnchorIds` is non-empty)
   - Add `unregisterAll(scope: string, ownerId: string)` method if not already present (for batch cleanup)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Files to Create/Modify
 
@@ -2947,12 +2915,9 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 ### Quality Loop
 
 ```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5-t48","files":["frontend/views/dashboard/certificates/template-editor/hooks/usePenToolShortcuts.ts","frontend/views/dashboard/certificates/template-editor/ShortcutManager.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/hooks/usePenToolShortcuts.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-editor/ShortcutManager.ts --lifecycle codescene
 ```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 ---
 
@@ -2971,7 +2936,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 - [ ] Modify `shared/locale/types/dashboard/certificates/templateEditor.ts`:
   - Add `penTool` interface per `design.md` §R5.5 with all 20+ keys
   - `anchorCount` pluralization: `(count: number) => string`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `shared/locale/en/dashboard/certificates/templateEditor.ts`:
   - Add English translations for all `penTool.*` keys
   - `penTool.pen`: `"Pen Tool"`
@@ -2999,7 +2964,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
   - `penTool.anchorCount`: `(count: number) => count === 1 ? \`1 anchor\` : \`${count} anchors\``
   - `penTool.cancelDrawing`: `"Cancel Drawing"`
   - `penTool.closePath`: `"Close Path"`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `shared/locale/ar/dashboard/certificates/templateEditor.ts`:
   - Add Arabic translations for all `penTool.*` keys
   - `penTool.pen`: `"أداة القلم"`
@@ -3027,7 +2992,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
   - `penTool.anchorCount`: `(count: number) => count === 1 ? \`1 نقطة ربط\` : \`${count} نقاط ربط\``
   - `penTool.cancelDrawing`: `"إلغاء الرسم"`
   - `penTool.closePath`: `"إغلاق المسار"`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Files to Create/Modify
 
@@ -3038,12 +3003,10 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 ### Quality Loop
 
 ```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5-t49","files":["shared/locale/types/dashboard/certificates/templateEditor.ts","shared/locale/ar/dashboard/certificates/templateEditor.ts","shared/locale/en/dashboard/certificates/templateEditor.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/templateEditor.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templateEditor.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templateEditor.ts --lifecycle codescene
 ```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 ---
 
@@ -3065,7 +3028,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
   - Test dropdown trigger button shows correct active tool label
   - Test `disabled` prop propagates to all controls
   - Test tooltip text includes keyboard shortcut hint
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/template-editor-toolbar/PenToolOptionsBar.test.tsx`:
   - Test drawing mode toggle has 3 options (Shape, Path, Selection)
   - Test drawing mode toggle only renders for `'pen'` and `'curvaturePen'` tools
@@ -3073,7 +3036,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
   - Test Rubber band switch toggles store state
   - Test Path operations dropdown only renders when `hasActivePath === true`
   - Test selecting a path operation calls `setPathOperation`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/template-editor-toolbar/usePenToolShortcuts.test.ts`:
   - Test `P` key calls `setActiveTool('pen')`
   - Test `Shift+P` cycles pen variants (pen → curvaturePen → freeformPen → pen)
@@ -3081,7 +3044,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
   - Test `Escape` calls `cancelDrawingPath()` when drawing, `setActiveTool('select')` when not
   - Test `Enter` calls `finishDrawingPath()` when drawing
   - Test shortcuts only fire when canvas is focused
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Files to Create/Modify
 
@@ -3092,12 +3055,10 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 ### Quality Loop
 
 ```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5-t50","files":["test/ui/components/template-editor-toolbar/PenToolGroup.test.tsx","test/ui/components/template-editor-toolbar/PenToolOptionsBar.test.tsx","test/ui/components/template-editor-toolbar/usePenToolShortcuts.test.ts"]}'
+bun run scripts/health/sub-loop.ts test/ui/components/template-editor-toolbar/PenToolGroup.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/template-editor-toolbar/PenToolOptionsBar.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/template-editor-toolbar/usePenToolShortcuts.test.ts --lifecycle codescene
 ```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 ---
 
@@ -3122,14 +3083,14 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - Zustand-backed service (exported as `useContextMenuService` hook)
   - `interface ContextMenuState { openMenuId: string | null; anchorPosition: { x: number; y: number } | null; menuItems: ContextMenuItem[]; closeOnBlur: boolean; openMenu: (id: string, position: { x: number; y: number }, items: ContextMenuItem[]) => void; closeMenu: () => void; updateItems: (items: ContextMenuItem[]) => void; }`
   - `ContextMenuItem` type (id, labelKey, label, shortcut, icon, disabled, hidden, checked, submenu, submenuDelayMs=200, onSelect, separator, isDangerous, confirmMessageKey)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/ContextMenuHost.tsx` (new)
   - Subscribes to the service via `useContextMenuService`
   - Renders an MUI v9 `Menu` with `anchorReference="anchorPosition"`, `anchorPosition={{ top: position.y, left: position.x }}`, open when `openMenuId !== null`
   - `sx={{}}` for Paper styled via `contextMenuPaperSx` (R5-T8 below) — no style props
   - Viewport-flip logic in `useLayoutEffect`: measures menu rect, flips openUp/openLeft if overflow
   - Closes on Escape / outside click / window blur — uses `useOutsideClickClose` (R5-T7)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T2: Shared Menu Item Builders
 
@@ -3138,7 +3099,7 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - Each returns `ContextMenuItem[]` with i18n `labelKey` (no hardcoded strings)
   - Each uses `id:` namespaces like `toolbar.editToolbar`, `swatches.new`, `color.copyAsHex` for unique `aria-activedescendant` keys
   - Item IDs also map back to keyboard-nav focus IDs
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T3: Smart Item Filtering Helper
 
@@ -3147,11 +3108,11 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - `export function filterMenuItems(items: ContextMenuItem[], ctx: MenuContextDescriptor): ContextMenuItem[]`
   - Rules: Cut/Copy disabled at selectionCount 0; Paste hidden when `!clipboardHasContent`; image-specific items hidden when selection has no image elements; Group disabled when `selectionCount <= 1` or all selected are groups; Ungroup disabled when none selected is a group; Lock toggle `checked` when all selected are locked
   - Items with `hidden: true` are not rendered; items with `disabled: true` render greyed
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/useMenuContextDescriptor.ts` (new)
   - Subscribes to `useCanvasStore` (selection / clipboard) with `useShallow` from `zustand/react/shallow`
   - Returns `MenuContextDescriptor` — re-renders only on selection/clipboard changes
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T4: Keyboard Navigation & Submenu Trigger
 
@@ -3161,14 +3122,14 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - ArrowDown/Up moves among enabled+visible items (wraps); Home/End jump to first/last
   - Enter invokes `onSelect`; Escape closes; ArrowRight opens submenu; ArrowLeft collapses
   - Tab is suppressed inside menus
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/SubmenuTrigger.tsx` (new)
   - Props: `{ item: ContextMenuItem; onParentSelect: () => void; parentMenuId: string; closeAllMenus: () => void; }`
   - `onMouseEnter` starts 200ms timer (`submenuDelayMs`, default per item); fires submenu open
   - `onMouseLeave` clears the timer; if submenu open, start a 150ms rollback timer
   - Mouse-entering the submenu cancels the rollback timer (so the submenu stays open during diagonal mouse moves)
   - ArrowRight opens immediately (no delay); ArrowLeft collapses
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T5: Toolbar Context Menu & Customize Dialog
 
@@ -3176,18 +3137,18 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - Attaches `onContextMenu` to `EditorToolbar` root Box
   - Calls `buildToolbarContextMenu` from R5-T2
   - Invokes the `contextMenuService.openMenu('toolbar', { x, y }, items)`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/dialogs/CustomizeToolbarDialog.tsx` (new)
   - Two-column `List` of available / current tools, drag-between via `@dnd-kit/core`
   - Confirms via `uiStore.setToolbarCustomization(ids)` on dialog close
   - Cancel restores prior customization
   - All MUI v9 `sx={{}}` — no style props; all colors from `theme.palette`
   - All labels via `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` from `@/shared/locale/client`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/useToolbarContextMenu.ts` (new)
   - Returns `{ onContextMenu, visibleTools, iconSize, showToolNames, resetToolbar }`
   - Reads/writes `uiStore.toolbarCustomization`, `toolbarIconSize`, `toolbarShowToolNames`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T6: Swatches Panel Context Menu
 
@@ -3196,7 +3157,7 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - On "empty area" right-click, suppress Edit/Delete (only show create/import — per Photoshop behavior)
   - On swatch right-click, full menu with Edit/Delete enabled per selection
   - Delete shows a confirm Mini Dialog (item has `isDangerous: true`)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/utils/swatchImportExport.ts` (new)
   - `parseAse(buffer: ArrayBuffer): Swatch[]` — Adobe Swatch Exchange parser
   - `parseAco(buffer: ArrayBuffer): Swatch[]` — Adobe Color parser
@@ -3206,11 +3167,11 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - `exportJson(swatches: Swatch[]): string`
   - `interface Swatch { name: string; hex: string; }`
   - Pure functions, no React, no `console.*` (use `logger` from `@/backend/lib/logger` if needed)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/common/stores/cert/swatchStore.ts` (new, if not already created in earlier rounds)
   - Zustand store: `swatches: Swatch[]`, `addSwatch`, `editSwatch`, `deleteSwatch`, `importSwatches`, `exportSwatches`, `setSwatchView`, `swatchView: 'small' | 'medium' | 'large'`
   - Dedupe on import by hex value
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T7: Properties Panel & Color Panel Context Menus
 
@@ -3218,33 +3179,33 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - Menu: Copy Properties (disabled if no selection), Paste Properties (disabled if `clipboardStore.propertiesClipboard` is null), Reset to Defaults, separator, Properties Panel Options
   - "Properties Panel Options..." opens a small `Dialog` for configuring visible/collapsed sections + panel width
   - State persists in `uiStore.propertiesPanelPrefs`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/ColorPanelContextMenu.tsx` (new)
   - Menu: Add to Swatches (disabled if swatch already exists or limit reached), Copy Color as Hex, Copy Color as RGB, Copy Color as HSL, separator, Color Picker Mode submenu (HSL/RGB/HSV/CMYK)
   - Copy actions call `navigator.clipboard.writeText(formattedColor)`
   - Color Picker Mode selection persists in `uiStore.colorPickerMode`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/utils/colorFormatUtils.ts` (new)
   - `rgbToHex({r,g,b}): string`, `rgbToHsl({r,g,b}): {h,s,l}`, `rgbToHsv({r,g,b}): {h,s,v}`, `rgbToCmyk({r,g,b}): {c,m,y,k}`, `hslToRgb`, `hsvToRgb`, `cmykToRgb`
   - Pure math functions — no external packages
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T8: Menu Bar Context Menu & Outside Click Close Hook
 
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/MenuBarContextMenu.tsx` (new)
   - Menu: Customize Menu Bar, separator, Show Full Menus (toggle), separator, Reset Menu Bar
   - Reads/writes `uiStore.menuBarShowFullMenus`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/useOutsideClickClose.ts` (new)
   - Hook consumed by `ContextMenuHost`; attaches `pointerdown` on document, `keydown` for Escape, `blur` on window, `scroll` on canvas root
   - Calls `contextMenuService.closeMenu()` on any of these triggers
   - Also closes when any new editor-level keyboard shortcut starts (intercepts at editor root listener)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/contextMenus/contextMenuTheme.ts` (new)
   - `contextMenuPaperSx(theme: Theme): SxProps<Theme>` — `backgroundColor: theme.palette.background.paper`, `color: theme.palette.text.primary`, `boxShadow: theme.shadows[8]`, `border: 1px solid theme.palette.divider`
   - Item heights 32px, font 13px, disabled opacity 0.35 (not invisible), dangerous item via `theme.palette.error.main`
   - No hardcoded colors
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T9: Keyboard Shortcuts Hook for Context Menu Invocation
 
@@ -3254,7 +3215,7 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - On `ContextMenu` key: invokes the menu for the active selection, or the focused region if no selection
   - Uses `e.preventDefault()` to suppress the browser's default context menu where possible
   - Falls back to `Shift+F10` on Mac keyboards lacking the Context Menu key
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T10: Test Suite
 
@@ -3263,47 +3224,47 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
   - Test: menu flips openUp / openLeft when overflow would occur near the viewport edge
   - Test: Escape closes the menu, outside click closes, window blur closes
   - Test: `aria-activedescendant` matches the active item id (no DOM focus movement)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/contextMenus/menuItemFilter.test.ts` (new)
   - Test: Cut/Copy disabled when `selectionCount === 0` and visible
   - Test: Paste hidden when `!clipboardHasContent`
   - Test: image-specific items hidden when selection has no image elements
   - Test: Group disabled when `selectionCount <= 1`; Ungroup disabled when no selected is a group
   - Test: Lock toggle `checked` when all selected are locked
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/contextMenus/SubmenuTrigger.test.tsx` (new)
   - Test: hover > 200ms opens submenu; mouse-leave at 150ms cancels open
   - Test: rollback timer keeps submenu open during diagonal mouse moves from parent to submenu
   - Test: ArrowRight opens immediately, ArrowLeft collapses
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/contextMenus/ToolbarContextMenu.test.tsx` (new)
   - Test: right-click on toolbar opens menu with Edit Toolbar, Show Tool Names, Icon Size submenu, Reset
   - Test: toggle Show Tool Names updates `uiStore.toolbarShowToolNames`
   - Test: Icon Size submenu → Small sets `toolbarIconSize = 'small'`
   - Test: Reset Toolbar restores default customization
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/contextMenus/SwatchesContextMenu.test.tsx` (new)
   - Test: right-click on empty swatch area shows New/Import but not Edit/Delete
   - Test: right-click on selected swatch shows full menu with Edit/Delete enabled
   - Test: Delete swatch shows confirm Mini Dialog before removing
   - Test: Import Swatches appends and dedupes by hex
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/contextMenus/ColorPanelContextMenu.test.tsx` (new)
   - Test: Copy as Hex/RGB/HSL write the correct format to `navigator.clipboard.writeText`
   - Test: Add to Swatches disabled when swatch already exists
   - Test: Color Picker Mode submenu persists selection in `uiStore.colorPickerMode`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/unit/colorFormatUtils.test.ts` (new)
   - Test: `rgbToHex({255,255,255}) === '#FFFFFF'`, `rgbToHex({0,0,0}) === '#000000'`
   - Test: round-trip `rgbToHsl` then `hslToRgb` within tolerance
   - Test: round-trip `rgbToHsv` then `hsvToRgb` within tolerance
   - Test: round-trip `rgbToCmyk` then `cmykToRgb` within tolerance
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/unit/swatchImportExport.test.ts` (new)
   - Test: `parseJsonSwatches`, `exportJson` round-trip stable
   - Test: `parseAse` handles a minimal valid sample
   - Test: `exportAse` produces a buffer with the "ASEF" magic header
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-T11: Knowledge Propagation
 
@@ -3317,7 +3278,7 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
 - [ ] Update `frontend/AGENTS.md` (append-only)
   - Reference `contextMenuService` and `ContextMenuItem` as the canonical context menu system for Plans 10, 11, 12
   - Note the shared `frontend/views/dashboard/cert/templates/editor/contextMenus/` location — must be imported (not redefined) by Plan 11 and 12
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Instruction File & AGENTS.md Discovery (Round 5 Append, Plan 10)
 
@@ -3354,7 +3315,7 @@ Phase R5-F (sequential): R5-T11 (knowledge propagation — waits on all of above
 
 ## Round 5: Advanced Layers Tasks
 
-> Tasks for the fourth Round 5 domain — **Advanced Layers Panel**. Mirrors `design.md` §"Round 5: Advanced Layers Panel". Quality model: every task ends with `**Quality loop**: tsgo + biome + lint queue client` per AGENTS.md §"Verification Loop". The lint queue server MUST be running before any lint call. File-scoped lint via `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"<id>","files":["<path>"]}'` (preferred over `bun run lint` — narrow scope saves time).
+> Tasks for the fourth Round 5 domain — **Advanced Layers Panel**. Mirrors `design.md` §"Round 5: Advanced Layers Panel". Quality model: every task ends with `**Quality loop**: per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure).
 >
 > **Note**: Per-row layer interactions, layer operations, groups, blending, clipping, and layer properties are tasks in Plan 12 §"Round 5: Advanced Layers Tasks". Plan 10 tasks cover only the **panel chrome** (workspace placement, header, list shell, options dialog, resize, i18n, store panel-state additions).
 
@@ -3407,7 +3368,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - **No hardcoded colors** in the store actions (the store does not own theme — the components do)
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - File: `frontend/common/stores/certificates/templateElementEditorStore.ts`
 
 **Files to Create/Modify:**
@@ -3447,7 +3408,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - Wire `panelDock` from store so the panel can fly out without losing the children tree
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - Files: `frontend/views/dashboard/certificates/template-editor/workspace/LayersWorkspacePanel.tsx`, `frontend/views/dashboard/certificates/template-editor/TemplateEditorDesktopView.tsx`
 
 **Files to Create/Modify:**
@@ -3481,7 +3442,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - All `aria-label`s from i18n keys per design §R5.9; never literal "Layers"
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - File: `frontend/views/dashboard/certificates/template-editor/layersPanel/AdvancedLayersPanelHeader.tsx`
 
 **Files to Create/Modify:**
@@ -3515,7 +3476,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - Root `Box` `sx={{ overflowY: 'auto', flex: 1, height: '100%' }}`; `role="listbox"` + `aria-label={t("certificateTemplateEditor.layersPanel.title")}` for screen readers
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - File: `frontend/views/dashboard/certificates/template-editor/layersPanel/AdvancedLayersList.tsx`
 
 - [ ] Install `@tanstack/react-virtual` only if missing:
@@ -3547,7 +3508,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - Verify RTL handling (`dir="rtl"` is automatic from the locale config; AR values mirror EN)
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - Files: `shared/locale/namespaces/dashboard/certificates/templateEditor.namespace.ts`, `shared/locale/namespaces/ar/dashboard/certificates/templateEditor.namespace.ts` (verify the AR path matches the existing Round 5 Effects i18n additions)
 
 **Files to Create/Modify:**
@@ -3572,7 +3533,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - If Plan 12 §R5 LY-T02 is not yet landed, render `<AdvancedLayersPanelPlaceholder />` (`Box` `sx={{ p: 2, color: 'text.disabled' }}` with `t("certificateTemplateEditor.layersPanel.comingSoon")` if that key exists, else a `Skeleton`) and surface a CROSS-FILE DEPENDENCY note to the orchestrator
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - Files: `frontend/views/dashboard/certificates/template-editor/workspace/LayersWorkspacePanel.tsx`, `frontend/views/dashboard/certificates/template-editor/TemplateEditorDesktopView.tsx`
 
 **Files to Create/Modify:**
@@ -3608,7 +3569,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
 - [ ] Wire from `AdvancedLayersPanelHeader` ≡ menu `Panel Options…` item — opens dialog (`useState` local open flag is fine; not store)
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - File: `frontend/views/dashboard/certificates/template-editor/layersPanel/LayerPanelOptionsDialog.tsx`
 
 **Files to Create/Modify:**
@@ -3652,7 +3613,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - Test scroll-to-selected fires when a hidden selection becomes active
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - Files: all test files in `test/ui/components/layersPanel/`
 
 **Files to Create/Modify:**
@@ -3677,7 +3638,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - Under an existing "UI Patterns"/"Component Patterns" section (or end): `See COMPONENT_PATTERNS.md §"Layers Workspace Panel Pattern" for the dockable panel + virtualized list implementation pattern.`
 
 - [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - Files: `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md`
 
 **Files to Create/Modify:**
@@ -3719,18 +3680,18 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
 - [ ] Create `frontend/common/stores/cert/snapAlignTypes.ts` (new)
   - Export `AlignAxis`, `AlignTarget`, `DistributeMode`, `DistributeFrom`, `SnapTargetKind`, `SnapSettings`, `SmartGuideColorToken`, `DEFAULT_SNAP_SETTINGS`
   - Pure type constants file (no React, no hooks) — canonical source for Plans 10/11/12
-  - Verify by running `bun run scripts/health/sub-loop.ts frontend/common/stores/cert/snapAlignTypes.ts --lifecycle biome`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - Verify by running `bun run scripts/health/sub-loop.ts frontend/common/stores/cert/snapAlignTypes.ts --lifecycle codescene`
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Update `shared/locale/types/dashboard/certificates/templateEditor.ts` (modify)
   - Append the `align`, `alignTo`, `distribute`, `view`, `snapTo`, `snapSettings` nested type schemas (per Plan 10 §R5S.7)
   - Add the `distributeWithGap: (gap: number) => string` pluralization slot
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Update `shared/locale/en/.../templateEditor.ts` (modify)
   - Implement the new keys + EN `distributeWithGap` pluralization function `(gap) => \`Distribute with ${gap}px gap\``
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Update `shared/locale/ar/.../templateEditor.ts` (modify)
   - Implement the new keys + AR `distributeWithGap` pluralization `(gap) => \`توزيع بفجوة ${gap}px\``
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5S-T2: Align Toolbar Cluster
 
@@ -3740,12 +3701,12 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
   - Colours via `sx={(theme) => ({ color: theme.palette.text.primary })}` — never hardcoded
   - Re-renders only on `selectedElementIds` change — wrap the store selector with `useShallow`
   - Hidden (CSS `display: none`) when `selectedElementIds.length < 2`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/toolbar/AlignToSelect.tsx` (new)
   - 4 options: selection/canvas/firstSelected/key (key disabled when no key object set)
   - Auto-reset to `selection` if `keyObjectId` becomes null
   - Compact `Select` with `size="small"` and `sx={{ width: 140 }}`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5S-T3: Distribute Toolbar Cluster
 
@@ -3755,7 +3716,7 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
   - Last-touched gap axis tracked in local state to drive Enter-key press behaviour
   - Disabled when `selectedElementIds.length < 3`; disabled `Tooltip` shows `i18n('distribute.requiresThree')`
   - Use custom 20×20 gap icons built from `Box`/`Divider` with `sx` theme strokes — never hardcoded colors
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5S-T4: View Menu Snap Section + Snap Settings Dialog
 
@@ -3764,16 +3725,16 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
   - `Snap To ▸` submenu with 6 `SnapTargetKind` checkboxes
   - Submenu items greyed when `snapEnabled === false`
   - Bottom "Snap Settings…" `MenuItem` opens the dialog
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/toolbar/SnapSettingsDialog.tsx` (new)
   - `Slider` for `snapThreshold` (2–20, default 6) with value badge
   - `Slider` for `smartGuideSensitivity` (2–20, default 6)
   - `RadioGroup` of 4 `Box` swatches for `SmartGuideColorToken` (colour via `theme.palette[token].main`)
   - All inputs have `aria-label` from i18n keys
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `frontend/views/dashboard/cert/templates/editor/toolbar/ViewMenu.tsx` (modify)
   - Bind `ViewMenuSnapSection` after the existing grid/rulers toggle block
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5S-T5: Key Object Badge
 
@@ -3782,7 +3743,7 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
   - Clear button removes the key object (calls store mutator shipped by Plan 11)
   - `Esc` while hovering clears the key object
   - Colours from `theme.palette.primary.main` / `theme.palette.onPrimary` (no hardcoded)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5S-T6: Align & Distribute Keyboard Shortcuts
 
@@ -3792,7 +3753,7 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
   - Bail if `document.activeElement` is `INPUT`/`TEXTAREA`
   - Reads current `selectedElementIds`, `alignTarget`, `distributeFrom` from `useCanvasStore.getState()`
   - Dispatches via the store's `alignElements` / `distributeElements` actions (Plan 11 ships those mutations)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5S-T7: Modify EditorToolbar to Host R5S Clusters
 
@@ -3800,7 +3761,7 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
   - Insert `AlignToolbarCluster` + `AlignToSelect` + `DistributeToolbarCluster` + `KeyObjectBadge` between alignment tools and zoom controls (per design §R5S.1)
   - Register the cluster with `priority: 30` in the `ToolbarOverflow` system (must stay between Fill/Stroke priority 25 and GridToggle priority 60 — verify does not collide)
   - Each contained component shows a `Tooltip` with i18n label + shortcut
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5S-T8: Test Suite (Plan 10 Snap & Align)
 
@@ -3809,39 +3770,39 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
   - Test: 6 buttons visible + tooltip-with-shortcut text when 2+ selected
   - Test: clicking each button dispatches `onAlign` with correct axis
   - Test: disabled state shows grey, no dispatch
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/AlignToSelect.test.tsx` (new)
   - Test: default value is `selection`
   - Test: `key` option disabled when `keyObjectId === null`
   - Test: switching alignTarget to `key` then clearing key object auto-resets to `selection`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/DistributeToolbarCluster.test.tsx` (new)
   - Test: disabled & shows `requiresThree` Tooltip when 2 elements selected
   - Test: 4 distribute buttons + gap field enabled with 3 elements
   - Test: gap field disabled unless `distributeFrom === 'spacing'`
   - Test: pressing Enter in gap field dispatches `onDistributeSpacing(gap, lastTouchedAxis)`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/ViewMenuSnapSection.test.tsx` (new)
   - Test: toggling `view.snap` flips all sub-toggles' disabled state
   - Test: submenu items have correct `aria-checked` from store state
   - Test: opening Snap Settings triggers dialog open
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/SnapSettingsDialog.test.tsx` (new)
   - Test: `snapThreshold` slider 2–20, snaps to integer
   - Test: `smartGuideColor` RadioGroup choices map to `SmartGuideColorToken`
   - Test: swatch `bgcolor` resolves to `theme.palette[token].main` (not a literal hex)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/useAlignShortcuts.test.tsx` (new)
   - Test: `Alt+A` triggers panel open (or focuses toolbar cluster)
   - Test: `Ctrl+Shift+Left` dispatches `alignElements('left', alignTarget)` with current selection
   - Test: shortcuts do not fire when an `INPUT` is focused
   - Test: no collision with `useFillStrokeShortcuts` priority 15 — both hooks mount, both dispatch their own accelerators only
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/editor/KeyObjectBadge.test.tsx` (new)
   - Test: chip hidden when `keyObjectId === null`
   - Test: chip shows element name + icon when set
   - Test: Esc clears the key object
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5S-T9: Knowledge Propagation (Plan 10 Snap & Align)
 
@@ -3854,7 +3815,7 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
 - [ ] Update `frontend/AGENTS.md` (append-only)
   - Reference `frontend/common/stores/cert/snapAlignTypes.ts` as the canonical types file shared across Plans 10/11/12 — must be imported, never redefined
   - Note the priority slot for the Align/Distribute cluster in the `ToolbarOverflow` system (30) and the dedicated `useAlignShortcuts` hook (priority 12, scope `'editor'`) distinct from `useFillStrokeShortcuts`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Instruction File & AGENTS.md Discovery (Round 5 Snap & Align, Plan 10)
 
@@ -3906,19 +3867,19 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Define `LoadedFont`, `FontCategory`, `FontLicense`, `VariableFontAxis` types
   - Define `FontPairing` interface (id, heading, body, label, description, suitableFor)
   - Export all types from `shared/types/certificates/index.ts`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Create `shared/constants/certificates/googleFontsManifest.ts`:
   - Export `GOOGLE_FONTS_MANIFEST: GoogleFontEntry[]` with family, category, weights, styles, variableAxes, license
   - Include collections: serif (Playfair Display, Merriweather, Georgia), sans-serif (Inter, Roboto, Montserrat, Open Sans), display (Bebas Neue, Anton, Oswald), handwriting (Dancing Script, Caveat), monospace (Roboto Mono, JetBrains Mono), arabic (Amiri, Cairo, Tajawal, Noto Naskh Arabic, Reem Kufi)
   - Each entry: `{ family, displayName, category, weights: number[], styles: string[], variableAxes?: VariableFontAxis[], license: FontLicense }`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Create `shared/constants/certificates/fontPairings.ts`:
   - Export `FONT_PAIRINGS: FontPairing[]` array with at least 6 curated pairings
   - Include `classic-serif`, `modern-sans`, `arabic-formal`, `arabic-modern`, `elegant-display`, `academic-traditional`
   - Each pairing: `{ id, heading: { family, weight }, body: { family, weight }, label, description, suitableFor: string[] }`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A2: Typography Zustand Store Slice
 
@@ -3935,13 +3896,13 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Implement `setFontSearchQuery(query)`, `setFontCategoryFilter(category)`, `setFontPreviewText(text)`
   - Use Zustand `create` with non-persisted mode (session-only per `frontend/common/stores/AGENTS.md`)
   - Import: `import { create } from "zustand"`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Create `frontend/common/stores/certificates/fontIndexedDB.ts`:
   - Functions: `getCachedFont(family): Promise<Blob | null>`, `cacheFont(family, blob): Promise<void>`, `removeCachedFont(family): Promise<void>`, `getAllCachedFonts(): Promise<LoadedFont[]>`
   - Uses IndexedDB API with database `cert-fonts-cache`, object store `fonts`, keyPath `family`
   - Handles open errors gracefully (falls back to no-cache mode)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A3: Rich Text Toolbar
 
@@ -3955,7 +3916,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - All i18n strings via `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` → `t.typography.toolbar.*`
   - All styling via `sx={{}}` (no style props), no hardcoded colors (use `theme.palette.*`)
   - Wrap in `React.memo` with custom comparator checking only `activeStyles` reference equality
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/typography/RichTextRenderer.tsx`:
   - Props: `content: RichTextContent`, `baseStyles: SpanStyles`, `elementId: string`
@@ -3965,7 +3926,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Each `<span>` wrapped in `React.memo` keyed by `span.id`
   - Applies `text-rendering: "optimizeLegibility"`, `font-smoothing: "antialiased"` at container level
   - RTL detection: if content text is predominantly Arabic characters, set `dir="rtl"` on container
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A4: Inline Text Editor
 
@@ -3981,7 +3942,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - `spellCheck` attribute toggle from store
   - Clipboard: copy serializes `{type: "rich-text", text, spans}`, also writes `text/plain` fallback. Paste deserializes rich text or falls back to plain. Paste-as-plain-text via `Ctrl/Cmd+Shift+V`
   - Debounce store updates at 16ms (one frame)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A5: Find & Replace Dialog
 
@@ -3994,7 +3955,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Invalid regex → `FormErrorSnackbar` with `t.typography.findReplace.invalidRegex`
   - Triggered from toolbar overflow menu or `Ctrl/Cmd+F` while editing
   - i18n via `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` → `t.typography.findReplace.*`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A6: Emoji & Special Characters Picker
 
@@ -4005,7 +3966,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Recent characters stored in localStorage (`cert-recent-chars`)
   - Custom characters: user-defined, stored in localStorage (`cert-custom-chars`)
   - i18n via `t.typography.specialChars.*`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A7: Spell Check Hook
 
@@ -4016,7 +3977,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - "Ignore" → session ignore list; "Add to dictionary" → localStorage `cert-dictionary-<locale>`
   - Language selector: `ar`, `en`, `auto` (RTL/LTR content ratio detection)
   - Toggle on/off via store flag
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A8: Font Management Panel
 
@@ -4028,13 +3989,13 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - `removeCustomFont(family)` removes `@font-face` → removes from IndexedDB
   - Rejects non-font MIME types, 10MB file size limit
   - `@font-face` always uses `font-display: swap`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Create `frontend/common/graphql/sharedDocuments/font.documents.ts`:
   - `UploadFontDocument` — mutation: `mutation UploadFont($file: Upload!) { uploadFont(file: $file) { url, family } }`
   - `DeleteFontDocument` — mutation: `mutation DeleteFont($family: String!) { deleteFont(family: $family) { success } }`
   - Import from `@apollo/client/react`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/fonts/FontCard.tsx`:
   - Props: `font: LoadedFont`, `sampleText?: string`, `onApply`, `onRemove?`
@@ -4045,7 +4006,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - "Apply" `IconButton` (`CheckOutlined`) and "Remove" `IconButton` (`DeleteOutlined`, custom fonts only)
   - Preview loads font on hover via `document.fonts.load`
   - i18n via `t.typography.fonts.*`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Create `frontend/common/views/dashboard/certificates/template-editor/fonts/FontManager.tsx`:
   - Left sidebar collapsible section (below element library from Plan 11)
@@ -4055,7 +4016,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Font grid (`Grid`): 3-column desktop, 1-column mobile
   - "Upload font" `Button` opening file `input type="file"` accepting `.ttf,.otf,.woff,.woff2`
   - i18n via `t.typography.fonts.*`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A9: Variable Font Controls
 
@@ -4066,7 +4027,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Updates `SpanStyles.variableAxes` map in store
   - Applies via `font-variation-settings` CSS in renderer
   - i18n axis labels via `t.typography.fonts.variable` + axis-specific keys
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A10: Font Pairing Suggestions
 
@@ -4076,7 +4037,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - "Apply pairing" `Button` sets heading element font + body element font (by element role tags)
   - Description + suitable-for tags as `Chip`s
   - i18n via `t.typography.fonts.pairing.*`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A11: GraphQL Integration for Rich Text Content
 
@@ -4084,12 +4045,12 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Add `richTextContent: JSON` field to `UpdateTextElementInput` in `frontend/common/graphql/sharedDocuments/element.documents.ts`
   - The GraphQL scalar `JSON` must be added to the Pothos schema (Plan 05)
   - Element queries return `richTextContent` as a JSON object
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Run GraphQL codegen after schema changes:
   - `bun run generate:gqlSchema` then `bun codegen`
   - Verify generated types include `RichTextContent` fields
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A12: i18n Namespace Extension
 
@@ -4098,13 +4059,13 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Pluralization `matchCount: (count: number, total: number) => string` using Arabic pluralization rules
   - Weight labels in Arabic (Thin → خفيف جداً, Regular → عادي, Bold → عريض, etc.)
   - Category labels, license labels, pairing labels all in Arabic
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] Extend `shared/locale/en/.../templateEditor.ts` with all `typography.*` keys:
   - English translations matching the Arabic key structure
   - Pluralization: `(count, total) => \`${count} of ${total} matches\``
   - Weight labels: Thin, ExtraLight, Light, Regular, Medium, SemiBold, Bold, ExtraBold, Black
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A13: Component Tests
 
@@ -4149,7 +4110,7 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Document variable font axis support
   - Document fallback font chain
   - Update `frontend/AGENTS.md` with reference to this doc
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-A15: Execution Order
 
@@ -4208,7 +4169,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
   - `clearLastTransform()` → `certTemplateEditorStore.setState({ lastTransform: null })`
   - `TransformOperationRecord` interface: `{ operationType, matrix: DOMMatrixReadOnly, elementIds: string[], timestamp: number }` — defined in `@/frontend/common/stores/cert/transformTypes.ts` ( Plan 11 owner)
 - [ ] Use `logger` from `@/frontend/utils/logger` (never `console.*`)
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### TR-T02 — `ToolbarFreeTransformButton` Component
 
@@ -4220,7 +4181,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
   - Active state: `sx={{ color: 'primary.main' }}` (no hardcoded colors)
   - `aria-label`, `aria-pressed`, `Tooltip title` — all from `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` namespace: `transform.freeTransform.tooltip`, `transform.freeTransform.ariaLabel`, `transform.freeTransform.disabledHint`
   - Icon: `CropFreeOutlined` from `@mui/icons-material` (MUI v9 — `*Outlined` suffix not `*Outline`)
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### TR-T03 — `EditorEditMenu` with Transform Submenu
 
@@ -4240,7 +4201,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
   - Gating: Mode-toggle items `disabled` when `activeTool !== 'freeTransform'`; Rotate/Flip/Again `disabled` when `selectedElementIds.length === 0`
   - MUI v9: `MenuItem disabled` prop, `ListItemText` + `<Typography variant="caption" sx={{ ml: 2, color: 'text.disabled' }}>` for shortcut caption (no style props, no hardcoded colors)
   - Handlers call Zustand store shims: `setActiveTool('freeTransform')`, `setFreeTransformMode(mode)`, `applyRotate九十({ degrees, direction })`, `applyFlip(horizontal)`, `openNumericTransformDialog()`, `repeatLastTransform()`
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### TR-T04 — `useEditorShortcuts` — Transform Shortcuts
 
@@ -4253,7 +4214,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
     - `Shift+Ctrl+[` → `applyRotate九十({ degrees: 90, direction: 'ccw' })` (predicate: `selectedElementIds.length >= 1`)
   - Use `ctrlKey` only (Linux target per AGENTS.md — don't gate on `metaKey`)
   - **No `eval` / no dynamic handler-string expansion** — handlers are function refs (security rule)
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### TR-T05 — Transform i18n Keys (Plan 10 Surface — AR + EN)
 
@@ -4264,7 +4225,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 - [ ] Modify `shared/locale/ar/dashboard/certificates/templateEditor.ts` — append Arabic implementations
 - [ ] Modify `shared/locale/en/dashboard/certificates/templateEditor.ts` — append English implementations
 - [ ] Per `shared/AGENTS.md`: plain strings are plain template literals; no interpolation → no `(param: string) => string` signature
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### TR-T06 — `certTemplateEditorStore` Transform Action Shims + Handler Surface
 
@@ -4291,7 +4252,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
   - `lastTransform` initializer: `null`
   - Import only `type { FreeTransformMode, TransformOperationRecord }` from `@/frontend/common/stores/cert/transformTypes` (Plan 11 owns the file)
   - Define `TransformHandlers` interface inline here: `{ setMode?, applyRotate九十?, applyFlip?, repeatTransform? }` — partials so Plan 11 can register a subset
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### TR-T07 — Component Tests: Toolbar Free Transform + Edit Menu
 
@@ -4308,7 +4269,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
   - Numeric… calls `openNumericTransformDialog`
   - Transform Again `disabled` when `lastTransform === null`
 - [ ] Mock Zustand stores via existing `test/ui/components` Happy DOM pattern (no backend)
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### TR-T08 — Knowledge Propagation (Plan 10 R6)
 
@@ -4321,7 +4282,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 - [ ] Update `frontend/AGENTS.md` (append-only):
   - Reference `useLastTransformRecord` and `transformHandlers` registration surface
   - Note cross-plan contract: Plan 11 `FreeTransformController` calls `registerTransformHandlers` on mount, `unregisterTransformHandlers` on unmount
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Round 5 Execution Order (Plan 10 Transform)
 
@@ -4355,7 +4316,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
 - [ ] Create `frontend/common/stores/cert/colorSystemTypes.ts` (new)
   - Define all color-system shared types: `ColorSpace`, `ColorPickerContext`, `ColorValue`, `ColorProfile`, `Swatch`, `SwatchGroup`, `HarmonyScheme`, `HarmonyColor`, `EyedropperSampleSource`, `EyedropperSampleSize`, `ActivePaintSlot`, `SwatchExportFormat`, `WebSafeSwatch`
   - Pure type file (no runtime exports) — importable by Plans 10/11/12 via `@/frontend/common/stores/cert/colorSystemTypes`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T2: Color Conversion Utilities
 
@@ -4364,12 +4325,12 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - CMYK conversion uses the formula for the selected `ColorProfile` — defaults to `'CMYK-SWOP-v2'`
   - No React — pure TS module; both frontend and store code import via `@/` alias
   - i18n: not needed (utility module)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/unit/colorConversionUtils.test.ts` (new)
   - Snapshot known conversions (R/G/B/W/K, mid-gray, saturated red, saturated blue out-of-CMYK-gamut case)
   - Round-trip: `rgbToHSL` → `hslToRGB`, `rgbToHSV` → `hsvToRGB` preserves value within ±1 tolerance
   - Shorthand expansion `#F0A` → `#FF00AA`; invalid input → `null` from `normalizeHex`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T3: Color System Zustand Store
 
@@ -4380,7 +4341,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - Persist subset: `fillColor`, `strokeColor`, `customSwatches`, `swatchGroups`, `lastColorMode`, `activeProfile`, `colorHistory`, `swatchDisplaySize`
   - Non-persisted (session-only): `colorPickerOpen`, `colorPickerContext`, `colorPickerColor`, `colorPickerPreviousColor`, `activePaintSlot`, `quickSwatches`
   - Storage key: `"certEditor.colorSystem"` → `localStorage`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T4: Toolbar Color Swatch Component
 
@@ -4391,7 +4352,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - Double-click opens color picker; single click selects the slot
   - i18n: `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` keys: `toolbarColors.fillActive`, `toolbarColors.strokeActive`, `toolbarColors.noFill`, `toolbarColors.noStroke`
   - `aria-label={slot === 'fill' ? t("toolbarColors.fillActive") : t("toolbarColors.strokeActive")}`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T5: Toolbar Color Cluster (Fill + Stroke + Swap + Reset + Eyedropper + Quick Swatches)
 
@@ -4402,7 +4363,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - `ToolbarEyedropperButton` (T6) and `ToolbarQuickSwatchesDropdown` (T7) — imported and composed
   - `sx={{ alignItems: 'center' }}` on the outer Stack (no direct style props)
   - Reads fill/stroke/activePaintSlot via `useColorSystemStore` with `useShallow` selector — returns stable tuple so unrelated store changes don't re-render
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T6: Toolbar Eyedropper Button
 
@@ -4412,7 +4373,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - On click: if active, deactivate (`setActiveTool('select')` + `useEyedropperStore.getState().deactivate()`); else activate (`setActiveTool('eyedropper')` + `useEyedropperStore.getState().activate(activePaintSlot)`)
   - Icon: `ColorizeOutlined` (note: NO `ColorizeOutline` — MUI v9 uses `*Outlined` postfix; see frontend/AGENTS.md)
   - Tooltip: `t("certificateTemplateEditor.toolbarEyedropper.tooltip") + " (I)"`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T7: Toolbar Quick Swatches Dropdown
 
@@ -4422,7 +4383,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - Reads `quickSwatches` from `useColorSystemStore` with `useShallow`
   - Empty state: `Typography` "no recent colors" (`t("certificateTemplateEditor.toolbarColors.noRecent")`)
   - On swatch click: applies to `activePaintSlot` (set fill or stroke via store) and calls `addToQuickSwatches(c)` to bump recency
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T8: Color System Keyboard Shortcuts Hook
 
@@ -4438,7 +4399,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
     - `Escape` → if `useColorSystemStore.getState().colorPickerOpen` close picker; else if `activeTool === 'eyedropper'` deactivate eyedropper
   - Skips handler if `event.target` is a text input (`tag === 'input' && type === 'text'`, `tag === 'textarea'`, or `contentEditable` true)
   - Cleanup: `removeEventListener` on unmount
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T9: Swatches Presets + Web-Safe Palette
 
@@ -4448,7 +4409,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - `PANTONE_PRESET: Array<{ hex: string; name: string }>` — ~36 curated Pantone Coatone entries
   - `generateWebSafePalette()` helper — memoized at module load (216 entries, <5KB)
   - No React — pure TS module
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T10: ASE/ACO/JSON Swatch Import/Export
 
@@ -4460,7 +4421,7 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - `exportGroupsToASE(groups: SwatchGroup[]): ArrayBuffer`
   - `importSwatches(file: File): Promise<SwatchGroup[]>` — dispatcher reads `file.arrayBuffer()` then routes by extension (`.ase`/`.aco`/`.json`)
   - `exportSwatches(groups: SwatchGroup[], format: 'json' | 'ase'): Promise<void>` — triggers a `Blob` download via `URL.createObjectURL`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T11: Left Sidebar Swatches Panel
 
@@ -4475,26 +4436,26 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - Import button (hidden file input, accept `.ase,.aco,.json`) + Export button (triggers file dialog with format selector)
   - Empty state: `Typography` `t("certificateTemplateEditor.swatches.emptySwatches")`
   - i18n: `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` — all `swatches.*` keys declared in R5-CS-T12 below
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/panels/swatches/ColorSwatchTile.tsx` (new — Plan 10 sidebar version; Plan 12 will import the same component for its properties panel)
   - `interface ColorSwatchTileProps { color: ColorValue; size: 'small' | 'medium' | 'large'; isBase?: boolean; onClick?: () => void; onDoubleClick?: () => void; onContextMenu?: (e: React.MouseEvent) => void; tooltip?: string; }` — sizes are 16/24/32px
   - Renders a square `Box` with checkerboard behind (alpha indicator) and color overlay — `sx={{ width, height, borderRadius: 0.5, border: '1px solid', borderColor: theme.palette.divider, cursor: onClick ? 'pointer' : 'default', position: 'relative', backgroundImage: CHECKERBOARD_PATTERN, backgroundColor: hexToRgba(color.hex, color.alpha), backgroundBlendMode: 'multiply' }}`
   - Optional outline highlight (isBase): `sx={{ outline: \`2px solid ${theme.palette.primary.main}\` }}`
   - `Tooltip` for hover preview — `title` shows `${hex} (#RRGGBB ${Math.round(alpha*100)}%)`
   - `role="button"`, `tabindex={0}`, `aria-label={tooltip || color.hex}`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### R5-CS-T12: i18n Keys + Test Suite + Knowledge Propagation
 
 - [ ] Modify `shared/locale/types/dashboard/certificates/templateEditor.ts` — add `toolbarColors`, `toolbarEyedropper`, `swatches` namespaces per §R5-CS12 spec
   - Append to existing `TemplateEditorLabels` interface
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `shared/locale/en/dashboard/certificates/templateEditor.ts` — add EN translations
   - Examples: `toolbarColors.swapTooltip: "Swap fill and stroke colors"`, `swatches.presetMaterial: "Material Design"`, `swatches.export: "Export"`, `swatches.import: "Import"`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Modify `shared/locale/ar/dashboard/certificates/templateEditor.ts` — add AR translations
   - Native-Arabic-reviewed strings (no machine translation); matching existing style
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/unit/colorSystemStore.test.ts` (new) — tests pure store
   - Test `swapFillStroke` swaps colors + has flags
   - Test `resetColors` resets to white fill, black stroke
@@ -4502,32 +4463,32 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - Test `addToColorHistory` dedups + caps at 20
   - Test `addCustomSwatch` / `removeCustomSwatch`
   - Test `openColorPicker` captures `previousColor`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/template-editor/ToolbarColorCluster.test.tsx` (new)
   - Test fill/stroke swatches render current colors
   - Test swap button swaps colors
   - Test reset button resets defaults
   - Test eyedropper toggle activates/deactivates
   - Test quick swatches dropdown opens and applies on click
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/ui/components/template-editor/SwatchesPanel.test.tsx` (new)
   - Test tab switching (Document/Custom/Recent)
   - Test display size toggle updates swatch tile sizes
   - Test swatch add (custom "+" → creates entry in customSwatches)
   - Test swatch edit (double-click → triggers color picker open)
   - Test swatch delete (right-click menu → Delete)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Update `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only) — document gotchas:
   - MUI v9 has NO `ColorizeOutline` icon — use `ColorizeOutlined` (see frontend/AGENTS.md)
   - The diagonal "no color" indicator must come from a CSS pseudo-element, not an imported SVG; avoids fragile image assets
   - ASE spec uses UTF-16 strings — Reader must use `TextDecoder('utf-16be')` for swatch names
   - The state-store selector for the color cluster should return a stable tuple (useShallow) — unrelated store changes (dialog open/close, mode change) shouldn't trigger toolbar re-render
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Update `frontend/COMPONENT_PATTERNS.md` (append-only) — patterns for:
   - "Toolbar color cluster" (fill/stroke stack, swap, reset, eyedropper, quick swatches)
   - "Swatch tile" (small UI component used by toolbar dropdown + left sidebar + plan 12 properties panel)
   - "Persisted Zustand store with partialize" (color system store pattern)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### Round 5 Color System Execution Order (Plan 10)
 
@@ -4697,15 +4658,13 @@ Phase R5-CS-G (sequential): R5-CS-T12 (i18n keys + tests + knowledge propagation
 
 **Requirements References:** REQ-10-R5G-01 (i18n namespace)
 
-**Quality Loop:** tsgo + biome + lint queue client
+**Quality Loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-10-R5G-T01","files":["shared/locale/types/dashboard/certificates/canvas.ts","shared/locale/en/dashboard/certificates/canvas.ts","shared/locale/ar/dashboard/certificates/canvas.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/canvas.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/canvas.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/canvas.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -4713,7 +4672,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - Read `.github/instructions/frontend.instructions.md`
 - Verify: no `next-intl` imports, compile-time type system pattern (interface + implementation), interpolation as `(param: string) => string`, pluralization as `(count: number) => string`
 
-**Quality loop**: tsgo + biome + lint queue client
+**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -4751,15 +4710,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-10-R5G-02 (keyboard shortcuts)
 
-**Quality loop:** tsgo + biome + lint queue client
+**Quality loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-10-R5G-T02","files":["frontend/common/views/dashboard/cert-template-editor/utils/guideGridShortcuts.ts","frontend/common/views/dashboard/cert-template-editor/hooks/useKeyboardShortcuts.ts","frontend/common/views/dashboard/cert-template-editor/hooks/__tests__/guideGridShortcuts.test.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/utils/guideGridShortcuts.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/hooks/useKeyboardShortcuts.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/hooks/__tests__/guideGridShortcuts.test.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -4767,7 +4724,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - Read `.github/instructions/frontend.instructions.md`
 - Verify: `@/` path aliases, no `console.*` (use `logger`), discriminated `ShortcutDefinition` type
 
-**Quality loop**: tsgo + biome + lint queue client
+**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -4820,15 +4777,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-10-R5G-03 (View menu), REQ-10-R5G-04 (guide presets menu), REQ-10-R5G-05 (print presets)
 
-**Quality loop:** tsgo + biome + lint queue client
+**Quality loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-10-R5G-T03","files":["frontend/common/views/dashboard/cert-template-editor/components/ViewMenu.tsx","frontend/common/views/dashboard/cert-template-editor/components/GuidePresetsSubmenu.tsx","frontend/common/views/dashboard/cert-template-editor/components/PrintPresetsSubmenu.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/components/ViewMenu.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/components/GuidePresetsSubmenu.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/components/PrintPresetsSubmenu.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -4837,7 +4792,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - Read `.github/instructions/frontend.instructions.md`
 - Verify: `useAppTranslation(Translation.Dashboard.CertificateCanvas)` pattern, `ListItemIcon` imports from `@mui/material`, icon names end with `Outlined` (MUI v9), `sx={{ color: theme => theme.palette.text.primary }}` pattern
 
-**Quality loop**: tsgo + biome + lint queue client
+**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -4868,22 +4823,18 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-10-R5G-06 (toolbar toggles)
 
-**Quality loop:** tsgo + biome + lint queue client
+**Quality loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-10-R5G-T04","files":["frontend/common/views/dashboard/cert-template-editor/components/GuideGridToolbarButtons.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/components/GuideGridToolbarButtons.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — MUI v9 icon names end with `Outlined`, `sx={{}}` only, no hardcoded colors
 - Read `.github/instructions/frontend.instructions.md`
 
-**Quality loop**: tsgo + biome + lint queue client
+**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -4930,15 +4881,12 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-10-R5G-07 (info bar), REQ-10-R5G-08 (drag info)
 
-**Quality loop:** tsgo + biome + lint queue client
+**Quality loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-10-R5G-T05","files":["frontend/common/views/dashboard/cert-canvas/components/InfoBar.tsx","frontend/common/views/dashboard/cert-canvas/utils/infoBarFormatter.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-canvas/components/InfoBar.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-canvas/utils/infoBarFormatter.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -4947,7 +4895,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - Read `.github/instructions/frontend.instructions.md`
 - Verify: `useAppTranslation(Translation.Dashboard.CertificateCanvas)` for i18n, `@/` path aliases, no hardcoded colors
 
-**Quality loop**: tsgo + biome + lint queue client
+**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -4984,22 +4932,18 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-10-R5G-09 (bleed/slug display)
 
-**Quality loop:** tsgo + biome + lint queue client
+**Quality loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-10-R5G-T06","files":["frontend/common/views/dashboard/cert-canvas/components/BleedIndicator.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-canvas/components/BleedIndicator.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — no hardcoded colors, use `theme.palette.*`
 - Read `.github/instructions/frontend.instructions.md`
 
-**Quality loop**: tsgo + biome + lint queue client
+**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -5030,22 +4974,18 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-10-R5G-10 (shortcut display)
 
-**Quality loop:** tsgo + biome + lint queue client
+**Quality loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-10-R5G-T07","files":["frontend/common/views/dashboard/cert-template-editor/utils/shortcutDisplay.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/utils/shortcutDisplay.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — no `console.*`
 - Read `.github/instructions/frontend.instructions.md`
 
-**Quality loop**: tsgo + biome + lint queue client
+**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -5074,22 +5014,18 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-10-R5G-11 (integration), REQ-10-R5G-12 (stories)
 
-**Quality loop:** tsgo + biome + lint queue client
+**Quality loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-10-R5G-T08","files":["frontend/common/views/dashboard/cert-template-editor/components/__tests__/guideGridIntegration.test.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/components/__tests__/guideGridIntegration.test.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — use test runner `bun run scripts/run-test/run-test.ts`
 - Read `.github/instructions/tests.instructions.md`
 
-**Quality loop**: tsgo + biome + lint queue client
+**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -5184,14 +5120,12 @@ T45–T57 ─> T58 (knowledge propagation)
 
 6. Run quality loop:
    ```bash
-   bun tsgo
-   bun biome:check
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"r5-45","files":["frontend/common/stores/templateEditorStore.ts","shared/types/cert/shapeTypes.ts","shared/constants/cert/shapeCategories.ts"]}'
-   ```
+   bun run scripts/health/sub-loop.ts frontend/common/stores/templateEditorStore.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/types/cert/shapeTypes.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/constants/cert/shapeCategories.ts --lifecycle codescene
+{"id":"r5-45","files":["frontend/common/stores/templateEditorStore.ts","shared/types/cert/shapeTypes.ts","shared/constants/cert/shapeCategories.ts"]}
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -5218,7 +5152,7 @@ T45–T57 ─> T58 (knowledge propagation)
 4. Add `ShapeToolGroup` to `EditorToolbar.tsx` after the existing tool groups
 5. Run quality loop per file
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Tests**:
 - `test/ui/components/editor/ShapeToolGroup.test.tsx` — verify tool selection sets `activeShapeTool` in store, each toggle button renders correct icon, only one active at a time
@@ -5269,7 +5203,7 @@ T45–T57 ─> T58 (knowledge propagation)
 6. All MUI components use `sx={{}}` — never direct style props
 7. All text uses `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` keys `shapeCategory.*` and `shapeLibrary.*`
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Tests**:
 - `test/ui/components/editor/ShapeLibraryPanel.test.tsx` — verify category sections render, search filters shapes, clicking shape calls `onSelectShape`, recently used section appears after selection
@@ -5309,7 +5243,7 @@ T45–T57 ─> T58 (knowledge propagation)
 4. `selectedShapeCount` is computed from `useCanvasStore(s => s.selectedElementIds)` filtering elements of `type === 'shape'`
 5. Run quality loop per file
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Tests**:
 - `test/ui/components/editor/BooleanToolbar.test.tsx` — verify toolbar hidden when <2 shapes selected, appears when ≥2 selected, each button triggers correct store action, flatten shows confirmation dialog
@@ -5341,7 +5275,7 @@ T45–T57 ─> T58 (knowledge propagation)
 2. Modify `ShapeToolGroup.tsx` to add a dropdown arrow `IconButton` next to the active tool group that opens the settings dialog
 3. Run quality loop per file
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Tests**:
 - `test/ui/components/editor/ShapeToolSettingsDialog.test.tsx` — verify default values display, config changes update store, preview shape updates
@@ -5373,7 +5307,7 @@ T45–T57 ─> T58 (knowledge propagation)
 4. Register shortcuts in the `ShortcutManager` with scope `shape-tools` — active when no text input is focused
 5. Run quality loop
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Tests**:
 - `test/ui/components/editor/shapeToolShortcuts.test.tsx` — verify each key sets correct tool, shortcuts disabled when text field focused, Escape returns to select mode
@@ -5414,7 +5348,7 @@ T45–T57 ─> T58 (knowledge propagation)
 3. Modify `ShapeLibraryPanel.tsx` import button to open `SvgImportDialog`
 4. Run quality loop per file
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Tests**:
 - `test/ui/components/editor/svgImport.test.ts` — verify valid SVG parses correctly, invalid SVG throws `InvalidSvgError`, multi-path SVG merges paths, empty SVG throws error
@@ -5450,7 +5384,7 @@ T45–T57 ─> T58 (knowledge propagation)
 3. Modify `ShapeLibraryPanel.tsx` URL import button to open `UrlImportDialog`
 4. Run quality loop per file
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Tests**:
 - `test/ui/components/editor/svgUrlImport.test.ts` — verify CORS failure throws error, valid SVG URL returns preset, non-SVG URL throws `InvalidSvgError`, network error throws `FetchError`
@@ -5473,7 +5407,7 @@ T45–T57 ─> T58 (knowledge propagation)
 4. Menu item: "Reset to defaults" → calls `setShapeToolConfig` with default values
 5. Run quality loop
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -5494,7 +5428,7 @@ T45–T57 ─> T58 (knowledge propagation)
 2. Add to `ShortcutManager` under scope `boolean-ops` — only active when `selectedShapeCount >= 2`
 3. Run quality loop
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 **Tests**:
 - `test/ui/components/editor/booleanShortcuts.test.tsx` — verify shortcuts only active when ≥2 shapes selected, each shortcut triggers correct boolean op
@@ -5524,7 +5458,7 @@ T45–T57 ─> T58 (knowledge propagation)
 6. All interpolation functions follow `(param: string, ...) => string` pattern
 7. Run quality loop per file
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -5551,7 +5485,7 @@ T45–T57 ─> T58 (knowledge propagation)
 4. Mock `useTemplateEditorStore` and `useCanvasStore` for component tests
 5. Run quality loop per test file
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -5579,7 +5513,7 @@ T45–T57 ─> T58 (knowledge propagation)
    j. Verify shape is placed on canvas
 4. Run quality loop
 
-- [ ] **Quality loop**: tsgo + biome + lint queue client
+- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -5668,7 +5602,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Actions: `setZoom`, `zoomIn`, `zoomOut`, `resetZoom`, `fitToScreen`, `actualSize`, `zoomToSelection`, `zoomToAll`, `setScrollOffset`, `startPan`, `endPan`, `setTempZoom`, `clearTempZoom`
   - Zoom levels array: [0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 8, 16]
   - File: `frontend/common/stores/cert/zoomStore.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T2. Create `ZoomControlsToolbar` component
   - Props: none (reads from zoomStore)
@@ -5676,7 +5610,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Percentage dropdown: preset levels menu (25%, 50%, 75%, 100%, 150%, 200%, 400%, 800%)
   - i18n keys: `certificateEditor.zoomIn`, `certificateEditor.zoomOut`, `certificateEditor.fitToScreen`, `certificateEditor.actualSize`, `certificateEditor.resetZoom`, `certificateEditor.zoomLevel`
   - File: `frontend/views/certificate-editor/components/ZoomControlsToolbar.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - _Instructions: frontend.instructions.md, frontend/AGENTS.md_
 
 - [ ] R5Z-T3. Create `NavigatorPanel` component (Photoshop-style)
@@ -5686,7 +5620,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Zoom percentage display
   - Pannable certificate preview in panel
   - File: `frontend/views/certificate-editor/components/NavigatorPanel.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T4. Create `MiniMapPanel` component
   - Thumbnail of entire certificate (25% scale)
@@ -5695,7 +5629,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Drag viewport rectangle to pan
   - Toggleable visibility
   - File: `frontend/views/certificate-editor/components/MiniMapPanel.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T5. Implement zoom-to-point with mouse wheel
   - Zoom toward cursor position (point under cursor stays fixed)
@@ -5703,7 +5637,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Pinch-zoom support on trackpad
   - Smooth zoom transitions (requestAnimationFrame easing)
   - File: `frontend/views/certificate-editor/hooks/useZoomOnWheel.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T6. Implement pan navigation
   - Spacebar+drag temporary pan mode
@@ -5712,7 +5646,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Scroll bar support (horizontal + vertical)
   - Trackpad two-finger drag pan
   - File: `frontend/views/certificate-editor/hooks/usePanNavigation.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T7. Implement keyboard zoom shortcuts
   - `Ctrl`+`+` zoom in, `Ctrl`+`-` zoom out
@@ -5723,7 +5657,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - `Z` (hold) temp zoom 200%, `Alt`+`Z` temp zoom 50%
   - `X` (hold) toggle 100% and previous
   - File: `frontend/views/certificate-editor/hooks/useZoomShortcuts.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T8. Implement navigation shortcuts
   - `Home` scroll to top-left, `End` scroll to bottom-right
@@ -5731,20 +5665,20 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - `Ctrl`+Arrow keys scroll in direction
   - Smooth scroll transitions (200ms animation)
   - File: `frontend/views/certificate-editor/hooks/useNavigationKeys.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T9. Implement scrubby zoom
   - `Space`+`Z`+drag: right to zoom in, left to zoom out
   - Continuous zoom following drag distance
   - Smooth transitions
   - File: `frontend/views/certificate-editor/hooks/useScrubbyZoom.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T10. Add i18n keys for zoom/navigation panel
   - Namespace: `certificateEditor`
   - Keys: zoomIn, zoomOut, fitToScreen, actualSize, resetZoom, zoomToSelection, zoomToAll, zoomLevel, fitWidth, fitHeight, navigatorPanel, miniMap, handTool, scrubbyZoom, tempZoomIn, tempZoomOut
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5Z-T11. Knowledge propagation & documentation
   - Read all outcome files
@@ -5763,7 +5697,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Supports modifier keys: Ctrl, Shift, Alt
   - Prevents browser default for captured shortcuts
   - File: `frontend/views/certificate-editor/hooks/useKeyboardShortcuts.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
   - _Instructions: frontend.instructions.md, frontend/AGENTS.md_
 
 - [ ] R5K-T2. Create `KeyboardShortcutsDialog` component
@@ -5775,7 +5709,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Import/export shortcuts as JSON
   - Context filter dropdown
   - File: `frontend/views/certificate-editor/components/KeyboardShortcutsDialog.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T3. Create `shortcutConfig.ts` with default bindings
   - All default shortcut definitions organized by category
@@ -5783,7 +5717,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Categories: 'file', 'edit', 'view', 'tools', 'elements', 'layers', 'arrange', 'typography', 'workspace', 'history'
   - Contexts: 'global', 'canvas', 'text', 'panel', 'dialog', 'drag'
   - File: `frontend/views/certificate-editor/config/shortcutConfig.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T4. Create `useShortcutCapture` hook
   - Captures next key combination when in rebinding mode
@@ -5791,7 +5725,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Supports single key, key+modifier, key+modifier+modifier
   - Esc cancels capture, Enter confirms
   - File: `frontend/views/certificate-editor/hooks/useShortcutCapture.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T5. Create `ShortcutHelpOverlay` component
   - Full-screen overlay showing all shortcuts by category
@@ -5800,14 +5734,14 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Context-aware active shortcuts highlighted
   - Close on Esc or clicking overlay
   - File: `frontend/views/certificate-editor/components/ShortcutHelpOverlay.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T6. Add shortcut display to menu items
   - Update all menu items to show shortcut binding on right
   - Use monospace font for shortcut text
   - Auto-update when shortcuts are rebound
   - File: `frontend/views/certificate-editor/components/MenuBar.tsx` (modify)
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T7. Create `useShortcutCustomization` hook
   - Manages custom binding overrides in `useEditorSettingsStore`
@@ -5818,12 +5752,12 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - `importShortcuts(json)`: applies imported bindings
   - `detectConflicts()`: returns array of conflicting actions
   - File: `frontend/views/certificate-editor/hooks/useShortcutCustomization.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T8. Add i18n keys for keyboard shortcuts dialog
   - Keys: keyboardShortcuts, searchShortcuts, shortcutCategory, currentBinding, newBinding, conflict, resetToDefault, resetAll, importShortcuts, exportShortcuts, file, edit, view, tools, elements, layers, arrange, typography, workspace, history, globalCtx, canvasCtx, textCtx, panelCtx, dialogCtx, dragCtx, showShortcuts, constrainAngle, duplicate, uniformScale, snapRotate
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T9. Test suite for keyboard shortcuts
   - Test default bindings load correctly
@@ -5834,7 +5768,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Test reset to default
   - Test modifier key behavior (Shift constrain, Alt duplicate)
   - File: `test/ui/components/certificate-editor/keyboard-shortcuts.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T10. Knowledge propagation & documentation
   - Read all outcome files
@@ -5901,18 +5835,16 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - `OpacityMaskData` interface (see design §R5.12): `id`, `clip: boolean`, `inverted: boolean`, `maskContent` (discriminated union: `MaskPixelData | { type: 'gradient'; gradientId } | { type: 'shape'; shapeId }`), `transform?`
   - Import `PathData` from `@/frontend/common/stores/cert/penToolTypes` for `vectorPath`
   - All comments use `// R5: Mask` prefix to distinguish from other rounds
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan10-t01","files":["frontend/common/stores/cert/maskTypes.ts"]}'
-    ```
+    bun run scripts/health/sub-loop.ts frontend/common/stores/cert/maskTypes.ts --lifecycle codescene
+{"id":"r5m-plan10-t01","files":["frontend/common/stores/cert/maskTypes.ts"]}
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/panels/layers/MaskIcon.tsx`:
   - Custom `SvgIcon` component (rectangle with circle — "mask" metaphor)
   - Uses `currentColor` for stroke/fill — inherits theme palette, NEVER hardcoded
   - `viewBox="0 0 24 24"` with `<rect>` outline + `<circle>` filled at 50% opacity
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### MASK-T02: Store Additions — Mask Actions + Mask Mode State
 
@@ -5948,12 +5880,10 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - **Do NOT add mask state to the `persist` partializer** — `maskMode`, `activeMaskTarget`, `quickMaskActive`, `quickMaskOptions`, `maskViewMode`, `refineSettings` are all ephemeral/session-only. Only `layerMask`, `vectorMask`, `clippingMaskBaseId`, `clippingMaskClippedIds`, `opacityMask` ON ELEMENTS are persisted.
   - `createClippingMask` sets `elements[topId].clippingMaskBaseId = baseId` and `elements[baseId].clippingMaskClippedIds = [...ids, topId]`
   - `releaseClippingMask` clears both fields and removes from array
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan10-t02","files":["frontend/common/stores/cert/certTemplateEditorStore.ts"]}'
-    ```
+    bun run scripts/health/sub-loop.ts frontend/common/stores/cert/certTemplateEditorStore.ts --lifecycle codescene
+{"id":"r5m-plan10-t02","files":["frontend/common/stores/cert/certTemplateEditorStore.ts"]}
 
 ### MASK-T03: Toolbar Mask Buttons
 
@@ -5974,17 +5904,15 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - Disabled when zero or multiple elements selected (mask buttons require single selection)
   - `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` for all labels — keys: `mask.addLayerMask`, `mask.addVectorMask`, `mask.toggleVisibility`, `mask.enterMaskMode`
   - Keyboard shortcut hints in tooltips (not in i18n — appended in Tooltip `title` via template: `t('mask.addLayerMask')`)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan10-t03","files":["frontend/views/dashboard/cert/templates/editor/toolbar/ToolbarMaskButtons.tsx"]}'
-    ```
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/toolbar/ToolbarMaskButtons.tsx --lifecycle codescene
+{"id":"r5m-plan10-t03","files":["frontend/views/dashboard/cert/templates/editor/toolbar/ToolbarMaskButtons.tsx"]}
 
 - [ ] **Modify** `frontend/views/dashboard/cert/templates/editor/toolbar/EditorToolbar.tsx`:
   - Import `ToolbarMaskButtons` and insert after `PenToolGroup` cluster, before `AlignToolbarCluster`
   - Wrap in `React.memo` — re-renders only on `selectedElementIds` / `hasActiveMask` / `maskDisabled` change (via `useShallow`)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### MASK-T04: Editor Layer Menu (Mask & Clipping Submenus)
 
@@ -6008,12 +5936,10 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - Context-sensitive disable: items disabled based on selection count, mask presence, mask type
   - Destructive operations (Apply, Rasterize) show confirmation `Dialog` with `DialogTitle`, `DialogContentText` (i18n: `mask.confirm.applyTitle`/`applyMessage`, `rasterizeTitle`/`rasterizeMessage`)
   - `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` — keys: `mask.createClippingMask`, `mask.releaseClippingMask`, `mask.layerMask`, `mask.addPixelMask`, `mask.addVectorMaskMenu`, `mask.enableMask`, `mask.disableMask`, `mask.applyMask`, `mask.deleteMask`, `mask.rasterizeVectorMask`, `mask.invertMask`, `mask.quickMask.tooltip`, `mask.quickMask.color`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan10-t04","files":["frontend/views/dashboard/cert/templates/editor/menubar/EditorLayerMenu.tsx"]}'
-    ```
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/menubar/EditorLayerMenu.tsx --lifecycle codescene
+{"id":"r5m-plan10-t04","files":["frontend/views/dashboard/cert/templates/editor/menubar/EditorLayerMenu.tsx"]}
 
 ### MASK-T05: Quick Mask Toolbar Button + Options Popover
 
@@ -6030,7 +5956,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - Icon: `GradientOutlined` (MUI v9)
   - `aria-pressed={quickMaskActive}` for accessibility
   - i18n keys: `mask.quickMask.tooltip`, `mask.quickMask.ariaLabel`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/toolbar/QuickMaskOptionsPopover.tsx`:
   - `Popover` anchored to the Quick Mask button
@@ -6040,7 +5966,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - All `sx={{}}`, colors from theme palette — never hardcoded
   - Keyboard accessible: `Tab` cycles controls, `Enter` applies, `Esc` closes
   - i18n keys: `mask.quickMask.mode`, `mask.quickMask.maskedAreas`, `mask.quickMask.selectedAreas`, `mask.quickMask.color`, `mask.quickMask.opacity`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### MASK-T06: Mask Brush Tool Group (Toolbar Selection)
 
@@ -6057,7 +5983,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - Icons: `BrushOutlined`, `EditOutlined`, `GradientOutlined`, `AutoFixOffOutlined` (all MUI v9 `*Outlined` suffix)
   - Only enabled when `maskMode === 'edit'` AND `activeMaskTarget` is set — otherwise `disabled`
   - `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` — keys: `mask.brush`, `mask.pencil`, `mask.gradient`, `mask.eraser`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### MASK-T07: Layers Panel Mask Buttons + Thumbnails + Alt+Click + Clipped Indicators
 
@@ -6073,7 +5999,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - Disabled when no selection or element already has that mask type
   - Position: left of existing delete/trash button in layers panel footer
   - i18n: `mask.addLayerMask`, `mask.addVectorMask`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/panels/layers/LayerRowMaskThumbnail.tsx`:
   - Renders mask thumbnail (32×32) — the actual canvas rendering is Plan 11's `MaskThumbnailCanvas`; this component provides the click/alt-click/shift-click interaction layer and the link icon
@@ -6085,20 +6011,20 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - Disabled indicator (red X) when `mask.enabled === false`
   - All `sx={{}}`, no style props, no hardcoded colors
   - i18n: `mask.maskThumbnail`, `mask.linkMask`, `mask.unlinkMask`, `mask.maskDisabledOverlay`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/panels/layers/LayersPanelAltClickHandler.tsx`:
   - Hit-area overlay between two layer rows (thin bar)
   - Shows highlight when `isAltPressed` (global Alt key listener — `keydown`/`keyup` on `window`)
   - Click toggles: `createClippingMask(topId, baseId)` or `releaseClippingMask(topId)` based on current clipping state
   - Cursor: `pointer` when active, `default` otherwise
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Modify** `frontend/views/dashboard/cert/templates/editor/panels/layers/LayerRow.tsx`:
   - If `element.clippingMaskBaseId` is set: indent row (`sx={{ pl: 3 }}`) + `ArrowDownwardOutlined` icon (`sx={{ fontSize: 16, color: 'text.secondary' }}`) before thumbnail
   - If element is a clipping base (other elements have `clippingMaskBaseId === this.id`): underline layer name (`sx={{ textDecoration: 'underline' }}`)
   - If element has a mask: render `LayerRowMaskThumbnail` next to the layer thumbnail
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### MASK-T08: Mask Keyboard Shortcuts
 
@@ -6123,12 +6049,10 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - macOS detection: `navigator.platform.includes('Mac')` swaps Ctrl → Cmd, Alt → Option
   - Returns cleanup function that unregisters on unmount
   - Context-gated: only active when editor canvas has focus (uses the same `ShortcutManager` context gating as existing shortcuts)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan10-t08","files":["frontend/views/dashboard/cert/templates/editor/shortcuts/useMaskShortcuts.ts"]}'
-    ```
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/shortcuts/useMaskShortcuts.ts --lifecycle codescene
+{"id":"r5m-plan10-t08","files":["frontend/views/dashboard/cert/templates/editor/shortcuts/useMaskShortcuts.ts"]}
 
 ### MASK-T09: i18n Keys (AR + EN) + Type Schema Extend
 
@@ -6151,15 +6075,15 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
     - `brush`, `pencil`, `gradient`, `eraser`
     - `maskModeActive`, `maskOnlyView`, `refineEdge`
     - `maskThumbnail`, `linkMask`, `unlinkMask`, `maskDisabledOverlay`, `clippedIndicator`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Modify** `shared/locale/ar/.../templateEditor.ts`:
   - Implement all `mask.*` keys in Arabic (RTL-aware — singular forms)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Modify** `shared/locale/en/.../templateEditor.ts`:
   - Implement all `mask.*` keys in English
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ### MASK-T10: Component Tests + Knowledge Propagation
 
@@ -6181,25 +6105,25 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
     - `LayerRowMaskThumbnail` test: mask click → `setActiveMaskTarget` + `setMaskMode('edit')`; alt+click → `maskViewMode = 'maskOnly'`; shift+click → `toggleMaskVisibility`; link icon toggle → `linked` property flipped
     - `useMaskShortcuts` test: Q key → `toggleQuickMask`; Ctrl+Alt+G → `createClippingMask`; `\\` → `toggleMaskVisibility`; macOS mode swaps Ctrl→Cmd
     - `EditorLayerMenu` test: menu structure correct; context-sensitive labels (Create vs Release clipping); destructive operations show confirmation dialog
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Create** `test/ui/e2e/editor-mask-toolbar.test.tsx`:
   - E2E: select element → click Add Layer Mask button → mask added to store; verify layers panel shows mask thumbnail
   - E2E: Q key → quick mask toggled; Q again → converts to selection
   - E2E: Ctrl+Alt+G with 2 selected elements → clipping mask created; Ctrl+Alt+G again → released
   - Requires `bun run build:test` before E2E
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Append** to `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only):
   - Entry: "Mask buttons require single-selection — multi-selection disables them. Alt+click between layers must use a global keydown/keyup listener (not per-row onClick) to avoid race conditions."
   - Entry: "Mask pixel data (`MaskPixelData.dataUri`) is persisted but OffscreenCanvas buffers are NOT — use `useRef` for buffers to avoid 1MB+ string serialization in store."
   - Entry: "Quick mask color must default from `theme.palette.error.main` — never hardcode '#FF0000'."
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Append** to `frontend/COMPONENT_PATTERNS.md` (append-only):
   - Pattern: "Mask toolbar button cluster — `IconButton` + `Tooltip` with active/inactive `sx={{ color: ... }}`"
   - Pattern: "Layer menu with context-sensitive labels — Create vs Release Clipping Mask based on element's `clippingMaskBaseId`"
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ---
 
@@ -6249,7 +6173,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Dropdown menu: Browse Assets, Import Asset, Recent Assets
   - Opens Asset Library panel as left sidebar
   - File: `frontend/views/certificate-editor/components/toolbar/AssetLibraryButton.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5AL-T2. Create asset library panel (left sidebar)
   - Tabbed: Images, Icons, Shapes, QR Codes, Barcodes, Uploaded
@@ -6258,7 +6182,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Grid view of assets with thumbnails
   - Drag from panel to canvas to place asset
   - File: `frontend/views/certificate-editor/components/panels/AssetLibraryPanel.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5AL-T3. Implement asset import functionality
   - Upload image (PNG, JPG, SVG, WebP)
@@ -6266,19 +6190,19 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Assign to category, add tags
   - Store in Zustand asset store
   - File: `frontend/views/certificate-editor/hooks/useAssetImport.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5AL-T4. Implement drag-and-drop from asset library to canvas
   - Drag asset thumbnail from panel
   - Drop on canvas creates element at drop position
   - Auto-size element to asset dimensions
   - File: `frontend/views/certificate-editor/hooks/useAssetDragDrop.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5AL-T5. Add i18n keys for asset library
   - assetLibrary, browseAssets, importAsset, recentAssets, images, icons, shapes, qrCodes, barcodes, uploaded, searchAssets, categories, dragToCanvas, importImage, autoExtract, assetTags
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5AL-T6. Test suite for asset library toolbar and panel
   - Test toolbar button opens panel
@@ -6287,7 +6211,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Test import upload flow
   - Test drag-and-drop to canvas
   - File: `test/ui/components/certificate-editor/asset-library-panel.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ## Round 5: History & States Tasks
 
@@ -6297,14 +6221,14 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Click any state to jump to it
   - scrolled into view
   - File: `frontend/views/certificate-editor/components/panels/HistoryPanel.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5H-T2. Create undo/redo toolbar buttons
   - `UndoButton` with ArrowBack icon, disabled when no undo
   - `RedoButton` with ArrowForward icon, disabled when no redo
   - Tooltip shows action name + shortcut
   - File: `frontend/views/certificate-editor/components/toolbar/HistoryToolbarButtons.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5H-T3. Implement Edit menu history items
   - Undo (Ctrl+Z), Redo (Ctrl+Shift+Z)
@@ -6313,7 +6237,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - New Snapshot, History Settings
   - Dynamic action name in menu label
   - File: `frontend/views/certificate-editor/components/menus/HistoryMenuItems.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5H-T4. Create history settings dialog
   - Max states slider (10-200, default 50)
@@ -6321,7 +6245,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Non-linear history toggle
   - Snapshot interval input
   - File: `frontend/views/certificate-editor/components/dialogs/HistorySettingsDialog.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5H-T5. Implement history store slice
   - States array with actionType, data snapshot, timestamp
@@ -6330,7 +6254,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - `clearHistory()`, `purgeHistory()`
   - Non-linear branching support
   - File: `frontend/common/stores/cert/historyStore.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5H-T6. Implement snapshots feature
   - Create named snapshot of current state
@@ -6338,12 +6262,12 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Restore snapshot without losing current state
   - Snapshots persist across history truncation
   - File: `frontend/views/certificate-editor/components/panels/SnapshotManager.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5H-T7. Add i18n keys for history
   - history, undo, redo, stepForward, stepBackward, clearHistory, purgeHistory, newSnapshot, historySettings, maxStates, autoFlush, nonlinearHistory, snapshotInterval, restoreSnapshot
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5H-T8. Test suite for history panel
   - Test undo/redo button states (disabled/enabled)
@@ -6351,7 +6275,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Test clear history
   - Test snapshots create and restore
   - File: `test/ui/components/certificate-editor/history-panel.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ## Round 5: Canvas Pro Tasks
 
@@ -6359,7 +6283,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - `ArtboardConfig`: width, height, name, background, bleed
   - Presets: A4 Landscape, A4 Portrait, Letter, Certificate sizes
   - File: `frontend/common/stores/cert/artboardTypes.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5C-T2. Implement artboard management in File menu
   - New Artboard (File ▸ New Artboard)
@@ -6368,7 +6292,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Artboard Settings dialog (dimensions, background, bleed)
   - Export each artboard independently or all
   - File: `frontend/views/certificate-editor/components/menus/ArtboardMenuItems.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5C-T3. Create artboards panel (left sidebar tab)
   - List of all artboards with thumbnails
@@ -6377,7 +6301,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Rename via double-click
   - Add/delete buttons
   - File: `frontend/views/certificate-editor/components/panels/ArtboardsPanel.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5C-T4. Implement multi-page support
   - Pages tab in left sidebar
@@ -6387,7 +6311,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Navigate via Page Up/Page Down
   - Export all or specific page range
   - File: `frontend/views/certificate-editor/components/panels/PagesPanel.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5C-T5. Create document setup dialog
   - Document dimensions and unit
@@ -6397,7 +6321,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Background color
   - Margin/padding guides
   - File: `frontend/views/certificate-editor/components/dialogs/DocumentSetupDialog.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5C-T6. Implement CMYK preview mode
   - CMYK Preview toggle in View menu
@@ -6405,7 +6329,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Gamut warning highlights out-of-gamut colors
   - CMYK profile selection dropdown
   - File: `frontend/views/certificate-editor/components/menus/CMYKPreviewMenuItem.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5C-T7. Create export options dialog
   - Format: PNG, JPG, SVG, PDF
@@ -6415,12 +6339,12 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Color profile embedding
   - Background transparency toggle
   - File: `frontend/views/certificate-editor/components/dialogs/ExportOptionsDialog.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5C-T8. Add i18n keys for canvas pro
   - artboards, newArtboard, duplicateArtboard, deleteArtboard, artboardSettings, artboardPresets, a4Landscape, a4Portrait, letter, certificateSize, pages, addPage, deletePage, duplicatePage, documentSetup, dpi, colorMode, rgb, cmyk, grayscale, bleed, backgroundColor, cmykPreview, gamutWarning, colorProfile, exportAs, png, jpg, svg, pdf, quality, exportArea, currentArtboard, allArtboards, pageRange, embedColorProfile, transparency, artboardThumbnail
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5C-T9. Test suite for canvas pro
   - Test artboard creation/duplication/deletion
@@ -6430,7 +6354,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Test CMYK preview toggle
   - Test export options dialog
   - File: `test/ui/components/certificate-editor/canvas-pro.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ## Round 5: Workspace & Panel Tasks
 
@@ -6439,7 +6363,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Save Current Workspace, Reset Workspace
   - Panel toggles: Properties, Layers, History, Colors, Character, Paragraph, Assets, Guides, Navigator
   - File: `frontend/views/certificate-editor/components/menus/WindowMenu.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5W-T2. Implement panel dock system
   - Dockable panels on left and right edges
@@ -6448,7 +6372,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Collapse/expand animations
   - Drag dividers to resize panel areas
   - File: `frontend/views/certificate-editor/components/workspace/PanelDock.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5W-T3. Create workspace Zustand store
   - Panel visibility states
@@ -6457,7 +6381,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Custom workspace presets
   - Persist to localStorage via Zustand persist
   - File: `frontend/common/stores/cert/workspaceStore.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5W-T4. Implement customizable toolbar
   - Add/remove/reorder toolbar buttons
@@ -6465,7 +6389,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Icon size option (small, large)
   - Toolbar position (top, left, right, floating)
   - File: `frontend/views/certificate-editor/components/toolbar/CustomizableToolbar.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5W-T5. Create application frame and status bar
   - Full-screen toggle (F11)
@@ -6473,7 +6397,7 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Status bar: zoom level, document size, cursor coords, element count
   - Tabbed document interface
   - File: `frontend/views/certificate-editor/components/workspace/ApplicationFrame.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5W-T6. Implement workspace persistence
   - Save custom workspace layouts per user
@@ -6481,12 +6405,12 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Last used workspace auto-loads
   - Multiple named workspaces
   - File: `frontend/common/stores/cert/workspacePersist.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5W-T7. Add i18n keys for workspace
   - window, workspace, defaultWorkspace, designWorkspace, minimalWorkspace, saveWorkspace, resetWorkspace, properties, layers, history, colors, character, paragraph, assets, guides, navigator, customizeToolbar, smallIcons, largeIcons, toolbarTop, toolbarLeft, toolbarRight, toolbarFloating, fullscreen, documentTitle, savedStatus, zoomLevel, documentSize, cursorPosition, elementCount
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5W-T8. Test suite for workspace
   - Test workspace preset switching
@@ -6495,4 +6419,4 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Test toolbar customization
   - Test workspace persistence
   - File: `test/ui/components/certificate-editor/workspace.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
+  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene

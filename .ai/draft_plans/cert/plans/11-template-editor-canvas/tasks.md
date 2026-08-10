@@ -97,11 +97,7 @@ T14 ──> T15: Knowledge Propagation & Documentation
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T01","files":["frontend/common/views/dashboard/cert-canvas/types/canvasElement.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-canvas/types/canvasElement.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -164,11 +160,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T02","files":["shared/locale/types/dashboard/certificates/canvas.ts","shared/locale/en/dashboard/certificates/canvas.ts","shared/locale/ar/dashboard/certificates/canvas.ts"]}'
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/canvas.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/canvas.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/canvas.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -283,11 +277,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T03","files":["frontend/common/stores/certCanvasStore.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/stores/certCanvasStore.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -339,11 +329,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T04","files":["frontend/desktop/views/dashboard/certificates/templates/editor/ElementRenderer.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/ElementRenderer.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -391,11 +377,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T05","files":["frontend/desktop/views/dashboard/certificates/templates/editor/ElementRenderer.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/ElementRenderer.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -450,11 +432,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T06","files":["frontend/desktop/views/dashboard/certificates/templates/editor/ResizeHandles.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/ResizeHandles.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -502,11 +480,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T07","files":["frontend/desktop/views/dashboard/certificates/templates/editor/RotationHandle.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/RotationHandle.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -557,11 +531,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T08","files":["frontend/desktop/views/dashboard/certificates/templates/editor/SnapGuideOverlay.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/SnapGuideOverlay.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -630,11 +600,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T09","files":["frontend/desktop/views/dashboard/certificates/templates/editor/CanvasToolbar.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/CanvasToolbar.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -710,11 +676,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10","files":["frontend/desktop/views/dashboard/certificates/templates/editor/CanvasRuler.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/templates/editor/CanvasRuler.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -751,11 +713,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10a","files":["frontend/views/dashboard/cert/templates/editor/nodes/TextNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/TextNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -790,11 +748,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10b","files":["frontend/views/dashboard/cert/templates/editor/nodes/ImageNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/ImageNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -834,11 +788,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10c","files":["frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -875,11 +825,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10d","files":["frontend/views/dashboard/cert/templates/editor/nodes/QRCodeNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/QRCodeNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -916,11 +862,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10e","files":["frontend/views/dashboard/cert/templates/editor/nodes/SignatureNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/SignatureNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -960,11 +902,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10f","files":["frontend/views/dashboard/cert/templates/editor/nodes/BackgroundNode.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/nodes/BackgroundNode.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -997,11 +935,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10g","files":["frontend/views/dashboard/cert/templates/editor/ElementLibraryPalette.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/ElementLibraryPalette.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1040,11 +974,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10h","files":["frontend/views/dashboard/cert/templates/editor/CanvasContextMenu.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/CanvasContextMenu.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1084,11 +1014,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10i","files":["frontend/common/stores/useCanvasStore.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/stores/useCanvasStore.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1130,11 +1056,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10j","files":["frontend/views/dashboard/cert/templates/editor/handles/ResizeHandles.tsx","frontend/views/dashboard/cert/templates/editor/handles/RotateHandle.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/handles/ResizeHandles.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/handles/RotateHandle.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1168,11 +1091,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10k","files":["frontend/views/dashboard/cert/templates/editor/AlignmentGuideOverlay.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/AlignmentGuideOverlay.tsx --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1221,11 +1140,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-11-T10l","files":["frontend/views/dashboard/cert/templates/editor/useCanvasKeyboard.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useCanvasKeyboard.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1448,14 +1363,9 @@ bun run scripts/run-test/run-test.ts test/ui/e2e/cert/canvas.spec.ts
 **Objective:** Run the per-file quality verification loop on every new file created in T10a–T10l before they are integrated.
 
 **Subtasks:**
-- [ ] 10o.1 Start lint queue server:
+- [ ] 10o.1 For each new file, run the progressive verification loop:
   ```bash
-  ~/.bun/bin/bun run scripts/lint-queue-server.ts &
-  ```
-
-- [ ] 10o.2 For each new file, run the progressive verification loop:
-  ```bash
-  bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+  bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
   ```
   Files to verify:
   - `frontend/views/dashboard/cert/templates/editor/nodes/TextNode.tsx`
@@ -1547,11 +1457,15 @@ bun run scripts/run-test/run-test.ts test/ui/e2e/cert/canvas.spec.ts
 
 **Requirements References:** Feature 6 (Outcome Knowledge Base)
 
-**Quality Loop:**
+**Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun run scripts/health/sub-loop.ts docs/frontend/canvas-editor.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts .agents/skills/frontend-patterns/SKILL.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts .agents/instructions/frontend.instructions.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1595,11 +1509,14 @@ bun run lint
 - [ ] 11.7 Update root `AGENTS.md` Important References:
   - Add `docs/frontend/canvas-editor.md`
 
-- [ ] 11.8 Run global quality check:
+- [ ] 11.8 Run per-file quality loop for each file (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  bun run lint
+  bun run scripts/health/sub-loop.ts docs/frontend/canvas-editor.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .agents/skills/frontend-patterns/SKILL.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .agents/instructions/frontend.instructions.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
   ```
 
 - [ ] 11.9 Write outcome file: `.ai/plans/cert-plan-11/outcome/T11-knowledge-propagation-outcome.md`
@@ -1614,11 +1531,14 @@ bun run lint
 
 **Requirements References:** Feature 6 (Outcome Knowledge Base)
 
-**Quality Loop:**
+**Quality Loop (per file):**
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun run scripts/health/sub-loop.ts docs/frontend/canvas-editor.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts .agents/skills/frontend-patterns/SKILL.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts .agents/instructions/frontend.instructions.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -1827,18 +1747,12 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 - [ ] R4.1.8 Run quality loop per file:
   ```bash
-  for f in frontend/views/dashboard/cert/templates/editor/useDragOverlap.ts \
-           frontend/common/stores/canvasStore.ts \
-           frontend/views/dashboard/cert/templates/editor/CanvasOverlapOverlay.tsx \
-           frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx \
-           frontend/views/dashboard/cert/templates/editor/Toolbar.tsx \
-           frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts; do
-    bun tsgo --filter "$f"
-    bun biome:check --write "$f"
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d "{\"id\":\"r4-01\",\"files\":[\"$f\"]}"
-  done
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/useDragOverlap.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/stores/canvasStore.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/CanvasOverlapOverlay.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/Toolbar.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts --lifecycle codescene
   ```
 
 **Files to Create/Modify:**
@@ -1849,7 +1763,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/Toolbar.tsx` (modify — add Pan Bounds toggle)
 - `frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts` (modify — add zoom shortcuts)
 
-**Quality Loop:** Per-file tsgo → biome → lint via queue client.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
 
@@ -1900,7 +1814,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/common/stores/canvasStore.ts` (modify — add `nudgeNode`)
 - `frontend/views/dashboard/cert/templates/editor/nodes/index.tsx` (modify — apply warning outline)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/collisionUtils.test.ts` — pure function tests for `computeNudgeDirection` with various overlap configurations
@@ -1941,7 +1855,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/CanvasOffscreenIndicators.tsx` (new)
 - `frontend/common/stores/canvasStore.ts` (modify — add `focusNode`)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/CanvasOffscreenIndicators.test.tsx` — verify badges appear when nodes are scrolled out of view, and that clicking badge calls `focusNode`
@@ -2010,7 +1924,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/nodes/BackgroundNode.tsx` (modify — wrap)
 - `frontend/views/dashboard/cert/templates/editor/PropertyPanel.tsx` (modify — add Size section)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`. Note MUI v9: NO style props (use `sx` prop), Outlined icon names.
 
@@ -2080,7 +1994,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/common/stores/canvasStore.ts` (modify — add `backgroundPattern`, `snapToNodes`)
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — apply background CSS)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/snapToGrid.test.tsx` — verify that dragging a node snaps its position to nearest 16px grid when `snapEnabled`
@@ -2175,7 +2089,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — add `onNodeClick`, `selectionOnDrag`)
 - `frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts` (modify — add Cmd+A, Delete)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/alignmentUtils.test.ts` — verify `alignLeft`, `alignRight`, `distributeH` produce correct node positions
@@ -2252,7 +2166,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/hooks/useKeyboardShortcuts.ts` (modify — add Copy/Paste)
 - `frontend/views/dashboard/cert/templates/editor/CanvasContextMenu.tsx` (modify — wire Copy/Paste items)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/clipboardStore.test.ts` — verify save/load, localStorage round-trip, zod validation
@@ -2310,7 +2224,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 - `frontend/views/dashboard/cert/templates/editor/nodes/ResizableNodeWrapper.tsx` (modify — touch handle sizes)
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — touch props)
 
-**Quality Loop:** Per-file tsgo → biome → lint.
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/useLongPress.test.tsx` — verify callback fires after 500ms hold, cancels if finger moves >10px
@@ -2724,7 +2638,7 @@ Phase R5S-G (sequential): R5S-T9 (knowledge propagation — waits on all of abov
 
 ## Round 5: Advanced Layers Tasks
 
-> Tasks for the canvas-side layer rendering — mirrors `design.md` §"Round 5: Advanced Layers Panel". Plan 11 R5 tasks cover the **compositor, render order, visibility, groups, clipping, masks, blend modes, scroll-sync, and WebGL fallback**. Per-row layer UI / panel chrome are in Plan 10 §"Round 5: Advanced Layers Tasks" and Plan 12 §"Round 5: Advanced Layers Tasks" respectively. Quality model: every task ends with `**Quality loop**: tsgo + biome + lint queue client`.
+> Tasks for the canvas-side layer rendering — mirrors `design.md` §"Round 5: Advanced Layers Panel". Plan 11 R5 tasks cover the **compositor, render order, visibility, groups, clipping, masks, blend modes, scroll-sync, and WebGL fallback**. Per-row layer UI / panel chrome are in Plan 10 §"Round 5: Advanced Layers Tasks" and Plan 12 §"Round 5: Advanced Layers Tasks" respectively. Quality model: every task ends with a per-file `scripts/health/sub-loop.ts --lifecycle codescene` call (runs progressive chain: tsgo → biome → lint → codescene).
 >
 > Cross-file dependencies are flagged inline (e.g. the compositor reads `layers`/`groups` owned by Plan 12 §R5 store tasks). Do NOT modify those store files — file a CROSS-FILE DEPENDENCY report and proceed with a typed interface against the expected store API.
 
@@ -3932,7 +3846,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/utils/shapePathGenerators.ts` (new)
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — add `shape` to `nodeTypes`)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/ShapeNode.test.tsx` — verify each shape type renders correct SVG element, correct attributes, pointer-events logic
@@ -3993,7 +3907,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/common/stores/canvasStore.ts` (modify — add drawing state)
 - `frontend/views/dashboard/cert/templates/editor/CanvasComponent.tsx` (modify — conditional panOnDrag)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/useShapeDrawing.test.tsx` — verify draw rectangle (normal), draw square (Shift), draw from center (Alt), accidental click discarded, custom shape placement
@@ -4053,7 +3967,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/common/stores/canvasStore.ts` (modify — edit mode state)
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — double-click handler)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/pathParser.test.ts` — verify parse/serialize round-trip, insert anchor, delete anchor, move anchor, convert anchor type
@@ -4120,7 +4034,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — render boolean path)
 - `package.json` (modify — add `js-clipper` dependency)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/booleanPathMath.test.ts` — verify unite of two overlapping rectangles, subtract creates cutout, intersect produces overlap area, exclude produces XOR, merge creates compound path, flatten produces single baked path, error on degenerate paths
@@ -4153,7 +4067,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/utils/shapePathCache.ts` (new)
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — use cache)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/shapePathCache.test.ts` — verify cache hit returns same string, cache miss computes and stores, LRU eviction at 500 limit, `clearShapePathCache` empties cache
@@ -4186,7 +4100,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/nodes/CornerRadiusHandle.tsx` (new)
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — render handle)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/CornerRadiusHandle.test.tsx` — verify handle visible only on selected rect, drag updates radius, radius clamped to valid range
@@ -4222,7 +4136,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeSidesHandle.tsx` (new)
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — render handle)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/ShapeSidesHandle.test.tsx` — verify +/− increments/decrements sides within bounds, star inner radius handle updates value, handle hidden when not selected
@@ -4253,7 +4167,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Files to Create/Modify:**
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — hover handlers)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/ShapeHover.test.tsx` — verify hover adds outline, mouse leave removes it, color from theme
@@ -4289,7 +4203,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx` (modify — error boundary fallback)
 - `frontend/views/dashboard/cert/templates/editor/utils/booleanPathMath.ts` (modify — error handling)
 
-**Quality Loop:** Per-file tsgo → biome → lint queue client
+**Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
 - `test/ui/components/canvas/ShapeErrorStates.test.tsx` — verify invalid path renders fallback, boolean failure renders first operand + toast, SVG import error shows alert
@@ -4549,9 +4463,10 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 - [ ] Add i18n implementations for `toolbarEyedropper.sampleSize.*` and `toolbarEyedropper.sampleFrom.*` in all locale files under `shared/locale/<lang>/dashboard/certificates/templateEditor.json` (Plan 10 owns the type additions — Plan 11 only adds the implementation string values)
 - [ ] Verify there are NO duplicate `Round 5` block ids in any design file (this Plan 11 R5-CS section names are unique to Plan 11)
 - [ ] Update any existing canvas documentation file that references the previous (pre-eyedropper) canvas interaction model — note that `I` key now picks the eyedropper when not in a text-editing context (see Plan 10 §R5-CS11 keyboard shortcuts)
-- [ ] Run `bun run tsgo` to verify the new store/overlay/hook files type-check against the shared Plan 10 types import
-- [ ] Run `bun biome:check` on new files
-- [ ] Run `bun run lint` (which goes through lint queue client) to verify no ESLint violations in new files
+- [ ] Run per-file quality loop for each new file (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
+  ```
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
 ---
@@ -4572,7 +4487,7 @@ Parallelism within phases: T1, T3, T4 are independent (parallel), then T2 + T9 o
 
 ## Round 5: Effects & Filter Tasks
 
-> These tasks implement the Plan 11 canvas rendering pipeline for the Round 5 effects engine defined in `design.md` §"Round 5: Effects & Filter Engine" (R5.1–R5.15). The canonical type source (`effectTypes.ts`) is created in Plan 10 FX-T01; Plan 11 imports it. Quality model: per-file tsgo + biome + lint queue client, per AGENTS.md.
+> These tasks implement the Plan 11 canvas rendering pipeline for the Round 5 effects engine defined in `design.md` §"Round 5: Effects & Filter Engine" (R5.1–R5.15). The canonical type source (`effectTypes.ts`) is created in Plan 10 FX-T01; Plan 11 imports it. Quality model: per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure), per AGENTS.md.
 
 ### Task Map (Plan 11 Effects Rendering)
 
@@ -4632,13 +4547,7 @@ R5FX-T01 (effectsPipeline.ts — orchestrator)
   - Import `blendModeMapping` from `./blendModeMapping`
   - Import `globalLight` from `./globalLight`
   - **Quality loop**: tsgo + biome + lint queue client
-  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/effectsPipeline.ts --lifecycle lint`
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t01","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/effectsPipeline.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/effectsPipeline.ts --lifecycle codescene`
 
 ---
 
@@ -4673,12 +4582,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - Return `css` for simple single-shadow; `svg` for knockout/multiple
   - Import `DropShadowParams`, `GlobalLightConfig` from `@/frontend/common/stores/cert/effectTypes.ts`
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t03","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/dropShadowRendering.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/dropShadowRendering.ts --lifecycle codescene`
 
 ---
 
@@ -4728,12 +4632,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - Return both `{ css, svg }` — caller merges as needed
   - Import `BlurEffectParams` from `@/frontend/common/stores/cert/effectTypes.ts`
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t06","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/blurRendering.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/blurRendering.ts --lifecycle codescene`
 
 ---
 
@@ -4793,12 +4692,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - If `effect.useGlobalLight` is true on bevelEmboss or emboss, use `globalLight.angle` and `globalLight.altitude`
   - Import `StylizeParams`, `GlobalLightConfig` from `@/frontend/common/stores/cert/effectTypes.ts`
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t09","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/stylizeRendering.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/stylizeRendering.ts --lifecycle codescene`
 
 ---
 
@@ -4847,12 +4741,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - `clear()` called when element is destroyed or effects array changes structurally (add/remove)
   - Invalidation: caller compares stored key against current params; if mismatch, recompute and `set`
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t12","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/effectCache.ts"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/effectCache.ts --lifecycle codescene`
 
 ---
 
@@ -4889,12 +4778,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - Import `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` from `@/shared/locale/client` (for aria-label)
   - MUI v9: `sx={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}` — NOT style prop
   - **Quality loop**: tsgo + biome + lint queue client
-
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t14","files":["frontend/views/dashboard/cert/templates/editor/effectRendering/EffectSvgContainer.tsx"]}'
-```
+  - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/effectRendering/EffectSvgContainer.tsx --lifecycle codescene`
 
 ---
 
@@ -4934,14 +4818,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   - MUI v9: `sx={{ position: 'relative' }}` on overlay wrappers — NOT style props
   - **Quality loop**: tsgo + biome + lint queue client
 
-```bash
-# Lint both files in one queue request
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t15","files":["frontend/common/stores/cert/canvasStore.ts","frontend/views/dashboard/cert/templates/editor/EffectElementWrapper.tsx"]}'
-```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` for each of the two files.
+Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for each of the two files.
 
 ---
 
@@ -4976,13 +4853,7 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` for each 
   - Document: "Backward-compat: boxShadow/textShadow derived from effects[], BlendMode → BlendMode46 superset"
   - **Quality loop**: tsgo + biome + lint queue client
 
-```bash
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"r5fx-t16","files":["test/ui/components/template-editor/effectRendering/effectsPipeline.test.tsx","test/ui/components/template-editor/effectRendering/EffectSvgContainer.test.tsx","frontend/IMPLEMENTATION_LEARNINGS.md"]}'
-```
-
-Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` for each file.
+Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for each file.
 
 ---
 
@@ -5134,11 +5005,7 @@ MASK-T02 (store additions from Plan 10)                                         
   - Transform: clip path recomputes on base transform change (`useMemo` keyed on `(baseId, baseShape.transform, baseShape.version)`)
   - All colors from theme palette — never hardcoded
   - **Quality loop**: tsgo + biome + lint queue client
-    ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan11-c01","files":["frontend/views/dashboard/cert/templates/editor/renderers/ClippingMaskRenderer.tsx"]}'
-    ```
+    - Per-file verify: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/renderers/ClippingMaskRenderer.tsx --lifecycle codescene`
 
 ### MASK-C02: Layer Mask Canvas Renderer
 

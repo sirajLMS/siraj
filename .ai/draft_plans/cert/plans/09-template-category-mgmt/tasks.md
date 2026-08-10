@@ -4,7 +4,7 @@
 > **Plan #**: 09
 > **Dependencies**: Plan 5 (GraphQL API), Plan 8 (Navigation Config)
 > **Execution Model**: Sequential per task (each task produces files the next task imports)
-> **Quality Model**: Per-file tsgo + biome + lint via `scripts/health/sub-loop.ts`
+> **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
 ---
@@ -76,7 +76,7 @@ T12, T13 ───────────────────────�
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/categories.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/categories.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -119,7 +119,7 @@ bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/ca
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/categories.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/categories.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -157,7 +157,7 @@ bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/categ
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/categories.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/categories.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -201,7 +201,7 @@ bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/categ
 
 For each modified file:
 ```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
 ```
 
 ### Verification
@@ -257,7 +257,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/category-documents.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/category-documents.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -313,7 +313,7 @@ bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -349,7 +349,7 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategorySto
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/types/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/types/index.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -398,7 +398,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/useCertificateCategoryViewModel.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/useCertificateCategoryViewModel.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -445,7 +445,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/CertificateCategoryContainer.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/CertificateCategoryContainer.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -533,7 +533,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 
 For each file created:
 ```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
 ```
 
 ### Verification
@@ -572,7 +572,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/components/CategoryPicker.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/components/CategoryPicker.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -650,7 +650,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 
 For each file created:
 ```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
 ```
 
 ### Verification
@@ -694,7 +694,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/categories/components/TemplatePane.desktop.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/categories/components/TemplatePane.desktop.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -741,7 +741,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/categories/certificateCategoryView.desktop.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/categories/certificateCategoryView.desktop.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -816,7 +816,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 
 For each file created:
 ```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
 ```
 
 ### Verification
@@ -857,7 +857,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/categories/page.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/categories/page.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -876,24 +876,21 @@ bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/categories/pag
 
 ### Subtasks
 
-1. **Run full type check**:
+1. **Run per-file quality loops** on all cert category files (full progressive chain: tsgo → biome → lint → codescene, short-circuiting on first failure):
    ```bash
-   bun tsgo
+   bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/categories/ --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/categories/ --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/categories/ --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/certificateCategory.documents.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/categories.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/categories.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/categories.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/constants/certificate-category-colors.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/constants/certificate-category-icons.ts --lifecycle codescene
    ```
 
-2. **Run biome across all cert category files**:
-   ```bash
-   bun biome:check -- frontend/common/views/dashboard/certificates/categories/ frontend/desktop/views/dashboard/certificates/categories/ frontend/mobile/views/dashboard/certificates/categories/ frontend/common/stores/certificateCategoryStore.ts frontend/common/graphql/sharedDocuments/certificates/certificateCategory.documents.ts shared/locale/types/dashboard/certificates/categories.ts shared/locale/ar/dashboard/certificates/categories.ts shared/locale/en/dashboard/certificates/categories.ts shared/constants/certificate-category-colors.ts shared/constants/certificate-category-icons.ts
-   ```
-
-3. **Run lint via queue client** on all cert category files:
-   ```bash
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"t17","files":["frontend/common/views/dashboard/certificates/categories/","frontend/desktop/views/dashboard/certificates/categories/","frontend/mobile/views/dashboard/certificates/categories/","frontend/common/stores/certificateCategoryStore.ts","frontend/common/graphql/sharedDocuments/certificates/certificateCategory.documents.ts","shared/locale/types/dashboard/certificates/categories.ts","shared/locale/ar/dashboard/certificates/categories.ts","shared/locale/en/dashboard/certificates/categories.ts","shared/constants/certificate-category-colors.ts","shared/constants/certificate-category-icons.ts"]}'
-   ```
-
-4. **Review acceptance criteria** from requirements.md §5:
+2. **Review acceptance criteria** from requirements.md §5:
    - AC-01: Root categories load on page mount via `categoryList` query with `parentId: null`
    - AC-02: Children lazy-load on expand via `categoryList` query with `parentId: <id>`
    - AC-03: Create category via dialog with name, description, parent, color, icon
@@ -918,13 +915,11 @@ bun run scripts/health/sub-loop.ts app/\(dashboard\)/certificates/categories/pag
 
 ### Quality Loop
 
-No per-file loop — this is integration verification. Run tsgo + biome + lint on all files together.
+Integration verification runs the per-file sub-loop on every cert category file (see subtask 1 above). All per-file loops must exit 0 before proceeding to AC review.
 
 ### Verification
 - All AC items pass
-- `bun tsgo` clean
-- `bun biome:check` clean on all cert category files
-- Lint queue returns exitCode 0
+- All per-file sub-loops exit 0 (tsgo + biome + lint + codescene clean)
 - No hardcoded user-facing strings in any file
 - No `useLazyQuery` in any file
 - No `console.*` calls
@@ -1029,7 +1024,7 @@ No per-file loop — this is integration verification. Run tsgo + biome + lint o
 #### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts test/ui/components/certificates/categories/ --lifecycle lint
+bun run scripts/health/sub-loop.ts test/ui/components/certificates/categories/ --lifecycle codescene
 ```
 
 #### Verification
@@ -1072,7 +1067,7 @@ bun run scripts/health/sub-loop.ts test/ui/components/certificates/categories/ -
 #### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/certificates/categories/ --lifecycle lint
+bun run scripts/health/sub-loop.ts test/ui/e2e/certificates/categories/ --lifecycle codescene
 ```
 
 #### Verification
@@ -1164,21 +1159,15 @@ Phase N (sequential):  T18 (knowledge propagation)
 Per-file verification loop for every file created/modified:
 
 ```bash
-# Progressive: tsgo → biome → lint (short-circuits at first failure)
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+# Progressive: tsgo → biome → lint → codescene (short-circuits at first failure)
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
-Full plan verification (after T17):
+Full plan verification (after per-file loops pass):
 
 ```bash
-bun tsgo                          # Type check (safe to run concurrently)
-bun biome:check                   # Biome (safe to run concurrently)
-bun run lint                      # Full-repo lint via queue client (serialized behind queue server)
+bun quality-gate
 ```
-
-> The lint queue server must be running before any lint call. Start it with:
-> `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background process).
-> See `AGENTS.md` §"Lint Queue Server" for details.
 
 ---
 
@@ -1211,7 +1200,7 @@ bun run lint                      # Full-repo lint via queue client (serialized 
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1255,8 +1244,8 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/CategoryTree.desktop.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/CategoryTree.desktop.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1293,7 +1282,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templat
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1325,7 +1314,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1359,7 +1348,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1398,7 +1387,7 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategorySto
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1441,10 +1430,10 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryManagementPage.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryTree.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryDetailPanel.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryEditorDialog.test.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryManagementPage.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryTree.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryDetailPanel.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryEditorDialog.test.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1487,10 +1476,10 @@ bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/create-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/edit-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/delete-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/drag-drop-reorder.spec.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/create-category.spec.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/edit-category.spec.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/delete-category.spec.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/drag-drop-reorder.spec.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1512,37 +1501,33 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/drag-dr
 1. **Per-file verification** for every file created in T21-T28 via progressive sub-loop (tsgo → biome → lint, short-circuits at first failure):
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/CategoryTree.desktop.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryManagementPage.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryTree.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryDetailPanel.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryEditorDialog.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/create-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/edit-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/delete-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/drag-drop-reorder.spec.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/CategoryTree.desktop.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryManagementPage.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryTree.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryDetailPanel.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryEditorDialog.test.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/create-category.spec.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/edit-category.spec.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/delete-category.spec.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/drag-drop-reorder.spec.ts --lifecycle codescene
 ```
 
 2. **Full-repo verification** (after per-file loops pass):
 
 ```bash
-bun tsgo                          # Type check (safe to run concurrently)
-bun biome:check                   # Biome (safe to run concurrently)
-bun run lint                      # Full-repo lint via queue client (serialized behind queue server)
+bun quality-gate
 ```
-
-> The lint queue server must be running before any lint call: `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background).
 
 3. **Failure handling**: If any per-file loop fails, fix the offending file and re-run only that file's loop (progressive enforcement — no skipping ahead: if tsgo fails, only fix tsgo before biome/lint). Cross-file dependencies are reported via the `CROSS-FILE DEPENDENCY` format per `AGENTS.md` — do NOT modify files outside the assigned task.
 
 ### Verification
 - All per-file sub-loops exit 0
-- `bun tsgo`, `bun biome:check`, `bun run lint` all clean
+- `bun quality-gate` clean
 - No `console.*` calls; no hardcoded user-facing strings; no `useLazyQuery`
 - All colors from theme + `shared/constants/`; all icons from `shared/constants/`
 
@@ -1633,7 +1618,7 @@ bun run lint                      # Full-repo lint via queue client (serialized 
 5. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1678,8 +1663,8 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategorySto
 5. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/DragPreviewGhost.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/CategoryTree.desktop.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/DragPreviewGhost.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/CategoryTree.desktop.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1738,9 +1723,9 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templat
 7. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/BulkOperationsDialog.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/category-documents.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/BulkOperationsDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/category-documents.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1785,9 +1770,9 @@ bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/
 6. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/SkeletonTreeItem.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/SkeletonTreeItem.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1833,9 +1818,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 6. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/dashboard/certificates/categories.namespace.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/dashboard/certificates/categories.namespace.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -1893,11 +1878,11 @@ bun run scripts/health/sub-loop.ts shared/locale/dashboard/certificates/categori
 8. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/hooks/useOnlineStatus.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/hooks/useOnlineStatus.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -1952,7 +1937,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 9. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/VirtualizedTree.desktop.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/VirtualizedTree.desktop.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -2005,9 +1990,9 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templat
 7. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryFilterBar.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/highlightMatch.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryFilterBar.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/highlightMatch.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -2060,9 +2045,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 7. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/VirtualizedTree.desktop.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templates/categories/VirtualizedTree.desktop.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -2107,9 +2092,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 5. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/cert/templates/categories/CategoryList.mobile.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/cert/templates/categories/CategoryDetailBottomSheet.mobile.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/cert/templates/categories/CategoryList.mobile.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/cert/templates/categories/CategoryDetailBottomSheet.mobile.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -2162,9 +2147,9 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 7. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts shared/constants/certificate-category-colors.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryFilterBar.tsx --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/constants/certificate-category-colors.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryFilterBar.tsx --lifecycle codescene
 ```
 
 ### Verification
@@ -2232,10 +2217,10 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 9. **Quality Loop**:
 
 ```bash
-bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/category-documents.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryHistoryTimeline.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/category-documents.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryHistoryTimeline.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle codescene
 ```
 
 ### Verification

@@ -185,7 +185,10 @@ T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 - [ ] Timeout threshold: 24 hours (configurable via `CERT_BATCH_TIMEOUT_HOURS` env)
 - [ ] Idempotency: items already `failed` or `complete` are skipped
 - [ ] Failure isolation: per-item errors logged, continue to next
-- [ ] Run quality loop
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/cleanup/BatchGenerationCleanup.ts --lifecycle codescene
+  ```
 - **Requirements**: REQ-CRON-08 (batch gen cleanup), REQ-CRON-13 (failure isolation)
 - **Files created**: `BatchGenerationCleanup.ts`
 - **Dependencies**: T01, T04, Plan 1 (recipient_group_items table)
@@ -263,14 +266,10 @@ Total: 11 tasks, ~29 hours estimated
 
 ## Quality Loop (Per File)
 
-After creating/modifying ANY file, run:
+After creating/modifying ANY file, run the per-file progressive verification (type checking → formatting → lint → codescene code-health analysis) in one command that short-circuits on first failure:
 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-22","files":["<the-file>"]}'
+bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
 
 Fix all errors before proceeding to next task.

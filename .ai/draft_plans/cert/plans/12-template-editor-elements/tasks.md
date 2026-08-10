@@ -895,8 +895,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 - Apollo cache updates use `cache.modify` / `cache.evict` / `cache.gc` (not raw writes)
 
 **Quality Loop:**
-- tsgo + biome:check + lint via queue client on ALL modified/created files
-- Run `bun biome:check` (unsafe fixes for formatting)
+- Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on ALL modified/created files (progressive: tsgo → biome → lint → codescene, short-circuits on first failure)
 - Verify both English and Arabic locale files have identical key structures (compile-time type check)
 - Run `bun run generate:gqlSchema && bun codegen` — verify no type errors
 
@@ -1029,7 +1028,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
@@ -1067,7 +1066,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
@@ -1098,7 +1097,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
@@ -1136,7 +1135,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
@@ -1169,7 +1168,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
@@ -1207,7 +1206,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
@@ -1238,7 +1237,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - tsgo + biome:check + lint via queue client on each new file
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` per file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file
 
 ---
 
@@ -1322,7 +1321,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - `bun run test:ui:components` for component tests
-- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle lint` on each test file
+- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle codescene` on each test file
 - Target: 90%+ line coverage for each new component
 
 ---
@@ -1405,7 +1404,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 
 **Quality Loop:**
 - `bun run build:test && bun run test:ui:e2e` for E2E tests
-- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle lint` on each test file
+- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle codescene` on each test file
 
 ---
 
@@ -1416,21 +1415,17 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 **Files:** All files created in Tasks 16–24
 
 **Subtasks:**
-1. Ensure the lint queue server is running: `~/.bun/bin/bun run scripts/lint-queue-server.ts`
-2. For each new file, run: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
-3. Fix all tsgo errors first (progressive enforcement — do not skip to biome/lint while tsgo fails)
-4. Fix all biome issues (formatting + unsafe fixes)
-5. Fix all lint errors (ESLint via queue client)
-6. Re-run `bun run tsgo` to ensure the full type check passes across the project (not just per-file)
-7. Re-run `bun biome:check` full-project to ensure no formatting drift
-8. Run `bun run lint` (full-repo via queue client) to ensure no lint regressions
-9. Verify no required types from GraphQL codegen are missing — if any `graphql-types.ts` types are referenced for new element types (`barcode`, `signature`, `background`), run `bun run generate:gqlSchema && bun codegen`
+ 1. For each new file, run: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`
+ 2. Fix all tsgo errors first (progressive enforcement — do not skip to biome/lint while tsgo fails)
+ 3. Fix all biome issues (formatting + unsafe fixes)
+ 4. Fix all lint errors (ESLint via queue client)
+ 5. Re-run full-project `bun run tsgo` then `bun biome:check` then `bun run lint` to ensure no regressions across the codebase
+ 6. Verify no required types from GraphQL codegen are missing — if any `graphql-types.ts` types are referenced for new element types (`barcode`, `signature`, `background`), run `bun run generate:gqlSchema && bun codegen`
 
 **Instruction Verification:**
 - Read: `AGENTS.md` (root) — Per-File Verification Loop section
 - Read: `scripts/health/sub-loop.ts` — progressive lifecycle enforcement
-- Progressive: tsgo → biome → lint (short-circuit on first failure — do not skip ahead)
-- Lint queue server MUST be running before lint calls
+- Progressive: tsgo → biome → lint → codescene (short-circuit on first failure — do not skip ahead)
 
 **Quality Loop:**
 - This task IS the quality loop — no additional gate needed beyond verification
@@ -1628,7 +1623,7 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 - `bun run test:ui:components` for component tests (Happy DOM)
 - `bun run test:graphql` for GraphQL integration tests (dev server)
 - `bun run build:test && bun run test:ui:e2e` for E2E tests (production server)
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` on each new test file
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on each new test file
 - Target: 90%+ line coverage for new components; 100% for repo layer
 
 ---
@@ -1639,7 +1634,7 @@ After all **27 tasks** complete, verify:
 
 - [ ] `bun run tsgo` passes with zero errors (including generated GraphQL types)
 - [ ] `bun biome:check` passes with zero issues
-- [ ] `bun run lint` passes (via queue client) on all files created/modified in this plan
+- [ ] `bun run lint` passes on all files created/modified in this plan
 - [ ] All 6 element type forms render correctly with translated labels
 - [ ] Shared input controls (PositionSizeInputs, OpacitySlider, ColorPickerField, FontPicker) render and validate correctly
 - [ ] Desktop property panel shows common + type-specific fields in collapsible accordion sections
@@ -2468,13 +2463,9 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
     - Subscribe-to-canvas-store bridge: use `subscribeWithSelector` to mirror `useCanvasStore.keyObjectId` into `templateElementEditorStore.keyObjectId` on every change (read-only subscriber).
   - **Imports**: types from `@/frontend/common/stores/cert/snapAlignTypes`.
   - **No hardcoded values** — defaults come from `DEFAULT_SNAP_SETTINGS` where applicable.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    bun run tsgo
-    bun biome:check
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5s-t1","files":["frontend/common/stores/templateElementEditorStore.ts"]}'
+    bun run scripts/health/sub-loop.ts frontend/common/stores/templateElementEditorStore.ts --lifecycle codescene
     ```
 
 - [ ] **R5S-T2: Add `'align'` tab to `RightPanelTabs`**
@@ -2483,13 +2474,9 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
     - New tab after `'transform'`: icon `VerticalAlignCenterOutlined`, label `i18n('rightPanel.tabs.align')`.
     - The panel header always renders (so user has snap settings affordance from any selection state).
     - Pass `alignTarget`, `distributeFrom`, `distributeGap`, `matchSizeReferenceKind`, `matchSizeScope`, `keyObjectId` from the panel store down to sub-panels.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    bun run tsgo
-    bun biome:check
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5s-t2","files":["frontend/views/dashboard/cert/templates/editor/properties/RightPanelTabs.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/properties/RightPanelTabs.tsx --lifecycle codescene
     ```
 
 - [ ] **R5S-T3: Create `AlignPanel.tsx`**
@@ -2884,7 +2871,7 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
   - Create doc: `docs/frontend/certificate-zoom-navigation.md`
   - Update `frontend/AGENTS.md` with zoom/navigation panel patterns
   - Update root `AGENTS.md` Important References
-  - Run: `bun tsgo`, `bun biome:check`, `bun run lint`
+  - Run: `bun run scripts/health/sub-loop.ts docs/frontend/certificate-zoom-navigation.md --lifecycle codescene`
   - Write outcome file
 
 ## Round 5: Advanced Typography Tasks
@@ -3786,11 +3773,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` — keys: `mask.typeIndicator.*`, `mask.density`, `mask.feather`, `mask.smooth`, `mask.contrast`, `mask.shiftEdge`, `mask.viewMode.*`, `mask.invert`, `mask.apply`, `mask.delete`, `mask.enable`, `mask.disable`, `mask.confirm.*`
   - Subscribe to `mask` data via `useShallow` selector — re-renders only on `mask.density`/`feather`/`smooth`/`contrast`/`shiftEdge` change, not entire element
   - Confimation `Dialog` for Apply: `DialogTitle` + `DialogContentText` (`mask.confirm.applyTitle` / `applyMessage`) + `DialogActions` (Cancel / Confirm)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p01","files":["frontend/views/dashboard/cert/templates/editor/panels/MaskPropertyPanel.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/MaskPropertyPanel.tsx --lifecycle codescene
     ```
 
 ### MASK-P02: Refine Edge Dialog
@@ -3823,11 +3808,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - All `sx={{}}`, colors from theme palette
   - i18n keys: `mask.refineEdge.title`, `.smooth`, `.feather`, `.contrast`, `.shiftEdge`, `.decontaminate`, `.decontaminateAmount`, `.output.layerMask`/`.newDocument`/`.newLayerWithMask`/`.newSelection`, `.apply`
   - Accessibility: sliders announce `aria-valuetext`; RadioGroup has `aria-label`; Dialog has `aria-labelledby` for title
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p02","files":["frontend/views/dashboard/cert/templates/editor/panels/RefineEdgeDialog.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/RefineEdgeDialog.tsx --lifecycle codescene
     ```
 
 ### MASK-P03: Opacity Mask Editor
@@ -3851,11 +3834,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - All `sx={{}}`, no style props, no hardcoded colors
   - i18n keys: `mask.opacityMask.title`, `.link`, `.unlink`, `.clip`, `.invert`, `.editMask`, `.transformIndependent`
   - `React.memo` on dual thumbnails — re-render only on mask version change (not every element change)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p03","files":["frontend/views/dashboard/cert/templates/editor/panels/OpacityMaskEditor.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/OpacityMaskEditor.tsx --lifecycle codescene
     ```
 
 ### MASK-P04: Clipping Mask Properties
@@ -3877,11 +3858,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - Description text: `mask.clipping.description` ("Element visible only inside the base shape's area")
   - All `sx={{}}`, colors from theme palette
   - i18n keys: `mask.clipping.description`, `.clippedTo`, `.clippedToName(name)`, `.baseFor`, `.baseForList(names)`, `.release`, `.editShape`, `.vectorType`, `.rasterType`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p04","files":["frontend/views/dashboard/cert/templates/editor/panels/ClippingMaskProperties.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/ClippingMaskProperties.tsx --lifecycle codescene
     ```
 
 ### MASK-P05: Mask Brush Settings Panel
@@ -3905,11 +3884,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - All `sx={{}}`, colors from theme palette
   - i18n keys: `mask.brushSettings.title`, `.size`, `.hardness`, `.opacity`, `.flow`, `.pressure`, `.pressureActive`, `.notDetected`, `.defaultBrush`, `.softRound`, `.hardRound`, `.airbrush`
   - Brush settings stored in the store (or local state synced to store) — canvas reads them via `useStore` selector; panel doesn't cause canvas re-renders on every slider move (primitive numbers)
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p05","files":["frontend/views/dashboard/cert/templates/editor/panels/MaskBrushSettings.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/MaskBrushSettings.tsx --lifecycle codescene
     ```
 
 ### MASK-P06: Quick Mask Panel
@@ -3928,11 +3905,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - **Opacity** `Slider` (0-100, default 50) — `aria-valuetext`
   - All `sx={{}}`, no style props, colors from theme palette
   - i18n keys: `mask.quickMaskPanel.title`, `mask.quickMask.mode`, `.maskedAreas`, `.selectedAreas`, `.color`, `.opacity`
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p06","files":["frontend/views/dashboard/cert/templates/editor/panels/QuickMaskPanel.tsx"]}'
+    bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/editor/panels/QuickMaskPanel.tsx --lifecycle codescene
     ```
 
 ### MASK-P07: i18n Keys (AR + EN) + Type Schema Extend
@@ -3992,11 +3967,9 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `addOpacityMask`, `deleteOpacityMask`, `toggleOpacityMaskClip`, `invertOpacityMask`, `toggleOpacityMaskLink` — for `OpacityMaskEditor`
   - `setMaskProperty` must accept `Partial<LayerMaskData>` — updates only the specified fields, increments `mask.version`
   - Persistence: verify `maskMode`, `activeMaskTarget`, `quickMaskActive`, `quickMaskOptions`, `maskViewMode`, `refineSettings` are NOT in `persist` partializer (ephemeral). Only element-level `layerMask`/`vectorMask`/`clippingMaskBaseId`/`clippingMaskClippedIds`/`opacityMask` persisted.
-  - **Quality loop**: tsgo + biome + lint queue client
+  - **Quality loop**: tsgo → biome → lint → codescene (progressive, short-circuits on first failure)
     ```bash
-    curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-      -H "Content-Type: application/json" \
-      -d '{"id":"r5m-plan12-p08","files":["frontend/common/stores/cert/certTemplateEditorStore.ts"]}'
+    bun run scripts/health/sub-loop.ts frontend/common/stores/cert/certTemplateEditorStore.ts --lifecycle codescene
     ```
 
 ### MASK-P09: Component Tests + Knowledge Propagation

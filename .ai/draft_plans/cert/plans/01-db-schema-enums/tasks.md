@@ -104,7 +104,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/enums.ts --lifecycle codesc
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/categories.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/categories.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -137,7 +137,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/categories.ts 
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templates.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templates.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -170,7 +170,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templates.ts -
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateElements.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateElements.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -199,7 +199,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateElemen
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateVariables.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateVariables.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -229,7 +229,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateVariab
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroups.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroups.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -259,7 +259,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroupItems.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroupItems.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -288,7 +288,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroupItemVariableValues.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroupItemVariableValues.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -318,7 +318,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificates.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificates.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -350,7 +350,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificates.t
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificateVerifications.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificateVerifications.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -378,7 +378,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificateVer
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateStylePresets.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateStylePresets.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -415,7 +415,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateStyleP
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/drizzleRelations.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/drizzleRelations.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -444,8 +444,8 @@ bun run scripts/health/sub-loop.ts backend/db/schema/drizzleRelations.ts --lifec
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/index.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/db/schema/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/index.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/db/schema/index.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -474,9 +474,10 @@ bun run scripts/health/sub-loop.ts backend/db/schema/index.ts --lifecycle lint
 3. **Verify** no existing data is affected (migration is additive only — new tables)
 
 ### Quality Loop
+
+Run per-file quality loop for the barrel export that aggregates all schema files (verifies tsgo still passes after migration):
 ```bash
-# Verify tsgo still passes after migration
-bun tsgo
+bun run scripts/health/sub-loop.ts backend/db/schema/index.ts --lifecycle codescene
 ```
 
 ### Verification

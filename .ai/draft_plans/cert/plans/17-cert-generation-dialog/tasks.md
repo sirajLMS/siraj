@@ -386,17 +386,13 @@ Total: 11 tasks, ~38 hours estimated
 
 ## Quality Loop (Per File)
 
-After creating/modifying ANY file, run:
+After creating/modifying ANY file, run progressively (tsgo → biome → lint → codescene), short-circuiting on first failure:
 
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-17","files":["<the-file>"]}'
+bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
 
-Fix all errors before proceeding to next task.
+This single command runs type checking, formatting, linting, and codescene code-health analysis. Fix all errors before proceeding to next task.
 
 ---
 
@@ -763,7 +759,15 @@ T20 ──► T21 (Integration: wire wizard into cert list)
   - Test cancel button + confirmation dialog
   - Test result screen (success, failed retry, view certificates, generate more)
 - [ ] All tests use Happy DOM + mocked Apollo + mocked store
-- [ ] Quality Loop per file: `bun tsgo && bun biome:check && curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"verify-17-test","files":["<test-file>"]}'`
+- [ ] Run per-file quality loop for each test file (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/CertificateGenerationWizard.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/Step1TemplateSelection.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/Step2RecipientSelection.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/Step3VariableMapping.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/Step4ReviewGenerate.test.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/GenerationProgressView.test.tsx --lifecycle codescene
+  ```
 - **Requirements**: AC-17.37 through AC-17.56
 - **Files created**: 6 test files under `test/ui/components/cert-generation/wizard/`
 - **Dependencies**: T21
@@ -939,18 +943,9 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] Unmapped variable warnings: MUI `Alert severity="warning"` — "3 optional variables are unmapped"
 - [ ] i18n keys: `certificates.generation.csvMapping.*` in `shared/locale/{en,ar}/certificates/generation-r4.ts`
 - [ ] Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md` before coding
-- [ ] **Quality Loop** (per file, progressive):
+- [ ] **Quality Loop** (per file, progressive: tsgo → biome → lint → codescene):
   ```bash
-  # tsgo first
-  ~/.bun/bin/bun tsgo
-  # If pass: biome
-  ~/.bun/bin/bun biome:check --files=frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx
-  # If pass: lint via queue client
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"r4-t01","files":["frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx"]}'
-  # If pass: codescene
-  ~/.bun/bin/bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx --lifecycle codescene
   ```
 - [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md` and verify all rules followed
 - [ ] Import types from `backend/types/csvMapping.types.ts` — create this file with `ColumnMapping`, `CsvMappingValidation` interfaces

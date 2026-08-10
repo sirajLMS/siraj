@@ -320,13 +320,11 @@ T07 (backgroundImageLoader)  T08 (fontLoader)           │
 **Requirements References:** REQ-RENDER-05 (AC1-AC3)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t07","files":["backend/services/cert/render/backgroundImageLoader.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/backgroundImageLoader.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/backgroundImageLoader.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -360,13 +358,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-03 (AC1-AC4)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t08","files":["backend/services/cert/render/fontLoader.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/fontLoader.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/fontLoader.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -400,13 +396,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-12 (AC1-AC4)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t09","files":["backend/services/cert/render/shapeRenderer.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/shapeRenderer.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/shapeRenderer.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -440,13 +434,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-07 (AC1-AC4)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t10","files":["backend/services/cert/render/renderCache.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/renderCache.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/renderCache.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -495,13 +487,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-01 (AC1-AC5), REQ-RENDER-09 (all error codes), REQ-RENDER-10 (AC1-AC4)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t11","files":["backend/services/cert/renderService.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/renderService.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/__tests__/renderService.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -539,13 +529,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-RENDER-08 (AC1-AC5)
 
-**Quality Loop:**
+**Quality Loop:** Run per-file progressive verification (tsgo → biome → lint → codescene, short-circuiting on first failure):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t12","files":["backend/services/cert/batch/batchRenderer.ts"]}'
+bun run scripts/health/sub-loop.ts backend/services/cert/batch/batchRenderer.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/services/cert/batch/__tests__/batchRenderer.test.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -573,7 +560,14 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Update `backend/AGENTS.md` — add rendering engine reference to services section
 - [ ] Update root `AGENTS.md` Important References — add `docs/services/pdf-rendering-engine.md`
 - [ ] Update `.agents/instructions/backend.instructions.md` — add rendering section if new conventions
-- [ ] Run global quality check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+- [ ] Run per-file quality loop for documentation and instruction files (tsgo → biome → lint → codescene, short-circuiting on first failure):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/services/pdf-rendering-engine.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .agents/instructions/backend.instructions.md --lifecycle codescene
+  ```
 - [ ] Write outcome file: `.ai/plans/06-pdf-rendering-engine/outcome/T13-knowledge-propagation-outcome.md`
 - [ ] Mark task T13 as `[x]` in `tasks.md`
 
@@ -589,11 +583,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** All (knowledge consolidation)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-bun run lint
-```
+Same as the per-file quality loop checklist item above — each file listed in "Files to Create/Modify" is verified via `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (full progressive chain: tsgo → biome → lint → codescene).
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — verify new section matches conventions

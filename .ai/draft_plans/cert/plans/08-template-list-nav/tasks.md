@@ -92,30 +92,14 @@
 
 ## Quality Loop (Per-File Verification)
 
-Every task must run the progressive quality loop **per file** before marking the task complete. The standard loop is:
+Every task must run the progressive quality loop **per file** before marking the task complete. The loop runs type checking, formatting/lint, and codescene code-health analysis in a single command, short-circuiting at the first failing check:
 
 ```bash
-# 1. Type check (fast, safe to run concurrently)
-bun tsgo
-
-# 2. Biome formatting + lint (safe to run concurrently)
-bun biome:check
-
-# 3. ESLint via lint queue client (serialized — safe for parallel sub-agents)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-08-T<NN>","files":["<file-path>"]}'
+# Full progressive chain: tsgo → biome → lint → codescene (short-circuits at first failure)
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
-For per-file progressive verification (tsgo → biome → lint → codescene, short-circuits at first failure):
-
-```bash
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>
-```
-
-**Stage options:** `tsgo`, `biome`, `lint`, `codescene`, `sonar-results` (sonar-results is same as codescene — no sonar-scan).
-
-> **Lint Queue Server:** Must be running before any lint call. Start with `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background). The port is in `scripts/lint-queue-config.ts`.
+**Stage options:** `tsgo`, `biome`, `lint`, `codescene`, `sonar-results` (sonar-results is same as codescene — no sonar-scan). Use `--lifecycle codescene` as the gold-standard for each file.
 
 ---
 
@@ -198,13 +182,16 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
   - `certificates.certificates` = "الشهادات"
   - `certificates.verificationLog` = "سجل التحقق"
 
-- [ ] 1.9 Run quality loop per file:
+- [ ] 1.9 Run quality loop per file (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-08-T01","files":["shared/locale/types/dashboard/certificates/templates/list.ts","shared/locale/types/dashboard/sidebar.ts","shared/locale/namespaces/dashboard/certificates/templates/list.namespace.ts","shared/locale/namespaces/dashboard/sidebar.namespace.ts","shared/locale/en/dashboard/certificates/templates/list.ts","shared/locale/en/dashboard/sidebar.ts","shared/locale/ar/dashboard/certificates/templates/list.ts","shared/locale/ar/dashboard/sidebar.ts"]}'
+  bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/templates/list.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/sidebar.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/certificates/templates/list.namespace.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/sidebar.namespace.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templates/list.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/sidebar.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templates/list.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/sidebar.ts --lifecycle codescene
   ```
 
 - [ ] 1.10 Write outcome file: `.ai/plans/cert-plan-08/outcome/T01-i18n-translations-outcome.md`
@@ -279,13 +266,9 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
   - Ensure `CertTemplateConnection`, `BatchResult`, `TemplateStatus` types exist
   - Fix any missing types by coordinating with Plan 05 backend (cross-file dependency — report if blocked)
 
-- [ ] 2.6 Run quality loop:
+- [ ] 2.6 Run quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-08-T02","files":["frontend/common/graphql/sharedDocuments/cert/template-list.documents.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/template-list.documents.ts --lifecycle codescene
   ```
 
 - [ ] 2.7 Write outcome file: `.ai/plans/cert-plan-08/outcome/T02-graphql-documents-outcome.md`
@@ -1512,46 +1495,19 @@ All outcome files are written to: `.ai/plans/cert-plan-08/outcome/`
 
 ```bash
 # Run the sub-loop script for progressive verification (tsgo → biome → lint → codescene)
-# Short-circuits at first failure; --lifecycle controls target stage
+# Short-circuits at first failure; --lifecycle codescene is the gold-standard
 bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
 ### Global Quality Commands
 
 ```bash
-# Type check (safe to run concurrently)
-bun tsgo
-
-# Biome formatting + lint (safe to run concurrently)
-bun biome:check
-
-# Full-repo ESLint via lint queue server (safe for parallel sub-agents)
-bun run lint
-
 # Full quality gate (tsgo → biome → lint → codescene → sonar)
 bun quality-gate
 
 # Fresh quality gate (reset state and run from scratch)
 bun quality-gate:fresh
 ```
-
-### Lint Queue Server (Required for `bun run lint`)
-
-```bash
-# Start the lint queue server (background — required before any lint call)
-~/.bun/bin/bun run scripts/lint-queue-server.ts
-
-# Health check
-curl -s http://localhost:${LINT_QUEUE_PORT}/status
-# Returns: { running: true, queueLength: N }
-
-# File-scoped lint (faster for sub-agents)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-08-T<NN>","files":["<file-path-1>","<file-path-2>"]}'
-```
-
-> **Port configuration:** The port is defined in `scripts/lint-queue-config.ts`. Set `export LINT_QUEUE_PORT=$(grep -oP 'LINT_QUEUE_PORT = \K\d+' scripts/lint-queue-config.ts)` or override with `LINT_QUEUE_PORT=<port>`.
 
 ### Sonar-Scan Prohibition
 
@@ -1616,11 +1572,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T12","files":["frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx --lifecycle codescene
 ```
 
 ---
@@ -1669,11 +1621,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T13","files":["frontend/views/dashboard/cert/templates/list/TemplateCard.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateCard.tsx --lifecycle codescene
 ```
 
 ---
@@ -1722,11 +1670,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T14","files":["frontend/views/dashboard/cert/templates/list/TemplateListTable.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateListTable.tsx --lifecycle codescene
 ```
 
 ---
@@ -1756,11 +1700,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T15","files":["frontend/views/dashboard/cert/templates/list/TemplateListTable.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateListTable.tsx --lifecycle codescene
 ```
 
 ---
@@ -1827,11 +1767,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T16","files":["frontend/views/dashboard/cert/templates/list/CreateTemplateDialog.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/CreateTemplateDialog.tsx --lifecycle codescene
 ```
 
 ---
@@ -1880,11 +1816,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T17","files":["frontend/stores/cert/templateListStore.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/stores/cert/templateListStore.ts --lifecycle codescene
 ```
 
 ---
@@ -1931,11 +1863,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T18","files":["frontend/components/layout/Sidebar.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/components/layout/Sidebar.tsx --lifecycle codescene
 ```
 
 ---
@@ -1973,11 +1901,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Verification:**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-T19","files":["frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/list/TemplateGrid.tsx --lifecycle codescene
 ```
 
 ---
@@ -2201,18 +2126,16 @@ done
 **Files:** All files created in T12–T21.
 
 **Sub-tasks:**
-1. Start the lint queue server in background: `~/.bun/bin/bun run scripts/lint-queue-server.ts`.
-2. Health check: `curl -s http://localhost:${LINT_QUEUE_PORT}/status`.
-3. For each file created, run:
+1. For each file created, run:
    ```bash
    bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
    ```
-4. The sub-loop runs progressive checks (tsgo → biome → lint → codescene) and short-circuits at the first failing check.
-5. Fix any issues found, re-run the sub-loop until exit code 0.
-6. For instruction-file / AGENTS.md discovery: the sub-loop automatically prints applicable instruction files (`.github/instructions/*.instructions.md`) and AGENTS.md files. Read ALL listed files before fixing.
-7. After all individual files pass, run `bun quality-gate` for full-project verification.
-8. If CODESCENE fails on a file: run `bun run codescene --file <path>` to get detailed report and fix.
-9. If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts` (read-only queries) — but sub-agents never run sonar-scan.
+2. The sub-loop runs progressive checks (tsgo → biome → lint → codescene) and short-circuits at the first failing check. The in-process lint queue client handles serialized lint automatically — no server startup needed.
+3. Fix any issues found, re-run the sub-loop until exit code 0.
+4. For instruction-file / AGENTS.md discovery: the sub-loop automatically prints applicable instruction files (`.github/instructions/*.instructions.md`) and AGENTS.md files. Read ALL listed files before fixing.
+5. After all individual files pass, run `bun quality-gate` for full-project verification.
+6. If CODESCENE fails on a file: run `bun run codescene --file <path>` to get detailed report and fix.
+7. If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts` (read-only queries) — but sub-agents never run sonar-scan.
 
 **File List for Quality Loop:**
 
@@ -2298,10 +2221,9 @@ bun quality-gate
 
 **Verification:**
 ```bash
-# Verify AGENTS.md files are updated
-bun tsgo
-bun biome:check
-bun run lint
+# Verify AGENTS.md files are updated (full progressive chain per file)
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/AGENTS.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/stores/AGENTS.md --lifecycle codescene
 
 # Verify no broken cross-references
 grep -r "dashboard/cert/templates" frontend/views/dashboard/cert/AGENTS.md

@@ -102,13 +102,9 @@ _**Instruction files**: `frontend.instructions.md`_
   - **Files to create**: `frontend/common/stores/certRecipientGroupsStore.ts`
   - **Instruction files**: `frontend.instructions.md`
 
-- [ ] 2.2 Run quality loop on the new store file
+- [ ] 2.2 Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t02","files":["frontend/common/stores/certRecipientGroupsStore.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/stores/certRecipientGroupsStore.ts --lifecycle codescene
   ```
 
 - [ ] 2.3 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t02-outcome.md`
@@ -141,13 +137,9 @@ _**Instruction files**: `frontend.instructions.md`_
   - **Files to create**: `frontend/common/graphql/sharedDocuments/certificates/certificateRecipientGroup.documents.ts`
   - **Instruction files**: `frontend.instructions.md`
 
-- [ ] 3.2 Run quality loop
+- [ ] 3.2 Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t03","files":["frontend/common/graphql/sharedDocuments/certificates/certificateRecipientGroup.documents.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/certificateRecipientGroup.documents.ts --lifecycle codescene
   ```
 
 - [ ] 3.3 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t03-outcome.md`
@@ -198,11 +190,11 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 3b.6 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t03b","files":["frontend/common/views/dashboard/certificates/recipient-groups/types/recipientGroup.types.ts","frontend/common/views/dashboard/certificates/recipient-groups/schemas/recipientGroup.schema.ts","frontend/common/views/dashboard/certificates/recipient-groups/utils/buildRecipientGroupLabels.ts","frontend/common/views/dashboard/certificates/recipient-groups/utils/mapRecipientGroupRows.ts","frontend/common/views/dashboard/certificates/recipient-groups/utils/exportGroupMembersCsv.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/types/recipientGroup.types.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/schemas/recipientGroup.schema.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/utils/buildRecipientGroupLabels.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/utils/mapRecipientGroupRows.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/utils/exportGroupMembersCsv.ts --lifecycle codescene
   ```
 
 - [ ] 3b.7 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t03b-outcome.md`
@@ -284,11 +276,12 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 4.7 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t04","files":["app/(dashboard)/certificates/recipient-groups/page.tsx","frontend/common/views/dashboard/certificates/recipient-groups/useRecipientGroupListViewModel.ts","frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupListView.tsx","frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupListContainer.tsx","frontend/desktop/views/dashboard/certificates/recipient-groups/recipientGroupList.desktop.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupList.mobile.tsx"]}'
+  bun run scripts/health/sub-loop.ts app/(dashboard)/certificates/recipient-groups/page.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/useRecipientGroupListViewModel.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupListView.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupListContainer.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/recipient-groups/recipientGroupList.desktop.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupList.mobile.tsx --lifecycle codescene
   ```
 
 - [ ] 4.8 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t04-outcome.md`
@@ -316,11 +309,7 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 5.2 Run quality loop
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t05","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/createRecipientGroupDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/createRecipientGroupDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 5.3 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t05-outcome.md`
@@ -360,11 +349,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 5b.4 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t05b","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/duplicateGroupDialog.tsx","frontend/common/views/dashboard/certificates/recipient-groups/shared/deleteGroupConfirmDialog.tsx","frontend/common/views/dashboard/certificates/recipient-groups/shared/changeTemplateDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/duplicateGroupDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/deleteGroupConfirmDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/changeTemplateDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 5b.5 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t05b-outcome.md`
@@ -436,11 +423,12 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 6.7 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t06","files":["app/(dashboard)/certificates/recipient-groups/[id]/page.tsx","frontend/common/views/dashboard/certificates/recipient-groups/useRecipientGroupDetailViewModel.ts","frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupDetailView.tsx","frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupDetailContainer.tsx","frontend/desktop/views/dashboard/certificates/recipient-groups/recipientGroupDetail.desktop.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupDetail.mobile.tsx"]}'
+  bun run scripts/health/sub-loop.ts app/(dashboard)/certificates/recipient-groups/[id]/page.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/useRecipientGroupDetailViewModel.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupDetailView.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupDetailContainer.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/recipient-groups/recipientGroupDetail.desktop.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupDetail.mobile.tsx --lifecycle codescene
   ```
 
 - [ ] 6.8 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t06-outcome.md`
@@ -481,11 +469,8 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 7.3 Run quality loop
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t07","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/studentAssignmentDialog.tsx","frontend/common/views/dashboard/certificates/recipient-groups/shared/removeStudentsConfirmDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/studentAssignmentDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/removeStudentsConfirmDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 7.4 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t07-outcome.md`
@@ -524,11 +509,7 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 7b.3 Run quality loop
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t07b","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/importMembersDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/importMembersDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 7b.4 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t07b-outcome.md`
@@ -587,11 +568,10 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 8.5 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t08","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/variableValueEditor.tsx","frontend/desktop/views/dashboard/certificates/recipient-groups/desktopVariableRow.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/mobileVariableDialog.tsx","frontend/common/views/dashboard/certificates/recipient-groups/shared/variableStatusBadge.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/variableValueEditor.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/recipient-groups/desktopVariableRow.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/mobileVariableDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/variableStatusBadge.tsx --lifecycle codescene
   ```
 
 - [ ] 8.6 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t08-outcome.md`
@@ -624,11 +604,8 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 9.3 Run quality loop
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t09","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/groupOperationsMenu.tsx","frontend/common/views/dashboard/config/navigationConfig.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/groupOperationsMenu.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/config/navigationConfig.ts --lifecycle codescene
   ```
 
 - [ ] 9.4 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t09-outcome.md`
@@ -659,11 +636,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 10.3 Run quality loop on mobile-specific files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t10","files":["frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupList.mobile.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupDetail.mobile.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/mobileVariableDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupList.mobile.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupDetail.mobile.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/mobileVariableDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 10.4 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t10-outcome.md`

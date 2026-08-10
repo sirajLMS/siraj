@@ -78,8 +78,7 @@
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
+bun run scripts/health/sub-loop.ts package.json --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -154,13 +153,13 @@ bun biome:check
 
 **Requirements covered:** REQ-18-01 (i18n), REQ-18-04 (revoke i18n), REQ-18-05 (reissue i18n), REQ-18-06 (audit i18n), REQ-18-08a (share i18n)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T01","files":["<file-path>"]}'
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/detail.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/detail.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/detail.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certDetailStore.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/__mocks__/certDetailStore.ts --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -242,13 +241,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-01 through REQ-18-07, REQ-18-09, REQ-18-11
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T02","files":["frontend/common/graphql/sharedDocuments/certificates/certDetail.documents.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/certDetail.documents.ts --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -303,13 +298,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-01 (detail page route), REQ-18-01a (UUID validation), REQ-18-13 (permission access)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T03","files":["app/(dashboard)/certificates/[certificateId]/page.tsx"]}'
+bun run scripts/health/sub-loop.ts app/(dashboard)/certificates/[certificateId]/page.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -439,13 +430,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-01 through REQ-18-07, REQ-18-09, REQ-18-11, REQ-18-11a
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T04","files":["frontend/common/views/dashboard/cert-detail/certDetailContainer.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/certDetailContainer.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/useCertDetailViewModel.ts --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -605,13 +593,12 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-01 (detail display), REQ-18-07 (status badge C.1), REQ-18-09 (breadcrumb), REQ-18-10 (mobile), REQ-18-09 (audit timeline C.9)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T05","files":["<file-path>"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/VerificationLinkCopy.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/CertificateActionsBar.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/DownloadMenu.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/StatusTimeline.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -690,13 +677,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-02 (PDF download), REQ-18-02a (PNG), REQ-18-02b (JPG), REQ-18-03 (lazy render polling), REQ-18-04 (error handling C.5)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T06","files":["<file-path>"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/certDetailContainer.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/utils/downloadFile.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/DownloadMenu.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -761,13 +746,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-05 (print via off-screen iframe — C.6, not display:none)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T07","files":["frontend/common/views/dashboard/cert-detail/PrintFrame.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/PrintFrame.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -839,13 +820,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-05 (revocation), REQ-18-06 (re-issue — C.7 renamed from reactivation), REQ-18-10 (status badge 5 canonical values)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T08","files":["frontend/common/views/dashboard/cert-detail/RevokeDialog.tsx","frontend/common/views/dashboard/cert-detail/ReissueDialog.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/RevokeDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/ReissueDialog.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -919,13 +897,9 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-07 (audit trail — C.9 paginated, server-sorted, expandable), REQ-18-10 (status badge canonical values)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T09","files":["frontend/common/views/dashboard/cert-detail/StatusTimeline.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/StatusTimeline.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -998,13 +972,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements covered:** REQ-18-09 (verification URL display + QR), REQ-18-08a (share dialog), REQ-18-11 (QR at 200x200 SVG, 1024x1024 PNG download)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T10","files":["frontend/common/views/dashboard/cert-detail/QrCodeDisplay.tsx","frontend/common/views/dashboard/cert-detail/VerificationLinkCopy.tsx","frontend/common/views/dashboard/cert-detail/ShareDialog.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/QrCodeDisplay.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/VerificationLinkCopy.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/ShareDialog.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -1429,7 +1401,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 24.4 Each test file includes ≥3 test cases for robust coverage.
 - [ ] 24.5 Run all six tests via `bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.tsx` per `tests.instructions.md`.
 - [ ] 24.6 Verify with `frontend/AGENTS.md` + `test/ui/AGENTS.md` instructions.
-- [ ] 24.7 Quality loop per test file (`bun biome:check` + tsgo + lint queue client for each file).
+- [ ] 24.7 Quality loop per test file: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each file.
 
 **Duration:** 14 hours
 **Dependencies:** All T13–T22 implementation tasks.
@@ -1452,7 +1424,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 25.6 Test 5 — Revoke certificate: click Revoke, choose reason (e.g. `DISHONESTY`), toggle notify switch off, confirm — assert success snackbar + badge updates to REVOKED + Revoke button hidden.
 - [ ] 25.7 Test 6 — Copy verification URL: in Overview tab, click Copy icon on verification URL, assert clipboard contains `NEXT_PUBLIC_PUBLIC_BASE_URL/verify/<code>` (use Playwright `browserContext.grantPermissions(['clipboard-read', 'clipboard-write'])`).
 - [ ] 25.8 Each test seeds a fresh certificate via Playwright fixture (use `globalSetup` script — mirror Plan 16 fixture pattern).
-- [ ] 25.9 Quality loop per test file (`bun biome:check` + tsgo + lint queue client).
+- [ ] 25.9 Quality loop per test file: `bun run scripts/health/sub-loop.ts test/ui/e2e/cert-detail-18.spec.ts --lifecycle codescene`.
 
 **Duration:** 16 hours
 **Dependencies:** T13–T22 implementation tasks done + T24 component tests.
@@ -1471,8 +1443,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 26.2 Persist sub-loop stdout to per-file log under `.ai/plans/cert-18/outcome/quality-logs/` directory (NOT in repo root).
 - [ ] 26.3 For each failed check, apply the relevant fix following `frontend.instructions.md` and/or `tests.instructions.md` (per the AGENTS.md instruction file mapping).
 - [ ] 26.4 Cross-file violation follow-up reported to orchestrator per the "Fix-Or-Report" rule in root AGENTS.md.
-- [ ] 26.5 Re-run full `bun run lint` (queue client serializes) after all files green to verify no inter-file regressions.
-- [ ] 26.6 Final `bun tsgo` + `bun biome:check` reproduction run.
+- [ ] 26.5 Re-run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for any file whose fix required cross-file coordination (the sub-loop serializes lint in-process).
+- [ ] 26.6 Final full-repo `bun quality-gate` run to confirm no regressions across tsgo → biome → lint → codescene.
 
 **Duration:** 8 hours
 **Dependencies:** All T13–T25 atomic files exist.
@@ -1931,7 +1903,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 41.5 Test consent checkbox state persistence via `localStorage` mock.
 - [ ] 41.6 Run all tests via `bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.tsx` per `tests.instructions.md`.
 - [ ] 41.7 Verify with `frontend/AGENTS.md` + `test/ui/AGENTS.md` + `tests.instructions.md` instructions.
-- [ ] 41.8 Quality loop per test file (`bun biome:check` + tsgo + lint queue client for each file).
+- [ ] 41.8 Quality loop per test file: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each file.
 - [ ] 41.9 Persist results to `.ai/plans/cert-18/outcome/quality-logs/T41-*.log`.
 
 **Duration:** 16 hours
@@ -1953,7 +1925,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 42.4 Test 3 — Share link: click Share, select 7-day expiry, enable password, generate, assert URL textfield contains `/share/`, copy to clipboard (grant permissions), revoke button visible.
 - [ ] 42.5 Test 4 — Revision revert: switch to Revisions tab, select a previous revision, click Revert, confirm in dialog, assert success snackbar + certificate detail refetches.
 - [ ] 42.6 Each test seeds a fresh certificate via Playwright fixture (mirror Plan 16 fixture pattern).
-- [ ] 42.7 Quality loop per test file (`bun biome:check` + tsgo + lint queue client).
+- [ ] 42.7 Quality loop per test file: `bun run scripts/health/sub-loop.ts test/ui/e2e/cert-detail-18-r4.spec.ts --lifecycle codescene`.
 - [ ] 42.8 Persist results to `.ai/plans/cert-18/outcome/quality-logs/T42-*.log`.
 
 **Duration:** 12 hours
@@ -1973,9 +1945,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 43.2 Persist sub-loop stdout to per-file log under `.ai/plans/cert-18/outcome/quality-logs/R4-T43-*.log` (NOT in repo root).
 - [ ] 43.3 For each failed check, apply fix per `frontend.instructions.md` and/or `tests.instructions.md` and/or `backend.instructions.md` (per AGENTS.md instruction file mapping).
 - [ ] 43.4 Cross-file violation follow-up reported to orchestrator per the "Fix-Or-Report" rule in root AGENTS.md.
-- [ ] 43.5 Re-run `bun run lint` (queue client serializes) after all files green.
-- [ ] 43.6 Final `bun tsgo` + `bun biome:check` reproduction run.
-- [ ] 43.7 Start lint queue server if not running: `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background; AGENTS.md lint queue section).
+- [ ] 43.5 Re-run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for any file whose fix required cross-file coordination (the sub-loop serializes lint in-process).
+- [ ] 43.6 Final full-repo `bun quality-gate` run to confirm no regressions across tsgo → biome → lint → codescene.
 
 **Duration:** 8 hours
 **Dependencies:** All T28–T42 atomic files exist.

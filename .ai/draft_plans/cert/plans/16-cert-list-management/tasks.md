@@ -79,18 +79,10 @@ For every file created/modified in this plan, read the applicable AGENTS.md and 
 
 After creating or modifying each file, run the per-file verification loop BEFORE moving to the next task:
 
-1. **tsgo**: `bun tsgo` — type checking (safe to run concurrently)
-2. **biome**: `bun biome:check` — formatting + lint (safe to run concurrently)
-3. **lint** (via queue client): Submit file to lint queue for ESLint check
+The per-file progressive verification runs type checking → formatting → lint → codescene code-health analysis in one command:
 
 ```bash
-# Start lint queue server (background) — once at start of plan
-~/.bun/bin/bun run scripts/lint-queue-server.ts &
-
-# Per-file lint (example)
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"task1-certlist","files":["shared/locale/types/dashboard/certificates/list.ts","shared/locale/en/dashboard/certificates/list.ts"]}'
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
 ---
@@ -175,7 +167,18 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 #### 1.7 Verify namespace compiles
 
-**Action**: Run `bun tsgo` to verify the entire i18n namespace compiles correctly and all type references resolve. Also verify `shared/locale/namespaces/index.ts` re-exports the new namespace (if the barrel file pattern requires it — check existing entries like `export * from "./dashboard/students/directory.namespace"`).
+**Action**: Verify the entire i18n namespace compiles correctly and all type references resolve. Also verify `shared/locale/namespaces/index.ts` re-exports the new namespace (if the barrel file pattern requires it — check existing entries like `export * from "./dashboard/students/directory.namespace"`).
+
+**Quality loop**: Run the per-file progressive quality loop on the i18n files created/modified in this task:
+
+```bash
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/list.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/list.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/list.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/certificates/list.namespace.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/translation.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/types/message.ts --lifecycle codescene
+```
 
 **AGENTS.md files to read for this task**:
 - `shared/AGENTS.md` (i18n namespace registration steps, layer isolation, barrel re-export rules)
@@ -641,22 +644,24 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 
 ### Subtasks
 
-#### 10.1 Verify type checking
+#### 10.1 Verify type checking, formatting, lint, and code health
 
-**Action**: Run `bun tsgo` to verify all TypeScript types resolve correctly across the entire plan. Fix any type errors in any file.
+**Action**: Run the per-file progressive quality loop on every file created/modified in this plan to verify TypeScript types, formatting, lint, and codescene health all pass:
 
-#### 10.2 Verify Biome formatting
+```bash
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateListPage.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateTable.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateCard.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateGrid.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/RevokeCertificateDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/list/CertificateExportDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certListStore.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certListStore.types.ts --lifecycle codescene
+```
 
-**Action**: Run `bun biome:check` to verify all files are properly formatted. Fix any issues.
+Fix any type errors, formatting issues, or lint violations in any file.
 
-#### 10.3 Verify ESLint
-
-**Action**: Run `bun run lint` (full-repo lint via queue client) to verify no ESLint violations in any file. Fix all violations.
-
-> The lint queue server must be running. Start it with:
-> `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background process)
-
-#### 10.4 Verify dev server renders
+#### 10.2 Verify dev server renders
 
 **Action**: Run `bun run dev` and navigate to `/certificates`:
 - Verify the page loads without errors
@@ -665,7 +670,7 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 - Verify search, filter, pagination work
 - Verify clicking a row navigates to `/certificates/[id]` (will 404 until Plan 18 is built — that's OK, just verify the navigation triggers)
 
-#### 10.5 Verify mutations
+#### 10.3 Verify mutations
 
 **Action**: In the dev server:
 - Select certificates and verify bulk action toolbar appears
@@ -675,7 +680,7 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 - Click Delete on a draft → verify it disappears from list (soft-deleted)
 - Verify error handling: attempt invalid transition and verify error toast/snackbar
 
-#### 10.6 Verify i18n
+#### 10.4 Verify i18n
 
 **Action**: Switch locale to Arabic (change cookie or URL param):
 - Verify all labels render in Arabic
@@ -712,12 +717,10 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 
 **Action**: Run the full quality gate to verify the entire plan passes:
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun quality-gate
 ```
 
-All three must pass clean. Fix any failures before marking this task complete.
+Must pass clean. Fix any failures before marking this task complete.
 
 ---
 
@@ -764,7 +767,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - `frontend/views/AGENTS.md` (view conventions, MUI v9 style props)
 - `frontend/AGENTS.md` (MUI v9, icon names, theme)
 
-**Quality loop**: tsgo + biome + lint (per `[scripts/health/sub-loop.ts](scripts/health/sub-loop.ts)` with `--lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (per `[scripts/health/sub-loop.ts](scripts/health/sub-loop.ts)` with `--lifecycle codescene`).
 
 #### 12.2 Wire FilterBar to store
 
@@ -804,7 +807,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 **AGENTS.md files to read**:
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/components/ui/AGENTS.md` (if present), root `AGENTS.md`.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -837,7 +840,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Content**: Map the current-page items to `<CertificateCard>` inside `<Grid container spacing={{ xs: 2, md: 3 }}>` — each item wrapped in `<Grid item xs={12} sm={6} md={4} lg={3}>`. Below the grid render the same page-size selector and pager used by `CertificateTable` so both views share pagination state from the store.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -869,7 +872,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, root `AGENTS.md`.
 - Cross-check §Status Badge Mapping to ensure the list re-renders with the new status badge after a successful revoke.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -894,7 +897,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - Open the returned download URL via `window.open(downloadUrl, '_blank')`.
 - Show a brief success snackbar; on error show the i18n `export.error` message.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -935,7 +938,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - `frontend/common/stores/AGENTS.md` (Zustand conventions, no persistence for directory stores).
 - `frontend/common/graphql/AGENTS.md` for the query/mutation imports used by the new actions.
 
-**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle lint`).
+**Quality loop**: tsgo + biome + lint (`sub-loop.ts --lifecycle codescene`).
 
 ---
 
@@ -1006,7 +1009,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 - `test/ui/AGENTS.md` and `tests.instructions.md` (component-test conventions, mock Apollo, no server).
 - `frontend/AGENTS.md` (for MUI v9 style notes when writing assertions).
 
-**Quality loop per file**: tsgo + biome + lint via `sub-loop.ts --lifecycle lint`. For per-test-file run use `bun run scripts/run-test/run-test.ts <test-path>`.
+**Quality loop per file**: tsgo + biome + lint via `sub-loop.ts --lifecycle codescene`. For per-test-file run use `bun run scripts/run-test/run-test.ts <test-path>`.
 
 ---
 
@@ -1086,7 +1089,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 Run the progressive per-file loop on every new file to catch issues at the file level before they propagate to the full quality gate:
 
 ```bash
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
 Where `<file-path>` is one of:
@@ -1117,12 +1120,10 @@ The loop runs tsgo → biome → lint-queue-client and short-circuits at the fir
 **Action**: After per-file loops pass, run the full-repo quality gate to ensure no regressions elsewhere:
 
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun quality-gate
 ```
 
-All three must pass clean before this task is marked complete. Do NOT run `bun sonar-scan` (subagents are prohibited from running the SonarQube scan; the orchestrator handles that stage).
+Must pass clean before this task is marked complete. Do NOT run `bun sonar-scan` (subagents are prohibited from running the SonarQube scan; the orchestrator handles that stage).
 
 ---
 
@@ -1155,12 +1156,10 @@ All three must pass clean before this task is marked complete. Do NOT run `bun s
 **Action**: Run the full quality gate to verify the entire plan passes clean:
 
 ```bash
-bun tsgo
-bun biome:check
-bun run lint
+bun quality-gate
 ```
 
-All three must pass clean. Fix any failures before marking this task complete.
+Must pass clean. Fix any failures before marking this task complete.
 
 ---
 

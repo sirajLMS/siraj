@@ -64,18 +64,11 @@ T01 (i18n schema) ─────────┐
 
 ### Quality Loop
 
-For each file created:
+For each file modified (full progressive chain: tsgo → biome → lint → codescene):
 ```bash
-bun tsgo
-bun biome:check -- <file>
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"t01","files":["<file>"]}'
-```
-
-Or equivalently:
-```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/types/errors/index.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/errors/index.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/errors/index.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -115,7 +108,7 @@ The barrel is the aggregation point; it's only "complete" after T09.
 
 Run only after all T03-T09 repos are added:
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/certificates/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/certificates/index.ts --lifecycle codescene
 ```
 
 ---
@@ -163,7 +156,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/index.ts --lifec
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/certificates/certificate.repository.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/certificates/certificate.repository.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -206,7 +199,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/certificate.repo
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template.repository.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template.repository.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -240,7 +233,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template.reposit
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template-element.repository.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template-element.repository.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -273,7 +266,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template-element
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template-variable.repository.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template-variable.repository.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -309,7 +302,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template-variabl
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/certificates/recipient-group.repository.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/certificates/recipient-group.repository.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -342,7 +335,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/recipient-group.
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/certificates/verification.repository.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/certificates/verification.repository.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -382,7 +375,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/verification.rep
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/certificates/category.repository.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/certificates/category.repository.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -413,7 +406,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/category.reposit
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/shared/soft-delete.repository.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/shared/soft-delete.repository.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -441,7 +434,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/shared/soft-delete.repository
 ### Quality Loop
 
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/repo/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/repo/index.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -458,27 +451,24 @@ bun run scripts/health/sub-loop.ts backend/db/repo/index.ts --lifecycle lint
 
 ### Subtasks
 
-1. **Run full type check**:
+1. **Run per-file quality loop on all cert repo files** (full progressive chain: tsgo → biome → lint → codescene):
    ```bash
-   bun tsgo
+   bun run scripts/health/sub-loop.ts backend/db/repo/certificates/certificate.repository.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template.repository.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template-element.repository.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/certificates/template-variable.repository.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/certificates/recipient-group.repository.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/certificates/verification.repository.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/certificates/category.repository.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/certificates/index.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/shared/soft-delete.repository.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts backend/db/repo/index.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/types/errors/index.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/en/errors/index.ts --lifecycle codescene
+   bun run scripts/health/sub-loop.ts shared/locale/ar/errors/index.ts --lifecycle codescene
    ```
 
-2. **Run biome across all cert repo files**:
-   ```bash
-   bun biome:check -- backend/db/repo/certificates/
-   ```
-
-3. **Run lint via queue client on all cert repo files**:
-   ```bash
-   # Ensure lint queue server is running
-   ~/.bun/bin/bun run scripts/lint-queue-server.ts &
-
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"t12","files":["backend/db/repo/certificates/certificate.repository.ts","backend/db/repo/certificates/template.repository.ts","backend/db/repo/certificates/template-element.repository.ts","backend/db/repo/certificates/template-variable.repository.ts","backend/db/repo/certificates/recipient-group.repository.ts","backend/db/repo/certificates/verification.repository.ts","backend/db/repo/certificates/category.repository.ts","backend/db/repo/certificates/index.ts","backend/db/repo/shared/soft-delete.repository.ts","backend/db/repo/index.ts","shared/locale/types/errors/index.ts","shared/locale/en/errors/index.ts","shared/locale/ar/errors/index.ts"]}'
-   ```
-
-4. **Review acceptance criteria** — manually verify each AC from `requirements.md` §4:
+2. **Review acceptance criteria** — manually verify each AC from `requirements.md` §4:
    - AC-1: Each file exports one namespace — grep `export namespace` per file
    - AC-5: Prepared statement names match design.md §4.1
    - AC-6: Each prepared method branches on `tx`
@@ -489,14 +479,11 @@ bun run scripts/health/sub-loop.ts backend/db/repo/index.ts --lifecycle lint
 
 ### Quality Loop
 
-No per-file loop — this is integration verification. Run tsgo + biome + lint on
-all files together.
+Per-file quality loop run in subtask 1 above — all cert repo files pass `sub-loop.ts --lifecycle codescene`.
 
 ### Verification
 - All AC items pass
-- `bun tsgo` clean
-- `bun biome:check` clean on all cert files
-- Lint queue returns exitCode 0
+- All cert repo files pass `--lifecycle codescene` (tsgo + biome + lint + codescene clean)
 
 ---
 
@@ -584,20 +571,10 @@ Per-file verification loop for every file created/modified:
 
 ```bash
 # Progressive: tsgo → biome → lint (short-circuits at first failure)
-bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
-Full plan verification (after T12):
-
-```bash
-bun tsgo                          # Type check (safe to run concurrently)
-bun biome:check                   # Biome (safe to run concurrently)
-bun run lint                      # Full-repo lint via queue client (serialized behind queue server)
-```
-
-> The lint queue server must be running before any lint call. Start it with:
-> `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background process).
-> See `AGENTS.md` §"Lint Queue Server" for details.
+Full plan verification (after T12): run `bun quality-gate` — handles tsgo, biome, lint, codescene sequentially across the full repo.
 
 ---
 

@@ -86,6 +86,10 @@ T1 (docs dir + INDEX)
 - Verify `INDEX.md` exists and links to all 13 documentation files (even if they are placeholders)
 - Verify no code snippets in INDEX.md
 - Verify all listed file paths are correct
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/certificates/INDEX.md --lifecycle codescene
+  ```
 
 ---
 
@@ -122,6 +126,11 @@ T1 (docs dir + INDEX)
 - Verify entity descriptions match Plan 1 schema
 - Verify repository method descriptions match Plan 3
 - Verify table of contents present
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/certificates/ARCHITECTURE.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts docs/certificates/DATABASE_PATTERNS.md --lifecycle codescene
+  ```
 
 ---
 
@@ -157,6 +166,11 @@ T1 (docs dir + INDEX)
 - Verify GraphQL type descriptions match Plan 5
 - Verify auth scope descriptions match existing Siraj patterns
 - Verify DataLoader descriptions follow existing patterns
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/certificates/SERVICE_PATTERNS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts docs/certificates/GRAPHQL_PATTERNS.md --lifecycle codescene
+  ```
 
 ---
 
@@ -192,6 +206,11 @@ T1 (docs dir + INDEX)
 - Verify store descriptions match existing Zustand patterns
 - Verify MUI descriptions follow v9 conventions (sx prop, no style props)
 - Verify storage patterns match Plan 7 and Plan 22 requirements
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/certificates/FRONTEND_PATTERNS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts docs/certificates/STORAGE_PATTERNS.md --lifecycle codescene
+  ```
 
 ---
 
@@ -231,6 +250,11 @@ T1 (docs dir + INDEX)
 - Verify testing patterns match Plan 20 design
 - Verify entity-setup helper table matches Plan 20 design
 - Verify env config table matches `siraj_analysis/12-cron-config-infra.md`
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/certificates/CRON_PATTERNS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts docs/certificates/TESTING_PATTERNS.md --lifecycle codescene
+  ```
 
 ---
 
@@ -279,6 +303,12 @@ T1 (docs dir + INDEX)
 - Verify Arabic translations cited in documentation are accurate
 - Verify template editor description matches Plans 10, 12, 15
 - Verify verification system description matches Plans 18, 19, 22
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/certificates/I18N_PATTERNS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts docs/certificates/TEMPLATE_EDITOR.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts docs/certificates/VERIFICATION_SYSTEM.md --lifecycle codescene
+  ```
 
 ---
 
@@ -326,6 +356,15 @@ T1 (docs dir + INDEX)
 - Verify no duplication of root AGENTS.md or docs content
 - Verify all cross-references are bidirectional (docs → AGENTS.md and AGENTS.md → docs)
 - Verify backend AGENTS.md sections are concise summaries with links to detailed docs
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/db/repo/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/db/seeds/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/types/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/enum/AGENTS.md --lifecycle codescene
+  ```
 
 ---
 
@@ -369,6 +408,14 @@ T1 (docs dir + INDEX)
 - Verify all cross-references are bidirectional
 - Verify frontend AGENTS.md sections follow existing section formatting conventions
 - Verify app AGENTS.md cron route description matches existing cron patterns
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts frontend/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/views/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/stores/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts app/AGENTS.md --lifecycle codescene
+  ```
 
 ---
 
@@ -397,6 +444,11 @@ T1 (docs dir + INDEX)
 - Verify shared AGENTS.md includes certificate namespace and shared types sections
 - Verify no duplication of layer AGENTS.md content in root AGENTS.md
 - Verify docs/certificates/INDEX.md is added to Important References
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/AGENTS.md --lifecycle codescene
+  ```
 
 ---
 
@@ -427,6 +479,12 @@ T1 (docs dir + INDEX)
 - Verify certificate subsections use tables and bullet lists
 - Verify naming conventions match AGENTS.md files and docs
 - Verify no code snippets in instruction file additions
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts .agents/instructions/frontend.instructions.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .agents/instructions/backend.instructions.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .agents/instructions/tests.instructions.md --lifecycle codescene
+  ```
 
 ---
 
@@ -459,6 +517,11 @@ T1 (docs dir + INDEX)
 - Verify quality gate dry run correctly maps certificate file paths
 - Verify coding agent references resolve to existing documentation files
 - Verify no code snippets in skill definition updates
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts scripts/health/sub-loop.ts --lifecycle codescene
+  # Also run on each updated skill definition file as applicable
+  ```
 
 ---
 

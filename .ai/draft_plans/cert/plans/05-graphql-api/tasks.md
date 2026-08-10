@@ -107,7 +107,11 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
   - Scalar fields: id, name, nameAr, description, status, orientation, widthPx, heightPx, backgroundType, backgroundColor, fontFamily, fontSize, version, createdAt, updatedAt
   - Relation fields: category (CertificateCategory), elements ([TemplateElement]), variables ([TemplateVariable]), recipientGroups ([RecipientGroup]), createdBy (User)
 - [ ] Create DataLoader: `certificateTemplate.dataLoader.ts`
-- [ ] Run quality loop
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/certificateTemplate.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/certificateTemplate.dataLoader.ts --lifecycle codescene
+  ```
 - **Requirements**: AC-01, AC-05
 - **Files created**: `certificateTemplate.pothos.ts`, `certificateTemplate.dataLoader.ts`
 - **Dependencies**: T04
@@ -123,7 +127,16 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - [ ] Create `stylePreset.pothos.ts` — TemplateStylePreset type
 - [ ] Each type uses plain `objectRef` (no DataLoader — loaded as child lists, not individually batched)
 - [ ] All field resolvers map from corresponding `ReturnType` types in Plan 2
-- [ ] Run quality loop on each file individually
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/templateElement.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/templateVariable.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/category.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/recipientGroup.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/recipientGroupItem.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/verification.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/stylePreset.pothos.ts --lifecycle codescene
+  ```
 - [ ] Verify against `backend/graphql/AGENTS.md`, `backend/types/AGENTS.md`
 - **Requirements**: AC-01 (9 Pothos object types total)
 - **Files created**: 7 Pothos type files
@@ -137,7 +150,11 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
   - Fields: successCount, failCount, totalAttempted, results ([GenerationResultItem]), errors ([GenerationError])
 - [ ] Define `GenerationResultItem` sub-type: certificateId, status, error?
 - [ ] Define `GenerationError` sub-type: certificateId, errorCode, message
-- [ ] Run quality loop
+- [ ] Run per-file quality loop for each file modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/verification.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/certificate.pothos.ts --lifecycle codescene
+  ```
 - **Requirements**: Design §5 (Query Catalog — certificateVerifyPublic return), Design §6 (Mutation Catalog — generateCertificatesBatch return)
 - **Files modified**: `verification.pothos.ts`, `certificate.pothos.ts`
 - **Dependencies**: T06
@@ -146,8 +163,10 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 ### T08: Wire All Object Types into Barrel Index
 - [ ] Update `backend/graphql/pothos/certificates/index.ts` to export all type files
 - [ ] Ensure import order respects Pothos type registration (types before queries/mutations)
-- [ ] Run `bun tsgo` to verify all types compile
-- [ ] Run `bun biome:check` on barrel file
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/index.ts --lifecycle codescene
+  ```
 - **Requirements**: AC-10
 - **Files modified**: `backend/graphql/pothos/certificates/index.ts`
 - **Dependencies**: T07
@@ -179,7 +198,11 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - [ ] Pagination arguments: `limit` (default 20, max 100), `offset` (default 0), for cursor-based: `after` cursor
 - [ ] Filter arguments: domain-specific filters per query (status, categoryId, templateId, search, dateRange, etc.)
 - [ ] Sort arguments: `sortBy` (field name), `sortDir` (ASC/DESC), multi-sort via array
-- [ ] Run quality loop on queries file
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/queries.pothos.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/query/index.ts --lifecycle codescene
+  ```
 - [ ] Verify against `backend/graphql/pothos/AGENTS.md`
 - **Requirements**: AC-03 (10 queries with correct auth scopes), AC-06 (public verification with rate limiting)
 - **Files created**: `backend/graphql/pothos/certificates/queries.pothos.ts`
@@ -189,7 +212,10 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 
 ### T10: Wire Queries into Root Query Index
 - [ ] Add import for `./certificates/queries.pothos` in `backend/graphql/pothos/query/index.ts`
-- [ ] Run `bun tsgo` to verify query resolvers compile
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/query/index.ts --lifecycle codescene
+  ```
 - [ ] Run full `bun run generate:gqlSchema` to verify schema generation succeeds with new queries
 - [ ] Fix any schema generation errors (circular refs, missing types, etc.)
 - **Requirements**: AC-08 (schema generation successful)
@@ -257,7 +283,10 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - [ ] Each mutation resolver wraps service calls with try/catch mapping service errors to GraphQL error extensions (see design §8)
 - [ ] Each resolver uses `ctx.t().errorsTranslations` for error message translation
 - [ ] Mutations return the full object type (not just id) for Apollo cache normalization
-- [ ] Run quality loop on mutations file
+- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificates/mutations.pothos.ts --lifecycle codescene
+  ```
 - **Requirements**: AC-04 (24 mutations with correct auth scopes), AC-07 (error mapping with translated messages)
 - **Files created**: `backend/graphql/pothos/certificates/mutations.pothos.ts`
 - **Dependencies**: T10

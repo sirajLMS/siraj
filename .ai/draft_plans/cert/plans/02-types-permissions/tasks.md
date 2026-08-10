@@ -242,8 +242,8 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItem
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/certificateVerification.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/templateStylePreset.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/certificateVerification.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/templateStylePreset.types.ts --lifecycle codescene
 ```
 
 ---
@@ -270,8 +270,8 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/templateStylePrese
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/filters.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/pagination.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/filters.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/pagination.types.ts --lifecycle codescene
 ```
 
 ---
@@ -309,7 +309,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/pagination.types.t
    - The Dutch/Arabic/English permission display rows are added via the seed/insert step in T10 (permission-group mappings) and the i18n namespace in T12.
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -339,7 +339,7 @@ bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts -
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts <modified-file> --lifecycle lint
+bun run scripts/health/sub-loop.ts <modified-file> --lifecycle codescene
 ```
 
 ---
@@ -363,8 +363,8 @@ bun run scripts/health/sub-loop.ts <modified-file> --lifecycle lint
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/index.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/index.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/index.ts --lifecycle codescene
 ```
 
 ---
@@ -394,14 +394,14 @@ bun run scripts/health/sub-loop.ts backend/types/index.ts --lifecycle lint
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/types/certificates/permissions.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/types/certificates/enums.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/permissions.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/enums.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/en/certificates/permissions.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/en/certificates/enums.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/permissions.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/enums.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/types/certificates/permissions.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/types/certificates/enums.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/permissions.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/enums.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/certificates/permissions.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/certificates/enums.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/permissions.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/enums.ts --lifecycle codescene
 ```
 
 
