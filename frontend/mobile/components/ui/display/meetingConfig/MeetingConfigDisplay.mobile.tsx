@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Chip, Stack, Typography } from "@mui/material";
-import type { TypographyProps } from "@mui/material/Typography";
 import type * as React from "react";
 import type {
   MeetingConfigDisplayData,
@@ -10,7 +9,6 @@ import type {
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
-import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay/localizedStringDisplay.mobile";
 import { type MeetingConfigDisplayLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function DetailRow({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
@@ -27,10 +25,12 @@ function resolveSourceLabel(
   t: MeetingConfigDisplayLabels
 ): string {
   const normalized = (source ?? "").toLowerCase();
-  if (normalized === EffectiveMeetingSource.Class) return t.sourceClass;
-  if (normalized === EffectiveMeetingSource.Recurring) return t.sourceRecurring;
-  if (normalized === EffectiveMeetingSource.Teacher) return t.sourceTeacher;
-  return t.sourceNone;
+  const labels: Partial<Record<string, string>> = {
+    [EffectiveMeetingSource.Class]: t.sourceClass,
+    [EffectiveMeetingSource.Recurring]: t.sourceRecurring,
+    [EffectiveMeetingSource.Teacher]: t.sourceTeacher,
+  };
+  return labels[normalized] ?? t.sourceNone;
 }
 
 function getDetailRows(
@@ -118,11 +118,11 @@ export function MobileMeetingConfigDisplay({
     <Stack spacing={compact ? 0.5 : 0.75}>
       <Stack sx={{ flexDirection: "row", flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
         {config.providerName ? (
-          <MobileLocalizedStringDisplay
-            value={config.providerName}
-            typographyVariant={"bodySm" as TypographyProps["variant"]}
-            sx={{ fontWeight: 700 }}
-          />
+          providerTitle !== "" ? (
+            <Typography sx={{ typography: "bodySm", fontWeight: 700 }} dir={locale === "ar" ? "rtl" : "ltr"}>
+              {providerTitle}
+            </Typography>
+          ) : null
         ) : (
           <Typography sx={{ typography: "titleSm" }}>{providerTitle}</Typography>
         )}
