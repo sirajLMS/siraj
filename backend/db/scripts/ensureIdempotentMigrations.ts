@@ -284,21 +284,23 @@ export async function preCommitEnumStatements(statements: string[]): Promise<voi
   const { db } = await import("@/backend/db/drizzleDb");
   const { sql } = await import("drizzle-orm");
 
-  for (const stmt of statements) {
+  // Sequential execution is required: statements may target the same enum type,
+  // and PostgreSQL does not allow concurrent `ALTER TYPE ... ADD VALUE` operations.
+  // `reduce` chains the promises so each statement awaits the previous one.
+  await statements.reduce<Promise<void>>(async (previous, stmt) => {
+    await previous;
     const typeMatch = /\bALTER\s+TYPE\s+("?(\w+)"?)\s+ADD\s+VALUE/i.exec(stmt);
     const typeName = typeMatch?.[2];
-    if (!typeName) continue;
+    if (!typeName) return;
 
-    if (!(await enumTypeExists(typeName))) {
-      continue;
-    }
+    if (!(await enumTypeExists(typeName))) return;
 
     try {
       await db.execute(sql.raw(stmt));
     } catch (err) {
       logger.warn(`Failed to pre-commit enum statement "${stmt}":`, err);
     }
-  }
+  }, Promise.resolve());
 }
 
 /**
@@ -334,8 +336,11 @@ export async function ensureEnumValuesCommitted(): Promise<void> {
     }
   });
 
-  for (const folder of folders) {
+  // Migration folders must be processed in order; chain the promises to keep
+  // sequential execution without awaiting inside a loop construct.
+  await folders.reduce<Promise<void>>(async (previous, folder) => {
+    await previous;
     const sqlPath = join(DRIZZLE_DIR, folder, "migration.sql");
     await preCommitEnumStatementsForMigrationFile(sqlPath);
-  }
+  }, Promise.resolve());
 }
