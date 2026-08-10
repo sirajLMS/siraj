@@ -1,8 +1,4 @@
-import {
-  AppPermission,
-  type ProfileAudience,
-  ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type ProfileTabId = "profile" | "paymentMethods" | "meeting" | "students" | "notifications" | "permissions";
 
@@ -48,7 +44,7 @@ function isPermissionsTabVisible(
   hasPermission: (permission: AppPermission) => boolean
 ): boolean {
   const staffPermissions =
-    audience === "STAFF" && scope === ProfileScope.Other
+    audience === ProfileAudience.Staff && scope === ProfileScope.Other
       ? hasPermission(AppPermission.ProfileStaffPermissionsViewOther)
       : false;
   const canEditOther = hasPermission(AppPermission.ProfileStaffPermissionsEditOther);
@@ -119,12 +115,25 @@ export function getVisibleProfileTabs({
   });
 }
 
+const PROFILE_TAB_IDS: readonly ProfileTabId[] = [
+  "profile",
+  "paymentMethods",
+  "meeting",
+  "students",
+  "notifications",
+  "permissions",
+];
+
+function isProfileTabId(value: string): value is ProfileTabId {
+  return (PROFILE_TAB_IDS as readonly string[]).includes(value);
+}
+
 export function resolveProfileTab(
   tabParam: string | null,
   availableTabs: readonly ProfileTabDefinition[]
 ): ProfileTabId | undefined {
-  if (tabParam && availableTabs.some(tab => tab.id === tabParam)) {
-    return tabParam as ProfileTabId;
+  if (tabParam !== null && isProfileTabId(tabParam) && availableTabs.some(tab => tab.id === tabParam)) {
+    return tabParam;
   }
   return availableTabs[0]?.id;
 }

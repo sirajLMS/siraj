@@ -56,6 +56,12 @@ const STATUS_OPTION_KEYS: readonly StatusFilterValue[] = [
   LessonReportStatus.Draft,
 ];
 
+const LESSON_REPORT_STATUSES: readonly LessonReportStatus[] = Object.values(LessonReportStatus);
+
+function isLessonReportStatus(value: StatusFilterValue): value is LessonReportStatus {
+  return (LESSON_REPORT_STATUSES as readonly string[]).includes(value);
+}
+
 export function useTeacherLessonReportsViewModel({
   teacherId,
 }: Readonly<UseTeacherLessonReportsViewModelProps>): TeacherLessonReportsViewModel {
@@ -72,17 +78,17 @@ export function useTeacherLessonReportsViewModel({
     () =>
       STATUS_OPTION_KEYS.map(value => ({
         value,
-        label: value === "ALL" ? t.filterAll : resolveStatusLabel(value as LessonReportStatus, t),
+        label: value === "ALL" ? t.filterAll : isLessonReportStatus(value) ? resolveStatusLabel(value, t) : t.filterAll,
       })),
     [t]
   );
 
   const rows = useMemo<readonly TeacherLessonReportRow[]>(() => {
     const source = data?.pendingLessonReports?.rows ?? [];
-    if (statusFilter === "ALL") {
+    if (statusFilter === "ALL" || !isLessonReportStatus(statusFilter)) {
       return source.map(toRow);
     }
-    const target = statusFilter as LessonReportStatus;
+    const target = statusFilter;
     return source.filter(row => row?.status === target).map(toRow);
   }, [data, statusFilter]);
 

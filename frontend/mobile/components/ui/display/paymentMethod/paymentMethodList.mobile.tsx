@@ -12,6 +12,28 @@ import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display";
 import { MobilePaymentMethodDisplay } from "@/frontend/mobile/components/ui/display/paymentMethod/paymentMethodDisplay.mobile";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { PaymentMethodDirectionLabels, PaymentMethodTypeLabels } from "@/shared/locale/types/ui";
+
+type PaymentMethodTypeLabelKey = keyof PaymentMethodTypeLabels;
+type PaymentDirectionLabelKey = keyof PaymentMethodDirectionLabels;
+
+const PAYMENT_METHOD_TYPE_LABEL_KEYS: readonly PaymentMethodTypeLabelKey[] = [
+  "mobileWallet",
+  "paymentLink",
+  "onlineAccount",
+  "bankTransfer",
+  "cash",
+  "proofUpload",
+];
+const PAYMENT_DIRECTION_LABEL_KEYS: readonly PaymentDirectionLabelKey[] = ["in", "out", "both"];
+
+function isPaymentMethodTypeLabelKey(value: string): value is PaymentMethodTypeLabelKey {
+  return (PAYMENT_METHOD_TYPE_LABEL_KEYS as readonly string[]).includes(value);
+}
+
+function isPaymentDirectionLabelKey(value: string): value is PaymentDirectionLabelKey {
+  return (PAYMENT_DIRECTION_LABEL_KEYS as readonly string[]).includes(value);
+}
 
 export type { PaymentMethodRow };
 
@@ -58,10 +80,11 @@ export function MobilePaymentMethodList({
       {title ? <Typography sx={{ typography: "titleMd", px: 0.5 }}>{title}</Typography> : null}
 
       {methods.map(row => {
-        const typeLabel = getPaymentMethodTypeLabel(row.type, key => t.type[key as keyof typeof t.type] ?? "");
-        const directionLabel = getPaymentMethodDirectionLabel(
-          row.direction,
-          key => t.direction[key as keyof typeof t.direction] ?? ""
+        const typeLabel = getPaymentMethodTypeLabel(row.type, key =>
+          isPaymentMethodTypeLabelKey(key) ? t.type[key] : ""
+        );
+        const directionLabel = getPaymentMethodDirectionLabel(row.direction, key =>
+          isPaymentDirectionLabelKey(key) ? t.direction[key] : ""
         );
         const verificationStatus: "verified" | "unverified" = row.verifiedAt ? "verified" : "unverified";
         const activityStatus: "active" | "inactive" = row.isActive === false ? "inactive" : "active";

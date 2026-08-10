@@ -36,6 +36,36 @@ function shouldShowSupervisorDashboard(permissions: readonly AppPermission[]): b
   );
 }
 
+const EMPTY_HEADERS: ScheduleOverviewData["headers"] = {
+  className: "",
+  student: "",
+  teacher: "",
+  time: "",
+  yourTime: "",
+  teacherTime: "",
+  studentTime: "",
+  duration: "",
+  status: "",
+  actions: "",
+  history: "",
+  joinVideo: "",
+};
+
+const EMPTY_STATUS_LABELS: ScheduleOverviewData["statusLabels"] = {
+  PENDING: "",
+  TAKEN: "",
+  ABSENT: "",
+  LEAVE: "",
+  NOT_ACTIVATED: "",
+  ACTIVATED: "",
+  RUNNING: "",
+  COMPLETED: "",
+  ON_DEMAND_PENDING_CREDITS: "",
+  ON_DEMAND_CONFLICT_HELD: "",
+  ON_DEMAND_NO_CREDITS_CANCELLED: "",
+  ON_DEMAND_NO_CREDITS_ABSENT: "",
+};
+
 export type DashboardRole = "parent" | "teacher" | "student" | "supervisor" | "admin";
 
 export interface DashboardViewModel {
@@ -139,8 +169,8 @@ export function useDashboardViewModel(_: Readonly<UseDashboardViewModelProps>): 
       submitLabel: adminT.submit,
       teachers: [],
       rows: [],
-      headers: {} as ScheduleOverviewData["headers"],
-      statusLabels: {} as ScheduleOverviewData["statusLabels"],
+      headers: EMPTY_HEADERS,
+      statusLabels: EMPTY_STATUS_LABELS,
       detailsLabel: adminT.details,
       emptyMessage: adminT.noClasses,
       page: 0,

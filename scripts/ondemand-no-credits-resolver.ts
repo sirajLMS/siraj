@@ -61,9 +61,9 @@ function classifyInstances(
   for (const { instance, schedule } of pendingInstances) {
     const outcome = schedule.ondemandNoCreditsOutcome ?? OnDemandNoCreditsOutcome.AUTO_CANCEL;
 
-    if (outcome === OnDemandNoCreditsOutcome.AUTO_CANCEL) {
+    if (outcome === "AUTO_CANCEL") {
       cancelIds.push(instance.id);
-    } else if (outcome === OnDemandNoCreditsOutcome.AUTO_ABSENT_NO_CREDITS) {
+    } else if (outcome === "AUTO_ABSENT_NO_CREDITS") {
       absentIds.push(instance.id);
     } else {
       remindInstances.push({

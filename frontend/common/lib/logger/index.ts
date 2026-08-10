@@ -1,6 +1,10 @@
 import type { ApiLogOptions, LogEntry, LoggerConfig, LogLevel } from "@/frontend/common/lib/logger/types";
 import { formatTimestamp } from "@/shared/utils/date-utils";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 type LogOptions = {
   caller: string;
   /**
@@ -95,8 +99,8 @@ class ClientLogger {
     for (const [key, value] of Object.entries(obj)) {
       if (this.PII_KEYS.has(key)) {
         sanitized[key] = "[REDACTED]";
-      } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-        sanitized[key] = this.sanitizeObject(value as Record<string, unknown>);
+      } else if (isRecord(value)) {
+        sanitized[key] = this.sanitizeObject(value);
       } else {
         sanitized[key] = value;
       }
@@ -111,8 +115,8 @@ class ClientLogger {
         if (arg instanceof Error) return `${arg.name}: [REDACTED]`;
         try {
           const parsed = structuredClone(arg);
-          if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
-            return JSON.stringify(this.sanitizeObject(parsed as Record<string, unknown>));
+          if (isRecord(parsed)) {
+            return JSON.stringify(this.sanitizeObject(parsed));
           }
           return JSON.stringify(parsed);
         } catch {

@@ -21,6 +21,48 @@ import type { ProfileLabels, ProfileRoleLabels } from "@/shared/locale/types/pro
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 
+function isProfileRoleKey(value: string): value is keyof ProfileRoleLabels {
+  return value === "teacher" || value === "parent" || value === "staff" || value === "student";
+}
+
+function buildStudentProfile(
+  audience: ProfileAudience,
+  scope: ProfileScope,
+  targetUserId: string,
+  user: User | null,
+  userName: string,
+  userAvatarUrl: string,
+  userEmail: string | null | undefined
+): ProfileData {
+  return {
+    assignedStudents: null,
+    associatedStudents: null,
+    audience,
+    avatarUrl: userAvatarUrl || user?.avatarUrl || null,
+    displayCurrency: null,
+    email: userEmail ?? user?.email ?? "",
+    id: targetUserId,
+    meetingConfigs: null,
+    name: userName || user?.name || "",
+    parentAdminProfile: null,
+    parentId: null,
+    parentOwnProfile: null,
+    paymentMethodDefaults: null,
+    paymentMethods: null,
+    phone: null,
+    scope,
+    staffPermissionGroups: null,
+    staffPermissionOverrides: null,
+    staffProfile: null,
+    staffProfileId: null,
+    teacherAdminProfile: null,
+    teacherId: null,
+    teacherOwnProfile: null,
+    timezone: null,
+    userId: targetUserId,
+  };
+}
+
 interface UseProfileDataParams {
   isStudentAudience: boolean;
   audience: ProfileAudience;
@@ -70,15 +112,7 @@ function useProfileData(params: UseProfileDataParams): ProfileData | null | unde
 
   return useMemo((): ProfileData | null | undefined => {
     if (isStudentAudience) {
-      return {
-        id: targetUserId,
-        userId: targetUserId,
-        audience,
-        scope,
-        name: userName || user?.name || "",
-        email: userEmail ?? user?.email ?? "",
-        avatarUrl: userAvatarUrl || user?.avatarUrl || null,
-      } as ProfileData;
+      return buildStudentProfile(audience, scope, targetUserId, user, userName, userAvatarUrl, userEmail);
     }
     return unifiedProfileData?.profileByUserId;
   }, [
@@ -134,7 +168,8 @@ function computeRoleLabel(
   if (audience === ProfileAudience.Staff) {
     return profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined;
   }
-  return base.role[audience.toLowerCase() as keyof ProfileRoleLabels];
+  const roleKey = audience.toLowerCase();
+  return isProfileRoleKey(roleKey) ? base.role[roleKey] : undefined;
 }
 
 /**

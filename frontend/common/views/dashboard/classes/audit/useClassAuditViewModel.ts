@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import type { GroupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
@@ -17,8 +18,10 @@ import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ClassAuditLabels as ClassAuditLocaleLabels } from "@/shared/locale/types/dashboard/classes/audit";
 
-export interface ClassAuditViewModel extends ClassAuditViewProps {
+export interface ClassAuditViewModel extends Omit<ClassAuditViewProps, "audit" | "labels"> {
   readonly status: "loading" | "invalidId" | "error" | "ready";
+  readonly audit: NonNullable<GroupClassAudit> | null;
+  readonly labels: ClassAuditLabels | Record<string, never>;
 }
 
 export type UseClassAuditViewModelProps = Record<string, never>;
@@ -61,8 +64,8 @@ type StubStatus = "loading" | "invalidId" | "error";
 function createStubClassAuditViewModel(status: StubStatus): ClassAuditViewModel {
   return {
     status,
-    audit: null as unknown as Audit,
-    labels: {} as unknown as ClassAuditLabels,
+    audit: null,
+    labels: {},
     onGenerateReport: noopAdminNoteHandler,
     onEditClass: noopAdminNoteHandler,
     onExportStudents: noopAdminNoteHandler,

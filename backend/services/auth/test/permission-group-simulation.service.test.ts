@@ -50,7 +50,8 @@ async function expectRejection(fn: () => Promise<unknown>): Promise<Error> {
     error = e;
   }
   expect(error).not.toBeNull();
-  return error as Error;
+  if (error instanceof Error) return error;
+  throw new Error(String(error));
 }
 
 describe("PermissionGroupSimulationService.assertCanSimulateGroup", () => {

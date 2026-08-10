@@ -32,7 +32,8 @@ const fetchPage = async (request: GraphApiRequestInit): Promise<ListMessageTempl
     signal: AbortSignal.timeout(10_000),
   });
   expect(response.ok).toBe(true);
-  return response.json() as Promise<ListMessageTemplatesResponseBody>;
+  const body: ListMessageTemplatesResponseBody = await response.json();
+  return body;
 };
 
 describeLive("list-message-templates @live-comm", () => {
@@ -58,7 +59,7 @@ describeLive("list-message-templates @live-comm", () => {
     const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10_000) });
     expect(response.ok).toBe(true);
 
-    const body = (await response.json()) as ListMessageTemplatesResponseBody;
+    const body: ListMessageTemplatesResponseBody = await response.json();
     const { templates, nextCursor } = parseResponse(body);
 
     expect(templates.length).toBeGreaterThan(0);

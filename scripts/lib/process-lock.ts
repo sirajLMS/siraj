@@ -255,6 +255,8 @@ function createReleaseCallback(description: string): () => void {
   return release;
 }
 
+const activeTickets = new Set<string>();
+
 /**
  * Attach process exit handlers to clean up active lock on crash/exit.
  */
@@ -270,6 +272,14 @@ function attachExitHandlers(): void {
         /* ignore process exit cleanup error */
       }
     }
+    for (const ticketPath of activeTickets) {
+      try {
+        unlinkSync(ticketPath);
+      } catch {
+        /* ignore ticket cleanup error */
+      }
+    }
+    activeTickets.clear();
   };
 
   process.on("exit", cleanupAll);
@@ -357,10 +367,12 @@ export async function acquireProcessLock(description: string): Promise<() => voi
 
   // 2. Queue registration
   const { ticketPath, ticketInfo } = createQueueTicket(description);
+  activeTickets.add(ticketPath);
   console.log(`${CYAN}[process-lock]${NC} Enqueued request for "${description}" (PID: ${process.pid})`);
 
   let lastLoggedState = "";
   const cleanupTicket = () => {
+    activeTickets.delete(ticketPath);
     try {
       unlinkSync(ticketPath);
     } catch {

@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentHistoryView } from "@/frontend/common/views/dashboard/students/history/StudentHistoryView";
 import type { ClassSession, StudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/types";
+import { dashboardStudentHistoryEn } from "@/shared/locale/en/dashboard/students/history";
 
 interface MockStudentHistoryState {
   readonly studentName: string;
@@ -196,6 +197,10 @@ const useMockStudentHistoryStore = create<MockStudentHistoryState>(set => ({
   setSelectedWeek: week => set({ selectedWeek: week }),
 }));
 
+function printHandler() {
+  globalThis.print();
+}
+
 function MockStudentHistoryContainer() {
   const store = useMockStudentHistoryStore();
   const [currentMonth, setCurrentMonth] = useState<Date>(store.currentMonth);
@@ -212,9 +217,7 @@ function MockStudentHistoryContainer() {
     setCurrentMonth(next);
   };
 
-  const handlePrint = () => {
-    globalThis.print();
-  };
+  const handlePrint = printHandler;
 
   return (
     <StudentHistoryView
@@ -230,7 +233,7 @@ function MockStudentHistoryContainer() {
       onNextMonth={handleNextMonth}
       onPrint={handlePrint}
       locale="en"
-      labels={{} as never}
+      labels={dashboardStudentHistoryEn}
       loading={false}
     />
   );

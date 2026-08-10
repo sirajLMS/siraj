@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect } from "react";
-import type { OverrideState, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { OverrideState, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   assignPermissionGroupToUserMutationDocument,
   bulkAssignUsersToGroupMutationDocument,
@@ -21,6 +21,12 @@ import { logger } from "@/frontend/common/utils/logger";
 import type { LocalizedString } from "@/shared/types";
 
 const USERS_QUERY_VARIABLES = { search: null, limit: 50, offset: 0 };
+
+const OVERRIDE_STATE_VALUES = new Set(Object.values(OverrideState) as readonly string[]);
+
+function isOverrideState(value: string): value is OverrideState {
+  return OVERRIDE_STATE_VALUES.has(value);
+}
 
 // Hook for handling queries
 const usePermissionQueries = () => {
@@ -48,7 +54,15 @@ const usePermissionQueries = () => {
   }, [permissionsData, setPermissions]);
 
   useEffect(() => {
-    if (groupsData?.permissionGroups) setGroups(groupsData.permissionGroups as PermissionGroup[]);
+    if (groupsData?.permissionGroups) {
+      setGroups(
+        groupsData.permissionGroups.map(group => ({
+          __typename: "PermissionGroup" as const,
+          ...group,
+          assignedUsers: null,
+        }))
+      );
+    }
   }, [groupsData, setGroups]);
 
   useEffect(() => {
@@ -207,7 +221,10 @@ const usePermissionHandlers = (
           updateOverridesMutation({
             variables: {
               userId,
-              overrides: overrides as Array<{ permissionId: string; state: OverrideState }>,
+              overrides: overrides.map(({ permissionId, state }) => ({
+                permissionId,
+                state: isOverrideState(state) ? state : OverrideState.Granted,
+              })),
             },
           }),
         store.closeManageOverrides

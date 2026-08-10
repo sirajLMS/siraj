@@ -1,4 +1,4 @@
-import { type AppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
+import { type AppPermission, isAppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
 
 export type FieldGroupScope = ProfileScope;
 
@@ -33,7 +33,11 @@ function profilePerm(
   group: ProfileFieldGroupKey,
   action: "view_own" | "view_other" | "edit_own" | "edit_other"
 ): AppPermission {
-  return `profile.${group}.${action}` as AppPermission;
+  const perm = `profile.${group}.${action}`;
+  if (isAppPermission(perm)) {
+    return perm;
+  }
+  throw new Error(`Invalid AppPermission: ${perm}`);
 }
 
 const ALL_AUDIENCES = [ProfileAudience.TEACHER, ProfileAudience.PARENT, ProfileAudience.STAFF] as const;
@@ -226,10 +230,34 @@ export const PROFILE_FIELD_GROUPS: readonly ProfileFieldGroupDefinition[] = [
   },
 ] as const;
 
+function buildGroupByKeyMap(): Readonly<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> {
+  const findGroup = (key: ProfileFieldGroupKey): ProfileFieldGroupDefinition => {
+    const group = PROFILE_FIELD_GROUPS.find(g => g.groupKey === key);
+    if (!group) {
+      throw new Error(`Missing profile field group: ${key}`);
+    }
+    return group;
+  };
+  return {
+    core_identity: findGroup("core_identity"),
+    core_contact: findGroup("core_contact"),
+    teacher_professional: findGroup("teacher_professional"),
+    teacher_identity: findGroup("teacher_identity"),
+    parent_social: findGroup("parent_social"),
+    parent_identity: findGroup("parent_identity"),
+    parent_billing: findGroup("parent_billing"),
+    parent_account: findGroup("parent_account"),
+    parent_students: findGroup("parent_students"),
+    teacher_students: findGroup("teacher_students"),
+    staff_role: findGroup("staff_role"),
+    staff_permissions: findGroup("staff_permissions"),
+    payment_methods: findGroup("payment_methods"),
+    meeting_configs: findGroup("meeting_configs"),
+  };
+}
+
 export const PROFILE_FIELD_GROUP_BY_KEY: Readonly<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> =
-  Object.fromEntries(PROFILE_FIELD_GROUPS.map(group => [group.groupKey, group])) as Readonly<
-    Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>
-  >;
+  buildGroupByKeyMap();
 
 export function getProfileViewPermission(group: ProfileFieldGroupDefinition, scope: ProfileScope): AppPermission {
   return scope === ProfileScope.OWN ? group.viewOwn : group.viewOther;

@@ -40,7 +40,8 @@ describe("TeacherOnboardingService.createTeacher", () => {
     }
 
     expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("permissions");
+    if (!(error instanceof Error)) throw new Error(String(error));
+    expect(error.message).toContain("permissions");
 
     hasPermissionSpy.mockRestore();
   });
@@ -113,7 +114,8 @@ describe("TeacherOnboardingService.createTeacher", () => {
     }
 
     expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("email");
+    if (!(error instanceof Error)) throw new Error(String(error));
+    expect(error.message).toContain("email");
 
     hasPermissionSpy.mockRestore();
     existsByEmailSpy.mockRestore();

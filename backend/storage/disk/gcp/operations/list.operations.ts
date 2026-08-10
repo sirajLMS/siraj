@@ -6,6 +6,12 @@ import { loadListEntities, paginateStorageItems } from "@/backend/storage/disk/s
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 
+function isGcsApiResponse(value: unknown): value is GcsApiResponse {
+  if (typeof value !== "object" || value === null) return false;
+  if (!("prefixes" in value) || value.prefixes === undefined) return true;
+  return Array.isArray(value.prefixes) && value.prefixes.every(p => typeof p === "string");
+}
+
 /**
  * List files and directories in a GCP bucket path
  */
@@ -20,7 +26,7 @@ export async function listFiles(ctx: GcpContext, input: Types.FilesListSearchInp
   });
 
   const [files] = response;
-  const apiResponse = response[2] as GcsApiResponse | undefined;
+  const apiResponse = isGcsApiResponse(response[2]) ? response[2] : undefined;
 
   const validFiles = files.filter(file => file.name !== prefix);
   const filePaths = validFiles.map(f => f.name);
@@ -92,6 +98,6 @@ async function originalFetchDirectoryChildren(ctx: GcpContext, path?: string | n
     autoPaginate: false,
   });
 
-  const apiResponse = responseData[2] as GcsApiResponse | undefined;
+  const apiResponse = isGcsApiResponse(responseData[2]) ? responseData[2] : undefined;
   return mapGcsDirectories(apiResponse?.prefixes || [], dbDirectoriesByPath, new Map());
 }

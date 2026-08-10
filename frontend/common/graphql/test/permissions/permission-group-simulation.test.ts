@@ -54,11 +54,12 @@ describe("GraphQL Permission Group Simulation Integration Tests", () => {
     expect(data.startPermissionGroupSimulation?.token).toBeDefined();
     expect(data.startPermissionGroupSimulation?.groupSlug).toBe(teacherGroupSlug || "teacher_default");
 
-    await authenticatedRequest(
-      data.startPermissionGroupSimulation?.token as string,
-      "mutate",
-      endPermissionGroupSimulationMutationDocument
-    );
+    const simulationToken = data.startPermissionGroupSimulation?.token;
+    if (!simulationToken) {
+      throw new Error("simulation token was not defined");
+    }
+
+    await authenticatedRequest(simulationToken, "mutate", endPermissionGroupSimulationMutationDocument);
   });
 
   test("me query keeps admin identity while simulating teacher group", async () => {
@@ -108,7 +109,10 @@ describe("GraphQL Permission Group Simulation Integration Tests", () => {
     const endData = await authenticatedRequest(simulationToken, "mutate", endPermissionGroupSimulationMutationDocument);
     expect(endData.endPermissionGroupSimulation?.token).toBeDefined();
 
-    const restoredToken = endData.endPermissionGroupSimulation?.token as string;
+    const restoredToken = endData.endPermissionGroupSimulation?.token;
+    if (!restoredToken) {
+      throw new Error("restored token was not defined");
+    }
     const status = await authenticatedRequest(restoredToken, "query", permissionGroupSimulationStatusQueryDocument);
     expect(status.permissionGroupSimulationStatus?.isActive).toBe(false);
   });
