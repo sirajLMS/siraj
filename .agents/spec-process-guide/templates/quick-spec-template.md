@@ -56,7 +56,7 @@ Ready-to-use template for 1-3 day features that need requirements and tasks but 
 ## Implementation Plan
 
 ### Phase 0: Baseline (Simplified for Quick Specs)
-- [ ] **Record error baseline** (tsgo + biome + lint counts) - document in outcome file
+- [ ] **Record error baseline** (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` exit code, plus granular `bun tsgo` / `bun biome:check` / `bun run scripts/lint-service.ts --json --id baseline` counts) - document in outcome file
 - [ ] **Create deferred-items ledger** (if feature has >3 tasks) - use template
 
 ### Prerequisites
@@ -67,19 +67,19 @@ Ready-to-use template for 1-3 day features that need requirements and tasks but 
 1. **[Task Name]** - [Brief description]
    - **Estimate:** [X hours]
    - **Details:** [Specific implementation notes]
-   - **Quality Loop:** `bun tsgo` + `bun biome:check` + `bun run scripts/lint-service.ts -f <file> --id verify`
-   - **Semantic Review:** Check race conditions, env-config, cross-layer, enums, deferred items
+   - **Quality Loop:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs tsgo → biome → oxlint → lint → duplicates → codescene; auto-discovers applicable AGENTS.md + instructions; exit code 0 = pass)
+   - **Semantic Review:** Check race conditions, env-config, cross-layer, enums, deferred items (sub-loop.ts handles mechanical checks; this covers semantic bugs it can't detect)
 
 2. **[Task Name]** - [Brief description]
    - **Estimate:** [X hours]
    - **Details:** [Specific implementation notes]
-   - **Quality Loop:** Per-file verification
+   - **Quality Loop:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
    - **Semantic Review:** Self-review checklist
 
 3. **[Task Name]** - [Brief description]
    - **Estimate:** [X hours]
    - **Details:** [Specific implementation notes]
-   - **Quality Loop:** Per-file verification
+   - **Quality Loop:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
    - **Semantic Review:** Self-review checklist
 
 **Note:** Quick specs skip Phase 1.5 (Plan Review) and Phase 4 (Parallel Review Waves) for speed. Use full spec process for features >3 days.

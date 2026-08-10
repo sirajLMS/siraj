@@ -34,11 +34,11 @@ Ultra-lightweight template for changes under 1 day of effort - bug fixes, copy c
 [Brief justification - why is this needed?]
 
 ## How
-- **Baseline:** Record error count before starting (tsgo + biome + lint)
+- **Baseline:** Record error count before starting (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` exit code)
 - [Implementation step 1]
 - [Implementation step 2]  
 - [Implementation step 3]
-- **Quality Loop:** Per-file verification after each change
+- **Quality Loop:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` after each change (exit code 0 = pass)
 
 ## Acceptance
 [Simple pass/fail criteria - how do you know it worked?]

@@ -67,15 +67,16 @@
 - [ ] All stale references resolved (grep confirms)
 - [ ] New tasks/components added where needed
 - [ ] AC traceability complete
-- [ ] Quality loop passes on all plan files (tsgo + biome + lint)
+- [ ] Quality loop passes on all plan files (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` exit code 0)
 - [ ] Re-run `@plan-review` confirms "Plan passes all AGENTS.md rules"
 
 **Verification command:**
 ```bash
-# Run quality loop on modified plan files
-bun tsgo
-bun biome:check
-bun run scripts/lint-service.ts -f specs.md -f implementation.md -f trackable-tasks.md --id plan-review-verification
+# Run the unified per-file quality loop on modified plan files
+# (runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file)
+bun run scripts/health/sub-loop.ts specs.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts implementation.md --lifecycle codescene
+bun run scripts/health/sub-loop.ts trackable-tasks.md --lifecycle codescene
 ```
 
 ---

@@ -724,6 +724,7 @@
   - _Requirements: REQ-8.1, NFR-4_
 
   - [ ] 4.1.QL **Quality Loop**: N/A (verification only)
+  - No file modifications — this task only runs verification commands
   - [ ] 4.1.OUT **Outcome File**: Write `outcome/4.1-final-jscpd-verification-outcome.md`
 
 - [ ] 4.2 Run full quality gate
@@ -735,6 +736,7 @@
   - _Requirements: REQ-8.2, NFR-1, NFR-2, NFR-3_
 
   - [ ] 4.2.QL **Quality Loop**: N/A (global gate)
+  - This task runs the full quality gate via `bun quality-gate` which orchestrates all stages
   - [ ] 4.2.OUT **Outcome File**: Write `outcome/4.2-quality-gate-outcome.md`
 
 - [ ] 4.3 Run full test suite (NO DEFERRAL — actually run all suites this time)
@@ -750,6 +752,7 @@
   - _Requirements: REQ-8.3, REQ-11, NFR-5_
 
   - [ ] 4.3.QL **Quality Loop**: N/A (test execution)
+  - This task runs the full test suite — no per-file quality loop needed
   - [ ] 4.3.OUT **Outcome File**: Write `outcome/4.3-full-test-suite-outcome.md`
     - Document: actual test results (pass/fail counts), any test updates made, behavioral changes verified
 
@@ -776,7 +779,6 @@
     - `frontend/common/components/ui/AGENTS.md` — add reference to any new scaffold patterns
     - `frontend/views/AGENTS.md` — add `__shared__/` directory convention for view component scaffolds
     - `frontend/desktop/AGENTS.md` — add cross-tier import reminder (desktop variants import only from `common/` scaffolds or `views/.../__shared__/` scaffolds)
-    ++ **MANDATORY Subtasks for Every Implementation Task**
   - **Update `.agents/skills/` if patterns affect skills**:
     - `.agents/skills/refactor-mobile-desktop/SKILL.md` — add view component scaffold pattern (Phase 2) as an extension of the UI component scaffold pattern (Phase 1)
   - **Update `.agents/instructions/` if new conventions**:
@@ -786,6 +788,9 @@
   - _Requirements: REQ-9_
 
   - [ ] 4.5.QL **Quality Loop**: Per-file verification on all modified docs and AGENTS.md files
+    - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
+    - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
+    - Fix all errors before proceeding
   - [ ] 4.5.OUT **Outcome File**: Write `outcome/4.5-knowledge-propagation-outcome.md`
   - Update progress: Mark task 4.5 as `[x]` in `tasks.md`
 ---
