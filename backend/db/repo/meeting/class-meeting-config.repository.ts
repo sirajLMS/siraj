@@ -169,16 +169,6 @@ export namespace ClassMeetingConfigRepository {
 
       const updateData: Record<string, unknown> = { updatedAt: new Date() };
 
-      function collectPresentKeys(obj: Record<string, unknown>, keys: readonly string[]): string[] {
-        const result: string[] = [];
-        for (const key of keys) {
-          if (key in obj) {
-            result.push(key);
-          }
-        }
-        return result;
-      }
-
       const UPDATABLE_KEYS = [
         "label",
         "isDefault",
@@ -188,8 +178,10 @@ export namespace ClassMeetingConfigRepository {
         "providerMetadata",
       ] as const;
 
-      for (const key of collectPresentKeys(input, UPDATABLE_KEYS)) {
-        updateData[key] = input[key as keyof typeof input];
+      for (const key of UPDATABLE_KEYS) {
+        if (key in input) {
+          updateData[key] = input[key];
+        }
       }
 
       const [result] = await t
@@ -230,7 +222,7 @@ export namespace ClassMeetingConfigRepository {
     return row ?? null;
   }
 
-  export async function _upsertMany(
+  export async function upsertMany(
     inputs: readonly ClassMeetingConfigInsertType[],
     tErrors: ErrorsLabels,
     tx?: DBTransaction
@@ -260,8 +252,6 @@ export namespace ClassMeetingConfigRepository {
       tx
     );
   }
-
-  export const upsertMany = _upsertMany;
 
   export async function setDefault(
     id: string,
