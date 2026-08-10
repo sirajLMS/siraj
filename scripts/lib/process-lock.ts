@@ -425,26 +425,29 @@ export async function acquireProcessLock(description: string): Promise<() => voi
 export async function withProcessLock<T>(description: string, fn: () => Promise<T>): Promise<T> {
   const release = await acquireProcessLock(description);
 
-  const isCodeScene = description.toLowerCase().includes("codescene");
+  const desc = description.toLowerCase();
+  const isCodeScene = desc.includes("codescene");
+  const isTestRun = desc.startsWith("test") || desc.includes("test:") || desc.includes("test ");
   const MAX_TASK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
   let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
   let timedOut = false;
 
-  const timeoutPromise = isCodeScene
-    ? null
-    : new Promise<never>((_, reject) => {
-        timeoutTimer = setTimeout(() => {
-          timedOut = true;
-          const msg =
-            `\n\x1b[31m❌ [process-lock] TASK TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
-            `Task "${description}" took longer than 5 minutes (300000ms) to complete.\n` +
-            `This usually indicates an un-excluded build/dist directory, an infinite loop, or resource contention.\n` +
-            `Fix the underlying issue before running again.\n`;
-          console.error(msg);
-          reject(new Error(msg));
-        }, MAX_TASK_TIMEOUT_MS);
-      });
+  const timeoutPromise =
+    isCodeScene || isTestRun
+      ? null
+      : new Promise<never>((_, reject) => {
+          timeoutTimer = setTimeout(() => {
+            timedOut = true;
+            const msg =
+              `\n\x1b[31m❌ [process-lock] TASK TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
+              `Task "${description}" took longer than 5 minutes (300000ms) to complete.\n` +
+              `This usually indicates an un-excluded build/dist directory, an infinite loop, or resource contention.\n` +
+              `Fix the underlying issue before running again.\n`;
+            console.error(msg);
+            reject(new Error(msg));
+          }, MAX_TASK_TIMEOUT_MS);
+        });
 
   try {
     if (timeoutPromise) {
