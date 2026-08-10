@@ -14,8 +14,8 @@ type ConfigStoreLike = {
   sirajHmrPatched?: boolean;
 };
 
-type BuilderWithConfigStore = {
-  configStore: ConfigStoreLike;
+type BuilderLike = {
+  configStore: unknown;
 };
 
 const patchedFieldMaps = new WeakSet<Map<string, unknown>>();
@@ -32,6 +32,26 @@ function allowFieldReplacement(fieldMap: Map<string, unknown>): Map<string, unkn
 
 function isRefLike(value: unknown): value is RefLike {
   return typeof value === "object" && value !== null && "name" in value && typeof value.name === "string";
+}
+
+function isConfigStoreLike(value: unknown): value is ConfigStoreLike {
+  if (typeof value !== "object" || value === null) return false;
+  return (
+    "addTypeRef" in value &&
+    typeof value.addTypeRef === "function" &&
+    "implementors" in value &&
+    value.implementors instanceof Map &&
+    "typeConfigs" in value &&
+    value.typeConfigs instanceof Map &&
+    "fields" in value &&
+    value.fields instanceof Map &&
+    "refs" in value &&
+    value.refs instanceof Set &&
+    "paramAssociations" in value &&
+    value.paramAssociations instanceof Map &&
+    "pending" in value &&
+    typeof value.pending === "boolean"
+  );
 }
 
 function clearTypeRegistration(store: ConfigStoreLike, typeName: string, keepRef: RefLike): void {
@@ -66,12 +86,15 @@ function clearTypeRegistration(store: ConfigStoreLike, typeName: string, keepRef
  * IMPORTANT: do not wrap ref.onConfig — that re-enters during updateConfig and
  * overflows the stack.
  */
-export function enablePothosDevHmr(builder: BuilderWithConfigStore): void {
+export function enablePothosDevHmr(builder: BuilderLike): void {
   if (process.env.NODE_ENV === "production") {
     return;
   }
 
   const store = builder.configStore;
+  if (!isConfigStoreLike(store)) {
+    return;
+  }
   if (store.sirajHmrPatched) {
     return;
   }

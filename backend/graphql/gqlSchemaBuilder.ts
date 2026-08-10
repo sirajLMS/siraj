@@ -25,6 +25,23 @@ if (process.env.NODE_ENV !== "production") {
   SchemaBuilder.allowPluginReRegistration = true;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+// Detects whether an auth-scope failure represents an unauthenticated request
+// (i.e. the `loggedIn` scope failed) so we can emit UNAUTHENTICATED vs FORBIDDEN.
+const hasLoggedInFailure = (failure: unknown): boolean => {
+  if (!isRecord(failure)) return false;
+  if (failure.kind === "AuthScope") {
+    return failure.scope === "loggedIn";
+  }
+  if (failure.kind === "AnyAuthScopes" || failure.kind === "AllAuthScopes") {
+    const failures = failure.failures;
+    return Array.isArray(failures) && failures.some(hasLoggedInFailure);
+  }
+  return false;
+};
+
 export interface PothosTypes {
   DrizzleRelations: DrizzleRelations;
   Context: BaseContext;
@@ -110,19 +127,6 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
       };
     },
     unauthorizedError: (_parent, _context, _info, result) => {
-      const hasLoggedInFailure = (failure: unknown): boolean => {
-        if (!failure || typeof failure !== "object") return false;
-        const failureObj = failure as Record<string, unknown>;
-        if (failureObj.kind === "AuthScope") {
-          return failureObj.scope === "loggedIn";
-        }
-        if (failureObj.kind === "AnyAuthScopes" || failureObj.kind === "AllAuthScopes") {
-          const failures = failureObj.failures;
-          return Array.isArray(failures) && failures.some(hasLoggedInFailure);
-        }
-        return false;
-      };
-
       const isUnauthenticated = hasLoggedInFailure(result.failure);
 
       return new GraphQLError(result.message, {
@@ -149,14 +153,14 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
   },
 });
 
-enablePothosDevHmr(gqlSchemaBuilder as never);
+enablePothosDevHmr(gqlSchemaBuilder);
 
 // Drop any builder cached by earlier HMR experiments so a stuck process can recover.
 if (process.env.NODE_ENV !== "production") {
   const globalForPothos = globalThis as typeof globalThis & {
     __sirajGqlSchemaBuilder?: unknown;
   };
-  delete globalForPothos.__sirajGqlSchemaBuilder;
+  delete globalForPothos["__sirajGqlSchemaBuilder"];
 }
 
 // HMR dependency edge (hayes/pothos#49): when any schema definition module
