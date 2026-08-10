@@ -41,6 +41,33 @@ async function setupEmptyTeacherWeeklyContext(tx: DBTransaction, prefix: string)
   return { teacher, weekStart, weekEnd, queries };
 }
 
+async function getRecurringPayload(
+  tx: DBTransaction,
+  studentId: string,
+  teacherId: string,
+  days: {
+    dayOfWeek: "FRIDAY" | "MONDAY" | "SATURDAY" | "SUNDAY" | "THURSDAY" | "TUESDAY" | "WEDNESDAY";
+    startTime: string;
+    isActive: boolean;
+  }[],
+  quotaDeducted = true
+) {
+  return {
+    studentId,
+    teacherId,
+    subjectId: await ensureTestSubjectId(tx),
+    durationMinutes: 60,
+    defaultStartTime: "10:00:00",
+    timezone: IanaTimezone.UTC,
+    effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+    effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+    days,
+    classType: "REGULAR" as const,
+    generateInstancesForWeeks: 1,
+    quotaDeducted,
+  };
+}
+
 describe("Scheduling Repository – Recurring & Weekly", () => {
   describe("getWeeklyScheduleGrid and getWeeklyWorkloadMetrics", () => {
     test("returns correct grid and metrics for a week", async () => {
@@ -126,31 +153,6 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
   });
 
   describe("createRecurringScheduleWithInstances", () => {
-    const getRecurringPayload = async (
-      tx: DBTransaction,
-      studentId: string,
-      teacherId: string,
-      days: {
-        dayOfWeek: "FRIDAY" | "MONDAY" | "SATURDAY" | "SUNDAY" | "THURSDAY" | "TUESDAY" | "WEDNESDAY";
-        startTime: string;
-        isActive: boolean;
-      }[],
-      quotaDeducted = true
-    ) => ({
-      studentId,
-      teacherId,
-      subjectId: await ensureTestSubjectId(tx),
-      durationMinutes: 60,
-      defaultStartTime: "10:00:00",
-      timezone: IanaTimezone.UTC,
-      effectiveFrom: new Date("2026-06-22T00:00:00Z"),
-      effectiveUntil: new Date("2026-07-22T00:00:00Z"),
-      days,
-      classType: "REGULAR" as const,
-      generateInstancesForWeeks: 1,
-      quotaDeducted,
-    });
-
     test("success with quota deduction", async () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "RecClass", { skipInstance: true });

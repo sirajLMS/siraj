@@ -101,7 +101,8 @@ export async function seedOrGet(
 
   const results: (TeacherDueReturnType | null)[] = [];
 
-  for (const spec of specs) {
+  await specs.reduce(async (prev, spec) => {
+    await prev;
     const due = await TeacherDueService.seedTeacherDueIfMissing({
       classInstanceId: spec.classInstance.id,
       teacherId: spec.teacherId,
@@ -116,7 +117,7 @@ export async function seedOrGet(
     });
 
     results.push(due);
-  }
+  }, Promise.resolve());
 
   const seeded = results.filter((row): row is TeacherDueReturnType => row != null);
   logger.info(`LMS teacher dues seeded (${seeded.length} rows).`);

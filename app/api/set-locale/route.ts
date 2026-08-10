@@ -3,9 +3,11 @@ import { getEnv, getEnvironmentConfig } from "@/backend/lib/env";
 import { locales } from "@/shared/locale/AppLocale";
 
 const envConfig = getEnvironmentConfig();
-const ALLOWED_ORIGINS = [getEnv("NEXT_PUBLIC_BASE_URL", ""), envConfig.allowedOrigin, "http://localhost:3000"].filter(
-  Boolean
-) as string[];
+const ALLOWED_ORIGINS: string[] = [
+  getEnv("NEXT_PUBLIC_BASE_URL", ""),
+  envConfig.allowedOrigin,
+  "http://localhost:3000",
+].filter((v): v is string => typeof v === "string" && v.length > 0);
 
 const LOCALE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year
 

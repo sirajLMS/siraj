@@ -60,32 +60,35 @@ export const getRescheduleTrackingRows = async (
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
 
-export const getRescheduleTrackingMetrics = async (tx?: DBTransaction) => {
-  const runner = async (t: DBTransaction) => {
-    const [lrMetrics] = await t
-      .select({
-        pending: sql<number>`sum(case when status = 'PENDING' then 1 else 0 end)`.mapWith(Number),
-        approved: sql<number>`sum(case when status = 'APPROVED' then 1 else 0 end)`.mapWith(Number),
-        rescheduled: sql<number>`sum(case when status = 'RESCHEDULED' then 1 else 0 end)`.mapWith(Number),
-        cancelled: sql<number>`sum(case when status = 'CANCELLED' then 1 else 0 end)`.mapWith(Number),
-        leave: sql<number>`count(*)`.mapWith(Number),
-      })
-      .from(leaveRequests);
+const getRescheduleMetricsRunner = async (t: DBTransaction) => {
+  const [lrMetrics] = await t
+    .select({
+      pending: sql<number>`sum(case when status = 'PENDING' then 1 else 0 end)`.mapWith(Number),
+      approved: sql<number>`sum(case when status = 'APPROVED' then 1 else 0 end)`.mapWith(Number),
+      rescheduled: sql<number>`sum(case when status = 'RESCHEDULED' then 1 else 0 end)`.mapWith(Number),
+      cancelled: sql<number>`sum(case when status = 'CANCELLED' then 1 else 0 end)`.mapWith(Number),
+      leave: sql<number>`count(*)`.mapWith(Number),
+    })
+    .from(leaveRequests);
 
-    const [rescheduledCountRow] = await t
-      .select({
-        count: sql<number>`count(*)`.mapWith(Number),
-      })
-      .from(classInstances)
-      .where(and(isNull(classInstances.deletedAt), sql`${classInstances.originalClassId} IS NOT NULL`));
+  const [rescheduledCountRow] = await t
+    .select({
+      count: sql<number>`count(*)`.mapWith(Number),
+    })
+    .from(classInstances)
+    .where(and(isNull(classInstances.deletedAt), sql`${classInstances.originalClassId} IS NOT NULL`));
 
-    return {
-      pending: lrMetrics?.pending ?? 0,
-      approved: lrMetrics?.approved ?? 0,
-      leave: lrMetrics?.leave ?? 0,
-      rescheduled: rescheduledCountRow?.count ?? 0,
-      cancelled: lrMetrics?.cancelled ?? 0,
-    };
+  return {
+    pending: lrMetrics?.pending ?? 0,
+    approved: lrMetrics?.approved ?? 0,
+    leave: lrMetrics?.leave ?? 0,
+    rescheduled: rescheduledCountRow?.count ?? 0,
+    cancelled: lrMetrics?.cancelled ?? 0,
   };
-  return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+};
+
+export const getRescheduleTrackingMetrics = async (tx?: DBTransaction) => {
+  return tx
+    ? await getRescheduleMetricsRunner(tx)
+    : await db.transaction((t: DBTransaction) => getRescheduleMetricsRunner(t));
 };

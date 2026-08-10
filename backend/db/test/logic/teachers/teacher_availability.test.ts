@@ -130,7 +130,11 @@ async function expectBookingToFail(args: {
   try {
     await createTestClassInstance({ tx, studentId, teacherId, start, end });
   } catch (error) {
-    bookingError = error as Error;
+    if (error instanceof Error) {
+      bookingError = error;
+    } else {
+      throw new Error(String(error));
+    }
   }
   if (bookingError) {
     expect(bookingError.message).toContain(expectedError);

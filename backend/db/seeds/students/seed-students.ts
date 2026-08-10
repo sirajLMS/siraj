@@ -160,14 +160,15 @@ export async function seedOrGet(
 
   const ctx = await prepareStudentSeedContext(users, seedConfig, parentsList, teachersList);
 
-  const results: StudentSelectType[] = [];
   const assignmentDate = new Date("2020-01-01");
 
-  for (let i = 0; i < ctx.totalStudents; i++) {
-    const spec = buildStudentRowSpec(i, ctx, parentsList, teachersList);
-    const student = await upsertStudentRow(spec, assignmentDate);
-    results.push(student);
-  }
+  const indices = Array.from({ length: ctx.totalStudents }, (_, i) => i);
+  const results = await Promise.all(
+    indices.map(i => {
+      const spec = buildStudentRowSpec(i, ctx, parentsList, teachersList);
+      return upsertStudentRow(spec, assignmentDate);
+    })
+  );
 
   if (shouldSeedExtendedFiles(seedConfig)) {
     await linkAvatarsToEntities({

@@ -16,6 +16,10 @@ function collectErrorMessages(error: unknown): string {
   return messages.join(" ");
 }
 
+function hasErrorCode(value: unknown): value is { code?: string } {
+  return typeof value === "object" && value !== null && "code" in value;
+}
+
 function isLeaveQuotaViolation(error: unknown): boolean {
   const combined = collectErrorMessages(error);
   if (combined.includes("Leave quota exceeded")) {
@@ -24,7 +28,7 @@ function isLeaveQuotaViolation(error: unknown): boolean {
 
   let current: unknown = error;
   while (current instanceof Error) {
-    if ((current as { code?: string }).code === "P0001") {
+    if (hasErrorCode(current) && current.code === "P0001") {
       return true;
     }
     current = current.cause;

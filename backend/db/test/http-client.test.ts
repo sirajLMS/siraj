@@ -31,8 +31,10 @@ function setEnv(overrides: EnvSnapshot): void {
   for (const key of ENV_KEYS) {
     setProcessEnv(key, undefined);
   }
-  for (const [key, value] of Object.entries(overrides)) {
-    setProcessEnv(key as EnvKey, value);
+  for (const key of ENV_KEYS) {
+    if (key in overrides) {
+      setProcessEnv(key, overrides[key]);
+    }
   }
 }
 

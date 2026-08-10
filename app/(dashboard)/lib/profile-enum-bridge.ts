@@ -34,7 +34,7 @@ export function toGqlProfileAudience(audience: ProfileAudience): GqlProfileAudie
     case ProfileAudience.STAFF:
       return GqlProfileAudience.Staff;
     case ProfileAudience.STUDENT:
-      return "STUDENT" as GqlProfileAudience;
+      return GqlProfileAudience.Student;
   }
   throw new Error(`Unhandled case in toGqlProfileAudience`);
 }

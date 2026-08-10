@@ -109,22 +109,23 @@ async function rescheduleTestClass(
   );
 }
 
-async function insertClassInstance(tx: DBTransaction, values: Partial<ClassInstanceInsertType>) {
+async function insertClassInstance(
+  tx: DBTransaction,
+  values: Partial<ClassInstanceInsertType> & { studentId: string; teacherId: string }
+) {
   const now = new Date();
-  const [instance] = await tx
-    .insert(classInstances)
-    .values({
-      scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
-      scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
-      durationMinutes: 60,
-      classType: "REGULAR",
-      createdAt: now,
-      updatedAt: now,
-      idempotencyKey: randomUUID(),
-      ...values,
-      subjectId: values.subjectId ?? (await ensureTestSubjectId(tx)),
-    } as ClassInstanceInsertType)
-    .returning();
+  const insertValues: ClassInstanceInsertType = {
+    scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+    scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
+    durationMinutes: 60,
+    classType: "REGULAR",
+    createdAt: now,
+    updatedAt: now,
+    idempotencyKey: randomUUID(),
+    ...values,
+    subjectId: values.subjectId ?? (await ensureTestSubjectId(tx)),
+  };
+  const [instance] = await tx.insert(classInstances).values(insertValues).returning();
   return instance;
 }
 

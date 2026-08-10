@@ -4,8 +4,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { studentStatusHistory } from "@/backend/db/schema/students/students";
 import type { StudentStatus } from "@/backend/enum";
+import type { StudentStatusHistorySelectType } from "@/backend/types";
 
-export type StudentStatusHistoryRow = typeof studentStatusHistory.$inferSelect;
+export type StudentStatusHistoryRow = StudentStatusHistorySelectType;
 
 export type CreateInitialStatusHistoryInput = {
   studentId: string;
@@ -30,10 +31,13 @@ export namespace StudentStatusHistoryRepository {
     const studentIds = inputs.map(i => i.studentId);
     const existing = await findByStudentIds(studentIds, tx);
     const existingStudentIds = new Set(existing.map(r => r.studentId));
-    const results = [...existing];
+    const toInsert = inputs.filter(input => !existingStudentIds.has(input.studentId));
 
-    for (const input of inputs) {
-      if (existingStudentIds.has(input.studentId)) continue;
+    const inserted: StudentStatusHistoryRow[] = [];
+
+    async function processNext(index: number): Promise<void> {
+      if (index >= toInsert.length) return;
+      const input = toInsert[index];
       const [row] = await executor
         .insert(studentStatusHistory)
         .values({
@@ -44,9 +48,13 @@ export namespace StudentStatusHistoryRepository {
           createdAt: input.createdAt,
         })
         .returning();
-      if (row) results.push(row);
+      if (row) inserted.push(row);
+      return processNext(index + 1);
     }
-    return results;
+
+    await processNext(0);
+
+    return [...existing, ...inserted];
   }
 
   export async function findFirstByStudentId(

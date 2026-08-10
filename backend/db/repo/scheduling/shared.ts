@@ -119,14 +119,17 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
         )
       );
 
-    for (const row of meetingUrlOverlaps) {
+    const resolvedUrls = await Promise.all(
+      meetingUrlOverlaps.map(row => EffectiveMeetingService.resolveForClassInstance(row.id, tErrors, tx))
+    );
+
+    for (const [index, row] of meetingUrlOverlaps.entries()) {
       // Check direct meetingJoinUrl column first
       if (row.meetingJoinUrl === meetingJoinUrl) {
         throw new Error(tErrors.meetingUrlInUse);
       }
       // Also check resolved meeting URL from config service
-      const resolved = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors, tx);
-      if (resolved.joinUrl === meetingJoinUrl) {
+      if (resolvedUrls[index].joinUrl === meetingJoinUrl) {
         throw new Error(tErrors.meetingUrlInUse);
       }
     }

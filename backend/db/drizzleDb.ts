@@ -57,13 +57,14 @@ function getStatelessHttpDb() {
  */
 export type QueryDbHandle = ReturnType<typeof getNeonHttpDb> | typeof db;
 
+function isTxDefined<T>(tx: T | undefined): tx is T {
+  return tx !== undefined;
+}
+
 export function queryDb(): QueryDbHandle;
 export function queryDb<T>(tx: T): T extends undefined ? QueryDbHandle : T;
-export function queryDb<T>(tx?: T): QueryDbHandle {
-  if (tx !== undefined) {
-    return tx as QueryDbHandle;
-  }
-  return getStatelessHttpDb() ?? db;
+export function queryDb<T>(tx?: T): QueryDbHandle | T {
+  return isTxDefined(tx) ? tx : (getStatelessHttpDb() ?? db);
 }
 
 export function getDrizzleDbPool(): ReturnType<typeof createPool> | null {
@@ -76,12 +77,9 @@ export function getDrizzleDbPool(): ReturnType<typeof createPool> | null {
 
 /** Type guard: checks if a value is a pool with an `end()` method. */
 function isPoolWithEnd(value: unknown): value is { end(): Promise<void> } {
-  return (
-    value != null &&
-    typeof value === "object" &&
-    "end" in value &&
-    typeof (value as Record<string, unknown>).end === "function"
-  );
+  if (value == null || typeof value !== "object") return false;
+  const endFn = Reflect.get(value, "end");
+  return typeof endFn === "function";
 }
 
 export async function closeDrizzleDbPool(): Promise<void> {

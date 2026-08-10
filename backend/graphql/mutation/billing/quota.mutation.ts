@@ -79,7 +79,14 @@ gqlSchemaBuilder.mutationField("updateQuota", t =>
       // V3-012: Permission check is enforced by QuotaService.updateQuota.
       // V3-070: Map service-layer errors to proper GraphQL error codes.
       try {
-        return await QuotaService.updateQuota(args.id, args.input as QuotaUpdateInput, actorUserId, ctx.locale);
+        const input: QuotaUpdateInput = {
+          ...args.input,
+          name: args.input.name ?? undefined,
+          status: args.input.status ?? undefined,
+          priority: args.input.priority ?? undefined,
+          version: args.input.version ?? undefined,
+        };
+        return await QuotaService.updateQuota(args.id, input, actorUserId, ctx.locale);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }

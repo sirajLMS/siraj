@@ -113,7 +113,30 @@ async function exchangeCodeForTokens(
     throw new Error(`${cfg.displayName} token exchange failed (${res.status}): ${body}`);
   }
 
-  return (await res.json()) as OAuthTokenResponse;
+  const data: unknown = await res.json();
+  if (!isOAuthTokenResponse(data)) {
+    throw new Error(`${cfg.displayName} token exchange returned unexpected shape: ${JSON.stringify(data)}`);
+  }
+  return data;
+}
+
+/**
+ * Type guard that validates a token-endpoint response conforms to the minimal
+ * {@link OAuthTokenResponse} shape. Used instead of `as` to satisfy oxlint's
+ * `no-unsafe-type-assertion` rule.
+ */
+function isOAuthTokenResponse(value: unknown): value is OAuthTokenResponse {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.access_token === "string" &&
+    typeof record.token_type === "string" &&
+    typeof record.expires_in === "number" &&
+    (record.refresh_token === undefined || typeof record.refresh_token === "string") &&
+    (record.scope === undefined || typeof record.scope === "string")
+  );
 }
 
 /**

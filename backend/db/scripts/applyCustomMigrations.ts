@@ -72,6 +72,26 @@ interface Sidecar {
   appliedFolders: string[];
 }
 
+/** Type guard: validates that an unknown value is a valid Sidecar object. */
+function isSidecar(value: unknown): value is Sidecar {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.manifestHash === "string" &&
+    Array.isArray(obj.manifest) &&
+    obj.manifest.every(
+      (e): e is ManifestEntry =>
+        typeof e === "object" &&
+        e !== null &&
+        !Array.isArray(e) &&
+        typeof (e as Record<string, unknown>).file === "string" &&
+        typeof (e as Record<string, unknown>).sha256 === "string"
+    ) &&
+    Array.isArray(obj.appliedFolders) &&
+    obj.appliedFolders.every((f): f is string => typeof f === "string")
+  );
+}
+
 /** Returns true for files that should be excluded from custom-migration bundling. */
 function isExcluded(filename: string): boolean {
   if (EXCLUDED_FILES.has(filename)) return true;
@@ -109,7 +129,12 @@ function computeManifestHash(manifest: ManifestEntry[]): string {
 function readSidecar(): Sidecar | null {
   if (!existsSync(SIDECAR_PATH)) return null;
   try {
-    return JSON.parse(readFileSync(SIDECAR_PATH, "utf8")) as Sidecar;
+    const parsed: unknown = JSON.parse(readFileSync(SIDECAR_PATH, "utf8"));
+    if (!isSidecar(parsed)) {
+      logger.warn("⚠️  .custom-migrations.json sidecar has invalid structure; ignoring it.");
+      return null;
+    }
+    return parsed;
   } catch {
     logger.warn("⚠️  Could not parse .custom-migrations.json sidecar; ignoring it.");
     return null;

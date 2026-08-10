@@ -41,9 +41,6 @@ export async function seedCatalogLogoUrls(
   category: CatalogLogoCategory,
   slugs: readonly string[]
 ): Promise<Map<string, string | null>> {
-  const results = new Map<string, string | null>();
-  for (const slug of slugs) {
-    results.set(slug, await seedCatalogLogoUrl(category, slug));
-  }
-  return results;
+  const entries = await Promise.all(slugs.map(async slug => [slug, await seedCatalogLogoUrl(category, slug)] as const));
+  return new Map<string, string | null>(entries);
 }

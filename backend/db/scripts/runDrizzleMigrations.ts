@@ -28,6 +28,16 @@ interface DbMigrationRow {
 
 type PgMigratorDatabase = NodePgDatabase | NeonDatabase;
 
+function isDbMigrationRow(value: unknown): value is DbMigrationRow {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    typeof (value as Record<string, unknown>).id === "number" &&
+    typeof (value as Record<string, unknown>).hash === "string"
+  );
+}
+
 /**
  * Runs pending Drizzle migrations one folder at a time (separate transactions).
  *
@@ -63,7 +73,7 @@ export async function runDrizzleMigrations(db: PgMigratorDatabase, config: Drizz
   const dbMigrationResult = await db.execute(
     sql`select id, hash, created_at, name from ${sql.identifier(migrationsSchema)}.${sql.identifier(migrationsTable)}`
   );
-  const dbMigrations = (dbMigrationResult.rows as unknown as DbMigrationRow[]).map(row => ({
+  const dbMigrations = (dbMigrationResult.rows as readonly unknown[]).filter(isDbMigrationRow).map(row => ({
     id: row.id,
     hash: row.hash,
     created_at: String(row.created_at),

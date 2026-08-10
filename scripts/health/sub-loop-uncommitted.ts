@@ -234,7 +234,7 @@ function checkBiomeAll(files: string[]): CheckResult {
   }
   logInfo(`Running biome:check on ${files.length} uncommitted file(s)...`);
   // Run biome on all uncommitted files at once
-  const result = runCommand("bunx", ["@biomejs/biome", "check", ...files]);
+  const result = runCommand("bunx", ["@biomejs/biome", "check", "--write", "--unsafe", ...files]);
 
   if (exitCodePassed(result.exitCode)) {
     logPass("biome:check passed for all uncommitted files");

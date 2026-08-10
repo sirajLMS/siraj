@@ -156,10 +156,11 @@ enablePothosDevHmr(gqlSchemaBuilder);
 
 // Drop any builder cached by earlier HMR experiments so a stuck process can recover.
 if (process.env.NODE_ENV !== "production") {
+  const BUILDER_KEY = "__sirajGqlSchemaBuilder";
   const globalForPothos = globalThis as typeof globalThis & {
-    __sirajGqlSchemaBuilder?: unknown;
+    [BUILDER_KEY]?: unknown;
   };
-  delete globalForPothos.__sirajGqlSchemaBuilder;
+  delete globalForPothos[BUILDER_KEY];
 }
 
 // HMR dependency edge (hayes/pothos#49): when any schema definition module

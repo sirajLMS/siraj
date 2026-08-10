@@ -48,22 +48,23 @@ export async function seedOrGet(
   const results = await ComplaintService.createManyComplaints(inputs);
 
   if (shouldSeedExtendedFiles(seedConfig)) {
-    for (let i = 0; i < results.length; i++) {
-      if (i % 2 !== 0) continue;
-      const inserted = results[i];
-      try {
-        await seedEntityFile({
-          assetRelativePath: "documents/sample-attachment.pdf",
-          bucketPath: `public/complaints/seed_${inserted.id}.pdf`,
-          referenceTable: "complaints",
-          referenceId: inserted.id,
-          usageType: "attachment",
-          ensureParentDirs: ["public/complaints"],
-        });
-      } catch (error) {
-        logger.error(`Failed to seed complaint file for ${inserted.id}:`, error);
-      }
-    }
+    const evenResults = results.filter((_, i) => i % 2 === 0);
+    await Promise.all(
+      evenResults.map(async inserted => {
+        try {
+          await seedEntityFile({
+            assetRelativePath: "documents/sample-attachment.pdf",
+            bucketPath: `public/complaints/seed_${inserted.id}.pdf`,
+            referenceTable: "complaints",
+            referenceId: inserted.id,
+            usageType: "attachment",
+            ensureParentDirs: ["public/complaints"],
+          });
+        } catch (error) {
+          logger.error(`Failed to seed complaint file for ${inserted.id}:`, error);
+        }
+      })
+    );
   }
 
   logger.info(`Complaints seeded (${results.length} rows).`);

@@ -18,7 +18,7 @@ async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTran
 }
 
 function activeSessionFilter(sessionCondition: SQL): SQL {
-  return and(sessionCondition, eq(impersonationSessions.isActive, true)) as SQL;
+  return and(sessionCondition, eq(impersonationSessions.isActive, true)) ?? sessionCondition;
 }
 
 async function updateToInactive(
