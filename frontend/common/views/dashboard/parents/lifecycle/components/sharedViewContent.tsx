@@ -11,6 +11,27 @@ import type { LifecycleUpdateFormData } from "@/frontend/common/views/dashboard/
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
 import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/parents";
 
+type LifecycleStatusKey = keyof ParentLifecycleLabels["status"];
+type AccountStatusKey = keyof ParentLifecycleLabels["accountStatus"];
+
+const LIFECYCLE_STATUS_KEYS: readonly LifecycleStatusKey[] = [
+  "regular",
+  "on_trial",
+  "on_leave",
+  "suspended",
+  "deactivated",
+];
+
+const ACCOUNT_STATUS_KEYS: readonly AccountStatusKey[] = ["activated", "deactivated"];
+
+function isLifecycleStatusKey(value: string): value is LifecycleStatusKey {
+  return (LIFECYCLE_STATUS_KEYS as readonly string[]).includes(value);
+}
+
+function isAccountStatusKey(value: string): value is AccountStatusKey {
+  return (ACCOUNT_STATUS_KEYS as readonly string[]).includes(value);
+}
+
 export function LifecycleParentSummaryCard({
   parent,
   labels,
@@ -48,12 +69,12 @@ export function LifecycleParentSummaryCard({
             <StatusBadge
               category="studentAccount"
               status={lifecycleKey}
-              label={labels.status[lifecycleKey as "regular" | "on_trial" | "on_leave" | "suspended" | "deactivated"]}
+              label={labels.status[isLifecycleStatusKey(lifecycleKey) ? lifecycleKey : "regular"]}
             />
             <StatusBadge
               category="staffAccount"
               status={accountKey}
-              label={labels.accountStatus[accountKey as "activated" | "deactivated"]}
+              label={labels.accountStatus[isAccountStatusKey(accountKey) ? accountKey : "activated"]}
             />
           </Stack>
         </Box>

@@ -111,11 +111,13 @@ function TagInputChipListDesktop({
   );
 }
 
+const DEFAULT_INITIAL_TAGS: string[] = [];
+
 export const TagInputDesktop: React.FC<TagInputProps> = ({
   label,
   placeholder,
   onChange,
-  initialTags = [],
+  initialTags = DEFAULT_INITIAL_TAGS,
 }: TagInputProps): React.ReactNode => {
   const t = useAppTranslation(Translation.Ui.TagInput);
   const [tags, setTags] = useState<string[]>(initialTags);

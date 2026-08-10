@@ -45,6 +45,12 @@ function DrawerHeader({
   );
 }
 
+function getFlipSx(theme: Theme) {
+  return {
+    transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+  };
+}
+
 function MonthNavigator({
   labels,
   currentMonth,
@@ -57,16 +63,12 @@ function MonthNavigator({
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
   const yearStr = currentMonth.getFullYear();
 
-  const flipSx = (theme: Theme) => ({
-    transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-  });
-
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, py: 2 }}>
       <IconButton
         aria-label={labels.previousMonth}
         onClick={() => onMonthChange(shiftMonth(currentMonth, -1))}
-        sx={flipSx}
+        sx={getFlipSx}
       >
         <ChevronLeft />
       </IconButton>
@@ -76,7 +78,11 @@ function MonthNavigator({
           {monthStr} {yearStr}
         </Typography>
       </Box>
-      <IconButton aria-label={labels.nextMonth} onClick={() => onMonthChange(shiftMonth(currentMonth, 1))} sx={flipSx}>
+      <IconButton
+        aria-label={labels.nextMonth}
+        onClick={() => onMonthChange(shiftMonth(currentMonth, 1))}
+        sx={getFlipSx}
+      >
         <ChevronRight />
       </IconButton>
     </Box>

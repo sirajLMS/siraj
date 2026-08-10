@@ -5,7 +5,7 @@ import type {
   UserMeetingConfigSelectType,
 } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
-import type { ErrorsLabels } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -16,14 +16,7 @@ const CONFIG_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const CLASS_INSTANCE_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const UPSTREAM_MEETING_ID = "zoom-meeting-123";
 
-const FAKE_ERRORS = {
-  meetingConfigNotFound: (id: string) => `Meeting config not found: ${id}`,
-  meetingProviderNotFound: (id: string) => `Meeting provider not found: ${id}`,
-} as unknown as ErrorsLabels;
-
-// ---------------------------------------------------------------------------
-// Mock data builders
-// ---------------------------------------------------------------------------
+const FAKE_ERRORS = errorsEn;
 
 // ---------------------------------------------------------------------------
 // Mock data builders
@@ -102,8 +95,21 @@ await mock.module("@/backend/lib/logger", () => ({
 }));
 
 // --- meeting-config.validation — passthrough
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isMeetingConfigDetails(value: unknown): value is MeetingConfigDetails {
+  if (!isRecord(value)) return false;
+  if ("meetingUrl" in value && value.meetingUrl !== null && typeof value.meetingUrl !== "string") return false;
+  if ("username" in value && typeof value.username !== "string") return false;
+  if ("tenantId" in value && typeof value.tenantId !== "string") return false;
+  return true;
+}
+
 await mock.module("@/backend/lib/meeting-config.validation", () => ({
-  parseMeetingConfigDetails: (_provider: unknown, details: unknown) => details as MeetingConfigDetails,
+  parseMeetingConfigDetails: (_provider: unknown, details: unknown): MeetingConfigDetails =>
+    isMeetingConfigDetails(details) ? details : {},
 }));
 
 // --- meeting-config-mask

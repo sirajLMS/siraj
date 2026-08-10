@@ -26,6 +26,10 @@ export type StudentFieldFilterContext = {
   readonly permissions: ReadonlySet<AppPermission>;
 };
 
+function isStringRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function setValueAtPath(target: Record<string, unknown>, path: string, value: unknown): void {
   const segments = path.split(".");
   let current: Record<string, unknown> = target;
@@ -33,13 +37,16 @@ function setValueAtPath(target: Record<string, unknown>, path: string, value: un
   for (let index = 0; index < segments.length - 1; index += 1) {
     const segment = segments[index];
     const next = current[segment];
-    if (next == null || typeof next !== "object") {
+    if (!isStringRecord(next)) {
       return;
     }
-    current = next as Record<string, unknown>;
+    current = next;
   }
 
-  current[segments.at(-1) as string] = value;
+  const lastSegment = segments.at(-1);
+  if (lastSegment !== undefined) {
+    current[lastSegment] = value;
+  }
 }
 
 function cloneForFiltering<T>(payload: T): T {

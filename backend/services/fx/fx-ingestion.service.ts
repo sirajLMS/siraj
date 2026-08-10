@@ -100,20 +100,31 @@ export namespace FxIngestionService {
     triggeredByUserId: string | null
   ): Promise<void> {
     await db.transaction(async (tx: DBTransaction) => {
-      for (const pair of pairs) {
-        await BillingRepository.updateExchangeRateInTx(
-          {
-            fromCurrency: pair.fromCurrency,
-            toCurrency: pair.toCurrency,
-            rate: pair.rate,
-            source: pair.source,
-            effectiveDate,
-          },
-          triggeredByUserId,
-          tx
-        );
-      }
+      await persistPairsSequentially(pairs, 0, effectiveDate, triggeredByUserId, tx);
     });
+  }
+
+  async function persistPairsSequentially(
+    pairs: readonly Types.FxRatePair[],
+    index: number,
+    effectiveDate: Date,
+    triggeredByUserId: string | null,
+    tx: DBTransaction
+  ): Promise<void> {
+    if (index >= pairs.length) return;
+    const pair = pairs[index];
+    await BillingRepository.updateExchangeRateInTx(
+      {
+        fromCurrency: pair.fromCurrency,
+        toCurrency: pair.toCurrency,
+        rate: pair.rate,
+        source: pair.source,
+        effectiveDate,
+      },
+      triggeredByUserId,
+      tx
+    );
+    await persistPairsSequentially(pairs, index + 1, effectiveDate, triggeredByUserId, tx);
   }
 
   export async function refreshRates(

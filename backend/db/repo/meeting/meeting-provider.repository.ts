@@ -11,6 +11,38 @@ import type {
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
+function buildMeetingProviderInsertValues(input: MeetingProviderSubmitInput, now: Date) {
+  return {
+    slug: input.slug,
+    providerKind: input.providerKind,
+    name: input.name,
+    description: input.description ?? null,
+    instructions: input.instructions ?? null,
+    urlAllowlist: input.urlAllowlist,
+    urlExample: input.urlExample ?? null,
+    logoUrl: input.logoUrl ?? null,
+    fieldSchema: input.fieldSchema,
+    isActive: input.isActive ?? true,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function buildMeetingProviderConflictSet(values: ReturnType<typeof buildMeetingProviderInsertValues>) {
+  return {
+    providerKind: values.providerKind,
+    name: values.name,
+    description: values.description,
+    instructions: values.instructions,
+    urlAllowlist: values.urlAllowlist,
+    urlExample: values.urlExample,
+    logoUrl: values.logoUrl,
+    fieldSchema: values.fieldSchema,
+    isActive: values.isActive,
+    updatedAt: values.updatedAt,
+  };
+}
+
 export namespace MeetingProviderRepository {
   export async function listActive(tx?: DBTransaction): Promise<MeetingProviderSelectType[]> {
     const client = queryDb(tx);
@@ -66,20 +98,7 @@ export namespace MeetingProviderRepository {
       const now = new Date();
       const [result] = await t
         .insert(meetingProviders)
-        .values({
-          slug: input.slug,
-          providerKind: input.providerKind,
-          name: input.name,
-          description: input.description ?? null,
-          instructions: input.instructions ?? null,
-          urlAllowlist: input.urlAllowlist,
-          urlExample: input.urlExample ?? null,
-          logoUrl: input.logoUrl ?? null,
-          fieldSchema: input.fieldSchema,
-          isActive: input.isActive ?? true,
-          createdAt: now,
-          updatedAt: now,
-        })
+        .values(buildMeetingProviderInsertValues(input, now))
         .returning();
 
       if (!result) {
@@ -144,48 +163,31 @@ export namespace MeetingProviderRepository {
 
     const run = async (t: DBTransaction): Promise<MeetingProviderSelectType[]> => {
       const now = new Date();
-      const results: MeetingProviderSelectType[] = [];
-
-      for (const input of inputs) {
+      const insertOne = async (input: MeetingProviderSubmitInput): Promise<MeetingProviderSelectType | null> => {
+        const insertValues = buildMeetingProviderInsertValues(input, now);
         const [row] = await t
           .insert(meetingProviders)
-          .values({
-            slug: input.slug,
-            providerKind: input.providerKind,
-            name: input.name,
-            description: input.description ?? null,
-            instructions: input.instructions ?? null,
-            urlAllowlist: input.urlAllowlist,
-            urlExample: input.urlExample ?? null,
-            logoUrl: input.logoUrl ?? null,
-            fieldSchema: input.fieldSchema,
-            isActive: input.isActive ?? true,
-            createdAt: now,
-            updatedAt: now,
-          })
+          .values(insertValues)
           .onConflictDoUpdate({
             target: meetingProviders.slug,
-            set: {
-              providerKind: input.providerKind,
-              name: input.name,
-              description: input.description ?? null,
-              instructions: input.instructions ?? null,
-              urlAllowlist: input.urlAllowlist,
-              urlExample: input.urlExample ?? null,
-              logoUrl: input.logoUrl ?? null,
-              fieldSchema: input.fieldSchema,
-              isActive: input.isActive ?? true,
-              updatedAt: now,
-            },
+            set: buildMeetingProviderConflictSet(insertValues),
           })
           .returning();
 
-        if (row) {
-          results.push(row);
-        }
-      }
+        return row ?? null;
+      };
 
-      return results;
+      const rows = await inputs.reduce(
+        async (prev, input) => {
+          const acc = await prev;
+          const row = await insertOne(input);
+          if (row) acc.push(row);
+          return acc;
+        },
+        Promise.resolve([] as MeetingProviderSelectType[])
+      );
+
+      return rows;
     };
 
     if (tx) {

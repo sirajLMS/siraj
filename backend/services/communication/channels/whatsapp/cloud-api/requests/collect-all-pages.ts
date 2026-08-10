@@ -42,24 +42,24 @@ export async function collectAllPages<T, R = unknown>(
   maxPages = 50
 ): Promise<readonly T[]> {
   const allItems: T[] = [];
-  let cursor: string | undefined;
-  let pageCount = 0;
 
-  do {
+  async function fetchNext(cursor: string | undefined, pageCount: number): Promise<void> {
     if (pageCount >= maxPages) {
       logger.warn("collectAllPages: reached maxPages limit, results may be truncated", {
         maxPages,
         itemsCollected: allItems.length,
       });
-      return allItems;
+      return;
     }
     const request = buildRequest(cursor);
     const body = await fetchPage(request);
     const { items, nextCursor } = parseResponse(body);
     allItems.push(...items);
-    cursor = nextCursor;
-    pageCount++;
-  } while (cursor);
+    if (!nextCursor) return;
+    return fetchNext(nextCursor, pageCount + 1);
+  }
+
+  await fetchNext(undefined, 0);
 
   return allItems;
 }

@@ -20,10 +20,10 @@ const SEARCH_BUTTON = /^search$|^بحث$/i;
 const SEARCH_OUTCOME =
   /teachers with \d+ available slots|معلمين مع \d+ فترات متاحة|no available time slots found|لم يتم العثور على فترات زمنية متاحة/i;
 
-let adminContext: BrowserContext;
-let adminPage: Page;
-let isolatedContext: BrowserContext;
-let isolatedPage: Page;
+let adminContext: BrowserContext | undefined;
+let adminPage: Page | undefined;
+let isolatedContext: BrowserContext | undefined;
+let isolatedPage: Page | undefined;
 
 function scheduleSearchNavLink(page: Page) {
   return page.getByRole("link", { name: SCHEDULE_SEARCH_NAV }).first();
@@ -73,16 +73,18 @@ describe.serial("Availability Search E2E", () => {
 
   afterEach(async () => {
     await closeE2eSession(isolatedPage, isolatedContext);
-    isolatedPage = undefined as unknown as Page;
-    isolatedContext = undefined as unknown as BrowserContext;
+    isolatedPage = undefined;
+    isolatedContext = undefined;
   });
 
   test("Admin sees Schedule Search nav item in sidebar", async () => {
+    if (!adminPage) throw new Error("adminPage not initialised in beforeAll");
     await waitForScheduleSearchNav(adminPage);
     expect(await scheduleSearchNavLink(adminPage).isVisible()).toBe(true);
   });
 
   test("Clicking nav item navigates to search-schedule page", async () => {
+    if (!adminPage) throw new Error("adminPage not initialised in beforeAll");
     await navigateToSearchSchedule(adminPage);
     expect(adminPage.url()).toContain("/search-schedule");
 
@@ -92,6 +94,7 @@ describe.serial("Availability Search E2E", () => {
   });
 
   test("Search form renders with date/time range pickers, filter and search buttons", async () => {
+    if (!adminPage) throw new Error("adminPage not initialised in beforeAll");
     if (!adminPage.url().includes("/search-schedule")) {
       await navigateToSearchSchedule(adminPage);
     }
@@ -109,6 +112,7 @@ describe.serial("Availability Search E2E", () => {
   });
 
   test("Submitting form shows results or no-results message", async () => {
+    if (!adminPage) throw new Error("adminPage not initialised in beforeAll");
     if (!adminPage.url().includes("/search-schedule")) {
       await navigateToSearchSchedule(adminPage);
     }

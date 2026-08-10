@@ -15,6 +15,21 @@ import {
 } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
+type ValidationKey = keyof RescheduleFormLabels["validation"];
+
+const VALIDATION_KEYS = new Set<string>(["dateRequired", "timeRequired"]);
+
+function isValidationKey(value: string | undefined): value is ValidationKey {
+  return value !== undefined && VALIDATION_KEYS.has(value);
+}
+
+function getValidationMessage(
+  message: string | undefined,
+  validation: RescheduleFormLabels["validation"]
+): string | undefined {
+  return isValidationKey(message) ? validation[message] : undefined;
+}
+
 interface Props {
   readonly labels: RescheduleFormLabels;
   readonly control: Control<RescheduleFormData>;
@@ -42,7 +57,7 @@ export function RescheduleDateTimeSectionMobile({ labels, control, errors }: Rea
                   variant: "outlined",
                   error: !!errors.newDate,
                   helperText: errors.newDate
-                    ? labels.validation[errors.newDate.message as keyof typeof labels.validation]
+                    ? getValidationMessage(errors.newDate.message, labels.validation)
                     : undefined,
                   slotProps: {
                     htmlInput: { autoComplete: "off" },
@@ -78,7 +93,7 @@ export function RescheduleDateTimeSectionMobile({ labels, control, errors }: Rea
                   variant: "outlined",
                   error: !!errors.newTime,
                   helperText: errors.newTime
-                    ? labels.validation[errors.newTime.message as keyof typeof labels.validation]
+                    ? getValidationMessage(errors.newTime.message, labels.validation)
                     : undefined,
                   sx: timeInputOutlinedSx,
                   slotProps: {

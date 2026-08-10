@@ -25,6 +25,10 @@ interface TeacherActionButtonProps {
   readonly onClick: () => void;
 }
 
+function isStringValue(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 function TeacherActionButton({ icon, variant, onClick }: TeacherActionButtonProps) {
   return (
     <IconButton
@@ -79,7 +83,7 @@ export function TeacherDataGrid({
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
         <DesktopPersonProfileLinkCell
           href={profileHrefForTeacher({ userId: params.row.userId, teacherId: params.row.id })}
-          name={(params.value as string) ?? ""}
+          name={isStringValue(params.value) ? params.value : ""}
           avatarUrl={params.row.avatarUrl}
           avatarSize={40}
           typographyVariant="bodyLg"
@@ -102,7 +106,7 @@ export function TeacherDataGrid({
             whiteSpace: "nowrap",
           })}
         >
-          {params.value as string}
+          {isStringValue(params.value) ? params.value : ""}
         </Typography>
       ),
     },

@@ -13,6 +13,8 @@ export type TagInputProps = {
   readonly initialTags?: string[];
 };
 
+const DEFAULT_INITIAL_TAGS: string[] = [];
+
 const TagContainerMobile = styled(Paper)(({ theme }) => ({
   display: "flex",
   flexWrap: "wrap",
@@ -117,7 +119,7 @@ export const TagInputMobile: React.FC<TagInputProps> = ({
   label,
   placeholder,
   onChange,
-  initialTags = [],
+  initialTags = DEFAULT_INITIAL_TAGS,
 }: TagInputProps): React.ReactNode => {
   const t = useAppTranslation(Translation.Ui.TagInput);
   const [tags, setTags] = useState<string[]>(initialTags);

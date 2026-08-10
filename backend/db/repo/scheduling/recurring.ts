@@ -397,8 +397,10 @@ async function validateInstanceBatch(
   // other (new in-transaction rows are not visible to the snapshot read).
   // Within the batch, no two slots overlap because each (day, weekOffset)
   // pair maps to a distinct UTC start time.
-  for (const row of instanceRows) {
-    await checkOverlaps(
+  // Sequential reduce chain — all iterations share the same DB transaction.
+  await instanceRows.reduce(async (prev, row) => {
+    await prev;
+    return checkOverlaps(
       t,
       {
         studentId: input.studentId,
@@ -409,7 +411,7 @@ async function validateInstanceBatch(
       },
       tFuncErrors
     );
-  }
+  }, Promise.resolve());
 }
 
 async function insertInstanceBatch(

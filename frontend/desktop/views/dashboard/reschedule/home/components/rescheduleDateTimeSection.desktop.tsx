@@ -21,6 +21,16 @@ interface Props {
   readonly errors: FieldErrors<RescheduleFormData>;
 }
 
+type RescheduleValidationKey = keyof RescheduleFormLabels["validation"];
+
+function isRescheduleValidationKey(value: string | undefined): value is RescheduleValidationKey {
+  return value === "dateRequired" || value === "timeRequired";
+}
+
+function getValidationLabel(labels: RescheduleFormLabels, message: string | undefined): string | undefined {
+  return isRescheduleValidationKey(message) ? labels.validation[message] : undefined;
+}
+
 export function RescheduleDateTimeSectionDesktop({ labels, control, errors }: Readonly<Props>) {
   return (
     <Grid container spacing={3}>
@@ -41,9 +51,7 @@ export function RescheduleDateTimeSectionDesktop({ labels, control, errors }: Re
                   fullWidth: true,
                   variant: "outlined",
                   error: !!errors.newDate,
-                  helperText: errors.newDate
-                    ? labels.validation[errors.newDate.message as keyof typeof labels.validation]
-                    : undefined,
+                  helperText: getValidationLabel(labels, errors.newDate?.message),
                   slotProps: {
                     htmlInput: { autoComplete: "off" },
                     input: {
@@ -77,9 +85,7 @@ export function RescheduleDateTimeSectionDesktop({ labels, control, errors }: Re
                   fullWidth: true,
                   variant: "outlined",
                   error: !!errors.newTime,
-                  helperText: errors.newTime
-                    ? labels.validation[errors.newTime.message as keyof typeof labels.validation]
-                    : undefined,
+                  helperText: getValidationLabel(labels, errors.newTime?.message),
                   sx: timeInputOutlinedSx,
                   slotProps: {
                     htmlInput: { autoComplete: "off" },

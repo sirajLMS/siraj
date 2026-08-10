@@ -1,6 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { DstMigrationRepository } from "@/backend/db/repo";
-import { AppPermission, DstMigrationResult, type MigrationStatus } from "@/backend/enum";
+import { AppPermission, DstMigrationResult, MigrationStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   DstCheckedEmptyItemReturnType,
@@ -126,8 +126,9 @@ export namespace DstMigrationService {
       const checkedEmptyItems: DstCheckedEmptyItemReturnType[] = [];
       const conflictByTeacher = new Map<string, DstConflictItemReturnType[]>();
 
-      for (const schedule of schedules) {
-        const result = await processSchedule(schedule, run.id, offsetMinutes, tx);
+      async function processNext(index: number): Promise<void> {
+        if (index >= schedules.length) return;
+        const result = await processSchedule(schedules[index], run.id, offsetMinutes, tx);
 
         if (result.kind === "unchanged") {
           unchangedCount++;
@@ -141,7 +142,9 @@ export namespace DstMigrationService {
           updatedCount++;
           updatedSessions.push(result.session);
         }
+        return processNext(index + 1);
       }
+      await processNext(0);
 
       const conflictGroups = buildConflictGroups(conflictByTeacher);
 
@@ -155,7 +158,7 @@ export namespace DstMigrationService {
         updatedSessions,
         conflictGroups,
         checkedEmptyItems,
-        status: "complete" as MigrationStatus,
+        status: MigrationStatus.COMPLETE,
       };
     });
   }

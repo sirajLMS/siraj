@@ -32,7 +32,8 @@ const fetchPage = async (request: GraphApiRequestInit): Promise<ListPhoneNumbers
     signal: AbortSignal.timeout(10_000),
   });
   expect(response.ok).toBe(true);
-  return response.json() as Promise<ListPhoneNumbersResponseBody>;
+  const data: ListPhoneNumbersResponseBody = await response.json();
+  return data;
 };
 
 describeLive("list-phone-numbers @live-comm", () => {
@@ -56,7 +57,7 @@ describeLive("list-phone-numbers @live-comm", () => {
     const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10_000) });
     expect(response.ok).toBe(true);
 
-    const body = (await response.json()) as ListPhoneNumbersResponseBody;
+    const body: ListPhoneNumbersResponseBody = await response.json();
     const { phoneNumbers, nextCursor } = parseResponse(body);
 
     expect(phoneNumbers.length).toBeGreaterThan(0);

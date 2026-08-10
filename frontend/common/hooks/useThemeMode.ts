@@ -3,6 +3,12 @@
 import { useContext } from "react";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 
+/** Backward-compat default — no-op state setter. */
+const defaultSetIsThemeChanging = () => {};
+
+/** Backward-compat default — theme is not in a transitioning state. */
+const defaultIsThemeChanging = false;
+
 /**
  * Read the application theme mode + toggler.
  *
@@ -19,9 +25,6 @@ export const useThemeMode = () => {
   }
 
   // Provide default values for properties if they don't exist (backward compat).
-  const defaultIsThemeChanging = false;
-  const defaultSetIsThemeChanging = () => {};
-
   return {
     ...context,
     isThemeChanging: context.isThemeChanging ?? defaultIsThemeChanging,

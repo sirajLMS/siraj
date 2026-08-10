@@ -665,10 +665,11 @@ export namespace QuotaService {
         return res.rows.map(mapQuotaToReturnType);
       }
       const created: QuotaReturnType[] = [];
-      for (const input of inputs) {
+      await inputs.reduce(async (prev, input) => {
+        await prev;
         const row = await QuotaRepository.create(t, { ...input });
         created.push(mapQuotaToReturnType(row));
-      }
+      }, Promise.resolve());
       return created;
     });
   };

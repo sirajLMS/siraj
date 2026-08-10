@@ -41,10 +41,12 @@ export namespace TeacherPaymentSeedService {
         dates.push(input.paymentDate);
         byTeacher.set(input.teacherId, dates);
       }
-      for (const [teacherId, dates] of byTeacher) {
+      const entries = [...byTeacher];
+      await entries.reduce(async (prev, [teacherId, dates]) => {
+        await prev;
         const rows = await TeacherPaymentRepository.findByTeacherAndPaymentDates(teacherId, dates, tx);
         results.push(...rows);
-      }
+      }, Promise.resolve());
       return results;
     }
   }

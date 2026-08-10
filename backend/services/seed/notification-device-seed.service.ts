@@ -36,10 +36,9 @@ export namespace NotificationDeviceSeedService {
     entries: readonly { userId: string; input: RegisterDeviceTokenInput }[],
     tx?: DBTransaction
   ): Promise<UserDeviceTokenSelectType[]> {
-    const results: UserDeviceTokenSelectType[] = [];
-    for (const entry of entries) {
-      results.push(await seedDeviceToken(entry.userId, entry.input, tx));
-    }
-    return results;
+    return entries.reduce<Promise<UserDeviceTokenSelectType[]>>(
+      async (prev, entry) => [...(await prev), await seedDeviceToken(entry.userId, entry.input, tx)],
+      Promise.resolve([])
+    );
   }
 }

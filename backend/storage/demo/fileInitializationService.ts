@@ -131,15 +131,10 @@ export class FileSeedingService implements IFileSeedingService {
   }
 
   /**
-   * Seeds multiple files in sequence.
+   * Seeds multiple files concurrently.
    */
   async seedFiles(inputs: FileSeedInput[]): Promise<FileUploadResult[]> {
-    const results: FileUploadResult[] = [];
-    for (const input of inputs) {
-      const result = await this.seedFile(input);
-      results.push(result);
-    }
-    return results;
+    return Promise.all(inputs.map(input => this.seedFile(input)));
   }
 
   private getContentTypeFromFileName(fileName: string): string {

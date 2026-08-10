@@ -15,6 +15,14 @@ import { getServerTranslations } from "@/shared/locale";
 const ALL_CHANNELS = Object.values(NotificationChannel);
 const ALL_EVENT_TYPES = Object.values(NotificationEventType);
 
+function isNotificationChannel(value: string): value is NotificationChannel {
+  return (Object.values(NotificationChannel) as readonly string[]).includes(value);
+}
+
+function isNotificationEventType(value: string): value is NotificationEventType {
+  return (Object.values(NotificationEventType) as readonly string[]).includes(value);
+}
+
 function preferenceKey(channel: NotificationChannel, eventType: NotificationEventType): string {
   return `${channel}:${eventType}`;
 }
@@ -55,7 +63,12 @@ function mergeWithDefaults(
   eventTypes: readonly NotificationEventType[]
 ): NotificationPreferenceReturnType[] {
   const storedMap = new Map(
-    stored.map(row => [preferenceKey(row.channel as NotificationChannel, row.eventType as NotificationEventType), row])
+    stored.flatMap(row => {
+      if (!isNotificationChannel(row.channel) || !isNotificationEventType(row.eventType)) {
+        return [];
+      }
+      return [[preferenceKey(row.channel, row.eventType), row] as const];
+    })
   );
 
   return ALL_CHANNELS.flatMap(channel =>
