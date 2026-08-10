@@ -3,7 +3,8 @@
 > **Plan #**: 05
 > **Dependencies**: Plan 2 (Types & Permissions), Plan 4 (Services)
 > **Scope**: Pothos object types, queries, mutations, DataLoader, auth scopes, public verification endpoint, error mapping
-> **Execution**: Sequential through phases below
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+> **Execution order**: (T01, T08 via parallel subagents) → (T02, T09 via parallel subagents) → (T03, T10 via parallel subagents) → (T04, T11 via parallel subagents) → (T05, T12 via parallel subagents) → T06 → T07 → T13 → T14
 
 ---
 
@@ -36,6 +37,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Dependencies**: Plan 1 (schema), Plan 2 (types)
 - **Estimated**: 2h
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T08.
+
 ### T02: Create Pothos Directory Structure & Barrel Index
 - [ ] Create `backend/graphql/pothos/certificates/` directory
 - [ ] Create `backend/graphql/pothos/certificates/index.ts` — barrel file exporting all cert Pothos modules
@@ -51,6 +54,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Files modified**: `backend/graphql/pothos/index.ts`
 - **Dependencies**: T01
 - **Estimated**: 1h
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T09.
 
 ### T03: Create Input Types (InputRefs)
 - [ ] Create `backend/graphql/pothos/certificates/inputs.pothos.ts`
@@ -76,6 +81,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Dependencies**: T02, Plan 2 (types)
 - **Estimated**: 3h
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T10.
+
 ---
 
 ## Phase 2: Object Types & DataLoader (T04–T08)
@@ -100,6 +107,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Dependencies**: T03, Plan 2 (types), Plan 4 (services)
 - **Estimated**: 3h
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T11.
+
 ### T05: Create CertificateTemplate Object Type with loadableObjectRef
 - [ ] Create `backend/graphql/pothos/certificates/certificateTemplate.pothos.ts`
 - [ ] Define `CertificateTemplate` object type using `loadableObjectRef('CertificateTemplate', ...)` with batch loader
@@ -116,6 +125,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Files created**: `certificateTemplate.pothos.ts`, `certificateTemplate.dataLoader.ts`
 - **Dependencies**: T04
 - **Estimated**: 3h
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12.
 
 ### T06: Create Remaining 7 Object Types (Plain objectRef)
 - [ ] Create `templateElement.pothos.ts` — TemplateElement type with all fields from Plan 2
@@ -172,6 +183,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Dependencies**: T07
 - **Estimated**: 1h
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T01.
+
 ---
 
 ## Phase 3: Queries (T09–T10)
@@ -210,6 +223,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Dependencies**: T08, Plan 4 (services)
 - **Estimated**: 4h
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02.
+
 ### T10: Wire Queries into Root Query Index
 - [ ] Add import for `./certificates/queries.pothos` in `backend/graphql/pothos/query/index.ts`
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
@@ -222,6 +237,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Files modified**: `backend/graphql/pothos/query/index.ts`
 - **Dependencies**: T09
 - **Estimated**: 2h
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03.
 
 ---
 
@@ -292,6 +309,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Dependencies**: T10
 - **Estimated**: 4h
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04.
+
 ### T12: Wire Mutations into Root Mutation Index
 - [ ] Add import for `./certificates/mutations.pothos` in `backend/graphql/pothos/mutation/index.ts`
 - [ ] Run `bun tsgo` to verify mutation resolvers compile
@@ -300,6 +319,8 @@ T08 ──► T09 ──► T10 ──────────► T11 ──► 
 - **Files modified**: `backend/graphql/pothos/mutation/index.ts`
 - **Dependencies**: T11
 - **Estimated**: 1h
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05.
 
 ---
 
@@ -353,6 +374,50 @@ Phase 5: T13 → T14                           (codegen + knowledge propagation)
 ```
 
 Total: 14 tasks, ~36 hours estimated
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01, T08
+- Tasks: T01 (Register Certificate Enums), T08 (Wire Object Types into Barrel Index)
+- Rationale: Both tasks are independent starting points with no interdependencies — T01 begins the top chain (enum registration), T08 begins the bottom chain (barrel wiring). They can be dispatched as separate subagents simultaneously.
+
+### Wave 2: T02, T09
+- Tasks: T02 (Pothos Directory Structure & Barrel), T09 (Create All 10 Queries)
+- Rationale: T02 continues the top chain after T01; T09 continues the bottom chain after T08. No interdependencies between them — each subagent works on independent files.
+
+### Wave 3: T03, T10
+- Tasks: T03 (Create Input Types), T10 (Wire Queries into Root Query Index)
+- Rationale: T03 follows T02 in the top chain; T10 follows T09 in the bottom chain. Independent file scopes enable parallel subagent dispatch.
+
+### Wave 4: T04, T11
+- Tasks: T04 (Certificate Object Type + DataLoader), T11 (Create All 24 Mutations)
+- Rationale: T04 follows T03 in the top chain; T11 follows T10 in the bottom chain. No shared file mutations — safe to run in parallel.
+
+### Wave 5: T05, T12
+- Tasks: T05 (CertificateTemplate Object Type + DataLoader), T12 (Wire Mutations into Root Mutation Index)
+- Rationale: T05 follows T04 in the top chain; T12 follows T11 in the bottom chain. Independent file scopes — parallel subagent dispatch.
+
+### Wave 6: T06
+- Tasks: T06 (Remaining 7 Object Types)
+- Rationale: Bottom chain has completed (T12 done). Only the top chain continues sequentially. Single subagent — no parallelism available in this wave.
+
+### Wave 7: T07
+- Tasks: T07 (Define Additional Result Types)
+- Rationale: Top chain continues. T07 must complete before T13 (convergence point) can begin. Single subagent.
+
+### Wave 8: T13
+- Tasks: T13 (Run GraphQL Codegen & Fix Generated Types)
+- Rationale: Convergence point — T13 depends on both T07 (top chain end) and T12 (bottom chain end). Must wait for both chains to complete before running. Single subagent.
+
+### Final Wave: Knowledge Propagation
+- Task: T14 (Knowledge Propagation & Documentation)
+- Rationale: Must run after all other tasks complete — synthesizes outcomes from every prior task into canonical reference docs and updates AGENTS.md files.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 

@@ -9,6 +9,9 @@
 | **Dependencies** | Plan 4 (Services & Business Logic) |
 | **Task Count** | 12 tasks across 4 phases |
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+> **Execution order**: (T01, T02, T04, T05, T07, T08, T09, T10 via parallel subagents) → (T03, T06 via parallel subagents) → T11 → T12 → T13
+
 ---
 
 ## Dependency Graph
@@ -38,6 +41,34 @@ T07 (backgroundImageLoader)  T08 (fontLoader)           │
                ▼
           T12 (batchRenderer)
 ```
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01, T02, T04, T05, T07, T08, T09, T10
+- Tasks: T01 (qrcode dep), T02 (puppeteerConfig), T04 (elementRenderer), T05 (variableResolver), T07 (backgroundImageLoader), T08 (fontLoader), T09 (shapeRenderer), T10 (renderCache)
+- Rationale: All have no internal task dependencies — T01, T02, T04, T05, T08, T09 have zero deps; T07 and T10 depend only on Plan 7 (StorageService) which is an external already-completed dependency. These 8 tasks are fully independent of each other and can run concurrently.
+
+### Wave 2: T03, T06
+- Tasks: T03 (puppeteerManager), T06 (qrCodeGenerator)
+- Rationale: T03 depends on T02 (puppeteerConfig from Wave 1); T06 depends on T01 (qrcode package from Wave 1). Both depend only on Wave 1 outputs and are independent of each other, so they can run in parallel.
+
+### Wave 3: T11
+- Tasks: T11 (renderService — main orchestrator)
+- Rationale: T11 depends on T02, T03, T04, T05, T06, T07, T08, T09, T10, and Plan 7. All dependencies are satisfied after Waves 1 and 2 complete. This is a single task — it runs as a single subagent.
+
+### Wave 4: T12
+- Tasks: T12 (batchRenderer)
+- Rationale: T12 depends on T11 (renderService). Must run after Wave 3 completes. Single task — single subagent.
+
+### Final Wave: Knowledge Propagation
+- Task: T13
+- Rationale: Must run after all other tasks complete (depends on T01–T12). Synthesizes all implementation learnings into docs and updates AGENTS.md files.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -88,6 +119,8 @@ T07 (backgroundImageLoader)  T08 (fontLoader)           │
 
 **Dependencies:** None
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T02, T04, T05, T07, T08, T09, T10.
+
 **Requirements References:** REQ-RENDER-04
 
 **Quality Loop:**
@@ -121,6 +154,8 @@ T07 (backgroundImageLoader)  T08 (fontLoader)           │
 - `backend/services/cert/puppeteer/__tests__/puppeteerConfig.test.ts` (create)
 
 **Dependencies:** None
+
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T01, T04, T05, T07, T08, T09, T10.
 
 **Requirements References:** REQ-RENDER-11
 
@@ -160,6 +195,8 @@ T07 (backgroundImageLoader)  T08 (fontLoader)           │
 - `backend/services/cert/puppeteer/__tests__/puppeteerManager.test.ts` (create)
 
 **Dependencies:** T02
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T06.
 
 **Requirements References:** REQ-RENDER-11 (AC1-AC5)
 

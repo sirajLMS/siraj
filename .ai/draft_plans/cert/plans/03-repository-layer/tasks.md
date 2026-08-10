@@ -3,7 +3,7 @@
 > **Feature**: Certificate Module — Repository Layer (Data Access)
 > **Plan #**: 03
 > **Dependencies**: Plan 1 (DB Schema & Enums), Plan 2 (Types & Permissions)
-> **Execution Model**: Sequential per task (each task produces files the next task imports)
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 > **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
@@ -29,7 +29,39 @@ T01 (i18n schema) ─────────┐
                            └──────────────────────────────────┘
 ```
 
-**Execution order**: T01 → T02 → (T03, T04, T05, T06, T07, T08, T09 in parallel after T02) → T10 → T11 → T12 → T13
+**Execution order**: T01 → T02 → (T03, T04, T05, T06, T07, T08, T09 via parallel subagents after T02) → T10 → T11 → T12 → T13
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01 (i18n schema)
+- Rationale: Foundational — all repository files import error translation keys from this task. No prior plan-level dependencies, so it runs first and alone.
+
+### Wave 2: T02
+- Tasks: T02 (sub-directory barrel stub)
+- Rationale: Depends only on T01 (Wave 1). Creates the barrel file that T03-T09 will incrementally update. Must complete before repo files can export through it.
+
+### Wave 3: T03, T04, T05, T06, T07, T08, T09
+- Tasks: T03 (CertificateRepository), T04 (TemplateRepository), T05 (TemplateElementRepository), T06 (TemplateVariableRepository), T07 (RecipientGroupRepository), T08 (VerificationRepository), T09 (CertificateCategoryRepository)
+- Rationale: All seven repositories depend only on T01 (i18n keys) and external Plans 1 & 2 — none depend on each other. Each creates a distinct file with no inter-dependency at import time. Maximum parallelism: 7 subagents.
+
+### Wave 4: T10, T11
+- Tasks: T10 (soft-delete registry), T11 (top-level repo barrel)
+- Rationale: T10 depends on T03/T04/T09 (repos that call `SoftDeleteRepository.softDelete`). T11 depends on T02 and T09 (barrel + all repos complete). Neither depends on the other — they modify different files (`soft-delete.repository.ts` vs `repo/index.ts`). Both Wave 3 dependencies are satisfied, so they run as 2 parallel subagents.
+
+### Wave 5: T12
+- Tasks: T12 (full repo integration verification)
+- Rationale: Depends on T03-T11 all complete. Runs per-file quality loops across all cert repo files and reviews acceptance criteria. Must run alone after all implementation tasks finish.
+
+### Final Wave: Knowledge Propagation
+- Task: T13 (knowledge propagation)
+- Rationale: Must run after all other tasks complete. Documents deviations, updates session todos, and prepares handoff notes for Plan 4 (Services).
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -119,6 +151,8 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/index.ts --lifec
 **Depends on**: T01 (i18n), Plan 1 (schema), Plan 2 (types)
 **Requirements**: REQ-CERT-001 through REQ-CERT-012, AC-1 through AC-13
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T04, T05, T06, T07, T08, T09.
+
 ### Subtasks
 
 1. **Read applicable AGENTS.md**:
@@ -174,6 +208,8 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/certificate.repo
 **Estimated time**: 3.5 hours
 **Depends on**: T01, Plan 1, Plan 2
 **Requirements**: REQ-TPL-001 through REQ-TPL-009
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T05, T06, T07, T08, T09.
 
 ### Subtasks
 

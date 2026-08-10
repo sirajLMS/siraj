@@ -9,6 +9,8 @@
 | **Tasks** | 23 tasks (11 original + 12 supplementary) |
 | **Total Estimated Effort** | ~80 hours (~12 working days) — ~29h original + ~51h supplementary |
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
 ---
 
 ## Dependency Graph
@@ -42,13 +44,65 @@ Task 1 (i18n namespace)
 1. **Task 1**: i18n namespace (foundation — all components need labels)
 2. **Task 2**: Verify route + public layout (App Router structure)
 3. **Task 3**: Verification container + GraphQL document (data layer)
-4. **Task 4** + **Task 5**: Result display + state components + loading/error states (can partly parallel)
+4. **Task 4** + **Task 5**: Result display + state components + loading/error states (can partly via parallel subagents)
 5. **Task 6**: Share + print + watermarks
 6. **Task 7**: SEO meta tags + OG image + JSON-LD + ISR cache headers
-7. **Task 8**: Language toggle (parallel with Tasks 4-7 — only depends on Tasks 1+2)
-8. **Task 9**: Analytics integration (depends on Task 3 — can run parallel with Tasks 4-8)
-9. **Task 10**: Manual code entry page (depends on Tasks 1+2+8 — parallel with Tasks 4-7)
+7. **Task 8**: Language toggle (via parallel subagents with Tasks 4-7 — only depends on Tasks 1+2)
+8. **Task 9**: Analytics integration (depends on Task 3 — can run via parallel subagents with Tasks 4-8)
+9. **Task 10**: Manual code entry page (depends on Tasks 1+2+8 — via parallel subagents with Tasks 4-7)
 10. **Task 11**: Knowledge propagation (final — requires all prior tasks complete)
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task (i18n namespace) — no dependencies, must complete first
+
+### Wave 2: T02, T14
+- Tasks: T02, T14
+- Rationale: Both depend only on T01 (i18n). T02 creates verify route/layout, T14 creates QrScanner — no interdependencies
+
+### Wave 3: T03, T08, T12, T13
+- Tasks: T03, T08, T12, T13
+- Rationale: All depend on T01+T02 (available after Wave 2). T03 (verification container + GraphQL), T08 (language toggle), T12 (PublicVerificationPage), T13 (VerificationSearchPage) — no interdependencies
+
+### Wave 4: T04, T09, T10
+- Tasks: T04, T09, T10
+- Rationale: T04 depends on T03 (Wave 3); T09 depends on T03 (Wave 3); T10 depends on T01+T02+T08 (Wave 3) — all dependencies satisfied, no interdependencies among them
+
+### Wave 5: T05, T06, T07, T15, T18
+- Tasks: T05, T06, T07, T15, T18
+- Rationale: T05 depends on T04 (Wave 4); T06 depends on T04 (Wave 4); T07 depends on T02+T04 (Wave 4); T15 depends on T12 (Wave 3); T18 depends on T12 (Wave 3) — all dependencies satisfied, no interdependencies
+
+### Wave 6: T16
+- Tasks: T16
+- Rationale: Depends on T15 (Wave 5). No other task is unblocked at this level
+
+### Wave 7: T17
+- Tasks: T17
+- Rationale: Depends on Plan 5 (cross-plan, already available). API route handler provides backend endpoint for T19
+
+### Wave 8: T19
+- Tasks: T19
+- Rationale: Depends on T17 (Wave 7). Zustand store fetches from the API route
+
+### Wave 9: T20, T21
+- Tasks: T20, T21
+- Rationale: T20 depends on T12-16 + T19 (all complete after Wave 8); T21 depends on T12-19 (all complete after Wave 8) — no interdependencies between them
+
+### Wave 10: T22
+- Tasks: T22
+- Rationale: Depends on T12-21 (all complete after Wave 9). Quality gate loop for all supplementary files
+
+### Final Wave: Knowledge Propagation
+- Tasks: T11, T23
+- Rationale: T11 requires all Tasks 1-10 complete; T23 requires all Tasks 12-22 complete. Both must run after all other tasks complete
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -285,6 +339,9 @@ bun run scripts/health/sub-loop.ts shared/locale/types/message.ts --lifecycle co
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 1 (i18n namespace)
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T14.
+
 **Requirements**: FR-V1
 **AC Mapping**: FR-V1.1, FR-V1.2, FR-V1.3, FR-V1.4, FR-V1.5, FR-V1.6, FR-V1.7
 
@@ -354,6 +411,9 @@ bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codesc
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 1 (i18n), Task 2 (route), Plan 5 (GraphQL API)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T08, T12, T13.
+
 **Requirements**: FR-V2, FR-V4, FR-V5 (client-side handling)
 **AC Mapping**: FR-V2.1, FR-V2.2, FR-V2.3, FR-V2.4, FR-V2.5, FR-V4.1, FR-V4.2, FR-V4.3, FR-V5.1, FR-V5.2, FR-V5.3
 
@@ -476,6 +536,9 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/types.ts --lifec
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Task 3 (container + view)
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T09, T10.
+
 **Requirements**: FR-V2, FR-V3, FR-V7 (partial — share buttons created in Task 6)
 **AC Mapping**: FR-V2.6, FR-V2.7, FR-V3.1, FR-V3.2, FR-V3.3, FR-V3.4, FR-V3.5, FR-V7.1, FR-V7.2
 
@@ -758,6 +821,9 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/NotFoundState.ts
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 4 (wire into view)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T06, T07, T15, T18.
+
 **Requirements**: FR-V8, FR-V9
 **AC Mapping**: FR-V8.1, FR-V8.2, FR-V8.3, FR-V9.1, FR-V9.2, FR-V9.3
 
@@ -862,6 +928,9 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (result components)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T07, T15, T18.
+
 **Requirements**: FR-V7, FR-V10
 **AC Mapping**: FR-V7.1, FR-V7.2, FR-V7.3, FR-V7.4, FR-V7.5, FR-V10.1, FR-V10.2, FR-V10.3, FR-V10.4, FR-V10.5, FR-V10.6, FR-V10.7
 
@@ -1000,6 +1069,9 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 2 (page), Task 4 (result components), Plan 4 (verification service)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T06, T15, T18.
+
 **Requirements**: FR-V6
 **AC Mapping**: FR-V6.1, FR-V6.2, FR-V6.3, FR-V6.4, FR-V6.5, FR-V6.6, FR-V6.7, FR-V6.8
 
@@ -1154,6 +1226,9 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/StructuredData.t
 
 **Estimated time**: 2 hours
 **Dependencies**: Task 2 (route), Task 1 (i18n)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T12, T13.
+
 **Requirements**: FR-V14
 
 ### Subtasks
@@ -1225,6 +1300,9 @@ bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codesc
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 3 (container), Plan 5 (GraphQL API), Plan 18 (verification logging)
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04, T10.
+
 **Requirements**: FR-V4.3 (analytics source detection), NFR-V4.3
 
 ### Subtasks
@@ -1281,6 +1359,9 @@ If Plan 18 does not yet support this, add a cross-plan note in `INTER_PLAN_CONTR
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 2 (verify route), Task 1 (i18n)
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04, T09.
+
 **Requirements**: FR-V12
 
 ### Subtasks
@@ -1340,6 +1421,9 @@ bun run scripts/health/sub-loop.ts app/verify/page.tsx --lifecycle codescene
 
 **Estimated time**: 1-2 hours
 **Dependencies**: All tasks 1-10 complete
+
+> **Parallelizable**: This task runs as a subagent in the Final Wave alongside T23.
+
 **Requirements**: Plan 21 alignment
 
 ### Subtasks
@@ -1423,7 +1507,7 @@ bun run scripts/health/sub-loop.ts app/verify/page.tsx --lifecycle codescene
 
 ### Execution Parallelism
 
-Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 can have partial overlap (4 and 5 both edit VerificationView, so coordinate). Task 8 (language toggle) depends only on Tasks 1+2 and can run parallel with Tasks 4-7. Task 9 (analytics) depends on Task 3 and can run parallel with Tasks 4-8. Task 10 (manual entry) depends on Tasks 1+2+8 and can run parallel with Tasks 4-7. Final task 11 requires all prior tasks complete.
+Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 can have partial overlap (4 and 5 both edit VerificationView, so coordinate). Task 8 (language toggle) depends only on Tasks 1+2 and can run via parallel subagents with Tasks 4-7. Task 9 (analytics) depends on Task 3 and can run via parallel subagents with Tasks 4-8. Task 10 (manual entry) depends on Tasks 1+2+8 and can run via parallel subagents with Tasks 4-7. Final task 11 requires all prior tasks complete.
 
 ---
 
@@ -1435,6 +1519,9 @@ The following tasks add the public-facing verification page components, REST API
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Task 1 (i18n), Task 2 (verify route)
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T08, T13.
+
 **Requirements**: FR-V1, FR-V2, FR-V3
 
 #### 12.1 Create PublicVerificationPage component
@@ -1499,6 +1586,8 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicVerificationP
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 1 (i18n), Task 14 (QrScanner)
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T08, T12.
+
 #### 13.1 Create VerificationSearchPage component
 
 **File to create**: `frontend/views/public/verify/VerificationSearchPage.tsx`
@@ -1561,6 +1650,8 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/VerificationSearchP
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 1 (i18n)
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02.
 
 #### 14.1 Install html5-qrcode
 
@@ -1627,6 +1718,8 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/QrScanner.test.tsx 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 12 (PublicVerificationPage — uses the card)
 
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T06, T07, T18.
+
 #### 15.1 Create PublicCertificateCard component
 
 **File to create**: `frontend/views/public/verify/PublicCertificateCard.tsx`
@@ -1678,6 +1771,8 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicCertificateCa
 
 **Estimated time**: 3 hours
 **Dependencies**: Task 15 (PublicCertificateCard — opens the dialog)
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 (singleton wave).
 
 #### 16.1 Create ShareCertificateDialog component
 
@@ -1731,6 +1826,8 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/ShareCertificateDia
 
 **Estimated time**: 4 hours
 **Dependencies**: Plan 5 (verifyCertificateService — cross-plan), Task 19 (rate limiter for store)
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 (singleton wave).
 
 #### 17.1 Create rate limiting middleware
 
@@ -1797,6 +1894,8 @@ bun run scripts/health/sub-loop.ts test/api/certificates/verify/route.test.ts --
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Plan 5 (verifyForMetadata — cross-plan), Task 12 (page route)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T06, T07, T15.
 
 #### 18.1 Add generateMetadata to app/[locale]/verify/[certificateNumber]/page.tsx
 
@@ -1869,6 +1968,8 @@ bun run scripts/health/sub-loop.ts app/robots.ts --lifecycle codescene
 **Estimated time**: 3 hours
 **Dependencies**: Task 17 (API route — store fetches from it)
 
+> **Parallelizable**: This task runs as a subagent in Wave 8 (singleton wave).
+
 #### 19.1 Create useVerificationStore
 
 **File to create**: `frontend/stores/verificationStore.ts`
@@ -1921,6 +2022,8 @@ bun run scripts/health/sub-loop.ts test/ui/stores/verificationStore.test.ts --li
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Tasks 12-16 (components to test), Task 19 (store)
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T21.
 
 This task creates 5 component test files for the public verification components. All tests use Happy DOM + mocked Apollo/fetch (no real server). Follows the pattern in existing `test/ui/components/verify/` tests.
 
@@ -2026,6 +2129,8 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/ShareCertificateDia
 **Estimated time**: 5-6 hours
 **Dependencies**: Tasks 12-19 (all components + store + API), `bun run build:test` (production server)
 
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T20.
+
 #### 21.1 Build production server
 
 **Action**: `bun run build:test` (required before E2E — see AGENTS.md)
@@ -2130,6 +2235,8 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/verify/share-dialog.spec.ts --lif
 **Estimated time**: 2-3 hours
 **Dependencies**: All tasks 12-21 complete
 
+> **Parallelizable**: This task runs as a subagent in Wave 10 (singleton wave).
+
 #### 22.1 Run quality gate
 
 **Action**: Run `bun quality-gate` for all files created in Tasks 12-21.
@@ -2175,6 +2282,8 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/verify/share-dialog.spec.ts --lif
 
 **Estimated time**: 1-2 hours
 **Dependencies**: All tasks 12-22 complete
+
+> **Parallelizable**: This task runs as a subagent in the Final Wave alongside T11.
 
 #### 23.1 Update NEW_PAGE_WORKFLOW.md with public REST endpoint pattern
 
@@ -2277,7 +2386,7 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
 **Supplementary tasks (12-23)**:
 - Task 12 (PublicVerificationPage) depends on Tasks 1+2 (i18n, route).
 - Task 13 (VerificationSearchPage) depends on Tasks 1+14 (QrScanner).
-- Task 14 (QrScanner) depends on Task 1 (i18n) — can run parallel with Tasks 4-10.
+- Task 14 (QrScanner) depends on Task 1 (i18n) — can run via parallel subagents with Tasks 4-10.
 - Task 15 (PublicCertificateCard) depends on Task 12.
 - Task 16 (ShareCertificateDialog) depends on Task 15.
 - Task 17 (API route handler) depends on Plan 5 (cross-plan) + Task 19 (rate limiter).

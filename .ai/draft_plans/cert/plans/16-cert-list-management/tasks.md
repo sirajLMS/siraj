@@ -1,5 +1,7 @@
 # Plan 16 — Certificate List & Management: Task Breakdown
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
 ## Document Info
 
 | Field | Value |
@@ -45,11 +47,13 @@ Task 1 (i18n namespace)
 
 ### Execution Order
 
+**Execution order**: T1 → T2 → T3 → T4 → (T5, T6, T7, T8 via parallel subagents after T4) → T9 → T10 → T11 → T12 → (T13, T14 via parallel subagents after T12) → (T15, T16 via parallel subagents after T13/T14) → T17 → (T18, T19 via parallel subagents after T17) → T20 → T21
+
 1. **Task 1**: i18n namespace (foundation — all components need labels)
 2. **Task 2**: Zustand store (state management foundation — all views depend on it)
 3. **Task 3**: GraphQL documents (data layer — container depends on these)
 4. **Task 4**: Container + ViewModel (orchestrates queries, mutations, store)
-5. **Task 5** + **Task 6**: Desktop view + Mobile view (parallel after container)
+5. **Task 5** + **Task 6**: Desktop view + Mobile view (via parallel subagents after container)
 6. **Task 7**: Revoke dialog + batch confirm dialog
 7. **Task 8**: FilterBar + FilterDrawer + DesktopMetricCardGrid + MobileMetricCardGrid
 8. **Task 9**: CertificateStatusBadge + CertificateCardItem (shared sub-components)
@@ -57,6 +61,74 @@ Task 1 (i18n namespace)
 10. **Task 11**: CSV export + batch re-download ZIP
 11. **Task 12**: Integration verification (refetch, cache, navigation)
 12. **Task 13**: Knowledge propagation (final)
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T1
+- Tasks: T1 (i18n namespace)
+- Rationale: Foundation task with no dependencies — all other tasks need i18n labels. Must complete before any other task starts.
+
+### Wave 2: T2
+- Tasks: T2 (Zustand store)
+- Rationale: Depends on T1 (i18n types). Must complete before GraphQL documents can reference store types. Sequential dependency on Wave 1.
+
+### Wave 3: T3
+- Tasks: T3 (GraphQL documents)
+- Rationale: Depends on T2 (store types) and Plan 5 (GraphQL schema). Must complete before the container can import query/mutation documents. Sequential dependency on Wave 2.
+
+### Wave 4: T4
+- Tasks: T4 (Container + ViewModel)
+- Rationale: Depends on T1 (i18n), T2 (store), T3 (GraphQL documents). Orchestrates all queries, mutations, and store interactions. Must complete before any view components can be built. Sequential dependency on Wave 3.
+
+### Wave 5: T5, T6, T7, T8
+- Tasks: T5 (Desktop view — AppDataGrid), T6 (Mobile view — card list), T7 (Revoke dialog + batch confirm), T8 (FilterBar + FilterDrawer + metrics)
+- Rationale: All four tasks depend only on T4 (Container + ViewModel). They create independent view/dialog/filter components with no interdependencies — each imports from the container but not from each other. Safe to run as 4 parallel subagents.
+
+### Wave 6: T9
+- Tasks: T9 (App Router page + sidebar navigation)
+- Rationale: Depends on T4 (container) and T8 (filter panel). Must complete before the page can render. Sequential dependency on Wave 5.
+
+### Wave 7: T10
+- Tasks: T10 (Integration verification)
+- Rationale: Depends on T4–T9 (all components built). Verifies end-to-end integration. Sequential dependency on Wave 6.
+
+### Wave 8: T11
+- Tasks: T11 (Knowledge propagation — base)
+- Rationale: Depends on T10 (verification complete). Records base-plan knowledge artifacts. Sequential dependency on Wave 7.
+
+### Wave 9: T12
+- Tasks: T12 (CertificateListPage component)
+- Rationale: Depends on T9 (App Router page) and T4 (Container + ViewModel). Builds the top-level desktop page wrapper. Sequential dependency on Wave 8.
+
+### Wave 10: T13, T14
+- Tasks: T13 (CertificateTable — AppDataGrid primary view), T14 (CertificateCard + CertificateGrid — grid view)
+- Rationale: Both depend on T4 (Container — exports row props) and T12 (page hosts the table/grid). T13 and T14 are independent components consumed by the page — no interdependency between them. Safe to run as 2 parallel subagents.
+
+### Wave 11: T15, T16
+- Tasks: T15 (RevokeCertificateDialog), T16 (CertificateExportDialog)
+- Rationale: Both depend on T4 (Container calls dialog open actions) and T13/T14 (table/card row actions). The two dialogs are independent components with no shared code — safe to run as 2 parallel subagents.
+
+### Wave 12: T17
+- Tasks: T17 (useCertificateListStore enhanced)
+- Rationale: Depends on T2 (existing certListStore), T3 (GraphQL documents), and T15/T16 (annotations to revoke/export actions). Extends the existing store with new dialog/view-mode actions. Sequential dependency on Wave 11.
+
+### Wave 13: T18, T19
+- Tasks: T18 (5 component tests), T19 (6 E2E tests)
+- Rationale: Both depend on T12–T17 (all components exist). Component tests (T18) use mocked Apollo (no server); E2E tests (T19) require `build:test` and run on the test port range. They are independent test suites — safe to run as 2 parallel subagents. (T19 requires `build:test` prerequisite but does not depend on T18 results.)
+
+### Wave 14: T20
+- Tasks: T20 (Quality loop per file)
+- Rationale: Depends on T12–T19 (all new files exist). Runs per-file progressive quality gate and full-repo quality gate. Must complete after all test files exist. Sequential dependency on Wave 13.
+
+### Final Wave: Knowledge Propagation
+- Task: T21 (Knowledge propagation — certificate list UI)
+- Rationale: Must run after all other tasks complete. Depends on T20 (quality gate clean) and packages knowledge artifacts for Plan 21.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -375,6 +447,7 @@ Do NOT define `CertificateFilters` here — the store uses individual fields (no
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (container + view)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T6, T7, T8.
 **Requirements**: REQ-16.7 (desktop grid columns), REQ-16.22–16.24 (column config), REQ-16.36 (status badges)
 
 ### Subtasks
@@ -433,6 +506,7 @@ Do NOT define `CertificateFilters` here — the store uses individual fields (no
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 4 (container + view)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T5, T7, T8.
 **Requirements**: REQ-16.8 (mobile card list), REQ-16.39–16.40 (navigation)
 
 ### Subtasks
@@ -482,6 +556,7 @@ Do NOT define `CertificateFilters` here — the store uses individual fields (no
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 4 (container + view)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T5, T6, T8.
 **Requirements**: §2.8 (revoke workflow), REQ-16.30 (bulk action confirmation)
 
 ### Subtasks
@@ -535,6 +610,7 @@ Do NOT define `CertificateFilters` here — the store uses individual fields (no
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Task 4 (container + view)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T5, T6, T7.
 **Requirements**: REQ-16.10–16.11 (metrics), REQ-16.15–16.18 (filters)
 
 ### Subtasks
@@ -787,6 +863,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Task 4 (Container + ViewModel — exports the row props), Task 12 (page hosts the table)
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T14.
 **Requirements**: REQ-16.1–16.7 (columns, sort), REQ-16.19–16.21 (pagination), REQ-16.25–16.30 (bulk action bar), §B (column spec)
 
 ### Subtasks
@@ -815,6 +892,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (Container — same Props shape as the mobile `CertificateCardItem`), Task 12 (page swaps to grid view)
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T13.
 **Requirements**: REQ-16.1 (list view alt), §C (card spec)
 
 ### Subtasks
@@ -848,6 +926,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (Container calls `openRevokeDialog`), Task 13 (table single-row Revoke action), Plan 5 (revoke/batch-revoke GraphQL mutations — see Task 3 documents)
+> **Parallelizable**: This task runs as a subagent in Wave 11 alongside T16.
 **Requirements**: REQ-16.31–16.35 (revoke workflow), §D (dialog spec)
 
 ### Subtasks
@@ -880,6 +959,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 3-4 hours
 **Dependencies**: Task 4 (Container calls `openExportDialog`), Task 13 (table Export button), Plan 5 (export query/mutation)
+> **Parallelizable**: This task runs as a subagent in Wave 11 alongside T15.
 **Requirements**: REQ-16.36–16.40 (export workflow), §E (dialog spec)
 
 ### Subtasks
@@ -946,6 +1026,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 5-6 hours
 **Dependencies**: Tasks 12–17 (all components exist), Plan 5 (mock Apollo providers)
+> **Parallelizable**: This task runs as a subagent in Wave 13 alongside T19.
 **Requirements**: REQ-16.1–16.40 (behavioural coverage), §Component test conventions
 
 ### Subtasks
@@ -1017,6 +1098,7 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 **Estimated time**: 4-5 hours
 **Dependencies**: Task 10 (dev server integration verified), Tasks 12–17 (page, table, card, dialogs)
+> **Parallelizable**: This task runs as a subagent in Wave 13 alongside T18.
 **Requirements**: REQ-16.1–16.40 (end-to-end verification on a production build)
 
 ### Prerequisites

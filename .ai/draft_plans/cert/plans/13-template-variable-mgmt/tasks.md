@@ -4,6 +4,7 @@
 > **Dependencies:** Plan 5 (GraphQL API), Plan 10 (Template Editor Basic)
 > **Total Tasks:** 11
 > **Estimated Effort:** 22-33 hours
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 
 ---
 
@@ -33,6 +34,36 @@ T02 ──┘                    │      ├──→ T10 ──→ T11
 | T09 | T02, T04 | T10 | 3 |
 | T10 | T03, T07, T08, T09 | T11 | 4 |
 | T11 | T10 | — | 4 |
+
+**Execution order**: (T01, T02 via parallel subagents) → (T03, T04, T05, T06, T08 via parallel subagents) → (T07, T09 via parallel subagents) → T10 → T11
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01, T02
+- Tasks: T01 (variablePanelStore), T02 (GraphQL Documents for Variable CRUD)
+- Rationale: Both tasks have no dependencies — T01 creates the Zustand store, T02 creates GraphQL documents and backend resolvers. They touch completely different file sets (frontend stores vs backend GraphQL/types/services) and can proceed concurrently.
+
+### Wave 2: T03, T04, T05, T06, T08
+- Tasks: T03 (VariablePanel + VariableList + VariableRow), T04 (VariableForm), T05 (Text/Number type inputs), T06 (DateVariableInput), T08 (SystemVariableBadge + System Variable Initialization)
+- Rationale: All five tasks depend only on T01 and/or T02 (both completed in Wave 1). T03 and T04 depend on T01+T02; T05, T06, and T08 depend only on T02. They create distinct component files with no interdependencies among each other (T07 wires them together later). T08 touches backend services while the others touch frontend components — no file conflicts.
+
+### Wave 3: T07, T09
+- Tasks: T07 (SelectOptionsEditor + Complete VariableForm Integration), T09 (DeleteBindingWarning + Variable Deletion Flow)
+- Rationale: T07 depends on T04, T05, T06 (all completed in Wave 2) — it wires type-specific sub-components into the VariableForm. T09 depends on T02 and T04 (both completed in earlier waves) — it creates the deletion dialog and backend deletion logic. These two tasks modify different files (T07 works on select editor components and VariableForm; T09 works on delete dialogs and backend service) and can run concurrently.
+
+### Wave 4: T10
+- Tasks: T10 (MobileVariablePanel + Integrate with Template Editor)
+- Rationale: T10 depends on T03, T07, T08, T09 — all completed in prior waves. It creates the mobile panel and integrates both desktop and mobile into the template editor. Single task, no parallelization within this wave.
+
+### Final Wave: Knowledge Propagation
+- Task: T11 (Docs + AGENTS.md Updates)
+- Rationale: Must run after all other tasks complete — it documents the full variable system and updates AGENTS.md files with conventions referencing all created files.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -84,6 +115,8 @@ bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 
 **Estimated:** 2-3 hrs | **Depends on:** — | **Phase:** 1
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T02.
+
 **Description:**
 Create the Zustand store that manages the variable panel's local UI state — form open/close, draft values, validation errors, touched/dirty tracking, confirmation dialog states (type change, name change, delete).
 
@@ -130,6 +163,8 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/index.ts --lifecycle c
 ### T02: Create GraphQL Documents for Variable CRUD
 
 **Estimated:** 2-3 hrs | **Depends on:** — | **Phase:** 1
+
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T01.
 
 **Description:**
 Create all GraphQL query and mutation documents for variable management: list query, bindings query, create/update/rename/changeType/delete/reorder mutations. These documents drive the Apollo hooks used by the variable panel components.
@@ -189,6 +224,8 @@ bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certi
 ### T03: Create VariablePanel + VariableList + VariableRow (Desktop)
 
 **Estimated:** 3-4 hrs | **Depends on:** T01, T02 | **Phase:** 1
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T04, T05, T06, T08.
 
 **Description:**
 Create the desktop variable panel container, the variable list (with system and user groups), and the individual variable row component. The panel lives in the template editor's right sidebar and displays all variables for the current template.
@@ -263,6 +300,8 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 
 **Estimated:** 3-4 hrs | **Depends on:** T01, T02 | **Phase:** 1
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03, T05, T06, T08.
+
 **Description:**
 Create the variable creation/editing form with all shared fields (name, display label, type selector, required checkbox, default value) and type-specific sub-forms rendered conditionally. The form integrates real-time validation via `variablePanelStore` and submits via Apollo mutations.
 
@@ -333,6 +372,8 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 
 **Estimated:** 2-3 hrs | **Depends on:** T02 | **Phase:** 2
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03, T04, T06, T08.
+
 **Description:**
 Complete the text and number type-specific configuration and default value inputs. This includes min/max length for text, min/max value and decimal places for number, and the number formatting for preview chips.
 
@@ -391,6 +432,8 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 ### T06: Create DateVariableInput (Date Picker, Format Selector, Relative Date)
 
 **Estimated:** 2-3 hrs | **Depends on:** T02 | **Phase:** 2
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03, T04, T05, T08.
 
 **Description:**
 Create the date-specific variable input with a date picker, format selector (short/medium/long), and optional relative date expression input. Also implement locale-aware date preview formatting.
@@ -451,6 +494,8 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 ### T07: Create SelectOptionsEditor + Complete VariableForm Integration
 
 **Estimated:** 2-3 hrs | **Depends on:** T04, T05, T06 | **Phase:** 2
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T09.
 
 **Description:**
 Create the select options editor (key-value pair list with add/remove capabilities), the select default value dropdown, and complete the VariableForm integration by wiring all type-specific sub-components together with the full validation flow.
@@ -519,6 +564,8 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 
 **Estimated:** 2-3 hrs | **Depends on:** T02 | **Phase:** 3
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03, T04, T05, T06.
+
 **Description:**
 Implement system variable initialization (triggered on template creation) and the visual system variable badge component. System variables are pre-defined when a template is created and are immutable in name and type.
 
@@ -581,6 +628,8 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 ### T09: Create DeleteBindingWarning + Variable Deletion Flow
 
 **Estimated:** 2-3 hrs | **Depends on:** T02, T04 | **Phase:** 3
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T07.
 
 **Description:**
 Implement the deletion flow for variables, including the binding warning dialog (shows affected template elements when a variable is bound), unbinding logic (elements fall back to static_text), and the simplified confirmation for variables with no bindings.

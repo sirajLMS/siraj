@@ -3,7 +3,7 @@
 > **Feature**: Certificate Module — Template Editor Basic Info Tab (Frontend)
 > **Plan #**: 10
 > **Dependencies**: Plan 5 (GraphQL API), Plan 7 (File Upload), Plan 8 (Navigation Config), Plan 9 (Category Management)
-> **Execution Model**: Sequential per task (each task produces files the next task imports)
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 > **Quality Model**: Per-file tsgo + biome + lint + codescene via `scripts/health/sub-loop.ts --lifecycle codescene`
 > **Time Budget**: 2-4 hours per task
 
@@ -41,7 +41,63 @@ T16 (BackgroundUploadZone)──┤         │         │         │
                                         │         │                     └─→ T21 (knowledge propagation)
 ```
 
-**Execution order**: T01 → (T02, T03 in parallel) → T04 → T05 → T06 → T07 → T08 → T09 → (T11, T12, T13, T14, T15, T16 in parallel) → T10 → (T17, T18 in parallel) → T19 → T20 → T21
+**Execution order**: T01 → (T02, T03 via parallel subagents) → T04 → T05 → T06 → T07 → T08 → T09 → (T11, T12, T13, T14, T15, T16 via parallel subagents) → T10 → (T17, T18 via parallel subagents) → T19 → T20 → T21
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01 (i18n type schema)
+- Rationale: No dependencies — foundational type schema all subsequent i18n tasks import
+
+### Wave 2: T02, T03
+- Tasks: T02 (AR i18n impl), T03 (EN i18n impl)
+- Rationale: Both depend only on T01 (completed); AR and EN implementations are independent of each other
+
+### Wave 3: T04, T05
+- Tasks: T04 (i18n namespace registration), T05 (shared constants)
+- Rationale: T04 depends on T01-T03 (completed); T05 depends only on T01 (completed); no interdependencies between T04 and T05
+
+### Wave 4: T06
+- Tasks: T06 (GraphQL documents)
+- Rationale: Depends on T04 (completed); codegen requires namespace wiring before document generation
+
+### Wave 5: T07
+- Tasks: T07 (view-model types)
+- Rationale: Depends on T05, T06 (completed); types must exist before ViewModel hook consumes them
+
+### Wave 6: T08
+- Tasks: T08 (ViewModel hook)
+- Rationale: Depends on T04, T05, T06, T07 (all completed); central integration hook that all form sections import
+
+### Wave 7: T09
+- Tasks: T09 (Container component)
+- Rationale: Depends on T08 (completed); container orchestrates form sections and responsive view switch
+
+### Wave 8: T10, T11, T12, T13, T14
+- Tasks: T10 (Basic Info form), T11 (Dimensions form), T12 (Background form), T13 (Title form), T14 (Validity Period form)
+- Rationale: All depend only on T08, T09 (completed); each form section is a self-contained component with no interdependencies — maximum parallelism
+
+### Wave 9: T15, T16
+- Tasks: T15 (desktop view), T16 (mobile view)
+- Rationale: Both depend on T09 (completed) and T10-T14 (completed); desktop (tabs) and mobile (accordion) views are independent tier-specific components
+
+### Wave 10: T17
+- Tasks: T17 (App Router page)
+- Rationale: Depends on T09, T15, T16 (completed); page wires container into App Router with metadata
+
+### Wave 11: T18
+- Tasks: T18 (integration verification)
+- Rationale: Depends on T01-T17 all complete; full-system verification across all acceptance criteria
+
+### Final Wave: Knowledge Propagation
+- Task: T19 (knowledge propagation)
+- Rationale: Must run after all other tasks complete — documents patterns and prepares handoff notes
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -99,6 +155,7 @@ bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/te
 
 **Estimated time**: 2 hours
 **Depends on**: T01 (type schema exists)
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03.
 **Requirements**: §3.1, §3.2, §3.3
 
 ### Subtasks
@@ -133,6 +190,7 @@ bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/templ
 
 **Estimated time**: 1.5 hours
 **Depends on**: T01 (type schema exists)
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02.
 **Requirements**: §3.1, §3.2, §3.3
 
 ### Subtasks
@@ -166,6 +224,7 @@ bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templ
 
 **Estimated time**: 1 hour
 **Depends on**: T01 (type schema), T02 (AR impl), T03 (EN impl)
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T05.
 **Requirements**: §3.1, §3.4
 
 ### Subtasks
@@ -209,6 +268,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
 
 **Estimated time**: 1 hour
 **Depends on**: T01 (i18n type schema, for label keys referenced by constants)
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T04.
 **Requirements**: REQ-10-04 (DPI), REQ-10-06 (font list), design.md §7 (DPI standard), §12.8 (font list source)
 
 ### Subtasks
@@ -449,6 +509,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 
 **Estimated time**: 2 hours
 **Depends on**: T08 (ViewModel), T09 (Container)
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T11, T12, T13, T14.
 **Requirements**: REQ-10-02, REQ-10-03, design.md §7.1
 
 ### Subtasks
@@ -491,6 +552,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 
 **Estimated time**: 2.5 hours
 **Depends on**: T08 (ViewModel), T09 (Container)
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10, T12, T13, T14.
 **Requirements**: REQ-10-04, REQ-10-05, design.md §7.2
 
 ### Subtasks
@@ -538,6 +600,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 
 **Estimated time**: 3 hours
 **Depends on**: T08 (ViewModel), T09 (Container)
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10, T11, T13, T14.
 **Requirements**: REQ-10-06, REQ-10-07, design.md §7.3, §8
 
 ### Subtasks
@@ -586,6 +649,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 
 **Estimated time**: 1.5 hours
 **Depends on**: T08 (ViewModel), T09 (Container)
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10, T11, T12, T14.
 **Requirements**: REQ-10-08, design.md §7.4
 
 ### Subtasks
@@ -629,6 +693,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 
 **Estimated time**: 1.5 hours
 **Depends on**: T08 (ViewModel), T09 (Container)
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10, T11, T12, T13.
 **Requirements**: REQ-10-08, design.md §7.5
 
 ### Subtasks
@@ -670,6 +735,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 
 **Estimated time**: 2 hours
 **Depends on**: T09 (Container), T10-T14 (form sections)
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T16.
 **Requirements**: REQ-10-01, REQ-10-02, design.md §3, §13
 
 ### Subtasks
@@ -711,6 +777,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 
 **Estimated time**: 2 hours
 **Depends on**: T09 (Container), T10-T14 (form sections)
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T15.
 **Requirements**: REQ-10-01, REQ-10-02, design.md §3, §13
 
 ### Subtasks

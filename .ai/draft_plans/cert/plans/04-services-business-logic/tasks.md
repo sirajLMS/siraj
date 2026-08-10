@@ -3,7 +3,7 @@
 > **Feature**: Certificate Module — Services & Business Logic
 > **Plan #**: 04
 > **Dependencies**: Plan 1 (DB Schema & Enums), Plan 2 (Types & Permissions), Plan 3 (Repository Layer)
-> **Execution Model**: Sequential per task (each task produces files the next task imports)
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 > **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
@@ -32,11 +32,59 @@ T01 (i18n schema) ──────────────┐
                                  └─────────────────────────────────────┘
 ```
 
-**Execution order**: T01 → T02 → (T03, T04, T05, T06, T07, T08, T09, T10, T11, T12 in parallel after T02) → T13 → T14 → T15 → T16
+**Execution order**: T01 → T02 → (T03, T04, T05, T06, T07, T08, T09, T10, T11, T12 via parallel subagents after T02) → T13 → T14 → T15 → T16
 
 > **Note**: T04 depends on T03 (batch calls generation). T05, T06, T07 are independent
 > of each other but rely on T01 for `tErrors` type. T09 and T10 are independent.
 > T11 depends on T10 (validates against template variables). T12 is independent.
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: No task dependencies — depends only on Plan 2 (Types) and Plan 3 (Repository Layer), which are already complete. Must complete before any other task since all tasks import `tErrors` from the i18n schema.
+
+### Wave 2: T02
+- Tasks: T02
+- Rationale: Depends on T01 only. Must complete before services that import via the barrel. T13 can also start in the same wave, as it depends on T01 only (barrel stub not needed for helpers) — but is grouped with other i18n-dependent tasks in the next wave.
+
+### Wave 3: T03, T07, T13
+- Tasks: T03, T07, T13
+- Rationale: All depend on T01 and T02 only (and Plan 3 for T03/T13). T03 (CertificateGenerationService), T07 (CertificateExpiryService), and T13 (cache helpers) are independent of each other — no cross-dependencies. T13 cache helpers are needed by T05, T06, T08, T09, T10, T12 in Wave 4.
+
+### Wave 4: T04, T05, T06, T08, T09, T10, T12
+- Tasks: T04, T05, T06, T08, T09, T10, T12
+- Rationale:
+  - T04 depends on T03 (Wave 3) — batch calls `CertificateGenerationService.generateCertificate`
+  - T05 depends on T13 (Wave 3) — uses cache invalidation helpers
+  - T06 depends on T13 (Wave 3) — uses cache lookup/populate helpers
+  - T08 depends on T13 (Wave 3) — uses cache invalidation helpers
+  - T09 depends on T13 (Wave 3) — uses cache invalidation helpers
+  - T10 depends on T13 (Wave 3) — uses cache invalidation helpers
+  - T12 depends on T13 (Wave 3) — uses cache invalidation helpers
+  - All seven tasks are independent of each other (no interdependencies among them)
+
+### Wave 5: T11
+- Tasks: T11
+- Rationale: T11 (RecipientGroupService) depends on T10 (TemplateVariableService) — validates against template variables. Must wait for T10 to complete in Wave 4. No other task in this wave.
+
+### Wave 6: T14
+- Tasks: T14
+- Rationale: T14 (barrel completion) depends on T03–T13 (all service files created). Must wait for all services and cache helpers to be complete. Single task.
+
+### Wave 7: T15
+- Tasks: T15
+- Rationale: T15 (top-level services barrel update) depends on T14 (cert barrel complete). Single task.
+
+### Final Wave: Knowledge Propagation
+- Task: T16
+- Rationale: Must run after all other tasks complete. Verifies handoff contracts, documents patterns, and runs full-repo quality gate.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -141,6 +189,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
 
 **Estimated time**: 4 hours
 **Depends on**: T01 (i18n), T02 (barrel), Plan 3 (Repository Layer)
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T07, T13.
 **Requirements**: REQ-SVC-001 through REQ-SVC-005, REQ-PERM-001, REQ-PERM-006, REQ-GEN-001 through REQ-GEN-004, AC-1 through AC-5, AC-6, AC-11 through AC-17, AC-49, AC-50, AC-56, AC-57, AC-61
 
 ### Subtasks

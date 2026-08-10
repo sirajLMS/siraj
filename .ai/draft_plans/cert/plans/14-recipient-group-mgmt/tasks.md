@@ -1,5 +1,7 @@
 # Tasks — Plan 14: Recipient Group Management
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
 ## Task Dependency Graph
 
 ```
@@ -27,6 +29,50 @@ T10 (Mobile variants verification + infinite scroll)
 T11 (Knowledge propagation)
 ```
 
+**Execution order**: T01 → (T02, T03, T03b via parallel subagents) → (T04, T05, T05b via parallel subagents) → (T06, T07, T07b via parallel subagents) → T08 → T09 → T10 → T11
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task — i18n types and translations required by all subsequent tasks
+
+### Wave 2: T02, T03, T03b
+- Tasks: T02, T03, T03b
+- Rationale: No interdependencies — all depend only on T01 (i18n). T02 (Zustand store), T03 (GraphQL documents), and T03b (types, schemas, utilities) produce independent files with no shared imports.
+
+### Wave 3: T04, T05, T05b
+- Tasks: T04, T05, T05b
+- Rationale: T04 depends on T02 + T03 + T03b (list page needs store, GraphQL docs, and types). T05 and T05b depend on T03 + T03b (dialogs need GraphQL docs and schemas). No interdependencies among the three — each produces separate view/dialog files.
+
+### Wave 4: T06, T07, T07b
+- Tasks: T06, T07, T07b
+- Rationale: T06 depends on T04 (detail page follows list page pattern) and T05 + T05b (dialogs rendered in detail). T07 and T07b depend on T03 + T03b (GraphQL docs and types for student assignment and import/export). All three produce separate components with no circular dependencies.
+
+### Wave 5: T08
+- Tasks: T08
+- Rationale: Per-recipient variable value editor depends on T06 (detail desktop/mobile views provide inline expansion targets) and T07 + T07b (assignment and import components for integration). Single task — no parallelization at this level.
+
+### Wave 6: T09
+- Tasks: T09
+- Rationale: Group operations menu and navigation config depend on T08 (detail view integration complete). Single task.
+
+### Wave 7: T10
+- Tasks: T10
+- Rationale: Mobile variants verification depends on T09 (navigation and operations menu complete). Single task.
+
+### Final Wave: Knowledge Propagation
+- Task: T11
+- Rationale: Must run after all other tasks complete — synthesizes learnings from all outcome files
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
+
+---
+
 ## Execution Rules
 
 - **Before starting any task**: Read ALL files in `.ai/plans/14-recipient-group-mgmt/outcome/`
@@ -36,6 +82,8 @@ T11 (Knowledge propagation)
 ---
 
 ## T01: i18n Type Definitions and Translations
+
+**Depends on**: (none — foundation task)
 
 - [ ] 1.1 Create i18n type file `shared/locale/types/certificates/recipient-groups.ts`
   - Define `RecipientGroupsLabels` interface with 10 nested sub-domains: `list`, `create`, `detail`, `variables`, `operations`, `errors`, `importExport`, `permissions`, `breadcrumbs`, `serverValidation`
@@ -90,6 +138,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 ## T02: Zustand Store for Recipient Group Management
 
+**Depends on**: T01
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03, T03b.
+
 - [ ] 2.1 Create `frontend/common/stores/certRecipientGroupsStore.ts`
   - Follow Siraj Zustand pattern: `create<State>(set => ({...}))`, no `persist`
   - State fields: `searchQuery`, `page`, `pageSize`, `sortBy`, `sortDir`, `selectedGroupIds`, `createDialogOpen`, `editingGroupId`, `assignmentDialogOpen`, `variableEditorState: Record<string, { open, values, saving, errors }>`
@@ -115,6 +166,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T03: GraphQL Documents
+
+**Depends on**: T01
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02, T03b.
 
 - [ ] 3.1 Create `frontend/common/graphql/sharedDocuments/certificates/certificateRecipientGroup.documents.ts`
   - Define all GraphQL documents listed in the design.md Interface Contracts section
@@ -150,6 +204,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T03b: Types, Schemas, and Utilities
+
+**Depends on**: T01
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02, T03.
 
 - [ ] 3b.1 Create types file `frontend/common/views/dashboard/certificates/recipient-groups/types/recipientGroup.types.ts`
   - Define ViewModel return types: `RecipientGroupListViewModel`, `RecipientGroupDetailViewModel`
@@ -205,6 +262,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T04: Recipient Group List Page (ViewModel + Switcher + Container + Desktop + Mobile)
+
+**Depends on**: T02, T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T05, T05b.
 
 - [ ] 4.1 Create App Router page `app/(dashboard)/certificates/recipient-groups/page.tsx`
   - Server component calling `requirePermissionForPage(userId, [AppPermission.CertificateRecipientGroupView], locale, context)`
@@ -293,6 +353,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 ## T05: Create Recipient Group Dialog
 
+**Depends on**: T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T04, T05b.
+
 - [ ] 5.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/createRecipientGroupDialog.tsx`
   - Dialog form: name (required, min 1, max 100 chars), description (optional multiline, max 500), template selection (Autocomplete)
   - Template Autocomplete fetches published templates via `TemplateListForSelectQueryDocument`
@@ -320,6 +383,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T05b: Group Operation Dialogs (Duplicate, Delete, Change Template)
+
+**Depends on**: T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T04, T05.
 
 - [ ] 5b.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/duplicateGroupDialog.tsx`
   - Fields: newName (default: "{originalName} (Copy)"), template (default: same template)
@@ -362,6 +428,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T06: Group Detail Page (ViewModel + Switcher + Container + Desktop + Mobile)
+
+**Depends on**: T04, T05, T05b
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T07b.
 
 - [ ] 6.1 Create App Router page `app/(dashboard)/certificates/recipient-groups/[id]/page.tsx`
   - Server component calling `requirePermissionForPage(userId, [AppPermission.CertificateRecipientGroupView], locale, context)`
@@ -440,6 +509,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 ## T07: Student Assignment Flow
 
+**Depends on**: T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T06, T07b.
+
 - [ ] 7.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/studentAssignmentDialog.tsx`
   - Dialog (desktop) / bottom sheet `mobileAssignmentSheet` (mobile) for searching and selecting students
   - Search Autocomplete: server-side via `StudentSearchQueryDocument` with 300ms debounce
@@ -482,6 +554,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 ## T07b: Member Import/Export
 
+**Depends on**: T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T06, T07.
+
 - [ ] 7b.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/importMembersDialog.tsx`
   - CSV file upload dropzone (accepts `.csv` only, max 1MB)
   - "Download Template" link — generates blank CSV with expected headers
@@ -520,6 +595,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T08: Per-Recipient Variable Value Editor
+
+**Depends on**: T06, T07, T07b
+> **Parallelizable**: This task runs as a subagent in Wave 5 (sole task in this wave — no siblings).
 
 - [ ] 8.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/variableValueEditor.tsx`
   - Core variable editing form (shared logic for desktop inline + mobile dialog)
@@ -583,6 +661,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 ## T09: Group Operations Menu
 
+**Depends on**: T08
+> **Parallelizable**: This task runs as a subagent in Wave 6 (sole task in this wave — no siblings).
+
 - [ ] 9.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/groupOperationsMenu.tsx`
   - `Popover` with `MenuList` — items: Duplicate, Change Template, Delete (with divider), Edit Description
   - Each item visible per `permissions` flags from ViewModel
@@ -617,6 +698,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 ## T10: Mobile Variants Integration
 
+**Depends on**: T09
+> **Parallelizable**: This task runs as a subagent in Wave 7 (sole task in this wave — no siblings).
+
 - [ ] 10.1 Verify mobile list view (`recipientGroupList.mobile.tsx`) connects to the same Apollo queries as desktop
   - Ensure `MobileCardList` renders paginated results
   - Ensure search debounce works on mobile
@@ -649,6 +733,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T11: Knowledge Propagation & Documentation
+
+**Depends on**: T10
+> **Parallelizable**: This task runs as a subagent in the Final Wave (sole task — knowledge propagation must run after all other tasks complete).
 
 - [ ] 11.1 Read all outcome files in `.ai/plans/14-recipient-group-mgmt/outcome/` to synthesize learnings
 

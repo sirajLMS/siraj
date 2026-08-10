@@ -3,7 +3,7 @@
 > **Feature**: Certificate Module — Template Category Management (Frontend)
 > **Plan #**: 09
 > **Dependencies**: Plan 5 (GraphQL API), Plan 8 (Navigation Config)
-> **Execution Model**: Sequential per task (each task produces files the next task imports)
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 > **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
@@ -42,7 +42,71 @@ T12, T13 ───────────────────────�
                                                             └─→ T18 (knowledge propagation)
 ```
 
-**Execution order**: T01 → (T02, T03 in parallel) → T04 → T05 → T06 → T07 → T08 → (T10, T11 in parallel) → (T12, T13 in parallel) → T09 → (T14, T15 in parallel) → T16 → T17 → T18
+**Execution order**: T01 → (T02, T03 via parallel subagents) → T04 → T05 → T06 → T07 → T08 → (T10, T11 via parallel subagents) → (T12, T13 via parallel subagents) → T09 → (T14, T15 via parallel subagents) → T16 → T17 → T18
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01 (i18n type schema)
+- Rationale: Foundation task with no internal dependencies — must complete before any i18n implementation can begin
+
+### Wave 2: T02, T03
+- Tasks: T02 (Arabic i18n impl), T03 (English i18n impl)
+- Rationale: Both depend only on T01 (type schema); no interdependencies between AR and EN implementations — safe to run concurrently
+
+### Wave 3: T04
+- Tasks: T04 (i18n namespace registration)
+- Rationale: Depends on T01, T02, and T03 — must wait for both locale implementations to complete
+
+### Wave 4: T05
+- Tasks: T05 (GraphQL documents)
+- Rationale: Depends on T04 (i18n wired for codegen) and Plan 5 (external) — no other tasks can proceed until GraphQL documents and codegen types exist
+
+### Wave 5: T06
+- Tasks: T06 (Zustand store)
+- Rationale: Depends on T04 (i18n wired) and T05 (GraphQL documents for types) — store types reference codegen output
+
+### Wave 6: T07
+- Tasks: T07 (ViewModel types)
+- Rationale: Depends on T05 (GraphQL documents for codegen types) and T06 (store for state types) — types aggregate both layers
+
+### Wave 7: T08
+- Tasks: T08 (ViewModel hook)
+- Rationale: Depends on T04, T05, T06, and T07 — orchestrates i18n, GraphQL, store, and types; no other task can run alongside it
+
+### Wave 8: T10, T11
+- Tasks: T10 (shared dialogs + sub-components), T11 (CategoryPicker)
+- Rationale: Both depend on T05 (GraphQL documents) and T08 (ViewModel); no interdependencies — T10 creates dialogs/pickers, T11 creates the category picker, neither imports the other
+
+### Wave 9: T12, T13
+- Tasks: T12 (desktop tree components), T13 (desktop template pane)
+- Rationale: Both depend on T05 (GraphQL documents) and T08 (ViewModel); no interdependencies — T12 builds the tree, T13 builds the template pane, neither imports the other
+
+### Wave 10: T09
+- Tasks: T09 (Container + switcher)
+- Rationale: Depends on T08 (ViewModel) and the completed T10–T13 components — container wires all view components together
+
+### Wave 11: T14, T15
+- Tasks: T14 (desktop view), T15 (mobile view)
+- Rationale: Both depend on T09 (Container), T10 (shared dialogs), T12/T13 (desktop components); no interdependencies between desktop and mobile views — safe to run concurrently
+
+### Wave 12: T16
+- Tasks: T16 (App Router page)
+- Rationale: Depends on T09 (Container), T14 (desktop view), T15 (mobile view) — the page wires both tier views
+
+### Wave 13: T17
+- Tasks: T17 (integration verification)
+- Rationale: Depends on T01–T16 all complete — verifies the full integration end-to-end
+
+### Final Wave: Knowledge Propagation
+- Task: T18 (knowledge propagation)
+- Rationale: Must run after all other tasks complete — documents patterns, updates session todos, and prepares handoff notes
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -92,6 +156,7 @@ bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/ca
 
 **Estimated time**: 1.5 hours
 **Depends on**: T01 (type schema exists)
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03.
 **Requirements**: §4.2, §4.3, §4.5
 
 ### Subtasks
@@ -134,6 +199,7 @@ bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/categ
 
 **Estimated time**: 1 hour
 **Depends on**: T01 (type schema exists)
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02.
 **Requirements**: §4.2, §4.3, §4.5
 
 ### Subtasks

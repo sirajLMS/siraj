@@ -9,6 +9,10 @@
 | **Depends On** | Plan 05 (GraphQL API), Plan 07 (Storage) |
 | **Parallel With** | Plan 10 (Template Editor), Plan 13 (Variables) |
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+>
+> **Execution order**: 1.1 → 1.2 → (1.3, 1.5 via parallel subagents) → 1.4 → (2.1, 2.2, 2.8, 2.11 via parallel subagents) → (2.3, 2.13, 2.14, 2.21 via parallel subagents) → (2.4, 2.5, 2.22, 2.23 via parallel subagents) → (2.6, 2.9, 2.10, 2.15, 2.18, 2.19 via parallel subagents) → (2.7, 2.12, 2.16, 2.17, 2.20 via parallel subagents) → (2.24, 2.25, 3.1, 3.2, 3.3 via parallel subagents) → (2.26, 3.4 via parallel subagents) → 3.5 → (R4-T1, R4-T2, R4-T3 via parallel subagents) → R4-T11 → (3.6, 2.27, R4-T12 via parallel subagents — knowledge propagation)
+
 ---
 
 ## 1. Task Dependency Graph
@@ -45,6 +49,74 @@
 │ Tests  Tests ibility  Tests  Gate      + AGENTS.md                 │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: 1.1
+- Tasks: 1.1 (Template Export Service)
+- Rationale: Starting task — no within-plan dependencies. Must complete before downstream backend tasks.
+
+### Wave 2: 1.2
+- Tasks: 1.2 (Template Import Service)
+- Rationale: Depends on 1.1 (export interface contract). Single dependency — sequential after Wave 1.
+
+### Wave 3: 1.3, 1.5
+- Tasks: 1.3 (Batch Import Service), 1.5 (Audit Logging)
+- Rationale: 1.3 depends on 1.2; 1.5 depends on 1.1 and 1.2 — both satisfied after Wave 2. No interdependency between them.
+
+### Wave 4: 1.4
+- Tasks: 1.4 (GraphQL Export/Import Mutations)
+- Rationale: Depends on 1.1, 1.2, 1.3 — all complete after Wave 3. Single task consolidating backend services into GraphQL layer.
+
+### Wave 5: 2.1, 2.2, 2.8, 2.11
+- Tasks: 2.1 (ImportExport Zustand Store), 2.2 (File Handling Utilities), 2.8 (TypeScript Type Definitions), 2.11 (i18n Keys Implementation)
+- Rationale: All depend on Plan 05/GraphQL (external) or 1.4 (complete after Wave 4). No interdependencies among them — fully independent frontend foundation tasks.
+
+### Wave 6: 2.3, 2.13, 2.14, 2.21
+- Tasks: 2.3 (Client-Side Validation), 2.13 (Export Zustand Store), 2.14 (Import Zustand Store), 2.21 (FileDropZone Component)
+- Rationale: 2.3 depends on 2.2; 2.13 and 2.14 depend on 1.4; 2.21 has no within-plan deps. All dependencies satisfied after Wave 5. No interdependencies among them.
+
+### Wave 7: 2.4, 2.5, 2.22, 2.23
+- Tasks: 2.4 (Export Actions), 2.5 (Import Actions & Preview), 2.22 (ConflictResolutionCard), 2.23 (File Validation Service)
+- Rationale: 2.4 depends on 1.4 and 2.1; 2.5 depends on 1.4, 2.1, 2.3; 2.22 depends on 2.14; 2.23 depends on 2.3 — all complete after Wave 6. No interdependencies among them.
+
+### Wave 8: 2.6, 2.9, 2.10, 2.15, 2.18, 2.19
+- Tasks: 2.6 (Batch Results Summary), 2.9 (Role-Based Access Matrix), 2.10 (Error Handling), 2.15 (Export Step 1 — Format), 2.18 (Import Step 1 — Upload), 2.19 (Import Step 2 — Validation)
+- Rationale: 2.6 depends on 2.5; 2.9 depends on 2.4 and 2.5; 2.10 depends on 2.5; 2.15 depends on 2.13; 2.18 depends on 2.14 and 2.21; 2.19 depends on 2.14 and 2.23 — all complete after Wave 7. No interdependencies among them.
+
+### Wave 9: 2.7, 2.12, 2.16, 2.17, 2.20
+- Tasks: 2.7 (Mobile/Desktop Adaptation), 2.12 (E2E Tests), 2.16 (Export Step 2 — Options), 2.17 (Export Step 3 — Progress), 2.20 (Import Steps 3+4 — Preview & Import)
+- Rationale: 2.7 depends on 2.4, 2.5, 2.6; 2.12 depends on 2.4–2.7; 2.16 depends on 2.13 and 2.15; 2.17 depends on 2.13 and 2.15; 2.20 depends on 2.14, 2.22, 2.23 — all complete after Wave 8. No interdependencies among them.
+
+### Wave 10: 2.24, 2.25, 3.1, 3.2, 3.3
+- Tasks: 2.24 (Enhanced Component Tests), 2.25 (Enhanced E2E Tests), 3.1 (Backend Unit Tests), 3.2 (Frontend Unit Tests), 3.3 (Accessibility Audit)
+- Rationale: 2.24 depends on all 2.13–2.23; 2.25 depends on 2.15–2.20; 3.1 depends on 1.1–1.3; 3.2 depends on 2.1–2.6; 3.3 depends on 2.5 and 2.6 — all complete after Wave 9. Test tasks are independent of each other (different test suites).
+
+### Wave 11: 2.26, 3.4
+- Tasks: 2.26 (Quality Loop Per File — Enhanced UI), 3.4 (Performance Tests)
+- Rationale: 2.26 depends on all 2.13–2.25; 3.4 depends on 3.2 — both complete after Wave 10. No interdependency between them.
+
+### Wave 12: 3.5
+- Tasks: 3.5 (Quality Gate)
+- Rationale: Depends on all above tasks. Must run alone — coordinates full quality-gate pipeline.
+
+### Wave 13: R4-T1, R4-T2, R4-T3
+- Tasks: R4-T1 (File Validation), R4-T2 (Progress Indicators), R4-T3 (Error Recovery System — includes TemplateDiff, BatchExport, Import Hooks, ExportFormats, Version Service, ExportWizard A11y, File Processing Utils as sub-items)
+- Rationale: Round 4 enhancement tasks — each creates/modifies distinct files with no interdependencies. All build on patterns established by prior waves.
+
+### Wave 14: R4-T11
+- Tasks: R4-T11 (Component Tests for Round 4)
+- Rationale: Depends on R4-T1–R4-T3. Tests the components created in Wave 13.
+
+### Final Wave: Knowledge Propagation
+- Tasks: 3.6 (Documentation & Knowledge Propagation), 2.27 (Knowledge Propagation — Enhanced UI), R4-T12 (Knowledge Propagation — Round 4)
+- Rationale: Must run after all other tasks complete. Each documents a different phase (Phase 3, Enhanced UI, Round 4) — no interdependencies among them.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -116,6 +188,9 @@
 ---
 
 ### TASK 1.3: Batch Import Service
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside 1.5.
+
 **Files to create/modify:**
 - `backend/services/certificates/templateBatchImport.service.ts` (new)
 
@@ -188,6 +263,9 @@
 ---
 
 ### TASK 1.5: Audit Logging
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside 1.3.
+
 **Files to create/modify:**
 - `backend/services/certificates/audit.service.ts` (extend if exists)
 - `backend/db/schema/auditLog.ts` (if new event types needed)
@@ -215,6 +293,9 @@
 ## 3. Frontend Tasks (Phase 2)
 
 ### TASK 2.1: ImportExport Zustand Store
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside 2.2, 2.8, 2.11.
+
 **Files to create/modify:**
 - `frontend/common/stores/importExportStore.ts` (new)
 
@@ -243,6 +324,9 @@
 ---
 
 ### TASK 2.2: File Handling Utilities
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside 2.1, 2.8, 2.11.
+
 **Files to create/modify:**
 - `frontend/common/views/dashboard/certificates/importExport/utils/fileReader.ts` (new)
 - `frontend/common/views/dashboard/certificates/importExport/utils/downloadHelpers.ts` (new)
@@ -278,6 +362,9 @@
 ---
 
 ### TASK 2.3: Import Validation (Client-Side)
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside 2.13, 2.14, 2.21.
+
 **Files to create/modify:**
 - `frontend/common/views/dashboard/certificates/importExport/schemas/importSchema.ts` (new)
 - `frontend/common/views/dashboard/certificates/importExport/shared/ImportValidationBadge.tsx` (new)
@@ -308,6 +395,9 @@
 ---
 
 ### TASK 2.4: Export Actions (Template List & Editor)
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside 2.5, 2.22, 2.23.
+
 **Files to create/modify:**
 - `frontend/desktop/views/dashboard/certificates/importExport/TemplateExportDesktop.tsx` (new)
 - `frontend/mobile/views/dashboard/certificates/importExport/TemplateExportMobileCard.tsx` (new)
@@ -345,6 +435,9 @@
 ---
 
 ### TASK 2.5: Import Actions & Preview Modal
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside 2.4, 2.22, 2.23.
+
 **Files to create/modify:**
 - `frontend/desktop/views/dashboard/certificates/importExport/TemplateImportDesktop.tsx` (new)
 - `frontend/mobile/views/dashboard/certificates/importExport/TemplateImportMobileCard.tsx` (new)
@@ -388,6 +481,9 @@
 ---
 
 ### TASK 2.6: Batch Import Results Summary
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside 2.9, 2.10, 2.15, 2.18, 2.19.
+
 **Files to create/modify:**
 - `frontend/desktop/views/dashboard/certificates/importExport/ImportResultsSummary.desktop.tsx` (new)
 - `frontend/mobile/views/dashboard/certificates/importExport/ImportResultsMobileBottomSheet.tsx` (new)
@@ -422,6 +518,9 @@
 ---
 
 ### TASK 2.7: Mobile/Desktop Adaptation
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.12, 2.16, 2.17, 2.20.
+
 **Files to create/modify:**
 - `frontend/common/views/dashboard/certificates/importExport/ImportExportView.tsx` (switcher)
 - `frontend/common/views/dashboard/certificates/importExport/ImportExportContainer.tsx`
@@ -457,6 +556,9 @@
 ---
 
 ### TASK 2.8: TypeScript Type Definitions
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside 2.1, 2.2, 2.11.
+
 **Files to create/modify:**
 - `frontend/common/views/dashboard/certificates/importExport/types/index.ts` (new)
 
@@ -481,6 +583,9 @@
 ---
 
 ### TASK 2.9: Role-Based Access Matrix Implementation
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside 2.6, 2.10, 2.15, 2.18, 2.19.
+
 **Files to create/modify:**
 - Template List page (Plan 08 integration) — add actions
 - Template Editor page (Plan 10/11/12 integration) — add actions
@@ -509,6 +614,9 @@
 ---
 
 ### TASK 2.10: Error Handling & User Feedback
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside 2.6, 2.9, 2.15, 2.18, 2.19.
+
 **Files to create/modify:**
 - `frontend/common/views/dashboard/certificates/importExport/utils/errorHandling.ts` (new)
 - Toast notifications integration (existing pattern)
@@ -537,6 +645,9 @@
 ---
 
 ### TASK 2.11: i18n Keys Implementation
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside 2.1, 2.2, 2.8.
+
 **Files to create/modify:**
 - `shared/locale/certificates/templates/importExport.en.ts` (new)
 - `shared/locale/certificates/templates/importExport.ar.ts` (new)
@@ -568,6 +679,9 @@
 ---
 
 ### TASK 2.12: E2E Tests (Playwright)
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.16, 2.17, 2.20.
+
 **Files to create/modify:**
 - `test/ui/e2e/importExport/importExport-flow.spec.ts` (new)
 - `test/ui/e2e/importExport/importExport-batch.spec.ts` (new)
@@ -602,6 +716,9 @@
 ## 4. Integration & Quality Tasks (Phase 3)
 
 ### TASK 3.1: Unit Tests (Backend)
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.24, 2.25, 3.2, 3.3.
+
 **Files:** `backend/db/test/services/`
 - [ ] `templateExport.test.ts` — 3+ cases (valid, not found, with image)
 - [ ] `templateImport.test.ts` — 5+ cases (valid, invalid schema, duplicate UUID, missing category, large image)
@@ -612,6 +729,9 @@
 ---
 
 ### TASK 3.2: Unit Tests (Frontend Components)
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.24, 2.25, 3.1, 3.3.
+
 **Files:** `test/ui/components/certificates/importExport/`
 - [ ] `TemplateExportActions.test.tsx` — 4+ cases
 - [ ] `ImportPreviewModal.test.tsx` — 4+ cases (warnings, errors, a11y)
@@ -622,6 +742,9 @@
 ---
 
 ### TASK 3.3: Accessibility Audit
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.24, 2.25, 3.1, 3.2.
+
 - [ ] Run axe-core on import/export modals (automated in E2E)
 - [ ] Manual keyboard navigation test (Tab, Enter, Escape)
 - [ ] Screen reader test (NVDA/VoiceOver): progress announcements, error reading
@@ -632,6 +755,9 @@
 ---
 
 ### TASK 3.4: Performance Tests
+
+> **Parallelizable**: This task runs as a subagent in Wave 11 alongside 2.26.
+
 - [ ] Single export < 2s (template with 50 elements) — measure in E2E
 - [ ] Batch export (50 templates) < 30s — measure in E2E
 - [ ] Single import validation < 1s — unit test with performance.now()
@@ -653,6 +779,9 @@
 ---
 
 ### TASK 3.6: Documentation & Knowledge Propagation
+
+> **Parallelizable**: This task runs as a subagent in the Final Wave (knowledge propagation) alongside 2.27, R4-T12.
+
 **Docs to create:**
 - [ ] `docs/certificates/template-import-export.md` — feature guide with:
   - UX flow diagrams (import wizard, export options)
@@ -770,6 +899,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.13: Export Zustand Store
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside 2.3, 2.14, 2.21.
+
 **Files to create/modify:**
 - `frontend/stores/cert/templateExportStore.ts` (new)
 
@@ -802,6 +934,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.14: Import Zustand Store
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside 2.3, 2.13, 2.21.
+
 **Files to create/modify:**
 - `frontend/stores/cert/templateImportStore.ts` (new)
 
@@ -832,6 +967,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.15: ExportWizardDialog — Step 1 (Format Selection)
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside 2.6, 2.9, 2.10, 2.18, 2.19.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/export/ExportWizardDialog.tsx` (new — main dialog shell)
 - `frontend/views/dashboard/cert/templates/export/steps/ExportFormatStep.tsx` (new)
@@ -868,6 +1006,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.16: ExportWizardDialog — Step 2 (Format Options)
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.12, 2.17, 2.20.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/export/steps/ExportOptionsStep.tsx` (new)
 
@@ -900,6 +1041,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.17: ExportWizardDialog — Step 3 (Progress & Download)
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.12, 2.16, 2.20.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/export/steps/ExportProgressStep.tsx` (new)
 
@@ -930,6 +1074,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.18: ImportWizardDialog — Step 1 (Upload)
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside 2.6, 2.9, 2.10, 2.15, 2.19.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/import/ImportWizardDialog.tsx` (new — main dialog shell)
 - `frontend/views/dashboard/cert/templates/import/steps/ImportUploadStep.tsx` (new)
@@ -965,6 +1112,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.19: ImportWizardDialog — Step 2 (Validation Results)
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside 2.6, 2.9, 2.10, 2.15, 2.18.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/import/steps/ImportValidationStep.tsx` (new)
 
@@ -998,6 +1148,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.20: ImportWizardDialog — Step 3 (Preview & Conflicts) + Step 4 (Import)
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.12, 2.16, 2.17.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/import/steps/ImportPreviewStep.tsx` (new)
 - `frontend/views/dashboard/cert/templates/import/steps/ImportProgressStep.tsx` (new)
@@ -1039,6 +1192,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.21: FileDropZone Component
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside 2.3, 2.13, 2.14.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/import/FileDropZone.tsx` (new)
 
@@ -1074,6 +1230,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.22: ConflictResolutionCard Component
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside 2.4, 2.5, 2.23.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/import/ConflictResolutionCard.tsx` (new)
 
@@ -1107,6 +1266,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.23: File Validation Service (Schema, Version, Asset)
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside 2.4, 2.5, 2.22.
+
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/import/validation/templateValidationService.ts` (new)
 - `frontend/views/dashboard/cert/templates/import/validation/schemaValidator.ts` (new)
@@ -1159,6 +1321,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.24: Enhanced Component Tests (6 Test Files)
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.25, 3.1, 3.2, 3.3.
+
 **Files to create/modify:**
 - `test/ui/components/cert/templates/ExportFormatStep.test.tsx` (new)
 - `test/ui/components/cert/templates/ExportOptionsStep.test.tsx` (new)
@@ -1305,6 +1470,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.25: Enhanced E2E Tests (6 E2E Test Specs)
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.24, 3.1, 3.2, 3.3.
+
 **Files to create/modify:**
 - `test/ui/e2e/cert/templates/export-json.spec.ts` (new)
 - `test/ui/e2e/cert/templates/export-zip.spec.ts` (new)
@@ -1405,6 +1573,9 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 ---
 
 ### TASK 2.26: Quality Loop Per File (Enhanced UI)
+
+> **Parallelizable**: This task runs as a subagent in Wave 11 alongside 3.4.
+
 **Files:** All files created in Tasks 2.13–2.25
 
 **Subtasks:**
@@ -1442,6 +1613,9 @@ After all files pass individually:
 ---
 
 ### TASK 2.27: Knowledge Propagation (Enhanced UI)
+
+> **Parallelizable**: This task runs as a subagent in the Final Wave (knowledge propagation) alongside 3.6, R4-T12.
+
 **Files to create/modify:**
 - `docs/certificates/template-import-export-wizard.md` (new)
 - `frontend/stores/AGENTS.md` (update — add export/import store references)
@@ -1554,6 +1728,9 @@ After all files pass individually:
 ## Round 4 Enhancement Tasks
 
 ### R4-T1: File Validation Implementation
+
+> **Parallelizable**: This task runs as a subagent in Wave 13 alongside R4-T2, R4-T3.
+
 - [ ] Create `frontend/views/dashboard/certificates/template-import-export/components/FileValidator.tsx`
   - Max file size: 50MB for template JSON, 10MB per image asset
   - Format validation: JSON schema validation for template, PNG/JPG/SVG for images
@@ -1564,6 +1741,9 @@ After all files pass individually:
   - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-import-export/components/FileValidator.tsx --lifecycle codescene`
 
 ### R4-T2: Progress Indicators
+
+> **Parallelizable**: This task runs as a subagent in Wave 13 alongside R4-T1, R4-T3.
+
 - [ ] Create `frontend/views/dashboard/certificates/template-import-export/components/ProgressIndicator.tsx`
   - Overall progress bar: MUI v9 LinearProgress with percentage
   - Per-file progress for multi-file exports: list of file names + individual bars
@@ -1573,6 +1753,9 @@ After all files pass individually:
   - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-import-export/components/ProgressIndicator.tsx --lifecycle codescene`
 
 ### R4-T3: Error Recovery System
+
+> **Parallelizable**: This task runs as a subagent in Wave 13 alongside R4-T1, R4-T2.
+
 - [ ] Create `frontend/views/dashboard/certificates/template-import-export/components/ErrorRecovery.tsx`
   - Retry failed file: button per failed item with exponential backoff (1s, 2s, 4s, 8s)
   - Skip and continue: button to skip failed file
@@ -1632,6 +1815,9 @@ After all files pass individually:
   - Memory management: revoke object URLs after use
   - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-import-export/utils/fileProcessing.ts --lifecycle codescene`
 ### R4-T11: Component Tests
+
+> **Parallelizable**: This task runs as a subagent in Wave 14 (alone — depends on all Round 4 enhancements).
+
 - [ ] Create `test/ui/components/template-import-export/FileValidator.test.tsx`
   - Test file size limits
   - Test format validation
@@ -1652,6 +1838,9 @@ After all files pass individually:
   ```
 
 ### R4-T12: Knowledge Propagation
+
+> **Parallelizable**: This task runs as a subagent in the Final Wave (knowledge propagation) alongside 3.6, 2.27.
+
 - [ ] Create `docs/frontend/template-import-export-patterns.md`
   - Update `frontend/AGENTS.md` with reference
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):

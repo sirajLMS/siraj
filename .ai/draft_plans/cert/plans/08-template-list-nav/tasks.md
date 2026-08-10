@@ -4,6 +4,7 @@
 > **Dependencies:** Plan 05 (GraphQL API for Certificate Templates), Plan 01 (Database Schema), Plan 02 (Types & Permissions)
 > **Dependents:** Plan 09 (Category Management — blocked by sidebar), Plan 10 (Template Editor — blocked by create dialog), Plan 11 (Certificate Generation — blocked by Generate action), Plan 15 (Verification Log — blocked by sidebar), Plan 17 (Admin Dashboard — blocked by nav)
 > **Estimate:** 11 tasks · ~32–40 hours total
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 
 ---
 
@@ -56,15 +57,61 @@
 ```
 
 **Chain:**
-- T01 → T02 → T03 → T04 → {T05, T06} → {T07, T08} → T09 → T10 → T11 → T12 → T13
+- T01 → T02 → T03 → T04 → {T05, T06, T10} → {T07, T08} → {T09, T13} → T12 → T11
 - T04 is the critical-path gate: all view/interaction tasks depend on the container
-- T05 and T06 may run in parallel after T04
-- T07 and T08 may run in parallel after T05 (T08 has soft dependency on T06 for mobile action wiring)
+- T05 and T06 may run via parallel subagents after T04
+- T07 and T08 may run via parallel subagents after T05 (T08 has soft dependency on T06 for mobile action wiring)
 - T09 requires T05 (BulkActionBar component) and T08 (action handlers)
-- T10 requires T01 (i18n sidebar keys) and can run concurrent with T05–T09
+- T10 requires T01 (i18n sidebar keys) and can run via parallel subagents concurrent with T05–T09
 - T11 (knowledge propagation) depends on all prior tasks
-- T12 (testing) depends on T09 (all components created) — can run parallel with T10/T11
-- T13 (feature enhancements) depends on T05, T06, T08 (component files must exist)
+- T12 (testing) depends on T09 (all components created) — can run via parallel subagents with T10/T11
+- T13 (feature enhancements) depends on T05, T06, T08 (component files must exist) — runs via parallel subagents concurrent with T09
+
+**Execution order**: T01 → T02 → T03 → T04 → (T05, T06, T10 via parallel subagents) → (T07, T08 via parallel subagents) → (T09, T13 via parallel subagents) → T12 → T11
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task with no dependencies — must complete first to unblock all subsequent tasks
+
+### Wave 2: T02
+- Tasks: T02
+- Rationale: GraphQL documents depend on T01 for naming alignment — sequential gating
+
+### Wave 3: T03
+- Tasks: T03
+- Rationale: Zustand store depends on T01 and T02 for type alignment and query variable shapes — sequential gating
+
+### Wave 4: T04
+- Tasks: T04
+- Rationale: Container + ViewModel is the critical-path gate — all view and interaction tasks depend on it
+
+### Wave 5: T05, T06, T10
+- Tasks: T05, T06, T10
+- Rationale: T05 (desktop view) and T06 (mobile view) depend only on T04; T10 (sidebar nav) depends only on T01 — no interdependencies, all can run via parallel subagents
+
+### Wave 6: T07, T08
+- Tasks: T07, T08
+- Rationale: T07 (create dialog) depends on T01, T02, T04; T08 (card actions) depends on T04, T05, T06 — both available after Wave 5, no interdependencies, can run via parallel subagents
+
+### Wave 7: T09, T13
+- Tasks: T09, T13
+- Rationale: T09 (bulk actions + filter panel) depends on T03, T04, T05; T13 (feature enhancements) depends on T05, T06, T08 — both available after Wave 6, no interdependencies, can run via parallel subagents
+
+### Wave 8: T12
+- Tasks: T12
+- Rationale: Testing requires all component files from T01–T09 to exist — gated by Wave 7 completion
+
+### Final Wave: T11 (Knowledge Propagation)
+- Task: T11
+- Rationale: Must run after all other tasks complete — synthesizes learnings from T01–T10 and T12–T13
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -468,6 +515,8 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 
 **Dependencies:** T04 (container provides ViewModel)
 
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T06, T10.
+
 **Subtasks:**
 
 - [ ] 5.1 Create `frontend/desktop/views/dashboard/certificates/templates/templates.desktop.tsx` — exports `DesktopTemplateListView({ ... }: Readonly<TemplateListViewModel>)` (named export, per codebase convention of `.desktop.tsx` suffix)
@@ -601,6 +650,8 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 
 **Dependencies:** T04 (container provides ViewModel)
 
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T10.
+
 **Subtasks:**
 
 - [ ] 6.1 Create `frontend/mobile/views/dashboard/certificates/templates/templates.mobile.tsx` — exports `MobileTemplateListView` (named export, per codebase convention of `.mobile.tsx` suffix)
@@ -703,6 +754,8 @@ These tasks implement user interactions: the create template dialog, card action
 
 **Dependencies:** T01 (i18n create dialog labels), T02 (create mutation document), T04 (container mutation handler)
 
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T08.
+
 **Subtasks:**
 
 - [ ] 7.1 Create `CreateTemplateDialog` at `frontend/common/views/dashboard/certificates/templates/components/CreateTemplateDialog.tsx`
@@ -774,6 +827,8 @@ These tasks implement user interactions: the create template dialog, card action
 
 **Dependencies:** T04 (container mutation handlers), T05 (card component), T06 (mobile card)
 
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T07.
+
 **Subtasks:**
 
 - [ ] 8.1 Create `CardActionMenu` at `frontend/common/views/dashboard/certificates/templates/components/CardActionMenu.tsx`
@@ -842,6 +897,8 @@ These tasks implement user interactions: the create template dialog, card action
 **Requirements covered:** REQ-08-03 (filter panel with AND logic), REQ-08-08 (bulk actions: archive, delete, change category)
 
 **Dependencies:** T03 (store selection state), T04 (container bulk handlers), T05 (BulkActionBar component)
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T13.
 
 **Subtasks:**
 
@@ -953,6 +1010,8 @@ These tasks add the sidebar navigation and capture all learnings in the knowledg
 **Requirements covered:** REQ-08-06 (sidebar navigation — Certificates group with 5 items)
 
 **Dependencies:** T01 (i18n sidebar keys)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T05, T06.
 
 **Subtasks:**
 
@@ -1132,6 +1191,8 @@ These tasks cover component testing (Happy DOM), E2E testing (Playwright), and i
 
 **Dependencies:** All prior tasks (T01–T09 must be complete; component files must exist; T10 sidebar is not a gating dependency)
 
+> **Parallelizable**: This task runs as a subagent in Wave 8 (single-task wave — testing gate before knowledge propagation).
+
 **Subtasks:**
 
 - [ ] 12.1 Create `test/ui/components/templates/TemplateCard.test.tsx`:
@@ -1253,6 +1314,8 @@ These tasks cover component testing (Happy DOM), E2E testing (Playwright), and i
 **Requirements covered:** REQ-08-05e (Generate action per Plan 17 flag), REQ-08-03 (filter enhancements), DD-6 (optimistic UI for mutations)
 
 **Dependencies:** T05 (desktop view files exist), T06 (mobile view files exist), T08 (CardActionMenu wired)
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T09.
 
 **Subtasks:**
 

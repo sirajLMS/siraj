@@ -9,6 +9,9 @@
 | Depends On | Plans 1–20 (all prior plans) |
 | Related Docs | `MASTER_ARCHITECTURE.md`, `siraj_analysis/10-testing-quality-patterns.md`, `siraj_analysis/12-cron-config-infra.md`, `requirements.md`, `design.md` |
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+> **Execution order**: T1 → (T2, T3, T4, T5, T6 via parallel subagents after T1) → (T7, T8 via parallel subagents) → (T9, T10 via parallel subagents) → (T11, T12 via parallel subagents) → T13 → T14 → T15
+
 ---
 
 ## Task Summary
@@ -63,6 +66,46 @@ T1 (docs dir + INDEX)
 
 ---
 
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T1
+- Tasks: T1
+- Rationale: Foundation task — creates the directory and INDEX.md that all subsequent documentation tasks depend on. Must complete before any other task can start.
+
+### Wave 2: T2, T3, T4, T5, T6
+- Tasks: T2, T3, T4, T5, T6
+- Rationale: All five documentation-writing tasks depend only on T1 (and T5 also requires Plan 22 requirements.md, which already exists). Each writes independent documentation files with no interdependencies, so they can all run concurrently as separate subagents.
+
+### Wave 3: T7, T8
+- Tasks: T7, T8
+- Rationale: T7 updates backend-layer AGENTS.md files (depends on T2, T3, T5) and T8 updates frontend/app AGENTS.md files (depends on T4, T6). Both depend only on already-completed Wave 2 tasks and touch different file sets, so they can run in parallel.
+
+### Wave 4: T9, T10
+- Tasks: T9, T10
+- Rationale: T9 (root + shared AGENTS.md, depends on T7, T8) and T10 (instruction files, depends on T7, T8) both depend only on the completion of Wave 3. They modify different file sets (AGENTS.md files vs instruction files), so they can run in parallel.
+
+### Wave 5: T11, T12
+- Tasks: T11, T12
+- Rationale: T11 (skills update, depends on T10) and T12 (i18n keys, depends on T9) have no interdependencies — each depends on a different Wave 4 task. They modify different file sets (skill definitions vs locale files), so they can run in parallel.
+
+### Wave 6: T13
+- Tasks: T13
+- Rationale: Cross-reference validation depends on all prior tasks (T2–T12). Must run after all documentation, AGENTS.md, instruction, skills, and i18n tasks complete to validate cross-references and accuracy across all outputs.
+
+### Wave 7: T14
+- Tasks: T14
+- Rationale: Quality loop and verification depends on T1–T13. Must run after all documentation and cross-reference validation is complete to perform the final quality gate pass.
+
+### Final Wave: Knowledge Propagation
+- Task: T15
+- Rationale: Must run after all other tasks complete. Finalizes the knowledge propagation by performing a last review pass over all documentation, AGENTS.md updates, instruction files, and skills.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
+
+---
+
 ## T1: Creating `docs/certificates/` Directory and INDEX.md
 
 **Estimated**: 2 hours | **Depends On**: Plans 1–20 | **Refs**: REQ-21.1, REQ-21.13, design.md §2.1–2.2
@@ -96,6 +139,8 @@ T1 (docs dir + INDEX)
 ## T2: Writing ARCHITECTURE.md and DATABASE_PATTERNS.md
 
 **Estimated**: 3–4 hours | **Depends On**: T1 | **Refs**: REQ-21.2, REQ-21.3, design.md §2.3–2.4
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T3, T4, T5, T6.
 
 ### Subtasks
 
@@ -138,6 +183,8 @@ T1 (docs dir + INDEX)
 
 **Estimated**: 3–4 hours | **Depends On**: T1 | **Refs**: REQ-21.4, REQ-21.5, design.md §2.5–2.6
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T4, T5, T6.
+
 ### Subtasks
 
 - **T3.1**: Write `docs/certificates/SERVICE_PATTERNS.md`
@@ -178,6 +225,8 @@ T1 (docs dir + INDEX)
 
 **Estimated**: 3–4 hours | **Depends On**: T1 | **Refs**: REQ-21.6, REQ-21.7, design.md §2.7–2.8
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T5, T6.
+
 ### Subtasks
 
 - **T4.1**: Write `docs/certificates/FRONTEND_PATTERNS.md`
@@ -217,6 +266,8 @@ T1 (docs dir + INDEX)
 ## T5: Writing CRON_PATTERNS.md and TESTING_PATTERNS.md
 
 **Estimated**: 3–4 hours | **Depends On**: T1, Plan 22 requirements.md | **Refs**: REQ-21.8, REQ-21.9, design.md §2.9–2.10
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T6.
 
 ### Subtasks
 
@@ -261,6 +312,8 @@ T1 (docs dir + INDEX)
 ## T6: Writing I18N_PATTERNS.md, TEMPLATE_EDITOR.md, and VERIFICATION_SYSTEM.md
 
 **Estimated**: 3–4 hours | **Depends On**: T1 | **Refs**: REQ-21.10, REQ-21.11, REQ-21.12, design.md §2.11–2.13
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5.
 
 ### Subtasks
 
@@ -315,6 +368,8 @@ T1 (docs dir + INDEX)
 ## T7: Updating Backend-Layer AGENTS.md Files
 
 **Estimated**: 3–4 hours | **Depends On**: T2, T3, T5 | **Refs**: REQ-21.16, design.md §3.3–3.8
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T8.
 
 ### Subtasks
 
@@ -372,6 +427,8 @@ T1 (docs dir + INDEX)
 
 **Estimated**: 3–4 hours | **Depends On**: T4, T6 | **Refs**: REQ-21.17, REQ-21.18, design.md §3.9–3.13
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T7.
+
 ### Subtasks
 
 - **T8.1**: Update `frontend/AGENTS.md`
@@ -423,6 +480,8 @@ T1 (docs dir + INDEX)
 
 **Estimated**: 2 hours | **Depends On**: T7, T8 | **Refs**: REQ-21.14, REQ-21.15, design.md §3.1–3.2
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T10.
+
 ### Subtasks
 
 - **T9.1**: Update root `AGENTS.md`
@@ -455,6 +514,8 @@ T1 (docs dir + INDEX)
 ## T10: Updating Instruction Files
 
 **Estimated**: 2–3 hours | **Depends On**: T7, T8 | **Refs**: REQ-21.19, REQ-21.20, REQ-21.21, design.md §4
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T9.
 
 ### Subtasks
 
@@ -492,6 +553,8 @@ T1 (docs dir + INDEX)
 
 **Estimated**: 2–3 hours | **Depends On**: T10 | **Refs**: REQ-21.22, REQ-21.23, REQ-21.24, design.md §5
 
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12.
+
 ### Subtasks
 
 - **T11.1**: Update review workflow skills
@@ -528,6 +591,8 @@ T1 (docs dir + INDEX)
 ## T12: Adding Knowledge Sub-Domain i18n Keys
 
 **Estimated**: 1–2 hours | **Depends On**: T9 | **Refs**: REQ-21.28, design.md §7
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11.
 
 ### Subtasks
 
@@ -677,30 +742,30 @@ T1 (docs dir + INDEX)
 
 ## Execution Order
 
-The tasks execute in the following order, with parallelism where noted:
+The tasks execute in the following order, with parallel subagent dispatch where noted:
 
 1. **T1** (docs dir + INDEX.md) — sequential, blocking
-2. **T2, T3, T4, T5, T6** (writing all 12 documentation files) — parallel after T1
+2. **T2, T3, T4, T5, T6** (writing all 12 documentation files) — via parallel subagents after T1
    - T5 also requires Plan 22 requirements.md (already exists)
 3. **T7** (backend AGENTS.md updates) — after T2, T3, T5
 4. **T8** (frontend/app AGENTS.md updates) — after T4, T6
-   - T7 and T8 can run in parallel if different team members
+   - T7 and T8 run via parallel subagents (Wave 3)
 5. **T9** (root + shared AGENTS.md) — after T7 and T8
-6. **T10** (instruction files) — after T7 and T8 (can run parallel with T9)
+6. **T10** (instruction files) — after T7 and T8 (runs via parallel subagents with T9)
 7. **T11** (skills) — after T10
-8. **T12** (i18n knowledge sub-domain) — after T9 (can run parallel with T10, T11)
+8. **T12** (i18n knowledge sub-domain) — after T9 (runs via parallel subagents with T11)
 9. **T13** (cross-reference validation) — after T2–T12
 10. **T14** (quality loop) — after T13
 11. **T15** (finalization) — after T14
 
-### Parallel Execution Opportunities
+### Parallel Subagent Opportunities
 
-| Parallel Group | Tasks |
+| Subagent Group | Tasks |
 |----------------|-------|
-| Group A (after T1) | T2, T3, T4, T5, T6 |
-| Group B (after T2, T3, T4, T5, T6) | T7, T8 |
-| Group C (after T7, T8) | T9, T10 |
-| Group D (after T9) | T11, T12 |
+| Wave 1 (after T1) | T2, T3, T4, T5, T6 |
+| Wave 2 (after T2, T3, T4, T5, T6) | T7, T8 |
+| Wave 3 (after T7, T8) | T9, T10 |
+| Wave 4 (after T9) | T11, T12 |
 
 ### Total Estimated Hours
 

@@ -4,6 +4,7 @@
 > **Dependencies**: Plan 5 (GraphQL API), Plan 6 (PDF Rendering — preview reference), Plan 11 (Visual Canvas — uses canvas elements)
 > **Scope**: Client-side visual preview, variable test value input, publish workflow, version snapshots, archive/unarchive, revert to version, confirmation dialogs, download preview
 > **Execution**: Sequential through phases below. Each task must complete quality loop before the next begins.
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 
 ---
 
@@ -421,6 +422,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - **Files created**: `ArchiveDialog.tsx`, `UnarchiveDialog.tsx`
 - **Files modified**: `usePreviewViewModel.ts` (confirmArchive, confirmUnarchive actions), `PreviewToolbar.tsx` (conditional archive/unarchive buttons)
 - **Dependencies**: T11 (publish dialog — establishes mutation integration pattern)
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T13, T14.
 - **Estimated**: 3h
 
 ### T13: Implement Download Preview (PDF & Image)
@@ -441,6 +443,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - **Files created**: `DownloadPreviewButton.tsx`, `app/api/certificates/templates/[templateId]/preview-pdf/route.ts`
 - **Files modified**: `usePreviewViewModel.ts` (downloadPreview action)
 - **Dependencies**: T06 (CertificatePreviewCanvas ref for html2canvas capture), T11 (mutation integration pattern)
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T12, T14.
 - **Estimated**: 4h
 
 ---
@@ -470,6 +473,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - **Files created**: `VersionHistory.tsx`, `VersionHistoryItem.tsx`
 - **Files modified**: `usePreviewViewModel.ts` (loadVersionHistory, closeVersionHistory actions)
 - **Dependencies**: T02 (TemplateVersionsQueryDocument), T06 (CertificatePreviewCanvas for rendering historical version)
+> **Parallelizable**: This task runs as a subagent in Wave 12 alongside T12, T13.
 - **Estimated**: 3h
 
 ### T15: Implement Revert to Previous Version
@@ -646,6 +650,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - **Files created**: `frontend/views/dashboard/cert/templates/preview/TemplatePreviewPage.tsx`
 - **Files modified**: Preview page route (T09 already wires the route; this T19 is the enhanced page container that can be referenced from the same route)
 - **Dependencies**: T03 (Zustand stores — must include enhanced PreviewState), T05 (Preview ViewModel), T09 (page route), T20 (PreviewCanvas), T21 (SampleDataSelector), T22 (VariableOverridePanel)
+> **Parallelizable**: This task runs as a subagent in Wave 18 alongside T24.
 - **Estimated**: 4h
 
 ### T20: Create PreviewCanvas Component (4 Rendering Modes)
@@ -725,6 +730,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - **Files created**: `frontend/views/dashboard/cert/templates/preview/SampleDataSelector.tsx`, `frontend/views/dashboard/cert/templates/preview/sampleDataProfiles.ts` (built-in profiles + types)
 - **Files modified**: none
 - **Dependencies**: T01 (i18n namespace — sampleData section), T05 (PreviewViewModel — provides `variables`), T09 (template id access)
+> **Parallelizable**: This task runs as a subagent in Wave 20 alongside T25.
 - **Estimated**: 4h
 
 ### T22: Create VariableOverridePanel Component
@@ -840,6 +846,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - **Files created**: `frontend/views/dashboard/cert/templates/publish/VersionHistoryPanel.tsx`
 - **Files modified**: none
 - **Dependencies**: T01 (i18n), T02 (GraphQL documents — `TemplateVersionsQueryDocument`, `RevertTemplateMutationDocument` via the store), T14 (Phase 3 version history — provides the GraphQL/pipeline used by the store), T26 (VersionStore)
+> **Parallelizable**: This task runs as a subagent in Wave 18 alongside T19.
 - **Estimated**: 4h
 
 ### T25: Create VersionDiffView Component
@@ -868,6 +875,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - **Files created**: `frontend/views/dashboard/cert/templates/publish/VersionDiffView.tsx`, `frontend/views/dashboard/cert/templates/publish/versionDiffUtils.ts`
 - **Files modified**: none
 - **Dependencies**: T01 (i18n), T02 (GraphQL documents), T04 (types + utils), T20 (PreviewCanvas — reused for mini previews), T26 (VersionStore), T24 (hosted by VersionHistoryPanel)
+> **Parallelizable**: This task runs as a subagent in Wave 20 alongside T21.
 - **Estimated**: 4h
 
 ### T26: Create Enhanced Zustand Stores (Preview, Publish, Version) — New + Extended
@@ -1133,9 +1141,123 @@ Phase 10: T29                                                      (quality loop
 Phase 11: T30                                                      (knowledge propagation for enhanced)
 ```
 
+**Execution order**: T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09 → T10 → T11 → (T12, T13, T14 via parallel subagents after T11) → T15 → T16 → T17 → T18 → T26 → (T19, T24 via parallel subagents after T26) → T20 → (T21, T25 via parallel subagents after T20) → T22 → T23 → T27 → T28 → T29 → T30
+
 > **Phase 6/7 ordering note**: T26 (enhanced stores) must precede both Phase 6 (T19–T23) and Phase 7 (T24–T25), because `TemplatePreviewPage`, `PreviewCanvas`, `SampleDataSelector`, `VariableOverridePanel`, `PublishDialog`, `VersionHistoryPanel`, and `VersionDiffView` all subscribe to the enhanced Zustand stores. T26 extends (does not replace) T03's stores, and T03 must be complete first.
 
 Total: 30 tasks (~117 hours estimated), including 12 new tasks (~52 hours estimated for T19–T30).
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundational i18n namespace — no dependencies; all other tasks depend on it
+
+### Wave 2: T02
+- Tasks: T02
+- Rationale: GraphQL documents — depends only on T01; many downstream tasks need generated types
+
+### Wave 3: T03
+- Tasks: T03
+- Rationale: Zustand stores — depends on T01, T02; required by all preview/publish components
+
+### Wave 4: T04
+- Tasks: T04
+- Rationale: Types, utilities, element renderer — depends on T01, T02, T03; required by preview components
+
+### Wave 5: T05
+- Tasks: T05
+- Rationale: Preview container & ViewModel — depends on T01–T04; central integration point for all preview UI
+
+### Wave 6: T06
+- Tasks: T06
+- Rationale: Desktop preview view & shared canvas — depends on T05; shared canvas used by T07, T08, T09, T13, T14, T20
+
+### Wave 7: T07
+- Tasks: T07
+- Rationale: Mobile preview view — depends on T06; T08 requires both T06 and T07 complete
+
+### Wave 8: T08
+- Tasks: T08
+- Rationale: Sample data panel — depends on T06 (desktop) and T07 (mobile); required by T09
+
+### Wave 9: T09
+- Tasks: T09
+- Rationale: Preview page route & editor navigation — depends on T05, T06, T07, T08; gates Phase 2 routing
+
+### Wave 10: T10
+- Tasks: T10
+- Rationale: Publish validation logic — depends on T01, T04, T09; required by T11
+
+### Wave 11: T11
+- Tasks: T11
+- Rationale: Publish dialog & mutation integration — depends on T10; establishes mutation pattern used by T12, T13
+
+### Wave 12: T12, T13, T14
+- Tasks: T12, T13, T14
+- Rationale: Archive/unarchive (T12 depends on T11), download preview (T13 depends on T06, T11), version history panel (T14 depends on T02, T06, T09) — all three are independent of each other, all their dependencies are satisfied
+
+### Wave 13: T15
+- Tasks: T15
+- Rationale: Revert to previous version — depends on T14 (revert button lives in version history item)
+
+### Wave 14: T16
+- Tasks: T16
+- Rationale: Component tests — depends on T01–T15 (all component tasks must be complete)
+
+### Wave 15: T17
+- Tasks: T17
+- Rationale: E2E tests — depends on T16 (component tests pass first), T01–T15
+
+### Wave 16: T18
+- Tasks: T18
+- Rationale: Knowledge propagation — depends on T17 (all tests pass), T01–T16; must complete before T30
+
+### Wave 17: T26
+- Tasks: T26
+- Rationale: Enhanced Zustand stores — depends on T01, T02, T03 (extends original stores); must precede all Phase 6/7 components that subscribe to enhanced stores
+
+### Wave 18: T19, T24
+- Tasks: T19, T24
+- Rationale: TemplatePreviewPage (T19 depends on T03, T05, T09, T26 — all complete) and VersionHistoryPanel (T24 depends on T01, T02, T14, T26 — all complete) are independent of each other
+
+### Wave 19: T20
+- Tasks: T20
+- Rationale: PreviewCanvas 4-mode renderer — depends on T26; required by T21, T22 (via T19), T25
+
+### Wave 20: T21, T25
+- Tasks: T21, T25
+- Rationale: SampleDataSelector (T21 depends on T01, T05, T09 — all complete) and VersionDiffView (T25 depends on T01, T02, T04, T20, T24, T26 — all complete) are independent of each other
+
+### Wave 21: T22
+- Tasks: T22
+- Rationale: VariableOverridePanel — depends on T01, T03, T05, T19 (sidebar host); required by T23 via T19
+
+### Wave 22: T23
+- Tasks: T23
+- Rationale: PublishDialog 3-step wizard — depends on T01, T02, T03, T05, T10; last enhanced preview component
+
+### Wave 23: T27
+- Tasks: T27
+- Rationale: Enhanced component tests — depends on T19–T26 (all enhanced components complete)
+
+### Wave 24: T28
+- Tasks: T28
+- Rationale: Enhanced E2E tests — depends on T19–T27 (all enhanced components + their tests)
+
+### Wave 25: T29
+- Tasks: T29
+- Rationale: Quality loop per enhanced file — depends on T19–T28; validates all enhanced deliverables
+
+### Final Wave: Knowledge Propagation
+- Task: T30
+- Rationale: Must run after all other tasks complete — extends T18's docs, only doc-tags verified-green code
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 

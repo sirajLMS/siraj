@@ -4,6 +4,7 @@
 > **Dependencies**: Plan 1 (schema), Plan 3 (repository), Plan 4 (services), Plan 5 (GraphQL—types), Plan 6 (PDF rendering—cache entries), Plan 7 (storage—storage cleanup), Plan 16 (certificates—status updates)
 > **Scope**: 5 cron jobs: expired certificate detection, storage cleanup (orphaned files), render cache cleanup, verification log archiving, batch generation cleanup. Vercel Cron integration, Redis single-flight locks, failure isolation, audit logging, idempotency
 > **Execution**: Sequential through phases below
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 
 ---
 
@@ -16,6 +17,44 @@ T01 ──► T02 ──► T03 ──► T04
          │                       │
 T06 ──► T07 ──► T08 ──► T09 ──► T10 ──► T11
 ```
+
+**Execution order**: T01 → T02 → T03 → T04 → (T05, T06, T07, T08, T09 via parallel subagents after T04) → T10 → T11
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task — creates cleanup infrastructure module. No dependencies on other tasks in this plan.
+
+### Wave 2: T02
+- Tasks: T02
+- Rationale: Depends on T01 (uses cleanup infrastructure patterns). Must wait for T01 to complete.
+
+### Wave 3: T03
+- Tasks: T03
+- Rationale: Depends on T02 (environment variables must be registered before cron job paths reference them). Must wait for T02 to complete.
+
+### Wave 4: T04
+- Tasks: T04
+- Rationale: Depends on T03 (cron auth helper needed after cron jobs are registered). Must wait for T03 to complete.
+
+### Wave 5: T05, T06, T07, T08, T09
+- Tasks: T05, T06, T07, T08, T09
+- Rationale: All five cleanup services depend only on T01 (infrastructure) and T04 (cron auth) which are already completed in Wave 4. They have no interdependencies — each is an independent service targeting different domain logic (expired certs, storage, render cache, verification logs, batch generation). All five can run as separate parallel subagents simultaneously.
+
+### Wave 6: T10
+- Tasks: T10
+- Rationale: Depends on all five cleanup services (T05–T09) — creates route files that import each service. Must wait for all Wave 5 subagents to complete.
+
+### Final Wave: Knowledge Propagation
+- Task: T11
+- Rationale: Must run after all other tasks complete — consolidates outcome files and updates documentation across all affected AGENTS.md files and instruction files.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
