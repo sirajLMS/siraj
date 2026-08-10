@@ -20,16 +20,13 @@ export async function runUpsertMany<TInput, TResult>(
   if (inputs.length === 0) return [];
 
   const run = async (t: DBTransaction): Promise<TResult[]> => {
-    const results: TResult[] = [];
-
-    for (const input of inputs) {
-      const existing = await findExisting(input, t);
-      const existingId = existing ? existing.id : null;
-
-      results.push(await upsertOne(input, existingId, t, locale));
-    }
-
-    return results;
+    return Promise.all(
+      inputs.map(async (input) => {
+        const existing = await findExisting(input, t);
+        const existingId = existing ? existing.id : null;
+        return upsertOne(input, existingId, t, locale);
+      })
+    );
   };
 
   if (tx) {
