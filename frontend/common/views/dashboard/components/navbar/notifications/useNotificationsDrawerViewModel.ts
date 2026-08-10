@@ -107,7 +107,7 @@ interface InvoiceProofHandlerDeps {
   readonly errorMessage: string;
 }
 
-async function _runInvoiceProofAction(
+async function runInvoiceProofAction(
   action: "approve" | "reject",
 
   deliveryId: string,
@@ -232,7 +232,7 @@ function useInvoiceProofHandlers(input: Readonly<InvoiceProofHandlersInput>): {
 
   const handleApproveInvoice = useCallback(
     async (deliveryId: string, invoiceId: string) => {
-      await _runInvoiceProofAction(
+      await runInvoiceProofAction(
         "approve",
 
         deliveryId,
@@ -250,7 +250,7 @@ function useInvoiceProofHandlers(input: Readonly<InvoiceProofHandlersInput>): {
 
   const handleRejectInvoice = useCallback(
     async (deliveryId: string, invoiceId: string) => {
-      await _runInvoiceProofAction(
+      await runInvoiceProofAction(
         "reject",
 
         deliveryId,
