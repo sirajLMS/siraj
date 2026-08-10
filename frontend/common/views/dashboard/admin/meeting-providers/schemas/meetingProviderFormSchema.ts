@@ -3,8 +3,8 @@ import type { MeetingProvidersLabels } from "@/shared/locale/types/dashboard/mee
 
 const localizedStringSchema = (requiredMessage?: string) =>
   z.object({
-    en: requiredMessage ? z.string().min(1, requiredMessage) : z.string().optional().default(""),
-    ar: z.string().optional().default(""),
+    en: requiredMessage ? z.string().min(1, requiredMessage) : z.string(),
+    ar: z.string(),
   });
 
 export const meetingProviderFormSchema = (labels: MeetingProvidersLabels["validation"]) =>
@@ -17,14 +17,14 @@ export const meetingProviderFormSchema = (labels: MeetingProvidersLabels["valida
     description: localizedStringSchema(),
     instructions: localizedStringSchema(),
     urlAllowlist: z.array(z.string().min(1)).min(1, labels.urlAllowlistRequired),
-    urlExample: z.string().optional().default(""),
-    logoUrl: z.string().nullable().optional().default(null),
-    supportsAutoGeneration: z.boolean().default(false),
-    supportsUsername: z.boolean().default(false),
-    supportsPassword: z.boolean().default(false),
-    supportsTenantId: z.boolean().default(false),
-    providerKind: z.string().optional().default("manual"),
-    isActive: z.boolean().default(true),
+    urlExample: z.string(),
+    logoUrl: z.string().nullable(),
+    supportsAutoGeneration: z.boolean(),
+    supportsUsername: z.boolean(),
+    supportsPassword: z.boolean(),
+    supportsTenantId: z.boolean(),
+    providerKind: z.string(),
+    isActive: z.boolean(),
   });
 
 export type MeetingProviderFormData = z.infer<ReturnType<typeof meetingProviderFormSchema>>;
