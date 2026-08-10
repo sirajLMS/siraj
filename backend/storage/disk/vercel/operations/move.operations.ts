@@ -93,31 +93,33 @@ async function moveDirectory(ctx: VercelContext, sourcePath: string, destPath: s
     fileCount: allBlobs.length,
   });
 
-  for (const blob of allBlobs) {
-    const relativePath = blob.pathname.slice(prefix.length);
-    const newFilePath = `${destPath}/${relativePath}`;
+  await Promise.all(
+    allBlobs.map(async (blob) => {
+      const relativePath = blob.pathname.slice(prefix.length);
+      const newFilePath = `${destPath}/${relativePath}`;
 
-    try {
-      await copy(blob.url, newFilePath, {
-        token: ctx.token,
-        access: ctx.access,
-      });
-
-      await del(blob.url, { token: ctx.token });
-
-      const dbFile = await StorageDbRepository.fileByPath(blob.pathname);
-      if (dbFile) {
-        await StorageDbRepository.updateFile({
-          id: dbFile.id,
-          path: newFilePath,
-          isProtected: dbFile.isProtected,
+      try {
+        await copy(blob.url, newFilePath, {
+          token: ctx.token,
+          access: ctx.access,
         });
+
+        await del(blob.url, { token: ctx.token });
+
+        const dbFile = await StorageDbRepository.fileByPath(blob.pathname);
+        if (dbFile) {
+          await StorageDbRepository.updateFile({
+            id: dbFile.id,
+            path: newFilePath,
+            isProtected: dbFile.isProtected,
+          });
+        }
+      } catch (error) {
+        logger.error(`Failed to move file in directory: ${blob.pathname}`, error);
+        throw error;
       }
-    } catch (error) {
-      logger.error(`Failed to move file in directory: ${blob.pathname}`, error);
-      throw error;
-    }
-  }
+    })
+  );
 
   logger.info("✅ moveDirectory: All files moved", {
     sourceDir: sourcePath,
