@@ -28,6 +28,16 @@ export interface CompensationViewData {
 
 type CompensationTranslations = ProfileTeacherLabels | ProfileStaffLabels;
 
+/**
+ * Wraps a form field name for use with react-hook-form's `useWatch` / `register` / `Controller`.
+ * For a generic `TFormValues`, `FieldPath<TFormValues>` resolves to a union of all property paths,
+ * so TypeScript cannot verify that an arbitrary string literal is a valid path. This helper
+ * provides a single cast site instead of scattering `as` assertions at each call site.
+ */
+function fieldPath<TFormValues extends FieldValues>(name: string): FieldPath<TFormValues> {
+  return name as FieldPath<TFormValues>;
+}
+
 export function CompensationEditFields<TFormValues extends FieldValues>({
   register,
   control,
@@ -38,10 +48,10 @@ export function CompensationEditFields<TFormValues extends FieldValues>({
   readonly translations: CompensationTranslations;
 }) {
   const t = translations;
-  const rateCurrency = useWatch({ control, name: "rateCurrency" as FieldPath<TFormValues> });
+  const rateCurrency = useWatch({ control, name: fieldPath<TFormValues>("rateCurrency") });
   const currencySymbol = getCurrencySymbol(rateCurrency ?? CurrencyCode.Usd);
 
-  const rateCurrencyName = "rateCurrency" as FieldPath<TFormValues>;
+  const rateCurrencyName = fieldPath<TFormValues>("rateCurrency");
 
   return (
     <SectionPanel title={t.sections.compensation}>
@@ -50,7 +60,7 @@ export function CompensationEditFields<TFormValues extends FieldValues>({
           label={t.fields.hourlyRate}
           fullWidth
           size="small"
-          {...register("hourlyRate" as FieldPath<TFormValues>)}
+          {...register(fieldPath<TFormValues>("hourlyRate"))}
           slotProps={{
             input: {
               startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>,

@@ -10,7 +10,7 @@ import type {
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
-import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
+import type { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import type { MeetingConfigDisplayLabels, MeetingConfigJoinLabels } from "@/shared/locale";
 
 // Re-export the canonical props types so common-side importers can resolve them from the lib path.
@@ -33,9 +33,9 @@ export function resolveSourceLabel(
   t: MeetingConfigDisplayLabels
 ): string {
   const normalized = (source ?? "").toLowerCase();
-  if (normalized === EffectiveMeetingSource.Class) return t.sourceClass;
-  if (normalized === EffectiveMeetingSource.Recurring) return t.sourceRecurring;
-  if (normalized === EffectiveMeetingSource.Teacher) return t.sourceTeacher;
+  if (normalized === "class") return t.sourceClass;
+  if (normalized === "recurring") return t.sourceRecurring;
+  if (normalized === "teacher") return t.sourceTeacher;
   return t.sourceNone;
 }
 

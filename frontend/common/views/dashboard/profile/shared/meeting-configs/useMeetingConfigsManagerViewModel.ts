@@ -64,6 +64,14 @@ export type UseMeetingConfigsManagerViewModelProps = {
   readonly targetUserId: string;
 };
 
+function isUserMeetingConfig(config: MeetingConfigListItem): config is UserMeetingConfigFieldsFragment {
+  return "userId" in config;
+}
+
+function isMeetingIntegrationProviderSlug(value: string): value is MeetingIntegrationProviderSlug {
+  return (Object.values(MeetingIntegrationProviderSlug) as readonly string[]).includes(value);
+}
+
 export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConfigsManagerViewModelProps>) {
   const { targetUserId } = props;
   const labels = useMeetingConfigProfileLabels();
@@ -147,7 +155,8 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
   };
 
   const openEditForm = (config: MeetingConfigListItem) => {
-    setEditConfig(config as UserMeetingConfigFieldsFragment);
+    if (!isUserMeetingConfig(config)) return;
+    setEditConfig(config);
     setFormOpen(true);
   };
 
@@ -462,6 +471,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
   };
 
   const handleReconnect = async (providerSlug: string) => {
+    if (!isMeetingIntegrationProviderSlug(providerSlug)) return;
     setConnectingSlugs(prev => new Set(prev).add(providerSlug));
     try {
       const result = await connectMeetingProviderOAuth({
@@ -520,6 +530,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
   };
 
   const disconnectProvider = async (providerSlug: string) => {
+    if (!isMeetingIntegrationProviderSlug(providerSlug)) return;
     setErrorMessage(null);
     try {
       await disconnectMeetingProviderOAuth({

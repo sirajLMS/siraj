@@ -22,6 +22,27 @@ import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/comp
 import { stripLocaleFromPath } from "@/frontend/common/views/dashboard/lib/stripLocaleFromPath";
 import { redirect } from "@/shared/i18n/routing";
 
+const GRAPHQL_APP_PERMISSION_VALUES = new Set<string>(Object.values(AppPermission) as readonly string[]);
+
+function isAppPermission(value: string): value is AppPermission {
+  return GRAPHQL_APP_PERMISSION_VALUES.has(value);
+}
+
+const GRAPHQL_CURRENCY_CODE_VALUES = new Set<string>(Object.values(CurrencyCode) as readonly string[]);
+
+function isGraphqlCurrencyCode(value: string): value is CurrencyCode {
+  return GRAPHQL_CURRENCY_CODE_VALUES.has(value);
+}
+
+function mapStringArrayToAppPermissions(values: readonly string[]): AppPermission[] {
+  return values.filter(isAppPermission);
+}
+
+function mapBackendCurrencyToGraphql(value: string | null): CurrencyCode | null {
+  if (value === null) return null;
+  return isGraphqlCurrencyCode(value) ? value : null;
+}
+
 interface DashboardProfileShellProps {
   readonly userId: string;
   readonly context: UserPermissionContext;
@@ -82,7 +103,7 @@ export async function DashboardProfileShell({
     name: userProfile.name,
     email: userProfile.email,
     avatarUrl: userProfile.avatarUrl,
-    permissions: mapBackendPermissionsToGraphql(userProfile.permissions) as AppPermission[],
+    permissions: mapStringArrayToAppPermissions(mapBackendPermissionsToGraphql(userProfile.permissions)),
     role: userProfile.role,
     notificationCount: userProfile.notificationCount,
     teacherId: userProfile.teacherId,
@@ -90,9 +111,9 @@ export async function DashboardProfileShell({
     createdAt: userProfile.createdAt?.toISOString() ?? null,
     updatedAt: userProfile.updatedAt?.toISOString() ?? null,
     emailVerifiedAt: userProfile.emailVerifiedAt?.toISOString() ?? null,
-    displayCurrency: userProfile.displayCurrency as CurrencyCode | null,
+    displayCurrency: mapBackendCurrencyToGraphql(userProfile.displayCurrency),
     phone: userProfile.phone ?? null,
-    status: userProfile.status === "DEACTIVATED" ? AccountStatus.Deactivated : AccountStatus.Activated,
+    status: String(userProfile.status) === String(AccountStatus.Deactivated) ? AccountStatus.Deactivated : AccountStatus.Activated,
   };
 
   return (

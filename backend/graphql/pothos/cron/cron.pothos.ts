@@ -136,33 +136,34 @@ const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
   }),
 });
 
-const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
-  fields: t => ({
-    name: t.string({ required: true }),
+/** Fields shared by both submit and update input types — all optional. */
+function commonScheduleOptionalFields(t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]) {
+  return {
     description: t.string({ required: false }),
-    cronExpression: t.string({ required: true }),
-    jobKind: t.field({ type: CronJobKindPothosEnum, required: true }),
     payload: t.field({ type: "JSON", required: false }),
     timezone: t.string({ required: false }),
     concurrencyPolicy: t.field({ type: CronConcurrencyPolicyPothosEnum, required: false }),
     maxRetries: t.int({ required: false }),
     retryBackoffSeconds: t.int({ required: false }),
     timeoutSeconds: t.int({ required: false }),
+  };
+}
+
+const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
+  fields: t => ({
+    name: t.string({ required: true }),
+    cronExpression: t.string({ required: true }),
+    jobKind: t.field({ type: CronJobKindPothosEnum, required: true }),
+    ...commonScheduleOptionalFields(t),
   }),
 });
 
 const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdateInput", {
   fields: t => ({
     name: t.string({ required: false }),
-    description: t.string({ required: false }),
     cronExpression: t.string({ required: false }),
     jobKind: t.field({ type: CronJobKindPothosEnum, required: false }),
-    payload: t.field({ type: "JSON", required: false }),
-    timezone: t.string({ required: false }),
-    concurrencyPolicy: t.field({ type: CronConcurrencyPolicyPothosEnum, required: false }),
-    maxRetries: t.int({ required: false }),
-    retryBackoffSeconds: t.int({ required: false }),
-    timeoutSeconds: t.int({ required: false }),
+    ...commonScheduleOptionalFields(t),
   }),
 });
 

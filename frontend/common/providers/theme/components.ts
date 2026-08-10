@@ -37,7 +37,10 @@ const MD3_SWITCH = {
 
 type SwitchPaletteColor = "primary" | "secondary" | "error" | "info" | "success" | "warning";
 
-const SWITCH_ON_COLORS: Record<SwitchPaletteColor, keyof Theme["palette"]> = {
+const SWITCH_ON_COLORS: Record<
+  SwitchPaletteColor,
+  "onPrimary" | "onSecondary" | "onError" | "onInfo" | "onSuccess" | "onWarning"
+> = {
   primary: "onPrimary",
   secondary: "onSecondary",
   error: "onError",
@@ -46,17 +49,18 @@ const SWITCH_ON_COLORS: Record<SwitchPaletteColor, keyof Theme["palette"]> = {
   warning: "onWarning",
 };
 
+const isSwitchPaletteColor = (color: string): color is SwitchPaletteColor => Object.hasOwn(SWITCH_ON_COLORS, color);
+
 const getSwitchOnColor = (theme: Theme, color: string | undefined): string => {
-  if (color && color in SWITCH_ON_COLORS) {
-    const key = SWITCH_ON_COLORS[color as SwitchPaletteColor];
-    return theme.palette[key] as string;
+  if (color && isSwitchPaletteColor(color)) {
+    return theme.palette[SWITCH_ON_COLORS[color]];
   }
   return theme.palette.onPrimary;
 };
 
 const getSwitchMainColor = (theme: Theme, color: string | undefined): string => {
-  if (color && color in SWITCH_ON_COLORS) {
-    return theme.palette[color as SwitchPaletteColor].main;
+  if (color && isSwitchPaletteColor(color)) {
+    return theme.palette[color].main;
   }
   return theme.palette.primary.main;
 };

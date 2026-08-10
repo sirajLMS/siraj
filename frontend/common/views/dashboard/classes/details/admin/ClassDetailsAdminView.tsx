@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/common/utils/logger";
 import { ActivityHeatmap } from "@/frontend/common/views/dashboard/classes/details/admin/ActivityHeatmap";
 import { AdminActionsBar } from "@/frontend/common/views/dashboard/classes/details/admin/AdminActionsBar";
@@ -30,6 +30,12 @@ import { MetadataCard } from "@/frontend/common/views/dashboard/classes/details/
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
 import type { AdminViewProps } from "@/frontend/common/views/dashboard/classes/details/types";
 import type { AdminViewLabels } from "@/shared/locale";
+
+const CURRENCY_CODE_VALUES = new Set<string>(Object.values(CurrencyCode).map((v): string => v));
+
+function isCurrencyCode(value: string): value is CurrencyCode {
+  return CURRENCY_CODE_VALUES.has(value);
+}
 
 interface ClassDetailsAdminViewProps extends AdminViewProps {
   readonly labels: AdminViewLabels;
@@ -205,7 +211,10 @@ function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
           select
           label={labels.rate.currencyLabel}
           value={overrideRateCurrency ?? ""}
-          onChange={event => onOverrideRateCurrencyChange((event.target.value as CurrencyCode) || null)}
+          onChange={event => {
+            const raw = event.target.value;
+            onOverrideRateCurrencyChange(raw && isCurrencyCode(raw) ? raw : null);
+          }}
           fullWidth
         >
           <MenuItem value="">{labels.rate.currencyLabel}</MenuItem>
@@ -296,7 +305,8 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
 
   const executionState = instance.executionState ?? "";
   const performance = instance.performance;
-  const showLiveMetadata = executionState === "ACTIVATED" || executionState === "RUNNING";
+  const showLiveMetadata =
+    executionState === ClassExecutionState.Activated || executionState === ClassExecutionState.Running;
   const { metrics, hasData } = buildLivePerformanceMetrics(instance);
   const heatmapData = coerceHeatmapData(performance?.heatmapData);
 

@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import {
   type CurrencyCode,
-  type IanaTimezone,
+  IanaTimezone,
   ParentStatus,
   type ProfileMode,
   ProfileScope,
@@ -26,6 +26,20 @@ import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-grou
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+
+const PARENT_STATUS_VALUES: readonly string[] = Object.values(ParentStatus);
+
+function isParentStatus(value: string | null | undefined): value is ParentStatus {
+  return value !== null && value !== undefined && PARENT_STATUS_VALUES.includes(value);
+}
+
+function isIanaTimezoneString(value: string | null | undefined): value is IanaTimezone {
+  return value !== null && value !== undefined && (Object.values(IanaTimezone) as readonly string[]).includes(value);
+}
+
+function toIanaTimezoneOrNull(value: string | null | undefined): IanaTimezone | null {
+  return isIanaTimezoneString(value) ? value : null;
+}
 
 function buildParentSource(scope: ProfileScope, profile: ProfileData | null | undefined): ParentViewData | null {
   if (!profile) return null;
@@ -54,7 +68,9 @@ function toEditData(
     feeAmount: adminData?.feeAmount ?? "",
     currency: adminData?.currency ?? undefined,
     timezone: adminData?.timezone ?? profileTimezone ?? "",
-    lifecycleStatus: (adminData?.lifecycleStatus as ParentStatus | undefined) ?? ParentStatus.Regular,
+    lifecycleStatus:
+      (adminData && isParentStatus(adminData.lifecycleStatus) ? adminData.lifecycleStatus : undefined) ??
+      ParentStatus.Regular,
   };
 }
 
@@ -142,7 +158,7 @@ export function useParentProfileViewModel(
               core,
               parent: {
                 ...parentOwn,
-                timezone: (formData.timezone || null) as IanaTimezone | null,
+                timezone: toIanaTimezoneOrNull(formData.timezone),
               },
             },
           },
@@ -160,7 +176,7 @@ export function useParentProfileViewModel(
                 invoiceType: formData.invoiceType || null,
                 feeAmount: formData.feeAmount || null,
                 currency: formData.currency ?? null,
-                timezone: (formData.timezone || null) as IanaTimezone | null,
+                timezone: toIanaTimezoneOrNull(formData.timezone),
               },
             },
           },

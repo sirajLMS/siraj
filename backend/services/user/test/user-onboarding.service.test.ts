@@ -9,6 +9,7 @@ import {
   type UserOnboardingService,
   UserOnboardingService as UserOnboardingServiceImpl,
 } from "@/backend/services/user/user-onboarding.service";
+import type { GroupWithPermissionIds } from "@/backend/types/permissions/permission-management.types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -46,13 +47,33 @@ function buildCreateUserOptions<TExtension>(
   };
 }
 
+function buildMockGroup(id: string, slug: SystemPermissionGroupSlug): GroupWithPermissionIds {
+  return {
+    id,
+    slug,
+    name: { en: "Mock Group" },
+    description: null,
+    isSystem: false,
+    createdByUserId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    permissionIds: [],
+    assignedUsers: [],
+  };
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 async function expectCreateUserOfTypeError(
   overrides: Partial<CreateUserOptions>,
   assertMessage: (message: string) => void,
   spies?: {
     readonly hasPermission?: boolean;
     readonly existsByEmail?: boolean;
-    readonly listAllGroups?: Array<{ id: string; slug: SystemPermissionGroupSlug }>;
+    readonly listAllGroups?: GroupWithPermissionIds[];
   }
 ): Promise<void> {
   const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(spies?.hasPermission ?? true);
@@ -60,7 +81,7 @@ async function expectCreateUserOfTypeError(
   const listAllGroupsSpy =
     spies?.listAllGroups === undefined
       ? null
-      : spyOn(PermissionManagementRepository, "listAllGroups").mockResolvedValue(spies.listAllGroups as never);
+      : spyOn(PermissionManagementRepository, "listAllGroups").mockResolvedValue(spies.listAllGroups);
 
   let error: unknown = null;
   try {
@@ -70,7 +91,7 @@ async function expectCreateUserOfTypeError(
   }
 
   expect(error).not.toBeNull();
-  assertMessage((error as Error).message);
+  assertMessage(getErrorMessage(error));
 
   hasPermissionSpy.mockRestore();
   existsByEmailSpy.mockRestore();
@@ -116,7 +137,7 @@ describe("UserOnboardingService.createUserOfType", () => {
     }
 
     expect(preChecksRan).toBeTrue();
-    expect((error as Error).message).toBe("pre-check-boom");
+    expect(getErrorMessage(error)).toBe("pre-check-boom");
     hasPermissionSpy.mockRestore();
     existsByEmailSpy.mockRestore();
   });
@@ -195,7 +216,7 @@ describe("UserOnboardingService.createUserOfType", () => {
       },
       message => expect(message).toBe(tErrors.permissionGroup.permissionGroupNotFound),
       {
-        listAllGroups: [{ id: "g1", slug: SystemPermissionGroupSlug.PARENT_DEFAULT }],
+        listAllGroups: [buildMockGroup("g1", SystemPermissionGroupSlug.PARENT_DEFAULT)],
       }
     );
   });
