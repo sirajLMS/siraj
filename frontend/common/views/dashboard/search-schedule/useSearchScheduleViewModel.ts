@@ -143,7 +143,7 @@ function adaptResultItemToStoreTeacher(teacher: SearchScheduleResultItem): Searc
     gender: teacher.gender ?? null,
     timezone: teacher.timezone ?? null,
     availableDaysCount: teacher.availableDaysCount ?? null,
-    gaps: (teacher.gaps ?? null) as SearchScheduleMonthDrawerTeacher["gaps"],
+    gaps: teacher.gaps ?? undefined,
   };
 }
 
@@ -178,7 +178,7 @@ function useSearchScheduleStoreSlice(): SearchScheduleStoreSlice {
   const commitSearch = useSearchScheduleStore(state => state.commitSearch);
   const setPage = useSearchScheduleStore(state => state.setPage);
   const hasSearched = useSearchScheduleStore(state => state.hasSearched);
-  const hasHydrated = useSearchScheduleStore(state => state._hasHydrated);
+  const hasHydrated = useSearchScheduleStore(state => state.hasHydrated);
 
   const selectedTeacher = useSearchScheduleStore(state => state.selectedTeacher);
   const setSelectedTeacher = useSearchScheduleStore(state => state.setSelectedTeacher);
@@ -231,7 +231,7 @@ interface SearchScheduleHandlers {
   readonly onSortChange: (sortBy: AvailabilitySearchSortBy) => void;
 }
 
-function _useSearchScheduleHandlers(
+function useSearchScheduleHandlers(
   setDraft: (draft: Partial<SearchScheduleDraftFilters>) => void,
   setSelectedTeacher: (teacher: SearchScheduleTeacherOption | null) => void,
   setFormFilterDrawerOpen: (open: boolean) => void,
@@ -268,7 +268,7 @@ function _useSearchScheduleHandlers(
 
 function useSearchScheduleMainQuery(activeInput: AvailabilitySearchInput | null) {
   const { data, loading, error, networkStatus, previousData } = useQuery(searchTeacherAvailabilityQueryDocument, {
-    variables: activeInput ? { input: activeInput } : { input: {} as AvailabilitySearchInput },
+    variables: activeInput ? { input: activeInput } : { input: EMPTY_INPUT },
     skip: activeInput === null,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network",
@@ -407,7 +407,7 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
     commitSearch();
   }, [commitSearch, hasHydrated, hasSearched]);
 
-  const handlers = _useSearchScheduleHandlers(
+  const handlers = useSearchScheduleHandlers(
     store.setDraft,
     store.setSelectedTeacher,
     store.setFormFilterDrawerOpen,

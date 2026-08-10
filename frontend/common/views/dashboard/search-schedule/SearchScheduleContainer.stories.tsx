@@ -107,7 +107,7 @@ const meta: Meta<typeof SearchScheduleContainer> = {
         hasSearched: false,
         page: 0,
         selectedTeacher: null,
-        _hasHydrated: true,
+        hasHydrated: true,
         // NEW FOR PLAN v5: reset lifted UI state in the storybook decorator.
         formFilterDrawerOpen: false,
         sortMenuAnchorEl: null,
