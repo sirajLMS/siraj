@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { $ } from "bun";
 import { withProcessLock } from "@/scripts/lib/process-lock";
@@ -36,6 +36,11 @@ const OUTPUT_FILE = join(OXLINT_DIR, "oxlint-results.json");
 
 async function main() {
   await withProcessLock("oxlint-categorize", async () => {
+    if (existsSync(OXLINT_DIR)) {
+      rmSync(OXLINT_DIR, { recursive: true, force: true });
+    }
+    mkdirSync(OXLINT_DIR, { recursive: true });
+
     console.log("Running oxlint...");
 
     // Run oxlint and capture JSON output (oxlint exits with 1 when issues found, which is expected)
