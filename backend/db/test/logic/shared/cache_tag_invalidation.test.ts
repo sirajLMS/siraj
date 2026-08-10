@@ -18,7 +18,7 @@ function buildTestKeys(uid: string, userId: string, parentId: string): TestKeys 
   };
 }
 
-async function primeCacheEntries(keys: TestKeys, uid: string): Promise<void> {
+async function primeCacheEntries(keys: TestKeys, uid: string, userId: string, parentId: string): Promise<void> {
   const parentDirData = await cachedRead(keys.parentDirKey, 60, async () => ({ type: "parent-dir", uid }), [
     "parentDirectory",
   ]);
@@ -33,12 +33,12 @@ async function primeCacheEntries(keys: TestKeys, uid: string): Promise<void> {
     keys.parentByUserIdKey,
     60,
     async () => ({ type: "parent-by-user-id", uid }),
-    [`parent:byUserId:usr_${uid}`]
+    [`parent:byUserId:${userId}`]
   );
   expect(parentByUserIdData.uid).toBe(uid);
 
   const parentDashData = await cachedRead(keys.parentDashKey, 60, async () => ({ type: "parent-dash", uid }), [
-    `parent:dash:metrics:par_${uid}`,
+    `parent:dash:metrics:${parentId}`,
   ]);
   expect(parentDashData.uid).toBe(uid);
 }
@@ -123,7 +123,7 @@ describe("Cache Tag Invalidation Integration", () => {
     const parentId = `par_${uid}`;
     const keys = buildTestKeys(uid, userId, parentId);
 
-    await primeCacheEntries(keys, uid);
+    await primeCacheEntries(keys, uid, userId, parentId);
     await verifyTagInvalidation(keys, uid);
     await verifyParentWriteInvalidation(keys, uid, userId, parentId);
   });

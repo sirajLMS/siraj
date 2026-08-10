@@ -213,6 +213,7 @@ describe("UserOnboardingService.createUserOfType", () => {
           email: `miss-${randomUUID()}@example.com`,
           password: generateTestPassword(),
         },
+        createExtension: async user => ({ id: user.id, status: "ACTIVATED" }),
       },
       message => expect(message).toBe(tErrors.permissionGroup.permissionGroupNotFound),
       {
