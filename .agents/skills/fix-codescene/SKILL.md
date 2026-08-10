@@ -2,7 +2,7 @@
 name: fix-codescene
 description: >
   Fix CodeScene health warnings only via wave-based parallel executor subagents and per-file
-  sub-loop verification (tsgo → biome → lint → codescene). Orchestrator runs codescene --scan,
+  sub-loop verification (tsgo → biome → oxlint → lint → duplicates → codescene). Orchestrator runs codescene --scan,
   asks wave size, dispatches one subagent per flagged file. Use when asked to fix CodeScene issues,
   codescene warnings, Large Method, Code Duplication, or code health scan failures — without
   running full quality-gate or sonar-scan.
@@ -31,9 +31,9 @@ CodeScene-only workflow: scan → optional wave-size question → parallel execu
 | `bun codescene --scan --full` | Bypasses incremental cache |
 | `bun quality-gate` / `bun quality-gate:fresh` | Out of scope |
 
-**Orchestrator allowed commands:** `bun run codescene --scan`, `curl` lint-queue `/status`, start lint-queue server in background if down.
+**Orchestrator allowed commands:** `bun run codescene --scan`, `bun run lint` (in-process lint service — no HTTP server).
 
-**Executor allowed commands:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs `codescene --file` internally).
+**Executor allowed commands:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs `codescene --file` internally, plus tsgo → biome → oxlint → lint → duplicates → codescene).
 
 ## Orchestrator: no repo file reads (one exception)
 
@@ -54,20 +54,18 @@ Orchestrator otherwise uses only: scan/curl shell output, template content, AskQ
 
 **Executors** read their one assigned file plus rule files from sub-loop.
 
-## Lint queue server
+## Lint service (in-process, no HTTP server)
 
-Before dispatching executors:
+The former HTTP-based lint queue (`lint-queue-server.ts`, `lint-queue-client.ts`, `LINT_QUEUE_PORT`)
+has been replaced by `scripts/lint-service.ts` — a purely in-process TypeScript service with an
+in-memory FIFO queue. No server to start, no port to check, no curl.
 
-```bash
-curl -s http://localhost:${LINT_QUEUE_PORT}/status
-```
+- **Full-repo lint:** `bun run lint` (calls `requestFullRepoLint` from `scripts/lint-service.ts`)
+- **File-scoped lint:** `bun run scripts/lint-service.ts -f <file> --id fix-codescene`
+- **JSON output:** `bun run scripts/lint-service.ts -f <file> --json --id fix-codescene`
 
-- **Not running** (`running: false` or connection failed): start in background without blocking:
-  ```bash
-  ~/.bun/bin/bun run scripts/lint-queue-server.ts
-  ```
-  Use `block_until_ms: 0` or equivalent.
-- **Already running:** do nothing — never stop, restart, or kill the server.
+Subagents should NOT run `bun run lint` directly — they use `sub-loop.ts` which calls the in-process
+lint service internally via `requestLint("sub-loop", [relPath], { typeAware: true, maxWarnings: 0 })`.
 
 ## Workflow
 

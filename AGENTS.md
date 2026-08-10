@@ -582,6 +582,35 @@ function getStatus(active: boolean) {
 
 **Config override exists** for `useEffect` callbacks (false positives — the rule doesn't understand React cleanup patterns). Already configured in `oxlint.config.mts`.
 
+### no-map-spread
+
+Using spread syntax (`...`) inside `.map()` is flagged because it creates a new object on every iteration, which can be expensive for large arrays.
+
+```ts
+// WRONG — spread inside .map()
+const result = items.map(item => ({ ...item, extra: true }));
+
+// RIGHT — use Object.assign
+const result = items.map(item => Object.assign({}, item, { extra: true }));
+
+// RIGHT — or create a new object explicitly
+const result = items.map(item => {
+  return { id: item.id, name: item.name, extra: true };
+});
+```
+
+### no-unnecessary-type-assertion
+
+Redundant `as` assertions that don't narrow or widen the type are flagged.
+
+```ts
+// WRONG — assertion to the same type
+const value = getString() as string;
+
+// RIGHT — remove the assertion
+const value = getString();
+```
+
 ### Config Overrides (legitimate — NOT `oxlint-disable`)
 
 The `oxlint.config.mts` has `overrides` for:

@@ -174,6 +174,20 @@ function printApplicableRuleFiles(filePath: string): void {
   console.log(`  • If fixing requires modifying ANOTHER file: do NOT modify that file.`);
   console.log(`    Report the cross-file dependency to the orchestrator instead.`);
   console.log("");
+  console.log(`${BOLD}Oxlint Fix Patterns (see AGENTS.md for full details):${NC}`);
+  console.log(
+    `  • no-unsafe-type-assertion: Use type guards ("value is Type"), instanceof Error, satisfies Partial<T>`
+  );
+  console.log(`  • no-await-in-loop: Use Promise.all (parallel) or recursive helper/reduce (sequential)`);
+  console.log(`  • consistent-function-scoping: Move non-capturing functions to module scope`);
+  console.log(`  • no-object-type-as-default-prop: Extract default to module-level const`);
+  console.log(`  • no-unsafe-enum-comparison: Wrap with String() or use string literals`);
+  console.log(`  • no-shadow: Destructuring rename or _ prefix for unused params`);
+  console.log(`  • consistent-return: Use "return undefined" instead of bare "return"`);
+  console.log(`  • no-map-spread: Use Object.assign instead of spread in .map()`);
+  console.log(`  • no-underscore-dangle: Rename or use bracket notation for external APIs`);
+  console.log(`  • NEVER add oxlint-disable comments — fix the root cause`);
+  console.log("");
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────

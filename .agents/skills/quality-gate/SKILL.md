@@ -5,8 +5,10 @@ description: >
   all reported issues across stages (BASIC_CHECKS, CODESCENE).
   Dispatches parallel subagents (one per file) within each lifecycle stage — no interleaving
   across stages. Each subagent calls `scripts/health/sub-loop.ts` for progressive per-file
-  verification (tsgo → biome → lint-queue-client → codescene, in strict order, short-circuiting
-  at first failure). Use when asked to run quality gates, fix quality-gate issues, or resolve CodeScene failures.
+  verification (tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene, in strict
+  order, short-circuiting at first failure). Use when asked to run quality gates, fix quality-gate
+  issues, or resolve CodeScene failures. Supports parallel pool orchestration with up to 16
+  subagents for large-scale cleanup campaigns.
 ---
 
 ## Quality Gate Workflow
@@ -18,20 +20,20 @@ that stage, and re-runs the gate until all stages pass.
 ### Architecture: Parallel Subagents per Lifecycle Stage
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                     QUALITY GATE ORCHESTRATOR                     │
-│                                                                   │
-│  bun quality-gate → parse failure → dispatch subagents ─────────┐ │
-│                                                                   │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │ │
-│  │ Subagent 1  │  │ Subagent 2  │  │ Subagent N  │  (parallel) │ │
-│  │ fixes File A│  │ fixes File B│  │ fixes File N│              │ │
-│  │ runs sub-   │  │ runs sub-   │  │ runs sub-   │              │ │
-│  │ loop.ts     │  │ loop.ts     │  │ loop.ts     │              │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘              │ │
-│                                                                   │
-│  wait for all → verify → re-run bun quality-gate ←──────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                      QUALITY GATE ORCHESTRATOR                       │
+│                                                                      │
+│  bun quality-gate → parse failure → dispatch subagents ────────────┐ │
+│                                                                      │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                │ │
+│  │ Subagent 1  │  │ Subagent 2  │  │ Subagent N  │  (parallel)   │ │
+│  │ fixes File A│  │ fixes File B│  │ fixes File N│                │ │
+│  │ runs sub-   │  │ runs sub-   │  │ runs sub-   │                │ │
+│  │ loop.ts     │  │ loop.ts     │  │ loop.ts     │                │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘                │ │
+│                                                                      │
+│  wait for all → verify → re-run bun quality-gate ←──────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 **Key principle**: Subagents run in parallel **within one lifecycle stage only**. No interleaving
@@ -39,31 +41,34 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while BASIC_CHECK
 
 ### Critical Rules
 
-1. **`bun run lint` IS the lint queue client.** The `package.json` `lint` script is a thin wrapper around `requestFullRepoLint` from `scripts/lint-queue-client.ts`, so running it directly is safe — requests serialize through the lint queue server. Make sure the server is running first:
+1. **`bun run lint` is safe to run directly.** The `package.json` `lint` script calls `requestFullRepoLint` from `scripts/lint-service.ts` (in-process serialized ESLint). No HTTP server, no port binding, no `LINT_QUEUE_PORT`. For file-scoped lint (faster):
    ```bash
-   curl -s http://localhost:${LINT_QUEUE_PORT}/status  # Check server is running
-   ~/.bun/bin/bun run scripts/lint-queue-server.ts &  # Start it if not running
+   bun run scripts/lint-service.ts -f <file1> -f <file2> --id quality-gate
    ```
-   For file-scoped lint (faster), call the lint queue client directly:
+   For JSON output (automation):
    ```bash
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"quality-gate","files":["file1.ts","file2.ts"]}'
+   bun run scripts/lint-service.ts -f <file> --json --id quality-gate
    ```
 
 3. **Each subagent calls `scripts/health/sub-loop.ts` for per-file verification:**
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle <stage>
    ```
-   The sub-loop script runs checks in strict order (tsgo → biome → lint → codescene) and
+   The sub-loop script runs checks in strict order (tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene) and
    **short-circuits at the first failure** — it stops and prints errors for the subagent to fix.
    The subagent fixes the errors and re-runs the script until it passes (exit 0).
 
+   The sub-loop also uses a **cross-process FIFO lock** (`scripts/lib/process-lock.ts`) via lockfiles in
+   `.quality-gate-lock/`, so parallel subagents running in separate processes serialize their heavy
+   checks (tsgo, oxlint, lint) automatically — no manual coordination needed.
+
 4. **Progressive loop — no skipping ahead.** The sub-loop always checks in order:
-   - If tsgo fails → only fix tsgo. Don't run biome/lint/codescene until tsgo passes.
+   - If tsgo fails → only fix tsgo. Don't run biome/oxlint/lint/codescene until tsgo passes.
    - If tsgo passes but biome fails → only fix biome.
-   - If tsgo+biome pass but lint fails → only fix lint.
-   - If tsgo+biome+lint pass but codescene fails → only fix codescene.
+   - If tsgo+biome pass but oxlint fails → only fix oxlint.
+   - If tsgo+biome+oxlint pass but lint fails → only fix lint.
+   - If tsgo+biome+oxlint+lint pass but check:duplicates fails → only fix duplicates.
+   - If all pass but codescene fails → only fix codescene.
 
 5. **Use the run-test script for test files.** When fixing or refactoring a test file:
    ```bash
@@ -221,31 +226,39 @@ in one file breaks another file.
 
 ---
 
-### Phase 5: Fix BASIC_CHECKS — lint (Parallel, via Queue Client)
+### Phase 5: Fix BASIC_CHECKS — oxlint + lint (Parallel)
 
-1. Submit all files to lint queue to get the list of files with lint errors:
-   ```bash
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"quality-gate-discover","files":["<all-affected-files>"]}'
-   ```
+The sub-loop's `lint` lifecycle stage covers **oxlint + ESLint (type-aware)** sequentially.
+Both are dispatched as parallel subagents — one per file.
 
-2. **Dispatch one subagent per file** with lint errors — launch all in a SINGLE response (parallel).
+1. Run `bun run oxlint` project-wide to discover files with oxlint violations.
+
+2. Run `bun run lint` (full-repo) to discover files with ESLint violations.
+
+3. Merge the file lists (a file may have both oxlint and ESLint issues).
+
+4. **Dispatch one subagent per file** — launch all in a SINGLE response (parallel).
+   Pool size: **16 subagents max** (24 causes rate-limiting in some environments).
    Each subagent receives:
    - `lifecycle: lint`
-   - The lint errors for that file
+   - The oxlint violations for that file
+   - The ESLint errors for that file
 
-3. Each subagent: reads instruction file, fixes lint errors, then runs:
+5. Each subagent: reads instruction file + AGENTS.md, fixes oxlint violations AND ESLint errors,
+   then runs:
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle lint
    ```
-   (This runs tsgo → biome → lint in order, short-circuiting if an earlier check fails.)
+   (This runs tsgo → biome → oxlint → lint:type-aware in order, short-circuiting at first failure.)
 
-4. **Wait for all subagents to complete.**
+6. **Wait for all subagents to complete.**
 
-5. Re-submit all fixed files to lint queue to verify clean.
+7. Re-run `bun run oxlint` and `bun run scripts/lint-service.ts` to verify clean.
 
-6. Resume: re-run `bun quality-gate` — it advances to CODESCENE stage.
+8. Resume: re-run `bun quality-gate` — it advances to CODESCENE stage.
+
+**No HTTP server needed.** The former `lint-queue-server.ts` / `lint-queue-client.ts` / `LINT_QUEUE_PORT`
+architecture is gone. All lint is now in-process via `scripts/lint-service.ts`.
 
 ---
 
@@ -264,7 +277,7 @@ in one file breaks another file.
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
    ```
-   (This runs tsgo → biome → lint → codescene --file in order, short-circuiting at any failure.)
+   (This runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file in order, short-circuiting at any failure.)
 
 4. **Wait for all subagents to complete.**
 
@@ -374,12 +387,49 @@ Report your results to the orchestrator:
  - Final sub-loop exit status (0 = passed)
 
 ## PROHIBITIONS
- - `bun run lint` IS the lint queue client — safe to run directly (it serializes through the queue server). However, subagents should prefer the per-file `sub-loop.ts` script for file-scoped verification.
+- `bun run lint` is safe to run directly (it uses the in-process lint service — no HTTP server). However, subagents should prefer the per-file `sub-loop.ts` script for file-scoped verification.
  - NEVER modify files other than <file-path>
+- NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section for fix patterns.
 
 ERRORS TO FIX:
-<paste errors from tsgo/biome/lint/codescene output for this file>
+<paste errors from tsgo/biome/oxlint/lint/codescene output for this file>
 ```
+
+### Oxlint Fix Patterns Reference
+
+When subagents encounter oxlint violations, refer them to the "Oxlint Rules" section in `AGENTS.md`
+which documents every rule with fix patterns:
+
+| Rule | Fix Pattern |
+|---|---|
+| `no-unsafe-type-assertion` | Type guards (`value is Type`), `instanceof Error`, `satisfies Partial<T>`, `.$type<EnumType>()` on Drizzle columns. `as unknown as T` does NOT bypass this rule. |
+| `no-await-in-loop` | `Promise.all(arr.map(async ...))` for independent iterations. Recursive helper or `reduce` chain for sequential (shared transactions, ordering). `for await...of` is NOT flagged. |
+| `consistent-function-scoping` | Move non-capturing functions to module scope. |
+| `no-object-type-as-default-prop` | Extract default to module-level `const` (e.g., `const DEFAULT_OPTIONS = {}`). |
+| `no-unsafe-enum-comparison` | `String(a) === String(Enum.VALUE)` or use string literals. |
+| `no-shadow` | Destructuring rename `{ prop: alias }` or `_` prefix for unused params. |
+| `consistent-return` | `return undefined` instead of bare `return`. Add `throw` after unhandled switch cases. |
+| `no-map-spread` | Use `Object.assign({}, ...)` instead of spread in `.map()`. |
+| `no-underscore-dangle` | Rename `_field` → `field` or use bracket notation `obj["_ref"]` for external APIs. |
+
+**Key lesson**: Type guards are the universal escape hatch for `no-unsafe-type-assertion`. When oxlint blocks
+`as`, write a `value is Type` predicate function with real runtime validation.
+
+### Parallel Pool Orchestration (for large-scale cleanup)
+
+When dispatching many subagents (e.g., fixing 100+ files with oxlint violations):
+
+1. **Pool size: 16 max.** 24 can cause rate-limiting in some environments. 8-16 is the sweet spot.
+2. **One file per agent.** Each subagent owns one file completely — fixes ALL violations in that file, not just one rule.
+3. **Always keep the pool full.** As each subagent completes, dispatch the next pending file immediately.
+4. **Use `--lifecycle codescene`** for full verification (tsgo → biome → oxlint → lint → duplicates → codescene).
+5. **Stage files when sub-loop exits 0.** Subagents should `git add <file>` after sub-loop passes.
+6. **Handle device crashes.** After a crash, check `git diff` to find files with partial changes. Reset broken
+  files with `git checkout -- <file>` before re-dispatching. Use `sub-loop-uncommitted.ts` to validate all
+  uncommitted files at once.
+7. **No GraphQL or UI/E2E tests.** Subagents should NOT run tests that require a Next.js server. DB and service
+  tests CAN be run if needed.
+8. **Commit and push frequently.** After each batch of files passes sub-loop, commit and push to preserve progress.
 
 ### Final Report
 

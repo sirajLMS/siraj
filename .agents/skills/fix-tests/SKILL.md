@@ -5,7 +5,7 @@ description: >
   backend services, GraphQL integration, UI components, and E2E tests). Asks scoping
   questions to confirm targeted test files or domains, checks existing skills, executes
   log-captured test runs, applies domain-specific fixes, verifies code quality via per-file
-  sub-loop (tsgo → biome → lint), and confirms clean type-checking. Use when any test fails
+  sub-loop (tsgo → biome → oxlint → lint:type-aware), and confirms clean type-checking. Use when any test fails
   or when asked to fix tests.
 allowed-tools: shell
 ---
@@ -22,7 +22,7 @@ Before diagnosing or editing code:
 
 1. **Check Existing Skills**:
    - `fix-db-tests`: Used specifically for database repository tests (`backend/db/test/`). `fix-tests` extends this to cover all domains.
-   - `quality-loop`: Runs project quality gates repeatedly (`tsgo`, `biome:check`, `lint`).
+   - `quality-loop`: Runs project quality gates repeatedly (`tsgo`, `biome:check`, `oxlint`, `lint`) plus file-scoped verification via `sub-loop.ts`.
    - `fix-codescene`: Used specifically for CodeScene health scan warnings.
    - `plan-review`: Used for reviewing architectural plans before large refactors.
 
@@ -121,15 +121,24 @@ Follow the project's **code quality rules** after making any code edits:
    bun tsgo                      # Type check (safe to run concurrently)
    bun run biome:check           # Biome format & lint
    ```
-2. **Lint Queue Client**:
-   For file-scoped linting on modified files, send a request to the lint queue server:
+2. **Sub-Loop Verification** (preferred over manual lint):
+   For file-scoped progressive verification (tsgo → biome → oxlint → lint → duplicates → codescene):
    ```bash
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"fix-tests","files":["<modified-file-path>"]}'
+   bun run scripts/health/sub-loop.ts <modified-file-path> --lifecycle lint
    ```
-3. **No Symptom Masking**:
+   This runs tsgo, biome, oxlint, and ESLint (type-aware) in order, short-circuiting at first failure.
+   The script also prints which instruction files and AGENTS.md files apply to the target file.
+3. **Lint Service (in-process, no HTTP server)**:
+   For direct file-scoped lint without the full sub-loop:
+   ```bash
+   bun run scripts/lint-service.ts -f <file> --id fix-tests
+   ```
+   The former HTTP-based lint queue (`lint-queue-server.ts`, `LINT_QUEUE_PORT`, curl) is GONE.
+   All lint is now in-process via `scripts/lint-service.ts`.
+4. **No Symptom Masking**:
    NEVER resolve errors by masking symptoms, swallowing exceptions, returning dummy fallbacks, commenting out assertions, or deleting failing tests. Trace and fix the root cause.
+5. **No `oxlint-disable` comments**:
+   NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section.
 
 ---
 

@@ -57,11 +57,19 @@ NEVER modify a file you were not assigned to.
 
   bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 
-If it fails at tsgo → fix only tsgo. Re-run. Once tsgo passes it advances to biome → fix biome → re-run → advances to lint → fix lint → re-run → advances to codescene --file → fix any remaining warnings → re-run. Repeat until the script exits 0.
+If it fails at tsgo → fix only tsgo. Re-run. Once tsgo passes it advances to biome → fix biome → re-run → advances to oxlint → fix oxlint → re-run → advances to lint:type-aware → fix lint → re-run → advances to check:duplicates → fix duplicates → re-run → advances to codescene --file → fix any remaining warnings → re-run. Repeat until the script exits 0.
 
 For test files, use `bun run scripts/run-test/run-test.ts <test-path>` when sub-loop passes but you need to validate behavior.
 
-## STEP 5: Report Completion
+NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section for fix patterns per rule.
+
+## STEP 5: Stage and Report
+
+### Step 5a: Stage the file (only if sub-loop exits 0)
+
+  git add <file-path>
+
+### Step 5b: Report Completion
 
 Reply to the orchestrator with:
 - File: <file-path>
@@ -73,7 +81,7 @@ Reply to the orchestrator with:
 
 - NEVER modify files other than `<file-path>` (except rule files from sub-loop Step 1)
 - NEVER run codescene with `--reset` or `--full`
-- Prefer sub-loop for verification; `bun run lint` is the lint queue client if needed outside sub-loop
+- Prefer sub-loop for verification; `bun run scripts/lint-service.ts -f <file> --id fix-codescene` if needed outside sub-loop (in-process, no HTTP server)
 
 ERRORS TO FIX:
 <paste warning lines>

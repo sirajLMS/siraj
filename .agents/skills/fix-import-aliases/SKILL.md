@@ -47,9 +47,7 @@ To process files efficiently:
 2. Group the found files into batches.
 3. Launch parallel subagents to process each batch.
 4. **Each subagent must view the files, resolve the import paths as described above, and use `replace_file_content` or `multi_replace_file_content` to make the edits.** Subagents must NEVER write or run scripts to automate the replacement.
-5. Verify changes with the lint queue client:
+5. Verify changes with the in-process lint service (no HTTP server):
    ```bash
-   curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-     -H "Content-Type: application/json" \
-     -d '{"id":"fix-imports","files":["<file-path>"]}'
+   bun run scripts/lint-service.ts -f <file-path> --id fix-imports
    ```
