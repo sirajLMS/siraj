@@ -55,36 +55,37 @@ function writeSnapshotFile(targetFile: string, json: string): boolean {
   return false;
 }
 
-async function processNamespaceExport(
-  exportVal: unknown,
-  hash: ReturnType<typeof createHash>
-): Promise<{ total: number; written: number }> {
-  if (!exportVal || typeof exportVal !== "object") return { total: 0, written: 0 };
+interface SnapshotUpdate {
+  hashChunk: string;
+  targetFile: string;
+  json: string;
+}
+
+async function loadNamespaceSnapshot(exportVal: unknown): Promise<{ updates: SnapshotUpdate[] } | null> {
+  if (!exportVal || typeof exportVal !== "object") return null;
 
   const config = getNamespaceConfig(exportVal as Parameters<typeof getNamespaceConfig>[0]);
   const id = getNamespaceId(exportVal);
 
-  if (!config || !id) return { total: 0, written: 0 };
+  if (!config || !id) return null;
 
-  let total = 0;
-  let written = 0;
+  const rawUpdates = await Promise.all(
+    LOCALES.map(async (locale): Promise<SnapshotUpdate | null> => {
+      const loader = config.load[locale];
+      if (!loader) return null;
+      const labels = await loader();
+      const json = serializeLabels(labels);
+      const targetFile = join(OUTPUT_DIR, locale, `${id}.json`);
+      return { hashChunk: `${id}:${locale}:${json}`, targetFile, json };
+    })
+  );
 
-  for (const locale of LOCALES) {
-    const loader = config.load[locale];
-    if (!loader) continue;
-
-    total++;
-    const labels = await loader();
-    const json = serializeLabels(labels);
-    hash.update(`${id}:${locale}:${json}`);
-
-    const targetFile = join(OUTPUT_DIR, locale, `${id}.json`);
-    if (writeSnapshotFile(targetFile, json)) {
-      written++;
-    }
+  const updates: SnapshotUpdate[] = [];
+  for (const update of rawUpdates) {
+    if (update) updates.push(update);
   }
 
-  return { total, written };
+  return { updates };
 }
 
 async function main() {
@@ -93,14 +94,29 @@ async function main() {
   let totalSnapshots = 0;
   let writtenSnapshots = 0;
 
-  for (const filePath of namespaceFiles) {
-    const relPath = relative(process.cwd(), filePath);
-    const moduleExports = await import(`@/${relPath}`);
+  // Load all namespace module exports and their snapshots in parallel.
+  // Promise.all preserves array order, so the file/export/locale ordering
+  // used below for hash updates is deterministic.
+  const processedFiles = await Promise.all(
+    namespaceFiles.map(async filePath => {
+      const relPath = relative(process.cwd(), filePath);
+      const moduleExports = await import(`@/${relPath}`);
+      return Promise.all(Object.values(moduleExports).map(exportVal => loadNamespaceSnapshot(exportVal)));
+    })
+  );
 
-    for (const exportVal of Object.values(moduleExports)) {
-      const res = await processNamespaceExport(exportVal, hash);
-      totalSnapshots += res.total;
-      writtenSnapshots += res.written;
+  // Apply hash updates and file writes sequentially (no awaits here) to keep
+  // the hash output stable regardless of parallel load completion order.
+  for (const fileResults of processedFiles) {
+    for (const result of fileResults) {
+      if (!result) continue;
+      for (const update of result.updates) {
+        hash.update(update.hashChunk);
+        totalSnapshots++;
+        if (writeSnapshotFile(update.targetFile, update.json)) {
+          writtenSnapshots++;
+        }
+      }
     }
   }
 
