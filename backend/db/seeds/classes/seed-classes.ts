@@ -46,9 +46,9 @@ export async function seedOrGet(
   const results = await RecurringClassService.upsertManyRecurringSchedules(inputs);
 
   if (shouldSeedExtendedFiles(seedConfig)) {
-    const validSchedules = results.filter((schedule) => schedule !== null);
+    const validSchedules = results;
     await Promise.all(
-      validSchedules.map((schedule) =>
+      validSchedules.map(schedule =>
         seedEntityFile({
           assetRelativePath: "documents/sample-attachment.pdf",
           bucketPath: `public/schedules/seed_${schedule.id}.pdf`,
@@ -56,7 +56,7 @@ export async function seedOrGet(
           referenceId: schedule.id,
           usageType: "attachment",
           ensureParentDirs: ["public/schedules"],
-        }).catch((error) => {
+        }).catch(error => {
           logger.error(`Failed to seed recurring schedule file for ${schedule.id}:`, error);
         })
       )

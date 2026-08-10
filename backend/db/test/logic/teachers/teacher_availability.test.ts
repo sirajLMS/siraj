@@ -133,7 +133,7 @@ async function expectBookingToFail(args: {
     if (error instanceof Error) {
       bookingError = error;
     } else {
-      throw new Error(String(error));
+      throw new Error(String(error), { cause: error });
     }
   }
   if (bookingError) {

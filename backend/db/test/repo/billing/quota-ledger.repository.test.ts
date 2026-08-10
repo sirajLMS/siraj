@@ -73,7 +73,7 @@ describe("QuotaLedgerRepository", () => {
       expect(second.delta).toBe(first.delta);
 
       const entries = await QuotaLedgerRepository.findByQuotaId(tx, quota.id);
-      const grants = entries.filter(e => String(e.reason) === String(QuotaLedgerReason.GRANT) && e.delta === 5);
+      const grants = entries.filter(e => e.reason === "GRANT" && e.delta === 5);
       expect(grants).toHaveLength(1);
     });
   });

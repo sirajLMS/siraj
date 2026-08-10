@@ -31,7 +31,9 @@ function sanitizeAndValidatePaths(rawPaths: string[]): string[] {
  * @param tErrors - Error labels for localized error messages.
  */
 async function authorizeBulkPaths(userId: string, itemPaths: string[], tErrors: ErrorsLabels): Promise<void> {
-  await Promise.all(itemPaths.map(itemPath => StorageAuthService.requireStorageManageOrOwner(userId, itemPath, tErrors)));
+  await Promise.all(
+    itemPaths.map(itemPath => StorageAuthService.requireStorageManageOrOwner(userId, itemPath, tErrors))
+  );
 }
 
 /**

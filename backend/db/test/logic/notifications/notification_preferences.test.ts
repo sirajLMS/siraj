@@ -98,8 +98,7 @@ describe("User Notification Preferences", () => {
         if (error instanceof Error) {
           message = error.message || "";
           if ("cause" in error && typeof error.cause === "object" && error.cause !== null && "code" in error.cause) {
-            const cause = error.cause as { code?: string };
-            code = cause.code || "";
+            code = typeof error.cause.code === "string" ? error.cause.code : "";
           }
         }
         expect(

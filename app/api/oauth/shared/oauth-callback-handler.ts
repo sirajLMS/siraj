@@ -129,13 +129,15 @@ function isOAuthTokenResponse(value: unknown): value is OAuthTokenResponse {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
-  const record = value as Record<string, unknown>;
   return (
-    typeof record.access_token === "string" &&
-    typeof record.token_type === "string" &&
-    typeof record.expires_in === "number" &&
-    (record.refresh_token === undefined || typeof record.refresh_token === "string") &&
-    (record.scope === undefined || typeof record.scope === "string")
+    "access_token" in value &&
+    typeof value.access_token === "string" &&
+    "token_type" in value &&
+    typeof value.token_type === "string" &&
+    "expires_in" in value &&
+    typeof value.expires_in === "number" &&
+    (!("refresh_token" in value) || value.refresh_token === undefined || typeof value.refresh_token === "string") &&
+    (!("scope" in value) || value.scope === undefined || typeof value.scope === "string")
   );
 }
 

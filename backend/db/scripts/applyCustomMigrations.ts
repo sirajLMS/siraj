@@ -75,20 +75,24 @@ interface Sidecar {
 /** Type guard: validates that an unknown value is a valid Sidecar object. */
 function isSidecar(value: unknown): value is Sidecar {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
-  const obj = value as Record<string, unknown>;
   return (
-    typeof obj.manifestHash === "string" &&
-    Array.isArray(obj.manifest) &&
-    obj.manifest.every(
+    "manifestHash" in value &&
+    typeof value.manifestHash === "string" &&
+    "manifest" in value &&
+    Array.isArray(value.manifest) &&
+    value.manifest.every(
       (e): e is ManifestEntry =>
         typeof e === "object" &&
         e !== null &&
         !Array.isArray(e) &&
-        typeof (e as Record<string, unknown>).file === "string" &&
-        typeof (e as Record<string, unknown>).sha256 === "string"
+        "file" in e &&
+        typeof e.file === "string" &&
+        "sha256" in e &&
+        typeof e.sha256 === "string"
     ) &&
-    Array.isArray(obj.appliedFolders) &&
-    obj.appliedFolders.every((f): f is string => typeof f === "string")
+    "appliedFolders" in value &&
+    Array.isArray(value.appliedFolders) &&
+    value.appliedFolders.every((f): f is string => typeof f === "string")
   );
 }
 

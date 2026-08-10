@@ -3,11 +3,11 @@ import { getEnv, getEnvironmentConfig } from "@/backend/lib/env";
 import { locales } from "@/shared/locale/AppLocale";
 
 const envConfig = getEnvironmentConfig();
-const ALLOWED_ORIGINS: string[] = [
-  getEnv("NEXT_PUBLIC_BASE_URL", ""),
-  envConfig.allowedOrigin,
-  "http://localhost:3000",
-].filter((v): v is string => typeof v === "string" && v.length > 0);
+const ALLOWED_ORIGINS = new Set(
+  [getEnv("NEXT_PUBLIC_BASE_URL", ""), envConfig.allowedOrigin, "http://localhost:3000"].filter(
+    (v): v is string => typeof v === "string" && v.length > 0
+  )
+);
 
 const LOCALE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year
 
@@ -39,7 +39,7 @@ function isAllowedOrigin(request: NextRequest): boolean {
   const origin = request.headers.get("origin");
   const sameOrigin = request.nextUrl.origin;
   // Same-origin fetch always sends Origin; also allow Sec-Fetch-Site: same-origin when Origin is absent.
-  if (origin && (origin === sameOrigin || ALLOWED_ORIGINS.includes(origin))) {
+  if (origin && (origin === sameOrigin || ALLOWED_ORIGINS.has(origin))) {
     return true;
   }
   if (!origin && request.headers.get("sec-fetch-site") === "same-origin") {

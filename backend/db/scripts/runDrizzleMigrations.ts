@@ -33,8 +33,10 @@ function isDbMigrationRow(value: unknown): value is DbMigrationRow {
     typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
-    typeof (value as Record<string, unknown>).id === "number" &&
-    typeof (value as Record<string, unknown>).hash === "string"
+    "id" in value &&
+    typeof value.id === "number" &&
+    "hash" in value &&
+    typeof value.hash === "string"
   );
 }
 
