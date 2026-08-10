@@ -393,8 +393,9 @@ async function printFileDuplicationDetails(options: {
         blocks: [],
       };
       for (const block of group.blocks) {
-        const refFile = block._ref ? dupData.files[block._ref] : null;
-        const refPath = refFile ? refFile.name || block._ref || "unknown" : file.path;
+        const refKey = "_ref";
+        const refFile = block[refKey] ? dupData.files[block[refKey]] : null;
+        const refPath = refFile ? refFile.name || block[refKey] || "unknown" : file.path;
         globalThis.console.log(
           `    ${COLORS.CYAN}→${COLORS.NC} ${refPath} (lines ${block.from}-${block.from + block.size - 1})`
         );
