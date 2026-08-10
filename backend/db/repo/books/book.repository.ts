@@ -84,58 +84,54 @@ export namespace BookRepository {
     if (inputs.length === 0) return [];
 
     const run = async (t: DBTransaction): Promise<BookReturnType[]> => {
-      const results: BookReturnType[] = [];
       const now = new Date();
 
-      for (const input of inputs) {
-        const [existing] = await t
-          .select({
-            id: books.id,
-            name: books.name,
-            availabilityStatus: books.availabilityStatus,
-            createdAt: books.createdAt,
-          })
-          .from(books)
-          .where(and(eq(books.name, input.name), isNull(books.deletedAt)))
-          .limit(1);
+      const results = await Promise.all(
+        inputs.map(async (input) => {
+          const [existing] = await t
+            .select({
+              id: books.id,
+              name: books.name,
+              availabilityStatus: books.availabilityStatus,
+              createdAt: books.createdAt,
+            })
+            .from(books)
+            .where(and(eq(books.name, input.name), isNull(books.deletedAt)))
+            .limit(1);
 
-        if (existing) {
-          const [updated] = await t
-            .update(books)
-            .set({ availabilityStatus: input.availabilityStatus })
-            .where(eq(books.id, existing.id))
+          if (existing) {
+            const [updated] = await t
+              .update(books)
+              .set({ availabilityStatus: input.availabilityStatus })
+              .where(eq(books.id, existing.id))
+              .returning({
+                id: books.id,
+                name: books.name,
+                availabilityStatus: books.availabilityStatus,
+                createdAt: books.createdAt,
+              });
+            return updated ? mapRow(updated) : null;
+          }
+
+          const [created] = await t
+            .insert(books)
+            .values({
+              name: input.name,
+              availabilityStatus: input.availabilityStatus,
+              createdAt: now,
+            })
             .returning({
               id: books.id,
               name: books.name,
               availabilityStatus: books.availabilityStatus,
               createdAt: books.createdAt,
             });
-          if (updated) {
-            results.push(mapRow(updated));
-          }
-          continue;
-        }
 
-        const [created] = await t
-          .insert(books)
-          .values({
-            name: input.name,
-            availabilityStatus: input.availabilityStatus,
-            createdAt: now,
-          })
-          .returning({
-            id: books.id,
-            name: books.name,
-            availabilityStatus: books.availabilityStatus,
-            createdAt: books.createdAt,
-          });
+          return created ? mapRow(created) : null;
+        })
+      );
 
-        if (created) {
-          results.push(mapRow(created));
-        }
-      }
-
-      return results;
+      return results.filter((r): r is BookReturnType => r !== null);
     };
 
     if (tx) {
