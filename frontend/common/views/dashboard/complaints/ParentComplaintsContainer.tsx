@@ -1,14 +1,9 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import {
-  AppPermission,
-  ComplaintCategory,
-  ComplaintStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ComplaintCategory, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
@@ -131,9 +126,5 @@ export function ParentComplaintsContainer() {
     onPageChange: setPage,
   });
 
-  return (
-    <RequirePermission permissions={[AppPermission.SupportSubmitComplaint]} fallback={null}>
-      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }

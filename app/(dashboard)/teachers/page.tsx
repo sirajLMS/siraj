@@ -26,7 +26,12 @@ export default async function TeachersPage() {
     await redirectToLogin();
     return undefined;
   }
-  await requirePermissionForPage(userId, [AppPermission.STAFF_VIEW_DIRECTORY], locale, context);
+  await requirePermissionForPage(
+    userId,
+    [AppPermission.STAFF_VIEW_DIRECTORY, AppPermission.TEACHERS_LIST],
+    locale,
+    context
+  );
 
   return <TeachersContainer />;
 }

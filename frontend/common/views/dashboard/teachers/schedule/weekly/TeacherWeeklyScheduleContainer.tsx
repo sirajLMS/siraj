@@ -29,7 +29,7 @@ export function TeacherWeeklyScheduleContainer(props: Readonly<UseTeacherWeeklyS
   // in the Container; the tier dialog files now consume `hasSessionCreateClass`
   // as a plain ViewModel-supplied boolean).
   return (
-    <RequirePermission permissions={[AppPermission.ScheduleViewWeekly]}>
+    <>
       <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
       <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
         <CreateRecurringClassDialog
@@ -38,7 +38,7 @@ export function TeacherWeeklyScheduleContainer(props: Readonly<UseTeacherWeeklyS
           viewModel={viewModel.createRecurringClassDialog}
         />
       </RequirePermission>
-    </RequirePermission>
+    </>
   );
 }
 export type { TeacherWeeklyScheduleViewModel, UseTeacherWeeklyScheduleViewModelProps };

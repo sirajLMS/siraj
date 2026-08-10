@@ -5,10 +5,9 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   changeStudentStatusMutationDocument,
@@ -208,11 +207,7 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
     return <ReassignmentErrorState message={reassignmentLabels.errors.invalidId} />;
   }
 
-  return (
-    <RequirePermission permissions={[AppPermission.StudentReassignTeacher, AppPermission.StudentManageStatus]}>
-      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
 export type { TeacherReassignmentViewModel, UseTeacherReassignmentViewModelProps };

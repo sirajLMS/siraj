@@ -26,7 +26,12 @@ export default async function ParentsPage() {
     await redirectToLogin();
     return undefined;
   }
-  await requirePermissionForPage(userId, [AppPermission.PARENT_VIEW_DIRECTORY], locale, context);
+  await requirePermissionForPage(
+    userId,
+    [AppPermission.PARENT_VIEW_DIRECTORY, AppPermission.PARENTS_LIST],
+    locale,
+    context
+  );
 
   return <ParentsContainer />;
 }

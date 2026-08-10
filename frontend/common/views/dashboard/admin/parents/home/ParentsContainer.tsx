@@ -1,7 +1,5 @@
 "use client";
 
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import { ParentsView } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
 
 interface ParentsContainerProps {
@@ -9,11 +7,7 @@ interface ParentsContainerProps {
 }
 
 export function ParentsContainer(_props: ParentsContainerProps) {
-  return (
-    <RequirePermission permissions={PAGE_PERMISSIONS.usersParents} fallback={null}>
-      <ParentsView />
-    </RequirePermission>
-  );
+  return <ParentsView />;
 }
 
 export type {

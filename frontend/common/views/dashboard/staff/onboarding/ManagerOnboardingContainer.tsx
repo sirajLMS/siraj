@@ -1,9 +1,7 @@
 "use client";
 
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type ManagerOnboardingContainerViewModel,
   type UseManagerOnboardingContainerViewModelProps,
@@ -24,11 +22,7 @@ const lazyViews = createLazyView<ManagerOnboardingContainerViewModel>(
 export function ManagerOnboardingContainer(props: UseManagerOnboardingContainerViewModelProps) {
   const viewModel = useManagerOnboardingContainerViewModel(props);
 
-  return (
-    <RequirePermission permissions={[AppPermission.StaffCreate]} fallback={null}>
-      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
 export type { ManagerOnboardingContainerViewModel, UseManagerOnboardingContainerViewModelProps };

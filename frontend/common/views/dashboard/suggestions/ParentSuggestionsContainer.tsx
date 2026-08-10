@@ -1,10 +1,8 @@
 "use client";
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { submitSuggestionMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useParentSuggestionsStore } from "@/frontend/common/stores/parentSuggestionsStore";
 import type { SuggestionFormData } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
@@ -72,11 +70,7 @@ export function ParentSuggestionsContainer() {
 
   const viewModel = useParentSuggestionsViewModel(props);
 
-  return (
-    <RequirePermission permissions={[AppPermission.CommunicationSubmitSuggestion]}>
-      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
 export type { ParentSuggestionsViewModel, UseParentSuggestionsViewModelProps };
